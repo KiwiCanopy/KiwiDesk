@@ -111,26 +111,37 @@ extension KiwiCore {
     /// the common case, because the post-settle AX echoes are
     /// already walking the overlay onto the real frame — this pass
     /// is the backstop for the app that sends no echo at all.
-    static let borderResyncDelayMS = 300
+    /// (The live value is `borderResyncDelayMS`, a stored seam on
+    /// the main type so a test can prove the guards without
+    /// sleeping the production delay.)
+    static let defaultBorderResyncDelayMS = 300
 
     /// WindowServer can briefly order the swap target out while a
-    /// drag/drop retile and focus raise overlap. Its hide notification
-    /// hides that target's ring, but macOS does not always send a
-    /// matching unhide. Re-assert the complete desired ring set one
-    /// short event turn later.
+    /// drag/drop retile and focus raise overlap. Its hide
+    /// notification hides that target's ring, but macOS does not
+    /// always send a matching unhide. Re-assert the complete
+    /// desired ring set once the swap animation is well under way
+    /// (or one short event turn later when nothing animates).
     ///
-    /// Only for the UNANIMATED drop. When something animates, the
-    /// re-assert rides `scheduleBorderResync` off the settle signal
-    /// instead: this used to fire at `durationMS + 50`, but a
-    /// spring's visual settle is ~2× its response, so that landed
-    /// mid-flight — where `updateBorders()` is precisely the
-    /// backward snap of #596 item 3, and where it is far too early
-    /// to heal anything.
+    /// This is the VISIBILITY pass, and it is deliberately early:
+    /// `sync`'s trailing `order(relativeTo:)` is what un-hides a
+    /// ring, so the sooner it runs the shorter a wrongly-hidden
+    /// ring stays invisible. Landing mid-flight used to make it
+    /// the backward snap of #596 item 3 — it no longer can,
+    /// because `FollowSource.syncFrame` holds an animating
+    /// window's geometry, so this pass re-orders and un-hides
+    /// without moving anything. That is why both passes exist:
+    /// this one restores VISIBILITY early and cannot fix
+    /// geometry; `scheduleBorderResync` fixes GEOMETRY late and
+    /// would be far too slow for a hidden ring. Separate deferred
+    /// keys, so neither can cancel the other.
     func scheduleBorderDropReconcile() {
-        guard tiler.animation.activeCount == 0 else { return }
+        let animationMS =
+            tiler.animation.activeCount > 0
+            ? tiler.settings.animations.durationMS : 0
         deferred.schedule(
             .borderDropSettle,
-            after: .milliseconds(50)
+            after: .milliseconds(animationMS + 50)
         ) { [weak self] in
             self?.updateBorders()
         }
@@ -144,24 +155,28 @@ extension KiwiCore {
     /// no WindowServer event there is nothing else to correct it;
     /// this pass reads the state the window actually has and glues
     /// the ring and mark back onto it.
+    func scheduleBorderResync() {
+        deferred.schedule(
+            .borderResync,
+            after: .milliseconds(borderResyncDelayMS)
+        ) { [weak self] in
+            self?.runBorderResync()
+        }
+    }
+
+    /// The re-sync body. Named rather than inlined so a test can
+    /// drive it directly instead of waiting out the grace.
     ///
     /// Drops the pass when a new animation started inside the
-    /// grace: reading a moving window is the very mistake this
+    /// grace: reading a moving window is the very mistake the
     /// delay exists to avoid, and nothing is lost — that
     /// animation ends with its own `onAllAnimationsEnded`, which
     /// schedules this again. Never re-arm from here; that would
     /// poll the grace away for the whole of a long animation.
-    func scheduleBorderResync() {
-        deferred.schedule(
-            .borderDropSettle,
-            after: .milliseconds(Self.borderResyncDelayMS)
-        ) { [weak self] in
-            guard let self,
-                tiler.animation.activeCount == 0
-            else { return }
-            updateBorders()
-            updateStickyMarks()
-        }
+    func runBorderResync() {
+        guard tiler.animation.activeCount == 0 else { return }
+        updateBorders()
+        updateStickyMarks()
     }
 
     /// The rings to show for one space. Focused window always

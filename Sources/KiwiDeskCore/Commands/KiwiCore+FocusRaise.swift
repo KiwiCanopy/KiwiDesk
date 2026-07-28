@@ -12,34 +12,13 @@ import Foundation
 /// front and keyboard focus land when the pan does.
 ///
 /// Timing rides the same settle signal as the z-order restore
-/// (`AnimationEngine.onAllAnimationsEnded` — the shared slot in
-/// `KiwiCore.init` runs both). Known trade, documented in the
-/// Lua reference and accepted limitations: keystrokes during
-/// the slide (one animation length, 50–1000 ms) still reach
-/// the previously focused app; Carbon hotkeys are unaffected.
+/// (`AnimationEngine.onAllAnimationsEnded`, dispatched by
+/// `animationsDidSettle` in `KiwiCore+Settle`). Known trade,
+/// documented in the Lua reference and accepted limitations:
+/// keystrokes during the slide (one animation length,
+/// 50–1000 ms) still reach the previously focused app; Carbon
+/// hotkeys are unaffected.
 extension KiwiCore {
-    /// The one `onAllAnimationsEnded` consumer — the slot is a
-    /// single callback by design; this method IS the dispatch.
-    /// Two pending-flag clients today, order-insensitive (the
-    /// z-order restore's async pile raises end by re-asserting
-    /// the focused window on top, healing any interleaving
-    /// with the synchronous focus raise). Fork this into a
-    /// real dispatcher only when (a) a third pending consumer
-    /// appears, (b) ordering between the runners becomes
-    /// semantic, or (c) a client needs per-monitor/per-space
-    /// settle instead of the global count-zero signal.
-    ///
-    /// The border re-sync (#596) is a third runner but not a
-    /// third *pending* client — it carries no flag, arms
-    /// unconditionally, and only schedules a task, so it neither
-    /// trips (a) nor (b): it cannot interleave with the two
-    /// raises above, which are done before its grace elapses.
-    func animationsDidSettle() {
-        runPendingZOrderRestore()
-        runPendingFocusRaise()
-        scheduleBorderResync()
-    }
-
     /// Fires a pending deferred raise. Called when animations
     /// settle, and directly by `focusWindow` when no animation
     /// started. Re-validates at fire time: a newer focus

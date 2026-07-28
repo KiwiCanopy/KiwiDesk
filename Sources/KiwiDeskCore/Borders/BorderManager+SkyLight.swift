@@ -17,9 +17,17 @@ extension BorderManager {
     /// Reads the `KIWIDESK_NO_WS_TRACKING` QA lever (#596). Any
     /// non-empty value keeps `skyLightActive` false for the whole
     /// run, so the ring and mark exercise the AX-fallback path
-    /// the settle-tail symptoms live on. Call once at wiring; the
-    /// environment parameter is the test seam (the strand
-    /// detector's `configureFromEnvironment`, mirrored).
+    /// the settle-tail symptoms live on — the same fallback
+    /// `os-private-apis.md` requires every private path to have,
+    /// and otherwise unreachable on a healthy Mac.
+    ///
+    /// Named after `StrandDetector.configureFromEnvironment` but
+    /// NOT its twin, in two ways worth keeping straight: this one
+    /// takes the environment as a parameter (that one reads
+    /// `ProcessInfo` directly), and where `KIWIDESK_STRAND_LOG`
+    /// only turns on logging and is otherwise inert, this kills a
+    /// production fast path for the whole run. Call once at
+    /// wiring.
     func configureFromEnvironment(
         _ environment: [String: String] = ProcessInfo.processInfo
             .environment

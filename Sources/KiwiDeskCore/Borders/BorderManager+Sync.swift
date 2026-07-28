@@ -1,17 +1,20 @@
 import AppKit
 
-/// The frame paths of `BorderManager` — everything that decides
-/// WHERE a ring is drawn and who is allowed to move it. Split out
-/// of `BorderManager.swift` to keep each file under the size
-/// ceiling; the main type keeps the store, the lifecycle and the
-/// per-window caches those paths read.
+/// `BorderManager`'s ring-rendering paths: the steady-state
+/// `sync` (which also creates and retires overlays), the
+/// animation / AX-echo `follow`, the unguarded `apply`, and the
+/// test seams that read back what was rendered. Split out when
+/// #596's additions pushed `BorderManager.swift` past the 350
+/// line ceiling; the main type keeps the stores, the app
+/// lifecycle, the draw-order flip and the per-window caches
+/// these read.
 ///
-/// Three entry points, in descending order of authority while our
+/// The three writers, in descending order of authority while our
 /// own animation drives a window (#594/#596): `apply` is
 /// unguarded and belongs to whoever owns the frame outright (the
 /// WindowServer re-read); `follow` carries a `FollowSource` and
-/// asks the shared decision; `sync` is the steady-state rebuild
-/// and stands down on geometry alone.
+/// asks the shared decision; `sync` rebuilds everything but
+/// holds an animating window's geometry.
 extension BorderManager {
     /// Shows exactly `desired` — one ring per window — and retires
     /// the overlays of any window no longer in the set (an empty
@@ -28,13 +31,27 @@ extension BorderManager {
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
+            // Geometry stands down mid-animation (#596) — the one
+            // decision the mark's `sync` shares. Everything else
+            // here (create, recolor, re-order, retire) runs
+            // unconditionally: only the frame is held back.
+            // `screen` MUST derive from the same rect, not from
+            // `spec.frame`: it selects the backing scale, so on a
+            // cross-display animated move a held frame paired with
+            // the spec's screen rasterizes the ring at the wrong
+            // display's scale.
+            let frame = FollowSource.syncFrame(
+                spec: spec.frame,
+                held: overlay.lastRenderedFrame,
+                animating: isAnimating(spec.window)
+            )
             overlay.update(
-                frame: syncFrame(for: spec, overlay: overlay),
+                frame: frame,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
-                screen: screen(for: spec.frame),
+                screen: screen(for: frame),
                 glowBlur: spec.glowBlur
             )
             // Re-assert stacking each sync (focus change, retile,
@@ -42,31 +59,6 @@ extension BorderManager {
             // window order since the ring last positioned.
             overlay.order(relativeTo: spec.window.raw)
         }
-    }
-
-    /// The frame a steady-state `sync` renders a ring at. Normally
-    /// the spec's; while OUR OWN animation drives the window the
-    /// ring holds where the last tick put it instead, because the
-    /// spec carries the echo-fed frame the motion has already left
-    /// behind (`FollowSource.steadySync`, #596). Everything else
-    /// `sync` does — create, recolor, re-order, retire — is
-    /// unaffected: only the geometry stands down.
-    ///
-    /// A ring being CREATED mid-flight (a focus change during a
-    /// pan) has no held frame and takes the spec's, one tick
-    /// behind; there is nothing better to show it, and the next
-    /// tick corrects it.
-    private func syncFrame(
-        for spec: Spec,
-        overlay: BorderOverlay
-    ) -> CGRect {
-        if FollowSource.steadySync.applies(
-            wsTracked: usesWindowServerTracking(spec.window),
-            animating: isAnimating(spec.window)
-        ) {
-            return spec.frame
-        }
-        return overlay.lastRenderedFrame ?? spec.frame
     }
 
     /// Animation / AX-echo hot path: move an already-shown ring
@@ -101,10 +93,12 @@ extension BorderManager {
         overlays[id]?.lastRenderedColorHex
     }
 
-    /// Unguarded reposition — the WS bounds re-read (`reconcile`)
-    /// and the steady-state `sync` own the ring's frame directly,
-    /// so they bypass the guards on `follow`. Internal, not
-    /// private: `reconcile` lives in the `+SkyLight` extension.
+    /// Unguarded reposition — the WS bounds re-read
+    /// (`reconcile`) owns the ring's frame outright, so it
+    /// bypasses the guards on `follow`. Internal, not private:
+    /// `reconcile` lives in the `+SkyLight` extension. `sync`
+    /// does NOT come through here; it asks
+    /// `FollowSource.syncFrame` first (#596).
     func apply(
         _ id: WindowID,
         windowFrame: CGRect,

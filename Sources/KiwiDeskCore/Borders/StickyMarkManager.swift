@@ -92,37 +92,22 @@ public final class StickyMarkManager {
             overlays[spec.window] = overlay
             overlay.setMarkColor(spec.color)
             overlay.setSymbol(spec.symbolName)
-            // Geometry stands down mid-animation — the spec's
-            // frame is the echo-fed one the motion already left
-            // behind, so the mark holds where the last tick put
-            // it (the ring's `syncFrame`, mirrored, #596).
-            // Colour, symbol, stacking and retirement are
+            // Geometry stands down mid-animation (#596) — the
+            // same call the ring's `sync` makes, not a mirror of
+            // it. Colour, symbol, stacking and retirement are
             // unaffected.
             overlay.update(
-                frame: syncFrame(for: spec, overlay: overlay)
+                frame: FollowSource.syncFrame(
+                    spec: spec.frame,
+                    held: overlay.lastFrame,
+                    animating: isAnimating(spec.window)
+                )
             )
             // Re-assert stacking each sync (focus change,
             // retile, z-order restore) — never per follow
             // tick (the mark lags otherwise).
             overlay.order()
         }
-    }
-
-    /// The frame a steady-state `sync` renders a mark at — the
-    /// ring's `syncFrame`, mirrored through the same shared
-    /// decision (`FollowSource.steadySync`, #596). A mark being
-    /// CREATED mid-flight has no held frame and takes the spec's.
-    private func syncFrame(
-        for spec: Spec,
-        overlay: StickyMarkOverlay
-    ) -> CGRect {
-        if FollowSource.steadySync.applies(
-            wsTracked: isWindowServerTracked(spec.window),
-            animating: isAnimating(spec.window)
-        ) {
-            return spec.frame
-        }
-        return overlay.lastFrame ?? spec.frame
     }
 
     /// AX-echo / animation hot path: re-corner an already-shown

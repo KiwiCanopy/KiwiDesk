@@ -6,9 +6,11 @@ import AppKit
 /// retires one `BorderOverlay` per window, keyed by `WindowID` —
 /// mirroring `AppBarManager`'s diff-sync.
 ///
-/// Two entry points: `sync` for steady state (create / recolor /
-/// destroy), and `follow` for the animation hot path (move an
-/// existing ring to a fresh window frame, no create / destroy).
+/// The rendering paths — `sync` for steady state (create /
+/// recolor / destroy), `follow` for the animation hot path, and
+/// the unguarded `apply` — live in the `+Sync` extension; the
+/// WindowServer integration in `+SkyLight`; the dead-end bounce
+/// in `+DeadEnd`. This file owns the stores they share.
 @MainActor
 public final class BorderManager {
     /// One window's desired ring. Frames are in AX coordinates,
@@ -211,6 +213,13 @@ public final class BorderManager {
         cornerRadii[id] = nil
     }
 
+    /// The window's ring, CREATING and storing one if it has
+    /// none — a mutating getter, so only `sync` may call it (it
+    /// alone knows the window should have a ring). The dead-end
+    /// bounce deliberately routes around it via `makeOverlay`
+    /// into a separate store, so a concurrent `sync` can never
+    /// adopt or stomp its transient. Internal, not private:
+    /// `sync` lives in the `+Sync` extension.
     func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = makeOverlay(for: window)

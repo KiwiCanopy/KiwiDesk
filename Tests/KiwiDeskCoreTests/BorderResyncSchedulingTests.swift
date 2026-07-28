@@ -4,15 +4,41 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The border re-sync's timing (#596 item 2). The old heal fired
-/// at `durationMS + 50`, but a spring's visual settle is ~2× its
-/// response, so it landed mid-flight — too early to heal anything
-/// and, being an `updateBorders()`, itself the backward snap of
-/// item 3. It now rides the settle signal the animation engine
-/// already emits.
-@Suite("Border re-sync scheduling")
+/// The border settle passes (#596). The old single heal fired at
+/// `durationMS + 50` and did both jobs badly: a spring's visual
+/// settle is ~2× its response, so it landed mid-flight — far too
+/// early to re-read a slow app's bounds, and (pre-`syncFrame`)
+/// itself a backward snap. They are now two passes with separate
+/// deferred slots: an early VISIBILITY re-assert, and a late
+/// GEOMETRY re-sync off the settle signal.
+@Suite("Border settle scheduling")
 @MainActor
 struct BorderResyncSchedulingTests {
+    /// A single tracked, focused window on the active space, at a
+    /// known frame — enough for `updateBorders()` /
+    /// `updateStickyMarks()` to produce one spec each.
+    private func seed(
+        _ core: KiwiCore,
+        frame: CGRect,
+        isSticky: Bool = false
+    ) -> WindowID {
+        let id = WindowID(1)
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        var window = ManagedWindow(
+            id: id,
+            pid: 100,
+            appName: "App",
+            title: "Title",
+            stickyScope: isSticky ? .global : .none
+        )
+        window.frame = frame
+        core.state.windows.upsert(window)
+        core.state.workspaces.add(id, to: "1")
+        core.state.workspaces.focus(id, in: "1")
+        return id
+    }
+
     /// Puts one animation in flight without a display link, so
     /// `activeCount` is non-zero for the guards under test.
     private func startAnimation(_ core: KiwiCore) {
@@ -28,50 +54,97 @@ struct BorderResyncSchedulingTests {
         ]
     }
 
-    @Test("The drop reconcile stands down while animating")
-    func dropReconcileStandsDownWhileAnimating() {
+    @Test("The two passes hold separate deferred slots")
+    func passesDoNotShareASlot() {
+        let core = makeTestCore()
+        core.scheduleBorderResync()
+        core.scheduleBorderDropReconcile()
+        // Sharing one key let whichever landed second cancel the
+        // other — silently dropping either the un-hide or the
+        // sticky mark's half of the heal.
+        #expect(core.deferred.task(for: .borderResync) != nil)
+        #expect(core.deferred.task(for: .borderDropSettle) != nil)
+        core.deferred.cancelAll()
+    }
+
+    @Test("The visibility pass still fires mid-animation")
+    func dropReconcileSchedulesWhileAnimating() {
         let core = makeTestCore()
         startAnimation(core)
         #expect(core.tiler.animation.activeCount == 1)
-        core.scheduleBorderDropReconcile()
-        // Nothing scheduled: the settle signal owns this case now.
-        // Pre-#596 this armed a `durationMS + 50` timer that fired
-        // mid-flight.
-        #expect(core.deferred.task(for: .borderDropSettle) == nil)
-    }
-
-    @Test("An unanimated drop still gets its short event turn")
-    func dropReconcileSchedulesWhenIdle() {
-        let core = makeTestCore()
-        #expect(core.tiler.animation.activeCount == 0)
+        // Deliberately early: `sync`'s trailing `order` is what
+        // un-hides a ring, and `FollowSource.syncFrame` keeps it
+        // from moving an animating window's geometry — so landing
+        // mid-flight is safe and the un-hide should not wait for
+        // the motion to end.
         core.scheduleBorderDropReconcile()
         #expect(core.deferred.task(for: .borderDropSettle) != nil)
         core.deferred.cancelAll()
     }
 
-    @Test("Settling schedules the re-sync")
+    @Test("Settling schedules the geometry re-sync")
     func settleSchedulesResync() {
         let core = makeTestCore()
         core.animationsDidSettle()
-        #expect(core.deferred.task(for: .borderDropSettle) != nil)
+        #expect(core.deferred.task(for: .borderResync) != nil)
         core.deferred.cancelAll()
     }
 
-    @Test("The re-sync drops itself if a new animation started")
-    func resyncDropsWhenAnimationRestarted() async {
+    @Test("The re-sync body stands down if a new animation began")
+    func resyncBodyGuardsOnActiveAnimation() {
         let core = makeTestCore()
-        core.animationsDidSettle()
-        // A new animation begins inside the grace: reading a
-        // moving window is the mistake the grace exists to avoid.
-        // Dropping loses nothing — that animation ends with its
-        // own settle, which schedules this again. Proven by the
-        // slot being clear afterwards: a re-arm would leave a
-        // fresh pending task and poll the grace away.
+        let id = WindowID(1)
+        core.borders.sync([
+            BorderManager.Spec(
+                window: id,
+                frame: CGRect(x: 0, y: 0, width: 400, height: 300),
+                colorHex: "#FF0000",
+                width: 4,
+                cornerStyle: .rounded
+            )
+        ])
+        let held = CGRect(x: 90, y: 90, width: 400, height: 300)
+        core.borders.apply(id, windowFrame: held)
+        // A new animation started inside the grace: reading a
+        // moving window is the mistake the delay exists to avoid.
+        // Nothing is lost — that animation ends with its own
+        // settle, which schedules this again.
         startAnimation(core)
-        let pending = core.deferred.task(for: .borderDropSettle)
-        await pending?.value
-        #expect(core.tiler.animation.activeCount == 1)
-        #expect(core.deferred.task(for: .borderDropSettle) == pending)
+        core.runBorderResync()
+        #expect(core.borders.lastFrame(id) == held)
+    }
+
+    @Test("The re-sync re-glues a stranded ring to real state")
+    func resyncHealsAStrandedRing() {
+        let core = makeTestCore()
+        let real = CGRect(x: 12, y: 34, width: 500, height: 400)
+        let id = seed(core, frame: real)
+        core.tiler.settings.borderStyle.enabled = true
+        core.updateBorders()
+        // The ring rode our commanded frames out to a target the
+        // app never applied — the #596 item 2 strand.
+        let stranded = CGRect(x: 900, y: 900, width: 500, height: 400)
+        core.borders.apply(id, windowFrame: stranded)
+        #expect(core.borders.lastFrame(id) == stranded)
+        core.runBorderResync()
+        // Back onto the frame the window actually has.
+        #expect(core.borders.lastFrame(id) == real)
+    }
+
+    @Test("The re-sync heals the sticky mark too")
+    func resyncHealsAStrandedMark() {
+        let core = makeTestCore()
+        let real = CGRect(x: 12, y: 34, width: 500, height: 400)
+        let id = seed(core, frame: real, isSticky: true)
+        core.tiler.settings.stickyStyle.mark = true
+        core.updateStickyMarks()
+        let stranded = CGRect(x: 900, y: 900, width: 500, height: 400)
+        core.stickyMarks.reposition(id, windowFrame: stranded)
+        #expect(core.stickyMarks.lastFrame(id) == stranded)
+        // Deleting `updateStickyMarks()` from the body leaves the
+        // ring's heal green and the mark stranded forever.
+        core.runBorderResync()
+        #expect(core.stickyMarks.lastFrame(id) == real)
     }
 
     @Test("The grace outlasts a slow app's post-settle catch-up")
@@ -79,6 +152,12 @@ struct BorderResyncSchedulingTests {
         // 100–300 ms on Electron/WebKit; 213 ms measured on device
         // for a frozen-then-resumed app. Reading sooner reads
         // bounds the app has not caught up to — the backward snap.
-        #expect(KiwiCore.borderResyncDelayMS >= 300)
+        #expect(KiwiCore.defaultBorderResyncDelayMS >= 300)
+        // And the live value is that default until a test lowers
+        // it — production never writes the seam.
+        #expect(
+            makeTestCore().borderResyncDelayMS
+                == KiwiCore.defaultBorderResyncDelayMS
+        )
     }
 }

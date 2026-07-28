@@ -73,6 +73,23 @@ struct BorderSteadySyncTests {
         #expect(border.lastColorHex(WindowID(1)) == "#00FF00")
     }
 
+    @Test("Idle and WS-tracked, sync still moves the ring")
+    func syncAppliesWhenTrackedAndIdle() {
+        let border = BorderManager()
+        border.sync([spec(1, frame: start)])
+        // Force the stream live AFTER sync (`sync` re-runs the
+        // subscription, which resets `skyLightActive`).
+        border.skyLightActive = true
+        border.isAnimating = { _ in false }
+        border.sync([spec(1, frame: stale)])
+        // Pins that the stand-down is keyed on OUR animation
+        // alone. "Harmonizing" it to also stand down while
+        // WS-tracked reads plausible and passes every other test
+        // here — and would freeze every tracked ring at its last
+        // frame permanently, `sync` being the steady-state path.
+        #expect(border.lastFrame(WindowID(1)) == stale)
+    }
+
     @Test("A ring created mid-animation takes the spec frame")
     func newRingMidAnimationUsesSpec() {
         let border = BorderManager()

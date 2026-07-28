@@ -266,6 +266,7 @@ touch a matching path.
 | `OS`, `SkyLight*.swift` | [os-private-apis.md](.claude/rules/os-private-apis.md) | Resolve private symbols with `dlsym`, never `@_silgen_name`; every private path needs a public fallback |
 | `Lua` | [lua.md](.claude/rules/lua.md) | The watchdog cannot interrupt blocking C calls; registry refs never cross interpreters |
 | `Keys`, `Events`, `Animation` | [input-and-animation.md](.claude/rules/input-and-animation.md) | Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per monitor |
+| `Borders` | [borders.md](.claude/rules/borders.md) | `FollowSource` owns which frame the ring AND mark render — never re-implement it beside a call site; mid-animation the commanded tick leads and every state-reading channel (echo, WS re-read, `sync` geometry) stands down; the settle passes are two keys, early visibility and late geometry |
 | `Sources/KiwiDesk` (the GUI) | [gui.md](.claude/rules/gui.md) | North-star and settled conventions; grey don't hide; `NSCursor.set()` never push/pop; keep `body` shallow or the CI type-checker dies |
 | `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; eight content guards with no exemption file; Core names, the GUI narrates (#96) |
 | `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); run the suite as two commands |

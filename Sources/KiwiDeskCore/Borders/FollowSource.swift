@@ -1,18 +1,20 @@
+import CoreGraphics
+
 /// Who reported a followed frame — shared by the ring's and the
 /// sticky mark's `follow`. The follow guards differ by source
 /// (#594): mid-animation the commanded per-tick frame leads
 /// every echo on slow-AX apps, so it drives the ring and mark;
 /// the echo paths stand down.
+///
+/// This type owns every "which frame does an overlay render"
+/// decision — `applies` for a *reported* frame, `syncFrame` for
+/// the steady-state rebuild — so the ring and the mark cannot
+/// answer either question differently.
 public enum FollowSource {
     /// A per-tick commanded frame from `AnimationEngine.apply`.
     case animationTick
     /// An AX `.windowMoved` / `.windowResized` echo.
     case axEcho
-    /// The steady-state `sync` pass (`updateBorders()` /
-    /// `updateStickyMarks()`), whose frame is
-    /// `state.windows[id]?.frame` — echo-fed, so mid-animation it
-    /// is the frame the motion has already left behind (#596).
-    case steadySync
 
     /// The one follow decision both managers share: does a
     /// reported frame apply, given what currently owns the
@@ -31,17 +33,6 @@ public enum FollowSource {
     /// (`usesWindowServerTracking` vs the broader
     /// `markUsesWindowServerTracking`); only the decision is
     /// shared.
-    ///
-    /// `steadySync` stands down mid-animation for the same
-    /// reason the echo does, one step further out: its frame is
-    /// the same echo-fed state, so any `sync` landing mid-flight
-    /// (a focus change, a retile burst) snaps the overlay back to
-    /// where the window was before the motion started, until the
-    /// next tick (≤16 ms) drags it forward again. Observed on
-    /// device as a ~31 pt backward snap (#596). Unlike the echo
-    /// it ignores `wsTracked`: WindowServer tracking says who
-    /// owns the frame in steady state, and this is only about the
-    /// window that our own animation is currently moving.
     public func applies(
         wsTracked: Bool,
         animating: Bool
@@ -51,8 +42,50 @@ public enum FollowSource {
             return true
         case .axEcho:
             return !wsTracked && !animating
-        case .steadySync:
-            return !animating
         }
+    }
+
+    /// The frame a steady-state `sync` should render an overlay
+    /// at (#596). `spec` is the desired frame the rebuild
+    /// computed — `state.windows[id]?.frame`, which is written
+    /// only by AX move/resize echoes — and `held` is where the
+    /// overlay currently sits, `nil` for one being created now.
+    ///
+    /// While our own animation drives the window the commanded
+    /// per-tick frame is the leading truth, and `spec` is the
+    /// echo-fed frame the motion has already left behind. So a
+    /// `sync` landing mid-flight (a focus change, a retile burst)
+    /// snapped the overlay back to where the window sat before
+    /// the motion started, until the next tick (≤16 ms) dragged
+    /// it forward — ~31 pt on device. The overlay holds instead,
+    /// and takes `spec` the moment the motion stops, which is
+    /// also the pass that heals a window whose app never moved.
+    ///
+    /// A WHOLE-CHOICE hoist, not just the predicate, and
+    /// deliberately so: a `sync` is not a *reported* frame, so it
+    /// cannot ride `applies` (different question, different
+    /// return type), and an enum case would have bought nothing —
+    /// exhaustiveness fires inside this type, never at a call
+    /// site, so wiring one manager and forgetting the other still
+    /// compiles. One body called from both is the only shape that
+    /// actually holds them together.
+    ///
+    /// **Takes no `wsTracked`, and that is a real residual.**
+    /// With a live WindowServer stream and no animation of ours —
+    /// a user drag — `spec` still lags the live WS bounds, so a
+    /// `sync` there snaps the overlay back exactly as above. It is
+    /// left alone rather than guarded: standing down on
+    /// `wsTracked` would mean `sync` never moves overlay geometry
+    /// while the private stream is up, leaning the whole steady
+    /// state on it and against the public-fallback doctrine. The
+    /// drag path already re-reads WS bounds continuously
+    /// (`reconcile`), so it self-corrects within an event.
+    public static func syncFrame(
+        spec: CGRect,
+        held: CGRect?,
+        animating: Bool
+    ) -> CGRect {
+        guard animating else { return spec }
+        return held ?? spec
     }
 }

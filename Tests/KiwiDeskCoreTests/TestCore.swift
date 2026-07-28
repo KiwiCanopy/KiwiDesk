@@ -71,5 +71,13 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
+    // Same class again (#596): bootstrap reads the
+    // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
+    // environment, so a developer who has it exported would get a
+    // different core in every test. Inert today — the private
+    // runtime never starts under test, so `skyLightActive` is
+    // already false — but neutralized here so it stays that way
+    // if the lever ever gains a second effect.
+    core.borders.windowServerTrackingDisabled = false
     return core
 }
