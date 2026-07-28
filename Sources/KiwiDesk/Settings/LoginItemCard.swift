@@ -112,11 +112,25 @@ struct LoginItemCard: View {
     /// state it reports back; a no-op selection (same level) is
     /// dropped so re-rendering the picker can't kick a spurious
     /// write.
+    ///
+    /// The `registerable` guard is the real gate on the upper
+    /// levels, not the per-item `.disabled()` on the menu — that
+    /// disable is a visual hint SwiftUI does not reliably honor for
+    /// individual `.menu`-Picker rows, and the harm it guards
+    /// against is a filesystem/launchd side effect, not a cosmetic
+    /// one: `apply(.atLoginWithAutoRestart)` would `writePlist()` a
+    /// LaunchAgent pointing at the *ephemeral* translocated /
+    /// `.build` path, which read-through can't undo (a bootstrapped
+    /// service reads back as level 3, so the broken agent persists).
+    /// So the setter refuses any level but "Never" on an
+    /// unregisterable copy — defense independent of the view layer.
     private var levelBinding: Binding<AutoStartLevel> {
         Binding(
             get: { status.level },
             set: { newLevel in
                 guard newLevel != status.level else { return }
+                guard status.registerable || newLevel == .off
+                else { return }
                 busy = true
                 Task {
                     let result = await AutoStartManager.set(newLevel)
@@ -175,7 +189,13 @@ struct LoginItemCard: View {
     }
 
     /// Kicks a fresh off-main dual read and publishes it on main.
+    /// Skipped while a `set(_:)` is in flight: a `didBecomeActive`
+    /// landing mid-write could otherwise publish a pre-write read
+    /// after the write's own re-read, transiently showing a stale
+    /// level. The write's re-read already refreshes from OS truth,
+    /// so nothing is lost by deferring to the next event.
     private func refresh() {
+        guard !busy else { return }
         Task {
             let result = await AutoStartManager.current()
             status = result
