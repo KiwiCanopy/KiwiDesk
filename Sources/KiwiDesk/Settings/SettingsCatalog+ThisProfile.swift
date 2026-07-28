@@ -8,7 +8,8 @@ import KiwiDeskCore
 // neighbours do. The aggregation and the enumeration stay in
 // `SettingsCatalog.swift`; the authoring rules are in its
 // header, and the catalog guards treat every
-// `SettingsCatalog*` file as catalog, not as a render site.
+// `SettingsCatalog+*` slice as catalog, not as a render site —
+// the `+` is load-bearing, see `SettingsCatalogFiles`.
 
 struct SpacesControls: Sendable {
     let spacesCard = SettingsControl("spaces.title", "Spaces")

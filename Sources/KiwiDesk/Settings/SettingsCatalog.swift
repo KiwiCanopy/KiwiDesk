@@ -9,9 +9,10 @@ import KiwiDeskCore
 /// The declarations themselves live one file per sidebar group —
 /// `SettingsCatalog+ThisProfile.swift` and
 /// `SettingsCatalog+WholeApp.swift` — leaving this file the
-/// aggregation and the enumeration. Every `SettingsCatalog*` file
-/// counts as catalog to the guards, so a further slice needs no
-/// allow-listing.
+/// aggregation and the enumeration. Every `SettingsCatalog+*`
+/// slice counts as catalog to the guards, so a further slice
+/// needs no allow-listing — the `+` is load-bearing, and
+/// `SettingsCatalogFiles` records why.
 ///
 /// `Mirror` yields stored properties in declaration order, so the
 /// index order is deterministic; keeping it *matching* the view's

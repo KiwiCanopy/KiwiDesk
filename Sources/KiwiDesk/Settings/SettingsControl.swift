@@ -61,8 +61,8 @@ struct SettingsControl: Hashable, Sendable {
         self.instanceTag = nil
     }
 
-    /// The scroll-anchor id — what `.searchAnchor`/`.searchFlash`
-    /// tag and what `SettingsAnchor.anchor` carries.
+    /// The scroll-anchor id — what the reveal
+    /// modifiers tag and what `SettingsAnchor.anchor` carries.
     var id: String {
         switch label {
         case .tuple(let key, _):

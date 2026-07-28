@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The one way a Settings drawer renders (#277): a
 /// `DisclosureGroup` that owns the anchor pairing part 1 left as
-/// a call-site convention — `.searchFlash` on the label,
-/// `.searchAnchor` on the whole group, OUTSIDE any card chrome —
+/// a call-site convention — `searchFlashHeader` on the label,
+/// `searchAnchorCard` on the whole group, OUTSIDE any card chrome —
 /// plus expansion, so a reveal targeting a control *inside* a
 /// collapsed drawer opens it before the scroll lands.
 ///

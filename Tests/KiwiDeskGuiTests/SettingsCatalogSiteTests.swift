@@ -58,7 +58,7 @@ struct SettingsCatalogSiteTests {
     /// cannot self-check, so a source scan closes it.
     @Test("no catalog control is a computed property")
     func catalogControlsAreStored() throws {
-        // Only the declaration files (`SettingsCatalog*`), NOT
+        // Only the declaration files (`SettingsCatalog+*`), NOT
         // `SettingsControl.swift` — its `AnySettingsDrawer`
         // protocol legitimately declares `var control:
         // SettingsControl { get }`, which is a requirement, not a
@@ -107,7 +107,13 @@ struct SettingsCatalogSiteTests {
             corpus += source
             declarations += SourceScan.allMatches(
                 in: source,
-                pattern: #"struct (\w+): Sendable"#
+                // Keyed on the naming convention, NOT on
+                // `: Sendable` — registration as a `static let`
+                // is what forces that conformance, so an
+                // unregistered struct (the one shape this hunts)
+                // is exactly the shape under no pressure to
+                // carry it.
+                pattern: #"struct (\w+Controls)\b"#
             )
         }
         // Two legitimate ways to be reached, and reflection walks

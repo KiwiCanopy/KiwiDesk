@@ -24,12 +24,6 @@ struct SettingsAnchorPrimitiveTests {
             .appendingPathComponent("Sources/KiwiDesk")
     }
 
-    private var revealFile: URL {
-        guiDir.appendingPathComponent(
-            "Settings/SettingsReveal.swift"
-        )
-    }
-
     /// `file -> count` for every file containing `needle`.
     private func occurrences(
         of needle: String,
@@ -119,45 +113,13 @@ struct SettingsAnchorPrimitiveTests {
         }
     }
 
-    /// The raw `String` halves are `fileprivate`, which is what
-    /// makes a literal or mismatched id **impossible** rather
-    /// than merely caught (#573). Widening either one back to
-    /// `internal` silently restores that whole failure class and
-    /// nothing else would notice, so the access level itself is
-    /// the invariant worth pinning.
-    @Test("the raw String halves stay fileprivate")
-    func rawHalvesStayFilePrivate() throws {
-        let source = SourceScan.stripComments(
-            try String(contentsOf: revealFile, encoding: .utf8)
-        )
-        for half in ["searchAnchor", "searchFlash"] {
-            let declared = source.occurrences(
-                of: "func \(half)("
-            )
-            let sealed = source.occurrences(
-                of: "fileprivate func \(half)("
-            )
-            #expect(
-                declared == 1 && sealed == 1,
-                Comment(
-                    rawValue:
-                        "\(half) is declared \(declared)× with "
-                        + "\(sealed) fileprivate — the typed "
-                        + "modifiers are the only way in; a "
-                        + "widened half re-opens literal ids"
-                )
-            )
-        }
-    }
-
     /// `searchAnchor` is a one-line `.id()` wrapper, so a raw
-    /// `.id(control.id)` at a call site is a THIRD door into the
-    /// same mistake: it anchors without washing, and the halves
-    /// being fileprivate does not close it. A search hit then
-    /// scrolls correctly and flashes nothing — silent, and the
-    /// most plausible regression of all, since `.id()` is
-    /// ordinary SwiftUI rather than anything this subsystem
-    /// invented.
+    /// `.id(control.id)` at a call site is a third door into the
+    /// same mistake: it anchors without washing, and sealing the
+    /// halves does not close it. A search hit then scrolls
+    /// correctly and flashes nothing — silent, and the most
+    /// plausible regression of all, since `.id()` is ordinary
+    /// SwiftUI rather than anything this subsystem invented.
     @Test("no ad-hoc .id() outside collection identity")
     func identityModifiersAreConfined() throws {
         let hits = try occurrences(
@@ -170,13 +132,12 @@ struct SettingsAnchorPrimitiveTests {
                 "KeybindingNavRow.swift",
                 "KeybindingAppGroup.swift",
                 "AdvancedLuaGroup.swift",
-                // Locale identity: `L()` is not observable
-                // state, so a language change rebuilds the whole
-                // hosting root by keying it on the locale. The
-                // one `.id()` here is deliberately the coarsest
-                // in the app — the opposite end of the scale
-                // from an anchor, and it would swallow one if
-                // anybody nested them.
+                // Locale identity: `L()` is not observable state,
+                // so a language change rebuilds the whole hosting
+                // root by keying it on the locale. Deliberately
+                // the coarsest `.id()` in the app — the opposite
+                // end of the scale from an anchor, and it would
+                // swallow one if anybody nested them.
                 "LocaleScopedRoot.swift",
             ]
         )
@@ -192,49 +153,39 @@ struct SettingsAnchorPrimitiveTests {
         )
     }
 
-    /// What the types still cannot say: that the two halves
-    /// inside `SettingsReveal` are fed the SAME control. They are
-    /// composed by hand there, so a slip would compile. Sets, not
-    /// counts — each typed wrapper calls one half once, and the
-    /// whole-pair wrapper calls both.
-    @Test("the halves in SettingsReveal name one control")
-    func halvesNameOneControl() throws {
-        let source = SourceScan.stripComments(
-            try String(contentsOf: revealFile, encoding: .utf8)
-        )
-        let anchors = Set(
-            SourceScan.firstArguments(
-                of: "searchAnchor(",
-                in: source
+    /// The files that may split the pair across chrome. Sealing
+    /// the raw `String` halves closed the literal-id door but not
+    /// this one: the typed container halves are `internal`, so
+    /// `.searchAnchorCard(someControl)` compiles at any view in
+    /// the target, where it anchors WITHOUT washing and mounts a
+    /// second copy of an id the real section already owns —
+    /// `scrollTo` then has two candidates. More plausible than
+    /// the `.id()` door, too, since both surface on autocomplete
+    /// for every `View` and read as an instruction.
+    private let pairingPrimitives: Set<String> = [
+        "SettingsReveal.swift",
+        "SettingsSection.swift",
+        "SettingsDisclosure.swift",
+    ]
+
+    @Test("the split halves stay inside the container shapes")
+    func containerHalvesAreConfined() throws {
+        for needle in [
+            ".searchAnchorCard(", ".searchFlashHeader(",
+        ] {
+            let hits = try occurrences(
+                of: needle,
+                excluding: pairingPrimitives
             )
-        )
-        let flashes = Set(
-            SourceScan.firstArguments(
-                of: "searchFlash(",
-                in: source
-            )
-        )
-        // Non-vacuity: a rename that stopped both needles
-        // matching would otherwise pass silently. The declaration
-        // contributes its parameter name, so both sets carry
-        // `_ anchor: String` plus the call arguments.
-        #expect(!anchors.isEmpty && !flashes.isEmpty)
-        #expect(
-            anchors == flashes,
-            Comment(
-                rawValue:
-                    "SettingsReveal anchors \(anchors.sorted()) "
-                    + "but flashes \(flashes.sorted()) — a reveal "
-                    + "would scroll to one id and wash another"
-            )
-        )
-        for argument in anchors.union(flashes) {
             #expect(
-                !argument.contains("\""),
+                hits.isEmpty,
                 Comment(
                     rawValue:
-                        "literal id '\(argument)' — the index "
-                        + "only ever emits SettingsControl.id"
+                        "\(needle)…) applied outside the "
+                        + "container shapes — a control that is "
+                        + "its own scroll target takes "
+                        + ".searchAnchored(control) whole: "
+                        + describe(hits)
                 )
             )
         }

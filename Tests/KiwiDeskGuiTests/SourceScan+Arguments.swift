@@ -4,8 +4,8 @@ import Foundation
 // ask "what is this primitive being FED?" — the catalog site
 // guards (`SettingsCatalogArgumentTests`: is a section's first
 // argument a catalog declaration?) and the anchor primitive
-// guards (`SettingsAnchorPrimitiveTests`: are `.searchAnchor` /
-// `.searchFlash` fed one matching, non-literal id?).
+// guards (`SettingsAnchorPrimitiveTests`: are a shape's two
+// reveal halves fed one matching control?).
 //
 // Here rather than copied per suite on the standing bar in
 // `.claude/rules/tests.md` — drift risk, not copy count. Both
