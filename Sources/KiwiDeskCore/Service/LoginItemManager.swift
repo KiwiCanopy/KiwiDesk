@@ -37,20 +37,24 @@ public enum LoginItemManager {
     /// as `.unavailable` (fix: move the app to Applications).
     public static var current: LoginItemState {
         let status = SMAppService.mainApp.status
-        if status == .notFound, !isRegisterableLocation {
+        let registerable = isRegisterable(
+            bundleURL: Bundle.main.bundleURL
+        )
+        if status == .notFound, !registerable {
             return .unavailable
         }
         return state(from: status)
     }
 
-    /// Whether the running bundle is somewhere `SMAppService` can
+    /// Whether a bundle at `url` is somewhere `SMAppService` can
     /// register it: a real `.app` macOS has not translocated to a
     /// read-only randomized path. A bare binary launched directly
-    /// (its bundle URL is not an `.app`) or a translocated copy
-    /// cannot register, which is what separates a terminal
-    /// `.notFound` from the ordinary pre-registration one.
-    private static var isRegisterableLocation: Bool {
-        let url = Bundle.main.bundleURL
+    /// (its bundle URL is the containing dir, not an `.app`) or a
+    /// translocated copy cannot register — the terminal `.notFound`
+    /// that greys the control, as opposed to the ordinary
+    /// pre-registration one. Pure over its argument so all three
+    /// cases are unit-testable without touching the real bundle.
+    static func isRegisterable(bundleURL url: URL) -> Bool {
         guard url.pathExtension == "app" else { return false }
         return !url.path.contains("/AppTranslocation/")
     }
