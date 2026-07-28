@@ -111,6 +111,30 @@ extension KiwiCore {
             }
             tiler.settings.animations.scrollSpeedMS = ms
             return .ok()
+        case "animations.set_grow_policy":
+            // Experimental (#47), engine-only — not persisted to a
+            // profile. Flip live to compare the throttled-smooth
+            // grow against the shipping mid-slide on device.
+            guard let raw = args.first?.stringValue else {
+                return .fail("expected \"mid_slide\" or \"smooth\"")
+            }
+            switch raw {
+            case "mid_slide": tiler.animation.growPolicy = .midSlide
+            case "smooth":
+                tiler.animation.growPolicy = .throttledSmooth
+            default:
+                return .fail("expected \"mid_slide\" or \"smooth\"")
+            }
+            return .ok()
+        case "animations.set_grow_rate":
+            // Size-set cap in Hz for `smooth` (#47), clamped 1–120.
+            // Zero or negative restores the per-tick default (no
+            // throttle), matching the engine's `nil`.
+            guard let hz = args.first?.intValue else {
+                return .fail("expected hertz")
+            }
+            tiler.animation.growRateHz = hz > 0 ? hz : nil
+            return .ok()
         default:
             break
         }

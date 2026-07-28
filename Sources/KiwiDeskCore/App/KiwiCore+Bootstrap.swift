@@ -43,6 +43,15 @@ extension KiwiCore {
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.animationsDidSettle()
         }
+        strandDetector.configureFromEnvironment()
+        strandDetector.frameReader = { [weak self] id in
+            guard let element = self?.eventLoop.element(for: id)
+            else { return nil }
+            return AXHelper.frame(of: element)
+        }
+        tiler.animation.onWindowSettled = { [weak self] id, target in
+            self?.strandDetector.windowSettled(id, target: target)
+        }
         tiler.onFrameApplied = { [weak self] id, frame in
             self?.borders.follow(id, windowFrame: frame)
             self?.stickyMarks

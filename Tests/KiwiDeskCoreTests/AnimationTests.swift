@@ -114,12 +114,14 @@ struct AnimationEngineSizingTests {
     /// no screen is available (headless CI).
     private func recordApplies(
         from: CGRect,
-        to: CGRect
+        to: CGRect,
+        policy: GrowPolicy = .throttledSmooth
     ) -> [(frame: CGRect, setSize: Bool)]? {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay?.id
         else { return nil }
         let engine = AnimationEngine()
+        engine.growPolicy = policy
         var applies: [(frame: CGRect, setSize: Bool)] = []
         engine.apply = { _, frame, setSize in
             applies.append((frame, setSize))
@@ -139,22 +141,46 @@ struct AnimationEngineSizingTests {
         return applies
     }
 
-    /// Issue #45: a growing window holds its start size, then
-    /// grows in a single frame at halfway (never interpolated
-    /// per tick, which would strand slow AX responders). The
-    /// grow lands mid-flight — before the settle frame — so the
-    /// slide masks it.
-    @Test("A pure grow resizes once, mid-flight")
+    /// Issue #45 (`.midSlide` fallback): a growing window holds
+    /// its start size, then grows in a single frame at halfway
+    /// (never interpolated per tick, which would strand slow AX
+    /// responders). The grow lands mid-flight — before the settle
+    /// frame — so the slide masks it. This is the legacy policy
+    /// kept as a Lua escape hatch; the default is smooth per-tick
+    /// (below).
+    @Test("A pure grow under .midSlide resizes once, mid-flight")
     func pureGrowResizesAtHalfway() throws {
         let from = CGRect(x: 10, y: 20, width: 400, height: 300)
         let to = CGRect(x: 10, y: 20, width: 900, height: 800)
-        guard let applies = recordApplies(from: from, to: to)
+        guard
+            let applies = recordApplies(
+                from: from,
+                to: to,
+                policy: .midSlide
+            )
         else { return }
         #expect(applies.last?.frame == to)
         #expect(applies.last?.setSize == true)
         // The grow lands before the final settle frame.
         #expect(applies.dropLast().contains { $0.setSize })
         #expect(applies.filter(\.setSize).count <= 2)
+    }
+
+    /// #47 default: a growing window follows the spring, emitting
+    /// a size-set on many frames (per-tick, since `growRateHz` is
+    /// nil) instead of one at halfway — the buttery grow. It still
+    /// lands exactly on the settle frame.
+    @Test("A pure grow under the smooth default resizes per tick")
+    func pureGrowSmoothInterpolates() throws {
+        let from = CGRect(x: 10, y: 20, width: 400, height: 300)
+        let to = CGRect(x: 10, y: 20, width: 900, height: 800)
+        guard let applies = recordApplies(from: from, to: to)
+        else { return }
+        #expect(applies.last?.frame == to)
+        #expect(applies.last?.setSize == true)
+        // Many size-sets across the grow, not a single mid-slide
+        // jump — the whole point of the smooth policy.
+        #expect(applies.filter(\.setSize).count > 5)
     }
 
     /// A shrinking window takes its target size on the first

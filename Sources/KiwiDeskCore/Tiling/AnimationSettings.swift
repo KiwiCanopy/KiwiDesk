@@ -1,11 +1,12 @@
 import Foundation
 
 /// Per-trigger animation toggles (issue #11), replacing the
-/// removed global `enable_animations`. Only position-only
-/// triggers are toggleable: an "off" size change would be an
-/// instant resize, which slow-AX apps (Electron/WebKit) clamp
-/// or drop — so window resize/swap always animate and have no
-/// toggle here.
+/// removed global `enable_animations`. Each trigger animates by
+/// default except the space switch; "off" snaps that trigger
+/// instantly. The instant resize/swap paths re-assert size via
+/// the EUI-bracketed size→position→size set (issue #50), so an
+/// un-animated landing is reliable on most apps — a few
+/// grid-snapping apps still clamp it.
 ///
 /// JSON shape follows the one-vocabulary rule (AGENTS.md §5):
 /// `animations.set_on_space_change` → `animations.on_space_change`

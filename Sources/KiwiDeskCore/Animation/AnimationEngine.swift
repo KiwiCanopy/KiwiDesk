@@ -19,7 +19,9 @@ import CoreGraphics
 /// a growing one holds its start size until halfway and then
 /// grows in one frame, where the ongoing slide masks the jump.
 /// Every other frame is position-only — one AX call, and the
-/// target app never re-lays-out its content mid-flight.
+/// target app never re-lays-out its content mid-flight. The
+/// grow direction's policy is swappable (`growPolicy`, #47) for
+/// on-device comparison; the size math lives in `GrowSize`.
 @MainActor
 public final class AnimationEngine {
     /// Applies one interpolated frame to a real window.
@@ -41,6 +43,14 @@ public final class AnimationEngine {
     /// must wait until windows stop moving, like z-order
     /// restoration.
     public var onAllAnimationsEnded: @MainActor () -> Void = {}
+
+    /// Fired when one window's animation reaches its exact target
+    /// (the settle frame), with that target. The strand detector
+    /// (#47 safety net) reads the window back after a grace and
+    /// logs if the app didn't actually land there. Not fired on
+    /// cancel/teardown — only a clean settle has a target to check.
+    public var onWindowSettled: @MainActor (WindowID, CGRect) -> Void =
+        { _, _ in }
 
     /// Test seam: when false, `animate` applies the target
     /// frame synchronously instead of spring-animating it, so
@@ -71,16 +81,42 @@ public final class AnimationEngine {
         }
     }
 
+    /// Grow-direction size policy (#47). Default `.throttledSmooth`
+    /// at the per-tick rate below — a growing window follows the
+    /// spring smoothly. Engine-only (not persisted to a profile),
+    /// but Lua-overridable: `animations.set_grow_policy` drops to
+    /// `.midSlide` for a session (e.g. from `init.lua`) if a
+    /// slow-AX app misbehaves. The GUI never exposes it (expert
+    /// knob, like the bars' `dim_factor`).
+    public var growPolicy: GrowPolicy = .throttledSmooth
+
+    /// Optional size-set rate cap for `.throttledSmooth`, in Hz.
+    /// `nil` (default) = per-tick: the size channel emits every
+    /// display tick, keeping pace with the always-per-tick position
+    /// channel on any refresh rate (60, 120, …) without a magic
+    /// number. A non-nil value throttles *below* the refresh
+    /// (clamped 1–120) to bound a slow-AX app's reflow load. No
+    /// effect under `.midSlide`.
+    public var growRateHz: Int? {
+        get { storedGrowRateHz }
+        set { storedGrowRateHz = newValue.map { min(max($0, 1), 120) } }
+    }
+
     private var storedDurationMS = 250
     private var storedScrollDurationMS = 250
-    private var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
-    private var drivers: [DisplayID: DisplayLinkDriver] = [:]
+    private var storedGrowRateHz: Int?
+    /// Per-window seconds since the last throttled size-set (#47).
+    // Members below are read by the `+Teardown` extension, so they
+    // are module-internal rather than file-private.
+    var sizeElapsed: [WindowID: TimeInterval] = [:]
+    var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
+    var drivers: [DisplayID: DisplayLinkDriver] = [:]
     /// Last rounded frame sent per window, for no-op skipping.
-    private var lastApplied: [WindowID: CGRect] = [:]
+    var lastApplied: [WindowID: CGRect] = [:]
     /// The size a window actually has on screen right now:
     /// per axis, the target size once shrinking or past
     /// halfway, otherwise the start size held until then.
-    private var heldSize: [WindowID: CGSize] = [:]
+    var heldSize: [WindowID: CGSize] = [:]
 
     public init() {}
 
@@ -174,70 +210,19 @@ public final class AnimationEngine {
         startDriver(for: display, screen: screen)
     }
 
-    /// Stops animating a window, leaving it where it is.
-    public func cancel(window: WindowID) {
-        if removeAnimation(for: window) != nil {
-            lastApplied[window] = nil
-            heldSize[window] = nil
-            onAnimationEnd(window)
-            notifyIfIdle()
-        }
-    }
-
-    /// Stops everything, snapping to targets when enabled.
-    /// Without `snapToTargets`, a window mid-exit-slide (#207)
-    /// is left half-visible until a retile re-parks it —
-    /// production callers should snap.
-    public func cancelAll(snapToTargets: Bool = false) {
-        for perWindow in animations.values {
-            for (id, animation) in perWindow {
-                if snapToTargets {
-                    apply(id, animation.targetFrame, true)
-                }
-                onAnimationEnd(id)
-            }
-        }
-        let wasActive = activeCount > 0
-        animations = [:]
-        lastApplied = [:]
-        heldSize = [:]
-        for driver in drivers.values {
-            driver.stop()
-        }
-        if wasActive {
-            onAllAnimationsEnded()
-        }
-    }
-
-    /// Drops display links for disconnected monitors. Their
-    /// in-flight animations complete instantly.
-    public func displaysChanged() {
-        let connected = Set(
-            NSScreen.screens.compactMap { $0.kiwiDisplay?.id }
-        )
-        for display in Array(drivers.keys)
-        where !connected.contains(display) {
-            drivers[display]?.invalidate()
-            drivers[display] = nil
-            var removedAny = false
-            for (id, animation) in animations[display] ?? [:] {
-                apply(id, animation.targetFrame, true)
-                lastApplied[id] = nil
-                heldSize[id] = nil
-                onAnimationEnd(id)
-                removedAny = true
-            }
-            animations[display] = nil
-            if removedAny {
-                notifyIfIdle()
-            }
-        }
-    }
-
     // MARK: - Internals
 
+    /// Drops all per-window bookkeeping for `id` (no-op skip cache,
+    /// held size, throttle accumulator). Shared by every teardown
+    /// path so a new per-window map can't be forgotten in one.
+    func clearState(_ id: WindowID) {
+        lastApplied[id] = nil
+        heldSize[id] = nil
+        sizeElapsed[id] = nil
+    }
+
     @discardableResult
-    private func removeAnimation(
+    func removeAnimation(
         for window: WindowID
     ) -> FrameAnimation? {
         for display in animations.keys {
@@ -278,37 +263,40 @@ public final class AnimationEngine {
                 // the source of truth for the final frame.
                 apply(id, animation.frame, true)
                 perWindow[id] = nil
-                lastApplied[id] = nil
-                heldSize[id] = nil
+                clearState(id)
+                onWindowSettled(id, animation.frame)
                 onAnimationEnd(id)
             } else {
                 // Stepwise size, split per axis (issue #45).
                 // A shrinking axis takes its target size on the
                 // first frame — mid-flight overlap clears at
                 // once (siblings yielding room to a newly
-                // opened window). A growing axis holds its start
-                // size until halfway, then grows in one frame,
-                // where the ongoing slide masks the jump and the
-                // window sits near its final origin (any clamp
-                // there self-heals on the exact settle frame).
-                // Either way a single size-set lands mid-flight;
-                // interpolating per tick would instead make slow
+                // opened window). The grow direction follows the
+                // active `growPolicy`: `.midSlide` (default) lands
+                // a single size-set mid-flight, where the ongoing
+                // slide masks the jump; `.throttledSmooth` (#47)
+                // resamples the spring at a capped rate instead.
+                // Interpolating per tick would instead make slow
                 // AX responders (Electron/WebKit) re-lay-out
-                // continuously and fall seconds behind,
-                // stranding the window mid-size. Pure moves keep
-                // the sizes equal, so no resize is emitted.
+                // continuously and fall seconds behind, stranding
+                // the window mid-size — the cap bounds that load.
+                // Pure moves keep the sizes equal, so no resize is
+                // emitted.
                 let held =
                     heldSize[id]
                     ?? Self.rounded(animation.frame).size
-                let target = animation.targetFrame.size
-                let grown = animation.pastHalfway
-                let width =
-                    target.width <= held.width || grown
-                    ? target.width : held.width
-                let height =
-                    target.height <= held.height || grown
-                    ? target.height : held.height
-                let size = CGSize(width: width, height: height)
+                let stepped = GrowSize.step(
+                    policy: growPolicy,
+                    held: held,
+                    target: animation.targetFrame.size,
+                    spring: animation.frame.size,
+                    pastHalfway: animation.pastHalfway,
+                    rateHz: storedGrowRateHz,
+                    elapsed: sizeElapsed[id] ?? 0,
+                    dt: dt
+                )
+                sizeElapsed[id] = stepped.elapsed
+                let size = stepped.size
                 let setSize = size != heldSize[id]
                 heldSize[id] = size
                 let frame = CGRect(
@@ -333,7 +321,7 @@ public final class AnimationEngine {
 
     /// Fires `onAllAnimationsEnded` when nothing animates
     /// anymore, on any display.
-    private func notifyIfIdle() {
+    func notifyIfIdle() {
         if activeCount == 0 {
             onAllAnimationsEnded()
         }
