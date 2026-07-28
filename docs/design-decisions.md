@@ -483,6 +483,50 @@ the ring and target together. No private symbol is linked at launch,
 and the optimization never changes SIP requirements or the layout/state
 model.
 
+**Everything that reads window state stands down mid-animation —
+including `sync` (#596):** while our own animation drives a
+window the commanded per-tick frame owns its ring and mark
+(#594). The AX echo and the WindowServer re-read already stand
+down; the third reader is the steady-state `sync`, whose frame is
+that same echo-fed state. It is the easy one to miss, because
+`sync` reads as a rebuild rather than a move — so a retile burst
+or focus change mid-flight snapped the overlay back to where the
+window sat before the motion started (~31 pt on device) until the
+next tick dragged it forward. The case is routed through the one
+shared decision (`FollowSource.steadySync`) rather than guarded
+at each `sync`, which is what forces the sticky mark through the
+same change: it had the identical defect. Only geometry stands
+down — create, recolor, re-order and retire must not.
+
+**The heal rides the settle signal, not a duration guess
+(#596):** once the motion stops the overlays need one re-sync
+from real state, because an app that accepted no AX write for the
+whole flight leaves the ring parked over empty space with no echo
+and no WindowServer event left to correct it. The old
+`durationMS + 50` timer predates that signal and is wrong in both
+directions — a spring's visual settle is ~2× its response, so it
+landed mid-flight, too early to heal anything and itself the
+snap above. The replacement waits for `onAllAnimationsEnded`,
+then a grace sized to a **slow-AX app's post-settle catch-up**,
+not to the animation: read sooner and it reads bounds the app has
+not reached yet, which is the same backward snap one moment
+later.
+
+**No echo is suppressed to smooth that tail (#596).** The
+untreated case is the post-settle echo that arrives while the app
+is still catching up — in principle it pulls the ring backward
+before later echoes walk it forward. Suppressing echoes for a
+grace would be a heuristic guarding a symptom that did not appear
+under a lever forcing the AX-fallback path
+(`KIWIDESK_NO_WS_TRACKING`), including with an app frozen across
+the whole flight, where its catch-up echoes walked the ring
+*forward* onto the real frame. And it is the one guard with a
+known cost: after an instant `setFrame` the echo is the *only*
+carrier of ring updates under AX fallback, so suppressing it
+freezes the ring in a case that works today. The delayed re-sync
+buys the same smoothness without silencing anything. Re-open only
+with a device capture of the backward pull.
+
 **Two vocabularies, one split (#185 review, 2026-07-12):**
 *navigation* (`focus`, window `swap`) is spatial and
 layout-agnostic — left/right/up/down everywhere, per the table

@@ -333,13 +333,12 @@ public final class KiwiCore {
         // An animated relayout (spawn, close, mode/gap change)
         // restacks windows, so WindowServer fires the same
         // hide/reorder events as a drag-swap — which can leave a
-        // ring hidden with no matching unhide. Re-assert the full
-        // ring set once the motion settles (keyed, so a burst of
-        // retiles collapses to one). Only when something animates:
-        // a static retile moves nothing, so no restack, no drop.
-        if tiler.animation.activeCount > 0 {
-            scheduleBorderDropReconcile()
-        }
+        // ring hidden with no matching unhide. No call needed here
+        // any more: an animated retile ends in
+        // `onAllAnimationsEnded`, and `scheduleBorderResync` does
+        // that re-assert off the settle signal (#596), keyed so a
+        // burst of retiles still collapses to one. A static retile
+        // moves nothing, so there is no restack and no drop.
         // Floats sit outside the layout loop above, so a bar just
         // switched on (or a window just turned floating) can leave
         // one hidden under a top strip; correct it here. Must run

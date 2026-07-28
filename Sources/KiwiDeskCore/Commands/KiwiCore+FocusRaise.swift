@@ -28,9 +28,16 @@ extension KiwiCore {
     /// appears, (b) ordering between the runners becomes
     /// semantic, or (c) a client needs per-monitor/per-space
     /// settle instead of the global count-zero signal.
+    ///
+    /// The border re-sync (#596) is a third runner but not a
+    /// third *pending* client — it carries no flag, arms
+    /// unconditionally, and only schedules a task, so it neither
+    /// trips (a) nor (b): it cannot interleave with the two
+    /// raises above, which are done before its grace elapses.
     func animationsDidSettle() {
         runPendingZOrderRestore()
         runPendingFocusRaise()
+        scheduleBorderResync()
     }
 
     /// Fires a pending deferred raise. Called when animations

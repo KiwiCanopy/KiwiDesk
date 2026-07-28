@@ -175,6 +175,12 @@ final class BorderOverlay {
     /// proving the `follow` guards stood down (or didn't).
     var lastRenderedFrame: CGRect? { lastFrame }
 
+    /// The last rendered colour — its sibling seam, for proving
+    /// that a `sync` standing down on GEOMETRY still recolored
+    /// (#596): both ride the one `update` call, so a guard placed
+    /// a level too high would silently eat the recolor.
+    var lastRenderedColorHex: String { lastColorHex }
+
     /// Renders the ring around `frame` (AX coords). Takes the raw
     /// inputs, not a finished `BorderGeometry`, because the geometry
     /// depends on the current backend's order mode — the facade owns

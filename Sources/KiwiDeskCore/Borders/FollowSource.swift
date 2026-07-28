@@ -8,6 +8,11 @@ public enum FollowSource {
     case animationTick
     /// An AX `.windowMoved` / `.windowResized` echo.
     case axEcho
+    /// The steady-state `sync` pass (`updateBorders()` /
+    /// `updateStickyMarks()`), whose frame is
+    /// `state.windows[id]?.frame` — echo-fed, so mid-animation it
+    /// is the frame the motion has already left behind (#596).
+    case steadySync
 
     /// The one follow decision both managers share: does a
     /// reported frame apply, given what currently owns the
@@ -26,6 +31,17 @@ public enum FollowSource {
     /// (`usesWindowServerTracking` vs the broader
     /// `markUsesWindowServerTracking`); only the decision is
     /// shared.
+    ///
+    /// `steadySync` stands down mid-animation for the same
+    /// reason the echo does, one step further out: its frame is
+    /// the same echo-fed state, so any `sync` landing mid-flight
+    /// (a focus change, a retile burst) snaps the overlay back to
+    /// where the window was before the motion started, until the
+    /// next tick (≤16 ms) drags it forward again. Observed on
+    /// device as a ~31 pt backward snap (#596). Unlike the echo
+    /// it ignores `wsTracked`: WindowServer tracking says who
+    /// owns the frame in steady state, and this is only about the
+    /// window that our own animation is currently moving.
     public func applies(
         wsTracked: Bool,
         animating: Bool
@@ -35,6 +51,8 @@ public enum FollowSource {
             return true
         case .axEcho:
             return !wsTracked && !animating
+        case .steadySync:
+            return !animating
         }
     }
 }

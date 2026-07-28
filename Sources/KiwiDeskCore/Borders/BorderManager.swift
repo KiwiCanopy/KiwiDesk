@@ -57,13 +57,17 @@ public final class BorderManager {
     /// Last synced spec per window, so the per-tick `follow` can
     /// recompute geometry from a fresh frame while reusing the
     /// window's color / width / corner style.
-    private var specs: [WindowID: Spec] = [:]
+    /// Internal, not private: the frame paths that read it
+    /// live in the `BorderManager+Sync` extension.
+    var specs: [WindowID: Spec] = [:]
     /// Each window's real corner radius, resolved once per window and
     /// reused. A window's radius is a fixed OS attribute, and a query
     /// that comes back empty (a square/borderless window reporting no
     /// radius) is a permanent answer, not a transient one — so a
     /// resolved default is cached too, never re-queried every sync.
-    private var cornerRadii: [WindowID: CGFloat] = [:]
+    /// Internal for the same reason as `specs` above: `sync`
+    /// retires a window's radius alongside its ring.
+    var cornerRadii: [WindowID: CGFloat] = [:]
     /// The draw order every ring is currently built for (#367).
     /// Global, not per-window: flipping it retires all overlays so
     /// each rebuilds for the new order at the next `sync`. Both
@@ -163,86 +167,6 @@ public final class BorderManager {
         activeOrder = mapped
     }
 
-    /// Shows exactly `desired` — one ring per window — and retires
-    /// the overlays of any window no longer in the set (an empty
-    /// array retires them all).
-    public func sync(_ desired: [Spec]) {
-        let wanted = Set(desired.map(\.window))
-        updateSkyLightSubscription(wanted)
-        for (id, overlay) in overlays where !wanted.contains(id) {
-            overlay.hide()
-            overlays[id] = nil
-            specs[id] = nil
-            cornerRadii[id] = nil
-        }
-        for spec in desired {
-            specs[spec.window] = spec
-            let overlay = overlay(for: spec.window)
-            overlay.update(
-                frame: spec.frame,
-                width: spec.width,
-                cornerStyle: spec.cornerStyle,
-                cornerRadius: cornerRadius(for: spec.window),
-                colorHex: spec.colorHex,
-                screen: screen(for: spec.frame),
-                glowBlur: spec.glowBlur
-            )
-            // Re-assert stacking each sync (focus change, retile,
-            // z-order restore) — the target may have moved in the
-            // window order since the ring last positioned.
-            overlay.order(relativeTo: spec.window.raw)
-        }
-    }
-
-    /// Animation / AX-echo hot path: move an already-shown ring
-    /// to a window's current frame. The stand-down decision is
-    /// `FollowSource.applies` — one switch shared with the
-    /// sticky mark, so no caller re-implements it (#285) and the
-    /// two overlays cannot drift (#594). A no-op for windows
-    /// without a ring.
-    public func follow(
-        _ id: WindowID,
-        windowFrame: CGRect,
-        source: FollowSource
-    ) {
-        guard
-            source.applies(
-                wsTracked: usesWindowServerTracking(id),
-                animating: isAnimating(id)
-            )
-        else { return }
-        apply(id, windowFrame: windowFrame)
-    }
-
-    /// The frame a window's ring last rendered against, for
-    /// tests that need to prove `follow` stood down (or didn't).
-    func lastFrame(_ id: WindowID) -> CGRect? {
-        overlays[id]?.lastRenderedFrame
-    }
-
-    /// Unguarded reposition — the WS bounds re-read (`reconcile`)
-    /// and the steady-state `sync` own the ring's frame directly,
-    /// so they bypass the guards on `follow`. Internal, not
-    /// private: `reconcile` lives in the `+SkyLight` extension.
-    func apply(
-        _ id: WindowID,
-        windowFrame: CGRect,
-        restoreVisibility: Bool = false
-    ) {
-        guard let overlay = overlays[id], let spec = specs[id]
-        else { return }
-        overlay.update(
-            frame: windowFrame,
-            width: spec.width,
-            cornerStyle: spec.cornerStyle,
-            cornerRadius: cornerRadius(for: id),
-            colorHex: spec.colorHex,
-            screen: screen(for: windowFrame),
-            glowBlur: spec.glowBlur,
-            restoreVisibility: restoreVisibility
-        )
-    }
-
     /// The window's real corner radius so the ring's arc hugs it,
     /// resolved once and cached (#357). Falls back to the shared
     /// default when SkyLight reports none — that default is cached
@@ -287,7 +211,7 @@ public final class BorderManager {
         cornerRadii[id] = nil
     }
 
-    private func overlay(for window: WindowID) -> BorderOverlay {
+    func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = makeOverlay(for: window)
         overlays[window] = overlay

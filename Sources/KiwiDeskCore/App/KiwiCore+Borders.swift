@@ -100,20 +100,67 @@ extension KiwiCore {
         }
     }
 
+    /// How long after the animation clock settles the overlays are
+    /// re-synced from real window state (#596). Not a guess at the
+    /// motion's length — the settle signal already tells us that —
+    /// but at how long a slow-AX app keeps applying queued frames
+    /// past it (100–300 ms on Electron/WebKit; 213 ms measured on
+    /// device for a frozen-then-resumed app). Reading sooner reads
+    /// bounds the app has not caught up to, which is the backward
+    /// snap this issue is about; reading later costs nothing in
+    /// the common case, because the post-settle AX echoes are
+    /// already walking the overlay onto the real frame — this pass
+    /// is the backstop for the app that sends no echo at all.
+    static let borderResyncDelayMS = 300
+
     /// WindowServer can briefly order the swap target out while a
     /// drag/drop retile and focus raise overlap. Its hide notification
     /// hides that target's ring, but macOS does not always send a
-    /// matching unhide. Re-assert the complete desired ring set after
-    /// the swap animation (or one short event turn when unanimated).
+    /// matching unhide. Re-assert the complete desired ring set one
+    /// short event turn later.
+    ///
+    /// Only for the UNANIMATED drop. When something animates, the
+    /// re-assert rides `scheduleBorderResync` off the settle signal
+    /// instead: this used to fire at `durationMS + 50`, but a
+    /// spring's visual settle is ~2× its response, so that landed
+    /// mid-flight — where `updateBorders()` is precisely the
+    /// backward snap of #596 item 3, and where it is far too early
+    /// to heal anything.
     func scheduleBorderDropReconcile() {
-        let animationMS =
-            tiler.animation.activeCount > 0
-            ? tiler.settings.animations.durationMS : 0
+        guard tiler.animation.activeCount == 0 else { return }
         deferred.schedule(
             .borderDropSettle,
-            after: .milliseconds(animationMS + 50)
+            after: .milliseconds(50)
         ) { [weak self] in
             self?.updateBorders()
+        }
+    }
+
+    /// Re-syncs both overlay families from real window state a
+    /// grace after the last animation ends — the heal for a window
+    /// whose app accepted no AX write during the flight (#596
+    /// item 2). The ring rode our commanded per-tick frames to the
+    /// target while the window never moved, and with no echo and
+    /// no WindowServer event there is nothing else to correct it;
+    /// this pass reads the state the window actually has and glues
+    /// the ring and mark back onto it.
+    ///
+    /// Drops the pass when a new animation started inside the
+    /// grace: reading a moving window is the very mistake this
+    /// delay exists to avoid, and nothing is lost — that
+    /// animation ends with its own `onAllAnimationsEnded`, which
+    /// schedules this again. Never re-arm from here; that would
+    /// poll the grace away for the whole of a long animation.
+    func scheduleBorderResync() {
+        deferred.schedule(
+            .borderDropSettle,
+            after: .milliseconds(Self.borderResyncDelayMS)
+        ) { [weak self] in
+            guard let self,
+                tiler.animation.activeCount == 0
+            else { return }
+            updateBorders()
+            updateStickyMarks()
         }
     }
 
