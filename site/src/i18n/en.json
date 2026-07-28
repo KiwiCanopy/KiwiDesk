@@ -1,5 +1,5 @@
 {
-  "beta_badge": "Public beta",
+  "beta_badge": "🥝 Public beta",
   "build_body": "KiwiDesk is in public beta. Install it with Homebrew — one command, and the kiwidesk CLI comes with it. Homebrew also keeps it current with brew upgrade. A signed, notarized download follows once the app can update itself, so a direct download is never a dead end.",
   "build_cmt": "# for contributors — Homebrew is the easy path",
   "build_code_aria": "Build KiwiDesk from source",
