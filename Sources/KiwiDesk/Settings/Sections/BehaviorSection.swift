@@ -70,25 +70,27 @@ struct BehaviorSection: View {
         }
     }
 
-    /// Master switch over the per-event animation toggles. Derived,
-    /// not a stored field (a second persisted on/off would re-create
-    /// the removed global `enable_animations` and a drift hazard):
-    /// on when any trigger animates; turning it off silences all
-    /// five; turning it on restores the shipped defaults (space
-    /// switch stays opt-in).
+    /// Master switch over the per-event animation toggles shown in
+    /// this card. Derived, not a stored field (a second persisted
+    /// on/off would re-create the removed global `enable_animations`
+    /// and a drift hazard): on when any of the four animates; off
+    /// silences all four; on restores their shipped defaults (space
+    /// switch stays opt-in). Deliberately excludes `onScrolling` —
+    /// the scrolling slide has its own toggle on the Scrolling card
+    /// (linked below), so folding it in here would let the master
+    /// read on with every visible box off, and silently revert a
+    /// choice made on a card the user can't see from here.
     private var animationsMaster: Binding<Bool> {
         Binding(
             get: {
                 let a = model.config.settings.animations
-                return a.onSpaceChange || a.onScrolling
-                    || a.onWindowResize || a.onWindowSwap
-                    || a.onRelayout
+                return a.onSpaceChange || a.onWindowResize
+                    || a.onWindowSwap || a.onRelayout
             },
             set: { on in
                 let defaults = AnimationSettings()
                 var a = model.config.settings.animations
                 a.onSpaceChange = on ? defaults.onSpaceChange : false
-                a.onScrolling = on ? defaults.onScrolling : false
                 a.onWindowResize = on ? defaults.onWindowResize : false
                 a.onWindowSwap = on ? defaults.onWindowSwap : false
                 a.onRelayout = on ? defaults.onRelayout : false
@@ -97,53 +99,65 @@ struct BehaviorSection: View {
         )
     }
 
-    private var animationsSection: some View {
-        SettingsSection(
-            SettingsCatalog.behavior.animationsCard
-        ) {
-            ToggleRow(
-                label: L(
-                    "behavior.animations.master",
-                    "Animate windows"
-                ),
-                isOn: animationsMaster,
-                help: L(
-                    "behavior.animations.master.help",
-                    "The master switch for KiwiDesk's window "
-                        + "animations. Off snaps windows into place "
-                        + "instantly. Turning macOS System Settings "
-                        + "▸ Accessibility ▸ Reduce Motion on also "
-                        + "keeps them off."
-                )
-            )
-            gatedAnimationControls
-                .modifier(
-                    GreyOut(active: !animationsMaster.wrappedValue)
-                )
-            CrossReferenceRow(
-                prose: L(
-                    "behavior.animations.scrolling_xref",
-                    "Scrolling-layout focus shifts have "
-                        + "their own toggle and speed in"
-                ),
-                linkTitle: L(
-                    "behavior.animations.scrolling_xref_link",
-                    "Layout Defaults ▸ Scrolling"
-                ),
-                destination: .layoutDefaults
-            )
-        }
-        .modifier(
-            GreyOut(
-                active: reduceMotion,
-                help: L(
-                    "behavior.animations.reduce_motion.help",
-                    "System Settings ▸ Accessibility ▸ Reduce "
-                        + "Motion is on, so animations stay off "
-                        + "regardless of this setting."
-                )
-            )
+    /// Explanation shown on the card's header `?` only while Reduce
+    /// Motion forces the whole card off — a live anchor outside the
+    /// dimmed subtree (#527), since a `GreyOut` kills every `?`
+    /// inside it.
+    private var reduceMotionHelp: String {
+        L(
+            "behavior.animations.reduce_motion.help",
+            "System Settings ▸ Accessibility ▸ Reduce "
+                + "Motion is on, so animations stay off "
+                + "regardless of this setting."
         )
+    }
+
+    private var animationsSection: some View {
+        // Reduce Motion greys the card CONTENT, not the header, so
+        // the header `?` (below) stays a live #527 anchor. Nested
+        // with the master gate: the non-compounding `GreyOut`
+        // dims once (AutoGatedGroup.swift).
+        SettingsSection(
+            SettingsCatalog.behavior.animationsCard,
+            help: reduceMotion ? reduceMotionHelp : nil
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                ToggleRow(
+                    label: L(
+                        "behavior.animations.master",
+                        "Animate windows"
+                    ),
+                    isOn: animationsMaster,
+                    help: L(
+                        "behavior.animations.master.help",
+                        "The master switch for KiwiDesk's window "
+                            + "animations. Off snaps windows into "
+                            + "place instantly. Turning macOS "
+                            + "System Settings ▸ Accessibility ▸ "
+                            + "Reduce Motion on also keeps them off."
+                    )
+                )
+                gatedAnimationControls
+                    .modifier(
+                        GreyOut(
+                            active: !animationsMaster.wrappedValue
+                        )
+                    )
+                CrossReferenceRow(
+                    prose: L(
+                        "behavior.animations.scrolling_xref",
+                        "Scrolling-layout focus shifts have "
+                            + "their own toggle and speed in"
+                    ),
+                    linkTitle: L(
+                        "behavior.animations.scrolling_xref_link",
+                        "Layout Defaults ▸ Scrolling"
+                    ),
+                    destination: .layoutDefaults
+                )
+            }
+            .modifier(GreyOut(active: reduceMotion))
+        }
     }
 
     /// The per-event toggles + duration the master switch gates.

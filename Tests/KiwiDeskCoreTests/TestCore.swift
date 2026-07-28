@@ -62,8 +62,14 @@ func makeTestCore(
         .appendingPathComponent(
             "kiwi-test-\(UUID().uuidString)"
         )
-    return KiwiCore(
+    let core = KiwiCore(
         configDirectory: directory,
         hotkeyRegistrar: hotkeyRegistrar
     )
+    // Bootstrap wires the real NSWorkspace Reduce-Motion read;
+    // neutralize it so a dev machine with Reduce Motion on can't
+    // silently turn a KiwiCore test's animations into instant
+    // snaps (same host-state-leak class as the hotkey registrar).
+    core.tiler.animation.reduceMotion = { false }
+    return core
 }
