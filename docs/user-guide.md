@@ -241,7 +241,7 @@ levels:
 - **At Login** — it launches automatically when you sign in, so
   your windows are arranged from the start rather than floating
   loose until you open it by hand.
-- **At Login, With Auto-Restart** — as above, plus a background
+- **At Login + Restart on Crash** — as above, plus a background
   helper that relaunches KiwiDesk if it ever crashes.
 
 First-launch setup offers **At Login** pre-selected on its final

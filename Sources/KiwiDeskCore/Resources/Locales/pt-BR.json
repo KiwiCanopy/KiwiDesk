@@ -268,7 +268,7 @@
   "general.login_item.applied_off": "O KiwiDesk não será iniciado sozinho.",
   "general.login_item.applied_restart": "O KiwiDesk será aberto ao iniciar a sessão e reiniciado se travar.",
   "general.login_item.level.at_login": "Ao iniciar a sessão",
-  "general.login_item.level.at_login_restart": "Reinício automático ao iniciar a sessão",
+  "general.login_item.level.at_login_restart": "Ao iniciar a sessão + reinício ao travar",
   "general.login_item.level.never": "Nunca",
   "general.login_item.open_login_items": "Abrir Itens de início de sessão",
   "general.login_item.requires_approval": "Requer aprovação nos Ajustes do Sistema",

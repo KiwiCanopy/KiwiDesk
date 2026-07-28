@@ -983,7 +983,7 @@ frames across monitors before. (#445)
 
 **Auto-start is one 3-level control, not a toggle and never a
 per-launch prompt.** (#342, #576) "Start KiwiDesk" in General
-offers *Never / At Login / At Login, With Auto-Restart* — folding
+offers *Never / At Login / At Login + Restart on Crash* — folding
 the crash-restart mechanism that used to be CLI-only into the same
 control that owns login-launch. Onboarding's closing card keeps
 the simpler pre-checked "open at login" box (the plain login

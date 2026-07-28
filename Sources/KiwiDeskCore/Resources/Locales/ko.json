@@ -268,7 +268,7 @@
   "general.login_item.applied_off": "KiwiDesk가 자동으로 실행되지 않습니다.",
   "general.login_item.applied_restart": "KiwiDesk가 로그인 시 실행되고 충돌 시 다시 실행됩니다.",
   "general.login_item.level.at_login": "로그인 시",
-  "general.login_item.level.at_login_restart": "자동 재시작 (로그인 시)",
+  "general.login_item.level.at_login_restart": "로그인 시 + 충돌 시 재시작",
   "general.login_item.level.never": "실행 안 함",
   "general.login_item.open_login_items": "로그인 항목 열기",
   "general.login_item.requires_approval": "시스템 설정에서 승인이 필요합니다",

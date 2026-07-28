@@ -65,7 +65,7 @@ A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
 
 This service is also the top level of the **Start KiwiDesk**
-control in Settings ▸ General: *At Login, With Auto-Restart* loads
+control in Settings ▸ General: *At Login + Restart on Crash* loads
 exactly this LaunchAgent, so running `service start` and choosing
 that level are equivalent, and `service status` reports the same
 state — one live source of truth, no second store. The middle

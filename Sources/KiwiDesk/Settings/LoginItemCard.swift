@@ -72,7 +72,7 @@ struct LoginItemCard: View {
                             L(
                                 "general.login_item.level"
                                     + ".at_login_restart",
-                                "Auto-Restart at Login"
+                                "At Login + Restart on Crash"
                             )
                         )
                         .tag(AutoStartLevel.atLoginWithAutoRestart)
@@ -120,7 +120,7 @@ struct LoginItemCard: View {
             "Choose when KiwiDesk starts on its own. "
                 + "\u{201C}At Login\u{201D} launches it when you sign "
                 + "in, so your windows are arranged from the start. "
-                + "\u{201C}Auto-Restart at Login\u{201D} also "
+                + "\u{201C}At Login + Restart on Crash\u{201D} also "
                 + "runs a background helper that relaunches KiwiDesk "
                 + "if it ever crashes. \u{201C}Never\u{201D} turns "
                 + "both off."
