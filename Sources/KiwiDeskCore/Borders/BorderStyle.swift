@@ -59,26 +59,31 @@ public struct BorderStyle: Sendable, Equatable {
     /// brighter, more saturated color than a hairline can (see
     /// `focusedColor`).
     public var width: CGFloat = 5
-    /// Kiwi green — the brand accent hue (~84°). Still darkened from
-    /// the fill-only bright accent (#8DB354, which vanishes as a ring
-    /// over light content), but at the 5 pt default width a thicker
-    /// stroke tolerates more saturation, so this sits livelier than
-    /// the old #567A1F (S 75% vs 60% at the same lightness) while
-    /// still clearing the 3:1 floor on both near-white (~4.3:1) and
-    /// near-black (~4.8:1). Hue, not lightness, stays the on-brand
-    /// invariant. May read low-contrast over window content that is
+    /// Kiwi green — a true-green ring (~96°). Deliberately shifted
+    /// *off* the 84° brand-accent hue that the bars use: at the low
+    /// lightness a thin stroke needs to clear the 3:1 floor, the
+    /// yellow-leaning 84° family reads as dull olive/moss no matter
+    /// the saturation, so the ring alone moves ~12° toward pure green
+    /// to escape that cast (#578 — the prior #588613 and even a
+    /// full-saturation same-hue #538A00 still read mossy on device).
+    /// Still darkened from the fill-only bright accent (#8DB354,
+    /// which vanishes as a ring over light content); this clears the
+    /// 3:1 floor on both near-white (~3.6:1) and near-black (~5.8:1).
+    /// The ~12° divergence from the bar accent is the accepted trade
+    /// for a legible non-moss ring — lightness had no room to give,
+    /// so hue did. May read low-contrast over window content that is
     /// itself green (see docs/accepted-limitations.md, whose
     /// mitigation is the 3:1 floor above — keep it if you retune).
     /// Default mirrored in docs/lua-reference.md (border colors)
-    /// — change both. The drag ghost used to be this same hex and
-    /// **deliberately no longer is** (#511: it has to separate
-    /// from the drop-zone amber under red-green vision loss, which
-    /// this hue family cannot do at this chroma — see
-    /// `DragVisual.ghostDefault`). Do not re-converge them; the
-    /// ring is free to move here precisely because it has no
-    /// partner to separate from. The optional glow blooms a brightened
-    /// derivative of this (`BorderStyle.glowColor(from:)`).
-    public var focusedColor = "#588613"
+    /// — change both. The drag ghost used to be this same family and
+    /// **deliberately isn't** (#511: it has to separate from the
+    /// drop-zone amber under red-green vision loss, which this hue
+    /// cannot do at this chroma — see `DragVisual.ghostDefault`). Do
+    /// not re-converge them; the ring is free to move here precisely
+    /// because it has no partner to separate from. The optional glow
+    /// blooms a brightened derivative of this
+    /// (`BorderStyle.glowColor(from:)`).
+    public var focusedColor = "#4A9816"
     public var unfocusedEnabled = false
     /// A subtle translucent grey — present without competing with
     /// the focused ring for attention.

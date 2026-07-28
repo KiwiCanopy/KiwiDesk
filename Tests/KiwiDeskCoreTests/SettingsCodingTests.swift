@@ -53,7 +53,7 @@ struct SettingsCodingTests {
         #expect(border["glow_size"] as? Double == 0)
         #expect(border["enabled"] as? Bool == true)
         #expect(border["width"] as? Double == 5)
-        #expect(border["focused_color"] as? String == "#588613")
+        #expect(border["focused_color"] as? String == "#4A9816")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["glow"] as? Bool == false)

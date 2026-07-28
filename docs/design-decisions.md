@@ -2090,9 +2090,15 @@ The focus ring and drag ghost paint over *arbitrary* third-party
 window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
 fill-only color — too light to survive as a thin stroke on light
 windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the **ring**
-drops the accent hue (~84°) down in lightness to `#588613`, which
-clears 3:1 on both near-white (~4.3:1) and near-black (~4.8:1)
-while staying unmistakably on-brand green. The **ghost** shared
+must darken to clear 3:1 on both near-white and near-black.
+Darkening the accent hue (~84°) on lightness alone gave the old
+`#588613`; but at the low lightness a thin stroke needs, that
+yellow-leaning hue reads as dull olive/*moss* (#578 — a
+full-saturation same-hue `#538A00` still did on device). So the
+ring leaves the 84° family, shifting ~12° toward true green to
+`#4A9816` (H96 S75 L34), which escapes the cast and still clears
+3:1 on near-white (~3.6:1) and near-black (~5.8:1) while staying
+unmistakably on-brand green. The **ghost** shared the old hex
 that hex until #511, and no longer does — see the origin/target
 paragraph below; the 3:1-at-both-ends bar is what survived the
 move, the shared hue is what did not. The
@@ -2100,7 +2106,8 @@ default ring width is 5 pt (was 2): a thicker stroke is not just
 more visible, it reads at a *more saturated* color than a hairline
 can (a 2 pt line's anti-aliased edges wash its effective contrast
 out), which is why the default could move off the duller `#567A1F`
-to this livelier `#588613` at the same lightness. 5 pt is also the
+to a livelier green at the same lightness (the `#588613` era,
+since shifted to `#4A9816`). 5 pt is also the
 widest that still tiles cleanly with unfocused rings on: each ring
 reaches its width into the 10 pt default inner gap, so `2 × 5 = 10`
 fills the gap edge-to-edge without overlap (6 pt would overlap).
@@ -2108,10 +2115,15 @@ That couples the width default to the gap default — changing either
 without the other re-opens or overlaps the ring band. The drag drop-zone
 keeps a distinct hue as a darkened amber `#C2790A` (the old
 `#E8A33D` had the same light-window problem), so origin still
-reads apart from target. For the *ring*, that darkening is not a
-hue change — the same move the green-forward identity makes for
-ink and borders: keep the hue, drop the lightness where a role
-needs contrast.
+reads apart from target. For the *ring*, the darkening began as
+lightness-only — the same move the green-forward identity makes
+for ink and borders (keep the hue, drop the lightness where a role
+needs contrast) — but #578 added a deliberate ~12° hue shift on
+top. It is the one place that "keep the hue" rule is broken,
+because at the contrast-mandated lightness the 84° hue had no
+non-mossy option left, so hue moved where lightness could not. The
+bars keep 84°; only the ring (and, separately, the ghost) leave
+it.
 
 **The drag ghost is the one place that move ran out of room
 (#511).** Origin and target are the only two overlays on screen
@@ -2136,9 +2148,10 @@ here are quoted from that guard rather than the other way round.
 So the ghost alone moved to a deep emerald `#347957` — hue 150,
 S0.40, **76/441**, 5.2:1 on near-white and 4.0:1 on near-black,
 margin on all three while keeping real chroma. The contrast bar
-held; the hue it shared with the ring did not. The ring keeps
-`#588613` — it has no partner to separate from, so nothing asks
-it to move. Origin is therefore green-but-not-*the*-green, which
+held; the hue it shared with the ring did not. The ring has no
+partner to separate from, so nothing asks it to move *for CVD* —
+it later shifted to `#4A9816` for the unrelated moss reason
+(#578), not this one. Origin is therefore green-but-not-*the*-green, which
 is the cost, and the alternative (`#2F4A0C`, a yellow-green at
 85/441) was rejected for falling to 2.11:1 on near-black — that
 would have traded a colour-vision defect for a contrast one.
@@ -2590,6 +2603,18 @@ profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color` —
 bare wire keys collide between the two bars), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
+This colors-only scope is **strict: no palette carries a non-color
+_effect_.** Kiwi Neon briefly forced `border.glow` on via a
+name-check in the GUI apply path; **retracted in #578** — it was
+one-directional (a later sober palette, being color-only, could
+not clear it, so glow stuck on) and a category error (picking a
+color swatch silently flipping an unrelated Focus-border toggle
+the user may have set on purpose). A palette that wants to *point*
+at an effect **links to its control** instead of writing it —
+Neon's swatch carries a link that reveals the Glow toggle. Do not
+reintroduce a magic-name effect side-effect here; if a future
+palette genuinely needs to recommend non-color settings, that is a
+schema-level "recommended settings" sidecar, not a name-check.
 The nine built-ins are read-only with reserved names (a user
 palette can't shadow one — rename/delete are *omitted*, not
 greyed, because the constraint is never-meaningful-for-this-kind,

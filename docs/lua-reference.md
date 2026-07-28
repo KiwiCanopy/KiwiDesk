@@ -2573,12 +2573,12 @@ border.set_width(5)
 the same format as every other KiwiDesk color.
 
 **Does:** sets the focused window's border color (default
-`"#588613"`, the Kiwi theme's deep-green focus accent).
+`"#4A9816"`, the Kiwi theme's bright-green focus accent).
 
 **Example:**
 
 ```lua
-border.set_focused_color("#588613")
+border.set_focused_color("#4A9816")
 ```
 
 ### border.set_unfocused_enabled

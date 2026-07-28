@@ -126,8 +126,9 @@ struct ColorPaletteTests {
         #expect(Set(names).count == 9)
         // The eight authored palettes decoded from the resource.
         #expect(PaletteCatalog.authored().count == 8)
-        // The neon showcase palette exists under its shared name, so
-        // the glow-on-select seam can key on it (#358 follow-up).
+        // The neon showcase palette exists under its shared name —
+        // the GUI keys its swatch's "pair with Glow" link on it
+        // (#578, replacing the retracted glow-on-select side-effect).
         #expect(names.contains(PaletteCatalog.neonName))
     }
 

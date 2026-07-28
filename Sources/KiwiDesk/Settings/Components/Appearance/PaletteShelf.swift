@@ -46,7 +46,20 @@ struct PaletteShelf: View {
                 spacing: 12
             ) {
                 ForEach(store.builtins(), id: \.name) { palette in
-                    chip(palette, builtin: true)
+                    if palette.name == PaletteCatalog.neonName {
+                        // Neon's colors read as neon on their own;
+                        // it no longer force-enables the border glow
+                        // (that was a sticky side-effect, #578).
+                        // Instead point at the pairing without
+                        // mutating state — a link that reveals the
+                        // Focus-border card, where Glow lives.
+                        VStack(alignment: .leading, spacing: 4) {
+                            chip(palette, builtin: true)
+                            neonGlowLink
+                        }
+                    } else {
+                        chip(palette, builtin: true)
+                    }
                 }
             }
         }
@@ -84,6 +97,23 @@ struct PaletteShelf: View {
                 .foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// Reveals the Focus-border card (where the Glow toggle lives)
+    /// with the shared scroll+flash, so the Neon↔glow pairing is
+    /// discoverable without the palette writing the flag itself.
+    private var neonGlowLink: some View {
+        Button {
+            model.nav.pendingReveal = SettingsAnchor(
+                destination: .appearance,
+                anchor: SettingsCatalog.appearance.focusBorder.id
+            )
+        } label: {
+            Text(L("palettes.neon_glow_hint", "Pair with Glow"))
+                .font(.caption2)
+        }
+        .buttonStyle(.link)
+        .controlSize(.small)
     }
 
     private func groupHeader(_ text: String) -> some View {
