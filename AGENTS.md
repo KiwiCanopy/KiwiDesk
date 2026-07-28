@@ -1,19 +1,51 @@
 # KiwiDesk — Agent & Contributor Guidelines
 
 Binding rules for human developers and AI agents working on this
-repository. Read this file before modifying any code.
+repository. Read this file before modifying any code. Every agent
+(Claude Code, Cursor, Codex) and human reads it directly.
 
-This file is the canonical source, and every agent (Claude Code,
-Cursor, Codex) and human reads it directly.
+## How this file is organized
+
+This file is the **hub**: the project shape, the rules that apply
+everywhere, and an index of the subsystem guardrails (§5).
+
+The guardrails themselves — the long "here is why this bit us"
+arguments — live one level down, in
+[`.claude/rules/*.md`](.claude/rules/), **one file per subsystem**.
+Each rule file is the canonical text for its subsystem; §5 carries
+the rule in one line and links to it. When they would disagree,
+the **rule file wins** and the §5 row is the thing to fix.
+
+One deliberate exception to "state it once": the handful of
+guardrails at the top of §5 are repeated verbatim in their rule
+file. They are the ones that destroy something before a rule file
+would ever load — a tree in the state model, a shipped `.app` that
+`fatalError`s — so they earn a tripwire in the file every agent
+already has. Everything else appears exactly once.
+
+They live in `.claude/` because Claude Code auto-loads a rule file
+whose `paths:` glob matches a file you are editing — so the right
+guardrails arrive when they are relevant and cost nothing when
+they are not. That placement is *only* about the loader. The files
+are ordinary Markdown: humans and other agents reach them through
+the §5 links, and §5 lists every one of them.
+
+Two shelves, don't confuse them:
+
+- **`docs/`** — the product: Lua reference, user guide, CLI,
+  design decisions, accepted limitations. Ships to users through
+  the site.
+- **`.claude/rules/`** — the workshop: engineering guardrails for
+  whoever changes the code.
 
 ---
 
 ## 1. Project Overview
 
-KiwiDesk is a tiling window manager for macOS (Swift, SwiftUI, Lua).
-It manages windows in a **flat, one-dimensional array per space** —
-never in hierarchical trees. Layout algorithms are pure functions
-over that array.
+KiwiDesk is a tiling window manager for macOS (Swift, SwiftUI,
+Lua). It manages windows in a **flat, one-dimensional array per
+space** — never in hierarchical trees. Layout algorithms are pure
+functions over that array.
 
 ```mermaid
 graph TD
@@ -64,24 +96,19 @@ file list; grep within a subsystem for specifics:
 | `Service` | Long-running service glue |
 | `Resources` | Bundled assets (locales, vendored app font, palettes) (assets, not code) |
 
-GUI lives in `Sources/KiwiDesk`: section bodies in
-`Settings/Sections/`, their widgets in
-`Settings/Components/<area>/` (Layouts, Keybindings, Bars,
-SpaceOverrides, Icons, Appearance, Lua, Common), and shell/model
-files plus root-composed widgets at `Settings/` root. `Common/`
-admits only primitives shared across multiple component areas;
-root-owned widgets stay at `Settings/` root.
+The GUI lives in `Sources/KiwiDesk` — layout conventions in
+[`.claude/rules/gui.md`](.claude/rules/gui.md).
 
 This table is the *where*. For the *how* — end-to-end pipelines
-(event→placement, command dispatch, config resolve, animation) traced
-at directory altitude — see **`docs/architecture.md`**.
+(event→placement, command dispatch, config resolve, animation)
+traced at directory altitude — see **`docs/architecture.md`**.
 
 ## 2. Code Rules
 
 1. **File size:** target **100–250 lines** per Swift file. Hard
-   ceiling: **350 lines** (only for cohesive, performance-critical
-   logic). Split files before they grow past the ceiling.
-2. **Line length:** max **79 characters** per line. Enforced by the
+   ceiling **350** (only for cohesive, performance-critical
+   logic). Split before you cross it.
+2. **Line length:** max **79 characters**. Enforced by the
    pre-commit hook and CI (`scripts/lint.sh`).
 3. **Single Responsibility:** one class/struct = one job (event
    listening, layout math, IPC — never mixed).
@@ -90,782 +117,163 @@ at directory altitude — see **`docs/architecture.md`**.
    readable duplication over a deep protocol hierarchy or heavy
    generics. Keep code flat.
 5. **Formatting:** `swift format` with the repo's `.swift-format`
-   config owns all style (whitespace, commas, braces). SwiftLint
-   (SPM build plugin, `.swiftlint.yml`) owns semantic rules
-   (force casts, complexity, file length) and warns directly in
-   Xcode during builds. Never enable a SwiftLint style rule that
-   fights swift-format. Run `scripts/lint.sh` before committing.
+   config owns all style. SwiftLint (SPM build plugin,
+   `.swiftlint.yml`) owns semantic rules — force casts,
+   complexity, file length — and warns in Xcode during builds.
+   Never enable a SwiftLint style rule that fights swift-format.
+   Run `scripts/lint.sh` before committing — its **exit code**
+   decides, not its warnings.
 6. **Concurrency:** AppKit/AX interaction is `@MainActor`. Pure
-   state and layout code must stay actor-free and unit-testable.
+   state and layout code stays actor-free and unit-testable.
 7. **GUI north-star — simplicity, intuitiveness, Apple-native
-   feeling, in that order.** The Settings app should feel like it
-   belongs in macOS System Settings, not like a bespoke control
-   panel. When a native pattern exists, use it; when unsure, ask a
-   `ui-designer` consult framed by these three priorities before
-   inventing a layout.
-   Companion principle — **approachable by default, powerful on
-   demand.** A new user gets a good tiling setup with almost no
-   configuration; that simplicity must never *cap* what's
-   achievable — beneath every easy surface is a deeper layer (Lua
-   config, profiles, advanced layouts, per-space overrides) there
-   when wanted and never required to begin. Depth is a capability
-   the user grows into, not a cost paid upfront; simplicity-first is
-   the entry point, not the ceiling (the #326 panel is the shape: a
-   glance surface with one "Edit in Settings…" bridge down to the
-   full editor). See `docs/design-decisions.md`; the shared
-   Settings control conventions (help affordance, control
-   choice, row tiers) are elaborated in `docs/ui-patterns.md`.
-   Corollary — **the GUI curates, Lua is open.** The GUI is the
-   opinionated gate that decides what most people *should* touch
-   (safe defaults for the rest); Lua is the unrestricted power
-   layer. A Lua setter clamps or rejects only genuinely-broken /
-   unrenderable values (an invisible alpha, a >1 factor, a
-   malformed color) — never to enforce taste or a ratio the GUI
-   keeps tidy. Risky-but-valid knob → hide from the GUI, expose it
-   Lua-only, don't add a guard that second-guesses the power user
-   (e.g. the bars' `dim_factor` / `active_dim_factor`: Lua-only,
-   clamped to a legible range yet free to invert the dim ladder).
-   Settled conventions that fall out of this
-   (extend, don't relitigate): **group by topic, never by widget
-   type** — a toggle and the control it gates are one decision, so
-   the toggle sits directly *above* the control it gates, never in
-   a separate "toggles" block (colors, which gate nothing, may
-   group by type for grid scannability); **grey, don't hide** a
-   control with no effect in the current mode (#171), keeping the
-   disabled control visible and dimmed — this covers a control
-   that *would* work in another mode, so dimming says "switch that
-   on and I act"; an affordance for a channel that does not exist
-   yet is **removed outright**, because dimming cannot revoke the
-   promise its shape makes and it reads broken instead of
-   forthcoming (the site's App Store badge, removed rather than
-   greyed — and permanently, the store being out of scope, see
-   `docs/design-decisions.md`); **the live preview leads**
-   its editor; **defer per-control "why" to contextual help**
-   (the planned `?` affordance, #94) rather than bloating labels or
-   captions with glosses that would later duplicate it. A caption's
-   job is to label what's shown, not to teach.
+   feeling, in that order**, and **approachable by default,
+   powerful on demand**: the Settings app should feel like it
+   belongs in macOS System Settings, and a new user should get a
+   good setup with almost no configuration without that
+   simplicity capping what Lua can reach. The full principle,
+   its corollaries and the settled conventions that fall out of
+   it are in [`.claude/rules/gui.md`](.claude/rules/gui.md);
+   `docs/ui-patterns.md` holds the shared control conventions
+   and `docs/design-decisions.md` the rulings behind them.
 
 ## 3. Workflow: Refine → Plan → Act → Verify
 
 1. **Refine:** read the relevant code and specs before proposing
    changes; clarify ambiguities first.
 2. **Plan:** for features and major fixes, write a short written
-   plan (files to change, API surface, tests) before implementing.
+   plan (files to change, API surface, tests) before
+   implementing.
 3. **Act:** implement step by step; keep commits focused.
-4. **Verify:** `swift build && swift test && scripts/lint.sh` for
-   the fast inner loop. A **release build**
-   (`swift build -c release`) enables the optimizer and stricter
-   concurrency diagnostics (e.g. non-Sendable captures in
-   `@Sendable` closures) that the debug build silently misses.
-   CI runs it as a **parallel job** on every PR (#532), so it is
-   no longer a mandatory local step: run it before committing
-   when the change touches concurrency, `@Sendable` boundaries,
-   or `Sendable` conformances, and otherwise let the PR catch it.
-   CI *reports* it, it does not *block* on it — required status
-   checks need branch protection, which this plan does not offer
-   for a private repo (#487 tracks the move that would unlock
-   it). So **read the `Release Build` job before merging**, and
-   run it locally for anything landing without a PR.
+4. **Verify:** run the **`verify-gate` skill**
+   ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
+   — `swift build`, the two-command test run, `scripts/lint.sh`,
+   and the release build when the change touches concurrency or
+   `Sendable`. That skill owns the procedure — what to run, in
+   what order, and when CI's `Release Build` job substitutes for
+   a local one.
 5. **Document:** any user-visible behavior change updates the
-   matching docs in the same change set —
-   `docs/lua-reference.md` (Lua config & behavior, in
-   *expects → does → example* form), `docs/user-guide.md`
-   (the Settings app & GUI flows), `docs/cli.md` (commands,
-   events, IPC), `docs/recipes/` (integration recipes),
-   `docs/design-decisions.md` (a durable product/UX decision a
-   contributor would otherwise re-litigate or undo — a
-   Principle, Rationale, Trade-off, or Map, per that file's
-   charter; never an event log or a restatement of current
-   behavior), `docs/ui-patterns.md` (when a
-   shared Settings control convention is added or changed) —
-   and `plan/` when the design itself shifts. Code and docs
-   must never describe different behavior.
-   The marketing/docs **site (`site/`)** renders `docs/` through
-   a symlink, so doc *content* edits flow to it automatically —
-   never hand-copy a doc into `site/`. But the site is not fully
-   covered by that symlink: a **new doc page** needs a sidebar
-   entry in `site/astro.config.mjs`, and **site-only surfaces**
-   (the landing page, cross-page callouts) are updated in the
-   same change set when a feature warrants surfacing there —
-   e.g. a new layout mode (#128) adds its user-guide/reference
-   prose *and* whatever nav or callout makes it findable. Run
-   `npm run build` in `site/` when you touch either, after
-   `nvm use` there — **`site/.nvmrc` is the one copy of the
-   Node version**, read by that command and by CI's
-   `node-version-file`, so never restate the number here or in
-   `site.yml`. Astro refuses anything below 22.12, and an
-   install performed on an older Node resolves the wrong
-   platform binaries, so a later `nvm use` alone still fails on
-   a missing native binding — delete `node_modules` and
-   reinstall if that happens.
-   When a review or manual pass classifies a behavior as
-   **accepted-by-architecture**, it adds a row to the *Accepted
-   limitations* page (`docs/accepted-limitations.md`) in the same
-   change set — the user-facing twin of the §5 guardrail rule
-   (OS-blocked-by-SIP items are a separate class, kept in
-   `docs/design-decisions.md`, with no in-app escape hatch).
-6. **Review:** once a substantial change is finished, verified,
-   and committed, spin up **both** `code-reviewer` and
-   `architect-reviewer` on the diff since the last review point —
-   the branch's merge base with `main`, or the last reviewed
-   commit / PR if there is one. Address or consciously dismiss
-   their findings before opening a PR. (See §4 subagent
-   delegation.)
-
-   Sequencing: the first round runs both agents **in
-   parallel** — the diff is finished, the perspectives are
-   independent, and serializing only costs time. When the
-   resulting fix batch is itself substantial (new
-   abstractions, behavioral gates — not just comment or guard
-   tweaks), run a focused re-review of **only the fix range**,
-   this time **sequentially**: `code-reviewer` first (are the
-   fixes correct?), then `architect-reviewer` (do the seams
-   the fixes introduced hold up?). Alternate rounds until one
-   returns no major findings. Brief each re-review with what
-   the fixes claim to do, so it verifies claims instead of
-   re-reviewing the feature.
-
-   Agent reuse (decision 2026-07-13): round 1 always uses
-   **fresh** agents — independence is the point, and a
-   reviewer carrying opinions from an earlier feature anchors
-   on them. Re-reviews of a fix batch in the **same session**
-   go back to the **round-1 agent** (message it) instead of
-   spawning a new one: it already holds the diff and its own
-   findings, so it verifies "were my findings fixed" directly
-   instead of re-deriving the whole context. Across sessions
-   this is moot — subagent context dies with the session, so
-   a new session always means fresh agents.
-
-   Reuse by **cache warmth**, not just the session boundary
-   (decision 2026-07-17): reusing the round-1 agent only wins
-   while its context is still cache-warm — then it's cheapest
-   and keeps its own findings. After a long gap (many edits,
-   a slow rebuild) the cache has cooled, so resuming reloads
-   its whole now-stale transcript uncached — a large context
-   just to answer a small question. In that case a **fresh**
-   agent with a tight "here's what each fix claims to do"
-   brief is usually cheaper and nearly as good, trading the
-   agent's memory of its findings for a small cold start. So:
-   reuse while warm; go fresh once it's cooled (or across
-   sessions). If the reuse target was stopped or died, fresh
-   is the only option — brief it fully. And the re-review loop
-   itself is gated on substance: a substantial fix batch earns
-   a round, a lone comment or guard tweak that closes a finding
-   does not — self-verify it and stop.
+   matching doc in the same change set — code and docs must
+   never describe different behavior. Which doc owns what, and
+   the `docs/design-decisions.md` charter, are in
+   [`.claude/rules/docs.md`](.claude/rules/docs.md); the site's
+   half of it in [`.claude/rules/site.md`](.claude/rules/site.md).
+6. **Review:** once a substantial change is finished, verified
+   and committed, run the **`review-change` skill**
+   ([`.claude/skills/review-change`](.claude/skills/review-change/SKILL.md))
+   — `code-reviewer` and `architect-reviewer` on the diff since
+   the last review point. Address or consciously dismiss every
+   finding before opening a PR. That skill owns the sequencing
+   (parallel first round, sequential re-review of a substantial
+   fix batch) and the agent-reuse rules.
 
 ### Branching & Pull Requests
 
-Branch from `main` with a name that matches the Conventional
-Commit type: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
-`chore/`, `ci/`, `perf/`, etc., followed by a short kebab-case
-description (e.g., `feat/scrolling-snap-mode`). One focused
-change per branch; separate refactors from features.
+Branch from `main` with a name matching the Conventional Commit
+type: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, `chore/`,
+`ci/`, `perf/`, then a short kebab-case description (e.g.
+`feat/scrolling-snap-mode`). One focused change per branch;
+separate refactors from features.
 
-When opening an issue or pull request, use the GitHub
-[issue templates](.github/ISSUE_TEMPLATE/) and
-[PR template](.github/pull_request_template.md). Reference
-related issues in commit messages or PR descriptions using
-`fixes #123` syntax.
+Use the GitHub [issue templates](.github/ISSUE_TEMPLATE/) and
+[PR template](.github/pull_request_template.md). Reference issues
+with `fixes #123`.
 
 ### Commit messages (Angular / Conventional Commits)
 
-Format: `type(scope): subject` — imperative, lower-case subject,
-no trailing period. Body (optional) explains the why, wrapped at
-72 columns.
+`type(scope): subject` — imperative, lower-case, no trailing
+period. Optional body explains the why, wrapped at 72 columns.
 
 - Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`,
   `build`, `ci`, `chore`.
-- Scope is the touched area, e.g. `animation`, `tiling`, `layout`,
-  `commands`, `lua`, `ax`, `profiles`, `docs`. Omit when the
+- Scope is the touched area (`animation`, `tiling`, `layout`,
+  `commands`, `lua`, `ax`, `profiles`, `docs`); omit when the
   change is repo-wide.
-- Examples:
-  - `feat(layout): add stack.set_overflow_style`
-  - `fix(tiling): defer z-order restore until animations settle`
-  - `perf(animation): apply position-only frames per app`
+- Examples: `feat(layout): add stack.set_overflow_style`,
+  `fix(tiling): defer z-order restore until animations settle`.
 
 ## 4. Tooling
 
-- Shared automation lives in the visible `/scripts/` directory
-  (never hidden in dot-folders): lint, git hooks, localization
-  scripts.
-- Install hooks once per clone: `./scripts/install-hooks.sh`.
-  The `pre-commit` hook lints staged Swift, runs the locale checks
-  when a catalog is staged, and **refuses a commit made while HEAD
-  is `main`** — server-side branch protection is impossible while
-  the repo is private (GitHub free answers `403 Upgrade to GitHub
-  Pro or make this repository public`), and the exposure that
-  actually bites is committing to `main` believing HEAD is a
-  feature branch. Deliberately the commit, not the push: ff-merging
-  a reviewed branch legitimately writes to `main`. Override a
-  genuinely-intended one with `KIWIDESK_ALLOW_MAIN_COMMIT=1`, which
-  names the rule you are skipping instead of `--no-verify` taking
-  the lint and locale checks with it.
-- Package the `.app`: `./scripts/build-app.sh` (#89). SwiftPM
-  cannot emit a bundle, so this assembles one from the release
-  build, compiles `assets/AppIcon.icon` through `actool`, and
-  signs it. Nothing it writes is a second copy: the version is
-  read from `KiwiDeskVersion.swift` and the two icon keys come
-  from actool's own partial plist — though the deployment
-  target is still typed in three places (`Package.swift`, the
-  plist, actool's flag), so a raise to macOS 15 touches all
-  three; both copies fail silently, but only the plist's does so
-  dangerously (an app declaring a lower minimum than it runs on,
-  versus a wrong rendition set). It also
-  **discovers the
-  signing identity** from the keychain — that string is not a
-  secret (any user can read it out of a shipped binary with
-  `codesign -dv`), so it is never hardcoded to a developer's
-  name nor passed through a CI secret; only the certificate is
-  secret, and it lives in the keychain. With no certificate
-  present it falls back to ad-hoc, so a contributor can still
-  build. `--identity` overrides, `--notarize <profile>` takes a
-  `notarytool` keychain profile the developer created
-  themselves. `--dmg` additionally wraps the result in a disk
-  image for the website download — the cask installs from a
-  `.zip` and never needs one; with `--notarize` that means two
-  submissions, for the reason in §5. Signing is inside-out over
-  `Resources/*.bundle` only, so the first dependency that adds
-  nested code (`Contents/Frameworks/`, i.e. Sparkle) has to
-  extend that loop — packaging is not "done" for it. Whether a
-  built artifact may be *published* is a separate, product
-  decision: see "No distribution channel without an update path"
-  in `docs/design-decisions.md`.
-- Fetch third-party subagents per clone with one explicit target:
-  `./scripts/install-subagents.sh --claude` installs Claude Code
-  agents and workspace skills; `./scripts/install-subagents.sh
-  --codex` installs project-scoped Codex agents.
-- (Optional, per-developer) install the `caveman` skill to
-  compress agent output — not a build dependency; needs Node
-  `>= 18` (the installer checks):
+Shared automation lives in the visible `/scripts/` directory,
+never hidden in dot-folders: lint, git hooks, localization
+scripts.
+
+- `./scripts/install-hooks.sh` once per clone. The `pre-commit`
+  hook lints staged Swift, runs the locale checks, and **refuses
+  a commit while HEAD is `main`** (override with
+  `KIWIDESK_ALLOW_MAIN_COMMIT=1`, never `--no-verify`).
+- `./scripts/build-app.sh` packages, signs and optionally
+  notarizes the `.app` (#89) — see
+  [packaging-and-release.md](.claude/rules/packaging-and-release.md).
+- `./scripts/install-subagents.sh --claude` (Claude Code agents +
+  workspace skills) or `--codex` (project-scoped Codex agents),
+  per clone, one explicit target.
+- Optional, per-developer: the `caveman` skill compresses agent
+  output — not a build dependency, needs Node `>= 18`:
   `npx -y github:JuliusBrussee/caveman --non-interactive`.
-  `--non-interactive` avoids a hang when piped; append flags to
-  scope it, e.g. `--only claude`, `--minimal`, `--uninstall`.
+  `--non-interactive` avoids a hang when piped; scope it with
+  `--only claude`, `--minimal`, or `--uninstall`.
+- CI (`.github/workflows/ci.yml`) builds, lints and tests on
+  every push and on PRs targeting `main`. A red build blocks
+  merging.
 
 ### Subagent delegation (AI agents)
 
-When subagents are available, spin them off proactively — no
-need to wait for the user to ask — but only where the payoff is
-clear. A subagent starts with zero conversation context, so
-delegate work that does not depend on it:
-
-- **Broad fan-out searches** across many files or naming
-  conventions where only the conclusion matters (`Explore`).
-- **Independent review passes** on a finished, substantial
-  change (`code-reviewer`, `architect-reviewer`).
-- **Parallel, isolated implementation work** (e.g. in a separate
-  worktree) that would otherwise serialize.
+Spin subagents off proactively where the payoff is clear — no
+need to wait to be asked. A subagent starts with zero
+conversation context, so delegate work that does not depend on
+it: broad fan-out searches where only the conclusion matters
+(`Explore`), independent review passes on a finished change
+(`code-reviewer`, `architect-reviewer`), and parallel isolated
+implementation work that would otherwise serialize.
 
 Stay inline for anything small, sequential, or dependent on
 conversation context: a cold agent re-deriving what the session
 already knows costs more than it saves.
-- CI (`.github/workflows/ci.yml`) builds, lints, and tests on every
-  push and on PRs targeting `main`. A red build blocks merging.
 
 ## 5. Guardrails (Known Pitfalls)
 
-Keep this list updated whenever a recurring mistake is found.
+These apply everywhere, whatever you touch:
 
-- **Every distributable artifact needs its OWN ticket, and this
-  cannot be caught on the machine that built it.** A disk image
-  is a separate piece of signed code from the app inside it:
-  notarizing the app does not cover the `.dmg` carrying it, so
-  `--notarize --dmg` submits *twice* and staples each. Like the
-  `Bundle.module` trap, the build machine is the one place the
-  failure is invisible — a locally-built image carries no
-  `com.apple.quarantine` attribute, so it mounts and runs
-  perfectly here and only says "KiwiDesk is damaged and can't be
-  opened" after a real download. **`spctl` is not the check.**
-  `spctl --assess` is satisfied by an *online* notarization
-  lookup, so it answers `accepted` for an artifact that was
-  notarized but never stapled — which then fails on a machine
-  that is offline or behind a captive portal. Only `xcrun
-  stapler validate` proves the ticket is physically attached.
-  **Verify by stamping quarantine on a copy**: `xattr -w
-  com.apple.quarantine "0081;0;Safari;$(uuidgen)"`, mount it,
-  then `stapler validate` plus `spctl -a -vvv -t open --context
-  context:primary-signature` on the image and `-t exec` on the
-  app inside (image and app need different `spctl` invocations).
-  Companion rule: **an archive meant for distribution is created
-  AFTER stapling, never reused from the notarization payload** —
-  the zip submitted to Apple is made pre-staple by construction,
-  so shipping it would strand every user with an unticketed
-  bundle. Applies to any artifact type added later (`.pkg`, the
-  cask's `.zip`, a Sparkle delta).
 - **Pre-release, single user: no backward-compat shims.** Nothing
-  is publicly released, so nothing external depends on the current
-  command names, Lua/CLI verbs, event names, or file formats.
-  Rename and restructure freely; do **not** add compatibility
-  aliases, deprecation layers, or migration scripts — re-saving or
-  re-editing the config is the migration (#42 renamed the space
-  commands outright instead of keeping `*_virtual_space` aliases;
-  profile JSON likewise needs none). Revisit at the first public
-  release — until then, back-compat is wasted complexity.
-- **One vocabulary across Lua and profile JSON.** A profile
-  JSON key is the Lua command name with the `set_` verb
-  stripped, snake_case, grouped by namespace:
-  `set_gap_override` → `gap.override`, `bsp.set_ratio_h` →
-  `layout.bsp.ratio_h`, `stack.set_master_ratio` →
-  `layout.stack.master_ratio`. Multi-part element names nest
-  further when the element is a configurable unit:
-  `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.
-  Groups are singular (`gap`,
-  `layout`, `drag`); never invent synonyms or plurals. When
-  adding a setting, pick the Lua name first and derive the
-  JSON key from it via `CodingKeys` (Swift property names may
-  differ internally). `SettingsCodingTests` pins this shape.
-- **Never use `Bundle.module` in code that runs from the `.app`
-  (#89)** — go through `ResourceBundle.locate`
-  (`Bundle.kiwiDeskCore` / `Bundle.kiwiDeskGui`). SwiftPM's
-  generated accessor searches `Bundle.main.bundleURL`, which is
-  the executable's directory for a bare binary but the **bundle
-  root** inside an `.app` — and codesign refuses to seal a
-  bundle with anything loose there ("unsealed contents present
-  in the bundle root", `Sealed Resources=none`). So the only
-  location that accessor accepts is one a distributable app
-  cannot use, and the resources live in `Contents/Resources`
-  instead.
-  **The trap is that this cannot be caught on the machine that
-  built it.** The accessor's second candidate is an absolute
-  path into the `.build` directory that compiled it, so locally
-  it always resolves and any layout looks correct; elsewhere —
-  or after deleting `.build` — it matches neither candidate and
-  calls `fatalError`. A hard crash at first access, not a quiet
-  fallback to defaults. Verifying that the files are *present*
-  in the bundle proves nothing about this; only launching a copy
-  with `.build` moved aside does.
-- **Never disable SIP or ask users to.** Private SkyLight/CGS
-  symbols are resolved at runtime via `dlsym` (`SkyLight.swift`),
-  never linked with `@_silgen_name` — a linked symbol that
-  disappears in a macOS update would crash the app at launch,
-  while a failed lookup returns nil and the caller falls back to
-  the public Accessibility API (`AXUIElement`). Every private
-  fast path must have such a fallback.
-- **The Lua watchdog cannot interrupt blocking C calls.** The
-  runaway-script guard is an instruction-count hook; code that
-  blocks inside C (`system()`, pipe reads) executes zero VM
-  instructions and freezes the main thread forever. Never add
-  an API that blocks in C on the main thread — external
-  commands always go through `ExecLauncher`. Lua registry refs
-  (`luaL_ref`) are VM-specific and their slots are reused:
-  never deliver a ref into a different interpreter than the
-  one that minted it (capture the owning `LuaInterpreter`
-  weakly, as `KiwiCore+ExecAPI` does).
-- **AX calls are slow and can block.** Never call AX APIs inside
-  tight loops or layout math; snapshot state first.
-- **Electron/WebKit apps answer AX queries lazily** (100–300 ms).
-  `AXEnhancedUserInterface` is set to `true` on managed apps to keep
-  their AX tree warm; do not remove this without a replacement.
-- **Windows live in a flat `[WindowID]` per space.** Do not
-  introduce tree/container structures into state or layout code.
-- **Display SIZE enters layout through one hook (#531), and a
-  layout SPAN through a second one on top of it (#537).** Layout
-  slots, track capacity and resize spans read their bounds from
-  `TilingEngine.visibleBounds` (default: the screen's
-  `axVisibleFrame`), never `GeometryUtils.axVisibleFrame`
-  directly — `VisibleBoundsRoutingTests` scans the whole
-  `KiwiDeskCore` target and fails on an unlisted direct call.
-  Everything that measures a *span* then reads
-  `TilingEngine.layoutBounds(on:)`, which reserves the Space
-  Bar's strip (#293) — the region the layout actually divided.
-  Routing through the hook and then dividing by the whole
-  display satisfies the first guard and is still the bug, which
-  is why there are two: `LayoutBoundsRoutingTests` is the
-  second, and **its `allowed` map is that exemption list.** The
-  exception is a rect used as a *containment box* for a window
-  the layout does not place — no span to divide, no midpoint to
-  classify against, and its relationship to a bar owned by the
-  painted-strip clamp (#242) instead. Do not restate which
-  files those are here; the `allowed` map is the one copy.
-  It pins **size, not topology**: which screen a space lands on
-  still comes from `NSScreen` through the static `screen(…)`
-  resolvers, so a fixture can shrink its display but not
-  fabricate a second one. **Which files are exempt, and why,
-  lives in that guard's `allowed` map, not in prose** — three
-  prose copies of the list drifted apart the first time they were
-  written. The shape: `static` sites with no instance in hand,
-  and sites resolving *several* screens (parking picks a corner
-  across all of them; float re-anchor compares two and
-  early-returns when they match, so routing it would silently
-  no-op a default-ON feature under every pinned fixture). So a
-  fixture driving `calculatedFrames`, `trackCapacity` or a resize
-  is fully pinned, and one driving a whole `retile` is not.
-  **Every geometry fixture pins its own rect**
-  (`core.tiler.visibleBounds = { _ in rect }`) rather than
-  inheriting the host's real `NSScreen`, and pins any default it
-  reasons from (`#expect(minWindowSize == 300)`): an inherited
-  display makes a test assert whatever the machine happens to be,
-  and a narrow CI runner then builds a *different* arrangement
-  from the same code (#523 — below `2 * min_window_size` BSP
-  correctly falls back to an `OverlapStack` pile, so three
-  reachability assertions failed on the runner and passed on a
-  dev Mac). Reproduce a CI-only geometry failure by **raising
-  `min_window_size` until the same threshold trips**, not by
-  chasing the screen size; a pile's signature is equal `minX`
-  with midYs exactly `OverlapStack.offset` (40 pt,
-  vertical-only) apart.
-- **macOS native tabs are one `NSWindow` per tab, coalesced
-  temporally.** Finder/Terminal/Ghostty native tabs are separate
-  `NSWindow`s sharing one on-screen frame, each with its own
-  `CGWindowID`, and **only the active tab is ever visible to AX** —
-  background tabs never appear in `kAXWindowsAttribute`, and a fresh
-  id is minted per switch (#308 probe). So a tab switch surfaces to
-  reconcile as one window vanishing while another appears at the same
-  frame; `TabReconciler` coalesces that pair into a `.windowRekeyed`
-  (id swapped in place — no tree, one slot per group) instead of a
-  destroy + create. The gate needs an `AXTabGroup` on **either** side
-  (Ghostty exposes one only at 2+ tabs, so the 1↔2 boundary window
-  has none). Coalescing is suppressed on the native-Space-switch
-  `reconcileAll` (`coalesceTabs: false`) — same-app windows across
-  spaces tile to identical frames and would false-merge. When editing
-  tracking/reconcile, keep these facts in view; never assume a
-  window's `CGWindowID` is stable or that every tab is an AX window.
-- **Cross-layout logic must account for each layout's navigation
-  model.** Anything spanning all layouts — focus/swap navigation,
-  overflow handling, geometric neighbor search — must consider
-  whether a layout is *geometric* (a neighbor search over
-  calculated slots) or *array-order* (steps the flat array), and
-  whether it can produce an *overflow pile* (an `OverlapStack`
-  cascade). The two models need different handling (e.g. #172:
-  exclude pile-mates from the geometric candidate set vs skip
-  their array indices; the shared detector is
-  `Navigation.pileMates`). The authoritative map is the "Layout
-  navigation & overflow models" table in `docs/design-decisions.md`
-  — a **new layout must add its row** there.
+  external depends on the current command names, Lua/CLI verbs,
+  event names or file formats. Rename and restructure freely; add
+  no compatibility aliases, deprecation layers or migration
+  scripts — re-saving or re-editing the config *is* the migration
+  (#42 renamed the space commands outright). Revisit at the first
+  public release.
+- **Windows live in a flat `[WindowID]` array per space.** Never
+  introduce tree or container structures into state or layout.
+- **Never disable SIP, or ask a user to.** Every private fast
+  path has a public-API fallback.
+- **Never `Bundle.module` in code that runs from the `.app`** —
+  go through `ResourceBundle.locate`. It resolves on the machine
+  that built it and `fatalError`s everywhere else.
 - **Space identifiers are strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
-- **Hotkeys use the Carbon API** (`RegisterEventHotKey`), not
-  CGEventTap — this avoids Input Monitoring permission. Event taps
-  are only for mouse drag tracking.
-- **One `DisplayLink` per monitor** (mixed refresh rates). Never
-  drive animations from a single global timer.
-- **`AXObserver` callbacks arrive on the thread's run loop** that
-  registered them; keep observer registration on the main thread.
-- **SwiftUI cursor changes use `NSCursor.set()`, never
-  push/pop.** A view removed under the pointer (a link that
-  deletes itself, a row rebuilt by rename) never delivers the
-  balancing `onHover(false)`, and hover interleaved with a drag
-  gesture pops the wrong entry — a cursor stack cannot balance.
-  Bit the spaces drag handle and the link-hover modifier.
-- **Keep SwiftUI `body` a shallow container.** A long modifier
-  chain with conditional `background`/`overlay` closures or
-  `+`-concatenated string literals inside one `body` expression
-  can exceed the type-checker's budget — and the failure is
-  machine-dependent: it compiles locally but dies on the slower
-  CI runner ("unable to type-check this expression in
-  reasonable time"), so the local verify gate does not catch
-  it. Extract chained subviews into private computed
-  properties / funcs and hoist concatenated strings into
-  constants. Bit `KeyRecorderField`.
-- **Split test suites early.** The 79-char limit and 350-line
-  ceiling repeatedly bit large test files. Break suites into
-  focused files before they grow; per-file private helpers are the
-  convention and small duplication across suites is fine. Five
-  ratified exceptions, all *stateless primitives* with no
-  setup/teardown coupling and no assertions of their own:
-  `ReflectionParity.swift` (structural-parity reflection helpers
-  backing the field-list guards), `ScriptFixture.swift`
-  (spawn a `scripts/*` tool and drain its pipes, plus the
-  repo-shaped temp tree the `__file__`-rooted scripts need), and
-  `SourceScan.swift` (the delimiter walker and file enumerator
-  the source-scanning parity guards share — an over-matching
-  divergent copy makes a guard pass for the wrong reason, which
-  is the exact failure those guards exist to prevent), and
-  `ColorVision.swift` (the Viénot protanopia transform,
-  luminance and contrast maths behind the CVD separation guards
-  — `SpaceBarAccentSeparationTests` and `DragPairSeparationTests`
-  assert *on the numbers it returns*, and the numbers are the
-  argument the palette decisions rest on, so a copy that drifted
-  in one suite would move a guard's threshold without failing
-  anything; extracted at the second copy, on that risk alone,
-  same as `SourceScan`). That last one also owns the shared
-  separation **floor**, deliberately — the two families share
-  hexes, so one threshold over one colour is the point; don't
-  "tidy" the policy back out of the maths file. The fifth,
-  `TestCore.swift` (the `makeTestCore` factory and its
-  `NoopHotkeyRegistrar`, #565), guards *nothing* and is admitted
-  on a **second ground**. The four above share to prevent
-  *divergence* — a drifted copy silently weakening a guard. This
-  one shares to prevent *omission*: every copy is identically
-  harmless, but a forgotten one re-enables a dangerous production
-  default (the live `CarbonHotkeyCenter` seizing the developer's
-  global chords, the real `~/.config/KiwiDesk` as config — the
-  two defaults `KiwiCore.init` cannot carry, 2414 conflict lines a
-  run). It clears the statelessness bar; the sharing basis is
-  forget-proofing 112 mandatory-safe call sites, not the
-  drift-risk basis. So the gate has two grounds — divergence OR a
-  forgotten copy re-enabling a dangerous default — and a sixth
-  must name which.
-  The classic bar is still the **drift risk** — a divergent copy weakens a
-  guard, or silently changes what a suite observes — not the
-  copy count, which is merely the evidence that prompted the
-  look (the script harness was extracted at the fifth hand-copy,
-  in #252). Duplication that only costs lines stays duplicated
-  (§2.4). A further exception needs the same case made.
-- **An async test that awaits real spawned work needs a generous
-  hang-guard, not a tight deadline (#344).** A test that spawns a
-  real subprocess (`ExecTests`) or schedules an unstructured `Task`
-  (`DragCoordinatorTests`) and then awaits its **main-actor
-  callback** cannot use a sub-second or few-second poll deadline:
-  swift-testing runs suites concurrently, so under full-suite load
-  the shared main actor is starved for seconds and the tight
-  deadline tripped spuriously (the callback landed, just late)
-  while the suite passed in isolation. Fixed by giving each such
-  wait one shared generous hang-guard (`execHangGuard` /
-  `dragSettleHangGuard`, 30s): the poll exits the instant the
-  condition holds, so a passing run is never slowed — the deadline
-  only bounds a genuine hang. Prove the *behavior* by the gap (a
-  short watchdog against a much longer sleep), never by a tight
-  wait. New async tests here follow suit.
-- **Unit tests never need the running app; device QA launches it
-  direct.** `swift test` is fully self-contained (per-test
-  `KiwiCore` over a temp config dir, throwaway sockets; the
-  service tests only parse `launchctl` strings) — the app's
-  run state is irrelevant to it. The running app matters only
-  for device QA, and there launch it DIRECT in a terminal
-  (`.build/release/KiwiDesk` — Ctrl-C to stop, `NSLog` output
-  visible, incl. the #292 preflight-denial and settle lines),
-  not via `service start`; stop the service first if loaded, or
-  the single-instance guard keeps the OLD binary running.
-  Every release rebuild changes the binary hash, which drops the
-  TCC Accessibility grant (re-grant in System Settings) and a
-  restart flattens session state (spaces, float flags) — plan
-  QA around it; the durable fix is #89's signed .app bundle.
-  Run the full suite as `swift test --skip ExecTests` then
-  `swift test --filter ExecTests`: combined it stalls for
-  minutes at the tail (spawned exec children hold the runner's
-  pipe, and the #344 hang-guards crawl under full-suite
-  starvation — #489 tracks the root fix); suite *ordering* is
-  not a lever, swift-testing schedules suites concurrently.
-- **Discardable test results must express side-effect intent.**
-  When a command or setup helper primarily mutates state but also
-  returns optional convenience data, mark the declaration
-  `@discardableResult` if valid callers commonly ignore that data.
-  Keep pure queries non-discardable — an ignored result there is
-  probably a bug. A test whose subject is command success or
-  failure still asserts the returned response; never remove tests
-  or assertions merely to silence an unused-result warning.
-- **Profiles own tiling, plus sparse behavior overrides.** A
-  profile serializes tiling state — that belongs *inside*
-  `TilingSettings` so it rides the config split for free (see
-  `gap.override`). Beyond tiling, a profile may carry a **sparse
-  override of a global _behavior_ setting** — one that shapes how
-  the workspace behaves *while the profile is active*: keybindings
-  (`Profile.modes`), app→space rules (`Profile.appRules`), float
-  rules (`Profile.floatRules`), and ignore rules
-  (`Profile.ignoreRules`). Global bases come from the active config
-  owner (`gui.json` or `init.lua`); the profile layer resolves over
-  either owner. Window-rule families resolve independently, with
-  effective ignore remaining the hard management gate. It may
-  **never** override a setting that *routes
-  or selects* the profile itself (`profile_bindings`, the
-  native-Space→profile map) or that lives outside config ownership
-  (the GUI language pref, which persists in `UserDefaults`) — a
-  profile that could rewrite what selects it is a self-reference
-  hazard. Every override is the base overlaid with a sparse diff
-  (absent = inherit; an explicit tombstone expresses removal),
-  never a second home for the setting. Add each one deliberately,
-  guarded by a round-trip + resolve parity test. App→space uses a
-  value-map override; float and ignore share the generic list-rule
-  primitive because two real clients now remove drift (see
-  `.claude/rules/parity-tests.md`).
-  `ProfileManager` mutators are `internal` by
-  design — mutate through a `KiwiCore` facade, never re-publicize
-  them. `read(name:)` is the public load-for-edit primitive
-  (path-traversal guarded, touches no state); `save()` **adopts**
-  (sets `currentName`, clears dirty), so an edit-without-activating
-  path must be a separate, non-adopting write — never overload
-  `save()`. The GUI-vs-Lua ownership predicate is centralized in
-  `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine that
-  one predicate, never add a second. Pre-release (single user):
-  profile JSON needs no migration scripts — re-saving is the
-  migration.
-- **Explicit settings applies must `retile(force: true)`.** The
-  engine's "already there" tolerance (±2 pt per edge) exists to
-  absorb AX-echo lag and app-side clamping; an un-forced retile
-  after a config edit lets it swallow small changes entirely (a
-  1 pt gap edit visibly did nothing). Config-apply entry points
-  (`applyProfileScopedState`, `set_gap_*`,
-  `set_min_window_size`, `set_mode`, and the whole
-  `layoutCommand` dispatch — every retile triggered by an
-  explicit `set_*` from Lua/CLI) force; event-driven retiles
-  stay un-forced so echo lag can't wobble windows. Profile
-  applies classify themselves: `apply(profile:)` /
-  `apply(composed:)` take a **required** `forceRetile`, so
-  every new caller must choose — explicit paths
-  (`load_profile`, an in-effect edit re-apply, the
-  post-reload re-apply, preset apply) force; monitor-change
-  and native-space-binding applies stay un-forced.
-- **Resolve before layout, and merge per-field first.** Settings
-  that layer (global → layout → space) merge field-by-field, with
-  cross-field clamps applied *last* on the already-merged values
-  (the `AppBarStyle.resolved…` pattern). Resolution runs before
-  layout math so the layout functions stay pure over the flat
-  array.
-- **Guard hand-mirrored field lists with a forget-proof parity
-  test.** Some patterns repeat a struct's field list across
-  sites — a global ↔ optional-override mirror
-  (`AppBarStyle` ↔ `LayoutAppBar`), a dual apply switch
-  (`AppBarCommandSetting`), a manual sparse `Codable`. Small
-  readable duplication is fine (§2.4), but past **two** mirrors
-  of the same field list the drift risk (add a field, forget one
-  site → silent data loss) outweighs the clarity. Before adding
-  the third, weigh whether the duplication still pays off; if it
-  ships, it **must** carry a parity test — and prefer one that
-  discovers fields by reflection / shared `CodingKeys` over a
-  hand-enumerated list, so the guard itself cannot silently rot
-  (a hand-listed parity test is one more place to forget). A
-  reflection net catches a missing *property*, not a forgotten
-  `resolved()` / `encode` line — back it with a round-trip +
-  resolve-every-field test for those. Reach
-  for a generic/keypath merge only when it removes the drift, not
-  just the `resolved()` lines — sparse `Codable` stays per-field
-  either way, so generics rarely buy down the real risk and fight
-  §2.4.
-- **`Resources/Locales/*.json` is generated/translation-owned
-  (issue #9).** Every GUI string routes through
-  `L("key", "English")` (`LocalizationManager.swift` in
-  `KiwiDeskCore/Localization/`); English is the source of truth,
-  inlined at the call site, with per-key fallback when a locale
-  omits a key. A value interpolated into a sentence (a name, a
-  count) MUST go through the `L(key, english, args...)`
-  overload with POSITIONAL `%1$@`/`%1$d` specifiers, never
-  `+`-concatenated fragments — a translation can't reorder
-  pieces stitched together in Swift, and many languages need to.
-  `en.json` is regenerated wholesale by `scripts/extract-keys`
-  (which scans both `Sources/KiwiDesk` and
-  `Sources/KiwiDeskCore`, and ignores `//`/`///` comments so a
-  doc-comment
-  example call site can't leak a phantom key) from real call
-  sites — never hand-edit it, and AI agents must not hand-edit
-  any `Resources/Locales/*.json` file: use
-  `scripts/extract-keys <locale>` /
-  `scripts/merge-keys <locale>` to translate,
-  `scripts/rename-key <old> <new>` to rename a key without
-  losing translations, `scripts/drop-key <key>` to delete a
-  key's shipped translations when its English **meaning**
-  changed — run in the same change set, so every locale falls
-  back to the new English and the key reappears on its
-  to-translate list; cosmetic English edits (typo,
-  punctuation) keep translations — `scripts/drop-key --locale
-  <locale> <key>` when the English is fine and a **single
-  locale's translation** is defective (the content guards below
-  report per locale, so dropping every locale's copy would
-  discard good work) — and
-  `scripts/extract-keys --prune` to
-  drop orphaned ones (see `docs/translating.md`). Because the
-  same English text can in principle be authored at two
-  different call sites for one key, `extract-keys` fails loudly
-  on any such drift (mismatched English for the same key) rather
-  than silently picking one; `extract-keys --check` (run
-  unconditionally by `scripts/lint.sh` — part of the verify
-  gate, CI, and `scripts/pre-commit` whenever a Swift or locale
-  file is staged) additionally hard-fails if `en.json` is stale
-  or if any shipped `<locale>.json` doesn't decode as a flat
-  `{string: string}` map (a broken file would otherwise make
-  `LocaleCatalog` soft-fail to `[:]` and silently revert that
-  locale to English); an orphan key (in a locale file, absent
-  from code) only warns — clean it up with
-  `extract-keys --prune`. **Everything above reads keys; eight
-  guards read the copy** (`scripts/localization_guards.py`, #95),
-  and `--check` hard-fails on each. Five are exact contracts: a
-  **wrong writing system** (Cyrillic→`ru`, Kana→`ja`,
-  Han→`ja`/`zh-Hans`/`zh-Hant`, Hangul→`ko`; Latin is deliberately
-  absent — every locale uses it, so its presence proves nothing),
-  a **tagged stub** (`"Icon & name (ES)"`, full-width `（JA）`
-  included), **specifier drift** (the `%1$@` multiset must match
-  the English — the only guard on a runtime path, since these
-  reach `String(format:)`), **cross-language overlap** (two
-  different languages sharing a file's worth of identical values),
-  and a **collapsed translation** (one filler reused for many
-  unrelated keys). The sixth, **English residue** in a translated
-  sentence, is a heuristic and the only one with a scope:
-  non-Latin-script locales, and the app catalogs only (not
-  `--site`, whose prose keeps third-party names and inline HTML).
-  In a Latin-script locale a retained English word is
-  indistinguishable from a cognate (`"Item ativo"`, `"Mein
-  Setup"`), so widening it would flag dozens of good translations;
-  don't re-add a rule claiming to be precise everywhere, as an
-  `-ing`-weld sub-rule once did — German `fing`/`Frühling`
-  falsifies it. The last two are the **feature-name pair**, and
-  `docs/localization-naming.md` is their one copy — read it
-  before touching either. In short: `dropped_product_names`
-  requires "App Bar" / "Space Bar" **present** in every locale,
-  script irrelevant (it is deliberately *not* the residue rule's
-  mirror); `untranslated_mode_names` requires the English mode
-  name **absent** in the three CJK locales, which render them
-  natively, and skips the seven that keep the English word. A new
-  name joins a family by one checkable question — does its own
-  label key ship untranslated in all eleven catalogs? — never by
-  arguing whether it is a coinage. Matched as a phrase, not as
-  tokens: `GLOSSARY` holds `app`, `bar` and `space` separately,
-  so a word-level test cannot tell "App Bar" from "App-Leiste". `merge-keys` runs the per-value guards so
-  contamination never lands. There is **no baseline/exemption
-  file** — a hit is a real defect; what the guards carry is a
-  grouped `GLOSSARY` of terms that stay English, which a new such
-  term must join, in the group that justifies it, in the same
-  change set. Locale policy is keyed by locale in **three**
-  tables, so a **new locale must be registered** in all of them:
-  `_STUB_TAGS`, plus a *script declaration* — `SCRIPTS` for a
-  non-Latin language, `LATIN_LOCALES` otherwise. Forgetting the
-  tags makes a guard go silently quiet; forgetting the script
-  declaration used to do the same and now goes **loudly wrong**,
-  which is why it is a declaration rather than a default: the
-  feature-name guard holds Latin-script locales to keeping
-  "App Bar" verbatim, so a locale read as Latin by accident is
-  *demanded* to carry an ASCII phrase inside its own script.
-  `--check` refuses a locale missing from either, and
-  `LocalizationRegistryTests` pins both plus their disjointness.
-  All of this is backed by
-  Swift tests — each localization script has a sibling suite
-  (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
-  `RenameKeyTests`, `DropKeyTests`,
-  `LocalizationContentGuardTests`,
-  `LocalizationResidueGuardTests`,
-  `LocalizationProductNameGuardTests`,
-  `LocalizationOverlapGuardTests`,
-  `LocalizationCollapseGuardTests`,
-  `LocalizationRegistryTests`,
-  `MergeKeysContentGuardTests`, and future scripts follow
-  suit) — so a regression in the tooling itself is
-  covered by `swift test`, not just by running the script. A
-  guard suite exercises its predicate against strings the test
-  writes itself, **never the shipped corpus** — asserting against
-  the real catalogs would make the guard's coverage depend on the
-  corpus staying dirty, passing only while a bug was live. The
-  GUI language pick persists in `UserDefaults`
-  (`LocalizationPreference`), never `gui.json` — it is
-  documented as side-effect-free and must never create a
-  sidecar or flip `KiwiCore.isGuiManaged`.
-- **Core names, the GUI narrates (#96).** `L()` is `@MainActor`
-  and much of Core is deliberately actor-free, so a user-facing
-  condition detected in Core returns **structure** — a case, an
-  enum, a value type — and the GUI renders the sentence at its
-  own boundary (`Conflict.Target.systemShortcut(SystemShortcut)`
-  → `ConflictText`). Never a pre-rendered English string across
-  that seam: it cannot be translated where it was written, and
-  routing `L()` into actor-free code to fix that would make the
-  manager's isolation a special case to buy one file's
-  convenience. Core currently holds **no** `L()` call site
-  outside `Localization/` — keep it that way. CLI/IPC error
-  strings are the deliberate exception and stay English: they
-  are a machine contract, not UI copy.
-- **Site template comments ship to visitors (#557).** An
-  `.astro` **template** comment written `<!-- ... -->` is emitted
-  verbatim into `dist/` and downloaded by everyone; only
-  JSX-style `{/* ... */}` is stripped at build. The design
-  rationale in `site/src/**` — the notes citing AGENTS.md
-  sections, issue numbers and `docs/` paths that explain a
-  non-obvious UX call, e.g. why there is deliberately no App
-  Store badge — is worth keeping in the source and must use
-  `{/* */}`; `Guide.astro` and `Landing.astro` published ~22 KB
-  of it across the locales before #557. Two places are **not**
-  template: frontmatter (between the `---` fences) is already
-  JS, so leave it alone, and inside `<script is:inline>` /
-  `<style>` Astro treats the body as raw text, where a JSX
-  comment renders literally — use `//` there. A comment body
-  containing `*/` self-terminates early, so check before a bulk
-  swap. Verify one by rebuilding the pre-change baseline,
-  regex-stripping `<!--.*?-->` from its output and diffing
-  against the new build: byte-identical across every page proves
-  no markup was swallowed by a mis-terminated delimiter, which
-  counting `<section` only weakly suggests.
+
+Everything else is indexed below. **Read the rule file before
+editing its subsystem** — the row is the rule, the file is the
+argument, and Claude Code loads the file automatically when you
+touch a matching path.
+
+| Touching | Read | The rule, in one line |
+|---|---|---|
+| Anywhere in `Sources/KiwiDeskCore` | [core-boundaries.md](.claude/rules/core-boundaries.md) | Core returns structure and the GUI renders the sentence (#96); CLI/IPC errors stay English; never `Bundle.module` |
+| `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs` | [state-and-layout.md](.claude/rules/state-and-layout.md) | Flat array, pure layouts; display bounds only via `TilingEngine.visibleBounds` (#531) and spans via `layoutBounds(on:)` (#537) — the guards' `allowed` maps are the one copy of who is exempt; a native tab switch is a re-key, not destroy+create (#308); an explicit `set_*` apply forces the retile |
+| `Config`, `Profiles`, `Commands` | [profiles.md](.claude/rules/profiles.md) | A profile owns tiling plus *sparse behavior overrides*, never anything that routes or selects the profile itself; `isGuiManaged` is the one ownership predicate |
+| Any setting name, `CodingKeys`, user-facing noun | [config-vocabulary.md](.claude/rules/config-vocabulary.md) | Pick the Lua name first and derive the JSON key from it; groups are singular; reuse the noun glossary instead of coining a synonym |
+| `AX` | [accessibility.md](.claude/rules/accessibility.md) | AX calls are slow and can block — snapshot before layout math; Electron/WebKit answer lazily, so `AXEnhancedUserInterface` stays |
+| `OS`, `SkyLight*.swift` | [os-private-apis.md](.claude/rules/os-private-apis.md) | Resolve private symbols with `dlsym`, never `@_silgen_name`; every private path needs a public fallback |
+| `Lua` | [lua.md](.claude/rules/lua.md) | The watchdog cannot interrupt blocking C calls; registry refs never cross interpreters |
+| `Keys`, `Events`, `Animation` | [input-and-animation.md](.claude/rules/input-and-animation.md) | Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per monitor |
+| `Sources/KiwiDesk` (the GUI) | [gui.md](.claude/rules/gui.md) | North-star and settled conventions; grey don't hide; `NSCursor.set()` never push/pop; keep `body` shallow or the CI type-checker dies |
+| `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; eight content guards with no exemption file; Core names, the GUI narrates (#96) |
+| `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); run the suite as two commands |
+| Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
+| `scripts/build-app.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible |
+| `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |
+| `site/**` | [site.md](.claude/rules/site.md) | `{/* */}` not `<!-- -->` — template comments ship to visitors (#557); `site/.nvmrc` is the one copy of the Node version |
+
+When a recurring mistake is found, add it to the **rule file**
+that owns the subsystem and refresh that row here — never write
+the rationale into both.

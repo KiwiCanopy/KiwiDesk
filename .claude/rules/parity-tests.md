@@ -1,7 +1,17 @@
+---
+paths:
+  - "Sources/KiwiDeskCore/Config/**"
+  - "Sources/KiwiDeskCore/Profiles/**"
+  - "Sources/KiwiDeskCore/Models/**"
+  - "Sources/KiwiDeskCore/Bar/**"
+  - "Sources/KiwiDeskCore/Borders/**"
+  - "Tests/**"
+---
+
 # Hand-mirrored field lists & parity tests
 
-See **AGENTS.md §5** (canonical, last bullet) for full rationale.
-The checklist for any code that repeats a struct's field list:
+Canonical for this pattern (AGENTS.md §5 indexes it). The
+checklist for any code that repeats a struct's field list:
 
 - Patterns that mirror a field list: global ↔ optional-override
   (`AppBarStyle` ↔ `LayoutAppBar`), dual apply switch

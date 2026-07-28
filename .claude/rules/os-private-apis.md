@@ -6,7 +6,8 @@ paths:
 
 # OS layer — private SkyLight/CGS APIs
 
-See AGENTS.md §5 for full rationale. When editing this subsystem:
+Canonical for this subsystem (AGENTS.md §5 indexes it). When
+editing here:
 
 - Resolve private SkyLight/CGS symbols at runtime via `dlsym`
   (`SkyLight.swift`). **Never** link them with `@_silgen_name` — a

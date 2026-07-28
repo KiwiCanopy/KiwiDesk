@@ -19,7 +19,10 @@ Requirements: macOS 14+, Xcode 16+ (Swift 6).
 ## Ground Rules
 
 The binding style and workflow rules live in
-[AGENTS.md](AGENTS.md). The short version:
+[AGENTS.md](AGENTS.md), and the per-subsystem guardrails one
+level down in [`.claude/rules/`](.claude/rules/) — AGENTS.md §5
+indexes every one of them, so start there and follow the link for
+the subsystem you're touching. The short version:
 
 - **File size:** aim for 100–250 lines per Swift file; the
   pre-commit hook errors above 350.

@@ -5,7 +5,8 @@ paths:
 
 # Accessibility (AX) bridge
 
-See AGENTS.md §5 for full rationale. When editing AX code:
+Canonical for this subsystem (AGENTS.md §5 indexes it). When
+editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
