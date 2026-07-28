@@ -16,19 +16,70 @@ public struct Spring: Sendable, Equatable {
         self.damping = 2 * dampingFraction * omega
     }
 
+    /// The largest step this spring may be integrated with
+    /// before semi-implicit Euler stops damping and starts
+    /// amplifying (#599).
+    ///
+    /// Two conditions, and the tighter one wins. The restoring
+    /// term needs `k·h² < 4`, i.e. `h < 2/ω`; the damping term
+    /// needs `|1 − c·h| < 1`, i.e. `h < 2/c`. With the fixed
+    /// `dampingFraction` of 0.85, `c = 1.7ω`, so damping is
+    /// always the binding one here — both are kept because a
+    /// future fraction below 0.5 would flip that. Halved for
+    /// margin, since these are the bounds where the amplification
+    /// factor reaches exactly 1 and the motion merely stops
+    /// converging.
+    ///
+    /// Concretely: a 60 Hz tick is 16.7 ms, and at the default
+    /// 250 ms duration this allows 32.8 ms — one substep, so the
+    /// common path is untouched. At the 50 ms floor it allows
+    /// 6.6 ms and the tick is split three ways. A 120 Hz display
+    /// was already inside the bound across the whole range, which
+    /// is why this only ever bit some machines.
+    var maxStableStep: Double {
+        let omega = stiffness.squareRoot()
+        return 1 / max(omega, damping)
+    }
+
     /// Advances one scalar by `dt` seconds (semi-implicit
     /// Euler). Mutates position and velocity in place.
+    ///
+    /// Substepped so the integration stays inside
+    /// `maxStableStep` whatever the caller's frame interval is.
+    /// Without it, a duration below ~80 ms on a 60 Hz display
+    /// diverges — the position runs away to infinity, and since
+    /// `FrameAnimation.step` only reports settled once it is
+    /// within epsilon of the target, that animation never settles
+    /// and never leaves the engine. Everything waiting on
+    /// `onAllAnimationsEnded` then stops for the rest of the
+    /// session: the deferred focus raise, the z-order restore and
+    /// the overlay re-sync (#599, #596).
+    ///
+    /// Substepping is the refresh-rate-independent fix, which
+    /// matters with one `DisplayLink` per monitor at mixed rates
+    /// — a per-duration clamp would have to know the display.
     public func step(
         position: inout Double,
         velocity: inout Double,
         target: Double,
         dt: Double
     ) {
-        let acceleration =
-            -stiffness * (position - target)
-            - damping * velocity
-        velocity += acceleration * dt
-        position += velocity * dt
+        // Bounded: a `dt` spike after a stall (display sleep, a
+        // wedged main actor) must not turn one tick into
+        // thousands of iterations. Past this the frame is so late
+        // that integration accuracy is moot anyway.
+        let count = min(
+            16,
+            max(1, Int((dt / maxStableStep).rounded(.up)))
+        )
+        let h = dt / Double(count)
+        for _ in 0..<count {
+            let acceleration =
+                -stiffness * (position - target)
+                - damping * velocity
+            velocity += acceleration * h
+            position += velocity * h
+        }
     }
 }
 
@@ -88,6 +139,18 @@ public struct FrameAnimation: Sendable {
                 target: target[i],
                 dt: dt
             )
+            // Backstop under the substepping (#599): if a
+            // component ever stops being finite it can never come
+            // back — `abs(inf - target)` is never within epsilon,
+            // so the animation would run forever and take the
+            // whole settle signal with it. Force it home instead.
+            // A visible jump beats a permanently wedged engine,
+            // and this is deliberately a net rather than the fix:
+            // if it ever fires, the integration is wrong.
+            if !current[i].isFinite || !velocity[i].isFinite {
+                current[i] = target[i]
+                velocity[i] = 0
+            }
             if abs(current[i] - target[i]) > Self.epsilon
                 || abs(velocity[i]) > Self.epsilon
             {
