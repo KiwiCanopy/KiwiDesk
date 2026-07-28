@@ -34,7 +34,7 @@ function localePath(l: Lang, sub = ""): string {
 
 const strings = legal[lang];
 const data: LegalDoc = strings[doc];
-const slug = doc === "impressum" ? "/impressum" : "/datenschutz";
+const slug = doc === "impressum" ? "/imprint" : "/privacy";
 const showNote = lang !== "de" && !!strings.translationNote;
 
 // Per-locale footer strings, English-fallback (mirrors Landing/Guide).
@@ -61,6 +61,7 @@ const kofi = "https://ko-fi.com/kiwicanopy";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDesc} />
+    <meta name="robots" content="noindex" />
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDesc} />
@@ -190,8 +191,8 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
-        <a href={localePath(lang, "/impressum")}>{t("footer_impressum")}</a>
-        <a href={localePath(lang, "/datenschutz")}>{t("footer_privacy")}</a>
+        <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
+        <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
         <a href={repo} target="_blank" rel="noopener">{t("footer_github")}</a>
         <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}</a>
       </nav>
@@ -380,6 +381,7 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         margin-top: 2.25rem;
       }
       .sec h2 {
+        margin: 0;
         font-size: 1.15rem;
         font-weight: 700;
         letter-spacing: -0.01em;
@@ -389,8 +391,10 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         margin-top: 0.6rem;
         color: var(--text);
       }
+      /* landing.css resets box-sizing but not margins, so kill the browser's
+         default vertical <p> margin and keep only the intended top rhythm. */
       .body :global(p) {
-        margin-top: 0.7rem;
+        margin: 0.7rem 0 0;
       }
       .body :global(p:first-child) {
         margin-top: 0;
