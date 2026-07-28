@@ -611,6 +611,16 @@ def untranslated_mode_names(
     "Stack dell'IDE" reads as either — so a hit is a prompt for
     judgment, not proof; there are few enough for that to be the
     right trade.
+
+    One blind spot the case-note understates (#568): a *lower-case*
+    English name that is also a `GLOSSARY` word — `track` is both —
+    is unreachable by BOTH passes, not merely rare. This guard
+    skips it (case-sensitive by design) and `english_residue`
+    exempts it (glossary), so a `ja` value writing "track
+    レイアウト" against a トラック picker passes both. The
+    lower-case referential use is the accepted cost of the
+    referential/descriptive split; naming it here so the next
+    reader does not mistake the hole for an edge case.
     """
     found = []
     for key in MODE_NAME_KEYS:
