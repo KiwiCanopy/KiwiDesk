@@ -46,13 +46,17 @@ struct PaletteShelf: View {
                 spacing: 12
             ) {
                 ForEach(store.builtins(), id: \.name) { palette in
-                    if palette.name == PaletteCatalog.neonName {
+                    if palette.name == PaletteCatalog.neonName
+                        && !model.config.settings.borderStyle.glow
+                    {
                         // Neon's colors read as neon on their own;
                         // it no longer force-enables the border glow
                         // (that was a sticky side-effect, #578).
                         // Instead point at the pairing without
                         // mutating state — a link that reveals the
-                        // Focus-border card, where Glow lives.
+                        // Focus-border card, where Glow lives. Hidden
+                        // once glow is already on: nothing left to
+                        // pair.
                         VStack(alignment: .leading, spacing: 4) {
                             chip(palette, builtin: true)
                             neonGlowLink

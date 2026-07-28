@@ -2098,8 +2098,8 @@ full-saturation same-hue `#538A00` still did on device). So the
 ring leaves the 84° family, shifting ~12° toward true green to
 `#4A9816` (H96 S75 L34), which escapes the cast and still clears
 3:1 on near-white (~3.6:1) and near-black (~5.8:1) while staying
-unmistakably on-brand green. The **ghost** shared the old hex
-that hex until #511, and no longer does — see the origin/target
+unmistakably on-brand green. The **ghost** shared the old
+`#588613` until #511, and no longer does — see the origin/target
 paragraph below; the 3:1-at-both-ends bar is what survived the
 move, the shared hue is what did not. The
 default ring width is 5 pt (was 2): a thicker stroke is not just

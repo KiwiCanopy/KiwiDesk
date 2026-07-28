@@ -9,12 +9,14 @@ public enum PaletteCatalog {
     /// The name of the always-present default palette.
     public static let defaultName = "Kiwi (Default)"
 
-    /// The neon showcase palette (#358 follow-up). Selecting it also
-    /// switches the focus-ring glow on — the one bundled palette that
-    /// carries a non-color behavior, applied by the GUI palette
-    /// picker because palettes are otherwise color-only
-    /// (`ColorPaletteKeys`). Must match its `name` in `bundled.json`;
-    /// `ColorPaletteTests` guards that the entry exists.
+    /// The neon showcase palette (#358 follow-up). It is color-only
+    /// like every other bundled palette — it does **not** switch the
+    /// focus-ring glow on (that name-check side-effect was retracted
+    /// in #578: it stuck on, being uncleared by later color-only
+    /// palettes). The GUI keys the Neon swatch's "pair with Glow"
+    /// link on this name instead. Must match its `name` in
+    /// `bundled.json`; `ColorPaletteTests` guards that the entry
+    /// exists.
     public static let neonName = "Kiwi Neon"
 
     /// All nine built-ins, default first.

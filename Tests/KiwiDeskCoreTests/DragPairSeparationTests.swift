@@ -60,9 +60,13 @@ struct DragPairSeparationTests {
             return gap >= ColorVision.separationFloor
                 && onWhite >= 3 && onBlack >= 3
         }
-        // At the ring's own hue AND its own saturation, no
-        // lightness works. This is the load-bearing claim: the
-        // ghost could not simply be a darker or lighter #588613.
+        // At the ring's hue AND its saturation, no lightness works.
+        // This is the load-bearing claim: the ghost could not
+        // simply be a darker or lighter #588613. "The ring's hue"
+        // here means 84° — the ring's hue AS OF #511; it later
+        // moved to 96° (`#4A9816`) for the unrelated moss reason
+        // (#578), which does not touch this argument (the ghost
+        // left 84° for CVD; the ring left it later, for legibility).
         for step in 0...100 {
             let candidate = ColorVision.hex(
                 hue: 84,
