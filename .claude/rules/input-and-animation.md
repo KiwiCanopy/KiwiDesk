@@ -7,7 +7,8 @@ paths:
 
 # Input & animation
 
-See AGENTS.md §5 for full rationale. When editing here:
+Canonical for this subsystem (AGENTS.md §5 indexes it). When
+editing here:
 
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
   CGEventTap — this avoids the Input Monitoring permission. Event

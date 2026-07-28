@@ -42,6 +42,34 @@ Brief each re-review with what the fixes claim to do, so it
 verifies the claims instead of re-reviewing the whole feature.
 Alternate rounds until one returns no major findings.
 
+The loop is gated on substance: a substantial fix batch earns a
+round, a lone comment or guard tweak that closes a finding does
+not — self-verify that one and stop.
+
+### Which agent runs a re-review
+
+Round 1 always uses **fresh** agents (decision 2026-07-13):
+independence is the point, and a reviewer carrying opinions from
+an earlier feature anchors on them.
+
+A re-review in the **same session** goes back to the round-1
+agent (message it) rather than spawning a new one — it already
+holds the diff and its own findings, so it verifies "were my
+findings fixed" directly instead of re-deriving the context.
+
+But reuse by **cache warmth**, not by the session boundary alone
+(decision 2026-07-17). Resuming only wins while the agent's
+context is still cache-warm. After a long gap (many edits, a slow
+rebuild) resuming reloads its whole now-stale transcript
+uncached — a large context just to answer a small question. Then
+a **fresh** agent with a tight "here's what each fix claims to
+do" brief is cheaper and nearly as good.
+
+So: reuse while warm; go fresh once it has cooled. Across
+sessions it is moot — subagent context dies with the session. If
+the reuse target was stopped or died, fresh is the only option:
+brief it fully.
+
 ## 5. Report
 
 Summarize: findings raised, fixed, and dismissed (with reasons).

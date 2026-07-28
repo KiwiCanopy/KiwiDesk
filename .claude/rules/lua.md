@@ -5,7 +5,8 @@ paths:
 
 # Lua VM bridge
 
-See AGENTS.md §5 for full rationale. When editing the Lua bridge:
+Canonical for this subsystem (AGENTS.md §5 indexes it). When
+editing the Lua bridge:
 
 - The runaway-script watchdog is an instruction-count hook; it
   **cannot** interrupt blocking C calls (`system()`, pipe reads),

@@ -5,8 +5,8 @@ paths:
 
 # Tests
 
-The binding rules live in **AGENTS.md §2 & §5** (canonical). The
-ones that bite large test PRs, as a checklist (rationale is in §5):
+Canonical for this tree (AGENTS.md §5 indexes it). The rules that
+bite large test PRs:
 
 - **Pin the display, never inherit it** — a geometry fixture sets
   `core.tiler.visibleBounds = { _ in rect }` (#531), and pins any
@@ -94,4 +94,55 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   it when adding a setting (Lua name → JSON key via `CodingKeys`;
   see [config-vocabulary.md](config-vocabulary.md)).
 - Pre-release, single-user: profile JSON needs no migration — see
-  [profiles.md](profiles.md) and §5.
+  [profiles.md](profiles.md).
+- Mirrored field lists need a forget-proof parity test — see
+  [parity-tests.md](parity-tests.md).
+
+## Async tests: a generous hang-guard, never a tight deadline (#344)
+
+A test that spawns a real subprocess (`ExecTests`) or schedules an
+unstructured `Task` (`DragCoordinatorTests`) and then awaits its
+**main-actor callback** cannot use a sub-second or few-second poll
+deadline. swift-testing runs suites concurrently, so under
+full-suite load the shared main actor is starved for seconds and
+the tight deadline trips spuriously (the callback landed, just
+late) while the suite passes in isolation.
+
+Each such wait uses one shared generous hang-guard
+(`execHangGuard` / `dragSettleHangGuard`, 30 s): the poll exits
+the instant the condition holds, so a passing run is never slowed
+— the deadline only bounds a genuine hang. Prove the *behavior* by
+the gap (a short watchdog against a much longer sleep), never by a
+tight wait. New async tests here follow suit.
+
+## Running the suite
+
+`swift test` is fully self-contained — a per-test `KiwiCore` over
+a temp config dir, throwaway sockets; the service tests only parse
+`launchctl` strings. **Unit tests never need the running app**;
+its run state is irrelevant to them.
+
+Run the full suite as two commands:
+
+```bash
+swift test --skip ExecTests
+```
+
+```bash
+swift test --filter ExecTests
+```
+
+Combined it stalls for minutes at the tail — spawned exec children
+hold the runner's pipe, and the hang-guards above crawl under
+full-suite starvation (#489 tracks the root fix). Suite *ordering*
+is not a lever; swift-testing schedules suites concurrently.
+
+**Device QA launches the app direct**, not via `service start`:
+`.build/release/KiwiDesk` in a terminal (Ctrl-C to stop, `NSLog`
+output visible, including the #292 preflight-denial and settle
+lines). Stop the service first if loaded, or the single-instance
+guard keeps the OLD binary running. Every release rebuild changes
+the binary hash, which drops the TCC Accessibility grant (re-grant
+in System Settings), and a restart flattens session state (spaces,
+float flags) — plan QA around it; #89's signed `.app` is the
+durable fix.

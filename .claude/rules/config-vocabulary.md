@@ -15,8 +15,8 @@ paths:
 
 # Config / profile vocabulary
 
-See AGENTS.md §5 for full rationale. One vocabulary spans Lua and
-profile JSON:
+Canonical for this vocabulary (AGENTS.md §5 indexes it). One
+vocabulary spans Lua and profile JSON:
 
 - A profile JSON key is the Lua command name with the `set_` verb
   stripped, snake_case, grouped by namespace:
