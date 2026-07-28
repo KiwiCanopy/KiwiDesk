@@ -187,8 +187,13 @@ struct StructuredConfigTests {
         """
     }
 
-    /// Verifies exactly one ref per combo exists after
-    /// loadConfig — structured loader resets stale-block refs.
+    /// A `KiwiDesk.bind` in init.lua makes the config Lua-owned
+    /// (`isGuiManaged` false, #116: a bind is a foreign token), so
+    /// gui.json is not structure-loaded and the init.lua bind is
+    /// the sole registration — exactly one ref per combo, no
+    /// double. (The structured loader's own ref reset is guarded by
+    /// `structuredReloadReleasesRefs` below, which keeps the config
+    /// GUI-managed.)
     @Test("Only one ref per combo after loadConfig (no double)")
     func noDoubleRegistration() throws {
         let core = makeGuiCore()
@@ -207,7 +212,8 @@ struct StructuredConfigTests {
             )
         ]
         try core.saveGuiConfig(config)
-        // A stale block (pre-#55) also binds alt+h on load.
+        // A hand-written bind in init.lua binds alt+h on load,
+        // and (being foreign) makes the config Lua-owned.
         try writeInitLua(
             staleBlock(binding: "alt+h"),
             core: core
@@ -216,27 +222,26 @@ struct StructuredConfigTests {
 
         let combo = try #require(KeyCombo.parse("alt+h"))
         let bindings = core.keys.bindings(for: "default")
-        // Pins re-registration: the structured entry is the
-        // only one. The keyed dict cannot hold duplicates, so
-        // the ref-leak half of the guard lives in
-        // `noLeakedRefsAfterLoad` below.
+        // The init.lua bind is the only registration (gui.json is
+        // ignored while Lua-owned); the keyed dict cannot hold
+        // duplicates. The structured ref-reset guard lives in
+        // `structuredReloadReleasesRefs` below.
         #expect(bindings[combo] != nil)
         #expect(bindings.count == 1)
     }
 
-    /// Leak canary for an init.lua bind that duplicates a
-    /// gui.json binding: the structured loader must release the
-    /// init.lua ref so it does not accumulate. `luaL_ref` reuses
-    /// released slots, so after `loadConfig()` the **second**
-    /// probe must land on the same slot in a core whose init.lua
-    /// holds the extra bind as in one whose init.lua is empty —
-    /// that equality is the real no-leak invariant. The first
-    /// probe must not shift *up* (a leaked ref would push it
-    /// higher); whether it lands strictly lower depends on the
-    /// release/re-register ordering, which #116 changed when it
-    /// dropped managed-block recognition (a pre-#55 bind is now an
-    /// ordinary foreign bind), so this asserts `<=`, not `<`.
-    @Test("init.lua bind refs are released (slot-reuse canary)")
+    /// No-leak canary comparing a Lua-owned core (a `KiwiDesk.bind`
+    /// in init.lua, #116) against a GUI-managed core with the same
+    /// gui.json and an empty init.lua. Each registers one live
+    /// keybinding ref, so the registry must not diverge: `luaL_ref`
+    /// reuses released slots, so the **second** probe must land on
+    /// the same slot in both (the real no-leak invariant), and the
+    /// first must never shift *up* (a leaked ref would). `<=`, not
+    /// `<`: both cores now reach the same high-water mark, where a
+    /// pre-#116 managed block would have freed a slot the loader
+    /// reused first. (The structured loader's own reload reset is
+    /// guarded by `structuredReloadReleasesRefs`.)
+    @Test("init.lua bind refs do not leak (slot-reuse canary)")
     func noLeakedRefsAfterLoad() throws {
         var config = GuiConfig()
         config.modes = [
@@ -266,8 +271,7 @@ struct StructuredConfigTests {
             try bareLua
             .makeFunction(body: "-- second probe").get()
 
-        // Block core: a stale pre-#55 block also binds alt+h
-        // on load; its ref must be released by the reset.
+        // Block core: an init.lua bind registers alt+h (Lua-owned).
         let block = makeGuiCore()
         try block.saveGuiConfig(config)
         try writeInitLua(
@@ -288,5 +292,44 @@ struct StructuredConfigTests {
         // match exactly — that is the invariant.
         #expect(blockProbe <= bareProbe)
         #expect(blockSecondProbe == bareSecondProbe)
+    }
+
+    /// The structured loader's transactional reset: reloading a
+    /// GUI-managed config (empty init.lua, so it stays managed)
+    /// must release the prior load's binding refs before
+    /// re-registering, so the registry does not grow across
+    /// reloads. This is the live `applyStructuredConfig` path —
+    /// after #116 no init.lua bind can drive it (a bind is foreign
+    /// → Lua-owned), so a reload is what exercises the reset.
+    @Test("Reloading a GUI-managed config releases prior refs")
+    func structuredReloadReleasesRefs() throws {
+        var config = GuiConfig()
+        config.modes = [
+            KeyMode(
+                name: "default",
+                bindings: [
+                    KeyBinding(
+                        combo: "alt+h",
+                        lua: "-- noop",
+                        kind: .custom,
+                        label: ""
+                    )
+                ]
+            )
+        ]
+        let core = makeGuiCore()
+        try core.saveGuiConfig(config)
+        try writeInitLua("", core: core)  // hooks-only → GUI-managed
+        core.loadConfig()  // first structured load
+        let afterFirst =
+            try #require(core.lua)
+            .makeFunction(body: "-- probe").get()
+        core.loadConfig()  // reload: release prior, re-register
+        let afterReload =
+            try #require(core.lua)
+            .makeFunction(body: "-- probe").get()
+        // No accumulation: the reload released the prior ref, so
+        // the probe does not climb across reloads.
+        #expect(afterReload <= afterFirst)
     }
 }

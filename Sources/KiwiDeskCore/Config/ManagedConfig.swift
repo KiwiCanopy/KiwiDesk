@@ -13,14 +13,14 @@ import Foundation
 ///
 /// Pre-release, the marker-block recognition that used to keep a
 /// stale pre-#55 block "app-owned" was removed (#116): such a block
-/// is now scanned like any other code — its `set_*` verbs read as
-/// Lua-owned config (so it is never seeded over), which is the safe
-/// direction. Re-saving is the migration.
+/// is now scanned like any other code, so a bind or rule inside it
+/// reads as foreign — the file becomes Lua-owned (raw editor, never
+/// seeded over), the safe direction. Re-saving is the migration.
 public enum ManagedConfig {
     // MARK: - Managed vocabulary
 
-    /// Tokens matched against non-comment lines outside the
-    /// (stale) managed block (see `touchesManagedVocabulary`).
+    /// Tokens matched against non-comment, non-blank lines of the
+    /// source (see `touchesManagedVocabulary`).
     /// A match forces the raw editor because the GUI cannot
     /// safely co-own that vocabulary — it owns app rules,
     /// float/ignore rules, keybindings, and profile bindings in
@@ -59,10 +59,9 @@ public enum ManagedConfig {
 
     // MARK: - Foreign-code detection
 
-    /// Whether code outside the managed block touches the GUI's
-    /// managed vocabulary — verbs the GUI itself writes into the
-    /// block (`app_rules`, `float_rules`, `ignore_rules`,
-    /// `KiwiDesk.bind(`,
+    /// Whether the code touches the GUI's managed vocabulary —
+    /// verbs the GUI itself owns in `gui.json` (`app_rules`,
+    /// `float_rules`, `ignore_rules`, `KiwiDesk.bind(`,
     /// etc.). When `true` the visual editor cannot safely co-own
     /// those constructs, so it yields to the raw Lua editor.
     ///
@@ -73,8 +72,8 @@ public enum ManagedConfig {
         classify(source).foreign
     }
 
-    /// Whether any non-blank, non-comment Lua exists outside the
-    /// managed block. This includes harmless code that does NOT
+    /// Whether any non-blank, non-comment Lua exists in the file.
+    /// This includes harmless code that does NOT
     /// touch the managed vocabulary. Used by the GUI to show an
     /// informational banner while keeping the visual editor
     /// active.
@@ -265,8 +264,8 @@ public enum ManagedConfig {
 }
 
 extension StringProtocol {
-    /// Trims spaces, tabs, and line terminators (`\r`) so marker
-    /// matching and the foreign-code scan survive CRLF files.
+    /// Trims spaces, tabs, and line terminators (`\r`) so the
+    /// foreign-code scan survives CRLF files.
     fileprivate var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }

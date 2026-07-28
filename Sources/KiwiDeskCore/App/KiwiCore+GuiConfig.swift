@@ -227,7 +227,7 @@ extension KiwiCore {
     /// discriminator for the three tiling tiers (#36): only a
     /// GUI-managed config lets the composed Standard own
     /// tiling on an unmatched monitor change; hand-written or
-    /// hybrid configs (foreign Lua beside the managed block)
+    /// hybrid configs (foreign Lua in `init.lua`)
     /// keep their Lua-declared tiling and get placement-only
     /// resolution. Mirrors the editor, which demotes itself to
     /// the raw-Lua fallback on foreign code.
@@ -235,8 +235,8 @@ extension KiwiCore {
         guiConfigStore.exists && !configHasForeignCode
     }
 
-    /// Whether `init.lua` holds code outside the managed block
-    /// that touches the managed vocabulary — verbs the GUI
+    /// Whether `init.lua` holds code that touches the managed
+    /// vocabulary — verbs the GUI
     /// itself generates. When true the visual editor cannot
     /// safely co-own the file and falls back to raw Lua mode.
     /// Harmless custom Lua (e.g. `print`, sketchybar hooks)
@@ -253,7 +253,7 @@ extension KiwiCore {
     }
 
     /// Whether `init.lua` holds any non-blank, non-comment Lua
-    /// outside the managed block (including harmless code that
+    /// (including harmless code that
     /// does not touch managed vocabulary). Used to show the
     /// "you also have custom Lua" banner in the visual editor.
     /// Always `false` when `configHasForeignCode` is `true`
