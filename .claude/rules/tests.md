@@ -18,8 +18,12 @@ bite large test PRs:
   host's, and a fixture driving a whole `retile` is only half
   pinned (parking and bar geometry run against the real display).
   Reproduce a CI-only geometry failure by raising
-  `min_window_size` until the same threshold trips; a pile is
-  equal `minX` with midYs 40 pt apart.
+  `min_window_size` until the same threshold trips — below
+  `2 * min_window_size` BSP correctly falls back to an
+  `OverlapStack` pile, which is how three reachability assertions
+  failed on a narrow runner and passed on a dev Mac (#523). A
+  pile's signature is equal `minX` with midYs exactly
+  `OverlapStack.offset` (40 pt, vertical-only) apart.
 - **Split suites early** — the 79-char limit and 350-line ceiling
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.

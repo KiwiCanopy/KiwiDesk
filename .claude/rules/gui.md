@@ -94,6 +94,24 @@ root-owned widgets stay at `Settings/` root.
 
 ## Strings
 
-Every user-facing string goes through `L("key", "English")` — see
-[localization.md](localization.md), including the "Core names, the
-GUI narrates" seam (#96).
+Nearly every `L()` call site in the repo is in this tree, so the
+authoring rules apply here even though the catalogs live in Core:
+
+- Every user-facing string goes through `L("key", "English")`
+  (issue #9). English is the source of truth, inlined at the call
+  site.
+- A value interpolated into a sentence (a name, a count) MUST use
+  the `L(key, english, args...)` overload with **positional**
+  `%1$@` / `%1$d` specifiers — never `+`-concatenated fragments.
+  A translation cannot reorder pieces stitched together in Swift,
+  and many languages need to.
+- **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
+  regenerated from real call sites; the other catalogs are
+  translation-owned and edited only through `scripts/*-key(s)`.
+- A cosmetic English edit (typo, punctuation) keeps translations;
+  a **meaning** change runs `scripts/drop-key <key>` in the same
+  change set.
+
+The tooling, the eight content guards and the "Core names, the
+GUI narrates" seam (#96) are in
+[localization.md](localization.md).

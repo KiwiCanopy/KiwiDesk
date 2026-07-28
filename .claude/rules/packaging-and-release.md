@@ -128,7 +128,6 @@ and locale checks with it.
 
 `.github/workflows/ci.yml` builds, lints, and tests on every push
 and on PRs targeting `main`. A red build blocks merging. The
-release build runs as a **parallel job** (#532) that *reports*
-rather than *blocks* — required status checks need branch
-protection, unavailable on a private repo (#487). Read the
-`Release Build` job before merging.
+release build runs as a separate, non-blocking job (#532) — when
+to run it locally instead is decided by the `verify-gate` skill,
+which owns that call.

@@ -51,9 +51,9 @@ struct ResourceBundleRoutingTests {
     /// `Sources/`, with today's exact count and why it is outside
     /// the resolver. Anything absent must be at zero.
     ///
-    /// **This map is the exemption list** — AGENTS.md §5 carries
-    /// the principle and points here rather than restating which
-    /// files qualify.
+    /// **This map is the exemption list** — AGENTS.md §5 and
+    /// .claude/rules/core-boundaries.md carry the principle and
+    /// point here rather than restating which files qualify.
     ///
     /// Both entries are the *argument* to `locate`, which is the
     /// only legitimate use: `Bundle.module` is per-target and

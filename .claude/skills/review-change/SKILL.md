@@ -3,8 +3,8 @@ description: Run KiwiDesk's two-agent review workflow (code-reviewer + architect
 argument-hint: "[optional: base ref, e.g. main or a commit/PR]"
 ---
 
-Run the review workflow from AGENTS.md §3 (the Review step) on the
-current change. Precondition: the change should already be
+Run the review workflow — the Review step AGENTS.md §3 delegates
+here — on the current change. Precondition: the change should already be
 finished, verified (`/verify-gate`), and committed. If it clearly
 is not, say so and stop.
 

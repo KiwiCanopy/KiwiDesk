@@ -33,7 +33,7 @@ for f in "${FILES[@]}"; do
 
     # File size check.
     #
-    # AGENTS.md §5 applies the 350-line hard ceiling to test suites
+    # .claude/rules/tests.md applies the §2.1 hard ceiling to suites
     # as well — "split test suites early" is what forced every one
     # of the ratified shared-helper extractions — but this used to
     # `continue` on */Tests/*, so the rule was unenforceable AND

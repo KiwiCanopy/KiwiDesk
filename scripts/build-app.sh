@@ -394,7 +394,7 @@ if [ -n "$NOTARY_PROFILE" ]; then
     # the ticket being physically attached is what buys the
     # offline pass, and only `stapler validate` proves that. For
     # the real download verdict see the quarantine recipe in
-    # AGENTS.md §5.
+    # .claude/rules/packaging-and-release.md.
     spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
 fi
 

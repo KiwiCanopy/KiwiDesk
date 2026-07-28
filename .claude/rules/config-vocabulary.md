@@ -10,6 +10,11 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/**"
   - "Sources/KiwiDeskCore/Borders/**"
   - "Sources/KiwiDeskCore/Bar/**"
+  # These author `CodingKeys` and user-facing knobs too — palettes,
+  # shared value types, the animation rates.
+  - "Sources/KiwiDeskCore/Appearance/**"
+  - "Sources/KiwiDeskCore/Models/**"
+  - "Sources/KiwiDeskCore/Animation/**"
   - "Sources/KiwiDesk/Settings/**"
 ---
 
@@ -21,7 +26,9 @@ vocabulary spans Lua and profile JSON:
 - A profile JSON key is the Lua command name with the `set_` verb
   stripped, snake_case, grouped by namespace:
   `set_gap_override` → `gap.override`, `bsp.set_ratio_h` →
-  `layout.bsp.ratio_h`. Multi-part element names nest further:
+  `layout.bsp.ratio_h`, `stack.set_master_ratio` →
+  `layout.stack.master_ratio`. Multi-part element names nest
+  further when the element is a configurable unit:
   `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.
 - Groups are **singular** (`gap`, `layout`, `drag`); never invent
   synonyms or plurals.
@@ -52,7 +59,8 @@ synonym:
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_size` / `item_gap`. Never "tab":
   that word belongs to macOS **native tabs** (§5) and to the
-  user guide's gesture prose alone.
+  user guide's gesture prose alone — see
+  [state-and-layout.md](state-and-layout.md).
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).

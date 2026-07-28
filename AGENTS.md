@@ -13,9 +13,15 @@ The guardrails themselves — the long "here is why this bit us"
 arguments — live one level down, in
 [`.claude/rules/*.md`](.claude/rules/), **one file per subsystem**.
 Each rule file is the canonical text for its subsystem; §5 carries
-the rule in one line and links to it. Nothing is duplicated: when
-they would disagree, the rule file wins, and the §5 row is the
-thing to fix.
+the rule in one line and links to it. When they would disagree,
+the **rule file wins** and the §5 row is the thing to fix.
+
+One deliberate exception to "state it once": the handful of
+guardrails at the top of §5 are repeated verbatim in their rule
+file. They are the ones that destroy something before a rule file
+would ever load — a tree in the state model, a shipped `.app` that
+`fatalError`s — so they earn a tripwire in the file every agent
+already has. Everything else appears exactly once.
 
 They live in `.claude/` because Claude Code auto-loads a rule file
 whose `paths:` glob matches a file you are editing — so the right
@@ -112,10 +118,11 @@ traced at directory altitude — see **`docs/architecture.md`**.
    generics. Keep code flat.
 5. **Formatting:** `swift format` with the repo's `.swift-format`
    config owns all style. SwiftLint (SPM build plugin,
-   `.swiftlint.yml`) owns semantic rules and warns in Xcode
-   during builds. Never enable a SwiftLint style rule that fights
-   swift-format. Run `scripts/lint.sh` before committing — its
-   **exit code** decides, not its warnings.
+   `.swiftlint.yml`) owns semantic rules — force casts,
+   complexity, file length — and warns in Xcode during builds.
+   Never enable a SwiftLint style rule that fights swift-format.
+   Run `scripts/lint.sh` before committing — its **exit code**
+   decides, not its warnings.
 6. **Concurrency:** AppKit/AX interaction is `@MainActor`. Pure
    state and layout code stays actor-free and unit-testable.
 7. **GUI north-star — simplicity, intuitiveness, Apple-native
@@ -141,9 +148,9 @@ traced at directory altitude — see **`docs/architecture.md`**.
    ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
    — `swift build`, the two-command test run, `scripts/lint.sh`,
    and the release build when the change touches concurrency or
-   `Sendable`. That skill is the one copy of the procedure,
-   including why the tests run as two commands and when CI's
-   `Release Build` job substitutes for a local one.
+   `Sendable`. That skill owns the procedure — what to run, in
+   what order, and when CI's `Release Build` job substitutes for
+   a local one.
 5. **Document:** any user-visible behavior change updates the
    matching doc in the same change set — code and docs must
    never describe different behavior. Which doc owns what, and
@@ -195,14 +202,16 @@ scripts.
   a commit while HEAD is `main`** (override with
   `KIWIDESK_ALLOW_MAIN_COMMIT=1`, never `--no-verify`).
 - `./scripts/build-app.sh` packages, signs and optionally
-  notarizes the `.app` (#89) — see the packaging rule in
-  [`.claude/rules/`](.claude/rules/packaging-and-release.md).
+  notarizes the `.app` (#89) — see
+  [packaging-and-release.md](.claude/rules/packaging-and-release.md).
 - `./scripts/install-subagents.sh --claude` (Claude Code agents +
   workspace skills) or `--codex` (project-scoped Codex agents),
   per clone, one explicit target.
 - Optional, per-developer: the `caveman` skill compresses agent
   output — not a build dependency, needs Node `>= 18`:
   `npx -y github:JuliusBrussee/caveman --non-interactive`.
+  `--non-interactive` avoids a hang when piped; scope it with
+  `--only claude`, `--minimal`, or `--uninstall`.
 - CI (`.github/workflows/ci.yml`) builds, lints and tests on
   every push and on PRs targeting `main`. A red build blocks
   merging.
@@ -249,7 +258,8 @@ touch a matching path.
 
 | Touching | Read | The rule, in one line |
 |---|---|---|
-| `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs` | [state-and-layout.md](.claude/rules/state-and-layout.md) | Flat array, pure layouts; display bounds only via `TilingEngine.visibleBounds` (#531) and spans via `layoutBounds(on:)` (#537); a native tab switch is a re-key, not destroy+create (#308); an explicit `set_*` apply forces the retile |
+| Anywhere in `Sources/KiwiDeskCore` | [core-boundaries.md](.claude/rules/core-boundaries.md) | Core returns structure and the GUI renders the sentence (#96); CLI/IPC errors stay English; never `Bundle.module` |
+| `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs` | [state-and-layout.md](.claude/rules/state-and-layout.md) | Flat array, pure layouts; display bounds only via `TilingEngine.visibleBounds` (#531) and spans via `layoutBounds(on:)` (#537) — the guards' `allowed` maps are the one copy of who is exempt; a native tab switch is a re-key, not destroy+create (#308); an explicit `set_*` apply forces the retile |
 | `Config`, `Profiles`, `Commands` | [profiles.md](.claude/rules/profiles.md) | A profile owns tiling plus *sparse behavior overrides*, never anything that routes or selects the profile itself; `isGuiManaged` is the one ownership predicate |
 | Any setting name, `CodingKeys`, user-facing noun | [config-vocabulary.md](.claude/rules/config-vocabulary.md) | Pick the Lua name first and derive the JSON key from it; groups are singular; reuse the noun glossary instead of coining a synonym |
 | `AX` | [accessibility.md](.claude/rules/accessibility.md) | AX calls are slow and can block — snapshot before layout math; Electron/WebKit answer lazily, so `AXEnhancedUserInterface` stays |

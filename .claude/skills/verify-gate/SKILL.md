@@ -3,10 +3,10 @@ description: Run KiwiDesk's full verification gate — debug build, tests, and l
 argument-hint: "[optional: file/dir to scope the lint]"
 ---
 
-Run KiwiDesk's verification gate from AGENTS.md §3 (the Verify
-step), in order, and report the result of each step. Stop and
-surface the failure the moment a step fails — do not continue to
-later steps.
+Run KiwiDesk's verification gate — the Verify step AGENTS.md §3
+delegates here — in order, and report the result of each step.
+Stop and surface the failure the moment a step fails; do not
+continue to later steps.
 
 ## Fast inner loop
 
@@ -16,10 +16,10 @@ later steps.
 4. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
    repo)
 
-Steps 2 and 3 are **separate commands** by design (AGENTS.md §5):
-run as one `swift test` the suite stalls for minutes at the tail,
-because spawned exec children hold the runner's pipe. #489 tracks
-the root fix.
+Steps 2 and 3 are **separate commands** by design — run as one
+`swift test` the suite stalls for minutes at the tail. Why, and
+the rest of the test conventions, live in
+`.claude/rules/tests.md`.
 
 `scripts/lint.sh` prints warnings that are not failures — only
 its **exit code** decides.

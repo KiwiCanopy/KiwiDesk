@@ -68,8 +68,9 @@ struct VisibleBoundsRoutingTests {
     /// basename, so two same-named files can never pool counts
     /// and mask each other.
     ///
-    /// **This map is the exemption list.** AGENTS.md §5 and the
-    /// `visibleBounds` doc comment carry the principle and point
+    /// **This map is the exemption list.** The state-and-layout
+    /// rule and the `visibleBounds` doc comment carry the
+    /// principle and point
     /// here for the files, rather than restating them — three
     /// prose copies drifted apart on their first outing (review).
     private let allowed: [String: Int] = [

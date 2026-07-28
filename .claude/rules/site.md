@@ -1,6 +1,8 @@
 ---
 paths:
   - "site/**"
+  # The Node version would be restated here, not in site/.
+  - ".github/workflows/site.yml"
 ---
 
 # Marketing / docs site (`site/`)
