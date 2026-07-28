@@ -174,23 +174,29 @@ extension KiwiCore {
     ///
     /// Deliberately UNGATED on the animation count. The obvious
     /// guard — bail if something started animating inside the
-    /// grace — is redundant with the fix this ships:
-    /// `FollowSource.syncFrame` already refuses to move a window
-    /// our animation is driving, per window, which is strictly
-    /// better than one global count. It is also dangerous,
-    /// because `activeCount` has an absorbing state: an animation
-    /// that never settles (the spring integrator diverges below
-    /// ~80 ms on a 60 Hz display, #599) pins the count above zero,
-    /// and a global gate would then kill the geometry heal
-    /// **app-wide** for the rest of the session while `syncFrame`
-    /// held that window's overlays frozen forever. Before #596
-    /// this method's ancestor was the un-gated healer that kept
-    /// the ring roughly right in exactly that state; closing that
-    /// hatch would turn a cosmetic bug into a permanent freeze.
+    /// grace — discards the whole pass because of ONE window,
+    /// stranding every other window that did settle. Nothing is
+    /// bought by it: `FollowSource.syncFrame` already refuses to
+    /// move a window our animation is driving, per window, which
+    /// is what the count was standing in for. That is the general
+    /// shape — never gate on the global count as a proxy for a
+    /// per-window question. (Waiting on the count for a genuinely
+    /// global precondition is a different thing and stays
+    /// correct: the z-order restore and the deferred focus raise
+    /// both do it, because a raise issued while any frames are
+    /// still landing arrives late on slow apps.)
     ///
     /// The cost of running early is one read of a window that
     /// settled seconds ago, and the in-flight animation's own
     /// settle arms another pass behind it.
+    ///
+    /// This does NOT rescue the diverged-spring case (#599). The
+    /// arming path sits behind the same signal — `notifyIfIdle`
+    /// only fires `onAllAnimationsEnded` at `activeCount == 0` —
+    /// so when an animation never settles this pass is never
+    /// scheduled, gate or no gate, and the same is true of the
+    /// deferred focus raise and the z-order restore. That wants
+    /// the engine-level fix tracked on #599, not a gate here.
     func runBorderResync() {
         updateBorders()
         updateStickyMarks()

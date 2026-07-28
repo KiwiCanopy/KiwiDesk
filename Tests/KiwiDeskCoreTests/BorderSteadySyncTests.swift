@@ -73,23 +73,6 @@ struct BorderSteadySyncTests {
         #expect(border.lastColorHex(WindowID(1)) == "#00FF00")
     }
 
-    @Test("Idle and WS-tracked, sync still moves the ring")
-    func syncAppliesWhenTrackedAndIdle() {
-        let border = BorderManager()
-        border.sync([spec(1, frame: start)])
-        // Force the stream live AFTER sync (`sync` re-runs the
-        // subscription, which resets `skyLightActive`).
-        border.skyLightActive = true
-        border.isAnimating = { _ in false }
-        border.sync([spec(1, frame: stale)])
-        // Pins that the stand-down is keyed on OUR animation
-        // alone. "Harmonizing" it to also stand down while
-        // WS-tracked reads plausible and passes every other test
-        // here — and would freeze every tracked ring at its last
-        // frame permanently, `sync` being the steady-state path.
-        #expect(border.lastFrame(WindowID(1)) == stale)
-    }
-
     @Test("A ring created mid-animation takes the spec frame")
     func newRingMidAnimationUsesSpec() {
         let border = BorderManager()
@@ -149,10 +132,24 @@ struct StickyMarkSteadySyncTests {
         marks.sync([
             StickyMarkManager.Spec(window: WindowID(1), frame: start)
         ])
-        // The mark keeps a live `isWindowServerTracked` closure
-        // for `follow`, so the ring's twin mistake — bolting a
-        // WS-tracked stand-down onto `sync` — is reachable here
-        // too, and would freeze every tracked mark permanently.
+        // The one live guard against a plausible future
+        // "harmonization": making `sync` also stand down while
+        // WindowServer-tracked, which reads sensible and would
+        // freeze every tracked overlay at its last frame
+        // permanently, `sync` being the steady-state path.
+        //
+        // This test lives on the MARK, not the ring, and that
+        // asymmetry is the point. `BorderManager.sync` opens with
+        // `updateSkyLightSubscription`, which recomputes
+        // `skyLightActive` from scratch — so a ring-side version
+        // of this test reads `false` no matter what it set, and
+        // could never fail in the direction it claims (a guard
+        // that cannot fire is worse than none). The mark's
+        // `isWindowServerTracked` is a plain injected closure its
+        // `sync` never recomputes, so here the mistake really
+        // does trip. The shared `FollowSource.syncFrame` takes no
+        // `wsTracked` at all, so introducing one would change a
+        // signature both managers call — and fail this.
         marks.isWindowServerTracked = { _ in true }
         marks.isAnimating = { _ in false }
         marks.sync([

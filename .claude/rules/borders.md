@@ -74,10 +74,12 @@ second cancel the other:
   `.borderDropSettle`). WindowServer can order a ring out with no
   matching unhide; `sync`'s trailing `order(relativeTo:)` is what
   un-hides it. Landing mid-flight is safe *because* geometry
-  stands down above — precisely: it cannot move the ring of a
-  window our own animation is driving. It still re-reads state
-  for every other ring, exactly as the `updateBorders()` at the
-  end of each `retile()` does.
+  stands down above — precisely, and only, for a window **our own
+  animation** is driving. It still re-reads state for every other
+  ring, exactly as the `updateBorders()` at the end of each
+  `retile()` does, and that includes the residual named below: a
+  window the user is dragging under a live WindowServer stream is
+  not guarded here either.
 - **Geometry, late** (`scheduleBorderResync`, `.borderResync`).
   Rides `AnimationEngine.onAllAnimationsEnded`, never a duration
   guess — a spring's visual settle is ~2× its response, so
@@ -88,6 +90,29 @@ second cancel the other:
   window whose app accepted no AX write at all — the ring rode our
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
+
+## Never gate an overlay pass on the global animation count
+
+`AnimationEngine.activeCount` is a poor proxy for "is *this*
+window moving?", and the per-window predicate (`syncFrame`,
+`isAnimating`) is always available. Two concrete reasons:
+
+- A global gate discards a whole pass because of one window,
+  stranding every window that did settle.
+- The count has an **absorbing state**. An animation that never
+  settles keeps ticking forever, so the count never returns to
+  zero — and `notifyIfIdle` only emits `onAllAnimationsEnded` at
+  zero, so the settle signal itself dies with it. The diverged
+  spring below ~80 ms on a 60 Hz display (#599) reaches it. Note
+  what this does *not* mean: ungating a consumer does not rescue
+  it, because the arming path is behind the same signal. The fix
+  belongs in the engine.
+
+This is scoped to using the count as a **proxy**. Waiting on it
+for a genuinely global precondition is correct and stays —
+`scheduleZOrderRestore` and the deferred focus raise both do,
+because a raise issued while any frames are still landing arrives
+late on slow apps.
 
 ## No echo is suppressed to smooth the settle tail
 
