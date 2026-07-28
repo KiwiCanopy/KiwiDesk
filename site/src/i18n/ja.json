@@ -186,7 +186,6 @@
   "guide_tour_spaces_title": "スペース",
   "hero_cta_primary": "KiwiDesk を入手",
   "hero_cta_secondary": "動いているところを見る",
-  "hero_dev_cta_docs": "ドキュメントを読む",
   "hero_dev_cta_github": "GitHub で見る",
   "hero_dev_kicker": "ちゃんと動く、macOS のためのタイル型ウインドウマネージャ",
   "hero_dev_sub": "KiwiDesk はウインドウを i3 のようなツリーではなく<b>フラットな配列</b>で管理します。<b>Lua で全面的に設定でき</b>、<b>7 つのレイアウト</b>を切り替えられます。そして<b>SIP を無効化しません</b>。",
