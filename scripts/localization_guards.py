@@ -272,7 +272,7 @@ PRODUCT_NAMES = (
     # zh-Hant "常駐"). The first single-word product name: every
     # `sticky`/`Sticky` hit in en.json names this exact feature (no
     # incidental UI use to false-positive on), so it is safe as one
-    # word. The obligation auto-scopes to the ~16 keys whose English
+    # word. The obligation auto-scopes to the 17 keys whose English
     # carries the word; the display tier is "Display Sticky" (de
     # "Display-Sticky"), "display" being an ordinary qualifier that
     # compounds per locale around the fixed "Sticky" atom.

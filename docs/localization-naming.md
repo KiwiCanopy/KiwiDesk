@@ -61,8 +61,9 @@ control every user taps says "Space Bar" whatever their language.
 decision to coin it verbatim the way the bars were, which Core
 already reflects (`design-decisions.md` calls it "the settled
 user-facing term"). Before admitting a single word, the
-descriptive-occurrence check below was run: every one of the ~19
-`sticky`/`Sticky` hits in `en.json` names this exact feature — there
+descriptive-occurrence check below was run: all 17 keys (21
+`sticky`/`Sticky` occurrences) in `en.json` name this exact
+feature — there
 is no incidental "sticky" in ordinary prose to false-positive on
 (unlike `app`/`space`/`bar`, which are common words and needed the
 per-token glossary carve-outs). Its display tier is **"Display
@@ -241,21 +242,40 @@ Apply the catalog question, then:
 - **Family B** — add its `layout.<mode>.name` key to
   `MODE_NAME_KEYS`.
 
-**A name that can occur descriptively does not belong in Family
-A.** The check is case-insensitive there, so it cannot tell a
-referential mention from a descriptive one. The two bar names are
-two-word coinages that only ever occur referentially, so the
-question never arises for them. **Sticky** is the single word where
-it had to be asked and answered: a grep of `en.json` found every
-`sticky`/`Sticky` occurrence naming the feature and none used
-descriptively (there is no "sticky note", "sticky key", or the
-like), so a verbatim demand never lands on a sentence with nothing
-to keep. That check is the price of admitting a single word — run
-it before adding one. A name built from *ordinary* words (one with
-incidental prose uses) would fire on copy that was never naming the
-feature; a guard failing on correct copy is the one failure that
-makes an exemption file look necessary, so the rule holds: argue a
-name in, never add one to silence a hit.
+A **product-coinage decision may override a Family-B catalog
+reading** — the catalog question sorts what *already exists*, but a
+name can be coined into Family A even when some locales had
+translated it, provided (i) the descriptive-occurrence check below
+passes and (ii) those locales are reharmonized to keep it verbatim
+in the same change, so the catalog question agrees *afterward*. That
+is exactly what #579 did for **Sticky** (`de`/`ru`/`zh-Hant` had
+translated it). The override is one-time, not a standing exception:
+once reharmonized, the catalogs are the test again.
+
+**A name that can occur for a _different_ thing does not belong in
+Family A.** The check is case-insensitive substring, so it cannot
+tell a referential mention from an unrelated one — and the
+substring reach means morphological variants inherit the obligation
+automatically (`keybinding.make_unsticky` "Make unsticky" already
+demands verbatim "Sticky", which every locale honors). The two bar
+names are two-word coinages that only ever occur referentially, so
+the question never arises for them. **Sticky** is the single word
+where it had to be asked: a grep found all 17 keys (21 occurrences)
+carrying `sticky`/`Sticky` name *this* feature, none a different
+one. The real collision to keep re-checking is not "sticky note" —
+it is macOS's own **Sticky Keys** accessibility feature: if a
+`system_shortcut.*` conflict string ever surfaces "Sticky Keys",
+this guard would demand KiwiDesk's "Sticky" be kept verbatim inside
+a correctly-localized *Apple* name (`de` "Einrastfunktion"), a false
+positive with no signpost back here. The corpus is clean today; when
+system-shortcut strings are added, re-grep `system_shortcut.*` for
+"Sticky Keys" specifically. That re-check is the price of a
+single-word Family A member — run it before adding one, and again
+when the shortcut corpus grows. A name built from *ordinary* words
+would fire on copy that was never naming the feature; a guard
+failing on correct copy is the one failure that makes an exemption
+file look necessary, so the rule holds: argue a name in, never add
+one to silence a hit.
 
 ## See also
 
