@@ -99,14 +99,14 @@ window moving?", and the per-window predicate (`syncFrame`,
 
 - A global gate discards a whole pass because of one window,
   stranding every window that did settle.
-- The count has an **absorbing state**. An animation that never
-  settles keeps ticking forever, so the count never returns to
-  zero — and `notifyIfIdle` only emits `onAllAnimationsEnded` at
-  zero, so the settle signal itself dies with it. The diverged
-  spring below ~80 ms on a 60 Hz display (#599) reaches it. Note
-  what this does *not* mean: ungating a consumer does not rescue
-  it, because the arming path is behind the same signal. The fix
-  belongs in the engine.
+- The count has an **absorbing state**: an animation that never
+  settles keeps the count above zero forever, and the settle
+  signal dies with it — see
+  [input-and-animation.md](input-and-animation.md), which owns
+  that mechanism. Note what this does *not* mean: ungating a
+  consumer does not rescue it, because the arming path is behind
+  the same signal. The fix belongs in the engine, and the known
+  cause (#599) is fixed — the structural exposure is not.
 
 This is scoped to using the count as a **proxy**. Waiting on it
 for a genuinely global precondition is correct and stays —
