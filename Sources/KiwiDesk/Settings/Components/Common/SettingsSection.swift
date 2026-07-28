@@ -34,11 +34,12 @@ struct SettingsGroupHeader: View {
 /// controls' help takes over and the anchor would gloss nothing.
 struct SettingsSection<Content: View>: View {
     let title: String
-    /// The search anchor id, from the `SettingsControl` this
-    /// section was declared as; nil for the String init, whose
-    /// remaining callers are the deliberately-unindexed
-    /// computed titles (`%1$@ bar`).
-    private let anchorID: String?
+    /// The catalog declaration this section was mounted as, or
+    /// nil for the String init — whose remaining callers are the
+    /// deliberately-unindexed computed titles (`%1$@ bar`). The
+    /// whole descriptor rather than its id, so both halves of
+    /// the pair below can only be fed from one control (#573).
+    private let control: SettingsControl?
     let symbol: String?
     let caption: String?
     let subsection: Bool
@@ -49,7 +50,7 @@ struct SettingsSection<Content: View>: View {
     /// search anchor. An indexable section takes a
     /// `SettingsControl` instead — declaring it in the catalog
     /// is what makes it findable, and the catalog's declaration
-    /// is the one list (`SettingsCatalogSiteTests` refuses a
+    /// is the one list (`SettingsCatalogArgumentTests` refuses a
     /// literal `L()` title here).
     init(
         _ title: String,
@@ -60,7 +61,7 @@ struct SettingsSection<Content: View>: View {
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
-        self.anchorID = nil
+        self.control = nil
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
@@ -81,7 +82,7 @@ struct SettingsSection<Content: View>: View {
         @ViewBuilder content: () -> Content
     ) {
         self.title = control.text
-        self.anchorID = control.id
+        self.control = control
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
@@ -90,8 +91,8 @@ struct SettingsSection<Content: View>: View {
     }
 
     var body: some View {
-        if let anchorID {
-            core.searchAnchor(anchorID)
+        if let control {
+            core.searchAnchorCard(control)
         } else {
             core
         }
@@ -122,13 +123,13 @@ struct SettingsSection<Content: View>: View {
     /// A catalog-declared section is a search anchor by existing
     /// (#277) — its `SettingsControl` supplies the stable id. The
     /// wash marks the heading; the scroll target is the whole
-    /// card (`body`). Both halves read the one `anchorID`, and
-    /// the unanchored String init takes neither: an earlier cut
+    /// card (`body`). Both halves read the one `control`, and the
+    /// unanchored String init takes neither: an earlier cut
     /// flashed on `anchorID ?? ""`, a sentinel that no reveal can
     /// ever name and that reads as a second, disagreeing id.
     @ViewBuilder private var flashedHeader: some View {
-        if let anchorID {
-            header.searchFlash(anchorID)
+        if let control {
+            header.searchFlashHeader(control)
         } else {
             header
         }

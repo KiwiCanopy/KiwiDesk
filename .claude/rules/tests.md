@@ -56,14 +56,23 @@ bite large test PRs:
     *is* the Space Bar's focused accent), so one threshold over
     one colour is deliberate, not policy misfiled into a maths
     helper.
-  - *source-scanning primitives* in `SourceScan.swift` — the
-    delimiter walker (`balanced`, `skipLiteral`), comment
-    stripper and file enumerator shared by the parity guards
-    that scan Swift source. Extracted at the **second** copy,
-    on drift risk alone: harden the walker in one copy and not
-    the other and the over-matching copy swallows the very call
+  - *source-scanning primitives* in `SourceScan.swift` and its
+    `SourceScan+*.swift` extensions — the walkers, matchers and
+    file enumeration shared by the parity guards that scan Swift
+    source. Deliberately **not** enumerated member by member
+    here: the family grows a helper whenever a second guard
+    needs the same walk, and a list in this file went stale
+    within two additions. Extracted at the **second** copy, on
+    drift risk alone: harden a walker in one copy and not the
+    other and the over-matching copy swallows the very call
     sites its guard exists to catch, so the guard passes for
-    the wrong reason.
+    the wrong reason. `SettingsCatalogFiles.swift` belongs to
+    this family rather than counting as a further exception —
+    it is the *which files* half of the same machinery, and the
+    named harm is identical: narrow the predicate in one copy
+    and not the other and the wider copy silently exempts a
+    file from a fail-open guard (#573 proved that exact bug
+    with a one-file probe that passed every check).
   - *test-core construction* in `TestCore.swift` — the
     `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565).
     It clears the statelessness bar (a per-instance id counter, no

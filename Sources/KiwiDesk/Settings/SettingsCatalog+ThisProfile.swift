@@ -7,7 +7,7 @@ import KiwiDeskCore
 // draws, so a destination's declarations sit where its
 // neighbours do. The aggregation and the enumeration stay in
 // `SettingsCatalog.swift`; the authoring rules are in its
-// header, and `SettingsCatalogSiteTests` treats every
+// header, and the catalog guards treat every
 // `SettingsCatalog*` file as catalog, not as a render site.
 
 struct SpacesControls: Sendable {

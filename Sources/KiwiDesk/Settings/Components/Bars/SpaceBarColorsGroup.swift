@@ -44,7 +44,7 @@ struct SpaceBarColorsGroup: View {
         // mounted, so the shared id is never ambiguous — but
         // deleting this mount silently restores the
         // scroll-to-nothing bug for this side
-        // (`SettingsCatalogSiteTests` pins both references).
+        // (`SettingsCatalogArgumentTests` pins both references).
         SettingsDisclosure(
             SettingsCatalog.bars.advancedColors,
             chrome: .inline(font: .subheadline),

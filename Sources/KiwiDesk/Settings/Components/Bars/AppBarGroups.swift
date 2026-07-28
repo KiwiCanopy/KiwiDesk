@@ -115,7 +115,7 @@ struct GlobalAppBarGroup: View {
             // reveal lands on whichever bar editor is already
             // open. Deleting either mount silently restores the
             // scroll-to-nothing bug for that side —
-            // `SettingsCatalogSiteTests` pins both references.
+            // `SettingsCatalogArgumentTests` pins both references.
             SettingsDisclosure(
                 SettingsCatalog.bars.advancedColors,
                 chrome: .inline(font: .subheadline),

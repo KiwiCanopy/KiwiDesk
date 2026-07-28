@@ -158,7 +158,7 @@ struct MonitorsSection: View {
     private var placementUnavailable: some View {
         // The if/else twin of the editable card above — never
         // co-mounted, so sharing its anchor id is safe and
-        // allow-listed in `SettingsCatalogSiteTests`.
+        // allow-listed in `SettingsCatalogArgumentTests`.
         SettingsSection(
             SettingsCatalog.monitors.spacePlacement
         ) {

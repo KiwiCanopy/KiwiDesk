@@ -69,6 +69,11 @@ struct BarEditorPicker: View {
                     )
             )
         }
+        // Load-bearing for the anchor below, not just cosmetic:
+        // `.plain` leaves the button its label's own frame, which
+        // is what keeps the wash rect equal to the chip. A styled
+        // button (`.bordered`) would add chrome and the wash would
+        // silently grow to it.
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityAddTraits(
@@ -76,9 +81,7 @@ struct BarEditorPicker: View {
         )
         // Self-anchoring: a bar-name search lands on the switch
         // (it sits at the top of the pane) and washes the chip.
-        // `.plain` gives the button its label's own frame, so the
-        // wash still sits behind the chip's fill from out here.
-        .settingsAnchor(control(editor))
+        .searchAnchored(control(editor))
     }
 
     /// A row of app-icon tiles, one ringed active.

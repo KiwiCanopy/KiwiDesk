@@ -64,7 +64,9 @@ struct SettingsCatalogSiteTests {
         // SettingsControl { get }`, which is a requirement, not a
         // catalog control.
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where file.lastPathComponent.hasPrefix("SettingsCatalog") {
+        where SettingsCatalogFiles.isDeclarationFile(
+            file.lastPathComponent
+        ) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -84,21 +86,54 @@ struct SettingsCatalogSiteTests {
             )
         }
     }
-}
-
-/// Which files ARE the catalog — everywhere else under
-/// `Settings/` is a render site. One home because three suites
-/// ask (`SettingsCatalogSiteTests`,
-/// `SettingsCatalogArgumentTests`,
-/// `SettingsAnchorPrimitiveTests`) and a copy that missed a
-/// declaration file would read that file's own declarations as
-/// render-site references, passing direction one vacuously.
-/// The prefix is load-bearing: the declarations are split across
-/// `SettingsCatalog+*.swift` by sidebar group, and a new slice
-/// must be covered by existing.
-enum SettingsCatalogFiles {
-    static func isCatalogFile(_ name: String) -> Bool {
-        name.hasPrefix("SettingsCatalog")
-            || name == "SettingsControl.swift"
+    /// Every `*Controls` declaration struct must be registered
+    /// in `SettingsCatalog.container(of:)`, or reflection never
+    /// reaches it — and an unregistered struct is invisible to
+    /// every count guard above, since they all reflect over what
+    /// IS registered. Contrived while the catalog was one file;
+    /// live now that "add a `SettingsCatalog+*` slice" is the
+    /// routine move (#573 architect review).
+    @Test("every declaration struct is reachable")
+    func declarationStructsAreReachable() throws {
+        var declarations: [String] = []
+        var corpus = ""
+        for file in try SourceScan.swiftSources(under: settingsDir)
+        where SettingsCatalogFiles.isDeclarationFile(
+            file.lastPathComponent
+        ) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            corpus += source
+            declarations += SourceScan.allMatches(
+                in: source,
+                pattern: #"struct (\w+): Sendable"#
+            )
+        }
+        // Two legitimate ways to be reached, and reflection walks
+        // exactly these: a destination container, registered as a
+        // `static let` on `SettingsCatalog`; or a drawer's nested
+        // children, mounted as `children:`. `container(of:)` is
+        // an exhaustive switch, so the compiler already pins the
+        // other direction — only a surplus struct can hide.
+        #expect(declarations.count >= 10)
+        for name in declarations {
+            let registered =
+                corpus.occurrences(of: "= \(name)()") > 0
+            let nested =
+                corpus.occurrences(of: "children: \(name)()") > 0
+            #expect(
+                registered || nested,
+                Comment(
+                    rawValue:
+                        "\(name) is declared but never "
+                        + "registered on SettingsCatalog nor "
+                        + "mounted as a drawer's children — "
+                        + "reflection never reaches it, so it "
+                        + "ships rendered-but-unsearchable with "
+                        + "every count guard still green"
+                )
+            )
+        }
     }
 }

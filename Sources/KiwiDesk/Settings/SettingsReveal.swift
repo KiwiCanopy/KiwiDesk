@@ -127,6 +127,23 @@ private struct SearchRevealFlash: ViewModifier {
     }
 }
 
+// MARK: - The raw halves
+//
+// `fileprivate` on purpose, and it is the whole design (#573).
+//
+// A reveal needs two things on the view tree: a scroll
+// destination (`.id`) and a wash. Feed them a hand-written
+// String and two mistakes become available, both SILENT — a
+// literal or mistyped id is a destination no search result
+// points at, and one half alone is a flash with nowhere to
+// scroll (or the reverse). Nothing crashes; the hit just lands
+// nowhere.
+//
+// Taking the ids from a `SettingsControl` closes both, so the
+// three typed modifiers below are the only way in and these two
+// cannot be reached from another file at all. That is strictly
+// better than a source-scan guard, which can only notice the
+// mistake after someone writes it.
 extension View {
     /// Tags this view as the scroll destination for `anchor` —
     /// a `SettingsControl.id`, never display text (Appearance
@@ -134,48 +151,59 @@ extension View {
     /// unique per co-mounted view by construction). A one-line
     /// wrapper over `.id()` on purpose: it names the intent and
     /// keeps the identity decision in one place to revisit.
-    ///
-    /// Goes on the whole card, while `searchFlash` goes on its
-    /// header: the scroll lands at the card's top so the group
-    /// heading is on screen (a header-less control reads as
-    /// disembodied), and the wash marks the heading rather than
-    /// washing a whole card in accent.
-    ///
-    /// Applied by the shared primitives only —
-    /// `SettingsSection`, `SettingsDisclosure`, and the anchored
-    /// row shapes — never ad hoc at feature call sites
-    /// (`SettingsCatalogSiteTests` pins the file set), so the
-    /// pairing rules those primitives encode cannot be skipped.
-    func searchAnchor(_ anchor: String) -> some View {
+    fileprivate func searchAnchor(
+        _ anchor: String
+    ) -> some View {
         id(anchor)
     }
 
     /// Paints the reveal wash while `anchor` is the flashed one.
-    func searchFlash(_ anchor: String) -> some View {
+    fileprivate func searchFlash(
+        _ anchor: String
+    ) -> some View {
         modifier(SearchRevealFlash(anchor: anchor))
     }
+}
 
+// MARK: - The typed surface
+
+extension View {
     /// The whole pairing for a **self-anchoring control** — a
     /// bespoke recognition control that is its own scroll target,
     /// with no header/card split to place the two halves across
     /// (`GapRow`'s slider rows, `BarEditorPicker`'s bar chips).
     /// Wash and target are the same rect: there is no expanded
     /// content below to tint by accident, which is the only
-    /// reason `SettingsSection` and `SettingsDisclosure` split
-    /// them at all.
+    /// reason the two container shapes split them at all.
     ///
-    /// It takes the descriptor rather than an id so both halves
-    /// come from one `SettingsControl`, which is what closes the
-    /// two silent failures a hand-written pair allows: an id
-    /// typed as a literal (a scroll target no search result
-    /// points at) and a forgotten half (a flash with nowhere to
-    /// scroll, or the reverse). Neither crashes — the hit simply
-    /// lands nowhere — so the type is the guard, and
-    /// `SettingsAnchorPrimitiveTests` keeps the raw halves out of
-    /// call sites that could re-grow the mistake.
-    func settingsAnchor(
+    /// A second invariant falls out of applying the pair at the
+    /// control's outermost point: the wash lands OUTSIDE any
+    /// `GreyOut` in the subtree by construction rather than by
+    /// call-site care, so a hit on a gated control still flashes
+    /// at full strength (see `SearchRevealFlash`).
+    func searchAnchored(
         _ control: SettingsControl
     ) -> some View {
         self.searchFlash(control.id).searchAnchor(control.id)
+    }
+
+    /// The container shapes' half of the pair: the scroll
+    /// destination, on the whole card, OUTSIDE its chrome so
+    /// `scrollTo(anchor: .top)` lands on the card's edge and not
+    /// inside its padding. Pairs with `searchFlashHeader`.
+    func searchAnchorCard(
+        _ control: SettingsControl
+    ) -> some View {
+        searchAnchor(control.id)
+    }
+
+    /// The container shapes' other half: the wash, on the header
+    /// alone. Flashing the whole card would tint its content too
+    /// — for a drawer, the expanded interior. Pairs with
+    /// `searchAnchorCard`.
+    func searchFlashHeader(
+        _ control: SettingsControl
+    ) -> some View {
+        searchFlash(control.id)
     }
 }

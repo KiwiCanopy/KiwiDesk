@@ -80,7 +80,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     var body: some View {
         switch chrome {
         case .inline:
-            group.searchAnchor(control.id)
+            group.searchAnchorCard(control)
         case .card:
             group
                 .padding(12)
@@ -92,7 +92,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                             )
                         )
                 )
-                .searchAnchor(control.id)
+                .searchAnchorCard(control)
         }
     }
 
@@ -108,7 +108,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                     .font(labelFont)
                 accessory()
             }
-            .searchFlash(control.id)
+            .searchFlashHeader(control)
         }
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also

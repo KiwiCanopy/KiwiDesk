@@ -32,4 +32,25 @@ extension SourceScan {
         else { return nil }
         return String(source[range])
     }
+
+    /// Every first capture of `pattern`, in document order.
+    /// An array, not a `Set`: a guard that counts declarations
+    /// needs to see a duplicate rather than have it silently
+    /// collapse.
+    static func allMatches(
+        in source: String,
+        pattern: String
+    ) -> [String] {
+        guard
+            let regex = try? NSRegularExpression(pattern: pattern)
+        else { return [] }
+        return regex.matches(
+            in: source,
+            range: NSRange(source.startIndex..., in: source)
+        )
+        .compactMap { match in
+            Range(match.range(at: 1), in: source)
+                .map { String(source[$0]) }
+        }
+    }
 }

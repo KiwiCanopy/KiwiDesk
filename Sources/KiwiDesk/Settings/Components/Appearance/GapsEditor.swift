@@ -211,7 +211,7 @@ struct GapsEditor: View {
 /// catalog descriptor, so the row is a search anchor by existing
 /// — the first drawer-interior controls the catalog reaches
 /// (#277); a reveal expands the drawer (`SettingsDisclosure`)
-/// and lands here. Self-anchoring, so it takes `.settingsAnchor`
+/// and lands here. Self-anchoring, so it takes `.searchAnchored`
 /// whole: the wash covers the same rect as the scroll target
 /// because, unlike a section card, there is no expanded content
 /// below the label to tint by accident.
@@ -220,7 +220,7 @@ private struct GapRow: View {
     @Binding var value: CGFloat
 
     var body: some View {
-        row.settingsAnchor(control)
+        row.searchAnchored(control)
     }
 
     private var row: some View {
