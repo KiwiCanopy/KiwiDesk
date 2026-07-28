@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "Systemeinstellungen öffnen",
   "onboarding.grant.title": "Bedienungshilfen aktivieren",
   "onboarding.grant.waiting": "Warten auf Erlaubnis…",
-  "onboarding.ready.body": "KiwiDesk ordnet deine Fenster bereits mit sinnvollen Standardwerten an. Öffne die Einstellungen und wende eine Voreinstellung für dein Setup an — danach kannst du alles feineinstellen. Du kommst hierher jederzeit über die Menüleiste zurück.",
+  "onboarding.ready.body": "KiwiDesk ordnet deine Fenster bereits mit sinnvollen Standardeinstellungen an. Öffne die Einstellungen und wende eine Voreinstellung für dein Setup an — und feinjustiere von dort aus alles Weitere. Über die Menüleiste kommst du jederzeit hierher zurück — oder drücke ⌃⌥K für einen Spickzettel mit Tastaturkurzbefehlen.",
   "onboarding.ready.not_now": "Später",
   "onboarding.ready.open_at_login": "KiwiDesk beim Anmelden öffnen",
   "onboarding.ready.open_settings": "Einstellungen öffnen",

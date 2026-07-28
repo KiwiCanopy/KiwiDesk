@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "打開系統設定",
   "onboarding.grant.title": "啟用「輔助使用」",
   "onboarding.grant.waiting": "正在等待權限…",
-  "onboarding.ready.body": "KiwiDesk 已以合理的預設值為你排列視窗。打開「設定」並套用適合你組態的預置組合，之後就能從那裡微調任何項目。你隨時都能從選單列回到這裡。",
+  "onboarding.ready.body": "KiwiDesk 已經以合理的預設值排列你的視窗。打開「設定」並套用適合你使用情境的預設集 — 接著就能從那裡微調任何細節。你隨時可以從選單列回到這裡 — 或按 ⌃⌥K 查看鍵盤快速鍵速查表。",
   "onboarding.ready.not_now": "現在不要",
   "onboarding.ready.open_at_login": "登入時開啟 KiwiDesk",
   "onboarding.ready.open_settings": "打開設定",

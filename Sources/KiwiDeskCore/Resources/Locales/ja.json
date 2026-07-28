@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "システム設定を開く",
   "onboarding.grant.title": "アクセシビリティを有効にする",
   "onboarding.grant.waiting": "許可を待っています…",
-  "onboarding.ready.body": "KiwiDeskはすでに適切な初期設定でウインドウを整理しています。設定を開いて、お使いの環境に合ったプリセットを適用し、そこから細かく調整してください。メニューバーからいつでもここに戻れます。",
+  "onboarding.ready.body": "KiwiDeskはすでに、実用的な初期設定でウインドウを整列しています。「設定」を開いて、あなたの環境に合ったプリセットを適用しましょう — あとはそこから細かく調整できます。メニューバーからいつでもここに戻れます — または⌃⌥Kを押すと、キーボードショートカットの早見表を表示できます。",
   "onboarding.ready.not_now": "今はしない",
   "onboarding.ready.open_at_login": "ログイン時にKiwiDeskを開く",
   "onboarding.ready.open_settings": "設定を開く",
