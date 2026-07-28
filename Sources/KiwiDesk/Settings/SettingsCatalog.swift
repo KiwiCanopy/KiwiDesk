@@ -262,9 +262,9 @@ struct GeneralControls: Sendable {
         "general.language.title",
         "Language"
     )
-    // Terse topic-noun heading; the toggle inside carries the
-    // fuller "Open KiwiDesk at Login" label (ui-designer
-    // 2026-07-28), as every card pairs a noun with an action.
+    // Terse topic-noun heading; the dropdown inside carries the
+    // verb "Start KiwiDesk" (#576), as every card pairs a noun
+    // with an action.
     let loginItemCard = SettingsControl(
         "general.login_item.title",
         "Login"

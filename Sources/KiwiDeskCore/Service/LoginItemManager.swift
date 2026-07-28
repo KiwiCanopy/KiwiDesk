@@ -140,6 +140,14 @@ public enum LoginItemState: Equatable, Sendable {
     public var isOn: Bool {
         self == .enabled || self == .requiresApproval
     }
+
+    /// The reason the running copy can't register, or `nil` when it
+    /// can. Lets `AutoStartManager` fold the unavailability out of
+    /// the state without re-matching the enum case.
+    public var unavailableReason: LoginItemUnavailable? {
+        if case .unavailable(let reason) = self { return reason }
+        return nil
+    }
 }
 
 /// Why `SMAppService` can't register the running copy — each maps to

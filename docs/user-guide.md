@@ -231,26 +231,37 @@ hooks. Only an `init.lua` that already sets tiling itself
 Lua-owned — no `gui.json` is seeded, and the **Adopt into the GUI**
 path is offered instead.
 
-## Open at Login
+## Start KiwiDesk
 
-At the top of **General** (in the **System** group), **Open
-KiwiDesk at Login** registers KiwiDesk as a macOS login item, so it
-launches automatically when you sign in and your windows are
-arranged from the start rather than floating loose until you open
-it by hand. First-launch setup offers this pre-checked on its final
-step, so a standard new install ends up enabled; turn it off here
-any time for manual control.
+At the top of **General** (in the **System** group), **Start
+KiwiDesk** chooses when KiwiDesk launches itself, with three
+levels:
 
-The switch reflects the real macOS state — you can also revoke it
-from **System Settings ▸ General ▸ Login Items**, and the switch
-follows. If macOS shows *Requires approval in System Settings*,
-click **Open Login Items** and enable KiwiDesk there.
+- **Never** — KiwiDesk never starts on its own.
+- **At Login** — it launches automatically when you sign in, so
+  your windows are arranged from the start rather than floating
+  loose until you open it by hand.
+- **At Login + Restart on Crash** — as above, plus a background
+  helper that relaunches KiwiDesk if it ever crashes.
 
-If you also use the advanced `kiwidesk service` command (which runs
-KiwiDesk as a crash-restarting background agent), note that it
-*also* launches KiwiDesk at login, independently of this switch —
-the two don't conflict, and `kiwidesk service status` reports both.
-Turn one off if you want a single auto-start path.
+First-launch setup offers **At Login** pre-selected on its final
+step, so a standard new install ends up launching at login;
+auto-restart is opt-in, chosen here when you want it. The `?`
+beside the control explains all three.
+
+The control reflects the real macOS state — you can also revoke
+the login item from **System Settings ▸ General ▸ Login Items**,
+and it follows. If macOS shows *Requires approval in System
+Settings*, click **Open Login Items** and enable KiwiDesk there.
+The control greys out when KiwiDesk is run from a spot it can't
+register from (a still-quarantined download, or the bare binary) —
+only "Never" would be valid there; the caption names the fix, and
+the `?` stays readable.
+
+The auto-restart level is the same crash-restart supervision the
+advanced `kiwidesk service` command installs, so the two stay in
+sync — `kiwidesk service status` reports the same state, and
+setting the level here is equivalent to running that command.
 
 ## GUI Language
 

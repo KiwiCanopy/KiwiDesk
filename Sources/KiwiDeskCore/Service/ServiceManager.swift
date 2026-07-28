@@ -156,7 +156,35 @@ public enum ServiceManager {
         )
     }
 
+    /// The agent's launchd state as structure (#576), for the
+    /// `AutoStartManager` facade. A blocking `launchctl print`
+    /// spawn like the other verbs — the facade calls it off the
+    /// main actor. Distinct from `status()`, which renders the CLI
+    /// sentence; this returns the machine value the facade folds.
+    public static func currentStatus() -> ServiceStatus {
+        let (exit, output) = printState()
+        return serviceStatus(printExit: exit, output: output)
+    }
+
     // MARK: - Helpers (pure — unit-tested)
+
+    /// Maps a `launchctl print` exit + output to structure. A
+    /// non-zero exit means the job isn't loaded in this domain; a
+    /// zero exit means loaded, with a pid only when a process is
+    /// actually running (#341). Pure so the mapping is testable
+    /// without spawning launchctl.
+    static func serviceStatus(
+        printExit: Int32,
+        output: String
+    ) -> ServiceStatus {
+        guard printExit == 0 else {
+            return ServiceStatus(isLoaded: false, pid: nil)
+        }
+        return ServiceStatus(
+            isLoaded: true,
+            pid: parsePID(from: output)
+        )
+    }
 
     /// What `start` must do given the agent's launchd state.
     /// Loaded-but-idle (registered, no pid) means the process was

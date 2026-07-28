@@ -73,4 +73,42 @@ struct ServiceStatusTests {
                 == "KiwiDesk service was not running — started it"
         )
     }
+
+    // MARK: - Structured status (#576)
+
+    @Test("A running job maps to loaded with its pid")
+    func structuredRunning() {
+        let output =
+            "org.kiwidesk.KiwiDesk = {\n"
+            + "\tstate = running\n\tpid = 4271\n}"
+        let status = ServiceManager.serviceStatus(
+            printExit: 0,
+            output: output
+        )
+        #expect(status == ServiceStatus(isLoaded: true, pid: 4271))
+        #expect(status.isRunning)
+    }
+
+    @Test("A loaded-but-idle job maps to loaded with no pid")
+    func structuredIdle() {
+        let status = ServiceManager.serviceStatus(
+            printExit: 0,
+            output: "\tstate = not running\n"
+        )
+        #expect(status == ServiceStatus(isLoaded: true, pid: nil))
+        // Loaded (RunAtLoad, so it auto-starts) but not running.
+        #expect(!status.isRunning)
+    }
+
+    @Test("A non-zero print exit maps to not loaded")
+    func structuredNotLoaded() {
+        // `launchctl print` on an unloaded job exits non-zero; the
+        // output (its error noise) is irrelevant to the mapping.
+        let status = ServiceManager.serviceStatus(
+            printExit: 113,
+            output: "Could not find service"
+        )
+        #expect(status == ServiceStatus(isLoaded: false, pid: nil))
+        #expect(!status.isRunning)
+    }
 }
