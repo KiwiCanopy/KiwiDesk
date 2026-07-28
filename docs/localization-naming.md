@@ -50,9 +50,24 @@ catalog question is checkable.
 
 ## Family A — the same name everywhere
 
-Currently **App Bar** and **Space Bar**. `bars.switch.app_bar` and
-`bars.switch.space_bar` are Latin in all eleven catalogs, so the
+**App Bar**, **Space Bar**, and **Sticky**. `bars.switch.app_bar`
+and `bars.switch.space_bar` are Latin in all eleven catalogs, so the
 control every user taps says "Space Bar" whatever their language.
+
+**Sticky** (#579) is the first **single-word** and the first
+*added* member — it did not arrive here by the sort question (`de`,
+`ru`, `zh-Hant` had translated it to "Fixierung"/"Закреплённое"/
+"常駐", so the catalog test read Family B), but by the product
+decision to coin it verbatim the way the bars were, which Core
+already reflects (`design-decisions.md` calls it "the settled
+user-facing term"). Before admitting a single word, the
+descriptive-occurrence check below was run: every one of the ~19
+`sticky`/`Sticky` hits in `en.json` names this exact feature — there
+is no incidental "sticky" in ordinary prose to false-positive on
+(unlike `app`/`space`/`bar`, which are common words and needed the
+per-token glossary carve-outs). Its display tier is **"Display
+Sticky"** (German **"Display-Sticky"**), "display" being an ordinary
+qualifier that compounds per locale around the fixed "Sticky" atom.
 
 ### What it requires
 
@@ -228,13 +243,18 @@ Apply the catalog question, then:
 
 **A name that can occur descriptively does not belong in Family
 A.** The check is case-insensitive there, so it cannot tell a
-referential mention from a descriptive one. Both current Family A
-names are two-word coinages that only ever occur referentially, so
-the question never arises. A name built from ordinary words would
-fire on incidental prose that was never naming the feature —
-demanding a verbatim keep for a sentence with nothing to keep. A
-guard failing on correct copy is the one failure that makes an
-exemption file look necessary, so the existing rule holds: argue a
+referential mention from a descriptive one. The two bar names are
+two-word coinages that only ever occur referentially, so the
+question never arises for them. **Sticky** is the single word where
+it had to be asked and answered: a grep of `en.json` found every
+`sticky`/`Sticky` occurrence naming the feature and none used
+descriptively (there is no "sticky note", "sticky key", or the
+like), so a verbatim demand never lands on a sentence with nothing
+to keep. That check is the price of admitting a single word — run
+it before adding one. A name built from *ordinary* words (one with
+incidental prose uses) would fire on copy that was never naming the
+feature; a guard failing on correct copy is the one failure that
+makes an exemption file look necessary, so the rule holds: argue a
 name in, never add one to silence a hit.
 
 ## See also
