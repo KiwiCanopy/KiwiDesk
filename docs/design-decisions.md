@@ -981,54 +981,79 @@ frames across monitors before. (#445)
 
 **[Principle]**
 
-**Launch-at-login is a pre-checked default and a durable toggle,
-never a per-launch prompt.** (#342) KiwiDesk registers itself as
-a login item through `SMAppService.mainApp`, surfaced as an
-"Open KiwiDesk at Login" switch at the top of General and as a
-pre-checked box on onboarding's closing card. Two rulings a
-contributor might otherwise undo:
+**Auto-start is one 3-level control, not a toggle and never a
+per-launch prompt.** (#342, #576) "Start KiwiDesk" in General
+offers *Never / At Login / At Login, With Auto-Restart* — folding
+the crash-restart mechanism that used to be CLI-only into the same
+control that owns login-launch. Onboarding's closing card keeps
+the simpler pre-checked "open at login" box (the plain login
+level); auto-restart is advanced, not first-run material. Rulings
+a contributor might otherwise undo:
 
-- **Default on.** Most apps default this to opt-in because "not
-  running yet" is a neutral absence. A tiling WM has no such
-  neutral: after a reboot, *not* launched means every window on
-  the machine is unmanaged until the user remembers to open a
-  menu-bar app with no Dock icon prompting them. The off-state
-  is a broken desktop, so the good default is on — which is why
-  "approachable by default" argues *for* pre-checked here, not
-  against it. It stays powerful-on-demand: one uncheck in
-  onboarding or one flip in Settings opts out.
+- **Default At Login, auto-restart opt-in.** Most apps default
+  login-launch to opt-in because "not running yet" is a neutral
+  absence. A tiling WM has no such neutral: after a reboot, *not*
+  launched means every window on the machine is unmanaged until
+  the user remembers to open a menu-bar app with no Dock icon
+  prompting them. The off-state is a broken desktop, so the good
+  default is At Login — which is why "approachable by default"
+  argues *for* pre-checked here. Auto-restart, though, *lacks*
+  that no-neutral-absence argument and installs a
+  less-discoverable LaunchAgent, so it stays opt-in: the good
+  default is the middle level, not the top.
 - **No modal on every start.** A dialog that asks "open at
   login?" each launch was considered and rejected — it is the
   same standing-nag shape the quick-menu Accessibility deep-link
   was cut for, only worse (a modal blocks; a menu row doesn't).
   Once answered, re-asking is either a persistence bug or a nag;
   there is no informative third case. Ask once, then the durable
-  Settings toggle owns the decision.
+  control owns the decision.
 
-**The toggle is read-through, and `SMAppService` is the
-login-item authority.** The switch never caches a bool — it reads
-the live `SMAppService.mainApp.status` on appear and on
-`didBecomeActive`, so a change made in System Settings ▸ Login
-Items directly is reflected without a second source of truth. A
-`.requiresApproval` status reads as *on* (the user's intent) with
-a jump to Login Items, reusing onboarding's "asked, not yet
-confirmed" shape. `.notFound` is the *pre-registration* state
-macOS reports for `mainApp`, so it reads as off-but-registerable,
-not as an error. A copy that genuinely cannot register greys out
-(grey, don't hide), and its caption names the fix for the specific
+**One folded control, not two toggles — the honesty argument.**
+The service is `RunAtLoad` + `KeepAlive` as one indivisible unit,
+so "restart on crash" is a *superset* of "open at login." Two
+independent read-through toggles could therefore render *Open at
+Login: OFF + Restart: ON* — a state where the first control's own
+label is false while the app still launches at login. It also
+doesn't fit the "toggle sits above the control it gates"
+convention: that gating is one-directional, not a child forcing
+its rendered parent on. Folding into one level over one merged
+status makes the contradictory pair unrepresentable. The
+`AutoStartManager` facade owns that coupling (the GUI analog of
+`CLIMain.runService`): `ServiceManager` stays a pure launchctl
+path and never imports `SMAppService`, and the facade folds the
+two into an `AutoStartLevel`. Because launchctl is a blocking
+spawn, `current()`/`set()` are `async` off the main actor and the
+control shows a transient pending state — a blocking `Process` in
+a SwiftUI `body` would be the AGENTS.md violation the CLI-only
+fallback existed to avoid.
+
+**The control is read-through, and the two subsystems are the
+authority.** It never caches a bool — every level is derived from
+a fresh dual read (`SMAppService.mainApp.status` +
+`ServiceManager`'s structured launchd state) on appear and on
+`didBecomeActive`, and a `set(_:)` re-reads, so a change made in
+System Settings ▸ Login Items directly is reflected without a
+second source of truth. A `.requiresApproval` status reads as the
+At-Login level (the user's intent) with a jump to Login Items,
+reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
+is the *pre-registration* state macOS reports for `mainApp`, so it
+reads as off-but-registerable, not as an error. A copy that
+genuinely cannot register greys out **both** upper levels (grey,
+don't hide) — leaving only "Never" — because level 2 is the
+`SMAppService` item and level 3 a LaunchAgent, and both need a
+stable `.app` path; the caption names the fix for the specific
 cause: **move to Applications** for a Gatekeeper-translocated
 download, **run the packaged app** for a bare non-bundled binary
 (the device-QA `.build/release` path). The registerability check
 is a *location* fact, evaluated before the OS status, so it holds
-even if a prior install left a stale registration. This is deliberately separate from the
-`kiwidesk service` LaunchAgent + `KeepAlive`, which solves a
-different problem (crash-restart supervision) `SMAppService` does
-not offer for the main app. The two overlap on one point: that
-LaunchAgent sets `RunAtLoad`, so a loaded service *also*
-auto-starts at login, independently of and invisibly to this
-toggle — an accepted overlap, made runtime-safe by the #196
-instance lock. The toggle is authoritative over the login item,
-not over every possible auto-start path.
+even if a prior install left a stale registration. The service's
+`KeepAlive { SuccessfulExit = false }` restarts only a *crash*, so
+the label "restart if it crashes" is literally accurate — a
+deliberate Quit is never resurrected. The overlap that used to be
+invisible (a loaded service's `RunAtLoad` also launches at login)
+is now *the* top level, made runtime-safe by the #196 instance
+lock.
 
 ### Navigation & saving
 

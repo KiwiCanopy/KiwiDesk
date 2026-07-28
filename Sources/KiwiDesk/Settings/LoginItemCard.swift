@@ -2,52 +2,81 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The "Open KiwiDesk at Login" card in App ▸ General (#342).
+/// The "Start KiwiDesk" card in App ▸ General (#576).
 ///
-/// A **read-through** control: it never stores a preference, it
-/// reads `LoginItemManager.current` (live `SMAppService` status) on
-/// appear and on every `didBecomeActive`, so a change made in
-/// System Settings ▸ Login Items directly is reflected here with no
-/// second source of truth. The switch writes through `setEnabled`,
-/// which returns the resulting state.
+/// A single 3-level control replacing #342's plain login toggle:
+/// *Never / At Login / At Login, With Auto-Restart*. The upper
+/// level is the `kiwidesk service` LaunchAgent (crash-restart) that
+/// used to be CLI-only; folding it in over one merged status avoids
+/// the two-toggle dishonesty (see `AutoStartManager`).
 ///
-/// Core hands us structure (`LoginItemState`); the sentence is
-/// rendered here (#96). Four states:
-/// - `.notRegistered` / `.enabled` → plain switch, no caption.
-/// - `.requiresApproval` → switch on (reflects the user's intent)
-///   plus a status line and a jump to Login Items — the exact shape
-///   the onboarding grant step uses for "asked, not yet confirmed".
-/// - `.unavailable` → switch greyed but visible (grey, don't hide,
-///   #171), with an error caption.
+/// A **read-through**, **async** control: it stores no preference,
+/// it reads `AutoStartManager.current()` off the main actor on
+/// appear and on every `didBecomeActive`, and a level change writes
+/// through `AutoStartManager.set(_:)` and adopts the state it reads
+/// back. launchctl is a blocking spawn, so the read/write happen on
+/// a detached task and publish to `@State` on main; `loaded` gates
+/// the pending window before the first read lands.
+///
+/// Core hands us structure (`AutoStartStatus`); the level labels and
+/// captions are rendered here (#96). Levels 2 and 3 grey out (grey,
+/// don't hide, #171) when the running copy can't register — a bare
+/// binary or a translocated download — leaving only "Never", the
+/// exact shape #342's whole-toggle grey took.
 struct LoginItemCard: View {
-    // Sentinel until `.onAppear` reads live status. A `@State`
-    // default re-runs on every `GeneralSection.body` recompute
-    // (a language change, etc.), so seeding it from the live probe
-    // would hit `SMAppService` each rebuild for a value SwiftUI
-    // keeps only from first render anyway. `refresh()` sets the
-    // real state before the first paint the user reads (#342).
-    @State private var state: LoginItemState = .notRegistered
+    // Seeded at the opt-in default (At Login); `refresh()` replaces
+    // it with the live read before the first paint the user reads.
+    // A `@State` default re-runs on every `GeneralSection.body`
+    // recompute, so it must stay a cheap literal, never a probe.
+    @State private var status = AutoStartStatus(
+        level: .atLogin,
+        unavailable: nil,
+        requiresApproval: false
+    )
+    // False until the first async read lands; the control is
+    // pending (disabled) until then. `busy` covers a `set(_:)` in
+    // flight so the menu can't be driven mid-write.
+    @State private var loaded = false
+    @State private var busy = false
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
         SettingsSection(SettingsCatalog.general.loginItemCard) {
             VStack(alignment: .leading, spacing: 6) {
-                ToggleRow(
-                    // Card heading is the noun "Login"; the switch
-                    // carries the full action label on its own key.
-                    label: L(
-                        "general.login_item.switch",
-                        "Open KiwiDesk at Login"
-                    ),
-                    isOn: enabledBinding,
-                    help: L(
-                        "general.login_item.help",
-                        "Launches KiwiDesk automatically when you "
-                            + "log in, so your windows are arranged "
-                            + "from the moment you sign in."
-                    )
-                )
-                .disabled(isUnavailable)
+                DropdownRow(
+                    // Card heading is the noun "Login"; the control
+                    // carries the verb "Start KiwiDesk".
+                    label: startLabel,
+                    help: startHelp
+                ) {
+                    Picker(startLabel, selection: levelBinding) {
+                        Text(
+                            L("general.login_item.level.never", "Never")
+                        )
+                        .tag(AutoStartLevel.off)
+                        // Levels 2 and 3 both need a stable `.app`
+                        // path, so an unregisterable copy disables
+                        // both — only "Never" stays selectable.
+                        Text(
+                            L(
+                                "general.login_item.level.at_login",
+                                "At Login"
+                            )
+                        )
+                        .disabled(!status.registerable)
+                        .tag(AutoStartLevel.atLogin)
+                        Text(
+                            L(
+                                "general.login_item.level"
+                                    + ".at_login_restart",
+                                "At Login, With Auto-Restart"
+                            )
+                        )
+                        .disabled(!status.registerable)
+                        .tag(AutoStartLevel.atLoginWithAutoRestart)
+                    }
+                }
+                .disabled(!loaded || busy)
                 caption
             }
         }
@@ -59,24 +88,48 @@ struct LoginItemCard: View {
         ) { _ in refresh() }
     }
 
-    /// Any `.unavailable(_)` reason greys the switch out.
-    private var isUnavailable: Bool {
-        if case .unavailable = state { return true }
-        return false
+    private var startLabel: String {
+        L("general.login_item.start", "Start KiwiDesk")
     }
 
-    /// On = enabled or awaiting approval; writing routes through the
-    /// manager and adopts the state it reports back.
-    private var enabledBinding: Binding<Bool> {
+    /// The one field-level `?` (#94): explains all three levels and
+    /// is the only place the crash-restart mechanism is named — the
+    /// row itself stays a plain label.
+    private var startHelp: String {
+        L(
+            "general.login_item.start_help",
+            "Choose when KiwiDesk starts on its own. "
+                + "\u{201C}At Login\u{201D} launches it when you sign "
+                + "in, so your windows are arranged from the start. "
+                + "\u{201C}At Login, With Auto-Restart\u{201D} also "
+                + "runs a background helper that relaunches KiwiDesk "
+                + "if it ever crashes. \u{201C}Never\u{201D} turns "
+                + "both off."
+        )
+    }
+
+    /// Writing a level routes through the facade and adopts the
+    /// state it reports back; a no-op selection (same level) is
+    /// dropped so re-rendering the picker can't kick a spurious
+    /// write.
+    private var levelBinding: Binding<AutoStartLevel> {
         Binding(
-            get: { state.isOn },
-            set: { state = LoginItemManager.setEnabled($0) }
+            get: { status.level },
+            set: { newLevel in
+                guard newLevel != status.level else { return }
+                busy = true
+                Task {
+                    let result = await AutoStartManager.set(newLevel)
+                    status = result
+                    loaded = true
+                    busy = false
+                }
+            }
         )
     }
 
     @ViewBuilder private var caption: some View {
-        switch state {
-        case .requiresApproval:
+        if status.requiresApproval {
             HStack(spacing: 8) {
                 Text(
                     L(
@@ -96,7 +149,7 @@ struct LoginItemCard: View {
                 }
                 .controlSize(.small)
             }
-        case .unavailable(.translocated):
+        } else if status.unavailable == .translocated {
             unavailableCaption(
                 L(
                     "general.login_item.unavailable",
@@ -104,15 +157,13 @@ struct LoginItemCard: View {
                         + "to turn this on."
                 )
             )
-        case .unavailable(.notBundled):
+        } else if status.unavailable == .notBundled {
             unavailableCaption(
                 L(
                     "general.login_item.unavailable_binary",
                     "Available only when running the KiwiDesk app."
                 )
             )
-        case .enabled, .notRegistered:
-            EmptyView()
         }
     }
 
@@ -123,7 +174,12 @@ struct LoginItemCard: View {
             .foregroundStyle(.secondary)
     }
 
+    /// Kicks a fresh off-main dual read and publishes it on main.
     private func refresh() {
-        state = LoginItemManager.current
+        Task {
+            let result = await AutoStartManager.current()
+            status = result
+            loaded = true
+        }
     }
 }

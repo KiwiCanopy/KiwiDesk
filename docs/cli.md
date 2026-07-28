@@ -64,14 +64,19 @@ the pid.
 A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
 
-The service is one of **two independent auto-start paths** — the
-other is the **Open at Login** toggle in Settings ▸ General
-(`SMAppService`, visible in System Settings ▸ Login Items). Both
-launch KiwiDesk at login; the single-instance lock keeps that to
-one process, so they never conflict (see
+This service is also the top level of the **Start KiwiDesk**
+control in Settings ▸ General: *At Login, With Auto-Restart* loads
+exactly this LaunchAgent, so running `service start` and choosing
+that level are equivalent, and `service status` reports the same
+state — one live source of truth, no second store. The middle
+level, *At Login*, is instead the `SMAppService` login item
+(visible in System Settings ▸ Login Items), a separate path that
+launches KiwiDesk at login without crash supervision. Both launch
+at login; the single-instance lock keeps that to one process, so
+they never conflict (see
 [Accepted limitations](accepted-limitations.md)). To keep the two
 visible to each other, `service status` adds a `login item:` line
-reporting the toggle's state, and `service start` prints a note
+reporting the login-item state, and `service start` prints a note
 when the login item is *also* on. These strings are the login
 item's only appearance in CLI output.
 
