@@ -45,12 +45,35 @@ private func runService(_ arguments: [String]) -> Int32 {
     // stay 0 on stdout (#328).
     if outcome.ok {
         print(outcome.message)
+        // The login item is a second, independent auto-start path
+        // (#575). Surface the overlap here — the CLI is the
+        // composition root that knows both verbs, so the two Core
+        // subsystems stay decoupled (`ServiceManager` never learns
+        // about `SMAppService`).
+        printLoginItemOverlap(for: arguments[2])
     } else {
         FileHandle.standardError.write(
             Data("\(outcome.message)\n".utf8)
         )
     }
     return outcome.ok ? 0 : 1
+}
+
+/// `status` always reports the login-item half of the auto-start
+/// picture; `start` adds a reassuring note only when the login item
+/// is *also* on. Other verbs stay silent.
+private func printLoginItemOverlap(for verb: String) {
+    let state = LoginItemManager.current
+    switch verb {
+    case "status":
+        print(LoginItemCLINote.statusLine(state))
+    case "start":
+        if let note = LoginItemCLINote.startNote(state) {
+            print(note)
+        }
+    default:
+        break
+    }
 }
 
 private func runSocketCommand(

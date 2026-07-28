@@ -246,6 +246,12 @@ from **System Settings ▸ General ▸ Login Items**, and the switch
 follows. If macOS shows *Requires approval in System Settings*,
 click **Open Login Items** and enable KiwiDesk there.
 
+If you also use the advanced `kiwidesk service` command (which runs
+KiwiDesk as a crash-restarting background agent), note that it
+*also* launches KiwiDesk at login, independently of this switch —
+the two don't conflict, and `kiwidesk service status` reports both.
+Turn one off if you want a single auto-start path.
+
 ## GUI Language
 
 Go to **General** (in the **System** group) and pick a display
