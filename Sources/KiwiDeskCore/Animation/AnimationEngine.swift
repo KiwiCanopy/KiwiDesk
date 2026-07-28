@@ -272,10 +272,11 @@ public final class AnimationEngine {
                 // first frame — mid-flight overlap clears at
                 // once (siblings yielding room to a newly
                 // opened window). The grow direction follows the
-                // active `growPolicy`: `.midSlide` (default) lands
-                // a single size-set mid-flight, where the ongoing
-                // slide masks the jump; `.throttledSmooth` (#47)
-                // resamples the spring at a capped rate instead.
+                // active `growPolicy`: `.throttledSmooth` (#47, the
+                // default) resamples the spring each tick (or at a
+                // capped rate); `.midSlide` (the legacy fallback)
+                // instead lands a single size-set mid-flight, where
+                // the ongoing slide masks the jump.
                 // Interpolating per tick would instead make slow
                 // AX responders (Electron/WebKit) re-lay-out
                 // continuously and fall seconds behind, stranding

@@ -9,7 +9,7 @@ struct GrowSizeTests {
     private let held = CGSize(width: 400, height: 300)
     private let target = CGSize(width: 800, height: 600)
 
-    // MARK: - midSlide (shipping default)
+    // MARK: - midSlide (legacy fallback)
 
     @Test("midSlide holds a growing axis until halfway")
     func midSlideHoldsBeforeHalfway() {

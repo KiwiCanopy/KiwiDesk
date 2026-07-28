@@ -115,13 +115,15 @@ struct AnimationEngineSizingTests {
     private func recordApplies(
         from: CGRect,
         to: CGRect,
-        policy: GrowPolicy = .throttledSmooth
+        policy: GrowPolicy = .throttledSmooth,
+        rateHz: Int? = nil
     ) -> [(frame: CGRect, setSize: Bool)]? {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay?.id
         else { return nil }
         let engine = AnimationEngine()
         engine.growPolicy = policy
+        engine.growRateHz = rateHz
         var applies: [(frame: CGRect, setSize: Bool)] = []
         engine.apply = { _, frame, setSize in
             applies.append((frame, setSize))
@@ -196,5 +198,69 @@ struct AnimationEngineSizingTests {
         #expect(applies.first?.frame.size == to.size)
         #expect(applies.last?.frame == to)
         #expect(applies.filter(\.setSize).count <= 2)
+    }
+
+    /// A throttle below the tick clock emits fewer size-sets than
+    /// per-tick, exercising the engine's `sizeElapsed` carry-over
+    /// (nil-default tests never drive it), yet still lands exact.
+    @Test("A throttled grow emits fewer size-sets than per-tick")
+    func throttledGrowEmitsFewer() throws {
+        let from = CGRect(x: 10, y: 20, width: 400, height: 300)
+        let to = CGRect(x: 10, y: 20, width: 900, height: 800)
+        guard let perTick = recordApplies(from: from, to: to),
+            let throttled = recordApplies(
+                from: from,
+                to: to,
+                rateHz: 25  // well below the 120 Hz tick clock
+            )
+        else { return }
+        let perTickSets = perTick.filter(\.setSize).count
+        let throttledSets = throttled.filter(\.setSize).count
+        #expect(throttledSets < perTickSets)
+        #expect(throttled.last?.frame == to)  // still exact
+    }
+
+    /// #45 regression guard: retargeting mid-grow preserves the
+    /// per-window held size / throttle state, and the window still
+    /// lands exactly on the *new* target — never stranded by the
+    /// interrupt (the failure that reverted per-tick before #47).
+    @Test("A retarget mid-grow still lands on the exact new target")
+    func retargetMidGrowLandsExact() throws {
+        guard let screen = NSScreen.main,
+            let display = screen.kiwiDisplay?.id
+        else { return }
+        let engine = AnimationEngine()
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        let from = CGRect(x: 0, y: 0, width: 400, height: 300)
+        let mid = CGRect(x: 0, y: 0, width: 1000, height: 900)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: from,
+            to: mid
+        )
+        for _ in 0..<12 {
+            engine.tick(display: display, dt: 1.0 / 120.0)
+        }
+        // Retarget: width now smaller than the grown size (snap),
+        // height larger (keep growing).
+        let final = CGRect(x: 0, y: 0, width: 500, height: 1100)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: mid,
+            to: final
+        )
+        var steps = 0
+        while engine.activeCount > 0, steps < 2000 {
+            engine.tick(display: display, dt: 1.0 / 120.0)
+            steps += 1
+        }
+        #expect(engine.activeCount == 0)
+        #expect(applies.last?.frame == final)
+        #expect(applies.last?.setSize == true)
     }
 }

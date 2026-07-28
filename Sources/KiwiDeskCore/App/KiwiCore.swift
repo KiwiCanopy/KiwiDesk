@@ -30,7 +30,7 @@ public final class KiwiCore {
     /// On-window sticky marks (#414): a border sibling,
     /// driven by `updateStickyMarks()` inside `retile()`.
     public let stickyMarks = StickyMarkManager()
-    public let strandDetector = StrandDetector()
+    let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery

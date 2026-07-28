@@ -12,14 +12,20 @@ import Foundation
 /// Off unless `KIWIDESK_STRAND_LOG` is set, so it costs nothing in
 /// production: no timer is scheduled and no AX read is made. The
 /// read is deliberately post-grace and one-shot per settle.
+///
+/// Kept as a **permanent** net, not #47 scaffolding to remove: the
+/// per-tick default's heavy-app stranding risk is real on hardware
+/// we cannot all test, so leaving the probe wired (inert until the
+/// env flag) means any future regression stays observable without a
+/// rebuild. Module-internal — a Core diagnostic, not app API.
 @MainActor
-public final class StrandDetector {
+final class StrandDetector {
     /// Reads a window's actual on-screen frame (AX). Nil if the
     /// window is gone by the time the check fires.
-    public var frameReader: (WindowID) -> CGRect? = { _ in nil }
+    var frameReader: (WindowID) -> CGRect? = { _ in nil }
 
     /// Whether checks run. Driven from the environment at wiring.
-    public var isEnabled = false
+    var isEnabled = false
 
     /// Per-edge slack (pt). Matches the applier's echo tolerance —
     /// below this a difference is AX rounding, not a strand.
@@ -29,19 +35,24 @@ public final class StrandDetector {
     /// a legitimately-late final echo isn't misread as a strand.
     private let graceSeconds = 0.6
 
-    public init() {}
+    init() {}
 
     /// Enable from the environment (`KIWIDESK_STRAND_LOG` set to any
     /// non-empty value). Call once at wiring.
-    public func configureFromEnvironment() {
+    func configureFromEnvironment() {
         let value = ProcessInfo.processInfo
             .environment["KIWIDESK_STRAND_LOG"]
         isEnabled = !(value?.isEmpty ?? true)
     }
 
     /// Records a settled target and schedules the read-back check.
-    /// No-op when disabled — the hot path stays free.
-    public func windowSettled(_ id: WindowID, target: CGRect) {
+    /// No-op when disabled — the hot path stays free. Captures only
+    /// `id` + `target`, no generation token: if a retile relocates
+    /// the window inside the grace, the read-back compares the new
+    /// (correct) frame to the stale target and can log a false
+    /// strand. Acceptable for a QA logger — read a STRAND line as a
+    /// lead to confirm, not proof.
+    func windowSettled(_ id: WindowID, target: CGRect) {
         guard isEnabled else { return }
         DispatchQueue.main.asyncAfter(
             deadline: .now() + graceSeconds

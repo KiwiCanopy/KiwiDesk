@@ -13,10 +13,11 @@ public enum GrowPolicy: Sendable, Equatable {
     /// pace with the smooth default.
     case midSlide
     /// Shipping default (#47). A growing axis follows the spring
-    /// continuously, size-sets throttled by `growRateHz` (default
-    /// 120 = per-tick). Slow-AX apps reflow at that rate rather
-    /// than once; lower the rate, or drop to `.midSlide`, if one
-    /// falls behind.
+    /// continuously. `growRateHz` caps the size-set rate; its
+    /// default `nil` means per **display tick** (60 on a 60 Hz
+    /// panel, 120 on a 120), matching the position channel. Slow-AX
+    /// apps reflow at that rate rather than once; lower the rate, or
+    /// drop to `.midSlide`, if one falls behind.
     case throttledSmooth
 }
 
