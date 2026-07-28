@@ -1226,9 +1226,10 @@ section {
 }
 
 .req {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 0.9rem;
   font-size: 0.85rem;
   color: var(--text-faint);
   margin-top: 1.25rem;
