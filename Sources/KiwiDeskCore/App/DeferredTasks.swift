@@ -15,7 +15,7 @@ import Foundation
 final class DeferredTasks {
     /// One slot per deferred job; scheduling a key replaces
     /// (cancels) whatever that key was still waiting on.
-    enum Key: Hashable {
+    enum Key: Hashable, CaseIterable {
         /// Deferred switch to a hidden window's virtual space
         /// (`scheduleFocusFollow`).
         case focusFollow

@@ -77,13 +77,6 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
-    /// The post-settle overlay re-sync grace in ms (#596) — see
-    /// `KiwiCore.defaultBorderResyncDelayMS` for what the number
-    /// is sized to. Stored purely as a test seam: a scheduling
-    /// test lowers it so it can prove the guards without sleeping
-    /// the real delay. Production never writes it.
-    var borderResyncDelayMS = KiwiCore.defaultBorderResyncDelayMS
-
     /// Window ids KiwiDesk's own AX raises issued but whose focus
     /// echoes have not yet landed (#152). A matching echo is
     /// self-inflicted, not a user action: it must not supersede a

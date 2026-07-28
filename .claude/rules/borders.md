@@ -1,6 +1,13 @@
 ---
 paths:
   - "Sources/KiwiDeskCore/Borders/**"
+  # The settle passes below are driven from App/, not Borders/ —
+  # scoping this file to Borders/ alone would mean it never loads
+  # for the exact file where someone would re-merge the two keys.
+  - "Sources/KiwiDeskCore/App/KiwiCore+Borders.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -67,7 +74,10 @@ second cancel the other:
   `.borderDropSettle`). WindowServer can order a ring out with no
   matching unhide; `sync`'s trailing `order(relativeTo:)` is what
   un-hides it. Landing mid-flight is safe *because* geometry
-  stands down above.
+  stands down above — precisely: it cannot move the ring of a
+  window our own animation is driving. It still re-reads state
+  for every other ring, exactly as the `updateBorders()` at the
+  end of each `retile()` does.
 - **Geometry, late** (`scheduleBorderResync`, `.borderResync`).
   Rides `AnimationEngine.onAllAnimationsEnded`, never a duration
   guess — a spring's visual settle is ~2× its response, so

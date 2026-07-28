@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `FollowSource.steadySync` (#596 item 3): a steady-state `sync`
+/// `FollowSource.syncFrame` (#596 item 3): a steady-state `sync`
 /// carries `state.windows[id]?.frame` — the echo-fed frame — so
 /// one landing mid-animation snapped the overlay back to where
 /// the window was before the motion started, until the next tick
@@ -134,6 +134,26 @@ struct StickyMarkSteadySyncTests {
             StickyMarkManager.Spec(window: WindowID(1), frame: stale)
         ])
         #expect(marks.lastFrame(WindowID(1)) == tick)
+        marks.isAnimating = { _ in false }
+        marks.sync([
+            StickyMarkManager.Spec(window: WindowID(1), frame: stale)
+        ])
+        #expect(marks.lastFrame(WindowID(1)) == stale)
+    }
+
+    @Test("Idle and WS-tracked, sync still moves the mark")
+    func markSyncAppliesWhenTrackedAndIdle() {
+        let marks = StickyMarkManager()
+        let start = CGRect(x: 0, y: 0, width: 400, height: 300)
+        let stale = CGRect(x: 5, y: 5, width: 400, height: 300)
+        marks.sync([
+            StickyMarkManager.Spec(window: WindowID(1), frame: start)
+        ])
+        // The mark keeps a live `isWindowServerTracked` closure
+        // for `follow`, so the ring's twin mistake — bolting a
+        // WS-tracked stand-down onto `sync` — is reachable here
+        // too, and would freeze every tracked mark permanently.
+        marks.isWindowServerTracked = { _ in true }
         marks.isAnimating = { _ in false }
         marks.sync([
             StickyMarkManager.Spec(window: WindowID(1), frame: stale)

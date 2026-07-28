@@ -23,6 +23,12 @@ struct BorderResyncSchedulingTests {
         isSticky: Bool = false
     ) -> WindowID {
         let id = WindowID(1)
+        // Pin the display: the heal path runs the real layout
+        // through `calculatedFrames`, so an inherited `NSScreen`
+        // would make this assert whatever the host happens to be.
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        }
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         var window = ManagedWindow(
@@ -90,28 +96,25 @@ struct BorderResyncSchedulingTests {
         core.deferred.cancelAll()
     }
 
-    @Test("The re-sync body stands down if a new animation began")
-    func resyncBodyGuardsOnActiveAnimation() {
+    @Test("A window animating inside the grace keeps its frame")
+    func resyncLeavesAnAnimatingWindowAlone() {
         let core = makeTestCore()
-        let id = WindowID(1)
-        core.borders.sync([
-            BorderManager.Spec(
-                window: id,
-                frame: CGRect(x: 0, y: 0, width: 400, height: 300),
-                colorHex: "#FF0000",
-                width: 4,
-                cornerStyle: .rounded
-            )
-        ])
-        let held = CGRect(x: 90, y: 90, width: 400, height: 300)
-        core.borders.apply(id, windowFrame: held)
-        // A new animation started inside the grace: reading a
-        // moving window is the mistake the delay exists to avoid.
-        // Nothing is lost — that animation ends with its own
-        // settle, which schedules this again.
+        let real = CGRect(x: 12, y: 34, width: 500, height: 400)
+        let id = seed(core, frame: real)
+        core.tiler.settings.borderStyle.enabled = true
+        core.updateBorders()
+        let commanded = CGRect(x: 700, y: 500, width: 500, height: 400)
+        core.borders.apply(id, windowFrame: commanded)
+        // A new animation began inside the grace. The body runs
+        // anyway — it is deliberately UNGATED on the animation
+        // count — and the window is protected per-window by
+        // `FollowSource.syncFrame`, which is strictly better: a
+        // global gate has an absorbing state (an animation that
+        // never settles pins the count and kills the heal
+        // app-wide forever, #599).
         startAnimation(core)
         core.runBorderResync()
-        #expect(core.borders.lastFrame(id) == held)
+        #expect(core.borders.lastFrame(id) == commanded)
     }
 
     @Test("The re-sync re-glues a stranded ring to real state")
@@ -152,12 +155,6 @@ struct BorderResyncSchedulingTests {
         // 100–300 ms on Electron/WebKit; 213 ms measured on device
         // for a frozen-then-resumed app. Reading sooner reads
         // bounds the app has not caught up to — the backward snap.
-        #expect(KiwiCore.defaultBorderResyncDelayMS >= 300)
-        // And the live value is that default until a test lowers
-        // it — production never writes the seam.
-        #expect(
-            makeTestCore().borderResyncDelayMS
-                == KiwiCore.defaultBorderResyncDelayMS
-        )
+        #expect(KiwiCore.borderResyncDelayMS >= 300)
     }
 }

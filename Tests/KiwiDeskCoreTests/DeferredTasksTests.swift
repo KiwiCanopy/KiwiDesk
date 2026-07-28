@@ -85,11 +85,10 @@ struct DeferredTasksTests {
         let owner = DeferredTasks()
         var fired = false
         let body: @MainActor () -> Void = { fired = true }
-        let keys: [DeferredTasks.Key] = [
-            .focusFollow, .startupSweep,
-            .spaceSettle, .nativeSpaceSettle,
-            .borderDropSettle, .borderResync,
-        ]
+        // Discovered, not enumerated: a hand-listed sweep is one
+        // more place to forget a new key (parity-tests.md prefers
+        // discovery for exactly this reason).
+        let keys = DeferredTasks.Key.allCases
         for key in keys {
             owner.schedule(key, after: .milliseconds(5), body)
         }

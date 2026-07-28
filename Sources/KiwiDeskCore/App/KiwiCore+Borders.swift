@@ -111,10 +111,10 @@ extension KiwiCore {
     /// the common case, because the post-settle AX echoes are
     /// already walking the overlay onto the real frame — this pass
     /// is the backstop for the app that sends no echo at all.
-    /// (The live value is `borderResyncDelayMS`, a stored seam on
-    /// the main type so a test can prove the guards without
-    /// sleeping the production delay.)
-    static let defaultBorderResyncDelayMS = 300
+    /// No mutable seam sits beside it: `runBorderResync` is
+    /// directly callable, so a test drives the body rather than
+    /// waiting the delay out.
+    static let borderResyncDelayMS = 300
 
     /// WindowServer can briefly order the swap target out while a
     /// drag/drop retile and focus raise overlap. Its hide
@@ -128,10 +128,15 @@ extension KiwiCore {
     /// ring, so the sooner it runs the shorter a wrongly-hidden
     /// ring stays invisible. Landing mid-flight used to make it
     /// the backward snap of #596 item 3 — it no longer can,
-    /// because `FollowSource.syncFrame` holds an animating
-    /// window's geometry, so this pass re-orders and un-hides
-    /// without moving anything. That is why both passes exist:
-    /// this one restores VISIBILITY early and cannot fix
+    /// because `FollowSource.syncFrame` holds the geometry of a
+    /// window OUR OWN animation is driving, so this pass
+    /// re-orders and un-hides without moving that window's ring.
+    /// (It still re-reads state for every non-animating ring in
+    /// the space — the same thing the unconditional
+    /// `updateBorders()` at the end of every `retile()` does.)
+    ///
+    /// That is why both passes exist: this one restores
+    /// VISIBILITY early and cannot fix an animating window's
     /// geometry; `scheduleBorderResync` fixes GEOMETRY late and
     /// would be far too slow for a hidden ring. Separate deferred
     /// keys, so neither can cancel the other.
@@ -158,7 +163,7 @@ extension KiwiCore {
     func scheduleBorderResync() {
         deferred.schedule(
             .borderResync,
-            after: .milliseconds(borderResyncDelayMS)
+            after: .milliseconds(Self.borderResyncDelayMS)
         ) { [weak self] in
             self?.runBorderResync()
         }
@@ -167,14 +172,26 @@ extension KiwiCore {
     /// The re-sync body. Named rather than inlined so a test can
     /// drive it directly instead of waiting out the grace.
     ///
-    /// Drops the pass when a new animation started inside the
-    /// grace: reading a moving window is the very mistake the
-    /// delay exists to avoid, and nothing is lost — that
-    /// animation ends with its own `onAllAnimationsEnded`, which
-    /// schedules this again. Never re-arm from here; that would
-    /// poll the grace away for the whole of a long animation.
+    /// Deliberately UNGATED on the animation count. The obvious
+    /// guard — bail if something started animating inside the
+    /// grace — is redundant with the fix this ships:
+    /// `FollowSource.syncFrame` already refuses to move a window
+    /// our animation is driving, per window, which is strictly
+    /// better than one global count. It is also dangerous,
+    /// because `activeCount` has an absorbing state: an animation
+    /// that never settles (the spring integrator diverges below
+    /// ~80 ms on a 60 Hz display, #599) pins the count above zero,
+    /// and a global gate would then kill the geometry heal
+    /// **app-wide** for the rest of the session while `syncFrame`
+    /// held that window's overlays frozen forever. Before #596
+    /// this method's ancestor was the un-gated healer that kept
+    /// the ring roughly right in exactly that state; closing that
+    /// hatch would turn a cosmetic bug into a permanent freeze.
+    ///
+    /// The cost of running early is one read of a window that
+    /// settled seconds ago, and the in-flight animation's own
+    /// settle arms another pass behind it.
     func runBorderResync() {
-        guard tiler.animation.activeCount == 0 else { return }
         updateBorders()
         updateStickyMarks()
     }
