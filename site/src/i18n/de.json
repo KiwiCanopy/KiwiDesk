@@ -186,7 +186,6 @@
   "guide_tour_spaces_title": "Spaces",
   "hero_cta_primary": "KiwiDesk holen",
   "hero_cta_secondary": "In Aktion ansehen",
-  "hero_dev_cta_docs": "Zur Doku",
   "hero_dev_cta_github": "Auf GitHub ansehen",
   "hero_dev_kicker": "Der Tiling-Manager für macOS der einfach funktioniert",
   "hero_dev_sub": "KiwiDesk verwaltet Fenster in <b>flachen Arrays</b>, nicht in i3-artigen Bäumen — <b>voll in Lua konfigurierbar</b>, mit <b>sieben Layouts</b> zum Umschalten. Und es <b>deaktiviert nie SIP</b>.",
