@@ -9,25 +9,17 @@ extension SettingsModel {
     /// or the Copy-appearance button (dirty now, persisted by the
     /// footer Save), never a live link.
     func applyPalette(_ palette: ColorPalette) {
+        // A palette is a colors-only shelf (#375): a sparse paint of
+        // `ColorPaletteKeys` onto the staged config, nothing else.
+        // No name-check side-effect turns a non-color flag on —
+        // Kiwi Neon used to force `border.glow = true` here, but that
+        // was one-directional (a later sober palette couldn't clear
+        // it, so glow stuck on) and a category error: a color pick
+        // silently mutating an unrelated Focus-border toggle the user
+        // may have set on purpose. Neon's identity is its own vivid
+        // colors; the glow pairing is surfaced as a discoverable
+        // link under its swatch (#578), not a hidden write. See the
+        // #375 "colors-only" entry in docs/design-decisions.md.
         palette.apply(to: &config.settings)
-        // Kiwi Neon is the glow showcase, but a palette's colors
-        // can't set the non-color `border.glow` flag (palettes are
-        // color-only, `ColorPaletteKeys`), so switch the bloom on
-        // when it's picked. One-directional by design — picking a
-        // sober palette later doesn't force glow back off, leaving a
-        // user's own choice intact (they toggle it in Focus border).
-        //
-        // This side-effect is coupled to the GUI apply entry point,
-        // not to the palette itself — a future Lua/CLI "apply palette"
-        // path would need to re-home it, or Neon would look inert
-        // there. And it is deliberately the ONLY behavior-carrying
-        // bundled palette: if a second one ever needs a non-color
-        // effect, don't grow this into a switch of magic names —
-        // revisit whether a schema-level "recommended settings"
-        // sidecar is warranted instead (the `_color`-only palette
-        // invariant is worth protecting).
-        if palette.name == PaletteCatalog.neonName {
-            config.settings.borderStyle.glow = true
-        }
     }
 }

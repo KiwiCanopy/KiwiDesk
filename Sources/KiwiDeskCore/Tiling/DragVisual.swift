@@ -39,7 +39,9 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     /// `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
     /// which is the place to re-derive it. So the ghost no longer
     /// matches the focus ring, deliberately: the ring has no
-    /// partner to separate from and keeps `#588613`.
+    /// partner to separate from, so nothing asks it to move for CVD
+    /// (it later shifted to `#4A9816` for the unrelated moss reason,
+    /// #578 — not this one).
     /// Defaults mirrored in docs/lua-reference.md (drag colors)
     /// — change both.
     public static let ghostDefault = DragVisual(

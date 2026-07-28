@@ -514,6 +514,7 @@
   "palettes.import": "팔레트 가져오기",
   "palettes.mine": "내 팔레트",
   "palettes.name_placeholder": "팔레트 이름",
+  "palettes.neon_glow_hint": "글로우 효과와 함께 사용",
   "palettes.overwrite": "덮어쓰기",
   "palettes.rename": "이름 변경…",
   "palettes.rename_confirm": "이름 변경",

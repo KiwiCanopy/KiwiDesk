@@ -8,9 +8,12 @@ import Testing
 /// floored, lightness lifted.
 @Suite("Border glow color")
 struct BorderGlowColorTests {
-    @Test("Default ring blooms a vivid lime")
-    func defaultDerivation() {
-        // #588613 (H84 S75 L30) → S floored to .80, L lifted to .55.
+    @Test("A dark ring blooms a vivid lime")
+    func darkRingDerivation() {
+        // A fixed vector (the ring's former default #588613,
+        // H84 S75 L30) → S floored to .80, L lifted to .55. The
+        // live default has since moved to #4A9816 (#578); this
+        // pins the derivation math, not the default.
         #expect(
             BorderStyle.glowColor(from: "#588613") == "#9FE830"
         )
