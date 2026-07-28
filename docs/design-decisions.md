@@ -1039,11 +1039,17 @@ At-Login level (the user's intent) with a jump to Login Items,
 reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
 is the *pre-registration* state macOS reports for `mainApp`, so it
 reads as off-but-registerable, not as an error. A copy that
-genuinely cannot register greys out **both** upper levels (grey,
-don't hide) — leaving only "Never" — because level 2 is the
-`SMAppService` item and level 3 a LaunchAgent, and both need a
-stable `.app` path; the caption names the fix for the specific
-cause: **move to Applications** for a Gatekeeper-translocated
+genuinely cannot register greys out the **whole** control (grey,
+don't hide) — because levels 2 and 3 both need a stable `.app`
+path (level 2 is the `SMAppService` item, level 3 a LaunchAgent),
+so with only "Never" left there is no live 3-way choice to
+preserve; a per-item disable can't render greyed on AppKit's
+`NSPopUpButton` anyway, and whole-control grey matches the #171
+"inapplicable control is greyed, not hidden" precedent. Its `?`
+help is hoisted outside the disable so it stays readable, and the
+reason-specific caption (a live sibling) names the fix for the
+specific cause: **move to Applications** for a
+Gatekeeper-translocated
 download, **run the packaged app** for a bare non-bundled binary
 (the device-QA `.build/release` path). The registerability check
 is a *location* fact, evaluated before the OS status, so it holds

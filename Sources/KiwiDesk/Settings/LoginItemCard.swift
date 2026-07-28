@@ -77,16 +77,24 @@ struct LoginItemCard: View {
                         )
                         .tag(AutoStartLevel.atLoginWithAutoRestart)
                     }
+                    // Grey the Picker only, not the whole row — the
+                    // label's `?` (which explains what the three
+                    // levels do) stays live even when the control is
+                    // greyed, since that help is useful regardless of
+                    // whether the levels can be picked right now.
+                    //
+                    // Levels 2 and 3 both need a stable `.app` path,
+                    // so an unregisterable copy (translocated / bare
+                    // binary) greys the control; the caption below
+                    // names the fix. A per-item `.disabled()` on a
+                    // `.menu` Picker blocks selection but AppKit's
+                    // NSPopUpButton won't render the item greyed, so
+                    // it wouldn't *read* as "grey, don't hide" (#171)
+                    // — greying the whole Picker does, matching #342.
+                    .disabled(
+                        !loaded || busy || !status.registerable
+                    )
                 }
-                // Levels 2 and 3 both need a stable `.app` path, so
-                // an unregisterable copy (translocated / bare binary)
-                // greys the whole control — the caption below names
-                // the fix. A per-item `.disabled()` on a `.menu`
-                // Picker blocks selection but AppKit's NSPopUpButton
-                // won't render the item greyed, so the disable
-                // wouldn't *read* as "grey, don't hide" (#171); the
-                // whole-control grey does, matching #342's toggle.
-                .disabled(!loaded || busy || !status.registerable)
                 confirmation
                 caption
             }

@@ -268,7 +268,7 @@
   "general.login_item.applied_off": "KiwiDesk は自動的に起動しません。",
   "general.login_item.applied_restart": "KiwiDesk はログイン時に起動し、クラッシュした場合は再起動します。",
   "general.login_item.level.at_login": "ログイン時",
-  "general.login_item.level.at_login_restart": "ログイン時（自動再起動あり）",
+  "general.login_item.level.at_login_restart": "自動再起動（ログイン時）",
   "general.login_item.level.never": "起動しない",
   "general.login_item.open_login_items": "ログイン項目を開く",
   "general.login_item.requires_approval": "システム設定での承認が必要です",

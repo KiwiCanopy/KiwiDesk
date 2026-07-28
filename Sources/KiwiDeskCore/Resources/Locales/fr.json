@@ -268,7 +268,7 @@
   "general.login_item.applied_off": "KiwiDesk ne démarrera pas tout seul.",
   "general.login_item.applied_restart": "KiwiDesk s’ouvrira à l’ouverture de session et redémarrera en cas de plantage.",
   "general.login_item.level.at_login": "À l’ouverture de session",
-  "general.login_item.level.at_login_restart": "À l’ouverture de session, avec redémarrage automatique",
+  "general.login_item.level.at_login_restart": "Redémarrage auto à l’ouverture",
   "general.login_item.level.never": "Jamais",
   "general.login_item.open_login_items": "Ouvrir les éléments d’ouverture",
   "general.login_item.requires_approval": "Approbation requise dans Réglages Système",

@@ -253,9 +253,10 @@ The control reflects the real macOS state — you can also revoke
 the login item from **System Settings ▸ General ▸ Login Items**,
 and it follows. If macOS shows *Requires approval in System
 Settings*, click **Open Login Items** and enable KiwiDesk there.
-The two upper levels grey out when KiwiDesk is run from a spot it
-can't register from (a still-quarantined download, or the bare
-binary); the caption names the fix.
+The control greys out when KiwiDesk is run from a spot it can't
+register from (a still-quarantined download, or the bare binary) —
+only "Never" would be valid there; the caption names the fix, and
+the `?` stays readable.
 
 The auto-restart level is the same crash-restart supervision the
 advanced `kiwidesk service` command installs, so the two stay in

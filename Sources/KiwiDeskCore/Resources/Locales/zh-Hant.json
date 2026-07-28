@@ -268,7 +268,7 @@
   "general.login_item.applied_off": "KiwiDesk 不會自動啟動。",
   "general.login_item.applied_restart": "KiwiDesk 將在登入時開啟，並在當機時重新啟動。",
   "general.login_item.level.at_login": "登入時",
-  "general.login_item.level.at_login_restart": "登入時，並自動重新啟動",
+  "general.login_item.level.at_login_restart": "自動重新啟動（登入時）",
   "general.login_item.level.never": "永不",
   "general.login_item.open_login_items": "打開登入項目",
   "general.login_item.requires_approval": "需要在系統設定中批准",
