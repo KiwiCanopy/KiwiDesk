@@ -174,13 +174,12 @@ struct SettingsCatalogSiteTests {
                 rawValue: problems.joined(separator: " | ")
             )
         )
-        // Exact totals, so a needle that silently stops
-        // matching cannot pass by matching nothing (the part-1
-        // lesson: a guard that cannot fire is worse than none).
-        // 36 = the 40 top-level declarations, minus the six
-        // reached through allow-listed indirect parameters
-        // (gaps drawers ×2, drag columns ×2, layout overrides
-        // ×2), plus the two double-mounted ones.
+        // Exact totals, so a needle that silently stops matching
+        // cannot pass vacuously (part-1: a guard that cannot fire
+        // is worse than none). 36 = the 40 section/disclosure-
+        // mounted top-level declarations − 6 indirect (gaps/drag/
+        // overrides ×2 each) + 2 double-mounted; the two bar-
+        // switch entries self-anchor, outside this count.
         #expect(direct.values.reduce(0, +) == 36)
         #expect(
             modeTabs.sorted() == [

@@ -107,18 +107,23 @@ struct BarsControls: Sendable {
     /// editor and flashes its chip. Reuses the chips' existing
     /// `bars.switch.*` label keys (same English), so the chip and
     /// the search entry name the bar with one string. Declared
-    /// first so a bare bar-name query lands on the switch rather
-    /// than the first section below it. `BarEditorPicker` carries
-    /// these ids.
-    let appBarSwitch = SettingsControl(
-        "bars.switch.app_bar",
-        "App Bar",
-        surface: .bar(.appBar)
-    )
+    /// before the sections so a bare bar-name query lands on the
+    /// switch rather than a section below it. `BarEditorPicker`
+    /// carries these ids.
+    ///
+    /// Space Bar leads, matching everywhere else it does — the
+    /// default editor, the picker order, the omnipresent bar — so
+    /// a bare "bar" query (which matches both under the one-row
+    /// cap) surfaces the leading bar, not App Bar.
     let spaceBarSwitch = SettingsControl(
         "bars.switch.space_bar",
         "Space Bar",
         surface: .bar(.spaceBar)
+    )
+    let appBarSwitch = SettingsControl(
+        "bars.switch.app_bar",
+        "App Bar",
+        surface: .bar(.appBar)
     )
     /// "App Bar style"/"App Bar colors", not "Global …"
     /// (ui-designer 2026-07-28): "Global" is KiwiDesk's word for
