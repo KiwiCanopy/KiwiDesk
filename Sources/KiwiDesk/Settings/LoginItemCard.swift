@@ -6,10 +6,10 @@ import SwiftUI
 ///
 /// A **read-through** control: it never stores a preference, it
 /// reads `LoginItemManager.current` (live `SMAppService` status) on
-/// appear and on every `didBecomeActive`, so a change made from the
-/// CLI or from System Settings ▸ Login Items directly is reflected
-/// here with no second source of truth. The switch writes through
-/// `setEnabled`, which returns the resulting state.
+/// appear and on every `didBecomeActive`, so a change made in
+/// System Settings ▸ Login Items directly is reflected here with no
+/// second source of truth. The switch writes through `setEnabled`,
+/// which returns the resulting state.
 ///
 /// Core hands us structure (`LoginItemState`); the sentence is
 /// rendered here (#96). Four states:
@@ -20,7 +20,13 @@ import SwiftUI
 /// - `.unavailable` → switch greyed but visible (grey, don't hide,
 ///   #171), with an error caption.
 struct LoginItemCard: View {
-    @State private var state: LoginItemState = LoginItemManager.current
+    // Sentinel until `.onAppear` reads live status. A `@State`
+    // default re-runs on every `GeneralSection.body` recompute
+    // (a language change, etc.), so seeding it from the live probe
+    // would hit `SMAppService` each rebuild for a value SwiftUI
+    // keeps only from first render anyway. `refresh()` sets the
+    // real state before the first paint the user reads (#342).
+    @State private var state: LoginItemState = .notRegistered
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {

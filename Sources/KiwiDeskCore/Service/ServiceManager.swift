@@ -4,6 +4,15 @@ import Foundation
 /// restart`). Writes a LaunchAgent referencing the installed
 /// binary and drives it via `launchctl bootstrap`/`bootout` —
 /// no Homebrew services dependency.
+///
+/// This is the advanced/CLI crash-supervision path, distinct from
+/// the user-facing login item (`LoginItemManager`, `SMAppService`).
+/// Note the overlap: the plist below sets `RunAtLoad`, so a loaded
+/// service ALSO auto-starts at login, independently of and
+/// invisibly to the "Open at Login" toggle. If `RunAtLoad` is ever
+/// reconsidered, weigh it against that toggle being the primary
+/// login mechanism (#342). The #196 instance lock keeps the two
+/// launch triggers from spawning two processes.
 public enum ServiceManager {
     public static let label = "org.kiwidesk.KiwiDesk"
 

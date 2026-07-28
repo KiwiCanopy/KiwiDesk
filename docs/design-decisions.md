@@ -1005,18 +1005,23 @@ contributor might otherwise undo:
   there is no informative third case. Ask once, then the durable
   Settings toggle owns the decision.
 
-**The toggle is read-through, and `SMAppService` is the one
-authority.** The switch never caches a bool — it reads the live
-`SMAppService.mainApp.status` on appear and on `didBecomeActive`,
-so a change made in System Settings ▸ Login Items directly, or by
-a CLI verb, is reflected without a second source of truth. A
+**The toggle is read-through, and `SMAppService` is the
+login-item authority.** The switch never caches a bool — it reads
+the live `SMAppService.mainApp.status` on appear and on
+`didBecomeActive`, so a change made in System Settings ▸ Login
+Items directly is reflected without a second source of truth. A
 `.requiresApproval` status reads as *on* (the user's intent) with
 a jump to Login Items, reusing onboarding's "asked, not yet
 confirmed" shape; `.notFound` greys the control (grey, don't
 hide) rather than lying. This is deliberately separate from the
 `kiwidesk service` LaunchAgent + `KeepAlive`, which solves a
 different problem (crash-restart supervision) `SMAppService` does
-not offer for the main app.
+not offer for the main app. The two overlap on one point: that
+LaunchAgent sets `RunAtLoad`, so a loaded service *also*
+auto-starts at login, independently of and invisibly to this
+toggle — an accepted overlap, made runtime-safe by the #196
+instance lock. The toggle is authoritative over the login item,
+not over every possible auto-start path.
 
 ### Navigation & saving
 

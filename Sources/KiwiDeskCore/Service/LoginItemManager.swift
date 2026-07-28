@@ -1,7 +1,7 @@
 import Foundation
 import ServiceManagement
 
-/// The single authority for "does KiwiDesk open at login" (#342).
+/// The authority for the KiwiDesk **login item** (#342).
 ///
 /// Wraps `SMAppService.mainApp` — the modern (macOS 13+) login-item
 /// API — so the app registers *itself* as a login item the user
@@ -10,10 +10,17 @@ import ServiceManagement
 /// to `launchctl` (the `ServiceManager` path, which stays for its
 /// own separate crash-supervision purpose).
 ///
+/// Not the *only* thing that can auto-start the app: the advanced
+/// `kiwidesk service` LaunchAgent sets `RunAtLoad`, so it also
+/// launches at login, independently of and invisibly to this
+/// toggle. The two can both be active (the #196 instance lock
+/// dedupes them into one process); this manager owns only the
+/// login-item half.
+///
 /// The GUI toggle is **read-through**: it never caches a bool, it
 /// reads `current` (which reflects `SMAppService`'s live status),
-/// so a change made from the CLI or from System Settings directly
-/// is seen on the next poll with no second source of truth.
+/// so a change made in System Settings ▸ Login Items directly is
+/// seen on the next poll with no second source of truth.
 ///
 /// Core returns *structure* (`LoginItemState`), never a rendered
 /// sentence — the GUI narrates the state at its own boundary (#96).
