@@ -74,6 +74,15 @@ public final class BorderManager {
     var triedEventSource = false
     var privateRuntimeStarted = false
     var skyLightActive = false
+    /// QA lever (#596): forces the WindowServer border-tracking
+    /// path off so `skyLightActive` stays false and the ring and
+    /// mark run the AX-fallback path on a healthy machine. Set
+    /// from `KIWIDESK_NO_WS_TRACKING` at wiring — the settle-tail
+    /// symptoms this issue chases are AX-fallback-only, and the
+    /// WS stream is up on every developer Mac, so without a lever
+    /// they are unobservable. Off by default: the flag is read
+    /// once and costs nothing after.
+    var windowServerTrackingDisabled = false
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = { _ in }
     /// Whether OUR OWN animation currently drives this window

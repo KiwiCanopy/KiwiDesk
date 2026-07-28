@@ -26,6 +26,9 @@ extension KiwiCore {
         borders.onLog = { [weak self] message in
             self?.onLog(message)
         }
+        // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
+        // pins the ring and mark to the AX-fallback path.
+        borders.configureFromEnvironment()
         wireDrag()
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
