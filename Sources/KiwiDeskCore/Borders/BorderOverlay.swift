@@ -171,6 +171,10 @@ final class BorderOverlay {
         return false
     }
 
+    /// The last rendered frame — the manager's test seam for
+    /// proving the `follow` guards stood down (or didn't).
+    var lastRenderedFrame: CGRect? { lastFrame }
+
     /// Renders the ring around `frame` (AX coords). Takes the raw
     /// inputs, not a finished `BorderGeometry`, because the geometry
     /// depends on the current backend's order mode — the facade owns

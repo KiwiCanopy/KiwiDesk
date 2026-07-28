@@ -49,6 +49,17 @@ public final class StickyMarkManager {
         false
     }
 
+    /// Whether OUR OWN animation currently drives this window —
+    /// wired to `AnimationEngine.isAnimating` (the ring's guard,
+    /// mirrored, #594). While true the per-tick commanded frame
+    /// owns the mark, so the AX-echo `follow` stands down; the
+    /// WS `reposition` tee already stands down upstream (the
+    /// ring's `reconcile` gate). A no-op default keeps the
+    /// manager testable in isolation.
+    public var isAnimating: @MainActor (WindowID) -> Bool = { _ in
+        false
+    }
+
     public init() {}
 
     /// Windows currently wearing the mark — the contract
@@ -90,12 +101,21 @@ public final class StickyMarkManager {
     }
 
     /// AX-echo / animation hot path: re-corner an already-shown
-    /// mark on a fresh frame — UNLESS the WindowServer stream
-    /// already tracks it, since a coalesced AX echo would rewind
-    /// the mark behind the live WS bounds (the ring's `follow`
-    /// guard, mirrored). A no-op for unmarked windows.
-    public func follow(_ id: WindowID, windowFrame: CGRect) {
-        guard !isWindowServerTracked(id) else { return }
+    /// mark on a fresh frame. The stand-down decision is
+    /// `FollowSource.applies` — one switch shared with the ring,
+    /// so the two overlays cannot drift (#285/#594). A no-op for
+    /// unmarked windows.
+    public func follow(
+        _ id: WindowID,
+        windowFrame: CGRect,
+        source: FollowSource
+    ) {
+        guard
+            source.applies(
+                wsTracked: isWindowServerTracked(id),
+                animating: isAnimating(id)
+            )
+        else { return }
         overlays[id]?.update(frame: windowFrame)
     }
 
