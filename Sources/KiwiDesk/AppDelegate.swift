@@ -194,13 +194,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
 
         // Reflect the active keybinding mode on the menu bar
-        // icon (custom modes carry their own indicator).
+        // icon (custom modes carry their own indicator), and close
+        // the shortcuts panel if it's open — its content is a
+        // per-open snapshot of one mode, stale after a switch
+        // (#603).
         core.keys.onModeChange = { [weak self] mode in
             let icon =
                 mode == KeybindingManager.defaultMode
                 ? nil
                 : self?.core.keys.icon(for: mode)
             self?.statusItem?.setModeIcon(icon)
+            self?.shortcutsPanel?.closeIfOpen()
         }
 
         // launchctl bootout (restart) delivers SIGTERM. AppKit

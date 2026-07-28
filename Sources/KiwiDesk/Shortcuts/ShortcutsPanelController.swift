@@ -73,8 +73,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // Accessory-level: no Dock icon appears (unlike the dashboard,
         // which promotes to regular). KiwiDesk's tiling hotkeys stay
         // global Carbon and keep firing while it's open; the panel is
-        // a stateless summon that rebuilds its content on each open,
-        // so a mode switch is reflected the next time it's opened.
+        // a stateless summon that rebuilds its content on each open.
+        // A mode switch while it's up auto-closes it (#603, see
+        // closeIfOpen) rather than leaving another mode's bindings on
+        // screen — reopen to see the new mode.
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
@@ -92,6 +94,16 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     private func close() {
         panel?.orderOut(nil)
+    }
+
+    /// Close the panel if it is open. Called when the active
+    /// keybinding mode changes (#603): the panel is a per-open
+    /// snapshot of one mode's bindings, so leaving it up after a
+    /// switch would advertise shortcuts that are no longer active.
+    /// Reopening (⌃⌥K) rebuilds it for the new mode.
+    func closeIfOpen() {
+        guard let panel, panel.isVisible else { return }
+        close()
     }
 
     // MARK: - Panel construction
