@@ -38,6 +38,13 @@ struct LoginItemCard: View {
     // flight so the menu can't be driven mid-write.
     @State private var loaded = false
     @State private var busy = false
+    // The just-applied level, shown as a transient green-check
+    // confirmation that fades on its own (the changes apply live, so
+    // there is no Save to press). `flashToken` lets a newer change
+    // cancel an older fade so a quick succession doesn't clear the
+    // latest confirmation early.
+    @State private var applied: AutoStartLevel?
+    @State private var flashToken = 0
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
@@ -54,29 +61,33 @@ struct LoginItemCard: View {
                             L("general.login_item.level.never", "Never")
                         )
                         .tag(AutoStartLevel.off)
-                        // Levels 2 and 3 both need a stable `.app`
-                        // path, so an unregisterable copy disables
-                        // both — only "Never" stays selectable.
                         Text(
                             L(
                                 "general.login_item.level.at_login",
                                 "At Login"
                             )
                         )
-                        .disabled(!status.registerable)
                         .tag(AutoStartLevel.atLogin)
                         Text(
                             L(
                                 "general.login_item.level"
                                     + ".at_login_restart",
-                                "At Login, With Auto-Restart"
+                                "Auto-Restart at Login"
                             )
                         )
-                        .disabled(!status.registerable)
                         .tag(AutoStartLevel.atLoginWithAutoRestart)
                     }
                 }
-                .disabled(!loaded || busy)
+                // Levels 2 and 3 both need a stable `.app` path, so
+                // an unregisterable copy (translocated / bare binary)
+                // greys the whole control — the caption below names
+                // the fix. A per-item `.disabled()` on a `.menu`
+                // Picker blocks selection but AppKit's NSPopUpButton
+                // won't render the item greyed, so the disable
+                // wouldn't *read* as "grey, don't hide" (#171); the
+                // whole-control grey does, matching #342's toggle.
+                .disabled(!loaded || busy || !status.registerable)
+                confirmation
                 caption
             }
         }
@@ -101,7 +112,7 @@ struct LoginItemCard: View {
             "Choose when KiwiDesk starts on its own. "
                 + "\u{201C}At Login\u{201D} launches it when you sign "
                 + "in, so your windows are arranged from the start. "
-                + "\u{201C}At Login, With Auto-Restart\u{201D} also "
+                + "\u{201C}Auto-Restart at Login\u{201D} also "
                 + "runs a background helper that relaunches KiwiDesk "
                 + "if it ever crashes. \u{201C}Never\u{201D} turns "
                 + "both off."
@@ -137,9 +148,81 @@ struct LoginItemCard: View {
                     status = result
                     loaded = true
                     busy = false
+                    // Confirm the level the OS actually adopted, not
+                    // the requested one — a failed apply re-reads to
+                    // a different level and should say so.
+                    flash(result.level)
                 }
             }
         )
+    }
+
+    /// The transient live-apply confirmation: "Updating…" while a
+    /// change is in flight, then a green check + a level-specific
+    /// line that fades on its own (mirrors the key recorder's
+    /// `LiveApplyCaption`). Nothing shows at rest, on the initial
+    /// read, or on the greyed unregisterable control — only after a
+    /// user-driven change, because the changes apply live and there
+    /// is no Save to press.
+    @ViewBuilder private var confirmation: some View {
+        if busy {
+            Text(L("general.login_item.updating", "Updating…"))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else if let applied {
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                Text(confirmationText(applied))
+            }
+            .font(.caption)
+            .foregroundStyle(.green)
+            .transition(.opacity)
+        }
+    }
+
+    /// The line each applied level confirms — present tense, naming
+    /// what will now happen, never a "saved" past tense (nothing was
+    /// staged).
+    private func confirmationText(_ level: AutoStartLevel) -> String {
+        switch level {
+        case .off:
+            L(
+                "general.login_item.applied_off",
+                "KiwiDesk won\u{2019}t start on its own."
+            )
+        case .atLogin:
+            L(
+                "general.login_item.applied_at_login",
+                "KiwiDesk will open at login."
+            )
+        case .atLoginWithAutoRestart:
+            L(
+                "general.login_item.applied_restart",
+                "KiwiDesk will open at login and restart if it "
+                    + "crashes."
+            )
+        }
+    }
+
+    /// Shows the confirmation for `level` and schedules its fade.
+    /// `flashToken` guards the fade so a newer change cancels an
+    /// older timer rather than clearing the latest confirmation.
+    ///
+    /// 2.5 s, longer than the key recorder's 1.5 s
+    /// (`KeyRecorderField`) on purpose: that caption is a short
+    /// phrase read mid-interaction while the user watches for the
+    /// next chord, whereas these are full sentences read once after
+    /// a single click, so the reading load is ~double. Don't "align"
+    /// it back to 1.5 s.
+    private func flash(_ level: AutoStartLevel) {
+        flashToken += 1
+        let token = flashToken
+        withAnimation { applied = level }
+        Task {
+            try? await Task.sleep(for: .seconds(2.5))
+            guard flashToken == token else { return }
+            withAnimation { applied = nil }
+        }
     }
 
     @ViewBuilder private var caption: some View {
