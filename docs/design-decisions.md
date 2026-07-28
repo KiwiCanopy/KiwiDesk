@@ -938,6 +938,10 @@ rejected — Apple's own apps use pin for "fixed here", the
 opposite direction. Sticky is per-instance state, never a
 rule list, never a profile key, and never stored by
 duplicating the id into other spaces' arrays. (#412, #414)
+Because it is a coinage, it is kept **verbatim in every locale**
+(#579) — a Family A product name like "App Bar"/"Space Bar", not
+translated to a native word for "pinned" (the display tier is
+"Display Sticky"); see `docs/localization-naming.md`.
 
 **Sticky has two scopes: global and display (#445).** The
 original sticky is *global* — every space of every monitor.

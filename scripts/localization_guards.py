@@ -217,11 +217,14 @@ GLOSSARY = {
     "scrolling",
     "stack",
     "track",
-    # `sticky` is NOT a layout mode and does not belong with them:
-    # it is a window state, and every locale translates its label
-    # (`de` Fixiert, `ru` Закреплённое, `zh-Hant` 常駐). It stays
-    # exempt because the word appears untranslated inside scattered
-    # prose values, which is a residue question, not a mode one.
+    # `sticky` is a `PRODUCT_NAMES` entry (#579) — kept verbatim in
+    # every locale, like "App Bar"/"Space Bar" below. It stays in
+    # `GLOSSARY` for the SAME reason those do: the residue guard must
+    # not flag the now-*required* verbatim "Sticky" sitting in a
+    # non-Latin sentence as leaked English. The two guards agree —
+    # `dropped_product_names` demands it be present, `english_residue`
+    # is told it is allowed. (It is NOT a layout mode; not in
+    # `MODE_NAME_KEYS`.)
     "sticky",
     # Nouns the shipped UI renders untranslated in the GUI's own
     # feature names — "App Bar", "Space Bar", "Gaps" — so prose
@@ -263,6 +266,17 @@ GLOSSARY = {
 PRODUCT_NAMES = (
     "App Bar",
     "Space Bar",
+    # The window-sticky feature (#579): a coined KiwiDesk name kept
+    # verbatim in every locale, like the bars — NOT translated to a
+    # native word for "pinned" (de "Fixierung", ru "закрепление",
+    # zh-Hant "常駐"). The first single-word product name: every
+    # `sticky`/`Sticky` hit in en.json names this exact feature (no
+    # incidental UI use to false-positive on), so it is safe as one
+    # word. The obligation auto-scopes to the 17 keys whose English
+    # carries the word; the display tier is "Display Sticky" (de
+    # "Display-Sticky"), "display" being an ordinary qualifier that
+    # compounds per locale around the fixed "Sticky" atom.
+    "Sticky",
 )
 
 # Locale codes a stub marker is written with. Keyed by the base
