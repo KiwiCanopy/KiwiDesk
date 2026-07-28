@@ -285,6 +285,15 @@ created at first launch, pre-filled with the
 you Save in the Settings window. You normally never edit it by
 hand, but it is documented here for backup and transparency.
 
+> **Keeping multiple Macs in sync.** Symlink `~/.config/KiwiDesk`
+> into an iCloud Drive or Dropbox folder to keep `gui.json` and
+> your profiles in continuous sync across machines — this is live
+> sync, not a one-time copy, so a change on either Mac applies
+> everywhere the folder reaches. Machine-specific state doesn't
+> travel with it: grant Accessibility permission on each Mac
+> separately, and expect display layout and macOS Spaces to
+> resolve against whatever is actually connected there.
+
 **Top-level structure:**
 
 ```json
