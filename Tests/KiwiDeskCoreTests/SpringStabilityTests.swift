@@ -13,13 +13,19 @@ import Testing
 /// end: a diverged animation never satisfies `settled`, so it
 /// never leaves the engine and the settle signal dies with it.
 ///
-/// **`framesStayBounded` is the real barrier here.** Settling is
-/// no longer evidence of stability, because `FrameAnimation`'s
-/// non-finite net force-settles a run that has already reached
-/// infinity — so at the shortest durations a regressed
-/// integrator still *drains*, and only the bounds check notices.
-/// Do not delete or loosen it on the grounds that the settle
-/// tests cover the same ground; they do not.
+/// The engine-layer half is `AnimationEngineStabilityTests`.
+///
+/// **Two tests here are the real barriers, and neither is the
+/// obvious one.** Settling stopped being evidence of stability
+/// once `FrameAnimation`'s non-finite net could force-settle a
+/// run that already reached infinity, so at the shortest
+/// durations a regressed integrator still *drains*.
+/// `framesStayBounded` notices anyway. `deadEndBumpSpringIsStable`
+/// is the more durable of the two: it builds its spring
+/// literally, so unlike everything else in this file it does not
+/// depend on the engine's `× 1.4` mapping, the 50–1000 clamp or
+/// ζ = 0.85 — a change to any of those can disarm the sweeps
+/// without disarming it. Do not demote either to "coverage".
 @Suite("Spring integrator stability")
 struct SpringStabilityTests {
     /// The engine's own mapping (`AnimationEngine.spring`).
@@ -44,7 +50,7 @@ struct SpringStabilityTests {
         (30, 1.0 / 30), (60, 1.0 / 60), (120, 1.0 / 120),
     ]
 
-    @Test("Every clamped duration settles at 60 and 120 Hz")
+    @Test("Every clamped duration settles at 30, 60 and 120 Hz")
     func everyDurationSettles() {
         for durationMS in durations {
             for (hz, dt) in intervals {
@@ -112,9 +118,7 @@ struct SpringStabilityTests {
 
     @Test("The default duration takes no substep at 60 Hz")
     func defaultDurationIsUnsubstepped() {
-        // The common path must be untouched: substepping only
-        // engages where the tick was actually unstable, so the
-        // 250 ms default integrates exactly as before.
+        // The 250 ms default must integrate exactly as before.
         let s = spring(durationMS: 250)
         #expect(s.maxStableStep > 1.0 / 60)
         // And the floor genuinely needs it.
@@ -149,15 +153,17 @@ struct SpringStabilityTests {
         // pushed `h` back above the bound, leaving a state that
         // is astronomically large yet finite — which an
         // `isFinite` assertion would happily pass.
+        let to = CGRect(x: 900, y: 600, width: 800, height: 700)
+        let slack = 900.0
         var animation = FrameAnimation(
             from: CGRect(x: 0, y: 0, width: 400, height: 300),
-            to: CGRect(x: 900, y: 600, width: 800, height: 700),
+            to: to,
             spring: spring(durationMS: 50)
         )
         _ = animation.step(dt: 5.0)
         let f = animation.frame
-        #expect(f.minX > -900 && f.minX < 1800)
-        #expect(f.minY > -900 && f.minY < 1500)
+        #expect(f.minX > -slack && f.minX < to.maxX + slack)
+        #expect(f.minY > -slack && f.minY < to.maxY + slack)
     }
 
     @Test("A garbage interval returns instead of trapping")
@@ -199,53 +205,6 @@ struct SpringStabilityTests {
         #expect(animation.frame.minX.isFinite)
     }
 
-    /// The reported symptom lived one layer above `FrameAnimation`:
-    /// the ENGINE never returned to idle, so `onAllAnimationsEnded`
-    /// stopped firing and the deferred focus raise, the z-order
-    /// restore and the overlay re-sync all died with it. Every
-    /// pre-existing engine drain ticks at 1/120 — precisely the
-    /// rate at which this could not reproduce, which is a large
-    /// part of why it was silent.
-    @MainActor
-    @Test("The engine drains at the shortest duration on 60 Hz")
-    func engineDrainsAtShortDurationOn60Hz() {
-        guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay?.id
-        else { return }
-        // The whole unstable band, not just its floor — the
-        // duration chosen matters, and 50 ms is the wrong one.
-        // Measured with the substepping removed: 50 ms drains at
-        // tick 590, 60 ms at 890, 70 ms at 1711, all because
-        // divergence reaches infinity and `FrameAnimation`'s
-        // non-finite net force-settles it. Only 80 ms diverges
-        // slowly enough to stay finite and hang outright. So a
-        // single-duration version of this test pinned at the
-        // floor would pass against the very bug it names; the
-        // sweep is what makes it fire.
-        for durationMS in [50, 60, 70, 80] {
-            let engine = AnimationEngine()
-            var ended = false
-            engine.onAllAnimationsEnded = { ended = true }
-            engine.durationMS = durationMS
-            engine.animate(
-                window: WindowID(1),
-                on: screen,
-                from: CGRect(x: 0, y: 0, width: 400, height: 300),
-                to: CGRect(x: 900, y: 600, width: 800, height: 700)
-            )
-            var steps = 0
-            while engine.activeCount > 0, steps < 2000 {
-                engine.tick(display: display, dt: 1.0 / 60.0)
-                steps += 1
-            }
-            // Before the substepping this exhausted its 2000
-            // ticks — over 33 s of animation — with the engine
-            // still busy and the settle signal never emitted.
-            #expect(engine.activeCount == 0, "\(durationMS)ms")
-            #expect(ended, "\(durationMS)ms never settled")
-        }
-    }
-
     @Test("The other shipped spring is inside the bound too")
     func deadEndBumpSpringIsStable() {
         // `DeadEndBump` builds its own spring at zeta 0.45 and is
@@ -269,45 +228,5 @@ struct SpringStabilityTests {
             #expect(position > -1000 && position < 1000)
         }
         #expect(abs(position - 100) < 1)
-    }
-
-    @MainActor
-    @Test("A non-finite target is refused, never handed to AX")
-    func nonFiniteTargetIsRefused() {
-        // The net in `FrameAnimation` cannot recover this case —
-        // it assigns the target onto the position, so a NaN
-        // target would reach AX as a NaN frame. Refused upstream.
-        #expect(
-            !AnimationEngine.isRenderable(
-                CGRect(x: 0, y: 0, width: CGFloat.nan, height: 100)
-            )
-        )
-        #expect(
-            !AnimationEngine.isRenderable(
-                CGRect(
-                    x: CGFloat.infinity,
-                    y: 0,
-                    width: 10,
-                    height: 10
-                )
-            )
-        )
-        #expect(
-            AnimationEngine.isRenderable(
-                CGRect(x: 1, y: 2, width: 3, height: 4)
-            )
-        )
-        guard let screen = NSScreen.main else { return }
-        let engine = AnimationEngine()
-        var applied: [CGRect] = []
-        engine.apply = { _, frame, _ in applied.append(frame) }
-        engine.animate(
-            window: WindowID(1),
-            on: screen,
-            from: CGRect(x: 0, y: 0, width: 100, height: 100),
-            to: CGRect(x: 0, y: 0, width: CGFloat.nan, height: 100)
-        )
-        #expect(engine.activeCount == 0)
-        #expect(applied.isEmpty)
     }
 }

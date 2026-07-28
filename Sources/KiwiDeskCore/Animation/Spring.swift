@@ -23,10 +23,13 @@ public struct Spring: Sendable, Equatable {
     ///
     /// `1/max(ω, c)` is a deliberately conservative closed form
     /// that satisfies the real condition for every ζ > 0. Its
-    /// margin is **1.24×–1.81×, not 2×** (1.57× at ζ = 0.85,
-    /// bottoming out at 1.24× near ζ = 0.5). That margin is
-    /// load-bearing, not slack: drop it and ζ = 0.85 lands on
-    /// ωh = 1.18, amplification 1.91 — #599 again.
+    /// margin is never below **1.24×** (the minimum, at ζ = 0.5)
+    /// and approaches but never reaches 2× as ζ → 0 or ζ → ∞ —
+    /// **1.57×** at the engine's ζ = 0.85, **1.29×** at
+    /// `DeadEndBump`'s ζ = 0.45, which sits near the tight end of
+    /// the curve. So the halving is load-bearing, not slack:
+    /// drop it and ζ = 0.85 lands on ωh = 1.18, amplification
+    /// 1.91 — #599 again.
     ///
     /// Both terms are kept because ζ below 0.5 flips which one
     /// `max` selects, and that is not hypothetical — `DeadEndBump`
@@ -44,7 +47,14 @@ public struct Spring: Sendable, Equatable {
         response: Double = 0.35,
         dampingFraction: Double = 0.85
     ) {
-        let omega = 2 * .pi / max(response, 0.01)
+        // A non-finite `response` would propagate through `max`
+        // into `maxStableStep`, and `step` guards against that by
+        // returning — which would freeze the animation instead of
+        // crashing it: never settling, never leaving the engine,
+        // the #599 wedge through another door. Degrade to the
+        // default instead. `init` is public, so this is reachable.
+        let clamped = response.isFinite ? max(response, 0.01) : 0.35
+        let omega = 2 * .pi / clamped
         self.stiffness = omega * omega
         self.damping = 2 * dampingFraction * omega
         self.maxStableStep = 1 / max(omega, self.damping)

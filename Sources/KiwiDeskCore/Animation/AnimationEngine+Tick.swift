@@ -92,8 +92,15 @@ extension AnimationEngine {
     nonisolated static func isRenderable(_ frame: CGRect) -> Bool {
         frame.origin.x.isFinite && frame.origin.y.isFinite
             && frame.width.isFinite && frame.height.isFinite
+            // A negative extent is as unrenderable as a NaN one,
+            // and the stability suite already rejects it — the
+            // production guard should not admit a shape the tests
+            // call nonsense.
+            && frame.width > 0 && frame.height > 0
     }
 
+    /// Internal, not private: a same-module extension cannot
+    /// reach a `private static` across files.
     static func rounded(_ frame: CGRect) -> CGRect {
         CGRect(
             x: frame.origin.x.rounded(),
