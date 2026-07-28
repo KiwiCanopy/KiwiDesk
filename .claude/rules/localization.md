@@ -161,12 +161,28 @@ corpus staying dirty, passing only while a bug was live.
 so a user-facing condition detected in Core returns **structure** —
 a case, an enum, a value type — and the GUI renders the sentence
 at its own boundary (`Conflict.Target.systemShortcut(…)` →
-`ConflictText`). Never a pre-rendered English string across that
-seam: it cannot be translated where it was written, and routing
-`L()` into actor-free code to fix that would make the manager's
-isolation a special case to buy one file's convenience.
+`ConflictText`, `ConfigIssue.Kind` → `ConfigIssueText`). Never a
+pre-rendered user-facing string across that seam: it cannot be
+translated where it was written, and routing `L()` into
+actor-free code to fix that would make the manager's isolation a
+special case to buy one file's convenience.
 
-Core currently holds **no** `L()` call site outside
-`Localization/` — keep it that way. CLI/IPC error strings are the
-deliberate exception and stay English: they are a machine
-contract, not UI copy.
+**The rule is about the seam, not about file paths.** Until #601
+this said "Core holds no `L()` call site outside
+`Localization/`", which was false — Core's in-app overlay views
+(App Bar, Space Bar, sticky mark) are `@MainActor` AppKit views
+that draw their own text and cross no seam, so `L()` is right in
+them. Worse, the literal reading pointed at the wrong defect: the
+four `ConfigIssue` messages that actually violated the seam never
+used `L()` at all. They were hardcoded English, so
+`extract-keys` could not see them, they never entered a catalog,
+and **no locale could translate them however complete it was** —
+which a ban phrased around `L()` would never have caught.
+`CoreLocalizationBoundaryTests` pins the file list;
+`ConfigIssueTextTests` pins that every case still renders.
+
+CLI/IPC error strings are the deliberate exception and stay
+English: they are a machine contract, not UI copy. A Lua
+interpreter message carried as an associated value is the same
+class — `ConfigIssue.Kind.luaError` keeps it verbatim and
+localizes only the frame around it.

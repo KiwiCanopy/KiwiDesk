@@ -52,6 +52,21 @@ struct TypoGuardTests {
         )
     }
 
+    /// The unknown-call payload, or nil for another kind.
+    /// Asserting on STRUCTURE rather than on rendered English
+    /// (#601) — the sentence now lives in the GUI, and these
+    /// assertions survive a copy edit that would have broken a
+    /// substring match.
+    private func unknownCall(
+        _ issue: ConfigIssue
+    ) -> (name: String, suggestion: String?)? {
+        guard
+            case .unknownCall(let name, let suggestion) =
+                issue.kind
+        else { return nil }
+        return (name, suggestion)
+    }
+
     @Test("A load-time namespace typo becomes a ConfigIssue")
     func loadIssue() {
         let core = makeCore(config: "scroll.set_width(1)")
@@ -59,9 +74,8 @@ struct TypoGuardTests {
         #expect(
             core.configIssues.contains {
                 $0.source == "init.lua"
-                    && $0.message.contains(
-                        "scroll.set_width"
-                    )
+                    && unknownCall($0)?.name
+                        == "scroll.set_width"
             }
         )
     }
@@ -78,8 +92,11 @@ struct TypoGuardTests {
         #expect(core.lua?.global("marker") == .number(1))
         #expect(
             core.configIssues.contains {
-                $0.message.contains("focsu")
-                    && $0.message.contains("focus")
+                guard let hit = unknownCall($0) else {
+                    return false
+                }
+                return hit.name.contains("focsu")
+                    && hit.suggestion?.contains("focus") == true
             }
         )
     }
@@ -142,9 +159,8 @@ struct TypoGuardTests {
         for table in tables {
             #expect(
                 core.configIssues.contains {
-                    $0.message.contains(
-                        "\(table).no_such_fn_xyz"
-                    )
+                    unknownCall($0)?.name
+                        == "\(table).no_such_fn_xyz"
                 },
                 "unguarded namespace: \(table)"
             )
