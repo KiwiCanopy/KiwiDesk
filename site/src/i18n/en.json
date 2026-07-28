@@ -85,7 +85,7 @@
   "guide_faq_2_q": "Does it replace Mission Control or Spaces?",
   "guide_faq_3_a": "Yes. KiwiDesk runs entirely on your Mac, in normal user space. It only moves and resizes windows — it never reads your files, and it isn't a keylogger (its shortcuts use a built-in macOS mechanism, not keyboard monitoring). It never asks you to weaken your Mac's built-in protections.",
   "guide_faq_3_q": "Is my data private?",
-  "guide_faq_4_a": "KiwiDesk is a small, native macOS app built to sit quietly in the background. It only does work when your windows actually change, and its animations run at each display's own natural refresh rate. Day to day, you shouldn't notice it in the background at all. If you'd rather it not animate when switching desktops, that's a one-click setting in Behavior.",
+  "guide_faq_4_a": "KiwiDesk is a small, native macOS app built to sit quietly in the background. It only does work when your windows actually change, and its animations run at each display's own natural refresh rate. Day to day, you shouldn't notice it in the background at all. If you'd rather skip the motion altogether, one switch in Behavior turns off every window animation at once, and KiwiDesk already honors Reduce Motion if that's on in your System Settings.",
   "guide_faq_4_q": "Will it slow down my Mac or drain the battery?",
   "guide_faq_5_a": "Quit KiwiDesk from its menu-bar icon and remove the app like any other. If you installed it with Homebrew, run <code>brew uninstall --cask kiwidesk</code>. The moment it's off, your windows behave exactly like normal macOS windows again — free to drag, resize, and overlap. Nothing sticks, and nothing of yours was ever changed.",
   "guide_faq_5_q": "How do I uninstall it?",
