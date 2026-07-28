@@ -436,7 +436,7 @@ const jsonLd = [
           <h1>{t.hero_title}</h1>
           <p class="hero__sub">{t.hero_sub}</p>
           <div class="hero__cta">
-            <a class="btn btn--primary" href="#start" data-install-bridge>
+            <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
               {t.hero_cta_primary}
             </a>
             <a class="btn btn--ghost btn--ghost-light" href="#demo">
@@ -859,8 +859,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  middle-click, "copy link"); the mode toggle is
                  JS-driven anyway, so a JS-off visitor has no Nerd
                  view to be sent to in the first place. */}
-            <a class="btn btn--primary simple-only" href="#start"
-              data-install-bridge>
+            <a class="btn btn--primary simple-only" href={`${homeHref}guide/#getting-started`}>
               {t.cta_primary}
               <Icon name="lucide:arrow-right" width={16} height={16}
                 aria-hidden="true" />
