@@ -103,6 +103,30 @@ struct AnimationEngineTests {
         engine.durationMS = 300
         #expect(engine.durationMS == 300)
     }
+
+    @Test("Reduce Motion snaps to the target with no animation")
+    func reduceMotionSnaps() {
+        guard let screen = NSScreen.main else { return }
+        let engine = AnimationEngine()
+        engine.reduceMotion = { true }
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        let to = CGRect(x: 5, y: 5, width: 300, height: 200)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 100, height: 100),
+            to: to
+        )
+        // Instant placement: one apply of the exact target, and
+        // no animation left running.
+        #expect(engine.activeCount == 0)
+        #expect(applies.count == 1)
+        #expect(applies.first?.frame == to)
+        #expect(applies.first?.setSize == true)
+    }
 }
 
 @Suite("AnimationEngine stepwise sizing")

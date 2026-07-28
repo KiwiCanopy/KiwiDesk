@@ -1138,6 +1138,12 @@ interaction.
 
 ### Animations
 
+- **Animate windows**: the master switch. Turn it off and windows
+  snap into place instantly; the per-event toggles and duration below
+  it grey out. Turning it back on restores the defaults. macOS
+  **System Settings ▸ Accessibility ▸ Reduce Motion** also keeps
+  animations off — with it on, the whole section greys out, since the
+  system setting wins regardless of this one.
 - **Duration** (ms): how fast windows move and resize (50–1000, default
   250).
 - **Scroll speed** (ms): scrolling-layout slide speed when focus moves

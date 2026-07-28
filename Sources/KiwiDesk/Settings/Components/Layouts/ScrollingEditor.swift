@@ -178,8 +178,11 @@ struct ScrollingEditor: View {
             step: 10,
             suffix: "ms"
         )
-        .disabled(
-            !model.config.settings.animations.onScrolling
+        .modifier(
+            GreyOut(
+                active: !model.config.settings.animations
+                    .onScrolling
+            )
         )
     }
 }
