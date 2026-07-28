@@ -68,14 +68,21 @@ extension KiwiCore {
         // bounds on slow-AX apps (#594): while this answers
         // true, the AX-echo follows and the WS reconcile stand
         // down so the ring and mark ride the tick, not the lag.
-        borders.isAnimating = { [weak self] id in
+        // ONE closure for both managers, so ring and mark cannot
+        // diverge when this predicate is next refined (#596).
+        // Distinct from the drag pipeline's broader self-driven
+        // check (`KiwiCore+Drag`), which also spans trailing
+        // echoes via `didRecentlySetFrame` — narrower on
+        // purpose: folding that in would suppress the
+        // post-settle echo, the only carrier of ring updates
+        // after an instant `setFrame` under AX fallback (#596).
+        let animationDriven: @MainActor (WindowID) -> Bool = {
+            [weak self] id in
             self?.tiler.animation.isAnimating(window: id)
                 ?? false
         }
-        stickyMarks.isAnimating = { [weak self] id in
-            self?.tiler.animation.isAnimating(window: id)
-                ?? false
-        }
+        borders.isAnimating = animationDriven
+        stickyMarks.isAnimating = animationDriven
 
         socket.handler = { [weak self] command, args in
             self?.execute(command, args: args)

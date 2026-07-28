@@ -87,15 +87,8 @@ public final class BorderManager {
     /// WindowServer bounds read behind `reconcile` — injectable
     /// so tests can hand the manager deterministic bounds
     /// without a live SkyLight connection.
-    var readWindowBounds: @MainActor (WindowID) -> CGRect? = { id in
-        guard let connection = SkyLight.connection,
-            let getBounds = SkyLight.getWindowBounds
-        else { return nil }
-        var frame = CGRect.zero
-        guard
-            getBounds(connection, id.raw, &frame) == .success
-        else { return nil }
-        return frame
+    var readWindowBounds: @MainActor (WindowID) -> CGRect? = {
+        SkyLight.windowBounds($0.raw)
     }
     /// Tee of every WindowServer bounds re-read (`reconcile`) —
     /// the live-tracking hot path AX echoes lag behind. Wired
@@ -193,30 +186,23 @@ public final class BorderManager {
     }
 
     /// Animation / AX-echo hot path: move an already-shown ring
-    /// to a window's current frame. The guards live here, once,
-    /// so no caller can forget them (#285) — but they differ by
-    /// source. An AX echo stands down while the WindowServer
-    /// stream tracks the ring (a coalesced echo would rewind it
-    /// behind the live WS bounds), and also while OUR OWN
-    /// animation drives the window (#594): the echo trails the
-    /// commanded frame by 100–300 ms on slow-AX apps, so it
-    /// would drag the ring behind the motion. The per-tick
-    /// animation frame is the leading truth mid-flight and
-    /// always applies. A no-op for windows without a ring.
+    /// to a window's current frame. The stand-down decision is
+    /// `FollowSource.applies` — one switch shared with the
+    /// sticky mark, so no caller re-implements it (#285) and the
+    /// two overlays cannot drift (#594). A no-op for windows
+    /// without a ring.
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
         source: FollowSource
     ) {
-        switch source {
-        case .animationTick:
-            apply(id, windowFrame: windowFrame)
-        case .axEcho:
-            guard !usesWindowServerTracking(id),
-                !isAnimating(id)
-            else { return }
-            apply(id, windowFrame: windowFrame)
-        }
+        guard
+            source.applies(
+                wsTracked: usesWindowServerTracking(id),
+                animating: isAnimating(id)
+            )
+        else { return }
+        apply(id, windowFrame: windowFrame)
     }
 
     /// The frame a window's ring last rendered against, for

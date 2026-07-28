@@ -42,6 +42,18 @@ struct BorderFollowAnimationTests {
             source: .animationTick
         )
         #expect(border.lastFrame(WindowID(1)) == tick)
+        // And with both suppressors down (a teardown snap, the
+        // no-display fallback): the tick still applies — pins
+        // the unconditional branch of `applies`.
+        border.skyLightActive = false
+        border.isAnimating = { _ in false }
+        let snap = CGRect(x: 60, y: 60, width: 400, height: 300)
+        border.follow(
+            WindowID(1),
+            windowFrame: snap,
+            source: .animationTick
+        )
+        #expect(border.lastFrame(WindowID(1)) == snap)
     }
 
     @Test("AX echo stands down while our animation drives it")

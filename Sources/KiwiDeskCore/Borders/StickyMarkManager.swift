@@ -101,28 +101,22 @@ public final class StickyMarkManager {
     }
 
     /// AX-echo / animation hot path: re-corner an already-shown
-    /// mark on a fresh frame (the ring's `follow` guards,
-    /// mirrored). An AX echo stands down while the WindowServer
-    /// stream tracks the window (a coalesced echo would rewind
-    /// the mark behind the live WS bounds) and while our own
-    /// animation drives it (#594 — the echo trails the commanded
-    /// frame on slow-AX apps). The per-tick animation frame is
-    /// the leading truth mid-flight and always applies. A no-op
-    /// for unmarked windows.
+    /// mark on a fresh frame. The stand-down decision is
+    /// `FollowSource.applies` — one switch shared with the ring,
+    /// so the two overlays cannot drift (#285/#594). A no-op for
+    /// unmarked windows.
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
         source: FollowSource
     ) {
-        switch source {
-        case .animationTick:
-            overlays[id]?.update(frame: windowFrame)
-        case .axEcho:
-            guard !isWindowServerTracked(id),
-                !isAnimating(id)
-            else { return }
-            overlays[id]?.update(frame: windowFrame)
-        }
+        guard
+            source.applies(
+                wsTracked: isWindowServerTracked(id),
+                animating: isAnimating(id)
+            )
+        else { return }
+        overlays[id]?.update(frame: windowFrame)
     }
 
     /// Unguarded reposition — the WindowServer bounds re-read
