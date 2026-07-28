@@ -190,13 +190,15 @@ extension KiwiCore {
     /// settled seconds ago, and the in-flight animation's own
     /// settle arms another pass behind it.
     ///
-    /// This does NOT rescue the diverged-spring case (#599). The
-    /// arming path sits behind the same signal — `notifyIfIdle`
-    /// only fires `onAllAnimationsEnded` at `activeCount == 0` —
-    /// so when an animation never settles this pass is never
-    /// scheduled, gate or no gate, and the same is true of the
-    /// deferred focus raise and the z-order restore. That wants
-    /// the engine-level fix tracked on #599, not a gate here.
+    /// Ungating does NOT, by itself, survive an animation that
+    /// never settles: the arming path sits behind the same
+    /// signal — `notifyIfIdle` only fires `onAllAnimationsEnded`
+    /// at `activeCount == 0` — so this pass would never be
+    /// scheduled, gate or no gate, and the same held for the
+    /// deferred focus raise and the z-order restore. That was
+    /// always the engine's to fix, and #599 fixed the known
+    /// cause; the shape of the exposure is why this stays
+    /// ungated rather than growing a second guard.
     func runBorderResync() {
         updateBorders()
         updateStickyMarks()

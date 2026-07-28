@@ -21,11 +21,19 @@ editing here:
   spring's response — so a 60 Hz tick diverged for every duration
   below ~80 ms, and the position ran away to infinity. It
   substeps to stay under `maxStableStep`; do not "simplify" that
-  loop away, and re-derive the bound if the damping fraction ever
-  changes (at 0.85 the damping term binds, but below 0.5 the
-  restoring term would). Substepping rather than a duration
-  clamp because there is one `DisplayLink` per monitor at mixed
-  rates — 120 Hz was always inside the bound, which is why this
+  loop away. **If you re-derive the bound, use the real
+  condition** — `k·h² + 2·c·h < 4`, i.e.
+  `ωh < 2(√(1+ζ²) − ζ)` — not either term alone; `k·h² < 4` is
+  the undamped special case and `|1 − c·h| < 1` is necessary but
+  not sufficient. The shipped `1/max(ω, c)` is conservative
+  against that, with a margin of 1.24×–1.81×, **not** 2× — so
+  the halving is load-bearing, and removing it at ζ = 0.85 is
+  immediately divergent again. Two springs ship (the engine's at
+  ζ = 0.85, `DeadEndBump`'s at ζ = 0.45) and they sit on
+  opposite sides of which term `max` selects. Substepping rather
+  than a duration clamp because there is one `DisplayLink` per
+  monitor at mixed rates and a spring outlives a cross-display
+  move — 120 Hz was always inside the bound, which is why this
   reproduced on some machines only.
   **Why it mattered far beyond one janky window:** a diverged
   animation never satisfies `settled`, so it never leaves the

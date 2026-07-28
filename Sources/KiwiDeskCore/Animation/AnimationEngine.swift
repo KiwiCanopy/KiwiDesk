@@ -111,7 +111,8 @@ public final class AnimationEngine {
 
     private var storedDurationMS = 250
     private var storedScrollDurationMS = 250
-    private var storedGrowRateHz: Int?
+    // Internal: the tick loop reads it from `+Tick`.
+    var storedGrowRateHz: Int?
     /// Per-window seconds since the last throttled size-set (#47).
     // Members below are read by the `+Teardown` extension, so they
     // are module-internal rather than file-private.
@@ -166,6 +167,17 @@ public final class AnimationEngine {
         to target: CGRect,
         isNewWindow: Bool = false
     ) {
+        // A non-finite target can only come from garbage upstream
+        // (a NaN layout rect, a bad AX read), and it is worse than
+        // useless: the spring would never converge to it, and
+        // `FrameAnimation`'s non-finite net cannot recover — it
+        // assigns the target onto the position, so a NaN target
+        // reaches AX as a NaN frame. Refuse the animation and
+        // leave the window where it is (#599).
+        guard Self.isRenderable(target) else {
+            cancel(window: window)
+            return
+        }
         guard isEnabled, !reduceMotion() else {
             cancel(window: window)
             apply(window, target, true)
@@ -254,93 +266,5 @@ public final class AnimationEngine {
             }
         }
         drivers[display]?.start()
-    }
-
-    func tick(display: DisplayID, dt: TimeInterval) {
-        guard var perWindow = animations[display],
-            !perWindow.isEmpty
-        else {
-            drivers[display]?.stop()
-            return
-        }
-        for (id, var animation) in perWindow {
-            let settled = animation.step(dt: dt)
-            if settled {
-                // Exact target, unrounded: layout output is
-                // the source of truth for the final frame.
-                apply(id, animation.frame, true)
-                perWindow[id] = nil
-                clearState(id)
-                onWindowSettled(id, animation.frame)
-                onAnimationEnd(id)
-            } else {
-                // Stepwise size, split per axis (issue #45).
-                // A shrinking axis takes its target size on the
-                // first frame — mid-flight overlap clears at
-                // once (siblings yielding room to a newly
-                // opened window). The grow direction follows the
-                // active `growPolicy`: `.throttledSmooth` (#47, the
-                // default) resamples the spring each tick (or at a
-                // capped rate); `.midSlide` (the legacy fallback)
-                // instead lands a single size-set mid-flight, where
-                // the ongoing slide masks the jump.
-                // Interpolating per tick would instead make slow
-                // AX responders (Electron/WebKit) re-lay-out
-                // continuously and fall seconds behind, stranding
-                // the window mid-size — the cap bounds that load.
-                // Pure moves keep the sizes equal, so no resize is
-                // emitted.
-                let held =
-                    heldSize[id]
-                    ?? Self.rounded(animation.frame).size
-                let stepped = GrowSize.step(
-                    policy: growPolicy,
-                    held: held,
-                    target: animation.targetFrame.size,
-                    spring: animation.frame.size,
-                    pastHalfway: animation.pastHalfway,
-                    rateHz: storedGrowRateHz,
-                    elapsed: sizeElapsed[id] ?? 0,
-                    dt: dt
-                )
-                sizeElapsed[id] = stepped.elapsed
-                let size = stepped.size
-                let setSize = size != heldSize[id]
-                heldSize[id] = size
-                let frame = CGRect(
-                    x: animation.frame.origin.x.rounded(),
-                    y: animation.frame.origin.y.rounded(),
-                    width: size.width.rounded(),
-                    height: size.height.rounded()
-                )
-                if setSize || lastApplied[id] != frame {
-                    lastApplied[id] = frame
-                    apply(id, frame, setSize)
-                }
-                perWindow[id] = animation
-            }
-        }
-        animations[display] = perWindow
-        if perWindow.isEmpty {
-            drivers[display]?.stop()
-            notifyIfIdle()
-        }
-    }
-
-    /// Fires `onAllAnimationsEnded` when nothing animates
-    /// anymore, on any display.
-    func notifyIfIdle() {
-        if activeCount == 0 {
-            onAllAnimationsEnded()
-        }
-    }
-
-    private static func rounded(_ frame: CGRect) -> CGRect {
-        CGRect(
-            x: frame.origin.x.rounded(),
-            y: frame.origin.y.rounded(),
-            width: frame.width.rounded(),
-            height: frame.height.rounded()
-        )
     }
 }

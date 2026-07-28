@@ -6,6 +6,39 @@ import Foundation
 public struct Spring: Sendable, Equatable {
     public let stiffness: Double
     public let damping: Double
+    /// The largest step this spring may be integrated with
+    /// before semi-implicit Euler stops damping and starts
+    /// amplifying (#599). Precomputed alongside the two above —
+    /// it is a fixed property of the spring, not a per-tick
+    /// question.
+    ///
+    /// **The real stability condition is
+    /// `k·h² + 2·c·h < 4`**, closed form `ωh < 2(√(1+ζ²) − ζ)`.
+    /// Do not reason from either term alone: `k·h² < 4` is the
+    /// undamped (ζ = 0) special case, and `|1 − c·h| < 1` is a
+    /// necessary-but-not-sufficient Jury condition. At ζ = 0.85
+    /// the combined bound (ωh < 0.925) is what binds, and the
+    /// amplification factor at the two single-term bounds is
+    /// 1.9 and 5.8 — both already divergent.
+    ///
+    /// `1/max(ω, c)` is a deliberately conservative closed form
+    /// that satisfies the real condition for every ζ > 0. Its
+    /// margin is **1.24×–1.81×, not 2×** (1.57× at ζ = 0.85,
+    /// bottoming out at 1.24× near ζ = 0.5). That margin is
+    /// load-bearing, not slack: drop it and ζ = 0.85 lands on
+    /// ωh = 1.18, amplification 1.91 — #599 again.
+    ///
+    /// Both terms are kept because ζ below 0.5 flips which one
+    /// `max` selects, and that is not hypothetical — `DeadEndBump`
+    /// already ships ζ = 0.45.
+    ///
+    /// Concretely at ζ = 0.85: a 60 Hz tick is 16.7 ms, and the
+    /// 250 ms default allows 32.8 ms — one substep, so the
+    /// default is untouched. At the 50 ms floor it allows 6.6 ms
+    /// and the tick splits three ways. A 120 Hz display was
+    /// inside the bound across the whole range, which is why this
+    /// only ever bit some machines.
+    let maxStableStep: Double
 
     public init(
         response: Double = 0.35,
@@ -14,32 +47,20 @@ public struct Spring: Sendable, Equatable {
         let omega = 2 * .pi / max(response, 0.01)
         self.stiffness = omega * omega
         self.damping = 2 * dampingFraction * omega
+        self.maxStableStep = 1 / max(omega, self.damping)
     }
 
-    /// The largest step this spring may be integrated with
-    /// before semi-implicit Euler stops damping and starts
-    /// amplifying (#599).
-    ///
-    /// Two conditions, and the tighter one wins. The restoring
-    /// term needs `k·h² < 4`, i.e. `h < 2/ω`; the damping term
-    /// needs `|1 − c·h| < 1`, i.e. `h < 2/c`. With the fixed
-    /// `dampingFraction` of 0.85, `c = 1.7ω`, so damping is
-    /// always the binding one here — both are kept because a
-    /// future fraction below 0.5 would flip that. Halved for
-    /// margin, since these are the bounds where the amplification
-    /// factor reaches exactly 1 and the motion merely stops
-    /// converging.
-    ///
-    /// Concretely: a 60 Hz tick is 16.7 ms, and at the default
-    /// 250 ms duration this allows 32.8 ms — one substep, so the
-    /// common path is untouched. At the 50 ms floor it allows
-    /// 6.6 ms and the tick is split three ways. A 120 Hz display
-    /// was already inside the bound across the whole range, which
-    /// is why this only ever bit some machines.
-    var maxStableStep: Double {
-        let omega = stiffness.squareRoot()
-        return 1 / max(omega, damping)
-    }
+    /// The most real time one `step` call will integrate,
+    /// however large its `dt` (#599). One 30 Hz frame, chosen to
+    /// match the floor of `DisplayLinkDriver`'s own clamp
+    /// (`max(nominal, 1/30)`). The two agree at 30 Hz and above,
+    /// which is every display this runs on in practice; below it
+    /// — a panel at a 24 Hz ProMotion floor — this truncates the
+    /// driver's longer interval, so the motion runs slightly slow
+    /// rather than integrating an unbounded span. That trade is
+    /// deliberate: a bounded loop matters more than exact pace on
+    /// a display that is already dropping frames.
+    static let maxIntegratedStep = 1.0 / 30.0
 
     /// Advances one scalar by `dt` seconds (semi-implicit
     /// Euler). Mutates position and velocity in place.
@@ -64,15 +85,26 @@ public struct Spring: Sendable, Equatable {
         target: Double,
         dt: Double
     ) {
-        // Bounded: a `dt` spike after a stall (display sleep, a
-        // wedged main actor) must not turn one tick into
-        // thousands of iterations. Past this the frame is so late
-        // that integration accuracy is moot anyway.
-        let count = min(
-            16,
-            max(1, Int((dt / maxStableStep).rounded(.up)))
-        )
-        let h = dt / Double(count)
+        // Nothing meaningful to integrate, and `Int(.infinity)`
+        // traps — this is a public entry point, so a garbage
+        // interval must return rather than crash.
+        guard dt.isFinite, dt > 0, maxStableStep.isFinite,
+            maxStableStep > 0
+        else { return }
+        // A stall (display sleep, a wedged main actor) can hand
+        // us an arbitrarily large interval. Integrating all of it
+        // is neither wanted nor affordable, so cap the span
+        // itself rather than the substep count: capping the count
+        // would silently push `h` back above `maxStableStep` —
+        // the exact amplifying regime this method exists to
+        // prevent. `DisplayLinkDriver` already clamps its own
+        // ticks the same way and for the same reason; this makes
+        // the guarantee hold for any caller, so `step` is
+        // unconditionally stable rather than stable given a
+        // well-behaved driver.
+        let span = min(dt, Self.maxIntegratedStep)
+        let count = max(1, Int((span / maxStableStep).rounded(.up)))
+        let h = span / Double(count)
         for _ in 0..<count {
             let acceleration =
                 -stiffness * (position - target)
@@ -144,9 +176,18 @@ public struct FrameAnimation: Sendable {
             // back — `abs(inf - target)` is never within epsilon,
             // so the animation would run forever and take the
             // whole settle signal with it. Force it home instead.
-            // A visible jump beats a permanently wedged engine,
-            // and this is deliberately a net rather than the fix:
-            // if it ever fires, the integration is wrong.
+            // A visible jump beats a permanently wedged engine.
+            // With the substepping above, a finite input can no
+            // longer produce a non-finite output at any `dt`, so
+            // the live trigger is a non-finite START — a garbage
+            // AX read — not the integrator. Check there first if
+            // this ever fires. It is deliberately silent: there
+            // is no log seam on a pure value type, and the engine
+            // would have to poll for it. A non-finite TARGET is a
+            // different matter and is refused upstream, in
+            // `AnimationEngine.animate`, because this recovery
+            // cannot help there — it would assign the NaN target
+            // onto `current` and hand a NaN rect to AX.
             if !current[i].isFinite || !velocity[i].isFinite {
                 current[i] = target[i]
                 velocity[i] = 0
