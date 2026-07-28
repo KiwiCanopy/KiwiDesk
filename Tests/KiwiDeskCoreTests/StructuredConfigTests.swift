@@ -170,20 +170,20 @@ struct StructuredConfigTests {
         #expect(core.state.appRules["xcode"] == nil)
     }
 
-    // MARK: - Stale managed block (O6)
+    // MARK: - Hand-written bind in init.lua (O6)
 
-    /// A stale pre-#55 managed block binding `combo` — earlier
-    /// versions generated this into init.lua. It still
+    /// A `KiwiDesk.bind` in init.lua binding `combo` — it still
     /// executes on load, but must stay inert in effect: the
     /// structured loader resets its refs and re-registers from
-    /// gui.json.
+    /// gui.json. (Formerly a pre-#55 managed block; the marker
+    /// recognition was removed in #116 — the bind is what the
+    /// loader-reset behavior turns on, not the surrounding
+    /// comments.)
     private func staleBlock(binding combo: String) -> String {
         """
-        \(ManagedConfig.beginMarker)
         KiwiDesk.bind("\(combo)", function()
             -- noop
         end)
-        \(ManagedConfig.endMarker)
         """
     }
 
@@ -224,16 +224,19 @@ struct StructuredConfigTests {
         #expect(bindings.count == 1)
     }
 
-    /// Leak canary for stale-block refs: `luaL_ref` reuses
-    /// released slots, so after `loadConfig()` a probe
-    /// second `makeFunction` probe must land on the same slot
-    /// number in a core whose init.lua holds a stale managed
-    /// block as in one whose init.lua is empty. Transactional
-    /// replacement prepares the structured ref first, then
-    /// releases the stale ref: the block core's first probe
-    /// reuses that slot, while both second probes match. If the
-    /// stale ref leaked, both block probes would shift up.
-    @Test("Stale-block refs are released (slot-reuse canary)")
+    /// Leak canary for an init.lua bind that duplicates a
+    /// gui.json binding: the structured loader must release the
+    /// init.lua ref so it does not accumulate. `luaL_ref` reuses
+    /// released slots, so after `loadConfig()` the **second**
+    /// probe must land on the same slot in a core whose init.lua
+    /// holds the extra bind as in one whose init.lua is empty —
+    /// that equality is the real no-leak invariant. The first
+    /// probe must not shift *up* (a leaked ref would push it
+    /// higher); whether it lands strictly lower depends on the
+    /// release/re-register ordering, which #116 changed when it
+    /// dropped managed-block recognition (a pre-#55 bind is now an
+    /// ordinary foreign bind), so this asserts `<=`, not `<`.
+    @Test("init.lua bind refs are released (slot-reuse canary)")
     func noLeakedRefsAfterLoad() throws {
         var config = GuiConfig()
         config.modes = [
@@ -280,7 +283,10 @@ struct StructuredConfigTests {
             try blockLua
             .makeFunction(body: "-- second probe").get()
 
-        #expect(blockProbe < bareProbe)
+        // No leak: the block core's ref is released, so its probe
+        // never shifts up (a leak would). The second probes must
+        // match exactly — that is the invariant.
+        #expect(blockProbe <= bareProbe)
         #expect(blockSecondProbe == bareSecondProbe)
     }
 }

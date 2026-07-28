@@ -210,7 +210,6 @@ struct ManagedConfigAdoptTests {
     func header() {
         let adopted = adopt("print(\"x\")")
         #expect(adopted.contains("Adopted by KiwiDesk on 2026-07-18"))
-        #expect(!adopted.contains(ManagedConfig.beginMarker))
     }
 
     @Test("An empty config adopts to just the header")

@@ -1,26 +1,22 @@
 import Foundation
 
-/// Recognizes the legacy app-managed block in `init.lua` and
-/// classifies the code around it (#55: the app no longer
-/// GENERATES a block — `gui.json` and profiles are loaded
-/// directly, and `init.lua` is hooks-only). The split stays so
-/// a stale block from an earlier version keeps being treated
-/// as app-owned (inert, never "foreign") until the user
-/// deletes it by hand — re-saving is the migration.
+/// Classifies `init.lua` by whether its code touches the GUI's
+/// managed vocabulary (#55: the app loads `gui.json` and profiles
+/// directly and treats `init.lua` as hooks-only — it neither
+/// generates nor recognizes a managed block).
 ///
-/// The GUI only falls back to the raw Lua editor when code
-/// outside a (stale) block touches the managed vocabulary —
-/// verbs the GUI owns in `gui.json`. Harmless custom Lua
-/// (print calls, debug hooks, sketchybar integrations)
-/// coexists with the visual editor; it shows an informational
-/// banner instead of locking the user out.
+/// The GUI falls back to the raw Lua editor only when the code
+/// touches the managed vocabulary — verbs the GUI owns in
+/// `gui.json`. Harmless custom Lua (print calls, debug hooks,
+/// sketchybar integrations) coexists with the visual editor; it
+/// shows an informational banner instead of locking the user out.
+///
+/// Pre-release, the marker-block recognition that used to keep a
+/// stale pre-#55 block "app-owned" was removed (#116): such a block
+/// is now scanned like any other code — its `set_*` verbs read as
+/// Lua-owned config (so it is never seeded over), which is the safe
+/// direction. Re-saving is the migration.
 public enum ManagedConfig {
-    public static let beginMarker =
-        "-- >>> KiwiDesk managed block "
-        + "(edit in the app, not by hand) >>>"
-    public static let endMarker =
-        "-- <<< KiwiDesk managed block <<<"
-
     // MARK: - Managed vocabulary
 
     /// Tokens matched against non-comment lines outside the
@@ -57,45 +53,6 @@ public enum ManagedConfig {
         "KiwiDesk.define_mode(",
         "KiwiDesk.bind_profile_to_native_space(",
     ]
-
-    // MARK: - Split / merge
-
-    /// The three regions of a config file. `managed` excludes
-    /// the marker lines; it is nil when no block is present.
-    public struct Split: Equatable {
-        public var before: String
-        public var managed: String?
-        public var after: String
-    }
-
-    /// Divides `source` on the marker lines. A file without
-    /// markers is entirely `before` (managed nil, after empty).
-    public static func split(_ source: String) -> Split {
-        let lines = source.components(separatedBy: "\n")
-        guard
-            let begin = lines.firstIndex(where: {
-                $0.trimmed == beginMarker
-            }),
-            let end = lines[begin...].firstIndex(where: {
-                $0.trimmed == endMarker
-            })
-        else {
-            return Split(
-                before: source,
-                managed: nil,
-                after: ""
-            )
-        }
-        let before = lines[..<begin].joined(separator: "\n")
-        let managed = lines[(begin + 1)..<end]
-            .joined(separator: "\n")
-        let after = lines[(end + 1)...].joined(separator: "\n")
-        return Split(
-            before: before,
-            managed: managed,
-            after: after
-        )
-    }
 
     // `adopt` and its selective-comment machinery live in
     // `ManagedConfig+Adopt.swift` (file-size split, §2).
@@ -229,14 +186,8 @@ public enum ManagedConfig {
     public static func classify(
         _ source: String
     ) -> (foreign: Bool, custom: Bool) {
-        let sp = split(source)
-        let foreign =
-            touchesManagedVocabulary(sp.before)
-            || touchesManagedVocabulary(sp.after)
-        let custom =
-            foreign
-            || isCode(sp.before)
-            || isCode(sp.after)
+        let foreign = touchesManagedVocabulary(source)
+        let custom = foreign || isCode(source)
         return (foreign: foreign, custom: custom)
     }
 

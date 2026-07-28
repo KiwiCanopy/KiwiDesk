@@ -24,15 +24,14 @@ struct CommandBehaviorTests {
             args: [.number(2500)]
         )
         #expect(core.sleepWake.restoreDelayMS == 2500)
-        // Duration: namespaced command clamps; old top-level name
-        // still works as a deprecated alias.
+        // Duration: the namespaced command clamps to 50–1000.
         core.execute(
             "animations.set_duration",
             args: [.number(5000)]
         )
         #expect(core.tiler.animation.durationMS == 1000)
         core.execute(
-            "set_animation_duration",
+            "animations.set_duration",
             args: [.number(300)]
         )
         #expect(core.tiler.animation.durationMS == 300)
@@ -79,18 +78,6 @@ struct CommandBehaviorTests {
             args: [.bool(false)]
         )
         #expect(!core.tiler.settings.animations.onRelayout)
-        // The old command still works as a deprecated alias, both
-        // ways: set it true then back to false.
-        core.execute(
-            "set_space_animation",
-            args: [.bool(true)]
-        )
-        #expect(core.tiler.settings.animations.onSpaceChange)
-        core.execute(
-            "set_space_animation",
-            args: [.bool(false)]
-        )
-        #expect(!core.tiler.settings.animations.onSpaceChange)
         #expect(core.tiler.settings.mouseResize == .layout)
         core.execute(
             "set_mouse_resize",

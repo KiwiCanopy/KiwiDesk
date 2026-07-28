@@ -29,20 +29,6 @@ extension KiwiCore {
                 )
             else { return Self.orientationError }
             tiler.settings.scrolling.orientation = orientation
-        case "scroll.set_speed":
-            // Deprecated alias for `animations.set_scroll_speed`
-            // (issue #51). Previously shared `durationMS` with
-            // `animations.set_duration`; now writes the separate
-            // `scrollDurationMS` knob.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            onLog(
-                "scroll.set_speed is deprecated — use "
-                    + "animations.set_scroll_speed(ms)"
-            )
-            // Engine syncs via TilingEngine.settings.didSet.
-            tiler.settings.animations.scrollSpeedMS = ms
         case "scroll.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
