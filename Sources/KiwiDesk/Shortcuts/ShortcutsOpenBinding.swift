@@ -9,7 +9,7 @@ enum ShortcutsOpenBinding {
     static let lua = "KiwiDesk.show_shortcuts()"
 
     /// The combo currently bound to open the panel, rendered as
-    /// native glyphs (`⌥␣`) via the same `ComboSymbols` + layout
+    /// native glyphs (`⌃⌥K`) via the same `ComboSymbols` + layout
     /// path the editor and reference panel use — so it reads
     /// identically everywhere. Nil when nothing is bound, or when
     /// the live snapshot is unavailable (paused / init.lua-owned):

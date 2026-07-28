@@ -44,6 +44,10 @@ struct DefaultSeedCatalogParityTests {
         ) {
             map[command.lua] = command.label
         }
+        // The General "Show shortcuts panel" row (#602): seeded but
+        // authored in its own section, not a navigation group.
+        let general = KeybindingCatalog.showShortcuts
+        map[general.lua] = general.label
         return map
     }
 

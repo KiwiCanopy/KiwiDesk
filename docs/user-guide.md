@@ -176,11 +176,12 @@ bound, grouped into three sections:
   a fresh instance).
 - **Custom** — any raw-Lua shortcuts, shown as their Lua source.
 
-You can also give the panel its own **hotkey**: under Settings ▸
-Shortcuts ▸ **General**, bind "Show shortcuts panel" to any combo (it
-ships unbound). That key both opens and closes the panel, and once set
-it appears beside the menu bar's **View Shortcuts…** row and in the
-panel's own close hint.
+The panel has its own **hotkey**: **⌃⌥K** by default (under Settings ▸
+Shortcuts ▸ **General**, "Show shortcuts panel" — rebindable or
+clearable per mode). That key both opens and closes the panel, and it
+appears beside the menu bar's **View Shortcuts…** row and in the
+panel's own close hint. Every mode you create gets the same ⌃⌥K row,
+so the cheat-sheet is always reachable from the keyboard.
 
 The panel always appears centered on the screen under your pointer and
 never remembers a position. Press **Esc**, click anywhere outside it, or

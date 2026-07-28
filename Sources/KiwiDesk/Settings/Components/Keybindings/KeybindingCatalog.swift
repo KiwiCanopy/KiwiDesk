@@ -239,8 +239,9 @@ enum KeybindingCatalog {
 
     /// The bindable "open the shortcuts reference panel" row
     /// (#330): a GUI action verb (`KiwiDesk.show_shortcuts()`).
-    /// Ships **unbound** — a rarely-summoned reference, so no
-    /// presumed factory combo. The Lua comes from
+    /// Seeded to **⌃⌥K** by default (#602) — reachable from the
+    /// keyboard out of the box — but editable or clearable per
+    /// mode like any default. The Lua comes from
     /// `ShortcutsOpenBinding` so the row, the classifier, and the
     /// quick-menu combo all speak of one binding.
     static let showShortcuts = NavCommand(

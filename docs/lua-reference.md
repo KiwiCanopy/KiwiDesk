@@ -3301,14 +3301,14 @@ applications shortcut carries a per-row **Launch behavior** menu —
 live glance at the active mode's bindings — or closes it if it is
 already open (the verb toggles). Bind it to a hotkey to summon the
 reference from anywhere. This is the same panel reached from the
-menu bar's *View Shortcuts…* row; when you bind a combo here, that
-combo also shows beside the menu row and in the panel's own close
-hint. It ships **unbound** — a rarely-summoned reference gets no
-presumed default combo.
+menu bar's *View Shortcuts…* row; the bound combo also shows beside
+the menu row and in the panel's own close hint. It is seeded to
+**⌃⌥K** by default, in the base mode and in every mode you create,
+so the reference is reachable from the keyboard out of the box.
 
 It is also offered as a bindable preset in the Settings app under
-**Shortcuts ▸ General** ("Show shortcuts panel"), so you need not
-hand-write the bind.
+**Shortcuts ▸ General** ("Show shortcuts panel"), where you can
+rebind or clear it per mode without hand-writing Lua.
 
 **Example:**
 

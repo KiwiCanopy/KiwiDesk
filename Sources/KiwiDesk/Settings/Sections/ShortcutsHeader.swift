@@ -303,7 +303,15 @@ struct ShortcutsHeader: View {
     private func addMode() {
         let name = newMode.trimmed
         guard canAddMode else { return }
-        model.config.modes.append(KeyMode(name: name))
+        // Seed the ⌃⌥K "Show shortcuts panel" row so a fresh mode
+        // can open the cheat-sheet from the keyboard, not only via
+        // the menu bar (#602). Deletable per mode like any default.
+        model.config.modes.append(
+            KeyMode(
+                name: name,
+                bindings: [DefaultKeybindings.showShortcutsRow()]
+            )
+        )
         selected = name
         newMode = ""
         addingMode = false

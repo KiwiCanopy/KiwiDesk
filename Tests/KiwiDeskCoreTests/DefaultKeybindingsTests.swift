@@ -142,6 +142,27 @@ struct DefaultKeybindingsTests {
         #expect(!rows.isEmpty)
     }
 
+    @Test("seeds the ⌃⌥K show-shortcuts row (#602)")
+    func seedsShowShortcuts() {
+        let rows = DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50
+        )
+        #expect(
+            rows.contains {
+                $0.combo == "control+option+k"
+                    && $0.lua == "KiwiDesk.show_shortcuts()"
+            }
+        )
+        // The shared helper the GUI's addMode reuses for every
+        // new mode — one authority for the combo/lua/label.
+        let row = DefaultKeybindings.showShortcutsRow()
+        #expect(row.combo == "control+option+k")
+        #expect(row.lua == "KiwiDesk.show_shortcuts()")
+        #expect(row.kind == .navigation)
+        #expect(row.label == "Show shortcuts panel")
+    }
+
     // MARK: - Additive digit top-up (#485)
 
     @Test("top-up binds only the digits grown past the seed")

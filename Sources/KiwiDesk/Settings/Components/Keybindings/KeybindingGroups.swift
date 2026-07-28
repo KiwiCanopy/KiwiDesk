@@ -191,7 +191,7 @@ struct SizeFloatGroup: View {
 /// General app actions (#330): today just the bindable
 /// "Show shortcuts panel" hotkey — app chrome, not a workspace
 /// action, so it sits in its own low section rather than among
-/// Focus / Move / Size. Unbound by default.
+/// Focus / Move / Size. Seeded to ⌃⌥K by default (#602).
 struct GeneralShortcutsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]

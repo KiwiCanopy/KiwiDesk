@@ -107,7 +107,31 @@ public enum DefaultKeybindings {
                 label: "Toggle sticky"
             )
         )
+        // General — open the read-only Shortcuts panel. App
+        // chrome, not a workspace verb, so it comes last (#602).
+        rows.append(showShortcutsRow())
         return rows
+    }
+
+    /// The ⌃⌥K row that opens the read-only Shortcuts panel
+    /// (#602) — a GUI/app action, not a workspace verb. "K = Keys"
+    /// names a shortcuts cheat-sheet; ⌃⌥H was avoided because
+    /// `⌘H` = Hide reads as *Hide* first to a Mac user. Seeded
+    /// into the base mode (here) and into every mode created in
+    /// the GUI (`ShortcutsHeader.addMode`), so the cheat-sheet is
+    /// reachable from the keyboard in any mode — editable or
+    /// deletable per mode like any default, with the menu bar's
+    /// "View Shortcuts…" as the mode-independent fallback. Its Lua
+    /// and label mirror `KeybindingCatalog.showShortcuts`
+    /// byte-for-byte (guarded by `DefaultSeedCatalogParityTests`),
+    /// so an imported copy classifies back to `.navigation`.
+    public static func showShortcutsRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+k",
+            lua: "KiwiDesk.show_shortcuts()",
+            kind: .navigation,
+            label: "Show shortcuts panel"
+        )
     }
 
     /// The four ⌃⌥⌘ + arrow resize rows: the arrow points the
