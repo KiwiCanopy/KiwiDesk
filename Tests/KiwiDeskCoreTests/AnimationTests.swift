@@ -114,12 +114,16 @@ struct AnimationEngineSizingTests {
     /// no screen is available (headless CI).
     private func recordApplies(
         from: CGRect,
-        to: CGRect
+        to: CGRect,
+        policy: GrowPolicy = .throttledSmooth,
+        rateHz: Int? = nil
     ) -> [(frame: CGRect, setSize: Bool)]? {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay?.id
         else { return nil }
         let engine = AnimationEngine()
+        engine.growPolicy = policy
+        engine.growRateHz = rateHz
         var applies: [(frame: CGRect, setSize: Bool)] = []
         engine.apply = { _, frame, setSize in
             applies.append((frame, setSize))
@@ -139,22 +143,46 @@ struct AnimationEngineSizingTests {
         return applies
     }
 
-    /// Issue #45: a growing window holds its start size, then
-    /// grows in a single frame at halfway (never interpolated
-    /// per tick, which would strand slow AX responders). The
-    /// grow lands mid-flight — before the settle frame — so the
-    /// slide masks it.
-    @Test("A pure grow resizes once, mid-flight")
+    /// Issue #45 (`.midSlide` fallback): a growing window holds
+    /// its start size, then grows in a single frame at halfway
+    /// (never interpolated per tick, which would strand slow AX
+    /// responders). The grow lands mid-flight — before the settle
+    /// frame — so the slide masks it. This is the legacy policy
+    /// kept as a Lua escape hatch; the default is smooth per-tick
+    /// (below).
+    @Test("A pure grow under .midSlide resizes once, mid-flight")
     func pureGrowResizesAtHalfway() throws {
         let from = CGRect(x: 10, y: 20, width: 400, height: 300)
         let to = CGRect(x: 10, y: 20, width: 900, height: 800)
-        guard let applies = recordApplies(from: from, to: to)
+        guard
+            let applies = recordApplies(
+                from: from,
+                to: to,
+                policy: .midSlide
+            )
         else { return }
         #expect(applies.last?.frame == to)
         #expect(applies.last?.setSize == true)
         // The grow lands before the final settle frame.
         #expect(applies.dropLast().contains { $0.setSize })
         #expect(applies.filter(\.setSize).count <= 2)
+    }
+
+    /// #47 default: a growing window follows the spring, emitting
+    /// a size-set on many frames (per-tick, since `growRateHz` is
+    /// nil) instead of one at halfway — the buttery grow. It still
+    /// lands exactly on the settle frame.
+    @Test("A pure grow under the smooth default resizes per tick")
+    func pureGrowSmoothInterpolates() throws {
+        let from = CGRect(x: 10, y: 20, width: 400, height: 300)
+        let to = CGRect(x: 10, y: 20, width: 900, height: 800)
+        guard let applies = recordApplies(from: from, to: to)
+        else { return }
+        #expect(applies.last?.frame == to)
+        #expect(applies.last?.setSize == true)
+        // Many size-sets across the grow, not a single mid-slide
+        // jump — the whole point of the smooth policy.
+        #expect(applies.filter(\.setSize).count > 5)
     }
 
     /// A shrinking window takes its target size on the first
@@ -170,5 +198,69 @@ struct AnimationEngineSizingTests {
         #expect(applies.first?.frame.size == to.size)
         #expect(applies.last?.frame == to)
         #expect(applies.filter(\.setSize).count <= 2)
+    }
+
+    /// A throttle below the tick clock emits fewer size-sets than
+    /// per-tick, exercising the engine's `sizeElapsed` carry-over
+    /// (nil-default tests never drive it), yet still lands exact.
+    @Test("A throttled grow emits fewer size-sets than per-tick")
+    func throttledGrowEmitsFewer() throws {
+        let from = CGRect(x: 10, y: 20, width: 400, height: 300)
+        let to = CGRect(x: 10, y: 20, width: 900, height: 800)
+        guard let perTick = recordApplies(from: from, to: to),
+            let throttled = recordApplies(
+                from: from,
+                to: to,
+                rateHz: 25  // well below the 120 Hz tick clock
+            )
+        else { return }
+        let perTickSets = perTick.filter(\.setSize).count
+        let throttledSets = throttled.filter(\.setSize).count
+        #expect(throttledSets < perTickSets)
+        #expect(throttled.last?.frame == to)  // still exact
+    }
+
+    /// #45 regression guard: retargeting mid-grow preserves the
+    /// per-window held size / throttle state, and the window still
+    /// lands exactly on the *new* target — never stranded by the
+    /// interrupt (the failure that reverted per-tick before #47).
+    @Test("A retarget mid-grow still lands on the exact new target")
+    func retargetMidGrowLandsExact() throws {
+        guard let screen = NSScreen.main,
+            let display = screen.kiwiDisplay?.id
+        else { return }
+        let engine = AnimationEngine()
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        let from = CGRect(x: 0, y: 0, width: 400, height: 300)
+        let mid = CGRect(x: 0, y: 0, width: 1000, height: 900)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: from,
+            to: mid
+        )
+        for _ in 0..<12 {
+            engine.tick(display: display, dt: 1.0 / 120.0)
+        }
+        // Retarget: width now smaller than the grown size (snap),
+        // height larger (keep growing).
+        let final = CGRect(x: 0, y: 0, width: 500, height: 1100)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: mid,
+            to: final
+        )
+        var steps = 0
+        while engine.activeCount > 0, steps < 2000 {
+            engine.tick(display: display, dt: 1.0 / 120.0)
+            steps += 1
+        }
+        #expect(engine.activeCount == 0)
+        #expect(applies.last?.frame == final)
+        #expect(applies.last?.setSize == true)
     }
 }

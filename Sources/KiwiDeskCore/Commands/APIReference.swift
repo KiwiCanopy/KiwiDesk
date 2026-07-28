@@ -98,6 +98,7 @@ public enum APIReference {
             "set_on_space_change", "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
+            "set_grow_policy", "set_grow_rate",
         ],
         "stack": [
             "promote", "demote",
