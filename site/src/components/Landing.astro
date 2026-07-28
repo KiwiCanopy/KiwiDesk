@@ -908,6 +908,10 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
             rel="noopener">{t.footer_github}</a>
+          {/* Legal links stay visible in every mode — the Impressum
+              must be reachable from every page (§ 5 DDG). */}
+          <a href={`${homeHref}impressum`}>{t.footer_impressum}</a>
+          <a href={`${homeHref}datenschutz`}>{t.footer_privacy}</a>
         </nav>
         <p class="footer__copy">{t.footer_copy}</p>
         {/* Low-key maker credit — the maker's personal profile,

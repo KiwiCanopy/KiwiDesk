@@ -1,18 +1,44 @@
 ---
 // Docs (Starlight) Footer override. Renders Starlight's default
 // footer chrome (pagination, last-updated, edit link) unchanged,
-// then appends one quiet parent-brand copyright so the docs
-// surface carries the same KiwiCanopy identity as the landing and
-// guide (#317) — matching the marketing footer's `© 2026
-// KiwiCanopy`, unlinked, at the low-emphasis `--sl-color-gray-3`
-// weight Starlight uses for its own footer metadata so it reads as
-// footer chrome rather than a brand mark. The credit string is the
-// same `footer_copy` the landing/guide footers use (docs are
-// English-only, so en.json is the single source) — no third
-// hand-maintained copy of the brand line.
+// then appends the legal links (Impressum / Datenschutz — must be
+// reachable from every page) and one quiet parent-brand copyright
+// so the docs surface carries the same KiwiCanopy identity as the
+// landing and guide (#317) — matching the marketing footer's
+// `© 2026 KiwiCanopy`, unlinked, at the low-emphasis
+// `--sl-color-gray-3` weight Starlight uses for its own footer
+// metadata so it reads as footer chrome rather than a brand mark.
+// The credit string is the same `footer_copy` the landing/guide
+// footers use (docs are English-only, so en.json is the single
+// source) — no third hand-maintained copy of the brand line.
 import Default from "@astrojs/starlight/components/Footer.astro";
 import en from "../i18n/en.json";
 ---
 
 <Default {...Astro.props}><slot /></Default>
+<nav class="kiwicanopy-legal" aria-label={en.footer_nav_aria}>
+  <a href="/impressum">{en.footer_impressum}</a>
+  <span aria-hidden="true">·</span>
+  <a href="/datenschutz">{en.footer_privacy}</a>
+</nav>
 <p class="kiwicanopy-credit">{en.footer_copy}</p>
+
+<style>
+  .kiwicanopy-legal {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: var(--sl-text-xs);
+  }
+  .kiwicanopy-legal a {
+    color: var(--sl-color-gray-3);
+  }
+  .kiwicanopy-legal a:hover {
+    color: var(--sl-color-accent);
+  }
+  .kiwicanopy-legal span {
+    color: var(--sl-color-gray-4);
+  }
+</style>
