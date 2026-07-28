@@ -270,6 +270,7 @@
   "general.login_item.switch": "Ouvrir KiwiDesk à l’ouverture de session",
   "general.login_item.title": "Ouverture de session",
   "general.login_item.unavailable": "Déplacez KiwiDesk dans votre dossier Applications pour activer cette option.",
+  "general.login_item.unavailable_binary": "Disponible uniquement avec l’app KiwiDesk.",
   "help.button": "Aide",
   "help.button.for": "Aide : %1$@",
   "help.button.hint": "Affiche une explication de ce réglage.",

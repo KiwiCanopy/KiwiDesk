@@ -1014,10 +1014,13 @@ Items directly is reflected without a second source of truth. A
 a jump to Login Items, reusing onboarding's "asked, not yet
 confirmed" shape. `.notFound` is the *pre-registration* state
 macOS reports for `mainApp`, so it reads as off-but-registerable,
-not as an error — only a copy that genuinely cannot register (a
-Gatekeeper-translocated download, or a bare non-bundled binary)
-greys the control (grey, don't hide) with a "move to Applications"
-caption. This is deliberately separate from the
+not as an error. A copy that genuinely cannot register greys out
+(grey, don't hide), and its caption names the fix for the specific
+cause: **move to Applications** for a Gatekeeper-translocated
+download, **run the packaged app** for a bare non-bundled binary
+(the device-QA `.build/release` path). The registerability check
+is a *location* fact, evaluated before the OS status, so it holds
+even if a prior install left a stale registration. This is deliberately separate from the
 `kiwidesk service` LaunchAgent + `KeepAlive`, which solves a
 different problem (crash-restart supervision) `SMAppService` does
 not offer for the main app. The two overlap on one point: that

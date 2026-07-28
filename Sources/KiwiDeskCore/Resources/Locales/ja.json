@@ -270,6 +270,7 @@
   "general.login_item.switch": "ログイン時にKiwiDeskを開く",
   "general.login_item.title": "ログイン",
   "general.login_item.unavailable": "これを有効にするには、KiwiDeskを「アプリケーション」フォルダに移動してください。",
+  "general.login_item.unavailable_binary": "KiwiDeskアプリを実行しているときのみ利用できます。",
   "help.button": "ヘルプ",
   "help.button.for": "ヘルプ: %1$@",
   "help.button.hint": "この設定の説明を表示します。",

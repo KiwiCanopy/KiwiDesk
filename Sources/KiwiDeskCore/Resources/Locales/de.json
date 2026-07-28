@@ -270,6 +270,7 @@
   "general.login_item.switch": "KiwiDesk beim Anmelden öffnen",
   "general.login_item.title": "Anmeldung",
   "general.login_item.unavailable": "Bewege KiwiDesk in deinen Programme-Ordner, um dies zu aktivieren.",
+  "general.login_item.unavailable_binary": "Nur verfügbar, wenn die KiwiDesk-App ausgeführt wird.",
   "help.button": "Hilfe",
   "help.button.for": "Hilfe: %1$@",
   "help.button.hint": "Zeigt eine Erklärung dieser Einstellung.",

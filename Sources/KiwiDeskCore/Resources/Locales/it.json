@@ -270,6 +270,7 @@
   "general.login_item.switch": "Apri KiwiDesk all’accesso",
   "general.login_item.title": "Accesso",
   "general.login_item.unavailable": "Sposta KiwiDesk nella cartella Applicazioni per attivarlo.",
+  "general.login_item.unavailable_binary": "Disponibile solo eseguendo l’app KiwiDesk.",
   "help.button": "Aiuto",
   "help.button.for": "Aiuto: %1$@",
   "help.button.hint": "Mostra una spiegazione di questa impostazione.",

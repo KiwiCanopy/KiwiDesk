@@ -270,6 +270,7 @@
   "general.login_item.switch": "Abrir o KiwiDesk ao iniciar a sessão",
   "general.login_item.title": "Início de sessão",
   "general.login_item.unavailable": "Mova o KiwiDesk para a pasta Aplicativos para ativar isto.",
+  "general.login_item.unavailable_binary": "Disponível apenas ao executar o app KiwiDesk.",
   "help.button": "Ajuda",
   "help.button.for": "Ajuda: %1$@",
   "help.button.hint": "Mostra uma explicação deste ajuste.",

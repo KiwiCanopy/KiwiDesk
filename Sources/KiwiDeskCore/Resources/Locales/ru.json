@@ -270,6 +270,7 @@
   "general.login_item.switch": "Открывать KiwiDesk при входе",
   "general.login_item.title": "Вход",
   "general.login_item.unavailable": "Переместите KiwiDesk в папку «Программы», чтобы включить эту функцию.",
+  "general.login_item.unavailable_binary": "Доступно только при запуске приложения KiwiDesk.",
   "help.button": "Справка",
   "help.button.for": "Справка: %1$@",
   "help.button.hint": "Показывает пояснение к этой настройке.",

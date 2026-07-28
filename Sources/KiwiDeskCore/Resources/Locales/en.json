@@ -270,6 +270,7 @@
   "general.login_item.switch": "Open KiwiDesk at Login",
   "general.login_item.title": "Login",
   "general.login_item.unavailable": "Move KiwiDesk to your Applications folder to turn this on.",
+  "general.login_item.unavailable_binary": "Available only when running the KiwiDesk app.",
   "help.button": "Help",
   "help.button.for": "Help: %1$@",
   "help.button.hint": "Shows an explanation of this setting.",

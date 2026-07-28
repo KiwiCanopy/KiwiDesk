@@ -270,6 +270,7 @@
   "general.login_item.switch": "登录时打开 KiwiDesk",
   "general.login_item.title": "登录",
   "general.login_item.unavailable": "将 KiwiDesk 移到“应用程序”文件夹以开启此功能。",
+  "general.login_item.unavailable_binary": "仅在运行 KiwiDesk 应用时可用。",
   "help.button": "帮助",
   "help.button.for": "帮助：%1$@",
   "help.button.hint": "显示此设置的说明。",

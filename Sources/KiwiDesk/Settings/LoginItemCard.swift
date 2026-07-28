@@ -47,7 +47,7 @@ struct LoginItemCard: View {
                             + "from the moment you sign in."
                     )
                 )
-                .disabled(state == .unavailable)
+                .disabled(isUnavailable)
                 caption
             }
         }
@@ -57,6 +57,12 @@ struct LoginItemCard: View {
                 for: NSApplication.didBecomeActiveNotification
             )
         ) { _ in refresh() }
+    }
+
+    /// Any `.unavailable(_)` reason greys the switch out.
+    private var isUnavailable: Bool {
+        if case .unavailable = state { return true }
+        return false
     }
 
     /// On = enabled or awaiting approval; writing routes through the
@@ -90,19 +96,31 @@ struct LoginItemCard: View {
                 }
                 .controlSize(.small)
             }
-        case .unavailable:
-            Text(
+        case .unavailable(.translocated):
+            unavailableCaption(
                 L(
                     "general.login_item.unavailable",
                     "Move KiwiDesk to your Applications folder "
                         + "to turn this on."
                 )
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        case .unavailable(.notBundled):
+            unavailableCaption(
+                L(
+                    "general.login_item.unavailable_binary",
+                    "Available only when running the KiwiDesk app."
+                )
+            )
         case .enabled, .notRegistered:
             EmptyView()
         }
+    }
+
+    /// Shared styling for the two greyed-state captions.
+    private func unavailableCaption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     private func refresh() {

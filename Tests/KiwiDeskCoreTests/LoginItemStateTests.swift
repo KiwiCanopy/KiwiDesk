@@ -34,10 +34,10 @@ struct LoginItemStateTests {
         )
     }
 
-    @Test("registerable-location gate discriminates the cases")
-    func registerableLocation() {
-        // A normal /Applications bundle is registerable, so its
-        // `.notFound` reads as "turn it on", not greyed.
+    @Test("unavailable-reason gate discriminates the three cases")
+    func unavailableReason() {
+        // A normal /Applications bundle is registerable (nil), so
+        // its `.notFound` reads as "turn it on", not greyed.
         let app = URL(fileURLWithPath: "/Applications/KiwiDesk.app")
         // A Gatekeeper-translocated copy is terminal: registering
         // would point the item at an ephemeral randomized path.
@@ -51,14 +51,16 @@ struct LoginItemStateTests {
         let bareBinary = URL(
             fileURLWithPath: "/Users/me/.build/release"
         )
-        #expect(LoginItemManager.isRegisterable(bundleURL: app))
         #expect(
-            !LoginItemManager.isRegisterable(
-                bundleURL: translocated
-            )
+            LoginItemManager.unavailableReason(for: app) == nil
         )
         #expect(
-            !LoginItemManager.isRegisterable(bundleURL: bareBinary)
+            LoginItemManager.unavailableReason(for: translocated)
+                == .translocated
+        )
+        #expect(
+            LoginItemManager.unavailableReason(for: bareBinary)
+                == .notBundled
         )
     }
 
@@ -69,6 +71,7 @@ struct LoginItemStateTests {
         #expect(LoginItemState.enabled.isOn)
         #expect(LoginItemState.requiresApproval.isOn)
         #expect(!LoginItemState.notRegistered.isOn)
-        #expect(!LoginItemState.unavailable.isOn)
+        #expect(!LoginItemState.unavailable(.notBundled).isOn)
+        #expect(!LoginItemState.unavailable(.translocated).isOn)
     }
 }

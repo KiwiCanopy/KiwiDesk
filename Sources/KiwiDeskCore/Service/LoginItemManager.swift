@@ -36,27 +36,34 @@ public enum LoginItemManager {
     /// download — and there `.notFound` is terminal, so it surfaces
     /// as `.unavailable` (fix: move the app to Applications).
     public static var current: LoginItemState {
-        let status = SMAppService.mainApp.status
-        let registerable = isRegisterable(
-            bundleURL: Bundle.main.bundleURL
-        )
-        if status == .notFound, !registerable {
-            return .unavailable
+        // Location first, unconditionally: a copy at a path that
+        // can't be a stable login item (a bare binary, or a
+        // Gatekeeper-translocated read-only download) is
+        // `.unavailable` whatever `SMAppService` reports — even if
+        // a prior install left a stale registration. Only a
+        // registerable location consults the live status.
+        if let reason = unavailableReason(for: Bundle.main.bundleURL) {
+            return .unavailable(reason)
         }
-        return state(from: status)
+        return state(from: SMAppService.mainApp.status)
     }
 
-    /// Whether a bundle at `url` is somewhere `SMAppService` can
-    /// register it: a real `.app` macOS has not translocated to a
-    /// read-only randomized path. A bare binary launched directly
-    /// (its bundle URL is the containing dir, not an `.app`) or a
-    /// translocated copy cannot register — the terminal `.notFound`
-    /// that greys the control, as opposed to the ordinary
-    /// pre-registration one. Pure over its argument so all three
-    /// cases are unit-testable without touching the real bundle.
-    static func isRegisterable(bundleURL url: URL) -> Bool {
-        guard url.pathExtension == "app" else { return false }
-        return !url.path.contains("/AppTranslocation/")
+    /// Why the bundle at `url` cannot register, or `nil` when it
+    /// can. A bare binary launched directly (its bundle URL is the
+    /// containing dir, not an `.app`) is `.notBundled`; a
+    /// Gatekeeper-translocated `.app` at a read-only randomized path
+    /// is `.translocated`; a normal `.app` returns `nil`, so its
+    /// `.notFound` is read as the ordinary pre-registration state.
+    /// Pure over its argument so all three cases are unit-testable
+    /// without touching the real bundle.
+    static func unavailableReason(
+        for url: URL
+    ) -> LoginItemUnavailable? {
+        guard url.pathExtension == "app" else { return .notBundled }
+        if url.path.contains("/AppTranslocation/") {
+            return .translocated
+        }
+        return nil
     }
 
     /// Registers or unregisters the app as a login item and returns
@@ -89,21 +96,24 @@ public enum LoginItemManager {
         SMAppService.openSystemSettingsLoginItems()
     }
 
-    /// Pure mapping from the OS status to our four-case model, kept
-    /// separate so it is unit-testable without touching the real
+    /// Pure mapping from the OS status to our model, kept separate
+    /// so it is unit-testable without touching the real
     /// registration. `.notFound` folds to `.notRegistered` — it is
     /// the pre-registration state for `mainApp`, so a registerable
     /// app should offer to turn it on, not grey out (the terminal
-    /// `.notFound` is caught by the location check in `current`).
-    /// A genuinely unknown future case folds to `.unavailable`:
-    /// grey out rather than lie about an on/off it cannot honor.
+    /// `.notFound` is caught by the location check in `current`,
+    /// which is the only path that produces `.unavailable`). A
+    /// genuinely unknown future status also folds to
+    /// `.notRegistered`: offer to enable rather than grey with a
+    /// location caption that would not fit — a failed `register()`
+    /// then logs and re-reads, flipping the switch back cleanly.
     static func state(from status: SMAppService.Status) -> LoginItemState {
         switch status {
         case .enabled: return .enabled
         case .notRegistered: return .notRegistered
         case .requiresApproval: return .requiresApproval
         case .notFound: return .notRegistered
-        @unknown default: return .unavailable
+        @unknown default: return .notRegistered
         }
     }
 }
@@ -119,15 +129,27 @@ public enum LoginItemState: Equatable, Sendable {
     /// System Settings ▸ Login Items. The toggle reads on (it
     /// reflects intent) with a status line + a jump button.
     case requiresApproval
-    /// Registration cannot succeed from where the app is running —
-    /// a Gatekeeper-translocated download or a bare non-bundled
-    /// binary — so the toggle greys out (grey, don't hide, #171)
-    /// and the caption points at the fix: move to Applications.
-    case unavailable
+    /// Registration cannot succeed from where the app is running,
+    /// so the toggle greys out (grey, don't hide, #171). The
+    /// associated reason picks the caption — the two causes need
+    /// different fixes.
+    case unavailable(LoginItemUnavailable)
 
     /// Whether the switch shows as on. `.requiresApproval` counts as
     /// on: the user said yes, macOS just hasn't confirmed.
     public var isOn: Bool {
         self == .enabled || self == .requiresApproval
     }
+}
+
+/// Why `SMAppService` can't register the running copy — each maps to
+/// a different caption at the GUI boundary (#96), because the fix
+/// differs.
+public enum LoginItemUnavailable: Equatable, Sendable {
+    /// A bare executable with no `.app` wrapper — the device-QA
+    /// `.build/release` path. Fix: run the packaged app.
+    case notBundled
+    /// A Gatekeeper-translocated read-only copy (a still-quarantined
+    /// download run in place). Fix: move it to Applications.
+    case translocated
 }
