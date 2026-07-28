@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "Abrir Ajustes del Sistema",
   "onboarding.grant.title": "Activar Accesibilidad",
   "onboarding.grant.waiting": "Esperando el permiso…",
-  "onboarding.ready.body": "KiwiDesk ya está organizando tus ventanas con valores sensatos. Abre los Ajustes y aplica un ajuste preestablecido para tu configuración; a partir de ahí puedes afinar lo que quieras. Siempre puedes volver aquí desde la barra de menús.",
+  "onboarding.ready.body": "KiwiDesk ya está organizando tus ventanas con ajustes predeterminados sensatos. Abre Ajustes y aplica un preajuste para tu configuración — luego ajusta con detalle lo que quieras desde ahí. Siempre puedes volver aquí desde la barra de menús — o pulsa ⌃⌥K para ver una guía rápida de atajos de teclado.",
   "onboarding.ready.not_now": "Ahora no",
   "onboarding.ready.open_at_login": "Abrir KiwiDesk cuando inicie sesión",
   "onboarding.ready.open_settings": "Abrir Ajustes",

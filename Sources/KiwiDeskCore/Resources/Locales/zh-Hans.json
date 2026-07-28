@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "打开系统设置",
   "onboarding.grant.title": "启用辅助功能",
   "onboarding.grant.waiting": "正在等待授权…",
-  "onboarding.ready.body": "KiwiDesk 已按合理的默认值整理你的窗口。打开“设置”并套用适合你的预设，然后即可从那里细致调整。你随时可以从菜单栏回到这里。",
+  "onboarding.ready.body": "KiwiDesk 已经在用合理的默认设置排列您的窗口。打开“设置”并应用适合您使用场景的预设 — 然后可以从那里对任何细节进行微调。您随时可以从菜单栏回到这里 — 或按 ⌃⌥K 查看键盘快捷键速查表。",
   "onboarding.ready.not_now": "以后再说",
   "onboarding.ready.open_at_login": "登录时打开 KiwiDesk",
   "onboarding.ready.open_settings": "打开设置",

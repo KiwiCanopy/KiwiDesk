@@ -496,7 +496,7 @@
   "onboarding.grant.open_settings": "Ouvrir Réglages Système",
   "onboarding.grant.title": "Activer l'Accessibilité",
   "onboarding.grant.waiting": "En attente de l'autorisation…",
-  "onboarding.ready.body": "KiwiDesk organise déjà vos fenêtres avec des réglages sensés. Ouvrez les Réglages et appliquez un préréglage adapté à votre configuration, puis affinez ce que vous voulez à partir de là. Vous pouvez toujours revenir ici depuis la barre des menus.",
+  "onboarding.ready.body": "KiwiDesk organise déjà vos fenêtres avec des réglages par défaut pertinents. Ouvrez les Réglages et appliquez un préréglage adapté à votre configuration — puis affinez tout ce que vous voulez à partir de là. Vous pouvez revenir ici à tout moment depuis la barre des menus — ou appuyer sur ⌃⌥K pour afficher un aide-mémoire des raccourcis clavier.",
   "onboarding.ready.not_now": "Pas maintenant",
   "onboarding.ready.open_at_login": "Ouvrir KiwiDesk à ma connexion",
   "onboarding.ready.open_settings": "Ouvrir les Réglages",

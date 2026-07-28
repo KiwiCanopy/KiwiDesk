@@ -311,7 +311,8 @@ struct OnboardingView: View {
             sensible defaults. Open Settings and apply a \
             preset for your setup — then fine-tune anything \
             from there. You can always get back here from the \
-            menu bar.
+            menu bar — or press ⌃⌥K for a shortcuts \
+            cheat-sheet.
             """
         )
     }
