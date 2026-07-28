@@ -379,6 +379,10 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       }
       .sec {
         margin-top: 2.25rem;
+        /* landing.css gives every bare <section> large marketing padding-block;
+           these legal sections are plain prose, so reset it — otherwise huge
+           vertical gaps open between numbered sections. */
+        padding-block: 0;
       }
       .sec h2 {
         margin: 0;
