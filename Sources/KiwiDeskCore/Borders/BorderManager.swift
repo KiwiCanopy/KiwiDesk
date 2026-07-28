@@ -76,6 +76,27 @@ public final class BorderManager {
     var skyLightActive = false
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = { _ in }
+    /// Whether OUR OWN animation currently drives this window
+    /// (#594). Wired to `AnimationEngine.isAnimating`; while
+    /// true, the per-tick commanded frame owns the ring — the
+    /// WS stream and the AX echo both trail it on slow-AX apps
+    /// — so `follow`'s echo path and the WS `reconcile` stand
+    /// down. A no-op default keeps the manager testable in
+    /// isolation.
+    var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
+    /// WindowServer bounds read behind `reconcile` — injectable
+    /// so tests can hand the manager deterministic bounds
+    /// without a live SkyLight connection.
+    var readWindowBounds: @MainActor (WindowID) -> CGRect? = { id in
+        guard let connection = SkyLight.connection,
+            let getBounds = SkyLight.getWindowBounds
+        else { return nil }
+        var frame = CGRect.zero
+        guard
+            getBounds(connection, id.raw, &frame) == .success
+        else { return nil }
+        return frame
+    }
     /// Tee of every WindowServer bounds re-read (`reconcile`) —
     /// the live-tracking hot path AX echoes lag behind. Wired
     /// to the sticky mark so it follows a dragged window at
@@ -171,22 +192,44 @@ public final class BorderManager {
         }
     }
 
-    /// Animation / AX-echo hot path: move an already-shown ring to
-    /// a window's current frame — UNLESS the WindowServer event
-    /// stream is already tracking it, since a coalesced AX echo
-    /// would rewind the ring behind the live WS bounds. This one
-    /// guard is the whole invariant, so no caller can forget it
-    /// (was hand-mirrored across three call sites). A no-op for
-    /// windows without a ring.
-    public func follow(_ id: WindowID, windowFrame: CGRect) {
-        guard !usesWindowServerTracking(id) else { return }
-        apply(id, windowFrame: windowFrame)
+    /// Animation / AX-echo hot path: move an already-shown ring
+    /// to a window's current frame. The guards live here, once,
+    /// so no caller can forget them (#285) — but they differ by
+    /// source. An AX echo stands down while the WindowServer
+    /// stream tracks the ring (a coalesced echo would rewind it
+    /// behind the live WS bounds), and also while OUR OWN
+    /// animation drives the window (#594): the echo trails the
+    /// commanded frame by 100–300 ms on slow-AX apps, so it
+    /// would drag the ring behind the motion. The per-tick
+    /// animation frame is the leading truth mid-flight and
+    /// always applies. A no-op for windows without a ring.
+    public func follow(
+        _ id: WindowID,
+        windowFrame: CGRect,
+        source: FollowSource
+    ) {
+        switch source {
+        case .animationTick:
+            apply(id, windowFrame: windowFrame)
+        case .axEcho:
+            guard !usesWindowServerTracking(id),
+                !isAnimating(id)
+            else { return }
+            apply(id, windowFrame: windowFrame)
+        }
+    }
+
+    /// The frame a window's ring last rendered against, for
+    /// tests that need to prove `follow` stood down (or didn't).
+    func lastFrame(_ id: WindowID) -> CGRect? {
+        overlays[id]?.lastRenderedFrame
     }
 
     /// Unguarded reposition — the WS bounds re-read (`reconcile`)
     /// and the steady-state `sync` own the ring's frame directly,
-    /// so they bypass the WS-tracking guard on `follow`.
-    private func apply(
+    /// so they bypass the guards on `follow`. Internal, not
+    /// private: `reconcile` lives in the `+SkyLight` extension.
+    func apply(
         _ id: WindowID,
         windowFrame: CGRect,
         restoreVisibility: Bool = false
@@ -216,30 +259,6 @@ public final class BorderManager {
             ?? GeometryUtils.systemWindowCornerRadius
         cornerRadii[id] = resolved
         return resolved
-    }
-
-    /// Re-reads the authoritative WindowServer bounds after a mouse
-    /// drag. Floating windows do not retile, so their final ring must
-    /// be reconciled explicitly on button-up.
-    @discardableResult
-    func reconcile(
-        _ id: WindowID,
-        restoreVisibility: Bool = true
-    ) -> Bool {
-        guard let connection = SkyLight.connection,
-            let getBounds = SkyLight.getWindowBounds
-        else { return false }
-        var frame = CGRect.zero
-        guard
-            getBounds(connection, id.raw, &frame) == .success
-        else { return false }
-        apply(
-            id,
-            windowFrame: frame,
-            restoreVisibility: restoreVisibility
-        )
-        onFrameReconciled(id, frame)
-        return true
     }
 
     /// Retires every ring at once. Used on shutdown (`stop()`)

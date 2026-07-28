@@ -61,11 +61,13 @@ public final class TilingEngine {
 
     /// Tee off every animated frame (AX coords), fired per tick
     /// from `AnimationEngine.apply`. Wired to the focus border
-    /// overlays as the AX/AppKit fallback so a ring stays glued to
-    /// its window mid-slide; healthy WindowServer tracking ignores
-    /// this commanded frame and reads the real bounds instead. A
-    /// no-op by default. The instant `setFrame` path does not tee;
-    /// its AX or WindowServer geometry event updates the ring.
+    /// overlays so a ring stays glued to its window mid-slide:
+    /// mid-animation this commanded frame is the leading truth —
+    /// the WindowServer stream and AX echo both trail it on
+    /// slow-AX apps (#594) — so it drives the ring even under
+    /// healthy WS tracking. A no-op by default. The instant
+    /// `setFrame` path does not tee; its AX or WindowServer
+    /// geometry event updates the ring.
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 

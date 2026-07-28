@@ -112,7 +112,11 @@ struct StickyChipManagerEntryPointTests {
         // WS-tracked: the laggy AX-echo `follow` must NOT move the
         // mark (the WS `reposition` owns the frame). Without the
         // guard this call would advance `lastFrame` to `moved`.
-        manager.follow(WindowID(1), windowFrame: moved)
+        manager.follow(
+            WindowID(1),
+            windowFrame: moved,
+            source: .axEcho
+        )
         #expect(manager.lastFrame(WindowID(1)) != moved)
         // The unguarded WS path always advances it.
         manager.reposition(WindowID(1), windowFrame: moved)
@@ -120,7 +124,55 @@ struct StickyChipManagerEntryPointTests {
         // And untracked, the AX echo is free to move it again.
         manager.isWindowServerTracked = { _ in false }
         let axFrame = CGRect(x: 5, y: 5, width: 5, height: 5)
-        manager.follow(WindowID(1), windowFrame: axFrame)
+        manager.follow(
+            WindowID(1),
+            windowFrame: axFrame,
+            source: .axEcho
+        )
         #expect(manager.lastFrame(WindowID(1)) == axFrame)
+    }
+
+    @Test("Animation tick drives the mark even under WS tracking")
+    func animationTickAppliesUnderTracking() {
+        let manager = StickyMarkManager()
+        let tick = CGRect(x: 40, y: 40, width: 400, height: 300)
+        manager.sync([spec(1)])
+        manager.isWindowServerTracked = { _ in true }
+        manager.isAnimating = { _ in true }
+        // Mid-animation the commanded per-tick frame leads the
+        // WS bounds on slow-AX apps (#594) — it must move the
+        // mark even while the stream claims the window.
+        manager.follow(
+            WindowID(1),
+            windowFrame: tick,
+            source: .animationTick
+        )
+        #expect(manager.lastFrame(WindowID(1)) == tick)
+    }
+
+    @Test("AX echo stands down while our animation drives it")
+    func axEchoSuppressedWhileAnimating() {
+        let manager = StickyMarkManager()
+        let echo = CGRect(x: 7, y: 7, width: 7, height: 7)
+        manager.sync([spec(1)])
+        // Stream down (AX fallback), but our animation owns the
+        // window: the trailing echo must not rewind the mark
+        // behind the per-tick frames (#594).
+        manager.isWindowServerTracked = { _ in false }
+        manager.isAnimating = { $0 == WindowID(1) }
+        manager.follow(
+            WindowID(1),
+            windowFrame: echo,
+            source: .axEcho
+        )
+        #expect(manager.lastFrame(WindowID(1)) != echo)
+        // Settled: the echo path resumes.
+        manager.isAnimating = { _ in false }
+        manager.follow(
+            WindowID(1),
+            windowFrame: echo,
+            source: .axEcho
+        )
+        #expect(manager.lastFrame(WindowID(1)) == echo)
     }
 }

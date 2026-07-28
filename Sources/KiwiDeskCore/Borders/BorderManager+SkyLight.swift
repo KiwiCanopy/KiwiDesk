@@ -77,6 +77,32 @@ extension BorderManager {
         }
     }
 
+    /// Re-reads the authoritative WindowServer bounds (the drag
+    /// stream, unhide). Floating windows do not retile, so their
+    /// final ring must be reconciled on button-up. Stands down
+    /// while OUR OWN animation drives the window (#594): the WS
+    /// bounds trail the commanded per-tick frame on slow-AX
+    /// apps, so mid-animation every event would rewind the ring
+    /// behind the motion. The first WS event after settle
+    /// reconciles any residual drift.
+    @discardableResult
+    func reconcile(
+        _ id: WindowID,
+        restoreVisibility: Bool = true
+    ) -> Bool {
+        guard !isAnimating(id) else { return false }
+        guard let frame = readWindowBounds(id) else {
+            return false
+        }
+        apply(
+            id,
+            windowFrame: frame,
+            restoreVisibility: restoreVisibility
+        )
+        onFrameReconciled(id, frame)
+        return true
+    }
+
     func updateSkyLightSubscription(
         _ borderWanted: Set<WindowID>
     ) {

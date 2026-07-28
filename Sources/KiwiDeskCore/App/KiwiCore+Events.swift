@@ -59,10 +59,19 @@ extension KiwiCore {
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already
-            // tracks the ring (#285), so an AX echo can't rewind it
-            // behind the live bounds — the guard lives there, once.
-            borders.follow(id, windowFrame: frame)
-            stickyMarks.follow(id, windowFrame: frame)
+            // tracks the ring (#285) and while our own animation
+            // drives the window (#594), so a laggy AX echo can't
+            // rewind it — the guards live there, once.
+            borders.follow(
+                id,
+                windowFrame: frame,
+                source: .axEcho
+            )
+            stickyMarks.follow(
+                id,
+                windowFrame: frame,
+                source: .axEcho
+            )
             // A genuine user move (not the echo of our own
             // frame-set) supersedes a pending stash restore:
             // the user took the window over, so the captured
@@ -77,8 +86,16 @@ extension KiwiCore {
             }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
-            borders.follow(id, windowFrame: frame)
-            stickyMarks.follow(id, windowFrame: frame)
+            borders.follow(
+                id,
+                windowFrame: frame,
+                source: .axEcho
+            )
+            stickyMarks.follow(
+                id,
+                windowFrame: frame,
+                source: .axEcho
+            )
             // Same policy as .windowMoved above: a genuine
             // user resize takes the window over.
             if !tiler.didRecentlySetFrame(id),

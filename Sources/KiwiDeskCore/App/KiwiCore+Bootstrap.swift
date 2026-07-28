@@ -53,9 +53,28 @@ extension KiwiCore {
             self?.strandDetector.windowSettled(id, target: target)
         }
         tiler.onFrameApplied = { [weak self] id, frame in
-            self?.borders.follow(id, windowFrame: frame)
-            self?.stickyMarks
-                .follow(id, windowFrame: frame)
+            self?.borders.follow(
+                id,
+                windowFrame: frame,
+                source: .animationTick
+            )
+            self?.stickyMarks.follow(
+                id,
+                windowFrame: frame,
+                source: .animationTick
+            )
+        }
+        // Mid-animation the commanded tick frame leads the real
+        // bounds on slow-AX apps (#594): while this answers
+        // true, the AX-echo follows and the WS reconcile stand
+        // down so the ring and mark ride the tick, not the lag.
+        borders.isAnimating = { [weak self] id in
+            self?.tiler.animation.isAnimating(window: id)
+                ?? false
+        }
+        stickyMarks.isAnimating = { [weak self] id in
+            self?.tiler.animation.isAnimating(window: id)
+                ?? false
         }
 
         socket.handler = { [weak self] command, args in

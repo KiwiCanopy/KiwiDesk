@@ -49,6 +49,17 @@ public final class StickyMarkManager {
         false
     }
 
+    /// Whether OUR OWN animation currently drives this window —
+    /// wired to `AnimationEngine.isAnimating` (the ring's guard,
+    /// mirrored, #594). While true the per-tick commanded frame
+    /// owns the mark, so the AX-echo `follow` stands down; the
+    /// WS `reposition` tee already stands down upstream (the
+    /// ring's `reconcile` gate). A no-op default keeps the
+    /// manager testable in isolation.
+    public var isAnimating: @MainActor (WindowID) -> Bool = { _ in
+        false
+    }
+
     public init() {}
 
     /// Windows currently wearing the mark — the contract
@@ -90,13 +101,28 @@ public final class StickyMarkManager {
     }
 
     /// AX-echo / animation hot path: re-corner an already-shown
-    /// mark on a fresh frame — UNLESS the WindowServer stream
-    /// already tracks it, since a coalesced AX echo would rewind
-    /// the mark behind the live WS bounds (the ring's `follow`
-    /// guard, mirrored). A no-op for unmarked windows.
-    public func follow(_ id: WindowID, windowFrame: CGRect) {
-        guard !isWindowServerTracked(id) else { return }
-        overlays[id]?.update(frame: windowFrame)
+    /// mark on a fresh frame (the ring's `follow` guards,
+    /// mirrored). An AX echo stands down while the WindowServer
+    /// stream tracks the window (a coalesced echo would rewind
+    /// the mark behind the live WS bounds) and while our own
+    /// animation drives it (#594 — the echo trails the commanded
+    /// frame on slow-AX apps). The per-tick animation frame is
+    /// the leading truth mid-flight and always applies. A no-op
+    /// for unmarked windows.
+    public func follow(
+        _ id: WindowID,
+        windowFrame: CGRect,
+        source: FollowSource
+    ) {
+        switch source {
+        case .animationTick:
+            overlays[id]?.update(frame: windowFrame)
+        case .axEcho:
+            guard !isWindowServerTracked(id),
+                !isAnimating(id)
+            else { return }
+            overlays[id]?.update(frame: windowFrame)
+        }
     }
 
     /// Unguarded reposition — the WindowServer bounds re-read
