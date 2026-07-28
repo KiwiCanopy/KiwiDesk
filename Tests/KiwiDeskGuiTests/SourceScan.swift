@@ -2,6 +2,7 @@ import Foundation
 
 /// Stateless primitives shared by the source-scanning parity
 /// guards: the catalog guards (`SettingsCatalogSiteTests`,
+/// `SettingsCatalogArgumentTests`,
 /// `SettingsAnchorPrimitiveTests`), `DiscardGateParityTests`,
 /// `GreyOutParityTests`, and the two bounds-routing guards
 /// (`VisibleBoundsRoutingTests`, `LayoutBoundsRoutingTests`) —

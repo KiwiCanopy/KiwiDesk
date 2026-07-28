@@ -99,38 +99,7 @@ struct SettingsSection<Content: View>: View {
 
     private var core: some View {
         VStack(alignment: .leading, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    HStack(spacing: 6) {
-                        if let symbol {
-                            Image(systemName: symbol)
-                                .foregroundStyle(.secondary)
-                        }
-                        Text(title)
-                    }
-                    .font(
-                        subsection
-                            ? .subheadline.weight(.semibold)
-                            : .headline
-                    )
-                    if let help {
-                        HelpButton(
-                            explanation: help,
-                            subject: title
-                        )
-                    }
-                }
-                if let caption {
-                    Text(caption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            // A catalog-declared section is a search anchor by
-            // existing (#277) — its `SettingsControl` supplies
-            // the stable id. The wash marks the heading; the
-            // scroll target is the whole card (`body`).
-            .searchFlash(anchorID ?? "")
+            flashedHeader
             VStack(alignment: .leading, spacing: 8) {
                 content
             }
@@ -147,6 +116,51 @@ struct SettingsSection<Content: View>: View {
                         )
                     )
             )
+        }
+    }
+
+    /// A catalog-declared section is a search anchor by existing
+    /// (#277) — its `SettingsControl` supplies the stable id. The
+    /// wash marks the heading; the scroll target is the whole
+    /// card (`body`). Both halves read the one `anchorID`, and
+    /// the unanchored String init takes neither: an earlier cut
+    /// flashed on `anchorID ?? ""`, a sentinel that no reveal can
+    /// ever name and that reads as a second, disagreeing id.
+    @ViewBuilder private var flashedHeader: some View {
+        if let anchorID {
+            header.searchFlash(anchorID)
+        } else {
+            header
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                HStack(spacing: 6) {
+                    if let symbol {
+                        Image(systemName: symbol)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(title)
+                }
+                .font(
+                    subsection
+                        ? .subheadline.weight(.semibold)
+                        : .headline
+                )
+                if let help {
+                    HelpButton(
+                        explanation: help,
+                        subject: title
+                    )
+                }
+            }
+            if let caption {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }

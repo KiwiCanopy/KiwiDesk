@@ -155,4 +155,27 @@ extension View {
         modifier(SearchRevealFlash(anchor: anchor))
     }
 
+    /// The whole pairing for a **self-anchoring control** — a
+    /// bespoke recognition control that is its own scroll target,
+    /// with no header/card split to place the two halves across
+    /// (`GapRow`'s slider rows, `BarEditorPicker`'s bar chips).
+    /// Wash and target are the same rect: there is no expanded
+    /// content below to tint by accident, which is the only
+    /// reason `SettingsSection` and `SettingsDisclosure` split
+    /// them at all.
+    ///
+    /// It takes the descriptor rather than an id so both halves
+    /// come from one `SettingsControl`, which is what closes the
+    /// two silent failures a hand-written pair allows: an id
+    /// typed as a literal (a scroll target no search result
+    /// points at) and a forgotten half (a flash with nowhere to
+    /// scroll, or the reverse). Neither crashes — the hit simply
+    /// lands nowhere — so the type is the guard, and
+    /// `SettingsAnchorPrimitiveTests` keeps the raw halves out of
+    /// call sites that could re-grow the mistake.
+    func settingsAnchor(
+        _ control: SettingsControl
+    ) -> some View {
+        self.searchFlash(control.id).searchAnchor(control.id)
+    }
 }

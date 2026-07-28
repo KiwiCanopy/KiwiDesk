@@ -5,6 +5,7 @@ import Foundation
 // `sectionHeaderKeys`, `searchAnchorKeys`, `anchorSiteKeys`,
 // `lKeys`) were retired with the hand-maintained index they
 // guarded — the catalog guards (`SettingsCatalogSiteTests`,
+// `SettingsCatalogArgumentTests`,
 // `SettingsAnchorPrimitiveTests`) scan primitive call shapes
 // and catalog references instead.
 //

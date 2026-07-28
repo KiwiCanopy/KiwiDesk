@@ -7,7 +7,11 @@ import Testing
 /// unique, surfaces fit their destinations, and the drawer
 /// containment that drives auto-expand is real. Pure data tests
 /// over `SettingsCatalog.entries(of:)` — the source-scanning
-/// guards live in `SettingsCatalogSiteTests`.
+/// guards live in `SettingsCatalogSiteTests` (every declaration
+/// is rendered), `SettingsCatalogArgumentTests` (every anchor
+/// primitive is fed a declaration) and
+/// `SettingsAnchorPrimitiveTests` (the raw halves stay confined
+/// and paired).
 @Suite("Settings catalog")
 struct SettingsCatalogTests {
     private var allEntries: [(SettingsDestination, SettingsIndexEntry)] {

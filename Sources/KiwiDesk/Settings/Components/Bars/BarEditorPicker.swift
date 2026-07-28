@@ -43,7 +43,6 @@ struct BarEditorPicker: View {
     ) -> some View {
         let selected = selection == editor
         let title = editor.displayName
-        let anchor = control(editor).id
         return Button {
             selection = editor
         } label: {
@@ -69,18 +68,17 @@ struct BarEditorPicker: View {
                         lineWidth: 2
                     )
             )
-            // Flash the chip when its bar name is the search hit;
-            // the wash sits behind the chip's own fill.
-            .searchFlash(anchor)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
-        // Scroll target for a bar-name search — the switch sits at
-        // the top of the pane, so a hit lands the user there.
-        .searchAnchor(anchor)
+        // Self-anchoring: a bar-name search lands on the switch
+        // (it sits at the top of the pane) and washes the chip.
+        // `.plain` gives the button its label's own frame, so the
+        // wash still sits behind the chip's fill from out here.
+        .settingsAnchor(control(editor))
     }
 
     /// A row of app-icon tiles, one ringed active.
