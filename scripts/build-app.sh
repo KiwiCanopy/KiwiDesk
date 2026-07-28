@@ -45,8 +45,28 @@ SKIP_BUILD=0
 ALLOW_NO_ICON=0
 MAKE_DMG=0
 
+usage() {
+    cat <<'EOF'
+Assemble KiwiDesk.app from the release build (#89).
+
+Usage: scripts/build-app.sh [options]
+
+  --identity <id>    Signing identity. Omit to use the sole
+                     "Developer ID Application" in the keychain,
+                     falling back to "-" (ad-hoc) when none.
+  --notarize <prof>  Submit to Apple and staple, via a notarytool
+                     keychain profile (needs a Developer ID).
+  --output <dir>     Where to write the bundle (default .build/app).
+  --skip-build       Reuse the existing release build.
+  --dmg              Also wrap the bundle in a disk image.
+  --allow-no-icon    Proceed even if actool cannot compile the icon.
+  -h, --help         Show this help and exit.
+EOF
+}
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        -h|--help) usage; exit 0 ;;
         --identity|--notarize|--output)
             # Named, because `set -u` alone would report only a
             # bare "$2: unbound variable".
