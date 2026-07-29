@@ -167,4 +167,84 @@ struct TrackModeIntegrationTests {
         // Window 1 starts a track of its own.
         #expect(space.trackBreaks.contains(WindowID(1)))
     }
+
+    @Test("floating spawn under own_track heals to its own track")
+    func floatingSpawnOwnTrackHeals() {
+        let core = makeCore()
+        core.state.trackParams.newWindow = .ownTrack
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "A")
+            )
+        )
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.state.workspaces.setMode(space, .track)
+        // A same-app sibling arrives float-classified (the
+        // late-title Electron shape, #160)...
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(2),
+                    pid: 1,
+                    appName: "A",
+                    isFloating: true
+                )
+            )
+        )
+        // ...carrying a dormant break, like the mode-entry seed
+        // gives every window.
+        #expect(
+            core.state.workspaces[space]?.trackBreaks
+                .contains(WindowID(2)) == true
+        )
+        // The float re-check heals it to tiled: it opens its own
+        // track instead of merging into window 1's.
+        core.state.apply(.windowFloatChanged(WindowID(2), isFloating: false))
+        let healed = core.state.workspaces[space]!
+        #expect(
+            TrackLayout.counts(
+                of: healed.windows,
+                breaks: healed.trackBreaks,
+                cap: 0
+            ) == [1, 1]
+        )
+    }
+
+    @Test("floating spawn under focused_track stays markerless")
+    func floatingSpawnFocusedTrackJoins() {
+        let core = makeCore()
+        // Default rule: fill-then-spill.
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "A")
+            )
+        )
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.state.workspaces.setMode(space, .track)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(2),
+                    pid: 1,
+                    appName: "A",
+                    isFloating: true
+                )
+            )
+        )
+        // No dormant break: joining by array position when it
+        // tiles is what `focused_track` means.
+        #expect(
+            core.state.workspaces[space]?.trackBreaks
+                .contains(WindowID(2)) == false
+        )
+        core.state.apply(.windowFloatChanged(WindowID(2), isFloating: false))
+        let healed = core.state.workspaces[space]!
+        #expect(
+            TrackLayout.counts(
+                of: healed.windows,
+                breaks: healed.trackBreaks,
+                cap: 0
+            ) == [2]
+        )
+    }
 }

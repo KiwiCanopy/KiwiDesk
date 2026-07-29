@@ -196,18 +196,20 @@ public struct StateCoordinator: Sendable {
                 ?? workspaces.activeSpace
             if let target {
                 let mode = workspaces[target]?.mode ?? .bsp
-                if mode == .track, !window.isFloating {
-                    let params =
-                        (trackParams.override[target]
+                let track =
+                    mode == .track
+                    ? (trackParams.override[target]
                         ?? TrackOverride())
                         .resolved(onto: trackParams)
+                    : nil
+                if let track, !window.isFloating {
                     workspaces.add(
                         window.id,
                         to: target,
-                        trackRule: params.newWindow,
-                        trackPosition: params.newWindowPosition,
+                        trackRule: track.newWindow,
+                        trackPosition: track.newWindowPosition,
                         spillCapacity: trackCapacities[target],
-                        trackCap: params.trackCap,
+                        trackCap: track.trackCap,
                         isTiled: { [windows] in
                             windows[$0]?.isFloating == false
                         }
@@ -220,6 +222,21 @@ public struct StateCoordinator: Sendable {
                             ?? spawnPlacements[mode]
                             ?? .afterFocused
                     )
+                    // A floating window spawned into an
+                    // `own_track` space carries a dormant break
+                    // marker, matching what the mode-entry seed
+                    // gives every window (`setMode`): when a
+                    // float re-check heals it to tiled (#160),
+                    // it opens its own track at its slot instead
+                    // of silently merging into its array
+                    // neighbor's track. `focused_track` stays
+                    // markerless — joining by position is that
+                    // rule's meaning.
+                    if track?.newWindow == .ownTrack {
+                        workspaces.withSpace(target) {
+                            $0.trackBreaks.insert(window.id)
+                        }
+                    }
                 }
                 workspaces.focus(window.id, in: target)
             }
