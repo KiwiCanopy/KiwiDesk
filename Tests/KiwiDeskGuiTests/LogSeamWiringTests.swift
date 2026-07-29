@@ -6,10 +6,10 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents is **nothing happening.** A seam
-/// whose default is a no-op, left unassigned, lets its
+/// The failure this prevents used to be **nothing happening.** A
+/// seam whose default was a no-op, left unassigned, let its
 /// subsystem compile, ship, run, and throw its diagnostics away.
-/// Nothing reds, nothing warns, and the only symptom is a log
+/// Nothing red, nothing warned, and the only symptom was a log
 /// line that was never going to appear, missed months later by
 /// whoever needed it. #599 was findable because a spring
 /// divergence was loud; #611 named the same trap — an
@@ -19,6 +19,16 @@ import Testing
 /// since it was written, six seams wired beside it in the same
 /// function. The omission cost nothing to make and showed
 /// nowhere.
+///
+/// Since #624 every seam defaults to `CoreLog.write`, so an
+/// unwired one reaches syslog on its way past instead of being
+/// dropped — kept honest by `LogSeamDefaultTests`, which is what
+/// this suite's argument now rests on. That is a smaller
+/// failure, not the absence of one, and it is why this guard
+/// stays: an unwired seam still bypasses `KiwiCore.onLog`, and
+/// so the test capture below and the GUI console that sink's own
+/// comment anticipates. Read the two together — this suite says
+/// *wired*, that one says *would be loud if it weren't*.
 ///
 /// **The lens, not the list.** Both ends are discovered: the seam
 /// owners by scanning every Swift file in the target for
@@ -47,6 +57,15 @@ import Testing
 ///   a red naming what it could not resolve: an unrecognised
 ///   assignment shape, a receiver whose type is ambiguous or
 ///   undeclared, a seam whose enclosing type the walk missed.
+///
+/// **Its completeness rests on a sibling.** This suite has no
+/// floor of its own: narrow `SourceScan.swiftSources` and it
+/// stops covering a subsystem while passing, because a seam that
+/// is never scanned is never required to be wired.
+/// `LogSeamDefaultTests` carries the floor for the seam-shaped
+/// half of the family and `LogSeamSinkTests` the per-directory
+/// one — do not delete either believing this suite is
+/// self-sufficient.
 ///
 /// It lives in the GUI test target purely because `SourceScan`
 /// does — `VisibleBoundsRoutingTests` makes the same trade. It
@@ -82,7 +101,8 @@ struct LogSeamWiringTests {
     /// instead of quietly excusing a real one.
     private let allowed: [String: String] = [
         // The sink, not a seam: what every other seam forwards
-        // *to*. It defaults to NSLog rather than to a no-op, and
+        // *to*. It carries the same `CoreLog.write` default they
+        // do, which is where their forwarded lines end up, and
         // wiring it to itself would recurse.
         "KiwiCore": "the syslog sink every other seam feeds"
     ]
@@ -91,7 +111,10 @@ struct LogSeamWiringTests {
     func everySeamReachesTheSink() throws {
         let sources = try SourceScan.swiftSources(under: coreRoot)
         var unresolved: [String] = []
-        let owners = try seamOwners(in: sources, gaps: &unresolved)
+        let owners = try seamOwners(
+            in: SourceScan.logSeamDeclarations(under: coreRoot),
+            gaps: &unresolved
+        )
         let wired = try wiredOwners(
             properties: try storedProperties(in: sources),
             gaps: &unresolved
@@ -145,30 +168,28 @@ struct LogSeamWiringTests {
 
     // MARK: - Discovery
 
-    /// The type enclosing each `var onLog:` declaration. The
-    /// colon is load-bearing: without it a future `onLogLevel`
-    /// registers as a seam and demands a wiring it has no use
-    /// for.
+    /// The type enclosing each `var onLog:` declaration.
+    ///
+    /// The walk itself is `SourceScan.logSeamDeclarations`, shared
+    /// with `LogSeamDefaultTests` — which reads the *default* off
+    /// the same declarations this reads the *owner* off. Two
+    /// copies of one needle would let the guards drift into
+    /// disagreeing about which seams exist; that helper's doc
+    /// comment carries the argument.
     private func seamOwners(
-        in sources: [URL],
+        in declarations: [LogSeamDeclaration],
         gaps: inout [String]
     ) throws -> Set<String> {
         var owners: Set<String> = []
-        for file in sources {
-            let lines = try strippedLines(of: file)
-            let enclosing = SourceScan.enclosingTypes(of: lines)
-            for index in lines.indices
-            where lines[index].contains("var onLog:") {
-                guard let owner = enclosing[index] else {
-                    gaps.append(
-                        "the type declaring `var onLog` at "
-                            + "\(file.lastPathComponent):"
-                            + "\(index + 1)"
-                    )
-                    continue
-                }
-                owners.insert(owner)
+        for declaration in declarations {
+            guard let owner = declaration.owner else {
+                gaps.append(
+                    "the type declaring `var onLog` at "
+                        + declaration.site
+                )
+                continue
             }
+            owners.insert(owner)
         }
         return owners
     }
@@ -285,14 +306,5 @@ struct LogSeamWiringTests {
             }
         }
         return index
-    }
-
-    private func strippedLines(
-        of file: URL
-    ) throws -> [Substring] {
-        SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(separator: "\n", omittingEmptySubsequences: false)
     }
 }

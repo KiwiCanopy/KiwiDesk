@@ -12,9 +12,10 @@ import Testing
 /// say it did.
 ///
 /// The last test is the one that matters most and is easiest to
-/// forget: a seam that is declared but never wired logs nothing
-/// in production while every unit test that sets it by hand stays
-/// green. `SocketServer.onLog` is already in that state.
+/// forget: a seam that is declared but never wired bypasses the
+/// sink in production while every unit test that sets it by hand
+/// stays green. `SocketServer.onLog` sat unwired from the day it
+/// was written until #622.
 @Suite("Animation net logging")
 @MainActor
 struct AnimationNetLoggingTests {
@@ -100,9 +101,10 @@ struct AnimationNetLoggingTests {
     func engineLogReachesTheCore() {
         // Every other assertion here sets `engine.onLog` by hand,
         // so all of them stay green if `KiwiCore+Bootstrap` stops
-        // connecting it — and then both nets go silent in
-        // production, which is the exact failure this issue
-        // exists to end. Assert the wiring, not just the seam.
+        // connecting it — and then both nets report past the sink
+        // (`CoreLog.write`, #624) rather than into it, so nothing
+        // the GUI console would show carries them. Assert the
+        // wiring, not just the seam.
         let core = makeTestCore()
         var logs: [String] = []
         core.onLog = { logs.append($0) }
