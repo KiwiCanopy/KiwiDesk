@@ -115,6 +115,17 @@ the tag matches the binary" step in
 when it fires, against a mislabelled download when it does not
 exist.
 
+**A version is three integers — no prerelease suffix.** `0.9.0-rc1`
+is valid SemVer and cannot be a `CFBundleVersion`, which takes 1-3
+dot-separated integers and nothing else. Both `bump-version.sh`
+and `build-app.sh` enforce a shape, and the *narrower* one has to
+run first: the packager only sees the version after
+`scripts/release.sh` has pushed the tag, and a fetched tag cannot
+be withdrawn. So widening what `bump-version.sh` accepts, without
+widening what `build-app.sh` can package, buys a release that
+fails on the far side of the one irreversible step.
+`ScriptStampTests` holds the accepted shape.
+
 **Its verification gate mirrors the `verify-gate` skill, and a
 change to one updates the other.** AGENTS.md §3 gives that skill
 the procedure, and `scripts/release.sh` deliberately re-states it

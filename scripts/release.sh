@@ -190,6 +190,12 @@ fi
 
 echo "==> committing"
 git add "$VERSION_FILE"
+# Whether THIS run created a commit. The decline path below prints
+# an undo, and `git reset --hard HEAD~1` is destructive in the
+# already-stamped case: HEAD is then a commit that is already on
+# origin/main, so the undo would discard an unrelated pushed
+# commit and leave local main behind the remote.
+COMMITTED=0
 if git diff --cached --quiet; then
     # The tree already declares this version, so there is nothing
     # to commit and `git commit` would exit 1 on "nothing to
@@ -207,6 +213,7 @@ else
     # which would also drop the lint and locale checks.
     KIWIDESK_ALLOW_MAIN_COMMIT=1 \
         git commit -m "chore(release): stamp version $VERSION"
+    COMMITTED=1
 fi
 # Either the commit carries the stamp or there was none to make.
 # Nothing left to revert, so the handler must not run.
@@ -221,7 +228,11 @@ git tag -a "$TAG" -m "KiwiDesk $VERSION"
 if [ "$ASSUME_YES" -eq 0 ]; then
     echo
     echo "About to push to origin:"
-    echo "  commit  $(git rev-parse --short HEAD) on main"
+    if [ "$COMMITTED" -eq 1 ]; then
+        echo "  commit  $(git rev-parse --short HEAD) on main"
+    else
+        echo "  commit  none (already stamped)"
+    fi
     echo "  tag     $TAG"
     echo
     echo "Pushing the tag starts the release workflow and cannot"
@@ -231,9 +242,21 @@ if [ "$ASSUME_YES" -eq 0 ]; then
     case "$reply" in
         [yY]|[yY][eE][sS]) ;;
         *)
-            echo "not pushed. The commit and tag are local:"
-            echo "  git push origin main && git push origin $TAG"
-            echo "  git tag -d $TAG && git reset --hard HEAD~1"
+            # The undo has to branch on what this run actually did.
+            # Printing `reset --hard HEAD~1` when no commit was
+            # made would throw away whatever HEAD already was — and
+            # in the already-stamped path that is a commit sitting
+            # on origin/main.
+            if [ "$COMMITTED" -eq 1 ]; then
+                echo "not pushed. The commit and tag are local:"
+                echo "  git push origin main &&" \
+                     "git push origin $TAG"
+                echo "  git tag -d $TAG && git reset --hard HEAD~1"
+            else
+                echo "not pushed. Only the tag is local:"
+                echo "  git push origin $TAG"
+                echo "  git tag -d $TAG"
+            fi
             exit 0
             ;;
     esac
@@ -243,7 +266,17 @@ fi
 # at an object that is not on main, and if the branch push were
 # then rejected the tag would be the only reference to it.
 echo "==> pushing main"
-git push origin main
+# Same courtesy as the tag push below: a bare re-run after this
+# fails dies at the "level with origin/main" precondition, which
+# describes the symptom and not the fix.
+if ! git push origin main; then
+    echo >&2
+    echo "error: could not push main, so the tag was not pushed" \
+         "either. Both are still local — resolve the push (pull," \
+         "or check access) and re-run:" >&2
+    echo "  git push origin main && git push origin $TAG" >&2
+    exit 1
+fi
 echo "==> pushing $TAG"
 # The one partial state this script can end in, so it names the
 # way out. A bare re-run would refuse at the local-tag

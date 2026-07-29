@@ -105,11 +105,20 @@ jobs:
           # tag off main is by definition one it did not make —
           # and "someone tagged by hand" is the threat this whole
           # step models.
-          if git rev-parse -q --verify origin/main >/dev/null; then
-            if ! git merge-base --is-ancestor HEAD origin/main; then
-              echo "::error::$TAG is not an ancestor of main."
-              exit 1
-            fi
+          if ! git rev-parse -q --verify origin/main >/dev/null; then
+            # Fatal, not skipped. origin/main resolves only because
+            # `fetch-depth: 0` above fetches the remote branches;
+            # trimming that for speed would turn this assertion
+            # into a silent no-op, and a guard that cannot fail is
+            # worse than no guard — it reads as protection.
+            echo "::error::origin/main did not resolve, so the" \
+                 "tag-on-main check could not run. The checkout" \
+                 "needs fetch-depth: 0."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::$TAG is not an ancestor of main."
+            exit 1
           fi
           echo "tag and binary agree on $EXPECTED"
 
@@ -132,10 +141,13 @@ jobs:
       # falls back to an ad-hoc signature, so the pipeline is
       # provable before any credential exists.
       #
-      # All FOUR notarization secrets are checked, not just the
-      # key: setting three of them takes the notarize branch and
-      # fails inside `store-credentials`, burning a tag's whole
-      # run for a missing string this step could have named.
+      # Every secret the notarize branch goes on to use is checked
+      # here, not just the key: setting all but one takes that
+      # branch and fails inside `store-credentials`, burning a
+      # tag's whole run for a missing string this step could have
+      # named. The list below is the count — restating it as a
+      # number in this sentence would be a second copy to keep in
+      # step (rule-authoring.md).
       - name: Detect signing credentials
         id: creds
         env:
@@ -257,9 +269,11 @@ jobs:
           fi
 
       - name: Build the app
+        env:
+          NOTARIZE: ${{ steps.creds.outputs.notarize }}
         run: |
           ARGS=(--zip --output "$RUNNER_TEMP/app")
-          if [ "${{ steps.creds.outputs.notarize }}" = "true" ]; then
+          if [ "$NOTARIZE" = "true" ]; then
             ARGS+=(--notarize kiwidesk-ci)
           fi
           ./scripts/build-app.sh "${ARGS[@]}"
@@ -318,6 +332,10 @@ jobs:
           name: ${{ steps.archive.outputs.artifact }}
           path: ${{ steps.archive.outputs.path }}
           retention-days: 90
+          # A UI "Re-run all jobs" reuses the run id, and v4
+          # rejects a duplicate artifact name — after the whole
+          # build has already been paid for.
+          overwrite: true
 
       # DRAFT, deliberately and not as a placeholder. A published
       # release asset is a channel a user can install from, and
@@ -339,20 +357,35 @@ jobs:
           ARCHIVE: ${{ steps.archive.outputs.path }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
-            # Drop BOTH names before uploading, not just the one
-            # being written. The prescribed sequence — prove the
+            # Drop every archive that is not the one being written,
+            # because `--clobber` only replaces an asset of the
+            # SAME name. The prescribed sequence — prove the
             # pipeline with no secrets, add credentials, re-run —
-            # changes the archive's NAME (`-unnotarized.zip` to
-            # `.zip`), and `--clobber` only replaces an asset of
-            # the same name. Without this the draft ends up
-            # carrying the un-notarized archive alongside the good
-            # one, and the naming convention that stops a SCRIPT
-            # reaching for the wrong file does nothing about a
-            # human publishing a draft with both hanging off it.
-            for stale in "KiwiDesk-$VERSION.zip" \
-                         "KiwiDesk-$VERSION-unnotarized.zip"; do
-              gh release delete-asset "$TAG" "$stale" --yes \
-                2>/dev/null || true
+            # changes the archive's name (`-unnotarized.zip` to
+            # `.zip`), so without this the draft ends up carrying
+            # the un-notarized archive alongside the good one. The
+            # naming convention stops a SCRIPT reaching for the
+            # wrong file; it does nothing about a human publishing
+            # a draft with both hanging off it.
+            #
+            # Read from the release rather than rebuilding the two
+            # names from $VERSION: "Locate the archive" above takes
+            # the name off disk precisely because reconstructing it
+            # is how a ticketless artifact gets attached under a
+            # clean one, and a rebuilt list here would silently
+            # match nothing the day build-app.sh's scheme changes.
+            KEEP="$(basename "$ARCHIVE")"
+            gh release view "$TAG" --json assets \
+              --jq '.assets[].name' | while IFS= read -r asset; do
+              case "$asset" in
+                *.zip)
+                  if [ "$asset" != "$KEEP" ]; then
+                    echo "dropping stale asset: $asset"
+                    gh release delete-asset "$TAG" "$asset" --yes \
+                      || true
+                  fi
+                  ;;
+              esac
             done
             gh release upload "$TAG" "$ARCHIVE" --clobber
           else
