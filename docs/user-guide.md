@@ -278,6 +278,29 @@ in app preferences only (`UserDefaults`, key `"language"`) — it
 never flips the app to raw-editor mode. To add or fix a
 translation, see [translating.md](translating.md).
 
+## When Things Act Up: Discard & Reset
+
+The tail of **General ▸ Advanced** holds two escape hatches, in
+ascending severity:
+
+- **Discard Saved Window Arrangement** — clears the arrangement
+  KiwiDesk remembered from your last session or wake (the hidden
+  snapshot files and the in-memory memory of which window
+  belonged to which space), without changing any settings. Use it
+  when windows come back in the wrong spaces or positions after a
+  restart or wake. No confirmation: the files regenerate from the
+  live state within seconds, so there is nothing lasting to lose.
+- **Reset All Settings…** — the last resort when KiwiDesk keeps
+  misbehaving. After a confirmation, it deletes every saved
+  profile, your spaces, layouts, and keybindings, forgets any
+  remembered arrangement, and starts over with the starter
+  defaults — the same state as a first launch. Kept, always: your
+  `init.lua` (on a Lua-owned setup its settings simply stay
+  authoritative), your color-palette library, the display
+  language, the login item, and onboarding (it does not re-run).
+  The old `gui.json` and profiles folder go to the **Trash**, so
+  one drag undoes a mistaken reset.
+
 ## The gui.json File
 
 The file `~/.config/KiwiDesk/gui.json` holds the app's global base
@@ -1192,10 +1215,21 @@ interaction.
 
 ### Wake & Restart
 
-- **Restore on wake** (checkbox): when your Mac wakes from sleep,
-  restore the previous window arrangement.
+Lua-only (`enable_wake_restore`, `set_wake_restore_delay` — see
+the [Lua reference](lua-reference.md)); there is no GUI control:
+
+- **Restore on wake**: when your Mac wakes from sleep or the
+  screen unlocks, restore the window arrangement captured when
+  it went to rest (on by default).
 - **Wake restore delay** (ms): how long to wait after wake before
-  restoring (default 1500 ms, giving apps time to settle).
+  restoring (default 1500 ms, giving displays time to settle).
+
+A wake restore is skipped when the display set changed while the
+Mac was asleep (say, you undocked) — the arrangement belongs to
+the old displays, so the monitor-change profile switch takes over
+instead. If a restore ever leaves things looking wrong, **General
+▸ Advanced ▸ Discard Saved Window Arrangement** clears the
+remembered arrangement without touching any settings.
 
 ### On Quit
 
@@ -1210,7 +1244,11 @@ so their title bars remain reachable.
   standard 5: 2×2 up to 20 windows · 3×3 up to 45 · 4×4 above 45).
 
 When you quit or restart KiwiDesk, it saves window order and focus
-per virtual space and restores on next launch. On the way out,
+per virtual space and restores on next launch. That restore only
+replays a snapshot taken since your Mac last booted — after a
+reboot every saved window id belongs to a window that no longer
+exists, so the snapshot is discarded and windows are rediscovered
+fresh. On the way out,
 each monitor's windows are spread into an evenly-filled grid —
 windows take turns claiming a cell, and windows sharing a cell
 cascade so every title bar stays clickable. The desktop is usable

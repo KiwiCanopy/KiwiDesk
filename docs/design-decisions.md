@@ -3003,6 +3003,39 @@ is baked at rasterization time rather than tinted at runtime.
 constraint both went in #479, which split the fused path.)
 
 
+### Recovery escape hatches
+
+**[Principle]**
+
+**A reset clears app-generated state, never authored content or
+app-level preferences** (#634). The two General ▸ Advanced
+hatches delete what KiwiDesk wrote for itself — `gui.json`,
+profiles, the arrangement snapshots — and always keep what the
+user made or chose: `init.lua`, the palette library, the display
+language, the login item, the onboarding flag. A panic button
+that can destroy user-authored work turns recovery into loss at
+exactly the moment trust is lowest; the boundary is what makes
+the button safe to press under stress. Corollaries that fall out
+of it, rather than separate rulings:
+
+- The label is **"Reset All Settings…"**, mirroring iOS
+  (config wiped, content kept) — never "Total reset" or
+  "Factory reset", which over-promise the moment `init.lua`
+  visibly survives.
+- Onboarding does **not** re-run: the person resetting is an
+  existing user fixing a live problem, not a newcomer.
+- The deleted files go to the **Trash**, not a bespoke backup
+  folder — one drag undoes a mistaken reset, and a dated-backup
+  subsystem would be new state the "start fresh" action then
+  fails to clean up.
+- The tier-1 **Discard Saved Window Arrangement** confirms
+  nothing: it is strictly less consequential than the
+  unconfirmed single-profile delete, because the snapshots
+  regenerate from live state within one autosave cycle. The
+  tier-2 wipe confirms every time, through its own dialog —
+  never the staged-edit discard gate, which only fires while
+  dirty.
+
 ### Out of scope, on purpose
 
 **[Trade-off]**

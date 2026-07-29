@@ -26,7 +26,28 @@ public final class SleepWakeManager {
     public var restoreState: @MainActor (StateSnapshot) -> Void =
         { _ in }
 
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
+
+    /// The display topology a held snapshot belongs to,
+    /// captured beside it and re-read when the delayed restore
+    /// fires. If it changed while asleep/locked (undock,
+    /// monitor power-off), the snapshot's raw frames belong to
+    /// dead geometry and the monitor-change re-adopt that
+    /// already ran is the truth — replaying on top of it is
+    /// what scrambled wakes (#633). Compared as a sorted
+    /// multiset, never a `Set`: display *order* may shuffle
+    /// without meaning a topology change, but two identical
+    /// monitors share one fingerprint, and a `Set` would
+    /// swallow the loss of one of them — the most common
+    /// matched-pair undock. The unwired default (`[]` both
+    /// sides) compares equal, so the gate stays inert until
+    /// Bootstrap wires it; `WakeFingerprintWiringTests` probes
+    /// that wiring on a live core.
+    public var displayFingerprints: @MainActor () -> [String] = { [] }
+
     private var snapshot: StateSnapshot?
+    /// Sorted at capture; see `displayFingerprints`.
+    private var snapshotFingerprints: [String] = []
     private var restoreTask: Task<Void, Never>?
     private var tokens: [(NotificationCenter, NSObjectProtocol)] =
         []
@@ -68,6 +89,26 @@ public final class SleepWakeManager {
         restoreTask = nil
     }
 
+    /// Drops a snapshot held for a pending wake/unlock replay,
+    /// cancelling the replay — the tier-1 escape hatch's
+    /// in-flight half (#634). Observers stay armed; the next
+    /// rest/return cycle captures fresh.
+    public func dropHeldSnapshot() {
+        restoreTask?.cancel()
+        restoreTask = nil
+        snapshot = nil
+        snapshotFingerprints = []
+    }
+
+    /// Whether a rest capture is currently held for replay.
+    /// Internal observability for the tier-1 discard pin — the
+    /// replay itself hides behind an awaited `Task`, so a test
+    /// asserting "nothing replayed" synchronously passes even
+    /// when the drop is broken; this reads the held state
+    /// directly. Production must not read it: the held
+    /// snapshot's one consumer is the return leg above.
+    var holdsSnapshot: Bool { snapshot != nil }
+
     // MARK: - Internals
 
     private func observe(
@@ -91,23 +132,39 @@ public final class SleepWakeManager {
         tokens.append((center, token))
     }
 
-    private func systemWillRest() {
+    /// Internal, not private: the notification observers above
+    /// are the production trigger, and tests drive the pair
+    /// directly instead of posting to the shared centers.
+    func systemWillRest() {
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil
         snapshot = captureState()
+        snapshotFingerprints = displayFingerprints().sorted()
     }
 
-    private func systemDidReturn() {
+    func systemDidReturn() {
         guard isEnabled, let saved = snapshot else { return }
         restoreTask?.cancel()
         let delay = restoreDelayMS
         restoreTask = Task { [weak self] in
             let ns = UInt64(delay) * 1_000_000
             try? await Task.sleep(nanoseconds: ns)
-            guard !Task.isCancelled else { return }
-            self?.restoreState(saved)
-            self?.snapshot = nil
+            guard !Task.isCancelled, let self else { return }
+            // Re-read at fire time, not at wake: the delay
+            // exists precisely so the topology can finish
+            // settling first.
+            if self.displayFingerprints().sorted()
+                == self.snapshotFingerprints
+            {
+                self.restoreState(saved)
+            } else {
+                self.onLog(
+                    "wake restore skipped: display topology "
+                        + "changed while away"
+                )
+            }
+            self.snapshot = nil
         }
     }
 }

@@ -101,8 +101,11 @@ struct SnapshotTests {
             activeSpace: "mail"
         )
         // Fresh start discovers 1, 2, 3 in AX order: all land
-        // in space 1 as [1, 2, 3].
+        // in space 1 as [1, 2, 3]. The config load that
+        // precedes a session restore declared "mail" — adopt
+        // only re-files into spaces that already exist (#633).
         var state = StateCoordinator()
+        state.workspaces.ensureSpace(SpaceID("mail"))
         for id: UInt32 in [1, 2, 3] {
             state.apply(
                 .windowCreated(
@@ -146,6 +149,7 @@ struct SnapshotTests {
             activeSpace: nil
         )
         var state = StateCoordinator()
+        state.workspaces.ensureSpace(SpaceID("code"))
         state.adopt(snapshot)
         #expect(
             state.workspaces[SpaceID("code")]?.windows.isEmpty
@@ -236,5 +240,45 @@ struct SnapshotTests {
         )
         #expect(snapshot.spaces.first?.trackBreaks == [])
         #expect(snapshot.spaces.first?.trackWeights == [:])
+    }
+
+    @Test("Adopt never creates a space the config dropped")
+    func adoptSkipsMissingSpaces() {
+        // The snapshot still carries "old", but the config that
+        // loaded before this restore no longer declares it —
+        // resurrecting it here is what poisoned gui.json via
+        // syncGuiSpacesToLive after a cross-topology boot
+        // (#633).
+        let snapshot = StateSnapshot(
+            windows: [],
+            spaces: [
+                .init(
+                    space: Space(
+                        id: SpaceID("old"),
+                        mode: .stack,
+                        windows: [WindowID(1)],
+                        focused: WindowID(1)
+                    )
+                )
+            ],
+            activeSpace: "old"
+        )
+        var state = StateCoordinator()
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 100,
+                    appName: "App"
+                )
+            )
+        )
+        state.adopt(snapshot)
+        #expect(state.workspaces[SpaceID("old")] == nil)
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID(1)
+        )
+        #expect(state.workspaces.activeSpace == SpaceID(1))
     }
 }

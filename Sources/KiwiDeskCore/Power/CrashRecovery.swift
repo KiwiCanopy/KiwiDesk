@@ -15,6 +15,19 @@ public final class CrashRecovery {
         { _ in }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
+    /// A snapshot is meaningful only within the boot that
+    /// captured it (#633): WindowServer mints fresh low-integer
+    /// `CGWindowID`s per login session, so replaying a pre-boot
+    /// snapshot files random new windows into old spaces and
+    /// seeds dead ids into the remembered-space map. Both
+    /// snapshot files survive a reboot, so both readers gate on
+    /// this. The gate is scoped to the *reboot* — a logout →
+    /// login on the same boot also remints ids but is not
+    /// caught here; accepted as the rare cousin of the dominant
+    /// case. Injected so tests pin the boundary instead of
+    /// reading the host's boot clock.
+    public var bootTime: () -> Date = SystemBoot.time
+
     private let fileURL: URL
     /// Arrangement saved on CLEAN shutdown, restored on the
     /// next launch (window order per space, active space).
@@ -51,6 +64,11 @@ public final class CrashRecovery {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        // First autosave immediately, not at the interval's
+        // end: the session file was already consumed by this
+        // launch, so a crash inside the first interval would
+        // otherwise lose the arrangement entirely (#633).
+        autosave()
     }
 
     /// Clean shutdown: stop autosaving, save the arrangement
@@ -68,18 +86,40 @@ public final class CrashRecovery {
     }
 
     /// The previous session's arrangement, if any. One-shot:
-    /// reading deletes the file, so a stale session (reboot,
-    /// crash) is never applied twice.
+    /// reading deletes the file, so a session is never applied
+    /// twice — and a session captured before the current boot
+    /// is discarded outright (see `bootTime`).
     public func consumeSession() -> StateSnapshot? {
         defer {
             try? FileManager.default.removeItem(at: sessionURL)
         }
         guard let data = try? Data(contentsOf: sessionURL)
         else { return nil }
-        return try? JSONDecoder().decode(
-            StateSnapshot.self,
-            from: data
-        )
+        guard
+            let snapshot = try? JSONDecoder().decode(
+                StateSnapshot.self,
+                from: data
+            )
+        else { return nil }
+        guard snapshot.capturedAt >= bootTime() else {
+            onLog(
+                "session snapshot predates this boot; "
+                    + "discarded"
+            )
+            return nil
+        }
+        return snapshot
+    }
+
+    /// Deletes both snapshot files — the tier-1 escape hatch
+    /// (#634). Anything captured EARLIER is gone; the files
+    /// regenerate from the live state (the crash marker on the
+    /// next autosave tick, the session file at the next clean
+    /// quit), which is the point: current state, not a stale
+    /// capture.
+    public func discardSavedSnapshots() {
+        try? FileManager.default.removeItem(at: fileURL)
+        try? FileManager.default.removeItem(at: sessionURL)
     }
 
     /// Writes one snapshot now (also called by the timer).
@@ -99,9 +139,22 @@ public final class CrashRecovery {
         guard
             let data = try? Data(contentsOf: fileURL)
         else { return nil }
-        return try? JSONDecoder().decode(
-            StateSnapshot.self,
-            from: data
-        )
+        guard
+            let snapshot = try? JSONDecoder().decode(
+                StateSnapshot.self,
+                from: data
+            )
+        else { return nil }
+        guard snapshot.capturedAt >= bootTime() else {
+            // A crash file left over from before a reboot
+            // (power loss, forced shutdown) — drop it, or the
+            // dead ids replay every launch until a clean quit.
+            onLog(
+                "crash snapshot predates this boot; discarded"
+            )
+            try? FileManager.default.removeItem(at: fileURL)
+            return nil
+        }
+        return snapshot
     }
 }

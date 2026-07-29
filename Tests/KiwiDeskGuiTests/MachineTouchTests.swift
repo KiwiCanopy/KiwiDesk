@@ -274,4 +274,11 @@ struct MachineTouchTests {
             "ExecLauncher gone — retarget the tripwire needle"
         )
     }
+
 }
+
+// `resetAllSettings`' real-Trash touch needs no scan needle
+// here: its `trash` parameter has NO default (the seal — see
+// the `KiwiCore.moveToTrash` docstring), so a test that fails
+// to inject does not compile. A scan guard shipped first and
+// was retired for the stronger tier.

@@ -110,10 +110,19 @@ extension StateCoordinator {
     /// Snapshot windows that are not currently tracked (other
     /// native desktops, minimized) are remembered so they
     /// return to their space when they reappear.
+    ///
+    /// A snapshot space that no longer exists is skipped, never
+    /// created (#633): the config/profile that loaded before
+    /// this ran is the space-set authority, and an `ensureSpace`
+    /// here resurrected spaces the adopted profile had pruned —
+    /// which `syncGuiSpacesToLive` and the next profile save
+    /// then persisted, corrupting `gui.json` from a restore.
+    /// Windows filed under a skipped space stay where reconcile
+    /// put them.
     public mutating func adopt(_ snapshot: StateSnapshot) {
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
-            workspaces.ensureSpace(space)
+            guard workspaces[space] != nil else { continue }
             for raw in record.windows {
                 let id = WindowID(raw)
                 if windows[id] != nil {
@@ -134,7 +143,18 @@ extension StateCoordinator {
             // every track space to one implicit track. Dormant
             // markers on windows not (yet) tracked are harmless
             // — the partition only spans the tiled list.
-            if !record.trackBreaks.isEmpty
+            //
+            // Trigger on "the record IS a track space", not on
+            // marker non-emptiness: a track space whose windows
+            // were all merged into one track captures as
+            // empty/empty, and since `restore` re-applies the
+            // mode before this runs (#633), a mode *entry* just
+            // seeded a default partition — the empty write is
+            // what clears the seed back to the captured single
+            // track. Non-track spaces keep the non-empty
+            // trigger for their dormant markers.
+            if record.mode == .track
+                || !record.trackBreaks.isEmpty
                 || !record.trackWeights.isEmpty
             {
                 workspaces.withSpace(space) {
@@ -150,7 +170,12 @@ extension StateCoordinator {
                 }
             }
         }
-        if let active = snapshot.activeSpace {
+        // Same existence gate as the loop above: `activate`
+        // ensures its space, so an unguarded call would
+        // re-create the one space the gate just skipped.
+        if let active = snapshot.activeSpace,
+            workspaces[SpaceID(active)] != nil
+        {
             workspaces.activate(SpaceID(active))
         }
     }
