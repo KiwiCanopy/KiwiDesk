@@ -127,11 +127,18 @@ fails on the far side of the one irreversible step.
 `ScriptStampTests` holds the accepted shape.
 
 **Its verification gate mirrors the `verify-gate` skill, and a
-change to one updates the other.** AGENTS.md §3 gives that skill
-the procedure, and `scripts/release.sh` deliberately re-states it
-with the release build made unconditional — but this is the copy
-where running a *stale* gate ships an artifact, and nothing keeps
-it in step automatically.
+change to one updates the others.** AGENTS.md §3 gives that skill
+the procedure, and it is re-stated twice: `scripts/release.sh`
+runs it with the release build made unconditional, and the
+`verify` job in `release.yml` re-runs it against the pushed tag —
+the copy that catches a tag pushed by hand, which never met the
+script's (#487; branch protection cannot see tags, so the
+workflow is the only gate such a tag passes). That job skips the
+`-c release` compile for the reason its own comment argues:
+`build-app.sh` in the job after it performs that exact compile
+before anything is drafted. These are the copies where running a
+*stale* gate ships an artifact, and nothing keeps them in step
+automatically.
 
 **Stamp the commit at build time; never check one in.** A commit
 cannot contain its own SHA, so a bump made while the release

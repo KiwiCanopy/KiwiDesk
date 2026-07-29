@@ -31,52 +31,57 @@ concurrency:
   group: release-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
+# Bound once here for every job, never pasted into a `run:`
+# body. A `${{ }}` expansion is substituted BEFORE bash parses
+# the script, so a tag name carrying a quote or a newline would
+# be executed rather than read. The trust boundary is "write
+# access" — one person today — so this is hardening, not a live
+# hole; it costs nothing and removes the class.
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
 jobs:
-  release:
-    name: Build & draft release
+  # The gate scripts/release.sh runs before it will tag, re-run
+  # against the tag itself. That script is the intended way to
+  # cut a release — but a tag can also be pushed by hand,
+  # skipping the gate entirely, and branch protection cannot see
+  # tags. A bad merge to main is cheap to fix; a bad tag fans out
+  # to Homebrew and the direct download and cannot be unshipped
+  # (#487). Tests fail, nothing ships: the release job `needs:`
+  # this one.
+  #
+  # No `swift build -c release` here, although the local gate
+  # runs one unconditionally: build-app.sh in the release job
+  # compiles the same tree at -c release as its first act, before
+  # anything is signed, uploaded or drafted — the pipeline's
+  # shape already refuses to ship a tree that cannot build
+  # release, and the jobs run in sequence, so a second compile
+  # here would only lengthen the critical path.
+  verify:
+    name: Verify
     # macos-26 for the same reason ci.yml pins it: the tree uses
     # macOS 26 SDK symbols, and `if #available` gates execution,
     # not compilation.
     runs-on: macos-26
-    env:
-      # Bound once here, never pasted into a `run:` body. A
-      # `${{ }}` expansion is substituted BEFORE bash parses the
-      # script, so a tag name carrying a quote or a newline would
-      # be executed rather than read. The trust boundary is
-      # "write access" — one person today — so this is hardening,
-      # not a live hole; it costs nothing and removes the class.
-      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
-          # Needed for the "tag is on main" assertion below, which
-          # resolves origin/main. NOT for the release notes:
-          # `--generate-notes` is computed server-side by the API
-          # and reads nothing from this clone.
+          # Needed for the "tag is on main" assertion below,
+          # which resolves origin/main.
           fetch-depth: 0
 
-      # No `|| /Applications/Xcode.app` fallback, deliberately
-      # diverging from ci.yml. There the fallback is right: a test
-      # run on a slightly different toolchain still tells you
-      # something. Here the output is the artifact a user installs,
-      # and a runner-image bump would silently build it with an
-      # unannounced compiler while nothing on the artifact records
-      # which. A release is precisely the run to stop rather than
-      # let vary.
+      # The same strict pin as the release job below, and unlike
+      # ci.yml's fallback: a green Verify must vouch for the
+      # exact toolchain the artifact is then built with, so the
+      # two jobs must not be allowed to diverge.
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_26.6.app
           swift --version
           xcodebuild -version
-
-      - name: Resolve the tag
-        id: tag
-        run: |
-          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # The one guard that stops a mislabelled binary shipping.
       # The tag and KiwiDeskVersion.semantic are two hand-written
@@ -85,10 +90,12 @@ jobs:
       # silently disagree the first time someone tags by hand.
       # Failing here costs a re-tag; not failing here ships a
       # binary whose --version output names a release it is not.
+      # First in the gate, before the build: every step in this
+      # job exists to fail a bad tag fast, and this one is the
+      # cheapest.
       - name: Verify the tag matches the binary
-        env:
-          EXPECTED: ${{ steps.tag.outputs.version }}
         run: |
+          EXPECTED="${TAG#v}"
           FILE=Sources/KiwiDeskCore/App/KiwiDeskVersion.swift
           # `head -1` matches build-app.sh's extraction. This is
           # the stricter of the two guards, so it must not be the
@@ -121,6 +128,61 @@ jobs:
             exit 1
           fi
           echo "tag and binary agree on $EXPECTED"
+
+      - name: Build
+        run: swift build
+
+      - name: Lint
+        run: ./scripts/lint.sh
+
+      # Split per AGENTS.md §5: run as one `swift test` the suite
+      # stalls for minutes at the tail, because spawned exec
+      # children hold the runner's pipe. #489 tracks the root fix.
+      - name: Test
+        run: swift test --skip ExecTests
+
+      - name: Test (ExecTests)
+        run: swift test --filter ExecTests
+
+  release:
+    name: Build & draft release
+    needs: verify
+    # macos-26 for the same reason ci.yml pins it: the tree uses
+    # macOS 26 SDK symbols, and `if #available` gates execution,
+    # not compilation.
+    runs-on: macos-26
+    permissions:
+      # The draft and its assets — the one write this workflow
+      # does. Verify above runs with read only.
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          # Shallow is enough here: the tag-on-main assertion
+          # that needed origin/main (fetch-depth: 0) lives in
+          # Verify now, and the release notes read nothing from
+          # this clone — `--generate-notes` is computed
+          # server-side by the API.
+
+      # No `|| /Applications/Xcode.app` fallback, deliberately
+      # diverging from ci.yml. There the fallback is right: a test
+      # run on a slightly different toolchain still tells you
+      # something. Here the output is the artifact a user installs,
+      # and a runner-image bump would silently build it with an
+      # unannounced compiler while nothing on the artifact records
+      # which. A release is precisely the run to stop rather than
+      # let vary.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app
+          swift --version
+          xcodebuild -version
+
+      - name: Resolve the tag
+        id: tag
+        run: |
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # Not a second copy of the sed in bump-version.sh — that
       # script owns the file's shape and this calls it. HEAD is
