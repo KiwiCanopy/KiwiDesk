@@ -105,14 +105,22 @@ producing something an upload would reach for.
 
 **Cut every release with `scripts/release.sh <version>`.** The
 git tag and `KiwiDeskVersion.semantic` are two hand-written copies
-of one number, and that script is the only path that stamps the
-constant *before* creating the tag. A tag pushed by hand ships a
-binary whose `--version` names a release it is not — nothing about
-the artifact looks wrong, and the mistake is only legible to
-someone who already knows the real answer. The "Verify the tag
-matches the binary" step in the release workflow is the guard; it
-costs a re-tag when it fires, against a mislabelled download when
-it does not exist.
+of one number, and that script stamps the constant *before*
+creating the tag so the two cannot disagree. A tag pushed by hand
+ships a binary whose `--version` names a release it is not —
+nothing about the artifact looks wrong, and the mistake is only
+legible to someone who already knows the real answer. The "Verify
+the tag matches the binary" step in
+`.github/workflows/release.yml` is the guard; it costs a re-tag
+when it fires, against a mislabelled download when it does not
+exist.
+
+**Its verification gate mirrors the `verify-gate` skill, and a
+change to one updates the other.** AGENTS.md §3 gives that skill
+the procedure, and `scripts/release.sh` deliberately re-states it
+with the release build made unconditional — but this is the copy
+where running a *stale* gate ships an artifact, and nothing keeps
+it in step automatically.
 
 **Stamp the commit at build time; never check one in.** A commit
 cannot contain its own SHA, so a bump made while the release
@@ -130,16 +138,18 @@ construction.** Absent a certificate it falls through to the same
 ad-hoc branch a contributor's machine takes, so the pipeline can
 be exercised before any credential exists — and the artifact it
 produces says `-unnotarized` in its own filename rather than
-relying on a log line. `secrets` is not available in a step-level
-`if`, so their presence is lifted into a step output first; a
-future gate on a new credential extends that step rather than
-reaching for `secrets` in a condition that silently reads empty.
+relying on a log line. As of 2026-07 GitHub does not expose
+`secrets` to a step-level `if`, so their presence is lifted into a
+step output first; a future gate on a new credential extends that
+step rather than reaching for `secrets` in a condition that
+silently reads empty.
 
 **Publishing is not this file's call.** See "No distribution
 channel without an update path" in `docs/design-decisions.md`. The
-workflow drafts the release because a draft is unfetchable without
-auth — it proves the pipeline end to end without opening a channel
-that rule holds shut.
+workflow drafts the release rather than publishing it: as of
+2026-07 a draft is not fetchable without auth, so it proves the
+pipeline end to end without opening a channel that rule holds
+shut.
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

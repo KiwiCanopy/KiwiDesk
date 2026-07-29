@@ -8,9 +8,11 @@ name: Release
 on:
   push:
     tags: ['v*']
-  # Re-run a release build without re-cutting the tag — the
-  # artifact is reproducible from the tag alone, so a workflow
+  # Re-run a release build without re-cutting the tag: a workflow
   # failure never needs a throwaway version number to retry.
+  # Note this runs the workflow file from the DEFAULT branch, not
+  # from the tag — so a retry of an old tag builds that tag's
+  # source with today's pipeline.
   workflow_dispatch:
     inputs:
       tag:
@@ -18,10 +20,15 @@ on:
         required: true
 
 # Never two builds of one tag racing to draft the same release.
+# `ref_name`, NOT `ref`: a tag push gives `refs/tags/v0.9.0` while
+# a dispatch input gives `v0.9.0`, so keying on `ref` would put a
+# dispatch retry in a DIFFERENT group from the tag-push run it is
+# retrying — leaving the one collision this exists to prevent as
+# the only one it missed. `ref_name` is `v0.9.0` for both.
 # No cancel-in-progress: a half-cancelled run can leave a draft
 # holding a partial upload, and a release is cheap to wait for.
 concurrency:
-  group: release-${{ github.event.inputs.tag || github.ref }}
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -34,26 +41,41 @@ jobs:
     # macOS 26 SDK symbols, and `if #available` gates execution,
     # not compilation.
     runs-on: macos-26
+    env:
+      # Bound once here, never pasted into a `run:` body. A
+      # `${{ }}` expansion is substituted BEFORE bash parses the
+      # script, so a tag name carrying a quote or a newline would
+      # be executed rather than read. The trust boundary is
+      # "write access" — one person today — so this is hardening,
+      # not a live hole; it costs nothing and removes the class.
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
-          # The draft's notes are generated from the history
-          # since the previous tag, which a shallow clone cannot
-          # see.
+          # Needed for the "tag is on main" assertion below, which
+          # resolves origin/main. NOT for the release notes:
+          # `--generate-notes` is computed server-side by the API
+          # and reads nothing from this clone.
           fetch-depth: 0
 
+      # No `|| /Applications/Xcode.app` fallback, deliberately
+      # diverging from ci.yml. There the fallback is right: a test
+      # run on a slightly different toolchain still tells you
+      # something. Here the output is the artifact a user installs,
+      # and a runner-image bump would silently build it with an
+      # unannounced compiler while nothing on the artifact records
+      # which. A release is precisely the run to stop rather than
+      # let vary.
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app \
-            || sudo xcode-select -s /Applications/Xcode.app
+          sudo xcode-select -s /Applications/Xcode_26.6.app
           swift --version
+          xcodebuild -version
 
       - name: Resolve the tag
         id: tag
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # The one guard that stops a mislabelled binary shipping.
@@ -64,16 +86,30 @@ jobs:
       # Failing here costs a re-tag; not failing here ships a
       # binary whose --version output names a release it is not.
       - name: Verify the tag matches the binary
+        env:
+          EXPECTED: ${{ steps.tag.outputs.version }}
         run: |
           FILE=Sources/KiwiDeskCore/App/KiwiDeskVersion.swift
+          # `head -1` matches build-app.sh's extraction. This is
+          # the stricter of the two guards, so it must not be the
+          # looser of the two parses.
           COMPILED="$(sed -n \
-            's/.*let semantic = "\(.*\)".*/\1/p' "$FILE")"
-          EXPECTED="${{ steps.tag.outputs.version }}"
+            's/.*let semantic = "\(.*\)".*/\1/p' "$FILE" | head -1)"
           if [ "$COMPILED" != "$EXPECTED" ]; then
-            echo "::error::tag ${{ steps.tag.outputs.tag }} wants" \
-                 "$EXPECTED but $FILE says '$COMPILED'." \
-                 "Cut releases with scripts/release.sh."
+            echo "::error::tag $TAG wants $EXPECTED but $FILE" \
+                 "says '$COMPILED'. Cut releases with" \
+                 "scripts/release.sh."
             exit 1
+          fi
+          # release.sh refuses to cut from anywhere but main, so a
+          # tag off main is by definition one it did not make —
+          # and "someone tagged by hand" is the threat this whole
+          # step models.
+          if git rev-parse -q --verify origin/main >/dev/null; then
+            if ! git merge-base --is-ancestor HEAD origin/main; then
+              echo "::error::$TAG is not an ancestor of main."
+              exit 1
+            fi
           fi
           echo "tag and binary agree on $EXPECTED"
 
@@ -83,30 +119,42 @@ jobs:
       # stamping the commit is correct; see that script's header
       # for why the checked-in value is "unknown".
       - name: Stamp the exact build commit
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          ./scripts/bump-version.sh \
-            "${{ steps.tag.outputs.version }}" --stamp-commit
+          ./scripts/bump-version.sh "$VERSION" --stamp-commit
           git --no-pager diff --stat
 
-      # `secrets` is not available in a step-level `if`, so the
-      # presence of the certificate is lifted into an output the
-      # later steps can branch on. Absent secrets are not an
-      # error: build-app.sh falls back to an ad-hoc signature, so
-      # the pipeline is provable before any credential exists.
+      # `secrets` is not available in a step-level `if` (checked
+      # against GitHub's context-availability table, 2026-07), so
+      # their presence is lifted into an output the later steps
+      # branch on. Absent secrets are not an error: build-app.sh
+      # falls back to an ad-hoc signature, so the pipeline is
+      # provable before any credential exists.
+      #
+      # All FOUR notarization secrets are checked, not just the
+      # key: setting three of them takes the notarize branch and
+      # fails inside `store-credentials`, burning a tag's whole
+      # run for a missing string this step could have named.
       - name: Detect signing credentials
         id: creds
         env:
           CERT: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
           NOTARY_KEY: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
-          if [ -n "$CERT" ]; then
+          if [ -n "$CERT" ] && [ -n "$CERT_PASSWORD" ]; then
             echo "sign=true" >> "$GITHUB_OUTPUT"
           else
             echo "sign=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::no MACOS_CERT_P12 — building ad-hoc," \
-                 "the artifact is NOT distributable"
+            echo "::warning::no signing certificate — building" \
+                 "ad-hoc, the artifact is NOT distributable"
           fi
-          if [ -n "$CERT" ] && [ -n "$NOTARY_KEY" ]; then
+          if [ -n "$CERT" ] && [ -n "$CERT_PASSWORD" ] \
+            && [ -n "$NOTARY_KEY" ] && [ -n "$NOTARY_KEY_ID" ] \
+            && [ -n "$NOTARY_ISSUER_ID" ]; then
             echo "notarize=true" >> "$GITHUB_OUTPUT"
           else
             echo "notarize=false" >> "$GITHUB_OUTPUT"
@@ -167,7 +215,7 @@ jobs:
           # not a thing that can happen silently.
           if ! security find-identity -v -p codesigning "$KEYCHAIN" \
             | grep -q "Developer ID Application"; then
-            echo "::error::MACOS_CERT_P12 imported but no Developer" \
+            echo "::error::certificate imported but no Developer" \
                  "ID Application identity is usable — check the" \
                  "certificate type and MACOS_CERT_PASSWORD"
             exit 1
@@ -191,6 +239,22 @@ jobs:
             --key-id "$KEY_ID" \
             --issuer "$ISSUER_ID"
           rm -f "$RUNNER_TEMP/key.p8"
+          # Prove the profile reads BACK before spending a full
+          # release build on it. `store-credentials` writes to the
+          # DEFAULT keychain, which the step above deliberately
+          # did not change — so this depends on the runner's login
+          # keychain being present and unlocked, a property of the
+          # image that nothing here controls and that cannot be
+          # checked locally. Without this probe that assumption
+          # fails as a notarytool auth error ten minutes later,
+          # after the build; with it, it fails here in seconds.
+          if ! xcrun notarytool history \
+            --keychain-profile kiwidesk-ci >/dev/null 2>&1; then
+            echo "::error::the notarization profile did not read" \
+                 "back — check NOTARY_ISSUER_ID / NOTARY_KEY_ID" \
+                 "and that the key has the Developer role"
+            exit 1
+          fi
 
       - name: Build the app
         run: |
@@ -222,8 +286,12 @@ jobs:
                  "${#zips[@]} in $RUNNER_TEMP/app"
             exit 1
           fi
+          name="$(basename "${zips[0]}")"
           echo "path=${zips[0]}" >> "$GITHUB_OUTPUT"
-          echo "name=$(basename "${zips[0]}")" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          # upload-artifact zips whatever it is given, so a name
+          # ending in .zip downloads as `….zip.zip`.
+          echo "artifact=${name%.zip}" >> "$GITHUB_OUTPUT"
 
       # The acceptance criterion of #32, asserted against the
       # built binary rather than against the source it was built
@@ -232,21 +300,22 @@ jobs:
       # asks the artifact itself, so a build that silently
       # compiled a stale constant stops here.
       - name: Verify the built binary reports the release
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
           BIN="$RUNNER_TEMP/app/KiwiDesk.app/Contents/MacOS/KiwiDesk"
           OUT="$("$BIN" --version)"
           echo "kiwidesk --version -> $OUT"
           SHA="$(git rev-parse --short HEAD)"
-          EXPECTED="${{ steps.tag.outputs.version }} ($SHA)"
-          if [ "$OUT" != "$EXPECTED" ]; then
+          if [ "$OUT" != "$VERSION ($SHA)" ]; then
             echo "::error::binary reports '$OUT', expected" \
-                 "'$EXPECTED'"
+                 "'$VERSION ($SHA)'"
             exit 1
           fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.archive.outputs.name }}
+          name: ${{ steps.archive.outputs.artifact }}
           path: ${{ steps.archive.outputs.path }}
           retention-days: 90
 
@@ -266,16 +335,30 @@ jobs:
       - name: Draft the release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          ARCHIVE: ${{ steps.archive.outputs.path }}
         run: |
-          TAG="${{ steps.tag.outputs.tag }}"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" \
-              "${{ steps.archive.outputs.path }}" --clobber
+            # Drop BOTH names before uploading, not just the one
+            # being written. The prescribed sequence — prove the
+            # pipeline with no secrets, add credentials, re-run —
+            # changes the archive's NAME (`-unnotarized.zip` to
+            # `.zip`), and `--clobber` only replaces an asset of
+            # the same name. Without this the draft ends up
+            # carrying the un-notarized archive alongside the good
+            # one, and the naming convention that stops a SCRIPT
+            # reaching for the wrong file does nothing about a
+            # human publishing a draft with both hanging off it.
+            for stale in "KiwiDesk-$VERSION.zip" \
+                         "KiwiDesk-$VERSION-unnotarized.zip"; do
+              gh release delete-asset "$TAG" "$stale" --yes \
+                2>/dev/null || true
+            done
+            gh release upload "$TAG" "$ARCHIVE" --clobber
           else
-            gh release create "$TAG" \
-              "${{ steps.archive.outputs.path }}" \
+            gh release create "$TAG" "$ARCHIVE" \
               --draft \
               --prerelease \
-              --title "KiwiDesk ${{ steps.tag.outputs.version }}" \
+              --title "KiwiDesk $VERSION" \
               --generate-notes
           fi

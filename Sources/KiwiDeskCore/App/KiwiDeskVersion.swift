@@ -7,13 +7,28 @@
 /// plugins cannot run on this project's CI toolchain (see the
 /// note in `Package.swift`), and shelling out to `git` at
 /// runtime would fail for an installed binary with no `.git`
-/// nearby. `commit` is `"unknown"` for local/dev builds where
-/// the bump script has not been run since the last commit.
+/// nearby.
+///
+/// `commit` is `"unknown"` in every checked-in tree and in any
+/// build made by hand — a commit cannot contain its own SHA, so
+/// the value can only be filled in at build time, and only the
+/// release workflow builds at a point where HEAD *is* the commit
+/// being shipped (#32).
+///
+/// **Keep both declarations literally `let <name> = "<value>"`.**
+/// `scripts/bump-version.sh` rewrites them with `sed`, which
+/// matches that exact shape and exits 0 having changed nothing
+/// when it drifts — a type annotation or a wrap for the
+/// 79-column limit is enough. The script reads back what it
+/// wrote so the drift fails there rather than shipping a stale
+/// constant under a fresh tag, and `ScriptStampTests` holds that
+/// guard against the real file.
 public enum KiwiDeskVersion {
     /// Semantic version, bumped per release.
     public static let semantic = "0.1.0"
 
-    /// Short commit SHA as of the last version bump.
+    /// Short commit SHA of the build, stamped by the release
+    /// workflow; `"unknown"` in every other build.
     public static let commit = "unknown"
 
     /// `"0.1.0 (abc1234)"`, or just the version when the

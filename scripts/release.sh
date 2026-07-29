@@ -109,7 +109,17 @@ fi
 # imports remote tags, so this only differs when the remote grew
 # one mid-run — but a tag push that loses that race is rejected
 # after the commit is already on main, which is the messy half.
-if [ -n "$(git ls-remote --tags origin "$TAG")" ]; then
+#
+# The status is captured rather than tested inline. Inside an
+# `if` condition errexit is suppressed, so a transient network
+# failure would produce empty output and read as "no such tag" —
+# a guard against the messy half that fails open into it.
+if ! remote_tag="$(git ls-remote --tags origin "$TAG")"; then
+    echo "error: could not reach origin to check whether $TAG" \
+         "already exists — refusing to cut a release blind" >&2
+    exit 1
+fi
+if [ -n "$remote_tag" ]; then
     echo "error: tag $TAG already exists on origin" >&2
     exit 1
 fi
@@ -130,13 +140,26 @@ echo "==> stamping $VERSION"
 STAMPED=0
 restore_stamp() {
     set +e
-    [ "$STAMPED" -eq 1 ] && git checkout -- "$VERSION_FILE"
+    # `git checkout HEAD --`, NOT `git checkout --`. The latter
+    # restores the worktree from the INDEX, so from the moment
+    # step 4 stages the file it overwrites the stamp with itself
+    # and reverts nothing. That window is real: `git commit` runs
+    # the pre-commit hook, which lints and can fail — and the
+    # residue would be precisely the staged, modified file this
+    # handler exists to prevent, with nothing to tell the operator
+    # whose edit it was.
+    [ "$STAMPED" -eq 1 ] && git checkout HEAD -- "$VERSION_FILE"
     return 0
 }
 trap restore_stamp EXIT
 
-"$ROOT/scripts/bump-version.sh" "$VERSION"
+# Armed BEFORE the write, not after. The handler runs on SIGINT
+# too, so a Ctrl-C landing between the sed and the assignment
+# would otherwise strand a stamped file. Reverting to HEAD is
+# idempotent, so arming early costs nothing when there is nothing
+# to undo.
 STAMPED=1
+"$ROOT/scripts/bump-version.sh" "$VERSION"
 
 # ---------------------------------------------------------------
 # 3. Verify
@@ -167,14 +190,26 @@ fi
 
 echo "==> committing"
 git add "$VERSION_FILE"
-# The pre-commit hook refuses commits on main, and this is the
-# case its override exists for: a release commit belongs on main
-# by definition. Named rather than `--no-verify`, which would
-# also drop the lint and locale checks.
-KIWIDESK_ALLOW_MAIN_COMMIT=1 \
-    git commit -m "chore(release): stamp version $VERSION"
-# The commit now carries the stamp, so there is nothing left to
-# revert and the handler must not run.
+if git diff --cached --quiet; then
+    # The tree already declares this version, so there is nothing
+    # to commit and `git commit` would exit 1 on "nothing to
+    # commit" — after the whole gate has run, reading like a bug
+    # rather than a state. Two ordinary ways to get here: the tag
+    # push failed and this is the re-run, or someone deleted the
+    # tag and started over. Tag HEAD instead; the workflow's
+    # tag-match guard is satisfied either way, because the
+    # constant already says $VERSION.
+    echo "    already stamped $VERSION — tagging HEAD"
+else
+    # The pre-commit hook refuses commits on main, and this is
+    # the case its override exists for: a release commit belongs
+    # on main by definition. Named rather than `--no-verify`,
+    # which would also drop the lint and locale checks.
+    KIWIDESK_ALLOW_MAIN_COMMIT=1 \
+        git commit -m "chore(release): stamp version $VERSION"
+fi
+# Either the commit carries the stamp or there was none to make.
+# Nothing left to revert, so the handler must not run.
 STAMPED=0
 
 echo "==> tagging $TAG"
@@ -210,7 +245,18 @@ fi
 echo "==> pushing main"
 git push origin main
 echo "==> pushing $TAG"
-git push origin "$TAG"
+# The one partial state this script can end in, so it names the
+# way out. A bare re-run would refuse at the local-tag
+# precondition — technically true and unhelpful, since the fix is
+# to push the tag that already exists, not to cut another.
+if ! git push origin "$TAG"; then
+    echo >&2
+    echo "error: main was pushed but $TAG was not. The release" \
+         "commit is on origin/main; only the tag is missing, so" \
+         "re-running this script will refuse. Push it directly:" >&2
+    echo "  git push origin $TAG" >&2
+    exit 1
+fi
 
 echo
 echo "released $TAG"

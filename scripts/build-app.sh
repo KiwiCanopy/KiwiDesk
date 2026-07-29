@@ -240,9 +240,12 @@ VERSION_FILE="$ROOT/Sources/KiwiDeskCore/App/KiwiDeskVersion.swift"
 VERSION="$(sed -n 's/.*let semantic = "\(.*\)".*/\1/p' \
     "$VERSION_FILE" | head -1)"
 # CFBundleVersion accepts only 1-3 dot-separated integers, and
-# bump-version.sh permits a prerelease suffix (`0.2.0-rc1`) that
-# would be rejected downstream. plutil -lint validates XML, not
-# this, so check the shape here.
+# plutil -lint validates XML, not this. bump-version.sh is now
+# the narrower gate (three integers, no prerelease suffix), so
+# this no longer catches anything IT wrote — it catches a
+# hand-edited constant, which is the only other way this file
+# gets a value. Kept for that reason: the input here is a file
+# on disk, not an argument this script was passed.
 case "$VERSION" in
     ''|*[!0-9.]*|*..*|.*|*.|*.*.*.*)
     echo "error: '$VERSION' from $VERSION_FILE is not usable as" \
@@ -386,6 +389,53 @@ notarize_and_staple() {
     return 0
 }
 
+# The staple assertion both packaging steps need, extracted at
+# the SECOND copy rather than waiting for the third — the rule
+# file names `.pkg` and a Sparkle delta as the ones coming, and
+# the harm of two copies is specific: harden one probe and not
+# the other and the un-hardened one ships an unticketed artifact
+# under a clean name, which is exactly the failure the build
+# machine cannot see.
+#
+# Two ways to arrive here unstapled: no --notarize at all, or a
+# --notarize run followed by a bare `--skip-build --dmg`/`--zip`,
+# which re-assembles and RE-SIGNS the app (step 2 strips the
+# signature, step 5 adds it) and discards the earlier ticket.
+# Neither is detectable once the artifact exists — a
+# locally-built one carries no quarantine attribute, so it opens
+# fine on this machine and only fails after a real download.
+#
+# Sets ARTIFACT_PATH and ARTIFACT_UNTICKETED rather than echoing
+# a result: an `exit 1` inside a command substitution kills only
+# the subshell, and stopping the run IS this function's job in
+# the --notarize case.
+require_stapled_or_rename() {
+    noun="$1"          # "image" / "archive", for the warning
+    verb="$2"          # "package" / "archive", for the error
+    clean="$3"
+    unnotarized="$4"
+    ARTIFACT_UNTICKETED=0
+    ARTIFACT_PATH="$clean"
+    if xcrun stapler validate "$APP" >/dev/null 2>&1; then
+        return 0
+    fi
+    ARTIFACT_UNTICKETED=1
+    if [ -n "$NOTARY_PROFILE" ]; then
+        echo "error: $APP is not stapled even though step 6" \
+             "ran — refusing to $verb it" >&2
+        exit 1
+    fi
+    echo "warning: the app is not notarized, so this $noun is" \
+         "for local inspection only — a downloaded copy will be" \
+         "refused. Re-run with --notarize <profile>." >&2
+    # The FILE says whether it is distributable, not a warning
+    # that scrolls away. Otherwise `ls` a week later shows a
+    # normally-named release artifact Gatekeeper will reject, and
+    # a cask or an upload reaches straight for it.
+    ARTIFACT_PATH="$unnotarized"
+    return 0
+}
+
 # The ad-hoc case already exited during argument handling; this
 # function is reached only with a real identity.
 if [ -n "$NOTARY_PROFILE" ]; then
@@ -416,7 +466,6 @@ fi
 # yields a bundle that passes Gatekeeper offline on its own.
 
 if [ "$MAKE_DMG" -eq 1 ]; then
-    DMG="$OUT/KiwiDesk-$VERSION.dmg"
     # Assemble under a partial name and rename only once the
     # image is stapled. A failure between here and there would
     # otherwise leave a correctly-named, plausibly-sized, signed
@@ -429,32 +478,13 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     DMG_PARTIAL="$OUT/KiwiDesk-$VERSION-partial.dmg"
     STAGE="$OUT/dmg-staging"
 
-    # Assert what the comment above claims, rather than trusting
-    # the caller's flag order. Two ways to arrive here with an
-    # unstapled bundle: no --notarize at all, or a --notarize run
-    # followed by a bare `--skip-build --dmg`, which re-assembles
-    # and RE-SIGNS the app (step 2 removes it, step 5 signs it),
-    # discarding the ticket the earlier run stapled. Neither is
-    # detectable once the image is built: a locally-built .dmg
-    # carries no quarantine attribute, so it opens fine on this
-    # machine and only fails after a download.
-    DMG_UNTICKETED=0
-    if ! xcrun stapler validate "$APP" >/dev/null 2>&1; then
-        DMG_UNTICKETED=1
-        if [ -n "$NOTARY_PROFILE" ]; then
-            echo "error: $APP is not stapled even though step 6" \
-                 "ran — refusing to package it" >&2
-            exit 1
-        fi
-        echo "warning: the app is not notarized, so this image is" \
-             "for local inspection only — a downloaded copy will" \
-             "be refused. Re-run with --notarize <profile>." >&2
-        # Same principle as the partial name above: the FILE says
-        # whether it is distributable, not a warning that scrolls
-        # away. Otherwise `ls` a week later shows a normally-named
-        # release artifact that Gatekeeper will reject.
-        DMG="$OUT/KiwiDesk-$VERSION-unnotarized.dmg"
-    fi
+    # Asserts what the comment above claims, rather than trusting
+    # the caller's flag order.
+    require_stapled_or_rename "image" "package" \
+        "$OUT/KiwiDesk-$VERSION.dmg" \
+        "$OUT/KiwiDesk-$VERSION-unnotarized.dmg"
+    DMG="$ARTIFACT_PATH"
+    DMG_UNTICKETED="$ARTIFACT_UNTICKETED"
 
     echo "==> building $DMG"
     rm -rf "$STAGE"
@@ -526,30 +556,11 @@ fi
 # identical on this machine.
 
 if [ "$MAKE_ZIP" -eq 1 ]; then
-    ZIP="$OUT/KiwiDesk-$VERSION.zip"
-
-    # Same assertion and the same two arrival paths as step 7: no
-    # --notarize at all, or a --notarize run followed by a bare
-    # `--skip-build --zip`, which re-signs the app and discards
-    # the stapled ticket. Neither is visible after the fact — an
-    # archive built here carries no quarantine attribute, so it
-    # unpacks and runs fine locally and only fails on download.
-    ZIP_UNTICKETED=0
-    if ! xcrun stapler validate "$APP" >/dev/null 2>&1; then
-        ZIP_UNTICKETED=1
-        if [ -n "$NOTARY_PROFILE" ]; then
-            echo "error: $APP is not stapled even though step 6" \
-                 "ran — refusing to archive it" >&2
-            exit 1
-        fi
-        echo "warning: the app is not notarized, so this archive" \
-             "is for local inspection only — a downloaded copy" \
-             "will be refused. Re-run with --notarize <profile>." >&2
-        # The FILE says whether it is distributable, so that a
-        # cask or an upload cannot reach for a normally-named
-        # archive that Gatekeeper will reject.
-        ZIP="$OUT/KiwiDesk-$VERSION-unnotarized.zip"
-    fi
+    require_stapled_or_rename "archive" "archive" \
+        "$OUT/KiwiDesk-$VERSION.zip" \
+        "$OUT/KiwiDesk-$VERSION-unnotarized.zip"
+    ZIP="$ARTIFACT_PATH"
+    ZIP_UNTICKETED="$ARTIFACT_UNTICKETED"
 
     echo "==> building $ZIP"
     rm -f "$ZIP"

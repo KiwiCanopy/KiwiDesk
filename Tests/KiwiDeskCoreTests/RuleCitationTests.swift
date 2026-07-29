@@ -91,7 +91,7 @@ struct RuleCitationTests {
         }
     }
 
-    @Test("Every cited script path exists")
+    @Test("Every cited script or workflow path exists")
     func citedScriptsExist() throws {
         var missing: [String] = []
         var seen = 0
@@ -104,7 +104,17 @@ struct RuleCitationTests {
                 // them added by the commit that shipped me.
                 let path =
                     raw.hasPrefix("./") ? String(raw.dropFirst(2)) : raw
-                guard path.hasPrefix("scripts/") else { continue }
+                // `.github/workflows/` joins `scripts/` as a
+                // resolvable shape (#32). A rule now cites the
+                // release workflow as an enforcing guard, and it
+                // is the most consequential one in the tree that
+                // no local test can execute — so a citation
+                // rotting to a file that no longer exists would
+                // leave the rule reading as guarded by nothing.
+                guard
+                    path.hasPrefix("scripts/")
+                        || path.hasPrefix(".github/workflows/")
+                else { continue }
                 // Trim a trailing glob or arg: `scripts/*key*`
                 // and `scripts/drop-key <key>` are both cited.
                 let bare = path.split(separator: " ")[0]
@@ -124,8 +134,8 @@ struct RuleCitationTests {
                 }
             }
         }
-        #expect(missing.isEmpty, "dangling scripts: \(missing)")
-        #expect(seen > 10, "only saw \(seen) script citations")
+        #expect(missing.isEmpty, "dangling paths: \(missing)")
+        #expect(seen > 10, "only saw \(seen) path citations")
     }
 
     /// AGENTS.md plus every rule file — both are in scope for the
