@@ -162,6 +162,7 @@ jobs:
       - name: Test (ExecTests)
         run: swift test --filter ExecTests
 
+
   release:
     name: Build & draft release
     needs: verify
@@ -534,6 +535,15 @@ jobs:
                 esac
               fi
             done <<< "$assets"
+            # A draft outlives its tag (it mints no ref until
+            # published) and is found here by NAME — so after a
+            # delete-and-re-tag its stored target still names
+            # the old commit, and a later publish following one
+            # more tag deletion would mint the ref THERE, under
+            # this run's artifact. Re-pin it beside the upload,
+            # the same invariant the create branch sets.
+            gh release edit "$TAG" \
+              --target "$(git rev-parse HEAD)"
             gh release upload "$TAG" "$ARCHIVE" --clobber
           else
             # --target: if the tag was deleted mid-run (a human

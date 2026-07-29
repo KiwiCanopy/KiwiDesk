@@ -67,17 +67,16 @@ struct VerifyGateParityTests {
 
     @Test("every fast skill step runs in release.yml's verify job")
     func gateMatchesWorkflowVerifyJob() throws {
-        // `swift build -c release` is the workflow copy's one
-        // named exemption: the release job must keep that
-        // compile ahead of any submission or draft (the
-        // obligation and its argument live in
-        // packaging-and-release.md), so verify does not repeat
-        // it.
-        let steps = try skillSteps().filter {
-            !$0.contains("-c release")
-        }
-        // Guards this test's own collection: the filter above
-        // consumes the scrape, so the count is re-asserted on
+        // The fast inner loop only, by the skill's own section
+        // structure — not a command-text filter, which would
+        // silently exempt any future step that happened to
+        // mention `-c release`. The conditional release build
+        // binds release.sh alone: the release job must keep
+        // that compile ahead of any submission or draft, and
+        // packaging-and-release.md owns that obligation.
+        let steps = try skillSteps(section: "Fast inner loop")
+        // Guards this test's own collection: the section scope
+        // narrows the scrape, so the count is re-asserted on
         // what THIS test iterates, not on the sibling's input.
         #expect(
             steps.count >= 4,
@@ -109,11 +108,14 @@ struct VerifyGateParityTests {
         // the boundaries would mean the slice absorbed a job
         // that is not `verify` — its commands would satisfy the
         // assertions below while the release job no longer
-        // `needs:` them.
+        // `needs:` them. The suffix is checked trimmed:
+        // `bogus: ` with a trailing space is YAML-identical to
+        // `bogus:` and must not slip past.
         let absorbed = lines[(start + 1)..<end].filter { line in
             line.hasPrefix("  ") && !line.hasPrefix("   ")
                 && !line.hasPrefix("  #")
-                && line.hasSuffix(":")
+                && line.trimmingCharacters(in: .whitespaces)
+                    .hasSuffix(":")
         }
         #expect(
             absorbed.isEmpty,
@@ -142,11 +144,17 @@ struct VerifyGateParityTests {
 
     /// The skill's numbered commands, in document order.
     ///
-    /// Both its lists are scraped: the fast inner loop and the
-    /// conditional release build. `release.sh` runs the release
-    /// build unconditionally — its own comment argues why — so
-    /// the skill's list is a subset obligation, not an equality.
-    private func skillSteps() throws -> [String] {
+    /// Both its lists are scraped by default: the fast inner
+    /// loop and the conditional release build. `release.sh` runs
+    /// the release build unconditionally — its own comment
+    /// argues why — so the skill's list is a subset obligation,
+    /// not an equality. `section` narrows the scrape to one
+    /// `## ` heading's list, which is how the workflow pin
+    /// expresses its exemption structurally instead of by
+    /// command text.
+    private func skillSteps(
+        section: String? = nil
+    ) throws -> [String] {
         let skill = try String(
             contentsOf: Self.repoRoot
                 .appendingPathComponent(".claude")
@@ -156,8 +164,16 @@ struct VerifyGateParityTests {
             encoding: .utf8
         )
         var steps: [String] = []
+        var heading = ""
         for raw in skill.split(separator: "\n") {
             let line = raw.trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("## ") {
+                heading = String(line.dropFirst(3))
+                continue
+            }
+            guard section == nil || heading == section else {
+                continue
+            }
             // `1. \`swift build\`` — a numbered step whose command
             // is the first backticked span on the line.
             guard let dot = line.firstIndex(of: "."),
