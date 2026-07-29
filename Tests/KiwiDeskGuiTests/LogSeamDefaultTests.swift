@@ -4,8 +4,8 @@ import Testing
 /// Every `var onLog:` declaration under `Sources/KiwiDeskCore`
 /// defaults to `CoreLog.write` (#624).
 ///
-/// `{ _ in }` is the
-/// obvious thing to type when declaring a new seam, it compiles,
+/// `{ _ in }` is the obvious thing to type when declaring a new
+/// seam, it compiles,
 /// and the subsystem it silences is the one nobody was reading
 /// yet — six of the eight seams carried exactly that default
 /// until #624.
@@ -68,6 +68,46 @@ struct LogSeamDefaultTests {
         }
     }
 
+    /// The canary over the collection these tests consume.
+    ///
+    /// `SourceScan.swiftSources` answers `[]` for a directory that
+    /// does not exist rather than throwing, so a mistyped root — or
+    /// a narrowed file predicate, the harm `tests.md` names for
+    /// this helper family — leaves the loops above asserting
+    /// nothing at all.
+    ///
+    /// Two checks, and the algebra of the first is worth being
+    /// careful about, because the obvious version reds a correct
+    /// tree.
+    ///
+    /// **Distinct receivers, and strictly greater.** Deduping
+    /// the receivers is what absorbs a seam assigned twice — the
+    /// duplicate that `#625` is about, and the shape a stale
+    /// auto-merge produces. Keeping `>` is what still catches a
+    /// narrowed scan: drop one subsystem from the walk and both
+    /// sides fall by one together, so `>=` would hold and the
+    /// seam would go unchecked by either guard. That is the
+    /// `tests.md` harm exactly, so the strict bound stays.
+    ///
+    /// What it is **not**: a law that declarations always exceed
+    /// receivers. A receiver is not declared — its *type* is — so
+    /// wiring N instances of one seam-owning type gives N
+    /// receivers against one declaration, and the margin here
+    /// absorbs none of them. That shape (`LogSeamWiringTests`
+    /// documents it as plausible, nothing has it today) would red
+    /// naming a scan bug that is not there. It fails shut, and
+    /// the alternative reopens a live hole.
+    ///
+    /// **And an anchor in `App/`.** The count alone still passes
+    /// a scan narrowed to skip `App/` entirely, which drops the
+    /// bootstrap files and the sink together and so shrinks both
+    /// sides at once. Anchoring on the *directory* rather than on
+    /// the sink's type name pins the same thing without a second
+    /// copy of who the sink is, and survives renaming it.
+    ///
+    /// Between them: a mistyped root reds, a narrowed file
+    /// predicate reds, and neither bound has to be edited when a
+    /// seam is added.
     private func assertScanReachedTheTree(
         _ declarations: [LogSeamDeclaration]
     ) throws {
