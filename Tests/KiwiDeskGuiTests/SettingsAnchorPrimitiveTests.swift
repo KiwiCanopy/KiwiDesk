@@ -194,6 +194,11 @@ struct SettingsAnchorPrimitiveTests {
     func containerHalvesAreConfined() throws {
         for needle in [
             ".searchAnchorCard(", ".searchFlashHeader(",
+            // The hoisted scroll half (#610): a bare scroll anchor
+            // with its wash on the drawer label a level down. Just
+            // as much a scroll-without-a-local-wash at a rogue call
+            // site as the card half, so it earns the same seal.
+            ".searchScrollAnchor(",
         ] {
             let hits = try occurrences(
                 of: needle,
@@ -234,6 +239,68 @@ struct SettingsAnchorPrimitiveTests {
                     + "site(s); expected at least the two "
                     + "self-anchoring controls (GapRow, "
                     + "BarEditorPicker): " + describe(hits)
+            )
+        )
+    }
+
+    /// The hoisted-reveal door (#610) is a new reveal shape, so it
+    /// earns the same confinement every other one carries. Confining
+    /// the KEY NAME to its three blessed files — declared in
+    /// `SettingsReveal`, published from `SettingsDisclosure`,
+    /// collected in `SettingsSection` — closes the whole door at
+    /// once: a feature file that cannot name `HoistedRevealAnchorsKey`
+    /// can neither publish a spurious marker nor read one. That
+    /// bubbling-`.preference` mistake is invisible to
+    /// `containerHalvesAreConfined`, since the marker's own mount is
+    /// legitimately in the section shape. Naming the key, not each
+    /// modifier, keeps this robust to how the calls wrap.
+    private let hoistKeyFiles: Set<String> = [
+        "SettingsReveal.swift",
+        "SettingsDisclosure.swift",
+        "SettingsSection.swift",
+    ]
+
+    @Test("the hoisted-reveal key stays inside its shapes")
+    func hoistedRevealKeyIsConfined() throws {
+        let hits = try occurrences(
+            of: "HoistedRevealAnchorsKey",
+            excluding: hoistKeyFiles
+        )
+        #expect(
+            hits.isEmpty,
+            Comment(
+                rawValue:
+                    "HoistedRevealAnchorsKey named outside its "
+                    + "three shapes (declare/publish/collect) — a "
+                    + "feature site naming it can mount or read a "
+                    + "spurious hoisted marker: " + describe(hits)
+            )
+        )
+    }
+
+    /// #610 must stay reached-for, the same floor
+    /// `thePrimitiveStaysReachedFor` holds for `searchAnchored`.
+    /// The id-pairing guard the old count check also did is now
+    /// sealed by construction (marker id == the drawer's own
+    /// published control), but its non-vacuity half is not — drop
+    /// `scrollHoisted: true` from a call site and that drawer
+    /// silently disembodies its heading again with a green suite.
+    /// Five: Gaps ×2, the two bar colour drawers, App Bar overrides.
+    @Test("hoisted drawers stay reached-for")
+    func hoistedDrawersStayReachedFor() throws {
+        let hits = try occurrences(
+            of: "scrollHoisted: true",
+            excluding: []
+        )
+        let sites = hits.reduce(0) { $0 + $1.count }
+        #expect(
+            sites >= 5,
+            Comment(
+                rawValue:
+                    "scrollHoisted: true at \(sites) site(s); "
+                    + "expected at least the five shipped hoists "
+                    + "(Gaps per-edge/per-axis, App/Space bar "
+                    + "colours, App Bar overrides): " + describe(hits)
             )
         )
     }

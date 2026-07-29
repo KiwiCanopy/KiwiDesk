@@ -51,7 +51,8 @@ struct LayoutAppBarGroup: View {
             // anchor: every `?` in the dimmed rows is dead.
             SettingsDisclosure(
                 overridesDrawer,
-                isExpanded: $overridesExpanded
+                isExpanded: $overridesExpanded,
+                scrollHoisted: true
             ) {
                 overrides
                     .modifier(

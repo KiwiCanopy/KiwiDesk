@@ -119,7 +119,8 @@ struct GlobalAppBarGroup: View {
             SettingsDisclosure(
                 SettingsCatalog.bars.advancedColors,
                 chrome: .inline(font: .subheadline),
-                isExpanded: $advancedColorsExpanded
+                isExpanded: $advancedColorsExpanded,
+                scrollHoisted: true
             ) {
                 AppBarColorGrid { advancedColors }
                     .padding(.top, 8)

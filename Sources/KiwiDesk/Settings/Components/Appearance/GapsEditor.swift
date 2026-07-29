@@ -35,7 +35,8 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perEdge,
-                isExpanded: outerDisclosure
+                isExpanded: outerDisclosure,
+                scrollHoisted: true
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
@@ -69,7 +70,8 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perAxis,
-                isExpanded: innerDisclosure
+                isExpanded: innerDisclosure,
+                scrollHoisted: true
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(

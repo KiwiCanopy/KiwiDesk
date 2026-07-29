@@ -722,6 +722,15 @@ drops the cross-fade only: the wash still shows for the same
 ≈1.2 s and then simply disappears, because a flat tint shown and
 removed is not motion.
 
+"That place's card" presupposes the place *has* a card. An
+**inline drawer** does not — it lives below its section's heading,
+inside that section's card — so its scroll target is its enclosing
+section, hoisted to the section's top. Revealing an inline drawer
+keeps the heading that names it on screen and washes the drawer's
+own label below it, rather than scrolling the bare disclosure to
+the top and the heading off (#610). The wash stays precise (the
+searched label alone); only the scroll unit moves up a level.
+
 Three things this must not become. **Not a ring or halo** — that
 is this app's vocabulary for "this input is armed"
 (`RecorderButtonChrome`, the search field's focus stroke), and

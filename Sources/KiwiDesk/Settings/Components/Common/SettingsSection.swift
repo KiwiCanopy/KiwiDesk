@@ -118,6 +118,44 @@ struct SettingsSection<Content: View>: View {
                     )
             )
         }
+        // The hoisted scroll markers (#610): any `scrollHoisted`
+        // inline drawer inside `content` publishes its control up
+        // `HoistedRevealAnchorsKey`, and each becomes a zero-size
+        // marker pinned to the top edge ABOVE the heading — so a
+        // reveal of that drawer lands the section's top, heading
+        // first, while the drawer's own wash paints below. The id
+        // is the drawer's own, so scroll and wash cannot disagree.
+        // Then consume the value, so a section nested in another
+        // never re-collects the same id and doubles the marker.
+        .overlayPreferenceValue(HoistedRevealAnchorsKey.self) {
+            anchors in
+            revealMarkers(anchors)
+        }
+        .transformPreference(HoistedRevealAnchorsKey.self) {
+            $0 = []
+        }
+    }
+
+    private func revealMarkers(
+        _ anchors: [SettingsControl]
+    ) -> some View {
+        // Fill the section and top-pin the markers, so this does
+        // not lean on `overlayPreferenceValue`'s default centering
+        // — the markers must sit at the section's top edge for
+        // `scrollTo(anchor: .top)` to land the heading.
+        VStack(spacing: 0) {
+            ForEach(anchors, id: \.id) { target in
+                Color.clear
+                    .frame(width: 0, height: 0)
+                    .searchScrollAnchor(target)
+            }
+        }
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .top
+        )
+        .allowsHitTesting(false)
     }
 
     /// A catalog-declared section is a search anchor by existing
