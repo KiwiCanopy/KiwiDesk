@@ -40,7 +40,7 @@ and forgetting the other still builds green. That is why
 rather than a case on `applies`: `sync` asks a different question
 and returns a frame, not a bool.
 
-## Three writers, in descending authority mid-animation
+## The frame writers, in descending authority mid-animation
 
 While *our own* animation drives a window, the commanded per-tick
 frame is the leading truth — every other channel trails it, by

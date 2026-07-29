@@ -22,9 +22,11 @@ Nothing it writes is a second copy: the version is read from
 `KiwiDeskVersion.swift` and the two icon keys come from actool's
 own partial plist — though the **deployment target is still typed
 in three places** (`Package.swift`, the plist, actool's flag), so
-a raise to macOS 15 touches all three. Both copies fail silently,
-but only the plist's does so dangerously (an app declaring a lower
-minimum than it runs on, versus a wrong rendition set).
+a raise to macOS 15 touches all three, and `Package.swift` is the
+one a build actually enforces. The two in the script fail
+silently, but only the plist's does so dangerously (an app
+declaring a lower minimum than it runs on, versus a wrong
+rendition set).
 
 It **discovers the signing identity** from the keychain. That
 string is not a secret (any user can read it out of a shipped

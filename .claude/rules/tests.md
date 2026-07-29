@@ -84,8 +84,10 @@ bite large test PRs:
     re-enables a dangerous production default — the live
     `CarbonHotkeyCenter` (and the real `~/.config/KiwiDesk`)
     seizing the developer's global chords and live config, 2414
-    conflict lines a run. Forget-proofing 112 mandatory-safe
-    call sites is a legitimate basis for sharing; it is simply not
+    conflict lines a run. Forget-proofing every one of those
+    call sites — well over a hundred, and the count climbs with
+    each new suite, which is the point — is a legitimate basis
+    for sharing; it is simply not
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
     one — state both when weighing a sixth.
@@ -157,8 +159,11 @@ lines). Stop the service first if loaded, or the single-instance
 guard keeps the OLD binary running. Every release rebuild changes
 the binary hash, which drops the TCC Accessibility grant (re-grant
 in System Settings), and a restart flattens session state (spaces,
-float flags) — plan QA around it; #89's signed `.app` is the
-durable fix.
+float flags) — plan QA around it. **Or avoid it entirely: build
+the signed `.app` with `./scripts/build-app.sh` and QA that**,
+which keeps a stable code identity and so keeps the grant across
+rebuilds (#89, shipped). See
+[packaging-and-release.md](packaging-and-release.md).
 
 Two env levers exist for device QA, both off by default and both
 read once at wiring:

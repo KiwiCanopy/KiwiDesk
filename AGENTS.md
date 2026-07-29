@@ -278,3 +278,39 @@ touch a matching path.
 When a recurring mistake is found, add it to the **rule file**
 that owns the subsystem and refresh that row here — never write
 the rationale into both.
+
+**Write a rule as an obligation, not as a state claim (#614).**
+An obligation — *"route a user-facing condition through structure
+the GUI renders"* — cannot become false; it can only be
+*violated*, which is a review event. An absolute claim about the
+current tree — *"Core holds no `L()` call site outside
+`Localization/`"* — is true only the day it is written, and the
+commit that falsifies it is somewhere else entirely, so nothing
+notices. That one was false for months while auto-loading on
+every Core edit (#601).
+
+So a sentence in `.claude/rules/*.md` phrased as an absolute
+state claim must **name its enforcing guard inline** — a
+`Tests/…` path, a test or test-function name, a `scripts/…` path
+— or be rewritten as an obligation. The best rows already do:
+`VisibleBoundsRoutingTests`, `SettingsCodingTests`,
+`LocalizationRegistryTests`, `ResourceBundleRoutingTests`. A
+claim that can be neither guarded nor reworded gets **deleted**,
+and a *number* gets pinned in the guard with the prose citing it
+rather than repeating it (#511).
+
+This matters more than ordinary doc drift because these files
+load as instructions: an agent reads a false claim as fact and
+reasons from it without checking. Two corollaries:
+
+- **Never close a claim with a guard that cannot fail.** Prove a
+  new guard reds — by reverting the thing it protects — before
+  trusting it. Several have passed vacuously on their first
+  draft.
+- **State a fact once.** A count or a list copied into a second
+  file rots in both on one commit, and neither copy knows the
+  other exists. Name the authority and link to it.
+
+Claims about the world outside this repo — macOS behavior, Apple
+tooling, a vendor's plan limits — cannot be guarded and should
+not be deleted. Scope them to when they were observed instead.

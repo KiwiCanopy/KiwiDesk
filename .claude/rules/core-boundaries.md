@@ -5,7 +5,7 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. Three
+Deliberately short — it loads on every `KiwiDeskCore` edit. The
 seams that are violated *outside* the directory that owns them.
 
 - **Core names, the GUI narrates (#96).** A user-facing
