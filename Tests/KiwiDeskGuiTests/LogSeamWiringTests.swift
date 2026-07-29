@@ -15,9 +15,9 @@ import Testing
 /// a diagnostic that was never going to appear where it was
 /// looked for, months later. Stated as routing rather than as
 /// silence on purpose: what the seam's *default* does is a
-/// separate question, owned by `CoreLog` and its guard, and
-/// phrasing the harm in terms of that default would make this
-/// sentence false the day the default changes. #599 was findable
+/// separate question from this one, and phrasing the harm in
+/// terms of whatever that default happens to be would make this
+/// sentence false the day it changes. #599 was findable
 /// because a spring
 /// divergence was loud; #611 named the same trap — an
 /// unobservable rescue is how a loud failure becomes a quiet one

@@ -46,10 +46,12 @@ itself when a fifth is added.
   `LogSeamProbeTests` sends a line through every seam it finds on
   a live `KiwiCore` and requires it out of the sink (#625). Each
   docstring carries its own argument.
-  Bootstrap-time only: `onLog` needs no permission to be useful,
-  so a seam wired later (`KiwiCore+Lifecycle`, after the AX
-  grant) is invisible to the source scan and **reds** in the
-  probe, which reads the sink before any lifecycle runs.
+  Bootstrap-time only, and both guards enforce it: `onLog` needs
+  no permission to be useful, so a seam wired later
+  (`KiwiCore+Lifecycle`, after the AX grant) reds in the scan —
+  a late wire is the violation by this rule's own terms — and
+  again in the probe, which reads the sink before any lifecycle
+  runs.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

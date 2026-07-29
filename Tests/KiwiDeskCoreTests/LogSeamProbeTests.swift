@@ -113,8 +113,9 @@ struct LogSeamProbeTests {
                     + "a static, an unforced `lazy var` or a "
                     + "superclass property — the seam is then "
                     + "unprobed with every guard green. Restore "
-                    + "the stored reference, or record it in "
-                    + "`SeamRegister.unreachable` with its reason."
+                    + "the stored reference, or drop it from "
+                    + "`SeamRegister.reachable` with a comment "
+                    + "saying why only the source scan covers it."
             )
         )
 

@@ -63,48 +63,16 @@ extension SocketServer: LogSeamOwner {}
 // forward *into*, not a seam, and it is exempted by identity
 // below rather than by name — see `SeamWalk.exempt`.
 
-/// Which of the conformers above the walk must actually **reach**
-/// on a live core, checked as an equality rather than a floor.
+/// **Why this is its own file, on tests.md's two grounds.**
+/// Divergence: a second copy of `SeamWalk` would let
+/// `SeamWalkReachTests` pin the behaviour of a walk
+/// `LogSeamProbeTests` does not run — harden one and not the
+/// other and the looser copy misses the very seams the guard
+/// exists to find. Omission: it clears that bar less clearly,
+/// since a forgotten copy here is a compile error rather than a
+/// silent re-enable. Stated both ways because tests.md asks for
+/// both when weighing a shared helper.
 ///
-/// This is the register that makes the list above honest, and it
-/// is the assertion that matters most here. Three of the walk's
-/// failure modes are fail-shut — depth truncation gaps, an
-/// unresolvable node gaps, a reached-but-unconformed owner is
-/// named — but **reachability is fail-open**, and a probe of
-/// seven seams asserts `[7] == [7]` just as happily as eight.
-/// Measured ways an owner leaves the graph with no signal at all:
-/// moving it behind a computed accessor over a `static`, holding
-/// it in a superclass-declared property, an unforced `lazy var`,
-/// and a `CustomReflectable` that curates `children`. The first
-/// is an ordinary refactor — a process-wide `ExecLauncher` is a
-/// natural reading of #467's in-flight dedup — and with the seam
-/// then broken, both this suite and `LogSeamWiringTests` pass.
-///
-/// A count would be the number-pin `rule-authoring.md` warns
-/// against; runtime cannot enumerate conformances, so a named set
-/// is the only register available. It earns disposition 5 by
-/// sitting against the list it mirrors: an author adding a ninth
-/// conformance has this on screen. A conformer that becomes
-/// genuinely unreachable moves to `unreachable` with its reason,
-/// the shape `LogSeamWiringTests.allowed` already uses.
-enum SeamRegister {
-    static let reachable: Set<String> = [
-        "AnimationEngine",
-        "BorderManager",
-        "CrashRecovery",
-        "EventBus",
-        "ExecLauncher",
-        "KeybindingManager",
-        "ProfileManager",
-        "SocketServer",
-    ]
-
-    /// Conformers the walk cannot reach under `makeTestCore`, and
-    /// why. Empty today; an entry here is a deliberate admission
-    /// that only the source scan covers that seam.
-    static let unreachable: [String: String] = [:]
-}
-
 /// One seam found on the live graph.
 struct FoundSeam {
     /// `core.tiler.animation`, for a message that can be acted on.
@@ -141,7 +109,10 @@ struct SeamWalk {
     /// would still be walked.
     private let exempt: ObjectIdentifier
 
-    init(root: AnyObject) {
+    /// Private: a `SeamWalk` built and not descended is a
+    /// permanently empty result, and `descend` is private.
+    /// `over(_:)` is the only entry point.
+    private init(root: AnyObject) {
         exempt = ObjectIdentifier(root)
     }
 

@@ -54,18 +54,26 @@ struct SeamWalkReachTests {
         let box = Box()
         let inherited = SeamDerived()
         let viaBaseProperty = HolderDerived()
+        // The weak edge must be the ONLY path to its target, or
+        // the assertion below passes on whichever edge `Mirror`
+        // happens to yield first. Holding it strongly here made
+        // that test green for a reason that had nothing to do
+        // with weak traversal: swapping two declaration lines,
+        // a semantically null edit, red it.
         weak var weakly: Owner?
-        private let weakKeeper: Owner
 
-        init() {
-            let held = Owner()
-            weakKeeper = held
-            weakly = held
+        init(weakTarget: Owner) {
+            weakly = weakTarget
         }
     }
 
     private final class BehindComputed {
         private static let shared = Owner()
+        /// The control. Without a stored owner beside the
+        /// computed one, `seams.isEmpty` below would hold even
+        /// if `SeamWalk` were entirely broken — the type has no
+        /// storage at all.
+        let stored = Owner()
         var owner: Owner { BehindComputed.shared }
     }
 
@@ -81,7 +89,10 @@ struct SeamWalkReachTests {
 
     @Test("Every stored shape a seam owner can sit in is reached")
     func storedShapesAreReached() {
-        let paths = reached(Reachable())
+        let weakTarget = Owner()
+        let paths = withExtendedLifetime(weakTarget) {
+            reached(Reachable(weakTarget: weakTarget))
+        }
 
         // Named individually rather than by count: a count says
         // "six of something" and a regression that swapped one
@@ -132,7 +143,7 @@ struct SeamWalkReachTests {
         // A root that is not itself a seam owner, so nothing here
         // is hidden by the sink exemption.
         let walk = SeamWalk.over(BehindComputed())
-        #expect(walk.seams.isEmpty)
+        #expect(walk.seams.map(\.path) == ["core.stored"])
         // The point of the test: it is not merely missed, it is
         // missed *quietly*. Nothing here would tell an author the
         // walk stopped covering a seam, which is why
@@ -154,6 +165,26 @@ struct SeamWalkReachTests {
         let forced = BehindLazy()
         _ = forced.owner
         #expect(!SeamWalk.over(forced).seams.isEmpty)
+    }
+
+    @Test("The walk exempts its root by identity, not by type")
+    func theRootIsExemptByIdentity() {
+        // Production relies on this: the root is `KiwiCore`, the
+        // sink, and probing it would prove nothing. Pinned
+        // because an exempt object is skipped before BOTH
+        // `seams` and `unconformed`, so it is a fail-open
+        // direction granted to one object — and because meeting
+        // it as a silent empty result costs a diagnosis.
+        final class Root: LogSeamOwner {
+            var onLog: @MainActor (String) -> Void = { _ in }
+            let sibling = Owner()
+        }
+
+        let walk = SeamWalk.over(Root())
+        // By identity: the root drops out, a second instance of
+        // a seam-owning type held by it does not.
+        #expect(walk.seams.map(\.path) == ["core.sibling"])
+        #expect(walk.unconformed.isEmpty)
     }
 
     // MARK: - What fails shut
