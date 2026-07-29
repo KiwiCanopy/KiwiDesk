@@ -10,11 +10,12 @@ import Testing
 /// merely call. These guards therefore pin both sides:
 ///
 /// - the production touch stays behind its injectable seam
-///   (one `NSStatusBar.system` site, inside the default
-///   factory);
-/// - the test trees construct the dangerous types only through
-///   the shared factories that neutralize their live defaults
-///   (`TestCore.swift` ×2, `TestStatusItem.swift`);
+///   (one `NSStatusBar.system` site, inside the sealed live
+///   wrapper — the *route* into `StatusItemController` is
+///   `StatusItemSeamGuardTests`' beat, not this suite's);
+/// - the test trees construct `KiwiCore` only through the
+///   shared factories that neutralize its live defaults
+///   (`TestCore.swift` ×2);
 /// - the two `makeTestCore` twins — one per test target, since
 ///   test targets cannot see each other — stay identical, so a
 ///   neutralization added to one cannot silently miss the
@@ -52,11 +53,15 @@ struct MachineTouchTests {
     }
 
     /// The one production file that may reach the live status
-    /// bar — inside `init`'s injectable default factory.
+    /// bar — inside the file-private `SystemStatusItem` wrapper
+    /// behind the `StatusItemHandle` seam.
     private static let statusBarAllowed =
         "StatusItemController.swift"
 
-    @Test("NSStatusBar.system only behind the injectable seam")
+    // This needle's one literal is pinned in
+    // `StatusItemSeamGuardTests.allowedInTests` — its token
+    // count over the test trees charges this line.
+    @Test("the live status-bar touch stays behind its seam")
     func statusBarBehindSeam() throws {
         let sites = try Self.sites(
             of: "NSStatusBar.system",
@@ -75,36 +80,6 @@ struct MachineTouchTests {
         #expect(
             strays.isEmpty,
             "live status-bar touch outside the seam: \(listed)"
-        )
-    }
-
-    /// The one test file that may construct
-    /// `StatusItemController` — the factory that injects the
-    /// nil status-item closure.
-    private static let statusItemFactory = "TestStatusItem.swift"
-
-    @Test("tests build StatusItemController via the factory")
-    func statusItemConstruction() throws {
-        let sites = try Self.sites(
-            of: "StatusItemController" + "(",
-            under: Self.testTrees
-        )
-        // The factory's own construction proves the scan sees
-        // through the trees.
-        #expect(
-            sites.contains {
-                $0.file.lastPathComponent
-                    == Self.statusItemFactory
-            }
-        )
-        let strays = sites.filter {
-            $0.file.lastPathComponent != Self.statusItemFactory
-        }
-        let listed = strays.map(\.site)
-            .joined(separator: ", ")
-        #expect(
-            strays.isEmpty,
-            "bare StatusItemController (live item): \(listed)"
         )
     }
 

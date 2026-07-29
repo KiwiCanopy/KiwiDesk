@@ -29,7 +29,7 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Six ratified exceptions, all *stateless primitives* with no
+  Five ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -94,14 +94,12 @@ bite large test PRs:
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
     one — state both when weighing a further one.
-  - *status-item construction* in `TestStatusItem.swift` — the
-    `makeTestStatusItemController` factory, admitted on the same
-    omission ground: a bare `StatusItemController()` creates a
-    **live menu-bar item inside the production initializer**, a
-    touch no grep of the test tree can see (`NSStatusBar` had
-    zero test-tree hits while fifteen live slots leaked a run).
-    `MachineTouchTests` pins test-tree constructions to the
-    factory and the production touch to its injectable seam.
+  (The status-item seam deliberately does NOT add a shared
+  factory here: its fake is a per-file `StatusItemHandle`
+  stub, because the live wrapper is sealed file-`private` and
+  `StatusItemSeamGuardTests` pins every construction route —
+  the omission risk the `makeTestCore` factory carries is
+  closed by the seal instead.)
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Each case above happened
@@ -119,9 +117,11 @@ bite large test PRs:
   production default live — never test-detection in
   production — inject a no-op fake in tests, and forget-proof
   the injection, because every forgotten call site re-enables
-  the default. The two standing guards: `makeTestCore` with
-  its `NoopHotkeyRegistrar` for the hotkey seam, and
-  `StatusItemSeamGuardTests` for the menu-bar seam.
+  the default. The standing enforcement: `MachineTouchTests`
+  pins every `KiwiCore(` to the `makeTestCore` factories (and
+  the seam class generally — spawns, the production status-bar
+  touch), and `StatusItemSeamGuardTests` pins the menu-bar
+  seam's construction routes and its sealed wrapper.
 - **Discardable results express side-effect intent** — a command
   or setup helper whose primary job is mutation may use
   `@discardableResult` when callers commonly ignore optional
@@ -163,15 +163,16 @@ the live Carbon chords and the real `~/.config/KiwiDesk`
 (#565), and a bare `StatusItemController()` put a live item in
 the menu bar per construction — fifteen leaked slots and a
 sustained WindowServer spike per run — while `NSStatusBar` had
-zero hits anywhere in `Tests/`. `MachineTouchTests` is the
-guard: dangerous constructions route through the shared
-factories (`makeTestCore`, `makeTestStatusItemController`), the
-`makeTestCore` twins stay identical, the production status-bar
-touch stays behind its injectable seam, and exec-child suites
-stay inside the `ExecTests` partition. Adding a production
-type whose *initializer* reaches the OS? Give it the same
-seam shape (live default in production, factory in the test
-trees) and a needle in that guard.
+zero hits anywhere in `Tests/`. Two guards split the beat:
+`MachineTouchTests` pins `KiwiCore(` constructions to the
+`makeTestCore` factories, the twins identical, the production
+`NSStatusBar.system` touch to its sealed wrapper, and
+exec-child suites inside the `ExecTests` partition;
+`StatusItemSeamGuardTests` pins the status-item seam's
+construction routes. Adding a production type whose
+*initializer* reaches the OS? Give it the same seam shape
+(live default in production, an injected fake in tests) and a
+needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
 2026-07-29 — a change adding a residue class extends and
