@@ -72,11 +72,38 @@ func runPythonScript(
     arguments: [String],
     environment: [String: String]? = nil
 ) throws -> ScriptRun {
+    try spawn(
+        "/usr/bin/env",
+        ["python3", script.path] + arguments,
+        environment: environment
+    )
+}
+
+/// Spawns any executable and drains both pipes — the primitive
+/// `runPythonScript` is a thin wrapper over.
+///
+/// Generalised when `bump-version.sh` needed spawning (#32): the
+/// interpreter was the *only* reason a second suite could not
+/// reuse this, and the drain semantics — the half that carries
+/// the risk this file was extracted to prevent — are the same
+/// whatever is on the other end. A `bash` copy beside a `python3`
+/// copy would be exactly the "undrained pipe, missed `stderr`"
+/// drift `.claude/rules/tests.md` names.
+@discardableResult
+func spawn(
+    _ launchPath: String,
+    _ arguments: [String],
+    environment: [String: String]? = nil,
+    currentDirectory: URL? = nil
+) throws -> ScriptRun {
     let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-    process.arguments = ["python3", script.path] + arguments
+    process.executableURL = URL(fileURLWithPath: launchPath)
+    process.arguments = arguments
     if let environment {
         process.environment = environment
+    }
+    if let currentDirectory {
+        process.currentDirectoryURL = currentDirectory
     }
     let stdoutPipe = Pipe()
     let stderrPipe = Pipe()

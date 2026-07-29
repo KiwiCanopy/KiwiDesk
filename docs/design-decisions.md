@@ -229,6 +229,23 @@ a property that exists for free.
 Until Sparkle lands, the two together mean: cask yes, `.dmg`
 and Release assets no.
 
+**Where the cask's bytes live is the part this does not settle,
+and [#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)
+has to.** A cask installs from a URL, so blessing the cask while
+shutting every host it could read from leaves it with no legal
+source. The distinction that resolves it is the one this entry
+already rests on: the rule governs who can *reach* a build, not
+where the file is stored. So the question is which host lets
+`brew` fetch the archive without that same URL becoming the
+browse-and-download channel a stranded user arrives through —
+and answering it is a precondition of shipping the cask, not a
+detail of it. Until then the release workflow drafts rather than
+publishes: a draft has no public URL and is visible only to
+people who already have repository access, so it proves the
+pipeline end to end without opening a channel a stranger can
+install from. Not "reachable by nobody" — collaborators can
+fetch it, and the distinction is the whole point of the rule.
+
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being

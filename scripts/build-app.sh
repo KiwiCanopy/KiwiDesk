@@ -11,6 +11,7 @@
 # Usage:
 #   scripts/build-app.sh [--identity <id>] [--notarize <profile>]
 #                        [--output <dir>] [--skip-build] [--dmg]
+#                        [--zip]
 #
 #   --identity   Signing identity. Omit it and the sole
 #                "Developer ID Application" identity in the
@@ -35,6 +36,11 @@
 #                from a .zip and never needs this. Combine with
 #                --notarize: the disk image is a separate piece of
 #                signed code and needs its own ticket (see step 7).
+#   --zip        Also archive the finished bundle for the Homebrew
+#                cask and the release upload (#32, #105). Built
+#                after step 6 so the app inside is already
+#                stapled — see step 8 for why the archive itself
+#                neither can nor should carry a ticket.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -44,6 +50,7 @@ OUT="$ROOT/.build/app"
 SKIP_BUILD=0
 ALLOW_NO_ICON=0
 MAKE_DMG=0
+MAKE_ZIP=0
 
 usage() {
     cat <<'EOF'
@@ -59,6 +66,7 @@ Usage: scripts/build-app.sh [options]
   --output <dir>     Where to write the bundle (default .build/app).
   --skip-build       Reuse the existing release build.
   --dmg              Also wrap the bundle in a disk image.
+  --zip              Also archive the bundle (cask / release).
   --allow-no-icon    Proceed even if actool cannot compile the icon.
   -h, --help         Show this help and exit.
 EOF
@@ -82,6 +90,7 @@ while [ "$#" -gt 0 ]; do
             shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
         --dmg) MAKE_DMG=1; shift ;;
+        --zip) MAKE_ZIP=1; shift ;;
         --allow-no-icon) ALLOW_NO_ICON=1; shift ;;
         *) echo "error: unknown argument '$1'" >&2; exit 2 ;;
     esac
@@ -231,9 +240,12 @@ VERSION_FILE="$ROOT/Sources/KiwiDeskCore/App/KiwiDeskVersion.swift"
 VERSION="$(sed -n 's/.*let semantic = "\(.*\)".*/\1/p' \
     "$VERSION_FILE" | head -1)"
 # CFBundleVersion accepts only 1-3 dot-separated integers, and
-# bump-version.sh permits a prerelease suffix (`0.2.0-rc1`) that
-# would be rejected downstream. plutil -lint validates XML, not
-# this, so check the shape here.
+# plutil -lint validates XML, not this. `bump-version.sh` owns
+# what a version may be and `ScriptStampTests` pins it — this is
+# not a second copy of that rule, and must not restate its shape.
+# It stays because the value here was READ OFF DISK rather than
+# passed as an argument, so a hand-edited constant reaches this
+# script without ever passing that gate.
 case "$VERSION" in
     ''|*[!0-9.]*|*..*|.*|*.|*.*.*.*)
     echo "error: '$VERSION' from $VERSION_FILE is not usable as" \
@@ -377,6 +389,56 @@ notarize_and_staple() {
     return 0
 }
 
+# The staple assertion both packaging steps need, extracted at
+# the SECOND copy rather than waiting for the third — the rule
+# file names `.pkg` and a Sparkle delta as the ones coming, and
+# the harm of two copies is specific: harden one probe and not
+# the other and the un-hardened one ships an unticketed artifact
+# under a clean name, which is exactly the failure the build
+# machine cannot see.
+#
+# Two ways to arrive here unstapled: no --notarize at all, or a
+# --notarize run followed by a bare `--skip-build --dmg`/`--zip`,
+# which re-assembles and RE-SIGNS the app (step 2 strips the
+# signature, step 5 adds it) and discards the earlier ticket.
+# Neither is detectable once the artifact exists — a
+# locally-built one carries no quarantine attribute, so it opens
+# fine on this machine and only fails after a real download.
+#
+# Sets ARTIFACT_PATH and ARTIFACT_UNTICKETED rather than echoing
+# a result: an `exit 1` inside a command substitution kills only
+# the subshell, and stopping the run IS this function's job in
+# the --notarize case.
+require_stapled_or_rename() {
+    # `local`, so the helper cannot leak these into the globals
+    # its callers read back (ARTIFACT_PATH / ARTIFACT_UNTICKETED
+    # are the deliberate exceptions, and they are the only two).
+    local noun="$1"    # "image" / "archive", for the warning
+    local verb="$2"    # "package" / "archive", for the error
+    local clean="$3"
+    local unnotarized="$4"
+    ARTIFACT_UNTICKETED=0
+    ARTIFACT_PATH="$clean"
+    if xcrun stapler validate "$APP" >/dev/null 2>&1; then
+        return 0
+    fi
+    ARTIFACT_UNTICKETED=1
+    if [ -n "$NOTARY_PROFILE" ]; then
+        echo "error: $APP is not stapled even though step 6" \
+             "ran — refusing to $verb it" >&2
+        exit 1
+    fi
+    echo "warning: the app is not notarized, so this $noun is" \
+         "for local inspection only — a downloaded copy will be" \
+         "refused. Re-run with --notarize <profile>." >&2
+    # The FILE says whether it is distributable, not a warning
+    # that scrolls away. Otherwise `ls` a week later shows a
+    # normally-named release artifact Gatekeeper will reject, and
+    # a cask or an upload reaches straight for it.
+    ARTIFACT_PATH="$unnotarized"
+    return 0
+}
+
 # The ad-hoc case already exited during argument handling; this
 # function is reached only with a real identity.
 if [ -n "$NOTARY_PROFILE" ]; then
@@ -388,6 +450,17 @@ if [ -n "$NOTARY_PROFILE" ]; then
     notarize_and_staple "$APP_ZIP" "$APP"
     rm -f "$APP_ZIP"
     APP_ZIP=""
+    # The .app's OWN ticket, asserted here rather than only as a
+    # side effect of packaging. Step 7 makes the identical
+    # assertion about the .dmg immediately after ticketing it —
+    # but the equivalent for the bundle only ran if --dmg or
+    # --zip was also passed, so `--notarize` on its own never
+    # checked the one artifact the whole submission was for.
+    xcrun stapler validate "$APP" >/dev/null || {
+        echo "error: $APP has no stapled ticket after" \
+             "notarization — it would fail offline" >&2
+        exit 1
+    }
     # Local assessment only — NOT the verdict a downloader gets.
     # `spctl --assess` is satisfied by an online lookup, so it
     # answers "accepted" for a notarized-but-unstapled artifact;
@@ -407,7 +480,6 @@ fi
 # yields a bundle that passes Gatekeeper offline on its own.
 
 if [ "$MAKE_DMG" -eq 1 ]; then
-    DMG="$OUT/KiwiDesk-$VERSION.dmg"
     # Assemble under a partial name and rename only once the
     # image is stapled. A failure between here and there would
     # otherwise leave a correctly-named, plausibly-sized, signed
@@ -420,32 +492,13 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     DMG_PARTIAL="$OUT/KiwiDesk-$VERSION-partial.dmg"
     STAGE="$OUT/dmg-staging"
 
-    # Assert what the comment above claims, rather than trusting
-    # the caller's flag order. Two ways to arrive here with an
-    # unstapled bundle: no --notarize at all, or a --notarize run
-    # followed by a bare `--skip-build --dmg`, which re-assembles
-    # and RE-SIGNS the app (step 2 removes it, step 5 signs it),
-    # discarding the ticket the earlier run stapled. Neither is
-    # detectable once the image is built: a locally-built .dmg
-    # carries no quarantine attribute, so it opens fine on this
-    # machine and only fails after a download.
-    DMG_UNTICKETED=0
-    if ! xcrun stapler validate "$APP" >/dev/null 2>&1; then
-        DMG_UNTICKETED=1
-        if [ -n "$NOTARY_PROFILE" ]; then
-            echo "error: $APP is not stapled even though step 6" \
-                 "ran — refusing to package it" >&2
-            exit 1
-        fi
-        echo "warning: the app is not notarized, so this image is" \
-             "for local inspection only — a downloaded copy will" \
-             "be refused. Re-run with --notarize <profile>." >&2
-        # Same principle as the partial name above: the FILE says
-        # whether it is distributable, not a warning that scrolls
-        # away. Otherwise `ls` a week later shows a normally-named
-        # release artifact that Gatekeeper will reject.
-        DMG="$OUT/KiwiDesk-$VERSION-unnotarized.dmg"
-    fi
+    # Asserts what the comment above claims, rather than trusting
+    # the caller's flag order.
+    require_stapled_or_rename "image" "package" \
+        "$OUT/KiwiDesk-$VERSION.dmg" \
+        "$OUT/KiwiDesk-$VERSION-unnotarized.dmg"
+    DMG="$ARTIFACT_PATH"
+    DMG_UNTICKETED="$ARTIFACT_UNTICKETED"
 
     echo "==> building $DMG"
     rm -rf "$STAGE"
@@ -496,6 +549,42 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     fi
 fi
 
+# ---------------------------------------------------------------
+# 8. Distribution archive (optional)
+#
+# What the Homebrew cask installs from (#105) and what the release
+# workflow attaches to a release (#32).
+#
+# THE ARCHIVE ITSELF CARRIES NO TICKET, and that is not an
+# oversight in the "every distributable artifact needs its own
+# ticket" rule — it is the one artifact type the rule cannot
+# reach. A .dmg is signed code, so Apple can ticket it; a .zip is
+# a container with nowhere to put a signature, so `stapler` has no
+# target. The ticket therefore travels on the .app INSIDE, which
+# is why this runs after step 6 and refuses to build otherwise.
+#
+# Built fresh here, never by keeping the archive step 6 submits:
+# that one is made BEFORE the staple by construction — it is the
+# thing submitted FOR the ticket — so shipping it would strand
+# every downloader with an unticketed bundle while looking
+# identical on this machine.
+
+if [ "$MAKE_ZIP" -eq 1 ]; then
+    require_stapled_or_rename "archive" "archive" \
+        "$OUT/KiwiDesk-$VERSION.zip" \
+        "$OUT/KiwiDesk-$VERSION-unnotarized.zip"
+    ZIP="$ARTIFACT_PATH"
+    ZIP_UNTICKETED="$ARTIFACT_UNTICKETED"
+
+    echo "==> building $ZIP"
+    rm -f "$ZIP"
+    # ditto, not `zip`: this archives a signed bundle, and only
+    # ditto is obliged to preserve the extended attributes and
+    # symlinks the signature is computed over. --keepParent so the
+    # archive expands to KiwiDesk.app, not its contents.
+    ditto -c -k --keepParent "$APP" "$ZIP"
+fi
+
 echo
 echo "built $APP"
 echo "  run:  open \"$APP\""
@@ -505,6 +594,13 @@ if [ "$MAKE_DMG" -eq 1 ]; then
         echo "  dmg:  $DMG  (NOT notarized — do not distribute)"
     else
         echo "  dmg:  $DMG"
+    fi
+fi
+if [ "$MAKE_ZIP" -eq 1 ]; then
+    if [ "$ZIP_UNTICKETED" -eq 1 ]; then
+        echo "  zip:  $ZIP  (NOT notarized — do not distribute)"
+    else
+        echo "  zip:  $ZIP"
     fi
 fi
 exit 0

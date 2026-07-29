@@ -1,0 +1,432 @@
+name: Release
+
+# Cut by `scripts/release.sh`, which pushes the tag that fires
+# this (#32). Nothing else should push a `v*` tag — the version
+# in the tag and the version compiled into the binary are a
+# hand-mirror, and the "Verify the tag matches the binary" step
+# below is the guard that they agree.
+on:
+  push:
+    tags: ['v*']
+  # Re-run a release build without re-cutting the tag: a workflow
+  # failure never needs a throwaway version number to retry.
+  # Note this runs the workflow file from the DEFAULT branch, not
+  # from the tag — so a retry of an old tag builds that tag's
+  # source with today's pipeline.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build (e.g. v0.9.0)'
+        required: true
+
+# Never two builds of one tag racing to draft the same release.
+# `ref_name`, NOT `ref`: a tag push gives `refs/tags/v0.9.0` while
+# a dispatch input gives `v0.9.0`, so keying on `ref` would put a
+# dispatch retry in a DIFFERENT group from the tag-push run it is
+# retrying — leaving the one collision this exists to prevent as
+# the only one it missed. `ref_name` is `v0.9.0` for both.
+# No cancel-in-progress: a half-cancelled run can leave a draft
+# holding a partial upload, and a release is cheap to wait for.
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & draft release
+    # macos-26 for the same reason ci.yml pins it: the tree uses
+    # macOS 26 SDK symbols, and `if #available` gates execution,
+    # not compilation.
+    runs-on: macos-26
+    env:
+      # Bound once here, never pasted into a `run:` body. A
+      # `${{ }}` expansion is substituted BEFORE bash parses the
+      # script, so a tag name carrying a quote or a newline would
+      # be executed rather than read. The trust boundary is
+      # "write access" — one person today — so this is hardening,
+      # not a live hole; it costs nothing and removes the class.
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          # Needed for the "tag is on main" assertion below, which
+          # resolves origin/main. NOT for the release notes:
+          # `--generate-notes` is computed server-side by the API
+          # and reads nothing from this clone.
+          fetch-depth: 0
+
+      # No `|| /Applications/Xcode.app` fallback, deliberately
+      # diverging from ci.yml. There the fallback is right: a test
+      # run on a slightly different toolchain still tells you
+      # something. Here the output is the artifact a user installs,
+      # and a runner-image bump would silently build it with an
+      # unannounced compiler while nothing on the artifact records
+      # which. A release is precisely the run to stop rather than
+      # let vary.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app
+          swift --version
+          xcodebuild -version
+
+      - name: Resolve the tag
+        id: tag
+        run: |
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      # The one guard that stops a mislabelled binary shipping.
+      # The tag and KiwiDeskVersion.semantic are two hand-written
+      # copies of one number: release.sh stamps the constant and
+      # then tags, so they agree when that path is followed and
+      # silently disagree the first time someone tags by hand.
+      # Failing here costs a re-tag; not failing here ships a
+      # binary whose --version output names a release it is not.
+      - name: Verify the tag matches the binary
+        env:
+          EXPECTED: ${{ steps.tag.outputs.version }}
+        run: |
+          FILE=Sources/KiwiDeskCore/App/KiwiDeskVersion.swift
+          # `head -1` matches build-app.sh's extraction. This is
+          # the stricter of the two guards, so it must not be the
+          # looser of the two parses.
+          COMPILED="$(sed -n \
+            's/.*let semantic = "\(.*\)".*/\1/p' "$FILE" | head -1)"
+          if [ "$COMPILED" != "$EXPECTED" ]; then
+            echo "::error::tag $TAG wants $EXPECTED but $FILE" \
+                 "says '$COMPILED'. Cut releases with" \
+                 "scripts/release.sh."
+            exit 1
+          fi
+          # release.sh refuses to cut from anywhere but main, so a
+          # tag off main is by definition one it did not make —
+          # and "someone tagged by hand" is the threat this whole
+          # step models.
+          if ! git rev-parse -q --verify origin/main >/dev/null; then
+            # Fatal, not skipped. origin/main resolves only because
+            # `fetch-depth: 0` above fetches the remote branches;
+            # trimming that for speed would turn this assertion
+            # into a silent no-op, and a guard that cannot fail is
+            # worse than no guard — it reads as protection.
+            echo "::error::origin/main did not resolve, so the" \
+                 "tag-on-main check could not run. The checkout" \
+                 "needs fetch-depth: 0."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::$TAG is not an ancestor of main."
+            exit 1
+          fi
+          echo "tag and binary agree on $EXPECTED"
+
+      # Not a second copy of the sed in bump-version.sh — that
+      # script owns the file's shape and this calls it. HEAD is
+      # the tagged commit here, which is the one context where
+      # stamping the commit is correct; see that script's header
+      # for why the checked-in value is "unknown".
+      - name: Stamp the exact build commit
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          ./scripts/bump-version.sh "$VERSION" --stamp-commit
+          git --no-pager diff --stat
+
+      # `secrets` is not available in a step-level `if` (checked
+      # against GitHub's context-availability table, 2026-07), so
+      # their presence is lifted into an output the later steps
+      # branch on. Absent secrets are not an error: build-app.sh
+      # falls back to an ad-hoc signature, so the pipeline is
+      # provable before any credential exists.
+      #
+      # Every secret the notarize branch goes on to use is checked
+      # here, not just the key: setting all but one takes that
+      # branch and fails inside `store-credentials`, burning a
+      # tag's whole run for a missing string this step could have
+      # named. The list below is the count — restating it as a
+      # number in this sentence would be a second copy to keep in
+      # step (rule-authoring.md).
+      - name: Detect signing credentials
+        id: creds
+        env:
+          CERT: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          if [ -n "$CERT" ] && [ -n "$CERT_PASSWORD" ]; then
+            echo "sign=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "sign=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::no signing certificate — building" \
+                 "ad-hoc, the artifact is NOT distributable"
+          fi
+          if [ -n "$CERT" ] && [ -n "$CERT_PASSWORD" ] \
+            && [ -n "$NOTARY_KEY" ] && [ -n "$NOTARY_KEY_ID" ] \
+            && [ -n "$NOTARY_ISSUER_ID" ]; then
+            echo "notarize=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "notarize=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # A throwaway keychain, unlocked for this run only. Its
+      # password is generated here rather than stored as a secret:
+      # it protects a keychain that ceases to exist with the
+      # runner, so a stored one would be a credential to rotate
+      # for no gain.
+      - name: Import the signing certificate
+        if: steps.creds.outputs.sign == 'true'
+        env:
+          CERT: ${{ secrets.MACOS_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$CERT" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$CERT_PASSWORD" -T /usr/bin/codesign \
+            -T /usr/bin/security
+          # Without this codesign blocks on a GUI prompt that no
+          # runner can answer, and the job hangs until timeout
+          # rather than failing.
+          security set-key-partition-list -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          # build-app.sh discovers the identity through
+          # `security find-identity`, which reads the search
+          # list — so the keychain has to JOIN it. Setting it as
+          # the sole entry instead would drop the login keychain,
+          # which is where notarytool stores its profile.
+          # Read into an array the way build-app.sh does: the
+          # runner's bash is 3.2, so there is no `mapfile`, and
+          # an unquoted expansion would split a keychain path on
+          # spaces. The trimming is left to sed rather than
+          # nested parameter expansion — this path cannot be
+          # exercised locally, so it is written to be obvious
+          # rather than clever.
+          existing=()
+          while IFS= read -r line; do
+            [ -n "$line" ] && existing+=("$line")
+          done < <(security list-keychains -d user \
+            | sed -e 's/^[[:space:]]*//' -e 's/^"//' -e 's/"$//')
+          security list-keychains -d user -s "$KEYCHAIN" \
+            "${existing[@]}"
+          rm -f "$RUNNER_TEMP/cert.p12"
+          # An import can fail without failing this step, and the
+          # consequence is quiet: build-app.sh would fall back to
+          # ad-hoc and produce a correctly-shaped archive that is
+          # merely unsigned. Assert the identity landed, so that
+          # supplying the secret and getting an ad-hoc build is
+          # not a thing that can happen silently.
+          if ! security find-identity -v -p codesigning "$KEYCHAIN" \
+            | grep -q "Developer ID Application"; then
+            echo "::error::certificate imported but no Developer" \
+                 "ID Application identity is usable — check the" \
+                 "certificate type and MACOS_CERT_PASSWORD"
+            exit 1
+          fi
+
+      # An App Store Connect API key, not an Apple ID: it carries
+      # no 2FA, is scoped to notarization and can be revoked
+      # without touching the account. build-app.sh takes only the
+      # profile NAME, so the credential never reaches its
+      # command line.
+      - name: Store the notarization profile
+        if: steps.creds.outputs.notarize == 'true'
+        env:
+          ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+        run: |
+          echo "$KEY_P8" | base64 --decode > "$RUNNER_TEMP/key.p8"
+          xcrun notarytool store-credentials kiwidesk-ci \
+            --key "$RUNNER_TEMP/key.p8" \
+            --key-id "$KEY_ID" \
+            --issuer "$ISSUER_ID"
+          rm -f "$RUNNER_TEMP/key.p8"
+          # Prove the profile reads BACK before spending a full
+          # release build on it. `store-credentials` writes to the
+          # DEFAULT keychain, which the step above deliberately
+          # did not change — so this depends on the runner's login
+          # keychain being present and unlocked, a property of the
+          # image that nothing here controls and that cannot be
+          # checked locally. Without this probe that assumption
+          # fails as a notarytool auth error ten minutes later,
+          # after the build; with it, it fails here in seconds.
+          if ! xcrun notarytool history \
+            --keychain-profile kiwidesk-ci >/dev/null 2>&1; then
+            echo "::error::the notarization profile did not read" \
+                 "back — check NOTARY_ISSUER_ID / NOTARY_KEY_ID" \
+                 "and that the key has the Developer role"
+            exit 1
+          fi
+
+      - name: Build the app
+        env:
+          NOTARIZE: ${{ steps.creds.outputs.notarize }}
+        run: |
+          ARGS=(--zip --output "$RUNNER_TEMP/app")
+          if [ "$NOTARIZE" = "true" ]; then
+            ARGS+=(--notarize kiwidesk-ci)
+          fi
+          ./scripts/build-app.sh "${ARGS[@]}"
+
+      # build-app.sh names an un-notarized archive
+      # `-unnotarized.zip` precisely so it cannot be mistaken for
+      # a shippable one, so the name is read here rather than
+      # reconstructed — reconstructing it is how a ticketless
+      # artifact would get attached under a clean name.
+      - name: Locate the archive
+        id: archive
+        run: |
+          zips=()
+          while IFS= read -r line; do
+            [ -n "$line" ] && zips+=("$line")
+          done < <(find "$RUNNER_TEMP/app" -maxdepth 1 -name '*.zip')
+          # Exactly one, asserted rather than assumed. The
+          # notarization payload is a .zip too and build-app.sh
+          # deletes it — so two here means that cleanup regressed,
+          # and picking either one silently would be a coin flip
+          # between the stapled archive and the pre-staple one.
+          if [ "${#zips[@]}" -ne 1 ]; then
+            echo "::error::expected 1 archive, found" \
+                 "${#zips[@]} in $RUNNER_TEMP/app"
+            exit 1
+          fi
+          name="$(basename "${zips[0]}")"
+          echo "path=${zips[0]}" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          # upload-artifact zips whatever it is given, so a name
+          # ending in .zip downloads as `….zip.zip`.
+          echo "artifact=${name%.zip}" >> "$GITHUB_OUTPUT"
+
+      # The acceptance criterion of #32, asserted against the
+      # built binary rather than against the source it was built
+      # from. Everything upstream — the stamp, the tag check —
+      # reasons about a file on disk; this is the only step that
+      # asks the artifact itself, so a build that silently
+      # compiled a stale constant stops here.
+      - name: Verify the built binary reports the release
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          BIN="$RUNNER_TEMP/app/KiwiDesk.app/Contents/MacOS/KiwiDesk"
+          OUT="$("$BIN" --version)"
+          echo "kiwidesk --version -> $OUT"
+          SHA="$(git rev-parse --short HEAD)"
+          if [ "$OUT" != "$VERSION ($SHA)" ]; then
+            echo "::error::binary reports '$OUT', expected" \
+                 "'$VERSION ($SHA)'"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.archive.outputs.artifact }}
+          path: ${{ steps.archive.outputs.path }}
+          retention-days: 90
+          # A UI "Re-run all jobs" reuses the run id, and v4
+          # rejects a duplicate artifact name — after the whole
+          # build has already been paid for.
+          overwrite: true
+
+      # DRAFT, deliberately and not as a placeholder. A published
+      # release asset is a channel a user can install from, and
+      # `docs/design-decisions.md` ("No distribution channel
+      # without an update path") holds that shut until the build
+      # can update itself. A draft is invisible and unfetchable
+      # without auth, so the pipeline is provable end to end
+      # without opening one. #105 owns the decision to publish.
+      #
+      # Notes are generated now rather than when that decision
+      # lands: they are built from the history since the previous
+      # tag, so generating them later would mean reconstructing
+      # every past release's changelog by hand (#570 renders them
+      # in Settings once they are public).
+      - name: Draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          ARCHIVE: ${{ steps.archive.outputs.path }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Drop every archive that is not the one being written,
+            # because `--clobber` only replaces an asset of the
+            # SAME name. The prescribed sequence — prove the
+            # pipeline with no secrets, add credentials, re-run —
+            # changes the archive's name (`-unnotarized.zip` to
+            # `.zip`), so without this the draft ends up carrying
+            # the un-notarized archive alongside the good one. The
+            # naming convention stops a SCRIPT reaching for the
+            # wrong file; it does nothing about a human publishing
+            # a draft with both hanging off it.
+            #
+            # Read from the release rather than rebuilding the two
+            # names from $VERSION: "Locate the archive" above takes
+            # the name off disk precisely because reconstructing it
+            # is how a ticketless artifact gets attached under a
+            # clean one, and a rebuilt list here would silently
+            # match nothing the day build-app.sh's scheme changes.
+            KEEP="$(basename "$ARCHIVE")"
+            # Captured, never read through a pipe. The default
+            # shell here is `bash -e` WITHOUT pipefail, so a
+            # failed `gh` on the left of a pipe yields empty
+            # output that reads as "nothing stale attached" —
+            # a guard against publishing both archives that
+            # fails open into precisely that. scripts/release.sh
+            # learned the same lesson for `git ls-remote`.
+            if ! assets="$(gh release view "$TAG" --json assets \
+              --jq '.assets[].name')"; then
+              echo "::error::could not list the release's assets," \
+                   "so a superseded archive may still be attached"
+              exit 1
+            fi
+            # Delete the SIBLING name only, derived from the name
+            # that came off disk — never a blanket "every other
+            # zip". Both rules fail; they fail in opposite
+            # directions, and this step cannot be exercised before
+            # it runs for real, so take the one whose failure is
+            # additive and visible on an unpublished draft over
+            # the one that silently deletes a legitimate second
+            # archive (per-arch zips are plausible once Sparkle
+            # lands). Anything else unexpected is reported, not
+            # removed.
+            case "$KEEP" in
+              *-unnotarized.zip)
+                SIBLING="${KEEP%-unnotarized.zip}.zip" ;;
+              *.zip)
+                SIBLING="${KEEP%.zip}-unnotarized.zip" ;;
+              *) SIBLING="" ;;
+            esac
+            while IFS= read -r asset; do
+              [ -n "$asset" ] || continue
+              if [ "$asset" = "$SIBLING" ]; then
+                echo "dropping superseded asset: $asset"
+                if ! gh release delete-asset "$TAG" "$asset" \
+                  --yes; then
+                  echo "::warning::could not delete $asset — it" \
+                       "may still be attached to the draft"
+                fi
+              elif [ "$asset" != "$KEEP" ]; then
+                case "$asset" in
+                  *.zip)
+                    echo "::warning::unexpected archive on the" \
+                         "draft, left in place: $asset" ;;
+                esac
+              fi
+            done <<< "$assets"
+            gh release upload "$TAG" "$ARCHIVE" --clobber
+          else
+            gh release create "$TAG" "$ARCHIVE" \
+              --draft \
+              --prerelease \
+              --title "KiwiDesk $VERSION" \
+              --generate-notes
+          fi
