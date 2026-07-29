@@ -72,6 +72,30 @@ extension KiwiCore {
         emitSpaceChange()
     }
 
+    /// The follow-shaped switch: activate `target`, focus and
+    /// raise `id` there, and arm the switch settle — shared by
+    /// `moveWindow(follow: true)` and the launch cycle (#637).
+    /// The ORDER is the load-bearing part, which is why this is
+    /// one copy: the frontmost pid is captured before the raise
+    /// can change it (the settle's dropped-activate detection,
+    /// #463); the focus skips its own retile because the
+    /// coordinated switch retile below owns placement — a
+    /// second retile would spring windows from stale
+    /// stash-corner frames (#11); and the settle is armed after
+    /// the emit so subscribers see the switch before its
+    /// re-assert.
+    func followSwitch(to target: SpaceID, focusing id: WindowID) {
+        let priorFrontmost = frontmostPIDProvider?()
+        state.workspaces.activate(target)
+        focusWindow(id, refocusRetile: false, warp: true)
+        emitSpaceChange()
+        scheduleSpaceSettle(
+            target,
+            priorFrontmost: priorFrontmost
+        )
+        spaceSwitchRetile()
+    }
+
     /// Hands key focus to the desktop when a move empties the
     /// focused display's space (#446). macOS exposes no "focus the
     /// empty desktop" API, so we activate Finder (the desktop's

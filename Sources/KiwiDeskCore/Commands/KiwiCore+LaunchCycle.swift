@@ -39,41 +39,40 @@ extension KiwiCore {
     /// Every tracked window of the app, in cycle order: spaces
     /// in their canonical order, each space's flat array order
     /// within. Deterministic, so repeat presses walk a stable
-    /// ring.
+    /// ring. Transient overlays (a launcher's panel, #300) are
+    /// not in it: they exist momentarily, never wear a ring,
+    /// and are not "the app's windows" in the user's mental
+    /// model of the cycle.
     private func trackedWindows(
         bundleID: String
     ) -> [WindowID] {
         state.workspaces.allSpaces.flatMap { space in
-            space.windows.filter {
-                state.windows[$0]?.appBundleID?.lowercased()
+            space.windows.filter { id in
+                guard let window = state.windows[id] else {
+                    return false
+                }
+                return window.appBundleID?.lowercased()
                     == bundleID
+                    && !window.isTransientOverlay
             }
         }
     }
 
     /// Focuses the cycle's successor. A same-space target is a
     /// plain focus; one on another virtual space switches the
-    /// way a follow move does (`moveWindow(follow: true)`):
-    /// activate, focus without the redundant retile, then the
-    /// coordinated switch retile owns placement.
+    /// way a follow move does (`followSwitch`). A STICKY
+    /// target never switches (#414): its membership names only
+    /// its hidden home space while the window renders right
+    /// here — the same fly-back `scheduleFocusFollow` refuses.
     private func focusCycleTarget(_ id: WindowID) {
         guard
             let space = state.workspaces.space(of: id),
-            space != state.workspaces.activeSpace
+            space != state.workspaces.activeSpace,
+            state.windows[id]?.isSticky != true
         else {
             focusWindow(id, warp: true)
             return
         }
-        // Captured before the raise below can change it — the
-        // settle's dropped-activate detection (#463 pattern).
-        let priorFrontmost = frontmostPIDProvider?()
-        state.workspaces.activate(space)
-        focusWindow(id, refocusRetile: false, warp: true)
-        emitSpaceChange()
-        scheduleSpaceSettle(
-            space,
-            priorFrontmost: priorFrontmost
-        )
-        spaceSwitchRetile()
+        followSwitch(to: space, focusing: id)
     }
 }

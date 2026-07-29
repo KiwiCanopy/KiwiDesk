@@ -3263,13 +3263,15 @@ are keyed on the bundle id, so it finds apps anywhere on disk
 system language.
 
 Pressing again while one of the app's windows is focused advances
-to the app's **next** window — space order, then slot order,
-wrapping around — so repeat presses cycle through all of the
-app's windows. With a single window a repeat press changes
-nothing. The cycle covers the windows KiwiDesk currently tracks;
-windows on another native macOS desktop are untracked while you
-are away (see accepted limitations) and are reached by the plain
-activate instead.
+to the app's **next** window — space order (the order spaces were
+created, the same order the Space Bar lists them), then slot
+order within a space, wrapping around — so repeat presses cycle
+through all of the app's windows. With a single window a repeat
+press changes nothing. The cycle covers the windows KiwiDesk
+currently tracks; the app's windows on another native macOS
+desktop are untracked while you are away and rejoin the cycle
+when you return to their desktop — see
+[Accepted limitations](accepted-limitations.md).
 
 **Example:**
 

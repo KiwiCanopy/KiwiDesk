@@ -18,6 +18,11 @@ struct OpenOrFocusRingTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 25, width: 1440, height: 875)
         }
+        // The ring assertions below reason from the shipped
+        // default — focused-only rings; pin it (tests.md).
+        #expect(
+            !core.tiler.settings.borderStyle.unfocusedEnabled
+        )
         return core
     }
 
@@ -127,6 +132,36 @@ struct OpenOrFocusRingTests {
         let focused = core.tiler.settings.borderStyle.focusedColor
         #expect(ring(core, 20)?.colorHex == focused)
         #expect(ring(core, 30) == nil)
+    }
+
+    /// The grant arm of the #636 condition, red-proofed: when a
+    /// native switch returns a space whose members ALL left
+    /// with it (`focused == nil`), the first returner must
+    /// seed the focus — the settle fallback needs a target even
+    /// when no focus report ever arrives.
+    @Test("A returning window seeds an empty space's focus")
+    func returningWindowSeedsEmptyFocus() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        core.handle(.windowCreated(window(20, pid: 100)))
+        core.handle(.windowCreated(window(30, pid: 300)))
+        core.handle(.nativeSpaceChanged)
+        core.handle(
+            .windowDestroyed(WindowID(20), wasMinimized: false)
+        )
+        core.handle(
+            .windowDestroyed(WindowID(30), wasMinimized: false)
+        )
+        core.handle(.nativeSpaceChanged)
+        core.handle(.windowCreated(window(20, pid: 100)))
+        // No focus report replay: the seed alone must land.
+        #expect(
+            core.state.workspaces["1"]?.focused == WindowID(20)
+        )
+        #expect(
+            core.state.workspaces.lastFocused == WindowID(20)
+        )
     }
 
     /// Scope guard for the fix: a genuinely NEW window (no

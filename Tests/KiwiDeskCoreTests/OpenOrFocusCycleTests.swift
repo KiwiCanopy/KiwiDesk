@@ -21,6 +21,11 @@ struct OpenOrFocusCycleTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 25, width: 1440, height: 875)
         }
+        // The ring assertions below reason from the shipped
+        // default — focused-only rings; pin it (tests.md).
+        #expect(
+            !core.tiler.settings.borderStyle.unfocusedEnabled
+        )
         return core
     }
 
@@ -28,7 +33,9 @@ struct OpenOrFocusCycleTests {
         _ core: KiwiCore,
         _ id: UInt32,
         pid: pid_t = 100,
-        space: SpaceID = "1"
+        space: SpaceID = "1",
+        sticky: Bool = false,
+        overlay: Bool = false
     ) {
         core.state.windows.upsert(
             ManagedWindow(
@@ -36,11 +43,23 @@ struct OpenOrFocusCycleTests {
                 pid: pid,
                 appName: "App\(pid)",
                 appBundleID: pid == 100
-                    ? Self.bundle : "app.test.\(pid)"
+                    ? Self.bundle : "app.test.\(pid)",
+                stickyScope: sticky ? .global : .none,
+                isTransientOverlay: overlay
             )
         )
         core.state.workspaces.ensureSpace(space)
         core.state.workspaces.add(WindowID(id), to: space)
+    }
+
+    /// The ring the specs grant `id`, if any.
+    private func ring(
+        _ core: KiwiCore,
+        _ id: UInt32
+    ) -> BorderManager.Spec? {
+        core.desiredBorderSpecs().first {
+            $0.window == WindowID(id)
+        }
     }
 
     private func press(_ core: KiwiCore) -> CommandResponse {
@@ -65,13 +84,8 @@ struct OpenOrFocusCycleTests {
             core.state.workspaces.lastFocused == WindowID(21)
         )
         let focused = core.tiler.settings.borderStyle.focusedColor
-        #expect(
-            core.desiredBorderSpecs().first?.window
-                == WindowID(21)
-        )
-        #expect(
-            core.desiredBorderSpecs().first?.colorHex == focused
-        )
+        #expect(ring(core, 21)?.colorHex == focused)
+        #expect(ring(core, 20) == nil)
     }
 
     @Test("The cycle wraps from the last window to the first")
@@ -106,11 +120,43 @@ struct OpenOrFocusCycleTests {
         )
         // The ring rides the switch (#636's regression class).
         let focused = core.tiler.settings.borderStyle.focusedColor
-        let specs = core.desiredBorderSpecs()
+        #expect(ring(core, 21)?.colorHex == focused)
+    }
+
+    /// A sticky successor is visible right here (#414): its
+    /// membership names only its hidden home space, so the
+    /// cycle must focus it in place, never fly to its home.
+    @Test("A sticky successor focuses without a space switch")
+    func stickySuccessorStaysPut() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.ensureSpace("2")
+        core.state.workspaces.activate("1")
+        addWindow(core, 20)
+        addWindow(core, 21, space: "2", sticky: true)
+        core.state.workspaces.focus(WindowID(20), in: "1")
+        core.frontmostPIDProvider = { 100 }
+        #expect(press(core).isSuccess)
+        #expect(core.state.workspaces.activeSpace == "1")
         #expect(
-            specs.first {
-                $0.window == WindowID(21)
-            }?.colorHex == focused
+            core.state.workspaces.lastFocused == WindowID(21)
+        )
+    }
+
+    /// A transient overlay (a launcher's panel, #300) is
+    /// tracked but momentary — never part of the ring.
+    @Test("A transient overlay never joins the cycle")
+    func overlayNeverJoinsTheCycle() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        addWindow(core, 20)
+        addWindow(core, 21, overlay: true)
+        core.state.workspaces.focus(WindowID(20), in: "1")
+        core.frontmostPIDProvider = { 100 }
+        #expect(!core.cycleToNextWindow(bundleID: Self.bundle))
+        #expect(
+            core.state.workspaces.lastFocused == WindowID(20)
         )
     }
 
