@@ -253,9 +253,8 @@ public final class KiwiCore {
     public internal(set) var nativeSpaceBindings: [Int: String] = [:]
 
     /// Log line consumer (GUI console later; syslog now) — the
-    /// sink every Core seam is wired to forward *into*, which is
-    /// why it is exempt from the wiring guard.
-    public var onLog: @MainActor (String) -> Void = CoreLog.emit
+    /// sink every Core seam is wired to forward *into*.
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     /// Problems from the last config load (#68): a broken
     /// init.lua, an unreadable gui.json, invalid profile JSONs.

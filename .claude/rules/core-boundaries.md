@@ -38,16 +38,11 @@ itself when a fifth is added.
   contract, not UI copy. The deliberate exception to the above.
 - **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
   the group where all of them are, and in the same change that
-  declares it — and it **defaults to `CoreLog.emit`** (#624), so
-  that forgetting costs a line which skips the sink rather than
-  a line that is dropped. `LogSeamWiringTests` guards the wiring
-  and its `allowed` map is the exemption list; `LogSeamDefaultTests`
-  guards the default. They fail on opposite mistakes and neither
-  implies the other, so both stay; each docstring carries its own
-  argument. The default buys down the *size* of the failure, not
-  its existence — an unwired seam still bypasses the sink a GUI
-  console reads from, which is why the wiring rule is the one
-  written as an obligation.
+  declares it — and it **defaults to `CoreLog.write`**, which is
+  never called directly. `LogSeamWiringTests` guards the wiring
+  and its `allowed` map is the exemption list;
+  `LogSeamDefaultTests` guards the default and the no-direct-call
+  half. The argument for both is on `CoreLog`.
   Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
   after the AX grant) is invisible to that guard, and `onLog`
   needs no permission to be useful.

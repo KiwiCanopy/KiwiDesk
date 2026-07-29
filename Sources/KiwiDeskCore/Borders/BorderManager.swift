@@ -90,7 +90,7 @@ public final class BorderManager {
     /// once and costs nothing after.
     var windowServerTrackingDisabled = false
     var reportedTrackingActive: Bool?
-    var onLog: @MainActor (String) -> Void = CoreLog.emit
+    var onLog: @MainActor (String) -> Void = CoreLog.write
     /// Whether OUR OWN animation currently drives this window
     /// (#594). Wired to `AnimationEngine.isAnimating`; while
     /// true, the per-tick commanded frame owns the ring — the

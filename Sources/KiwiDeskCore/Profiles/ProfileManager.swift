@@ -42,7 +42,7 @@ public final class ProfileManager {
     private let directory: URL
 
     /// Invalid profile files reported while listing (#31).
-    public var onLog: @MainActor (String) -> Void = CoreLog.emit
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     public init(directory: URL) {
         self.directory = directory

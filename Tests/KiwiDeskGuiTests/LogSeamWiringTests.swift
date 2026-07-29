@@ -20,7 +20,7 @@ import Testing
 /// function. The omission cost nothing to make and showed
 /// nowhere.
 ///
-/// Since #624 every seam defaults to `CoreLog.emit`, so an
+/// Since #624 every seam defaults to `CoreLog.write`, so an
 /// unwired one reaches syslog on its way past instead of being
 /// dropped — kept honest by `LogSeamDefaultTests`, which is what
 /// this suite's argument now rests on. That is a smaller
@@ -92,7 +92,7 @@ struct LogSeamWiringTests {
     /// instead of quietly excusing a real one.
     private let allowed: [String: String] = [
         // The sink, not a seam: what every other seam forwards
-        // *to*. It carries the same `CoreLog.emit` default they
+        // *to*. It carries the same `CoreLog.write` default they
         // do, which is where their forwarded lines end up, and
         // wiring it to itself would recurse.
         "KiwiCore": "the syslog sink every other seam feeds"
@@ -102,7 +102,10 @@ struct LogSeamWiringTests {
     func everySeamReachesTheSink() throws {
         let sources = try SourceScan.swiftSources(under: coreRoot)
         var unresolved: [String] = []
-        let owners = try seamOwners(in: sources, gaps: &unresolved)
+        let owners = try seamOwners(
+            in: SourceScan.logSeamDeclarations(under: coreRoot),
+            gaps: &unresolved
+        )
         let wired = try wiredOwners(
             properties: try storedProperties(in: sources),
             gaps: &unresolved
@@ -156,30 +159,28 @@ struct LogSeamWiringTests {
 
     // MARK: - Discovery
 
-    /// The type enclosing each `var onLog:` declaration. The
-    /// colon is load-bearing: without it a future `onLogLevel`
-    /// registers as a seam and demands a wiring it has no use
-    /// for.
+    /// The type enclosing each `var onLog:` declaration.
+    ///
+    /// The walk itself is `SourceScan.logSeamDeclarations`, shared
+    /// with `LogSeamDefaultTests` — which reads the *default* off
+    /// the same declarations this reads the *owner* off. Two
+    /// copies of one needle would let the guards drift into
+    /// disagreeing about which seams exist; that helper's doc
+    /// comment carries the argument.
     private func seamOwners(
-        in sources: [URL],
+        in declarations: [LogSeamDeclaration],
         gaps: inout [String]
     ) throws -> Set<String> {
         var owners: Set<String> = []
-        for file in sources {
-            let lines = try strippedLines(of: file)
-            let enclosing = SourceScan.enclosingTypes(of: lines)
-            for index in lines.indices
-            where lines[index].contains("var onLog:") {
-                guard let owner = enclosing[index] else {
-                    gaps.append(
-                        "the type declaring `var onLog` at "
-                            + "\(file.lastPathComponent):"
-                            + "\(index + 1)"
-                    )
-                    continue
-                }
-                owners.insert(owner)
+        for declaration in declarations {
+            guard let owner = declaration.owner else {
+                gaps.append(
+                    "the type declaring `var onLog` at "
+                        + declaration.site
+                )
+                continue
             }
+            owners.insert(owner)
         }
         return owners
     }
@@ -296,14 +297,5 @@ struct LogSeamWiringTests {
             }
         }
         return index
-    }
-
-    private func strippedLines(
-        of file: URL
-    ) throws -> [Substring] {
-        SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(separator: "\n", omittingEmptySubsequences: false)
     }
 }

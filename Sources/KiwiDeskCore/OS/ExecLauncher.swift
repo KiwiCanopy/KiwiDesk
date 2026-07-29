@@ -35,7 +35,7 @@ public final class ExecLauncher {
     public typealias ExitHandler =
         @MainActor @Sendable (Int32, String, String) -> Void
 
-    public var onLog: @MainActor (String) -> Void = CoreLog.emit
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     /// A launched child and its optional timeout watchdog, kept
     /// together so the two can never desync — one table, one

@@ -1,36 +1,45 @@
 import Foundation
 import Testing
 
-/// Every `var onLog` declaration under `Sources/KiwiDeskCore`
-/// defaults to `CoreLog.emit` (#624).
+/// `CoreLog.write` is every seam's default and nothing else
+/// (#624).
 ///
-/// The argument for that default is on `CoreLog` itself, where an
-/// author reaches it. What this guard adds is that the default
-/// cannot drift back one seam at a time: `{ _ in }` is the
-/// obvious thing to type when declaring a new seam, it compiles,
-/// and the subsystem it silences is the one nobody was reading
-/// yet. Six of the eight seams carried exactly that default
-/// until #624.
+/// Three assertions, because the invariant has three halves and
+/// each fails on its own:
 ///
-/// It is the **companion** to `LogSeamWiringTests`, not a
-/// duplicate of it, and the two fail on opposite mistakes: that
-/// one catches a seam nobody wired, this one catches a seam whose
-/// unwired state would be silent. Neither implies the other — a
-/// seam can be wired and still declare a no-op default (harmless
-/// today, a silent drop the moment someone forgets the wiring),
-/// and a seam can default here and never be wired (loud, but
-/// bypassing the sink a GUI console reads from).
+/// 1. **Every `var onLog:` defaults to it.** `{ _ in }` is the
+///    obvious thing to type when declaring a new seam, it
+///    compiles, and the subsystem it silences is the one nobody
+///    was reading yet — six of the eight seams carried exactly
+///    that default until #624.
+/// 2. **Its body still writes.** Nothing else in the tree looks
+///    at what `CoreLog.write` *does*: the other seam guards all
+///    assign `core.onLog` themselves, so none of them ever runs
+///    the default. Gut the `NSLog` and the tree returns to its
+///    pre-#624 behaviour with every seam still naming
+///    `CoreLog.write` and every other guard green — and the
+///    pressure to do exactly that is real, since these lines land
+///    in the unified log during test runs.
+/// 3. **Core reaches it only through a seam declaration.** It is
+///    `internal`, but internal is the whole of `KiwiDeskCore`. A
+///    direct `CoreLog.write("…")` call site would put a
+///    diagnostic in syslog that `KiwiCore.onLog` never sees,
+///    which is the routing failure the wiring rule exists to
+///    prevent, wearing a blessed-looking spelling.
 ///
-/// Deliberately line-scoped: it reads the default off the same
-/// line as the declaration and **gaps** — reds naming what it
-/// could not read — on a declaration whose `=` is not there. A
-/// wrapped or otherwise unrecognised shape therefore fails shut
-/// with an honest message rather than as "does not default to
-/// `CoreLog.emit`", which would send the reader looking at the
-/// wrong thing.
+/// The argument for the default itself is on `CoreLog`, where an
+/// author reaches it; the seam discovery is shared with
+/// `LogSeamWiringTests` through `SourceScan.logSeamDeclarations`.
 ///
-/// It lives in the GUI test target because `SourceScan` does, as
-/// `LogSeamWiringTests` and `VisibleBoundsRoutingTests` do.
+/// Companion to `LogSeamWiringTests`, not a duplicate: that one
+/// catches a seam nobody wired, this one catches a seam whose
+/// unwired state would be silent. Neither implies the other.
+///
+/// Deliberately line-scoped: it reads the default off the
+/// declaration's own line and **gaps** — reds naming what it
+/// could not read — on a declaration whose `=` is elsewhere, so a
+/// wrapped shape fails shut with an honest message rather than as
+/// "does not default to `CoreLog.write`".
 @Suite("Log-seam defaults")
 struct LogSeamDefaultTests {
     private var coreRoot: URL {
@@ -38,25 +47,13 @@ struct LogSeamDefaultTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
     }
 
-    @Test("Every onLog seam defaults to CoreLog.emit")
+    @Test("Every onLog seam defaults to CoreLog.write")
     func everySeamDefaultsToTheSyslogWrite() throws {
-        let declarations = try onLogDeclarations()
-
-        // The canary over the collection this test consumes.
-        // `SourceScan.swiftSources` answers `[]` for a directory
-        // that does not exist rather than throwing, so a mistyped
-        // `coreRoot` yields no declarations and every loop below
-        // passes without asserting once. No count is pinned: the
-        // set is meant to grow, and a hand-written total would
-        // red on the next honest seam.
-        #expect(
-            !declarations.isEmpty,
-            Comment(
-                rawValue: "no `var onLog` declaration found "
-                    + "under \(coreRoot) — the scan reached "
-                    + "nothing, so nothing below was checked"
-            )
+        let declarations = try SourceScan.logSeamDeclarations(
+            under: coreRoot
         )
+
+        try assertScanReachedTheTree(declarations)
 
         for declaration in declarations {
             guard let defaultValue = declaration.defaultValue
@@ -73,69 +70,153 @@ struct LogSeamDefaultTests {
                 continue
             }
             #expect(
-                defaultValue == "CoreLog.emit",
+                defaultValue == "CoreLog.write",
                 Comment(
                     rawValue: "\(declaration.site) defaults its "
                         + "`onLog` seam to `\(defaultValue)`. "
-                        + "Every seam defaults to `CoreLog.emit` "
-                        + "so that forgetting to wire one costs "
-                        + "a routing inconsistency rather than "
-                        + "silence — see `CoreLog`."
+                        + "Every seam defaults to `CoreLog.write` "
+                        + "so that a seam running on its default "
+                        + "skips the sink rather than dropping "
+                        + "the line — see `CoreLog`."
                 )
             )
         }
     }
 
-    // MARK: - Discovery
-
-    private struct Declaration {
-        /// `File.swift:12`, for a message that can be clicked.
-        let site: String
-        /// The text right of `=`, or nil when the line has none.
-        let defaultValue: String?
+    @Test("CoreLog.write still writes")
+    func theDefaultStillReachesSyslog() throws {
+        let source = try String(
+            contentsOf: coreRoot.appendingPathComponent(
+                "App/CoreLog.swift"
+            ),
+            encoding: .utf8
+        )
+        let body = SourceScan.stripComments(source)
+            .components(separatedBy: "static func write(")
+        #expect(
+            body.count == 2,
+            Comment(
+                rawValue: "CoreLog no longer declares `static "
+                    + "func write(` — this guard reads its body "
+                    + "and cannot find it"
+            )
+        )
+        #expect(
+            body.last?.contains("NSLog(") == true,
+            Comment(
+                rawValue: "`CoreLog.write` no longer calls "
+                    + "`NSLog`. Nothing else in the tree asserts "
+                    + "what this body does, so gutting it "
+                    + "restores the pre-#624 silence with every "
+                    + "seam still naming `CoreLog.write`. If the "
+                    + "write is deliberately moving to `os_log` "
+                    + "or similar, change this guard in the same "
+                    + "commit rather than around it."
+            )
+        )
+        #expect(
+            body.last?.contains("#if") != true,
+            Comment(
+                rawValue: "`CoreLog.write`'s body is "
+                    + "conditionally compiled — a build where "
+                    + "the write vanishes is the failure this "
+                    + "guard exists to catch"
+            )
+        )
     }
 
-    /// Every `var onLog:` declaration and the default it carries.
-    ///
-    /// The colon is load-bearing exactly as it is in
-    /// `LogSeamWiringTests`: without it a future `onLogLevel`
-    /// registers as a seam and is asked for a default it has no
-    /// use for.
-    private func onLogDeclarations() throws -> [Declaration] {
-        var found: [Declaration] = []
-        for file in try SourceScan.swiftSources(under: coreRoot) {
-            let source = SourceScan.stripComments(
+    @Test("Core reaches CoreLog only through a seam default")
+    func theDefaultIsNeverCalledDirectly() throws {
+        let declarationLines = Set(
+            try SourceScan.logSeamDeclarations(under: coreRoot)
+                .map(\.site)
+        )
+        var callSites: [String] = []
+        for file in try SourceScan.swiftSources(under: coreRoot)
+        where file.lastPathComponent != "CoreLog.swift" {
+            let lines = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let lines = source.split(
-                separator: "\n",
-                omittingEmptySubsequences: false
-            )
+            .split(separator: "\n", omittingEmptySubsequences: false)
             for index in lines.indices
-            where lines[index].contains("var onLog:") {
-                found.append(
-                    Declaration(
-                        site: "\(file.lastPathComponent):"
-                            + "\(index + 1)",
-                        defaultValue: defaultValue(
-                            on: lines[index]
-                        )
-                    )
-                )
+            where lines[index].contains("CoreLog.") {
+                let site = "\(file.lastPathComponent):\(index + 1)"
+                guard !declarationLines.contains(site) else {
+                    continue
+                }
+                callSites.append(site)
             }
         }
-        return found
+        #expect(
+            callSites.isEmpty,
+            Comment(
+                rawValue: "\(callSites.sorted().joined(separator: ", ")) "
+                    + "names `CoreLog` outside a `var onLog:` "
+                    + "declaration. It is a default, not a "
+                    + "logging API — a direct call writes to "
+                    + "syslog without passing `KiwiCore.onLog`, "
+                    + "so nothing capturing that sink sees it. "
+                    + "Log through the subsystem's own `onLog`."
+            )
+        )
     }
 
-    /// The trimmed text after the first `=`, or nil when the
-    /// line carries none. `(String) -> Void` holds no `=`, so
-    /// the first one is the assignment's.
-    private func defaultValue(on line: Substring) -> String? {
-        guard let equals = line.firstIndex(of: "=") else {
-            return nil
+    /// The canary over the collection these tests consume.
+    ///
+    /// `SourceScan.swiftSources` answers `[]` for a directory that
+    /// does not exist rather than throwing, so a mistyped root — or
+    /// a narrowed file predicate, the harm `tests.md` names for
+    /// this helper family — leaves the loops above asserting
+    /// nothing at all.
+    ///
+    /// The floor is **derived, not restated**: the seams outnumber
+    /// bootstrap's assignments, because `KiwiCore.onLog` is a
+    /// declaration that is never assigned. So a scan that lost even
+    /// one declaration reds here, and the bound moves on its own
+    /// when a seam is added. A hand-written total would instead red
+    /// on the next honest seam, and `!isEmpty` would be satisfied
+    /// by a single surviving declaration while eight went
+    /// unchecked.
+    private func assertScanReachedTheTree(
+        _ declarations: [LogSeamDeclaration]
+    ) throws {
+        let bootstrap = try SourceScan.swiftSources(
+            under: coreRoot.appendingPathComponent("App")
+        )
+        .filter {
+            $0.lastPathComponent.hasPrefix("KiwiCore+Bootstrap")
         }
-        let value = line[line.index(after: equals)...]
-            .trimmingCharacters(in: .whitespaces)
-        return value.isEmpty ? nil : value
+        var assignments = 0
+        for file in bootstrap {
+            assignments +=
+                SourceScan.allMatches(
+                    in: SourceScan.stripComments(
+                        try String(contentsOf: file, encoding: .utf8)
+                    ),
+                    pattern: #"(\.onLog)\s*="#
+                ).count
+        }
+
+        #expect(
+            assignments > 0,
+            Comment(
+                rawValue: "no `.onLog =` assignment found in any "
+                    + "KiwiCore+Bootstrap file under \(coreRoot) "
+                    + "— the scan reached nothing, so nothing "
+                    + "below was checked"
+            )
+        )
+        #expect(
+            declarations.count > assignments,
+            Comment(
+                rawValue: "found \(declarations.count) `var "
+                    + "onLog:` declaration(s) but \(assignments) "
+                    + "bootstrap assignment(s). Every seam that "
+                    + "is assigned must first be declared, and "
+                    + "`KiwiCore.onLog` is declared without "
+                    + "being assigned, so declarations always "
+                    + "exceed assignments — this scan lost some."
+            )
+        )
     }
 }

@@ -13,7 +13,7 @@ public final class CrashRecovery {
         { nil }
     public var restoreState: @MainActor (StateSnapshot) -> Void =
         { _ in }
-    public var onLog: @MainActor (String) -> Void = CoreLog.emit
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     private let fileURL: URL
     /// Arrangement saved on CLEAN shutdown, restored on the
