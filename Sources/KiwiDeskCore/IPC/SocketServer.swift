@@ -180,8 +180,17 @@ public final class SocketServer {
         // read as a subscription working very hard. Arguments
         // given, filter honoured exactly; none given,
         // everything.
+        //
+        // Asked of `args` and not reconstructed from the two
+        // accumulators above. Those are equivalent only while
+        // every argument lands in one of them, so a later branch
+        // that consumes one without doing so — skipping an empty
+        // name, capping the collected list the way the log is
+        // capped — would restore this bug in silence, and no
+        // argument shape that skips both exists to have a test
+        // (review).
         let wanted =
-            events.isEmpty && unknown.isEmpty
+            args.isEmpty
             ? Set(KiwiNotification.allCases)
             : events
         if let old = client.sinkToken {

@@ -143,13 +143,21 @@ struct SocketTests {
     /// firehose, so the stream looked like it was working very
     /// hard rather than not at all.
     ///
-    /// Proven without a sleep, by ordering. The emit runs on the
-    /// main actor between two awaited round-trips, so a delivered
-    /// event would already be queued **ahead** of the second
-    /// response — and the second round-trip reads exactly one
-    /// line. Getting a bare `ok` back is therefore proof the
+    /// Proven without a sleep, by ordering. `EventBus.emit` is
+    /// synchronous, so in the broken case the event bytes reach
+    /// the connection before `MainActor.run` returns — before
+    /// the second subscribe is even written — and a stream
+    /// preserves order, so the next line read would be the
+    /// event. Getting the response back instead is proof the
     /// event was never sent, and the control below proves the
-    /// emit reaches a client that did subscribe.
+    /// emit machinery works for a client that did subscribe.
+    ///
+    /// Its failure mode is a **stalled job**, not a named
+    /// assertion: if delivery to a subscribed client ever broke,
+    /// the final `readLine()` blocks in an uncancellable read.
+    /// That is this suite's shape throughout — `roundTrip` hangs
+    /// the same way if the server never answers — and `Tests/`
+    /// has no `.timeLimit` precedent to follow instead.
     @Test("An all-unknown subscribe streams nothing")
     func allUnknownSubscribeStreamsNothing() async throws {
         let path = Self.throwawaySocketPath()
