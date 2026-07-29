@@ -136,6 +136,18 @@ public struct FrameAnimation: Sendable {
     public private(set) var target: [Double]
     public let spring: Spring
 
+    /// Why this animation is running (#593) — read every tick by
+    /// `SizeStep` to decide whether a shrinking axis may follow
+    /// the spring. Stored here, per animation, rather than as an
+    /// engine-wide flag "for the duration of a retile": `animate`
+    /// **retargets** a window that is already in flight, so an
+    /// engine flag would leak a resize's intent into a reflow that
+    /// arrived mid-resize. `retarget(to:sizeIntent:)` makes that
+    /// an explicit decision instead, and the rule is that the
+    /// newest intent wins — a reflow interrupting a resize must
+    /// restore the snap.
+    public private(set) var sizeIntent: SizeIntent
+
     /// Settled when within this distance at negligible speed.
     /// Sub-pixel tails are invisible but cost real AX calls,
     /// so half a point is close enough (the final frame snaps
@@ -146,20 +158,36 @@ public struct FrameAnimation: Sendable {
     /// for `pastHalfway`.
     private var initialDistance: Double
 
-    public init(from: CGRect, to: CGRect, spring: Spring) {
+    /// `sizeIntent` defaults to `.reflow` — today's first-frame
+    /// shrink snap — so a construction site that has no opinion
+    /// gets the fail-safe one (#593).
+    public init(
+        from: CGRect,
+        to: CGRect,
+        spring: Spring,
+        sizeIntent: SizeIntent = .reflow
+    ) {
         self.current = Self.vector(from)
         self.velocity = [0, 0, 0, 0]
         self.target = Self.vector(to)
         self.spring = spring
+        self.sizeIntent = sizeIntent
         self.initialDistance = Self.distance(
             self.current,
             self.target
         )
     }
 
-    /// Redirects the animation to a new target mid-flight.
-    public mutating func retarget(to frame: CGRect) {
+    /// Redirects the animation to a new target mid-flight. The
+    /// intent is **required**, not defaulted: an interrupt is
+    /// exactly where a stale one would go unnoticed, and the
+    /// newest one wins (#593).
+    public mutating func retarget(
+        to frame: CGRect,
+        sizeIntent: SizeIntent
+    ) {
         target = Self.vector(frame)
+        self.sizeIntent = sizeIntent
         initialDistance = Self.distance(current, target)
     }
 

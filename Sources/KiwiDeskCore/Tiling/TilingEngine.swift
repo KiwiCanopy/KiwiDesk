@@ -165,12 +165,19 @@ public final class TilingEngine {
     /// instant set — the coordinated space switch (#207), where
     /// the outgoing windows slide out WHILE the incoming ones
     /// slide in. Every other retile keeps the instant default.
+    ///
+    /// `sizeIntent` marks the whole pass as a plain resize (#593)
+    /// so a shrinking pane slides its shared edge instead of
+    /// snapping. It rides the layout loop only: the stash park and
+    /// the float restore below place windows that sit *outside*
+    /// the layout, and neither may borrow a resize's smoothing.
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
         force: Bool = false,
         newlyCreatedWindow: WindowID? = nil,
-        stashAnimated: Bool = false
+        stashAnimated: Bool = false,
+        sizeIntent: SizeIntent = .reflow
     ) {
         guard
             let screen = NSScreen.main
@@ -202,7 +209,8 @@ public final class TilingEngine {
                 from: current,
                 to: target,
                 animated: animated,
-                isNewWindow: id == newlyCreatedWindow
+                isNewWindow: id == newlyCreatedWindow,
+                sizeIntent: sizeIntent
             )
         }
         stashInactive(
@@ -223,12 +231,19 @@ public final class TilingEngine {
     /// drifted once, dropping the cancel). The animation screen
     /// is the display the target frame lands on (multi-monitor:
     /// one `DisplayLink` per monitor), falling back to main.
+    ///
+    /// `sizeIntent` says why this frame is being applied (#593);
+    /// it reaches `SizeStep` through the animation and decides
+    /// whether a shrinking axis may slide instead of snapping.
+    /// `.reflow` is the default because mismarking is asymmetric —
+    /// see `SizeIntent`.
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
         to target: CGRect,
         animated: Bool,
-        isNewWindow: Bool = false
+        isNewWindow: Bool = false,
+        sizeIntent: SizeIntent = .reflow
     ) {
         if animated,
             let screen = Self.screen(containing: target)
@@ -240,7 +255,8 @@ public final class TilingEngine {
                 on: screen,
                 from: current,
                 to: target,
-                isNewWindow: isNewWindow
+                isNewWindow: isNewWindow,
+                sizeIntent: sizeIntent
             )
         } else {
             animation.cancel(window: id)

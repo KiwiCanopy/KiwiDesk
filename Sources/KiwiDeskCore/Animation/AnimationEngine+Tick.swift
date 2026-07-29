@@ -30,8 +30,11 @@ extension AnimationEngine {
                 // A shrinking axis takes its target size on the
                 // first frame — mid-flight overlap clears at
                 // once (siblings yielding room to a newly
-                // opened window). The grow direction follows the
-                // active `growPolicy`: `.throttledSmooth` (#47, the
+                // opened window) — unless this animation was
+                // started as a plain resize (#593), where nothing
+                // is instantly sized and the shared edge may slide.
+                // The grow direction follows the active
+                // `sizePolicy`: `.throttledSmooth` (#47, the
                 // default) resamples the spring each tick (or at a
                 // capped rate); `.midSlide` (the legacy fallback)
                 // instead lands a single size-set mid-flight, where
@@ -45,13 +48,14 @@ extension AnimationEngine {
                 let held =
                     heldSize[id]
                     ?? Self.rounded(animation.frame).size
-                let stepped = GrowSize.step(
-                    policy: growPolicy,
+                let stepped = SizeStep.step(
+                    policy: sizePolicy,
+                    intent: animation.sizeIntent,
                     held: held,
                     target: animation.targetFrame.size,
                     spring: animation.frame.size,
                     pastHalfway: animation.pastHalfway,
-                    rateHz: storedGrowRateHz,
+                    rateHz: storedSizeRateHz,
                     elapsed: sizeElapsed[id] ?? 0,
                     dt: dt
                 )

@@ -53,7 +53,10 @@ extension KiwiCore {
             // ±2 pt tolerance would swallow a small ratio
             // nudge exactly like the 1 pt gap edit that
             // motivated the guardrail.
-            retile(force: true)
+            retile(
+                force: true,
+                sizeIntent: Self.sizeIntent(for: command)
+            )
             // Now that the reorder's animations are in flight,
             // arm the deferred z-order restore (#153) — it rides
             // their settle instead of the pre-retile frames.
@@ -63,6 +66,33 @@ extension KiwiCore {
             }
         }
         return response
+    }
+
+    /// The scalar layout parameters that only re-divide room
+    /// among the windows already placed, so their retile may
+    /// slide a shrinking pane's shared edge instead of snapping
+    /// it (#593). Named one by one rather than derived from a
+    /// prefix or a `set_`/`ratio` pattern: this whole dispatch
+    /// shares ONE trailing retile, and its other members —
+    /// `stack.set_master_count`, `stack.set_stack_position`,
+    /// `track.set_limit`, `grid.set_dimensions`, every
+    /// `set_new_window_placement` — reassign slots wholesale and
+    /// must keep the #45 snap.
+    ///
+    /// A command that gets renamed out of this set falls back to
+    /// `.reflow`, which is the fail-safe direction: a lost snap is
+    /// cosmetic, a lost reflow is a visible overlap.
+    private static let resizeLikeCommands: Set<String> = [
+        "bsp.set_ratio_h",
+        "bsp.set_ratio_v",
+        "stack.set_master_ratio",
+        "scroll.set_slot_size",
+    ]
+
+    private static func sizeIntent(
+        for command: String
+    ) -> SizeIntent {
+        resizeLikeCommands.contains(command) ? .resize : .reflow
     }
 
     /// Shared parsing for the per-layout

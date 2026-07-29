@@ -125,8 +125,15 @@ extension KiwiCore {
         // the ±2 pt tolerance can only delay a sub-tolerance
         // step, never lose it — and forcing every keypress
         // would wobble windows that apps clamp.
+        //
+        // The canonical `.resize` pass (#593): membership and slot
+        // assignment are untouched, every path above only rewrites
+        // a ratio or weight, and nothing here is instantly sized —
+        // so a yielding pane may slide its shared edge instead of
+        // snapping.
         retile(
-            animated: tiler.settings.animations.onWindowResize
+            animated: tiler.settings.animations.onWindowResize,
+            sizeIntent: .resize
         )
         // Resizing a track past min_window_size flips it into an
         // overflow cascade (or unflips one back); fix the pile's

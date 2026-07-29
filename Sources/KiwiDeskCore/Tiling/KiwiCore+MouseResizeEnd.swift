@@ -50,8 +50,13 @@ extension KiwiCore {
                 in: state
             )
         else {
+            // snap_back / no-parameter axis: the dragged window
+            // animates back to its own slot and nothing else
+            // moves, so `.resize` (#593) is safe by the same
+            // argument as the settle below.
             retile(
-                animated: tiler.settings.animations.onWindowResize
+                animated: tiler.settings.animations.onWindowResize,
+                sizeIntent: .resize
             )
             focusWindow(id, warp: false)
             return
@@ -91,8 +96,17 @@ extension KiwiCore {
             in: space,
             bounds: bounds
         )
+        // `.resize` (#593) — the drop writes a ratio and nothing
+        // else, exactly like the keyboard verb. Judged separately
+        // from it on device, though: the pointer already put the
+        // dragged window where the user wanted it, so the thing
+        // that smooths here is the NEIGHBOUR catching up over the
+        // animation duration, which can read as lag rather than
+        // butter. If it does, this one call site reverts to
+        // `.reflow` and the keyboard half still ships.
         retile(
-            animated: tiler.settings.animations.onWindowResize
+            animated: tiler.settings.animations.onWindowResize,
+            sizeIntent: .resize
         )
         // A track resize can flip a track into/out of an overflow
         // cascade — restack the pile once it settles (#193).
