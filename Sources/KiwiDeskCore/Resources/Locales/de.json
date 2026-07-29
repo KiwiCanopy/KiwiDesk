@@ -652,7 +652,7 @@
   "shortcuts.advanced.caption": "Weise beliebigem Lua-Code ein Tastenkürzel zu. Das ist die Notlösung für Power-User — alle Standard-Aktionen kannst du bequem oben einstellen.",
   "shortcuts.advanced.title": "Lua-Tastenkürzel",
   "shortcuts.app_behavior": "Startverhalten",
-  "shortcuts.app_behavior.help": "**Öffnen oder Fokussieren** bringt das bestehende Fenster der App auf den aktuellen Space oder startet sie, falls sie nicht läuft.\n\n**Neu öffnen** startet immer eine frische Instanz, selbst wenn die App bereits geöffnet ist.",
+  "shortcuts.app_behavior.help": "**Öffnen oder Fokussieren** holt das bestehende Fenster der App in den aktuellen Space oder startet die App, falls sie nicht läuft. Erneutes Drücken, während dieses Fenster fokussiert ist, wechselt der Reihe nach durch die übrigen Fenster der App.\n\n**Neu öffnen** startet immer eine neue Instanz, auch wenn die App bereits geöffnet ist.",
   "shortcuts.app_behavior.open_new": "Neu öffnen",
   "shortcuts.app_behavior.open_new.badge": "Öffnet eine neue Instanz",
   "shortcuts.app_behavior.open_or_focus": "Öffnen oder Fokussieren",

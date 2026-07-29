@@ -73,7 +73,9 @@ extension ApplicationsGroup {
             "shortcuts.app_behavior.help",
             "**Open or Focus** brings the app's existing window to "
                 + "the current space, or launches it if the app "
-                + "isn't running.\n\n**Open New** always launches a "
+                + "isn't running. Pressing again while that window "
+                + "is focused cycles through the app's other "
+                + "windows.\n\n**Open New** always launches a "
                 + "fresh instance, even when the app is already "
                 + "open."
         )

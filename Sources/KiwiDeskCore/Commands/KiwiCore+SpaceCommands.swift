@@ -244,19 +244,9 @@ extension KiwiCore {
             moveLatch.stamp(window)
         }
         if follow {
-            // Captured before the raise below can change it —
-            // the settle's dropped-activate detection (#463).
-            let priorFrontmost = frontmostPIDProvider?()
-            state.workspaces.activate(target)
-            // The retile below owns placement (see focusWindow).
-            focusWindow(window, refocusRetile: false, warp: true)
-            emitSpaceChange()
-            // Following is a space switch too: re-assert so the
-            // target's other windows survive a dropped frame.
-            scheduleSpaceSettle(
-                target,
-                priorFrontmost: priorFrontmost
-            )
+            // The one copy of the follow-shaped switch — the
+            // capture/raise/settle ordering lives on it.
+            followSwitch(to: target, focusing: window)
         } else if let next = activeSpace?.focused {
             // Captured before the refocus raise below — the
             // settle's dropped-activate detection (#463 pattern).
@@ -293,11 +283,10 @@ extension KiwiCore {
             // is cleaned up wherever its origin was.
             desktopFocusYield?()
         }
-        if follow {
-            // A follow IS a space switch: same coordinated
-            // out+in policy (#207), same force contract.
-            spaceSwitchRetile()
-        } else {
+        if !follow {
+            // The follow branch retiled inside `followSwitch`
+            // (a follow IS a space switch — same coordinated
+            // out+in policy, #207, same force contract).
             retile(animated: true)
         }
     }

@@ -1771,6 +1771,28 @@ bound" placeholder while the footer teaches ⌃⌥K.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing
 it re-leaks the seed into Custom. (#602, PR #638)
 
+**Open-or-Focus cycles in canonical order, never
+most-recently-used.** A repeat press of the shortcut walks the
+app's tracked windows in space-creation order, then flat-array
+order within a space, wrapping — not the MRU ring macOS's own
+in-app window cycling keeps. MRU reorders itself with every
+visit: the third press's target depends on history the user
+cannot see, and two windows can trade places forever while a
+third is never reached. A canonical ring is a fixed loop the
+user can learn — N presses visit all N windows exactly once —
+and it is derivable from state KiwiDesk already owns, so the
+order is testable and never guesses. The trade-off is that the
+first repeat press may not land on the "second most recent"
+window the way ⌘-backtick does; anyone wanting MRU semantics
+already has macOS's own cycling, which KiwiDesk deliberately
+does not shadow. The ring is app-scoped, so overflow pile-mates
+are reachable by construction (they are windows of the ring's
+app like any other — the cross-layout navigation table's
+pile-exclusion logic is about *spatial* neighbor search and
+does not apply). On multiple displays the ring follows the one
+global space order; scope it per display only if device use
+shows the cross-display hop misleads. (#637)
+
 ### Overrides & appearance
 
 **[Principle]**

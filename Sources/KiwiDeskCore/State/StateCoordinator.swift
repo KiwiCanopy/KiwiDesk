@@ -64,7 +64,10 @@ public struct StateCoordinator: Sendable {
     /// session restore) and returns there instead of landing
     /// in the active space. Minimized windows are deliberately
     /// forgotten: deminiaturize opens in the active space.
-    private var rememberedSpaces: [WindowID: SpaceID] = [:]
+    /// Internal, not private: the create fold lives in
+    /// `StateCoordinator+WindowCreated.swift` (file-ceiling
+    /// split).
+    var rememberedSpaces: [WindowID: SpaceID] = [:]
 
     /// Windows currently minimized, so their deminiaturize
     /// (`.windowCreated`) classifies as `restored` (#40). Lives
@@ -74,8 +77,9 @@ public struct StateCoordinator: Sendable {
     /// scoped and tiny, but slightly weaker than
     /// `rememberedSpaces`' staleness — these are DEAD ids, so a
     /// recycled WindowID could pin `restored` onto an unrelated
-    /// window. The payload is advisory; accepted.
-    private var minimizedWindows: Set<WindowID> = []
+    /// window. The payload is advisory; accepted. Internal for
+    /// the same split as `rememberedSpaces` above.
+    var minimizedWindows: Set<WindowID> = []
 
     /// Explicit `make_floating` / `make_tiled` verdicts per
     /// tracked window — the only float state worth carrying
@@ -194,63 +198,7 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowCreated(let window):
-            effects.appearedWasMinimized =
-                minimizedWindows.remove(window.id) != nil
-            effects.hadRememberedSpace =
-                rememberedSpaces[window.id] != nil
-            windows.upsert(window)
-            restoreFloatOverride(of: window)
-            restoreStickyIntent(of: window)
-            let target =
-                rememberedSpaces[window.id]
-                ?? window.appBundleID.flatMap { appRules[$0] }
-                ?? workspaces.activeSpace
-            if let target {
-                let mode = workspaces[target]?.mode ?? .bsp
-                let track =
-                    mode == .track
-                    ? (trackParams.override[target]
-                        ?? TrackOverride())
-                        .resolved(onto: trackParams)
-                    : nil
-                if let track, !window.isFloating {
-                    workspaces.add(
-                        window.id,
-                        to: target,
-                        trackRule: track.newWindow,
-                        trackPosition: track.newWindowPosition,
-                        spillCapacity: trackCapacities[target],
-                        trackCap: track.trackCap,
-                        isTiled: { [windows] in
-                            windows[$0]?.isFloating == false
-                        }
-                    )
-                } else {
-                    workspaces.add(
-                        window.id,
-                        to: target,
-                        placement: spawnOverride[target]
-                            ?? spawnPlacements[mode]
-                            ?? .afterFocused
-                    )
-                    // A floating window spawned into an
-                    // `own_track` space carries a dormant break
-                    // marker, matching what the mode-entry seed
-                    // gives every window (`setMode`): when a
-                    // float re-check heals it to tiled (#160),
-                    // it opens its own track at its slot instead
-                    // of silently merging into its array
-                    // neighbor's track. `focused_track` stays
-                    // markerless — joining by position is that
-                    // rule's meaning.
-                    if track?.newWindow == .ownTrack {
-                        workspaces.withSpace(target) {
-                            $0.trackBreaks.insert(window.id)
-                        }
-                    }
-                }
-                workspaces.focus(window.id, in: target)
-            }
+            applyWindowCreated(window, effects: &effects)
 
         case .windowDestroyed(let id, let wasMinimized):
             effects.removedWindow = removalFacts(id)

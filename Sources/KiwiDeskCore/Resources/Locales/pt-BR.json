@@ -652,7 +652,7 @@
   "shortcuts.advanced.caption": "Associe qualquer código Lua a uma tecla de atalho. Esta é a saída para usuários avançados — os grupos acima cobrem as ações integradas.",
   "shortcuts.advanced.title": "Atalhos Lua",
   "shortcuts.app_behavior": "Comportamento na abertura",
-  "shortcuts.app_behavior.help": "**Abrir ou focar** traz a janela existente do app para o espaço atual, ou o inicia se ele não estiver em execução.\n\n**Abrir nova** sempre inicia uma nova instância, mesmo quando o app já está aberto.",
+  "shortcuts.app_behavior.help": "**Abrir ou focar** traz a janela existente do app para o espaço atual, ou inicia o app se ele não estiver em execução. Pressionar de novo com essa janela em foco alterna, em ordem, entre as outras janelas do app.\n\n**Abrir nova** sempre inicia uma nova instância, mesmo com o app já aberto.",
   "shortcuts.app_behavior.open_new": "Abrir nova",
   "shortcuts.app_behavior.open_new.badge": "Abre uma nova instância",
   "shortcuts.app_behavior.open_or_focus": "Abrir ou focar",

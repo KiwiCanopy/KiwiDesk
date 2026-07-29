@@ -652,7 +652,7 @@
   "shortcuts.advanced.caption": "可将任意 Lua 代码绑定到快捷键。这是为高级用户预留的入口，上方的分组已涵盖内置操作。",
   "shortcuts.advanced.title": "Lua 快捷键",
   "shortcuts.app_behavior": "启动行为",
-  "shortcuts.app_behavior.help": "**打开或聚焦**会把 App 已有的窗口调到当前空间；若 App 未在运行则将其启动。\n\n**新建打开**始终启动一个新实例，即使该 App 已经打开。",
+  "shortcuts.app_behavior.help": "**打开或聚焦**会把应用的现有窗口带到当前空间；如果应用未运行则启动它。当该窗口已聚焦时再次按下，会依次切换到应用的其他窗口。\n\n**打开新实例**总是启动一个新实例，即使应用已经打开。",
   "shortcuts.app_behavior.open_new": "打开新实例",
   "shortcuts.app_behavior.open_new.badge": "打开一个新实例",
   "shortcuts.app_behavior.open_or_focus": "打开或聚焦",
