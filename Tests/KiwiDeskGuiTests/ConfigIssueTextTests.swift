@@ -14,11 +14,32 @@ import Testing
 /// untranslatable in the first place. Switching over the enum
 /// makes the compiler demand a case, and these assertions demand
 /// that the case produce a catalog-visible string.
-@Suite("Config issue text")
+/// `.serialized` and locale-pinned for the reason
+/// `SystemShortcutNamesTests` and `StandardLayoutDisplayTests`
+/// already carry: `LocalizationManager` is a process-wide
+/// singleton and other suites `select()` into it concurrently, so
+/// an unpinned assertion here is really about whichever catalog
+/// won the race — `tests.md`'s "pin the display, never inherit
+/// it", applied to the locale.
+@Suite("Config issue text", .serialized)
 @MainActor
 struct ConfigIssueTextTests {
-    /// Every case, listed once. A new one fails to compile in
-    /// `ConfigIssueText` before it reaches here.
+    private func pinEnglish() {
+        LocalizationManager.shared.select("en")
+    }
+
+    private func reset() {
+        LocalizationManager.shared.select(nil)
+    }
+
+    /// Every case, listed once. A hand-listed mirror, and
+    /// therefore one more place to forget
+    /// (`.claude/rules/parity-tests.md`): the compiler forces a
+    /// new case into `ConfigIssueText`'s exhaustive switch, but
+    /// nothing forces it into this array, so a new `Kind` would
+    /// skip the assertions below. Associated values rule out
+    /// `CaseIterable`; the count check at the end is the
+    /// backstop.
     private let kinds: [ConfigIssue.Kind] = [
         .profileUnreadable,
         .luaVMUnavailable,
@@ -30,6 +51,12 @@ struct ConfigIssueTextTests {
 
     @Test("Every kind renders non-empty, distinct text")
     func everyKindRenders() {
+        pinEnglish()
+        defer { reset() }
+        // Five cases, six fixtures (`unknownCall` twice). Bump
+        // deliberately when a case is added — the failure is the
+        // reminder the compiler cannot give.
+        #expect(kinds.count == 6)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)
@@ -46,6 +73,8 @@ struct ConfigIssueTextTests {
 
     @Test("The interpreter's own message survives verbatim")
     func luaErrorKeepsItsDetail() {
+        pinEnglish()
+        defer { reset() }
         // The payload is machine output the user will search for,
         // so only the frame around it is localized — the same
         // rule that keeps CLI/IPC errors English.
@@ -58,6 +87,8 @@ struct ConfigIssueTextTests {
 
     @Test("A suggestion changes the sentence, not just the data")
     func suggestionSelectsItsOwnKey() {
+        pinEnglish()
+        defer { reset() }
         // Two keys, because a translator cannot append "did you
         // mean X?" to a sentence that did not leave room for it.
         let without = ConfigIssueText.message(

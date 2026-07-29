@@ -22,15 +22,17 @@ seams that are violated *outside* the directory that owns them.
   translate it (four `ConfigIssue` messages shipped that way
   until #601).
 
-  It is **not** a ban on `L()` by file location. Core's in-app
-  overlays — the App Bar and Space Bar item views, the sticky
-  mark — are AppKit views that render their own text and are
-  already `@MainActor`; they live under `Sources/KiwiDeskCore`
-  only because the subsystem map puts the overlays there. There
-  is no seam for them to cross, and `L()` is correct in them.
-  `CoreLocalizationBoundaryTests` is the guard, and **its
-  `allowed` map is the one copy** of which files are exempt and
-  why. Full argument: [localization.md](localization.md).
+  It is **not** a ban on `L()` by file location. Core draws some
+  of its own UI — the Space Bar and the sticky mark — and that
+  copy never crosses a seam, so `L()` is right there. **Which
+  files, and why, lives in `CoreLocalizationBoundaryTests`'s
+  `allowed` map**, not here: that guard covers the `L()`-shaped
+  half of the invariant. The other half — a sentence built
+  without `L()` — no string scan can see; it is prevented by
+  making Core carry *structure*, and by a per-family renderer
+  test (`ConfigIssueTextTests`,
+  `PresetSummaryCoverageTests`). Full argument:
+  [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.
 - **Never `Bundle.module`** in code that runs from the `.app` —

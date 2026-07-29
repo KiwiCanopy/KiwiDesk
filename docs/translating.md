@@ -42,13 +42,22 @@ never tiling/keybinding state, and never migrates config
 ownership the way writing to `gui.json` would.
 
 Some strings a user reads do not *originate* in the GUI: a
-keybinding conflict is detected in `KiwiDeskCore`, in code that
-is deliberately actor-free, while `L` is `@MainActor`. Those are
-not left in English — Core returns the **structure** (a
-`Conflict`, naming a `SystemShortcut` case) and the GUI turns it
-into a sentence, so a translator sees ordinary keys
-(`system_shortcut.*`, `keybinding.conflict.*`) with nothing
-special about their plumbing.
+keybinding conflict is detected in `KiwiDeskCore`, and so is a
+config-load problem, and so are the built-in layout presets.
+Those are not left in English — Core returns the **structure**
+(a `Conflict` naming a `SystemShortcut`, a `ConfigIssue.Kind`, a
+preset's stable `name`) and the GUI turns it into a sentence, so
+a translator sees ordinary keys (`system_shortcut.*`,
+`keybinding.conflict.*`, `config_issues.*`, `presets.*`) with
+nothing special about their plumbing.
+
+That is a rule about *ownership*, not about which file can call
+`L`: copy written in Core cannot be re-rendered when the user
+switches language, and — the part that actually bit — a plain
+English literal there never reaches `extract-keys`, so it never
+becomes a key and no locale can translate it however complete.
+Four config-issue messages and three preset summaries shipped
+that way before #601.
 
 **The `system_shortcut.*` keys do need one thing done
 differently.** They are Apple's own feature names — Spotlight,

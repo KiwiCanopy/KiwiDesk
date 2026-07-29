@@ -169,17 +169,20 @@ special case to buy one file's convenience.
 
 **The rule is about the seam, not about file paths.** Until #601
 this said "Core holds no `L()` call site outside
-`Localization/`", which was false — Core's in-app overlay views
-(App Bar, Space Bar, sticky mark) are `@MainActor` AppKit views
-that draw their own text and cross no seam, so `L()` is right in
-them. Worse, the literal reading pointed at the wrong defect: the
+`Localization/`", which was false — Core draws some of its own
+UI (the Space Bar, the sticky mark) and that copy crosses no
+seam, so `L()` is right there. Worse, the literal reading pointed at the wrong defect: the
 four `ConfigIssue` messages that actually violated the seam never
 used `L()` at all. They were hardcoded English, so
 `extract-keys` could not see them, they never entered a catalog,
 and **no locale could translate them however complete it was** —
 which a ban phrased around `L()` would never have caught.
-`CoreLocalizationBoundaryTests` pins the file list;
-`ConfigIssueTextTests` pins that every case still renders.
+`CoreLocalizationBoundaryTests` pins the file list. It covers
+only the `L()`-shaped half; a sentence built *without* `L()` is
+invisible to any string scan, so that half is prevented by
+carrying structure and pinned per family by a renderer test —
+`ConfigIssueTextTests`, and `PresetSummaryCoverageTests` after
+the same defect turned up in the Presets list.
 
 CLI/IPC error strings are the deliberate exception and stay
 English: they are a machine contract, not UI copy. A Lua

@@ -6,7 +6,6 @@ import Foundation
 /// as an applyable *Preset* in the GUI.
 public struct StandardLayout: Sendable, Equatable {
     public let name: String
-    public let summary: String
     /// How many screens this layout plans for.
     public let screenCount: Int
     /// The spaces the layout defines, ids "1"…"N".
@@ -40,30 +39,12 @@ public enum StandardProfiles {
     /// first-run seed uses, so the two never drift. Never the
     /// silent `isStandard` fallback: a demo layout of empty modes
     /// is a poor thing to land in silently on a monitor change.
-    static let starterOne = starter(
-        screens: 1,
-        summary: "One space per layout mode — track, stack, "
-            + "bsp, grid, and floating."
-    )
-    static let starterTwo = starter(
-        screens: 2,
-        summary: "The five-mode set repeated on each display, "
-            + "track through floating."
-    )
-    static let starterThree = starter(
-        screens: 3,
-        summary: "The five-mode set on all three displays, "
-            + "track through floating."
-    )
+    static let starterOne = starter(screens: 1)
+    static let starterTwo = starter(screens: 2)
+    static let starterThree = starter(screens: 3)
 
-    private static func starter(
-        screens: Int,
-        summary: String
-    ) -> StandardLayout {
-        StarterLadder.standardLayout(
-            displayCount: screens,
-            summary: summary
-        )
+    private static func starter(screens: Int) -> StandardLayout {
+        StarterLadder.standardLayout(displayCount: screens)
     }
 
     /// The layouts planning for exactly `count` screens.
@@ -88,8 +69,6 @@ public enum StandardProfiles {
     /// Best-practice single-monitor software development.
     static let developer = StandardLayout(
         name: "Developer",
-        summary: "IDE stack, scrolling docs, and a fullscreen "
-            + "preview space.",
         screenCount: 1,
         spaceCount: 4,
         spaceModes: [
@@ -103,8 +82,6 @@ public enum StandardProfiles {
     /// Spacious, distraction-free writing or reading.
     static let minimalist = StandardLayout(
         name: "Minimalist",
-        summary: "Spacious gaps, a scrolling reading space, and "
-            + "single-focus work.",
         screenCount: 1,
         spaceCount: 4,
         spaceModes: ["1": .scrolling, "3": .monocle, "4": .floating],
@@ -118,8 +95,6 @@ public enum StandardProfiles {
     /// Heavy multitasking on stacked panels.
     static let focusStack = StandardLayout(
         name: "Focus Stack",
-        summary: "Two stacked task spaces and a deep-work "
-            + "monocle space.",
         screenCount: 1,
         spaceCount: 4,
         spaceModes: ["1": .stack, "2": .stack, "4": .monocle],
@@ -134,8 +109,6 @@ public enum StandardProfiles {
     /// monitoring on the second.
     static let dualDeveloper = StandardLayout(
         name: "Dual Developer",
-        summary: "Code and docs on the main display; mail, chat, "
-            + "and media on the second.",
         screenCount: 2,
         spaceCount: 8,
         spaceModes: [
@@ -150,8 +123,6 @@ public enum StandardProfiles {
     /// Build logs, metrics, and database viewers on screen two.
     static let coderAndMonitor = StandardLayout(
         name: "Coder & Monitor",
-        summary: "Editor and terminals on the main display; "
-            + "dashboards and logs on the second.",
         screenCount: 2,
         spaceCount: 8,
         spaceModes: [
@@ -169,8 +140,6 @@ public enum StandardProfiles {
     /// Maximum real estate for triple-head setups.
     static let commandCenter = StandardLayout(
         name: "Command Center",
-        summary: "Workspace and docs center, communication left, "
-            + "logs and monitoring right.",
         screenCount: 3,
         spaceCount: 10,
         spaceModes: [
@@ -189,8 +158,6 @@ public enum StandardProfiles {
     /// Design and frontend engineering pipelines.
     static let visualCreative = StandardLayout(
         name: "Visual Creative & Developer",
-        summary: "Frontend IDE and previews center, design "
-            + "canvas left, inspectors right.",
         screenCount: 3,
         spaceCount: 10,
         spaceModes: [
