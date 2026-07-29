@@ -36,19 +36,23 @@ defect was hardcoded English that never went near `L()`.
 Ranked. Take the first that fits; **delete is the last resort**,
 not a peer of the others.
 
-1. **Name its enforcing guard inline** — a suite name, a
-   `scripts/…` path, or a test function name. The best rows
-   already do: `VisibleBoundsRoutingTests`, `SettingsCodingTests`,
+1. **Name its enforcing guard inline** — a suite name or a
+   `scripts/…` path. The best rows already do: `VisibleBoundsRoutingTests`, `SettingsCodingTests`,
    `LocalizationRegistryTests`, `ResourceBundleRoutingTests`,
    `SpringStabilityMarginTests`.
 
-   **Always name the suite, even when a function name is the
-   precise answer.** `RuleCitationTests` resolves suite names and
-   `scripts/…` paths, so those citations cannot rot silently; a
-   bare function name is not machine-checked, because nothing
-   about its shape distinguishes it from the production symbols
-   these files cite constantly. Name the suite and add the
-   function for precision.
+   A test **function** name is a fine *addition* when it is the
+   precise answer — but never the whole citation.
+   `RuleCitationTests` resolves suite names and `scripts/…`
+   paths, so those cannot rot silently; a bare function name is
+   not machine-checked, because nothing about its shape
+   distinguishes it from the production symbols these files cite
+   constantly. Name the suite, then add the function.
+
+   Note what a resolved citation does and does not prove: that
+   the guard still *exists*, not that it still guards what the
+   sentence says. A rename is caught; gutting a suite and keeping
+   its name is not.
 2. **Rewrite it as an obligation** — say what a future author must
    do, not what the tree currently is.
 3. **Re-home the fact to a named authority** and cite that
@@ -61,11 +65,18 @@ not a peer of the others.
    outside this repo — macOS behavior, Apple tooling, a vendor's
    plan limits, a device measurement — cannot be guarded and are
    still worth keeping. Say when they were seen.
-5. **Leave it, if it sits beside its own register.** A count
-   immediately above the list it counts is self-correcting: a
-   reader can see both at once, and an author adding an item is
-   looking at the number. "Two env levers" over a two-row table
-   is fine; a count in a *different* file from its list is not.
+5. **Leave it, if it sits beside its own register.** The test is
+   the mechanism, not the file boundary: **would an author adding
+   an entry have the count on screen?** If yes it is
+   self-correcting; if they would have to go looking, it is not.
+   The register also has to be a list *in this document* — a
+   count of things a script defines is disposition 3, however
+   close the prose sits. `core-boundaries.md` is the worked
+   example, and it writes its own justification inline: "the
+   count is the three bullets immediately below". A heading
+   twenty-six lines above its table fails this even though both
+   are in one file — that was `borders.md`'s "Three writers",
+   and it was wrong.
 6. **Delete it.** Only when none of the above fits.
 
 A **past-tense fact** is not a state claim and needs none of
@@ -99,6 +110,14 @@ guardrails verbatim in their rule file. That exception covers
 *obligations*, and an obligation repeated verbatim cannot go out
 of sync with itself. A **fact** — a count, a file list, a
 measured number — is what must not be duplicated.
+
+One narrow extension, on the tripwire's own reasoning: a
+**danger fact**, whose cost of not knowing it is destructive,
+earns a copy at the seam where someone would act without it.
+`input-and-animation.md` repeats that `KIWIDESK_NO_WS_TRACKING`
+kills a production fast path, because `tests.md` owns that table
+and does not load while you are editing `Animation/`. Copy the
+danger, not the table.
 
 ## Scope
 

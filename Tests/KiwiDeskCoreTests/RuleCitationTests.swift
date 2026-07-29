@@ -76,8 +76,12 @@ struct RuleCitationTests {
         // it is silently skipped. The count canary above does not
         // reach this — the other fifteen files still supply
         // plenty of citations — so parity has to be checked per
-        // document. (Fenced code blocks are fine: three backticks
-        // twice is an even number of toggles.)
+        // document. A fenced code block keeps parity (three
+        // backticks twice is an even number of toggles) but is
+        // NOT otherwise handled: its whole body is harvested as
+        // one span, and it matches neither predicate only
+        // because a fence body ends in a newline. Inert by
+        // accident, not by design.
         for (file, text) in try ruleDocuments() {
             let ticks = text.filter { $0 == "`" }.count
             let why =

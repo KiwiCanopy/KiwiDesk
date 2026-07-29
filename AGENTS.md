@@ -25,6 +25,15 @@ already has. Aim to state everything else exactly once, and see
 [rule-authoring.md](.claude/rules/rule-authoring.md) for which
 kinds of sentence may be repeated safely and which may not.
 
+§5 also carries **one** prose rule rather than a one-line row:
+how to write a rule at all (#614). It is there because it is the
+only rule whose subject is this delivery mechanism, and because a
+reader who never edits a rule file — Cursor, Codex, a human
+skimming the hub — would otherwise meet it nowhere. Its argument
+still lives one level down, in
+[rule-authoring.md](.claude/rules/rule-authoring.md). Do not read
+it as licence for a second long paragraph in §5.
+
 They live in `.claude/` because Claude Code auto-loads a rule file
 whose `paths:` glob matches a file you are editing — so the right
 guardrails arrive when they are relevant and cost nothing when

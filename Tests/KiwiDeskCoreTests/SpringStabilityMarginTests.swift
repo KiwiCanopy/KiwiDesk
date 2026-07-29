@@ -56,11 +56,12 @@ struct SpringStabilityMarginTests {
         for step in 1...400 {
             let z = Double(step) / 100
             let m = margin(dampingFraction: z)
+            // Only the floor here. The ceiling is swept by
+            // `doublingTheStepIsNeverSafe`, which is named for
+            // it — asserting it in both places means weakening
+            // either one leaves the other passing, and a future
+            // editor cannot tell which test owns the property.
             #expect(m > 1, "zeta \(z) margin \(m)")
-            // The ceiling is the general reason the step cannot
-            // simply be doubled at ANY damping — without it the
-            // argument only covers the two shipped values.
-            #expect(m < 2, "zeta \(z) margin \(m)")
         }
     }
 

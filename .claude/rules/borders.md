@@ -14,7 +14,8 @@ paths:
 
 Canonical for this subsystem (AGENTS.md §5 indexes it). Two
 overlay families — the focus ring (#278) and the sticky mark
-(#414) — track the same windows through the same channels,
+(#414) — track the same windows through the channels the
+table below lists,
 so they share their decisions rather than mirroring them.
 
 The *product* rulings about these overlays (who gets a ring, why

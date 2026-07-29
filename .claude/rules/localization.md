@@ -104,8 +104,8 @@ These are **exact contracts** and hold for any corpus:
 heuristic, and the only one carrying a *corpus* scope as well as
 a locale one: non-Latin-script locales, and the app catalogs only
 (not `--site`, whose prose keeps third-party names and inline
-HTML). In a Latin-script locale a
-retained English word is indistinguishable from a cognate
+HTML). In a Latin-script locale a retained English word is
+indistinguishable from a cognate
 (`"Item ativo"`, `"Mein Setup"`), so widening it would flag dozens
 of good translations. Don't re-add a rule claiming to be precise
 everywhere, as an `-ing`-weld sub-rule once did — German
