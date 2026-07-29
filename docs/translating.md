@@ -347,6 +347,17 @@ To add a new English string to the site: add the key to
 component, then run `scripts/extract-keys --site <locale>` for
 each language so it surfaces as missing to translate.
 
+### Adding a whole new site language
+
+Alongside the manifest and the per-locale routes under
+`site/src/pages/<locale>/`, one file needs the locale listed **by
+hand**: `site/src/pages/404.astro`. Static hosting serves that
+single page for every unmatched path, so it cannot pick a locale
+from the URL and instead renders them all together, from an `alts`
+array. It is the site's only hand-enumerated locale list — every
+other route is one file per locale — so a language added
+everywhere else still ships a 404 that silently omits itself.
+
 ### Key naming keeps the file structured
 
 The site manifests (`en.json`, `de.json`) are stored **sorted by

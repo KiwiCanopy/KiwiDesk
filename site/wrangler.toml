@@ -14,12 +14,11 @@
 # the source.
 #
 # NODE VERSION: pinned by site/.nvmrc, the one copy of that number
-# (Cloudflare reads it, as do CI and a local `nvm use`). There is
-# deliberately no second pin file: Cloudflare resolves
-# `.node-version` ahead of `.nvmrc`, so a stale duplicate silently
-# wins the build — this repo carried `.node-version` at 20 against
-# `.nvmrc` at 24 until #106, and Astro 7 refuses anything below
-# 22.12. Do not reintroduce one.
+# (Cloudflare reads it, as do CI and a local `nvm use`). Do NOT add
+# a `.node-version` beside it — Cloudflare resolves that file first,
+# so a duplicate wins the deploy while every local and CI signal
+# keeps reading `.nvmrc`. The argument is in
+# .claude/rules/site.md ("Never add a second Node pin file").
 #
 # DASHBOARD ENV VARS DO NOT REACH BUILDS. With this file committed,
 # Pages sources project config from it and ignores variables added

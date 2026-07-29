@@ -38,15 +38,16 @@ older Node resolves the wrong platform binaries, so a later
 `nvm use` alone still fails on a missing native binding — delete
 `node_modules` and reinstall if that happens.
 
-**Never add a second Node pin file.** Cloudflare Pages resolves
-`.node-version` ahead of `.nvmrc`, so a duplicate does not merely
-restate the number — it silently *wins* the deploy while every
-local and CI signal keeps reading `.nvmrc`. This repo carried
-`.node-version` at 20 against `.nvmrc` at 24 until #106, and
-Astro refuses below 22.12 as above. `package.json` → `engines` is
-not a safe alternative either: the Pages v3 build image does not
-read it (Cloudflare's own docs list it as unsupported,
-2026-07-30).
+**Never add a second Node pin file.** Cloudflare Pages resolved
+`.node-version` ahead of `.nvmrc` as of 2026-07-30, so a duplicate
+does not merely restate the number — it *wins* the deploy, while
+every local and CI signal keeps reading `.nvmrc`. What is silent is
+which pin wins; the outcome is a loud engine error, on the one
+machine you are not watching. This repo carried a stale
+`.node-version` below Astro's floor against a current `.nvmrc`
+until #106. `package.json` → `engines` is not a safe alternative
+either: Cloudflare's own docs listed it as unsupported by the
+Pages v3 build image (2026-07-30).
 
 ## Cloudflare Pages: the dashboard is not a config surface (#106)
 
@@ -65,35 +66,60 @@ one that reads wrong — *Build output directory* is relative to
 ## The 404 is a user page, so withdraw Starlight's (#635)
 
 `src/pages/404.astro` and `disable404Route: true` in
-`astro.config.mjs` move together. A user page already outranks
-Starlight's injected route, so the override *appears* to work with
-the option missing — but Astro then logs a duplicate-route
-collision it says "will result in a hard error in following
-versions", i.e. the site builds until a minor bump and then does
-not.
+`astro.config.mjs` move together, and **both** one-sided states
+build green:
+
+- **Page, no flag.** A user page already outranks Starlight's
+  injected route, so the override works — while Astro logs a
+  duplicate-route collision it says "will result in a hard error in
+  following versions" (astro 7.1.1 / starlight 0.41.3, 2026-07-30).
+  A log line fails no build, so the site ships until a bump.
+- **Flag, no page.** Starlight injects its stock route only when
+  the option is false, so withdrawing it with nothing in its place
+  emits **no `404.html` at all** and the host serves its own
+  generic one forever.
+
+`scripts/check-site-tokens.py` therefore asserts on the *artifact*
+— `dist/404.html` exists and carries a marker only the branded page
+emits. That also covers a rename of the page and an upstream rename
+of the option, neither of which a config-pair check would see.
 
 Static hosting serves that one page for **every** unmatched path,
 including `/de/*` and `/ja/*`, so it cannot pick a locale from the
-URL: all three locales render together instead. Which is also why
-it must not carry `Landing.astro`'s language-resolve script — that
+URL: every locale renders on it together. Which is also why it must
+not carry `Landing.astro`'s language-resolve script — that
 redirects a stored-locale visitor to `/de/` or `/ja/`, which on a
 404 URL swallows the broken link and lands them on a homepage with
 nothing to explain why.
 
-## One AA green-text literal, two homes (#635)
+Consequence for **adding a locale**: `404.astro`'s `alts` array is
+the site's only hand-enumerated locale list (every other route is
+one file per locale), so a new locale must be added there or its
+404 silently omits itself. `docs/translating.md`'s add-a-locale
+checklist carries that step.
 
-The light-mode accent-as-text green is one decision. `theme.css`
-declares it for the docs and `landing.css` for the landing, guide
-and 404, because neither stylesheet imports the other — change
-both together. They were independently derived and one notch apart
-until #635. The `Check the AA green-text literal agrees` step in
-`.github/workflows/site.yml` compares the two files' own values,
-so a one-sided edit fails the gate.
+## The light-mode green is derived, not chosen (#635)
 
-What that step cannot see: the same value is shared with
-kiwicanopy.com and KiwiCV, which is the point of pinning it —
-re-deriving a private near-neighbour here splits the brand family
-silently. Keeping *that* in step is a review obligation.
+The accent-as-text green is the 50/50 midpoint of the brand fill
+green and the forest ink — a rule, not a hex — and it is one
+decision with two homes: `theme.css` for the Starlight docs and
+`landing.css` for every non-Starlight surface (`grep -l landing.css
+site/src` lists them). They were independently derived and one
+notch apart until #635.
+
+`scripts/check-site-tokens.py` recomputes the midpoint from the
+tree and holds both files to it, plus AA as text on the light bg —
+so it catches a **both**-sided drift, which comparing the two files
+to each other would not, and which is exactly the cross-repo case:
+the same value is shared with kiwicanopy.com and KiwiCV, where CI
+here cannot reach. Pinning the derivation rather than the output is
+what makes the rule portable to those repos.
+
+Those two stylesheets are deliberately independent — neither
+imports the other. If a future change unifies them behind a shared
+token file, **delete that check in the same change set**: it
+requires a literal hex in each light block and would otherwise fail
+with a message that reads like a bug rather than like a fix.
 
 ## Template comments ship to visitors (#557)
 

@@ -168,10 +168,12 @@
   /* Accents — the raw brand fill green is ~2.3:1 on this bg and
      fails AA, so text/link uses a darkened, purpose-built shade
      of the same hue instead (never the raw fill green as text).
-     #506c37 is the 50/50 midpoint of --kiwi-flesh and the forest
-     ink, and the one value the whole brand family uses for this
-     decision (see src/styles/theme.css, #635) — keep the two in
-     step rather than re-deriving a private near-neighbour here.
+     Specifically the 50/50 midpoint of --kiwi-flesh and the forest
+     ink (--text below), the one value the whole brand family uses
+     for this decision. theme.css declares the same value for the
+     docs, and scripts/check-site-tokens.py recomputes the midpoint
+     and holds BOTH files to it (#635) — so do not re-derive a
+     private near-neighbour here.
      Re-verified AA on every new surface above (4.93:1 min, on
      --bg-0). */
   --accent: #506c37;         /* AA on bg + .tint bands */

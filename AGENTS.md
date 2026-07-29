@@ -290,7 +290,7 @@ touch a matching path.
 | `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32) |
 | `.claude/rules/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614) |
 | `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |
-| `site/**` | [site.md](.claude/rules/site.md) | `{/* */}` not `<!-- -->` — template comments ship to visitors (#557); `site/.nvmrc` is the one copy of the Node version and a second pin file silently wins the Cloudflare deploy; Pages ignores dashboard env vars while `wrangler.toml` is committed, so configure in the repo; `src/pages/404.astro` and `disable404Route` move together and the AA green-text literal carries one value across both stylesheets (#635) |
+| `site/**` | [site.md](.claude/rules/site.md) | `{/* */}` not `<!-- -->` — template comments ship to visitors (#557); `site/.nvmrc` is the one Node pin and never a second file; configure Cloudflare Pages in the repo, not the dashboard; `src/pages/404.astro` and `disable404Route` move together (#635) |
 
 When a recurring mistake is found, add it to the **rule file**
 that owns the subsystem and refresh that row here — never write

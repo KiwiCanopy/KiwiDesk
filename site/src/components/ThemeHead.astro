@@ -1,0 +1,43 @@
+---
+// The two theme facts every non-Starlight page shell needs, in one
+// place: the browser-chrome color and the anti-FOUC resolver that
+// stamps `data-theme` on <html> before first paint.
+//
+// Place it inside <head>, ahead of any stylesheet — the script is
+// `is:inline`, so Astro emits it verbatim where the component sits
+// and it runs synchronously before anything paints.
+//
+// This existed as four hand-copies (the landing, the guide, the
+// legal pages and the 404) until #635 made it a fifth. Its drift
+// mode is quiet: change the localStorage key or the no-storage
+// fallback in one copy and that page alone flashes or settles on
+// the wrong theme, which no build or test notices. So it is one
+// component rather than four copies plus a parity check.
+//
+// `starlight-theme` is deliberately the docs' own key: a toggle
+// anywhere on the site carries to every other surface, including
+// Starlight's. Any page-local state (the landing's `mode`, a
+// language preference) stays in that page's own script — this
+// component owns the theme and nothing else.
+---
+
+<meta name="theme-color" content="#101d0b" />
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    try {
+      var stored = localStorage.getItem("starlight-theme");
+      root.dataset.theme =
+        stored === "light" || stored === "dark"
+          ? stored
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+    } catch (e) {
+      // No storage access at all (Safari private mode, a locked-down
+      // profile): fall back to the palette the stylesheets declare on
+      // bare `:root`, so the resolved theme and the CSS default agree.
+      root.dataset.theme = "dark";
+    }
+  })();
+</script>

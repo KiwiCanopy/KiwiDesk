@@ -30,11 +30,13 @@
 /* Light theme accents. Accent text is a darkened variant of the
    brand's kiwi green — the raw fill green is ~2.3:1 on this bg
    and fails AA, so this role stays a purpose-built text-safe
-   shade rather than the raw brand hex. #506c37 is the 50/50
-   midpoint of --kiwi-green and the forest ink, 5.6:1 on the light
-   bg, and is the one value the whole brand family uses for this
-   decision (KiwiCanopy-web documents the derivation, #635) — so
-   never re-derive a private near-neighbour of it here.
+   shade rather than the raw brand hex. Specifically the 50/50
+   midpoint of --kiwi-green and the forest ink (--sl-color-white
+   below), which is the one value the whole brand family uses for
+   this decision — so never re-derive a private near-neighbour of
+   it here. scripts/check-site-tokens.py recomputes that midpoint
+   and refuses anything else, and also holds it to AA as text on
+   the light bg (#635).
    --sl-color-white and the gray ramp are anchored on the forest
    ink (green-forward, no teal — issue #439 follow-up), not a
    teal-tinted ink. */

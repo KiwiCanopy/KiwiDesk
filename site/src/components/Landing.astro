@@ -15,6 +15,7 @@
 //              the route (/ ↔ /de/); resolved anti-FOUC in <head>.
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
+import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
@@ -170,7 +171,7 @@ const jsonLd = [
     <meta name="twitter:title" content={t.meta_title} />
     <meta name="twitter:description" content={t.meta_desc} />
     <meta name="twitter:image" content={ogImageURL} />
-    <meta name="theme-color" content="#101d0b" />
+    <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={enURL} />
     <link rel="alternate" hreflang="de" href={deURL} />
@@ -178,25 +179,13 @@ const jsonLd = [
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
-    {/* Anti-FOUC: resolve theme AND mode before first paint so the
-         page never flashes the wrong theme or reveals dev sections.
-         `starlight-theme` is shared with the docs; `kiwidesk-site-
-         mode` is this page's own key (default = simple). */}
+    {/* Anti-FOUC mode resolve — the theme half is <ThemeHead />
+         above, and this page's own `kiwidesk-site-mode` key is
+         resolved here so no dev section is ever revealed on the
+         first paint (default = simple). */}
     <script is:inline>
       (function () {
         var root = document.documentElement;
-        try {
-          var stored = localStorage.getItem("starlight-theme");
-          root.dataset.theme =
-            stored === "light" || stored === "dark"
-              ? stored
-              : window.matchMedia("(prefers-color-scheme: dark)")
-                  .matches
-                ? "dark"
-                : "light";
-        } catch (e) {
-          root.dataset.theme = "dark";
-        }
         // Arriving on #start is the install bridge. Resolve Nerd
         // BEFORE first paint — the section is .dev-only
         // (display:none), so a hash landing on a hidden element

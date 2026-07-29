@@ -7,6 +7,7 @@
 // Starlight's chrome. German is legally binding; en/ja are courtesy
 // translations (see src/i18n/legal.ts).
 import "../styles/landing.css";
+import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
@@ -69,31 +70,12 @@ const kofi = "https://ko-fi.com/kiwicanopy";
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
     <meta property="og:locale" content={ogLocale} />
-    <meta name="theme-color" content="#101d0b" />
+    <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
     <link rel="alternate" hreflang="de" href={`${site}${localePath("de", slug)}`} />
     <link rel="alternate" hreflang="ja" href={`${site}${localePath("ja", slug)}`} />
     <link rel="alternate" hreflang="x-default" href={`${site}${localePath("en", slug)}`} />
-
-    {/* Anti-FOUC theme resolve — shares `starlight-theme` with the
-        docs and stamps data-theme before first paint. */}
-    <script is:inline>
-      (function () {
-        var root = document.documentElement;
-        try {
-          var stored = localStorage.getItem("starlight-theme");
-          root.dataset.theme =
-            stored === "light" || stored === "dark"
-              ? stored
-              : window.matchMedia("(prefers-color-scheme: dark)").matches
-                ? "dark"
-                : "light";
-        } catch (e) {
-          root.dataset.theme = "dark";
-        }
-      })();
-    </script>
 
     {/* Language resolve (anti-redirect-loop). Unlike the landing's
         root-only redirect, this PRESERVES the sub-path so a stored

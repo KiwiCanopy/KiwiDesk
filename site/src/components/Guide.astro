@@ -29,6 +29,7 @@
 //             <head>. Guide is never mode-gated, so no mode key.
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
+import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
@@ -251,7 +252,7 @@ const jsonLd = [
     <meta name="twitter:title" content={s.guide_meta_title} />
     <meta name="twitter:description" content={s.guide_meta_desc} />
     <meta name="twitter:image" content={ogImageURL} />
-    <meta name="theme-color" content="#101d0b" />
+    <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={enURL} />
     <link rel="alternate" hreflang="de" href={deURL} />
@@ -259,28 +260,8 @@ const jsonLd = [
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
-    {/* Anti-FOUC: resolve the theme before first paint so the
-         page never flashes the wrong theme. Shares the exact
-         `starlight-theme` key with the landing + docs, so a
-         toggle anywhere carries across the whole site. (No mode
-         key here — the Guide is never mode-gated.) */}
-    <script is:inline>
-      (function () {
-        var root = document.documentElement;
-        try {
-          var stored = localStorage.getItem("starlight-theme");
-          root.dataset.theme =
-            stored === "light" || stored === "dark"
-              ? stored
-              : window.matchMedia("(prefers-color-scheme: dark)")
-                  .matches
-                ? "dark"
-                : "light";
-        } catch (e) {
-          root.dataset.theme = "dark";
-        }
-      })();
-    </script>
+    {/* The theme resolve lives in <ThemeHead /> above. No mode key
+         here — the Guide is never mode-gated. */}
     {/* Language resolve (anti-redirect-loop), scoped to the guide
          pair /guide/ ↔ /de/guide/. Runs before paint, at most once
          per load, and only ever redirects between those two known
