@@ -70,16 +70,21 @@ shipped `<locale>.json` doesn't decode as a flat
 locale to English. An orphan key (in a locale file, absent from
 code) only warns.
 
-## The eight content guards (#95)
+## The content guards (#95)
 
 Everything above reads *keys*; `scripts/localization_guards.py`
-reads the *copy*, and `--check` hard-fails on each. There is **no
+reads the *copy*, and `--check` hard-fails on each. **That
+script's own docstring is the authority on how many there are** —
+the list below is a reader's map, not a second register, so add a
+guard there and let this follow. (The docstring contracts the
+exact-and-heuristic ones individually; the feature-name pair is
+described here and in `docs/localization-naming.md`.) There is **no
 baseline / exemption file** — a hit is a real defect. What the
 guards carry instead is a grouped `GLOSSARY` of terms that stay
 English; a new such term joins it, in the group that justifies
 it, in the same change set.
 
-Five are exact contracts:
+These are **exact contracts** and hold for any corpus:
 
 - **wrong writing system** — Cyrillic→`ru`, Kana→`ja`,
   Han→`ja`/`zh-Hans`/`zh-Hant`, Hangul→`ko`. Latin is
@@ -95,17 +100,18 @@ Five are exact contracts:
 - **collapsed translation** — one filler reused for many
   unrelated keys.
 
-The sixth, **English residue** in a translated sentence, is a
-heuristic and the only one with a scope: non-Latin-script locales,
-and the app catalogs only (not `--site`, whose prose keeps
-third-party names and inline HTML). In a Latin-script locale a
-retained English word is indistinguishable from a cognate
+**English residue** in a translated sentence is instead a
+heuristic, and the only one carrying a *corpus* scope as well as
+a locale one: non-Latin-script locales, and the app catalogs only
+(not `--site`, whose prose keeps third-party names and inline
+HTML). In a Latin-script locale a retained English word is
+indistinguishable from a cognate
 (`"Item ativo"`, `"Mein Setup"`), so widening it would flag dozens
 of good translations. Don't re-add a rule claiming to be precise
 everywhere, as an `-ing`-weld sub-rule once did — German
 `fing` / `Frühling` falsifies it.
 
-The last two are the **feature-name pair**, and
+The **feature-name pair** is the remaining group, and
 `docs/localization-naming.md` is their one copy — read it before
 touching either. In short: `dropped_product_names` requires
 "App Bar" / "Space Bar" **present** in every locale, script

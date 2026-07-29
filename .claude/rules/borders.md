@@ -14,7 +14,8 @@ paths:
 
 Canonical for this subsystem (AGENTS.md §5 indexes it). Two
 overlay families — the focus ring (#278) and the sticky mark
-(#414) — track the same windows through the same three channels,
+(#414) — track the same windows through the channels the
+table below lists,
 so they share their decisions rather than mirroring them.
 
 The *product* rulings about these overlays (who gets a ring, why
@@ -40,7 +41,7 @@ and forgetting the other still builds green. That is why
 rather than a case on `applies`: `sync` asks a different question
 and returns a frame, not a bool.
 
-## Three writers, in descending authority mid-animation
+## The frame writers, in descending authority mid-animation
 
 While *our own* animation drives a window, the commanded per-tick
 frame is the leading truth — every other channel trails it, by

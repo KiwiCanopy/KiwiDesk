@@ -26,13 +26,16 @@ editing here:
   `ωh < 2(√(1+ζ²) − ζ)` — not either term alone; `k·h² < 4` is
   the undamped special case and `|1 − c·h| < 1` is necessary but
   not sufficient. The shipped `1/max(ω, c)` is conservative
-  against that, with a margin never below **1.24×** (its minimum,
-  at ζ = 0.5) that approaches 2× only as ζ → 0 or ζ → ∞ — 1.57×
-  at the engine's ζ = 0.85 and 1.29× at `DeadEndBump`'s ζ = 0.45.
-  So the halving is load-bearing, and removing it at ζ = 0.85 is
-  immediately divergent again. Two springs ship (the engine's at
-  ζ = 0.85, `DeadEndBump`'s at ζ = 0.45) and they sit on
-  opposite sides of which term `max` selects. Substepping rather
+  against that for every ζ > 0, and **its margin — including the
+  minimum, where that minimum sits, and the two shipped springs'
+  values — is computed and asserted by
+  `SpringStabilityMarginTests`**, which also proves the halving
+  is load-bearing by showing the looser `2/max(ω, c)` lands
+  outside the bound at the damping the engine ships. Read the
+  numbers there rather than from this paragraph. What the numbers
+  are *for*: the engine's spring and `DeadEndBump`'s sit on
+  opposite sides of which term `max` selects, so neither can
+  stand in for the other. Substepping rather
   than a duration clamp because there is one `DisplayLink` per
   monitor at mixed rates and a spring outlives a cross-display
   move — 120 Hz was always inside the bound, which is why this
@@ -158,9 +161,13 @@ editing here:
   lifecycle event ever does want it, wire it deliberately and give
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
-- Two env levers exist for device QA of this subsystem —
-  `KIWIDESK_STRAND_LOG` (logs a window that did not land on its
-  settled target, #47) and `KIWIDESK_NO_WS_TRACKING` (forces the
-  overlays' AX-fallback path, #596). Both are documented in
-  [tests.md](tests.md), which is scoped to `Tests/**` and so does
-  not load while you are editing here.
+- Env levers for device QA of this subsystem are **listed and
+  explained in [tests.md](tests.md)**, which owns that table.
+  Named here only because that file is scoped to `Tests/**` and
+  so will not load while you are editing this directory. One
+  thing from it is repeated because it changes what you are
+  looking at rather than merely adding output:
+  **`KIWIDESK_NO_WS_TRACKING` kills a production fast path**,
+  forcing the overlays onto their AX fallback for the whole run
+  (#596). `KIWIDESK_STRAND_LOG` is inert by comparison — it only
+  logs (#47).

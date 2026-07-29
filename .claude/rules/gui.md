@@ -112,6 +112,6 @@ authoring rules apply here even though the catalogs live in Core:
   a **meaning** change runs `scripts/drop-key <key>` in the same
   change set.
 
-The tooling, the eight content guards and the "Core names, the
+The tooling, the content guards and the "Core names, the
 GUI narrates" seam (#96) are in
 [localization.md](localization.md).

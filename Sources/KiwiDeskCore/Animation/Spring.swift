@@ -29,14 +29,14 @@ public struct Spring: Sendable, Equatable {
     /// 1.9 and 5.8 — both already divergent.
     ///
     /// `1/max(ω, c)` is a deliberately conservative closed form
-    /// that satisfies the real condition for every ζ > 0. Its
-    /// margin is never below **1.24×** (the minimum, at ζ = 0.5)
-    /// and approaches but never reaches 2× as ζ → 0 or ζ → ∞ —
-    /// **1.57×** at the engine's ζ = 0.85, **1.29×** at
-    /// `DeadEndBump`'s ζ = 0.45, which sits near the tight end of
-    /// the curve. So the halving is load-bearing, not slack:
-    /// drop it and ζ = 0.85 lands on ωh = 1.18, amplification
-    /// 1.91 — #599 again.
+    /// that satisfies the real condition for every ζ > 0.
+    /// **`SpringStabilityMarginTests` computes that margin** —
+    /// its floor, where the floor sits, and each shipped spring's
+    /// value — so read it there rather than from a number copied
+    /// into a comment (#614). The halving is load-bearing, not
+    /// slack, and the same suite proves it: the looser
+    /// `2/max(ω, c)` lands outside the real bound at the damping
+    /// the engine ships, which is #599 again.
     ///
     /// Both terms are kept because ζ below 0.5 flips which one
     /// `max` selects, and that is not hypothetical — `DeadEndBump`
