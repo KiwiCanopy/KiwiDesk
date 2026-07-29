@@ -260,6 +260,24 @@ Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `native_space_change`, `window_created`,
 `window_destroyed`, `window_moved_to_space`.
 
+Give no arguments and you get every event; give arguments and
+the filter is honoured exactly. An argument that names no event
+is dropped, and the subscription still succeeds — so the
+confirmation line lists what was dropped:
+
+```json
+{"status": "success", "data": {"unknown": ["space_chnage"]}}
+```
+
+A non-string argument appears there as `<non-string>`: it has no
+name to report back, but it was dropped just the same. The same
+names, truncated after the first few, go to the application log
+(viewable in Console.app).
+
+Subscribe to nothing *but* unrecognised names and the stream
+stays silent — an empty filter is not the same request as no
+filter, and `unknown` says why nothing is arriving.
+
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `pull_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for

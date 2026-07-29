@@ -5,10 +5,10 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. Three
+Deliberately short — it loads on every `KiwiDeskCore` edit. Four
 seams, each violated *outside* the directory that owns them — the
-count is the three bullets immediately below, so it corrects
-itself when a fourth is added.
+count is the four bullets immediately below, so it corrects
+itself when a fifth is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an
@@ -36,6 +36,17 @@ itself when a fourth is added.
   [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.
+- **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
+  the group where all of them are, and in the same change that
+  declares it. Leaving one unassigned fails by **doing
+  nothing** — a seam whose default is a no-op lets its subsystem
+  compile, ship, run and drop every line it logs, with no red and
+  no symptom beyond a diagnostic that was never going to
+  appear. `LogSeamWiringTests` is the guard, its `allowed` map
+  is the exemption list, and its docstring carries the argument.
+  Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
+  after the AX grant) is invisible to that guard, and `onLog`
+  needs no permission to be useful.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

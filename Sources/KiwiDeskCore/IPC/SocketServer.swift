@@ -99,8 +99,21 @@ public final class SocketServer {
             return
         }
         if request.command == "subscribe" {
-            subscribe(client, args: request.args ?? [])
-            client.send(CommandResponse.ok())
+            let unknown = subscribe(
+                client,
+                args: request.args ?? []
+            )
+            client.send(
+                unknown.isEmpty
+                    ? CommandResponse.ok()
+                    : CommandResponse.ok(
+                        .object([
+                            "unknown": .array(
+                                unknown.map(JSONValue.string)
+                            )
+                        ])
+                    )
+            )
             return
         }
         client.send(
@@ -108,19 +121,76 @@ public final class SocketServer {
         )
     }
 
+    /// Subscribes `client` and returns the names it asked for
+    /// that name no event.
+    ///
+    /// A misspelled name used to be dropped in silence while the
+    /// client still got a bare `ok`, so the subscription read as
+    /// working; when *every* name is unknown the empty set falls
+    /// through to the firehose below, which reads as working
+    /// harder. The caller now carries the list back on the wire
+    /// — the client made the mistake, so the client is told —
+    /// and the log line is the server's own record. English like
+    /// every other IPC string (core-boundaries.md).
     private func subscribe(
         _ client: Client,
         args: [JSONValue]
-    ) {
-        let events = Set(
-            args.compactMap { arg in
-                arg.stringValue.flatMap {
-                    KiwiNotification(rawValue: $0)
-                }
+    ) -> [String] {
+        var events: Set<KiwiNotification> = []
+        var unknown: [String] = []
+        // `seen` rather than `unknown.contains`: the frame limit
+        // is 1 MB, so `args` can carry ~150k names, and a linear
+        // scan per name is quadratic work on the main queue —
+        // where the whole window manager lives.
+        var seen: Set<String> = []
+        for arg in args {
+            // A non-string arg has no name to report, but it is
+            // just as dropped, so it is counted as unknown
+            // rather than vanishing a second way.
+            let name = arg.stringValue ?? "<non-string>"
+            if let event = KiwiNotification(rawValue: name) {
+                events.insert(event)
+            } else if seen.insert(name).inserted {
+                unknown.append(name)
             }
-        )
+        }
+        if !unknown.isEmpty {
+            // Capped: the names are client-supplied and the
+            // socket is unauthenticated, so an unbounded join
+            // lets any local process write a line of any length
+            // into the unified log. The *returned* list is
+            // deliberately not capped — it echoes only what this
+            // client just sent, whose decode already cost the
+            // main actor more than the echo will, and truncating
+            // it would hide a real typo from a client with many.
+            let listed = unknown.prefix(5).joined(separator: ", ")
+            let rest = unknown.count > 5 ? ", …" : ""
+            onLog(
+                "subscribe: unknown event(s) \(listed)\(rest)"
+                    + (events.isEmpty
+                        ? "; nothing left to subscribe to"
+                        : "; ignored")
+            )
+        }
+        // An empty filter means "everything" only for the
+        // request that means it — **no arguments**. Letting it
+        // also catch a subscribe made entirely of typos handed
+        // back the whole firehose, which is not a partial
+        // result but the opposite of what was asked for, and it
+        // read as a subscription working very hard. Arguments
+        // given, filter honoured exactly; none given,
+        // everything.
+        //
+        // Asked of `args` and not reconstructed from the two
+        // accumulators above. Those are equivalent only while
+        // every argument lands in one of them, so a later branch
+        // that consumes one without doing so — skipping an empty
+        // name, capping the collected list the way the log is
+        // capped — would restore this bug in silence, and no
+        // argument shape that skips both exists to have a test
+        // (review).
         let wanted =
-            events.isEmpty
+            args.isEmpty
             ? Set(KiwiNotification.allCases)
             : events
         if let old = client.sinkToken {
@@ -138,6 +208,7 @@ public final class SocketServer {
                 )
             )
         }
+        return unknown
     }
 }
 
