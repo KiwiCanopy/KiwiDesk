@@ -100,9 +100,17 @@ extension KiwiCore {
         // the pass got its size from the spring. The dragged
         // window got its size from the *pointer*: it is already at
         // its final frame when this runs, so the un-forced retile
-        // below finds it inside the ±2 pt tolerance and skips it
-        // entirely. That is an instantly-sized window in the
+        // below usually finds it inside the ±2 pt tolerance and
+        // skips it entirely — an instantly-sized window in the
         // batch, which is exactly what the promise denies.
+        //
+        // "Usually" is the point, not a hedge. `cappedRatioWrite`
+        // and the 0.1…0.9 clamp mean a drag past the min-size
+        // cliff recomputes a slot far from where the pointer left
+        // the window (0.95 → 0.9 is ~96 pt on a 1920 display), and
+        // *that* run does re-frame and spring-size it. A promise
+        // has to hold on every run, so one run that breaks it is
+        // enough to withhold it (found in review).
         //
         // The keyboard verb has no such member — both panes spring
         // from the old ratio to the new, on one clock — which is

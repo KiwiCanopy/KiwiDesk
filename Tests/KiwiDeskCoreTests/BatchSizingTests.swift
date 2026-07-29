@@ -289,6 +289,11 @@ struct BatchSizingEngineTests {
         for _ in 0..<5 {
             engine.tick(display: display, dt: Self.tick)
         }
+        // The first flight must still be airborne, or all three
+        // interrupt tests silently exercise the *construction*
+        // branch instead of the retarget one and assert nothing
+        // about interrupts at all (found in review).
+        #expect(engine.isAnimating(window: WindowID(1)))
         applies.removeAll()
         // A real `from` frame, not `.zero`: the retarget branch
         // ignores it, but if that path ever regressed to the

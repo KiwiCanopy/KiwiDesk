@@ -202,8 +202,8 @@ public struct FrameAnimation: Sendable {
     /// up to the whole shrink delta, and the spring is simply not
     /// a claim about the window any more.
     ///
-    /// `.allSpringSized` reads that spring *as* the on-screen size. Switch
-    /// into it mid-`.mayInstantSize`-shrink without re-seating and the
+    /// `.allSpringSized` reads that spring *as* the on-screen
+    /// size. Switch into it mid-shrink without re-seating and the
     /// window jumps back up by the divergence on the next frame —
     /// and if the interrupted flight was a make-room shrink, the
     /// sibling springing back up re-overlaps the newcomer that
@@ -211,14 +211,31 @@ public struct FrameAnimation: Sendable {
     /// is #45, reintroduced *across* batches rather than inside
     /// one (found in review).
     ///
-    /// Velocity goes to zero rather than carrying over: the
-    /// window was not moving in that axis: it snapped once and
-    /// held, so there is no rate to preserve.
+    /// **Per axis, and only where the two actually disagree** —
+    /// the staleness is a property of one axis, not of the
+    /// animation. A *growing* axis emits the spring on every due
+    /// tick, so it already agrees and must be left alone: zeroing
+    /// its velocity would stall a grow that was travelling
+    /// correctly (26 pt lost on the first frame after an
+    /// interrupt, still 17 pt behind eight frames later — measured
+    /// in review). The equality test is what separates them, and
+    /// it stays honest under a throttle, where a grow axis does
+    /// lag its last emitted size and is reseated too.
+    ///
+    /// Velocity goes to zero on a reseated axis rather than
+    /// carrying over: that axis was not moving on screen — it
+    /// snapped once and held — so there is no rate to preserve.
     public mutating func reseatSize(_ size: CGSize) {
-        current[2] = Double(size.width)
-        current[3] = Double(size.height)
-        velocity[2] = 0
-        velocity[3] = 0
+        let onScreen = [Double(size.width), Double(size.height)]
+        for (offset, value) in onScreen.enumerated() {
+            let i = offset + 2
+            guard current[i] != value else { continue }
+            current[i] = value
+            velocity[i] = 0
+        }
+        // Dead in the one production call site (the `retarget`
+        // that follows recomputes it), kept so a public mutating
+        // method cannot leave the struct inconsistent on its own.
         initialDistance = Self.distance(current, target)
     }
 
