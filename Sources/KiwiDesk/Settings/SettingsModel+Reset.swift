@@ -15,7 +15,7 @@ extension SettingsModel {
     /// confirmation dialog says so, and `reload` drops a
     /// stored-profile target whose file went with the reset.
     func resetAllSettings() {
-        core.resetAllSettings()
+        core.resetAllSettings(trash: KiwiCore.moveToTrash)
         reload()
     }
 }

@@ -105,7 +105,8 @@ public final class SleepWakeManager {
     /// replay itself hides behind an awaited `Task`, so a test
     /// asserting "nothing replayed" synchronously passes even
     /// when the drop is broken; this reads the held state
-    /// directly. No production reader.
+    /// directly. Production must not read it: the held
+    /// snapshot's one consumer is the return leg above.
     var holdsSnapshot: Bool { snapshot != nil }
 
     // MARK: - Internals

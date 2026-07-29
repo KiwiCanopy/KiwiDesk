@@ -84,9 +84,13 @@ struct ResetEscapeHatchTests {
             args: [.string("Poisoned")]
         )
 
-        core.resetAllSettings(trash: {
-            try FileManager.default.removeItem(at: $0)
-        })
+        // The verdict has its one consumer here: every doomed
+        // file went.
+        #expect(
+            core.resetAllSettings(trash: {
+                try FileManager.default.removeItem(at: $0)
+            })
+        )
 
         // The sidecar reseeded, the poisoned space and profile
         // gone, factory settings back, init.lua untouched.
@@ -183,49 +187,63 @@ struct ResetEscapeHatchTests {
         // diff.
         #expect(resetData == virginData)
         #expect(core.profiles.list() == virgin.profiles.list())
-        // The sidecar bytes cannot see the profile-scoped live
-        // overlay; pin its two hand-cleared members directly.
-        #expect(core.spacePins == virgin.spacePins)
-        #expect(core.mainSpaces == virgin.mainSpaces)
     }
 
     @Test("A Lua-owned reset never grafts the starter ladder")
     func luaOwnedResetSkipsLadder() throws {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-reset-\(UUID().uuidString)"
+        let files = FileManager.default
+        func luaCore() throws -> KiwiCore {
+            let dir = files.temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-reset-\(UUID().uuidString)"
+                )
+            try files.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
             )
-        defer { try? FileManager.default.removeItem(at: dir) }
-        try FileManager.default.createDirectory(
-            at: dir,
-            withIntermediateDirectories: true
-        )
-        let core = makeTestCore(configDirectory: dir)
-        core.onLog = { _ in }
-        // A Lua-owned config: declares managed settings, so no
-        // sidecar and no ladder ever seed for it.
-        let lua = "KiwiDesk.set_gap_global(5)\n"
-        try lua.write(
-            to: core.configURL,
-            atomically: true,
-            encoding: .utf8
-        )
-        core.loadConfig()
+            let core = makeTestCore(configDirectory: dir)
+            core.onLog = { _ in }
+            // A Lua-owned config: declares managed settings,
+            // so no sidecar and no ladder ever seed for it —
+            // and nothing re-stamps the live overlay after a
+            // reset, which makes THIS the path where every
+            // hand-clear in resetAllSettings is load-bearing
+            // and observable.
+            try "KiwiDesk.set_gap_global(5)\n".write(
+                to: core.configURL,
+                atomically: true,
+                encoding: .utf8
+            )
+            core.loadConfig()
+            return core
+        }
+
+        let virgin = try luaCore()
+        defer {
+            try? files.removeItem(at: virgin.configDirectory)
+        }
+        let core = try luaCore()
+        defer {
+            try? files.removeItem(at: core.configDirectory)
+        }
+        // Poison every live-overlay family the seed captures
+        // and only the reset clears on this path: a space, an
+        // undeclared settings field, a pin, a Main role.
         core.state.workspaces.ensureSpace(SpaceID("poison"))
-        // A settings field the Lua config does NOT declare: on
-        // this path no starter ladder re-stamps the settings,
-        // so the reset's own factory clear is the only thing
-        // between this value and the "fresh" state — the
-        // GUI-managed equivalence test cannot see that clear.
         core.tiler.settings.animations.durationMS = 999
+        core.spacePins[SpaceID(1)] = "A:1x1"
+        core.mainSpaces.insert(SpaceID(1))
 
         core.resetAllSettings(trash: {
             try FileManager.default.removeItem(at: $0)
         })
-        #expect(
-            core.tiler.settings.animations.durationMS
-                == AnimationSettings().durationMS
-        )
+        // The forget-proof net (review round 2): the seed is
+        // the whole live overlay as a value — settings, pins,
+        // Main roles, modes, fallback, every future stored
+        // field — so a hand-clear the reset forgets shows up
+        // as an inequality against the virgin twin, not as a
+        // silently narrower hand-pin list.
+        #expect(core.guiConfigSeed() == virgin.guiConfigSeed())
         let spaces = core.state.workspaces.allSpaces.map(\.id)
         #expect(!spaces.contains(SpaceID("poison")))
         // First launch of this config is the single default
@@ -237,7 +255,7 @@ struct ResetEscapeHatchTests {
             try String(
                 contentsOf: core.configURL,
                 encoding: .utf8
-            ) == lua
+            ) == "KiwiDesk.set_gap_global(5)\n"
         )
     }
 }

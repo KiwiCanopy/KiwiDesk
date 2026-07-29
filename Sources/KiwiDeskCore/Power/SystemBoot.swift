@@ -15,9 +15,12 @@ enum SystemBoot {
     /// restore working if the call ever breaks — the gate is a
     /// hardening, not a load-bearing feature. `kern.boottime`
     /// is wall-clock and moves under NTP steps, like the
-    /// `capturedAt` stamps it is compared against; a forward
-    /// step can wrongly discard a same-boot snapshot, which
-    /// fails in the benign direction (fresh rediscovery).
+    /// `capturedAt` stamps it is compared against: a forward
+    /// step can wrongly discard a same-boot snapshot (benign —
+    /// fresh rediscovery), a backward step can wrongly admit a
+    /// pre-boot one (the pre-gate status quo, for the one
+    /// launch after a manual clock change). Both accepted —
+    /// see docs/accepted-limitations.md.
     static func time() -> Date {
         var tv = timeval()
         var size = MemoryLayout<timeval>.size

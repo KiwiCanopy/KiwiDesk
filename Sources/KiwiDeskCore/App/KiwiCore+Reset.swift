@@ -34,9 +34,12 @@ extension KiwiCore {
     /// deleting the files alone would write the old space list
     /// and old settings straight back into the fresh sidecar.
     ///
-    /// `trash` is injectable so tests hard-delete instead of
-    /// filling the real Trash; production uses the Finder
-    /// Move-to-Trash call. A failed trash falls back to a hard
+    /// `trash` has no default on purpose — the compiler forces
+    /// every caller to choose (tests inject a hard delete; the
+    /// GUI facade passes `KiwiCore.moveToTrash`). A defaulted
+    /// parameter let a bare test call fill the real Trash with
+    /// zero red; do not re-add one. A failed trash falls back
+    /// to a hard
     /// delete — a surviving `gui.json` would flip the reload
     /// back onto the old sidecar and turn the confirmed wipe
     /// into a silent no-op, which is strictly worse than
@@ -47,14 +50,20 @@ extension KiwiCore {
     /// verdict; `false` (both attempts failed on the user's
     /// own config dir — effectively unreachable) leaves the
     /// log line as the trail.
+    /// The production Move-to-Trash policy, held as the one
+    /// named constant so the choice stays in Core while the
+    /// parameter stays default-free.
+    public static let moveToTrash: (URL) throws -> Void = {
+        url in
+        try FileManager.default.trashItem(
+            at: url,
+            resultingItemURL: nil
+        )
+    }
+
     @discardableResult
     public func resetAllSettings(
-        trash: (URL) throws -> Void = { url in
-            try FileManager.default.trashItem(
-                at: url,
-                resultingItemURL: nil
-            )
-        }
+        trash: (URL) throws -> Void
     ) -> Bool {
         let files = FileManager.default
         var cleared = true
