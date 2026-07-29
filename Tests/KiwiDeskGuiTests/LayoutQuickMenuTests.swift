@@ -17,6 +17,16 @@ private final class NoopRegistrar: HotkeyRegistrar {
     func unregister(id: UInt32) {}
 }
 
+/// Fake menu-bar slot so this suite never registers a real
+/// system status item — the same seam discipline as the
+/// registrar above; `StatusItemSeamGuardTests` pins that every
+/// test construction injects one.
+@MainActor
+private final class FakeStatusItem: StatusItemHandle {
+    let button: NSStatusBarButton? = nil
+    var menu: NSMenu?
+}
+
 @Suite("Layout Quick Menu and Drift", .serialized)
 @MainActor
 struct LayoutQuickMenuTests {
@@ -36,7 +46,9 @@ struct LayoutQuickMenuTests {
     private func makeController(
         _ core: KiwiCore
     ) -> StatusItemController {
-        let controller = StatusItemController()
+        let controller = StatusItemController(
+            item: FakeStatusItem()
+        )
         controller.layoutInfoProvider = {
             (
                 activeMode: core.activeSpace?.mode,

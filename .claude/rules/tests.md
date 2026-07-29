@@ -99,6 +99,18 @@ bite large test PRs:
   named way that a divergent copy would weaken a guard or
   change what a suite observes, plus statelessness. Duplication
   that merely costs lines stays duplicated (§2.4).
+- **A production default that grabs live host state gets an
+  injection seam, a fake in tests, and a guard.** An `init`
+  that seizes a real resource drags that seizure into every
+  suite constructing the type: the #565 hotkey chords first,
+  then the menu-bar slots a full GUI run parked in the real
+  menu bar (up to 15, WindowServer at 40%+ CPU). Keep the
+  production default live — never test-detection in
+  production — inject a no-op fake in tests, and forget-proof
+  the injection, because every forgotten call site re-enables
+  the default. The two standing guards: `makeTestCore` with
+  its `NoopHotkeyRegistrar` for the hotkey seam, and
+  `StatusItemSeamGuardTests` for the menu-bar seam.
 - **Discardable results express side-effect intent** — a command
   or setup helper whose primary job is mutation may use
   `@discardableResult` when callers commonly ignore optional
