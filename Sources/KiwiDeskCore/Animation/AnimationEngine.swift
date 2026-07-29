@@ -204,20 +204,26 @@ public final class AnimationEngine {
             return
         }
         if var existing = removeAnimation(for: window) {
-            // Entering `.allSpringSized` from `.mayInstantSize` re-seats the
-            // size springs onto what is actually on screen first:
-            // a structural shrink renders `target` from frame 1
-            // while the springs travel on, so `.allSpringSized` would read
-            // a stale, larger size and jump the window back up —
-            // #45 across batches. `reseatSize` argues it in full.
+            // Taking on a promise the previous pass did not make
+            // re-seats the size springs onto what is actually on
+            // screen first: an unpromised shrink renders `target`
+            // from frame 1 while the springs travel on, so the
+            // promised step would read a stale, larger size and
+            // jump the window back up — #45 across batches.
+            // `reseatSize` argues it in full. The held size falls
+            // back to the rendered frame the way the tick loop's
+            // does, so a missing entry cannot silently skip the
+            // re-seat and let the jump through.
             if sizing == .allSpringSized,
-                existing.sizing == .mayInstantSize,
-                let onScreen = heldSize[window]
+                existing.sizing == .mayInstantSize
             {
-                existing.reseatSize(onScreen)
+                existing.reseatSize(
+                    heldSize[window]
+                        ?? Self.rounded(existing.frame).size
+                )
             }
-            // Newest intent wins: a structural retile interrupting
-            // a resize restores the first-frame shrink snap (#593).
+            // Newest promise wins: a pass that promises nothing,
+            // interrupting one that did, restores the snap (#593).
             existing.retarget(to: target, sizing: sizing)
             animations[display, default: [:]][window] = existing
         } else {

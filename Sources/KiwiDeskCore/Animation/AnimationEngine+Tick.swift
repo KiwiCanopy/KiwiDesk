@@ -85,7 +85,7 @@ extension AnimationEngine {
                 // unrounded compare marked the entire convergence
                 // tail as a resize — 13 of 36 frames byte-identical
                 // to their predecessor, each one a forced content
-                // reflow on a slow-AX app (found in review).
+                // reflow on a slow-AX app.
                 let setSize =
                     previous.map {
                         $0.width.rounded() != frame.width

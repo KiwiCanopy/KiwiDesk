@@ -40,9 +40,13 @@
 public enum BatchSizing: Sendable, Equatable {
     /// This pass may place a window at its final size in a single
     /// frame — a newcomer pre-sized by `isNewWindow`, a float
-    /// restored by `setFrame`, an un-animated placement. A
-    /// shrinking axis snaps to its target on frame 1 so any room
-    /// it is yielding clears before the newcomer paints.
+    /// restored by `setFrame`, an un-animated placement — **or it
+    /// touches a window that was already at its final size when
+    /// the pass began**: one the pointer just placed, one the
+    /// retile tolerance skips. Either way something on screen is
+    /// at its final size while a sibling is still travelling, so a
+    /// shrinking axis snaps to its target on frame 1 and any room
+    /// it is yielding clears before that sibling is overlapped.
     ///
     /// The default, and true at the several hundred call sites
     /// that never mention this type. Note the *may*: it is a

@@ -12,16 +12,16 @@ public struct FrameAnimation: Sendable {
     public private(set) var target: [Double]
     public let spring: Spring
 
-    /// Why this animation is running (#593) — read every tick by
-    /// `SizeStep` to decide whether a shrinking axis may follow
-    /// the spring. Stored here, per animation, rather than as an
-    /// engine-wide flag "for the duration of a retile": `animate`
-    /// **retargets** a window that is already in flight, so an
-    /// engine flag would leak a resize's intent into a reflow that
-    /// arrived mid-resize. `retarget(to:sizing:)` makes that
-    /// an explicit decision instead, and the rule is that the
-    /// newest intent wins — a reflow interrupting a resize must
-    /// restore the snap.
+    /// What the pass that started this animation promised about
+    /// its sizing (#593) — read every tick by `SizeStep` to decide
+    /// whether a shrinking axis may follow the spring. Stored per
+    /// animation rather than as an engine-wide flag "for the
+    /// duration of a retile": `animate` **retargets** a window
+    /// already in flight, so an engine flag would let one pass's
+    /// promise cover a later pass that never made it.
+    /// `retarget(to:sizing:)` makes that an explicit decision
+    /// instead, and the newest promise wins — a pass that promises
+    /// nothing must restore the snap.
     public private(set) var sizing: BatchSizing
 
     /// Settled when within this distance at negligible speed.
@@ -55,8 +55,8 @@ public struct FrameAnimation: Sendable {
     }
 
     /// Redirects the animation to a new target mid-flight. The
-    /// intent is **required**, not defaulted: an interrupt is
-    /// exactly where a stale one would go unnoticed, and the
+    /// sizing is **required**, not defaulted: an interrupt is
+    /// exactly where a stale promise would go unnoticed, and the
     /// newest one wins (#593).
     public mutating func retarget(
         to frame: CGRect,
@@ -85,7 +85,7 @@ public struct FrameAnimation: Sendable {
     /// sibling springing back up re-overlaps the newcomer that
     /// `animate(isNewWindow:)` already painted at full size. That
     /// is #45, reintroduced *across* batches rather than inside
-    /// one (found in review).
+    /// one.
     ///
     /// **Per axis, and only where the two actually disagree** —
     /// the staleness is a property of one axis, not of the

@@ -52,8 +52,11 @@ editing here:
   final size in one frame" rather than "is this a resize", and
   why the default has to be the pessimistic one — is the doc
   comment on `BatchSizing` itself, which is where a caller
-  reaches it. Do not restate it here or in a call-site comment;
-  it has already been three prose copies once.
+  reaches it. Do not restate **the discriminator argument or the
+  default's asymmetry** here or at a call site — that is the part
+  which was three prose copies once. Site-specific eligibility
+  reasoning (why *this* pass may or may not promise) belongs at
+  the site, because it is not in the type.
   Two things worth knowing before you edit this directory:
   a promise is **enforced**, not trusted, at
   `TilingEngine.retile` (a pass carrying `newlyCreatedWindow`

@@ -14,13 +14,12 @@ extension KiwiCore {
     /// resize, focus slide) pass an explicit `animated:` and are
     /// gated by their own toggle instead.
     ///
-    /// `sizing: .allSpringSized` says this pass only re-divides
-    /// room
-    /// among windows that are already placed (#593), so a
-    /// shrinking pane slides its shared edge instead of snapping.
-    /// Opt-in and allow-listed — `BatchSizingRoutingTests` names
-    /// every call site that may pass it, and `BatchSizing` argues
-    /// why guessing is the one mistake that reintroduces #45.
+    /// `sizing: .allSpringSized` promises that every window this
+    /// pass touches is spring-sized (#593), which lets a shrinking
+    /// pane slide its shared edge instead of snapping. Opt-in and
+    /// allow-listed — `BatchSizingRoutingTests` names every call
+    /// site that may promise, and `BatchSizing` argues why
+    /// guessing is the one mistake that reintroduces #45.
     public func retile(
         animated: Bool? = nil,
         force: Bool = false,

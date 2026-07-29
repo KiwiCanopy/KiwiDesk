@@ -166,11 +166,13 @@ public final class TilingEngine {
     /// the outgoing windows slide out WHILE the incoming ones
     /// slide in. Every other retile keeps the instant default.
     ///
-    /// `sizing` marks the whole pass as a plain resize (#593)
-    /// so a shrinking pane slides its shared edge instead of
-    /// snapping. It rides the layout loop only: the stash park and
-    /// the float restore below place windows that sit *outside*
-    /// the layout, and neither may borrow a resize's smoothing.
+    /// `sizing` is the caller's promise about how every window in
+    /// this pass gets its size (#593); promising them all
+    /// spring-sized lets a shrinking pane slide its shared edge
+    /// instead of snapping. It rides the layout loop only: the
+    /// stash park and the float restore below place windows that
+    /// sit *outside* the layout, and a promise about the layout
+    /// cannot extend to them.
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
@@ -184,16 +186,13 @@ public final class TilingEngine {
                 ?? NSScreen.screens.first
         else { return }
         let frames = calculatedFrames(state: state)
-        // The #45 invariant, enforced instead of trusted. A batch
-        // that pre-sizes a newcomer can never smooth a sibling's
-        // shrink, whatever the caller asked for: the newcomer is
-        // painted at full size on frame 1, so a gradual shrink
-        // leaves it overlapping for the flight. Both arguments
-        // meet in this one signature, which makes this the only
-        // place the combination is even expressible — and the
-        // routing guard cannot see it, because it counts
-        // occurrences, not combinations (found in review).
-        let intent: BatchSizing =
+        // The #45 invariant, enforced rather than trusted: a
+        // newcomer IS an instant size, so no promise survives one.
+        // Both arguments meet in this one signature, which makes
+        // this the only place the combination is expressible — and
+        // the routing guard cannot see it, because it counts
+        // occurrences, not combinations.
+        let promised: BatchSizing =
             newlyCreatedWindow == nil ? sizing : .mayInstantSize
 
         for (id, target) in frames {
@@ -221,7 +220,7 @@ public final class TilingEngine {
                 to: target,
                 animated: animated,
                 isNewWindow: id == newlyCreatedWindow,
-                sizing: intent
+                sizing: promised
             )
         }
         stashInactive(

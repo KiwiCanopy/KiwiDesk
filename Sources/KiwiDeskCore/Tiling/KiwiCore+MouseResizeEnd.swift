@@ -110,7 +110,7 @@ extension KiwiCore {
         // the window (0.95 → 0.9 is ~96 pt on a 1920 display), and
         // *that* run does re-frame and spring-size it. A promise
         // has to hold on every run, so one run that breaks it is
-        // enough to withhold it (found in review).
+        // enough to withhold it.
         //
         // The keyboard verb has no such member — both panes spring
         // from the old ratio to the new, on one clock — which is
