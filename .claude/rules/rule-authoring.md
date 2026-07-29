@@ -72,8 +72,10 @@ not a peer of the others.
    The register also has to be a list *in this document* — a
    count of things a script defines is disposition 3, however
    close the prose sits. `core-boundaries.md` is the worked
-   example, and it writes its own justification inline: "the
-   count is the four bullets immediately below". A heading
+   example, and it writes its own justification inline — its
+   opening count says it is "the … bullets immediately below",
+   naming the register rather than a number this file would then
+   hold a second copy of. A heading
    twenty-six lines above its table fails this even though both
    are in one file — that was `borders.md`'s "Three writers",
    and it was wrong.

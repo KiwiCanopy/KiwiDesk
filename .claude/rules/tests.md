@@ -142,8 +142,9 @@ its run state is irrelevant to them.
 like the app's. Most come through `KiwiCore.onLog`, whose default
 has always been the syslog write; since #624 a subsystem
 constructed bare — `AnimationEngine()`, `KeybindingManager(…)` —
-adds its own, because every seam now defaults to `CoreLog.write`
-rather than to a no-op. That is the intended trade (a test
+adds its own, because a seam defaults to `CoreLog.write` rather
+than to a no-op (`LogSeamDefaultTests`). That is the intended
+trade (a test
 triggering the settle watchdog prints the rescue instead of
 swallowing it), and a suite that wants quiet assigns
 `onLog = { _ in }` on the instance it builds. Do not read a

@@ -91,18 +91,20 @@ struct LogSeamDefaultTests {
             ),
             encoding: .utf8
         )
-        let body = SourceScan.stripComments(source)
-            .components(separatedBy: "static func write(")
-        #expect(
-            body.count == 2,
-            Comment(
-                rawValue: "CoreLog no longer declares `static "
-                    + "func write(` — this guard reads its body "
-                    + "and cannot find it"
-            )
+        // The **balanced** body, not "everything after the
+        // signature". `components(separatedBy:)` would run to
+        // EOF, so a sibling declaration below carrying its own
+        // `NSLog(` would satisfy this while `write` itself was
+        // gutted — the guard passing for exactly the reason it
+        // exists to catch. It passes today only because `write`
+        // happens to be the file's last declaration, which is
+        // not a property anything holds still.
+        let body = try functionBody(
+            of: "static func write",
+            in: SourceScan.stripComments(source)
         )
         #expect(
-            body.last?.contains("NSLog(") == true,
+            body?.contains("NSLog(") == true,
             Comment(
                 rawValue: "`CoreLog.write` no longer calls "
                     + "`NSLog`. Nothing else in the tree asserts "
@@ -115,7 +117,7 @@ struct LogSeamDefaultTests {
             )
         )
         #expect(
-            body.last?.contains("#if") != true,
+            body?.contains("#if") != true,
             Comment(
                 rawValue: "`CoreLog.write`'s body is "
                     + "conditionally compiled — a build where "
@@ -125,11 +127,72 @@ struct LogSeamDefaultTests {
         )
     }
 
+    /// The nearest non-blank line above `index`, or "" at the
+    /// top of the file.
+    private func previousCodeLine(
+        before index: Int,
+        in lines: [Substring]
+    ) -> Substring {
+        var cursor = index - 1
+        while cursor >= 0,
+            lines[cursor].trimmingCharacters(in: .whitespaces)
+                .isEmpty
+        {
+            cursor -= 1
+        }
+        return cursor >= 0 ? lines[cursor] : ""
+    }
+
+    /// The balanced `{ … }` run following `signature`, or nil
+    /// when the signature is not there — which the caller reds
+    /// on, rather than silently checking an empty string.
+    private func functionBody(
+        of signature: String,
+        in source: String
+    ) throws -> String? {
+        guard let range = source.range(of: signature) else {
+            Issue.record(
+                Comment(
+                    rawValue: "CoreLog no longer declares "
+                        + "`\(signature)` — this guard reads its "
+                        + "body and cannot find it"
+                )
+            )
+            return nil
+        }
+        let characters = Array(source)
+        var cursor = source.distance(
+            from: source.startIndex,
+            to: range.upperBound
+        )
+        // Step over the parameter list, then take the brace run.
+        guard
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            ) != nil
+        else { return nil }
+        return SourceScan.balanced(
+            characters,
+            from: &cursor,
+            open: "{",
+            close: "}"
+        )
+    }
+
     @Test("Core reaches CoreLog only through a seam default")
     func theDefaultIsNeverCalledDirectly() throws {
+        // Keyed on the full path, not the basename: two files of
+        // one name under `Sources/KiwiDeskCore` would otherwise
+        // let a declaration in the first mask a real direct call
+        // at the same line number in the second. Nothing has that
+        // shape today, which is exactly when it is cheap to rule
+        // out.
         let declarationLines = Set(
             try SourceScan.logSeamDeclarations(under: coreRoot)
-                .map(\.site)
+                .map { "\($0.file.path):\($0.line)" }
         )
         var callSites: [String] = []
         for file in try SourceScan.swiftSources(under: coreRoot)
@@ -140,11 +203,24 @@ struct LogSeamDefaultTests {
             .split(separator: "\n", omittingEmptySubsequences: false)
             for index in lines.indices
             where lines[index].contains("CoreLog.") {
-                let site = "\(file.lastPathComponent):\(index + 1)"
-                guard !declarationLines.contains(site) else {
-                    continue
-                }
-                callSites.append(site)
+                guard
+                    !declarationLines.contains(
+                        "\(file.path):\(index + 1)"
+                    )
+                else { continue }
+                // A wrapped declaration puts the default on its
+                // own line, which is not a call site. Without
+                // this, that shape reds twice: once correctly
+                // ("cannot read a default from") and once telling
+                // the author to log through `onLog`, which is
+                // what they were already doing.
+                guard
+                    !previousCodeLine(before: index, in: lines)
+                        .contains("var onLog:")
+                else { continue }
+                callSites.append(
+                    "\(file.lastPathComponent):\(index + 1)"
+                )
             }
         }
         #expect(
@@ -169,14 +245,32 @@ struct LogSeamDefaultTests {
     /// this helper family — leaves the loops above asserting
     /// nothing at all.
     ///
-    /// The floor is **derived, not restated**: the seams outnumber
-    /// bootstrap's assignments, because `KiwiCore.onLog` is a
-    /// declaration that is never assigned. So a scan that lost even
-    /// one declaration reds here, and the bound moves on its own
-    /// when a seam is added. A hand-written total would instead red
-    /// on the next honest seam, and `!isEmpty` would be satisfied
-    /// by a single surviving declaration while eight went
-    /// unchecked.
+    /// Two checks, and the algebra of the first is worth being
+    /// careful about, because the obvious version reds a correct
+    /// tree.
+    ///
+    /// **Distinct receivers, and `>=` not `>`.** Every receiver
+    /// bootstrap assigns must be declared somewhere, so the
+    /// declarations cannot be fewer than the distinct receivers.
+    /// Counting raw assignments and demanding strictly more
+    /// declarations looks tighter and is wrong: it spends a
+    /// margin of exactly one, which two legitimate changes
+    /// consume — wiring two instances of one seam-owning type
+    /// (the shape `LogSeamWiringTests` documents as plausible)
+    /// and assigning one seam in a second
+    /// `KiwiCore+Bootstrap*.swift` (which its prefix match exists
+    /// to allow). Both would then red naming a scan bug that is
+    /// not there.
+    ///
+    /// **And an anchor in `App/`.** The count alone still passes
+    /// a scan narrowed to skip `App/` entirely, which drops the
+    /// bootstrap files and the sink together and so shrinks both
+    /// sides at once. Requiring the sink's own declaration pins
+    /// the one directory that failure hides in.
+    ///
+    /// Between them: a mistyped root reds, a narrowed file
+    /// predicate reds, and neither bound has to be edited when a
+    /// seam is added.
     private func assertScanReachedTheTree(
         _ declarations: [LogSeamDeclaration]
     ) throws {
@@ -186,19 +280,21 @@ struct LogSeamDefaultTests {
         .filter {
             $0.lastPathComponent.hasPrefix("KiwiCore+Bootstrap")
         }
-        var assignments = 0
+        var receivers: Set<String> = []
         for file in bootstrap {
-            assignments +=
+            receivers.formUnion(
                 SourceScan.allMatches(
                     in: SourceScan.stripComments(
                         try String(contentsOf: file, encoding: .utf8)
                     ),
-                    pattern: #"(\.onLog)\s*="#
-                ).count
+                    pattern:
+                        #"([A-Za-z_][A-Za-z0-9_.]*)\.onLog\s*="#
+                )
+            )
         }
 
         #expect(
-            assignments > 0,
+            !receivers.isEmpty,
             Comment(
                 rawValue: "no `.onLog =` assignment found in any "
                     + "KiwiCore+Bootstrap file under \(coreRoot) "
@@ -207,15 +303,23 @@ struct LogSeamDefaultTests {
             )
         )
         #expect(
-            declarations.count > assignments,
+            declarations.count >= receivers.count,
             Comment(
                 rawValue: "found \(declarations.count) `var "
-                    + "onLog:` declaration(s) but \(assignments) "
-                    + "bootstrap assignment(s). Every seam that "
-                    + "is assigned must first be declared, and "
-                    + "`KiwiCore.onLog` is declared without "
-                    + "being assigned, so declarations always "
-                    + "exceed assignments — this scan lost some."
+                    + "onLog:` declaration(s) but bootstrap "
+                    + "assigns \(receivers.count) distinct "
+                    + "receiver(s). Each of those is declared "
+                    + "somewhere, so this scan reached fewer "
+                    + "files than it should have."
+            )
+        )
+        #expect(
+            declarations.contains { $0.owner == "KiwiCore" },
+            Comment(
+                rawValue: "the scan found no `var onLog:` in "
+                    + "`KiwiCore` itself, so it did not reach "
+                    + "`App/` — where the sink and every "
+                    + "bootstrap file live"
             )
         )
     }
