@@ -16,7 +16,7 @@ public final class SocketServer {
         .fail("server not wired")
     }
     public weak var bus: EventBus?
-    public var onLog: @MainActor (String) -> Void = { _ in }
+    public var onLog: @MainActor (String) -> Void = CoreLog.emit
 
     private let path: String
     private var listener: NWListener?

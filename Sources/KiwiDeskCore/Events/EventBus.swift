@@ -32,9 +32,7 @@ public final class EventBus {
         @MainActor (KiwiNotification, JSONValue) -> Void
 
     public var lua: LuaInterpreter?
-    public var onLog: @MainActor (String) -> Void = { message in
-        NSLog("KiwiDesk: %@", message)
-    }
+    public var onLog: @MainActor (String) -> Void = CoreLog.emit
 
     private var luaCallbacks: [KiwiNotification: [Int32]] = [:]
     private var sinks: [UUID: Sink] = [:]

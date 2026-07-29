@@ -252,10 +252,10 @@ public final class KiwiCore {
     /// `bind_profile_to_native_space`.
     public internal(set) var nativeSpaceBindings: [Int: String] = [:]
 
-    /// Log line consumer (GUI console later; syslog now).
-    public var onLog: @MainActor (String) -> Void = { message in
-        NSLog("KiwiDesk: %@", message)
-    }
+    /// Log line consumer (GUI console later; syslog now) — the
+    /// sink every Core seam is wired to forward *into*, which is
+    /// why it is exempt from the wiring guard.
+    public var onLog: @MainActor (String) -> Void = CoreLog.emit
 
     /// Problems from the last config load (#68): a broken
     /// init.lua, an unreadable gui.json, invalid profile JSONs.

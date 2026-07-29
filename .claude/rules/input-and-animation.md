@@ -127,11 +127,11 @@ editing here:
 
   Report both nets through `AnimationEngine.onLog` (wired in
   `KiwiCore+Bootstrap`, asserted end-to-end by
-  `engineLogReachesTheCore` — a seam that is declared and never
-  wired logs nothing in production while every unit test that
-  sets it by hand stays green). A rescue that fires silently
-  removes the symptom that made #599 findable and leaves only a
-  visible jump.
+  `AnimationNetLoggingTests.engineLogReachesTheCore` — a seam
+  declared and never wired bypasses the sink in production while
+  every unit test that sets it by hand stays green). A rescue
+  that fires silently removes the symptom that made #599
+  findable and leaves only a visible jump.
 - **A shrinking axis snaps to target on frame 1 unless the
   caller promised `BatchSizing.allSpringSized` (#593), and that
   promise is opt-in, never inferred.** The full argument — why

@@ -64,9 +64,10 @@ public final class AnimationEngine {
     /// wedged state, and a net that fires silently converts the
     /// loud failure that made #599 findable into a quiet one —
     /// leaving only a visible jump and no way to tell a rescue
-    /// from a retile. Unwired it is inert, so unit suites that
-    /// never set it see nothing.
-    public var onLog: @MainActor (String) -> Void = { _ in }
+    /// from a retile. Unwired it goes to syslog rather than
+    /// nowhere (`CoreLog`, #624), so a unit suite that never
+    /// sets it prints the rescue instead of swallowing it.
+    public var onLog: @MainActor (String) -> Void = CoreLog.emit
 
     /// Test seam: when false, `animate` applies the target
     /// frame synchronously instead of spring-animating it, so

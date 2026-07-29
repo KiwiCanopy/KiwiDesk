@@ -6,10 +6,10 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents is **nothing happening.** A seam
-/// whose default is a no-op, left unassigned, lets its
+/// The failure this prevents used to be **nothing happening.** A
+/// seam whose default was a no-op, left unassigned, let its
 /// subsystem compile, ship, run, and throw its diagnostics away.
-/// Nothing reds, nothing warns, and the only symptom is a log
+/// Nothing red, nothing warned, and the only symptom was a log
 /// line that was never going to appear, missed months later by
 /// whoever needed it. #599 was findable because a spring
 /// divergence was loud; #611 named the same trap — an
@@ -19,6 +19,16 @@ import Testing
 /// since it was written, six seams wired beside it in the same
 /// function. The omission cost nothing to make and showed
 /// nowhere.
+///
+/// Since #624 every seam defaults to `CoreLog.emit`, so an
+/// unwired one reaches syslog on its way past instead of being
+/// dropped — kept honest by `LogSeamDefaultTests`, which is what
+/// this suite's argument now rests on. That is a smaller
+/// failure, not the absence of one, and it is why this guard
+/// stays: an unwired seam still bypasses `KiwiCore.onLog`, and
+/// so the test capture below and the GUI console that sink's own
+/// comment anticipates. Read the two together — this suite says
+/// *wired*, that one says *would be loud if it weren't*.
 ///
 /// **The lens, not the list.** Both ends are discovered: the seam
 /// owners by scanning every Swift file in the target for
@@ -82,7 +92,8 @@ struct LogSeamWiringTests {
     /// instead of quietly excusing a real one.
     private let allowed: [String: String] = [
         // The sink, not a seam: what every other seam forwards
-        // *to*. It defaults to NSLog rather than to a no-op, and
+        // *to*. It carries the same `CoreLog.emit` default they
+        // do, which is where their forwarded lines end up, and
         // wiring it to itself would recurse.
         "KiwiCore": "the syslog sink every other seam feeds"
     ]

@@ -22,7 +22,7 @@ public final class KeybindingManager {
     public static let defaultMode = "default"
 
     public var lua: LuaInterpreter?
-    public var onLog: @MainActor (String) -> Void = { _ in }
+    public var onLog: @MainActor (String) -> Void = CoreLog.emit
     /// GUI indicator hook (mode name).
     public var onModeChange: @MainActor (String) -> Void = {
         _ in
