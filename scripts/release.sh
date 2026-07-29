@@ -1,7 +1,8 @@
 #!/bin/bash
 # Cut a release: stamp the version, verify, commit, tag, push
 # (#32). Pushing the tag is what triggers .github/workflows/
-# release.yml, which builds the artifact and drafts the release.
+# release.yml, which re-verifies the tag, builds the artifact
+# and drafts the release.
 #
 # Usage: scripts/release.sh <semantic-version> [options]
 #   e.g. scripts/release.sh 0.9.0

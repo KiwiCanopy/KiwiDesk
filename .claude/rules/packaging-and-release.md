@@ -127,11 +127,39 @@ fails on the far side of the one irreversible step.
 `ScriptStampTests` holds the accepted shape.
 
 **Its verification gate mirrors the `verify-gate` skill, and a
-change to one updates the other.** AGENTS.md §3 gives that skill
-the procedure, and `scripts/release.sh` deliberately re-states it
-with the release build made unconditional — but this is the copy
-where running a *stale* gate ships an artifact, and nothing keeps
-it in step automatically.
+change to one updates the others.** AGENTS.md §3 gives that skill
+the procedure, and two ship-grade copies re-state it — the ones
+where running a *stale* gate ships an artifact:
+`scripts/release.sh` (release build made unconditional) and the
+`verify` job in `release.yml`, which re-runs the gate against a
+pushed tag — the copy that catches a tag pushed by hand, which
+never met the script's (#487; branch protection cannot see tags,
+so the workflow is the only gate such a tag passes). Both copies
+are pinned to the skill by `VerifyGateParityTests`, which derives
+the command list from `SKILL.md` — extend that suite before
+shipping a further copy, and at a *third* ship-grade copy weigh
+one sealed verify script every copy calls over another scanner
+(the same past-two-mirrors escalation parity-tests.md applies to
+field lists). (Drift in ci.yml's copy weakens a PR check, not a
+release, so it sits outside the suite's ship-grade scope.)
+
+The `verify` job carries one named exemption, which the suite
+encodes structurally — its workflow pin scrapes only the skill's
+fast-inner-loop section: no `swift build -c release`. The
+obligation it leans on — **the release job must keep a
+`-c release` compile ahead of any submission or draft**; today
+that is `build-app.sh`'s first act — is what lets the pipeline
+still refuse a tree that cannot build release without paying the
+same compile twice in sequence.
+
+**A job downstream of `verify` checks out
+`needs.verify.outputs.sha`, never a ref name.** A tag name is
+re-resolved against the remote at each job's own start, so by
+name a single-job re-run — or a tag deleted and re-pushed
+mid-run — hands the job a tree the gate never saw. The release
+job's checkout comment carries the full argument; a future
+publish job (a tap bump, a Sparkle appcast) copies its shape,
+not ci.yml's `github.ref` template.
 
 **Stamp the commit at build time; never check one in.** A commit
 cannot contain its own SHA, so a bump made while the release

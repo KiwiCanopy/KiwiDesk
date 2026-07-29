@@ -31,52 +31,75 @@ concurrency:
   group: release-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
-permissions:
-  contents: write
+# Bound once here for every job, never pasted into a `run:`
+# body. A `${{ }}` expansion is substituted BEFORE bash parses
+# the script, so a tag name carrying a quote or a newline would
+# be executed rather than read. The trust boundary is "write
+# access" — one person today — so this is hardening, not a live
+# hole; it costs nothing and removes the class.
+env:
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+  # One copy for both jobs, read by the shell like TAG above: a
+  # green Verify vouches for the exact toolchain the artifact is
+  # then built with, so the two pins must be one string — an
+  # Xcode bump that edited one job and not the other would leave
+  # both green while the artifact is built by a compiler Verify
+  # never ran.
+  XCODE: /Applications/Xcode_26.6.app
 
 jobs:
-  release:
-    name: Build & draft release
+  # The gate scripts/release.sh runs before it will tag, re-run
+  # against the tag itself. That script is the intended way to
+  # cut a release — but a tag can also be pushed by hand,
+  # skipping the gate entirely, and branch protection cannot see
+  # tags. A bad merge to main is cheap to fix; a bad tag fans out
+  # to Homebrew and the direct download and cannot be unshipped
+  # (#487). Tests fail, nothing ships: the release job `needs:`
+  # this one. VerifyGateParityTests pins this job's command list
+  # to the verify-gate skill that owns the procedure.
+  #
+  # No `swift build -c release` here: the release job must keep
+  # that compile ahead of any submission or draft — today it is
+  # build-app.sh's first act — and the jobs run in sequence, so
+  # this copy would only lengthen the critical path. The full
+  # argument lives in packaging-and-release.md.
+  verify:
+    name: Verify
     # macos-26 for the same reason ci.yml pins it: the tree uses
     # macOS 26 SDK symbols, and `if #available` gates execution,
     # not compilation.
     runs-on: macos-26
-    env:
-      # Bound once here, never pasted into a `run:` body. A
-      # `${{ }}` expansion is substituted BEFORE bash parses the
-      # script, so a tag name carrying a quote or a newline would
-      # be executed rather than read. The trust boundary is
-      # "write access" — one person today — so this is hardening,
-      # not a live hole; it costs nothing and removes the class.
-      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    permissions:
+      contents: read
+    # The commit this job vetted, for the release job to build.
+    # A tag NAME is re-resolved against the remote at each job's
+    # own checkout, so it cannot carry this assertion — see the
+    # release job's checkout for what would slip through.
+    outputs:
+      sha: ${{ steps.audit.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
-          # Needed for the "tag is on main" assertion below, which
-          # resolves origin/main. NOT for the release notes:
-          # `--generate-notes` is computed server-side by the API
-          # and reads nothing from this clone.
+          # Needed for the "tag is on main" assertion below,
+          # which resolves origin/main.
           fetch-depth: 0
 
-      # No `|| /Applications/Xcode.app` fallback, deliberately
-      # diverging from ci.yml. There the fallback is right: a test
-      # run on a slightly different toolchain still tells you
-      # something. Here the output is the artifact a user installs,
-      # and a runner-image bump would silently build it with an
-      # unannounced compiler while nothing on the artifact records
-      # which. A release is precisely the run to stop rather than
-      # let vary.
+      # Not `github.sha`: on a workflow_dispatch run that is the
+      # DEFAULT branch's tip, not the tag's commit — only the
+      # clone knows what the ref above resolved to.
+      - name: Record the audited commit
+        id: audit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Strict, from the one workflow-level pin — and unlike
+      # ci.yml's fallback, deliberately: see the release job's
+      # Select Xcode for the argument.
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app
+          sudo xcode-select -s "$XCODE"
           swift --version
           xcodebuild -version
-
-      - name: Resolve the tag
-        id: tag
-        run: |
-          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # The one guard that stops a mislabelled binary shipping.
       # The tag and KiwiDeskVersion.semantic are two hand-written
@@ -85,10 +108,12 @@ jobs:
       # silently disagree the first time someone tags by hand.
       # Failing here costs a re-tag; not failing here ships a
       # binary whose --version output names a release it is not.
+      # First in the gate, before the build: every step in this
+      # job exists to fail a bad tag fast, and this one is the
+      # cheapest.
       - name: Verify the tag matches the binary
-        env:
-          EXPECTED: ${{ steps.tag.outputs.version }}
         run: |
+          EXPECTED="${TAG#v}"
           FILE=Sources/KiwiDeskCore/App/KiwiDeskVersion.swift
           # `head -1` matches build-app.sh's extraction. This is
           # the stricter of the two guards, so it must not be the
@@ -121,6 +146,94 @@ jobs:
             exit 1
           fi
           echo "tag and binary agree on $EXPECTED"
+
+      - name: Build
+        run: swift build
+
+      - name: Lint
+        run: ./scripts/lint.sh
+
+      # Split per AGENTS.md §5: run as one `swift test` the suite
+      # stalls for minutes at the tail, because spawned exec
+      # children hold the runner's pipe. #489 tracks the root fix.
+      - name: Test
+        run: swift test --skip ExecTests
+
+      - name: Test (ExecTests)
+        run: swift test --filter ExecTests
+
+
+  release:
+    name: Build & draft release
+    needs: verify
+    # macos-26 for the same reason ci.yml pins it: the tree uses
+    # macOS 26 SDK symbols, and `if #available` gates execution,
+    # not compilation.
+    runs-on: macos-26
+    permissions:
+      # The draft and its assets — the one write this workflow
+      # does. Verify above runs with read only.
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The exact commit Verify vetted — never the tag name,
+          # which is re-resolved against the remote at THIS job's
+          # start. By name, a tag deleted and re-pushed after
+          # Verify passed (or a "Re-run failed jobs" of this job
+          # alone, to which job outputs are replayed) would build
+          # a tree that never met the gate. Everything below
+          # reads the tag only as a NAME for the API — and the
+          # one call that could recreate the ref, `gh release
+          # create`, pins --target to this clone's HEAD.
+          ref: ${{ needs.verify.outputs.sha }}
+          # Shallow is enough here: the tag-on-main assertion
+          # that needed origin/main (fetch-depth: 0) lives in
+          # Verify now, and the release notes read nothing from
+          # this clone — `--generate-notes` is computed
+          # server-side by the API.
+
+      # The pin above fails OPEN if its wiring ever breaks: a
+      # renamed step id or output key evaluates to an empty
+      # string with Verify still green, and checkout treats an
+      # empty `ref` as unset — falling back to the DEFAULT
+      # branch's tip on a workflow_dispatch run, after which
+      # every later check self-agrees on the wrong tree (the
+      # stamp and the binary check both read this clone's HEAD).
+      # So prove the checkout resolved the pin, not a fallback.
+      - name: Assert the vetted commit is checked out
+        env:
+          VETTED: ${{ needs.verify.outputs.sha }}
+        run: |
+          if [ -z "$VETTED" ]; then
+            echo "::error::verify's sha output is empty — the" \
+                 "audit step's wiring broke"
+            exit 1
+          fi
+          if [ "$(git rev-parse HEAD)" != "$VETTED" ]; then
+            echo "::error::checked out $(git rev-parse HEAD)" \
+                 "but verify vetted $VETTED"
+            exit 1
+          fi
+
+      # No `|| /Applications/Xcode.app` fallback, deliberately
+      # diverging from ci.yml. There the fallback is right: a test
+      # run on a slightly different toolchain still tells you
+      # something. Here the output is the artifact a user installs,
+      # and a runner-image bump would silently build it with an
+      # unannounced compiler while nothing on the artifact records
+      # which. A release is precisely the run to stop rather than
+      # let vary.
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$XCODE"
+          swift --version
+          xcodebuild -version
+
+      - name: Resolve the tag
+        id: tag
+        run: |
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # Not a second copy of the sed in bump-version.sh — that
       # script owns the file's shape and this calls it. HEAD is
@@ -422,11 +535,28 @@ jobs:
                 esac
               fi
             done <<< "$assets"
+            # A draft outlives its tag (it mints no ref until
+            # published) and is found here by NAME — so after a
+            # delete-and-re-tag its stored target still names
+            # the old commit, and a later publish following one
+            # more tag deletion would mint the ref THERE, under
+            # this run's artifact. Re-pin it beside the upload,
+            # the same invariant the create branch sets.
+            gh release edit "$TAG" \
+              --target "$(git rev-parse HEAD)"
             gh release upload "$TAG" "$ARCHIVE" --clobber
           else
+            # --target: if the tag was deleted mid-run (a human
+            # aborting a bad release), this call would otherwise
+            # MINT it server-side at the default branch's
+            # current tip — an ungated, unstamped commit, with
+            # the vetted artifact attached under it. Pinned, a
+            # minted tag lands on the vetted commit; with the
+            # tag intact the flag is ignored.
             gh release create "$TAG" "$ARCHIVE" \
               --draft \
               --prerelease \
               --title "KiwiDesk $VERSION" \
+              --target "$(git rev-parse HEAD)" \
               --generate-notes
           fi
