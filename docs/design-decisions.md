@@ -1746,6 +1746,31 @@ deleting it would lose config across a routine monitor swap.
 The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
+**The reference panel never lists its own opener.** The
+`show_shortcuts` binding (⌃⌥K, seeded per mode since #602) is
+dropped from the panel builder's working set and renders in no
+band — the one deliberate exception to the panel's "no bound
+shortcut is ever invisible" contract. The footer's dismiss hint
+is its home: it shows the live resolved combo wherever bindings
+are live, follows a rebind automatically, and still renders in
+the empty and unavailable states, which no band does — a row
+can't match that. A row would also be self-referential (you
+just pressed the combo it teaches; no macOS surface lists its
+own trigger as content) and, pre-fix, it surfaced in *Custom*,
+the band that means "user-authored raw Lua" — a first-party
+seeded default there reads as the user's own script. Promoting
+the row to the top instead was considered and rejected:
+redundancy with the footer is most jarring as the first line
+read, ahead of the actions the user opened the panel to look
+up. The editor's General section likewise stays low — macOS's
+own Keyboard pane puts "Keyboard Shortcuts…" below the content,
+and the menu bar's "View Shortcuts…" plus the onboarding hint
+already carry discovery. Consequence to keep: a fresh mode
+(seeded with only the opener) honestly shows the "nothing
+bound" placeholder while the footer teaches ⌃⌥K.
+`ShortcutsSelfRowTests` pins the suppression — un-suppressing
+it re-leaks the seed into Custom. (#602, PR #638)
+
 ### Overrides & appearance
 
 **[Principle]**

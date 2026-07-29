@@ -1,68 +1,21 @@
 import Foundation
 import KiwiDeskCore
 
-/// One row in the read-only shortcuts reference: a label, the
-/// rendered key-combo glyph string, and an optional leading glyph
-/// (a space icon) or app bundle id (a real app icon). Pure value
-/// data — the view owns all presentation.
-struct ShortcutRow: Identifiable {
-    let id: String
-    let label: String
-    /// The combo rendered as native glyphs (`⌃⌥←`), through the
-    /// same `ComboSymbols` path the editor uses.
-    let combo: String
-    /// Leading SF Symbol / emoji glyph (space rows). Nil = none.
-    var icon: String? = nil
-    /// App bundle id for a real 20pt icon (Apps band). Nil = none.
-    var bundleID: String? = nil
-    /// App Font ligature (#294): set when the bar's icon source
-    /// is Glyphs and this app has one, so the panel's Apps band
-    /// matches the bar. Wins over `bundleID`; nil falls back to
-    /// the bundle icon.
-    var glyph: String? = nil
-    /// Custom-Lua rows render their label monospaced.
-    var monospaced: Bool = false
-    /// Trailing accessory glyph for a non-default launch behavior
-    /// (#334: Open New). Nil = default row, which renders exactly
-    /// as before. `accessoryHelp` is its hover tooltip.
-    var accessoryIcon: String? = nil
-    var accessoryHelp: String = ""
-}
-
-/// A named group of rows inside the Controls band (Focus / Move
-/// Windows / Size & float / Switch modes).
-struct ShortcutSubgroup: Identifiable {
-    let title: String
-    let rows: [ShortcutRow]
-    var id: String { title }
-}
-
-/// The whole read-only reference for one key mode: three bands
-/// (Controls grouped by subgroup, Apps, Custom). Empty bands are
-/// dropped by the builder, so an empty band never renders.
-struct ShortcutsReference {
-    // `var`, not `let`: post-processing (the #294 glyph pass)
-    // mutates a copy instead of re-initializing memberwise,
-    // which would be one more hand-mirrored field list.
-    var modeName: String
-    var controls: [ShortcutSubgroup]
-    var apps: [ShortcutRow]
-    var custom: [ShortcutRow]
-
-    /// True when the active mode has no bound shortcuts at all —
-    /// the view shows a "nothing bound yet" placeholder.
-    var isEmpty: Bool {
-        controls.isEmpty && apps.isEmpty && custom.isEmpty
-    }
-}
-
 /// Builds a `ShortcutsReference` from a live key mode by filtering
 /// the `KeybindingCatalog` presets to the bindings that actually
 /// exist — reusing the exact labels, icons, and Lua identity the
 /// editor authors, so the panel can never disagree with the tab.
 /// Anything bound but unrecognized (custom Lua, or a resize of a
 /// non-current step) falls through to the Custom band, so no bound
-/// shortcut is ever invisible.
+/// shortcut is ever invisible — with one deliberate exception:
+/// `KiwiDesk.show_shortcuts()` opens this very panel, so it is
+/// dropped from the working set before any band builds and never
+/// becomes a row in any of them. The footer's dismiss hint
+/// teaches its combo in every state whose bindings are live
+/// (paused bindings do nothing, so the generic hint is honest
+/// there). Un-suppressing it would re-leak the seeded ⌃⌥K
+/// default (#602) into Custom as raw Lua — the band that means
+/// "user-authored". `ShortcutsSelfRowTests` pins the exception.
 @MainActor
 enum ShortcutsReferenceBuilder {
     static func build(
@@ -72,6 +25,16 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         modeNames: [String]
     ) -> ShortcutsReference {
+        // The panel's own opener never renders as a row (see the
+        // type docstring): drop every binding of it — whatever its
+        // kind or combo — from the working set before any band
+        // builds, so the suppression holds across all three bands
+        // by construction, not by each band's filter remembering.
+        var mode = mode
+        mode.bindings.removeAll {
+            $0.lua == ShortcutsOpenBinding.lua
+        }
+
         // Keyed by row identity (UUID), not `lua`: two bindings can
         // share a command's Lua with different combos (vim keys +
         // arrows both bound to `focus("left")`). Keying by `lua`

@@ -186,7 +186,10 @@ so the cheat-sheet is always reachable from the keyboard.
 The panel always appears centered on the screen under your pointer and
 never remembers a position. Press **Esc**, click anywhere outside it, or
 choose **View Shortcuts…** again to close it. Empty sections are hidden;
-a mode with nothing bound shows a short placeholder. To change any
+a mode with nothing bound shows a short placeholder. The panel never
+lists its own ⌃⌥K shortcut as a row — the close hint in the footer
+already shows it — so a fresh mode, which starts with only that
+binding, shows the placeholder too. To change any
 shortcut, click **Edit in Settings…** at the bottom — it opens Settings
 ▸ Shortcuts, the one place bindings are edited. If your configuration is
 owned by `init.lua`, the panel says so instead of listing shortcuts.
