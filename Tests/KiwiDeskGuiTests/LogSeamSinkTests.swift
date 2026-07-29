@@ -153,17 +153,34 @@ struct LogSeamSinkTests {
     ///
     /// Derived from the filesystem, so a new subsystem is inside
     /// it on arrival and no list here is edited to keep it there.
+    ///
+    /// **The expected set must not come from the walker under
+    /// test.** Deriving "directories holding a `.swift` file" via
+    /// `SourceScan.swiftSources` would make this tautological —
+    /// expected and actual narrow together and it is green
+    /// forever. A second hand-rolled walk is the same trap one
+    /// step out, and is the drift `tests.md` names for this
+    /// helper family. A plain directory listing against the
+    /// scan's own output is the only shape in which a narrowing
+    /// is visible at all; do not "simplify" it into agreement.
     private func assertEverySubsystemWasScanned(
         _ scanned: [URL]
     ) throws {
+        // Indexed, not searched: every scanned file descends
+        // from `coreRoot`, so its depth is exact. Searching the
+        // components for "KiwiDeskCore" would read the wrong
+        // element on a checkout path that happens to contain one
+        // higher up, and then red a correct tree.
+        let depth = coreRoot.pathComponents.count
         let reached = Set(
             scanned.compactMap { file -> String? in
                 let parts = file.pathComponents
-                guard
-                    let root = parts.firstIndex(of: "KiwiDeskCore"),
-                    parts.index(after: root) < parts.count - 1
-                else { return nil }
-                return parts[parts.index(after: root)]
+                // `depth` is the subdirectory, `depth + 1` the
+                // file inside it — so a `.swift` sitting directly
+                // in `KiwiDeskCore/` contributes no directory,
+                // which is correct.
+                guard parts.count > depth + 1 else { return nil }
+                return parts[depth]
             }
         )
         let directories = Set(
@@ -176,8 +193,20 @@ struct LogSeamSinkTests {
                     .isDirectory) == true
             }
             .map(\.lastPathComponent)
-            // Assets, not code — it holds no Swift file to scan.
+            // Assets, not code (AGENTS.md §1 owns that
+            // classification), so it contributes no Swift file.
+            // Checked both ways below, per the house rule for an
+            // exemption list.
             .filter { $0 != "Resources" }
+        )
+        #expect(
+            !reached.contains("Resources"),
+            Comment(
+                rawValue: "`Resources/` now holds Swift code, so "
+                    + "its exemption here is stale — drop it and "
+                    + "let the directory be covered like any "
+                    + "other."
+            )
         )
         #expect(
             directories.subtracting(reached).isEmpty,
@@ -186,7 +215,8 @@ struct LogSeamSinkTests {
                     + directories.subtracting(reached).sorted()
                     .joined(separator: ", ")
                     + ", so a direct `CoreLog` call there would "
-                    + "go unseen. A narrowed file predicate does "
+                    + "go unseen — or the directory holds no "
+                    + "Swift file yet. A narrowed file predicate does "
                     + "this, and the seam guards cannot catch it "
                     + "when the directory holds no seam."
             )
