@@ -9,7 +9,7 @@ import Testing
 /// would satisfy a source scan — so this runs one line through
 /// the wiring and checks it comes out of the sink.
 ///
-/// **What it proves, exactly.** All seven seams are *currently*
+/// **What it proves, exactly.** Every seam is *currently*
 /// assigned the same forwarding closure, so probing any of them
 /// probes that one body — and that premise is an assumption
 /// about the tree, not something either guard enforces: an
