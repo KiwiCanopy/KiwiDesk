@@ -1,11 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The scrolling slot-size pair: the unit picker (Auto /
-/// Points / Percent) and the value row it drives — a slider in
-/// the explicit units, a value chip in Auto. Split out of
-/// `ScrollGridEditor` so the unit seeds and bindings live with
-/// the rows they feed.
+/// The scrolling slot-size pair: the unit picker (Percent /
+/// Points) and the slider row it drives. A stored `.auto`
+/// renders as Percent at the orientation standard — the GUI
+/// stopped offering "Default" as a third unit once both axes'
+/// standards became the same 80% fraction (ui-designer,
+/// 2026-07-29; see `docs/design-decisions.md`), while `.auto`
+/// itself stays in the model and Lua (`scroll.set_slot_size(0)`).
+/// Split out of `ScrollGridEditor` so the unit seeds and
+/// bindings live with the rows they feed.
 struct SlotSizeRows: View {
     @ObservedObject var model: SettingsModel
     /// The slot size the rows edit. Injected as a binding so the
@@ -55,14 +59,19 @@ struct SlotSizeRows: View {
     }
 
     private enum SizeUnit: Hashable {
-        case auto, points, percent
+        case points, percent
     }
 
+    /// `.auto` presents as Percent: it resolves to the standard
+    /// fraction on either axis, so Percent-at-80 is its truthful
+    /// rendering. The stored value stays `.auto` until the user
+    /// moves the slider (the binding then writes an explicit
+    /// `.fraction`) — an untouched config keeps tracking the
+    /// shipped standard.
     private var sizeUnit: SizeUnit {
         switch size {
-        case .auto: return .auto
+        case .auto, .fraction: return .percent
         case .points: return .points
-        case .fraction: return .percent
         }
     }
 
@@ -103,8 +112,6 @@ struct SlotSizeRows: View {
             get: { sizeUnit },
             set: { unit in
                 switch unit {
-                case .auto:
-                    size = .auto
                 case .points:
                     size =
                         .points(currentPoints)
@@ -151,12 +158,11 @@ struct SlotSizeRows: View {
 
     private var unitOptions: [(String, SizeUnit)] {
         [
-            // "Default" (not "Auto"): it's a fixed built-in size,
-            // not an adaptive/auto-fitting one — the grid's
-            // "Auto-size" owns that meaning.
-            (L("slot_size.auto", "Default"), SizeUnit.auto),
+            // Percent leads: it is the shipped default's unit and
+            // the recommended one (it keeps the slot's share of
+            // the screen across displays).
+            (L("slot_size.percent", "Percent"), SizeUnit.percent),
             (L("slot_size.points", "Points"), .points),
-            (L("slot_size.percent", "Percent"), .percent),
         ]
     }
 
@@ -186,39 +192,6 @@ struct SlotSizeRows: View {
     @ViewBuilder
     private var sizeControl: some View {
         switch sizeUnit {
-        case .auto:
-            HStack {
-                Text(sizeLabel)
-                    .frame(
-                        width: labelColumn,
-                        alignment: .leading
-                    )
-                // A value chip, not prose: the row where the
-                // slider lives in the other units shows the
-                // resolved state in the chips' capsule
-                // language, so it can't be read over as filler
-                // text.
-                Text(
-                    L(
-                        "slot_size.auto_standard",
-                        "Default — orientation standard"
-                    )
-                )
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(
-                    Capsule().fill(.secondary.opacity(0.08))
-                )
-                .overlay(
-                    Capsule().strokeBorder(
-                        .secondary.opacity(0.15),
-                        lineWidth: 0.5
-                    )
-                )
-                Spacer()
-            }
         case .points:
             HStack {
                 Text(sizeLabel)

@@ -510,8 +510,9 @@ Adjust each mode's defaults:
   flush against the leading/trailing edge, shown as **Left**/
   **Right** when horizontal and **Top**/**Bottom** when vertical;
   or **Follow**, the default, which holds the viewport and pans
-  the minimum to keep the focus visible), slot size (auto, pixel
-  count, or percentage of available space), and **Wrap focus** —
+  the minimum to keep the focus visible), slot size (a
+  percentage of the available space — 80% out of the box — or
+  an exact point count), and **Wrap focus** —
   off by default, so
   stepping focus past a row end stops there; turn it on to wrap
   from the last window back to the first (and vice versa). Swap
@@ -606,11 +607,12 @@ inherited value), checked overrides just that field for this space
 and seeds the current value so nothing jumps.
 
 **Scrolling slot size** is one override with a size unit
-(**Default**, **Points**, **Percent**) and a value. It sets each
-window's size along the scroll direction — **Column width** when
-the space scrolls horizontally, **Row height** when vertical. The
-single checkbox owns the whole setting; **Default** is an explicit
-orientation standard and stays distinct from inheriting.
+(**Percent**, **Points**) and a value. It sets each window's
+size along the scroll direction — **Column width** when the
+space scrolls horizontally, **Row height** when vertical.
+Percent scales with the available space (80% out of the box);
+Points fixes an exact size. The single checkbox owns the whole
+setting.
 
 **Overrides for other layouts.** Changing a space's layout never
 deletes overrides — each layout keeps its own. Switch from

@@ -2371,6 +2371,27 @@ corner-radius and
 border-width previews now remap the full slider range instead
 of hard-capping halfway (the `AppBarPreviewStrip` fix).
 
+**[Trade-off]**
+
+**The slot-size unit picker offers Percent and Points only;
+`.auto` stays in the model and Lua but has no GUI segment.**
+The three-way picker's founding reason was that the shipped
+default could not be expressed as one number (a fixed pt
+horizontally, a fraction vertically). Once both axes' standards
+became the same 80% fraction, a "Default" segment was
+indistinguishable from Percent-at-80 by anything the user could
+do in Settings — and a picker option that no in-app action can
+ever tell apart from its sibling is removed outright, not
+greyed ("grey, don't hide" covers controls another mode
+reactivates, which this was not). A stored `.auto` renders as
+Percent at the standard and stays `.auto` until the slider is
+touched, so an untouched config still tracks a future retune of
+the standard; `scroll.set_slot_size(0)` keeps that policy
+reachable from the open layer (GUI curates, Lua stays open —
+the `dim_factor` precedent). Removing `.auto` from the model
+instead would have spent Lua surface to solve a GUI problem the
+two-way picker already solves. (ui-designer, 2026-07-29.)
+
 ### App Bar
 
 **[Principle]**

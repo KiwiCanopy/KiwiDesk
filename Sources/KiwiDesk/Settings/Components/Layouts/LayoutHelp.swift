@@ -120,15 +120,16 @@ enum LayoutHelp {
 
     /// Scrolling's per-space slot-size override (#290). Names the
     /// orientation-driven meaning (column width vs row height) and
-    /// the two auto standards so the checkbox's inherited value
+    /// what each unit does, so the checkbox's inherited value
     /// reads clearly.
     @MainActor static var slotSize: String {
         L(
             "space_override.slot_size.help",
             "Sets each scrolling window's size along the scroll "
                 + "direction. Horizontal uses column width; "
-                + "vertical uses row height. Default is 80% of "
-                + "the available width or height."
+                + "vertical uses row height. Percent scales with "
+                + "the available space (80% out of the box); "
+                + "Points fixes an exact size."
         )
     }
 

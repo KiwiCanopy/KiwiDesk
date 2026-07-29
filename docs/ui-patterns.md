@@ -655,9 +655,7 @@ Either shape must name **what** is decided automatically:
 "Automatic tracks" was retired because no track is itself
 automatic, only how many of them exist (ui-designer,
 2026-07-25). And "Automatic" is for a value the system
-*computes* — a fixed built-in stays **"Default"** (the slot
-size's `Default — orientation standard`), which is why that one
-does not take the word despite its `slot_size.auto` key.
+*computes* — a fixed built-in default stays **"Default"**.
 
 **A boolean mode flag names the MODE on the wire, even when its
 label names the field it gates (R6/#406).** "Auto track limit"
