@@ -249,7 +249,21 @@ public struct StateCoordinator: Sendable {
                         }
                     }
                 }
-                workspaces.focus(window.id, in: target)
+                // A RETURNING window (remembered space — a
+                // native-switch re-track, wake restore, app
+                // relaunch) joins its space without stealing an
+                // existing focus (#636): the re-track burst
+                // arrives in arbitrary per-pid order, so the
+                // last-created window won the ring while the OS
+                // had focused another — the focus report, not
+                // re-track order, is the authority. A fresh
+                // spawn (or deminiaturize, which clears the
+                // memory) still takes focus.
+                if !effects.hadRememberedSpace
+                    || workspaces[target]?.focused == nil
+                {
+                    workspaces.focus(window.id, in: target)
+                }
             }
 
         case .windowDestroyed(let id, let wasMinimized):
