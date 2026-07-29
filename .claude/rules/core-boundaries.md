@@ -39,15 +39,22 @@ itself when a fifth is added.
 - **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
   the group where all of them are, and in the same change that
   declares it — and it **defaults to `CoreLog.write`**, which is
-  never called directly. `LogSeamWiringTests` guards the wiring
-  and its `allowed` map is the exemption list;
-  `LogSeamDefaultTests` guards the default, and
-  `LogSeamSinkTests` guards the sink itself — that its body still
-  writes, and that Core never calls it outside a seam
-  declaration. The argument for all of it is on `CoreLog`.
-  Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
-  after the AX grant) is invisible to that guard, and `onLog`
-  needs no permission to be useful.
+  never called directly. Leaving one unassigned costs no red and
+  no warning: its lines simply never reach `KiwiCore.onLog`, so
+  nothing that reads the sink carries them. Four guards, reading
+  different things — `LogSeamWiringTests` scans source for the
+  wiring and its `allowed` map is the exemption list;
+  `LogSeamDefaultTests` guards the default; `LogSeamSinkTests`
+  guards the sink itself; and `LogSeamProbeTests` sends a line
+  through every seam it finds on a live `KiwiCore` and requires
+  it back out of the sink (#625). Each docstring carries its own
+  argument, and `CoreLog` carries the default's.
+  Bootstrap-time only, enforced twice: `onLog` needs no
+  permission to be useful, so a seam wired later
+  (`KiwiCore+Lifecycle`, after the AX grant) reds in the scan —
+  a late wire is that rule's violation by its own terms — and
+  again in the probe, which reads the sink before any lifecycle
+  runs.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

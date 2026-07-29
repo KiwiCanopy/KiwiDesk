@@ -6,12 +6,20 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents used to be **nothing happening.** A
-/// seam whose default was a no-op, left unassigned, let its
-/// subsystem compile, ship, run, and throw its diagnostics away.
-/// Nothing red, nothing warned, and the only symptom was a log
-/// line that was never going to appear, missed months later by
-/// whoever needed it. #599 was findable because a spring
+/// The failure this prevents is **the line never reaching
+/// `KiwiCore.onLog`.** A seam left unassigned lets its subsystem
+/// compile, ship and run while everything it logs goes past the
+/// sink — so nothing that reads the sink carries it, which is
+/// every test capture and the GUI console `KiwiCore.onLog`
+/// anticipates. Nothing reds, nothing warns, and the symptom is
+/// a diagnostic that was never going to appear where it was
+/// looked for, months later. Stated as routing rather than as
+/// silence on purpose: what the seam's *default* does is a
+/// separate question from this one — owned by `CoreLog` and
+/// `LogSeamDefaultTests` — and phrasing the harm in terms of
+/// whatever that default happens to be would make this sentence
+/// false the day it changes. #599 was findable
+/// because a spring
 /// divergence was loud; #611 named the same trap — an
 /// unobservable rescue is how a loud failure becomes a quiet one
 /// — and wired `AnimationEngine.onLog` on the spot.
@@ -39,24 +47,25 @@ import Testing
 /// is inside the net on arrival, and no list here is touched to
 /// keep it there.
 ///
-/// **Three limits, and they do not all fail the same way** —
-/// which is why they are written out rather than summarised:
+/// **Do not delete this as redundant with `LogSeamProbeTests`.**
+/// That suite closes three limits a source scan structurally
+/// cannot reach, and its docstring enumerates them — they are not
+/// repeated here, so that one commit cannot leave two copies
+/// disagreeing. What this suite owns is the other side of one
+/// axis: it reads *declarations*, so it is indifferent to whether
+/// the owner is reachable from the core root at runtime — behind
+/// a computed accessor, a static, an unforced `lazy var`, or on a
+/// type left nil under `makeTestCore` (`KiwiCore.lua`). The probe
+/// sees routing and only what the graph exposes as a stored
+/// reference. That division is permanent, not incidental. This
+/// one also names the *rule* — wired in a `KiwiCore+Bootstrap`
+/// file — rather than the outcome.
 ///
-/// - It is **type**-keyed, not instance-keyed. Two instances of
-///   one seam-owning type with only one of them wired passes
-///   green. Nothing has that shape today (`borders` and
-///   `stickyMarks` are separate types and only `BorderManager`
-///   declares a seam), but the shape is plausible, so this one
-///   fails **open**.
-/// - It proves the seam is **assigned**, not that the assignment
-///   reaches the sink: `socket.onLog = { _ in }` in bootstrap
-///   passes. Also **open**, and no cheap scan does better —
-///   pinning the closure body would red on any refactor of a
-///   line that is correct.
-/// - Everything the resolver cannot work out fails **shut**, as
-///   a red naming what it could not resolve: an unrecognised
-///   assignment shape, a receiver whose type is ambiguous or
-///   undeclared, a seam whose enclosing type the walk missed.
+/// **Its own failures are fail-shut.** Everything the resolver
+/// cannot work out reds naming what it could not resolve: an
+/// unrecognised assignment shape, a receiver whose type is
+/// ambiguous or undeclared, a seam whose enclosing type the walk
+/// missed.
 ///
 /// **Its completeness rests on a sibling.** This suite has no
 /// floor of its own: narrow `SourceScan.swiftSources` and it
