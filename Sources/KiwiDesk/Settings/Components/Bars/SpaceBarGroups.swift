@@ -74,8 +74,7 @@ struct SpaceBarEditorGroup: View {
         }
         SettingsSection(
             SettingsCatalog.bars.spaceBarColorsCard,
-            help: enabled ? nil : offHelp,
-            revealTargets: [SettingsCatalog.bars.advancedColors.control]
+            help: enabled ? nil : offHelp
         ) {
             // Gate passed IN, not wrapped around: the group has
             // to keep its "Advanced colors" disclosure label

@@ -26,10 +26,7 @@ struct GapsEditor: View {
     }
 
     var body: some View {
-        SettingsSection(
-            SettingsCatalog.appearance.gapsCard,
-            revealTargets: [perEdge.control, perAxis.control]
-        ) {
+        SettingsSection(SettingsCatalog.appearance.gapsCard) {
             GapsDiagram(outer: outer, inner: inner)
             masterRow(
                 label: L("gaps.outer", "Outer gap"),

@@ -26,11 +26,12 @@ import SwiftUI
 ///
 /// An `.inline` drawer sits *below* its section's heading, so
 /// anchoring its own body would scroll that heading off screen
-/// (#610). Such a drawer sets `scrollHoisted` and gives up its
-/// scroll id; its `SettingsSection` mounts the matching
-/// `searchScrollAnchor` marker at its top via `revealTargets`, so
-/// the reveal lands the section — heading first — while the
-/// drawer keeps its own wash.
+/// (#610). Such a drawer sets `scrollHoisted`: it gives up its
+/// scroll id and publishes its control through
+/// `HoistedRevealAnchorsKey`, which its enclosing `SettingsSection`
+/// turns into a top-of-section `searchScrollAnchor` marker, so the
+/// reveal lands the section — heading first — while the drawer
+/// keeps its own wash.
 struct SettingsDisclosure<Content: View, Accessory: View>: View {
     enum Chrome {
         /// Inside a section card; `font` styles the label
@@ -47,11 +48,10 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     private let chrome: Chrome
     /// `.inline` only: the scroll id is hoisted to the enclosing
     /// section's top (#610), so this drawer keeps its wash but
-    /// gives up its own `searchAnchorCard`. The section mounts the
-    /// matching `searchScrollAnchor` marker; feeding `revealTargets`
-    /// there and setting this flag are two halves of one call —
-    /// see `SettingsSection`. A `.card` drawer paints its own card
-    /// and anchors it, so it ignores this.
+    /// gives up its own `searchAnchorCard`, publishing its control
+    /// through `HoistedRevealAnchorsKey` for the section to anchor.
+    /// A `.card` drawer paints its own card and anchors it, so it
+    /// ignores this.
     private let scrollHoisted: Bool
     /// Call-site expansion state, for a drawer with its own
     /// rules (Gaps force-expands while its values are mixed);
@@ -100,13 +100,18 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     var body: some View {
         switch chrome {
         case .inline:
-            // Hoisted (#610): the scroll id lives on the section's
-            // top marker, so anchoring here too would give
-            // `scrollTo` a second candidate and land the bare
-            // drawer at the top — the very bug. The wash stays, on
-            // the label inside `group`.
+            // Hoisted (#610): publish this control so the enclosing
+            // section mounts the scroll marker at its top, and DON'T
+            // anchor here — a second candidate would let `scrollTo`
+            // land the bare drawer at the top, the very bug. The
+            // wash stays, on the label inside `group`. Emitting only
+            // from `.inline` also means `scrollHoisted` on a `.card`
+            // drawer is inert rather than a double anchor.
             if scrollHoisted {
-                group
+                group.preference(
+                    key: HoistedRevealAnchorsKey.self,
+                    value: [control]
+                )
             } else {
                 group.searchAnchorCard(control)
             }

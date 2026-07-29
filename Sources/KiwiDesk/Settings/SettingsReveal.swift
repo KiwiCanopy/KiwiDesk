@@ -74,6 +74,31 @@ extension EnvironmentValues {
     }
 }
 
+/// The scroll ids an inline drawer wants **hoisted to its
+/// enclosing section's top** (#610). A hoisted `SettingsDisclosure`
+/// contributes its own `SettingsControl`; the nearest
+/// `SettingsSection` collects the list and mounts a
+/// `searchScrollAnchor` marker per id above its heading, then
+/// consumes the value so an outer section never re-collects it.
+///
+/// The point of routing it through a preference rather than a
+/// call-site parameter: the marker's id is the drawer's OWN
+/// control by construction, so a hoisted drawer's scroll id and
+/// its wash id are the same control with no second list to keep in
+/// step — the same "seal it, don't guard it" the `fileprivate`
+/// halves buy for the co-located pair (#573). The section
+/// auto-discovers whichever drawer is mounted, so the shared
+/// surface-free `advancedColors` drawer needs no static parent.
+struct HoistedRevealAnchorsKey: PreferenceKey {
+    static let defaultValue: [SettingsControl] = []
+    static func reduce(
+        value: inout [SettingsControl],
+        nextValue: () -> [SettingsControl]
+    ) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
 /// Paints the reveal wash behind the anchored content while the
 /// environment names it.
 ///
@@ -217,14 +242,17 @@ extension View {
     /// off screen — the disembodiment the #277 top-alignment
     /// ruling exists to prevent. So the drawer keeps its wash
     /// (`searchFlashHeader`, on its own label) but gives up its
-    /// scroll id, and its enclosing `SettingsSection` mounts this
-    /// zero-size marker at its top instead. `scrollTo` then aligns
-    /// the section's top edge — heading first — and the drawer
-    /// label still washes below it.
+    /// scroll id, publishing its control through
+    /// `HoistedRevealAnchorsKey`; its enclosing `SettingsSection`
+    /// collects that and mounts this zero-size marker at its top.
+    /// `scrollTo` then aligns the section's top edge — heading
+    /// first — and the drawer label still washes below it.
     ///
-    /// Scroll-only by construction, so the pair is split across
-    /// two views (this marker scrolls, the drawer label washes)
-    /// over one control — confined to the container shapes by
+    /// Scroll-only, so the pair is split across two views (this
+    /// marker scrolls, the drawer label washes) — but over the
+    /// same control by construction, because the marker's id comes
+    /// from the drawer's own published control, not a second list.
+    /// Confined to the container shapes by
     /// `SettingsAnchorPrimitiveTests`, the same seal the paired
     /// halves carry.
     func searchScrollAnchor(

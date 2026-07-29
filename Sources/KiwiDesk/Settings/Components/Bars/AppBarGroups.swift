@@ -95,8 +95,7 @@ struct GlobalAppBarGroup: View {
         }
         SettingsSection(
             SettingsCatalog.bars.appBarColorsCard,
-            help: anyBarShown ? nil : noBarHelp,
-            revealTargets: [SettingsCatalog.bars.advancedColors.control]
+            help: anyBarShown ? nil : noBarHelp
         ) {
             AppBarColorGrid { inlineColors }
                 .modifier(
