@@ -101,7 +101,7 @@ struct BatchSizingRoutingTests {
         // pessimistic case. `AnimationEngine` names the promise
         // once, in the re-seat guard that keeps a mid-flight
         // switch into it from rebounding the window.
-        "KiwiDeskCore/Animation/Spring.swift":
+        "KiwiDeskCore/Animation/FrameAnimation.swift":
             Site(names: 10, promises: 0),
         "KiwiDeskCore/Animation/AnimationEngine.swift":
             Site(names: 11, promises: 1),
