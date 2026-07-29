@@ -34,6 +34,19 @@ public struct FrameAnimation: Sendable {
     /// for `pastHalfway`.
     private var initialDistance: Double
 
+    /// Simulated seconds spent stepping toward the *current*
+    /// target — the settle watchdog's clock. Simulated rather
+    /// than wall-clock so a stalled `DisplayLink` cannot age an
+    /// animation that was not running; the bound it feeds lives
+    /// in `FrameAnimation+Watchdog` (#611).
+    private(set) var age: TimeInterval = 0
+
+    /// Raised by the non-finite net, drained by
+    /// `takeNonFiniteNotice()` in `FrameAnimation+Watchdog`. A
+    /// value type has no log seam of its own, so the net leaves a
+    /// mark the tick loop collects on its way past (#611).
+    var pendingRescueNotice = false
+
     /// `sizing` defaults to `.mayInstantSize` — today's first-frame
     /// shrink snap — so a construction site that has no opinion
     /// gets the fail-safe one (#593).
@@ -62,8 +75,39 @@ public struct FrameAnimation: Sendable {
         to frame: CGRect,
         sizing: BatchSizing
     ) {
-        target = Self.vector(frame)
+        let next = Self.vector(frame)
+        // A genuinely new target is a new journey, so the settle
+        // watchdog's clock restarts with it (#611): a live
+        // make-room drag retargets its siblings for as long as the
+        // user holds the mouse, and a watchdog that fires on
+        // healthy motion is worse than none.
+        //
+        // Only on a *changed* target, though. A retile loop that
+        // re-issues an identical rect would otherwise reset the
+        // clock forever and blind the watchdog to the one wedge it
+        // could plausibly meet in production — an echo/retile
+        // feedback loop, which is far more reachable than the
+        // pathological spring the bound is written against. The
+        // comparison is exact, so a loop whose rect wobbles by a
+        // point (an app-enforced minimum bouncing the placement)
+        // still resets; see the accepted hole in the rule file.
+        //
+        // Keyed on the target alone, not on `sizing`: a pass that
+        // changes only its sizing promise has not moved the window
+        // anywhere new, so it has not restarted the journey.
+        if next != target {
+            age = 0
+        }
+        target = next
         self.sizing = sizing
+        // Outside the branch deliberately, though it is journey
+        // state too. Rebasing it on an identical target is the
+        // pre-existing behaviour of the `.midSlide` size policy's
+        // halfway yardstick (#45/#47), which has no coverage of
+        // its own; changing it here would be an unrelated,
+        // untested change to the size channel. The shipped
+        // `.throttledSmooth` never reads `pastHalfway`, so this
+        // is inert today.
         initialDistance = Self.distance(current, target)
     }
 
@@ -124,7 +168,15 @@ public struct FrameAnimation: Sendable {
     }
 
     /// Advances by `dt`; returns true when settled.
+    ///
+    /// A caller that wants the non-finite net's diagnostics must
+    /// drain `takeNonFiniteNotice()` after each call — the notice
+    /// is raised here and reported by whoever is driving.
     public mutating func step(dt: Double) -> Bool {
+        // Simulated time, not wall-clock, and deliberately not
+        // gated on whether the spring below actually integrated —
+        // see `FrameAnimation+Watchdog`.
+        age += Spring.integratedSpan(dt)
         var settled = true
         for i in 0..<4 {
             spring.step(
@@ -133,26 +185,21 @@ public struct FrameAnimation: Sendable {
                 target: target[i],
                 dt: dt
             )
-            // Backstop under the substepping (#599): if a
-            // component ever stops being finite it can never come
-            // back — `abs(inf - target)` is never within epsilon,
-            // so the animation would run forever and take the
-            // whole settle signal with it. Force it home instead.
-            // A visible jump beats a permanently wedged engine.
-            // With the substepping above, a finite input can no
-            // longer produce a non-finite output at any `dt`, so
-            // the live trigger is a non-finite START — a garbage
-            // AX read — not the integrator. Check there first if
-            // this ever fires. It is deliberately silent: there
-            // is no log seam on a pure value type, and the engine
-            // would have to poll for it. A non-finite TARGET is a
-            // different matter and is refused upstream, in
-            // `AnimationEngine.animate`, because this recovery
-            // cannot help there — it would assign the NaN target
-            // onto `current` and hand a NaN rect to AX.
+            // Backstop under the substepping (#599): a component
+            // that stops being finite can never come back, since
+            // `abs(inf - target)` is never within epsilon — so
+            // force it home rather than let it run forever. With
+            // the substepping in place a finite input cannot
+            // produce a non-finite output, so the live trigger is
+            // a non-finite START (a garbage AX read); check there
+            // first if this fires, and the engine logs it (#611)
+            // so there will be a symptom to check. A non-finite
+            // TARGET is refused upstream in `animate` instead —
+            // this recovery would hand the NaN straight to AX.
             if !current[i].isFinite || !velocity[i].isFinite {
                 current[i] = target[i]
                 velocity[i] = 0
+                pendingRescueNotice = true
             }
             if abs(current[i] - target[i]) > Self.epsilon
                 || abs(velocity[i]) > Self.epsilon
@@ -161,10 +208,18 @@ public struct FrameAnimation: Sendable {
             }
         }
         if settled {
-            current = target
-            velocity = [0, 0, 0, 0]
+            forceSettle()
         }
         return settled
+    }
+
+    /// Snaps to the exact target and stops dead. The single
+    /// recovery shape: a clean settle, the non-finite net and the
+    /// age watchdog all end here, and the caller then runs its
+    /// ordinary settled handling.
+    mutating func forceSettle() {
+        current = target
+        velocity = [0, 0, 0, 0]
     }
 
     public var frame: CGRect {

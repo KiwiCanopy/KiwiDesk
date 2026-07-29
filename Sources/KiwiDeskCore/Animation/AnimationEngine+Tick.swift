@@ -16,7 +16,31 @@ extension AnimationEngine {
             return
         }
         for (id, var animation) in perWindow {
-            let settled = animation.step(dt: dt)
+            var settled = animation.step(dt: dt)
+            if animation.takeNonFiniteNotice() {
+                onLog(
+                    "animation: \(id) held a non-finite frame, "
+                        + "snapped to its target"
+                )
+            }
+            // The settle watchdog (#611): an animation that never
+            // satisfies `settled` never leaves `animations`, and
+            // `onAllAnimationsEnded` only fires at zero — so one
+            // stuck window kills the signal for the session. It
+            // belongs here rather than in any consumer, because a
+            // consumer cannot rescue itself: its arming path is
+            // behind the same dead signal. Full argument, and what
+            // the bound is worth, in
+            // `.claude/rules/input-and-animation.md`.
+            if !settled, animation.isOverdue {
+                animation.forceSettle()
+                settled = true
+                onLog(
+                    "animation: \(id) did not settle in "
+                        + String(format: "%.1f", animation.age)
+                        + "s of motion, snapped to its target"
+                )
+            }
             if settled {
                 // Exact target, unrounded: layout output is
                 // the source of truth for the final frame.

@@ -84,7 +84,7 @@ struct ZOrderScheduleTests {
         )
         // Armed, deferred to the pan settle (not fired at once).
         #expect(core.pendingZOrderRestore)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(!core.pendingZOrderRestore)
     }
 
@@ -105,7 +105,7 @@ struct ZOrderScheduleTests {
             core.execute("swap", args: [.string("right")]).isSuccess
         )
         #expect(!core.pendingZOrderRestore)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("Stack promote arms the restore after its retile (#153)")
@@ -122,7 +122,7 @@ struct ZOrderScheduleTests {
         ) {
             core.state.apply(.windowMoved(id, frame))
         }
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.tiler.animation.activeCount == 0)
         // Promote a stack-zone window: the reorder's retile flies
         // it into the master zone, starting animations.
@@ -132,7 +132,7 @@ struct ZOrderScheduleTests {
         // (before the dispatcher retile) and was consumed, so the
         // post-settle restore never ran. Now it is still pending.
         #expect(core.pendingZOrderRestore)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(!core.pendingZOrderRestore)
     }
 
@@ -184,7 +184,7 @@ struct ZOrderScheduleTests {
             core.execute("swap", args: [.string("down")]).isSuccess
         )
         #expect(core.pendingZOrderRestore)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(!core.pendingZOrderRestore)
     }
 

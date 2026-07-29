@@ -44,7 +44,91 @@ editing here:
   focus raise, the z-order restore and the overlay re-sync for
   the rest of the session. Anything new that waits on that signal
   inherits the same exposure, so keep the integrator honest
-  rather than gating each consumer.
+  rather than gating each consumer — and read the #611 bullet
+  below, which is the net for whatever gets past it.
+- **Force-settle non-convergence rather than waiting it out
+  (#611).** The bullet above is the one *known* way to wedge the
+  settle signal; the watchdog in `tick` is the net under it, so
+  the next one — a pathological Lua-supplied spring, an
+  integrator change — costs one window a jump instead of three
+  subsystems for a session. Past `max(5s, min(12 × response, 60s))`
+  of motion an animation snaps to its target and leaves the engine
+  through `FrameAnimation.forceSettle`, the same exit a clean
+  settle and the non-finite net take. Keep it one recovery shape:
+  that is the shape already proven to release the signal.
+
+  Three things about it are load-bearing, each with its own
+  guard — and the inverse is guarded twice, because a watchdog
+  that fires on healthy motion is worse than none:
+  `healthyMotionNeverTrips` sweeps the real `animate` path, and
+  `slowestHealthySettleIsPinned` covers the same ground with no
+  `NSScreen` — the first returns vacuously on a headless host,
+  so the second is what keeps the inverse guarded there:
+  - **Both terms of the bound**
+    (`bothTermsOfTheBoundBind`). Not for the reason it is
+    tempting to give: the floor is *not* slack for a slow-AX
+    app, because a blocked app costs wall-clock and ages an
+    animation by at most one tick's worth. It is a margin
+    argument — each term is the thin one at the end the other
+    covers, so keeping both is what holds the worst case clear
+    of the slowest healthy settle. Neither term alone would fire
+    on today's measurements, so this is headroom against a
+    future change to the clamp, the mapping or the integrator
+    rather than a live fix. **The ratios are computed and
+    asserted by `slowestHealthySettleIsPinned`** — do not
+    transcribe them back into this file. A ceiling caps the
+    multiple, or a spring built with a large response opts out
+    of the watchdog entirely (`hugeResponseStillTrips`).
+  - **Age is simulated, never wall-clock**
+    (`ageIsSimulatedNotWallClock`). `step` accumulates
+    `Spring.integratedSpan(dt)`, so a stalled `DisplayLink`
+    ages an animation by what it moved rather than by how long
+    the display slept. That span deliberately does **not**
+    share `Spring.step`'s other refusal (an unusable
+    `maxStableStep`): such a spring integrates to a standstill
+    without settling, and ageing it anyway is the only reason
+    the watchdog can reach it
+    (`aFrozenSpringIsStillRescued`).
+  - **`retarget` restarts the clock only on a changed target**
+    (`retargetResetsAge`, `unchangedRetargetKeepsAgeing`). A
+    live make-room drag retargets its siblings for as long as
+    the user holds the mouse, so a new target must reset; a
+    retile loop re-issuing the *same* placement must not, or it
+    blinds the watchdog to the one wedge it could plausibly
+    meet in production.
+
+  Two known holes, both accepted rather than overlooked. A storm
+  of genuinely *different* targets defers the bound indefinitely
+  — indistinguishable from a long drag from inside the engine,
+  which sees one retarget and no history, and the first target a
+  storm stops on ages normally. Do not answer it with a second,
+  non-resetting accumulator: it cannot tell a storm from a long
+  drag either, so it only relocates the threshold and buys a
+  false snap during the interaction the reset exists to protect.
+  If it ever needs a real fix, that belongs at the retile path,
+  which can see retiles per unit time. And the
+  watchdog is only as live as the clock it rides: nothing ages
+  while a display's `DisplayLink` is stopped, so **never stop a
+  driver while animations are still resident on its display** —
+  that is the precondition the whole net rests on. Stated as an
+  obligation on purpose: "every teardown path drains first" is
+  true today and nothing keeps it true, so it is the caller's
+  job to hold, not a fact to rely on.
+
+  `DeadEndBump` is deliberately outside this net. It feeds no
+  global signal (`BorderBumpAnimator` keeps its own map), its
+  input space is closed — clamped impulse, constant target, a
+  hardcoded spring `SpringStabilityTests` already pins — and
+  `flushAll()` is a real, wired escape hatch. Do not widen the
+  engine's watchdog to cover it.
+
+  Report both nets through `AnimationEngine.onLog` (wired in
+  `KiwiCore+Bootstrap`, asserted end-to-end by
+  `engineLogReachesTheCore` — a seam that is declared and never
+  wired logs nothing in production while every unit test that
+  sets it by hand stays green). A rescue that fires silently
+  removes the symptom that made #599 findable and leaves only a
+  visible jump.
 - **A shrinking axis snaps to target on frame 1 unless the
   caller promised `BatchSizing.allSpringSized` (#593), and that
   promise is opt-in, never inferred.** The full argument — why
@@ -66,6 +150,14 @@ editing here:
   a structural shrink renders its target from frame 1 while the
   size springs keep travelling, so the spring is not a claim
   about the window until it is re-seated.
+- `AnimationEngine.cancelAll(snapToTargets:)` is a **test drain
+  primitive**; production has no global cancel by design (`stop()`
+  tears down differently on purpose, `displaysChanged()` covers
+  the per-display case, `cancel(window:)` the per-window one).
+  Read its doc comment before filing it as dead code, and if a
+  lifecycle event ever does want it, wire it deliberately and give
+  it a test — an untested escape hatch is discovered not to work
+  at exactly the moment it is needed.
 - Two env levers exist for device QA of this subsystem —
   `KIWIDESK_STRAND_LOG` (logs a window that did not land on its
   settled target, #47) and `KIWIDESK_NO_WS_TRACKING` (forces the

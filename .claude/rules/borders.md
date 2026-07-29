@@ -105,8 +105,13 @@ window moving?", and the per-window predicate (`syncFrame`,
   [input-and-animation.md](input-and-animation.md), which owns
   that mechanism. Note what this does *not* mean: ungating a
   consumer does not rescue it, because the arming path is behind
-  the same signal. The fix belongs in the engine, and the known
-  cause (#599) is fixed — the structural exposure is not.
+  the same signal. The fix belongs in the engine and is there:
+  #599 removed the known cause, and #611's watchdog force-settles
+  an animation that outlives its age bound rather than letting it
+  hold the count above zero for the session
+  (`AnimationSettleWatchdogTests`). Netted is not the same as
+  impossible, and the absorbing state is still the reason not to
+  use the count as a per-window proxy.
 
 This is scoped to using the count as a **proxy**. Waiting on it
 for a genuinely global precondition is correct and stays —

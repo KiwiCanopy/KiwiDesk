@@ -83,7 +83,7 @@ struct ScrollingDeferredRaiseTests {
         // pending, for the last target.
         #expect(core.activeSpace?.focused == WindowID(2))
         #expect(core.pendingFocusRaise == WindowID(2))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.pendingFocusRaise == nil)
         #expect(core.activeSpace?.focused == WindowID(2))
     }
@@ -99,7 +99,7 @@ struct ScrollingDeferredRaiseTests {
         // itself; a stale raise must not steal focus back.
         core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.activeSpace?.focused == WindowID(1))
     }
 
@@ -125,7 +125,7 @@ struct ScrollingDeferredRaiseTests {
         #expect(core.pendingFocusRaise == WindowID(3))
         #expect(core.activeSpace?.focused == WindowID(3))
         #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
@@ -148,7 +148,7 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("A real echo (not self-raised) still supersedes (#152)")
@@ -169,7 +169,7 @@ struct ScrollingDeferredRaiseTests {
         core.outstandingSelfRaises = []
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
@@ -187,7 +187,7 @@ struct ScrollingDeferredRaiseTests {
         )
         #expect(core.pendingFocusRaise == nil)
         #expect(core.activeSpace?.focused == WindowID(2))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("A non-animated focus move raises immediately")
@@ -211,7 +211,7 @@ struct ScrollingDeferredRaiseTests {
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
         #expect(core.pendingFocusRaise == nil)
         var focusEmits = 0
         core.bus.addSink { event, _ in
@@ -277,7 +277,7 @@ struct ScrollingDeferredRaiseTests {
         )
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(core.pendingFocusRaise == nil)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("Fire-time re-validation drops a stale target")
@@ -321,6 +321,6 @@ struct ScrollingDeferredRaiseTests {
         core.execute("focus", args: [.string("right")])
         #expect(core.pendingFocusRaise == nil)
         #expect(core.activeSpace?.focused == WindowID(2))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 }

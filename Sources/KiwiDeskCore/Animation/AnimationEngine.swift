@@ -51,9 +51,22 @@ public final class AnimationEngine {
     /// (the settle frame), with that target. The strand detector
     /// (#47 safety net) reads the window back after a grace and
     /// logs if the app didn't actually land there. Not fired on
-    /// cancel/teardown — only a clean settle has a target to check.
+    /// cancel/teardown — those have no target to check. A
+    /// force-settled animation (either net, #611) does fire it:
+    /// `apply` wrote the exact target, so the read-back is as
+    /// meaningful as after a clean settle.
     public var onWindowSettled: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
+
+    /// Log line consumer, wired to `KiwiCore.onLog` at bootstrap
+    /// like every other subsystem's. It exists for the two
+    /// force-settle nets (#611): both remove a window from a
+    /// wedged state, and a net that fires silently converts the
+    /// loud failure that made #599 findable into a quiet one —
+    /// leaving only a visible jump and no way to tell a rescue
+    /// from a retile. Unwired it is inert, so unit suites that
+    /// never set it see nothing.
+    public var onLog: @MainActor (String) -> Void = { _ in }
 
     /// Test seam: when false, `animate` applies the target
     /// frame synchronously instead of spring-animating it, so
