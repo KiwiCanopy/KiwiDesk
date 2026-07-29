@@ -78,6 +78,8 @@ struct AnimationSettleWatchdogTests {
     func wedgedAnimationReleasesTheSettleSignal() {
         let window = WindowID(7)
         let engine = AnimationEngine()
+        var log: [String] = []
+        engine.onLog = { log.append($0) }
         var ended = false
         var settledOn: [WindowID: CGRect] = [:]
         var animationEnded: [WindowID] = []
@@ -105,6 +107,13 @@ struct AnimationSettleWatchdogTests {
         // Long enough that no real motion could reach it, short
         // enough to be a blip rather than a dead session.
         #expect(seconds > 4 && seconds < 7, "fired at \(seconds)s")
+        // The rescue is only useful if it says it happened —
+        // input-and-animation.md writes that as an obligation
+        // ("report both nets through `AnimationEngine.onLog`"),
+        // and every other assertion here would hold on a silent
+        // watchdog.
+        #expect(log.count == 1, "\(log)")
+        #expect(log.first?.contains("window#7") == true, "\(log)")
     }
 
     @Test("Both terms of the age bound are load-bearing")
@@ -127,6 +136,8 @@ struct AnimationSettleWatchdogTests {
         ]
         for row in cases {
             let engine = AnimationEngine()
+            var log: [String] = []
+            engine.onLog = { log.append($0) }
             engine.animations[display] = [
                 WindowID(1): wedge(response: row.response)
             ]
@@ -136,6 +147,7 @@ struct AnimationSettleWatchdogTests {
                 seconds > row.low && seconds < row.high,
                 "response \(row.response)s fired at \(seconds)s"
             )
+            #expect(log.count == 1, "\(row.response): \(log)")
         }
     }
 
@@ -149,12 +161,15 @@ struct AnimationSettleWatchdogTests {
         // motivating case is a spring built directly, which is
         // exactly what this is.
         let engine = AnimationEngine()
+        var log: [String] = []
+        engine.onLog = { log.append($0) }
         engine.animations[display] = [
             WindowID(1): wedge(response: 1_000_000)
         ]
         let seconds = drain(engine)
         #expect(engine.activeCount == 0)
         #expect(seconds < 70, "fired at \(seconds)s")
+        #expect(log.count == 1, "\(log)")
     }
 
     @Test("No healthy duration trips it, at 30, 60 or 120 Hz")

@@ -137,6 +137,22 @@ a temp config dir, throwaway sockets; the service tests only parse
 `launchctl` strings. **Unit tests never need the running app**;
 its run state is irrelevant to them.
 
+**A run writes `KiwiDesk: …` lines to the unified log**, so a
+`log stream` during one shows test diagnostics that read exactly
+like the app's. Most come through `KiwiCore.onLog`, whose default
+has always been the syslog write; since #624 a subsystem
+constructed bare — `KeybindingManager(registrar:)`,
+`CrashRecovery(directory:)` — adds its own, because a seam
+defaults to `CoreLog.write` rather than to a no-op
+(`LogSeamDefaultTests`). That is the intended trade: a suite
+triggering a diagnostic path prints it instead of swallowing it,
+which is how the settle-watchdog fixtures came to assert on the
+line they were silently dropping. A suite that wants quiet
+assigns `onLog = { _ in }` on the instance it builds, and one
+that wants the coverage captures instead. Do not read a
+`keybinding conflict` or `unclean shutdown detected` line seen
+during a run as the app misbehaving.
+
 Run the full suite as two commands:
 
 ```bash
