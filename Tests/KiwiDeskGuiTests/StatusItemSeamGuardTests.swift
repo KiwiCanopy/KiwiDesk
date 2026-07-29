@@ -10,7 +10,7 @@ import Testing
 /// seam (`StatusItemHandle`) whose production default stays
 /// live while tests pass a per-file fake.
 ///
-/// Three pins:
+/// The pins, one per route:
 /// - a construction under `Tests/` must inject — the bare `()`
 ///   form (and its `.init` spelling) is banned outright, so a
 ///   future suite that forgets the fake fails here instead of
@@ -23,7 +23,10 @@ import Testing
 ///   controller, unnameable from tests even under
 ///   `@testable import`;
 /// - under `Sources/`, the token is named only by the file
-///   holding that wrapper.
+///   holding that wrapper;
+/// - and the seal itself is pinned — the wrapper's declaration
+///   must stay file-scoped `private`, or every claim above
+///   silently inverts while the token counts hold.
 ///
 /// The needle is the bare type token, never the qualified
 /// `.system` access: a 79-column wrap between type and member
