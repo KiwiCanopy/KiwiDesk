@@ -168,9 +168,13 @@
   /* Accents — the raw brand fill green is ~2.3:1 on this bg and
      fails AA, so text/link uses a darkened, purpose-built shade
      of the same hue instead (never the raw fill green as text).
-     Re-verified AA on every new surface above (4.95:1 min, on
+     #506c37 is the 50/50 midpoint of --kiwi-flesh and the forest
+     ink, and the one value the whole brand family uses for this
+     decision (see src/styles/theme.css, #635) — keep the two in
+     step rather than re-deriving a private near-neighbour here.
+     Re-verified AA on every new surface above (4.93:1 min, on
      --bg-0). */
-  --accent: #546b32;         /* AA on bg + .tint bands */
+  --accent: #506c37;         /* AA on bg + .tint bands */
   --accent-deep: var(--kiwi-flesh);
   --glow: rgba(141, 179, 84, 0.35);
 

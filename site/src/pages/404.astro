@@ -1,0 +1,205 @@
+---
+// KiwiDesk — branded 404, overriding Starlight's stock one (#635).
+//
+// Static hosting (Cloudflare Pages) serves this ONE page for every
+// unmatched path — /nope, /de/nope, /docs/nope alike — so it cannot
+// pick a locale from the URL. All three render together instead:
+// English leads, German and Japanese follow as compact lines, each
+// linking to its own home. That is why this route deliberately does
+// NOT carry Landing.astro's language-resolve script: that script
+// redirects a stored-locale visitor to /de/ or /ja/, which on a 404
+// URL would silently swallow the broken link and land them on a
+// homepage with nothing to explain why.
+//
+// The 4🥝4 motif (kiwi emoji as the zero) is the family signature
+// shared with kiwicanopy.com — the marketing-site face of the
+// brand. KiwiCV keeps its own compass NotFound on purpose.
+import logoMark from "../assets/brand/logo.svg";
+import en from "../i18n/en.json";
+import de from "../i18n/de.json";
+import ja from "../i18n/ja.json";
+import "../styles/landing.css";
+
+// Secondary locales, each with its own home path. English is the
+// lead block above them, so it is not in this list.
+const alts = [
+  { lang: "de", href: "/de/", t: de },
+  { lang: "ja", href: "/ja/", t: ja },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{en.notfound_title} · KiwiDesk</title>
+    <meta name="description" content={en.notfound_msg} />
+    {/* A 404 must never be indexed, and it carries no canonical:
+         every unmatched path renders this same body, so any
+         canonical we named would be a lie about one of them. */}
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#101d0b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* Anti-FOUC theme resolve, same `starlight-theme` key the docs
+         and the landing share, so a visitor's choice carries here
+         too. Mode/lang keys are irrelevant on this page. */}
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem("starlight-theme");
+          root.dataset.theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)")
+                  .matches
+                ? "dark"
+                : "light";
+        } catch (e) {
+          root.dataset.theme = "dark";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <main id="main-content" class="nf">
+      <a class="nf__brand" href="/" aria-label={en.nav_home_label}>
+        <img src={logoMark.src} width="32" height="32" alt=""
+          aria-hidden="true" />
+        <span>KiwiDesk</span>
+      </a>
+
+      {/* The glyph is decoration, not content: a screen reader
+           would read the emoji's name mid-number. The heading
+           below carries the meaning. */}
+      <p class="nf__code" aria-hidden="true">4🥝4</p>
+      <h1 class="nf__title">{en.notfound_title}</h1>
+      <p class="nf__msg">{en.notfound_msg}</p>
+      <a class="nf__home" href="/">← {en.notfound_home}</a>
+
+      <div class="nf__alts">
+        {
+          alts.map((a) => (
+            <p lang={a.lang}>
+              {a.t.notfound_msg}{" "}
+              <a href={a.href}>{a.t.notfound_home}</a>
+            </p>
+          ))
+        }
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .nf {
+    position: relative;
+    z-index: 1;
+    min-height: 100svh;
+    max-width: 44rem;
+    margin-inline: auto;
+    padding: 1.5rem clamp(1.1rem, 4vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nf__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 2.5rem;
+    color: var(--text);
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+
+  .nf__code {
+    margin: 0;
+    font-size: clamp(3.5rem, 14vw, 6rem);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .nf__title {
+    margin: 1rem 0 0;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    letter-spacing: -0.02em;
+  }
+
+  .nf__msg {
+    margin: 0.75rem 0 0;
+    max-width: 34rem;
+    color: var(--text-dim);
+  }
+
+  /* Primary link outranks the secondary-locale ones: ink text with
+     a thick accent underline in light mode, plain accent green on
+     the dark surface. --accent is already the text-safe role in
+     both themes (landing.css), so no literal is needed here. */
+  .nf__home {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  .nf__home:hover {
+    text-decoration-thickness: 3px;
+  }
+
+  :root[data-theme="dark"] .nf__home {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  :root[data-theme="dark"] .nf__home:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .nf__alts {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    /* Dim via text color, not block opacity, so the links inside
+       keep their full AA contrast. */
+    color: var(--text-dim);
+  }
+
+  .nf__alts p {
+    margin: 0;
+  }
+
+  .nf__alts a {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: currentColor;
+  }
+
+  .nf__alts a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  :root[data-theme="dark"] .nf__alts a {
+    text-decoration: none;
+  }
+
+  :root[data-theme="dark"] .nf__alts a:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

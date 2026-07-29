@@ -56,3 +56,41 @@ jobs:
       # site working-directory is fine (../scripts reaches it).
       - name: Check locale manifests
         run: python3 ../scripts/extract-keys --site --check
+
+      # The light-mode AA green-text literal is ONE decision with two
+      # homes here — theme.css (Starlight/docs) and landing.css (the
+      # landing, guide and 404) — because neither stylesheet imports
+      # the other. #635 found them independently derived and one
+      # notch apart. This reads both values out of the files and
+      # compares them, so no third copy of the number lives in this
+      # workflow and a one-sided edit fails the gate.
+      #
+      # What it cannot see: the same value is shared with
+      # kiwicanopy.com and KiwiCV. Keeping THAT in step is a review
+      # obligation (.claude/rules/site.md), not something CI can check.
+      - name: Check the AA green-text literal agrees
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          def light(path, prop):
+              src = pathlib.Path(path).read_text()
+              head, sep, rest = src.partition(':root[data-theme="light"]')
+              if not sep:
+                  sys.exit(f"{path}: no light-theme token block")
+              block = rest.split("}", 1)[0]
+              m = re.search(prop + r":\s*(#[0-9a-fA-F]{6})", block)
+              if not m:
+                  sys.exit(f"{path}: no {prop} hex in the light block")
+              return m.group(1).lower()
+
+          a = light("src/styles/theme.css", "--sl-color-accent")
+          b = light("src/styles/landing.css", "--accent")
+          print(f"theme.css {a}  landing.css {b}")
+          if a != b:
+              sys.exit(
+                  "the light-mode AA green-text literal disagrees "
+                  "across the two stylesheets (#635) — they are one "
+                  "decision and must carry one value"
+              )
+          PY

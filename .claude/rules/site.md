@@ -38,6 +38,39 @@ older Node resolves the wrong platform binaries, so a later
 `nvm use` alone still fails on a missing native binding — delete
 `node_modules` and reinstall if that happens.
 
+## The 404 is a user page, so withdraw Starlight's (#635)
+
+`src/pages/404.astro` and `disable404Route: true` in
+`astro.config.mjs` move together. A user page already outranks
+Starlight's injected route, so the override *appears* to work with
+the option missing — but Astro then logs a duplicate-route
+collision it says "will result in a hard error in following
+versions", i.e. the site builds until a minor bump and then does
+not.
+
+Static hosting serves that one page for **every** unmatched path,
+including `/de/*` and `/ja/*`, so it cannot pick a locale from the
+URL: all three locales render together instead. Which is also why
+it must not carry `Landing.astro`'s language-resolve script — that
+redirects a stored-locale visitor to `/de/` or `/ja/`, which on a
+404 URL swallows the broken link and lands them on a homepage with
+nothing to explain why.
+
+## One AA green-text literal, two homes (#635)
+
+The light-mode accent-as-text green is one decision. `theme.css`
+declares it for the docs and `landing.css` for the landing, guide
+and 404, because neither stylesheet imports the other — change
+both together. They were independently derived and one notch apart
+until #635. The `Check the AA green-text literal agrees` step in
+`.github/workflows/site.yml` compares the two files' own values,
+so a one-sided edit fails the gate.
+
+What that step cannot see: the same value is shared with
+kiwicanopy.com and KiwiCV, which is the point of pinning it —
+re-deriving a private near-neighbour here splits the brand family
+silently. Keeping *that* in step is a review obligation.
+
 ## Template comments ship to visitors (#557)
 
 An `.astro` **template** comment written `<!-- ... -->` is emitted

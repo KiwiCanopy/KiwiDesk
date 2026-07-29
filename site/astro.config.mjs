@@ -49,6 +49,13 @@ export default defineConfig({
         Footer: "./src/components/Footer.astro",
       },
       customCss: ["./src/styles/theme.css"],
+      // src/pages/404.astro owns the 404 (#635). A user page already
+      // outranks an injected route, so Starlight's stock one loses
+      // either way — but leaving it injected logs a duplicate-route
+      // collision that Astro warns "will result in a hard error in
+      // following versions". Withdrawing it here is the difference
+      // between a working override and a future build failure.
+      disable404Route: true,
       // Docs live under /docs/* (repo docs/ is symlinked into
       // src/content/docs/docs/). The landing page at / is a
       // custom Astro page, not Starlight.
