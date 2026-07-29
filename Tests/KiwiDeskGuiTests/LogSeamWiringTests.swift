@@ -29,20 +29,32 @@ import Testing
 /// is inside the net on arrival, and no list here is touched to
 /// keep it there.
 ///
-/// **Three limits, and they do not all fail the same way** —
-/// which is why they are written out rather than summarised:
+/// **What a source scan structurally cannot do**, and which of
+/// it still binds here. The first three were open limits until
+/// #625; `LogSeamProbeTests` closes them by reading final runtime
+/// state instead of text, and they are kept written out because
+/// they are the reason that suite exists — delete them and the
+/// next author sees two guards over one invariant and removes
+/// the wrong one:
 ///
-/// - It is **type**-keyed, not instance-keyed. Two instances of
-///   one seam-owning type with only one of them wired passes
-///   green. Nothing has that shape today (`borders` and
-///   `stickyMarks` are separate types and only `BorderManager`
-///   declares a seam), but the shape is plausible, so this one
-///   fails **open**.
-/// - It proves the seam is **assigned**, not that the assignment
-///   reaches the sink: `socket.onLog = { _ in }` in bootstrap
-///   passes. Also **open**, and no cheap scan does better —
-///   pinning the closure body would red on any refactor of a
-///   line that is correct.
+/// - **Type**-keyed, not instance-keyed. Two instances of one
+///   seam-owning type with only one wired passes this scan.
+/// - **Assigned**, not routed: `socket.onLog = { _ in }` in
+///   bootstrap satisfies it completely, and no cheap scan does
+///   better — pinning the closure body would red on any refactor
+///   of a line that is correct.
+/// - **Assigned**, not assigned *exactly once*. This counts
+///   assignments in text and has no notion of last-writer-wins,
+///   so a seam wired correctly in the group and then clobbered
+///   by a stale duplicate elsewhere passes. That shape arrives
+///   by silent auto-merge rather than by anything a reviewer
+///   reads.
+///
+/// What this suite still owns, and why it is not redundant: it
+/// sees a seam on a type that `makeTestCore` never instantiates,
+/// which no runtime walk can reach, and it names the *rule*
+/// (wired in bootstrap, in the group) rather than the outcome.
+///
 /// - Everything the resolver cannot work out fails **shut**, as
 ///   a red naming what it could not resolve: an unrecognised
 ///   assignment shape, a receiver whose type is ambiguous or

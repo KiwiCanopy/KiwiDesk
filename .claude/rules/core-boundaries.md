@@ -42,11 +42,18 @@ itself when a fifth is added.
   nothing** — a seam whose default is a no-op lets its subsystem
   compile, ship, run and drop every line it logs, with no red and
   no symptom beyond a diagnostic that was never going to
-  appear. `LogSeamWiringTests` is the guard, its `allowed` map
-  is the exemption list, and its docstring carries the argument.
+  appear. Two guards, reading different things:
+  `LogSeamWiringTests` scans source for the wiring and its
+  `allowed` map is the exemption list; `LogSeamProbeTests` sends
+  a line through every seam it finds on a live `KiwiCore` and
+  requires it out of the sink, which is what catches a seam that
+  is assigned to a body dropping the line, or clobbered by a
+  later assignment (#625). Each docstring carries its own
+  argument.
   Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
-  after the AX grant) is invisible to that guard, and `onLog`
-  needs no permission to be useful.
+  after the AX grant) is invisible to both — the runtime probe
+  builds its `KiwiCore` and reads it, never running the app's
+  later lifecycle — and `onLog` needs no permission to be useful.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it
