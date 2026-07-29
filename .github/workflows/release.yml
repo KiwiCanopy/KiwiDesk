@@ -181,15 +181,39 @@ jobs:
           # start. By name, a tag deleted and re-pushed after
           # Verify passed (or a "Re-run failed jobs" of this job
           # alone, to which job outputs are replayed) would build
-          # a tree that never met the gate. Everything below is
-          # tag-safe: `gh` reaches the release by $TAG through
-          # the API, and the stamp reads HEAD from this clone.
+          # a tree that never met the gate. Everything below
+          # reads the tag only as a NAME for the API — and the
+          # one call that could recreate the ref, `gh release
+          # create`, pins --target to this clone's HEAD.
           ref: ${{ needs.verify.outputs.sha }}
           # Shallow is enough here: the tag-on-main assertion
           # that needed origin/main (fetch-depth: 0) lives in
           # Verify now, and the release notes read nothing from
           # this clone — `--generate-notes` is computed
           # server-side by the API.
+
+      # The pin above fails OPEN if its wiring ever breaks: a
+      # renamed step id or output key evaluates to an empty
+      # string with Verify still green, and checkout treats an
+      # empty `ref` as unset — falling back to the DEFAULT
+      # branch's tip on a workflow_dispatch run, after which
+      # every later check self-agrees on the wrong tree (the
+      # stamp and the binary check both read this clone's HEAD).
+      # So prove the checkout resolved the pin, not a fallback.
+      - name: Assert the vetted commit is checked out
+        env:
+          VETTED: ${{ needs.verify.outputs.sha }}
+        run: |
+          if [ -z "$VETTED" ]; then
+            echo "::error::verify's sha output is empty — the" \
+                 "audit step's wiring broke"
+            exit 1
+          fi
+          if [ "$(git rev-parse HEAD)" != "$VETTED" ]; then
+            echo "::error::checked out $(git rev-parse HEAD)" \
+                 "but verify vetted $VETTED"
+            exit 1
+          fi
 
       # No `|| /Applications/Xcode.app` fallback, deliberately
       # diverging from ci.yml. There the fallback is right: a test
@@ -512,9 +536,17 @@ jobs:
             done <<< "$assets"
             gh release upload "$TAG" "$ARCHIVE" --clobber
           else
+            # --target: if the tag was deleted mid-run (a human
+            # aborting a bad release), this call would otherwise
+            # MINT it server-side at the default branch's
+            # current tip — an ungated, unstamped commit, with
+            # the vetted artifact attached under it. Pinned, a
+            # minted tag lands on the vetted commit; with the
+            # tag intact the flag is ignored.
             gh release create "$TAG" "$ARCHIVE" \
               --draft \
               --prerelease \
               --title "KiwiDesk $VERSION" \
+              --target "$(git rev-parse HEAD)" \
               --generate-notes
           fi

@@ -137,9 +137,9 @@ never met the script's (#487; branch protection cannot see tags,
 so the workflow is the only gate such a tag passes). Both copies
 are pinned to the skill by `VerifyGateParityTests`, which derives
 the command list from `SKILL.md` — extend that suite before
-shipping a further copy. (ci.yml runs the same commands as the
-merge gate; drift there weakens a PR check, not a release, so it
-sits outside the suite's ship-grade scope.)
+shipping a further copy. (Drift in ci.yml's copy weakens a PR
+check, not a release, so it sits outside the suite's ship-grade
+scope.)
 
 The `verify` job carries one named exemption, which that suite
 also encodes: no `swift build -c release`. The obligation it

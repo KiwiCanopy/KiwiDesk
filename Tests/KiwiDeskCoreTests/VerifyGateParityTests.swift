@@ -105,6 +105,20 @@ struct VerifyGateParityTests {
             lines[start...].firstIndex(of: "  release:"),
             "release.yml has no `release:` job after `verify:`"
         )
+        // A job key sits at exactly 2-space indent. One between
+        // the boundaries would mean the slice absorbed a job
+        // that is not `verify` — its commands would satisfy the
+        // assertions below while the release job no longer
+        // `needs:` them.
+        let absorbed = lines[(start + 1)..<end].filter { line in
+            line.hasPrefix("  ") && !line.hasPrefix("   ")
+                && !line.hasPrefix("  #")
+                && line.hasSuffix(":")
+        }
+        #expect(
+            absorbed.isEmpty,
+            "verify slice absorbed another job: \(absorbed)"
+        )
         let slice = lines[start..<end].map {
             $0.trimmingCharacters(in: .whitespaces)
         }
