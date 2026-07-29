@@ -184,6 +184,25 @@ struct SettingsView: View {
             // wrappers would buy nothing and drift.
             ScrollViewReader { proxy in
                 detail
+                    // The panes' top gutter, spent here rather
+                    // than as padding inside each one: a content
+                    // margin moves what "top of the viewport"
+                    // means, so `scrollTo(anchor: .top)` lands a
+                    // revealed card with the same gutter above it
+                    // that a pane's first card has at rest —
+                    // where padding would only have pushed the
+                    // resting content down and left the scrolled
+                    // card just as flush.
+                    //
+                    // One call site, not ten: the margin
+                    // propagates to every scroll view below,
+                    // which is the same reach the one
+                    // `ScrollViewReader` above already relies on.
+                    .contentMargins(
+                        .top,
+                        SettingsMetrics.paneInset,
+                        for: .scrollContent
+                    )
                     .environment(\.settingsFlash, model.nav.flash)
                     .environment(
                         \.settingsRevealTarget,

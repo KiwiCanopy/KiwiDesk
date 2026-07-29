@@ -74,7 +74,7 @@ struct ShortcutsSection: View {
                     )
                     advancedDrawer
                 }
-                .padding(16)
+                .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
                 .environment(
                     \.keybindingOverrideBase,
                     model.overrideBaseRows(mode: selected)

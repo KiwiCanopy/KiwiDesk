@@ -36,7 +36,7 @@ struct BarsSection: View {
                     SpaceBarEditorGroup(model: model)
                 }
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 

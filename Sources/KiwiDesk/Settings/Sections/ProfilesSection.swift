@@ -36,7 +36,7 @@ struct ProfilesSection: View {
                 .default,
                 value: model.profileSummaries.isEmpty
             )
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 

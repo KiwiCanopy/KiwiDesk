@@ -21,7 +21,7 @@ struct BehaviorSection: View {
                 animationsSection
                 quitSection
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 

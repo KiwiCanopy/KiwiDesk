@@ -28,7 +28,7 @@ struct MonitorsSection: View {
                     advancedSection
                 }
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 

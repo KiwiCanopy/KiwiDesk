@@ -51,7 +51,7 @@ struct LayoutDefaultsSection: View {
                 tabStrip
                 editor
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
         // Land on the profile's most-used mode, then leave the tab
         // alone (mirrors `ShortcutsSection.ensureSelection`).

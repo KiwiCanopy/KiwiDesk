@@ -22,7 +22,7 @@ struct AppearanceSection: View {
                 FocusBorderEditor(model: model)
                 StickyMarkEditor(model: model)
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 }

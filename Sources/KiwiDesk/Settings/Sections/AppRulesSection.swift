@@ -50,7 +50,7 @@ struct AppRulesSection: View {
                     addRow
                 }
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 

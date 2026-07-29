@@ -59,7 +59,7 @@ struct SpacesSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 spacesSection
             }
-            .padding(16)
+            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
             .coordinateSpace(name: Self.listSpace)
             .onPreferenceChange(SpaceRowFrames.self) {
                 rowFrames = $0

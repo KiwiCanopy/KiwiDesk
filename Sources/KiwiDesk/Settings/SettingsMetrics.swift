@@ -33,6 +33,31 @@ enum SettingsMetrics {
     /// every language regardless.
     static let labelColumn: CGFloat = 210
 
+    /// The gutter around a destination pane's scrolling content.
+    /// Horizontal and bottom are ordinary padding on the content;
+    /// the TOP is spent as the scroll viewport's content margin
+    /// instead (`SettingsView.detailPane`), which is what gives a
+    /// revealed card the same gutter above it that a pane's first
+    /// card has at rest.
+    ///
+    /// `scrollTo(anchor: .top)` aligns the target's top edge with
+    /// the viewport's, so before the margin existed any card but
+    /// a pane's first landed flush — and the reveal wash, which
+    /// bleeds 4 pt past its content, had its rounded top corners
+    /// clipped into a flat edge by the scroll view's own bounds.
+    /// Spending the gutter as a margin rather than as padding is
+    /// what fixes both.
+    ///
+    /// ONE number for both roles, and that is the design, not a
+    /// shortcut: a content margin moves what "top of the
+    /// viewport" means, so it cannot give a revealed card a
+    /// different gutter from a resting one. Tried 30 on device to
+    /// give reveals more room — it reads as too airy at rest,
+    /// because it moves every pane too. The equality is the point:
+    /// a revealed card should look like a pane you scrolled to the
+    /// top yourself, not like a bespoke state.
+    static let paneInset: CGFloat = 16
+
     /// `OverrideChrome`'s leading padding and checkbox
     /// spacing — consumed by the chrome itself, so retuning
     /// the chrome moves `overrideLabelColumn` in lockstep.
