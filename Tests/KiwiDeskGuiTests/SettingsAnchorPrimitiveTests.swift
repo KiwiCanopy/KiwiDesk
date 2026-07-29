@@ -194,6 +194,11 @@ struct SettingsAnchorPrimitiveTests {
     func containerHalvesAreConfined() throws {
         for needle in [
             ".searchAnchorCard(", ".searchFlashHeader(",
+            // The hoisted scroll half (#610): a bare scroll anchor
+            // with its wash on the drawer label a level down. Just
+            // as much a scroll-without-a-local-wash at a rogue call
+            // site as the card half, so it earns the same seal.
+            ".searchScrollAnchor(",
         ] {
             let hits = try occurrences(
                 of: needle,
@@ -211,6 +216,67 @@ struct SettingsAnchorPrimitiveTests {
                 )
             )
         }
+    }
+
+    /// #610's hoisted pair is split across two views: an inline
+    /// drawer sets `scrollHoisted` and drops its scroll id, while
+    /// its enclosing section lists it in `revealTargets` and mounts
+    /// the `searchScrollAnchor` marker. Neither half is any use
+    /// alone — a flag without a marker scrolls nowhere, a marker
+    /// without the flag mounts a second view carrying the drawer's
+    /// id and `scrollTo` picks arbitrarily (the exact undefined-id
+    /// harm `alternatelyMounted` guards on the other side). The
+    /// types cannot tie the two (different views, different files),
+    /// so a count does: one listed reveal target per hoisted
+    /// drawer, and vice versa.
+    @Test("every hoisted drawer pairs with a section marker")
+    func hoistedDrawersPairWithMarkers() throws {
+        var flags = 0
+        var targets = 0
+        for file in try SourceScan.swiftSources(under: guiDir) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            flags += source.occurrences(of: "scrollHoisted: true")
+            // The definition file spells `revealTargets:` in its
+            // stored property and inits; only call sites pass a
+            // populated list, so it alone carries the real count.
+            if file.lastPathComponent != "SettingsSection.swift" {
+                targets += revealTargetCount(in: source)
+            }
+        }
+        #expect(
+            flags == targets && flags >= 4,
+            Comment(
+                rawValue:
+                    "scrollHoisted: true ×\(flags) but "
+                    + "\(targets) reveal target(s) listed — each "
+                    + "hoisted inline drawer needs exactly one "
+                    + "section revealTargets entry (#610), and the "
+                    + "four shipped ones must not silently drop"
+            )
+        )
+    }
+
+    /// Sums the entries across every `revealTargets: [ … ]` list
+    /// in one source (single-line lists, comma-separated).
+    private func revealTargetCount(in source: String) -> Int {
+        var total = 0
+        var rest = Substring(source)
+        while let hit = rest.range(of: "revealTargets:") {
+            let after = rest[hit.upperBound...]
+            guard
+                let open = after.firstIndex(of: "["),
+                let close = after[open...].firstIndex(of: "]")
+            else { break }
+            let inner = after[after.index(after: open)..<close]
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !inner.isEmpty {
+                total += inner.split(separator: ",").count
+            }
+            rest = after[close...]
+        }
+        return total
     }
 
     /// The whole-pair primitive must stay reached-for: at zero

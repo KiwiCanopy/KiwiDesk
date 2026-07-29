@@ -95,7 +95,8 @@ struct GlobalAppBarGroup: View {
         }
         SettingsSection(
             SettingsCatalog.bars.appBarColorsCard,
-            help: anyBarShown ? nil : noBarHelp
+            help: anyBarShown ? nil : noBarHelp,
+            revealTargets: [SettingsCatalog.bars.advancedColors.control]
         ) {
             AppBarColorGrid { inlineColors }
                 .modifier(
@@ -119,7 +120,8 @@ struct GlobalAppBarGroup: View {
             SettingsDisclosure(
                 SettingsCatalog.bars.advancedColors,
                 chrome: .inline(font: .subheadline),
-                isExpanded: $advancedColorsExpanded
+                isExpanded: $advancedColorsExpanded,
+                scrollHoisted: true
             ) {
                 AppBarColorGrid { advancedColors }
                     .padding(.top, 8)

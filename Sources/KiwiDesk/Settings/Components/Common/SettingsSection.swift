@@ -44,6 +44,14 @@ struct SettingsSection<Content: View>: View {
     let caption: String?
     let subsection: Bool
     let help: String?
+    /// Inline drawers whose scroll id is hoisted to this section's
+    /// top (#610). Each mounts a zero-size `searchScrollAnchor`
+    /// marker above the heading, so revealing that drawer scrolls
+    /// the section — heading first — into view rather than the
+    /// bare drawer label. The drawer keeps its own wash; this is
+    /// only its scroll half. Pass a drawer's `.control`; empty for
+    /// a section with no inline drawer to lift.
+    private let revealTargets: [SettingsControl]
     @ViewBuilder let content: Content
 
     /// Computed-title init: renders identically but is NOT a
@@ -66,6 +74,7 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
+        self.revealTargets = []
         self.content = content()
     }
 
@@ -79,6 +88,7 @@ struct SettingsSection<Content: View>: View {
         caption: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
+        revealTargets: [SettingsControl] = [],
         @ViewBuilder content: () -> Content
     ) {
         self.title = control.text
@@ -87,6 +97,7 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
+        self.revealTargets = revealTargets
         self.content = content()
     }
 
@@ -118,6 +129,21 @@ struct SettingsSection<Content: View>: View {
                     )
             )
         }
+        // The hoisted scroll markers (#610), pinned to the top
+        // edge ABOVE the heading and zero-size, so a reveal of an
+        // inline drawer inside `content` lands the section's top —
+        // heading first — while the drawer's own wash paints
+        // below. Non-interactive; they only give `scrollTo` an id.
+        .overlay(alignment: .top) { revealMarkers }
+    }
+
+    @ViewBuilder private var revealMarkers: some View {
+        ForEach(revealTargets, id: \.id) { target in
+            Color.clear
+                .frame(width: 0, height: 0)
+                .searchScrollAnchor(target)
+        }
+        .allowsHitTesting(false)
     }
 
     /// A catalog-declared section is a search anchor by existing

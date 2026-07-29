@@ -26,7 +26,10 @@ struct GapsEditor: View {
     }
 
     var body: some View {
-        SettingsSection(SettingsCatalog.appearance.gapsCard) {
+        SettingsSection(
+            SettingsCatalog.appearance.gapsCard,
+            revealTargets: [perEdge.control, perAxis.control]
+        ) {
             GapsDiagram(outer: outer, inner: inner)
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
@@ -35,7 +38,8 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perEdge,
-                isExpanded: outerDisclosure
+                isExpanded: outerDisclosure,
+                scrollHoisted: true
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
@@ -69,7 +73,8 @@ struct GapsEditor: View {
             )
             SettingsDisclosure(
                 perAxis,
-                isExpanded: innerDisclosure
+                isExpanded: innerDisclosure,
+                scrollHoisted: true
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(

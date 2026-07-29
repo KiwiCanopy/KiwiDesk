@@ -206,4 +206,30 @@ extension View {
     ) -> some View {
         searchFlash(control.id)
     }
+
+    /// A **hoisted scroll target** for a drawer whose scroll id is
+    /// lifted to the top of its enclosing section (#610).
+    ///
+    /// An `.inline` `SettingsDisclosure` lives inside a section
+    /// card, below that section's heading. Anchoring its own body
+    /// makes `scrollTo(anchor: .top)` land the bare drawer label
+    /// at the viewport top and scroll the heading that names it
+    /// off screen — the disembodiment the #277 top-alignment
+    /// ruling exists to prevent. So the drawer keeps its wash
+    /// (`searchFlashHeader`, on its own label) but gives up its
+    /// scroll id, and its enclosing `SettingsSection` mounts this
+    /// zero-size marker at its top instead. `scrollTo` then aligns
+    /// the section's top edge — heading first — and the drawer
+    /// label still washes below it.
+    ///
+    /// Scroll-only by construction, so the pair is split across
+    /// two views (this marker scrolls, the drawer label washes)
+    /// over one control — confined to the container shapes by
+    /// `SettingsAnchorPrimitiveTests`, the same seal the paired
+    /// halves carry.
+    func searchScrollAnchor(
+        _ control: SettingsControl
+    ) -> some View {
+        searchAnchor(control.id)
+    }
 }
