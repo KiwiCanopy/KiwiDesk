@@ -80,7 +80,11 @@ const alts = [
   .nf {
     position: relative;
     z-index: 1;
-    min-height: 100vh;
+    /* `svh` with no `vh` fallback on purpose: lightningcss prunes the
+       earlier declaration as dead (no browserslist target is set), so
+       a fallback pair ships as `svh` alone and the fallback is a
+       comforting no-op. An engine too old for `svh` loses vertical
+       centering, not visibility. */
     min-height: 100svh;
     max-width: 44rem;
     margin-inline: auto;

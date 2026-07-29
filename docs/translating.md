@@ -349,14 +349,27 @@ each language so it surfaces as missing to translate.
 
 ### Adding a whole new site language
 
-Alongside the manifest and the per-locale routes under
-`site/src/pages/<locale>/`, one file needs the locale listed **by
-hand**: `site/src/pages/404.astro`. Static hosting serves that
-single page for every unmatched path, so it cannot pick a locale
-from the URL and instead renders them all together, from an `alts`
-array. It is the site's only hand-enumerated locale list — every
-other route is one file per locale — so a language added
-everywhere else still ships a 404 that silently omits itself.
+Routes are one file per locale, but a dozen places inside the
+components **hand-enumerate** the locale set, and a language added
+everywhere else still ships with those omitting it — a language
+switcher missing an option, a stored-locale redirect that cannot
+reach the new path, an `og:locale` naming the wrong one, and a 404
+that leaves the new language out of its own list.
+
+There is no single list to update, so find them mechanically:
+
+```bash
+grep -rn '"ja"\|/ja/\|ja_JP\|(de|ja)' site/src
+```
+
+Every hit is a decision to extend. The shapes to expect are locale
+→ path maps (`{ en: "/", de: "/de/", ja: "/ja/" }`), display-name
+and `og:locale` maps, `en|de|ja` predicates and route regexes, the
+`Lang` union in `site/src/i18n/legal.ts`, the language-switcher
+markup in `Landing.astro` and `Guide.astro`, and the `alts` array
+in `site/src/pages/404.astro` — that last one because static
+hosting serves one 404 for every unmatched path, so it cannot pick
+a locale from the URL and renders them all together instead.
 
 ### Key naming keeps the file structured
 

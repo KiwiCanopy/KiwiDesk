@@ -93,10 +93,11 @@ redirects a stored-locale visitor to `/de/` or `/ja/`, which on a
 nothing to explain why.
 
 Consequence for **adding a locale**: `404.astro`'s `alts` array is
-the site's only hand-enumerated locale list (every other route is
-one file per locale), so a new locale must be added there or its
-404 silently omits itself. `docs/translating.md`'s add-a-locale
-checklist carries that step.
+one of a dozen places in `site/src` that hand-enumerate the locale
+set, so a new locale must be added there or its 404 omits itself.
+`docs/translating.md`'s add-a-locale section owns the full list and
+gives a grep for finding them rather than an enumeration to keep in
+step.
 
 ## The light-mode green is derived, not chosen (#635)
 
@@ -109,11 +110,15 @@ notch apart until #635.
 
 `scripts/check-site-tokens.py` recomputes the midpoint from the
 tree and holds both files to it, plus AA as text on the light bg —
-so it catches a **both**-sided drift, which comparing the two files
-to each other would not, and which is exactly the cross-repo case:
-the same value is shared with kiwicanopy.com and KiwiCV, where CI
-here cannot reach. Pinning the derivation rather than the output is
-what makes the rule portable to those repos.
+so it catches a drift applied to both files at once, which comparing
+them only to each other would not.
+
+It pins the *relationship*, though, and both endpoints are in-tree:
+retune the fill green and re-derive everything downstream here, and
+it passes. The same value is shared with kiwicanopy.com and KiwiCV,
+so **an edit to the fill green or the forest ink still needs the
+cross-repo check by hand** — that half is a review obligation, not
+something CI here can reach.
 
 Those two stylesheets are deliberately independent — neither
 imports the other. If a future change unifies them behind a shared

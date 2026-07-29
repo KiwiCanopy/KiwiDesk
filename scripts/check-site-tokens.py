@@ -9,10 +9,17 @@ be one more copy to drift.
    the brand's fill green and the forest ink, in BOTH stylesheets.
    `theme.css` serves the Starlight docs and `landing.css` every
    other surface; neither imports the other, so the value has two
-   homes. Comparing them to each other would miss a *both*-sided
-   drift, which is exactly the cross-repo failure mode (the same
-   value is shared with kiwicanopy.com and KiwiCV) — so the
-   midpoint is computed and both sides are checked against it.
+   homes. Comparing them only to each other would miss a drift
+   applied to both at once, so the midpoint is computed and both
+   sides are checked against it.
+
+   What this does NOT cover: it pins the *relationship*, and both
+   endpoints are in-tree and mutable. Retune the fill green, then
+   dutifully re-derive everything downstream here but not in
+   kiwicanopy.com / KiwiCV, and this passes while the brand family
+   splits — which is the most likely way it actually happens. So
+   **any edit to the fill green or the forest ink still needs the
+   cross-repo check by hand.**
 2. That green clears WCAG AA (4.5:1) as text on the light page
    background, also read out of the stylesheet. Agreement alone
    would happily pass two files that both name the raw fill green,
@@ -49,53 +56,90 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parent.parent
 STYLES = REPO / "site" / "src" / "styles"
 
-# The light-theme token block selector shared by both stylesheets.
-LIGHT = ':root[data-theme="light"]'
+# Any selector that targets the light theme, in any spelling that
+# ships: double or single quotes, an unquoted attribute value, a
+# tag/pseudo prefix, or CSS nesting (`:root { &[data-theme="light"]
+# { … } }`). Matching one literal spelling is a vacuous pass waiting
+# to happen — every variant here is valid CSS that lightningcss
+# emits happily, and no stylelint config normalizes them.
+LIGHT = r"[^{}]*\[data-theme\s*=\s*['\"]?light['\"]?\s*\][^{}]*\{"
+
+# A bare `:root { … }` block — the un-themed token layer. Excludes
+# `:root[…]` so the light/dark blocks are not mistaken for it.
+BARE_ROOT = r":root\s*\{"
 
 
 def fail(msg: str) -> None:
     sys.exit(f"check-site-tokens: {msg}")
 
 
-def hex_of(text: str, prop: str) -> str | None:
-    """First `prop: #rrggbb` in `text`, lower-cased."""
-    m = re.search(re.escape(prop) + r":\s*(#[0-9a-fA-F]{6})", text)
+def declared(block: str, prop: str) -> str | None:
+    """`prop`'s value in `block`, or None if it does not declare it.
+
+    Returns the raw value text, hex or not. Telling "not declared"
+    apart from "declared as something other than a hex" is what
+    keeps a `var()` or 3-digit override loud instead of invisible.
+    """
+    m = re.search(re.escape(prop) + r"\s*:\s*([^;}]+)", block)
+    return m.group(1).strip() if m else None
+
+
+def as_hex(value: str) -> str | None:
+    m = re.fullmatch(r"(#[0-9a-fA-F]{6})", value.split()[0] if value else "")
     return m.group(1).lower() if m else None
 
 
-def light_blocks(path: pathlib.Path) -> list[str]:
-    """Every light-theme token block in `path`, in source order."""
-    parts = re.split(re.escape(LIGHT), path.read_text())
-    if len(parts) < 2:
-        fail(f"{path.name}: no {LIGHT} block")
-    return [p.split("}", 1)[0] for p in parts[1:]]
+def blocks(path: pathlib.Path, selector: str, label: str) -> list[str]:
+    """Every `selector` block in `path`, in source order."""
+    found = [
+        path.read_text()[m.end() :].split("}", 1)[0]
+        for m in re.finditer(selector, path.read_text())
+    ]
+    if not found:
+        fail(f"{path.name}: no {label} block")
+    return found
+
+
+def resolve(path: pathlib.Path, prop: str, selector: str, label: str) -> str:
+    """`prop`'s cascade-winning value across every `selector` block.
+
+    Resolved per property, not per block. A stylesheet may carry more
+    than one such block: reading only the first would let an appended
+    override ship while this check kept reading the original, and
+    reading only the last would let a one-token override hide every
+    other token's real value. Both are vacuous passes.
+
+    A block that declares `prop` as anything but a 6-digit hex is a
+    hard error, not a skip — skipping it would fall back to the
+    previous block's stale value, which is the same vacuous pass by
+    another route.
+    """
+    winner = None
+    for block in blocks(path, selector, label):
+        value = declared(block, prop)
+        if value is None:
+            continue
+        found = as_hex(value)
+        if found is None:
+            fail(
+                f"{path.name}: a {label} block declares `{prop}: {value}`, "
+                "which is not a 6-digit hex. This check compares hex "
+                "values, so it cannot follow that — resolve the colour "
+                "to a literal here, or update this script to understand "
+                "the new form."
+            )
+        winner = found
+    if winner is None:
+        fail(f"{path.name}: no `{prop}` declaration in any {label} block")
+    return winner
 
 
 def root_hex(path: pathlib.Path, prop: str) -> str:
-    value = hex_of(path.read_text(), prop)
-    if value is None:
-        fail(f"{path.name}: no `{prop}` hex")
-    return value
+    return resolve(path, prop, BARE_ROOT, "bare `:root`")
 
 
 def light_hex(path: pathlib.Path, prop: str) -> str:
-    """`prop`'s cascade-winning light value: the LAST block declaring it.
-
-    Resolved per property, not per block. A stylesheet may carry
-    more than one light block, and reading only the first would let
-    an appended override ship while this check kept reading the
-    original — a vacuous pass. Reading only the *last* block is
-    equally wrong the other way: a small appended override declaring
-    one token would hide every other token's real value.
-    """
-    found = [
-        value
-        for block in light_blocks(path)
-        if (value := hex_of(block, prop)) is not None
-    ]
-    if not found:
-        fail(f"{path.name}: no `{prop}` hex in any light block")
-    return found[-1]
+    return resolve(path, prop, LIGHT, "light-theme")
 
 
 def midpoint(a: str, b: str) -> str:
@@ -186,15 +230,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dist",
-        help="path to the built site (enables the 404 artifact check)",
+        required=True,
+        help="path to the built site (for the 404 artifact check)",
     )
     args = parser.parse_args()
 
     check_accent()
-    if args.dist:
-        check_branded_404(pathlib.Path(args.dist).resolve())
-    else:
-        print("no --dist given: skipped the built-404 check")
+    check_branded_404(pathlib.Path(args.dist).resolve())
 
 
 if __name__ == "__main__":
