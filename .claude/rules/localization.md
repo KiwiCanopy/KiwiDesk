@@ -157,16 +157,39 @@ corpus staying dirty, passing only while a bug was live.
 
 ## Core names, the GUI narrates (#96)
 
-`L()` is `@MainActor` and much of Core is deliberately actor-free,
-so a user-facing condition detected in Core returns **structure** —
+A user-facing condition detected in Core returns **structure** —
 a case, an enum, a value type — and the GUI renders the sentence
 at its own boundary (`Conflict.Target.systemShortcut(…)` →
-`ConflictText`). Never a pre-rendered English string across that
-seam: it cannot be translated where it was written, and routing
-`L()` into actor-free code to fix that would make the manager's
-isolation a special case to buy one file's convenience.
+`ConflictText`, `ConfigIssue.Kind` → `ConfigIssueText`). Never a
+pre-rendered user-facing string across that seam. The reason is
+**ownership**, not actor isolation: copy authored in Core cannot
+be re-rendered when the user switches language, and an English
+literal there never reaches `extract-keys`, so it never becomes a
+key and no locale can translate it. (Some of Core genuinely is
+actor-free and so genuinely cannot call `L()` — `StandardProfiles`,
+`KeybindingConflicts`. But `KiwiCore` is `@MainActor` and *could*;
+that is why "cannot reach `L()`" is the wrong test.)
 
-Core currently holds **no** `L()` call site outside
-`Localization/` — keep it that way. CLI/IPC error strings are the
-deliberate exception and stay English: they are a machine
-contract, not UI copy.
+**The rule is about the seam, not about file paths.** Until #601
+this said "Core holds no `L()` call site outside
+`Localization/`", which was false — Core draws some of its own
+UI (the Space Bar, the sticky mark) and that copy crosses no
+seam, so `L()` is right there. Worse, the literal reading
+pointed at the wrong defect: the
+four `ConfigIssue` messages that actually violated the seam never
+used `L()` at all. They were hardcoded English, so
+`extract-keys` could not see them, they never entered a catalog,
+and **no locale could translate them however complete it was** —
+which a ban phrased around `L()` would never have caught.
+`CoreLocalizationBoundaryTests` pins the file list. It covers
+only the `L()`-shaped half; a sentence built *without* `L()` is
+invisible to any string scan, so that half is prevented by
+carrying structure and pinned per family by a renderer test —
+`ConfigIssueTextTests`, and `PresetSummaryCoverageTests` after
+the same defect turned up in the Presets list.
+
+CLI/IPC error strings are the deliberate exception and stay
+English: they are a machine contract, not UI copy. A Lua
+interpreter message carried as an associated value is the same
+class — `ConfigIssue.Kind.luaError` keeps it verbatim and
+localizes only the frame around it.

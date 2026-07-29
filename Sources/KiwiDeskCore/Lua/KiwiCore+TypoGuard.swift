@@ -80,9 +80,9 @@ extension KiwiCore {
     private func reportUnknownCall(table: String, key: String) {
         let qualified =
             table == "KiwiDesk" ? key : "\(table).\(key)"
+        let suggestion = APIReference.suggestion(for: qualified)
         let hint =
-            APIReference.suggestion(for: qualified)
-            .map { " — did you mean '\($0)'?" } ?? ""
+            suggestion.map { " — did you mean '\($0)'?" } ?? ""
         onLog(
             "unknown \(table) function '\(key)'\(hint)"
                 + " — see KiwiDesk.help()"
@@ -90,7 +90,10 @@ extension KiwiCore {
         guard typoIssues != nil else { return }
         let issue = ConfigIssue(
             source: "init.lua",
-            message: "unknown call '\(qualified)'\(hint)"
+            kind: .unknownCall(
+                name: qualified,
+                suggestion: suggestion
+            )
         )
         if typoIssues?.contains(issue) == false {
             typoIssues?.append(issue)

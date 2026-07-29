@@ -160,7 +160,7 @@ struct ConfigIssuesView: View {
                 Text(issue.source)
                     .font(.system(.callout, design: .monospaced))
                     .bold()
-                Text(issue.message)
+                Text(ConfigIssueText.message(for: issue.kind))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)

@@ -95,17 +95,15 @@ public enum StarterLadder {
 
     /// The ladder packaged as a `StandardLayout` for a display
     /// count — the single shape shared by the fixed 1/2/3-screen
-    /// presets (which pass a `summary`) and the first-run seed
+    /// presets and the first-run seed
     /// (which composes and applies it through `applyStandard`, so
     /// the seed rides the one canonical apply path rather than
     /// re-implementing it).
     public static func standardLayout(
-        displayCount: Int,
-        summary: String = ""
+        displayCount: Int
     ) -> StandardLayout {
         StandardLayout(
             name: name,
-            summary: summary,
             screenCount: max(1, displayCount),
             spaceCount: spaceCount(displayCount: displayCount),
             spaceModes: spaceModes(displayCount: displayCount),

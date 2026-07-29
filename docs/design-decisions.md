@@ -1558,12 +1558,20 @@ persisted data or breaking import classification (issue #9
 follow-up: the original literal-routing sweep covered SwiftUI
 view literals but missed catalog-defined strings).
 
-**Core names it; the GUI says it (#96).** `L()` is `@MainActor` —
-it drives SwiftUI and publishes — while the code that *detects*
-user-facing conditions is deliberately actor-free so it stays
-unit-testable off the main actor (§2.6). So Core never returns a
+**Core names it; the GUI says it (#96).** Core never returns a
 rendered sentence: it returns the structure, and the GUI
-localizes at its own boundary. `KeybindingConflicts.conflict`
+localizes at its own boundary. The reason is **ownership**, and
+stating it as actor isolation is a trap worth naming, because the
+codebase falsifies that version — `L()` is `@MainActor`, but so
+is `KiwiCore`, which called it happily until #601. Some detection
+genuinely is actor-free (`KeybindingConflicts`, `StandardProfiles`)
+and so genuinely cannot; that is a consequence, not the rule.
+What binds everywhere is that copy owned by Core cannot be
+re-rendered when the user switches language, and an English
+literal there never reaches `extract-keys` — so it never becomes
+a key and no locale can translate it, however complete. That is
+the failure #601 found in `ConfigIssue` and the preset summaries,
+and a rule phrased around `L()` would not have caught either. `KeybindingConflicts.conflict`
 returns a `Conflict` whose target names a `SystemShortcut`
 **case**, and `ConflictText` / `SettingsModel+ConflictMessages`
 render the row tooltip and the banner from it at two different

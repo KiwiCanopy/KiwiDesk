@@ -22,7 +22,7 @@ extension KiwiCore {
             issues.append(
                 ConfigIssue(
                     source: "init.lua",
-                    message: "failed to create the Lua VM"
+                    kind: .luaVMUnavailable
                 )
             )
             if guiConfigStore.exists,
@@ -81,7 +81,7 @@ extension KiwiCore {
                 issues.append(
                     ConfigIssue(
                         source: "init.lua",
-                        message: "\(error)"
+                        kind: .luaError("\(error)")
                     )
                 )
             }
@@ -147,8 +147,7 @@ extension KiwiCore {
     private var unreadableSidecarIssue: ConfigIssue {
         ConfigIssue(
             source: "gui.json",
-            message: "unreadable — rules and "
-                + "shortcuts were not applied"
+            kind: .guiConfigUnreadable
         )
     }
 

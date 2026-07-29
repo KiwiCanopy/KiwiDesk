@@ -10,25 +10,58 @@ import Foundation
 /// (`profileConfigIssues()` / `configLoadIssues`) is a
 /// follow-up candidate, not a promise this file already keeps.
 public struct ConfigIssue: Sendable, Equatable, Identifiable {
+    /// What went wrong, as STRUCTURE rather than a sentence
+    /// (#96/#601). Core names the condition and the GUI renders
+    /// it — `ConfigIssueText`, mirroring `Conflict` →
+    /// `ConflictText`. Not because this code cannot reach `L()`
+    /// (`KiwiCore` is `@MainActor` and did call it), but because
+    /// copy owned by Core cannot be re-rendered on a language
+    /// switch.
+    ///
+    /// Before this was an enum every case was a hardcoded English
+    /// `String` built in Core, which `scripts/extract-keys` could
+    /// not see: four of the five never entered a catalog, so no
+    /// locale could translate them however complete it was.
+    public enum Kind: Sendable, Equatable {
+        /// A profile JSON that no longer decodes (#246).
+        case profileUnreadable
+        /// The Lua VM could not be created at all.
+        case luaVMUnavailable
+        /// `init.lua` raised. The payload is the interpreter's
+        /// own message and stays English by the same rule as
+        /// CLI/IPC errors — it is machine output, not UI copy,
+        /// and translating it would break searching for it.
+        case luaError(String)
+        /// `gui.json` exists but no longer decodes, so its rules
+        /// and shortcuts were not applied.
+        case guiConfigUnreadable
+        /// A `KiwiDesk.*` call the API does not have (#39), with
+        /// the nearest match when one was found.
+        case unknownCall(name: String, suggestion: String?)
+    }
+
     /// The offending file, as the user knows it
     /// (`init.lua`, `gui.json`, `<profile>.json`).
     public let source: String
-    public let message: String
+    public let kind: Kind
     /// The profile this issue belongs to, when it is an
     /// unreadable profile — nil for load-scoped issues
     /// (init.lua/gui.json). Lets the panel offer a per-profile
     /// remedy (Delete / Reveal) only where one applies (#246).
     public let profileName: String?
 
-    public var id: String { source + "|" + message }
+    /// Stable across locales, unlike the rendered sentence: the
+    /// old id was `source + message`, so switching language would
+    /// have re-keyed every row.
+    public var id: String { source + "|" + String(describing: kind) }
 
     public init(
         source: String,
-        message: String,
+        kind: Kind,
         profileName: String? = nil
     ) {
         self.source = source
-        self.message = message
+        self.kind = kind
         self.profileName = profileName
     }
 }
@@ -72,11 +105,7 @@ extension KiwiCore {
             onLog("profile '\(name)' is invalid: \(error)")
             return ConfigIssue(
                 source: "\(name).json",
-                message: L(
-                    "config_issues.profile_unreadable",
-                    "Couldn't be loaded — it was saved by a "
-                        + "different version or edited by hand."
-                ),
+                kind: .profileUnreadable,
                 profileName: name
             )
         }

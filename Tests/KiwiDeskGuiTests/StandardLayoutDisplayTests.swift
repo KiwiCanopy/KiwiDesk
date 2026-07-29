@@ -33,14 +33,19 @@ struct StandardLayoutDisplayTests {
         // Explicit English (not System default) → canonical.
         LocalizationManager.shared.select("en")
         #expect(layout.displayName == layout.name)
-        #expect(layout.displaySummary == layout.summary)
+        // `summary` left Core in #601 — the GUI owns preset copy
+        // now, so the English rendering is the catalog's, not a
+        // Core-held duplicate to compare against. Capture it and
+        // require the locale to move it.
+        let englishSummary = layout.displaySummary
+        #expect(!englishSummary.isEmpty)
         // German → localized away from the canonical English,
         // while the stable identity never changes.
         LocalizationManager.shared.select("de")
         defer { reset() }
         #expect(layout.name == "Developer")
         #expect(layout.displayName != layout.name)
-        #expect(layout.displaySummary != layout.summary)
+        #expect(layout.displaySummary != englishSummary)
     }
 
     @Test("standardDisplayName localizes a bare name")
