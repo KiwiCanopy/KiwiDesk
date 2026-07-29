@@ -46,6 +46,12 @@ extension KiwiCore {
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.animationsDidSettle()
         }
+        // Both force-settle nets report here (#611) — an
+        // unobservable rescue is how a loud failure becomes a
+        // quiet one.
+        tiler.animation.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
         tiler.animation.reduceMotion = {
             NSWorkspace.shared
                 .accessibilityDisplayShouldReduceMotion

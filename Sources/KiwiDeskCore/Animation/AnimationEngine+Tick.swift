@@ -16,7 +16,37 @@ extension AnimationEngine {
             return
         }
         for (id, var animation) in perWindow {
-            let settled = animation.step(dt: dt)
+            var settled = animation.step(dt: dt)
+            if animation.takeRescueNotice() {
+                onLog(
+                    "animation: \(id) held a non-finite frame, "
+                        + "snapped to its target"
+                )
+            }
+            // The settle watchdog (#611). An animation that never
+            // satisfies `settled` never leaves `animations`, so
+            // `activeCount` never returns to zero and
+            // `onAllAnimationsEnded` stops firing for the rest of
+            // the session — taking the deferred focus raise, the
+            // z-order restore and the overlay re-sync with it.
+            // #599 removed the one known way to get there; this is
+            // the net under it, so any future non-convergence (a
+            // pathological Lua-supplied spring, the next
+            // integrator change) costs one window a jump instead
+            // of three subsystems for a session.
+            //
+            // It lives in the engine rather than in each consumer
+            // because a consumer cannot rescue itself: its arming
+            // path is behind the same dead signal.
+            if !settled, animation.isOverdue {
+                animation.forceSettle()
+                settled = true
+                onLog(
+                    "animation: \(id) did not settle in "
+                        + String(format: "%.1f", animation.age)
+                        + "s of motion, snapped to its target"
+                )
+            }
             if settled {
                 // Exact target, unrounded: layout output is
                 // the source of truth for the final frame.

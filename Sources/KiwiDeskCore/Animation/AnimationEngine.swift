@@ -52,6 +52,16 @@ public final class AnimationEngine {
     public var onWindowSettled: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
+    /// Log line consumer, wired to `KiwiCore.onLog` at bootstrap
+    /// like every other subsystem's. It exists for the two
+    /// force-settle nets (#611): both remove a window from a
+    /// wedged state, and a net that fires silently converts the
+    /// loud failure that made #599 findable into a quiet one —
+    /// leaving only a visible jump and no way to tell a rescue
+    /// from a retile. Unwired it is inert, so unit suites that
+    /// never set it see nothing.
+    public var onLog: @MainActor (String) -> Void = { _ in }
+
     /// Test seam: when false, `animate` applies the target
     /// frame synchronously instead of spring-animating it, so
     /// unit tests get deterministic placement without driving

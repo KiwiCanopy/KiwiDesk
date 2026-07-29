@@ -44,7 +44,45 @@ editing here:
   focus raise, the z-order restore and the overlay re-sync for
   the rest of the session. Anything new that waits on that signal
   inherits the same exposure, so keep the integrator honest
-  rather than gating each consumer.
+  rather than gating each consumer — and read the next bullet,
+  which is the net for whatever gets past it.
+- **Force-settle non-convergence rather than waiting it out
+  (#611).** The bullet above is the one *known* way to wedge the
+  settle signal; the watchdog in `tick` is the net under it, so
+  the next one — a pathological Lua-supplied spring, an
+  integrator change — costs one window a jump instead of three
+  subsystems for a session. Past `max(5s, 12 × response)` of
+  motion an animation snaps to its target and leaves the engine
+  through `FrameAnimation.forceSettle`, the same exit a clean
+  settle and the non-finite net take. Keep it one recovery shape:
+  that is the shape already proven to release the signal. Two
+  things about it are load-bearing, and
+  `AnimationSettleWatchdogTests` guards both — including the
+  inverse, because a watchdog that fires on healthy motion is
+  worse than none:
+  - **Both terms of the bound.** The multiple alone fires at
+    0.84 s for a 50 ms duration, inside the lag a slow-AX app
+    legitimately shows; the flat floor alone leaves 1000 ms
+    motion — which comes to rest around 2.8 s — under 2×
+    headroom.
+  - **Age is simulated, never wall-clock.** `step` accumulates
+    `Spring.integratedSpan(dt)`, so a stalled `DisplayLink`
+    (display sleep) ages an animation by what it moved rather
+    than by how long the display slept, and `retarget` resets it
+    — a live make-room drag retargets its siblings for as long
+    as the user holds the mouse.
+
+  Report both nets through `AnimationEngine.onLog` (wired in
+  `KiwiCore+Bootstrap`). A rescue that fires silently removes the
+  symptom that made #599 findable and leaves only a visible jump.
+- `AnimationEngine.cancelAll(snapToTargets:)` is a **test drain
+  primitive**; production has no global cancel by design (`stop()`
+  tears down differently on purpose, `displaysChanged()` covers
+  the per-display case, `cancel(window:)` the per-window one).
+  Read its doc comment before filing it as dead code, and if a
+  lifecycle event ever does want it, wire it deliberately and give
+  it a test — an untested escape hatch is discovered not to work
+  at exactly the moment it is needed.
 - Two env levers exist for device QA of this subsystem —
   `KIWIDESK_STRAND_LOG` (logs a window that did not land on its
   settled target, #47) and `KIWIDESK_NO_WS_TRACKING` (forces the

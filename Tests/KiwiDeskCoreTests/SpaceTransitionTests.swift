@@ -67,7 +67,7 @@ struct SpaceTransitionTests {
                     corner: .bottomRight
                 )
         )
-        engine.animation.cancelAll()
+        engine.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("Instant park lets a slide to the same corner finish")
@@ -97,7 +97,7 @@ struct SpaceTransitionTests {
         #expect(
             engine.animation.isAnimating(window: WindowID(1))
         )
-        engine.animation.cancelAll()
+        engine.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("Instant park to another corner cancels the slide")
@@ -196,6 +196,6 @@ struct SpaceSwitchPolicyTests {
                 window: WindowID(2)
             )
         )
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 }

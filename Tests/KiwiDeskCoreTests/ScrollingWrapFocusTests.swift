@@ -144,7 +144,7 @@ struct ScrollingWrapFocusTests {
         )
         #expect(core.activeSpace?.focused == WindowID(1))
         #expect(core.pendingFocusRaise == WindowID(1))
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("Wrapping backward raises immediately (forward pan)")
@@ -162,7 +162,7 @@ struct ScrollingWrapFocusTests {
         )
         #expect(core.activeSpace?.focused == WindowID(3))
         #expect(core.pendingFocusRaise == nil)
-        core.tiler.animation.cancelAll()
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("With the toggle off, ends still stop")
