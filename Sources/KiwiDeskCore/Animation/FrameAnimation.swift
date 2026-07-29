@@ -33,22 +33,21 @@ public struct FrameAnimation: Sendable {
     /// tempting to give.** The floor is *not* slack for a slow-AX
     /// app: `age` counts simulated motion (see below), so a
     /// blocked app costs wall-clock and ages an animation by at
-    /// most one tick's worth. Measured against the worst travel
-    /// across the 50–1000 ms clamp at 30/60/120 Hz, each term
-    /// covers the end where the other runs thin —
-    /// `slowestHealthySettleIsPinned` keeps these honest:
+    /// most one tick's worth.
     ///
-    /// | duration | slowest settle | floor | multiple |
-    /// |---|---|---|---|
-    /// | 50 ms | 0.20 s | 25× | 4.2× |
-    /// | 1000 ms | 2.80 s | **1.8×** | 6.0× |
+    /// The real argument is a margin one. Each term is the thin
+    /// one at the end the other covers — the multiple at the fast
+    /// end, the flat floor at the slow end — so keeping both is
+    /// what holds the worst case well clear of the slowest healthy
+    /// settle. Neither term *alone* would fire on today's
+    /// measurements, so this buys headroom against a future change
+    /// to the duration clamp, the `× 1.4` mapping or the
+    /// integrator, rather than fixing a live defect.
     ///
-    /// So the multiple is the term that holds the slow end, and
-    /// the floor buys back the fast end's 4.2× — the thinnest
-    /// margin either term has, and the one a future change to the
-    /// duration clamp, the `× 1.4` mapping or the integrator would
-    /// eat first. `AnimationSettleWatchdogTests` pins both terms
-    /// and the inverse.
+    /// The ratios that argument rests on are computed and asserted
+    /// by `slowestHealthySettleIsPinned`, not restated here: a
+    /// number transcribed into prose drifts (#511), and this one
+    /// would have been transcribed into three files.
     ///
     /// The ceiling exists because the multiple scales with a
     /// caller-supplied response, and `Spring.init` clamps that
@@ -100,11 +99,14 @@ public struct FrameAnimation: Sendable {
         // than none.
         //
         // Only on a *changed* target, though. A retile loop that
-        // re-issues the same placement would otherwise reset the
+        // re-issues an identical rect would otherwise reset the
         // clock forever and blind the watchdog to the one wedge it
         // could plausibly meet in production — an echo/retile
         // feedback loop, which is far more reachable than the
-        // pathological spring the bound is written against.
+        // pathological spring the bound is written against. The
+        // comparison is exact, so a loop whose rect wobbles by a
+        // point (an app-enforced minimum bouncing the placement)
+        // still resets; see the accepted hole in the rule file.
         //
         // A storm of genuinely *different* targets still defers
         // the bound indefinitely, and that is an accepted hole
@@ -115,6 +117,14 @@ public struct FrameAnimation: Sendable {
             age = 0
         }
         target = next
+        // Outside the branch deliberately, though it is journey
+        // state too. Rebasing it on an identical target is the
+        // pre-existing behaviour of the `.midSlide` grow policy's
+        // halfway yardstick (#45/#47), which has no coverage of
+        // its own; changing it here would be an unrelated,
+        // untested change to the size channel. The shipped
+        // `.throttledSmooth` never reads `pastHalfway`, so this
+        // is inert today.
         initialDistance = Self.distance(current, target)
     }
 
@@ -146,14 +156,14 @@ public struct FrameAnimation: Sendable {
     /// drain `takeNonFiniteNotice()` after each call — the notice
     /// is raised here and reported by whoever is driving.
     public mutating func step(dt: Double) -> Bool {
-        // The interval the integrator would accept, so a refused
-        // one ages nothing. Deliberately NOT the same predicate
-        // `Spring.step` applies: that also refuses when the
-        // spring's own `maxStableStep` is unusable, and such a
-        // spring integrates to a standstill. Ageing it anyway is
-        // what lets the watchdog rescue it — sharing one predicate
-        // here would hand that case straight back to the wedge
-        // (`aFrozenSpringIsStillRescued` pins it).
+        // How much simulated time this interval represents — a
+        // property of `dt` alone. `Spring.step` separately asks
+        // whether the spring can integrate at all, and a spring
+        // that cannot (an unusable `maxStableStep`) stands still
+        // without ever settling. Age must count elapsed simulated
+        // time either way; that is what makes it a watchdog rather
+        // than a progress meter, and it is the only reason such a
+        // spring is ever rescued (`aFrozenSpringIsStillRescued`).
         age += Spring.integratedSpan(dt)
         var settled = true
         for i in 0..<4 {
@@ -163,23 +173,17 @@ public struct FrameAnimation: Sendable {
                 target: target[i],
                 dt: dt
             )
-            // Backstop under the substepping (#599): if a
-            // component ever stops being finite it can never come
-            // back — `abs(inf - target)` is never within epsilon,
-            // so the animation would run forever and take the
-            // whole settle signal with it. Force it home instead.
-            // A visible jump beats a permanently wedged engine.
-            // With the substepping above, a finite input can no
-            // longer produce a non-finite output at any `dt`, so
-            // the live trigger is a non-finite START — a garbage
-            // AX read — not the integrator. Check there first if
-            // this ever fires; the engine logs it (#611), so
-            // "there was no symptom" is no longer the answer. A
-            // non-finite TARGET is a different matter and is
-            // refused upstream, in `AnimationEngine.animate`,
-            // because this recovery cannot help there — it would
-            // assign the NaN target onto `current` and hand a NaN
-            // rect to AX.
+            // Backstop under the substepping (#599): a component
+            // that stops being finite can never come back, since
+            // `abs(inf - target)` is never within epsilon — so
+            // force it home rather than let it run forever. With
+            // the substepping in place a finite input cannot
+            // produce a non-finite output, so the live trigger is
+            // a non-finite START (a garbage AX read); check there
+            // first if this fires, and the engine logs it (#611)
+            // so there will be a symptom to check. A non-finite
+            // TARGET is refused upstream in `animate` instead —
+            // this recovery would hand the NaN straight to AX.
             if !current[i].isFinite || !velocity[i].isFinite {
                 current[i] = target[i]
                 velocity[i] = 0
@@ -211,6 +215,16 @@ public struct FrameAnimation: Sendable {
     /// though the animation keeps running for many more ticks.
     /// Named for that net specifically: the age watchdog is the
     /// driver's own decision and needs no notice from here.
+    ///
+    /// A flag rather than a richer `step` return because the net
+    /// repairs in place — after `step` there is nothing left to
+    /// observe, so a caller cannot derive this by inspection, and
+    /// a pre-step check would only see a non-finite *entry*
+    /// (today's sole live trigger, but not the one a future
+    /// integrator change would produce). It stays a flag while
+    /// there is exactly **one** production caller draining it on
+    /// the next line; a second caller is the trigger to fold it
+    /// into `step`'s result instead.
     mutating func takeNonFiniteNotice() -> Bool {
         defer { pendingRescueNotice = false }
         return pendingRescueNotice

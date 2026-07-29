@@ -60,6 +60,14 @@ public struct Spring: Sendable, Equatable {
         // crashing it: never settling, never leaving the engine,
         // the #599 wedge through another door. Degrade to the
         // default instead. `init` is public, so this is reachable.
+        // `dampingFraction` is deliberately left unclamped. It can
+        // reach the same standstill (it drives `damping`, and an
+        // infinite one zeroes `maxStableStep`), but that case is
+        // covered by the settle watchdog rather than refused here
+        // — and leaving the vector open is what keeps
+        // `aFrozenSpringIsStillRescued` a reachable test. Do not
+        // "finish the job" by clamping it; that deletes the only
+        // way to exercise the rescue.
         let clamped = response.isFinite ? max(response, 0.01) : 0.35
         let omega = 2 * .pi / clamped
         self.response = clamped
@@ -90,13 +98,14 @@ public struct Spring: Sendable, Equatable {
     /// hands over one enormous `dt`, and an animation must age by
     /// what it moved, not by how long the display slept.
     ///
-    /// It refuses only the *interval*, on purpose. `step` refuses
-    /// on one more ground — an unusable `maxStableStep`, which a
-    /// caller-built spring can produce — and a spring in that
-    /// state integrates to a standstill without ever settling.
-    /// Keeping that ground out of here is what lets its animation
-    /// still age, and so still be rescued; do not fold the two
-    /// predicates together to make them look symmetric.
+    /// It answers a different question from `step`'s own guard,
+    /// which is why it refuses only the *interval*. This one asks
+    /// how much simulated time a `dt` represents; `step` asks
+    /// whether this spring can integrate at all. A spring that
+    /// cannot (an unusable `maxStableStep`, which a caller-built
+    /// spring can produce) stands still without ever settling, and
+    /// its animation must still age or nothing will ever rescue
+    /// it — see `aFrozenSpringIsStillRescued`.
     static func integratedSpan(_ dt: Double) -> Double {
         guard dt.isFinite, dt > 0 else { return 0 }
         return min(dt, maxIntegratedStep)

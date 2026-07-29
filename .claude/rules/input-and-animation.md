@@ -58,22 +58,27 @@ editing here:
   that is the shape already proven to release the signal.
 
   Three things about it are load-bearing, each with its own
-  guard — and the inverse is guarded too
-  (`healthyMotionNeverTrips`), because a watchdog that fires on
-  healthy motion is worse than none:
+  guard — and the inverse is guarded twice, because a watchdog
+  that fires on healthy motion is worse than none:
+  `healthyMotionNeverTrips` sweeps the real `animate` path, and
+  `slowestHealthySettleIsPinned` covers the same ground with no
+  `NSScreen` — the first returns vacuously on a headless host,
+  so the second is what keeps the inverse guarded there:
   - **Both terms of the bound**
     (`bothTermsOfTheBoundBind`). Not for the reason it is
     tempting to give: the floor is *not* slack for a slow-AX
     app, because a blocked app costs wall-clock and ages an
-    animation by at most one tick's worth. Measured against the
-    worst travel at 30/60/120 Hz
-    (`slowestHealthySettleIsPinned`), 50 ms settles in 0.20 s
-    and 1000 ms in 2.80 s — so the multiple holds the slow end
-    (6.0× there, where the floor has only 1.8×) and the floor
-    buys back the fast end's 4.2×, the thinnest margin either
-    term has. A ceiling caps the multiple, or a spring built
-    with a large response opts out of the watchdog entirely
-    (`hugeResponseStillTrips`).
+    animation by at most one tick's worth. It is a margin
+    argument — each term is the thin one at the end the other
+    covers, so keeping both is what holds the worst case clear
+    of the slowest healthy settle. Neither term alone would fire
+    on today's measurements, so this is headroom against a
+    future change to the clamp, the mapping or the integrator
+    rather than a live fix. **The ratios are computed and
+    asserted by `slowestHealthySettleIsPinned`** — do not
+    transcribe them back into this file. A ceiling caps the
+    multiple, or a spring built with a large response opts out
+    of the watchdog entirely (`hugeResponseStillTrips`).
   - **Age is simulated, never wall-clock**
     (`ageIsSimulatedNotWallClock`). `step` accumulates
     `Spring.integratedSpan(dt)`, so a stalled `DisplayLink`
@@ -95,12 +100,20 @@ editing here:
   Two known holes, both accepted rather than overlooked. A storm
   of genuinely *different* targets defers the bound indefinitely
   — indistinguishable from a long drag from inside the engine,
-  and the first target a storm stops on ages normally. And the
+  which sees one retarget and no history, and the first target a
+  storm stops on ages normally. Do not answer it with a second,
+  non-resetting accumulator: it cannot tell a storm from a long
+  drag either, so it only relocates the threshold and buys a
+  false snap during the interaction the reset exists to protect.
+  If it ever needs a real fix, that belongs at the retile path,
+  which can see retiles per unit time. And the
   watchdog is only as live as the clock it rides: nothing ages
   while a display's `DisplayLink` is stopped, so **never stop a
   driver while animations are still resident on its display** —
-  every teardown path drains first, and that is the precondition
-  the whole net rests on.
+  that is the precondition the whole net rests on. Stated as an
+  obligation on purpose: "every teardown path drains first" is
+  true today and nothing keeps it true, so it is the caller's
+  job to hold, not a fact to rely on.
 
   `DeadEndBump` is deliberately outside this net. It feeds no
   global signal (`BorderBumpAnimator` keeps its own map), its

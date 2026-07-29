@@ -196,28 +196,26 @@ struct AnimationSettleWatchdogTests {
         }
     }
 
-    @Test("The margin the bound was chosen against still holds")
+    @Test("The bound's margin over healthy motion still holds")
     func slowestHealthySettleIsPinned() {
-        // `FrameAnimation`'s bound comment argues from two
-        // measured numbers, and prose that restates a number
-        // drifts (#511) — so measure them here and let the
-        // comment cite this test. Travel is deliberately wider
-        // than the fixture above: a two-display move is the
-        // slowest real settle, and it is what sets the margin.
+        // The prose in `FrameAnimation` and the rule file argues
+        // from RATIOS — which term is thin at which end. A number
+        // that is restated rather than computed drifts (#511), and
+        // a ratio restated in three places drifts three ways, so
+        // the ratios are asserted here and both prose sites cite
+        // this test instead of the digits.
+        //
+        // Travel is deliberately wider than the fixture above: a
+        // two-display move is the slowest real settle, and it is
+        // what sets every margin below. Deterministic and
+        // host-independent (no `NSScreen`, pure float).
         let far = CGRect(x: 15360, y: 2160, width: 1920, height: 1080)
-        // Two-sided on purpose. A ceiling alone reds a broken
-        // margin, which is the safety property — but the settle
-        // could also *shrink* (a ζ change, a new mapping) and
-        // leave "0.20 s" and "2.80 s" quietly wrong in two files
-        // while this stayed green. That is the drift the test was
-        // added to stop, so bound it from below too. Deterministic
-        // and host-independent (no `NSScreen`, pure float), so a
-        // tight window is staleness pressure, not flake risk.
-        for (durationMS, low, high) in [
-            (50, 0.15, 0.30), (1000, 2.6, 3.2),
-        ] {
+        var floorOnly: [Int: Double] = [:]
+        var multipleOnly: [Int: Double] = [:]
+        for durationMS in [50, 1000] {
+            let response = Double(durationMS) / 1000 * 1.4
             let spring = Spring(
-                response: Double(durationMS) / 1000 * 1.4,
+                response: response,
                 dampingFraction: 0.85
             )
             var worst = 0.0
@@ -235,15 +233,25 @@ struct AnimationSettleWatchdogTests {
                 }
                 worst = max(worst, Double(ticks) / hz)
             }
-            // 50 ms measures 0.20 s against a 5 s floor (25x);
-            // 1000 ms measures 2.80 s against a 16.8 s multiple
-            // (6.0x) and only 1.8x against the floor — which is
-            // why the multiple, not the floor, holds that end.
-            #expect(
-                worst > low && worst < high,
-                "\(durationMS)ms slowest settle \(worst)s"
-            )
+            floorOnly[durationMS] = 5 / worst
+            multipleOnly[durationMS] = 12 * response / worst
+            // The safety property: the SHIPPED bound — the larger
+            // of the two terms — clears the slowest healthy settle
+            // by a wide margin at both ends.
+            let shipped = max(5, 12 * response) / worst
+            #expect(shipped > 5, "\(durationMS)ms margin \(shipped)")
         }
+        // And the argument for keeping both terms, as the
+        // comparison it actually is. Each term is the thin one at
+        // the end the other covers, so dropping either halves the
+        // worst-case margin even though neither alone would fire
+        // on today's measurements. That "neither alone fires" is
+        // why this is a margin argument and not a correctness one
+        // — say so rather than claiming a bare term is unsafe.
+        #expect(multipleOnly[50] ?? 0 < 5, "\(multipleOnly)")
+        #expect(floorOnly[50] ?? 0 > 20, "\(floorOnly)")
+        #expect(floorOnly[1000] ?? 0 < 2, "\(floorOnly)")
+        #expect(multipleOnly[1000] ?? 0 > 5, "\(multipleOnly)")
     }
 
     /// Every duration the 50–1000 clamp admits.
