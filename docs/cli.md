@@ -35,9 +35,12 @@ kiwidesk --version   # or -v; works without the app running
 
 Prints `<semantic version> (<short commit>)`, e.g. `0.1.0
 (abc1234)`, or just the semantic version when the commit is
-unknown (a build made without running
-`scripts/bump-version.sh`). The same information is available
-over IPC/Lua as the `version` command — see the table below.
+unknown. Only a build produced by the release workflow knows its
+own commit — a commit cannot contain its own SHA, so a checked-in
+tree cannot name the one it becomes, and any build you make
+yourself prints the bare version. The same information is
+available over IPC/Lua as the `version` command — see the table
+below.
 
 ## Service Control
 

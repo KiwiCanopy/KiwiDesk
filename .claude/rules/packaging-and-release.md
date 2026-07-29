@@ -1,6 +1,8 @@
 ---
 paths:
   - "scripts/build-app.sh"
+  - "scripts/release.sh"
+  - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
   - "scripts/pre-commit"
   - "Package.swift"
@@ -85,7 +87,59 @@ AFTER stapling, never reused from the notarization payload** —
 the zip submitted to Apple is made pre-staple by construction, so
 shipping it would strand every user with an unticketed bundle.
 Applies to any artifact type added later (`.pkg`, the cask's
-`.zip`, a Sparkle delta).
+`.zip`, a Sparkle delta). `--zip` is the cask's archive and obeys
+it: built after step 6, and refusing an unstapled bundle the way
+`--dmg` does.
+
+**An archive is the one artifact that carries no ticket of its
+own, and that is not a loophole in the rule above.** A disk image
+is signed code, so Apple can ticket it; a `.zip` is a container
+with nowhere to put a signature, so `stapler` has no target to
+staple to. The ticket therefore rides on the `.app` **inside** —
+which is exactly why the archive must be built after the staple
+rather than before it, and why a `--zip` run that cannot find a
+stapled bundle names its output `-unnotarized.zip` instead of
+producing something an upload would reach for.
+
+## Cutting a release (#32)
+
+**Cut every release with `scripts/release.sh <version>`.** The
+git tag and `KiwiDeskVersion.semantic` are two hand-written copies
+of one number, and that script is the only path that stamps the
+constant *before* creating the tag. A tag pushed by hand ships a
+binary whose `--version` names a release it is not — nothing about
+the artifact looks wrong, and the mistake is only legible to
+someone who already knows the real answer. The "Verify the tag
+matches the binary" step in the release workflow is the guard; it
+costs a re-tag when it fires, against a mislabelled download when
+it does not exist.
+
+**Stamp the commit at build time; never check one in.** A commit
+cannot contain its own SHA, so a bump made while the release
+commit is still being written can only name that commit's
+*parent* — which is what shipped until #32, reliably off by one
+and wrong in the direction that looks right. `bump-version.sh`
+therefore writes `"unknown"`, and `--stamp-commit` writes the real
+one from the workflow, where HEAD *is* the tagged commit. Anything
+needing that stamp calls the script: a second `sed` over
+`KiwiDeskVersion.swift` would be a second owner of the file's
+shape.
+
+**Signing credentials are optional to the workflow, by
+construction.** Absent a certificate it falls through to the same
+ad-hoc branch a contributor's machine takes, so the pipeline can
+be exercised before any credential exists — and the artifact it
+produces says `-unnotarized` in its own filename rather than
+relying on a log line. `secrets` is not available in a step-level
+`if`, so their presence is lifted into a step output first; a
+future gate on a new credential extends that step rather than
+reaching for `secrets` in a condition that silently reads empty.
+
+**Publishing is not this file's call.** See "No distribution
+channel without an update path" in `docs/design-decisions.md`. The
+workflow drafts the release because a draft is unfetchable without
+auth — it proves the pipeline end to end without opening a channel
+that rule holds shut.
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

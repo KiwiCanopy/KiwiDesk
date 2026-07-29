@@ -11,6 +11,7 @@
 # Usage:
 #   scripts/build-app.sh [--identity <id>] [--notarize <profile>]
 #                        [--output <dir>] [--skip-build] [--dmg]
+#                        [--zip]
 #
 #   --identity   Signing identity. Omit it and the sole
 #                "Developer ID Application" identity in the
@@ -35,6 +36,11 @@
 #                from a .zip and never needs this. Combine with
 #                --notarize: the disk image is a separate piece of
 #                signed code and needs its own ticket (see step 7).
+#   --zip        Also archive the finished bundle for the Homebrew
+#                cask and the release upload (#32, #105). Built
+#                after step 6 so the app inside is already
+#                stapled — see step 8 for why the archive itself
+#                neither can nor should carry a ticket.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -44,6 +50,7 @@ OUT="$ROOT/.build/app"
 SKIP_BUILD=0
 ALLOW_NO_ICON=0
 MAKE_DMG=0
+MAKE_ZIP=0
 
 usage() {
     cat <<'EOF'
@@ -59,6 +66,7 @@ Usage: scripts/build-app.sh [options]
   --output <dir>     Where to write the bundle (default .build/app).
   --skip-build       Reuse the existing release build.
   --dmg              Also wrap the bundle in a disk image.
+  --zip              Also archive the bundle (cask / release).
   --allow-no-icon    Proceed even if actool cannot compile the icon.
   -h, --help         Show this help and exit.
 EOF
@@ -82,6 +90,7 @@ while [ "$#" -gt 0 ]; do
             shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
         --dmg) MAKE_DMG=1; shift ;;
+        --zip) MAKE_ZIP=1; shift ;;
         --allow-no-icon) ALLOW_NO_ICON=1; shift ;;
         *) echo "error: unknown argument '$1'" >&2; exit 2 ;;
     esac
@@ -496,6 +505,61 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     fi
 fi
 
+# ---------------------------------------------------------------
+# 8. Distribution archive (optional)
+#
+# What the Homebrew cask installs from (#105) and what the release
+# workflow attaches to a release (#32).
+#
+# THE ARCHIVE ITSELF CARRIES NO TICKET, and that is not an
+# oversight in the "every distributable artifact needs its own
+# ticket" rule — it is the one artifact type the rule cannot
+# reach. A .dmg is signed code, so Apple can ticket it; a .zip is
+# a container with nowhere to put a signature, so `stapler` has no
+# target. The ticket therefore travels on the .app INSIDE, which
+# is why this runs after step 6 and refuses to build otherwise.
+#
+# Built fresh here, never by keeping the archive step 6 submits:
+# that one is made BEFORE the staple by construction — it is the
+# thing submitted FOR the ticket — so shipping it would strand
+# every downloader with an unticketed bundle while looking
+# identical on this machine.
+
+if [ "$MAKE_ZIP" -eq 1 ]; then
+    ZIP="$OUT/KiwiDesk-$VERSION.zip"
+
+    # Same assertion and the same two arrival paths as step 7: no
+    # --notarize at all, or a --notarize run followed by a bare
+    # `--skip-build --zip`, which re-signs the app and discards
+    # the stapled ticket. Neither is visible after the fact — an
+    # archive built here carries no quarantine attribute, so it
+    # unpacks and runs fine locally and only fails on download.
+    ZIP_UNTICKETED=0
+    if ! xcrun stapler validate "$APP" >/dev/null 2>&1; then
+        ZIP_UNTICKETED=1
+        if [ -n "$NOTARY_PROFILE" ]; then
+            echo "error: $APP is not stapled even though step 6" \
+                 "ran — refusing to archive it" >&2
+            exit 1
+        fi
+        echo "warning: the app is not notarized, so this archive" \
+             "is for local inspection only — a downloaded copy" \
+             "will be refused. Re-run with --notarize <profile>." >&2
+        # The FILE says whether it is distributable, so that a
+        # cask or an upload cannot reach for a normally-named
+        # archive that Gatekeeper will reject.
+        ZIP="$OUT/KiwiDesk-$VERSION-unnotarized.zip"
+    fi
+
+    echo "==> building $ZIP"
+    rm -f "$ZIP"
+    # ditto, not `zip`: this archives a signed bundle, and only
+    # ditto is obliged to preserve the extended attributes and
+    # symlinks the signature is computed over. --keepParent so the
+    # archive expands to KiwiDesk.app, not its contents.
+    ditto -c -k --keepParent "$APP" "$ZIP"
+fi
+
 echo
 echo "built $APP"
 echo "  run:  open \"$APP\""
@@ -505,6 +569,13 @@ if [ "$MAKE_DMG" -eq 1 ]; then
         echo "  dmg:  $DMG  (NOT notarized — do not distribute)"
     else
         echo "  dmg:  $DMG"
+    fi
+fi
+if [ "$MAKE_ZIP" -eq 1 ]; then
+    if [ "$ZIP_UNTICKETED" -eq 1 ]; then
+        echo "  zip:  $ZIP  (NOT notarized — do not distribute)"
+    else
+        echo "  zip:  $ZIP"
     fi
 fi
 exit 0
