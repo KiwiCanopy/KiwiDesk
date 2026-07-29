@@ -44,8 +44,8 @@ editing here:
   focus raise, the z-order restore and the overlay re-sync for
   the rest of the session. Anything new that waits on that signal
   inherits the same exposure, so keep the integrator honest
-  rather than gating each consumer — and read the next bullet,
-  which is the net for whatever gets past it.
+  rather than gating each consumer — and read the #611 bullet
+  below, which is the net for whatever gets past it.
 - **Force-settle non-convergence rather than waiting it out
   (#611).** The bullet above is the one *known* way to wedge the
   settle signal; the watchdog in `tick` is the net under it, so
@@ -129,6 +129,27 @@ editing here:
   sets it by hand stays green). A rescue that fires silently
   removes the symptom that made #599 findable and leaves only a
   visible jump.
+- **A shrinking axis snaps to target on frame 1 unless the
+  caller promised `BatchSizing.allSpringSized` (#593), and that
+  promise is opt-in, never inferred.** The full argument — why
+  the discriminator is "does this pass place any window at its
+  final size in one frame" rather than "is this a resize", and
+  why the default has to be the pessimistic one — is the doc
+  comment on `BatchSizing` itself, which is where a caller
+  reaches it. Do not restate **the discriminator argument or the
+  default's asymmetry** here or at a call site — that is the part
+  which was three prose copies once. Site-specific eligibility
+  reasoning (why *this* pass may or may not promise) belongs at
+  the site, because it is not in the type.
+  Two things worth knowing before you edit this directory:
+  a promise is **enforced**, not trusted, at
+  `TilingEngine.retile` (a pass carrying `newlyCreatedWindow`
+  is forced back to `.mayInstantSize` whatever it asked for),
+  and entering `.allSpringSized` from `.mayInstantSize`
+  mid-flight must go through `FrameAnimation.reseatSize` —
+  a structural shrink renders its target from frame 1 while the
+  size springs keep travelling, so the spring is not a claim
+  about the window until it is re-seated.
 - `AnimationEngine.cancelAll(snapToTargets:)` is a **test drain
   primitive**; production has no global cancel by design (`stop()`
   tears down differently on purpose, `displaysChanged()` covers

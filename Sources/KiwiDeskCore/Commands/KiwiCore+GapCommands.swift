@@ -25,7 +25,11 @@ extension KiwiCore {
         }
         // Forced: an explicit gap command must apply even when
         // the delta is within the retile tolerance (±2 pt).
-        retile(force: true)
+        // Promises (#593): a gap edit is pure geometry — the
+        // same windows in the same slots, every one of them
+        // spring-sized from one clock — so the shared edges may
+        // slide.
+        retile(force: true, sizing: .allSpringSized)
         return .ok()
     }
 
@@ -67,7 +71,13 @@ extension KiwiCore {
             return .fail("expected size")
         }
         tiler.settings.minWindowSize = CGFloat(size)
-        retile(force: true)
+        // Promises, like the gap edit above (#593): the floor
+        // only re-divides room among the windows already placed.
+        // It can flip a track into an overflow cascade, where
+        // windows overlap by design — but that pile is
+        // spring-sized like everything else in the pass, so no
+        // #45 instant sizing enters it.
+        retile(force: true, sizing: .allSpringSized)
         return .ok()
     }
 

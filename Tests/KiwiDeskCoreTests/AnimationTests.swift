@@ -71,7 +71,7 @@ struct SpringTests {
             _ = animation.step(dt: 1.0 / 120.0)
         }
         let midFlight = animation.frame
-        animation.retarget(to: frameC)
+        animation.retarget(to: frameC, sizing: .mayInstantSize)
         #expect(animation.frame == midFlight)
         _ = settle(&animation)
         #expect(animation.frame == frameC)
@@ -177,15 +177,15 @@ struct AnimationEngineSizingTests {
     private func recordApplies(
         from: CGRect,
         to: CGRect,
-        policy: GrowPolicy = .throttledSmooth,
+        policy: SizePolicy = .throttledSmooth,
         rateHz: Int? = nil
     ) -> [(frame: CGRect, setSize: Bool)]? {
         guard let screen = NSScreen.main,
             let display = screen.kiwiDisplay?.id
         else { return nil }
         let engine = AnimationEngine()
-        engine.growPolicy = policy
-        engine.growRateHz = rateHz
+        engine.sizePolicy = policy
+        engine.sizeRateHz = rateHz
         var applies: [(frame: CGRect, setSize: Bool)] = []
         engine.apply = { _, frame, setSize in
             applies.append((frame, setSize))
@@ -231,7 +231,7 @@ struct AnimationEngineSizingTests {
     }
 
     /// #47 default: a growing window follows the spring, emitting
-    /// a size-set on many frames (per-tick, since `growRateHz` is
+    /// a size-set on many frames (per-tick, since `sizeRateHz` is
     /// nil) instead of one at halfway — the buttery grow. It still
     /// lands exactly on the settle frame.
     @Test("A pure grow under the smooth default resizes per tick")

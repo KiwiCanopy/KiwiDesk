@@ -54,8 +54,11 @@ extension AnimationEngine {
                 // A shrinking axis takes its target size on the
                 // first frame — mid-flight overlap clears at
                 // once (siblings yielding room to a newly
-                // opened window). The grow direction follows the
-                // active `growPolicy`: `.throttledSmooth` (#47, the
+                // opened window) — unless this animation was
+                // started as a plain resize (#593), where nothing
+                // is instantly sized and the shared edge may slide.
+                // The grow direction follows the active
+                // `sizePolicy`: `.throttledSmooth` (#47, the
                 // default) resamples the spring each tick (or at a
                 // capped rate); `.midSlide` (the legacy fallback)
                 // instead lands a single size-set mid-flight, where
@@ -69,19 +72,23 @@ extension AnimationEngine {
                 let held =
                     heldSize[id]
                     ?? Self.rounded(animation.frame).size
-                let stepped = GrowSize.step(
-                    policy: growPolicy,
+                let stepped = SizeStep.step(
+                    policy: sizePolicy,
+                    sizing: animation.sizing,
                     held: held,
                     target: animation.targetFrame.size,
                     spring: animation.frame.size,
                     pastHalfway: animation.pastHalfway,
-                    rateHz: storedGrowRateHz,
+                    rateHz: storedSizeRateHz,
                     elapsed: sizeElapsed[id] ?? 0,
                     dt: dt
                 )
                 sizeElapsed[id] = stepped.elapsed
                 let size = stepped.size
-                let setSize = size != heldSize[id]
+                let previous = heldSize[id]
+                // `heldSize` stays UNROUNDED: it feeds the next
+                // tick's `target <= held` direction test, and
+                // rounding it would perturb that comparison.
                 heldSize[id] = size
                 let frame = CGRect(
                     x: animation.frame.origin.x.rounded(),
@@ -89,6 +96,25 @@ extension AnimationEngine {
                     width: size.width.rounded(),
                     height: size.height.rounded()
                 )
+                // Whether to SET the size is asked of the rounded
+                // sizes, which are what actually reach the window.
+                // A sub-pixel delta does not render but still
+                // costs a blocking AX round-trip — the waste this
+                // type's header says it skips. Without a sizing
+                // promise the question never arose: a shrinking
+                // axis emits the exact target, a stable value, so
+                // the flag fell false after frame 1. A promised
+                // pass hands back a fresh sub-pixel spring value
+                // every tick, so an
+                // unrounded compare marked the entire convergence
+                // tail as a resize — 13 of 36 frames byte-identical
+                // to their predecessor, each one a forced content
+                // reflow on a slow-AX app.
+                let setSize =
+                    previous.map {
+                        $0.width.rounded() != frame.width
+                            || $0.height.rounded() != frame.height
+                    } ?? true
                 if setSize || lastApplied[id] != frame {
                     lastApplied[id] = frame
                     apply(id, frame, setSize)

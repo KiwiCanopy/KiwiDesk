@@ -3,9 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pure size-channel policy math for the grow experiment (#47).
-@Suite("GrowSize")
-struct GrowSizeTests {
+/// Pure size-channel policy math (#47), both directions.
+/// Everything here passes `.mayInstantSize`, so it doubles as the
+/// standing regression net for the #45 first-frame shrink snap;
+/// the promised half lives in `BatchSizingTests`.
+@Suite("SizeStep")
+struct SizeStepTests {
     private let held = CGSize(width: 400, height: 300)
     private let target = CGSize(width: 800, height: 600)
 
@@ -13,8 +16,9 @@ struct GrowSizeTests {
 
     @Test("midSlide holds a growing axis until halfway")
     func midSlideHoldsBeforeHalfway() {
-        let step = GrowSize.step(
+        let step = SizeStep.step(
             policy: .midSlide,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -28,8 +32,9 @@ struct GrowSizeTests {
 
     @Test("midSlide grows in one frame past halfway")
     func midSlideGrowsPastHalfway() {
-        let step = GrowSize.step(
+        let step = SizeStep.step(
             policy: .midSlide,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -41,12 +46,17 @@ struct GrowSizeTests {
         #expect(step.size == target)
     }
 
+    /// #45's invariant: with no sizing promise — the default,
+    /// and every open / retile path — a shrinking axis
+    /// still takes its target on frame 1, under BOTH policies, so
+    /// a sibling yielding room clears before the newcomer paints.
     @Test("A shrinking axis snaps to target immediately")
     func shrinkSnapsImmediately() {
         // held larger than target on both axes → shrink.
-        for policy in [GrowPolicy.midSlide, .throttledSmooth] {
-            let step = GrowSize.step(
+        for policy in [SizePolicy.midSlide, .throttledSmooth] {
+            let step = SizeStep.step(
                 policy: policy,
+                sizing: .mayInstantSize,
                 held: target,
                 target: held,
                 spring: CGSize(width: 700, height: 500),
@@ -64,8 +74,9 @@ struct GrowSizeTests {
     @Test("A nil rate is per-tick: grow follows the spring each tick")
     func perTickFollowsSpringEveryTick() {
         let spring = CGSize(width: 612, height: 458)
-        let step = GrowSize.step(
+        let step = SizeStep.step(
             policy: .throttledSmooth,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: spring,
@@ -81,8 +92,9 @@ struct GrowSizeTests {
     @Test("Below the interval a growing axis holds and accrues")
     func throttleHoldsUntilDue() {
         let dt = 1.0 / 120.0
-        let step = GrowSize.step(
+        let step = SizeStep.step(
             policy: .throttledSmooth,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -98,8 +110,9 @@ struct GrowSizeTests {
     @Test("At the interval it resamples the spring and resets")
     func throttleEmitsWhenDue() {
         let spring = CGSize(width: 640, height: 470)
-        let step = GrowSize.step(
+        let step = SizeStep.step(
             policy: .throttledSmooth,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: spring,
@@ -117,8 +130,9 @@ struct GrowSizeTests {
         // 30 ms accrued, one 8.3 ms tick → 38.3 ms.
         // 30 Hz interval is 33.3 ms (due); 25 Hz is 40 ms (not).
         let args: (Int, Bool) -> Void = { hz, shouldEmit in
-            let step = GrowSize.step(
+            let step = SizeStep.step(
                 policy: .throttledSmooth,
+                sizing: .mayInstantSize,
                 held: held,
                 target: target,
                 spring: CGSize(width: 640, height: 470),
@@ -136,24 +150,24 @@ struct GrowSizeTests {
 
 /// The promoted #47 default and its rate clamp.
 @MainActor
-@Suite("Grow policy defaults")
-struct GrowDefaultsTests {
+@Suite("Size policy defaults")
+struct SizeDefaultsTests {
     @Test("Engine ships smooth per-tick")
     func shipsSmoothPerTick() {
         let engine = AnimationEngine()
-        #expect(engine.growPolicy == .throttledSmooth)
-        #expect(engine.growRateHz == nil)
+        #expect(engine.sizePolicy == .throttledSmooth)
+        #expect(engine.sizeRateHz == nil)
     }
 
     @Test("Rate clamps to 1…120; nil is per-tick")
     func rateClamp() {
         let engine = AnimationEngine()
-        engine.growRateHz = 500
-        #expect(engine.growRateHz == 120)
-        engine.growRateHz = -5
-        #expect(engine.growRateHz == 1)
-        engine.growRateHz = nil
-        #expect(engine.growRateHz == nil)
+        engine.sizeRateHz = 500
+        #expect(engine.sizeRateHz == 120)
+        engine.sizeRateHz = -5
+        #expect(engine.sizeRateHz == 1)
+        engine.sizeRateHz = nil
+        #expect(engine.sizeRateHz == nil)
     }
 }
 

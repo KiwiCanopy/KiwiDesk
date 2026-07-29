@@ -82,7 +82,10 @@ struct AnimationAgeAccountingTests {
             _ = animation.step(dt: 1.0 / 60)
         }
         #expect(!animation.isOverdue)
-        animation.retarget(to: CGRect(x: 1, y: 2, width: 30, height: 40))
+        animation.retarget(
+            to: CGRect(x: 1, y: 2, width: 30, height: 40),
+            sizing: .mayInstantSize
+        )
         #expect(animation.age == 0)
         // Still under the bound a full second past where the
         // un-retargeted animation would have fired.
@@ -103,7 +106,7 @@ struct AnimationAgeAccountingTests {
         var animation = wedge()
         for _ in 0..<(60 * 6) {
             _ = animation.step(dt: 1.0 / 60)
-            animation.retarget(to: target)
+            animation.retarget(to: target, sizing: .mayInstantSize)
         }
         #expect(animation.age > 5)
         #expect(animation.isOverdue)

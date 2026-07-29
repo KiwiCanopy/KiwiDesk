@@ -15,6 +15,12 @@ extension KiwiCore {
         // reordering command below arms it, and it is flushed
         // strictly after this dispatch's forced retile.
         deferredCommandZOrderRestore = false
+        // Same shape for the sizing promise (#593): the ratio
+        // writers below raise it where they write, and the one
+        // trailing retile consumes it. Reset at ENTRY, because a
+        // failing command returns before that retile and would
+        // otherwise leave it raised for the next dispatch.
+        commandSizing = .mayInstantSize
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -53,7 +59,7 @@ extension KiwiCore {
             // ±2 pt tolerance would swallow a small ratio
             // nudge exactly like the 1 pt gap edit that
             // motivated the guardrail.
-            retile(force: true)
+            retile(force: true, sizing: commandSizing)
             // Now that the reorder's animations are in flight,
             // arm the deferred z-order restore (#153) — it rides
             // their settle instead of the pre-retile frames.
@@ -63,6 +69,20 @@ extension KiwiCore {
             }
         }
         return response
+    }
+
+    /// Raised by a layout setter that only re-divides room among
+    /// the windows already placed — a ratio or slot-size write —
+    /// so this dispatch's trailing retile may slide a shrinking
+    /// pane's shared edge instead of snapping it (#593).
+    ///
+    /// Called from the write itself, in the layout's own command
+    /// file, so the global setter and its `_override` twin sit in
+    /// one switch statement apiece and a maintainer editing either
+    /// arm sees the other. `BatchSizing` argues why promising this
+    /// of a slot-reassigning command reintroduces #45.
+    func promiseAllWindowsSpringSized() {
+        commandSizing = .allSpringSized
     }
 
     /// Shared parsing for the per-layout

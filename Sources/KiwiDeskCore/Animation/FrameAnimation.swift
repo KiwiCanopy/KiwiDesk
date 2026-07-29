@@ -6,19 +6,23 @@ import Foundation
 /// Four independent springs (x, y, width, height). Retargeting
 /// keeps the current position and velocity, so an interrupted
 /// animation redirects smoothly instead of jumping.
-///
-/// It carries two recovery nets, and they share one shape —
-/// `forceSettle()`, after which the engine's ordinary settled
-/// handling runs. The component-wise one catches a value that
-/// stopped being finite; the age bound below catches a spring that
-/// stays finite and simply never converges. Split from
-/// `Spring.swift` at the §2.1 size target; the integrator is the
-/// other half.
 public struct FrameAnimation: Sendable {
     public private(set) var current: [Double]
     public private(set) var velocity: [Double]
     public private(set) var target: [Double]
     public let spring: Spring
+
+    /// What the pass that started this animation promised about
+    /// its sizing (#593) — read every tick by `SizeStep` to decide
+    /// whether a shrinking axis may follow the spring. Stored per
+    /// animation rather than as an engine-wide flag "for the
+    /// duration of a retile": `animate` **retargets** a window
+    /// already in flight, so an engine flag would let one pass's
+    /// promise cover a later pass that never made it.
+    /// `retarget(to:sizing:)` makes that an explicit decision
+    /// instead, and the newest promise wins — a pass that promises
+    /// nothing must restore the snap.
+    public private(set) var sizing: BatchSizing
 
     /// Settled when within this distance at negligible speed.
     /// Sub-pixel tails are invisible but cost real AX calls,
@@ -26,77 +30,57 @@ public struct FrameAnimation: Sendable {
     /// to the exact target anyway).
     private static let epsilon = 0.5
 
-    /// The settle watchdog's bound (#611):
-    /// `max(ageFloor, ageResponseMultiple × response)`, capped.
-    ///
-    /// **Both terms are needed, but not for the reason it is
-    /// tempting to give.** The floor is *not* slack for a slow-AX
-    /// app: `age` counts simulated motion (see below), so a
-    /// blocked app costs wall-clock and ages an animation by at
-    /// most one tick's worth.
-    ///
-    /// The real argument is a margin one. Each term is the thin
-    /// one at the end the other covers — the multiple at the fast
-    /// end, the flat floor at the slow end — so keeping both is
-    /// what holds the worst case well clear of the slowest healthy
-    /// settle. Neither term *alone* would fire on today's
-    /// measurements, so this buys headroom against a future change
-    /// to the duration clamp, the `× 1.4` mapping or the
-    /// integrator, rather than fixing a live defect.
-    ///
-    /// The ratios that argument rests on are computed and asserted
-    /// by `slowestHealthySettleIsPinned`, not restated here: a
-    /// number transcribed into prose drifts (#511), and this one
-    /// would have been transcribed into three files.
-    ///
-    /// The ceiling exists because the multiple scales with a
-    /// caller-supplied response, and `Spring.init` clamps that
-    /// only from below: without it `Spring(response: 1e6)` buys a
-    /// 139-day bound, i.e. a spring can opt out of the watchdog
-    /// entirely. It sits far above the largest legitimate bound
-    /// (16.8 s at 1000 ms) so it never binds on a shipped spring.
-    private static let ageResponseMultiple = 12.0
-    private static let ageFloor: TimeInterval = 5
-    private static let ageCeiling: TimeInterval = 60
-
     /// Total distance at start (or last retarget); yardstick
     /// for `pastHalfway`.
     private var initialDistance: Double
 
     /// Simulated seconds spent stepping toward the *current*
-    /// target. Simulated rather than wall-clock on purpose:
-    /// `Spring.integratedSpan` caps what one `step` may add, so a
-    /// stalled `DisplayLink` (display sleep, a wedged main actor)
-    /// hands over one huge `dt` and ages this by only as much as
-    /// the spring actually moved. Wall-clock would age an
-    /// animation that was not running at all.
+    /// target — the settle watchdog's clock. Simulated rather
+    /// than wall-clock so a stalled `DisplayLink` cannot age an
+    /// animation that was not running; the bound it feeds lives
+    /// in `FrameAnimation+Watchdog` (#611).
     private(set) var age: TimeInterval = 0
 
-    /// Raised by the non-finite net, cleared by
-    /// `takeNonFiniteNotice()`. A value type has no log seam of its
-    /// own and the engine will not poll for one, so the net leaves
-    /// a mark that the tick loop collects on its way past (#611).
-    private var pendingRescueNotice = false
+    /// Raised by the non-finite net, drained by
+    /// `takeNonFiniteNotice()` in `FrameAnimation+Watchdog`. A
+    /// value type has no log seam of its own, so the net leaves a
+    /// mark the tick loop collects on its way past (#611).
+    var pendingRescueNotice = false
 
-    public init(from: CGRect, to: CGRect, spring: Spring) {
+    /// `sizing` defaults to `.mayInstantSize` — today's first-frame
+    /// shrink snap — so a construction site that has no opinion
+    /// gets the fail-safe one (#593).
+    public init(
+        from: CGRect,
+        to: CGRect,
+        spring: Spring,
+        sizing: BatchSizing = .mayInstantSize
+    ) {
         self.current = Self.vector(from)
         self.velocity = [0, 0, 0, 0]
         self.target = Self.vector(to)
         self.spring = spring
+        self.sizing = sizing
         self.initialDistance = Self.distance(
             self.current,
             self.target
         )
     }
 
-    /// Redirects the animation to a new target mid-flight.
-    public mutating func retarget(to frame: CGRect) {
+    /// Redirects the animation to a new target mid-flight. The
+    /// sizing is **required**, not defaulted: an interrupt is
+    /// exactly where a stale promise would go unnoticed, and the
+    /// newest one wins (#593).
+    public mutating func retarget(
+        to frame: CGRect,
+        sizing: BatchSizing
+    ) {
         let next = Self.vector(frame)
-        // A genuinely new target is a new journey, so the age
-        // bound restarts with it: a live make-room drag retargets
-        // its siblings for as long as the user holds the mouse,
-        // and a watchdog that fires on healthy motion is worse
-        // than none.
+        // A genuinely new target is a new journey, so the settle
+        // watchdog's clock restarts with it (#611): a live
+        // make-room drag retargets its siblings for as long as the
+        // user holds the mouse, and a watchdog that fires on
+        // healthy motion is worse than none.
         //
         // Only on a *changed* target, though. A retile loop that
         // re-issues an identical rect would otherwise reset the
@@ -108,23 +92,70 @@ public struct FrameAnimation: Sendable {
         // point (an app-enforced minimum bouncing the placement)
         // still resets; see the accepted hole in the rule file.
         //
-        // A storm of genuinely *different* targets still defers
-        // the bound indefinitely, and that is an accepted hole
-        // (documented in `.claude/rules/input-and-animation.md`):
-        // it is indistinguishable from a long drag from here, and
-        // the first target a storm stops on ages normally.
+        // Keyed on the target alone, not on `sizing`: a pass that
+        // changes only its sizing promise has not moved the window
+        // anywhere new, so it has not restarted the journey.
         if next != target {
             age = 0
         }
         target = next
+        self.sizing = sizing
         // Outside the branch deliberately, though it is journey
         // state too. Rebasing it on an identical target is the
-        // pre-existing behaviour of the `.midSlide` grow policy's
+        // pre-existing behaviour of the `.midSlide` size policy's
         // halfway yardstick (#45/#47), which has no coverage of
         // its own; changing it here would be an unrelated,
         // untested change to the size channel. The shipped
         // `.throttledSmooth` never reads `pastHalfway`, so this
         // is inert today.
+        initialDistance = Self.distance(current, target)
+    }
+
+    /// Re-seats the two SIZE springs onto a known on-screen size,
+    /// with zero size velocity. Position is untouched.
+    ///
+    /// The size springs integrate on every animation, but under
+    /// `.mayInstantSize` a shrinking axis does not *render* them —
+    /// `SizeStep` pins the emitted size to the target from frame
+    /// 1 while the spring keeps travelling down from the start
+    /// size. So mid-flight the spring and the screen diverge by
+    /// up to the whole shrink delta, and the spring is simply not
+    /// a claim about the window any more.
+    ///
+    /// `.allSpringSized` reads that spring *as* the on-screen
+    /// size. Switch into it mid-shrink without re-seating and the
+    /// window jumps back up by the divergence on the next frame —
+    /// and if the interrupted flight was a make-room shrink, the
+    /// sibling springing back up re-overlaps the newcomer that
+    /// `animate(isNewWindow:)` already painted at full size. That
+    /// is #45, reintroduced *across* batches rather than inside
+    /// one.
+    ///
+    /// **Per axis, and only where the two actually disagree** —
+    /// the staleness is a property of one axis, not of the
+    /// animation. A *growing* axis emits the spring on every due
+    /// tick, so it already agrees and must be left alone: zeroing
+    /// its velocity would stall a grow that was travelling
+    /// correctly (26 pt lost on the first frame after an
+    /// interrupt, still 17 pt behind eight frames later — measured
+    /// in review). The equality test is what separates them, and
+    /// it stays honest under a throttle, where a grow axis does
+    /// lag its last emitted size and is reseated too.
+    ///
+    /// Velocity goes to zero on a reseated axis rather than
+    /// carrying over: that axis was not moving on screen — it
+    /// snapped once and held — so there is no rate to preserve.
+    public mutating func reseatSize(_ size: CGSize) {
+        let onScreen = [Double(size.width), Double(size.height)]
+        for (offset, value) in onScreen.enumerated() {
+            let i = offset + 2
+            guard current[i] != value else { continue }
+            current[i] = value
+            velocity[i] = 0
+        }
+        // Dead in the one production call site (the `retarget`
+        // that follows recomputes it), kept so a public mutating
+        // method cannot leave the struct inconsistent on its own.
         initialDistance = Self.distance(current, target)
     }
 
@@ -136,34 +167,15 @@ public struct FrameAnimation: Sendable {
         Self.distance(current, target) * 2 <= initialDistance
     }
 
-    /// Whether this animation has been stepping toward one target
-    /// for longer than any healthy motion to it could take, and so
-    /// should be force-settled rather than left to run (#611). The
-    /// engine, not this type, owns what happens next: the whole
-    /// point is that a stuck animation never leaves `animations`,
-    /// which is what kills `onAllAnimationsEnded` for the session.
-    var isOverdue: Bool {
-        let scaled = min(
-            Self.ageResponseMultiple * spring.response,
-            Self.ageCeiling
-        )
-        return age > max(Self.ageFloor, scaled)
-    }
-
     /// Advances by `dt`; returns true when settled.
     ///
     /// A caller that wants the non-finite net's diagnostics must
     /// drain `takeNonFiniteNotice()` after each call — the notice
     /// is raised here and reported by whoever is driving.
     public mutating func step(dt: Double) -> Bool {
-        // How much simulated time this interval represents — a
-        // property of `dt` alone. `Spring.step` separately asks
-        // whether the spring can integrate at all, and a spring
-        // that cannot (an unusable `maxStableStep`) stands still
-        // without ever settling. Age must count elapsed simulated
-        // time either way; that is what makes it a watchdog rather
-        // than a progress meter, and it is the only reason such a
-        // spring is ever rescued (`aFrozenSpringIsStillRescued`).
+        // Simulated time, not wall-clock, and deliberately not
+        // gated on whether the spring below actually integrated —
+        // see `FrameAnimation+Watchdog`.
         age += Spring.integratedSpan(dt)
         var settled = true
         for i in 0..<4 {
@@ -208,26 +220,6 @@ public struct FrameAnimation: Sendable {
     mutating func forceSettle() {
         current = target
         velocity = [0, 0, 0, 0]
-    }
-
-    /// Whether the **non-finite** net fired since this was last
-    /// asked, clearing the flag so one rescue reports once even
-    /// though the animation keeps running for many more ticks.
-    /// Named for that net specifically: the age watchdog is the
-    /// driver's own decision and needs no notice from here.
-    ///
-    /// A flag rather than a richer `step` return because the net
-    /// repairs in place — after `step` there is nothing left to
-    /// observe, so a caller cannot derive this by inspection, and
-    /// a pre-step check would only see a non-finite *entry*
-    /// (today's sole live trigger, but not the one a future
-    /// integrator change would produce). It stays a flag while
-    /// there is exactly **one** production caller draining it on
-    /// the next line; a second caller is the trigger to fold it
-    /// into `step`'s result instead.
-    mutating func takeNonFiniteNotice() -> Bool {
-        defer { pendingRescueNotice = false }
-        return pendingRescueNotice
     }
 
     public var frame: CGRect {

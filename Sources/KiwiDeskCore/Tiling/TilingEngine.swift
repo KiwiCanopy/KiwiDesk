@@ -165,18 +165,35 @@ public final class TilingEngine {
     /// instant set — the coordinated space switch (#207), where
     /// the outgoing windows slide out WHILE the incoming ones
     /// slide in. Every other retile keeps the instant default.
+    ///
+    /// `sizing` is the caller's promise about how every window in
+    /// this pass gets its size (#593); promising them all
+    /// spring-sized lets a shrinking pane slide its shared edge
+    /// instead of snapping. It rides the layout loop only: the
+    /// stash park and the float restore below place windows that
+    /// sit *outside* the layout, and a promise about the layout
+    /// cannot extend to them.
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
         force: Bool = false,
         newlyCreatedWindow: WindowID? = nil,
-        stashAnimated: Bool = false
+        stashAnimated: Bool = false,
+        sizing: BatchSizing = .mayInstantSize
     ) {
         guard
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return }
         let frames = calculatedFrames(state: state)
+        // The #45 invariant, enforced rather than trusted: a
+        // newcomer IS an instant size, so no promise survives one.
+        // Both arguments meet in this one signature, which makes
+        // this the only place the combination is expressible — and
+        // the routing guard cannot see it, because it counts
+        // occurrences, not combinations.
+        let promised: BatchSizing =
+            newlyCreatedWindow == nil ? sizing : .mayInstantSize
 
         for (id, target) in frames {
             // A window in an active drag keeps its user-driven
@@ -202,7 +219,8 @@ public final class TilingEngine {
                 from: current,
                 to: target,
                 animated: animated,
-                isNewWindow: id == newlyCreatedWindow
+                isNewWindow: id == newlyCreatedWindow,
+                sizing: promised
             )
         }
         stashInactive(
@@ -223,12 +241,19 @@ public final class TilingEngine {
     /// drifted once, dropping the cancel). The animation screen
     /// is the display the target frame lands on (multi-monitor:
     /// one `DisplayLink` per monitor), falling back to main.
+    ///
+    /// `sizing` says why this frame is being applied (#593);
+    /// it reaches `SizeStep` through the animation and decides
+    /// whether a shrinking axis may slide instead of snapping.
+    /// `.mayInstantSize` is the default because mismarking is asymmetric —
+    /// see `BatchSizing`.
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
         to target: CGRect,
         animated: Bool,
-        isNewWindow: Bool = false
+        isNewWindow: Bool = false,
+        sizing: BatchSizing = .mayInstantSize
     ) {
         if animated,
             let screen = Self.screen(containing: target)
@@ -240,7 +265,8 @@ public final class TilingEngine {
                 on: screen,
                 from: current,
                 to: target,
-                isNewWindow: isNewWindow
+                isNewWindow: isNewWindow,
+                sizing: sizing
             )
         } else {
             animation.cancel(window: id)
