@@ -142,11 +142,11 @@ public struct FrameAnimation: Sendable {
     /// engine-wide flag "for the duration of a retile": `animate`
     /// **retargets** a window that is already in flight, so an
     /// engine flag would leak a resize's intent into a reflow that
-    /// arrived mid-resize. `retarget(to:sizeIntent:)` makes that
+    /// arrived mid-resize. `retarget(to:sizing:)` makes that
     /// an explicit decision instead, and the rule is that the
     /// newest intent wins — a reflow interrupting a resize must
     /// restore the snap.
-    public private(set) var sizeIntent: SizeIntent
+    public private(set) var sizing: BatchSizing
 
     /// Settled when within this distance at negligible speed.
     /// Sub-pixel tails are invisible but cost real AX calls,
@@ -158,20 +158,20 @@ public struct FrameAnimation: Sendable {
     /// for `pastHalfway`.
     private var initialDistance: Double
 
-    /// `sizeIntent` defaults to `.reflow` — today's first-frame
+    /// `sizing` defaults to `.mayInstantSize` — today's first-frame
     /// shrink snap — so a construction site that has no opinion
     /// gets the fail-safe one (#593).
     public init(
         from: CGRect,
         to: CGRect,
         spring: Spring,
-        sizeIntent: SizeIntent = .reflow
+        sizing: BatchSizing = .mayInstantSize
     ) {
         self.current = Self.vector(from)
         self.velocity = [0, 0, 0, 0]
         self.target = Self.vector(to)
         self.spring = spring
-        self.sizeIntent = sizeIntent
+        self.sizing = sizing
         self.initialDistance = Self.distance(
             self.current,
             self.target
@@ -184,10 +184,41 @@ public struct FrameAnimation: Sendable {
     /// newest one wins (#593).
     public mutating func retarget(
         to frame: CGRect,
-        sizeIntent: SizeIntent
+        sizing: BatchSizing
     ) {
         target = Self.vector(frame)
-        self.sizeIntent = sizeIntent
+        self.sizing = sizing
+        initialDistance = Self.distance(current, target)
+    }
+
+    /// Re-seats the two SIZE springs onto a known on-screen size,
+    /// with zero size velocity. Position is untouched.
+    ///
+    /// The size springs integrate on every animation, but under
+    /// `.mayInstantSize` a shrinking axis does not *render* them —
+    /// `SizeStep` pins the emitted size to the target from frame
+    /// 1 while the spring keeps travelling down from the start
+    /// size. So mid-flight the spring and the screen diverge by
+    /// up to the whole shrink delta, and the spring is simply not
+    /// a claim about the window any more.
+    ///
+    /// `.allSpringSized` reads that spring *as* the on-screen size. Switch
+    /// into it mid-`.mayInstantSize`-shrink without re-seating and the
+    /// window jumps back up by the divergence on the next frame —
+    /// and if the interrupted flight was a make-room shrink, the
+    /// sibling springing back up re-overlaps the newcomer that
+    /// `animate(isNewWindow:)` already painted at full size. That
+    /// is #45, reintroduced *across* batches rather than inside
+    /// one (found in review).
+    ///
+    /// Velocity goes to zero rather than carrying over: the
+    /// window was not moving in that axis: it snapped once and
+    /// held, so there is no rate to preserve.
+    public mutating func reseatSize(_ size: CGSize) {
+        current[2] = Double(size.width)
+        current[3] = Double(size.height)
+        velocity[2] = 0
+        velocity[3] = 0
         initialDistance = Self.distance(current, target)
     }
 

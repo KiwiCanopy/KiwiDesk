@@ -10,58 +10,19 @@ public enum SizePolicy: Sendable, Equatable {
     /// ongoing slide masks the jump. One size-set lands mid-flight,
     /// so slow-AX apps (Electron/WebKit) reflow exactly once. Kept
     /// as a Lua-selectable escape hatch for an app that can't keep
-    /// pace with the smooth default. Deaf to `SizeIntent` by
+    /// pace with the smooth default. Deaf to `BatchSizing` by
     /// definition: its whole contract is that single size-set, in
     /// whichever direction the axis moves.
     case midSlide
     /// Shipping default (#47). A growing axis follows the spring
     /// continuously — and so does a shrinking one, once the
-    /// trigger vouches for it (`SizeIntent.resize`, #593).
+    /// pass promises it (`BatchSizing.allSpringSized`, #593).
     /// `sizeRateHz` caps the size-set rate; its default `nil`
     /// means per **display tick** (60 on a 60 Hz panel, 120 on a
     /// 120), matching the position channel. Slow-AX apps reflow at
     /// that rate rather than once; lower the rate, or drop to
     /// `.midSlide`, if one falls behind.
     case throttledSmooth
-}
-
-/// *Why* a window is animating — the one input that decides
-/// whether a shrinking axis may follow the spring (#593).
-///
-/// The hazard the first-frame shrink snap exists for (#45) is
-/// **not** "a window shrank slowly". It is an *instantly-sized*
-/// window sharing the screen with a smoothly-sized one:
-/// `AnimationEngine.animate(isNewWindow: true)` pre-sets a
-/// newcomer's target size at its current position, so a window
-/// that just opened is already full size on frame 1. A sibling
-/// that vacates its room gradually is then visibly overlapped for
-/// the length of the flight.
-///
-/// In a plain resize nothing is instantly sized: both panes run
-/// the same spring, on the same clock, for the same duration, so
-/// their shared edge moves in lockstep — no gap, no overlap. That
-/// is why smoothing is safe there and only there.
-///
-/// So the discriminator is *does this batch contain any
-/// instantly-sized window* — not "is this axis shrinking", and
-/// not "did membership change".
-///
-/// **`.reflow` is the default and `.resize` is opt-in, never
-/// inferred.** Forgetting to mark a new resize path costs a snap:
-/// cosmetic, and exactly today's behavior. Marking a reflow path
-/// by mistake costs a visible overlap. `SizeIntentRoutingTests`
-/// pins which call sites may say `.resize`, and its `allowed` map
-/// is that list.
-public enum SizeIntent: Sendable, Equatable {
-    /// Structural: window open/close, focus, swap, mode change,
-    /// space switch, monitor change, profile apply, stash and
-    /// restore. A shrinking axis snaps to its target on frame 1.
-    case reflow
-    /// A plain resize between already-placed windows — a ratio or
-    /// gap edit, a mouse-resize settle — where the shared edge
-    /// just slides. A shrinking axis follows the spring under the
-    /// same throttle the growing one uses.
-    case resize
 }
 
 /// Result of one size step: the size to render this frame plus the
@@ -79,7 +40,7 @@ struct SizeStepResult {
 enum SizeStep {
     static func step(
         policy: SizePolicy,
-        intent: SizeIntent,
+        sizing: BatchSizing,
         held: CGSize,
         target: CGSize,
         spring: CGSize,
@@ -106,6 +67,19 @@ enum SizeStep {
             // accumulator stays unused (0). A rate throttles below
             // the refresh: accrue dt and emit only when the
             // interval has elapsed.
+            //
+            // `dt` is the display-link interval, so this counts
+            // real seconds between size-sets — which is what a cap
+            // in Hz should count. `Spring.step`'s substepping
+            // (#599) does not change that: it partitions one
+            // tick's span into several integrations, but the tick
+            // is still one frame of wall clock and still emits at
+            // most one size. The two do diverge after a stall,
+            // where `Spring.maxIntegratedStep` truncates the span
+            // to 1/30 s while this accrues the whole gap — so the
+            // next frame is instantly due and carries only 33 ms
+            // of travel. Harmless, and the position channel
+            // behaves the same way.
             let acc = elapsed + dt
             let due: Bool
             if let rateHz {
@@ -113,7 +87,7 @@ enum SizeStep {
             } else {
                 due = true
             }
-            let snapShrink = intent == .reflow
+            let snapShrink = sizing == .mayInstantSize
             return SizeStepResult(
                 size: CGSize(
                     width: smoothAxis(

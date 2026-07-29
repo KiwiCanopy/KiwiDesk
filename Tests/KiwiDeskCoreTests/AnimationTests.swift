@@ -71,7 +71,7 @@ struct SpringTests {
             _ = animation.step(dt: 1.0 / 120.0)
         }
         let midFlight = animation.frame
-        animation.retarget(to: frameC, sizeIntent: .reflow)
+        animation.retarget(to: frameC, sizing: .mayInstantSize)
         #expect(animation.frame == midFlight)
         _ = settle(&animation)
         #expect(animation.frame == frameC)

@@ -18,10 +18,10 @@ import CoreGraphics
 /// math for both lives in `SizeStep`. `sizePolicy` (#47) is
 /// engine-wide and swappable for on-device comparison: the
 /// shipping `.throttledSmooth` follows the spring, the legacy
-/// `.midSlide` lands one size-set mid-flight. `SizeIntent` (#593)
+/// `.midSlide` lands one size-set mid-flight. `BatchSizing` (#593)
 /// is per animation and only ever loosens the shrink direction —
-/// `.reflow` keeps the #45 first-frame snap so a sibling yielding
-/// room clears at once, `.resize` lets a shrinking axis follow the
+/// `.mayInstantSize` keeps the #45 first-frame snap so a sibling yielding
+/// room clears at once, `.allSpringSized` lets a shrinking axis follow the
 /// spring where nothing in the batch is instantly sized. Frames
 /// that change no size are position-only — one AX call, and the
 /// target app never re-lays-out its content mid-flight.
@@ -94,7 +94,7 @@ public final class AnimationEngine {
     /// Size-channel policy (#47). Default `.throttledSmooth` at
     /// the per-tick rate below — a growing window follows the
     /// spring smoothly, and so does a shrinking one on a
-    /// `.resize`-marked animation (#593). Engine-only (not
+    /// `.allSpringSized`-marked animation (#593). Engine-only (not
     /// persisted to a profile), but Lua-overridable:
     /// `animations.set_size_policy` drops to
     /// `.midSlide` for a session (e.g. from `init.lua`) if a
@@ -166,9 +166,9 @@ public final class AnimationEngine {
 
     /// Animates a window to a target frame on a given screen.
     ///
-    /// `sizeIntent` is why the caller is animating (#593), and it
-    /// only ever loosens the shrink direction: `.reflow` (the
-    /// default) keeps the #45 first-frame snap, `.resize` lets a
+    /// `sizing` is why the caller is animating (#593), and it
+    /// only ever loosens the shrink direction: `.mayInstantSize` (the
+    /// default) keeps the #45 first-frame snap, `.allSpringSized` lets a
     /// shrinking axis follow the spring. It is deliberately NOT
     /// derivable from `isNewWindow` — that flag marks the
     /// *newly-opened* window and is consumed right here to pre-set
@@ -180,7 +180,7 @@ public final class AnimationEngine {
         from current: CGRect,
         to target: CGRect,
         isNewWindow: Bool = false,
-        sizeIntent: SizeIntent = .reflow
+        sizing: BatchSizing = .mayInstantSize
     ) {
         // A non-finite target can only come from garbage upstream
         // (a NaN layout rect, a bad AX read), and it is worse than
@@ -204,9 +204,21 @@ public final class AnimationEngine {
             return
         }
         if var existing = removeAnimation(for: window) {
-            // Newest intent wins: a reflow interrupting a resize
-            // restores the first-frame shrink snap (#593).
-            existing.retarget(to: target, sizeIntent: sizeIntent)
+            // Entering `.allSpringSized` from `.mayInstantSize` re-seats the
+            // size springs onto what is actually on screen first:
+            // a structural shrink renders `target` from frame 1
+            // while the springs travel on, so `.allSpringSized` would read
+            // a stale, larger size and jump the window back up —
+            // #45 across batches. `reseatSize` argues it in full.
+            if sizing == .allSpringSized,
+                existing.sizing == .mayInstantSize,
+                let onScreen = heldSize[window]
+            {
+                existing.reseatSize(onScreen)
+            }
+            // Newest intent wins: a structural retile interrupting
+            // a resize restores the first-frame shrink snap (#593).
+            existing.retarget(to: target, sizing: sizing)
             animations[display, default: [:]][window] = existing
         } else {
             onAnimationStart(window)
@@ -232,7 +244,7 @@ public final class AnimationEngine {
                         ),
                         to: target,
                         spring: spring,
-                        sizeIntent: sizeIntent
+                        sizing: sizing
                     )
             } else {
                 heldSize[window] = current.size
@@ -241,7 +253,7 @@ public final class AnimationEngine {
                         from: current,
                         to: target,
                         spring: spring,
-                        sizeIntent: sizeIntent
+                        sizing: sizing
                     )
             }
         }

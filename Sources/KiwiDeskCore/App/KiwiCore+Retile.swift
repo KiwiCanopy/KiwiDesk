@@ -14,18 +14,19 @@ extension KiwiCore {
     /// resize, focus slide) pass an explicit `animated:` and are
     /// gated by their own toggle instead.
     ///
-    /// `sizeIntent: .resize` says this pass only re-divides room
+    /// `sizing: .allSpringSized` says this pass only re-divides
+    /// room
     /// among windows that are already placed (#593), so a
     /// shrinking pane slides its shared edge instead of snapping.
-    /// Opt-in and allow-listed — `SizeIntentRoutingTests` names
-    /// every call site that may pass it, and `SizeIntent` argues
+    /// Opt-in and allow-listed — `BatchSizingRoutingTests` names
+    /// every call site that may pass it, and `BatchSizing` argues
     /// why guessing is the one mistake that reintroduces #45.
     public func retile(
         animated: Bool? = nil,
         force: Bool = false,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
-        sizeIntent: SizeIntent = .reflow
+        sizing: BatchSizing = .mayInstantSize
     ) {
         tiler.retile(
             state: state,
@@ -34,7 +35,7 @@ extension KiwiCore {
             force: force,
             newlyCreatedWindow: newlyCreatedWindow,
             stashAnimated: stashAnimated,
-            sizeIntent: sizeIntent
+            sizing: sizing
         )
         // Scrolling reads back its own last offset (#66); other
         // modes never write `scrollOffset`, so this is a no-op

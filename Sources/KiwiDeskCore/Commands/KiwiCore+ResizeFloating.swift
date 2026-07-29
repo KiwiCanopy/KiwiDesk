@@ -32,7 +32,7 @@ extension KiwiCore {
                 minSize: tiler.settings.minWindowSize
             )
         )
-        // `.resize` (#593): a float resizes ITSELF and no tiled
+        // Promises (#593): a float resizes ITSELF and no tiled
         // window moves — there is no sibling yielding room, and a
         // float already overlaps the layout by definition, so the
         // #45 hazard cannot arise here at all.
@@ -41,7 +41,7 @@ extension KiwiCore {
             from: window.frame,
             to: target,
             animated: tiler.settings.animations.onWindowResize,
-            sizeIntent: .resize
+            sizing: .allSpringSized
         )
         return .ok()
     }

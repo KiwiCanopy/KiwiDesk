@@ -4090,23 +4090,24 @@ across launches.
   ongoing slide masks the jump. Slow-AX apps reflow exactly once.
   Drop to this for an app that can't keep pace with `"smooth"`.
 
-Shrinking splits by *why* the window is animating, and only under
+Shrinking splits by *what else is moving*, and only under
 `"smooth"`:
 
-- On a **plain resize** — a `resize` press, a ratio or gap edit, a
-  mouse-resize release — a shrinking axis follows the animation
-  too, so the edge two panes share slides instead of jumping.
-  Nothing else on screen is changing size at that moment, so
+- When every window in the change is being animated — a `resize`
+  press, a ratio, gap or `min_window_size` edit — a shrinking axis
+  follows the animation too, so the edge two panes share slides
+  instead of jumping. Both panes travel on the same clock, so
   there is nothing for a gradual shrink to expose.
-- On a **reflow** — a window opening or closing, a mode or space
-  change — it still takes its target on the first frame. A window
-  that just opened is full size immediately, so a sibling that
-  gave up its room gradually would sit *underneath* it for the
-  length of the animation.
+- When something is placed at its final size in one frame, it
+  still takes its target on the first frame. A window that just
+  opened is full size immediately, so a sibling that gave up its
+  room gradually would sit *underneath* it for the length of the
+  animation. This covers window open and close, mode and space
+  changes — and a **mouse resize**, where the window you dragged
+  is already where you left it when the rest catches up.
 
-Under `"mid_slide"` a shrinking axis always takes the first frame,
-whatever the trigger. Either way the exact target lands on the
-settle frame.
+Under `"mid_slide"` a shrinking axis always takes the first frame.
+Either way the exact target lands on the settle frame.
 
 **Example:**
 

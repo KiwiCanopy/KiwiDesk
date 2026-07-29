@@ -46,30 +46,23 @@ editing here:
   inherits the same exposure, so keep the integrator honest
   rather than gating each consumer.
 - **A shrinking axis snaps to target on frame 1 unless the
-  caller marked the animation `SizeIntent.resize` (#593), and
-  marking is opt-in, never inferred.** The hazard the snap
-  exists for (#45) is not "a window shrank slowly" — it is an
-  *instantly-sized* window sharing the screen with a
-  smoothly-sized one. `animate(isNewWindow: true)` pre-sets a
-  newcomer's target size at its current position, so a window
-  that just opened is already full size on frame 1; a sibling
-  vacating its room gradually sits underneath it for the whole
-  flight. In a plain resize nothing is instantly sized — both
-  panes run the same spring on the same clock — so the shared
-  edge slides in lockstep. **The discriminator is therefore
-  "does this batch contain an instantly-sized window", not "is
-  this axis shrinking" and not "did membership change".**
-  The asymmetry is what fixes the default: forgetting to mark a
-  new resize path costs a snap (cosmetic, and today's
-  behavior), while marking a reflow path costs a visible
-  overlap — so `.reflow` is the default and `.resize` is the
-  deliberate act. `SizeIntentRoutingTests` scans **both**
-  source trees and pins a per-file count, and **its `allowed`
-  map is the exemption list** — add the entry there rather
-  than a note here. Do not try to derive the intent from
-  `isNewWindow`: that flag marks the *newly-opened* window,
-  while a make-room shrink hits the siblings, which retile
-  with `isNewWindow: false`.
+  caller promised `BatchSizing.allSpringSized` (#593), and that
+  promise is opt-in, never inferred.** The full argument — why
+  the discriminator is "does this pass place any window at its
+  final size in one frame" rather than "is this a resize", and
+  why the default has to be the pessimistic one — is the doc
+  comment on `BatchSizing` itself, which is where a caller
+  reaches it. Do not restate it here or in a call-site comment;
+  it has already been three prose copies once.
+  Two things worth knowing before you edit this directory:
+  a promise is **enforced**, not trusted, at
+  `TilingEngine.retile` (a pass carrying `newlyCreatedWindow`
+  is forced back to `.mayInstantSize` whatever it asked for),
+  and entering `.allSpringSized` from `.mayInstantSize`
+  mid-flight must go through `FrameAnimation.reseatSize` —
+  a structural shrink renders its target from frame 1 while the
+  size springs keep travelling, so the spring is not a claim
+  about the window until it is re-seated.
 - Two env levers exist for device QA of this subsystem —
   `KIWIDESK_STRAND_LOG` (logs a window that did not land on its
   settled target, #47) and `KIWIDESK_NO_WS_TRACKING` (forces the

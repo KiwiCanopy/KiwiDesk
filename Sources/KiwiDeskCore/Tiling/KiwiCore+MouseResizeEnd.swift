@@ -50,13 +50,11 @@ extension KiwiCore {
                 in: state
             )
         else {
-            // snap_back / no-parameter axis: the dragged window
-            // animates back to its own slot and nothing else
-            // moves, so `.resize` (#593) is safe by the same
-            // argument as the settle below.
+            // No sizing promise, for the reason spelled out at the
+            // settle below: the pointer, not the spring, decided
+            // this window's size.
             retile(
-                animated: tiler.settings.animations.onWindowResize,
-                sizeIntent: .resize
+                animated: tiler.settings.animations.onWindowResize
             )
             focusWindow(id, warp: false)
             return
@@ -96,17 +94,30 @@ extension KiwiCore {
             in: space,
             bounds: bounds
         )
-        // `.resize` (#593) — the drop writes a ratio and nothing
-        // else, exactly like the keyboard verb. Judged separately
-        // from it on device, though: the pointer already put the
-        // dragged window where the user wanted it, so the thing
-        // that smooths here is the NEIGHBOUR catching up over the
-        // animation duration, which can read as lag rather than
-        // butter. If it does, this one call site reverts to
-        // `.reflow` and the keyboard half still ships.
+        // **No sizing promise here**, unlike the keyboard verb —
+        // and the difference is not taste, it is the definition
+        // (#593). `.allSpringSized` asserts that every window in
+        // the pass got its size from the spring. The dragged
+        // window got its size from the *pointer*: it is already at
+        // its final frame when this runs, so the un-forced retile
+        // below finds it inside the ±2 pt tolerance and skips it
+        // entirely. That is an instantly-sized window in the
+        // batch, which is exactly what the promise denies.
+        //
+        // The keyboard verb has no such member — both panes spring
+        // from the old ratio to the new, on one clock — which is
+        // the whole reason that path may promise and this one may
+        // not.
+        //
+        // It would also buy nothing. Smoothing here only affects
+        // the NEIGHBOUR, and a neighbour that shrinks is vacating
+        // room the dragged window already covers, so the motion is
+        // either invisible (dragged window on top) or an obvious
+        // artifact (neighbour on top, overhanging mid-flight). The
+        // grow direction is smooth regardless — that is #47, and
+        // it is untouched here.
         retile(
-            animated: tiler.settings.animations.onWindowResize,
-            sizeIntent: .resize
+            animated: tiler.settings.animations.onWindowResize
         )
         // A track resize can flip a track into/out of an overflow
         // cascade — restack the pile once it settles (#193).

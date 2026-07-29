@@ -126,14 +126,14 @@ extension KiwiCore {
         // step, never lose it — and forcing every keypress
         // would wobble windows that apps clamp.
         //
-        // The canonical `.resize` pass (#593): membership and slot
-        // assignment are untouched, every path above only rewrites
-        // a ratio or weight, and nothing here is instantly sized —
-        // so a yielding pane may slide its shared edge instead of
-        // snapping.
+        // The canonical promising pass (#593): membership and
+        // slot assignment are untouched, every path above only
+        // rewrites a ratio or weight, and both panes spring from
+        // the old value to the new on one clock — so a yielding
+        // pane may slide its shared edge instead of snapping.
         retile(
             animated: tiler.settings.animations.onWindowResize,
-            sizeIntent: .resize
+            sizing: .allSpringSized
         )
         // Resizing a track past min_window_size flips it into an
         // overflow cascade (or unflips one back); fix the pile's

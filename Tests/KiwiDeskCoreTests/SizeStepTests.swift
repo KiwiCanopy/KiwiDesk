@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pure size-channel policy math for the grow experiment (#47).
-/// Everything here passes `.reflow`, so it is also the standing
-/// regression net for the #45 first-frame shrink snap; the
-/// `.resize` half lives in `SizeIntentTests`.
+/// Pure size-channel policy math (#47), both directions.
+/// Everything here passes `.mayInstantSize`, so it doubles as the
+/// standing regression net for the #45 first-frame shrink snap;
+/// the promised half lives in `BatchSizingTests`.
 @Suite("SizeStep")
 struct SizeStepTests {
     private let held = CGSize(width: 400, height: 300)
@@ -18,7 +18,7 @@ struct SizeStepTests {
     func midSlideHoldsBeforeHalfway() {
         let step = SizeStep.step(
             policy: .midSlide,
-            intent: .reflow,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -34,7 +34,7 @@ struct SizeStepTests {
     func midSlideGrowsPastHalfway() {
         let step = SizeStep.step(
             policy: .midSlide,
-            intent: .reflow,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -46,8 +46,8 @@ struct SizeStepTests {
         #expect(step.size == target)
     }
 
-    /// Plan item 1 / #45's invariant: under `.reflow` — the
-    /// default, and every open / retile path — a shrinking axis
+    /// #45's invariant: with no sizing promise — the default,
+    /// and every open / retile path — a shrinking axis
     /// still takes its target on frame 1, under BOTH policies, so
     /// a sibling yielding room clears before the newcomer paints.
     @Test("A shrinking axis snaps to target immediately")
@@ -56,7 +56,7 @@ struct SizeStepTests {
         for policy in [SizePolicy.midSlide, .throttledSmooth] {
             let step = SizeStep.step(
                 policy: policy,
-                intent: .reflow,
+                sizing: .mayInstantSize,
                 held: target,
                 target: held,
                 spring: CGSize(width: 700, height: 500),
@@ -76,7 +76,7 @@ struct SizeStepTests {
         let spring = CGSize(width: 612, height: 458)
         let step = SizeStep.step(
             policy: .throttledSmooth,
-            intent: .reflow,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: spring,
@@ -94,7 +94,7 @@ struct SizeStepTests {
         let dt = 1.0 / 120.0
         let step = SizeStep.step(
             policy: .throttledSmooth,
-            intent: .reflow,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: CGSize(width: 600, height: 450),
@@ -112,7 +112,7 @@ struct SizeStepTests {
         let spring = CGSize(width: 640, height: 470)
         let step = SizeStep.step(
             policy: .throttledSmooth,
-            intent: .reflow,
+            sizing: .mayInstantSize,
             held: held,
             target: target,
             spring: spring,
@@ -132,7 +132,7 @@ struct SizeStepTests {
         let args: (Int, Bool) -> Void = { hz, shouldEmit in
             let step = SizeStep.step(
                 policy: .throttledSmooth,
-                intent: .reflow,
+                sizing: .mayInstantSize,
                 held: held,
                 target: target,
                 spring: CGSize(width: 640, height: 470),

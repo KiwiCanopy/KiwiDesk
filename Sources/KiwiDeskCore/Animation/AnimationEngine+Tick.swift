@@ -50,7 +50,7 @@ extension AnimationEngine {
                     ?? Self.rounded(animation.frame).size
                 let stepped = SizeStep.step(
                     policy: sizePolicy,
-                    intent: animation.sizeIntent,
+                    sizing: animation.sizing,
                     held: held,
                     target: animation.targetFrame.size,
                     spring: animation.frame.size,
@@ -61,7 +61,10 @@ extension AnimationEngine {
                 )
                 sizeElapsed[id] = stepped.elapsed
                 let size = stepped.size
-                let setSize = size != heldSize[id]
+                let previous = heldSize[id]
+                // `heldSize` stays UNROUNDED: it feeds the next
+                // tick's `target <= held` direction test, and
+                // rounding it would perturb that comparison.
                 heldSize[id] = size
                 let frame = CGRect(
                     x: animation.frame.origin.x.rounded(),
@@ -69,6 +72,25 @@ extension AnimationEngine {
                     width: size.width.rounded(),
                     height: size.height.rounded()
                 )
+                // Whether to SET the size is asked of the rounded
+                // sizes, which are what actually reach the window.
+                // A sub-pixel delta does not render but still
+                // costs a blocking AX round-trip — the waste this
+                // type's header says it skips. Without a sizing
+                // promise the question never arose: a shrinking
+                // axis emits the exact target, a stable value, so
+                // the flag fell false after frame 1. A promised
+                // pass hands back a fresh sub-pixel spring value
+                // every tick, so an
+                // unrounded compare marked the entire convergence
+                // tail as a resize — 13 of 36 frames byte-identical
+                // to their predecessor, each one a forced content
+                // reflow on a slow-AX app (found in review).
+                let setSize =
+                    previous.map {
+                        $0.width.rounded() != frame.width
+                            || $0.height.rounded() != frame.height
+                    } ?? true
                 if setSize || lastApplied[id] != frame {
                     lastApplied[id] = frame
                     apply(id, frame, setSize)
