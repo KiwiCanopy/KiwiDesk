@@ -46,6 +46,14 @@ import Testing
 struct StatusItemSeamGuardTests {
     private let needle = "NSStatusBar"
     private let benign = "NSStatusBarButton"
+    /// This guard's own Tests-relative path: the allowlisted
+    /// self-hit in pin 2, and the one file the pin-1 floor must
+    /// skip — its failure-message literals match the
+    /// injected-construction needle, and counting them would
+    /// hold the floor green through the very rename it exists
+    /// to catch.
+    private static let selfFile =
+        "KiwiDeskGuiTests/StatusItemSeamGuardTests.swift"
 
     private var testsRoot: URL {
         SourceScan.repoRoot(from: #filePath)
@@ -87,11 +95,13 @@ struct StatusItemSeamGuardTests {
 
     /// The injected-form floor at the end is this pin's own
     /// liveness canary: a controller rename (or a moved root)
-    /// finds zero injected constructions and reds there,
-    /// instead of the ban scanning forever for a type name
-    /// that no longer exists. Pin 2's allowlisted self-hit
-    /// still covers root-and-walker liveness for the token
-    /// scans.
+    /// finds zero injected constructions in the *other* test
+    /// files and reds there, instead of the ban scanning
+    /// forever for a type name that no longer exists. The
+    /// floor skips this guard's own file — see `selfFile` —
+    /// so its self-hits cannot satisfy it. Pin 2's allowlisted
+    /// self-hit still covers root-and-walker liveness for the
+    /// token scans.
     @Test("Test constructions always inject a handle")
     func bareConstructionStaysOutOfTests() throws {
         // `.init` sugar included: the spelled-out initializer
@@ -121,14 +131,16 @@ struct StatusItemSeamGuardTests {
                 in: source,
                 range: range
             )
-            injected += injectedForm.numberOfMatches(
-                in: source,
-                range: range
-            )
             let path =
                 file.path.hasPrefix(prefix)
                 ? String(file.path.dropFirst(prefix.count))
                 : file.path
+            if path != Self.selfFile {
+                injected += injectedForm.numberOfMatches(
+                    in: source,
+                    range: range
+                )
+            }
             #expect(
                 bare == 0,
                 """
@@ -161,7 +173,7 @@ struct StatusItemSeamGuardTests {
     /// reds on the inverse check below rather than passing
     /// vacuously.
     private let allowedInTests: [String: Int] = [
-        "KiwiDeskGuiTests/StatusItemSeamGuardTests.swift": 1
+        Self.selfFile: 1
     ]
 
     @Test("Tests reach the menu bar only through the seam")
@@ -231,5 +243,43 @@ struct StatusItemSeamGuardTests {
                 """
             )
         }
+    }
+
+    // MARK: - Pin 4: the seal itself
+
+    /// The wrapper's file-scoped `private` IS the seal the
+    /// header describes: an in-place access raise (`private`
+    /// to `internal`) would re-open the wrapper to
+    /// `@testable import` while every token count above stays
+    /// unchanged. Requiring exactly one match also makes this
+    /// the wrapper's existence canary — a rename or move of
+    /// the declaration reds here first.
+    @Test("The wrapper stays file-scoped private")
+    func wrapperKeepsItsSeal() throws {
+        let declaration = try NSRegularExpression(
+            pattern:
+                "(?m)^\\s*private\\s+final\\s+class\\s+"
+                + "SystemStatusItem\\b"
+        )
+        let file = sourcesRoot.appendingPathComponent(
+            "KiwiDesk/StatusItemController.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let matches = declaration.numberOfMatches(
+            in: source,
+            range: NSRange(source.startIndex..., in: source)
+        )
+        #expect(
+            matches == 1,
+            """
+            SystemStatusItem is no longer declared file-scoped \
+            private in StatusItemController.swift — that access \
+            level is what keeps tests from naming the live \
+            wrapper; restore it, or re-review the seam if the \
+            wrapper deliberately moved.
+            """
+        )
     }
 }

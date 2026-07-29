@@ -297,8 +297,8 @@ final class StatusItemController: NSObject, NSMenuDelegate,
 ///
 /// File-scoped `private` IS the seal — tests cannot name this
 /// type, so a live item cannot be passed through the seam; do
-/// not raise its access. The seam's story lives at
-/// `StatusItemHandle`.
+/// not raise its access (`StatusItemSeamGuardTests` pins the
+/// declaration). The seam's story lives at `StatusItemHandle`.
 @MainActor
 private final class SystemStatusItem: StatusItemHandle {
     private let item: NSStatusItem

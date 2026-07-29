@@ -20,7 +20,8 @@ import AppKit
 /// `@testable import` — sealed by construction. The remaining
 /// routes — a bare construction taking the live default, a
 /// hand-rolled handle naming `NSStatusBar` — are scanned by
-/// `StatusItemSeamGuardTests`.
+/// `StatusItemSeamGuardTests`, which also pins the wrapper's
+/// access level so the seal cannot be raised unnoticed.
 ///
 /// The surface is only what the controller uses: the button
 /// (icon rendering, popover anchoring) and the menu assignment.
