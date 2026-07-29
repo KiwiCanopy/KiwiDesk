@@ -102,6 +102,14 @@ extension SourceScan {
     /// --skip/--filter` matches test identifiers, so the suite
     /// TYPE name is what the partition actually consumes; the
     /// filename is only the greppable convention.
+    ///
+    /// Recognized shapes only: a line-initial `@Suite`, then a
+    /// `struct`/`class` on it or a later line. An implicit
+    /// suite (no `@Suite`), an attribute stacked before it on
+    /// one line, or an `actor`/`enum` suite is invisible — safe
+    /// while a spawning file's only suites use today's
+    /// convention, and a file where *nothing* is recognized
+    /// reds at the consumer rather than passing.
     static func suiteTypeNames(
         in file: URL
     ) throws -> [String] {

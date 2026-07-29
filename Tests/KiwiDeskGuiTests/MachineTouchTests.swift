@@ -173,9 +173,18 @@ struct MachineTouchTests {
             strayFiles.isEmpty,
             "real shell children outside --skip: \(listed)"
         )
-        // The type axis: every @Suite declared in a spawning
-        // file must carry the prefix the CLI partition matches.
-        for file in Set(sites.map(\.file)) {
+        try Self.expectExecTypes(in: Set(sites.map(\.file)))
+    }
+
+    /// The type axis: every @Suite declared in a spawning file
+    /// must carry the prefix the CLI partition matches. Shared
+    /// by both spawn guards so a raw-`Process` file cannot pass
+    /// on its filename while declaring a stray-named suite —
+    /// the same axis gap, one guard over.
+    private static func expectExecTypes(
+        in files: Set<URL>
+    ) throws {
+        for file in files {
             let types = try SourceScan.suiteTypeNames(in: file)
             // A spawning file with no recognizable suite is a
             // walk gap — red, never a silent skip.
@@ -224,8 +233,14 @@ struct MachineTouchTests {
     /// suites may also spawn raw within their partition.
     @Test("raw process spawns stay in ratified homes")
     func rawSpawnConstruction() throws {
+        // `launchedProcess(` is the deprecated-but-functional
+        // second spelling of the same spawn.
         let processSites = try Self.sites(
             of: "Process" + "(",
+            under: Self.testTrees
+        )
+        let launched = try Self.sites(
+            of: "launchedProcess" + "(",
             under: Self.testTrees
         )
         // ScriptFixture's own spawn proves the scan sees.
@@ -235,7 +250,7 @@ struct MachineTouchTests {
                     == "ScriptFixture.swift"
             }
         )
-        let strays = processSites.filter {
+        let strays = (processSites + launched).filter {
             $0.file.lastPathComponent != "ScriptFixture.swift"
                 && !$0.file.lastPathComponent
                     .hasPrefix("ExecTests")
@@ -246,6 +261,15 @@ struct MachineTouchTests {
             strays.isEmpty,
             "raw Process outside ratified homes: \(listed)"
         )
+        // A raw spawn admitted by filename still owes the type
+        // axis (ScriptFixture declares no suite — it is the
+        // ratified helper, not a partition member).
+        let rawExecFiles = Set(
+            (processSites + launched).map(\.file).filter {
+                $0.lastPathComponent.hasPrefix("ExecTests")
+            }
+        )
+        try Self.expectExecTypes(in: rawExecFiles)
         // Pure tripwire — no live site today, so no presence
         // canary: an empty result is the desired state.
         let launcherSites = try Self.sites(
@@ -257,6 +281,16 @@ struct MachineTouchTests {
         #expect(
             launcherSites.isEmpty,
             "test-built ExecLauncher: \(launchers)"
+        )
+        // The tripwire's needle rots if production renames the
+        // spawner; its construction there is the existence pin.
+        let production = try Self.sites(
+            of: "ExecLauncher" + "(",
+            under: Self.productionTrees
+        )
+        #expect(
+            !production.isEmpty,
+            "ExecLauncher gone — retarget the tripwire needle"
         )
     }
 }
