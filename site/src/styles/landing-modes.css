@@ -749,7 +749,7 @@
 /* Extra Lua/CLI syntax tokens for the code blocks. */
 .code .str { color: #d8b06a; }
 .code .num { color: #7fd0a0; }
-.code .fn { color: #aacb5d; }
+.code .fn { color: var(--kiwi-bright); }
 
 /* =========================================================
    Pull-quotes — a personal, human voice.

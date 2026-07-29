@@ -26,6 +26,48 @@ though:
 - Site i18n is hand-maintained (not generated from the app
   catalogs).
 
+## One brand-color layer, imported by both stylesheets
+
+`site/src/styles/brand-tokens.css` is the **only** place a brand
+hex may be written. `theme.css` (the Starlight docs, wired through
+`customCss` in `astro.config.mjs`) and `landing.css` (every
+non-Starlight surface — landing, guide, legal) must both `@import`
+it and map their own role names through `var()`.
+
+Neither may re-state a brand hex. The two reach **disjoint page
+sets**, so nothing renders both at once and nothing makes them
+agree on its own: they had each declared the same nine hexes
+independently, several under divergent names for one color
+(`--kiwi-green` vs `--kiwi-flesh`) — the vocabulary split
+[config-vocabulary.md](config-vocabulary.md) exists to prevent,
+one layer below Swift. When two names compete for one color, keep
+the one with live `var()` consumers.
+
+**The light-mode text green is derived, not chosen.** Raw
+`--kiwi-flesh` is ~2.3:1 on the light surfaces and fails AA, so
+every light text/link/eyebrow role takes `--kiwi-flesh-text`, the
+50/50 midpoint of `--kiwi-flesh` and `--kiwi-ink` shared with the
+wider brand family (#635). Never put raw `--kiwi-flesh` on text.
+
+`scripts/check-site-tokens.py` enforces all of the above: it
+rejects a brand hex written anywhere else under `site/src`,
+recomputes both the midpoint and the WCAG contrast from the tokens
+rather than restating them, and fails if a stylesheet drops the
+import. The site workflow runs it against the built artifact.
+
+Two gaps it deliberately leaves:
+
+- **Alpha variants.** `landing.css` still spells brand colors as
+  decimal `rgba()` triples wherever it needs opacity —
+  `rgba(141, 179, 84, 0.45)` is `--kiwi-flesh`. Folding those in
+  wants relative-color syntax (`rgb(from var(--kiwi-flesh) r g b /
+  0.45)`) and its own browser-support call; until then, don't add
+  new ones by hand.
+- **Values CSS cannot reach.** A `<meta name="theme-color">`
+  attribute cannot read a custom property, so the shared
+  `ThemeHead.astro` component owns that non-token browser-chrome
+  color for every standalone page.
+
 ## Build
 
 Run `npm run build` in `site/` when you touch either, after
@@ -98,33 +140,6 @@ set, so a new locale must be added there or its 404 omits itself.
 `docs/translating.md`'s add-a-locale section owns the full list and
 gives a grep for finding them rather than an enumeration to keep in
 step.
-
-## The light-mode green is derived, not chosen (#635)
-
-The accent-as-text green is the 50/50 midpoint of the brand fill
-green and the forest ink — a rule, not a hex — and it is one
-decision with two homes: `theme.css` for the Starlight docs and
-`landing.css` for every non-Starlight surface (`grep -l landing.css
-site/src` lists them). They were independently derived and one
-notch apart until #635.
-
-`scripts/check-site-tokens.py` recomputes the midpoint from the
-tree and holds both files to it, plus AA as text on the light bg —
-so it catches a drift applied to both files at once, which comparing
-them only to each other would not.
-
-It pins the *relationship*, though, and both endpoints are in-tree:
-retune the fill green and re-derive everything downstream here, and
-it passes. The same value is shared with kiwicanopy.com and KiwiCV,
-so **an edit to the fill green or the forest ink still needs the
-cross-repo check by hand** — that half is a review obligation, not
-something CI here can reach.
-
-Those two stylesheets are deliberately independent — neither
-imports the other. If a future change unifies them behind a shared
-token file, **delete that check in the same change set**: it
-requires a literal hex in each light block and would otherwise fail
-with a message that reads like a bug rather than like a fix.
 
 ## Template comments ship to visitors (#557)
 
