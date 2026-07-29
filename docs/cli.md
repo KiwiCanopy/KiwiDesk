@@ -107,7 +107,7 @@ item's only appearance in CLI output.
 | | `toggle_display_sticky` | — |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
-| Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) |
+| Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
 | | `spawn_new` | app bundle id |
 | System | `set_mode` | [space,] mode |
 | | `set_mouse_resize` | `layout\|snap_back` |

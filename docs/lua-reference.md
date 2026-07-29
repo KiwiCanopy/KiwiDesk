@@ -3262,6 +3262,15 @@ are keyed on the bundle id, so it finds apps anywhere on disk
 (including Finder and apps outside `/Applications`) regardless of
 system language.
 
+Pressing again while one of the app's windows is focused advances
+to the app's **next** window — space order, then slot order,
+wrapping around — so repeat presses cycle through all of the
+app's windows. With a single window a repeat press changes
+nothing. The cycle covers the windows KiwiDesk currently tracks;
+windows on another native macOS desktop are untracked while you
+are away (see accepted limitations) and are reached by the plain
+activate instead.
+
 **Example:**
 
 ```lua

@@ -1725,7 +1725,9 @@ Each row has an action. Built-in actions live under headings:
 - **Applications** — launch an app. Each row carries a **Launch
   behavior** menu: *Open or Focus* (the default — pull a running
   instance into the current space, or launch it if it isn't
-  running) or *Open New* (always launch a fresh instance). You can
+  running; pressing again while its window is focused cycles
+  through the app's other windows) or *Open New* (always launch
+  a fresh instance). You can
   add the same app twice to bind one shortcut per behavior; the
   menu greys a behavior already bound for that app so the two can't
   collide. Rows are sorted alphabetically by app name (settled when

@@ -255,6 +255,14 @@ extension KiwiCore {
         else {
             return .fail("expected app bundle id")
         }
+        // Already focused: advance to the app's next window
+        // (#637) — checked first, off tracked state alone, so
+        // the repeat press cycles instead of re-activating.
+        if !newInstance,
+            cycleToNextWindow(bundleID: bundleID)
+        {
+            return .ok()
+        }
         // Pull an existing instance forward, matched by bundle
         // id (locale- and rename-proof, unlike the display
         // name — see AppRef).
