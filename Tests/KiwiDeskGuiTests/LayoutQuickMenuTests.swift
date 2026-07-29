@@ -5,22 +5,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// No-op so this GUI suite never registers real global chords
-/// (#565); the Core target's `NoopHotkeyRegistrar` is not visible
-/// here, and the Gui convention is a per-file fake.
-private final class NoopRegistrar: HotkeyRegistrar {
-    func register(
-        keyCode: UInt32,
-        modifiers: HotkeyModifiers,
-        handler: @escaping @MainActor () -> Void
-    ) -> UInt32? { 1 }
-    func unregister(id: UInt32) {}
-}
-
 /// Fake menu-bar slot so this suite never registers a real
-/// system status item — the same seam discipline as the
-/// registrar above; `StatusItemSeamGuardTests` pins that every
-/// test construction injects one.
+/// system status item (#565 seam class);
+/// `StatusItemSeamGuardTests` pins that every test
+/// construction injects one.
 @MainActor
 private final class FakeStatusItem: StatusItemHandle {
     let button: NSStatusBarButton? = nil
@@ -31,9 +19,9 @@ private final class FakeStatusItem: StatusItemHandle {
 @MainActor
 struct LayoutQuickMenuTests {
     private func makeModel() -> (SettingsModel, KiwiCore) {
-        let core = makeTestCore(
-            hotkeyRegistrar: NoopRegistrar()
-        )
+        // makeTestCore's default registrar is already the no-op
+        // (#565) — this suite asserts nothing about registration.
+        let core = makeTestCore()
         try? core.guiConfigStore.save(GuiConfig())
         return (SettingsModel(core: core), core)
     }

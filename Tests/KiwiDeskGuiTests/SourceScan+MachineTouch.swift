@@ -19,6 +19,15 @@ extension SourceScan {
     /// *construction sites* (a type name followed by `(`), and a
     /// plain substring count would let a wrapper type or factory
     /// suffix silently satisfy or evade the pin.
+    ///
+    /// `stripComments`' known `//`-inside-a-string cut was
+    /// weighed for these needles (per `SourceScan.swift`): for a
+    /// stray-detector it fails OPEN — a violation after such a
+    /// string on one line is erased — but a construction site
+    /// sharing its line with a `//`-bearing literal has no
+    /// plausible shape under the 79-char format, and each
+    /// guard's presence canary reds if the scan goes blind
+    /// wholesale.
     static func identifierSites(
         of needle: String,
         under directory: URL
@@ -64,65 +73,60 @@ extension SourceScan {
         return found
     }
 
-    /// The first `func <name>` in `file` — signature, parameter
-    /// list and brace body — comments stripped, every line
-    /// whitespace-trimmed, blank lines dropped: a normalized
-    /// form two twin files can be compared by without
-    /// hand-listing what they must contain. The parameter list
-    /// is deliberately inside the comparison: `makeTestCore`'s
-    /// no-op registrar is a *default argument*, so a twin that
-    /// dropped it would differ in the signature, not the body.
-    ///
-    /// Returns nil when the function or its brace block cannot
-    /// be found — a gap for the consumer to red on, never a
-    /// silent skip.
-    static func normalizedFunction(
-        named name: String,
-        in file: URL
-    ) throws -> String? {
-        let source = stripComments(
+    /// The whole of `file`, comments stripped, every line
+    /// whitespace-trimmed, blank lines dropped — the form the
+    /// twin files are compared by. Whole-file, not per-function:
+    /// a hand-picked function list is itself one more place to
+    /// forget (a neutralization added as a *new* symbol in one
+    /// twin only would slip a narrower net), and the twins'
+    /// non-code differences are doc comments, which strip away.
+    static func normalizedFile(
+        _ file: URL
+    ) throws -> String {
+        stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
-        guard let start = source.range(of: "func \(name)")
-        else { return nil }
-        let text = Array(source[start.lowerBound...])
-        // Walk past the parameter list, then to the end of the
-        // brace block; the normalized form is everything from
-        // the `func` keyword through the closing brace.
-        var cursor = 0
-        while cursor < text.count, text[cursor] != "(" {
-            cursor += 1
-        }
-        guard
-            balanced(
-                text,
-                from: &cursor,
-                open: "(",
-                close: ")"
-            ) != nil
-        else { return nil }
-        // The return arrow sits between `)` and `{`; balanced()
-        // itself skips leading whitespace before `{`.
-        while cursor < text.count, text[cursor] != "{" {
-            cursor += 1
-        }
-        guard
-            balanced(
-                text,
-                from: &cursor,
-                open: "{",
-                close: "}"
-            ) != nil
-        else { return nil }
-        return String(text[0..<cursor])
-            .split(
-                separator: "\n",
-                omittingEmptySubsequences: true
-            )
-            .map {
-                $0.trimmingCharacters(in: .whitespaces)
+        .split(
+            separator: "\n",
+            omittingEmptySubsequences: true
+        )
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty }
+        .joined(separator: "\n")
+    }
+
+    /// The type names declared under an `@Suite` attribute in
+    /// `file`: for each stripped line starting with `@Suite`,
+    /// the identifier after the next `struct `/`class ` keyword.
+    /// Backs the partition guard's *type* axis — `swift test
+    /// --skip/--filter` matches test identifiers, so the suite
+    /// TYPE name is what the partition actually consumes; the
+    /// filename is only the greppable convention.
+    static func suiteTypeNames(
+        in file: URL
+    ) throws -> [String] {
+        let lines = stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        .split(separator: "\n", omittingEmptySubsequences: false)
+        var names: [String] = []
+        var pending = false
+        for line in lines {
+            let bare = line.trimmingCharacters(in: .whitespaces)
+            if bare.hasPrefix("@Suite") { pending = true }
+            guard pending else { continue }
+            for keyword in ["struct ", "class "] {
+                guard let range = bare.range(of: keyword)
+                else { continue }
+                let name = bare[range.upperBound...].prefix {
+                    $0.isLetter || $0.isNumber || $0 == "_"
+                }
+                if !name.isEmpty {
+                    names.append(String(name))
+                    pending = false
+                }
             }
-            .filter { !$0.isEmpty }
-            .joined(separator: "\n")
+        }
+        return names
     }
 }

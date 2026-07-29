@@ -22,8 +22,9 @@ import Testing
 ///
 /// Needles are spelled `"Name" + "("` so this file never
 /// matches its own scan. Each `allowed` constant is the one
-/// copy of who may (`.claude/rules/parity-tests.md`); grow it
-/// only with a seam argument in the nominee's doc comment.
+/// copy of who may — the AGENTS.md §5 allowed-map convention;
+/// grow it only with a seam argument in the nominee's doc
+/// comment.
 @Suite("Machine-touch seams stay injected")
 struct MachineTouchTests {
     private static let root = SourceScan.repoRoot(
@@ -61,9 +62,11 @@ struct MachineTouchTests {
             of: "NSStatusBar.system",
             under: Self.productionTrees
         )
-        // The seam itself must exist, or the scan is looking at
-        // the wrong tree.
-        #expect(!sites.isEmpty)
+        // Exactly the seam's one default-factory site: zero
+        // means the scan looks at the wrong tree, two means a
+        // second touch grew beside the seam *inside* the
+        // allowed file, which the stray filter cannot see.
+        #expect(sites.count == 1)
         let strays = sites.filter {
             $0.file.lastPathComponent != Self.statusBarAllowed
         }
@@ -145,6 +148,14 @@ struct MachineTouchTests {
     /// out of a text scan's reach — the same string is pure data
     /// in the ManagedConfig analyses — so fixtures that run keep
     /// their exec commands inert instead (`FirstRunSeedTests`).
+    ///
+    /// Two axes, deliberately: `swift test --skip/--filter`
+    /// matches the suite *type* name, so that is the axis the
+    /// partition consumes; the *filename* prefix is only the
+    /// greppable convention. Pinning the filename alone would
+    /// re-open the exact escape the `ExecDedupTests` rename
+    /// closed — a properly-named file declaring a stray-named
+    /// suite.
     @Test("exec-child suites stay in the ExecTests partition")
     func execChildSuites() throws {
         let sites = try Self.sites(
@@ -153,41 +164,99 @@ struct MachineTouchTests {
         )
         // The partition must be inhabited, or the needle rotted.
         #expect(!sites.isEmpty)
-        let strays = sites.filter {
+        let strayFiles = sites.filter {
             !$0.file.lastPathComponent.hasPrefix("ExecTests")
         }
-        let listed = strays.map(\.site)
+        let listed = strayFiles.map(\.site)
             .joined(separator: ", ")
         #expect(
-            strays.isEmpty,
+            strayFiles.isEmpty,
             "real shell children outside --skip: \(listed)"
         )
+        // The type axis: every @Suite declared in a spawning
+        // file must carry the prefix the CLI partition matches.
+        for file in Set(sites.map(\.file)) {
+            let types = try SourceScan.suiteTypeNames(in: file)
+            // A spawning file with no recognizable suite is a
+            // walk gap — red, never a silent skip.
+            #expect(
+                !types.isEmpty,
+                "no @Suite found in \(file.lastPathComponent)"
+            )
+            let strayTypes = types.filter {
+                !$0.hasPrefix("ExecTests")
+            }
+            let names = strayTypes.joined(separator: ", ")
+            #expect(
+                strayTypes.isEmpty,
+                "suite escapes the type partition: \(names)"
+            )
+        }
     }
 
+    /// Whole-file comparison, not a hand-picked function list —
+    /// a list is one more place to forget, and a neutralization
+    /// added as a *new* symbol in one twin only would slip a
+    /// narrower net. The twins' only legitimate differences are
+    /// doc comments, which the normalization strips.
     @Test("the makeTestCore twins are identical")
     func testCoreTwins() throws {
         let twins = Self.testTrees.map {
             $0.appendingPathComponent(Self.coreFactory)
         }
-        let factories = try twins.map {
-            try SourceScan.normalizedFunction(
-                named: "makeTestCore",
-                in: $0
-            )
+        let normalized = try twins.map {
+            try SourceScan.normalizedFile($0)
         }
-        let registrars = try twins.map {
-            try SourceScan.normalizedFunction(
-                named: "register",
-                in: $0
-            )
-        }
-        // nil means the walk failed — red, never skip.
-        #expect(!factories.contains(nil))
-        #expect(!registrars.contains(nil))
+        // An empty normalization is a gutted twin or a broken
+        // walk — red, never a vacuous pass.
+        #expect(!normalized.contains(""))
         #expect(
-            factories[0] == factories[1],
+            normalized[0] == normalized[1],
             "makeTestCore twins drifted — desynced seams"
         )
-        #expect(registrars[0] == registrars[1])
+    }
+
+    /// Raw spawner constructions, so the class is sealed rather
+    /// than one spelling: `exec.launch` covers the shared-core
+    /// drive, this covers a test building its own `Process` or
+    /// `ExecLauncher`. `ScriptFixture.swift` is the ratified
+    /// spawn primitive (repo scripts, drained pipes); exec
+    /// suites may also spawn raw within their partition.
+    @Test("raw process spawns stay in ratified homes")
+    func rawSpawnConstruction() throws {
+        let processSites = try Self.sites(
+            of: "Process" + "(",
+            under: Self.testTrees
+        )
+        // ScriptFixture's own spawn proves the scan sees.
+        #expect(
+            processSites.contains {
+                $0.file.lastPathComponent
+                    == "ScriptFixture.swift"
+            }
+        )
+        let strays = processSites.filter {
+            $0.file.lastPathComponent != "ScriptFixture.swift"
+                && !$0.file.lastPathComponent
+                    .hasPrefix("ExecTests")
+        }
+        let listed = strays.map(\.site)
+            .joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "raw Process outside ratified homes: \(listed)"
+        )
+        // Pure tripwire — no live site today, so no presence
+        // canary: an empty result is the desired state.
+        let launcherSites = try Self.sites(
+            of: "ExecLauncher" + "(",
+            under: Self.testTrees
+        )
+        let launchers = launcherSites.map(\.site)
+            .joined(separator: ", ")
+        #expect(
+            launcherSites.isEmpty,
+            "test-built ExecLauncher: \(launchers)"
+        )
     }
 }

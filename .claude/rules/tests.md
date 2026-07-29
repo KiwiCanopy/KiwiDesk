@@ -174,11 +174,14 @@ seam shape (live default in production, factory in the test
 trees) and a needle in that guard.
 
 Deliberate residue a run does still touch, as audited
-2026-07-29: throwaway AF_UNIX sockets under temp paths
-(`SocketTests`), real `CADisplayLink`s from
-animation-keyed suites, repo-script children drained by
-`ScriptFixture`, scratch `UserDefaults` suites cleaned on both
-sides, one live `NSEvent.pressedMouseButtons` read —
+2026-07-29 — a change adding a residue class extends and
+re-dates this list in the same change set: throwaway AF_UNIX
+sockets under temp paths (`SocketTests`), real `CADisplayLink`s
+from animation-keyed suites, repo-script children drained by
+`ScriptFixture`, one inert `true` child when
+`FirstRunSeedTests`' executed hooks fixture fires, scratch
+`UserDefaults` suites cleaned on both sides, one live
+`NSEvent.pressedMouseButtons` read —
 `MouseFollowsFocusTests` fails if a human holds a mouse button
 mid-run — and `GeometryUtils.menuBarAutoHides`, a read-only
 global-defaults lookup that only reaches fixtures which didn't

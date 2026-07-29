@@ -157,7 +157,7 @@ traced at directory altitude — see **`docs/architecture.md`**.
 3. **Act:** implement step by step; keep commits focused.
 4. **Verify:** run the **`verify-gate` skill**
    ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
-   — `swift build`, the two-command test run, `scripts/lint.sh`,
+   — `swift build`, the test run, `scripts/lint.sh`,
    and the release build when the change touches concurrency or
    `Sendable`. That skill owns the procedure — what to run, in
    what order, and when CI's `Release Build` job substitutes for
