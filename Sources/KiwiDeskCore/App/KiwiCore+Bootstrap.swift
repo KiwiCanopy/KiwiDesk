@@ -11,21 +11,24 @@ extension KiwiCore {
         crash.restoreState = { [weak self] snapshot in
             self?.restore(snapshot)
         }
-        crash.onLog = { [weak self] message in
-            self?.onLog(message)
+        // Every diagnostic seam in Core is wired here, together,
+        // through one forwarding closure (core-boundaries.md).
+        // Together because a seam that is missing from the group
+        // is then missing from a list of near-identical lines
+        // rather than from a hundred-line function; one closure
+        // because seven copies of the same body is seven chances
+        // to write a subtly different one. `LogSeamWiringTests`
+        // is the net under both.
+        let log: @MainActor (String) -> Void = { [weak self] in
+            self?.onLog($0)
         }
-        keys.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
-        exec.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
-        profiles.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
-        borders.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
+        crash.onLog = log
+        keys.onLog = log
+        exec.onLog = log
+        profiles.onLog = log
+        borders.onLog = log
+        socket.onLog = log
+        bus.onLog = log
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
         // pins the ring and mark to the AX-fallback path.
         borders.configureFromEnvironment()
@@ -102,9 +105,6 @@ extension KiwiCore {
                 ?? .fail("core unavailable")
         }
         socket.bus = bus
-        socket.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }
@@ -119,9 +119,6 @@ extension KiwiCore {
         }
         sleepWake.restoreState = { [weak self] snapshot in
             self?.restore(snapshot)
-        }
-        bus.onLog = { [weak self] message in
-            self?.onLog(message)
         }
     }
 }

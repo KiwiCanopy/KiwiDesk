@@ -36,20 +36,17 @@ itself when a fifth is added.
   [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.
-- **A `var onLog` seam is wired in `KiwiCore+Bootstrap`** — that
-  is the one place a subsystem's diagnostics are joined to
-  `KiwiCore.onLog`, and so to syslog. Declaring one and leaving
-  it unassigned fails by **doing nothing**: the default is
-  `{ _ in }`, so the subsystem compiles, ships, runs and drops
-  every line it logs, with no red, no warning and no symptom
-  beyond a diagnostic that was never going to appear.
-  `SocketServer.onLog` sat that way from the day it was written,
-  six seams wired beside it in the same function. Declare the
-  seam and wire it in the same change, and give it a caller —
-  #611's rule, that an unobservable rescue is how a loud failure
-  becomes a quiet one, applies to the seam as much as to the
-  code that reports through it. `LogSeamWiringTests` discovers
-  both ends and its map is the exemption list.
+- **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
+  the group where all of them are, and in the same change that
+  declares it. Leaving one unassigned fails by **doing
+  nothing** — most default to a no-op, so the subsystem
+  compiles, ships, runs and drops every line it logs, with no
+  red and no symptom beyond a diagnostic that was never going to
+  appear. `LogSeamWiringTests` is the guard, its `allowed` map
+  is the exemption list, and its docstring carries the argument.
+  Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
+  after the AX grant) is invisible to that guard, and `onLog`
+  needs no permission to be useful.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

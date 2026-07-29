@@ -6,13 +6,13 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents is **nothing happening.** An
-/// unassigned seam keeps its default — `{ _ in }` for four of the
-/// seven — so the subsystem compiles, ships, runs, and throws its
-/// diagnostics away. Nothing reds, nothing warns, and the only
-/// symptom is a log line that was never going to appear, missed
-/// months later by whoever needed it. #599 was findable because a
-/// spring divergence was loud; #611 named the same trap — an
+/// The failure this prevents is **nothing happening.** Most of
+/// the seams default to a no-op, so an unassigned one lets its
+/// subsystem compile, ship, run, and throw its diagnostics away.
+/// Nothing reds, nothing warns, and the only symptom is a log
+/// line that was never going to appear, missed months later by
+/// whoever needed it. #599 was findable because a spring
+/// divergence was loud; #611 named the same trap — an
 /// unobservable rescue is how a loud failure becomes a quiet one
 /// — and wired `AnimationEngine.onLog` on the spot.
 /// `SocketServer.onLog` had been declared and never assigned
@@ -22,19 +22,31 @@ import Testing
 ///
 /// **The lens, not the list.** Both ends are discovered: the seam
 /// owners by scanning every Swift file in the target for
-/// `var onLog` and walking each declaration back to its enclosing
-/// type, and the wired set by resolving each receiver assigned in
+/// `var onLog:` and resolving each declaration's enclosing type,
+/// and the wired set by resolving each receiver assigned in
 /// bootstrap through the stored-property declaration that gives
 /// it a type. A seam added to a subsystem that does not exist yet
 /// is inside the net on arrival, and no list here is touched to
 /// keep it there.
 ///
-/// The resolver's limits all fail **shut** — a red naming what it
-/// could not resolve, never a silent pass. It reads stored
-/// properties at type scope (four-space indent), so a seam owner
-/// held by a nested type resolves to nothing and reds; a property
-/// name two types share resolves ambiguously and reds. Both want
-/// a human, and neither is reachable today.
+/// **Three limits, and they do not all fail the same way** —
+/// which is why they are written out rather than summarised:
+///
+/// - It is **type**-keyed, not instance-keyed. Two instances of
+///   one seam-owning type with only one of them wired passes
+///   green. Nothing has that shape today (`borders` and
+///   `stickyMarks` are separate types and only `BorderManager`
+///   declares a seam), but the shape is plausible, so this one
+///   fails **open**.
+/// - It proves the seam is **assigned**, not that the assignment
+///   reaches the sink: `socket.onLog = { _ in }` in bootstrap
+///   passes. Also **open**, and no cheap scan does better —
+///   pinning the closure body would red on any refactor of a
+///   line that is correct.
+/// - Everything the resolver cannot work out fails **shut**, as
+///   a red naming what it could not resolve: an unrecognised
+///   assignment shape, a receiver whose type is ambiguous or
+///   undeclared, a seam whose enclosing type the walk missed.
 ///
 /// It lives in the GUI test target purely because `SourceScan`
 /// does — `VisibleBoundsRoutingTests` makes the same trade. It
@@ -46,16 +58,24 @@ struct LogSeamWiringTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
     }
 
-    private var bootstrapFile: URL {
-        coreRoot.appendingPathComponent(
-            "App/KiwiCore+Bootstrap.swift"
+    /// Bootstrap by **prefix**, because the rule is written
+    /// "wired in `KiwiCore+Bootstrap`" and that file grows with
+    /// every subsystem. A split into `KiwiCore+Bootstrap2` would
+    /// otherwise red every seam at once, over a change that
+    /// honours the rule exactly.
+    private func bootstrapFiles() throws -> [URL] {
+        try SourceScan.swiftSources(
+            under: coreRoot.appendingPathComponent("App")
         )
+        .filter {
+            $0.lastPathComponent.hasPrefix("KiwiCore+Bootstrap")
+        }
     }
 
     /// Seam owners deliberately left out of bootstrap, and why.
     ///
     /// **This map is the exemption list** — AGENTS.md §5 and
-    /// `.claude/rules/parity-tests.md` carry the principle and
+    /// `.claude/rules/core-boundaries.md` carry the principle and
     /// point here rather than restating who qualifies. Each entry
     /// is checked both ways: its type must still declare a seam
     /// and must still be unwired, so a stale exemption reds
@@ -125,24 +145,25 @@ struct LogSeamWiringTests {
 
     // MARK: - Discovery
 
-    /// The type enclosing each `var onLog` declaration.
+    /// The type enclosing each `var onLog:` declaration. The
+    /// colon is load-bearing: without it a future `onLogLevel`
+    /// registers as a seam and demands a wiring it has no use
+    /// for.
     private func seamOwners(
         in sources: [URL],
         gaps: inout [String]
     ) throws -> Set<String> {
-        let declaration = try regex(
-            #"(?:^|\s)(?:class|struct|actor|enum|extension"#
-                + #"|protocol)\s+([A-Za-z_][A-Za-z0-9_]*)"#
-        )
         var owners: Set<String> = []
         for file in sources {
             let lines = try strippedLines(of: file)
-            for seam in seams(in: lines, declaration: declaration) {
-                guard let owner = seam.owner else {
+            let enclosing = SourceScan.enclosingTypes(of: lines)
+            for index in lines.indices
+            where lines[index].contains("var onLog:") {
+                guard let owner = enclosing[index] else {
                     gaps.append(
                         "the type declaring `var onLog` at "
                             + "\(file.lastPathComponent):"
-                            + "\(seam.line + 1)"
+                            + "\(index + 1)"
                     )
                     continue
                 }
@@ -152,118 +173,98 @@ struct LogSeamWiringTests {
         return owners
     }
 
-    /// Each `var onLog` line in one file with the type that
-    /// encloses it, from a forward walk carrying a brace-depth
-    /// type stack.
-    ///
-    /// The stack is the whole point. Walking *backwards* to the
-    /// nearest preceding declaration reads a closed **sibling**
-    /// as the owner: `BorderManager.Spec` is declared above
-    /// `BorderManager.onLog`, and the first draft of this guard
-    /// reported the seam's owner as `Spec` — a red on a healthy
-    /// tree, which is how a guard gets weakened into silence.
-    ///
-    /// `extension` and `protocol` push like any other: a seam
-    /// declared in either resolves to that name and is then
-    /// judged the same way.
-    private func seams(
-        in lines: [Substring],
-        declaration: NSRegularExpression
-    ) -> [(line: Int, owner: String?)] {
-        var found: [(line: Int, owner: String?)] = []
-        var stack: [(name: String, depth: Int)] = []
-        var pending: String?
-        var depth = 0
-        for (index, line) in lines.enumerated() {
-            if line.contains("var onLog") {
-                found.append((index, stack.last?.name))
-            }
-            if let name = captures(
-                declaration,
-                in: String(line),
-                [1]
-            ).first?[1] {
-                pending = name
-            }
-            var inString = false
-            var escaped = false
-            for character in line {
-                if escaped {
-                    escaped = false
-                } else if character == "\\" {
-                    escaped = true
-                } else if character == "\"" {
-                    inString.toggle()
-                } else if inString {
-                    continue
-                } else if character == "{" {
-                    depth += 1
-                    if let name = pending {
-                        stack.append((name, depth))
-                        pending = nil
-                    }
-                } else if character == "}" {
-                    if stack.last?.depth == depth {
-                        stack.removeLast()
-                    }
-                    depth -= 1
-                }
-            }
-        }
-        return found
-    }
-
     /// The seam owners bootstrap actually assigns, found by
-    /// resolving each receiver (`crash`, `tiler.animation`)
-    /// through its stored-property declaration.
+    /// resolving each receiver (`crash`, or `tiler.animation`
+    /// once #611 lands) through its stored-property declaration.
     private func wiredOwners(
         properties: [String: Set<String>],
         gaps: inout [String]
     ) throws -> Set<String> {
-        let source = SourceScan.stripComments(
-            try String(contentsOf: bootstrapFile, encoding: .utf8)
-        )
-        let assignment = try regex(
-            #"([A-Za-z_][A-Za-z0-9_.]*)\.onLog\s*="#
-        )
         var owners: Set<String> = []
-        for match in captures(assignment, in: source, [1]) {
-            guard let receiver = match[1] else { continue }
-            let leaf = receiver.split(separator: ".").last
-                .map(String.init)
-            guard let types = leaf.flatMap({ properties[$0] }),
-                types.count == 1, let owner = types.first
-            else {
+        for file in try bootstrapFiles() {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let receivers = SourceScan.allMatches(
+                in: source,
+                pattern: #"([A-Za-z_][A-Za-z0-9_.]*)\.onLog\s*="#
+            )
+            // That pattern knows one wiring shape.
+            // `luaEngine?.onLog =` and `engines[0].onLog =` match
+            // nothing at all, and the seam would then read as
+            // *unwired* — a red carrying the wrong message, which
+            // is worse than no red. So count the bare
+            // assignments too and gap on the difference.
+            let bare = source.occurrences(of: ".onLog =")
+            if bare > receivers.count {
                 gaps.append(
-                    "the type of `\(receiver)`, assigned "
-                        + "`.onLog` in KiwiCore+Bootstrap.swift"
+                    "\(bare - receivers.count) `.onLog =` "
+                        + "assignment(s) in "
+                        + "\(file.lastPathComponent) written in "
+                        + "a shape this scan cannot read"
                 )
-                continue
             }
-            owners.insert(owner)
+            for receiver in receivers {
+                guard
+                    let owner = resolve(receiver, in: properties)
+                else {
+                    gaps.append(
+                        "the type of `\(receiver)`, assigned "
+                            + "`.onLog` in "
+                            + file.lastPathComponent
+                    )
+                    continue
+                }
+                owners.insert(owner)
+            }
         }
         return owners
     }
 
+    /// A receiver's declared type, or `nil` when the index holds
+    /// no entry for its name or holds more than one — an
+    /// ambiguous name is refused rather than resolved to
+    /// whichever declaration the scan reached last.
+    private func resolve(
+        _ receiver: String,
+        in properties: [String: Set<String>]
+    ) -> String? {
+        guard let leaf = receiver.split(separator: ".").last,
+            let types = properties[String(leaf)],
+            types.count == 1
+        else { return nil }
+        return types.first
+    }
+
     /// Every stored property declared at type scope, as
     /// name → declared types. A name keeps a *set* so a collision
-    /// resolves to nothing above, rather than to whichever
-    /// declaration the walk happened to reach last.
+    /// is refused above rather than resolved arbitrarily.
     private func storedProperties(
         in sources: [URL]
     ) throws -> [String: Set<String>] {
-        let property = try regex(
+        // The type capture is deliberately upper-case-initial.
+        // Accepting any word reads `var x: any P` as the type
+        // `any` and `var x = makeThing()` as the type
+        // `makeThing`, and since either resolves to exactly one
+        // name the junk is then accepted **silently** — the one
+        // way this scan could pass for the wrong reason. Both
+        // shapes exist in the tree today.
+        let pattern =
             #"^ {4}(?:[a-z]+(?:\(set\))?\s+)*(?:let|var)\s+"#
-                + #"([A-Za-z_][A-Za-z0-9_]*)\s*"#
-                + #"(?::\s*([A-Za-z_][A-Za-z0-9_]*)"#
-                + #"|=\s*([A-Za-z_][A-Za-z0-9_]*)\()"#
-        )
+            + #"([A-Za-z_][A-Za-z0-9_]*)\s*"#
+            + #"(?::\s*([A-Z][A-Za-z0-9_]*)"#
+            + #"|=\s*([A-Z][A-Za-z0-9_]*)\()"#
         var index: [String: Set<String>] = [:]
         for file in sources {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            for match in captures(property, in: source, [1, 2, 3]) {
+            for match in SourceScan.allMatchGroups(
+                in: source,
+                pattern: pattern,
+                groups: [1, 2, 3],
+                options: [.anchorsMatchLines]
+            ) {
                 guard let name = match[1],
                     let type = match[2] ?? match[3]
                 else { continue }
@@ -273,8 +274,6 @@ struct LogSeamWiringTests {
         return index
     }
 
-    // MARK: - Primitives
-
     private func strippedLines(
         of file: URL
     ) throws -> [Substring] {
@@ -282,37 +281,5 @@ struct LogSeamWiringTests {
             try String(contentsOf: file, encoding: .utf8)
         )
         .split(separator: "\n", omittingEmptySubsequences: false)
-    }
-
-    private func regex(
-        _ pattern: String
-    ) throws -> NSRegularExpression {
-        try NSRegularExpression(
-            pattern: pattern,
-            options: [.anchorsMatchLines]
-        )
-    }
-
-    /// Each match's requested capture groups, a group that did
-    /// not participate simply absent.
-    private func captures(
-        _ regex: NSRegularExpression,
-        in text: String,
-        _ groups: [Int]
-    ) -> [[Int: String]] {
-        let whole = NSRange(text.startIndex..., in: text)
-        return regex.matches(in: text, range: whole).map { match in
-            var found: [Int: String] = [:]
-            for group in groups {
-                guard group < match.numberOfRanges,
-                    let range = Range(
-                        match.range(at: group),
-                        in: text
-                    )
-                else { continue }
-                found[group] = String(text[range])
-            }
-            return found
-        }
     }
 }

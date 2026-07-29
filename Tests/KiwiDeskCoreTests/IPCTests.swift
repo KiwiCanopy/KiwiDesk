@@ -124,13 +124,13 @@ struct SocketTests {
         )
     }
 
-    /// A misspelled event name is dropped by `compactMap` and the
-    /// client still gets `ok`, so nothing on the wire says the
-    /// subscription is deaf — `onLog` is the only channel that
-    /// can (#611's rule: an unobservable rescue is how a loud
-    /// failure becomes a quiet one).
-    @Test("An unknown subscribe event reports through onLog")
-    func unknownSubscribeEventLogs() async throws {
+    /// A name that matches no event is dropped and the client
+    /// still gets `ok`, so the subscription reads as working.
+    /// The client made the mistake, so the response carries the
+    /// list; `onLog` is the server's own record of it, and this
+    /// is the seam's only caller.
+    @Test("Unknown subscribe events reach the wire and the log")
+    func unknownSubscribeEventsAreReported() async throws {
         let path = Self.throwawaySocketPath()
         let server = SocketServer(path: path)
         var logs: [String] = []
@@ -140,7 +140,7 @@ struct SocketTests {
 
         // The log lands before the `ok` is written, so awaiting
         // the response is the synchronisation — no poll, no
-        // deadline.
+        // deadline on the assertion.
         let all = try await Self.roundTrip(
             CommandRequest(
                 command: "subscribe",
@@ -149,29 +149,47 @@ struct SocketTests {
             over: path
         )
         #expect(all.isSuccess)
+        #expect(
+            all.data
+                == .object([
+                    "unknown": .array([.string("space_chnage")])
+                ])
+        )
         #expect(logs.count == 1)
         #expect(logs.last?.contains("space_chnage") == true)
         // Every name unknown means the empty set falls through
-        // to the firehose, which is the more misleading outcome
-        // of the two and says so.
+        // to the firehose, which is the more misleading of the
+        // two outcomes and says so.
         #expect(
             logs.last?.contains("streaming all events") == true
         )
 
-        let some = try await Self.roundTrip(
+        // A non-string argument has no name to report but is
+        // just as dropped, and a repeat is listed once.
+        let mixed = try await Self.roundTrip(
             CommandRequest(
                 command: "subscribe",
-                args: [.string("space_change"), .string("nope")]
+                args: [
+                    .string("space_change"), .string("nope"),
+                    .string("nope"), .bool(true),
+                ]
             ),
             over: path
         )
-        #expect(some.isSuccess)
+        #expect(mixed.isSuccess)
+        #expect(
+            mixed.data
+                == .object([
+                    "unknown": .array([
+                        .string("nope"), .string("<non-string>"),
+                    ])
+                ])
+        )
         #expect(logs.count == 2)
-        #expect(logs.last?.contains("nope") == true)
         #expect(logs.last?.contains("ignored") == true)
     }
 
-    @Test("A known subscribe event logs nothing")
+    @Test("A known subscribe event is silent and bare")
     func knownSubscribeEventIsQuiet() async throws {
         let path = Self.throwawaySocketPath()
         let server = SocketServer(path: path)
@@ -188,6 +206,7 @@ struct SocketTests {
             over: path
         )
         #expect(response.isSuccess)
+        #expect(response.data == nil)
         #expect(logs.isEmpty)
     }
 
@@ -200,15 +219,18 @@ struct SocketTests {
 
     /// Blocking client work happens off the main actor; the
     /// server needs the main queue to process. The listener binds
-    /// asynchronously, so connecting may need a few retries.
+    /// asynchronously, so connecting retries until it answers.
     private static func roundTrip(
         _ request: CommandRequest,
         over path: String
     ) async throws -> CommandResponse {
         try await Task.detached {
             () async throws -> CommandResponse in
+            let deadline = Date().addingTimeInterval(
+                socketConnectHangGuard
+            )
             var client: SocketClient?
-            for _ in 0..<50 {
+            while client == nil, Date() < deadline {
                 client = try? SocketClient(path: path)
                 if client != nil { break }
                 try await Task.sleep(
@@ -222,3 +244,12 @@ struct SocketTests {
         }.value
     }
 }
+
+/// The listener binds on the **main queue**, and swift-testing
+/// runs suites concurrently, so under full-suite load the shared
+/// main actor is starved for seconds and a tight deadline trips
+/// on a connection that landed, just late (#344). Generous by
+/// design: the loop exits the instant the socket answers — ~30 ms
+/// in practice — so a passing run is never slowed and the
+/// deadline only bounds a genuine hang.
+private let socketConnectHangGuard: TimeInterval = 30

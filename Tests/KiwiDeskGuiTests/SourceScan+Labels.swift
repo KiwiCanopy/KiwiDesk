@@ -33,6 +33,41 @@ extension SourceScan {
         return String(source[range])
     }
 
+    /// Every match's requested capture groups, in document
+    /// order, a group that did not participate simply absent.
+    /// The multi-group form of `allMatches`, for a pattern whose
+    /// captures only mean something *together* — a property's
+    /// name beside its type, where taking either alone pairs the
+    /// wrong two.
+    static func allMatchGroups(
+        in source: String,
+        pattern: String,
+        groups: [Int],
+        options: NSRegularExpression.Options = []
+    ) -> [[Int: String]] {
+        guard
+            let regex = try? NSRegularExpression(
+                pattern: pattern,
+                options: options
+            )
+        else { return [] }
+        let whole = NSRange(source.startIndex..., in: source)
+        return regex.matches(in: source, range: whole).map {
+            match in
+            var found: [Int: String] = [:]
+            for group in groups {
+                guard group < match.numberOfRanges,
+                    let range = Range(
+                        match.range(at: group),
+                        in: source
+                    )
+                else { continue }
+                found[group] = String(source[range])
+            }
+            return found
+        }
+    }
+
     /// Every first capture of `pattern`, in document order.
     /// An array, not a `Set`: a guard that counts declarations
     /// needs to see a duplicate rather than have it silently

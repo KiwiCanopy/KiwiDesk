@@ -99,8 +99,21 @@ public final class SocketServer {
             return
         }
         if request.command == "subscribe" {
-            subscribe(client, args: request.args ?? [])
-            client.send(CommandResponse.ok())
+            let unknown = subscribe(
+                client,
+                args: request.args ?? []
+            )
+            client.send(
+                unknown.isEmpty
+                    ? CommandResponse.ok()
+                    : CommandResponse.ok(
+                        .object([
+                            "unknown": .array(
+                                unknown.map(JSONValue.string)
+                            )
+                        ])
+                    )
+            )
             return
         }
         client.send(
@@ -108,30 +121,43 @@ public final class SocketServer {
         )
     }
 
+    /// Subscribes `client` and returns the names it asked for
+    /// that name no event.
+    ///
+    /// A misspelled name used to be dropped in silence while the
+    /// client still got a bare `ok`, so the subscription read as
+    /// working; when *every* name is unknown the empty set falls
+    /// through to the firehose below, which reads as working
+    /// harder. The caller now carries the list back on the wire
+    /// — the client made the mistake, so the client is told —
+    /// and the log line is the server's own record. English like
+    /// every other IPC string (core-boundaries.md).
     private func subscribe(
         _ client: Client,
         args: [JSONValue]
-    ) {
+    ) -> [String] {
         var events: Set<KiwiNotification> = []
         var unknown: [String] = []
-        for name in args.compactMap(\.stringValue) {
+        for arg in args {
+            // A non-string arg has no name to report, but it is
+            // just as dropped, so it is counted as unknown
+            // rather than vanishing a second way.
+            let name = arg.stringValue ?? "<non-string>"
             if let event = KiwiNotification(rawValue: name) {
                 events.insert(event)
-            } else {
+            } else if !unknown.contains(name) {
                 unknown.append(name)
             }
         }
-        // A misspelled event name is dropped in silence and the
-        // client still gets `ok`, so the subscription reads as
-        // working; when *every* name is unknown the empty set
-        // falls through to the firehose below, which reads as
-        // working harder. The socket is the one surface with no
-        // other way to say so — the CLI just sits there. English
-        // like every other IPC string (core-boundaries.md).
         if !unknown.isEmpty {
+            // Capped: the names are client-supplied and the
+            // socket is unauthenticated, so an unbounded join
+            // lets any local process write a line of any length
+            // into the unified log.
+            let listed = unknown.prefix(5).joined(separator: ", ")
+            let rest = unknown.count > 5 ? ", …" : ""
             onLog(
-                "subscribe: unknown event(s) "
-                    + unknown.joined(separator: ", ")
+                "subscribe: unknown event(s) \(listed)\(rest)"
                     + (events.isEmpty
                         ? "; streaming all events instead"
                         : "; ignored")
@@ -156,6 +182,7 @@ public final class SocketServer {
                 )
             )
         }
+        return unknown
     }
 }
 
