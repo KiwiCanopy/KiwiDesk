@@ -205,7 +205,17 @@ struct AnimationSettleWatchdogTests {
         // than the fixture above: a two-display move is the
         // slowest real settle, and it is what sets the margin.
         let far = CGRect(x: 15360, y: 2160, width: 1920, height: 1080)
-        for (durationMS, ceiling) in [(50, 0.30), (1000, 3.2)] {
+        // Two-sided on purpose. A ceiling alone reds a broken
+        // margin, which is the safety property — but the settle
+        // could also *shrink* (a ζ change, a new mapping) and
+        // leave "0.20 s" and "2.80 s" quietly wrong in two files
+        // while this stayed green. That is the drift the test was
+        // added to stop, so bound it from below too. Deterministic
+        // and host-independent (no `NSScreen`, pure float), so a
+        // tight window is staleness pressure, not flake risk.
+        for (durationMS, low, high) in [
+            (50, 0.15, 0.30), (1000, 2.6, 3.2),
+        ] {
             let spring = Spring(
                 response: Double(durationMS) / 1000 * 1.4,
                 dampingFraction: 0.85
@@ -230,7 +240,7 @@ struct AnimationSettleWatchdogTests {
             // (6.0x) and only 1.8x against the floor — which is
             // why the multiple, not the floor, holds that end.
             #expect(
-                worst < ceiling,
+                worst > low && worst < high,
                 "\(durationMS)ms slowest settle \(worst)s"
             )
         }

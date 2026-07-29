@@ -51,8 +51,8 @@ editing here:
   settle signal; the watchdog in `tick` is the net under it, so
   the next one — a pathological Lua-supplied spring, an
   integrator change — costs one window a jump instead of three
-  subsystems for a session. Past `max(5s, 12 × response)` of
-  motion an animation snaps to its target and leaves the engine
+  subsystems for a session. Past `max(5s, min(12 × response, 60s))`
+  of motion an animation snaps to its target and leaves the engine
   through `FrameAnimation.forceSettle`, the same exit a clean
   settle and the non-finite net take. Keep it one recovery shape:
   that is the shape already proven to release the signal.

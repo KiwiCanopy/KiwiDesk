@@ -74,7 +74,7 @@ public struct FrameAnimation: Sendable {
     private(set) var age: TimeInterval = 0
 
     /// Raised by the non-finite net, cleared by
-    /// `takeRescueNotice()`. A value type has no log seam of its
+    /// `takeNonFiniteNotice()`. A value type has no log seam of its
     /// own and the engine will not poll for one, so the net leaves
     /// a mark that the tick loop collects on its way past (#611).
     private var pendingRescueNotice = false
