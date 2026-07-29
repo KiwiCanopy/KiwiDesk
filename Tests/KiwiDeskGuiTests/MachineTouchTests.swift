@@ -233,14 +233,19 @@ struct MachineTouchTests {
     /// suites may also spawn raw within their partition.
     @Test("raw process spawns stay in ratified homes")
     func rawSpawnConstruction() throws {
-        // `launchedProcess(` is the deprecated-but-functional
-        // second spelling of the same spawn.
+        // All three spawn spellings: the initializer, the
+        // deprecated `launchedProcess(` factory, and the
+        // `Process.run(` class factory that constructs nothing.
         let processSites = try Self.sites(
             of: "Process" + "(",
             under: Self.testTrees
         )
         let launched = try Self.sites(
             of: "launchedProcess" + "(",
+            under: Self.testTrees
+        )
+        let classRun = try Self.sites(
+            of: "Process.run" + "(",
             under: Self.testTrees
         )
         // ScriptFixture's own spawn proves the scan sees.
@@ -250,7 +255,8 @@ struct MachineTouchTests {
                     == "ScriptFixture.swift"
             }
         )
-        let strays = (processSites + launched).filter {
+        let raw = processSites + launched + classRun
+        let strays = raw.filter {
             $0.file.lastPathComponent != "ScriptFixture.swift"
                 && !$0.file.lastPathComponent
                     .hasPrefix("ExecTests")
@@ -265,7 +271,7 @@ struct MachineTouchTests {
         // axis (ScriptFixture declares no suite — it is the
         // ratified helper, not a partition member).
         let rawExecFiles = Set(
-            (processSites + launched).map(\.file).filter {
+            raw.map(\.file).filter {
                 $0.lastPathComponent.hasPrefix("ExecTests")
             }
         )
