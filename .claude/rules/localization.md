@@ -74,15 +74,17 @@ code) only warns.
 
 Everything above reads *keys*; `scripts/localization_guards.py`
 reads the *copy*, and `--check` hard-fails on each. **That
-script's own docstring is the authority on how many there are and
-what each one contracts** — the list below is a reader's map, not
-a second register, so add a guard there and let this follow. There is **no
+script's own docstring is the authority on how many there are** —
+the list below is a reader's map, not a second register, so add a
+guard there and let this follow. (The docstring contracts the
+exact-and-heuristic ones individually; the feature-name pair is
+described here and in `docs/localization-naming.md`.) There is **no
 baseline / exemption file** — a hit is a real defect. What the
 guards carry instead is a grouped `GLOSSARY` of terms that stay
 English; a new such term joins it, in the group that justifies
 it, in the same change set.
 
-Some are **exact contracts**, and hold for any corpus:
+These are **exact contracts** and hold for any corpus:
 
 - **wrong writing system** — Cyrillic→`ru`, Kana→`ja`,
   Han→`ja`/`zh-Hans`/`zh-Hant`, Hangul→`ko`. Latin is
@@ -99,7 +101,9 @@ Some are **exact contracts**, and hold for any corpus:
   unrelated keys.
 
 **English residue** in a translated sentence is instead a
-heuristic, and carries a scope where the others do not: non-Latin-script locales,
+heuristic, and the only one scoped by *corpus* rather than by
+locale — it runs on the app catalogs and not `--site`, whose
+prose keeps third-party names and inline HTML: non-Latin-script locales,
 and the app catalogs only (not `--site`, whose prose keeps
 third-party names and inline HTML). In a Latin-script locale a
 retained English word is indistinguishable from a cognate

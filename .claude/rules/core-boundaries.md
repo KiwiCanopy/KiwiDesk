@@ -5,8 +5,10 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. The
-seams that are violated *outside* the directory that owns them.
+Deliberately short — it loads on every `KiwiDeskCore` edit. Three
+seams, each violated *outside* the directory that owns them — the
+count is the three bullets immediately below, so it corrects
+itself when a fourth is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an

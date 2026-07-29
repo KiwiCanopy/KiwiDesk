@@ -20,9 +20,9 @@ _behavior_ setting** — one that shapes how the workspace behaves
 *while the profile is active*: keybindings (`Profile.modes`),
 app→space rules (`Profile.appRules`), float rules
 (`Profile.floatRules`) and ignore rules (`Profile.ignoreRules`).
-`Profile`'s own stored properties are the register of which
-families exist — the test for a new one is the *rule* below, not
-membership of this list.
+`Profile`'s `…Override?`-typed properties are the register of
+which families exist — the test for a new one is the *rule*
+below, not membership of this list.
 Global bases come from the active config owner (`gui.json` or
 `init.lua`); the profile layer resolves over either owner.
 Window-rule families resolve independently, with effective ignore

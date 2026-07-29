@@ -21,7 +21,9 @@ guardrails at the top of §5 are repeated verbatim in their rule
 file. They are the ones that destroy something before a rule file
 would ever load — a tree in the state model, a shipped `.app` that
 `fatalError`s — so they earn a tripwire in the file every agent
-already has. Everything else appears exactly once.
+already has. Aim to state everything else exactly once, and see
+[rule-authoring.md](.claude/rules/rule-authoring.md) for which
+kinds of sentence may be repeated safely and which may not.
 
 They live in `.claude/` because Claude Code auto-loads a rule file
 whose `paths:` glob matches a file you are editing — so the right
@@ -268,10 +270,11 @@ touch a matching path.
 | `Keys`, `Events`, `Animation` | [input-and-animation.md](.claude/rules/input-and-animation.md) | Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per monitor; the spring integrator must stay inside its stability bound — an animation that never settles kills the settle signal for the whole session (#599), so `tick` force-settles one that outlives its age bound (#611); a shrink snaps on frame 1 unless the pass promised `BatchSizing.allSpringSized` (#593) — opt-in, never inferred, and the guard's `allowed` map is the one copy of who may |
 | `Borders` | [borders.md](.claude/rules/borders.md) | `FollowSource` owns which frame the ring AND mark render — never re-implement it beside a call site; mid-animation the commanded tick leads and every state-reading channel (echo, WS re-read, `sync` geometry) stands down; the settle passes are two keys, early visibility and late geometry |
 | `Sources/KiwiDesk` (the GUI) | [gui.md](.claude/rules/gui.md) | North-star and settled conventions; grey don't hide; `NSCursor.set()` never push/pop; keep `body` shallow or the CI type-checker dies |
-| `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; eight content guards with no exemption file; Core names, the GUI narrates (#96) |
+| `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; content guards with no exemption file; Core names, the GUI narrates (#96) |
 | `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); run the suite as two commands |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
 | `scripts/build-app.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible |
+| `.claude/rules/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614) |
 | `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |
 | `site/**` | [site.md](.claude/rules/site.md) | `{/* */}` not `<!-- -->` — template comments ship to visitors (#557); `site/.nvmrc` is the one copy of the Node version |
 
@@ -280,37 +283,11 @@ that owns the subsystem and refresh that row here — never write
 the rationale into both.
 
 **Write a rule as an obligation, not as a state claim (#614).**
-An obligation — *"route a user-facing condition through structure
-the GUI renders"* — cannot become false; it can only be
-*violated*, which is a review event. An absolute claim about the
-current tree — *"Core holds no `L()` call site outside
-`Localization/`"* — is true only the day it is written, and the
-commit that falsifies it is somewhere else entirely, so nothing
-notices. That one was false for months while auto-loading on
-every Core edit (#601).
-
-So a sentence in `.claude/rules/*.md` phrased as an absolute
-state claim must **name its enforcing guard inline** — a
-`Tests/…` path, a test or test-function name, a `scripts/…` path
-— or be rewritten as an obligation. The best rows already do:
-`VisibleBoundsRoutingTests`, `SettingsCodingTests`,
-`LocalizationRegistryTests`, `ResourceBundleRoutingTests`. A
-claim that can be neither guarded nor reworded gets **deleted**,
-and a *number* gets pinned in the guard with the prose citing it
-rather than repeating it (#511).
-
-This matters more than ordinary doc drift because these files
-load as instructions: an agent reads a false claim as fact and
-reasons from it without checking. Two corollaries:
-
-- **Never close a claim with a guard that cannot fail.** Prove a
-  new guard reds — by reverting the thing it protects — before
-  trusting it. Several have passed vacuously on their first
-  draft.
-- **State a fact once.** A count or a list copied into a second
-  file rots in both on one commit, and neither copy knows the
-  other exists. Name the authority and link to it.
-
-Claims about the world outside this repo — macOS behavior, Apple
-tooling, a vendor's plan limits — cannot be guarded and should
-not be deleted. Scope them to when they were observed instead.
+An obligation can only be *violated*, which a review catches; an
+absolute claim about the current tree is true only the day it is
+written, and the commit that falsifies it is somewhere else, so
+nothing notices. A claim that stays must name its enforcing guard
+inline or be re-homed to one — the dispositions, ranked, and the
+two rules about the guards themselves are in
+[rule-authoring.md](.claude/rules/rule-authoring.md), which loads
+when you edit a rule file.

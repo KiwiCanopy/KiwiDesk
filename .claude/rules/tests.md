@@ -159,11 +159,16 @@ lines). Stop the service first if loaded, or the single-instance
 guard keeps the OLD binary running. Every release rebuild changes
 the binary hash, which drops the TCC Accessibility grant (re-grant
 in System Settings), and a restart flattens session state (spaces,
-float flags) — plan QA around it. **Or avoid it entirely: build
-the signed `.app` with `./scripts/build-app.sh` and QA that**,
-which keeps a stable code identity and so keeps the grant across
-rebuilds (#89, shipped). See
-[packaging-and-release.md](packaging-and-release.md).
+float flags) — plan QA around it.
+
+**With a Developer ID certificate in the keychain you can stop
+paying that cost**: `./scripts/build-app.sh` (#89, shipped)
+produces a signed `.app` whose code identity is stable across
+rebuilds, so the grant survives. Without one the script falls
+back to ad-hoc and says so — it prints that the grant will reset
+on every rebuild — which leaves you exactly where the paragraph
+above starts. Check the identity line it echoes rather than
+assuming. See [packaging-and-release.md](packaging-and-release.md).
 
 Two env levers exist for device QA, both off by default and both
 read once at wiring:

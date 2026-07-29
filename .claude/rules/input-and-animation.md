@@ -161,9 +161,13 @@ editing here:
   lifecycle event ever does want it, wire it deliberately and give
   it a test — an untested escape hatch is discovered not to work
   at exactly the moment it is needed.
-- Env levers for device QA of this subsystem —
-  `KIWIDESK_STRAND_LOG` and `KIWIDESK_NO_WS_TRACKING` among them
-  — are **listed and explained in [tests.md](tests.md)**, which
-  owns that table. Named here only because that file is scoped to
-  `Tests/**` and so does not load while you are editing this
-  directory; do not copy the list back.
+- Env levers for device QA of this subsystem are **listed and
+  explained in [tests.md](tests.md)**, which owns that table.
+  Named here only because that file is scoped to `Tests/**` and
+  so will not load while you are editing this directory. One
+  thing from it is repeated because it changes what you are
+  looking at rather than merely adding output:
+  **`KIWIDESK_NO_WS_TRACKING` kills a production fast path**,
+  forcing the overlays onto their AX fallback for the whole run
+  (#596). `KIWIDESK_STRAND_LOG` is inert by comparison — it only
+  logs (#47).
