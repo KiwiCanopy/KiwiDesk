@@ -17,27 +17,21 @@ extension AnimationEngine {
         }
         for (id, var animation) in perWindow {
             var settled = animation.step(dt: dt)
-            if animation.takeRescueNotice() {
+            if animation.takeNonFiniteNotice() {
                 onLog(
                     "animation: \(id) held a non-finite frame, "
                         + "snapped to its target"
                 )
             }
-            // The settle watchdog (#611). An animation that never
-            // satisfies `settled` never leaves `animations`, so
-            // `activeCount` never returns to zero and
-            // `onAllAnimationsEnded` stops firing for the rest of
-            // the session — taking the deferred focus raise, the
-            // z-order restore and the overlay re-sync with it.
-            // #599 removed the one known way to get there; this is
-            // the net under it, so any future non-convergence (a
-            // pathological Lua-supplied spring, the next
-            // integrator change) costs one window a jump instead
-            // of three subsystems for a session.
-            //
-            // It lives in the engine rather than in each consumer
-            // because a consumer cannot rescue itself: its arming
-            // path is behind the same dead signal.
+            // The settle watchdog (#611): an animation that never
+            // satisfies `settled` never leaves `animations`, and
+            // `onAllAnimationsEnded` only fires at zero — so one
+            // stuck window kills the signal for the session. It
+            // belongs here rather than in any consumer, because a
+            // consumer cannot rescue itself: its arming path is
+            // behind the same dead signal. Full argument, and what
+            // the bound is worth, in
+            // `.claude/rules/input-and-animation.md`.
             if !settled, animation.isOverdue {
                 animation.forceSettle()
                 settled = true

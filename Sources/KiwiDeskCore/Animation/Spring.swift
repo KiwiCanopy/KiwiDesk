@@ -89,6 +89,14 @@ public struct Spring: Sendable, Equatable {
     /// wall-clock time is the point: a `DisplayLink` that stalls
     /// hands over one enormous `dt`, and an animation must age by
     /// what it moved, not by how long the display slept.
+    ///
+    /// It refuses only the *interval*, on purpose. `step` refuses
+    /// on one more ground — an unusable `maxStableStep`, which a
+    /// caller-built spring can produce — and a spring in that
+    /// state integrates to a standstill without ever settling.
+    /// Keeping that ground out of here is what lets its animation
+    /// still age, and so still be rescued; do not fold the two
+    /// predicates together to make them look symmetric.
     static func integratedSpan(_ dt: Double) -> Double {
         guard dt.isFinite, dt > 0 else { return 0 }
         return min(dt, maxIntegratedStep)

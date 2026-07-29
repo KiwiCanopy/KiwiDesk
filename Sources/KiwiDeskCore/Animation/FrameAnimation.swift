@@ -26,19 +26,39 @@ public struct FrameAnimation: Sendable {
     /// to the exact target anyway).
     private static let epsilon = 0.5
 
-    /// The settle watchdog's bound (#611): a multiple of the
-    /// spring's own response, floored. **Both terms are needed.**
-    /// The multiple alone is too tight at the fast end of the
-    /// 50–1000 ms clamp — 50 ms yields 0.84 s, and a slow-AX app
-    /// legitimately lags past that — and the floor alone is too
-    /// tight at the slow end, where 1000 ms comes to rest around
-    /// 2.8 s. Their union clears healthy motion by a wide margin
-    /// (measured settles are 10–15 ticks at 60 Hz, and
-    /// `SpringStabilityTests` already treats ten seconds as "far
-    /// past any settle in the range") while keeping a wedge to a
-    /// blip. `AnimationSettleWatchdogTests` pins both directions.
+    /// The settle watchdog's bound (#611):
+    /// `max(ageFloor, ageResponseMultiple × response)`, capped.
+    ///
+    /// **Both terms are needed, but not for the reason it is
+    /// tempting to give.** The floor is *not* slack for a slow-AX
+    /// app: `age` counts simulated motion (see below), so a
+    /// blocked app costs wall-clock and ages an animation by at
+    /// most one tick's worth. Measured against the worst travel
+    /// across the 50–1000 ms clamp at 30/60/120 Hz, each term
+    /// covers the end where the other runs thin —
+    /// `slowestHealthySettleIsPinned` keeps these honest:
+    ///
+    /// | duration | slowest settle | floor | multiple |
+    /// |---|---|---|---|
+    /// | 50 ms | 0.20 s | 25× | 4.2× |
+    /// | 1000 ms | 2.80 s | **1.8×** | 6.0× |
+    ///
+    /// So the multiple is the term that holds the slow end, and
+    /// the floor buys back the fast end's 4.2× — the thinnest
+    /// margin either term has, and the one a future change to the
+    /// duration clamp, the `× 1.4` mapping or the integrator would
+    /// eat first. `AnimationSettleWatchdogTests` pins both terms
+    /// and the inverse.
+    ///
+    /// The ceiling exists because the multiple scales with a
+    /// caller-supplied response, and `Spring.init` clamps that
+    /// only from below: without it `Spring(response: 1e6)` buys a
+    /// 139-day bound, i.e. a spring can opt out of the watchdog
+    /// entirely. It sits far above the largest legitimate bound
+    /// (16.8 s at 1000 ms) so it never binds on a shipped spring.
     private static let ageResponseMultiple = 12.0
     private static let ageFloor: TimeInterval = 5
+    private static let ageCeiling: TimeInterval = 60
 
     /// Total distance at start (or last retarget); yardstick
     /// for `pastHalfway`.
@@ -72,17 +92,30 @@ public struct FrameAnimation: Sendable {
 
     /// Redirects the animation to a new target mid-flight.
     public mutating func retarget(to frame: CGRect) {
-        target = Self.vector(frame)
+        let next = Self.vector(frame)
+        // A genuinely new target is a new journey, so the age
+        // bound restarts with it: a live make-room drag retargets
+        // its siblings for as long as the user holds the mouse,
+        // and a watchdog that fires on healthy motion is worse
+        // than none.
+        //
+        // Only on a *changed* target, though. A retile loop that
+        // re-issues the same placement would otherwise reset the
+        // clock forever and blind the watchdog to the one wedge it
+        // could plausibly meet in production — an echo/retile
+        // feedback loop, which is far more reachable than the
+        // pathological spring the bound is written against.
+        //
+        // A storm of genuinely *different* targets still defers
+        // the bound indefinitely, and that is an accepted hole
+        // (documented in `.claude/rules/input-and-animation.md`):
+        // it is indistinguishable from a long drag from here, and
+        // the first target a storm stops on ages normally.
+        if next != target {
+            age = 0
+        }
+        target = next
         initialDistance = Self.distance(current, target)
-        // A new target is a new journey, so the age bound restarts
-        // with it. Without this a live make-room drag — which
-        // retargets its siblings for as long as the user holds the
-        // mouse — would trip the watchdog mid-drag, and a watchdog
-        // that fires on healthy motion is worse than none. A
-        // retarget storm is not lost either: it is only ever
-        // *deferring* the bound, and the first target the storm
-        // stops on ages normally.
-        age = 0
     }
 
     /// True once at least half the distance is covered. A
@@ -100,17 +133,27 @@ public struct FrameAnimation: Sendable {
     /// point is that a stuck animation never leaves `animations`,
     /// which is what kills `onAllAnimationsEnded` for the session.
     var isOverdue: Bool {
-        let bound = max(
-            Self.ageFloor,
-            Self.ageResponseMultiple * spring.response
+        let scaled = min(
+            Self.ageResponseMultiple * spring.response,
+            Self.ageCeiling
         )
-        return age > bound
+        return age > max(Self.ageFloor, scaled)
     }
 
     /// Advances by `dt`; returns true when settled.
+    ///
+    /// A caller that wants the non-finite net's diagnostics must
+    /// drain `takeNonFiniteNotice()` after each call — the notice
+    /// is raised here and reported by whoever is driving.
     public mutating func step(dt: Double) -> Bool {
-        // Exactly what the integrator below will consume, so a
-        // refused interval ages nothing.
+        // The interval the integrator would accept, so a refused
+        // one ages nothing. Deliberately NOT the same predicate
+        // `Spring.step` applies: that also refuses when the
+        // spring's own `maxStableStep` is unusable, and such a
+        // spring integrates to a standstill. Ageing it anyway is
+        // what lets the watchdog rescue it — sharing one predicate
+        // here would hand that case straight back to the wedge
+        // (`aFrozenSpringIsStillRescued` pins it).
         age += Spring.integratedSpan(dt)
         var settled = true
         for i in 0..<4 {
@@ -163,10 +206,12 @@ public struct FrameAnimation: Sendable {
         velocity = [0, 0, 0, 0]
     }
 
-    /// Whether the non-finite net fired since this was last asked,
-    /// clearing the flag so one rescue is reported once even when
-    /// the animation keeps running for several more ticks.
-    mutating func takeRescueNotice() -> Bool {
+    /// Whether the **non-finite** net fired since this was last
+    /// asked, clearing the flag so one rescue reports once even
+    /// though the animation keeps running for many more ticks.
+    /// Named for that net specifically: the age watchdog is the
+    /// driver's own decision and needs no notice from here.
+    mutating func takeNonFiniteNotice() -> Bool {
         defer { pendingRescueNotice = false }
         return pendingRescueNotice
     }

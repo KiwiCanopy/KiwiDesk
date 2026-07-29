@@ -48,7 +48,10 @@ public final class AnimationEngine {
     /// (the settle frame), with that target. The strand detector
     /// (#47 safety net) reads the window back after a grace and
     /// logs if the app didn't actually land there. Not fired on
-    /// cancel/teardown — only a clean settle has a target to check.
+    /// cancel/teardown — those have no target to check. A
+    /// force-settled animation (either net, #611) does fire it:
+    /// `apply` wrote the exact target, so the read-back is as
+    /// meaningful as after a clean settle.
     public var onWindowSettled: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 

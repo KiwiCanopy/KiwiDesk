@@ -55,26 +55,67 @@ editing here:
   motion an animation snaps to its target and leaves the engine
   through `FrameAnimation.forceSettle`, the same exit a clean
   settle and the non-finite net take. Keep it one recovery shape:
-  that is the shape already proven to release the signal. Two
-  things about it are load-bearing, and
-  `AnimationSettleWatchdogTests` guards both — including the
-  inverse, because a watchdog that fires on healthy motion is
-  worse than none:
-  - **Both terms of the bound.** The multiple alone fires at
-    0.84 s for a 50 ms duration, inside the lag a slow-AX app
-    legitimately shows; the flat floor alone leaves 1000 ms
-    motion — which comes to rest around 2.8 s — under 2×
-    headroom.
-  - **Age is simulated, never wall-clock.** `step` accumulates
+  that is the shape already proven to release the signal.
+
+  Three things about it are load-bearing, each with its own
+  guard — and the inverse is guarded too
+  (`healthyMotionNeverTrips`), because a watchdog that fires on
+  healthy motion is worse than none:
+  - **Both terms of the bound**
+    (`bothTermsOfTheBoundBind`). Not for the reason it is
+    tempting to give: the floor is *not* slack for a slow-AX
+    app, because a blocked app costs wall-clock and ages an
+    animation by at most one tick's worth. Measured against the
+    worst travel at 30/60/120 Hz
+    (`slowestHealthySettleIsPinned`), 50 ms settles in 0.20 s
+    and 1000 ms in 2.80 s — so the multiple holds the slow end
+    (6.0× there, where the floor has only 1.8×) and the floor
+    buys back the fast end's 4.2×, the thinnest margin either
+    term has. A ceiling caps the multiple, or a spring built
+    with a large response opts out of the watchdog entirely
+    (`hugeResponseStillTrips`).
+  - **Age is simulated, never wall-clock**
+    (`ageIsSimulatedNotWallClock`). `step` accumulates
     `Spring.integratedSpan(dt)`, so a stalled `DisplayLink`
-    (display sleep) ages an animation by what it moved rather
-    than by how long the display slept, and `retarget` resets it
-    — a live make-room drag retargets its siblings for as long
-    as the user holds the mouse.
+    ages an animation by what it moved rather than by how long
+    the display slept. That span deliberately does **not**
+    share `Spring.step`'s other refusal (an unusable
+    `maxStableStep`): such a spring integrates to a standstill
+    without settling, and ageing it anyway is the only reason
+    the watchdog can reach it
+    (`aFrozenSpringIsStillRescued`).
+  - **`retarget` restarts the clock only on a changed target**
+    (`retargetResetsAge`, `unchangedRetargetKeepsAgeing`). A
+    live make-room drag retargets its siblings for as long as
+    the user holds the mouse, so a new target must reset; a
+    retile loop re-issuing the *same* placement must not, or it
+    blinds the watchdog to the one wedge it could plausibly
+    meet in production.
+
+  Two known holes, both accepted rather than overlooked. A storm
+  of genuinely *different* targets defers the bound indefinitely
+  — indistinguishable from a long drag from inside the engine,
+  and the first target a storm stops on ages normally. And the
+  watchdog is only as live as the clock it rides: nothing ages
+  while a display's `DisplayLink` is stopped, so **never stop a
+  driver while animations are still resident on its display** —
+  every teardown path drains first, and that is the precondition
+  the whole net rests on.
+
+  `DeadEndBump` is deliberately outside this net. It feeds no
+  global signal (`BorderBumpAnimator` keeps its own map), its
+  input space is closed — clamped impulse, constant target, a
+  hardcoded spring `SpringStabilityTests` already pins — and
+  `flushAll()` is a real, wired escape hatch. Do not widen the
+  engine's watchdog to cover it.
 
   Report both nets through `AnimationEngine.onLog` (wired in
-  `KiwiCore+Bootstrap`). A rescue that fires silently removes the
-  symptom that made #599 findable and leaves only a visible jump.
+  `KiwiCore+Bootstrap`, asserted end-to-end by
+  `engineLogReachesTheCore` — a seam that is declared and never
+  wired logs nothing in production while every unit test that
+  sets it by hand stays green). A rescue that fires silently
+  removes the symptom that made #599 findable and leaves only a
+  visible jump.
 - `AnimationEngine.cancelAll(snapToTargets:)` is a **test drain
   primitive**; production has no global cancel by design (`stop()`
   tears down differently on purpose, `displaysChanged()` covers

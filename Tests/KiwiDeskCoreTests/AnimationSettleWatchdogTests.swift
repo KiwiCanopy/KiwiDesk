@@ -20,12 +20,16 @@ import Testing
 /// is conserved exactly — finite, bounded, stable, and never
 /// within epsilon of the target at negligible speed. That is the
 /// class the watchdog exists for and the one the non-finite net
-/// cannot reach, and `Spring.init` is public, so a
-/// Lua-supplied spring could land there.
+/// cannot reach, and `Spring.init` is public, so a Lua-supplied
+/// spring could land there.
 ///
 /// The inverse matters as much: a watchdog that fires on healthy
 /// motion is worse than none, so `healthyMotionNeverTrips` sweeps
-/// the whole clamped duration range at three refresh rates.
+/// the whole clamped duration range at three refresh rates and
+/// `slowestHealthySettleIsPinned` records the margin the bound
+/// is chosen against. How `age` is measured is
+/// `AnimationAgeAccountingTests`; that both nets are observable
+/// is `AnimationNetLoggingTests`.
 @Suite("Animation settle watchdog")
 @MainActor
 struct AnimationSettleWatchdogTests {
@@ -59,7 +63,7 @@ struct AnimationSettleWatchdogTests {
     private func drain(
         _ engine: AnimationEngine,
         hz: Double = 60,
-        limitSeconds: Double = 60
+        limitSeconds: Double = 200
     ) -> Double {
         var steps = 0
         let limit = Int(limitSeconds * hz)
@@ -78,12 +82,10 @@ struct AnimationSettleWatchdogTests {
         var settledOn: [WindowID: CGRect] = [:]
         var animationEnded: [WindowID] = []
         var applied: [(WindowID, CGRect, Bool)] = []
-        var log: [String] = []
         engine.onAllAnimationsEnded = { ended = true }
         engine.onWindowSettled = { settledOn[$0] = $1 }
         engine.onAnimationEnd = { animationEnded.append($0) }
         engine.apply = { applied.append(($0, $1, $2)) }
-        engine.onLog = { log.append($0) }
         engine.animations[display] = [window: wedge(response: 0.35)]
 
         let seconds = drain(engine)
@@ -100,11 +102,6 @@ struct AnimationSettleWatchdogTests {
         #expect(settledOn[window] == target)
         #expect(applied.last?.1 == target)
         #expect(applied.last?.2 == true)
-        // Observable. A net that fires silently converts the loud
-        // failure that made #599 findable into a quiet one.
-        #expect(log.count == 1, "\(log)")
-        #expect(log.first?.contains("window#7") == true, "\(log)")
-        #expect(log.first?.contains("did not settle") == true)
         // Long enough that no real motion could reach it, short
         // enough to be a blip rather than a dead session.
         #expect(seconds > 4 && seconds < 7, "fired at \(seconds)s")
@@ -112,20 +109,19 @@ struct AnimationSettleWatchdogTests {
 
     @Test("Both terms of the age bound are load-bearing")
     func bothTermsOfTheBoundBind() {
-        // `AnimationEngine` maps its 50–1000 ms clamp onto
+        // `AnimationEngine` maps its 50-1000 ms clamp onto
         // responses of 0.07 to 1.4 s, and the bound is
-        // `max(5s, 12 x response)`. Each end proves a different
-        // term is live: 12 x response alone fires at 0.84 s for
-        // the fastest duration, inside the lag a slow-AX app
-        // legitimately shows; the 5 s floor alone fires at 5 s
-        // for the slowest, against a motion that legitimately
-        // takes about 2.8 s to come to rest. Drop either term
-        // and one of these rows moves.
+        // `max(5s, 12 x response)`. Each row is placed so that
+        // deleting ONE term moves it out of its window — the 0.35
+        // case is not a third data point, it is the default
+        // duration, and its low bound is set at 4.5 so that the
+        // floor's removal (which would fire it at 4.2 s) fails
+        // here rather than passing on a coincidence.
         let cases: [(response: Double, low: Double, high: Double)] = [
             // Floor binds; the multiple alone would be 0.84 s.
             (0.07, 4, 7),
             // Floor binds; the multiple alone would be 4.2 s.
-            (0.35, 4, 7),
+            (0.35, 4.5, 7),
             // Multiple binds at 16.8 s; the floor alone is 5 s.
             (1.4, 15, 19),
         ]
@@ -143,6 +139,24 @@ struct AnimationSettleWatchdogTests {
         }
     }
 
+    @Test("A spring cannot scale itself out of the watchdog")
+    func hugeResponseStillTrips() {
+        // The multiple term scales with a caller-supplied
+        // response and `Spring.init` clamps it only from below,
+        // so without a ceiling this buys a 139-day bound — a
+        // spring opting out of the one net that covers it. Not
+        // reachable through `durationMS` today; the suite header's
+        // motivating case is a spring built directly, which is
+        // exactly what this is.
+        let engine = AnimationEngine()
+        engine.animations[display] = [
+            WindowID(1): wedge(response: 1_000_000)
+        ]
+        let seconds = drain(engine)
+        #expect(engine.activeCount == 0)
+        #expect(seconds < 70, "fired at \(seconds)s")
+    }
+
     @Test("No healthy duration trips it, at 30, 60 or 120 Hz")
     func healthyMotionNeverTrips() {
         // Through `animate`, so this rides the engine's real
@@ -150,13 +164,7 @@ struct AnimationSettleWatchdogTests {
         guard let screen = NSScreen.main,
             let screenDisplay = screen.kiwiDisplay?.id
         else { return }
-        let durations = [
-            50, 60, 70, 80, 90, 100, 150, 250, 500, 1000,
-        ]
-        // 30 Hz is `DisplayLinkDriver`'s own clamped worst case,
-        // and so the largest interval production can hand the
-        // integrator — the slowest a healthy animation can age.
-        for durationMS in durations {
+        for durationMS in Self.durations {
             for hz in [30.0, 60.0, 120.0] {
                 let engine = AnimationEngine()
                 var log: [String] = []
@@ -188,40 +196,48 @@ struct AnimationSettleWatchdogTests {
         }
     }
 
-    @Test("The non-finite net reports itself exactly once")
-    func nonFiniteRescueIsLoggedOnce() {
-        let engine = AnimationEngine()
-        var log: [String] = []
-        engine.onLog = { log.append($0) }
-        // A garbage AX read is this net's live trigger now that
-        // the integrator cannot produce a non-finite value from
-        // finite input (#599). One component only, so the
-        // animation keeps stepping for many ticks after the
-        // rescue — the notice must not re-log on each of them.
-        engine.animations[display] = [
-            WindowID(3): FrameAnimation(
-                from: CGRect(
-                    x: CGFloat.infinity,
-                    y: 0,
-                    width: 400,
-                    height: 300
-                ),
-                to: target,
-                spring: Spring(
-                    response: 0.35,
-                    dampingFraction: 0.85
-                )
+    @Test("The margin the bound was chosen against still holds")
+    func slowestHealthySettleIsPinned() {
+        // `FrameAnimation`'s bound comment argues from two
+        // measured numbers, and prose that restates a number
+        // drifts (#511) — so measure them here and let the
+        // comment cite this test. Travel is deliberately wider
+        // than the fixture above: a two-display move is the
+        // slowest real settle, and it is what sets the margin.
+        let far = CGRect(x: 15360, y: 2160, width: 1920, height: 1080)
+        for (durationMS, ceiling) in [(50, 0.30), (1000, 3.2)] {
+            let spring = Spring(
+                response: Double(durationMS) / 1000 * 1.4,
+                dampingFraction: 0.85
             )
-        ]
-
-        let seconds = drain(engine)
-
-        #expect(engine.activeCount == 0)
-        #expect(log.count == 1, "\(log)")
-        #expect(log.first?.contains("window#3") == true, "\(log)")
-        #expect(log.first?.contains("non-finite") == true, "\(log)")
-        // Rescued by the component net and then converging on its
-        // own, nowhere near the watchdog's bound.
-        #expect(seconds < 4, "took \(seconds)s")
+            var worst = 0.0
+            for hz in [30.0, 60.0, 120.0] {
+                var animation = FrameAnimation(
+                    from: start,
+                    to: far,
+                    spring: spring
+                )
+                var ticks = 0
+                while ticks < Int(20 * hz),
+                    !animation.step(dt: 1 / hz)
+                {
+                    ticks += 1
+                }
+                worst = max(worst, Double(ticks) / hz)
+            }
+            // 50 ms measures 0.20 s against a 5 s floor (25x);
+            // 1000 ms measures 2.80 s against a 16.8 s multiple
+            // (6.0x) and only 1.8x against the floor — which is
+            // why the multiple, not the floor, holds that end.
+            #expect(
+                worst < ceiling,
+                "\(durationMS)ms slowest settle \(worst)s"
+            )
+        }
     }
+
+    /// Every duration the 50–1000 clamp admits.
+    private static let durations = [
+        50, 60, 70, 80, 90, 100, 150, 250, 500, 1000,
+    ]
 }
