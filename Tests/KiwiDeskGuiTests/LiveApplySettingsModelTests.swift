@@ -24,12 +24,7 @@ private final class SettingsLiveRegistrar: HotkeyRegistrar {
 @MainActor
 struct LiveApplySettingsModelTests {
     private func makeModel() throws -> (SettingsModel, KiwiCore) {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-settings-live-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: SettingsLiveRegistrar()
         )
         var config = GuiConfig()

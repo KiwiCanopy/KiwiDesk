@@ -115,14 +115,20 @@ struct FirstRunSeedTests {
     @Test("hooks-only init.lua still gets the GUI seed (#354)")
     func hooksOnlyConfigSeeds() throws {
         let core = makeCore()
-        // The documented sketchybar bridge: event hooks + control
-        // flow, no managed settings. Should still boot GUI-managed
-        // with defaults, and the hooks are untouched.
+        // The documented sketchybar bridge shape: event hooks +
+        // control flow, no managed settings. Should still boot
+        // GUI-managed with defaults, and the hooks are untouched.
+        // The hook body execs `true`, not a real receiver: this
+        // fixture *executes* (unlike the ManagedConfig string
+        // analyses), and a `sketchybar --trigger` here spawned a
+        // forever-blocked child on any host with the binary but
+        // no daemon — the #489/#494 tail-hang root. Classification
+        // only reads the shape, so the command is free to be inert.
         try writeInitLua(
             """
             for _, event in ipairs({ "space_change" }) do
                 KiwiDesk.on(event, function()
-                    KiwiDesk.exec("sketchybar --trigger x")
+                    KiwiDesk.exec("true")
                 end)
             end
             """,

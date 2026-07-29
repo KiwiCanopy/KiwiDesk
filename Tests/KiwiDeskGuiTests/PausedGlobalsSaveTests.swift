@@ -29,12 +29,7 @@ struct PausedGlobalsSaveTests {
     /// never started) is what the two tests below build by hand,
     /// and it is where the interesting failures live.
     private func makeModel() throws -> (SettingsModel, KiwiCore) {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-paused-save-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: PausedRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())
@@ -159,7 +154,7 @@ struct PausedGlobalsSaveTests {
         authored.spaces = [SpaceID("work"), SpaceID("mail")]
         try GuiConfigStore(directory: directory).save(authored)
 
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )
@@ -218,7 +213,7 @@ struct PausedGlobalsSaveTests {
         authored.spaces = [SpaceID("work")]
         try GuiConfigStore(directory: directory).save(authored)
 
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )
@@ -260,7 +255,7 @@ struct PausedGlobalsSaveTests {
             atomically: true,
             encoding: .utf8
         )
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )

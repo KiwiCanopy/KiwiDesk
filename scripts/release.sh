@@ -171,14 +171,12 @@ else
     # conditional there because CI runs it per PR; it is
     # unconditional here because this tree is what ships and
     # because nothing else will build it in release before a user
-    # does. The two `swift test` calls stay separate — see
-    # .claude/rules/tests.md.
+    # does. One `swift test`: the old two-command split died
+    # with the #494 tail-hang fix — see .claude/rules/tests.md.
     echo "==> swift build"
     swift build
-    echo "==> swift test --skip ExecTests"
-    swift test --skip ExecTests
-    echo "==> swift test --filter ExecTests"
-    swift test --filter ExecTests
+    echo "==> swift test"
+    swift test
     echo "==> scripts/lint.sh"
     ./scripts/lint.sh
     echo "==> swift build -c release"

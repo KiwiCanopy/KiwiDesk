@@ -23,12 +23,7 @@ private final class GateRegistrar: HotkeyRegistrar {
 @MainActor
 struct ProfileSaveGateTests {
     private func makeModel() throws -> SettingsModel {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-save-gate-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: GateRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())

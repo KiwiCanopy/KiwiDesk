@@ -44,9 +44,12 @@ jobs:
       - name: Lint
         run: ./scripts/lint.sh
 
-      # Split per AGENTS.md §5: run as one `swift test` the suite
-      # stalls for minutes at the tail, because spawned exec
-      # children hold the runner's pipe. #489 tracks the root fix.
+      # The old tail-stall died with #494; the split is kept for
+      # failure attribution — a hang or leak in a real-child
+      # suite points at the exec step. The skip/filter matches
+      # suite TYPE names, so exec-child suites carry the
+      # ExecTests prefix (.claude/rules/tests.md, pinned by
+      # MachineTouchTests).
       - name: Test
         run: swift test --skip ExecTests
 

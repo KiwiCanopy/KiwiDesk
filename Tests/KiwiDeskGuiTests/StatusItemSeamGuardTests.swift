@@ -169,14 +169,17 @@ struct StatusItemSeamGuardTests {
 
     /// Net-count allowlist for `Tests/`, path-keyed with
     /// today's exact count (the family idiom — the lens, not
-    /// the list; see `VisibleBoundsRoutingTests`). The single
-    /// entry is this guard itself, which must name the token to
-    /// scan for it; that self-hit doubles as the liveness
-    /// canary — a moved root yields zero hits everywhere and
-    /// reds on the inverse check below rather than passing
-    /// vacuously.
+    /// the list; see `VisibleBoundsRoutingTests`). One entry is
+    /// this guard itself, which must name the token to scan for
+    /// it; that self-hit doubles as the liveness canary — a
+    /// moved root yields zero hits everywhere and reds on the
+    /// inverse check below rather than passing vacuously. The
+    /// other is `MachineTouchTests`, whose sibling guard scans
+    /// the *production* trees for the qualified `.system` touch
+    /// and so also names the token once in its needle.
     private let allowedInTests: [String: Int] = [
-        Self.selfFile: 1
+        Self.selfFile: 1,
+        "KiwiDeskGuiTests/MachineTouchTests.swift": 1,
     ]
 
     @Test("Tests reach the menu bar only through the seam")

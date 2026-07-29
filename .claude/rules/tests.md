@@ -74,7 +74,10 @@ bite large test PRs:
     file from a fail-open guard (#573 proved that exact bug
     with a one-file probe that passed every check).
   - *test-core construction* in `TestCore.swift` — the
-    `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565).
+    `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565),
+    one copy per test target since test targets cannot see each
+    other; `MachineTouchTests` pins the twins identical and pins
+    every `KiwiCore(` in the test trees to them.
     It clears the statelessness bar (a per-instance id counter, no
     assertions, no setup/teardown coupling), but it is admitted on
     a **second, distinct ground** from the four above. Their risk
@@ -90,7 +93,13 @@ bite large test PRs:
     for sharing; it is simply not
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
-    one — state both when weighing a sixth.
+    one — state both when weighing a further one.
+  (The status-item seam deliberately does NOT add a shared
+  factory here: its fake is a per-file `StatusItemHandle`
+  stub, because the live wrapper is sealed file-`private` and
+  `StatusItemSeamGuardTests` pins every construction route —
+  the omission risk the `makeTestCore` factory carries is
+  closed by the seal instead.)
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Each case above happened
@@ -108,9 +117,11 @@ bite large test PRs:
   production default live — never test-detection in
   production — inject a no-op fake in tests, and forget-proof
   the injection, because every forgotten call site re-enables
-  the default. The two standing guards: `makeTestCore` with
-  its `NoopHotkeyRegistrar` for the hotkey seam, and
-  `StatusItemSeamGuardTests` for the menu-bar seam.
+  the default. The standing enforcement: `MachineTouchTests`
+  pins every `KiwiCore(` to the `makeTestCore` factories (and
+  the seam class generally — spawns, the production status-bar
+  touch), and `StatusItemSeamGuardTests` pins the menu-bar
+  seam's construction routes and its sealed wrapper.
 - **Discardable results express side-effect intent** — a command
   or setup helper whose primary job is mutation may use
   `@discardableResult` when callers commonly ignore optional
@@ -144,10 +155,40 @@ tight wait. New async tests here follow suit.
 
 ## Running the suite
 
-`swift test` is fully self-contained — a per-test `KiwiCore` over
-a temp config dir, throwaway sockets; the service tests only parse
-`launchctl` strings. **Unit tests never need the running app**;
-its run state is irrelevant to them.
+**A test reaches the machine only through a seam it injects,
+never through a production default it inherited.** The touch a
+test-tree grep cannot see is the one inside a *production*
+initializer the test merely calls: a bare `KiwiCore()` seizes
+the live Carbon chords and the real `~/.config/KiwiDesk`
+(#565), and a bare `StatusItemController()` put a live item in
+the menu bar per construction — fifteen leaked slots and a
+sustained WindowServer spike per run — while `NSStatusBar` had
+zero hits anywhere in `Tests/`. Two guards split the beat:
+`MachineTouchTests` pins `KiwiCore(` constructions to the
+`makeTestCore` factories, the twins identical, the production
+`NSStatusBar.system` touch to its sealed wrapper, and
+exec-child suites inside the `ExecTests` partition;
+`StatusItemSeamGuardTests` pins the status-item seam's
+construction routes. Adding a production type whose
+*initializer* reaches the OS? Give it the same seam shape
+(live default in production, an injected fake in tests) and a
+needle in one of those guards.
+
+Deliberate residue a run does still touch, as audited
+2026-07-29 — a change adding a residue class extends and
+re-dates this list in the same change set: throwaway AF_UNIX
+sockets under temp paths (`SocketTests`), real `CADisplayLink`s
+from animation-keyed suites, repo-script children drained by
+`ScriptFixture`, one inert `true` child when
+`FirstRunSeedTests`' executed hooks fixture fires, scratch
+`UserDefaults` suites cleaned on both sides, one live
+`NSEvent.pressedMouseButtons` read —
+`MouseFollowsFocusTests` fails if a human holds a mouse button
+mid-run — and `GeometryUtils.menuBarAutoHides`, a read-only
+global-defaults lookup that only reaches fixtures which didn't
+pin their bounds. The service tests only parse `launchctl`
+strings; nothing spawns it. **Unit tests never need the running
+app**; its run state is irrelevant to them.
 
 **A run writes `KiwiDesk: …` lines to the unified log**, so a
 `log stream` during one shows test diagnostics that read exactly
@@ -165,20 +206,24 @@ that wants the coverage captures instead. Do not read a
 `keybinding conflict` or `unclean shutdown detected` line seen
 during a run as the app misbehaving.
 
-Run the full suite as two commands:
+Run the full suite as one command (~2 min):
 
 ```bash
-swift test --skip ExecTests
+swift test
 ```
 
-```bash
-swift test --filter ExecTests
-```
-
-Combined it stalls for minutes at the tail — spawned exec children
-hold the runner's pipe, and the hang-guards above crawl under
-full-suite starvation (#489 tracks the root fix). Suite *ordering*
-is not a lever; swift-testing schedules suites concurrently.
+It used to stall for minutes at the tail; that was two bugs,
+both fixed in #494 — a `SocketClient` double-close that
+`EXC_GUARD`-killed the runner mid-suite, and fire-and-forget
+exec children inheriting the runner's stdout, so whoever read
+it waited for an EOF that never came. Fire-and-forget children
+now get `FileHandle.nullDevice` and callback children write to
+launcher-owned pipes (`ExecLauncher`), so no child holds the
+runner's stdio on either path. CI keeps its `--skip` /
+`--filter` two-step over `ExecTests` for failure attribution,
+which is why every suite spawning real shell children is
+*named* under the `ExecTests` prefix (`MachineTouchTests` pins
+that partition).
 
 **Device QA launches the app direct**, not via `service start`:
 `.build/release/KiwiDesk` in a terminal (Ctrl-C to stop, `NSLog`

@@ -39,14 +39,7 @@ struct LiveApplyKeybindingStatusTests {
     private func makeCore(
         registrar: TrackingLiveRegistrar
     ) -> KiwiCore {
-        KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-live-status-\(UUID().uuidString)"
-                ),
-            hotkeyRegistrar: registrar
-        )
+        makeTestCore(hotkeyRegistrar: registrar)
     }
 
     private func binding(

@@ -11,22 +11,18 @@ continue to later steps.
 ## Fast inner loop
 
 1. `swift build`
-2. `swift test --skip ExecTests`
-3. `swift test --filter ExecTests`
-4. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
+2. `swift test` (one command — the old two-command split died
+   with the #494 tail-hang fix; history and the rest of the
+   test conventions live in `.claude/rules/tests.md`)
+3. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
    repo)
-
-Steps 2 and 3 are **separate commands** by design — run as one
-`swift test` the suite stalls for minutes at the tail. Why, and
-the rest of the test conventions, live in
-`.claude/rules/tests.md`.
 
 `scripts/lint.sh` prints warnings that are not failures — only
 its **exit code** decides.
 
 ## Release build — conditional
 
-5. `swift build -c release`
+4. `swift build -c release`
 
 The release build enables the optimizer and stricter concurrency
 diagnostics (e.g. non-Sendable captures in `@Sendable` closures)
@@ -47,7 +43,7 @@ without a PR.
 
 ## Report
 
-End with a one-line PASS/FAIL summary per step, marking step 5
+End with a one-line PASS/FAIL summary per step, marking step 4
 PASS, FAIL, or SKIPPED (with the reason). On any failure, show
 the relevant compiler/test/lint output and stop — the gate has
 not passed.

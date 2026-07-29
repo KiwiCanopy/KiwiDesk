@@ -157,7 +157,7 @@ traced at directory altitude — see **`docs/architecture.md`**.
 3. **Act:** implement step by step; keep commits focused.
 4. **Verify:** run the **`verify-gate` skill**
    ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
-   — `swift build`, the two-command test run, `scripts/lint.sh`,
+   — `swift build`, the test run, `scripts/lint.sh`,
    and the release build when the change touches concurrency or
    `Sendable`. That skill owns the procedure — what to run, in
    what order, and when CI's `Release Build` job substitutes for
@@ -284,7 +284,7 @@ touch a matching path.
 | `Borders` | [borders.md](.claude/rules/borders.md) | `FollowSource` owns which frame the ring AND mark render — never re-implement it beside a call site; mid-animation the commanded tick leads and every state-reading channel (echo, WS re-read, `sync` geometry) stands down; the settle passes are two keys, early visibility and late geometry |
 | `Sources/KiwiDesk` (the GUI) | [gui.md](.claude/rules/gui.md) | North-star and settled conventions; grey don't hide; `NSCursor.set()` never push/pop; keep `body` shallow or the CI type-checker dies |
 | `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; content guards with no exemption file; Core names, the GUI narrates (#96) |
-| `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); run the suite as two commands; a production default that grabs live host state (hotkeys #565, menu-bar slots) is injected as a fake, never inherited |
+| `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`) |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
 | `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32) |
 | `.claude/rules/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614) |
