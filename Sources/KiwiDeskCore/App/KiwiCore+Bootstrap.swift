@@ -102,6 +102,9 @@ extension KiwiCore {
                 ?? .fail("core unavailable")
         }
         socket.bus = bus
+        socket.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }

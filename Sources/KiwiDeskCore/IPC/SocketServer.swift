@@ -112,13 +112,31 @@ public final class SocketServer {
         _ client: Client,
         args: [JSONValue]
     ) {
-        let events = Set(
-            args.compactMap { arg in
-                arg.stringValue.flatMap {
-                    KiwiNotification(rawValue: $0)
-                }
+        var events: Set<KiwiNotification> = []
+        var unknown: [String] = []
+        for name in args.compactMap(\.stringValue) {
+            if let event = KiwiNotification(rawValue: name) {
+                events.insert(event)
+            } else {
+                unknown.append(name)
             }
-        )
+        }
+        // A misspelled event name is dropped in silence and the
+        // client still gets `ok`, so the subscription reads as
+        // working; when *every* name is unknown the empty set
+        // falls through to the firehose below, which reads as
+        // working harder. The socket is the one surface with no
+        // other way to say so — the CLI just sits there. English
+        // like every other IPC string (core-boundaries.md).
+        if !unknown.isEmpty {
+            onLog(
+                "subscribe: unknown event(s) "
+                    + unknown.joined(separator: ", ")
+                    + (events.isEmpty
+                        ? "; streaming all events instead"
+                        : "; ignored")
+            )
+        }
         let wanted =
             events.isEmpty
             ? Set(KiwiNotification.allCases)

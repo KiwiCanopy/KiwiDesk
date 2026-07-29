@@ -260,6 +260,12 @@ Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `native_space_change`, `window_created`,
 `window_destroyed`, `window_moved_to_space`.
 
+An unrecognised name is dropped and reported to the app's log —
+the subscription itself still succeeds, so nothing on the wire
+says the stream is narrower than asked for. When *every* name is
+unrecognised the filter is empty and the stream falls back to
+all events, exactly as if none had been given.
+
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `pull_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for

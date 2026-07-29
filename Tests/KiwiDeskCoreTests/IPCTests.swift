@@ -91,10 +91,7 @@ struct ServiceManagerTests {
 struct SocketTests {
     @Test("Client command reaches the server handler")
     func roundTrip() async throws {
-        let path = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-\(UUID().uuidString.prefix(8)).sock"
-            ).path
+        let path = Self.throwawaySocketPath()
         let server = SocketServer(path: path)
         server.handler = { command, args in
             .ok(
@@ -109,11 +106,106 @@ struct SocketTests {
         try server.start()
         defer { server.stop() }
 
-        // Blocking client work happens off the main actor;
-        // the server needs the main queue to process. The
-        // listener binds asynchronously, so connecting may
-        // need a few retries.
-        let response = try await Task.detached {
+        let response = try await Self.roundTrip(
+            CommandRequest(
+                command: "focus",
+                args: [.string("left")]
+            ),
+            over: path
+        )
+
+        #expect(response.isSuccess)
+        #expect(
+            response.data
+                == .object([
+                    "echo": .string("focus"),
+                    "count": .number(1),
+                ])
+        )
+    }
+
+    /// A misspelled event name is dropped by `compactMap` and the
+    /// client still gets `ok`, so nothing on the wire says the
+    /// subscription is deaf — `onLog` is the only channel that
+    /// can (#611's rule: an unobservable rescue is how a loud
+    /// failure becomes a quiet one).
+    @Test("An unknown subscribe event reports through onLog")
+    func unknownSubscribeEventLogs() async throws {
+        let path = Self.throwawaySocketPath()
+        let server = SocketServer(path: path)
+        var logs: [String] = []
+        server.onLog = { logs.append($0) }
+        try server.start()
+        defer { server.stop() }
+
+        // The log lands before the `ok` is written, so awaiting
+        // the response is the synchronisation — no poll, no
+        // deadline.
+        let all = try await Self.roundTrip(
+            CommandRequest(
+                command: "subscribe",
+                args: [.string("space_chnage")]
+            ),
+            over: path
+        )
+        #expect(all.isSuccess)
+        #expect(logs.count == 1)
+        #expect(logs.last?.contains("space_chnage") == true)
+        // Every name unknown means the empty set falls through
+        // to the firehose, which is the more misleading outcome
+        // of the two and says so.
+        #expect(
+            logs.last?.contains("streaming all events") == true
+        )
+
+        let some = try await Self.roundTrip(
+            CommandRequest(
+                command: "subscribe",
+                args: [.string("space_change"), .string("nope")]
+            ),
+            over: path
+        )
+        #expect(some.isSuccess)
+        #expect(logs.count == 2)
+        #expect(logs.last?.contains("nope") == true)
+        #expect(logs.last?.contains("ignored") == true)
+    }
+
+    @Test("A known subscribe event logs nothing")
+    func knownSubscribeEventIsQuiet() async throws {
+        let path = Self.throwawaySocketPath()
+        let server = SocketServer(path: path)
+        var logs: [String] = []
+        server.onLog = { logs.append($0) }
+        try server.start()
+        defer { server.stop() }
+
+        let response = try await Self.roundTrip(
+            CommandRequest(
+                command: "subscribe",
+                args: [.string("space_change")]
+            ),
+            over: path
+        )
+        #expect(response.isSuccess)
+        #expect(logs.isEmpty)
+    }
+
+    private static func throwawaySocketPath() -> String {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-\(UUID().uuidString.prefix(8)).sock"
+            ).path
+    }
+
+    /// Blocking client work happens off the main actor; the
+    /// server needs the main queue to process. The listener binds
+    /// asynchronously, so connecting may need a few retries.
+    private static func roundTrip(
+        _ request: CommandRequest,
+        over path: String
+    ) async throws -> CommandResponse {
+        try await Task.detached {
             () async throws -> CommandResponse in
             var client: SocketClient?
             for _ in 0..<50 {
@@ -126,21 +218,7 @@ struct SocketTests {
             guard let client else {
                 throw SocketError.connectFailed("timeout")
             }
-            return try client.roundTrip(
-                CommandRequest(
-                    command: "focus",
-                    args: [.string("left")]
-                )
-            )
+            return try client.roundTrip(request)
         }.value
-
-        #expect(response.isSuccess)
-        #expect(
-            response.data
-                == .object([
-                    "echo": .string("focus"),
-                    "count": .number(1),
-                ])
-        )
     }
 }
