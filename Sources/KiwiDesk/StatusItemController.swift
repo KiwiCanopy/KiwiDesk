@@ -42,7 +42,10 @@ final class StatusItemController: NSObject, NSMenuDelegate,
     var onSetLayoutMode: (LayoutMode) -> Void = { _ in }
     var onSaveLayoutToProfile: () -> Void = {}
 
-    private let item: NSStatusItem
+    /// The menu-bar slot — injected so tests can build the
+    /// quick-menu logic without registering a real system item
+    /// (see `StatusItemHandle`, the #565-class seam).
+    private let item: StatusItemHandle
     private let menu = NSMenu()
     /// Missing-permission warning overrides everything.
     /// `private(set)`: the menu builder in `+Menu` reads it to add
@@ -67,10 +70,8 @@ final class StatusItemController: NSObject, NSMenuDelegate,
     /// non-cancellable `asyncAfter`.
     private var discoveryDismiss: Task<Void, Never>?
 
-    override init() {
-        item = NSStatusBar.system.statusItem(
-            withLength: NSStatusItem.squareLength
-        )
+    init(item: StatusItemHandle = SystemStatusItem()) {
+        self.item = item
         super.init()
         menu.delegate = self
         item.menu = menu

@@ -4,6 +4,16 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
+/// Fake menu-bar slot so this suite never registers a real
+/// system status item (#565-class seam); the Gui convention is
+/// a per-file fake, and `StatusItemSeamGuardTests` pins that
+/// every test construction injects one.
+@MainActor
+private final class FakeStatusItem: StatusItemHandle {
+    let button: NSStatusBarButton? = nil
+    var menu: NSMenu?
+}
+
 /// The Switch Profile quick-menu row — and the active-profile
 /// context line above it — appear only when there is a profile
 /// worth switching to: one that isn't the active one and isn't
@@ -21,7 +31,9 @@ struct QuickMenuProfileRowTests {
         all: [String],
         broken: [String] = []
     ) -> StatusItemController {
-        let controller = StatusItemController()
+        let controller = StatusItemController(
+            item: FakeStatusItem()
+        )
         controller.profilesProvider = {
             (active: active, all: all, broken: Set(broken))
         }
