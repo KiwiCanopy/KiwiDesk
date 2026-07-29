@@ -6,8 +6,8 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents is **nothing happening.** Most of
-/// the seams default to a no-op, so an unassigned one lets its
+/// The failure this prevents is **nothing happening.** A seam
+/// whose default is a no-op, left unassigned, lets its
 /// subsystem compile, ship, run, and throw its diagnostics away.
 /// Nothing reds, nothing warns, and the only symptom is a log
 /// line that was never going to appear, missed months later by

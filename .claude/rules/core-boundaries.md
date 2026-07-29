@@ -39,9 +39,9 @@ itself when a fifth is added.
 - **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
   the group where all of them are, and in the same change that
   declares it. Leaving one unassigned fails by **doing
-  nothing** — most default to a no-op, so the subsystem
-  compiles, ships, runs and drops every line it logs, with no
-  red and no symptom beyond a diagnostic that was never going to
+  nothing** — a seam whose default is a no-op lets its subsystem
+  compile, ship, run and drop every line it logs, with no red and
+  no symptom beyond a diagnostic that was never going to
   appear. `LogSeamWiringTests` is the guard, its `allowed` map
   is the exemption list, and its docstring carries the argument.
   Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
