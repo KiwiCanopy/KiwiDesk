@@ -4070,53 +4070,69 @@ knob, also persisted per-profile).
 animations.set_scroll_speed(250)
 ```
 
-### animations.set_grow_policy
+### animations.set_size_policy
 
 **Expects:** `"smooth"` (default) or `"mid_slide"`.
 
-**Does:** picks how a window's size is applied *while it grows*
-(issue #47). Engine-only and **not persisted** to a profile — an
-expert knob (like the bars' `dim_factor`), Lua-only and absent from
-Settings. Set it from `init.lua` to make an override stick across
-launches.
+**Does:** picks how a window's size is applied while it animates
+(issues #47, #593). Engine-only and **not persisted** to a profile
+— an expert knob (like the bars' `dim_factor`), Lua-only and absent
+from Settings. Set it from `init.lua` to make an override stick
+across launches.
 
 - `"smooth"` (default) — a growing axis follows the animation
   continuously. By default the size updates **per display tick**
   (matching the position channel, on any refresh rate), so slow-AX
   apps (Electron/WebKit: VS Code, Slack, Discord, Chrome) reflow
-  once per frame. `animations.set_grow_rate` can throttle that.
+  once per frame. `animations.set_size_rate` can throttle that.
 - `"mid_slide"` — the legacy fallback: a growing axis holds its
   start size, then grows in a single frame at halfway, where the
   ongoing slide masks the jump. Slow-AX apps reflow exactly once.
   Drop to this for an app that can't keep pace with `"smooth"`.
 
-A shrinking axis snaps to its target on the first frame under
-either policy, and the exact target always lands on the settle
-frame.
+Shrinking splits by *what else is moving*, and only under
+`"smooth"`:
+
+- When every window in the change is being animated — a `resize`
+  press, a ratio, gap or `min_window_size` edit — a shrinking axis
+  follows the animation too, so the edge two panes share slides
+  instead of jumping. Both panes travel on the same clock, so
+  there is nothing for a gradual shrink to expose.
+- When something is placed at its final size in one frame, it
+  still takes its target on the first frame. A window that just
+  opened is full size immediately, so a sibling that gave up its
+  room gradually would sit *underneath* it for the length of the
+  animation. This covers window open and close, mode and space
+  changes — and a **mouse resize**, where the window you dragged
+  is already where you left it when the rest catches up.
+
+Under `"mid_slide"` a shrinking axis always takes the first frame.
+Either way the exact target lands on the settle frame.
 
 **Example:**
 
 ```lua
--- fall back to the legacy grow for a stubborn app
-animations.set_grow_policy("mid_slide")
+-- fall back to the legacy sizing for a stubborn app
+animations.set_size_policy("mid_slide")
 ```
 
-### animations.set_grow_rate
+### animations.set_size_rate
 
 **Expects:** a number (hertz, clamped 1–120). `0` or negative
 restores the default **per-tick** behavior (no throttle).
 
-**Does:** caps how often the `"smooth"` grow policy emits a size-set,
+**Does:** caps how often the `"smooth"` policy emits a size-set,
 bounding a slow-AX app's reflow load. By default the size follows
 the display refresh (per-tick); set a lower rate only if a heavy app
-falls behind. No effect under `"mid_slide"`. Engine-only, not
-persisted (#47).
+falls behind. It caps both directions — a plain resize that shrinks
+one pane while growing another is where the load is highest. No
+effect under `"mid_slide"`. Engine-only, not persisted (#47, #593).
 
 **Example:**
 
 ```lua
-animations.set_grow_rate(30)   -- throttle a heavy app
-animations.set_grow_rate(0)    -- back to per-tick default
+animations.set_size_rate(30)   -- throttle a heavy app
+animations.set_size_rate(0)    -- back to per-tick default
 ```
 
 ### animations.set_on_space_change

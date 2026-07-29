@@ -140,8 +140,8 @@ item's only appearance in CLI output.
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `animations.set_grow_policy` | smooth (default)\|mid_slide; grow size policy (#47), Lua-only, not persisted |
-| | `animations.set_grow_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets, Lua-only, not persisted |
+| | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
+| | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |

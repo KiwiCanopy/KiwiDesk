@@ -42,6 +42,17 @@ editing here:
   lives in that map, not here.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
+- A retile may **promise** that every window it touches is
+  spring-sized (`BatchSizing.allSpringSized`, #593), which lets a
+  shrinking pane slide its shared edge instead of snapping. The
+  promise is false for any pass that opens, closes or re-slots a
+  window — that reintroduces #45 — so it is opt-in and
+  allow-listed by `BatchSizingRoutingTests`. The argument lives
+  on `BatchSizing`; it is named here because every site that can
+  break it is in `Commands/`, `Tiling/` or `App/`, while the
+  subsystem rule that owns it
+  ([input-and-animation.md](input-and-animation.md)) only loads
+  under `Animation/`.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

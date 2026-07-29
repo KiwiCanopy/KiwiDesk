@@ -14,14 +14,17 @@ import CoreGraphics
 /// duplicates are skipped: sub-pixel deltas don't render but
 /// each one would still cost a blocking AX round-trip.
 ///
-/// Sizes are applied stepwise, split by direction: a
-/// shrinking window takes its target size on the first frame,
-/// a growing one holds its start size until halfway and then
-/// grows in one frame, where the ongoing slide masks the jump.
-/// Every other frame is position-only — one AX call, and the
-/// target app never re-lays-out its content mid-flight. The
-/// grow direction's policy is swappable (`growPolicy`, #47) for
-/// on-device comparison; the size math lives in `GrowSize`.
+/// The size channel steps under two orthogonal inputs, and the
+/// math for both lives in `SizeStep`. `sizePolicy` (#47) is
+/// engine-wide and swappable for on-device comparison: the
+/// shipping `.throttledSmooth` follows the spring, the legacy
+/// `.midSlide` lands one size-set mid-flight. `BatchSizing` (#593)
+/// is per animation and only ever loosens the shrink direction —
+/// `.mayInstantSize` keeps the #45 first-frame snap so a sibling yielding
+/// room clears at once, `.allSpringSized` lets a shrinking axis follow the
+/// spring where nothing in the batch is instantly sized. Frames
+/// that change no size are position-only — one AX call, and the
+/// target app never re-lays-out its content mid-flight.
 @MainActor
 public final class AnimationEngine {
     /// Applies one interpolated frame to a real window.
@@ -88,14 +91,16 @@ public final class AnimationEngine {
         }
     }
 
-    /// Grow-direction size policy (#47). Default `.throttledSmooth`
-    /// at the per-tick rate below — a growing window follows the
-    /// spring smoothly. Engine-only (not persisted to a profile),
-    /// but Lua-overridable: `animations.set_grow_policy` drops to
+    /// Size-channel policy (#47). Default `.throttledSmooth` at
+    /// the per-tick rate below — a growing window follows the
+    /// spring smoothly, and so does a shrinking one on a
+    /// `.allSpringSized`-marked animation (#593). Engine-only (not
+    /// persisted to a profile), but Lua-overridable:
+    /// `animations.set_size_policy` drops to
     /// `.midSlide` for a session (e.g. from `init.lua`) if a
     /// slow-AX app misbehaves. The GUI never exposes it (expert
     /// knob, like the bars' `dim_factor`).
-    public var growPolicy: GrowPolicy = .throttledSmooth
+    public var sizePolicy: SizePolicy = .throttledSmooth
 
     /// Optional size-set rate cap for `.throttledSmooth`, in Hz.
     /// `nil` (default) = per-tick: the size channel emits every
@@ -104,15 +109,15 @@ public final class AnimationEngine {
     /// number. A non-nil value throttles *below* the refresh
     /// (clamped 1–120) to bound a slow-AX app's reflow load. No
     /// effect under `.midSlide`.
-    public var growRateHz: Int? {
-        get { storedGrowRateHz }
-        set { storedGrowRateHz = newValue.map { min(max($0, 1), 120) } }
+    public var sizeRateHz: Int? {
+        get { storedSizeRateHz }
+        set { storedSizeRateHz = newValue.map { min(max($0, 1), 120) } }
     }
 
     private var storedDurationMS = 250
     private var storedScrollDurationMS = 250
     // Internal: the tick loop reads it from `+Tick`.
-    var storedGrowRateHz: Int?
+    var storedSizeRateHz: Int?
     /// Per-window seconds since the last throttled size-set (#47).
     // Members below are read by the `+Teardown` extension, so they
     // are module-internal rather than file-private.
@@ -160,12 +165,22 @@ public final class AnimationEngine {
     // MARK: - Public API
 
     /// Animates a window to a target frame on a given screen.
+    ///
+    /// `sizing` is why the caller is animating (#593), and it
+    /// only ever loosens the shrink direction: `.mayInstantSize` (the
+    /// default) keeps the #45 first-frame snap, `.allSpringSized` lets a
+    /// shrinking axis follow the spring. It is deliberately NOT
+    /// derivable from `isNewWindow` — that flag marks the
+    /// *newly-opened* window and is consumed right here to pre-set
+    /// `heldSize`, while a make-room shrink hits the **siblings**,
+    /// which retile with `isNewWindow: false`.
     public func animate(
         window: WindowID,
         on screen: NSScreen,
         from current: CGRect,
         to target: CGRect,
-        isNewWindow: Bool = false
+        isNewWindow: Bool = false,
+        sizing: BatchSizing = .mayInstantSize
     ) {
         // A non-finite target can only come from garbage upstream
         // (a NaN layout rect, a bad AX read), and it is worse than
@@ -189,7 +204,27 @@ public final class AnimationEngine {
             return
         }
         if var existing = removeAnimation(for: window) {
-            existing.retarget(to: target)
+            // Taking on a promise the previous pass did not make
+            // re-seats the size springs onto what is actually on
+            // screen first: an unpromised shrink renders `target`
+            // from frame 1 while the springs travel on, so the
+            // promised step would read a stale, larger size and
+            // jump the window back up — #45 across batches.
+            // `reseatSize` argues it in full. The held size falls
+            // back to the rendered frame the way the tick loop's
+            // does, so a missing entry cannot silently skip the
+            // re-seat and let the jump through.
+            if sizing == .allSpringSized,
+                existing.sizing == .mayInstantSize
+            {
+                existing.reseatSize(
+                    heldSize[window]
+                        ?? Self.rounded(existing.frame).size
+                )
+            }
+            // Newest promise wins: a pass that promises nothing,
+            // interrupting one that did, restores the snap (#593).
+            existing.retarget(to: target, sizing: sizing)
             animations[display, default: [:]][window] = existing
         } else {
             onAnimationStart(window)
@@ -214,7 +249,8 @@ public final class AnimationEngine {
                             size: target.size
                         ),
                         to: target,
-                        spring: spring
+                        spring: spring,
+                        sizing: sizing
                     )
             } else {
                 heldSize[window] = current.size
@@ -222,7 +258,8 @@ public final class AnimationEngine {
                     FrameAnimation(
                         from: current,
                         to: target,
-                        spring: spring
+                        spring: spring,
+                        sizing: sizing
                     )
             }
         }

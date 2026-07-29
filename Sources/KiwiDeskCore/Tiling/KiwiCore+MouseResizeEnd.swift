@@ -50,6 +50,9 @@ extension KiwiCore {
                 in: state
             )
         else {
+            // No sizing promise, for the reason spelled out at the
+            // settle below: the pointer, not the spring, decided
+            // this window's size.
             retile(
                 animated: tiler.settings.animations.onWindowResize
             )
@@ -91,6 +94,36 @@ extension KiwiCore {
             in: space,
             bounds: bounds
         )
+        // **No sizing promise here**, unlike the keyboard verb —
+        // and the difference is not taste, it is the definition
+        // (#593). `.allSpringSized` asserts that every window in
+        // the pass got its size from the spring. The dragged
+        // window got its size from the *pointer*: it is already at
+        // its final frame when this runs, so the un-forced retile
+        // below usually finds it inside the ±2 pt tolerance and
+        // skips it entirely — an instantly-sized window in the
+        // batch, which is exactly what the promise denies.
+        //
+        // "Usually" is the point, not a hedge. `cappedRatioWrite`
+        // and the 0.1…0.9 clamp mean a drag past the min-size
+        // cliff recomputes a slot far from where the pointer left
+        // the window (0.95 → 0.9 is ~96 pt on a 1920 display), and
+        // *that* run does re-frame and spring-size it. A promise
+        // has to hold on every run, so one run that breaks it is
+        // enough to withhold it.
+        //
+        // The keyboard verb has no such member — both panes spring
+        // from the old ratio to the new, on one clock — which is
+        // the whole reason that path may promise and this one may
+        // not.
+        //
+        // It would also buy nothing. Smoothing here only affects
+        // the NEIGHBOUR, and a neighbour that shrinks is vacating
+        // room the dragged window already covers, so the motion is
+        // either invisible (dragged window on top) or an obvious
+        // artifact (neighbour on top, overhanging mid-flight). The
+        // grow direction is smooth regardless — that is #47, and
+        // it is untouched here.
         retile(
             animated: tiler.settings.animations.onWindowResize
         )

@@ -21,6 +21,7 @@ extension KiwiCore {
             guard let ratio = Self.parseSplitRatio(args.first)
             else { return Self.ratioError }
             tiler.settings.bsp.splitRatioH = ratio
+            promiseAllWindowsSpringSized()
             // An explicit global write must show everywhere:
             // drop the session shadow (#458).
             clearSessionRatios { $0.splitRatioH = nil }
@@ -28,6 +29,7 @@ extension KiwiCore {
             guard let ratio = Self.parseSplitRatio(args.first)
             else { return Self.ratioError }
             tiler.settings.bsp.splitRatioV = ratio
+            promiseAllWindowsSpringSized()
             clearSessionRatios { $0.splitRatioV = nil }
         case "bsp.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
@@ -81,10 +83,12 @@ extension KiwiCore {
             guard let ratio = Self.parseSplitRatio(rest.first)
             else { return Self.ratioError }
             over.splitRatioH = ratio
+            promiseAllWindowsSpringSized()
         case "ratio_v":
             guard let ratio = Self.parseSplitRatio(rest.first)
             else { return Self.ratioError }
             over.splitRatioV = ratio
+            promiseAllWindowsSpringSized()
         default:
             return .fail(
                 "unknown command: bsp.set_\(field)_override"

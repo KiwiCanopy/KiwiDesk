@@ -15,6 +15,7 @@ extension KiwiCore {
                 return Self.slotSizeError
             }
             tiler.settings.scrolling.slotSize = size
+            promiseAllWindowsSpringSized()
             // Explicit global write shows everywhere (#458).
             clearSessionRatios { $0.slotSize = nil }
         case "scroll.set_anchor":
@@ -94,6 +95,7 @@ extension KiwiCore {
                 return Self.slotSizeError
             }
             over.slotSize = size
+            promiseAllWindowsSpringSized()
         case "anchor":
             guard
                 let anchor = Self.parseAnchor(rest.first?.stringValue)
