@@ -30,18 +30,24 @@ public final class SleepWakeManager {
 
     /// The display topology a held snapshot belongs to,
     /// captured beside it and re-read when the delayed restore
-    /// fires. If the set changed while asleep/locked (undock,
+    /// fires. If it changed while asleep/locked (undock,
     /// monitor power-off), the snapshot's raw frames belong to
     /// dead geometry and the monitor-change re-adopt that
     /// already ran is the truth — replaying on top of it is
-    /// what scrambled wakes (#633). Compared as a set: display
-    /// *order* may shuffle without meaning a topology change.
-    /// The unwired default (`[]` both sides) compares equal, so
-    /// the gate stays inert until Bootstrap wires it.
+    /// what scrambled wakes (#633). Compared as a sorted
+    /// multiset, never a `Set`: display *order* may shuffle
+    /// without meaning a topology change, but two identical
+    /// monitors share one fingerprint, and a `Set` would
+    /// swallow the loss of one of them — the most common
+    /// matched-pair undock. The unwired default (`[]` both
+    /// sides) compares equal, so the gate stays inert until
+    /// Bootstrap wires it; `WakeFingerprintWiringTests` probes
+    /// that wiring on a live core.
     public var displayFingerprints: @MainActor () -> [String] = { [] }
 
     private var snapshot: StateSnapshot?
-    private var snapshotFingerprints: Set<String> = []
+    /// Sorted at capture; see `displayFingerprints`.
+    private var snapshotFingerprints: [String] = []
     private var restoreTask: Task<Void, Never>?
     private var tokens: [(NotificationCenter, NSObjectProtocol)] =
         []
@@ -125,7 +131,7 @@ public final class SleepWakeManager {
         restoreTask?.cancel()
         restoreTask = nil
         snapshot = captureState()
-        snapshotFingerprints = Set(displayFingerprints())
+        snapshotFingerprints = displayFingerprints().sorted()
     }
 
     func systemDidReturn() {
@@ -139,7 +145,7 @@ public final class SleepWakeManager {
             // Re-read at fire time, not at wake: the delay
             // exists precisely so the topology can finish
             // settling first.
-            if Set(self.displayFingerprints())
+            if self.displayFingerprints().sorted()
                 == self.snapshotFingerprints
             {
                 self.restoreState(saved)

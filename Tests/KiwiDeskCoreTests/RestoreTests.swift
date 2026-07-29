@@ -60,6 +60,13 @@ struct RestoreTests {
     @Test("Restore keeps the snapshot's track partition")
     func trackPartitionSurvivesModeEntry() {
         let core = makeTestCore()
+        // Pin the display (#531): the track entry seed resolves
+        // capacity through the visible bounds, and inheriting
+        // the host's screen would make the seed — observable if
+        // the reinstate ever regresses — machine-dependent.
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 900)
+        }
         core.state.workspaces.ensureSpace(SpaceID(1))
         for id: UInt32 in [1, 2] {
             core.state.apply(
@@ -97,5 +104,49 @@ struct RestoreTests {
         #expect(space?.mode == .track)
         #expect(space?.trackBreaks == Set([WindowID(1)]))
         #expect(space?.trackWeights == [WindowID(1): 2.0])
+    }
+
+    @Test("A single-track space restores without the entry seed")
+    func singleTrackRestoresClean() {
+        // All tracks were merged into one before capture, so
+        // the record carries empty breaks/weights. The mode
+        // re-application seeds a default partition on entry —
+        // adopt must clear it back to the captured single
+        // track, not leave the seed showing.
+        let core = makeTestCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 900)
+        }
+        core.state.workspaces.ensureSpace(SpaceID(1))
+        for id: UInt32 in [1, 2] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: 100,
+                        appName: "App"
+                    )
+                )
+            )
+        }
+        let snapshot = StateSnapshot(
+            windows: [],
+            spaces: [
+                .init(
+                    space: Space(
+                        id: SpaceID(1),
+                        mode: .track,
+                        windows: [WindowID(1), WindowID(2)],
+                        focused: nil
+                    )
+                )
+            ],
+            activeSpace: "1"
+        )
+        core.restore(snapshot)
+        let space = core.state.workspaces[SpaceID(1)]
+        #expect(space?.mode == .track)
+        #expect(space?.trackBreaks == [])
+        #expect(space?.trackWeights == [:])
     }
 }

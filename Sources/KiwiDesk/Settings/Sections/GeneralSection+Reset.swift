@@ -134,7 +134,10 @@ extension GeneralSection {
             // `spaces.delete_confirm.cancel`, not
             // `discard.cancel`: the latter translates as
             // "Continue editing" in six locales — right for
-            // the staged-edit gate, nonsense here.
+            // the staged-edit gate, nonsense here. Accepted
+            // coupling: rewording the Spaces dialog's Cancel
+            // rewords this one too — fine while both mean a
+            // plain "Cancel"; mint a key if either drifts.
             Button(
                 L("spaces.delete_confirm.cancel", "Cancel"),
                 role: .cancel

@@ -274,4 +274,51 @@ struct MachineTouchTests {
             "ExecLauncher gone — retarget the tripwire needle"
         )
     }
+
+    /// `resetAllSettings`' `trash` parameter defaults to the
+    /// real Move-to-Trash (#634) — the live default the seam
+    /// shape requires — so a test calling it without injecting
+    /// fills the developer's actual Trash with zero red. The
+    /// name alone cannot discriminate (the SettingsModel facade
+    /// shares it), so the pin is on the call LINE: every
+    /// test-tree site must carry the `trash:` label, which also
+    /// forces the argument onto the needle's line where this
+    /// scan can see it.
+    @Test("tests never call resetAllSettings bare")
+    func resetKeepsTrashInjected() throws {
+        let sites = try Self.sites(
+            of: "resetAllSettings" + "(",
+            under: Self.testTrees
+        )
+        // The suite exercising the reset is the presence pin.
+        #expect(!sites.isEmpty, "needle rotted")
+        var bare: [MachineTouchSite] = []
+        for site in sites {
+            let lines = try String(
+                contentsOf: site.file,
+                encoding: .utf8
+            ).split(
+                separator: "\n",
+                omittingEmptySubsequences: false
+            )
+            let line = String(lines[site.line - 1])
+            if !line.contains("trash:") {
+                bare.append(site)
+            }
+        }
+        let listed = bare.map(\.site)
+            .joined(separator: ", ")
+        #expect(
+            bare.isEmpty,
+            "un-injected reset fills the real Trash: \(listed)"
+        )
+        // Production may use the live default (the GUI facade
+        // does); its sites only pin the needle against a
+        // rename.
+        let production = try Self.sites(
+            of: "resetAllSettings" + "(",
+            under: Self.productionTrees
+        )
+        #expect(!production.isEmpty, "needle rotted")
+    }
 }

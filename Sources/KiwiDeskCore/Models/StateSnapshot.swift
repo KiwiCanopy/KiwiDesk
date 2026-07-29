@@ -143,7 +143,18 @@ extension StateCoordinator {
             // every track space to one implicit track. Dormant
             // markers on windows not (yet) tracked are harmless
             // — the partition only spans the tiled list.
-            if !record.trackBreaks.isEmpty
+            //
+            // Trigger on "the record IS a track space", not on
+            // marker non-emptiness: a track space whose windows
+            // were all merged into one track captures as
+            // empty/empty, and since `restore` re-applies the
+            // mode before this runs (#633), a mode *entry* just
+            // seeded a default partition — the empty write is
+            // what clears the seed back to the captured single
+            // track. Non-track spaces keep the non-empty
+            // trigger for their dormant markers.
+            if record.mode == .track
+                || !record.trackBreaks.isEmpty
                 || !record.trackWeights.isEmpty
             {
                 workspaces.withSpace(space) {

@@ -100,4 +100,55 @@ struct SleepWakeManagerTests {
         await pollUntil { restored }
         #expect(restored)
     }
+
+    @Test("Losing one of two identical displays still skips")
+    func identicalPairLossSkips() async {
+        // Two same-model, same-resolution monitors share one
+        // fingerprint string — a Set comparison would swallow
+        // the loss of one; the multiset must not.
+        let manager = SleepWakeManager()
+        manager.restoreDelayMS = 0
+        var logged: [String] = []
+        manager.onLog = { logged.append($0) }
+        manager.captureState = { self.sample() }
+        var current = ["twin", "twin"]
+        manager.displayFingerprints = { current }
+        var restored = false
+        manager.restoreState = { _ in restored = true }
+        manager.systemWillRest()
+        current = ["twin"]
+        manager.systemDidReturn()
+        await pollUntil {
+            logged.contains { $0.contains("topology") }
+        }
+        #expect(!restored)
+    }
+}
+
+/// The wiring probe for the fail-open `displayFingerprints`
+/// seam: unwired it returns `[]` forever, which compares equal
+/// on both sides of the gate — restores keep firing while the
+/// topology check silently never trips, the shipped-inert-seam
+/// class the log-seam guards exist for. This asserts on the
+/// value the wired seam actually returns for a seeded display,
+/// so deleting the Bootstrap wiring line reds it.
+@Suite("WakeFingerprintWiringTests")
+@MainActor
+struct WakeFingerprintWiringTests {
+    @Test("Bootstrap wires the seam to live display state")
+    func seamReturnsLiveFingerprints() {
+        let core = makeTestCore()
+        let display = Display(
+            id: DisplayID(7),
+            name: "Probe",
+            frame: CGRect(x: 0, y: 0, width: 800, height: 600)
+        )
+        core.state.apply(.displaysChanged([display]))
+        let expected = core.state.workspaces.allDisplays
+            .map(\.fingerprint)
+        #expect(!expected.isEmpty)
+        #expect(
+            core.sleepWake.displayFingerprints() == expected
+        )
+    }
 }

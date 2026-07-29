@@ -21,7 +21,10 @@ public final class CrashRecovery {
     /// snapshot files random new windows into old spaces and
     /// seeds dead ids into the remembered-space map. Both
     /// snapshot files survive a reboot, so both readers gate on
-    /// this. Injected so tests pin the boundary instead of
+    /// this. The gate is scoped to the *reboot* — a logout →
+    /// login on the same boot also remints ids but is not
+    /// caught here; accepted as the rare cousin of the dominant
+    /// case. Injected so tests pin the boundary instead of
     /// reading the host's boot clock.
     public var bootTime: () -> Date = SystemBoot.time
 

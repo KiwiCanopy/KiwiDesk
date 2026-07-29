@@ -13,7 +13,11 @@ enum SystemBoot {
     /// Boot time, or `.distantPast` when the sysctl fails.
     /// Failing open (every snapshot counts as same-boot) keeps
     /// restore working if the call ever breaks — the gate is a
-    /// hardening, not a load-bearing feature.
+    /// hardening, not a load-bearing feature. `kern.boottime`
+    /// is wall-clock and moves under NTP steps, like the
+    /// `capturedAt` stamps it is compared against; a forward
+    /// step can wrongly discard a same-boot snapshot, which
+    /// fails in the benign direction (fresh rediscovery).
     static func time() -> Date {
         var tv = timeval()
         var size = MemoryLayout<timeval>.size

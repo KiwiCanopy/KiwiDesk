@@ -36,7 +36,15 @@ extension KiwiCore {
     ///
     /// `trash` is injectable so tests hard-delete instead of
     /// filling the real Trash; production uses the Finder
-    /// Move-to-Trash call.
+    /// Move-to-Trash call. A failed trash falls back to a hard
+    /// delete — a surviving `gui.json` would flip the reload
+    /// back onto the old sidecar and turn the confirmed wipe
+    /// into a silent no-op, which is strictly worse than
+    /// skipping the Trash courtesy. Returns whether every
+    /// doomed file is actually gone; `false` (both attempts
+    /// failed on the user's own config dir — effectively
+    /// unreachable) leaves the log line as the trail.
+    @discardableResult
     public func resetAllSettings(
         trash: (URL) throws -> Void = { url in
             try FileManager.default.trashItem(
@@ -44,8 +52,9 @@ extension KiwiCore {
                 resultingItemURL: nil
             )
         }
-    ) {
+    ) -> Bool {
         let files = FileManager.default
+        var cleared = true
         for url in [guiConfigStore.url, profiles.directory]
         where files.fileExists(atPath: url.path) {
             do {
@@ -53,8 +62,19 @@ extension KiwiCore {
             } catch {
                 onLog(
                     "reset: could not trash "
-                        + "\(url.lastPathComponent): \(error)"
+                        + "\(url.lastPathComponent) (\(error)); "
+                        + "deleting instead"
                 )
+                do {
+                    try files.removeItem(at: url)
+                } catch {
+                    onLog(
+                        "reset: could not delete "
+                            + "\(url.lastPathComponent): "
+                            + "\(error)"
+                    )
+                    cleared = false
+                }
             }
         }
         discardSavedArrangement()
@@ -62,10 +82,20 @@ extension KiwiCore {
         spacePins = [:]
         mainSpaces = []
         tiler.settings = TilingSettings()
-        // Live spaces down to the starter set before the
+        // Live spaces down to the first-launch set before the
         // reload's seed reads them; windows are forwarded, so
-        // nothing is stranded in a pruned space.
-        let fresh = starterSpaces()
+        // nothing is stranded in a pruned space. The target
+        // depends on who owns settings: a GUI-managed config's
+        // first launch seeds the starter ladder, but a
+        // Lua-owned one (`configDeclaresManagedSettings`) never
+        // gets a ladder — its first launch is the single
+        // default space plus whatever the Lua declares on the
+        // reload below, so grafting starter spaces here would
+        // produce a state no first launch ever shows.
+        let fresh =
+            configDeclaresManagedSettings
+            ? [SpaceID(1)]
+            : starterSpaces()
         for space in fresh {
             state.workspaces.ensureSpace(space)
         }
@@ -79,5 +109,6 @@ extension KiwiCore {
         retile(force: true)
         emitSpaceChange()
         onLog("all settings reset to defaults")
+        return cleared
     }
 }

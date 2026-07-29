@@ -15,8 +15,10 @@ extension KiwiCore {
         // Modes before adopt, never after: a runtime `set_mode`
         // was captured but silently reverted on every restore
         // (#633) — and entering track mode seeds a default
-        // partition, which `adopt` then overwrites with the
-        // snapshot's own breaks/weights. The reverse order
+        // partition, which `adopt` then replaces with the
+        // snapshot's own breaks/weights (writing even an empty
+        // pair for a track record, so a captured single track
+        // is not left showing the seed). The reverse order
         // would wipe the restored partition with the seed.
         // Same existence gate as `adopt`: never a new space.
         for record in snapshot.spaces {
@@ -51,7 +53,12 @@ extension KiwiCore {
     /// the bare replay (#633), which left everything un-retiled
     /// with stale bars. The launch-time session restore keeps
     /// its own sequence in `KiwiCore+Lifecycle` — it seeds
-    /// focus between the replay and the settle.
+    /// focus between the replay and the settle. Crash restore
+    /// gets no focus seeding here on purpose: it runs inside
+    /// `start()`, whose 1 s startup sweep
+    /// (`scheduleStartupSweep`) re-runs the landing choice and
+    /// `seedStartupFocus` — that sweep is the focus half of
+    /// this path's contract.
     func restoreAndSettle(_ snapshot: StateSnapshot) {
         restore(snapshot)
         spaceSwitchRetile()
