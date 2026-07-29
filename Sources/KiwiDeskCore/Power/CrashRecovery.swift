@@ -108,6 +108,17 @@ public final class CrashRecovery {
         return snapshot
     }
 
+    /// Deletes both snapshot files — the tier-1 escape hatch
+    /// (#634). Anything captured EARLIER is gone; the files
+    /// regenerate from the live state (the crash marker on the
+    /// next autosave tick, the session file at the next clean
+    /// quit), which is the point: current state, not a stale
+    /// capture.
+    public func discardSavedSnapshots() {
+        try? FileManager.default.removeItem(at: fileURL)
+        try? FileManager.default.removeItem(at: sessionURL)
+    }
+
     /// Writes one snapshot now (also called by the timer).
     public func autosave() {
         guard let snapshot = captureState() else { return }

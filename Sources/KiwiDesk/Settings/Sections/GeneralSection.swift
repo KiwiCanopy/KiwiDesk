@@ -11,6 +11,10 @@ struct GeneralSection: View {
     /// Advanced is collapsed by default — only interested
     /// users need the config-file path and the raw editor.
     @State private var advancedExpanded = false
+    /// The Reset All Settings confirmation (#634). Internal:
+    /// the row and dialog live in `GeneralSection+Reset`, and
+    /// an extension in another file cannot reach `private`.
+    @State var confirmingReset = false
     /// Drives the light/dark wordmark swap (see `aboutBrand`).
     @Environment(\.colorScheme) private var colorScheme
 
@@ -241,6 +245,7 @@ struct GeneralSection: View {
                 Text(editLuaCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                resetLadder
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)

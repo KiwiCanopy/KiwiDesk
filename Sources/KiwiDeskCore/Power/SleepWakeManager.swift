@@ -83,6 +83,17 @@ public final class SleepWakeManager {
         restoreTask = nil
     }
 
+    /// Drops a snapshot held for a pending wake/unlock replay,
+    /// cancelling the replay — the tier-1 escape hatch's
+    /// in-flight half (#634). Observers stay armed; the next
+    /// rest/return cycle captures fresh.
+    public func dropHeldSnapshot() {
+        restoreTask?.cancel()
+        restoreTask = nil
+        snapshot = nil
+        snapshotFingerprints = []
+    }
+
     // MARK: - Internals
 
     private func observe(

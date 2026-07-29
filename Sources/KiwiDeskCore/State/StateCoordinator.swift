@@ -126,6 +126,17 @@ public struct StateCoordinator: Sendable {
         rememberedSpaces[id] = space
     }
 
+    /// Drops every remembered window→space association — the
+    /// tier-1 escape hatch's in-memory half (#634): entries for
+    /// windows that no longer exist are the ids a recycled
+    /// `CGWindowID` can inherit, teleporting an unrelated new
+    /// window into an old space. Live windows are unaffected;
+    /// one that leaves and returns lands in the active space
+    /// once, like any new window.
+    public mutating func forgetRememberedSpaces() {
+        rememberedSpaces = [:]
+    }
+
     /// Where an untracked window will be filed once tracked.
     /// Session restore fills this before slow-AX apps list
     /// their windows, so startup can land on the right space

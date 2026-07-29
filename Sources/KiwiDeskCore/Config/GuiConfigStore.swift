@@ -6,7 +6,7 @@ import Foundation
 /// live Lua state can't reconstruct (keybinding actions, mode
 /// icons).
 public struct GuiConfigStore {
-    private let url: URL
+    let url: URL
 
     public init(directory: URL) {
         self.url = directory.appendingPathComponent("gui.json")

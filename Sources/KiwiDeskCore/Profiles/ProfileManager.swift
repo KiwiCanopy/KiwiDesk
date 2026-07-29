@@ -39,7 +39,7 @@ public final class ProfileManager {
     /// profile (e.g. after a monitor change).
     public private(set) var isDirty = false
 
-    private let directory: URL
+    let directory: URL
 
     /// Invalid profile files reported while listing (#31).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
@@ -285,6 +285,16 @@ public final class ProfileManager {
         currentName = nil
         currentStandard = name
         isDirty = true
+    }
+
+    /// Back to the nothing-adopted state — for Reset All
+    /// Settings (#634), after the profile files were trashed:
+    /// a `currentName` pointing at a deleted file would make
+    /// every re-apply path report a read failure.
+    func resetAdoption() {
+        currentName = nil
+        currentStandard = nil
+        isDirty = false
     }
 
     /// The non-adopting write: persists the JSON only, touching

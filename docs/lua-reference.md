@@ -4235,7 +4235,12 @@ animations.set_on_relayout(true)
 - `set_wake_restore_delay(ms)` — a number (milliseconds).
 
 **Does:** when `true`, restores window positions and focus after the
-machine wakes from sleep, after the specified delay (default 1500 ms).
+machine wakes from sleep or the screen unlocks, after the specified
+delay (default 1500 ms). The restore is skipped when the display set
+changed while the machine was away (undock, monitor power-off): the
+captured frames belong to the old displays, so the monitor-change
+profile resolution wins instead. A restore that does run finishes
+with a full retile, like any space switch.
 
 **Example:**
 
