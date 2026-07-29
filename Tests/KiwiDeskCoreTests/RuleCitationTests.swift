@@ -19,6 +19,14 @@ import Testing
 ///
 /// Symbols are matched by **declaration**, not by filename —
 /// `DragCoordinatorTests` lives in `DragTests.swift`.
+///
+/// **What it deliberately does not check:** a bare test *function*
+/// name. `rule-authoring.md` allows one, but nothing about the
+/// shape of `aFrozenSpringIsStillRescued` separates it from the
+/// production symbols these files cite on every other line, so
+/// checking them would mean flagging `retarget` and
+/// `maxStableStep` too. The rule file therefore asks for the
+/// suite name alongside; that half is checked here.
 @Suite("Rule file citations")
 struct RuleCitationTests {
     private var repoRoot: URL {
@@ -32,9 +40,11 @@ struct RuleCitationTests {
     func citedSuitesExist() throws {
         let declared = try declaredTestSymbols()
         var missing: [String] = []
+        var seen = 0
         for (file, text) in try ruleDocuments() {
             for name in Self.backticked(text)
             where name.hasSuffix("Tests") && !name.contains("/") {
+                seen += 1
                 // A SwiftPM *target* also ends in "Tests"
                 // (`KiwiDeskCoreTests`) and is a directory, not a
                 // declaration. Resolving either way counts.
@@ -53,14 +63,44 @@ struct RuleCitationTests {
             }
         }
         #expect(missing.isEmpty, "dangling citations: \(missing)")
+        // A total-scan canary, for a walk that finds nothing.
+        #expect(seen > 20, "only saw \(seen) suite citations")
+    }
+
+    @Test("No document can invert the scanner")
+    func backticksAreBalanced() throws {
+        // The fail-open path, and it is specific to how
+        // `backticked` works: it toggles on every backtick, so
+        // ONE unbalanced backtick inverts inside/outside for the
+        // rest of *that document* and every real citation after
+        // it is silently skipped. The count canary above does not
+        // reach this — the other fifteen files still supply
+        // plenty of citations — so parity has to be checked per
+        // document. (Fenced code blocks are fine: three backticks
+        // twice is an even number of toggles.)
+        for (file, text) in try ruleDocuments() {
+            let ticks = text.filter { $0 == "`" }.count
+            let why =
+                "\(file) has \(ticks) backticks, so the scan "
+                + "silently stops seeing citations partway"
+            #expect(ticks % 2 == 0, "\(why)")
+        }
     }
 
     @Test("Every cited script path exists")
     func citedScriptsExist() throws {
         var missing: [String] = []
+        var seen = 0
         for (file, text) in try ruleDocuments() {
-            for path in Self.backticked(text)
-            where path.hasPrefix("scripts/") {
+            for raw in Self.backticked(text) {
+                // `./scripts/build-app.sh` is how AGENTS.md and
+                // packaging-and-release.md cite these, so the
+                // prefix test has to see past the `./` — six live
+                // citations were invisible without this, one of
+                // them added by the commit that shipped me.
+                let path =
+                    raw.hasPrefix("./") ? String(raw.dropFirst(2)) : raw
+                guard path.hasPrefix("scripts/") else { continue }
                 // Trim a trailing glob or arg: `scripts/*key*`
                 // and `scripts/drop-key <key>` are both cited.
                 let bare = path.split(separator: " ")[0]
@@ -72,6 +112,7 @@ struct RuleCitationTests {
                 let url = repoRoot.appendingPathComponent(
                     String(bare)
                 )
+                seen += 1
                 if !FileManager.default.fileExists(
                     atPath: url.path
                 ) {
@@ -80,6 +121,7 @@ struct RuleCitationTests {
             }
         }
         #expect(missing.isEmpty, "dangling scripts: \(missing)")
+        #expect(seen > 10, "only saw \(seen) script citations")
     }
 
     /// AGENTS.md plus every rule file — both are in scope for the
@@ -106,7 +148,7 @@ struct RuleCitationTests {
             .sorted()
         // A fail-open guard is the thing this file exists to
         // prevent, so refuse to pass on an empty scan.
-        #expect(names.count > 10, "only found \(names.count) rules")
+        #expect(names.count >= 15, "only found \(names.count) rules")
         for name in names {
             out.append(
                 (
@@ -137,6 +179,13 @@ struct RuleCitationTests {
                 encoding: .utf8
             )
             for line in text.split(separator: "\n") {
+                // Declarations only. Substring matching over raw
+                // lines also fires on `/// The struct FooTests
+                // covers…`, so a rename that leaves any prose
+                // mention behind would keep its citation
+                // resolving.
+                let bare = line.drop { $0 == " " }
+                guard !bare.hasPrefix("//") else { continue }
                 for keyword in ["struct ", "final class ", "class "]
                 where line.contains(keyword) {
                     let tail =

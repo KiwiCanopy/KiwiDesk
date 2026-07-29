@@ -125,10 +125,13 @@ struct SpringStabilityMarginTests {
         // says the bound has no room for a second factor of two.
         for step in 1...400 {
             let z = Double(step) / 100
-            let doubled = 2 * margin(dampingFraction: z)
-            #expect(doubled > 2, "zeta \(z)")
+            // `margin < 2`, not `2 * margin > 2` — the latter
+            // reduces to `margin > 1`, which is the *safety*
+            // property this file already sweeps elsewhere, so it
+            // sat here contributing nothing. Proven inert in
+            // review: under a ceiling-violating spring it raised
+            // zero issues across all 400 points.
+            #expect(margin(dampingFraction: z) < 2, "zeta \(z)")
         }
-        #expect(margin(dampingFraction: 0.85) < 2)
-        #expect(margin(dampingFraction: 0.45) < 2)
     }
 }

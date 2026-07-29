@@ -36,11 +36,19 @@ defect was hardcoded English that never went near `L()`.
 Ranked. Take the first that fits; **delete is the last resort**,
 not a peer of the others.
 
-1. **Name its enforcing guard inline** — a `Tests/…` path, a test
-   type or function name, a `scripts/…` path. The best rows
+1. **Name its enforcing guard inline** — a suite name, a
+   `scripts/…` path, or a test function name. The best rows
    already do: `VisibleBoundsRoutingTests`, `SettingsCodingTests`,
    `LocalizationRegistryTests`, `ResourceBundleRoutingTests`,
    `SpringStabilityMarginTests`.
+
+   **Always name the suite, even when a function name is the
+   precise answer.** `RuleCitationTests` resolves suite names and
+   `scripts/…` paths, so those citations cannot rot silently; a
+   bare function name is not machine-checked, because nothing
+   about its shape distinguishes it from the production symbols
+   these files cite constantly. Name the suite and add the
+   function for precision.
 2. **Rewrite it as an obligation** — say what a future author must
    do, not what the tree currently is.
 3. **Re-home the fact to a named authority** and cite that
