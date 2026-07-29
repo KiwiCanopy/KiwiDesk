@@ -552,7 +552,7 @@
   "presets.minimalist.name": "Minimalista",
   "presets.minimalist.summary": "Espaçamentos amplos, um espaço de leitura com rolagem e trabalho de foco único.",
   "presets.needs_screens": "Requer %1$d tela(s) conectada(s).",
-  "presets.space_label": "Opção %1$d e %2$@",
+  "presets.space_label": "Espaço %1$d: %2$@",
   "presets.standard_badge": "padrão",
   "presets.start_here": "Comece por aqui — aplique uma predefinição para a sua configuração e depois ajuste o que quiser em qualquer aba.",
   "presets.starter_one.summary": "Um espaço por modo de disposição — Track, Stack, BSP, Grid e Floating.",

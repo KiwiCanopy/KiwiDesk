@@ -8,8 +8,7 @@ paths:
 Deliberately short — it loads on every `KiwiDeskCore` edit. Three
 seams that are violated *outside* the directory that owns them.
 
-- **Core names, the GUI narrates (#96).** `L()` is `@MainActor`
-  and much of Core is deliberately actor-free, so a user-facing
+- **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an
   enum, a value type) and the GUI renders the sentence at its own
   boundary — `Conflict.Target.systemShortcut(…)` (authored in

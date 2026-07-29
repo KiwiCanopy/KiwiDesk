@@ -96,27 +96,35 @@ extension StandardLayout {
         case StarterLadder.name where screenCount <= 1:
             return L(
                 "presets.starter_one.summary",
-                "One space per layout mode — track, stack, "
-                    + "bsp, grid, and floating."
+                "One space per layout mode — Track, Stack, "
+                    + "BSP, Grid, and Floating."
             )
         case StarterLadder.name where screenCount == 2:
             return L(
                 "presets.starter_two.summary",
                 "The five-mode set repeated on each display, "
-                    + "track through floating."
+                    + "Track through Floating."
             )
         case StarterLadder.name:
             return L(
                 "presets.starter_three.summary",
                 "The five-mode set on all three displays, "
-                    + "track through floating."
+                    + "Track through Floating."
             )
         default:
             // Unreachable for anything in `StandardProfiles.all`,
-            // and `PresetSummaryCoverageTests` proves it: Core no
+            // and `PresetSummaryCoverageTests` proves it. Core no
             // longer carries copy to fall back to, so a preset
-            // without a case here would render blank rather than
-            // untranslated English.
+            // without a case here renders blank rather than
+            // untranslated English — the right trade (a missing
+            // caption beats an unlocalized one), but a silent
+            // one. Shout in debug so the mistake surfaces where
+            // it is made, while release still never shows
+            // English.
+            assertionFailure(
+                "preset '\(name)' (\(screenCount) screen) has "
+                    + "no localized summary"
+            )
             return ""
         }
     }

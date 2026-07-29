@@ -4,13 +4,15 @@ import SwiftUI
 /// The GUI boundary where a Core `ConfigIssue` becomes readable
 /// text (#96/#601) — `Conflict` → `ConflictText`, mirrored.
 ///
-/// Core detects these conditions while loading config, in code
-/// that cannot reach `L()` (it is `@MainActor`), so it reports
-/// the condition and this file says it in the user's language.
-/// Until #601 four of the five were hardcoded English built in
-/// Core, invisible to `scripts/extract-keys` and therefore
-/// untranslatable in every locale; routing them through here is
-/// what puts them in the catalogs.
+/// Core detects these conditions while loading config and
+/// reports the condition; this file says it in the user's
+/// language. The reason is OWNERSHIP, not actor isolation —
+/// `KiwiCore` is itself `@MainActor` and could call `L()` (it
+/// did, until #601). Copy authored in Core cannot be re-rendered
+/// when the user switches language, and a plain English literal
+/// there never reaches `scripts/extract-keys`, so it never
+/// becomes a key and no locale can translate it. That is exactly
+/// how four of these five shipped untranslatable.
 enum ConfigIssueText {
     /// The sentence for one issue, in the user's language.
     @MainActor

@@ -11,9 +11,12 @@ import Foundation
 /// follow-up candidate, not a promise this file already keeps.
 public struct ConfigIssue: Sendable, Equatable, Identifiable {
     /// What went wrong, as STRUCTURE rather than a sentence
-    /// (#96/#601). Core detects these in code that cannot reach
-    /// `L()`, so it names the condition and the GUI renders it —
-    /// `ConfigIssueText`, mirroring `Conflict` → `ConflictText`.
+    /// (#96/#601). Core names the condition and the GUI renders
+    /// it — `ConfigIssueText`, mirroring `Conflict` →
+    /// `ConflictText`. Not because this code cannot reach `L()`
+    /// (`KiwiCore` is `@MainActor` and did call it), but because
+    /// copy owned by Core cannot be re-rendered on a language
+    /// switch.
     ///
     /// Before this was an enum every case was a hardcoded English
     /// `String` built in Core, which `scripts/extract-keys` could

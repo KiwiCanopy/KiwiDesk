@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -60,25 +61,53 @@ struct PresetSummaryCoverageTests {
     }
 
     @Test("Preset copy actually resolves through a catalog")
-    func summariesAreTranslated() {
-        // Pinned to a complete non-English locale: if a preset's
-        // copy were hardcoded rather than keyed, it would read
-        // identically here and in English. This is what would
-        // have caught the Starter rungs before they shipped.
+    func summariesAreKeyed() throws {
+        // The defect this exists to catch is a summary written as
+        // a plain literal instead of an `L()` key — which is how
+        // the Starter rungs shipped untranslatable.
+        //
+        // Deliberately NOT "en and de differ". A preset added the
+        // documented way (call site → extract-keys → translate
+        // later) falls back to English in de by design, and
+        // `drop-key --locale de` is the sanctioned repair for a
+        // bad German string — both would have reddened that
+        // formulation with a diagnosis that is simply false, and
+        // it would have made presets the one family where a
+        // half-translated locale is a test failure rather than
+        // graceful degradation.
+        //
+        // `en.json` is generated from real `L()` call sites, so a
+        // literal is absent from it by construction. That is the
+        // precise question, and it does not touch any locale's
+        // completeness.
+        let english = try catalogValues(locale: "en")
         LocalizationManager.shared.select("en")
-        let english = StandardProfiles.all.map(\.displaySummary)
-        LocalizationManager.shared.select("de")
         defer { reset() }
-        let german = StandardProfiles.all.map(\.displaySummary)
-        for (index, layout) in StandardProfiles.all.enumerated() {
+        for layout in StandardProfiles.all {
+            let rendered = layout.displaySummary
+            // Resolve to a Bool first: passing the Set into the
+            // expectation makes a failure print all 843 values.
+            let isKeyed = english.contains(rendered)
             let unkeyed =
-                "\(layout.name) (\(layout.screenCount) screen) "
-                + "reads the same in en and de — its summary "
-                + "is not going through a catalog key"
-            #expect(
-                english[index] != german[index],
-                Comment(rawValue: unkeyed)
-            )
+                "\(layout.name) (\(layout.screenCount) screen): "
+                + "\"\(rendered)\" is not a value in en.json, so "
+                + "it is a hardcoded literal rather than an L() key"
+            #expect(isKeyed, Comment(rawValue: unkeyed))
         }
+    }
+
+    /// The shipped catalog for a locale, read from the resource
+    /// the app itself loads.
+    private func catalogValues(locale: String) throws -> Set<String> {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Resources/Locales/"
+                    + locale + ".json"
+            )
+        let data = try Data(contentsOf: url)
+        let map =
+            try JSONSerialization.jsonObject(with: data)
+            as? [String: String] ?? [:]
+        return Set(map.values)
     }
 }
