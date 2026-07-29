@@ -37,6 +37,15 @@ struct SettingsCatalogArgumentTests {
         // `BarsSection` (`monocleBarOverrides` /
         // `scrollingBarOverrides`).
         "AppBarLayoutGroup.swift: overridesDrawer",
+        // The two self-anchoring controls hand their descriptor
+        // to a private row/chip helper, so the argument at the
+        // `.searchAnchored` site is the parameter, not a dotted
+        // path. Both are covered by the dotted-reference sweep in
+        // `SettingsCatalogSiteTests`; the count net above bites
+        // future DIRECT mounts, which is where a duplicate id
+        // would actually come from.
+        "GapsEditor.swift: control",
+        "BarEditorPicker.swift: control(editor)",
     ]
 
     /// The one sanctioned literal-`L()` `SettingsSection` title:
@@ -73,7 +82,7 @@ struct SettingsCatalogArgumentTests {
         var problems: [String] = []
 
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where !SettingsCatalogFiles.isCatalogFile(
+        where !SourceScan.isCatalogFile(
             file.lastPathComponent
         ) {
             let name = file.lastPathComponent
@@ -82,6 +91,15 @@ struct SettingsCatalogArgumentTests {
             )
             for needle in [
                 "SettingsSection(", "SettingsDisclosure(",
+                // The leaf shape counts too (#573 re-review): a
+                // stray `.searchAnchored(SettingsCatalog.x.y)`
+                // mounts a second view carrying an id the real
+                // section already owns, and `scrollTo` then picks
+                // arbitrarily. The container shapes were guarded
+                // against that from the start; promoting the leaf
+                // to the canonical door without counting it left
+                // the same harm open on the more-used side.
+                ".searchAnchored(",
             ] {
                 for argument in SourceScan.firstArguments(
                     of: needle,

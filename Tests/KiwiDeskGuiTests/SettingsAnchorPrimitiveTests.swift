@@ -91,7 +91,7 @@ struct SettingsAnchorPrimitiveTests {
     func descriptorConstructionIsConfined() throws {
         var catalogFiles: Set<String> = []
         for file in try SourceScan.swiftSources(under: guiDir)
-        where SettingsCatalogFiles.isCatalogFile(
+        where SourceScan.isCatalogFile(
             file.lastPathComponent
         ) {
             catalogFiles.insert(file.lastPathComponent)
@@ -120,37 +120,59 @@ struct SettingsAnchorPrimitiveTests {
     /// correctly and flashes nothing — silent, and the most
     /// plausible regression of all, since `.id()` is ordinary
     /// SwiftUI rather than anything this subsystem invented.
+    /// Exact counts, not an exempt file set. A whole-file
+    /// exemption would blind the guard to a SECOND `.id(` in one
+    /// of these — and `KeybindingNavRow` is a real Settings row
+    /// in the destination whose controls it would be tempted to
+    /// anchor, so that blind spot sits exactly where the mistake
+    /// would be made. Same idiom as `alternatelyMounted`: record
+    /// the number, not the permission.
+    ///
+    /// Known limit worth naming rather than rediscovering: the
+    /// needle carries a leading dot, so a *dotless* `id(...)`
+    /// inside a `View` extension — the shape `searchAnchor`'s own
+    /// body uses — is invisible here.
+    private let identitySites: [String: Int] = [
+        // Collection identity, not search identity: each keys a
+        // row inside a ForEach so edits and reorders don't
+        // recycle state onto the wrong row. Nothing here is a
+        // reveal target.
+        "KeybindingNavRow.swift": 1,
+        "KeybindingAppGroup.swift": 1,
+        "AdvancedLuaGroup.swift": 1,
+        // Locale identity: `L()` is not observable state, so a
+        // language change rebuilds the whole hosting root by
+        // keying it on the locale. Deliberately the coarsest
+        // `.id()` in the app — the opposite end of the scale from
+        // an anchor, and it would swallow one if anybody nested
+        // them.
+        "LocaleScopedRoot.swift": 1,
+    ]
+
     @Test("no ad-hoc .id() outside collection identity")
     func identityModifiersAreConfined() throws {
-        let hits = try occurrences(
-            of: ".id(",
-            excluding: [
-                // Collection identity, not search identity: each
-                // keys a row inside a ForEach so edits and
-                // reorders don't recycle state onto the wrong
-                // row. Nothing here is a reveal target.
-                "KeybindingNavRow.swift",
-                "KeybindingAppGroup.swift",
-                "AdvancedLuaGroup.swift",
-                // Locale identity: `L()` is not observable state,
-                // so a language change rebuilds the whole hosting
-                // root by keying it on the locale. Deliberately
-                // the coarsest `.id()` in the app — the opposite
-                // end of the scale from an anchor, and it would
-                // swallow one if anybody nested them.
-                "LocaleScopedRoot.swift",
-            ]
-        )
-        #expect(
-            hits.isEmpty,
-            Comment(
-                rawValue:
-                    ".id(…) applied outside collection identity "
-                    + "— a search anchor takes "
-                    + ".searchAnchored(control) so it cannot "
-                    + "anchor without washing: " + describe(hits)
+        let hits = try occurrences(of: ".id(", excluding: [])
+        var seen: Set<String> = []
+        for hit in hits {
+            seen.insert(hit.name)
+            let allowed =
+                identitySites[hit.name]
+                .map(String.init) ?? "none"
+            #expect(
+                identitySites[hit.name] == hit.count,
+                Comment(
+                    rawValue:
+                        "\(hit.name) applies .id(…) "
+                        + "×\(hit.count), expected \(allowed) — "
+                        + "a search anchor takes "
+                        + ".searchAnchored(control) so it cannot "
+                        + "anchor without washing"
+                )
             )
-        )
+        }
+        // A renamed or deleted exempt file must not leave a stale
+        // entry standing in for coverage it no longer provides.
+        #expect(seen == Set(identitySites.keys))
     }
 
     /// The files that may split the pair across chrome. Sealing

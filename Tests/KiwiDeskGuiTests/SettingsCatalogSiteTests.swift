@@ -25,7 +25,7 @@ struct SettingsCatalogSiteTests {
     func catalogDeclarationsAreReferenced() throws {
         var rendered = ""
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where !SettingsCatalogFiles.isCatalogFile(
+        where !SourceScan.isCatalogFile(
             file.lastPathComponent
         ) {
             rendered += SourceScan.stripComments(
@@ -64,7 +64,7 @@ struct SettingsCatalogSiteTests {
         // SettingsControl { get }`, which is a requirement, not a
         // catalog control.
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where SettingsCatalogFiles.isDeclarationFile(
+        where SourceScan.isDeclarationFile(
             file.lastPathComponent
         ) {
             let source = SourceScan.stripComments(
@@ -98,7 +98,7 @@ struct SettingsCatalogSiteTests {
         var declarations: [String] = []
         var corpus = ""
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where SettingsCatalogFiles.isDeclarationFile(
+        where SourceScan.isDeclarationFile(
             file.lastPathComponent
         ) {
             let source = SourceScan.stripComments(
@@ -113,7 +113,7 @@ struct SettingsCatalogSiteTests {
                 // unregistered struct (the one shape this hunts)
                 // is exactly the shape under no pressure to
                 // carry it.
-                pattern: #"struct (\w+Controls)\b"#
+                pattern: #"struct (\w+)\b"#
             )
         }
         // Two legitimate ways to be reached, and reflection walks

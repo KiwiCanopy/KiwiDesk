@@ -20,7 +20,7 @@ import Foundation
 /// payoff — a new `SettingsCatalog+Foo.swift` slice still needs
 /// no allow-listing — while a view cannot claim the exemption by
 /// picking a name.
-enum SettingsCatalogFiles {
+extension SourceScan {
     /// The declaration files: where `SettingsControl(` /
     /// `SettingsDrawer(` literals legitimately live.
     static func isDeclarationFile(_ name: String) -> Bool {
