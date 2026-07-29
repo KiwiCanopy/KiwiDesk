@@ -100,6 +100,14 @@ public final class SleepWakeManager {
         snapshotFingerprints = []
     }
 
+    /// Whether a rest capture is currently held for replay.
+    /// Internal observability for the tier-1 discard pin — the
+    /// replay itself hides behind an awaited `Task`, so a test
+    /// asserting "nothing replayed" synchronously passes even
+    /// when the drop is broken; this reads the held state
+    /// directly. No production reader.
+    var holdsSnapshot: Bool { snapshot != nil }
+
     // MARK: - Internals
 
     private func observe(

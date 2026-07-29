@@ -122,6 +122,14 @@ struct SleepWakeManagerTests {
             logged.contains { $0.contains("topology") }
         }
         #expect(!restored)
+        // The explicit skip line, so a return leg that
+        // regresses to a no-op fails here instead of passing
+        // vacuously after the poll's 30 s guard burns out.
+        #expect(
+            logged.contains {
+                $0.contains("wake restore skipped")
+            }
+        )
     }
 }
 

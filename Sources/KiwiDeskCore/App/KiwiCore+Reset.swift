@@ -40,10 +40,13 @@ extension KiwiCore {
     /// delete — a surviving `gui.json` would flip the reload
     /// back onto the old sidecar and turn the confirmed wipe
     /// into a silent no-op, which is strictly worse than
-    /// skipping the Trash courtesy. Returns whether every
-    /// doomed file is actually gone; `false` (both attempts
-    /// failed on the user's own config dir — effectively
-    /// unreachable) leaves the log line as the trail.
+    /// skipping the Trash courtesy. Returns whether both
+    /// config files (`gui.json`, the profiles folder) are
+    /// actually gone — the snapshot files ride
+    /// `discardSavedArrangement` and are not part of the
+    /// verdict; `false` (both attempts failed on the user's
+    /// own config dir — effectively unreachable) leaves the
+    /// log line as the trail.
     @discardableResult
     public func resetAllSettings(
         trash: (URL) throws -> Void = { url in
@@ -108,7 +111,12 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile(force: true)
         emitSpaceChange()
-        onLog("all settings reset to defaults")
+        onLog(
+            cleared
+                ? "all settings reset to defaults"
+                : "settings reset finished, but a config file "
+                    + "could not be removed"
+        )
         return cleared
     }
 }

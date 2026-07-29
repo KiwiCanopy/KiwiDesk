@@ -41,6 +41,7 @@ struct ResetEscapeHatchTests {
         core.state.remember(WindowID(9), in: SpaceID("gone"))
         core.sleepWake.restoreDelayMS = 0
         core.sleepWake.systemWillRest()
+        #expect(core.sleepWake.holdsSnapshot)
 
         core.discardSavedArrangement()
         #expect(!files.fileExists(atPath: marker.path))
@@ -48,13 +49,11 @@ struct ResetEscapeHatchTests {
         #expect(
             core.state.rememberedSpace(of: WindowID(9)) == nil
         )
-        // The held snapshot is gone, so the return leg has
-        // nothing to replay — `systemDidReturn` bails on its
-        // synchronous guard, before any delayed task exists.
-        var replayed = false
-        core.sleepWake.restoreState = { _ in replayed = true }
-        core.sleepWake.systemDidReturn()
-        #expect(!replayed)
+        // The held-state probe, not a "nothing replayed" spy:
+        // a surviving snapshot's replay hides behind an awaited
+        // Task, so a synchronous spy assert passes even when
+        // the drop is broken (review round 2).
+        #expect(!core.sleepWake.holdsSnapshot)
     }
 
     @Test("Reset reseeds first-launch state and keeps init.lua")
@@ -184,6 +183,10 @@ struct ResetEscapeHatchTests {
         // diff.
         #expect(resetData == virginData)
         #expect(core.profiles.list() == virgin.profiles.list())
+        // The sidecar bytes cannot see the profile-scoped live
+        // overlay; pin its two hand-cleared members directly.
+        #expect(core.spacePins == virgin.spacePins)
+        #expect(core.mainSpaces == virgin.mainSpaces)
     }
 
     @Test("A Lua-owned reset never grafts the starter ladder")
