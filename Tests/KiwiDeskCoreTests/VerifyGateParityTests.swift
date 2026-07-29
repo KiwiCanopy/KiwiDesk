@@ -78,8 +78,10 @@ struct VerifyGateParityTests {
         // Guards this test's own collection: the section scope
         // narrows the scrape, so the count is re-asserted on
         // what THIS test iterates, not on the sibling's input.
+        // 3 = build, test, lint since #494 collapsed the test
+        // split; the sibling's canary covers the full list.
         #expect(
-            steps.count >= 4,
+            steps.count >= 3,
             "scraped too few steps — has SKILL.md's list changed?"
         )
 

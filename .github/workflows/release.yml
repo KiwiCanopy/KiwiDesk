@@ -153,14 +153,13 @@ jobs:
       - name: Lint
         run: ./scripts/lint.sh
 
-      # Split per AGENTS.md §5: run as one `swift test` the suite
-      # stalls for minutes at the tail, because spawned exec
-      # children hold the runner's pipe. #489 tracks the root fix.
+      # One `swift test`: the two-command split died with the
+      # #494 tail-hang fix (.claude/rules/tests.md). ci.yml
+      # keeps a two-step over ExecTests for per-partition
+      # failure attribution; this job mirrors the skill instead,
+      # and VerifyGateParityTests pins it there.
       - name: Test
-        run: swift test --skip ExecTests
-
-      - name: Test (ExecTests)
-        run: swift test --filter ExecTests
+        run: swift test
 
 
   release:
