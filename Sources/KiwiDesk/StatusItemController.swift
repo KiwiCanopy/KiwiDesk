@@ -70,11 +70,16 @@ final class StatusItemController: NSObject, NSMenuDelegate,
     /// non-cancellable `asyncAfter`.
     private var discoveryDismiss: Task<Void, Never>?
 
-    init(item: StatusItemHandle = SystemStatusItem()) {
-        self.item = item
+    /// `nil` means the live system slot. The optional-with-nil
+    /// shape, rather than `= SystemStatusItem()`, is what lets
+    /// the wrapper below stay file-scoped `private` — a
+    /// default-argument expression cannot reference a type less
+    /// accessible than the init, but the body can.
+    init(item: (any StatusItemHandle)? = nil) {
+        self.item = item ?? SystemStatusItem()
         super.init()
         menu.delegate = self
-        item.menu = menu
+        self.item.menu = menu
         render()
     }
 
@@ -279,5 +284,35 @@ final class StatusItemController: NSObject, NSMenuDelegate,
         let frame = window.convertToScreen(button.frame)
         let mid = CGPoint(x: frame.midX, y: frame.midY)
         return NSScreen.screens.contains { $0.frame.contains(mid) }
+    }
+}
+
+// MARK: - The live slot
+
+/// The real menu-bar slot: registers a visible item with the
+/// system bar for the life of the process — right for the app,
+/// wrong for a test process. No removal on deinit,
+/// deliberately: the controller is app-lifetime, and `deinit`
+/// is nonisolated where `NSStatusBar` is main-actor.
+///
+/// File-scoped `private` IS the seal — tests cannot name this
+/// type, so a live item cannot be passed through the seam; do
+/// not raise its access. The seam's story lives at
+/// `StatusItemHandle`.
+@MainActor
+private final class SystemStatusItem: StatusItemHandle {
+    private let item: NSStatusItem
+
+    init() {
+        item = NSStatusBar.system.statusItem(
+            withLength: NSStatusItem.squareLength
+        )
+    }
+
+    var button: NSStatusBarButton? { item.button }
+
+    var menu: NSMenu? {
+        get { item.menu }
+        set { item.menu = newValue }
     }
 }
