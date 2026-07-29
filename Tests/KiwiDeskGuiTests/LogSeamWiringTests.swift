@@ -195,7 +195,20 @@ struct LogSeamWiringTests {
             // *unwired* — a red carrying the wrong message, which
             // is worse than no red. So count the bare
             // assignments too and gap on the difference.
-            let bare = source.occurrences(of: ".onLog =")
+            //
+            // A regex and not `occurrences(of: ".onLog =")`,
+            // which would tie the count to one spacing: an
+            // unreadable `socket?.onLog = x` would then be
+            // masked by a readable `bus.onLog=x` elsewhere in
+            // the file, since the literal counts neither. That
+            // is unreachable while swift-format normalises `=`
+            // spacing, and a guard resting on a formatter rule
+            // is a guard that a formatter change can quietly
+            // switch off (review).
+            let bare = SourceScan.allMatches(
+                in: source,
+                pattern: #"(\.onLog)\s*="#
+            ).count
             if bare > receivers.count {
                 gaps.append(
                     "\(bare - receivers.count) `.onLog =` "

@@ -264,10 +264,10 @@ An argument that names no event is dropped, and the subscription
 still succeeds — so the confirmation line lists what was dropped:
 
 ```json
-{"ok": true, "data": {"unknown": ["space_chnage"]}}
+{"status": "success", "data": {"unknown": ["space_chnage"]}}
 ```
 
-The same line goes to the application log (viewable in
+The same information goes to the application log (viewable in
 Console.app). When *every* argument is unrecognised the filter
 is empty and the stream falls back to all events, exactly as if
 none had been given.

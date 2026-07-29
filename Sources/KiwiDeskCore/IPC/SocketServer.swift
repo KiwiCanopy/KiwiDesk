@@ -138,6 +138,11 @@ public final class SocketServer {
     ) -> [String] {
         var events: Set<KiwiNotification> = []
         var unknown: [String] = []
+        // `seen` rather than `unknown.contains`: the frame limit
+        // is 1 MB, so `args` can carry ~150k names, and a linear
+        // scan per name is quadratic work on the main queue —
+        // where the whole window manager lives.
+        var seen: Set<String> = []
         for arg in args {
             // A non-string arg has no name to report, but it is
             // just as dropped, so it is counted as unknown
@@ -145,7 +150,7 @@ public final class SocketServer {
             let name = arg.stringValue ?? "<non-string>"
             if let event = KiwiNotification(rawValue: name) {
                 events.insert(event)
-            } else if !unknown.contains(name) {
+            } else if seen.insert(name).inserted {
                 unknown.append(name)
             }
         }
@@ -153,7 +158,11 @@ public final class SocketServer {
             // Capped: the names are client-supplied and the
             // socket is unauthenticated, so an unbounded join
             // lets any local process write a line of any length
-            // into the unified log.
+            // into the unified log. The *returned* list is
+            // deliberately not capped — it echoes only what this
+            // client just sent, whose decode already cost the
+            // main actor more than the echo will, and truncating
+            // it would hide a real typo from a client with many.
             let listed = unknown.prefix(5).joined(separator: ", ")
             let rest = unknown.count > 5 ? ", …" : ""
             onLog(
