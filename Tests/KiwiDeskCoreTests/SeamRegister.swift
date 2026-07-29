@@ -33,6 +33,7 @@ enum SeamRegister {
         "ExecLauncher",
         "KeybindingManager",
         "ProfileManager",
+        "SleepWakeManager",
         "SocketServer",
     ]
 

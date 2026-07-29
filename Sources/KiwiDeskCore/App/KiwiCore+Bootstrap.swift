@@ -9,7 +9,7 @@ extension KiwiCore {
             self?.state.snapshot()
         }
         crash.restoreState = { [weak self] snapshot in
-            self?.restore(snapshot)
+            self?.restoreAndSettle(snapshot)
         }
         // Every diagnostic seam in Core is wired here, together,
         // through one forwarding closure (core-boundaries.md).
@@ -35,6 +35,7 @@ extension KiwiCore {
         borders.onLog = log
         socket.onLog = log
         bus.onLog = log
+        sleepWake.onLog = log
         // Both force-settle nets report through this one (#611)
         // — an unobservable rescue is how a loud failure becomes
         // a quiet one.
@@ -122,7 +123,11 @@ extension KiwiCore {
             self?.state.snapshot()
         }
         sleepWake.restoreState = { [weak self] snapshot in
-            self?.restore(snapshot)
+            self?.restoreAndSettle(snapshot)
+        }
+        sleepWake.displayFingerprints = { [weak self] in
+            self?.state.workspaces.allDisplays
+                .map(\.fingerprint) ?? []
         }
     }
 }

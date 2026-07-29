@@ -26,7 +26,22 @@ public final class SleepWakeManager {
     public var restoreState: @MainActor (StateSnapshot) -> Void =
         { _ in }
 
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
+
+    /// The display topology a held snapshot belongs to,
+    /// captured beside it and re-read when the delayed restore
+    /// fires. If the set changed while asleep/locked (undock,
+    /// monitor power-off), the snapshot's raw frames belong to
+    /// dead geometry and the monitor-change re-adopt that
+    /// already ran is the truth — replaying on top of it is
+    /// what scrambled wakes (#633). Compared as a set: display
+    /// *order* may shuffle without meaning a topology change.
+    /// The unwired default (`[]` both sides) compares equal, so
+    /// the gate stays inert until Bootstrap wires it.
+    public var displayFingerprints: @MainActor () -> [String] = { [] }
+
     private var snapshot: StateSnapshot?
+    private var snapshotFingerprints: Set<String> = []
     private var restoreTask: Task<Void, Never>?
     private var tokens: [(NotificationCenter, NSObjectProtocol)] =
         []
@@ -91,23 +106,39 @@ public final class SleepWakeManager {
         tokens.append((center, token))
     }
 
-    private func systemWillRest() {
+    /// Internal, not private: the notification observers above
+    /// are the production trigger, and tests drive the pair
+    /// directly instead of posting to the shared centers.
+    func systemWillRest() {
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil
         snapshot = captureState()
+        snapshotFingerprints = Set(displayFingerprints())
     }
 
-    private func systemDidReturn() {
+    func systemDidReturn() {
         guard isEnabled, let saved = snapshot else { return }
         restoreTask?.cancel()
         let delay = restoreDelayMS
         restoreTask = Task { [weak self] in
             let ns = UInt64(delay) * 1_000_000
             try? await Task.sleep(nanoseconds: ns)
-            guard !Task.isCancelled else { return }
-            self?.restoreState(saved)
-            self?.snapshot = nil
+            guard !Task.isCancelled, let self else { return }
+            // Re-read at fire time, not at wake: the delay
+            // exists precisely so the topology can finish
+            // settling first.
+            if Set(self.displayFingerprints())
+                == self.snapshotFingerprints
+            {
+                self.restoreState(saved)
+            } else {
+                self.onLog(
+                    "wake restore skipped: display topology "
+                        + "changed while away"
+                )
+            }
+            self.snapshot = nil
         }
     }
 }

@@ -58,6 +58,7 @@ extension EventBus: LogSeamOwner {}
 extension ExecLauncher: LogSeamOwner {}
 extension KeybindingManager: LogSeamOwner {}
 extension ProfileManager: LogSeamOwner {}
+extension SleepWakeManager: LogSeamOwner {}
 extension SocketServer: LogSeamOwner {}
 // `KiwiCore` deliberately does not conform. It is the sink these
 // forward *into*, not a seam, and it is exempted by identity
