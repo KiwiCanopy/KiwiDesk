@@ -2,7 +2,7 @@ import Foundation
 import Testing
 
 /// Every `var onLog` seam declared under `Sources/KiwiDeskCore`
-/// must be assigned in `KiwiCore+Bootstrap.swift` — the one place
+/// must be assigned in a `KiwiCore+Bootstrap` file — the one place
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
@@ -110,11 +110,11 @@ struct LogSeamWiringTests {
                 wired.contains(owner),
                 Comment(
                     rawValue: "\(owner) declares a `var onLog` "
-                        + "seam that KiwiCore+Bootstrap.swift "
-                        + "never assigns, so its diagnostics "
-                        + "reach nothing. Wire it beside the "
-                        + "others, or record why it is exempt in "
-                        + "this suite's `allowed` map."
+                        + "seam that no KiwiCore+Bootstrap file "
+                        + "assigns, so its diagnostics reach "
+                        + "nothing. Wire it beside the others, "
+                        + "or record why it is exempt in this "
+                        + "suite's `allowed` map."
                 )
             )
         }

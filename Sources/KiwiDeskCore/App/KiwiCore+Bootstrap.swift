@@ -13,12 +13,14 @@ extension KiwiCore {
         }
         // Every diagnostic seam in Core is wired here, together,
         // through one forwarding closure (core-boundaries.md).
-        // Together because a seam that is missing from the group
-        // is then missing from a list of near-identical lines
-        // rather than from a hundred-line function; one closure
-        // because seven copies of the same body is seven chances
-        // to write a subtly different one. `LogSeamWiringTests`
-        // is the net under both.
+        // Together so that a seam missing from the group is
+        // missing from a run of near-identical lines rather than
+        // from a hundred-line function — that is the half
+        // `LogSeamWiringTests` catches. One closure because
+        // seven copies of the same body is seven chances to
+        // write a subtly different one; the guard cannot see
+        // that half at all (it proves assignment, not routing),
+        // so this shape prevents it rather than detecting it.
         let log: @MainActor (String) -> Void = { [weak self] in
             self?.onLog($0)
         }

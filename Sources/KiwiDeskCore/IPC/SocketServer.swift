@@ -168,12 +168,20 @@ public final class SocketServer {
             onLog(
                 "subscribe: unknown event(s) \(listed)\(rest)"
                     + (events.isEmpty
-                        ? "; streaming all events instead"
+                        ? "; nothing left to subscribe to"
                         : "; ignored")
             )
         }
+        // An empty filter means "everything" only for the
+        // request that means it — **no arguments**. Letting it
+        // also catch a subscribe made entirely of typos handed
+        // back the whole firehose, which is not a partial
+        // result but the opposite of what was asked for, and it
+        // read as a subscription working very hard. Arguments
+        // given, filter honoured exactly; none given,
+        // everything.
         let wanted =
-            events.isEmpty
+            events.isEmpty && unknown.isEmpty
             ? Set(KiwiNotification.allCases)
             : events
         if let old = client.sinkToken {
