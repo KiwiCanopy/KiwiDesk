@@ -155,3 +155,161 @@ struct ScriptStampTests {
         return StampFixture.declaration("semantic", in: source)
     }
 }
+
+// MARK: - Fixture
+
+private struct StampFixture {
+    let root: URL
+    let headSHA: String?
+
+    static var repoRoot: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // KiwiDeskCoreTests
+            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // repo root
+    }
+
+    static var realVersionFile: URL {
+        repoRoot
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDeskCore")
+            .appendingPathComponent("App")
+            .appendingPathComponent("KiwiDeskVersion.swift")
+    }
+
+    var versionFile: URL {
+        root
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDeskCore")
+            .appendingPathComponent("App")
+            .appendingPathComponent("KiwiDeskVersion.swift")
+    }
+
+    init() throws {
+        let fm = FileManager.default
+        // Local URLs, not the computed properties: Swift forbids
+        // touching an instance member before every stored property
+        // is initialized, and `headSHA` is filled at the bottom.
+        let root = fm.temporaryDirectory
+            .appendingPathComponent("stamp-\(UUID().uuidString)")
+        self.root = root
+        let appDir =
+            root
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDeskCore")
+            .appendingPathComponent("App")
+        let scriptsDir = root.appendingPathComponent("scripts")
+        for dir in [appDir, scriptsDir] {
+            try fm.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
+        }
+        // Copied, never written from a literal — see the suite
+        // docstring.
+        try fm.copyItem(
+            at: Self.realVersionFile,
+            to:
+                appDir
+                .appendingPathComponent("KiwiDeskVersion.swift")
+        )
+        try fm.copyItem(
+            at: Self.repoRoot
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("bump-version.sh"),
+            to:
+                scriptsDir
+                .appendingPathComponent("bump-version.sh")
+        )
+        // `--stamp-commit` asks git for HEAD, so the fixture needs
+        // one. `-c` flags rather than `git config`, so the run
+        // cannot depend on the developer's global identity.
+        let git = ["init", "--quiet", "--initial-branch=main"]
+        _ = try spawn("/usr/bin/git", git, currentDirectory: root)
+        _ = try spawn("/usr/bin/git", ["add", "-A"], currentDirectory: root)
+        _ = try spawn(
+            "/usr/bin/git",
+            [
+                "-c", "user.name=t", "-c", "user.email=t@t",
+                "commit", "--quiet", "-m", "fixture",
+            ],
+            currentDirectory: root
+        )
+        headSHA = try spawn(
+            "/usr/bin/git",
+            ["rev-parse", "--short", "HEAD"],
+            currentDirectory: root
+        ).stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    func cleanup() {
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    @discardableResult
+    func bump(_ arguments: [String]) throws -> ScriptRun {
+        try spawn(
+            "/bin/bash",
+            [
+                root.appendingPathComponent("scripts")
+                    .appendingPathComponent("bump-version.sh").path
+            ] + arguments,
+            currentDirectory: root
+        )
+    }
+
+    /// Applies `transform` and **asserts it changed something**.
+    ///
+    /// A `replacingOccurrences` whose needle is absent is a silent
+    /// no-op, so a caller introducing drift would go on to assert
+    /// against a rewrite it never performed — green for the wrong
+    /// reason, and green precisely when the shipped declaration has
+    /// already drifted. The canary has to guard the thing the test
+    /// consumes, so it lives here rather than at one call site.
+    func rewriteVersionFile(
+        _ transform: (String) -> String
+    ) throws {
+        let source = try String(
+            contentsOf: versionFile,
+            encoding: .utf8
+        )
+        let rewritten = transform(source)
+        #expect(
+            rewritten != source,
+            "the transform matched nothing — it rewrote no drift"
+        )
+        try rewritten.write(
+            to: versionFile,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
+    func declaration(_ name: String) throws -> String? {
+        Self.declaration(
+            name,
+            in: try String(contentsOf: versionFile, encoding: .utf8)
+        )
+    }
+
+    /// The same shape `build-app.sh` and the release workflow
+    /// parse, so this reads the file the way the pipeline does
+    /// rather than however is convenient here.
+    static func declaration(
+        _ name: String,
+        in source: String
+    ) -> String? {
+        for line in source.split(separator: "\n") {
+            guard
+                let range = line.range(of: "let \(name) = \"")
+            else { continue }
+            let rest = line[range.upperBound...]
+            guard let end = rest.firstIndex(of: "\"") else {
+                continue
+            }
+            return String(rest[..<end])
+        }
+        return nil
+    }
+
+}

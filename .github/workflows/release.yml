@@ -375,18 +375,53 @@ jobs:
             # clean one, and a rebuilt list here would silently
             # match nothing the day build-app.sh's scheme changes.
             KEEP="$(basename "$ARCHIVE")"
-            gh release view "$TAG" --json assets \
-              --jq '.assets[].name' | while IFS= read -r asset; do
-              case "$asset" in
-                *.zip)
-                  if [ "$asset" != "$KEEP" ]; then
-                    echo "dropping stale asset: $asset"
-                    gh release delete-asset "$TAG" "$asset" --yes \
-                      || true
-                  fi
-                  ;;
-              esac
-            done
+            # Captured, never read through a pipe. The default
+            # shell here is `bash -e` WITHOUT pipefail, so a
+            # failed `gh` on the left of a pipe yields empty
+            # output that reads as "nothing stale attached" —
+            # a guard against publishing both archives that
+            # fails open into precisely that. scripts/release.sh
+            # learned the same lesson for `git ls-remote`.
+            if ! assets="$(gh release view "$TAG" --json assets \
+              --jq '.assets[].name')"; then
+              echo "::error::could not list the release's assets," \
+                   "so a superseded archive may still be attached"
+              exit 1
+            fi
+            # Delete the SIBLING name only, derived from the name
+            # that came off disk — never a blanket "every other
+            # zip". Both rules fail; they fail in opposite
+            # directions, and this step cannot be exercised before
+            # it runs for real, so take the one whose failure is
+            # additive and visible on an unpublished draft over
+            # the one that silently deletes a legitimate second
+            # archive (per-arch zips are plausible once Sparkle
+            # lands). Anything else unexpected is reported, not
+            # removed.
+            case "$KEEP" in
+              *-unnotarized.zip)
+                SIBLING="${KEEP%-unnotarized.zip}.zip" ;;
+              *.zip)
+                SIBLING="${KEEP%.zip}-unnotarized.zip" ;;
+              *) SIBLING="" ;;
+            esac
+            while IFS= read -r asset; do
+              [ -n "$asset" ] || continue
+              if [ "$asset" = "$SIBLING" ]; then
+                echo "dropping superseded asset: $asset"
+                if ! gh release delete-asset "$TAG" "$asset" \
+                  --yes; then
+                  echo "::warning::could not delete $asset — it" \
+                       "may still be attached to the draft"
+                fi
+              elif [ "$asset" != "$KEEP" ]; then
+                case "$asset" in
+                  *.zip)
+                    echo "::warning::unexpected archive on the" \
+                         "draft, left in place: $asset" ;;
+                esac
+              fi
+            done <<< "$assets"
             gh release upload "$TAG" "$ARCHIVE" --clobber
           else
             gh release create "$TAG" "$ARCHIVE" \

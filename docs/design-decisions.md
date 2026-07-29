@@ -240,8 +240,11 @@ where the file is stored. So the question is which host lets
 browse-and-download channel a stranded user arrives through —
 and answering it is a precondition of shipping the cask, not a
 detail of it. Until then the release workflow drafts rather than
-publishes: a draft is reachable by nobody, which proves the
-pipeline end to end while opening nothing.
+publishes: a draft has no public URL and is visible only to
+people who already have repository access, so it proves the
+pipeline end to end without opening a channel a stranger can
+install from. Not "reachable by nobody" — collaborators can
+fetch it, and the distinction is the whole point of the rule.
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first

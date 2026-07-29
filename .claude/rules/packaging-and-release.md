@@ -155,12 +155,13 @@ step output first; a future gate on a new credential extends that
 step rather than reaching for `secrets` in a condition that
 silently reads empty.
 
-**Publishing is not this file's call.** See "No distribution
-channel without an update path" in `docs/design-decisions.md`. The
-workflow drafts the release rather than publishing it: as of
-2026-07 a draft is not fetchable without auth, so it proves the
-pipeline end to end without opening a channel that rule holds
-shut.
+**Publishing is not this file's call.** The workflow drafts the
+release rather than publishing it, and "No distribution channel
+without an update path" in `docs/design-decisions.md` owns both
+the reason and what a draft does and does not expose. Do not
+change that step to publish without changing that entry first —
+restating its argument here is how the two copies came to
+disagree about a draft's reach on the day they were written.
 
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 

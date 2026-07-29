@@ -240,12 +240,12 @@ VERSION_FILE="$ROOT/Sources/KiwiDeskCore/App/KiwiDeskVersion.swift"
 VERSION="$(sed -n 's/.*let semantic = "\(.*\)".*/\1/p' \
     "$VERSION_FILE" | head -1)"
 # CFBundleVersion accepts only 1-3 dot-separated integers, and
-# plutil -lint validates XML, not this. bump-version.sh is now
-# the narrower gate (three integers, no prerelease suffix), so
-# this no longer catches anything IT wrote — it catches a
-# hand-edited constant, which is the only other way this file
-# gets a value. Kept for that reason: the input here is a file
-# on disk, not an argument this script was passed.
+# plutil -lint validates XML, not this. `bump-version.sh` owns
+# what a version may be and `ScriptStampTests` pins it — this is
+# not a second copy of that rule, and must not restate its shape.
+# It stays because the value here was READ OFF DISK rather than
+# passed as an argument, so a hand-edited constant reaches this
+# script without ever passing that gate.
 case "$VERSION" in
     ''|*[!0-9.]*|*..*|.*|*.|*.*.*.*)
     echo "error: '$VERSION' from $VERSION_FILE is not usable as" \
@@ -410,10 +410,13 @@ notarize_and_staple() {
 # the subshell, and stopping the run IS this function's job in
 # the --notarize case.
 require_stapled_or_rename() {
-    noun="$1"          # "image" / "archive", for the warning
-    verb="$2"          # "package" / "archive", for the error
-    clean="$3"
-    unnotarized="$4"
+    # `local`, so the helper cannot leak these into the globals
+    # its callers read back (ARTIFACT_PATH / ARTIFACT_UNTICKETED
+    # are the deliberate exceptions, and they are the only two).
+    local noun="$1"    # "image" / "archive", for the warning
+    local verb="$2"    # "package" / "archive", for the error
+    local clean="$3"
+    local unnotarized="$4"
     ARTIFACT_UNTICKETED=0
     ARTIFACT_PATH="$clean"
     if xcrun stapler validate "$APP" >/dev/null 2>&1; then
@@ -447,6 +450,17 @@ if [ -n "$NOTARY_PROFILE" ]; then
     notarize_and_staple "$APP_ZIP" "$APP"
     rm -f "$APP_ZIP"
     APP_ZIP=""
+    # The .app's OWN ticket, asserted here rather than only as a
+    # side effect of packaging. Step 7 makes the identical
+    # assertion about the .dmg immediately after ticketing it —
+    # but the equivalent for the bundle only ran if --dmg or
+    # --zip was also passed, so `--notarize` on its own never
+    # checked the one artifact the whole submission was for.
+    xcrun stapler validate "$APP" >/dev/null || {
+        echo "error: $APP has no stapled ticket after" \
+             "notarization — it would fail offline" >&2
+        exit 1
+    }
     # Local assessment only — NOT the verdict a downloader gets.
     # `spctl --assess` is satisfied by an online lookup, so it
     # answers "accepted" for a notarized-but-unstapled artifact;
