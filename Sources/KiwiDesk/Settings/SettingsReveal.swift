@@ -89,6 +89,12 @@ extension EnvironmentValues {
 /// halves buy for the co-located pair (#573). The section
 /// auto-discovers whichever drawer is mounted, so the shared
 /// surface-free `advancedColors` drawer needs no static parent.
+///
+/// Known limit: a hoisted drawer with no enclosing
+/// `SettingsSection` publishes to nobody, mounts no marker and
+/// scrolls nowhere — a nonsensical placement (an inline drawer's
+/// premise is that it lives in a section card), but a silent one,
+/// so keep hoisted drawers inside a section.
 struct HoistedRevealAnchorsKey: PreferenceKey {
     static let defaultValue: [SettingsControl] = []
     static func reduce(
