@@ -25,9 +25,30 @@ import Foundation
 /// by garbage. So `Mirror` is only ever asked for the **object**,
 /// which it boxes soundly, and every call goes through
 /// `LogSeamOwner.onLog`, a real typed accessor.
+///
+/// Precisely what the defect forces, because the over-broad
+/// reading gets re-litigated: it is a property of a **bare
+/// function-typed** stored property, not of reflection generally.
+/// A closure wrapped in a struct round-trips through `Mirror`
+/// intact and is callable, so a `LogSink` value type would be
+/// discoverable **by type** with no protocol and no conformances.
+/// That is a real alternative shape and it is not taken here only
+/// because it would change nine public property types and every
+/// test that assigns a seam — not because it cannot work. Note it
+/// would fix none of the reachability holes below; the shape that
+/// would dissolve this invariant rather than guard it is a
+/// non-defaulted sink injected into each subsystem's initializer,
+/// which makes a forgotten seam a compile error.
 @MainActor
 protocol LogSeamOwner: AnyObject {
-    var onLog: @MainActor (String) -> Void { get set }
+    /// `get` only — the probe reads and calls, never assigns.
+    ///
+    /// `@MainActor` on the protocol means a **nonisolated** seam
+    /// owner cannot conform. That fails shut (it lands in
+    /// `unconformed`) but the remedy is then to give the walk an
+    /// isolation-free path, not to add a conformance that will
+    /// not compile.
+    var onLog: @MainActor (String) -> Void { get }
 }
 
 extension AnimationEngine: LogSeamOwner {}
@@ -41,6 +62,48 @@ extension SocketServer: LogSeamOwner {}
 // `KiwiCore` deliberately does not conform. It is the sink these
 // forward *into*, not a seam, and it is exempted by identity
 // below rather than by name — see `SeamWalk.exempt`.
+
+/// Which of the conformers above the walk must actually **reach**
+/// on a live core, checked as an equality rather than a floor.
+///
+/// This is the register that makes the list above honest, and it
+/// is the assertion that matters most here. Three of the walk's
+/// failure modes are fail-shut — depth truncation gaps, an
+/// unresolvable node gaps, a reached-but-unconformed owner is
+/// named — but **reachability is fail-open**, and a probe of
+/// seven seams asserts `[7] == [7]` just as happily as eight.
+/// Measured ways an owner leaves the graph with no signal at all:
+/// moving it behind a computed accessor over a `static`, holding
+/// it in a superclass-declared property, an unforced `lazy var`,
+/// and a `CustomReflectable` that curates `children`. The first
+/// is an ordinary refactor — a process-wide `ExecLauncher` is a
+/// natural reading of #467's in-flight dedup — and with the seam
+/// then broken, both this suite and `LogSeamWiringTests` pass.
+///
+/// A count would be the number-pin `rule-authoring.md` warns
+/// against; runtime cannot enumerate conformances, so a named set
+/// is the only register available. It earns disposition 5 by
+/// sitting against the list it mirrors: an author adding a ninth
+/// conformance has this on screen. A conformer that becomes
+/// genuinely unreachable moves to `unreachable` with its reason,
+/// the shape `LogSeamWiringTests.allowed` already uses.
+enum SeamRegister {
+    static let reachable: Set<String> = [
+        "AnimationEngine",
+        "BorderManager",
+        "CrashRecovery",
+        "EventBus",
+        "ExecLauncher",
+        "KeybindingManager",
+        "ProfileManager",
+        "SocketServer",
+    ]
+
+    /// Conformers the walk cannot reach under `makeTestCore`, and
+    /// why. Empty today; an entry here is a deliberate admission
+    /// that only the source scan covers that seam.
+    static let unreachable: [String: String] = [:]
+}
 
 /// One seam found on the live graph.
 struct FoundSeam {
@@ -103,8 +166,11 @@ struct SeamWalk {
         }
         let mirror = Mirror(reflecting: value)
 
-        if let object = value as AnyObject?,
-            mirror.displayStyle == .class
+        // `displayStyle` first: `as AnyObject?` bridges every
+        // value type into a `__SwiftValue` box, so testing it
+        // first allocates one per node only to discard it.
+        if mirror.displayStyle == .class,
+            let object = value as AnyObject?
         {
             let id = ObjectIdentifier(object)
             guard !visited.contains(id) else { return }
@@ -112,9 +178,30 @@ struct SeamWalk {
             record(object, mirror: mirror, path: path)
         }
 
+        // Superclass storage, which `children` excludes: a seam
+        // declared on a base class, or a seam owner held in a
+        // base-class property, is otherwise invisible AND
+        // ungapped — the walk's one silent miss that costs
+        // nothing to close. ObjC bases reflect nothing, so this
+        // adds no nodes for the AppKit subclasses in Core.
+        var ancestor = mirror.superclassMirror
+        while let level = ancestor {
+            descendChildren(of: level, path: path, depth: depth)
+            ancestor = level.superclassMirror
+        }
+        descendChildren(of: mirror, path: path, depth: depth)
+    }
+
+    private mutating func descendChildren(
+        of mirror: Mirror,
+        path: String,
+        depth: Int
+    ) {
         for child in mirror.children {
-            // An unlabelled child is an Optional's payload or a
-            // collection element; it inherits its parent's path.
+            // Array and Set elements are unlabelled and inherit
+            // their parent's path. An Optional's payload is
+            // labelled `some` and a Dictionary element's tuple
+            // `key`/`value`, so those extend it.
             let childPath =
                 child.label.map { "\(path).\($0)" } ?? path
             guard child.label != "onLog" else { continue }
@@ -129,8 +216,15 @@ struct SeamWalk {
         mirror: Mirror,
         path: String
     ) {
-        let declaresSeam = mirror.children.contains {
-            $0.label == "onLog"
+        // Superclass storage counts here too, or a subclass whose
+        // `onLog` is inherited reads as "declares no seam" and is
+        // dropped without landing in `unconformed`.
+        var levels: [Mirror] = [mirror]
+        while let next = levels.last?.superclassMirror {
+            levels.append(next)
+        }
+        let declaresSeam = levels.contains { level in
+            level.children.contains { $0.label == "onLog" }
         }
         guard declaresSeam, ObjectIdentifier(object) != exempt
         else { return }

@@ -6,12 +6,19 @@ import Testing
 /// a subsystem's diagnostics are joined to `KiwiCore.onLog`, and
 /// so to syslog.
 ///
-/// The failure this prevents is **nothing happening.** A seam
-/// whose default is a no-op, left unassigned, lets its
-/// subsystem compile, ship, run, and throw its diagnostics away.
-/// Nothing reds, nothing warns, and the only symptom is a log
-/// line that was never going to appear, missed months later by
-/// whoever needed it. #599 was findable because a spring
+/// The failure this prevents is **the line never reaching
+/// `KiwiCore.onLog`.** A seam left unassigned lets its subsystem
+/// compile, ship and run while everything it logs goes past the
+/// sink — so nothing that reads the sink carries it, which is
+/// every test capture and the GUI console `KiwiCore.onLog`
+/// anticipates. Nothing reds, nothing warns, and the symptom is
+/// a diagnostic that was never going to appear where it was
+/// looked for, months later. Stated as routing rather than as
+/// silence on purpose: what the seam's *default* does is a
+/// separate question, owned by `CoreLog` and its guard, and
+/// phrasing the harm in terms of that default would make this
+/// sentence false the day the default changes. #599 was findable
+/// because a spring
 /// divergence was loud; #611 named the same trap — an
 /// unobservable rescue is how a loud failure becomes a quiet one
 /// — and wired `AnimationEngine.onLog` on the spot.
@@ -29,36 +36,25 @@ import Testing
 /// is inside the net on arrival, and no list here is touched to
 /// keep it there.
 ///
-/// **What a source scan structurally cannot do**, and which of
-/// it still binds here. The first three were open limits until
-/// #625; `LogSeamProbeTests` closes them by reading final runtime
-/// state instead of text, and they are kept written out because
-/// they are the reason that suite exists — delete them and the
-/// next author sees two guards over one invariant and removes
-/// the wrong one:
+/// **Do not delete this as redundant with `LogSeamProbeTests`.**
+/// That suite closes three limits a source scan structurally
+/// cannot reach, and its docstring enumerates them — they are not
+/// repeated here, so that one commit cannot leave two copies
+/// disagreeing. What this suite owns is the other side of one
+/// axis: it reads *declarations*, so it is indifferent to whether
+/// the owner is reachable from the core root at runtime — behind
+/// a computed accessor, a static, an unforced `lazy var`, or on a
+/// type left nil under `makeTestCore` (`KiwiCore.lua`). The probe
+/// sees routing and only what the graph exposes as a stored
+/// reference. That division is permanent, not incidental. This
+/// one also names the *rule* — wired in a `KiwiCore+Bootstrap`
+/// file — rather than the outcome.
 ///
-/// - **Type**-keyed, not instance-keyed. Two instances of one
-///   seam-owning type with only one wired passes this scan.
-/// - **Assigned**, not routed: `socket.onLog = { _ in }` in
-///   bootstrap satisfies it completely, and no cheap scan does
-///   better — pinning the closure body would red on any refactor
-///   of a line that is correct.
-/// - **Assigned**, not assigned *exactly once*. This counts
-///   assignments in text and has no notion of last-writer-wins,
-///   so a seam wired correctly in the group and then clobbered
-///   by a stale duplicate elsewhere passes. That shape arrives
-///   by silent auto-merge rather than by anything a reviewer
-///   reads.
-///
-/// What this suite still owns, and why it is not redundant: it
-/// sees a seam on a type that `makeTestCore` never instantiates,
-/// which no runtime walk can reach, and it names the *rule*
-/// (wired in bootstrap, in the group) rather than the outcome.
-///
-/// - Everything the resolver cannot work out fails **shut**, as
-///   a red naming what it could not resolve: an unrecognised
-///   assignment shape, a receiver whose type is ambiguous or
-///   undeclared, a seam whose enclosing type the walk missed.
+/// **Its own failures are fail-shut.** Everything the resolver
+/// cannot work out reds naming what it could not resolve: an
+/// unrecognised assignment shape, a receiver whose type is
+/// ambiguous or undeclared, a seam whose enclosing type the walk
+/// missed.
 ///
 /// It lives in the GUI test target purely because `SourceScan`
 /// does — `VisibleBoundsRoutingTests` makes the same trade. It

@@ -38,22 +38,18 @@ itself when a fifth is added.
   contract, not UI copy. The deliberate exception to the above.
 - **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
   the group where all of them are, and in the same change that
-  declares it. Leaving one unassigned fails by **doing
-  nothing** — a seam whose default is a no-op lets its subsystem
-  compile, ship, run and drop every line it logs, with no red and
-  no symptom beyond a diagnostic that was never going to
-  appear. Two guards, reading different things:
-  `LogSeamWiringTests` scans source for the wiring and its
-  `allowed` map is the exemption list; `LogSeamProbeTests` sends
-  a line through every seam it finds on a live `KiwiCore` and
-  requires it out of the sink, which is what catches a seam that
-  is assigned to a body dropping the line, or clobbered by a
-  later assignment (#625). Each docstring carries its own
-  argument.
-  Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
-  after the AX grant) is invisible to both — the runtime probe
-  builds its `KiwiCore` and reads it, never running the app's
-  later lifecycle — and `onLog` needs no permission to be useful.
+  declares it. Leaving one unassigned costs no red and no
+  warning: its lines simply never reach `KiwiCore.onLog`, so
+  nothing that reads the sink carries them. Two guards, reading
+  different things — `LogSeamWiringTests` scans source for the
+  wiring, its `allowed` map being the exemption list, and
+  `LogSeamProbeTests` sends a line through every seam it finds on
+  a live `KiwiCore` and requires it out of the sink (#625). Each
+  docstring carries its own argument.
+  Bootstrap-time only: `onLog` needs no permission to be useful,
+  so a seam wired later (`KiwiCore+Lifecycle`, after the AX
+  grant) is invisible to the source scan and **reds** in the
+  probe, which reads the sink before any lifecycle runs.
 - **Never `Bundle.module`** in code that runs from the `.app` —
   go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
   `Bundle.kiwiDeskGui`). It resolves on the machine that built it

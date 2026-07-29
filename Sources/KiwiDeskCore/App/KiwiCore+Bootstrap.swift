@@ -18,9 +18,13 @@ extension KiwiCore {
         // from a hundred-line function — that is the half
         // `LogSeamWiringTests` catches. One closure because a
         // copy of the body per seam is a chance per seam to
-        // write a subtly different one; the guard cannot see
-        // that half at all (it proves assignment, not routing),
-        // so this shape prevents it rather than detecting it.
+        // write a subtly different one — this shape prevents
+        // that, and `LogSeamProbeTests` detects it (#625) by
+        // requiring each seam's line back out of the sink.
+        // That probe compares the line exactly, so a seam whose
+        // body decorated its line would red even though it
+        // routes; keep the shared closure rather than working
+        // around it.
         let log: @MainActor (String) -> Void = { [weak self] in
             self?.onLog($0)
         }

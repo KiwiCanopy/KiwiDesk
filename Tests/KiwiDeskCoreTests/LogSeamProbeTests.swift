@@ -34,9 +34,17 @@ import Testing
 ///    correct: it routes.
 ///
 /// Both suites stay. Neither subsumes the other — this one cannot
-/// see a seam on a type that is never instantiated under
-/// `makeTestCore`, and the source scan cannot see any of the
-/// three above.
+/// see a seam the walk cannot **reach** from the core root —
+/// which is weaker than "a type never instantiated under
+/// `makeTestCore`", and worth stating exactly: a seam owner that
+/// is constructed but sits behind a computed accessor, a static,
+/// an unforced `lazy var` or (before the `superclassMirror`
+/// traversal) a base-class property is live and still invisible.
+/// `KiwiCore.lua` is the standing example of the instantiation
+/// case — nil under `makeTestCore`, because no config load runs,
+/// so a seam there would be scan-visible and probe-invisible.
+/// The source scan reads declarations and is indifferent to all
+/// of it, which is the axis the two guards actually divide on.
 ///
 /// Discovery, the walk's termination argument and the reason the
 /// probe call goes through a protocol rather than a `Mirror`-boxed
@@ -71,20 +79,42 @@ struct LogSeamProbeTests {
                     + "declares a `var onLog` seam but is not "
                     + "conformed to `LogSeamOwner`, so this guard "
                     + "cannot probe it. Add the conformance in "
-                    + "`LogSeamDiscovery.swift`."
+                    + "`LogSeamDiscovery.swift` — and note the "
+                    + "protocol is `@MainActor`, so a nonisolated "
+                    + "owner cannot conform as it stands."
             )
         )
 
-        // The canary over the collection this test consumes. A
-        // walk that reaches nothing leaves `sent` and `captured`
-        // both empty, and the routing assertion below then holds
-        // vacuously — [] == []. No count is pinned: the set is
-        // meant to grow with each new subsystem.
+        // The canary, and it is an equality rather than a floor
+        // on purpose. `!isEmpty` would only catch a walk that
+        // collapsed entirely; a walk that reached seven of eight
+        // probes seven and asserts [7] == [7], green. Reachability
+        // is this guard's one fail-open direction — see
+        // `SeamRegister`, which owns the argument and the list.
+        let reached = Set(
+            walk.seams.map { "\(type(of: $0.owner))" }
+        )
         #expect(
-            !walk.seams.isEmpty,
+            reached == SeamRegister.reachable,
             Comment(
-                rawValue: "the walk found no seam at all on a "
-                    + "live KiwiCore, so nothing below was probed"
+                rawValue: "the walk no longer reaches "
+                    + SeamRegister.reachable.subtracting(reached)
+                    .sorted().joined(separator: ", ")
+                    + " on a live KiwiCore"
+                    + (reached.subtracting(SeamRegister.reachable)
+                        .isEmpty
+                        ? ""
+                        : ", and newly reaches "
+                            + reached.subtracting(
+                                SeamRegister.reachable
+                            ).sorted().joined(separator: ", "))
+                    + ". A seam owner leaves the graph silently "
+                    + "when it moves behind a computed accessor, "
+                    + "a static, an unforced `lazy var` or a "
+                    + "superclass property — the seam is then "
+                    + "unprobed with every guard green. Restore "
+                    + "the stored reference, or record it in "
+                    + "`SeamRegister.unreachable` with its reason."
             )
         )
 
@@ -95,21 +125,34 @@ struct LogSeamProbeTests {
             seam.owner.onLog(line)
         }
 
-        // Set equality, not prefix or count: a seam wired to a
-        // body that drops the line is missing from `captured`, and
-        // a seam wired to something that rewrites the line shows
-        // up as an unexpected entry. Sorted because the walk order
-        // is the graph's, not something worth pinning.
+        // Set equality both ways. A dropped line is missing from
+        // `captured`; a rewritten or duplicated one is an extra.
+        // Both differences are reported — naming only the missing
+        // half left the rewrite case reding with an empty list
+        // and a stated cause that was not the cause. Sorted
+        // because the walk order is the graph's, not something
+        // worth pinning.
+        //
+        // Exact equality does forbid a seam whose body transforms
+        // the line (`{ core.onLog("socket: " + $0) }`), which
+        // would route correctly. That is deliberate — the seams
+        // share one forwarding closure, and the wiring site says
+        // why — but it is the assertion to revisit first if a
+        // prefixing seam is ever wanted.
+        let missing = Set(sent).subtracting(captured)
+        let unexpected = Set(captured).subtracting(sent)
         #expect(
             captured.sorted() == sent.sorted(),
             Comment(
-                rawValue: "these seams did not deliver their "
-                    + "line to `KiwiCore.onLog`: "
-                    + Set(sent).subtracting(captured).sorted()
-                    .joined(separator: ", ")
-                    + " — a seam that is assigned but wired to a "
-                    + "body which drops the line, or clobbered by "
-                    + "a later assignment, fails exactly here."
+                rawValue: "seam routing did not round-trip. "
+                    + "Never arrived at `KiwiCore.onLog`: "
+                    + "[\(missing.sorted().joined(separator: ", "))]"
+                    + " — a seam assigned to a body that drops the "
+                    + "line, or clobbered by a later assignment. "
+                    + "Arrived unbidden: "
+                    + "[\(unexpected.sorted().joined(separator: ", "))]"
+                    + " — a seam that rewrites the line, or a "
+                    + "second path into the sink."
             )
         )
     }
