@@ -23,12 +23,7 @@ private final class NoopRegistrar: HotkeyRegistrar {
 
 @MainActor
 private func makeModel() -> SettingsModel {
-    let core = KiwiCore(
-        configDirectory: FileManager.default
-            .temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-target-\(UUID().uuidString)"
-            ),
+    let core = makeTestCore(
         hotkeyRegistrar: NoopRegistrar()
     )
     // GUI-managed config: the sidecar exists and init.lua

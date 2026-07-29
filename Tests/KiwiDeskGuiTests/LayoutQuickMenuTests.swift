@@ -31,12 +31,7 @@ private final class FakeStatusItem: StatusItemHandle {
 @MainActor
 struct LayoutQuickMenuTests {
     private func makeModel() -> (SettingsModel, KiwiCore) {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-layout-test-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: NoopRegistrar()
         )
         try? core.guiConfigStore.save(GuiConfig())

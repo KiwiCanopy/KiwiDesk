@@ -25,12 +25,7 @@ private final class AcceptingLiveRegistrar: HotkeyRegistrar {
 @MainActor
 struct LiveApplyKeybindingsTests {
     private func makeGuiCore() -> KiwiCore {
-        KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-liveapply-\(UUID().uuidString)"
-                ),
+        makeTestCore(
             hotkeyRegistrar: AcceptingLiveRegistrar()
         )
     }

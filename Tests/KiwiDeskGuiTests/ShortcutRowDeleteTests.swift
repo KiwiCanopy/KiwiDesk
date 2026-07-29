@@ -36,12 +36,7 @@ private final class DeleteRegistrar: HotkeyRegistrar {
 @MainActor
 struct ShortcutRowDeleteTests {
     private func makeModel() throws -> (SettingsModel, KiwiCore) {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-row-delete-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: DeleteRegistrar()
         )
         var config = GuiConfig()

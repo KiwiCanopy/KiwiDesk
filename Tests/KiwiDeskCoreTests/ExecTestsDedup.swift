@@ -39,9 +39,14 @@ private func awaitReaped(
     }
 }
 
+/// Named under the `ExecTests` prefix so every suite that spawns
+/// real shell children through the production exec path lands in
+/// the same `--filter ExecTests` / `--skip ExecTests` partition
+/// (the CI split): as `ExecDedupTests` it silently escaped the
+/// skip and ran its `sleep 5` children in the main pass.
 @Suite("Exec dedup & default timeout", .serialized)
 @MainActor
-struct ExecDedupTests {
+struct ExecTestsDedup {
     @Test("dedup skips a command already in flight")
     func dedupSkipsInFlight() {
         let core = makeCore()

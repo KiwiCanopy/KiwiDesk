@@ -29,7 +29,7 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Five ratified exceptions, all *stateless primitives* with no
+  Six ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -74,7 +74,10 @@ bite large test PRs:
     file from a fail-open guard (#573 proved that exact bug
     with a one-file probe that passed every check).
   - *test-core construction* in `TestCore.swift` — the
-    `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565).
+    `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565),
+    one copy per test target since test targets cannot see each
+    other; `MachineTouchTests` pins the twins identical and pins
+    every `KiwiCore(` in the test trees to them.
     It clears the statelessness bar (a per-instance id counter, no
     assertions, no setup/teardown coupling), but it is admitted on
     a **second, distinct ground** from the four above. Their risk
@@ -90,7 +93,15 @@ bite large test PRs:
     for sharing; it is simply not
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
-    one — state both when weighing a sixth.
+    one — state both when weighing a further one.
+  - *status-item construction* in `TestStatusItem.swift` — the
+    `makeTestStatusItemController` factory, admitted on the same
+    omission ground: a bare `StatusItemController()` creates a
+    **live menu-bar item inside the production initializer**, a
+    touch no grep of the test tree can see (`NSStatusBar` had
+    zero test-tree hits while fifteen live slots leaked a run).
+    `MachineTouchTests` pins test-tree constructions to the
+    factory and the production touch to its injectable seam.
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Each case above happened
@@ -144,10 +155,36 @@ tight wait. New async tests here follow suit.
 
 ## Running the suite
 
-`swift test` is fully self-contained — a per-test `KiwiCore` over
-a temp config dir, throwaway sockets; the service tests only parse
-`launchctl` strings. **Unit tests never need the running app**;
-its run state is irrelevant to them.
+**A test reaches the machine only through a seam it injects,
+never through a production default it inherited.** The touch a
+test-tree grep cannot see is the one inside a *production*
+initializer the test merely calls: a bare `KiwiCore()` seizes
+the live Carbon chords and the real `~/.config/KiwiDesk`
+(#565), and a bare `StatusItemController()` put a live item in
+the menu bar per construction — fifteen leaked slots and a
+sustained WindowServer spike per run — while `NSStatusBar` had
+zero hits anywhere in `Tests/`. `MachineTouchTests` is the
+guard: dangerous constructions route through the shared
+factories (`makeTestCore`, `makeTestStatusItemController`), the
+`makeTestCore` twins stay identical, the production status-bar
+touch stays behind its injectable seam, and exec-child suites
+stay inside the `ExecTests` partition. Adding a production
+type whose *initializer* reaches the OS? Give it the same
+seam shape (live default in production, factory in the test
+trees) and a needle in that guard.
+
+Deliberate residue a run does still touch, as audited
+2026-07-29: throwaway AF_UNIX sockets under temp paths
+(`SocketTests`), real `CADisplayLink`s from
+animation-keyed suites, repo-script children drained by
+`ScriptFixture`, scratch `UserDefaults` suites cleaned on both
+sides, one live `NSEvent.pressedMouseButtons` read —
+`MouseFollowsFocusTests` fails if a human holds a mouse button
+mid-run — and `GeometryUtils.menuBarAutoHides`, a read-only
+global-defaults lookup that only reaches fixtures which didn't
+pin their bounds. The service tests only parse `launchctl`
+strings; nothing spawns it. **Unit tests never need the running
+app**; its run state is irrelevant to them.
 
 **A run writes `KiwiDesk: …` lines to the unified log**, so a
 `log stream` during one shows test diagnostics that read exactly
@@ -165,20 +202,24 @@ that wants the coverage captures instead. Do not read a
 `keybinding conflict` or `unclean shutdown detected` line seen
 during a run as the app misbehaving.
 
-Run the full suite as two commands:
+Run the full suite as one command (~2 min):
 
 ```bash
-swift test --skip ExecTests
+swift test
 ```
 
-```bash
-swift test --filter ExecTests
-```
-
-Combined it stalls for minutes at the tail — spawned exec children
-hold the runner's pipe, and the hang-guards above crawl under
-full-suite starvation (#489 tracks the root fix). Suite *ordering*
-is not a lever; swift-testing schedules suites concurrently.
+It used to stall for minutes at the tail; that was two bugs,
+both fixed in #494 — a `SocketClient` double-close that
+`EXC_GUARD`-killed the runner mid-suite, and fire-and-forget
+exec children inheriting the runner's stdout, so whoever read
+it waited for an EOF that never came. Fire-and-forget children
+now get `FileHandle.nullDevice` and callback children write to
+launcher-owned pipes (`ExecLauncher`), so no child holds the
+runner's stdio on either path. CI keeps its `--skip` /
+`--filter` two-step over `ExecTests` for failure attribution,
+which is why every suite spawning real shell children is
+*named* under the `ExecTests` prefix (`MachineTouchTests` pins
+that partition).
 
 **Device QA launches the app direct**, not via `service start`:
 `.build/release/KiwiDesk` in a terminal (Ctrl-C to stop, `NSLog`

@@ -24,12 +24,7 @@ private final class DiscardRegistrar: HotkeyRegistrar {
 @MainActor
 struct DiscardGateTests {
     private func makeModel() throws -> SettingsModel {
-        let core = KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-discard-\(UUID().uuidString)"
-                ),
+        let core = makeTestCore(
             hotkeyRegistrar: DiscardRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())
