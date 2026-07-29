@@ -1,24 +1,28 @@
 import Foundation
 import Testing
 
-/// `scripts/release.sh`'s verification gate against the
-/// `verify-gate` skill that owns the procedure (#32).
+/// The ship-grade copies of the verification gate against the
+/// `verify-gate` skill that owns the procedure (#32, #487).
 ///
 /// AGENTS.md §3 gives the skill the gate — "what to run, in what
-/// order" — and `release.sh` deliberately re-states it, because
-/// CI cannot run and a release must not be cut on an unverified
-/// tree. That makes the command list a hand-mirror, and
+/// order" — and two copies deliberately re-state it:
+/// `scripts/release.sh`, because a release must not be cut on an
+/// unverified tree, and the `verify` job in
+/// `.github/workflows/release.yml`, because a tag pushed by hand
+/// never met the script's gate and branch protection cannot see
+/// tags. That makes the command list a hand-mirror, and
 /// `.claude/rules/parity-tests.md` says a shipped mirror must
 /// carry a parity test.
 ///
-/// This is the mirror where drift is worst: every other copy of
-/// the gate merely reports, while a stale copy *here* ships an
-/// artifact. Adding a step to the skill and not to `release.sh`
-/// silently narrows what a release is checked against, and
-/// nothing else notices.
+/// These are the mirrors where drift is worst: every other copy
+/// of the gate merely reports, while a stale copy in either
+/// ships an artifact. Adding a step to the skill and not to a
+/// ship-grade copy silently narrows what a release is checked
+/// against, and nothing else notices — the workflow copy cannot
+/// even be exercised before a tag is live.
 ///
 /// The expectation is **derived from the skill**, never listed
-/// here — a hand-written copy in this file would be a third
+/// here — a hand-written copy in this file would be one more
 /// place to forget, which is the failure the rule names.
 @Suite("Release gate mirrors the verify-gate skill")
 struct VerifyGateParityTests {
@@ -58,6 +62,67 @@ struct VerifyGateParityTests {
                 "release.sh drifted from the skill: no `\(step)`"
             )
             searchFrom = at + 1
+        }
+    }
+
+    @Test("every fast skill step runs in release.yml's verify job")
+    func gateMatchesWorkflowVerifyJob() throws {
+        // `swift build -c release` is the workflow copy's one
+        // named exemption: the release job must keep that
+        // compile ahead of any submission or draft (the
+        // obligation and its argument live in
+        // packaging-and-release.md), so verify does not repeat
+        // it.
+        let steps = try skillSteps().filter {
+            !$0.contains("-c release")
+        }
+        // Guards this test's own collection: the filter above
+        // consumes the scrape, so the count is re-asserted on
+        // what THIS test iterates, not on the sibling's input.
+        #expect(
+            steps.count >= 4,
+            "scraped too few steps — has SKILL.md's list changed?"
+        )
+
+        let workflow = try String(
+            contentsOf: Self.repoRoot
+                .appendingPathComponent(".github")
+                .appendingPathComponent("workflows")
+                .appendingPathComponent("release.yml"),
+            encoding: .utf8
+        )
+        let lines = workflow.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        ).map(String.init)
+        // The job's slice, keyed on the 2-space job indentation
+        // so a `needs: verify` elsewhere cannot match.
+        let start = try #require(
+            lines.firstIndex(of: "  verify:"),
+            "release.yml has no `verify:` job"
+        )
+        let end = try #require(
+            lines[start...].firstIndex(of: "  release:"),
+            "release.yml has no `release:` job after `verify:`"
+        )
+        let slice = lines[start..<end].map {
+            $0.trimmingCharacters(in: .whitespaces)
+        }
+
+        // Presence, not order: the job runs lint before the
+        // tests (ci.yml's arrangement) while the skill lists
+        // lint last, so the obligation here is the command SET.
+        for step in steps {
+            let present = slice.contains { line in
+                line == step
+                    || line == "./\(step)"
+                    || line == "run: \(step)"
+                    || line == "run: ./\(step)"
+            }
+            #expect(
+                present,
+                "verify job drifted from the skill: no `\(step)`"
+            )
         }
     }
 

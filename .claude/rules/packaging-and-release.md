@@ -128,17 +128,26 @@ fails on the far side of the one irreversible step.
 
 **Its verification gate mirrors the `verify-gate` skill, and a
 change to one updates the others.** AGENTS.md §3 gives that skill
-the procedure, and it is re-stated twice: `scripts/release.sh`
-runs it with the release build made unconditional, and the
-`verify` job in `release.yml` re-runs it against the pushed tag —
-the copy that catches a tag pushed by hand, which never met the
-script's (#487; branch protection cannot see tags, so the
-workflow is the only gate such a tag passes). That job skips the
-`-c release` compile for the reason its own comment argues:
-`build-app.sh` in the job after it performs that exact compile
-before anything is drafted. These are the copies where running a
-*stale* gate ships an artifact, and nothing keeps them in step
-automatically.
+the procedure, and two ship-grade copies re-state it — the ones
+where running a *stale* gate ships an artifact:
+`scripts/release.sh` (release build made unconditional) and the
+`verify` job in `release.yml`, which re-runs the gate against a
+pushed tag — the copy that catches a tag pushed by hand, which
+never met the script's (#487; branch protection cannot see tags,
+so the workflow is the only gate such a tag passes). Both copies
+are pinned to the skill by `VerifyGateParityTests`, which derives
+the command list from `SKILL.md` — extend that suite before
+shipping a further copy. (ci.yml runs the same commands as the
+merge gate; drift there weakens a PR check, not a release, so it
+sits outside the suite's ship-grade scope.)
+
+The `verify` job carries one named exemption, which that suite
+also encodes: no `swift build -c release`. The obligation it
+leans on — **the release job must keep a `-c release` compile
+ahead of any submission or draft**; today that is
+`build-app.sh`'s first act — is what lets the pipeline still
+refuse a tree that cannot build release without paying the same
+compile twice in sequence.
 
 **Stamp the commit at build time; never check one in.** A commit
 cannot contain its own SHA, so a bump made while the release

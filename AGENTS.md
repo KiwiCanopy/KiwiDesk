@@ -217,8 +217,9 @@ scripts.
   [packaging-and-release.md](.claude/rules/packaging-and-release.md).
 - `./scripts/release.sh <version>` cuts a release: stamps the
   version, runs the gate, commits, tags and pushes. The pushed
-  tag fires `.github/workflows/release.yml`, which builds the
-  artifact and drafts the release — same rule file.
+  tag fires `.github/workflows/release.yml`, which re-verifies
+  the tag, builds the artifact and drafts the release — same
+  rule file.
 - `./scripts/install-subagents.sh --claude` (Claude Code agents +
   workspace skills) or `--codex` (project-scoped Codex agents),
   per clone, one explicit target.
