@@ -1,12 +1,31 @@
-# Cloudflare Pages configuration for the KiwiDesk site.
+# Cloudflare Pages configuration for the KiwiDesk site (#106).
 #
-# One-time setup in the Cloudflare dashboard (Pages ▸ Create ▸
-# Connect to Git ▸ this repo):
-#   Build command:        npm run build
-#   Build output dir:     site/dist
+# One-time dashboard setup (Pages ▸ Create ▸ Connect to Git ▸ this
+# repo). The project name must be `kiwidesk` so the default domain
+# matches astro.config.mjs's fallback:
 #   Root directory:       site
-#   Node version:         20 or newer (Astro 5 needs >=18.20)
-# Every push to main then auto-deploys. Set SITE_URL as an env
-# var per environment to override the default pages.dev domain.
+#   Build command:        npm run build
+#   Build output dir:     dist   <- relative to Root directory, so
+#                                  NOT "site/dist"
+#
+# Every push to the production branch auto-deploys; other branches
+# get preview URLs. The repo stays PRIVATE — Pages builds a private
+# repo over the GitHub App, so publishing never requires opening
+# the source.
+#
+# NODE VERSION: pinned by site/.nvmrc, the one copy of that number
+# (Cloudflare reads it, as do CI and a local `nvm use`). There is
+# deliberately no second pin file: Cloudflare resolves
+# `.node-version` ahead of `.nvmrc`, so a stale duplicate silently
+# wins the build — this repo carried `.node-version` at 20 against
+# `.nvmrc` at 24 until #106, and Astro 7 refuses anything below
+# 22.12. Do not reintroduce one.
+#
+# DASHBOARD ENV VARS DO NOT REACH BUILDS. With this file committed,
+# Pages sources project config from it and ignores variables added
+# in the dashboard — a SITE_URL set there never arrived (observed
+# on the KiwiCanopy launch, 2026-07-29). So the canonical URL is
+# committed as the default in astro.config.mjs instead, and
+# SITE_URL stays a local override for one-off builds only.
 name = "kiwidesk"
 pages_build_output_dir = "dist"

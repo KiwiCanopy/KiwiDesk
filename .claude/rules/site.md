@@ -38,6 +38,30 @@ older Node resolves the wrong platform binaries, so a later
 `nvm use` alone still fails on a missing native binding — delete
 `node_modules` and reinstall if that happens.
 
+**Never add a second Node pin file.** Cloudflare Pages resolves
+`.node-version` ahead of `.nvmrc`, so a duplicate does not merely
+restate the number — it silently *wins* the deploy while every
+local and CI signal keeps reading `.nvmrc`. This repo carried
+`.node-version` at 20 against `.nvmrc` at 24 until #106, and
+Astro refuses below 22.12 as above. `package.json` → `engines` is
+not a safe alternative either: the Pages v3 build image does not
+read it (Cloudflare's own docs list it as unsupported,
+2026-07-30).
+
+## Cloudflare Pages: the dashboard is not a config surface (#106)
+
+`site/wrangler.toml` is committed, and its presence makes Pages
+source project config from the file and **ignore environment
+variables added in the dashboard** — a `SITE_URL` set there never
+reaches a build (observed on the KiwiCanopy launch, 2026-07-29).
+
+So configure the site in the repo, not the dashboard: the
+canonical URL is the committed default in `astro.config.mjs` and
+`SITE_URL` is a local override for one-off builds only. That
+wrangler.toml holds the one-time setup fields too, including the
+one that reads wrong — *Build output directory* is relative to
+*Root directory*, so it is `dist`, never `site/dist`.
+
 ## The 404 is a user page, so withdraw Starlight's (#635)
 
 `src/pages/404.astro` and `disable404Route: true` in
