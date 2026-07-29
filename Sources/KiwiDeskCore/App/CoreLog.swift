@@ -43,13 +43,15 @@ enum CoreLog {
     /// converts into the seams' `@MainActor (String) -> Void`
     /// without pinning the write itself to the main actor.
     ///
-    /// Not `public`, and `LogSeamDefaultTests` keeps it a default
+    /// Not `public`, and `LogSeamSinkTests` keeps it a default
     /// rather than a bypass — it asserts this body still writes,
     /// and that Core reaches this symbol only through a seam
     /// declaration. Both matter: gutting the body would restore
     /// the pre-#624 behaviour with every seam still naming it,
     /// and a direct call would put a diagnostic in syslog that
-    /// `KiwiCore.onLog` never sees.
+    /// `KiwiCore.onLog` never sees. `LogSeamDefaultTests` is the
+    /// other half — that every seam names this in the first
+    /// place.
     static func write(_ message: String) {
         NSLog("KiwiDesk: %@", message)
     }

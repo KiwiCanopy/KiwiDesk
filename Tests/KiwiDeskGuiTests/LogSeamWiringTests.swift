@@ -58,6 +58,15 @@ import Testing
 ///   assignment shape, a receiver whose type is ambiguous or
 ///   undeclared, a seam whose enclosing type the walk missed.
 ///
+/// **Its completeness rests on a sibling.** This suite has no
+/// floor of its own: narrow `SourceScan.swiftSources` and it
+/// stops covering a subsystem while passing, because a seam that
+/// is never scanned is never required to be wired.
+/// `LogSeamDefaultTests` carries the floor for the seam-shaped
+/// half of the family and `LogSeamSinkTests` the per-directory
+/// one — do not delete either believing this suite is
+/// self-sufficient.
+///
 /// It lives in the GUI test target purely because `SourceScan`
 /// does — `VisibleBoundsRoutingTests` makes the same trade. It
 /// scans `Sources/KiwiDeskCore`; the GUI tree declares no seam.

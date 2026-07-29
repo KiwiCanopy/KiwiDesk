@@ -41,8 +41,10 @@ itself when a fifth is added.
   declares it — and it **defaults to `CoreLog.write`**, which is
   never called directly. `LogSeamWiringTests` guards the wiring
   and its `allowed` map is the exemption list;
-  `LogSeamDefaultTests` guards the default and the no-direct-call
-  half. The argument for both is on `CoreLog`.
+  `LogSeamDefaultTests` guards the default, and
+  `LogSeamSinkTests` guards the sink itself — that its body still
+  writes, and that Core never calls it outside a seam
+  declaration. The argument for all of it is on `CoreLog`.
   Bootstrap-time only: a seam wired later (`KiwiCore+Lifecycle`,
   after the AX grant) is invisible to that guard, and `onLog`
   needs no permission to be useful.

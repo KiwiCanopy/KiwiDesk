@@ -20,6 +20,10 @@ import Testing
 /// catches a seam nobody wired, this one catches a seam whose
 /// unwired state would be silent. Neither implies the other.
 ///
+/// It reads the working tree, not a snapshot, so a red naming a
+/// file can mean the tree moved under the run rather than that
+/// the file is wrong — re-run before believing it.
+///
 /// Deliberately line-scoped: it reads the default off the
 /// declaration's own line and **gaps** — reds naming what it
 /// could not read — on a declaration whose `=` is elsewhere, so a

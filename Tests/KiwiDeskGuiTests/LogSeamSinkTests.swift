@@ -137,6 +137,62 @@ struct LogSeamSinkTests {
         )
     }
 
+    /// Every immediate subdirectory of `Sources/KiwiDeskCore`
+    /// contributed at least one scanned file.
+    ///
+    /// This guard needs a **wider** reach than the seam guards do,
+    /// and that difference is not obvious. `LogSeamDefaultTests`
+    /// carries the family's only floor, and it proves the walk
+    /// reached every file holding a `var onLog:` — which is enough
+    /// for a question about seams, and not enough for this one: a
+    /// direct `CoreLog.write` can sit in any Core file at all.
+    /// Narrowing the scan to skip a directory with no seam in it
+    /// leaves every suite in the family green while the call-site
+    /// ban quietly stops covering that subsystem. `Lua/` is such a
+    /// directory, and dropping it was measured to pass all four.
+    ///
+    /// Derived from the filesystem, so a new subsystem is inside
+    /// it on arrival and no list here is edited to keep it there.
+    private func assertEverySubsystemWasScanned(
+        _ scanned: [URL]
+    ) throws {
+        let reached = Set(
+            scanned.compactMap { file -> String? in
+                let parts = file.pathComponents
+                guard
+                    let root = parts.firstIndex(of: "KiwiDeskCore"),
+                    parts.index(after: root) < parts.count - 1
+                else { return nil }
+                return parts[parts.index(after: root)]
+            }
+        )
+        let directories = Set(
+            try FileManager.default.contentsOfDirectory(
+                at: coreRoot,
+                includingPropertiesForKeys: [.isDirectoryKey]
+            )
+            .filter {
+                (try? $0.resourceValues(forKeys: [.isDirectoryKey])
+                    .isDirectory) == true
+            }
+            .map(\.lastPathComponent)
+            // Assets, not code — it holds no Swift file to scan.
+            .filter { $0 != "Resources" }
+        )
+        #expect(
+            directories.subtracting(reached).isEmpty,
+            Comment(
+                rawValue: "the scan reached no Swift file under "
+                    + directories.subtracting(reached).sorted()
+                    .joined(separator: ", ")
+                    + ", so a direct `CoreLog` call there would "
+                    + "go unseen. A narrowed file predicate does "
+                    + "this, and the seam guards cannot catch it "
+                    + "when the directory holds no seam."
+            )
+        )
+    }
+
     @Test("Core reaches CoreLog only through a seam default")
     func theDefaultIsNeverCalledDirectly() throws {
         // Keyed on the full path, not the basename: two files of
@@ -155,8 +211,11 @@ struct LogSeamSinkTests {
             seams.filter { $0.defaultValue == nil }
                 .map { "\($0.file.path):\($0.line + 1)" }
         )
+        let scanned = try SourceScan.swiftSources(under: coreRoot)
+        try assertEverySubsystemWasScanned(scanned)
+
         var callSites: [String] = []
-        for file in try SourceScan.swiftSources(under: coreRoot)
+        for file in scanned
         where file.lastPathComponent != "CoreLog.swift" {
             let lines = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
