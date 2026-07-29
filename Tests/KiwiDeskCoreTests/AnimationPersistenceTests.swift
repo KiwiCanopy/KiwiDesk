@@ -48,7 +48,7 @@ struct AnimationPersistenceTests {
         #expect(decoded.animations.scrollSpeedMS == 150)
     }
 
-    @Test("Pre-issue-51 profile (no keys) keeps 250 ms defaults")
+    @Test("Pre-issue-51 profile (no keys) keeps 150 ms defaults")
     func legacyProfileDefaults() throws {
         // A profile saved before issue #51 has no duration keys.
         let json = #"{"animations":{"on_scrolling":false}}"#
@@ -56,8 +56,8 @@ struct AnimationPersistenceTests {
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.animations.durationMS == 250)
-        #expect(decoded.animations.scrollSpeedMS == 250)
+        #expect(decoded.animations.durationMS == 150)
+        #expect(decoded.animations.scrollSpeedMS == 150)
     }
 
     // MARK: - Commands

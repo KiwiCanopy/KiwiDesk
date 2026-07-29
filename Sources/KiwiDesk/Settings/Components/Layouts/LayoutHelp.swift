@@ -127,9 +127,8 @@ enum LayoutHelp {
             "space_override.slot_size.help",
             "Sets each scrolling window's size along the scroll "
                 + "direction. Horizontal uses column width; "
-                + "vertical uses row height. Default is 1100 pt "
-                + "horizontally and 80% of the available height "
-                + "vertically."
+                + "vertical uses row height. Default is 80% of "
+                + "the available width or height."
         )
     }
 

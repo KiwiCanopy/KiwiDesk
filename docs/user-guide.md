@@ -1155,9 +1155,9 @@ interaction.
   animations off — with it on, the whole section greys out, since the
   system setting wins regardless of this one.
 - **Duration** (ms): how fast windows move and resize (50–1000, default
-  250).
+  150).
 - **Scroll speed** (ms): scrolling-layout slide speed when focus moves
-  (50–1000, default 250).
+  (50–1000, default 150).
 - **On space change**: animate virtual space switches as a coordinated
   transition — windows slide out of the space you're leaving while the
   new space's windows slide in from the hiding corner (default off;
@@ -1343,8 +1343,8 @@ or stack.)
 
 **1 Screen:**
 
-- **Starter** — One space per layout mode: track, stack, bsp, grid,
-  and floating. The fresh-install tour; a good way back to a
+- **Starter** — One space per layout mode: scrolling, stack, track,
+  grid, and floating. The fresh-install tour; a good way back to a
   known-good starting point.
 - **Developer** *(Standard)* — IDE in stack (space 2), docs in scrolling
   (space 3), preview fullscreen (space 4). Best for software dev.

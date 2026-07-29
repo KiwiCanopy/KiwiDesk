@@ -240,7 +240,7 @@ struct ScrollingDeferredRaiseTests {
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard NSScreen.main != nil else { return }
         // Narrow slots so the neighbor is fully visible (the
-        // 1100 pt auto column would force a pan on any screen).
+        // 80%-width auto column would force a pan on any screen).
         core.execute("scroll.set_slot_size", args: [.number(200)])
         // Settle the row at its layout targets so the next
         // focus step needs no pan: the neighbor is already

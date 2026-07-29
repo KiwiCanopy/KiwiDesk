@@ -878,8 +878,9 @@ stack.set_master_orientation_override("3", "vertical")
 available axis), or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
-in scrolling layouts. Auto is 1100 pt horizontal, 80% of available
-height vertical. Any resolved size is floored at the global
+in scrolling layouts. Auto is 80% of the available width
+(horizontal) or height (vertical). Any resolved size is floored
+at the global
 minimum window size (`set_min_window_size`) and capped at the
 axis length — so a small percentage on a narrow display falls
 back to the minimum rather than tiling windows smaller than it.
@@ -4054,7 +4055,7 @@ layout reflowing. **Persisted per-profile** since issue #51.
 **Example:**
 
 ```lua
-animations.set_duration(250)
+animations.set_duration(150)
 ```
 
 ### animations.set_scroll_speed
@@ -4067,7 +4068,7 @@ knob, also persisted per-profile).
 **Example:**
 
 ```lua
-animations.set_scroll_speed(250)
+animations.set_scroll_speed(150)
 ```
 
 ### animations.set_size_policy

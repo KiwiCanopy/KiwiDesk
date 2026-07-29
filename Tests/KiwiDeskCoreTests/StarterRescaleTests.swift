@@ -95,10 +95,11 @@ struct StarterRescaleTests {
         // Developer workflow Standard.
         #expect(core.profiles.currentStandard == "Starter")
         #expect(core.state.workspaces.allSpaces.count == 10)
-        #expect(core.state.workspaces[SpaceID(6)]?.mode == .track)
+        #expect(
+            core.state.workspaces[SpaceID(6)]?.mode == .scrolling
+        )
         #expect(core.state.workspaces[SpaceID(9)]?.mode == .grid)
-        // The bsp rung stays bsp, not remapped by a Standard.
-        #expect(core.state.workspaces[SpaceID(3)]?.mode == .bsp)
+        #expect(core.state.workspaces[SpaceID(3)]?.mode == .track)
         // Five per display, not the Dual Developer 4/4/2 scatter:
         // each five-space block lands whole on one screen, and the
         // two blocks are on different screens. (Asserted by block
@@ -134,7 +135,9 @@ struct StarterRescaleTests {
         core.handleMonitorChange()
         #expect(core.profiles.currentStandard == "Starter")
         #expect(core.state.workspaces.allSpaces.count == 15)
-        #expect(core.state.workspaces[SpaceID(11)]?.mode == .track)
+        #expect(
+            core.state.workspaces[SpaceID(11)]?.mode == .scrolling
+        )
         // Three whole five-space blocks, one per display.
         let blocks = [
             displaysOf(core, 1...5),

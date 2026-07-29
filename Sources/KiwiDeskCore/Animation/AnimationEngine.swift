@@ -85,7 +85,7 @@ public final class AnimationEngine {
     var reduceMotion: @MainActor () -> Bool = { false }
 
     /// General animation duration in ms, clamped to 50–1000.
-    /// Maps onto the spring's response time (250 ms = 0.35 s).
+    /// Maps onto the spring's response time (150 ms = 0.21 s).
     /// Synced from `AnimationSettings.durationMS` on profile
     /// apply; also set directly by `animations.set_duration`.
     public var durationMS: Int {
@@ -128,8 +128,8 @@ public final class AnimationEngine {
         set { storedSizeRateHz = newValue.map { min(max($0, 1), 120) } }
     }
 
-    private var storedDurationMS = 250
-    private var storedScrollDurationMS = 250
+    private var storedDurationMS = 150
+    private var storedScrollDurationMS = 150
     // Internal: the tick loop reads it from `+Tick`.
     var storedSizeRateHz: Int?
     /// Per-window seconds since the last throttled size-set (#47).

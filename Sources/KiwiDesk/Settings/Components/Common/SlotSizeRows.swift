@@ -68,8 +68,8 @@ struct SlotSizeRows: View {
 
     /// Seed for the Points unit: keep an explicit pt, else a
     /// sensible per-axis start. The editor has no screen to
-    /// resolve `.auto` against, so vertical (auto = a fraction)
-    /// uses a fixed pt hint rather than the fraction standard.
+    /// resolve `.auto` (a fraction on both axes) against, so each
+    /// axis uses a fixed pt hint rather than the fraction standard.
     private var currentPoints: CGFloat {
         let stored: CGFloat
         if case .points(let points) =
@@ -77,8 +77,7 @@ struct SlotSizeRows: View {
         {
             stored = points
         } else {
-            stored =
-                isVertical ? 700 : ScrollSize.autoHorizontalPoints
+            stored = isVertical ? 700 : 1100
         }
         // Keep the readout and slider thumb inside the slider's
         // range; a smaller stored slot is floored at minWindowSize
@@ -87,14 +86,16 @@ struct SlotSizeRows: View {
     }
 
     /// Seed for the Percent unit: keep an explicit fraction, else
-    /// the orientation's auto standard (vertical) or a neutral half.
+    /// the orientation's auto standard.
     private var currentFraction: Double {
         if case .fraction(let fraction) =
             size
         {
             return fraction
         }
-        return isVertical ? ScrollSize.autoVerticalFraction : 0.5
+        return isVertical
+            ? ScrollSize.autoVerticalFraction
+            : ScrollSize.autoHorizontalFraction
     }
 
     private var sizeUnitBinding: Binding<SizeUnit> {

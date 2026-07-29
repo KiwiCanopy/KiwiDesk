@@ -96,20 +96,20 @@ extension StandardLayout {
         case StarterLadder.name where screenCount <= 1:
             return L(
                 "presets.starter_one.summary",
-                "One space per layout mode — Track, Stack, "
-                    + "BSP, Grid, and Floating."
+                "One space per layout mode — Scrolling, Stack, "
+                    + "Track, Grid, and Floating."
             )
         case StarterLadder.name where screenCount == 2:
             return L(
                 "presets.starter_two.summary",
                 "The five-mode set repeated on each display, "
-                    + "Track through Floating."
+                    + "Scrolling through Floating."
             )
         case StarterLadder.name:
             return L(
                 "presets.starter_three.summary",
                 "The five-mode set on all three displays, "
-                    + "Track through Floating."
+                    + "Scrolling through Floating."
             )
         default:
             // Unreachable for anything in `StandardProfiles.all`,

@@ -43,7 +43,7 @@ public struct Spring: Sendable, Equatable {
     /// already ships ζ = 0.45.
     ///
     /// Concretely at ζ = 0.85: a 60 Hz tick is 16.7 ms, and the
-    /// 250 ms default allows 32.8 ms — one substep, so the
+    /// 150 ms default allows 19.7 ms — one substep, so the
     /// default is untouched. At the 50 ms floor it allows 6.6 ms
     /// and the tick splits three ways. A 120 Hz display was
     /// inside the bound across the whole range, which is why this

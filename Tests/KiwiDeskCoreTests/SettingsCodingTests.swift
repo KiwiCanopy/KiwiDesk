@@ -128,9 +128,9 @@ struct SettingsCodingTests {
         #expect(animations["on_window_swap"] as? Bool == true)
         #expect(animations["on_relayout"] as? Bool == true)
         // `animations.set_duration` → JSON `animations.duration`
-        #expect(animations["duration"] as? Int == 250)
+        #expect(animations["duration"] as? Int == 150)
         // `animations.set_scroll_speed` → `animations.scroll_speed`
-        #expect(animations["scroll_speed"] as? Int == 250)
+        #expect(animations["scroll_speed"] as? Int == 150)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
@@ -316,9 +316,9 @@ struct SettingsCodingTests {
         #expect(decoded.animations.onSpaceChange)
         // on_scrolling absent — keeps its `true` default.
         #expect(decoded.animations.onScrolling)
-        // Duration knobs absent — keep their 250 ms defaults.
-        #expect(decoded.animations.durationMS == 250)
-        #expect(decoded.animations.scrollSpeedMS == 250)
+        // Duration knobs absent — keep their 150 ms defaults.
+        #expect(decoded.animations.durationMS == 150)
+        #expect(decoded.animations.scrollSpeedMS == 150)
     }
 
     @Test("Missing keys fall back to defaults")

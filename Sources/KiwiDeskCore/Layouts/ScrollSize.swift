@@ -51,9 +51,14 @@ public enum ScrollSize: Sendable, Equatable {
 
     // MARK: - Auto standards (scrolling policy)
 
-    /// `auto` + horizontal → a fixed pt column. A `%` here would be
-    /// enormous on ultrawide displays, so width stays absolute.
-    public static let autoHorizontalPoints: CGFloat = 1100
+    /// `auto` + horizontal → this fraction of the *available*
+    /// width. A fraction keeps the column's share of the screen
+    /// identical across displays and scaled-resolution settings,
+    /// where a fixed pt count drifted (the same 1100 pt column was
+    /// ~73% of a 14" MBP but ~64% of a 16"). On an ultrawide the
+    /// resolved column is huge — an accepted trade; set an
+    /// explicit pt/% slot size there.
+    public static let autoHorizontalFraction: Double = 0.8
     /// `auto` + vertical → this fraction of the *available* height.
     /// Height is bounded, so a fraction adapts across laptop and
     /// desktop without producing near-full-height rows.
@@ -63,8 +68,7 @@ public enum ScrollSize: Sendable, Equatable {
 
     /// The resolved point extent along the scroll axis, clamped to
     /// the available `along` length. `auto` resolves to the
-    /// per-orientation standard (fixed pt horizontal, a fraction of
-    /// `along` vertical).
+    /// per-orientation standard fraction of `along`.
     public func resolved(
         along: CGFloat,
         horizontal: Bool
@@ -73,9 +77,12 @@ public enum ScrollSize: Sendable, Equatable {
         switch self {
         case .auto:
             raw =
-                horizontal
-                ? Self.autoHorizontalPoints
-                : along * CGFloat(Self.autoVerticalFraction)
+                along
+                * CGFloat(
+                    horizontal
+                        ? Self.autoHorizontalFraction
+                        : Self.autoVerticalFraction
+                )
         case .points(let points):
             raw = points
         case .fraction(let fraction):

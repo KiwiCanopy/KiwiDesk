@@ -68,17 +68,16 @@ struct ScrollSizeTests {
 
     @Test("resolved clamps to the along-axis")
     func resolvedClamps() {
-        // Horizontal auto is a fixed pt, clamped when the axis is
-        // shorter than the standard.
+        // Auto is 80% of the available along-axis on both
+        // orientations.
         #expect(
             ScrollSize.auto.resolved(along: 2000, horizontal: true)
-                == 1100
+                == 1600
         )
         #expect(
             ScrollSize.auto.resolved(along: 1000, horizontal: true)
-                == 1000
+                == 800
         )
-        // Vertical auto is 80% of the available along-axis.
         #expect(
             ScrollSize.auto.resolved(along: 1000, horizontal: false)
                 == 800
@@ -106,7 +105,7 @@ struct ScrollSizeTests {
         #expect(
             ScrollSize.auto
                 .editablePoints(along: 2000, horizontal: true)
-                == 1100
+                == 1600
         )
         #expect(
             ScrollSize.fraction(0.5)

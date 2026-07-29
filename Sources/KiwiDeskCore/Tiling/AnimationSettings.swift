@@ -46,9 +46,9 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// General spring animation duration (ms). Clamped 50–1000
     /// here (the single clamp authority) so a persisted or
     /// hand-edited value can never diverge from what the engine
-    /// runs. Synced to the engine on profile apply. Default 250.
+    /// runs. Synced to the engine on profile apply. Default 150.
     /// Lua: `animations.set_duration`.
-    public var durationMS = 250 {
+    public var durationMS = 150 {
         didSet { durationMS = Self.clampMS(durationMS) }
     }
 
@@ -56,7 +56,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// clamped 50–1000. Separate from `durationMS` so each
     /// knob tunes its own trigger. Synced on profile apply.
     /// Lua: `animations.set_scroll_speed` (issue #51).
-    public var scrollSpeedMS = 250 {
+    public var scrollSpeedMS = 150 {
         didSet { scrollSpeedMS = Self.clampMS(scrollSpeedMS) }
     }
 
@@ -117,13 +117,13 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .durationMS
-            ) ?? 250
+            ) ?? 150
         )
         scrollSpeedMS = Self.clampMS(
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .scrollSpeedMS
-            ) ?? 250
+            ) ?? 150
         )
     }
 }
