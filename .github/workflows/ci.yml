@@ -30,7 +30,7 @@ jobs:
     # is unchanged, so the binary still runs on older macOS.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Select Xcode
         run: |
@@ -70,7 +70,7 @@ jobs:
     # build silently accepts. #532.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Select Xcode
         run: |

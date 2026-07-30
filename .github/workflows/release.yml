@@ -78,7 +78,7 @@ jobs:
     outputs:
       sha: ${{ steps.audit.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.tag || github.ref }}
           # Needed for the "tag is on main" assertion below,
@@ -174,7 +174,7 @@ jobs:
       # does. Verify above runs with read only.
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # The exact commit Verify vetted — never the tag name,
           # which is re-resolved against the remote at THIS job's

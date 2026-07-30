@@ -33,9 +33,9 @@ jobs:
       run:
         working-directory: site
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           # Read from site/.nvmrc so CI and a local `nvm use`
           # cannot drift apart — a literal here would silently
