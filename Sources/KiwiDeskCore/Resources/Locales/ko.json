@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "손쉬운 사용 권한이 취소되었습니다. 시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 다시 활성화하십시오.",
   "notification.permission_lost.title": "KiwiDesk가 윈도우 관리를 중단했습니다",
   "onboarding.continue": "계속",
-  "onboarding.discovery.popover": "KiwiDesk는 여기에 있습니다. 레이아웃과 설정은 언제든 클릭하여 여십시오.",
+  "onboarding.discovery.body": "%1$@를 언제든 눌러 모든 단축키 개요를 확인하세요.",
   "onboarding.grant.body": "1. 아래의 ‘시스템 설정 열기’를 클릭하십시오.\n2. 목록에서 KiwiDesk를 찾아 켜십시오.\n3. 여기로 돌아오십시오 — 자동으로 감지합니다.",
   "onboarding.grant.granted": "권한이 부여되었습니다.",
   "onboarding.grant.open_settings": "시스템 설정 열기",

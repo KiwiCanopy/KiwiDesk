@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "“辅助功能”权限已被撤销。请在“系统设置”>“隐私与安全性”>“辅助功能”中重新启用。",
   "notification.permission_lost.title": "KiwiDesk 已停止管理窗口",
   "onboarding.continue": "继续",
-  "onboarding.discovery.popover": "KiwiDesk 就在这里。随时点按即可查看布局和设置。",
+  "onboarding.discovery.body": "随时按 %1$@ 查看所有快捷键的概述。",
   "onboarding.grant.body": "1. 点按下方的“打开系统设置”。\n2. 在列表中找到 KiwiDesk 并将其打开。\n3. 回到这里 — 我们会自动检测。",
   "onboarding.grant.granted": "已授予权限！",
   "onboarding.grant.open_settings": "打开系统设置",

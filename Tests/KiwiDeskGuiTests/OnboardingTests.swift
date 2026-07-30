@@ -45,7 +45,7 @@ struct OnboardingTests {
             recommendSharedSpaces: false
         )
 
-        #expect(model.step == .readyToExplore)
+        #expect(model.step == .discoverShortcuts)
         #expect(!finished)
     }
 
@@ -59,7 +59,7 @@ struct OnboardingTests {
         // The `separateSpaces` "Continue" button's action.
         model.finishOrDiscover()
 
-        #expect(model.step == .readyToExplore)
+        #expect(model.step == .discoverShortcuts)
         #expect(!finished)
     }
 
@@ -74,6 +74,19 @@ struct OnboardingTests {
 
         #expect(model.step == .welcome)
         #expect(finished)
+    }
+
+    @Test("shortcuts discovery opens the panel then advances")
+    func shortcutsDiscoveryActions() {
+        let model = OnboardingModel()
+        var opened = false
+        model.onShowShortcuts = { opened = true }
+
+        model.onShowShortcuts()
+        model.step = .readyToExplore
+
+        #expect(opened)
+        #expect(model.step == .readyToExplore)
     }
 
     @Test("open-at-login defaults to pre-checked (#342)")

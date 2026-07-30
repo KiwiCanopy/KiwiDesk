@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "アクセシビリティの許可が取り消されました。システム設定 > プライバシーとセキュリティ > アクセシビリティで再度有効にしてください。",
   "notification.permission_lost.title": "KiwiDeskがウインドウの管理を停止しました",
   "onboarding.continue": "続ける",
-  "onboarding.discovery.popover": "KiwiDeskはここにあります。レイアウトや設定はいつでもクリックして開けます。",
+  "onboarding.discovery.body": "%1$@ を押すと、いつでもすべてのショートカットの概要が表示されます。",
   "onboarding.grant.body": "1. 下の「システム設定を開く」をクリックします。\n2. リストからKiwiDeskを見つけてオンにします。\n3. ここに戻ってきてください — 自動的に検出します。",
   "onboarding.grant.granted": "許可されました。",
   "onboarding.grant.open_settings": "システム設定を開く",

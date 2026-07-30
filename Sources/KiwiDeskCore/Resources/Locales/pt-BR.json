@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "A permissão de Acessibilidade foi revogada. Reative-a em Ajustes do Sistema > Privacidade e Segurança > Acessibilidade.",
   "notification.permission_lost.title": "O KiwiDesk parou de gerenciar as janelas",
   "onboarding.continue": "Continuar",
-  "onboarding.discovery.popover": "O KiwiDesk fica aqui. Clique quando quiser para ver layouts e ajustes.",
+  "onboarding.discovery.body": "Pressione %1$@ a qualquer momento para ver uma visão geral de todos os seus atalhos.",
   "onboarding.grant.body": "1. Clique em “Abrir Ajustes do Sistema” abaixo.\n2. Encontre o KiwiDesk na lista e ative-o.\n3. Volte aqui — detectamos automaticamente.",
   "onboarding.grant.granted": "Permissão concedida!",
   "onboarding.grant.open_settings": "Abrir Ajustes do Sistema",

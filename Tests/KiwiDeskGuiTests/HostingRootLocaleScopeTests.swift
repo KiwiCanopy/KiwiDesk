@@ -16,7 +16,7 @@ import Testing
 /// writing a feature, and every test builds a view fresh.
 ///
 /// So the invariant gets a source scan rather than trust: adding
-/// a sixth window and forgetting the wrapper is exactly the shape
+/// another window and forgetting the wrapper is exactly the shape
 /// of mistake that produced the bug, and nothing else would catch
 /// it.
 @Suite("hosting roots are locale-scoped")
@@ -70,7 +70,7 @@ struct HostingRootLocaleScopeTests {
     func everyHostingRootIsLocaleScoped() throws {
         let roots = try hostingRoots()
         // A scan that found nothing would "pass" forever.
-        #expect(roots.count >= 5)
+        #expect(!roots.isEmpty)
         for (file, snippet) in roots {
             #expect(
                 snippet.contains("LocaleScopedRoot"),

@@ -58,6 +58,57 @@ struct QuickMenuProfileRowTests {
         }
     }
 
+    @Test("shortcuts combo uses the native menu column")
+    func shortcutsNativeEquivalent() {
+        reset()
+        let controller = controller(active: nil, all: [])
+        controller.shortcutsComboProvider = {
+            KeyCombo(
+                keyCode: 40,
+                modifiers: [.control, .option]
+            )
+        }
+        let menu = NSMenu()
+
+        controller.menuNeedsUpdate(menu)
+
+        let item = menu.items.first { $0.title == "View Shortcuts…" }
+        #expect(item?.keyEquivalent == "k")
+        #expect(item?.keyEquivalentModifierMask == [.control, .option])
+        #expect(item?.attributedTitle == nil)
+    }
+
+    @Test("native column covers every special-key glyph")
+    func shortcutsSpecialEquivalents() {
+        reset()
+        let specialCodes = (0...127).compactMap { value -> UInt32? in
+            let code = UInt32(value)
+            return ComboSymbols.specialKeyGlyph(code) == nil
+                ? nil : code
+        }
+        #expect(!specialCodes.isEmpty)
+        for code in specialCodes {
+            let controller = controller(active: nil, all: [])
+            controller.shortcutsComboProvider = {
+                KeyCombo(keyCode: code, modifiers: [.control])
+            }
+            let menu = NSMenu()
+
+            controller.menuNeedsUpdate(menu)
+
+            let item = menu.items.first {
+                $0.title == "View Shortcuts…"
+            }
+            #expect(
+                item?.keyEquivalent.count == 1,
+                "virtual key code \(code)"
+            )
+            #expect(
+                item?.keyEquivalentModifierMask == [.control]
+            )
+        }
+    }
+
     @Test("hidden with no profiles")
     func noProfiles() {
         reset()

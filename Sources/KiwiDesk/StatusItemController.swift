@@ -7,18 +7,16 @@ import SwiftUI
 /// active mode's custom icon beats the standard glyph. The quick
 /// menu (#68 §3.10) is built in `StatusItemController+Menu`.
 @MainActor
-final class StatusItemController: NSObject, NSMenuDelegate,
-    NSPopoverDelegate
-{
+final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
     /// Opens the read-only shortcuts reference panel (#326).
     var onShowShortcuts: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
-    /// The combo bound to open the shortcuts panel (#330), rendered
-    /// as native glyphs, or nil when unbound. Read fresh on each
-    /// menu open so the "View Shortcuts…" row shows the live
-    /// binding beside it (like `profilesProvider`).
-    var shortcutsComboProvider: () -> String? = { nil }
+    /// The combo bound to open the shortcuts panel (#330), or nil
+    /// when unbound. Read fresh on each menu open so AppKit renders
+    /// the live binding in its native shortcut column (like
+    /// `profilesProvider`).
+    var shortcutsComboProvider: () -> KeyCombo? = { nil }
     /// Opens the guided permission fix (the onboarding wizard at
     /// its grant step). Wired unconditionally; the *row* that
     /// invokes it appears only while Accessibility is missing.
@@ -60,15 +58,6 @@ final class StatusItemController: NSObject, NSMenuDelegate,
     /// Active keybinding mode indicator (SF Symbol or emoji);
     /// nil restores the standard KiwiDesk icon.
     private var modeIcon: String?
-    /// The one-time post-setup "look here" popover (#331), held
-    /// while shown so the auto-dismiss and menu-open paths can
-    /// close it.
-    private var discoveryPopover: NSPopover?
-    /// Cancellable auto-dismiss for the popover, so dismissing it
-    /// early (menu open, outside click) drops the pending fire —
-    /// the repo's cancellable-`Task` timer convention over a
-    /// non-cancellable `asyncAfter`.
-    private var discoveryDismiss: Task<Void, Never>?
 
     /// `nil` means the live system slot. The optional-with-nil
     /// shape, rather than `= SystemStatusItem()`, is what lets
@@ -213,78 +202,6 @@ final class StatusItemController: NSObject, NSMenuDelegate,
         return image
     }
 
-    // MARK: - Discovery popover (#331)
-
-    /// Fires the one-time "look here" hint the instant onboarding
-    /// closes. Anchored to the real status-item button — the only
-    /// mechanism that maps to the icon's pixels (a centered window
-    /// can't point at the menu bar). Non-modal `.transient`, so
-    /// any outside click dismisses it; opening the quick menu (the
-    /// success case) closes it via `menuNeedsUpdate`; a ~5s
-    /// fallback covers the ignore case.
-    ///
-    /// Skipped when the icon is offscreen — an auto-hidden menu bar
-    /// leaves the item with no on-screen pixels to point at, so a
-    /// popover would land in a garbage corner. The wizard card's
-    /// "you can get back from the menu bar" copy covers that user
-    /// instead (#331).
-    func showDiscoveryPopover() {
-        guard let button = item.button,
-            statusItemIsOnScreen(button)
-        else { return }
-        let popover = NSPopover()
-        popover.behavior = .transient
-        popover.delegate = self
-        popover.contentViewController = NSHostingController(
-            rootView: LocaleScopedRoot {
-                DiscoveryPopoverView()
-            }
-            .environmentObject(LocalizationManager.shared)
-        )
-        discoveryPopover = popover
-        popover.show(
-            relativeTo: button.bounds,
-            of: button,
-            preferredEdge: .minY
-        )
-        discoveryDismiss = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
-            guard !Task.isCancelled else { return }
-            self?.dismissDiscoveryPopover()
-        }
-    }
-
-    /// Closes the discovery popover if it's still up. Shared by the
-    /// menu-open success path and the timed fallback; safe to call
-    /// when nothing is showing.
-    func dismissDiscoveryPopover() {
-        discoveryDismiss?.cancel()
-        discoveryDismiss = nil
-        discoveryPopover?.performClose(nil)
-        discoveryPopover = nil
-    }
-
-    /// The `.transient` outside-click path closes the popover
-    /// without routing through `dismissDiscoveryPopover`, so clear
-    /// the retained reference and pending timer here too.
-    func popoverDidClose(_ notification: Notification) {
-        discoveryDismiss?.cancel()
-        discoveryDismiss = nil
-        discoveryPopover = nil
-    }
-
-    /// Whether the status-item button currently has on-screen
-    /// pixels. A menu bar set to auto-hide (and not revealed)
-    /// parks the item offscreen; anchoring there misplaces the
-    /// popover, so callers skip it (#331).
-    private func statusItemIsOnScreen(
-        _ button: NSStatusBarButton
-    ) -> Bool {
-        guard let window = button.window else { return false }
-        let frame = window.convertToScreen(button.frame)
-        let mid = CGPoint(x: frame.midX, y: frame.midY)
-        return NSScreen.screens.contains { $0.frame.contains(mid) }
-    }
 }
 
 // MARK: - The live slot

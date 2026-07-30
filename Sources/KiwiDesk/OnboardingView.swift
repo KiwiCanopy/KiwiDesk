@@ -9,6 +9,7 @@ final class OnboardingModel {
         case welcome
         case grant
         case separateSpaces
+        case discoverShortcuts
         case readyToExplore
     }
 
@@ -27,10 +28,12 @@ final class OnboardingModel {
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
+    /// Opens the shortcuts reference without leaving onboarding.
+    var onShowShortcuts: () -> Void = {}
     /// Closes onboarding and opens the dashboard on Layout — the
-    /// "Open Settings" action of the discovery card (#331).
+    /// "Open Settings" action of the closing card (#331).
     var onExploreSettings: () -> Void = {}
-    /// Whether the one-time post-setup discovery card should be
+    /// Whether the one-time shortcuts discovery page should be
     /// shown now (false once its persisted flag is set). Gated on
     /// that flag, NEVER AX trust (#331).
     var wantsDiscovery: () -> Bool = { false }
@@ -38,6 +41,8 @@ final class OnboardingModel {
     /// fires only in the multi-display state that can actually
     /// suffer ambiguous Desktop→profile bindings (#8).
     var displayCount: () -> Int = { 1 }
+    /// Formatted shortcut glyphs (e.g. "⌃⌥K") to open the shortcuts panel.
+    var shortcutGlyphs: () -> String = { "⌃⌥K" }
 
     /// Shared display Spaces match KiwiDesk's one-active-profile
     /// model. Separate Spaces remain usable for basic tiling, so
@@ -56,14 +61,14 @@ final class OnboardingModel {
     /// (grant-only and grant+Spaces): show the one-time discovery
     /// card if it's still pending, else just close (#331).
     ///
-    /// The login-item choice lives on the discovery card, so a run
+    /// The login-item choice lives on the closing card, so a run
     /// that skips it (the card already shown) never had the chance
     /// to opt in — that is intended: the checkbox is a one-time
     /// offer, and Settings ▸ General carries the durable toggle for
     /// everyone after (#342).
     func finishOrDiscover() {
         if wantsDiscovery() {
-            step = .readyToExplore
+            step = .discoverShortcuts
         } else {
             onFinish()
         }
@@ -94,6 +99,8 @@ struct OnboardingView: View {
                 grant
             case .separateSpaces:
                 separateSpaces
+            case .discoverShortcuts:
+                discoverShortcuts
             case .readyToExplore:
                 readyToExplore
             }
@@ -266,10 +273,9 @@ struct OnboardingView: View {
         )
     }
 
-    /// The one-time closing card (#331): points a fresh user at
-    /// Settings and teaches that the app lives in the menu bar.
-    /// "Not Now" is a real equal-weight exit — no forced visit,
-    /// no repeat. Both routes hand off to the menu-bar popover.
+    /// The closing card follows the durable shortcuts-discovery
+    /// page. "Not Now" remains a real equal-weight exit — no forced
+    /// Settings visit and no repeat after discovery is dismissed.
     private var readyToExplore: some View {
         VStack(spacing: 16) {
             Image(systemName: "sparkles")

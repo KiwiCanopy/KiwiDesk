@@ -18,12 +18,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     var statusItem: StatusItemController?
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
-    /// One-shot: the discovery card's "Open Settings" close routes
-    /// the user into the app, so the menu-bar "look here" popover
-    /// is redundant there and stays suppressed for that one close.
-    /// The Not Now / red-button routes leave it false, so they
-    /// fire the hint (#331).
-    var openedSettingsFromDiscovery = false
     /// Created on first `dashboard` access. Kept alongside so
     /// the quick-menu closures can refresh an *already open*
     /// dashboard without constructing the whole settings stack
@@ -46,7 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// The read-only shortcuts reference panel (#326), retained so
     /// it survives close/reopen. Its "Edit in Settings…" bridge
     /// opens the dashboard already navigated to Shortcuts.
-    private var shortcutsPanel: ShortcutsPanelController?
+    var shortcutsPanel: ShortcutsPanelController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -136,7 +130,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         let shortcutsPanel = ShortcutsPanelController(
             core: core
         ) { [weak self] in
-            self?.dashboard.show(navigatingTo: .shortcuts)
+            self?.openShortcutsSettings()
         }
         self.shortcutsPanel = shortcutsPanel
         statusItem.onShowShortcuts = { [weak shortcutsPanel] in
@@ -153,7 +147,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // read live from the resolved binding on each menu open.
         statusItem.shortcutsComboProvider = { [weak self] in
             guard let self else { return nil }
-            return ShortcutsOpenBinding.comboGlyphs(core: self.core)
+            return ShortcutsOpenBinding.combo(core: self.core)
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
@@ -227,8 +221,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         permissions.start()
 
-        if permissions.isTrusted {
+        let trusted = permissions.isTrusted
+        if trusted {
             startManaging()
+            if OnboardingDiscovery.shouldResume(
+                isTrusted: trusted
+            ) {
+                onboardingModel.step = .discoverShortcuts
+                showOnboarding()
+            }
         } else {
             statusItem.setWarning(true)
             showOnboarding()
@@ -264,7 +265,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             statusItem?.setWarning(false)
             // Float the still-open wizard above the windows
             // `startManaging` is about to tile up, so the "granted →
-            // Continue" screen (and the discovery card after it)
+            // Continue" screen (and the discovery pages after it)
             // can't sink behind them (#331).
             floatOnboardingAboveManagedWindows()
             startManaging()
@@ -272,7 +273,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             // Revoked mid-session: pause management, warn. Reopen
             // straight at the grant step — the user already saw
             // the welcome, and the model may still rest on a prior
-            // terminal step (e.g. the discovery card) that the
+            // terminal step (e.g. a discovery page) that the
             // bare reuse path would otherwise redisplay.
             core.stop()
             statusItem?.setWarning(true)

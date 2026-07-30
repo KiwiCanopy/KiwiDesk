@@ -108,15 +108,15 @@ basic tiling still works with separate display Spaces, and a single
 display is never affected. Changing the macOS option requires
 logging out and back in.
 
-When setup finishes, a final card confirms KiwiDesk is now
-arranging your windows and offers to **Open Settings** (landing on
-Layout) — or **Not Now** to jump straight in; neither is required.
-If you choose Not Now (or just close the card), a one-time hint
-points at the menu bar icon, where KiwiDesk lives, so it's easy to
-find again; opening Settings skips the hint, since it already
-takes you into the app. Both appear only once, on that first
-setup — losing and regranting Accessibility later never repeats
-them.
+When setup finishes, a shortcuts page lets you open the live
+shortcut panel before continuing. It stays in the wizard rather
+than pointing at the menu bar, so it also works when the menu bar
+is auto-hidden. The final card then confirms KiwiDesk is arranging
+your windows and offers to **Open Settings** (landing on Layout)
+— or **Not Now** to jump straight in; neither is required. If you
+grant Accessibility but close before reaching discovery, KiwiDesk
+resumes at that page on the next launch. Once shown or dismissed,
+losing and regranting Accessibility later never repeats it.
 
 If Accessibility permission is ever missing — you dismissed the
 wizard, or the permission was revoked later — window management

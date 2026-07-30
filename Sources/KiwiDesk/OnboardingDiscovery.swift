@@ -1,8 +1,6 @@
 import Foundation
 
-/// One-time gate for the post-setup discovery beat (#331): the
-/// "you're ready" wizard card plus the menu-bar "look here"
-/// popover, both keyed off this single flag.
+/// One-time gate for the shortcuts discovery page (#331).
 ///
 /// Persisted in `UserDefaults`, NEVER the Accessibility trust
 /// state. The wizard itself is gated on `permissions.isTrusted`
@@ -19,6 +17,15 @@ enum OnboardingDiscovery {
         _ defaults: UserDefaults = .standard
     ) -> Bool {
         defaults.bool(forKey: key)
+    }
+
+    /// A trusted launch resumes discovery when permission was
+    /// granted but the first-run window closed before this page.
+    static func shouldResume(
+        isTrusted: Bool,
+        _ defaults: UserDefaults = .standard
+    ) -> Bool {
+        isTrusted && !hasShown(defaults)
     }
 
     /// Records that the beat ran, so it never repeats.

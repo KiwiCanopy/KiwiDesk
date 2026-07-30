@@ -41,4 +41,30 @@ struct OnboardingDiscoveryTests {
         OnboardingDiscovery.markShown(defaults)
         #expect(OnboardingDiscovery.hasShown(defaults))
     }
+
+    @Test("trusted launch resumes unfinished discovery")
+    func resumesOnlyWhenTrustedAndPending() {
+        let (defaults, cleanup) = scratch("resume")
+        defer { cleanup() }
+
+        #expect(
+            OnboardingDiscovery.shouldResume(
+                isTrusted: true,
+                defaults
+            )
+        )
+        #expect(
+            !OnboardingDiscovery.shouldResume(
+                isTrusted: false,
+                defaults
+            )
+        )
+        OnboardingDiscovery.markShown(defaults)
+        #expect(
+            !OnboardingDiscovery.shouldResume(
+                isTrusted: true,
+                defaults
+            )
+        )
+    }
 }
