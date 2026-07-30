@@ -4,6 +4,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
+@MainActor
+private final class DisplayFingerprintState {
+    var values: [String]
+
+    init(_ values: [String]) {
+        self.values = values
+    }
+}
+
 /// The wake/unlock preserve-and-replay cycle, and its display
 /// topology gate (#633). The rest/return pair is driven
 /// directly — never through the real workspace notification
@@ -65,13 +74,13 @@ struct SleepWakeManagerTests {
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
-        var current = ["main", "side"]
-        manager.displayFingerprints = { current }
+        let displays = DisplayFingerprintState(["main", "side"])
+        manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
         manager.systemWillRest()
         // The side monitor was unplugged while asleep.
-        current = ["main"]
+        displays.values = ["main"]
         manager.systemDidReturn()
         await pollUntil {
             logged.contains { $0.contains("topology") }
@@ -90,12 +99,12 @@ struct SleepWakeManagerTests {
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
         manager.captureState = { self.sample() }
-        var current = ["main", "side"]
-        manager.displayFingerprints = { current }
+        let displays = DisplayFingerprintState(["main", "side"])
+        manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
         manager.systemWillRest()
-        current = ["side", "main"]
+        displays.values = ["side", "main"]
         manager.systemDidReturn()
         await pollUntil { restored }
         #expect(restored)
@@ -111,12 +120,12 @@ struct SleepWakeManagerTests {
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
-        var current = ["twin", "twin"]
-        manager.displayFingerprints = { current }
+        let displays = DisplayFingerprintState(["twin", "twin"])
+        manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
         manager.systemWillRest()
-        current = ["twin"]
+        displays.values = ["twin"]
         manager.systemDidReturn()
         await pollUntil {
             logged.contains { $0.contains("topology") }
