@@ -81,10 +81,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // (#277), so they need the same re-assertion — otherwise
         // reopening Settings can land in the App Bar editor.
         model.nav.resetSurfaces()
-        // Promote on every open, not just the first — closing
-        // the window demotes to `.accessory`, so a reused
-        // window must re-raise to get its Dock icon back.
-        NSApp.activateAsRegular()
         if let window {
             NSApp.forceFront(window)
             return
@@ -168,8 +164,5 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // Put the shared color panel away so it can't write
         // into the config after the window is gone.
         ColorPanelController.shared.dismiss()
-        // Demote only if no other content window remains (Config
-        // Issues / onboarding may still be up).
-        NSApp.deactivateIfNoWindows(excluding: window)
     }
 }
