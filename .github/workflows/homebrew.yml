@@ -1,0 +1,150 @@
+name: Update Homebrew Cask
+
+# The release workflow deliberately stops at a draft. Only the owner's
+# publication action makes the asset a real distribution channel, so that is
+# the event allowed to advance the cask. A manual dispatch retries an existing
+# published release without rebuilding or retagging it.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published release tag to retry (e.g. v0.9.0)'
+        required: true
+
+permissions:
+  contents: read
+
+# Two releases must never race to write the tap's one version pointer. Queue
+# every pending update: GitHub otherwise retains only the newest pending run,
+# so a manual retry could displace a newer release. Do not cancel a running
+# update either; cancellation can stop between commit and push.
+concurrency:
+  group: homebrew-cask
+  queue: max
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  update:
+    name: Update cask
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # This supplies the updater, not release bytes. Use today's
+          # protected main so a manual retry can repair an older release.
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Verify the published release asset
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag must be vMAJOR.MINOR.PATCH: $TAG"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          EXPECTED="KiwiDesk-$VERSION.zip"
+          RELEASE="$(gh api \
+            "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")"
+
+          if [ "$(jq -r '.draft' <<< "$RELEASE")" != false ]; then
+            echo "::error::$TAG is still a draft"
+            exit 1
+          fi
+          COUNT="$(jq '.assets | length' <<< "$RELEASE")"
+          if [ "$COUNT" -ne 1 ]; then
+            echo "::error::$TAG must have exactly one asset, found $COUNT"
+            exit 1
+          fi
+
+          NAME="$(jq -r '.assets[0].name' <<< "$RELEASE")"
+          STATE="$(jq -r '.assets[0].state' <<< "$RELEASE")"
+          TYPE="$(jq -r '.assets[0].content_type' <<< "$RELEASE")"
+          DIGEST="$(jq -r '.assets[0].digest' <<< "$RELEASE")"
+          if [ "$NAME" != "$EXPECTED" ]; then
+            echo "::error::expected $EXPECTED, found $NAME"
+            exit 1
+          fi
+          if [ "$STATE" != uploaded ] || [ "$TYPE" != application/zip ]; then
+            echo "::error::$NAME is not an uploaded ZIP ($STATE, $TYPE)"
+            exit 1
+          fi
+          if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::$NAME has no valid GitHub SHA-256 digest"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset=$NAME" >> "$GITHUB_OUTPUT"
+          echo "digest=${DIGEST#sha256:}" >> "$GITHUB_OUTPUT"
+
+      - name: Download and verify the archive bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ASSET: ${{ steps.release.outputs.asset }}
+          DIGEST: ${{ steps.release.outputs.digest }}
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/release"
+          gh release download "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "$ASSET" \
+            --dir "$RUNNER_TEMP/release"
+          ACTUAL="$(sha256sum "$RUNNER_TEMP/release/$ASSET")"
+          ACTUAL="${ACTUAL%% *}"
+          if [ "$ACTUAL" != "$DIGEST" ]; then
+            echo "::error::$ASSET digest is $ACTUAL, expected $DIGEST"
+            exit 1
+          fi
+
+      - name: Require the tap deploy key
+        env:
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error::HOMEBREW_TAP_DEPLOY_KEY is not configured"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          repository: KiwiCanopy/homebrew-tap
+          ref: main
+          path: homebrew-tap
+          ssh-key: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+
+      - name: Update and validate the cask
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          DIGEST: ${{ steps.release.outputs.digest }}
+        run: |
+          set -euo pipefail
+          scripts/update-homebrew-cask.py \
+            "$VERSION" "$DIGEST" \
+            --cask homebrew-tap/Casks/kiwidesk.rb
+          ruby -c homebrew-tap/Casks/kiwidesk.rb
+          git -C homebrew-tap diff --check
+
+      - name: Commit and push the cask
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          if git -C homebrew-tap diff --quiet -- Casks/kiwidesk.rb; then
+            echo "Homebrew cask already points to $TAG"
+            exit 0
+          fi
+          git -C homebrew-tap config user.name github-actions\[bot\]
+          git -C homebrew-tap config \
+            user.email 41898282+github-actions\[bot\]@users.noreply.github.com
+          git -C homebrew-tap add Casks/kiwidesk.rb
+          git -C homebrew-tap commit \
+            -m "chore: update kiwidesk to $VERSION"
+          git -C homebrew-tap push origin HEAD:main

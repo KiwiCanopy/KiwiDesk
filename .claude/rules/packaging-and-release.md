@@ -191,6 +191,15 @@ change that step to publish without changing that entry first —
 restating its argument here is how the two copies came to
 disagree about a draft's reach on the day they were written.
 
+**Advance Homebrew only after publication.**
+`.github/workflows/homebrew.yml` owns the tap update: the
+`release.published` event is the distribution boundary, never the
+tag push or draft creation. It must verify the release's one ZIP
+against GitHub's SHA-256 digest before changing the cask, and its
+write credential stays scoped to `KiwiCanopy/homebrew-tap`. A
+manual dispatch is a retry of that same published asset, not an
+alternate way to build or publish one.
+
 ## Never `Bundle.module` in code that runs from the `.app` (#89)
 
 Go through `ResourceBundle.locate` (`Bundle.kiwiDeskCore` /
