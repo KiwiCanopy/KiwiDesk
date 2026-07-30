@@ -1,0 +1,44 @@
+/* =========================================================
+   KiwiDesk — raw brand color layer (issue #439)
+
+   The ONE place a brand hex literal is written. `theme.css`
+   (Starlight docs) and `landing.css` (every non-Starlight
+   surface) both @import this file and map their own role names
+   through var() — they reach disjoint page sets and had each
+   re-declared these values independently, several under
+   divergent names for one color.
+
+   This layer is theme-INVARIANT: it names colors, never roles.
+   A consumer decides which theme block a token lands in, and
+   never re-states its hex. Adding a token here automatically
+   puts its hex under `scripts/check-site-tokens.py`, which
+   fails if the literal reappears anywhere else in `site/src`.
+
+   Naming: where the two stylesheets disagreed, keep the name
+   with live var() consumers rather than the dead synonym. That
+   also preserves the kiwifruit-anatomy family (seed / flesh /
+   shell) already used throughout the landing design system.
+   ========================================================= */
+:root {
+  /* ---- Darks ---- */
+  --kiwi-seed: #0d1512; /* deep brand bg (darkest surface) */
+  --kiwi-ink: #12251a; /* forest ink, green-forward, no teal */
+
+  /* ---- Chromatics ---- */
+  --kiwi-shell: #8b5e3c; /* warm tertiary — fills only, sparing */
+  --kiwi-flesh: #8db354; /* deeper kiwi green — fills */
+  --kiwi-bright: #aacb5d; /* brighter kiwi green — AA on darks */
+
+  /* Text-safe flesh: the 50/50 midpoint of --kiwi-flesh and
+     --kiwi-ink, shared with the wider brand family (#635). Raw
+     --kiwi-flesh is only ~2.3:1 on the light surfaces and fails
+     AA, so this is the shade every light-mode text/link/eyebrow
+     role uses. The site-token guard recomputes the midpoint and
+     its contrast from the token layer. */
+  --kiwi-flesh-text: #506c37;
+
+  /* ---- Pales ---- */
+  --kiwi-cream: #e1eedb; /* pale kiwi mist — light deepest tint */
+  --kiwi-frost: #eaf3ee; /* green-tinted off-white — dark ink */
+  --kiwi-snow: #f7f9f5; /* near-neutral white — light page ground */
+}

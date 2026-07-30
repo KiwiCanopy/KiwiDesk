@@ -1,22 +1,16 @@
+@import "./brand-tokens.css";
+
 /* KiwiCanopy brand palette layered onto Starlight's theme —
    shared kiwi-green accent + a sparing warm-brown tertiary,
    matching the parent brand's token set (issue #439). */
-:root {
-  --kiwi-green: #8db354;
-  --kiwi-green-bright: #aacb5d;
-  --kiwi-brown: #8b5e3c;
-  --kiwi-cream: #e1eedb;
-  --kiwi-seed: #0d1512;
-}
-
 /* Dark theme accents (default). Accent text uses the brighter
    kiwi green (accent-soft) — it clears AA on these dark
    surfaces; the deeper green stays a fill-only color elsewhere. */
 :root {
   --sl-color-accent-low: #1a2519;
-  --sl-color-accent: #aacb5d;
+  --sl-color-accent: var(--kiwi-bright);
   --sl-color-accent-high: #c7dd9e;
-  --sl-color-white: #eaf3ee;
+  --sl-color-white: var(--kiwi-frost);
   --sl-color-gray-1: #cdd6d1;
   --sl-color-gray-2: #868e8a;
   --sl-color-gray-3: #454e4a;
@@ -24,14 +18,14 @@
   --sl-color-gray-5: #161e1b;
   --sl-color-gray-6: #0f1714;
   --sl-color-gray-7: #0e1613;
-  --sl-color-black: #0d1512;
+  --sl-color-black: var(--kiwi-seed);
 }
 
 /* Light theme accents. Accent text is a darkened variant of the
    brand's kiwi green — the raw fill green is ~2.3:1 on this bg
    and fails AA, so this role stays a purpose-built text-safe
    shade rather than the raw brand hex. Specifically the 50/50
-   midpoint of --kiwi-green and the forest ink (--sl-color-white
+   midpoint of --kiwi-flesh and the forest ink (--sl-color-white
    below), which is the one value the whole brand family uses for
    this decision — so never re-derive a private near-neighbour of
    it here. scripts/check-site-tokens.py recomputes that midpoint
@@ -42,9 +36,9 @@
    teal-tinted ink. */
 :root[data-theme="light"] {
   --sl-color-accent-low: #cce0a2;
-  --sl-color-accent: #506c37;
+  --sl-color-accent: var(--kiwi-flesh-text);
   --sl-color-accent-high: #384721;
-  --sl-color-white: #12251a;
+  --sl-color-white: var(--kiwi-ink);
   --sl-color-gray-1: #14271c;
   --sl-color-gray-2: #1d2f25;
   --sl-color-gray-3: #2b3c32;
@@ -52,7 +46,7 @@
   --sl-color-gray-5: #949d96;
   --sl-color-gray-6: #d9ddd8;
   --sl-color-gray-7: #e7eae6;
-  --sl-color-black: #f7f9f5;
+  --sl-color-black: var(--kiwi-snow);
 }
 
 /* Quiet KiwiCanopy parent-brand mention appended below the docs

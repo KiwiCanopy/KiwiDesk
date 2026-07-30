@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """Guard the site's shared brand decisions (#635, #106).
 
-Three checks, all of which DERIVE what they assert from the tree
+Four checks, all of which DERIVE what they assert from the tree
 rather than restating it here — a literal in this file would just
 be one more copy to drift.
 
-1. The light-mode accent-as-text green equals the 50/50 midpoint of
-   the brand's fill green and the forest ink, in BOTH stylesheets.
-   `theme.css` serves the Starlight docs and `landing.css` every
-   other surface; neither imports the other, so the value has two
-   homes. Comparing them only to each other would miss a drift
-   applied to both at once, so the midpoint is computed and both
-   sides are checked against it.
+1. `brand-tokens.css` is the one raw brand-color layer. Its hexes
+   appear nowhere else under `site/src`, and both role-mapping
+   stylesheets import it.
+
+2. The light-mode accent-as-text green equals the 50/50 midpoint of
+   the brand's fill green and forest ink in that token layer.
 
    What this does NOT cover: it pins the *relationship*, and both
    endpoints are in-tree and mutable. Retune the fill green, then
@@ -20,11 +19,10 @@ be one more copy to drift.
    splits — which is the most likely way it actually happens. So
    **any edit to the fill green or the forest ink still needs the
    cross-repo check by hand.**
-2. That green clears WCAG AA (4.5:1) as text on the light page
-   background, also read out of the stylesheet. Agreement alone
-   would happily pass two files that both name the raw fill green,
-   which is ~2.3:1.
-3. The built 404 is the branded page. `src/pages/404.astro` and
+3. That green clears WCAG AA (4.5:1) as text on both tokenized light
+   backgrounds. Agreement alone would happily pass the raw fill
+   green, which is ~2.3:1.
+4. The built 404 is the branded page. `src/pages/404.astro` and
    `disable404Route: true` in astro.config.mjs must move together,
    and BOTH one-sided failures are silent: without the flag Astro
    only *logs* a duplicate-route collision (a log line fails no
@@ -34,16 +32,9 @@ be one more copy to drift.
    catches both, plus a rename of the page and an upstream rename
    of the option, which a config-pair check cannot.
 
-KNOWN LIMITS. This reads CSS with regexes, not a parser, so treat it
-as a net for ordinary edits rather than proof. Three adversarial
-attribute-selector spellings are known to slip past and would ship:
-`[data-theme|="light"]`, `[data-theme~="light"]` and
-`[data-theme*="light"]` in a block that also re-declares the token.
-Nothing writes those by accident, which is why they are documented
-rather than handled — but do not read a green run as "no override
-exists anywhere". `STYLES` also names two stylesheets by hand; a
-third that declared a light token (e.g. `learn.css`) would be
-invisible.
+KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
+as a net for ordinary edits rather than proof. `CONSUMERS` names the
+two role-mapping stylesheets by hand; add any future consumer there.
 
 Usage: scripts/check-site-tokens.py --dist site/dist
 
@@ -66,147 +57,89 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 STYLES = REPO / "site" / "src" / "styles"
-
-# Any selector that targets the light theme, in any spelling that
-# ships: double or single quotes, an unquoted attribute value, a
-# tag/pseudo prefix, or CSS nesting (`:root { &[data-theme="light"]
-# { … } }`). Matching one literal spelling is a vacuous pass waiting
-# to happen — every variant here is valid CSS that lightningcss
-# emits happily, and no stylelint config normalizes them.
+SRC = REPO / "site" / "src"
+TOKENS = STYLES / "brand-tokens.css"
+CONSUMERS = (STYLES / "theme.css", STYLES / "landing.css")
+HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
+TOKEN_DECL = re.compile(r"(--kiwi-[a-z0-9-]+)\s*:\s*([^;}]+)")
+SCAN_SUFFIXES = {".css", ".astro", ".ts", ".js", ".mjs"}
 LIGHT = (
     r"[^{}]*\[\s*data-theme\s*[|~^$*]?=\s*['\"]?light['\"]?"
     r"\s*[isIS]?\s*\][^{}]*\{"
 )
 
-# A bare `:root { … }` block — the un-themed token layer. Excludes
-# `:root[…]` so the light/dark blocks are not mistaken for it.
-BARE_ROOT = r":root\s*\{"
-
-
 def fail(msg: str) -> None:
     sys.exit(f"check-site-tokens: {msg}")
 
 
-def declared(block: str, prop: str) -> str | None:
-    """`prop`'s winning value in `block`, or None if not declared.
-
-    The LAST declaration, because that is the one CSS takes — and
-    re-declaring a token below the old line is the most ordinary way
-    to change one, so reading the first would be a vacuous pass on
-    the commonest edit there is.
-
-    Returns the raw value text, hex or not. Telling "not declared"
-    apart from "declared as something other than a hex" is what
-    keeps a `var()` or 3-digit override loud instead of invisible.
-    """
-    found = re.findall(re.escape(prop) + r"\s*:\s*([^;}]+)", block)
-    return found[-1].strip() if found else None
-
-
-def as_hex(value: str) -> str | None:
-    m = re.fullmatch(r"(#[0-9a-fA-F]{6})", value.split()[0] if value else "")
-    return m.group(1).lower() if m else None
-
-
 def source(path: pathlib.Path) -> str:
-    """`path` with comments stripped.
-
-    Blocks are delimited by the first `}`, so a `}` inside a comment
-    would truncate the block and hide every declaration after it —
-    falling back to an earlier block's stale value, the same vacuous
-    pass by another route. These stylesheets carry long prose
-    comments right above the tokens, so this is not hypothetical.
-    """
+    """`path` with block and JSX comments stripped."""
     return re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.S)
 
 
-def blocks(path: pathlib.Path, selector: str, label: str) -> list[str]:
-    """Every `selector` block in `path`, in source order."""
+def source_without_comments(path: pathlib.Path) -> str:
+    """Source with block, JSX, and ordinary line comments removed."""
     text = source(path)
-    found = [
-        text[m.end() :].split("}", 1)[0]
-        for m in re.finditer(selector, text)
-    ]
+    return re.sub(r"(?<!:)//[^\n]*", "", text)
+
+
+def token_map() -> dict[str, str]:
+    if not TOKENS.is_file():
+        fail(f"missing {TOKENS.relative_to(REPO)}")
+    found = TOKEN_DECL.findall(source_without_comments(TOKENS))
     if not found:
-        fail(f"{path.name}: no {label} block")
-    return found
+        fail(f"{TOKENS.relative_to(REPO)} declares no brand tokens")
+    tokens = {}
+    for name, raw in found:
+        value = raw.strip()
+        if name in tokens:
+            fail(f"{TOKENS.relative_to(REPO)} repeats {name}")
+        if not HEX.fullmatch(value):
+            fail(f"{TOKENS.relative_to(REPO)} declares {name} as "
+                 f"`{value}`, not a six-digit hex")
+        tokens[name] = value.lower()
+    if len(tokens) != len(found):
+        fail(f"{TOKENS.relative_to(REPO)} repeats a token name")
+    return tokens
 
 
-def resolve(path: pathlib.Path, prop: str, selector: str, label: str) -> str:
-    """`prop`'s cascade-winning value across every `selector` block.
-
-    Resolved per property, not per block. A stylesheet may carry more
-    than one such block: reading only the first would let an appended
-    override ship while this check kept reading the original, and
-    reading only the last would let a one-token override hide every
-    other token's real value. Both are vacuous passes.
-
-    A block that declares `prop` as anything but a 6-digit hex is a
-    hard error, not a skip — skipping it would fall back to the
-    previous block's stale value, which is the same vacuous pass by
-    another route.
-    """
-    values = []
-    for block in blocks(path, selector, label):
-        value = declared(block, prop)
-        if value is None:
+def check_token_layer(tokens: dict[str, str]) -> None:
+    owners = {value: name for name, value in tokens.items()}
+    for path in sorted(SRC.rglob("*")):
+        if path == TOKENS or path.suffix not in SCAN_SUFFIXES:
             continue
-        if "!important" in value:
-            fail(
-                f"{path.name}: a {label} block declares `{prop}` "
-                "`!important`. A token block has no legitimate use for "
-                "it, and this check models the cascade as last-wins, so "
-                "it would read the wrong winner. Drop the `!important`."
-            )
-        found = as_hex(value)
-        if found is None:
-            fail(
-                f"{path.name}: a {label} block declares `{prop}: {value}`, "
-                "which is not a 6-digit hex. This check compares hex "
-                "values, so it cannot follow that — resolve the colour "
-                "to a literal here, or update this script to understand "
-                "the new form."
-            )
-        values.append(found)
+        body = source_without_comments(path)
+        declared = TOKEN_DECL.search(body)
+        if declared:
+            fail(f"{path.relative_to(REPO)} declares {declared.group(1)}; "
+                 f"brand tokens belong in {TOKENS.relative_to(REPO)}")
+        for hit in HEX.findall(body):
+            if hit.lower() in owners:
+                fail(
+                    f"{path.relative_to(REPO)} repeats {owners[hit.lower()]} "
+                    f"as {hit}; use var({owners[hit.lower()]})"
+                )
+    needle = f'@import "./{TOKENS.name}";'
+    for path in CONSUMERS:
+        body = source_without_comments(path).lstrip()
+        if not body.startswith(needle):
+            fail(f"{path.name}: `{needle}` must be its first rule")
+
+
+def light_role(path: pathlib.Path, prop: str) -> str:
+    """Return the cascade-winning light-theme value for `prop`."""
+    values = []
+    body = source(path)
+    for match in re.finditer(LIGHT, body):
+        block = body[match.end() :].split("}", 1)[0]
+        found = re.findall(re.escape(prop) + r"\s*:\s*([^;}]+)", block)
+        if found:
+            values.append(found[-1].strip())
     if not values:
-        fail(f"{path.name}: no `{prop}` declaration in any {label} block")
+        fail(f"{path.name}: no light-theme {prop} declaration")
+    if any("!important" in value for value in values):
+        fail(f"{path.name}: {prop} must not use !important")
     return values[-1]
-
-
-def root_hex(path: pathlib.Path, prop: str) -> str:
-    """A brand endpoint, which must be declared EXACTLY once.
-
-    Not last-wins like a themed token: `theme.css` carries more than
-    one bare `:root` block (the brand palette, then the dark-theme
-    defaults), and taking the last would let an ordinary addition to
-    the dark block silently become the derivation endpoint. The check
-    would then still fail — but by accusing the *light* accent of a
-    brand violation while naming the dark fill as the authority, when
-    nothing about the brand changed. A count check fails in terms of
-    the actual problem instead.
-    """
-    found = [
-        value
-        for block in blocks(path, BARE_ROOT, "bare `:root`")
-        if (value := declared(block, prop)) is not None
-    ]
-    if not found:
-        fail(f"{path.name}: no `{prop}` in any bare `:root` block")
-    if len(found) > 1:
-        fail(
-            f"{path.name}: `{prop}` is declared in {len(found)} bare "
-            "`:root` blocks. It is a brand endpoint this check derives "
-            "from, so which one wins must not be ambiguous — keep it in "
-            "the brand-palette block only."
-        )
-    value = as_hex(found[0])
-    if value is None:
-        fail(f"{path.name}: `{prop}` is `{found[0]}`, not a 6-digit hex")
-    return value
-
-
-def light_hex(path: pathlib.Path, prop: str) -> str:
-    return resolve(path, prop, LIGHT, "light-theme")
 
 
 def midpoint(a: str, b: str) -> str:
@@ -231,42 +164,35 @@ def contrast(fg: str, bg: str) -> float:
     return (hi + 0.05) / (lo + 0.05)
 
 
-def check_accent() -> None:
-    theme, landing = STYLES / "theme.css", STYLES / "landing.css"
-
-    # theme.css is the authority for the two endpoints: the raw
-    # brand fill green on bare :root, and the forest ink that its
-    # light block uses as strong text.
-    fill = root_hex(theme, "--kiwi-green")
-    ink = light_hex(theme, "--sl-color-white")
+def check_accent(tokens: dict[str, str]) -> None:
+    fill = tokens.get("--kiwi-flesh")
+    ink = tokens.get("--kiwi-ink")
+    text = tokens.get("--kiwi-flesh-text")
+    if not fill or not ink or not text:
+        fail("token layer needs --kiwi-flesh, --kiwi-ink, and "
+             "--kiwi-flesh-text")
     expected = midpoint(fill, ink)
-
-    docs = light_hex(theme, "--sl-color-accent")
-    rest = light_hex(landing, "--accent")
-    print(
-        f"fill {fill} + ink {ink} -> midpoint {expected}; "
-        f"theme.css {docs}, landing.css {rest}"
+    if text != expected:
+        fail(f"--kiwi-flesh-text is {text}, not the {expected} midpoint "
+             f"of {fill} and {ink} (#635)")
+    expected_role = "var(--kiwi-flesh-text)"
+    roles = (
+        (STYLES / "theme.css", "--sl-color-accent"),
+        (STYLES / "landing.css", "--accent"),
     )
-
-    for name, found in (("theme.css", docs), ("landing.css", rest)):
-        if found != expected:
-            fail(
-                f"{name}'s light-mode accent is {found}, not the "
-                f"{expected} midpoint of {fill} and {ink}. This green "
-                "is one decision shared with kiwicanopy.com and "
-                "KiwiCV — re-derive it and the brand family splits "
-                "silently (#635)."
-            )
-
-    bg = light_hex(theme, "--sl-color-black")
-    ratio = contrast(expected, bg)
-    print(f"contrast {ratio:.2f}:1 on the light bg {bg}")
-    if ratio < 4.5:
-        fail(
-            f"{expected} is {ratio:.2f}:1 on {bg}, below WCAG AA "
-            "(4.5:1) for body text. The raw fill green fails this, "
-            "which is why the midpoint exists."
-        )
+    for path, prop in roles:
+        value = light_role(path, prop)
+        if value != expected_role:
+            fail(f"{path.name}: light {prop} is `{value}`, not "
+                 f"`{expected_role}`")
+    for surface in ("--kiwi-cream", "--kiwi-snow"):
+        bg = tokens.get(surface)
+        if not bg:
+            fail(f"token layer needs {surface} for the contrast check")
+        ratio = contrast(text, bg)
+        print(f"contrast {ratio:.2f}:1 on {surface} {bg}")
+        if ratio < 4.5:
+            fail(f"{text} is {ratio:.2f}:1 on {bg}, below WCAG AA")
 
 
 def check_branded_404(dist: pathlib.Path) -> None:
@@ -302,7 +228,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    check_accent()
+    tokens = token_map()
+    check_token_layer(tokens)
+    check_accent(tokens)
     check_branded_404(pathlib.Path(args.dist).resolve())
 
 
