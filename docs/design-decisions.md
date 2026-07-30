@@ -998,18 +998,16 @@ frames across monitors before. (#445)
 
 ## Settings GUI & UX
 
-### Settings window non-miniaturizable
+### Permanent accessory mode (no activation policy switching)
 
 **[Rationale]**
 
-**The Settings window disables the miniaturize button (`.miniaturizable`
-removed).** Minimizing the Settings window leaves KiwiDesk in an
-active-but-invisible foreground state (`.regular`), causing macOS focus
-handoff ambiguity where foreground PID checks (`focusedCommandDenial`)
-fail and focus commands get blocked. Removing `.miniaturizable` ensures the
-Settings window is only ever closed, which cleanly triggers the
-`windowWillClose` teardown path and returns focus to the active managed
-workspace window.
+**KiwiDesk stays permanently in `.accessory` mode (never promoting to
+`.regular`).** Opening the Settings window no longer promotes the app to
+`.regular` or adds a Dock icon. This completely eliminates macOS 14+
+activation policy demotion bugs and focus handoff lockouts, guaranteeing that
+shortcuts and window focus commands remain 100% reliable at all times without
+dynamic policy switching.
 
 ### Open at login
 
