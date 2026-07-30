@@ -99,7 +99,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
                 height: 620
             ),
             styleMask: [
-                .titled, .closable, .miniaturizable,
+                .titled, .closable,
                 .resizable, .fullSizeContentView,
             ],
             backing: .buffered,
