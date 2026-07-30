@@ -14,14 +14,10 @@
    puts its hex under `scripts/check-site-tokens.py`, which
    fails if the literal reappears anywhere else in `site/src`.
 
-   Naming: where the two stylesheets disagreed, the name with
-   live var() consumers won over the name with none —
-   --kiwi-flesh (9 uses) over --kiwi-green (0), --kiwi-bright
-   (13) over --kiwi-green-bright (0), --kiwi-shell (1) over
-   --kiwi-brown (0). That also keeps the kiwifruit-anatomy
-   family (seed / flesh / shell) that --kiwi-seed and
-   --kiwi-cream — already spelled identically in both files —
-   were the surviving half of.
+   Naming: where the two stylesheets disagreed, keep the name
+   with live var() consumers rather than the dead synonym. That
+   also preserves the kiwifruit-anatomy family (seed / flesh /
+   shell) already used throughout the landing design system.
    ========================================================= */
 :root {
   /* ---- Darks ---- */

@@ -61,10 +61,12 @@ SRC = REPO / "site" / "src"
 TOKENS = STYLES / "brand-tokens.css"
 CONSUMERS = (STYLES / "theme.css", STYLES / "landing.css")
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
-TOKEN_DECL = re.compile(
-    r"(--kiwi-[a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b"
-)
+TOKEN_DECL = re.compile(r"(--kiwi-[a-z0-9-]+)\s*:\s*([^;}]+)")
 SCAN_SUFFIXES = {".css", ".astro", ".ts", ".js", ".mjs"}
+LIGHT = (
+    r"[^{}]*\[\s*data-theme\s*[|~^$*]?=\s*['\"]?light['\"]?"
+    r"\s*[isIS]?\s*\][^{}]*\{"
+)
 
 def fail(msg: str) -> None:
     sys.exit(f"check-site-tokens: {msg}")
@@ -87,7 +89,15 @@ def token_map() -> dict[str, str]:
     found = TOKEN_DECL.findall(source_without_comments(TOKENS))
     if not found:
         fail(f"{TOKENS.relative_to(REPO)} declares no brand tokens")
-    tokens = {name: value.lower() for name, value in found}
+    tokens = {}
+    for name, raw in found:
+        value = raw.strip()
+        if name in tokens:
+            fail(f"{TOKENS.relative_to(REPO)} repeats {name}")
+        if not HEX.fullmatch(value):
+            fail(f"{TOKENS.relative_to(REPO)} declares {name} as "
+                 f"`{value}`, not a six-digit hex")
+        tokens[name] = value.lower()
     if len(tokens) != len(found):
         fail(f"{TOKENS.relative_to(REPO)} repeats a token name")
     return tokens
@@ -98,16 +108,38 @@ def check_token_layer(tokens: dict[str, str]) -> None:
     for path in sorted(SRC.rglob("*")):
         if path == TOKENS or path.suffix not in SCAN_SUFFIXES:
             continue
-        for hit in HEX.findall(source_without_comments(path)):
+        body = source_without_comments(path)
+        declared = TOKEN_DECL.search(body)
+        if declared:
+            fail(f"{path.relative_to(REPO)} declares {declared.group(1)}; "
+                 f"brand tokens belong in {TOKENS.relative_to(REPO)}")
+        for hit in HEX.findall(body):
             if hit.lower() in owners:
                 fail(
                     f"{path.relative_to(REPO)} repeats {owners[hit.lower()]} "
                     f"as {hit}; use var({owners[hit.lower()]})"
                 )
-    needle = f'@import "./{TOKENS.name}"'
+    needle = f'@import "./{TOKENS.name}";'
     for path in CONSUMERS:
-        if needle not in path.read_text():
-            fail(f"{path.name}: missing `{needle}`")
+        body = source_without_comments(path).lstrip()
+        if not body.startswith(needle):
+            fail(f"{path.name}: `{needle}` must be its first rule")
+
+
+def light_role(path: pathlib.Path, prop: str) -> str:
+    """Return the cascade-winning light-theme value for `prop`."""
+    values = []
+    body = source(path)
+    for match in re.finditer(LIGHT, body):
+        block = body[match.end() :].split("}", 1)[0]
+        found = re.findall(re.escape(prop) + r"\s*:\s*([^;}]+)", block)
+        if found:
+            values.append(found[-1].strip())
+    if not values:
+        fail(f"{path.name}: no light-theme {prop} declaration")
+    if any("!important" in value for value in values):
+        fail(f"{path.name}: {prop} must not use !important")
+    return values[-1]
 
 
 def midpoint(a: str, b: str) -> str:
@@ -143,6 +175,16 @@ def check_accent(tokens: dict[str, str]) -> None:
     if text != expected:
         fail(f"--kiwi-flesh-text is {text}, not the {expected} midpoint "
              f"of {fill} and {ink} (#635)")
+    expected_role = "var(--kiwi-flesh-text)"
+    roles = (
+        (STYLES / "theme.css", "--sl-color-accent"),
+        (STYLES / "landing.css", "--accent"),
+    )
+    for path, prop in roles:
+        value = light_role(path, prop)
+        if value != expected_role:
+            fail(f"{path.name}: light {prop} is `{value}`, not "
+                 f"`{expected_role}`")
     for surface in ("--kiwi-cream", "--kiwi-snow"):
         bg = tokens.get(surface)
         if not bg:

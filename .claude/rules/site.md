@@ -49,6 +49,10 @@ every light text/link/eyebrow role takes `--kiwi-flesh-text`, the
 50/50 midpoint of `--kiwi-flesh` and `--kiwi-ink` shared with the
 wider brand family (#635). Never put raw `--kiwi-flesh` on text.
 
+An edit to `--kiwi-flesh` or `--kiwi-ink` must include a manual
+cross-repo check against kiwicanopy.com and KiwiCV. The local guard
+can enforce the relationship but cannot see those repositories.
+
 `scripts/check-site-tokens.py` enforces all of the above: it
 rejects a brand hex written anywhere else under `site/src`,
 recomputes both the midpoint and the WCAG contrast from the tokens
