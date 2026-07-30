@@ -219,32 +219,32 @@ publishing rather than on remembering to fix it afterwards.
 
 **Homebrew is the deliberate exception, and it is conditional.**
 `brew upgrade` is a real update path, so a Sparkle-less build
-may ship as a cask. That holds only while the release workflow
-actually bumps the tap — if the cask goes stale the exception
-lapses and the cask users are the stranded ones. It is an
-obligation on the cask
+may ship as a cask. The cask's public GitHub Release ZIP is its
+backing artifact, not a standalone channel KiwiDesk promotes:
+until Sparkle lands, do not link that ZIP from the product site
+or advertise it as a direct download. Someone who deliberately
+installs from the repository instead of Homebrew has chosen a
+manual update path.
+
+The Release must be published before Homebrew can fetch its ZIP,
+so publication and the tap update cannot be atomic. The accepted
+failure model is a short, visible stale-cask window: the release
+is not operationally complete until the `Update Homebrew Cask`
+workflow is green. That workflow queues every publication,
+verifies the published bytes, and permits a retry only when the
+same version still has the same digest. On failure, retry the
+workflow or publish a newer version; never replace an existing
+version's bytes.
+
+This exception holds only while the release workflow actually
+bumps the tap — if the cask goes stale the exception lapses and
+the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 
-Until Sparkle lands, the two together mean: cask yes, `.dmg`
-and Release assets no.
-
-**Where the cask's bytes live is the part this does not settle,
-and [#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)
-has to.** A cask installs from a URL, so blessing the cask while
-shutting every host it could read from leaves it with no legal
-source. The distinction that resolves it is the one this entry
-already rests on: the rule governs who can *reach* a build, not
-where the file is stored. So the question is which host lets
-`brew` fetch the archive without that same URL becoming the
-browse-and-download channel a stranded user arrives through —
-and answering it is a precondition of shipping the cask, not a
-detail of it. Until then the release workflow drafts rather than
-publishes: a draft has no public URL and is visible only to
-people who already have repository access, so it proves the
-pipeline end to end without opening a channel a stranger can
-install from. Not "reachable by nobody" — collaborators can
-fetch it, and the distinction is the whole point of the rule.
+Until Sparkle lands, the two together mean: a Homebrew cask
+backed by one public Release ZIP yes; a promoted standalone ZIP
+or `.dmg` download no.
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first

@@ -34,6 +34,22 @@ struct HomebrewCaskUpdateTests {
         #expect(try fixture.source() == once)
     }
 
+    @Test("same version with different bytes fails closed")
+    func sameVersionDifferentDigestFailsClosed() throws {
+        let fixture = try CaskFixture()
+        defer { fixture.cleanup() }
+        let original = try fixture.source()
+
+        let run = try fixture.update(
+            "0.9.0",
+            String(repeating: "b", count: 64)
+        )
+
+        #expect(run.status != 0)
+        #expect(run.stderr.contains("refusing to replace digest"))
+        #expect(try fixture.source() == original)
+    }
+
     @Test("malformed inputs fail without changing the cask")
     func malformedInputsFailClosed() throws {
         let fixture = try CaskFixture()

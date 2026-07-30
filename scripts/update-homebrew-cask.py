@@ -18,7 +18,7 @@ VERSION_LINE = re.compile(
     r'^(?P<indent>\s*)version "(?P<value>[^"]+)"$', re.MULTILINE
 )
 SHA_LINE = re.compile(
-    r'^(?P<indent>\s*)sha256 "[^"]+"$', re.MULTILINE
+    r'^(?P<indent>\s*)sha256 "(?P<value>[^"]+)"$', re.MULTILINE
 )
 
 
@@ -102,12 +102,27 @@ def main() -> int:
     current = current_versions[0].group("value")
     if VERSION.fullmatch(current) is None:
         raise SystemExit(f"error: current cask version is invalid: {current}")
+    current_digests = list(SHA_LINE.finditer(source))
+    if len(current_digests) != 1:
+        raise SystemExit(
+            "error: expected exactly one sha256 line, "
+            f"found {len(current_digests)}"
+        )
+    current_digest = current_digests[0].group("value")
     requested_parts = tuple(map(int, arguments.version.split(".")))
     current_parts = tuple(map(int, current.split(".")))
     if requested_parts < current_parts:
         raise SystemExit(
             f"error: refusing to downgrade {current} to {arguments.version}"
         )
+    if requested_parts == current_parts:
+        if arguments.sha256 != current_digest:
+            raise SystemExit(
+                "error: refusing to replace digest for existing version "
+                f"{current}"
+            )
+        print(f"kiwidesk cask is already at {arguments.version}")
+        return 0
 
     try:
         updated = replace_one(
@@ -118,10 +133,6 @@ def main() -> int:
         )
     except ValueError as error:
         raise SystemExit(f"error: {error}") from error
-
-    if updated == source:
-        print(f"kiwidesk cask is already at {arguments.version}")
-        return 0
 
     try:
         write_atomically(path, updated)
