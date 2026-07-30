@@ -10,18 +10,26 @@ import Testing
 @Suite("Per-space resize (#17)", .serialized)
 @MainActor
 struct PerSpaceResizeTests {
+    /// The display these ratio clamps resize against (#531).
+    /// Pin it so a narrow headless runner cannot lower the cap.
+    private static let display = CGRect(
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080
+    )
+
     private func makeCore() -> KiwiCore {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return makeTestCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: dir)
+        core.tiler.visibleBounds = { _ in Self.display }
+        #expect(core.tiler.settings.minWindowSize == 300)
+        return core
     }
 
-    // NOTE: the grow assertions below assume the host (or
-    // headless-fallback 1920) screen is wide enough that the
-    // #44 interactive cap sits above the tested bases — true
-    // for any visible width > 1000 pt.
     private func stackSpace(_ core: KiwiCore) {
         core.execute(
             "set_mode",
