@@ -397,8 +397,8 @@ const jsonLd = [
                and compact. Reads as LESS obtrusive than a worded
                link: a small, recognizable control sitting quietly
                among the toggles. aria-label carries the meaning. */}
-          <a class="nav__support dev-only" href={kofi} target="_blank"
-            rel="noopener" aria-label={t.nav_support_aria}>
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={t.nav_support_aria} title={t.nav_support_aria}>
             <img class="kofi-icon" src={kofiIcon.src} alt=""
               aria-hidden="true" width="20" height="16" />
           </a>
@@ -863,7 +863,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               </svg>
               {t.hero_dev_cta_github}
             </a>
-            <a class="btn btn--ghost dev-only" href={kofi}
+            <a class="btn btn--ghost" href={kofi}
               target="_blank" rel="noopener">
               <img class="kofi-icon" src={kofiIcon.src} alt=""
                 aria-hidden="true" width="20" height="16" />

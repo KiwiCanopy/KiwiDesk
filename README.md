@@ -23,7 +23,7 @@ Powerful when you reach for it, never in your way.
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 ![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
 ![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)
-![Direct download — with in-app updates](https://img.shields.io/badge/Direct_download-with_in--app_updates-8B5E3C)
+![Direct download — coming soon](https://img.shields.io/badge/Direct_download-coming_soon-inactive)
 
 <br>
 
