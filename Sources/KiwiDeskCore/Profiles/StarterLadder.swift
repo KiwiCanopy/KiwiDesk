@@ -8,7 +8,7 @@ import Foundation
 /// | Position in block | Mode | Shown off |
 /// |---|---|---|
 /// | 1 | scrolling | the infinite Niri-style column row |
-/// | 2 | stack | single master, 80/20 split |
+/// | 2 | bsp | binary space partitioning (classic split) |
 /// | 3 | track | new window → its own new track |
 /// | 4 | grid | a 3×2 grid |
 /// | 5 | floating | untiled |
@@ -27,11 +27,9 @@ public enum StarterLadder {
     /// Spaces each display's block contributes.
     public static let spacesPerDisplay = 5
 
-    /// The mode for each 1-based position within a block. No rung
-    /// is `.bsp` today; the sparse `spaceModes` map below still
-    /// omits any fallback rung a future ladder reintroduces.
+    /// The mode for each 1-based position within a block.
     private static let blockModes: [LayoutMode] = [
-        .scrolling, .stack, .track, .grid, .floating,
+        .scrolling, .bsp, .track, .grid, .floating,
     ]
 
     /// Total spaces for `displayCount` displays (floored at one —
@@ -46,16 +44,14 @@ public enum StarterLadder {
             .map { SpaceID($0) }
     }
 
-    /// Sparse per-space modes — `.bsp` positions (none in the
-    /// current ladder) are omitted (they resolve to the fallback),
-    /// matching `StandardLayout`'s sparse convention.
+    /// Sparse per-space modes.
     public static func spaceModes(
         displayCount: Int
     ) -> [SpaceID: LayoutMode] {
         var modes: [SpaceID: LayoutMode] = [:]
         for number in 1...spaceCount(displayCount: displayCount) {
             let mode = blockModes[(number - 1) % spacesPerDisplay]
-            if mode != .bsp { modes[SpaceID(number)] = mode }
+            modes[SpaceID(number)] = mode
         }
         return modes
     }

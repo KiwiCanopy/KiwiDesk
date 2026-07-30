@@ -56,15 +56,15 @@ struct StarterLadderSeedTests {
     @Test("modes ladder repeats per display")
     func modesLadder() {
         let modes = StarterLadder.spaceModes(displayCount: 2)
-        // Block one (no bsp rung, so no omitted position).
+        // Block one.
         #expect(modes[SpaceID("1")] == .scrolling)
-        #expect(modes[SpaceID("2")] == .stack)
+        #expect(modes[SpaceID("2")] == .bsp)
         #expect(modes[SpaceID("3")] == .track)
         #expect(modes[SpaceID("4")] == .grid)
         #expect(modes[SpaceID("5")] == .floating)
         // Block two mirrors it.
         #expect(modes[SpaceID("6")] == .scrolling)
-        #expect(modes[SpaceID("7")] == .stack)
+        #expect(modes[SpaceID("7")] == .bsp)
         #expect(modes[SpaceID("8")] == .track)
         #expect(modes[SpaceID("9")] == .grid)
         #expect(modes[SpaceID("10")] == .floating)
@@ -171,7 +171,7 @@ struct StarterLadderSeedTests {
                 .map { ($0.id, $0.mode) }
         )
         #expect(modes[SpaceID("1")] == .scrolling)
-        #expect(modes[SpaceID("2")] == .stack)
+        #expect(modes[SpaceID("2")] == .bsp)
         #expect(modes[SpaceID("3")] == .track)
         #expect(modes[SpaceID("4")] == .grid)
         #expect(modes[SpaceID("5")] == .floating)
@@ -192,7 +192,7 @@ struct StarterLadderSeedTests {
         // Persisted and adopted, so a reload re-applies it.
         #expect(core.profiles.currentName == "Starter")
         let saved = try core.profiles.read(name: "Starter")
-        #expect(saved.spaceModes[SpaceID("2")] == .stack)
+        #expect(saved.spaceModes[SpaceID("2")] == .bsp)
         #expect(
             saved.spaceModes[SpaceID("9")] == .grid
         )
