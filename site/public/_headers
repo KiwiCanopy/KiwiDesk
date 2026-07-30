@@ -1,15 +1,11 @@
 # Cloudflare Pages response headers (served from site root; ignored
 # by the local `astro dev`/`preview` — only takes effect on deploy).
 #
-# The Content-Security-Policy is deliberately shipped **Report-Only**
-# first: it never blocks, only reports violations, so it cannot break
-# the live site while we confirm the policy fits every page —
-# especially the Starlight /docs/ search (Pagefind uses a WASM module
-# + web worker + same-origin fetches, which is why 'wasm-unsafe-eval',
-# worker-src and connect-src 'self' are present). Once a deploy is
-# verified clean (watch the browser console for CSP reports on /,
-# /guide/ and a /docs/ page with a search), flip the header name to
-# `Content-Security-Policy` to enforce it. Tracked in #71.
+# Keep this policy in enforcing form and validate changes on a
+# Cloudflare preview before merging. Exercise /, /guide/ and /docs/
+# search; Pagefind uses a WASM module, web worker and same-origin
+# fetches, which is why 'wasm-unsafe-eval', worker-src and
+# connect-src 'self' are present.
 #
 # 'unsafe-inline' for scripts is unavoidable here (Astro/Starlight
 # emit inline theme/anti-FOUC scripts). It still blocks EXTERNAL
@@ -17,7 +13,7 @@
 # vectors that matter for a static site. Outbound <a> links (GitHub,
 # Ko-fi) need no allowance; they are navigations, not resource loads.
 /*
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
