@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility.",
   "notification.permission_lost.title": "KiwiDesk stopped managing windows",
   "onboarding.continue": "Continue",
-  "onboarding.discovery.popover": "KiwiDesk lives here. Click anytime for layouts and settings.",
+  "onboarding.discovery.body": "Press %1$@ anytime to see an overview of all your shortcuts.",
   "onboarding.grant.body": "1. Click “Open System Settings” below.\n2. Find KiwiDesk in the list and turn it on.\n3. Come back here — we detect it automatically.",
   "onboarding.grant.granted": "Permission granted!",
   "onboarding.grant.open_settings": "Open System Settings",

@@ -38,19 +38,26 @@ extension AppDelegate {
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
+        onboardingModel.onShowShortcuts = { [weak self] in
+            self?.shortcutsPanel?.toggle()
+        }
+        onboardingModel.shortcutGlyphs = { [weak self] in
+            guard let core = self?.core else { return "⌃⌥K" }
+            return ShortcutsOpenBinding.comboGlyphs(core: core) ?? "⌃⌥K"
+        }
         // The closing card's "open at login" checkbox registers the
         // app as a login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
         }
-        // The post-setup discovery card fires once, gated on its
+        // The shortcuts discovery page fires once, gated on its
         // own persisted flag — never AX trust, so a later TCC
         // reset never re-pitches (#331).
         onboardingModel.wantsDiscovery = {
             !OnboardingDiscovery.hasShown()
         }
         onboardingModel.onExploreSettings = { [weak self] in
-            self?.exploreFromDiscovery()
+            self?.openSettingsFromOnboarding()
         }
 
         let window = NSWindow(
@@ -109,16 +116,25 @@ extension AppDelegate {
         onboardingWindow?.close()
     }
 
-    /// The discovery card's "Open Settings": open the dashboard on
+    /// The closing card's "Open Settings": open the dashboard on
     /// Layout (its schematic preview is the most persuasive first
     /// impression) *before* closing onboarding, so the still-open
     /// dashboard keeps the app `.regular` and the close doesn't
-    /// demote it. Suppresses the menu-bar hint for this route —
-    /// the user is already being led into the app (#331).
-    func exploreFromDiscovery() {
-        openedSettingsFromDiscovery = true
+    /// demote it.
+    func openSettingsFromOnboarding() {
         dashboard.show(navigatingTo: .layoutDefaults)
         closeOnboarding()
+    }
+
+    /// The discovery panel's Edit bridge must not leave the
+    /// floating onboarding window above the requested Settings
+    /// destination. Show Settings first, then close onboarding so
+    /// the app stays regular throughout the handoff.
+    func openShortcutsSettings() {
+        dashboard.show(navigatingTo: .shortcuts)
+        if onboardingWindow != nil {
+            closeOnboarding()
+        }
     }
 
     func windowWillClose(_ notification: Notification) {
@@ -127,30 +143,11 @@ extension AppDelegate {
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
-        // Demote *before* the hint. On the Not Now / red-button
-        // routes no other content window remains, so this flips the
-        // app to `.accessory`; showing the `.transient` popover
-        // first and demoting after risks the policy change
-        // dismissing it. The still-visible closing window is
-        // excluded from the count.
-        NSApp.deactivateIfNoWindows(excluding: closing)
-        fireDiscoveryHintIfPending()
-    }
-
-    /// The one-time discovery hint, fired from the single close
-    /// funnel every exit route passes through. Burns the shared
-    /// flag so it never repeats, then shows the menu-bar popover
-    /// only on routes that did NOT open Settings — opening it
-    /// already leads the user into the app, so the hint would just
-    /// be a second surface at a far corner (#331, ui-designer B).
-    private func fireDiscoveryHintIfPending() {
-        guard onboardingModel.step == .readyToExplore else {
-            return
+        if onboardingModel.step == .discoverShortcuts
+            || onboardingModel.step == .readyToExplore
+        {
+            OnboardingDiscovery.markShown()
         }
-        OnboardingDiscovery.markShown()
-        let suppressed = openedSettingsFromDiscovery
-        openedSettingsFromDiscovery = false
-        guard !suppressed else { return }
-        statusItem?.showDiscoveryPopover()
+        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 }

@@ -7,10 +7,6 @@ import KiwiDeskCore
 /// `StatusItemController` file.
 extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
-        // Opening the quick menu IS the discovery popover's success
-        // case — the user found the icon. Close it so the hint and
-        // the menu never overlap (#331).
-        dismissDiscoveryPopover()
         menu.removeAllItems()
         let profiles = profilesProvider()
 
@@ -112,20 +108,18 @@ extension StatusItemController {
         )
         let shortcuts = NSMenuItem(
             title: shortcutsTitle,
-            action: #selector(showShortcuts),
+            action: #selector(showShortcuts(_:)),
             keyEquivalent: ""
         )
         shortcuts.target = self
         shortcuts.image = symbol("keyboard")
-        // Show the bound open-combo beside the row (#330) — drawn
-        // via attributedTitle, NEVER keyEquivalent (that would be a
-        // live second trigger, and a mirrored MainMenu item would
-        // fire it globally while frontmost). Nothing shown unbound.
+        // The status menu is not the app's MainMenu, so its key
+        // equivalent is active only while this menu is tracking.
+        // Using the native column gives the combo AppKit's dimmed,
+        // right-aligned treatment; its duplicate keyboard action
+        // is ignored in `showShortcuts` below.
         if let combo = shortcutsComboProvider() {
-            shortcuts.attributedTitle = Self.menuRowTitle(
-                shortcutsTitle,
-                trailing: combo
-            )
+            Self.applyMenuEquivalent(combo, to: shortcuts)
         }
         menu.addItem(shortcuts)
         let settings = NSMenuItem(
@@ -199,46 +193,45 @@ extension StatusItemController {
         return parent
     }
 
-    /// A menu title with a dimmed, right-aligned trailing hint —
-    /// the bound open-combo beside "View Shortcuts…" (#330). A
-    /// right tab stop pushes the combo toward the row's trailing
-    /// edge, matching how a native `⌘,` key equivalent sits.
-    private static func menuRowTitle(
-        _ title: String,
-        trailing: String
-    ) -> NSAttributedString {
-        let font = NSFont.menuFont(ofSize: 0)
-        // Right tab positions the combo so its right edge sits at
-        // `location`. Derive it from the rendered title + combo
-        // widths (plus a gap) so a long localized title can't run
-        // into the combo; floor at 200pt so short titles still
-        // align consistently.
-        let attrs: [NSAttributedString.Key: Any] = [.font: font]
-        let titleWidth = (title as NSString)
-            .size(withAttributes: attrs).width
-        let comboWidth = (trailing as NSString)
-            .size(withAttributes: attrs).width
-        let location = max(200, ceil(titleWidth + 16 + comboWidth))
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.tabStops = [
-            NSTextTab(textAlignment: .right, location: location)
+    private static func applyMenuEquivalent(
+        _ combo: KeyCombo,
+        to item: NSMenuItem
+    ) {
+        var modifiers: NSEvent.ModifierFlags = []
+        if combo.modifiers.contains(.control) {
+            modifiers.insert(.control)
+        }
+        if combo.modifiers.contains(.option) {
+            modifiers.insert(.option)
+        }
+        if combo.modifiers.contains(.shift) {
+            modifiers.insert(.shift)
+        }
+        if combo.modifiers.contains(.command) {
+            modifiers.insert(.command)
+        }
+        guard let key = menuKey(for: combo.keyCode) else { return }
+        item.keyEquivalent = key
+        item.keyEquivalentModifierMask = modifiers
+    }
+
+    private static func menuKey(for code: UInt32) -> String? {
+        let special: [UInt32: String] = [
+            36: "\r", 76: "\u{3}", 48: "\t", 49: " ",
+            51: "\u{8}", 117: "\u{7F}", 53: "\u{1B}",
+            123: "\u{F702}", 124: "\u{F703}",
+            125: "\u{F701}", 126: "\u{F700}",
+            115: "\u{F729}", 119: "\u{F72B}",
+            116: "\u{F72C}", 121: "\u{F72D}",
+            122: "\u{F704}", 120: "\u{F705}",
+            99: "\u{F706}", 118: "\u{F707}",
+            96: "\u{F708}", 97: "\u{F709}",
+            98: "\u{F70A}", 100: "\u{F70B}",
+            101: "\u{F70C}", 109: "\u{F70D}",
+            103: "\u{F70E}", 111: "\u{F70F}",
         ]
-        let result = NSMutableAttributedString(
-            string: title,
-            attributes: [.font: font, .paragraphStyle: paragraph]
-        )
-        result.append(
-            NSAttributedString(
-                string: "\t" + trailing,
-                attributes: [
-                    .font: font,
-                    .paragraphStyle: paragraph,
-                    .foregroundColor:
-                        NSColor.secondaryLabelColor,
-                ]
-            )
-        )
-        return result
+        return special[code]
+            ?? LayoutKeyGlyph.char(for: code)?.lowercased()
     }
 
     // MARK: - Actions
@@ -247,7 +240,12 @@ extension StatusItemController {
         onOpenDashboard()
     }
 
-    @objc private func showShortcuts() {
+    @objc private func showShortcuts(_ sender: NSMenuItem) {
+        // AppKit needs a real key equivalent to render its native
+        // trailing column, but Carbon already owns this shortcut
+        // globally. Ignore AppKit's duplicate keyboard action;
+        // mouse selection and programmatic dispatch still toggle.
+        if NSApp.currentEvent?.type == .keyDown { return }
         onShowShortcuts()
     }
 

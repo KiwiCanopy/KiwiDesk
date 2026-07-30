@@ -3063,19 +3063,22 @@ of it, rather than separate rulings:
 **[Trade-off]**
 
 - **Post-setup discovery** (#331) closes the first-run
-  discovery gap with the smallest surface that works: one
-  appended wizard card ("You're ready to go" → **Open Settings**
-  on Layout, or an equal-weight **Not Now**) plus a one-time
-  `NSPopover` at the menu bar icon, fired only on the decline
-  routes (Open Settings already leads into the app). Not a
+  discovery gap with the smallest durable surface that works: a
+  shortcuts page immediately before the closing wizard card. It
+  offers the real **View Shortcuts…** action and remains usable
+  when the menu bar is auto-hidden; the closing card keeps
+  **Open Settings** on Layout and an equal-weight **Not Now**. Not a
   guided tour of every tab — that fights the contextual-help
   convention (#94) and is the classic skipped-onboarding trap.
-  Both fire exactly once, gated on a dedicated `UserDefaults`
+  It fires exactly once, gated on a dedicated `UserDefaults`
   flag (`onboarding.discoveryShown`), never the Accessibility
-  trust state — the wizard reopens on any AX revoke, and a
-  trust-gated beat would re-pitch a user whose TCC a macOS
-  update reset. Copy is jargon-free for a first-run non-power
-  user. (Supersedes #68 §5.9's "separate follow-up pass" note.)
+  trust state. If permission is granted but the wizard closes
+  before discovery, the next launch resumes at that page; after
+  the page is shown, closing it or the final card records the
+  one-time dismissal. A later TCC reset therefore does not
+  re-pitch an existing user. Copy is jargon-free for a first-run
+  non-power user. (Supersedes #68 §5.9's "separate follow-up
+  pass" note.)
 - **Configurable resize step** (#58): the `resize.step` setting
   is authoritative only at *authoring* time — it sizes
   newly-authored Grow/Shrink bindings and is recovered from

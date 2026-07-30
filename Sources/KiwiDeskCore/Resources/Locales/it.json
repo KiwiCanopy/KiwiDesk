@@ -504,7 +504,7 @@
   "notification.permission_lost.body": "L'autorizzazione di Accessibilità è stata revocata. Riattivala in Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.",
   "notification.permission_lost.title": "KiwiDesk ha smesso di gestire le finestre",
   "onboarding.continue": "Continua",
-  "onboarding.discovery.popover": "KiwiDesk si trova qui. Fai clic quando vuoi per layout e impostazioni.",
+  "onboarding.discovery.body": "Premi %1$@ in qualsiasi momento per vedere una panoramica di tutte le abbreviazioni.",
   "onboarding.grant.body": "1. Fai clic su «Apri Impostazioni di Sistema» qui sotto.\n2. Trova KiwiDesk nell'elenco e attivalo.\n3. Torna qui: lo rileviamo automaticamente.",
   "onboarding.grant.granted": "Autorizzazione concessa!",
   "onboarding.grant.open_settings": "Apri Impostazioni di Sistema",

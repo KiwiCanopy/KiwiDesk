@@ -24,7 +24,7 @@ import AppKit
 /// access level so the seal cannot be raised unnoticed.
 ///
 /// The surface is only what the controller uses: the button
-/// (icon rendering, popover anchoring) and the menu assignment.
+/// (icon rendering) and the menu assignment.
 /// Widen the protocol here rather than reaching around it.
 @MainActor
 protocol StatusItemHandle: AnyObject {
