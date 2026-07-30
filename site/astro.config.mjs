@@ -6,9 +6,10 @@ import mermaid from "astro-mermaid";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
-// (Cloudflare Pages sets it per environment); the default is
-// the free pages.dev subdomain until a custom domain lands.
-const site = process.env.SITE_URL ?? "https://kiwidesk.pages.dev";
+// for a one-off local build; production uses the committed
+// custom-domain default (#106).
+const site =
+  process.env.SITE_URL ?? "https://kiwidesk.kiwicanopy.com";
 
 export default defineConfig({
   site,

@@ -27,9 +27,9 @@ Powerful when you reach for it, never in your way.
 
 <br>
 
-[![Documentation](https://img.shields.io/badge/📖_Documentation-8DB354?style=for-the-badge)](https://kiwidesk.pages.dev/docs/)
-[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-627D3A?style=for-the-badge)](https://kiwidesk.pages.dev/docs/user-guide/)
-[![Recipes](https://img.shields.io/badge/🧩_Recipes-AACB5D?style=for-the-badge)](https://kiwidesk.pages.dev/docs/recipes/)
+[![Documentation](https://img.shields.io/badge/📖_Documentation-8DB354?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/)
+[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-627D3A?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/user-guide/)
+[![Recipes](https://img.shields.io/badge/🧩_Recipes-AACB5D?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/recipes/)
 [![Support on Ko-fi](https://img.shields.io/badge/Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwicanopy)
 
 </div>
@@ -43,10 +43,10 @@ Powerful when you reach for it, never in your way.
 > current via `brew upgrade`; a signed, notarized `.dmg` follows
 > once the app can update itself, so that a direct download is
 > never a dead end — see
-> [No distribution channel without an update path](https://kiwidesk.pages.dev/docs/design-decisions/#no-distribution-channel-without-an-update-path).
+> [No distribution channel without an update path](https://kiwidesk.kiwicanopy.com/docs/design-decisions/#no-distribution-channel-without-an-update-path).
 > KiwiDesk is
 > distributed directly and **not** through the Mac App Store —
-> see [Distribution](https://kiwidesk.pages.dev/docs/design-decisions/#distribution-direct-download-not-the-mac-app-store)
+> see [Distribution](https://kiwidesk.kiwicanopy.com/docs/design-decisions/#distribution-direct-download-not-the-mac-app-store)
 > for why.
 
 KiwiDesk is a modular, high-performance tiling window manager for
@@ -177,7 +177,7 @@ end)
 
 ## Documentation
 
-Full docs live at **[kiwidesk.pages.dev](https://kiwidesk.pages.dev)**
+Full docs live at **[kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com)**
 (searchable, light/dark). The same pages are readable here on
 GitHub:
 
