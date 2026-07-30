@@ -108,7 +108,9 @@ struct SpaceBarDropMoveTests {
         // calls this closure). Eager membership: the window moves
         // into the target NOW, so the live drag can preview and the
         // drop places it precisely.
-        core.spaceBarDrop.spring(SpaceID("2"), WindowID(1))
+        #expect(
+            core.spaceBarDrop.spring(SpaceID("2"), WindowID(1))
+        )
 
         #expect(core.state.workspaces.activeSpace == SpaceID("2"))
         #expect(

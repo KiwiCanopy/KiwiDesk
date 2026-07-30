@@ -14,6 +14,15 @@ import Testing
 /// slows a passing run — it only bounds a genuine hang.
 private let dragSettleHangGuard: Duration = .seconds(30)
 
+@MainActor
+private final class MouseButtonState {
+    var isPressed: Bool
+
+    init(isPressed: Bool) {
+        self.isPressed = isPressed
+    }
+}
+
 @Suite("DragCoordinator", .serialized)
 @MainActor
 struct DragCoordinatorTests {
@@ -21,8 +30,8 @@ struct DragCoordinatorTests {
     func debounce() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
-        var pressed = true
-        drag.isMousePressed = { pressed }
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
         var ended: [(WindowID, CGRect, CGRect)] = []
         drag.onDragEnd = { id, start, frame in
             ended.append((id, start, frame))
@@ -39,7 +48,7 @@ struct DragCoordinatorTests {
                 )
             )
         }
-        pressed = false
+        mouse.isPressed = false
         // Poll instead of a fixed sleep: under full-suite
         // load the settle task can get main-actor time late.
         let deadline = ContinuousClock.now + dragSettleHangGuard
@@ -102,8 +111,8 @@ struct DragCoordinatorTests {
     func trailingMovesJoinGesture() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
-        var pressed = true
-        drag.isMousePressed = { pressed }
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
         var ended: [(start: CGRect, end: CGRect)] = []
         drag.onDragEnd = { _, start, end in
             ended.append((start, end))
@@ -112,7 +121,7 @@ struct DragCoordinatorTests {
         drag.windowMoved(WindowID(1), frame: first)
         // The last AX event of a fast drag lags the release;
         // it must still update the gesture's end frame.
-        pressed = false
+        mouse.isPressed = false
         let trailing = CGRect(x: 400, y: 0, width: 10, height: 10)
         drag.windowMoved(WindowID(1), frame: trailing)
         let deadline = ContinuousClock.now + dragSettleHangGuard
@@ -140,12 +149,12 @@ struct DragCoordinatorTests {
     func cancelPending() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
-        var pressed = true
-        drag.isMousePressed = { pressed }
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
         var ended = 0
         drag.onDragEnd = { _, _, _ in ended += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
-        pressed = false
+        mouse.isPressed = false
         drag.cancel(WindowID(1))
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended == 0)
@@ -154,8 +163,8 @@ struct DragCoordinatorTests {
     @Test("Moves with the button down fire live drag moves")
     func liveMoves() throws {
         let drag = DragCoordinator()
-        var pressed = true
-        drag.isMousePressed = { pressed }
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
         var moves: [CGRect] = []
         drag.onDragMove = { _, _, frame in
             moves.append(frame)
@@ -164,7 +173,7 @@ struct DragCoordinatorTests {
         drag.windowMoved(WindowID(1), frame: frame)
         #expect(moves == [frame])
         // Trailing AX events after the release: no feedback.
-        pressed = false
+        mouse.isPressed = false
         drag.windowMoved(WindowID(1), frame: .zero)
         #expect(moves == [frame])
     }
@@ -185,8 +194,8 @@ struct DragCoordinatorTests {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
         drag.releasePollDelay = 0.02
-        var pressed = true
-        drag.isMousePressed = { pressed }
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
         var ended: [CGRect] = []
         drag.onDragEnd = { _, _, frame in
             ended.append(frame)
@@ -196,7 +205,7 @@ struct DragCoordinatorTests {
         // Standing still with the button down is not a drop.
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended.isEmpty)
-        pressed = false
+        mouse.isPressed = false
         let deadline = ContinuousClock.now + dragSettleHangGuard
         while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
