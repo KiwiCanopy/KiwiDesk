@@ -106,12 +106,26 @@ public final class EventLoop {
     // MARK: - Lifecycle
 
     /// Starts observing. Requires Accessibility permission.
+    ///
+    /// One `CGWindowListCopyWindowInfo` snapshot before the app
+    /// loop identifies PIDs with at least one layer-0 window.
+    /// Apps without visible windows skip the expensive AX window
+    /// query and warmup — the AXObserver is still installed so
+    /// future `kAXWindowCreatedNotification`s fire, and the
+    /// 1-second startup sweep (`reconcileAll`) re-warms any cold
+    /// app whose window appeared in the interim.
     public func start() {
         guard !isRunning else { return }
         isRunning = true
         registerWorkspaceObservers()
+        let visible = EventLoop.pidsWithVisibleWindows()
         for app in NSWorkspace.shared.runningApplications {
-            attach(app: app)
+            attach(
+                app: app,
+                hasVisibleWindows: visible.contains(
+                    app.processIdentifier
+                )
+            )
         }
         publishDisplays()
     }

@@ -29,13 +29,28 @@ extension EventLoop {
     /// observer is installed before the initial window snapshot,
     /// closing the gap in which an accessory app can create its
     /// first window (#177).
-    func attach(app: NSRunningApplication) {
-        attach(app: app, ref: AppRef(app))
+    ///
+    /// `hasVisibleWindows` is a WindowServer pre-filter: when
+    /// false the app had zero layer-0 windows on the server at
+    /// scan time, so the expensive AX window query and EUI/MAI
+    /// warmup are skipped — the AXObserver still fires for
+    /// future window creation, and the 1-second startup sweep
+    /// re-warms via `reconcileAll()`.
+    func attach(
+        app: NSRunningApplication,
+        hasVisibleWindows: Bool = true
+    ) {
+        attach(
+            app: app,
+            ref: AppRef(app),
+            hasVisibleWindows: hasVisibleWindows
+        )
     }
 
     private func attach(
         app: NSRunningApplication,
-        ref: AppRef
+        ref: AppRef,
+        hasVisibleWindows: Bool = true
     ) {
         let pid = app.processIdentifier
         guard observers[pid] == nil else { return }
@@ -55,6 +70,13 @@ extension EventLoop {
             self?.handle(note, element, pid: pid, app: ref)
         }
         observers[pid] = observer
+
+        // When the WindowServer reports zero layer-0 windows
+        // for this app, skip the slow AX window query and
+        // warmup — the observer above still catches future
+        // window creation, and the 1 s startup sweep
+        // (reconcileAll) re-warms cold apps.
+        guard hasVisibleWindows else { return }
 
         let windows = AXHelper.windows(pid: pid)
         if app.activationPolicy == .regular
@@ -140,5 +162,29 @@ extension EventLoop {
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil
+    }
+
+    /// PIDs that own at least one layer-0 (normal document)
+    /// window according to the WindowServer. One snapshot,
+    /// ~1 ms, no AX.
+    nonisolated static func pidsWithVisibleWindows() -> Set<pid_t> {
+        guard
+            let list = CGWindowListCopyWindowInfo(
+                [.optionAll, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]]
+        else { return [] }
+        var result = Set<pid_t>()
+        for info in list {
+            guard
+                let pid = (info[kCGWindowOwnerPID as String] as? NSNumber)?
+                    .int32Value,
+                let layer = (info[kCGWindowLayer as String] as? NSNumber)?
+                    .intValue,
+                layer == 0
+            else { continue }
+            result.insert(pid)
+        }
+        return result
     }
 }
