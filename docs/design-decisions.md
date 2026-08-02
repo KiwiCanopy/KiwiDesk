@@ -425,6 +425,30 @@ decision stays AX-free, and it clears the moment detection
 self-heals a window back to tiled — the flag can never outlive the
 float state it depends on (overlay ⟹ floating).
 
+The same class is also never **granted** a space's focus when it
+appears (#671). KiwiDesk used to hand the focused slot to every
+window it saw created, so a popup that surfaces as an AX window —
+a Telegram context menu — became `space.focused` on arrival, and
+its dismissal therefore read as the focused window closing: the
+fallback handoff fired a `kAXRaiseAction` that re-activates an
+app and, under mouse-follows-focus, warped the pointer off what
+had just been clicked. In a focus-driven layout the grant also
+panned the space toward the popup. A window nobody asked to focus
+should not collect the consequences of being focused.
+
+This stops at the *grant* deliberately, and does not extend to
+the slot: a window in this class that macOS genuinely focuses
+still lands in it through the focus report a moment later. That
+is what the long-lived members need — a layer-0 dialog or panel
+carries the same flag, and the paragraph above is precisely the
+ruling that those windows behave correctly and want their focus,
+with only the ring wrong. Denying them the slot outright would
+put every focused command on the window behind the one being
+typed in. The signal is the structural overlay flag and not
+floating-ness, exactly as for the ring: a window the user floated
+through `float_rules` is an ordinary window and takes focus like
+one when it spawns.
+
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — graduated
 from draw-time suppression to the **built-in ignore gate** (#448):

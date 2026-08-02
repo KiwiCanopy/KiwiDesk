@@ -75,8 +75,25 @@ extension StateCoordinator {
         // returner into a space whose members all left with
         // it (`focused == nil`) — the settle fallback needs a
         // target even when no focus report ever arrives.
-        if !effects.hadRememberedSpace
-            || workspaces[target]?.focused == nil
+        //
+        // A TRANSIENT OVERLAY is granted nothing here — only the
+        // GRANT, never the slot, and the argument for stopping
+        // exactly there is the #300 entry in
+        // `docs/design-decisions.md` (#671).
+        //
+        // Two things it does not say, both local to this fold.
+        // The flag is asked of STATE, not of the incoming
+        // snapshot: a remembered-tiled restore above clears it
+        // (`setFloating`), and such a window is ordinary again.
+        // And this beats the `focused == nil` arm above, so an
+        // overlay spawning into a space with no focus leaves it
+        // nil — which is the wanted answer (a popup is not a
+        // settle target) at the price of a space that reports no
+        // focused window until a real one arrives, or a space
+        // switch re-seeds it.
+        if windows[window.id]?.isTransientOverlay != true,
+            !effects.hadRememberedSpace
+                || workspaces[target]?.focused == nil
         {
             workspaces.focus(window.id, in: target)
         }

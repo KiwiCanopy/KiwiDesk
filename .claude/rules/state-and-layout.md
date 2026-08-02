@@ -53,6 +53,21 @@ editing here:
   subsystem rule that owns it
   ([input-and-animation.md](input-and-animation.md)) only loads
   under `Animation/`.
+- The **create fold's spawn grant** — the focus a fresh window
+  gets for existing, not one macOS reported — consults
+  `ManagedWindow.isTransientOverlay`
+  first, and asks **state** rather than the incoming snapshot,
+  because the create fold clears the flag when a remembered-tiled
+  restore heals the window. A popup that surfaces as an AX window
+  collected the whole apparatus of being focused, dismissal
+  handoff included, from a grant nobody asked for (#671).
+  Weigh the reach before widening this to a slot-wide rule: the
+  same flag covers layer-0 dialogs and panels, which `#300`
+  ruled behave correctly and want their focus, so barring them
+  from the slot would put every focused command on the window
+  behind the one being typed in.
+  `TransientOverlayFocusTests` pins both arms; the product
+  argument lives in `docs/design-decisions.md`.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
