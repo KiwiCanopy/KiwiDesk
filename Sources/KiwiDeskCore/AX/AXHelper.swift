@@ -103,6 +103,25 @@ public enum AXHelper {
         }.count
     }
 
+    /// Bounds every AX message this process sends. A message to
+    /// an unresponsive app (stopped, deadlocked, paged out)
+    /// blocks the caller for the system default of ~6 s per
+    /// call; the boot scan makes several sequential main-thread
+    /// calls per app, so one hung helper serializes startup
+    /// into tens of seconds (#672 field report: ~60 s).
+    /// Setting the timeout on the system-wide element makes it
+    /// the process-wide default; an element carrying its own
+    /// timeout keeps it. Deterministic repro for the failure
+    /// this bounds: `kill -STOP` any GUI app, then boot.
+    public static func setGlobalMessagingTimeout(
+        seconds: Float
+    ) {
+        AXUIElementSetMessagingTimeout(
+            AXUIElementCreateSystemWide(),
+            seconds
+        )
+    }
+
     /// The window that currently has focus within an app.
     public static func focusedWindow(
         pid: pid_t

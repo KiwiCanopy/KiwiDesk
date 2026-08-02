@@ -42,7 +42,7 @@ public final class EventLoop {
     /// Bundle identifiers match case-insensitively.
     public var ignoreRules = IgnoreRules()
 
-    var observers: [pid_t: AXApplicationObserver] = [:]
+    var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop
     /// changed it. An ignore transition or stop restores that
@@ -106,6 +106,41 @@ public final class EventLoop {
     /// to the core sink in `KiwiCore+Bootstrap`; defaults to the
     /// syslog write like every Core seam (core-boundaries.md).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
+
+    // MARK: - Machine seams
+    // Injectable per tests.md ("a test reaches the machine only
+    // through a seam it injects"); production runs the live
+    // defaults, tests swap fakes so `start`, attach and
+    // reconcile are drivable without touching the host's apps.
+
+    /// Creates the per-app AX observer `attach` installs.
+    var makeObserver: @MainActor (pid_t) -> (any AppObserving)? =
+        { AXApplicationObserver(pid: $0) }
+
+    /// The app source the startup scan iterates.
+    var runningApplications: () -> [NSRunningApplication] = {
+        NSWorkspace.shared.runningApplications
+    }
+
+    /// The WindowServer prefilter feeding the scan's
+    /// `hasVisibleWindows` answers (see `attach`).
+    var visiblePIDs: () -> Set<pid_t> =
+        EventLoop.pidsWithVisibleWindows
+
+    /// Applies the process-global AX messaging timeout at
+    /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`
+    /// for what it bounds and why.
+    var applyAXMessagingTimeout: (Float) -> Void =
+        AXHelper.setGlobalMessagingTimeout
+
+    /// ~1 s: comfortably above the slowest healthy responders
+    /// (Electron/WebKit answer lazily in 100–300 ms,
+    /// accessibility.md) yet it caps an unresponsive app at
+    /// ~1 s per call instead of the ~6 s system default that
+    /// turned one hung helper into a ~60 s boot (#672).
+    /// `StartupAXTimeoutTests` pins the boot applying it before
+    /// the first per-app AX call.
+    static let axMessagingTimeoutSeconds: Float = 1.0
 
     public init() {}
 

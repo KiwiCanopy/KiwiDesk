@@ -82,7 +82,7 @@ extension EventLoop {
                 onLog("slow attach: \(name) took \(ms)ms")
             }
         }
-        guard let observer = AXApplicationObserver(pid: pid)
+        guard let observer = makeObserver(pid)
         else { return }
 
         observer.onNotification = { [weak self] note, element in

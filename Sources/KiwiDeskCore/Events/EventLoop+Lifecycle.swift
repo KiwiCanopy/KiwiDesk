@@ -17,12 +17,17 @@ extension EventLoop {
     public func start() {
         guard !isRunning else { return }
         isRunning = true
+        // Bound every AX message before the first per-app call:
+        // the scan below is serial and an unresponsive app
+        // otherwise costs the ~6 s system default per call
+        // (#672).
+        applyAXMessagingTimeout(Self.axMessagingTimeoutSeconds)
         registerWorkspaceObservers()
         let signposter = BootSignpost.signposter
         let scan = signposter.beginInterval("startupScan")
         let begin = ContinuousClock.now
-        let visible = EventLoop.pidsWithVisibleWindows()
-        let apps = NSWorkspace.shared.runningApplications
+        let visible = visiblePIDs()
+        let apps = runningApplications()
         for app in apps {
             attach(
                 app: app,
