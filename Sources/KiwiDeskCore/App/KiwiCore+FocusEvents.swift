@@ -172,12 +172,36 @@ extension KiwiCore {
         // would revert to the stale target. Re-assert the
         // intended focus and drop the echo. Consume the id
         // from the outstanding set either way.
-        let selfEcho = outstandingSelfRaises.remove(id) != nil
+        // An outstanding entry is our raise's echo only while
+        // the raise is RECENT (`selfRaiseStamps`, stamped at
+        // raise time, age-pruned): raising an already-key
+        // window emits no echo at all — the restore's closing
+        // re-assert does exactly that — so its entry sat
+        // unconsumed forever and classified the user's NEXT
+        // click on that window as our echo, eating it (device
+        // QA 2026-08-03). `outstandingSelfRaises` was the last
+        // unbounded ledger — the `zOrderRaiseEchoWindow`
+        // lesson again. The entry is consumed either way.
+        let selfEcho =
+            outstandingSelfRaises.remove(id) != nil
+            && selfRaiseStamps[id].map {
+                now.timeIntervalSince($0)
+                    < Self.selfRaiseSiblingWindow
+            } == true
+        // And even a FRESH entry stands down for a report with
+        // click provenance (#687): a click that reached the
+        // reported window is a user action our raise cannot
+        // have forged — without this, a click landing inside
+        // the ~1 s echo window of a no-echo re-assert was
+        // still eaten. Safe against bar clicks forging it:
+        // a press a bar absorbed resolves no window at all
+        // (`clickReachedWindow`).
         if selfEcho,
             activeSpace?.mode.defersFocusRaise == true,
             let intended = effects.focusBefore, intended != id,
             state.workspaces.space(of: id)
-                == state.workspaces.activeSpace
+                == state.workspaces.activeSpace,
+            !recentClickReached(id, now: now)
         {
             if let space = state.workspaces.space(
                 of: intended
@@ -287,60 +311,5 @@ extension KiwiCore {
             let frame = state.windows[id]?.frame
         else { return false }
         return frame.contains(click.point)
-    }
-
-    /// Whether a left click within the echo window actually
-    /// REACHED `id` — the raise-echo revert's provenance escape
-    /// (#687). Deliberately stricter than `recentClickInside`:
-    /// containment alone is ambiguous here, because edge-pile
-    /// frames overlap, so a slow pile-mate's late echo can
-    /// contain the click point too — honoring it would pan the
-    /// row onto a window the user did not click. Which window
-    /// the press hit was resolved at press time
-    /// (`clickReachedWindow` carries the argument); this only
-    /// asks whether that click is fresh and hit `id`.
-    private func recentClickReached(
-        _ id: WindowID,
-        now: Date
-    ) -> Bool {
-        guard let click = lastLeftClick,
-            now.timeIntervalSince(click.at)
-                < Self.zOrderRaiseEchoWindow
-        else { return false }
-        return click.reached == id
-    }
-
-    /// The managed window a left press at `point` (AX coords)
-    /// hit: the frontmost stacking entry whose state frame
-    /// contains the point. Called by the `KiwiCore+Lifecycle`
-    /// press stamp, AT PRESS TIME deliberately: provenance is a
-    /// press-time fact. Resolving it when the echo arrives read
-    /// a stacking a drain may have churned since — a quiet
-    /// raise of a same-app sibling reorders above the app's key
-    /// window (`restoreMonocleZOrder`'s churn note) — against
-    /// frames a retile may have moved, so a stamped sibling
-    /// could forge the escape (architect review, 2026-08-03).
-    /// At press time the frontmost window at the point IS the
-    /// window the press lands in.
-    ///
-    /// Frontmost MANAGED window, deliberately: candidates the
-    /// state does not track are skipped, so a click on a
-    /// non-click-through IGNORED window (a quick-terminal
-    /// panel) overlapping a stamped window can still resolve to
-    /// the window beneath. Accepted: narrow, and it fails
-    /// toward honoring a focus report, never toward eating one.
-    /// An unwired provider answers nil — no provenance.
-    func clickReachedWindow(at point: CGPoint) -> WindowID? {
-        guard let stacking = stackingOrderProvider?() else {
-            return nil
-        }
-        for candidate in stacking {
-            guard
-                let frame = state.windows[candidate]?.frame,
-                frame.contains(point)
-            else { continue }
-            return candidate
-        }
-        return nil
     }
 }

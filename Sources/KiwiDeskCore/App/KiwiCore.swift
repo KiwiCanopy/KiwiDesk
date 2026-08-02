@@ -117,16 +117,16 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
-    /// Window ids KiwiDesk's own AX raises issued but whose focus
-    /// echoes have not yet landed (#152). A matching echo is
-    /// self-inflicted, not a user action: it must not supersede a
-    /// newer focus nor snap state focus back. A *set*, not one
-    /// slot, because forward focus raises immediately (#158) while
-    /// a backward raise may still be unechoed — two self-raises
-    /// can be outstanding at once. An id is removed on its own
-    /// echo, and when its window is destroyed (WindowIDs can be
-    /// reused). See `handleWindowFocused` in
-    /// `KiwiCore+FocusEvents.swift`.
+    /// Window ids KiwiDesk's own AX raises issued but whose
+    /// focus echoes have not yet landed (#152). A matching echo
+    /// is self-inflicted, not a user action: it must not
+    /// supersede a newer focus nor snap state focus back. A set
+    /// — two can be outstanding at once (#158). An entry counts
+    /// as an echo only while `selfRaiseStamps` says the raise
+    /// is RECENT: an already-key raise echoes never, and an
+    /// unbounded entry ate the next click on that window (#687
+    /// device QA). Removed on echo and destroy (ids reused);
+    /// the classification lives in `handleWindowFocused`.
     var outstandingSelfRaises: Set<WindowID> = []
 
     /// When each self-raise was issued — the recency bound for
