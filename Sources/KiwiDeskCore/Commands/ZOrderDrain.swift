@@ -71,54 +71,56 @@ struct ZOrderDrain: Sendable {
     /// Poll interval while waiting for a raise to land. The read
     /// costs ~0.4 ms, so this spends under a tenth of a core.
     static let pollInterval: TimeInterval = 0.005
-    /// One verifying pass, then one re-read and retry of whatever
-    /// is still out of place.
-    static let maxPasses = 2
-
     /// Raises `order` — deepest first, each landing on top of the
-    /// last — and returns once the stacking matches or the budget
-    /// is spent. Blocking: call it on `zOrderQueue`, never on the
-    /// main actor.
+    /// last — and returns once every raise has been issued or the
+    /// budget is spent. Blocking: call it on `zOrderQueue`, never
+    /// on the main actor.
+    ///
+    /// **Exactly one pass, and never the same window twice.** A
+    /// retry pass for the windows that missed their landing was
+    /// built and removed on device evidence: the raise echo ledger
+    /// (`zOrderRaiseEchoes`) consumes a window's stamp on its
+    /// FIRST echo, so a second raise of that window inside one
+    /// sequence emits an echo nothing reverts, and it reads as a
+    /// deliberate focus change — focus lands on the pile-mate and
+    /// a scrolling row pans to it. The last window raised is the
+    /// one next to the focus, so the visible symptom is the focus
+    /// sliding one slot after every restore (owner QA,
+    /// 2026-08-02). Re-stamping per pass would be the fix if a
+    /// retry ever earns its place; measurement says it has not —
+    /// no raise was ever LOST, only late, and a late one is put
+    /// right by the next restore.
     func run(_ order: [WindowID]) {
+        guard isCurrent() else { return }
         let deadline = now() + Self.totalLimit
-        for _ in 0..<Self.maxPasses {
-            guard isCurrent() else { return }
-            let targets = Set(order)
-            let observed = stacking()
-            let seen = observed.filter { targets.contains($0) }
-            let plan = Self.plan(
-                raiseOrder: order,
-                observed: observed,
-                above: floor
-            )
-            guard !plan.isEmpty else { return }
-            let planned = Set(plan)
-            // The windows the plan left alone keep their observed
-            // order and belong below every raised one — that is
-            // what makes them safe to leave alone, so they are
-            // part of what each landing is checked against.
-            let untouched = seen.filter { !planned.contains($0) }
-            guard
-                issue(
-                    plan,
-                    over: untouched,
-                    deadline: deadline
-                )
-            else { return }
-        }
+        let targets = Set(order)
+        let observed = stacking()
+        let seen = observed.filter { targets.contains($0) }
+        let plan = Self.plan(
+            raiseOrder: order,
+            observed: observed,
+            above: floor
+        )
+        guard !plan.isEmpty else { return }
+        let planned = Set(plan)
+        // The windows the plan left alone keep their observed
+        // order and belong below every raised one — that is
+        // what makes them safe to leave alone, so they are
+        // part of what each landing is checked against.
+        let untouched = seen.filter { !planned.contains($0) }
+        issue(plan, over: untouched, deadline: deadline)
     }
 
-    /// Issues one pass. Returns false when the drain must stop
-    /// outright — superseded, or out of budget with the remaining
-    /// raises fired off unverified.
+    /// Issues the plan, waiting for each raise to land before the
+    /// next. Every window here is raised exactly once — see `run`.
     private func issue(
         _ plan: [WindowID],
         over untouched: [WindowID],
         deadline: TimeInterval
-    ) -> Bool {
+    ) {
         var raised: [WindowID] = []
         for (index, id) in plan.enumerated() {
-            guard isCurrent() else { return false }
+            guard isCurrent() else { return }
             raise(id)
             raised.append(id)
             guard now() < deadline else {
@@ -128,7 +130,7 @@ struct ZOrderDrain: Sendable {
                 // a dropped raise is a window left definitely in
                 // the wrong place.
                 for rest in plan.dropFirst(index + 1) { raise(rest) }
-                return false
+                return
             }
             _ = awaitLanding(
                 raised: raised,
@@ -136,7 +138,6 @@ struct ZOrderDrain: Sendable {
                 deadline: deadline
             )
         }
-        return true
     }
 
     /// Polls until the windows raised so far stand front-to-back

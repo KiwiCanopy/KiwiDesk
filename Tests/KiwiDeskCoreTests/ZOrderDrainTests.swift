@@ -22,146 +22,51 @@ struct ZOrderDrainTests {
         raw.map(WindowID.init)
     }
 
-    // MARK: - The plan
-
-    @Test("A pile already in order raises nothing")
-    func correctOrderPlansNothing() {
-        // Raise order is deepest-first, so the desired
-        // front-to-back is its reverse.
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([4, 3, 2, 1]),
-                observed: ids([1, 2, 3, 4]),
-                above: []
-            ).isEmpty
-        )
-    }
-
-    /// A reversed pile needs every raise but ONE: the window that
-    /// belongs at the very back is already there, and a raise can
-    /// only move a window to the front. That is the pathological
-    /// case head-on — the deepest window used to be raised first
-    /// every time, so a slow app in that slot always surfaced.
-    @Test("A reversed pile leaves the deepest window alone")
-    func reversedOrderLeavesTheDeepestWindow() {
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([4, 3, 2, 1]),
-                observed: ids([4, 3, 2, 1]),
-                above: []
-            ) == ids([3, 2, 1])
-        )
-    }
-
-    @Test("A single misplaced window is the only raise")
-    func oneSwappedPairPlansOneRaise() {
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([4, 3, 2, 1]),
-                observed: ids([2, 1, 3, 4]),
-                above: []
-            ) == ids([1])
-        )
-    }
-
-    /// The measured failure: one window too far forward, the rest
-    /// already right. Stacking is by distance from focus, so a
-    /// short jump leaves most pairs correct — and a needless raise
-    /// is not free, it steals focus for an echo and drags a slow
-    /// app back to the front of the pile.
-    @Test("Only the windows out of place are raised")
-    func oneMisplacedWindowPlansTheStretchAboveIt() {
-        // Desired front-to-back 1 > 2 > 3 > 4; window 4 already
-        // stands correctly at the back, 3 does not.
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([4, 3, 2, 1]),
-                observed: ids([1, 2, 4, 3]),
-                above: []
-            ) == ids([3, 2, 1])
-        )
-    }
-
-    /// A target the WindowServer does not list on screen —
-    /// minimized, or on another space — has no stacking to fix and
-    /// no landing that could ever be verified.
-    @Test("An off-screen target is dropped from the plan")
-    func offScreenTargetIsDropped() {
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([9, 3, 2, 1]),
-                observed: ids([3, 1, 2]),
-                above: []
-            ) == ids([2, 1])
-        )
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([9]),
-                observed: ids([1, 2]),
-                above: []
-            ).isEmpty
-        )
-    }
-
     // MARK: - The floor
 
-    /// The float raise (#418) exists to lift the float layer back
-    /// over the tiled window `focusWindow` just raised — and
-    /// nothing ever reorders floats relative to each other, so
-    /// diffing them against each other alone finds them "already
-    /// correct" and raises nothing, leaving them buried. The floor
-    /// is what makes that visible to the plan.
-    @Test("A target under the floor is out of place")
-    func floorForcesARaise() {
-        let floats = ids([1, 2])
-        // Floats in the right order among themselves, but the
-        // tiled window (9) sits above both.
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([2, 1]),
-                observed: ids([9, 1, 2]),
-                above: ids([9])
-            ) == ids([2, 1])
-        )
-        // Same floats, already clear of the tiled plane: nothing
-        // to do, so the common case still costs one read.
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: floats.reversed(),
-                observed: ids([1, 2, 9]),
-                above: ids([9])
-            ).isEmpty
-        )
-    }
-
-    /// One float left under the floor drags the whole layer with
-    /// it, and that is minimal rather than lazy: a raise can only
-    /// move a window to the FRONT, so lifting the buried float
-    /// clear of the tile puts it above its own layer-mates, and
-    /// they have to go back over it in order.
-    @Test("A float under the floor drags the layer above it")
-    func floorRaisesTheStretchAboveTheBuriedTarget() {
-        #expect(
-            ZOrderDrain.plan(
-                raiseOrder: ids([3, 2, 1]),
-                observed: ids([1, 2, 9, 3]),
-                above: ids([9])
-            ) == ids([3, 2, 1])
-        )
-    }
-
-    /// And the landing check has to know about it too: with the
-    /// floor unmodelled, the first raise of a pass verifies
-    /// against an empty set and returns instantly, which is the
-    /// slot the measured failure lives in.
+    /// The landing check knows about the floor too, not just the
+    /// plan (`ZOrderRaisePlanTests` owns that half): without it
+    /// the first raise of a sequence verifies against an empty set
+    /// and returns instantly, which is the slot the measured
+    /// failure lives in.
+    ///
+    /// The focused window (7) is pinned frontmost here because a
+    /// quiet raise cannot beat the key window on a real machine.
+    /// It is deliberately NOT in the floor: asking the floats to
+    /// clear it would be a condition no raise can satisfy, and
+    /// the drain would spend its whole budget failing it on every
+    /// focus change.
     @Test("The drain waits for a raise to clear the floor")
     func drainWaitsForTheFloor() {
-        let server = FakeWindowServer(order: ids([9, 1, 2]))
+        let server = FakeWindowServer(
+            order: ids([7, 9, 1, 2]),
+            pinned: WindowID(7)
+        )
         server.latency[WindowID(2)] = 0.06
         let drain = server.drain(above: ids([9]))
         drain.run(ids([2, 1]))
-        #expect(server.stacking() == ids([1, 2, 9]))
+        #expect(server.stacking() == ids([7, 1, 2, 9]))
         #expect(server.raised == ids([2, 1]))
+    }
+
+    /// The floor a raise CANNOT clear is the failure this models:
+    /// with the key window in the floor, every poll fails and the
+    /// drain burns its budget on a sequence that can never verify.
+    /// The bound is what keeps that survivable — but the real fix
+    /// is that `raiseFloatsAndSticky` leaves the focused window
+    /// out of the floor.
+    @Test("An unreachable floor still ends inside the budget")
+    func unreachableFloorStaysBounded() {
+        let server = FakeWindowServer(
+            order: ids([7, 1, 2]),
+            pinned: WindowID(7)
+        )
+        let drain = server.drain(above: ids([7]))
+        drain.run(ids([2, 1]))
+        #expect(
+            server.clock
+                <= ZOrderDrain.totalLimit + ZOrderDrain.pollInterval
+        )
     }
 
     // MARK: - The drain
@@ -195,9 +100,11 @@ struct ZOrderDrainTests {
         drain.run(ids([4, 3, 2, 1]))
         #expect(server.raised.contains(WindowID(1)))
         #expect(server.raised.contains(WindowID(2)))
-        // The wedged window is retried by the second pass, and the
-        // ones that do answer still stand in order among
-        // themselves.
+        // It is not retried — a second raise inside one sequence
+        // strands focus, see `neverRaisesAWindowTwice` — so it
+        // stays where it is, and the windows that do answer still
+        // stand in order among themselves. The next restore
+        // diffs against reality and picks it up.
         #expect(
             server.stacking().filter { $0 != WindowID(3) }
                 == ids([1, 2, 4])
@@ -228,6 +135,29 @@ struct ZOrderDrainTests {
             server.clock
                 <= ZOrderDrain.totalLimit + ZOrderDrain.pollInterval
         )
+    }
+
+    /// **No window is raised twice in one sequence**, whatever the
+    /// apps do — the invariant that keeps focus where the user put
+    /// it. `zOrderRaiseEchoes` consumes a window's stamp on its
+    /// FIRST raise echo, so a second raise inside one sequence
+    /// emits an echo nothing reverts and it reads as a deliberate
+    /// focus change; the last window raised is the one next to the
+    /// focus, so the row pans one slot after every restore (owner
+    /// QA, 2026-08-02, on a retry pass that has since been
+    /// removed). Both shapes that could re-raise are exercised
+    /// here: an app that answers late, and one that never answers.
+    @Test("No window is raised twice in one sequence")
+    func neverRaisesAWindowTwice() {
+        for latency in [0.2, TimeInterval.infinity] {
+            let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
+            server.latency[WindowID(2)] = latency
+            let drain = server.drain()
+            drain.run(ids([4, 3, 2, 1]))
+            #expect(
+                Set(server.raised).count == server.raised.count
+            )
+        }
     }
 
     /// A jump landing mid-drain supersedes the sequence: it must
@@ -262,9 +192,17 @@ private final class FakeWindowServer: @unchecked Sendable {
     /// How many raises this sequence stays current for, so a test
     /// can supersede it mid-drain.
     var currentUntilRaises = Int.max
+    /// The frontmost app's key window, which a quiet raise cannot
+    /// get above — measured on device, 0 of 7 windows over 600 ms.
+    /// A raise lands directly UNDER it, not at the front. Modelled
+    /// here because the fake's old "every raise reaches index 0"
+    /// is what let a landing condition no real raise can satisfy
+    /// sit under twelve green tests.
+    var pinned: WindowID?
 
-    init(order: [WindowID]) {
+    init(order: [WindowID], pinned: WindowID? = nil) {
         self.order = order
+        self.pinned = pinned
     }
 
     func drain(above floor: [WindowID] = []) -> ZOrderDrain {
@@ -285,15 +223,19 @@ private final class FakeWindowServer: @unchecked Sendable {
         )
     }
 
-    /// Performs everything now due — front-to-back means the
-    /// newest raise ends up first — and answers the order.
+    /// Performs everything now due — the newest raise ends up
+    /// front, or directly under `pinned` where one is set — and
+    /// answers the order.
     func stacking() -> [WindowID] {
         let due = inFlight.filter { $0.due <= clock }
             .sorted { $0.due < $1.due }
         inFlight.removeAll { $0.due <= clock }
-        for entry in due {
+        for entry in due where entry.id != pinned {
             order.removeAll { $0 == entry.id }
-            order.insert(entry.id, at: 0)
+            let front =
+                pinned.flatMap { order.firstIndex(of: $0) }
+                .map { $0 + 1 } ?? 0
+            order.insert(entry.id, at: front)
         }
         return order
     }

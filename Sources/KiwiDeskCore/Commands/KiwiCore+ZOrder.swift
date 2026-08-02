@@ -23,19 +23,19 @@ extension KiwiCore {
     /// still being applied, slow apps process their raise
     /// late and end up out of order.
     ///
-    /// Deferred past a restore that is still DRAINING, too, and
-    /// for the same reason at a smaller scale (#684): starting a
-    /// second sequence there would queue it behind the first and
-    /// then have the two fight over the same pile. The drain's
-    /// completion runs this one instead — exactly once, however
-    /// many arrived while it drained, and off the order the drain
-    /// actually left behind, which is what makes the extra pass
-    /// nearly free (it diffs, so a correct pile raises nothing).
+    /// NOT deferred past a restore that is still draining, though
+    /// a sequence queued behind another does lag the settle
+    /// (#684's second half, still open). Holding it back and
+    /// running it from the drain's completion was built and
+    /// reverted: it re-raises windows whose first raise echo may
+    /// still be in flight, and `zOrderRaiseEchoes` consumes a
+    /// window's stamp on its FIRST echo — so the second echo
+    /// reads as a deliberate focus change and the row pans onto a
+    /// pile-mate (owner QA, 2026-08-02). Coalescing needs the
+    /// ledger to be re-stamped per sequence before it is safe.
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
-        if tiler.animation.activeCount == 0,
-            zOrderRestoresInFlight == 0
-        {
+        if tiler.animation.activeCount == 0 {
             runPendingZOrderRestore()
         }
     }

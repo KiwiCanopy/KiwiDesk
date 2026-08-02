@@ -59,12 +59,23 @@ extension KiwiCore {
         // floats relative to each other — so without the floor the
         // sequence would diff itself down to nothing every time
         // and leave them buried.
+        //
+        // The focused window is NOT in the floor, and that is the
+        // difference between a floor a raise can clear and one it
+        // cannot: a quiet raise never gets a window above the
+        // frontmost app's key window — measured, 0 of 7 windows
+        // over 600 ms — and after `focusWindow` the key window is
+        // exactly this one. Asking the floats to beat it would
+        // fail every poll and burn the drain's whole budget on
+        // every focus change. Above every OTHER tiled window is
+        // both what #418 promises and what a raise can deliver.
         let floor =
             activeSpace.map { space in
                 state.effectiveTiledMembers(
                     of: space,
                     activeSpace: space.id
                 )
+                .filter { $0 != focused }
             } ?? []
         performZOrderSequence(targets: pairs, above: floor) {
             [weak self] in
@@ -212,21 +223,7 @@ extension KiwiCore {
             drain.run(order)
             Task { @MainActor [weak self] in
                 completion()
-                guard let self else { return }
-                zOrderRestoresInFlight -= 1
-                // A restore armed WHILE this one drained was held
-                // back rather than queued behind it (see
-                // `scheduleZOrderRestore`); run it now, once, off
-                // the order the drain actually left behind. Still
-                // behind the animation gate: if frames started
-                // landing again meanwhile, the settle callback
-                // owns it, and running here would raise off
-                // half-applied frames (#153).
-                if zOrderRestoresInFlight == 0,
-                    tiler.animation.activeCount == 0
-                {
-                    runPendingZOrderRestore()
-                }
+                self?.zOrderRestoresInFlight -= 1
             }
         }
     }
