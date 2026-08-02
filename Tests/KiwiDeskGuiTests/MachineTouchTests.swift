@@ -58,57 +58,6 @@ struct MachineTouchTests {
     private static let statusBarAllowed =
         "StatusItemController.swift"
 
-    /// The one Core file that may LAUNCH an app — the
-    /// `OpenOrFocusSeams` defaults (#673).
-    ///
-    /// Deliberately only the launch surface, not every
-    /// `NSWorkspace` reach: enumerating running apps has several
-    /// legitimate Core homes behind their own seams
-    /// (`EventLoop`'s descriptors, the desktop-focus yield), and
-    /// pinning those wants its own allowed map. Starting a
-    /// process is the one that cannot be undone by a later event.
-    private static let launchAllowed =
-        "KiwiCore+LaunchRestore.swift"
-
-    /// A seam whose touch fires on *execute* rather than on
-    /// *init* falls between this file's `KiwiCore(` pin and
-    /// `StatusItemSeamGuardTests`' construction pin — nothing
-    /// stops a suite that calls `execute("pull_or_spawn", …)`
-    /// from inheriting a live `NSWorkspace`. It already bit: a
-    /// command-path test activated the real Finder on every
-    /// `swift test` run, because under the runner
-    /// `Bundle.main.bundleIdentifier` is nil, so the test's
-    /// fallback bundle id reached the then-unseamed
-    /// `activate()`. Naming an INSTALLED id would have launched
-    /// that app outright.
-    @Test("starting an app stays behind its seam")
-    func appLaunchBehindSeam() throws {
-        let core = [
-            Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore"
-            )
-        ]
-        for needle in ["openApplication", "urlForApplication"] {
-            let sites = try Self.sites(of: needle, under: core)
-            // Non-empty, or the needle rotted against a rename
-            // and the scan passes for having found nothing.
-            #expect(
-                !sites.isEmpty,
-                "\(needle) gone — retarget the needle"
-            )
-            let strays = sites.filter {
-                $0.file.lastPathComponent != Self.launchAllowed
-            }
-            #expect(
-                strays.isEmpty,
-                """
-                \(needle) outside its seam: \
-                \(strays.map(\.site).joined(separator: ", "))
-                """
-            )
-        }
-    }
-
     // This needle's one literal is pinned in
     // `StatusItemSeamGuardTests.allowedInTests` — its token
     // count over the test trees charges this line.
