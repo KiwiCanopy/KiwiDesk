@@ -1172,11 +1172,13 @@ inactive Spaces, **Active space** the Space currently shown on
 the display, and **Focused window** the focused window's glyph
 inside the active Space. The ladder sits inline; the rest of
 the palette collapses behind an **Advanced colors** disclosure,
-shut by default — the App Bar's exact tiering. **Copy
-appearance to Space Bar…** (in the App Bar card's Style
-disclosure) takes the App Bar's current sizes, style, and
-colors once — edits afterwards stay independent (position and
-visibility are never copied).
+shut by default — the App Bar's exact tiering. **Copy sizes
+and style to Space Bar…** (in the App Bar card's Style
+disclosure) takes the App Bar's current sizes and style once —
+thickness, background, indicator and the rest — and edits
+afterwards stay independent. Colors, position and visibility
+are never copied: colors are the palette's and the colour
+cards' concern.
 
 Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by

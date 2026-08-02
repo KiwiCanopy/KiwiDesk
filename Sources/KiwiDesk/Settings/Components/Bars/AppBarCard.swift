@@ -146,8 +146,10 @@ struct AppBarCard: View {
     /// link (the census's `(action)` row, moved here from the
     /// Space Bar colours block: it copies App Bar → Space Bar,
     /// so it needs the Space Bar on, not the App Bar shown).
-    /// The one-shot caveat rides a persistent caption, never
-    /// hover alone.
+    /// Sizes and style ONLY — colours are the Advanced Colours
+    /// area's concern (owner ruling 2026-08-02; a colours-copy,
+    /// if it ships, lives there). The one-shot caveat rides a
+    /// persistent caption, never hover alone.
     private var copyAppearanceRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             Button {
@@ -159,7 +161,7 @@ struct AppBarCard: View {
                 Text(
                     L(
                         "space_bar.copy_appearance",
-                        "Copy appearance to Space Bar…"
+                        "Copy sizes and style to Space Bar…"
                     )
                 )
             }
@@ -168,17 +170,20 @@ struct AppBarCard: View {
             .help(
                 L(
                     "space_bar.copy_appearance.help",
-                    "Takes the App Bar's current sizes, style, "
-                        + "and colors once; edits afterwards "
-                        + "stay independent."
+                    "Takes the App Bar's current sizes and "
+                        + "style once — thickness, background, "
+                        + "indicator and the rest. Colors are "
+                        + "not copied; edits afterwards stay "
+                        + "independent."
                 )
             )
             Text(
                 L(
                     "space_bar.copy_appearance.caption",
-                    "Copies the App Bar's current sizes, "
-                        + "style, and colors — a one-time "
-                        + "starting point, not a live link."
+                    "Copies the App Bar's current sizes and "
+                        + "style — not its colors — as a "
+                        + "one-time starting point, never a "
+                        + "live link."
                 )
             )
             .font(.caption)
@@ -205,7 +210,7 @@ struct AppBarCard: View {
         L(
             "bars.style.app_bar.summary",
             "Background, content, indicator, sizes, symbol "
-                + "style, copy appearance"
+                + "style, copy to Space Bar"
         )
     }
 

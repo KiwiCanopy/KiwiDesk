@@ -70,15 +70,28 @@ struct SpaceBarParityTests {
         // The exclusions stay untouched.
         #expect(target.enabled == SpaceBarStyle().enabled)
         #expect(target.edge == SpaceBarStyle().edge)
-        // Sanity: the intersection is non-trivial and the
-        // space-only fields never join it.
+        // Sanity: the intersection is non-trivial, and the
+        // colour class is excluded wholesale (owner ruling
+        // 2026-08-02: a colours-copy, if any, belongs to
+        // Advanced Colours) — derived by suffix, so a new
+        // shared colour field stays out automatically.
         #expect(
             SpaceBarStyle.copyAppearanceKeys.contains(
-                "item_color"
+                "thickness"
+            )
+        )
+        #expect(!SpaceBarStyle.sharedColorKeys.isEmpty)
+        #expect(
+            SpaceBarStyle.copyAppearanceKeys.isDisjoint(
+                with: SpaceBarStyle.sharedColorKeys
             )
         )
         #expect(
-            !SpaceBarStyle.copyAppearanceKeys.contains(
+            SpaceBarStyle.sharedColorKeys.contains("item_color")
+        )
+        // The space-only fields never join either set.
+        #expect(
+            !SpaceBarStyle.sharedColorKeys.contains(
                 "focused_item_color"
             )
         )

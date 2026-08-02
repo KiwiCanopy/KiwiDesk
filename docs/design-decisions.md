@@ -2876,15 +2876,31 @@ needs: a `setDragHover` synthetic-hover path, because a foreign
 AX-tracked window drag delivers no `mouseEntered`, so the arrow
 would otherwise go dark during the one gesture it exists for.
 
-**The two bar editors share one canonical row order.** (#374.)
-App Bar's shape is the reference: enable, Position (with the
-same-edge note under it, in both editors), item-look
-(background, indicator, symbol style), content toggles, sizes,
-then colors — signature colors inline, the rest behind a shut
-"Advanced colors" disclosure in both. Differences remain only
-where the bars genuinely differ (per-layout tier, front-app
-segment, copy button). A new bar-editor row must slot into
-this order on both sides, not grow a per-editor one.
+**The two bar cards share one canonical row order.** (#374,
+re-cut by the #678 Phase 2 census render.) At rest: existence
+(the Show toggle / the Show-it-in switches), Position (with the
+same-edge note under it, in both cards), Thickness, the content
+toggles; the Style disclosure then runs background → indicator
+→ symbol style → sizes, and colors live in the colour cards —
+signature colors inline, the rest behind a shut "Advanced
+colors" disclosure in both. Differences remain only where the
+bars genuinely differ (front-app segment, glyph cap, spring
+delay, the copy action). A new bar row must slot into this
+order on both sides — in the census order lists
+(`BarsRowOrder`), not a per-card invention.
+
+**The copy action copies structure, never colours.** "Copy
+sizes and style to Space Bar…" takes the shared structural
+fields (thickness, background, indicator, sizes, roundness,
+symbol style) and deliberately excludes the `*_color` class —
+derived by suffix, so a new shared colour field stays excluded
+automatically (`SpaceBarParityTests.copyAppearanceParity`).
+Colours are the palette's and the Advanced Colours area's
+concern; a colours-copy, if it ever ships, lives there — a
+copy that also painted colors would silently overwrite a
+palette the user applied on purpose, the same category of
+surprise the palette entry below bans in the other direction.
+(Owner ruling 2026-08-02, during Phase 2 device review.)
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to
