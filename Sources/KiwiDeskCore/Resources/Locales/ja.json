@@ -656,7 +656,6 @@
   "shortcuts.advanced.caption": "任意のLuaをホットキーに割り当てられます。上級者向けの逃げ道で、上のグループが内蔵のアクションを網羅しています。",
   "shortcuts.advanced.title": "Lua ショートカット",
   "shortcuts.app_behavior": "起動時の動作",
-  "shortcuts.app_behavior.help": "**開く/前面に出す**は、アプリの既存ウインドウを現在のスペースに呼び出し、起動していなければアプリを起動します。そのウインドウにフォーカスがある状態でもう一度押すと、アプリの他のウインドウへ順に切り替わります。\n\n**新規で開く**は、アプリがすでに開いていても常に新しいインスタンスを起動します。",
   "shortcuts.app_behavior.open_new": "新規で開く",
   "shortcuts.app_behavior.open_new.badge": "新しいインスタンスを開きます",
   "shortcuts.app_behavior.open_or_focus": "開く/前面に出す",

@@ -656,7 +656,6 @@
   "shortcuts.advanced.caption": "Asigna cualquier código Lua a un atajo de teclado. Es la opción de escape para usuarios avanzados — los grupos superiores cubren las acciones integradas.",
   "shortcuts.advanced.title": "Atajos Lua",
   "shortcuts.app_behavior": "Comportamiento al abrir",
-  "shortcuts.app_behavior.help": "**Abrir o Enfocar** trae la ventana existente de la app al espacio actual, o la inicia si no está en ejecución. Al pulsar de nuevo con esa ventana enfocada, pasa una a una por las demás ventanas de la app.\n\n**Abrir nueva** siempre inicia una instancia nueva, aunque la app ya esté abierta.",
   "shortcuts.app_behavior.open_new": "Abrir nueva",
   "shortcuts.app_behavior.open_new.badge": "Abre una instancia nueva",
   "shortcuts.app_behavior.open_or_focus": "Abrir o Enfocar",

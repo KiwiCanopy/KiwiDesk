@@ -1670,6 +1670,34 @@ permission. Multi-key chords (⌘J+K) are therefore not
 recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
+**Overrides always resolve; the mode never changes what
+runs.** There is no stored flag deciding whether a profile's
+shortcut overrides apply — an early draft of the redesign
+specified one, with a default and an upgrade migration, and it
+was cut before any of it was built. The reason it must stay
+cut: a preference that changes *which shortcuts fire* is not a
+preference, it is a second config the user cannot see, and the
+first time a shortcut goes dead because of a display setting
+the app has lied. So the resolver takes a base list and a
+sparse override and nothing else, and nothing in the Settings
+window is read-only because of the mode a user picked.
+
+What the mode may decide is only whether *creating* an override
+is offered — and that offer retires itself. **A used capability
+unlocks its whole list.** The moment a profile carries one
+shortcut override, the override column is live on every row of
+that list, because a user who has overridden one key is a user
+who overrides keys and making them re-earn the affordance per
+row is busywork dressed as simplicity. **The scope is the list,
+not the app**: overriding a shortcut must not turn a deeper
+surface on in App Rules or anywhere else, or the mode becomes
+something users lose by accident and stop trusting.
+`ShortcutsCapabilityUnlockTests` holds both halves plus the
+mode-independence, because all three already hold by
+construction and the cheapest way to build mode mechanics later
+is to gate the column on a mode — which would break all three
+and, until that suite existed, no test.
+
 **A named alternate keybinding set is a LAYER, never a
 mode.** "Mode" was already carrying two unrelated meanings —
 a space's layout (monocle, grid, …) and the Settings window's

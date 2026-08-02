@@ -656,7 +656,6 @@
   "shortcuts.advanced.caption": "把任意 Lua 綁定到熱鍵。這是給進階使用者的逃生門 — 上方的群組已涵蓋內建動作。",
   "shortcuts.advanced.title": "Lua 綁定",
   "shortcuts.app_behavior": "啟動行為",
-  "shortcuts.app_behavior.help": "**打開或聚焦**會把 App 的現有視窗帶到目前空間；如果 App 未執行則啟動它。當該視窗已聚焦時再次按下，會依序切換到 App 的其他視窗。\n\n**開啟新實體**總是啟動一個新實體，即使 App 已經開啟。",
   "shortcuts.app_behavior.open_new": "開啟新實體",
   "shortcuts.app_behavior.open_new.badge": "會開啟一個新實體",
   "shortcuts.app_behavior.open_or_focus": "打開或聚焦",

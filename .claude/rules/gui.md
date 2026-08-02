@@ -108,11 +108,37 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion and Advanced Colours render from
-it now** (#678 Phases 2-3): `BarsRowOrder` / `ColorsRowOrder`
+it. **Bars, Colours & Motion, Advanced Colours and Shortcuts
+render from it now** (#678 Phases 2-3): `BarsRowOrder` /
+`ColorsRowOrder` / `ShortcutsRowOrder`
 hold the display order and `BarsCensusRenderTests` /
-`ColorsCensusRenderTests` pin them to the census, so a row in
+`ColorsCensusRenderTests` / `ShortcutsCensusRenderTests` pin
+them to the census, so a row in
 those areas moves by editing the census.
+
+**The census's unit is a SETTING, and one setting may draw many
+rows.** A keybinding family is the worked case: `focusDir` is
+one census case that puts four rows on screen and `goToSpace`
+one that puts a row per live space, so the Shortcuts area needs
+a second seam the other areas do not — an order list saying
+*where a family sits* and `ShortcutsFamilyRows` saying *what it
+draws*. An area whose keys expand this way owes both halves and
+a guard over each; **which keys may legitimately expand to
+nothing is data, never a skipped branch**, because a renderer
+reading `rows(for:) ?? []` cannot tell a hand-drawn container
+from a family that lost its rows, and a guard that skips `nil`
+goes green on exactly the disappearance it exists to catch
+(proven against `ShortcutsCensusRenderTests` before it shipped).
+
+**A capability unlocked in one list stays scoped to that list**
+(#678). Once a profile carries a single shortcut override, the
+override affordance is live on every row of that list — never
+re-earned per row — and it turns nothing on elsewhere in the
+app. Do not gate such an affordance on a Settings mode: mode
+depth is per AREA (`SettingsArea.minimumMode`) and never
+per row, nothing is read-only because of the mode, and the
+resolver takes no mode input at all.
+`ShortcutsCapabilityUnlockTests` holds all three.
 Container-level greying is census-driven there (the container
 gate plus `exemptFromContainerGate`), but a ROW's grey
 predicate stays wiring-owned even in a census-rendered area —
