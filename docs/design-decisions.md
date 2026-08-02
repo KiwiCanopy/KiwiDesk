@@ -613,6 +613,62 @@ the overflow-pile classification are unchanged (the pile is still
 the array-order Track model's fallback), so the table above keeps
 its Track row as-is.
 
+### Raise-echo revert: state-only, and a click is provenance
+
+**[Rationale]**
+
+A z-order raise couples with app activation, so every window a
+restore raises emits a focus report carrying no self-raise
+provenance ([#152](https://github.com/KiwiCanopy/KiwiDesk/issues/152)).
+KiwiDesk stamps the raised windows and **reverts** the first
+report from a stamped window back to the real focus
+(`zOrderRaiseEchoes`,
+[#418](https://github.com/KiwiCanopy/KiwiDesk/issues/418)/[#425](https://github.com/KiwiCanopy/KiwiDesk/issues/425)).
+Two rulings shape that revert
+([#687](https://github.com/KiwiCanopy/KiwiDesk/issues/687)):
+
+**The revert moves state only, never OS focus.** During a
+sequence, macOS key focus genuinely churns window by window as
+each raise's activation lands; the one owner of putting it back
+is the sequence's **closing re-assert**
+(`raiseSequentially(thenFocus:)`), generation-guarded so a
+stale sequence cannot steal focus back. Re-asserting inside the
+revert instead — once per echo — would issue a loud raise
+mid-drain for every echo that trails in, fighting the very
+ordering the drain is verifying and re-activating the focused
+app once per pile member. The divergence a state-only revert
+leaves (state on the intended focus, OS still on the echoed
+window) is transient by construction: the closing re-assert
+ends it, and an echo arriving *after* that re-assert finds OS
+focus already restored, so reverting state alone is exactly
+right. The one case where the divergence persisted was a
+wrongly-reverted click — closed by the second ruling, not by
+re-asserting.
+
+**A click that reached the reported window escapes the revert.**
+A genuine click on a stamped window is shaped exactly like the
+raise echo, so it was consumed: keystrokes followed the click
+(macOS focused it) while ring and pan stayed behind — the
+first-click-does-nothing bug. A restore's echoes come from
+windows the user did not click, so a fresh click *that reached
+the reported window* is provenance no echo can forge. "Reached"
+is deliberately stricter than "landed inside its frame":
+edge-pile frames overlap, so a slow pile-mate's late echo can
+contain the click point too, and honoring it would pan the row
+onto a window the user never clicked. The escape therefore also
+requires the reported window to be the frontmost managed window
+at the click point (one WindowServer stacking read, ~0.4 ms) —
+safe against the drain's own later raises, because a quiet
+raise can never lift a pile-mate above the frontmost app's key
+window (measured for
+[#684](https://github.com/KiwiCanopy/KiwiDesk/issues/684)).
+The escaped report keeps its stamp: the raise's real echo may
+still be in flight, and if focus has moved on by the time it
+lands, that echo must still be reverted. What remains eaten is
+a deliberate *clickless* focus of a stamped window (cmd-tab,
+app-driven) inside the ~1 s echo window — once, and strictly
+better than the pre-#418 permanent poisoning.
+
 ### Layout and resize behavior
 
 **[Rationale]**

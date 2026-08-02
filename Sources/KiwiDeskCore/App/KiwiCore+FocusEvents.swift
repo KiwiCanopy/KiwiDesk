@@ -67,11 +67,26 @@ extension KiwiCore {
         // focus and strand the ring off the truly focused
         // window (#431). The self-echo path below consumes the
         // outstanding entry; the stamp expires on its own.
+        //
+        // Nor for a report with CLICK provenance (#687): a
+        // restore's echoes come from windows the user did not
+        // click, so a fresh click that reached the reported
+        // window is proof no echo can forge — without the
+        // escape, the first click after a restack was consumed
+        // (state reverted while macOS kept the click's focus,
+        // splitting keystrokes from ring and pan until the
+        // next focus event). The revert itself stays
+        // state-only either way: OS focus during a sequence is
+        // owned by its closing re-assert
+        // (`raiseSequentially(thenFocus:)`), and re-asserting
+        // per echo would fight the drain mid-sequence — see
+        // docs/design-decisions.md.
         if let stamp = zOrderRaiseEchoes[id],
             Date().timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
             let intended = effects.focusBefore, intended != id,
-            !outstandingSelfRaises.contains(id)
+            !outstandingSelfRaises.contains(id),
+            !recentClickReached(id, now: Date())
         {
             zOrderRaiseEchoes[id] = nil
             if let space = state.workspaces.space(of: intended) {
@@ -272,5 +287,43 @@ extension KiwiCore {
             let frame = state.windows[id]?.frame
         else { return false }
         return frame.contains(click.point)
+    }
+
+    /// Whether a left click within the echo window actually
+    /// REACHED `id` — the raise-echo revert's provenance escape
+    /// (#687). Deliberately stricter than `recentClickInside`:
+    /// containment alone is ambiguous here, because edge-pile
+    /// frames overlap, so a slow pile-mate's late echo can
+    /// contain the click point too — honoring it would pan the
+    /// row onto a window the user did not click. The stacking
+    /// read resolves the tie: the click reached the frontmost
+    /// window at its point, and a pile-mate the drain raised
+    /// after the click still cannot sit above it (a quiet raise
+    /// never beats the frontmost app's key window — measured
+    /// for #684). An unwired provider answers "unknown", which
+    /// is no provenance — the revert then behaves as before.
+    /// The containment check ahead of the provider call is a
+    /// SHORT-CIRCUIT, not load-bearing (the loop re-checks it):
+    /// it skips the stacking read for reports whose window the
+    /// click plainly missed.
+    private func recentClickReached(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let click = lastLeftClick,
+            now.timeIntervalSince(click.at)
+                < Self.zOrderRaiseEchoWindow,
+            state.windows[id]?.frame.contains(click.point)
+                == true,
+            let stacking = stackingOrderProvider?()
+        else { return false }
+        for candidate in stacking {
+            guard
+                let frame = state.windows[candidate]?.frame,
+                frame.contains(click.point)
+            else { continue }
+            return candidate == id
+        }
+        return false
     }
 }

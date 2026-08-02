@@ -150,6 +150,16 @@ public final class KiwiCore {
     /// see `recentClickInside`. Stamped in `KiwiCore+Lifecycle`.
     var lastLeftClick: (at: Date, point: CGPoint)?
 
+    /// The WindowServer's front-to-back stacking, for the
+    /// raise-echo revert's click-provenance check (#687) — which
+    /// window a click actually reached, where overlapping pile
+    /// frames make containment alone ambiguous. nil until
+    /// `start()` wires `AXHelper.onScreenStackingOrder`, so unit
+    /// tests exercising focus events never read the host's real
+    /// windows (the `frontmostPIDProvider` pattern); nil answers
+    /// "unknown", which the revert treats as no provenance.
+    var stackingOrderProvider: (@MainActor () -> [WindowID])?
+
     /// Windows we raised purely for z-order, stamped with the raise
     /// time — floats promoted above the tiled plane (#418) AND the
     /// overflow-pile members a cascade restore re-raises (#425). A
@@ -182,9 +192,10 @@ public final class KiwiCore {
     /// and be reverted (#418/#425). Sized to the slowest AX
     /// responders — Electron/WebKit answer focus queries in
     /// ~100-300 ms (§5) — with ~3x margin, at the cost of a
-    /// deliberate focus of a raised window within the window being
-    /// eaten once (strictly better than the old permanent
-    /// poisoning). Tunable.
+    /// deliberate CLICKLESS focus of a raised window (cmd-tab,
+    /// app-driven) within the window being eaten once — strictly
+    /// better than the old permanent poisoning, and a click
+    /// escapes on provenance (#687). Tunable.
     static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
     /// Resolves the OS foreground app's pid for the focused-command
@@ -304,19 +315,8 @@ public final class KiwiCore {
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
-    public var configURL: URL {
-        configDirectory.appendingPathComponent("init.lua")
-    }
 
     public let socket: SocketServer
-
-    /// Where the CLI expects the running app's socket.
-    public nonisolated static var defaultSocketPath: String {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(
-                ".config/KiwiDesk/KiwiDesk.sock"
-            ).path
-    }
 
     public init(
         configDirectory: URL? = nil,

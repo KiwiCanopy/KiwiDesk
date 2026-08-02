@@ -23,6 +23,14 @@ extension KiwiCore {
             NSWorkspace.shared.frontmostApplication?
                 .processIdentifier
         }
+        // Arm the raise-echo revert's click-provenance check
+        // (#687): which window a click actually reached, where
+        // overlapping pile frames make containment ambiguous.
+        // Left nil until here so unit tests never read the
+        // host's real windows.
+        stackingOrderProvider = {
+            AXHelper.onScreenStackingOrder()
+        }
         // Yields key focus to the desktop when a move empties the
         // focused display's space (#446) — Finder owns the desktop,
         // gated so it never teleports the user to another Space.

@@ -42,4 +42,16 @@ extension KiwiCore {
             $0.caseInsensitiveCompare(name) == .orderedSame
         }
     }
+
+    public var configURL: URL {
+        configDirectory.appendingPathComponent("init.lua")
+    }
+
+    /// Where the CLI expects the running app's socket.
+    public nonisolated static var defaultSocketPath: String {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                ".config/KiwiDesk/KiwiDesk.sock"
+            ).path
+    }
 }
