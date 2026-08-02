@@ -252,6 +252,27 @@ case "$VERSION" in
          "CFBundleVersion (1-3 dot-separated integers)" >&2
     exit 1 ;;
 esac
+# CFBundleLocalizations. Without it macOS resolves the process
+# locale to CFBundleDevelopmentRegion on every launch, so the
+# language picker's "System default" could never be anything but
+# English however complete a catalog was — the bundle claimed to
+# speak one language, so that is the one the OS handed back.
+# Derived from the shipped catalogs, never re-typed: en.json is on
+# disk as the translator manifest, so English is in the list by
+# construction rather than by a special case.
+LOCALES="$ROOT/Sources/KiwiDeskCore/Resources/Locales"
+LOCALE_KEYS=""
+for locale_file in "$LOCALES"/*.json; do
+    [ -e "$locale_file" ] || continue
+    code="$(basename "$locale_file" .json)"
+    LOCALE_KEYS="$LOCALE_KEYS
+        <string>$code</string>"
+done
+if [ -z "$LOCALE_KEYS" ]; then
+    echo "error: no locale catalogs under $LOCALES" >&2
+    exit 1
+fi
+
 echo "==> Info.plist (version $VERSION)"
 
 PLIST="$APP/Contents/Info.plist"
@@ -269,6 +290,9 @@ cat > "$PLIST" <<PLISTEOF
     <string>com.kiwicanopy.kiwidesk</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
+    <key>CFBundleLocalizations</key>
+    <array>$LOCALE_KEYS
+    </array>
     <key>CFBundleName</key>
     <string>KiwiDesk</string>
     <key>CFBundlePackageType</key>
