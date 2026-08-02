@@ -117,9 +117,16 @@ public final class EventLoop {
     var makeObserver: @MainActor (pid_t) -> (any AppObserving)? =
         { AXApplicationObserver(pid: $0) }
 
-    /// The app source the startup scan iterates.
-    var runningApplications: () -> [NSRunningApplication] = {
-        NSWorkspace.shared.runningApplications
+    /// The app source the startup scan and `reconcileAll`
+    /// iterate. Descriptor-shaped rather than
+    /// `NSRunningApplication`-shaped so a test can fabricate an
+    /// app — a real `NSRunningApplication` cannot be built for
+    /// a made-up pid, which would leave every wiring below the
+    /// seam unpinnable (#672 review).
+    var runningApplications: () -> [RunningApp] = {
+        NSWorkspace.shared.runningApplications.map(
+            RunningApp.init
+        )
     }
 
     /// The WindowServer prefilter feeding the scan's
@@ -152,6 +159,15 @@ public final class EventLoop {
     /// for what it bounds and why.
     var applyAXMessagingTimeout: (Float) -> Void =
         AXHelper.setGlobalMessagingTimeout
+
+    /// Whether `start()` registers the live NSWorkspace /
+    /// screen-parameter observers. Default-true (production);
+    /// the lifecycle suites turn it off so driving `start()`
+    /// leaves no observer whose callback could re-enter the
+    /// loop through live defaults mid-test. A forgotten opt-out
+    /// only registers observers that are removed by `stop()` —
+    /// never a missed production registration.
+    var registersWorkspaceObservers = true
 
     /// ~1 s: comfortably above the slowest healthy responders
     /// (Electron/WebKit answer lazily in 100–300 ms,

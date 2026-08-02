@@ -10,10 +10,12 @@ import Testing
 /// The boot scan may skip the expensive AX warmup for an app the
 /// WindowServer reports windowless — that skip is safe *only*
 /// because a following reconcile warms whatever was skipped.
-/// Until this suite, that promise lived in prose alone, so
-/// re-timing or dropping the startup sweep would have silently
-/// turned the skip into "slow-to-show-a-window Electron apps are
-/// never warmed" — the #360 failure by a new route. Everything
+/// This suite pins the funnel halves of that promise: the skip
+/// gate itself, the reconcile-warms retry, the pre-start attach
+/// inertness, and the `reconcileAll` scan dedup. What it cannot
+/// see is `start()` still *calling* `scheduleStartupSweep()` —
+/// `StartupSweepTests` pins the scheduled task's reconcile, and
+/// accessibility.md carries the remaining obligation. Everything
 /// here drives the funnels through the injected machine seams
 /// (tests.md); no real app, observer, or AX call is touched.
 @MainActor
@@ -32,8 +34,11 @@ struct StartupWarmupSkipTests {
     /// A loop whose machine seams are fakes, plus the write log
     /// the assertions read. The fake app answers the EUI read
     /// with `false` (an Electron shape: answers, tree cold), so
-    /// a warmup is visible as the EUI-on write.
+    /// a warmup is visible as the EUI-on write. `started: true`
+    /// drives the real `start()` (empty app list, no workspace
+    /// observers) rather than poking `isRunning` directly.
     private func makeLoop(
+        started: Bool = true,
         euiReads: @escaping @MainActor (pid_t) -> Bool? = {
             _ in false
         }
@@ -45,8 +50,11 @@ struct StartupWarmupSkipTests {
     ) {
         let loop = EventLoop()
         let box = WriteBox()
-        loop.isRunning = true
         loop.onLog = { _ in }
+        loop.registersWorkspaceObservers = false
+        loop.runningApplications = { [] }
+        loop.visiblePIDs = { [] }
+        loop.applyAXMessagingTimeout = { _ in }
         loop.makeObserver = { _ in FakeObserver() }
         loop.readEnhancedUI = euiReads
         loop.writeEnhancedUI = { _, on in
@@ -58,6 +66,9 @@ struct StartupWarmupSkipTests {
             return []
         }
         loop.activationPolicy = { _ in .regular }
+        if started {
+            loop.start()
+        }
         return (
             loop,
             { box.euiWrites },
@@ -85,7 +96,7 @@ struct StartupWarmupSkipTests {
             pid: pid,
             activationPolicy: .regular,
             ref: ref,
-            hasVisibleWindows: false
+            scanWindowsAtAttach: false
         )
         // The skip half: attached (observer installed), but no
         // window query and no warmup ran.
@@ -95,12 +106,7 @@ struct StartupWarmupSkipTests {
         // The promise half: the next reconcile of the attached
         // regular app warms it — and the attach + reconcile
         // pair cost exactly one window snapshot, which is the
-        // #672 scan dedup's mechanism (`scanOnAttach: false`
-        // rides this same deferral; the *wiring* of that flag
-        // in `reconcileAll`/`appActivated` is out of this
-        // suite's seam reach — it needs a real
-        // NSRunningApplication, and a headless runner has
-        // none to fabricate).
+        // #672 scan dedup's mechanism.
         loop.reconcile(pid: pid, app: ref)
         #expect(euiWrites() == [true])
         #expect(windowQueries() == 1)
@@ -113,7 +119,7 @@ struct StartupWarmupSkipTests {
             pid: pid,
             activationPolicy: .regular,
             ref: ref,
-            hasVisibleWindows: true
+            scanWindowsAtAttach: true
         )
         #expect(euiWrites() == [true])
     }
@@ -129,7 +135,7 @@ struct StartupWarmupSkipTests {
             pid: pid,
             activationPolicy: .regular,
             ref: ref,
-            hasVisibleWindows: false
+            scanWindowsAtAttach: false
         )
         loop.reconcile(pid: pid, app: ref)
         loop.reconcile(pid: pid, app: ref)
@@ -137,19 +143,42 @@ struct StartupWarmupSkipTests {
         #expect(euiWrites().isEmpty)
     }
 
+    @Test("reconcileAll scans a newly attached app once (#672)")
+    func reconcileAllScansOnce() {
+        // The old shape scanned every app twice on one turn:
+        // attach took a window snapshot and the reconcile right
+        // after took another. reconcileAll's sync loop now
+        // defers the scan to its own reconcile loop
+        // (scanWindowsAtAttach: false) — this is the wiring
+        // pin; the deferral mechanism itself is asserted above.
+        let (loop, euiWrites, _, windowQueries) = makeLoop()
+        let app = RunningApp(
+            pid: pid,
+            activationPolicy: .regular,
+            ref: ref
+        )
+        loop.runningApplications = { [app] }
+        loop.reconcileAll()
+        #expect(loop.observes(pid: pid))
+        #expect(windowQueries() == 1)
+        #expect(euiWrites() == [true])
+    }
+
     @Test("attach before start is inert (#672)")
     func attachBeforeStartIsInert() {
         // The ordering half of the boot fix: loadConfig's
         // pre-start reconcileAll must not attach anything, or
         // the scan's prefilter tests nothing — every app is
-        // already attached and warmed with the eager default by
-        // the time start() runs.
-        let (loop, euiWrites, _, windowQueries) = makeLoop()
-        loop.isRunning = false
+        // already attached and warmed eagerly by the time
+        // start() runs.
+        let (loop, euiWrites, _, windowQueries) = makeLoop(
+            started: false
+        )
         loop.attach(
             pid: pid,
             activationPolicy: .regular,
-            ref: ref
+            ref: ref,
+            scanWindowsAtAttach: true
         )
         #expect(!loop.observes(pid: pid))
         #expect(windowQueries() == 0)

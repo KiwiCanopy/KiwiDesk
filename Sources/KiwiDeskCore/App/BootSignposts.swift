@@ -18,19 +18,24 @@ import os
 /// subsystem's `onLog` seam, so a field report's syslog names the
 /// offending app without Instruments attached.
 enum BootSignpost {
-    /// Same string the packaged `.app` uses as its bundle
-    /// identifier (scripts/build-app.sh), so one subsystem
-    /// predicate finds the app's log lines and these intervals.
+    /// Keep this string equal to the `.app`'s
+    /// `CFBundleIdentifier` (scripts/build-app.sh writes that
+    /// one) — the whole point is that one subsystem predicate
+    /// finds the app's log lines and these intervals together,
+    /// so whoever changes either copy must change both.
     static let signposter = OSSignposter(
         subsystem: "com.kiwicanopy.kiwidesk",
         category: "boot"
     )
 
     /// An attach/reconcile span at or above this many
-    /// milliseconds logs one line through `onLog` — sized above
-    /// the Electron/WebKit lazy-answer band (100–300 ms,
-    /// accessibility.md) so a healthy warmup logs at most a
-    /// quiet line while a stalled app is always on record.
+    /// milliseconds logs one line through `onLog`. Sized at the
+    /// *floor* of the Electron/WebKit lazy-answer band
+    /// (100–300 ms, accessibility.md) on purpose: a nontrivial
+    /// warmup is itself boot-cost evidence worth one line (the
+    /// baseline's 289 ms Obsidian attach was exactly the
+    /// signal), while fast native apps stay quiet and a
+    /// stalled app is always on record.
     static let slowSpanMs: Int64 = 100
 }
 

@@ -24,6 +24,7 @@ struct StartupAXTimeoutTests {
         recording order: @escaping @MainActor (String) -> Void
     ) -> EventLoop {
         let loop = EventLoop()
+        loop.registersWorkspaceObservers = false
         loop.makeObserver = { _ in nil }
         loop.onLog = { _ in }
         loop.applyAXMessagingTimeout = { seconds in

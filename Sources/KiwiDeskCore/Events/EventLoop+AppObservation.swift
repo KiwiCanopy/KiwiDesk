@@ -7,7 +7,7 @@ extension EventLoop {
     /// rules. An ignored app has no AX observer, no enhanced-UI
     /// flag, and no tracked windows.
     ///
-    /// `scanOnAttach: false` is for callers that run a
+    /// `scanWindowsAtAttach: false` is for callers that run a
     /// `reconcile` of the same app on the same turn: the
     /// reconcile takes the one window snapshot, so scanning at
     /// attach too would read every window list twice (#672).
@@ -15,27 +15,27 @@ extension EventLoop {
     /// following reconcile warms and tracks whatever attach
     /// skipped (StartupWarmupSkipTests, #662).
     func syncObservation(
-        for app: NSRunningApplication,
-        scanOnAttach: Bool = true
+        for app: RunningApp,
+        scanWindowsAtAttach: Bool = true
     ) {
-        let pid = app.processIdentifier
-        let ref = AppRef(app)
-        let isIgnored = shouldIgnoreApp(bundleID: ref.bundleID)
+        let isIgnored = shouldIgnoreApp(
+            bundleID: app.ref.bundleID
+        )
         guard
             Self.shouldAttach(
-                pid: pid,
+                pid: app.pid,
                 activationPolicy: app.activationPolicy,
                 isIgnored: isIgnored
             )
         else {
-            detach(pid: pid, restoreEnhancedUI: true)
+            detach(pid: app.pid, restoreEnhancedUI: true)
             return
         }
         attach(
-            pid: pid,
+            pid: app.pid,
             activationPolicy: app.activationPolicy,
-            ref: ref,
-            hasVisibleWindows: scanOnAttach
+            ref: app.ref,
+            scanWindowsAtAttach: scanWindowsAtAttach
         )
     }
 
@@ -44,34 +44,21 @@ extension EventLoop {
     /// closing the gap in which an accessory app can create its
     /// first window (#177).
     ///
-    /// `hasVisibleWindows` is a WindowServer pre-filter: when
-    /// false the app had zero layer-0 windows on the server at
-    /// scan time, so the expensive AX window query and EUI/MAI
-    /// warmup are skipped — the AXObserver still fires for
-    /// future window creation, and a following reconcile
-    /// re-warms (the promise `StartupWarmupSkipTests` pins,
-    /// #662). No default: the boot scan is its only caller and
-    /// must state its answer.
-    func attach(
-        app: NSRunningApplication,
-        hasVisibleWindows: Bool
-    ) {
-        attach(
-            pid: app.processIdentifier,
-            activationPolicy: app.activationPolicy,
-            ref: AppRef(app),
-            hasVisibleWindows: hasVisibleWindows
-        )
-    }
-
-    /// Internal (not private): the pid-shaped entry the warmup
-    /// and lifecycle suites drive through injected seams — an
-    /// NSRunningApplication cannot be fabricated for a test pid.
+    /// `scanWindowsAtAttach: false` skips the expensive AX
+    /// window query and EUI/MAI warmup here, for one of two
+    /// reasons that share one safety argument: the boot scan's
+    /// WindowServer prefilter says the app is windowless, or
+    /// the caller reconciles this app on the same turn (#672
+    /// scan dedup). Either way the AXObserver still fires for
+    /// future window creation and a following reconcile warms
+    /// and tracks what was skipped — the promise
+    /// `StartupWarmupSkipTests` pins (#662). No default: every
+    /// caller states its answer.
     func attach(
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy,
         ref: AppRef,
-        hasVisibleWindows: Bool = true
+        scanWindowsAtAttach: Bool
     ) {
         // Nothing attaches before `start()` (#672): loadConfig's
         // pre-start `reconcileAll()` used to reach here and
@@ -117,12 +104,12 @@ extension EventLoop {
         }
         observers[pid] = observer
 
-        // When the WindowServer reports zero layer-0 windows
-        // for this app, skip the slow AX window query and
-        // warmup — the observer above still catches future
-        // window creation, and a following reconcile re-warms
-        // (StartupWarmupSkipTests, #662).
-        guard hasVisibleWindows else { return }
+        // Skip the slow AX window query and warmup when asked
+        // (windowless per the prefilter, or a same-turn
+        // reconcile follows) — the observer above still catches
+        // future window creation, and a following reconcile
+        // re-warms (StartupWarmupSkipTests, #662).
+        guard scanWindowsAtAttach else { return }
 
         let windows = axWindows(pid)
         if activationPolicy == .regular

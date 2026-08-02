@@ -23,7 +23,9 @@ extension EventLoop {
         // otherwise costs the ~6 s system default per call
         // (#672).
         applyAXMessagingTimeout(Self.axMessagingTimeoutSeconds)
-        registerWorkspaceObservers()
+        if registersWorkspaceObservers {
+            registerWorkspaceObservers()
+        }
         let signposter = BootSignpost.signposter
         let scan = signposter.beginInterval("startupScan")
         let begin = ContinuousClock.now
@@ -31,10 +33,10 @@ extension EventLoop {
         let apps = runningApplications()
         for app in apps {
             attach(
-                app: app,
-                hasVisibleWindows: visible.contains(
-                    app.processIdentifier
-                )
+                pid: app.pid,
+                activationPolicy: app.activationPolicy,
+                ref: app.ref,
+                scanWindowsAtAttach: visible.contains(app.pid)
             )
         }
         signposter.endInterval("startupScan", scan)

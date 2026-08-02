@@ -27,9 +27,13 @@ editing AX code:
   tests.md's hang-guard rule.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
-  reconcile warms whatever was skipped (#662).** A reconcile of
-  a regular app must keep retrying `warmAccessibilityTree`;
-  `StartupWarmupSkipTests` is the guard that reds when either
-  half of that promise breaks. The user-visible residue — a
-  windowless app's tree materializes up to ~1 s late — is
-  accepted in `docs/accepted-limitations.md`.
+  reconcile warms whatever was skipped (#662).** Three links
+  carry that promise, guarded two-and-a-half ways: the skip
+  gate and the reconcile-warms retry are pinned by
+  `StartupWarmupSkipTests`, and the scheduled sweep's task
+  actually running a `reconcileAll` is pinned by
+  `StartupSweepTests` — but nothing machine-checks that
+  `start()` still *calls* `scheduleStartupSweep()`, so do not
+  drop or re-time that call without adding the pin and
+  re-deriving the ceiling `docs/accepted-limitations.md`
+  accepts for the user-visible residue.

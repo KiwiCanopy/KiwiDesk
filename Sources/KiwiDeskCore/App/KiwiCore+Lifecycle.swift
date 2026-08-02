@@ -70,11 +70,15 @@ extension KiwiCore {
         sleepWake.start()
         // One retile for the whole scan instead of one per
         // discovered window (#672): windows fold into state as
-        // the events arrive, geometry lands once below.
+        // the events arrive, geometry lands once below. The
+        // per-event #193 pile restore was suppressed with the
+        // retiles, so re-arm it once here — it self-gates on
+        // track + actual overflow.
         defersEventRetiles = true
         eventLoop.start()
         defersEventRetiles = false
         retile()
+        scheduleTrackZOrderRestoreIfOverflowing()
         let scanDone = ContinuousClock.now
         mouse.start()
         // The event loop discovered windows in AX order; put
@@ -125,7 +129,13 @@ extension KiwiCore {
     /// spaces. If the user has not switched away meanwhile,
     /// the landing choice is re-run: the focused window may
     /// only now be resolvable to its space.
-    private func scheduleStartupSweep() {
+    ///
+    /// Internal (not private): the sweep is the promise the
+    /// boot prefilter's warmup skip rests on (#662), so
+    /// `StartupSweepTests` drives it directly and asserts the
+    /// fired task reconciles — `start()` itself is not
+    /// test-drivable.
+    func scheduleStartupSweep() {
         let landed = state.workspaces.activeSpace
         deferred.schedule(.startupSweep, after: .seconds(1)) {
             [weak self] in
@@ -135,11 +145,13 @@ extension KiwiCore {
             let sweep = signposter.beginInterval("startupSweep")
             let begin = ContinuousClock.now
             // Same batching as the boot scan: what the sweep
-            // discovers lands in one retile (#672).
+            // discovers lands in one retile, and the #193 pile
+            // restore is re-armed once after it (#672).
             self.defersEventRetiles = true
             self.eventLoop.reconcileAll()
             self.defersEventRetiles = false
             self.retile()
+            self.scheduleTrackZOrderRestoreIfOverflowing()
             signposter.endInterval("startupSweep", sweep)
             let ms =
                 begin.duration(to: .now).wholeMilliseconds
