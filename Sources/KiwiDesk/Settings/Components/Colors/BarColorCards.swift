@@ -146,24 +146,37 @@ struct AdvancedColorRows: View {
 
     var body: some View {
         ForEach(keys, id: \.id) { key in
+            let gate = Self.gate(allows: allows, key: key)
             AdvancedColorRow(
                 model: model,
                 key: key,
-                // An exempt row skips the CONTAINER gate below,
-                // so it must not also have its own predicate
-                // neutralised — without the `||` it would ship
-                // with both gates off, which is the opposite of
-                // what the exemption asks for.
-                containerAllows: allows
-                    || key.placement.exemptFromContainerGate
+                containerAllows: gate.rowPredicateLive
             )
             .modifier(
-                GreyOut(
-                    active: !allows
-                        && !key.placement.exemptFromContainerGate,
-                    help: gateHelp
-                )
+                GreyOut(active: gate.containerGrey, help: gateHelp)
             )
         }
+    }
+
+    /// How a row's two gates resolve, lifted out of `body` so the
+    /// rule can be asserted instead of only read.
+    ///
+    /// The exemption means "escape the CONTAINER gate", not
+    /// "escape both". Without the `||` an exempt row loses its
+    /// own predicate as well and ships as an editable swatch
+    /// that tints nothing, with no explanation anywhere on
+    /// screen — the exact opposite of what the exemption asks
+    /// for. Nothing is exempt in this area today, which is why
+    /// this is a seam rather than a comment: the first person to
+    /// add one should not have to rediscover it.
+    static func gate(
+        allows: Bool,
+        key: SettingKey
+    ) -> (rowPredicateLive: Bool, containerGrey: Bool) {
+        let exempt = key.placement.exemptFromContainerGate
+        return (
+            rowPredicateLive: allows || exempt,
+            containerGrey: !allows && !exempt
+        )
     }
 }

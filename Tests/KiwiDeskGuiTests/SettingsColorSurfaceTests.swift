@@ -136,21 +136,32 @@ struct SettingsColorSurfaceTests {
     /// `automatic: true` the row builder hands its swatch. Only
     /// the Core half was pinned, so a `_color` row given the flag
     /// would let the GUI write an empty value that `apply`
-    /// silently drops on the next palette round-trip. Pin the
-    /// count of GUI call sites against the derived set.
+    /// silently drops on the next palette round-trip.
+    ///
+    /// Counted across the WHOLE Settings tree, not one builder: a
+    /// guard-prover run put the flag on the App Bar's Fill
+    /// swatch — a `_color` path, precisely the defect above — and
+    /// a scan confined to the mark rows' own file stayed green.
+    ///
+    /// **Both assertions earn their place, and they fail apart in
+    /// both directions** (proven): the derived comparison alone
+    /// catches Core's predicate widening under a static GUI; the
+    /// literal alone catches the two halves growing TOGETHER, a
+    /// third mark struct plus a third flagged row, which the
+    /// derived comparison cannot see. The literal is a
+    /// conscious-edit tripwire over a derived value, not a
+    /// restated constant.
     @Test("only the mark rows offer Automatic")
     func automaticFlagMatchesTheColorSurface() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
-                    + "AdvancedColorRow+Structure.swift"
+        var flags = 0
+        for file in try SourceScan.swiftSources(under: settingsDir) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
             )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        let flags =
-            source.components(separatedBy: "automatic: true").count
-            - 1
+            flags +=
+                source.components(separatedBy: "automatic: true")
+                .count - 1
+        }
         let automaticPaths = ColorPaletteKeys.all.filter(
             ColorPaletteKeys.allowsAutomatic
         )

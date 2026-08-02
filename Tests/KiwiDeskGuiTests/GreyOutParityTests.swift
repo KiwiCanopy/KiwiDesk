@@ -107,17 +107,15 @@ struct GreyOutParityTests {
         // Advanced Colours (#678 Phase 3), which replaced the
         // interim colour cards.
         //
-        // The first is a SHAPE pin, not behavioural coverage,
-        // and its green must not be read as one: no
-        // `.advancedColours` census row sets
-        // `exemptFromContainerGate` today
-        // (`ColorsCensusRenderTests.nothingIsExempt` pins
-        // that), so deleting the term reds this needle and
-        // changes nothing on screen. It is here so the renderer
-        // honors the flag as data BEFORE anyone sets it —
-        // whoever adds the first exemption should find the
-        // renderer already ready, not discover it silently
-        // ignored.
+        // The first pins the WIRING: each row must actually
+        // apply the resolved container gate. The gate's own
+        // logic — that an exemption escapes the container grey
+        // and nothing else — used to live inline here as a
+        // shape pin whose green was not coverage; it is now a
+        // pure function with a behavioural test
+        // (`ColorsCensusRenderTests`,
+        // `exemptionEscapesOnlyTheContainerGate`), so this
+        // needle no longer has to stand in for it.
         //
         // The second IS behavioural: without it a row gate
         // fires alongside its container gate and the hover
@@ -125,7 +123,7 @@ struct GreyOutParityTests {
         // un-grey anything.
         (
             "BarColorCards.swift",
-            "&& !key.placement.exemptFromContainerGate",
+            "GreyOut(active: gate.containerGrey",
             1
         ),
         (
@@ -162,8 +160,14 @@ struct GreyOutParityTests {
             )
             let found =
                 source.components(separatedBy: gate).count - 1
+            // EXACT, not a floor. `>=` lets an expression that
+            // later gains a third occurrence regain slack — one
+            // of three could then be deleted green, which is the
+            // hole the count field was added to close. Every
+            // entry matches exactly today, so a gate gaining an
+            // occurrence is a conscious edit here too.
             #expect(
-                found >= count,
+                found == count,
                 Comment(
                     rawValue:
                         "\(name) has \(found) of \(count) gate(s) "

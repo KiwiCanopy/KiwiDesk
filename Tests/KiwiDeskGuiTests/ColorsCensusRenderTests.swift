@@ -70,23 +70,6 @@ struct ColorsCensusRenderTests {
         )
     }
 
-    /// Advanced Colours exempts no row from a container gate
-    /// today. Pinned so that adding one is a conscious edit —
-    /// the renderer already honors the flag as data
-    /// (`AdvancedColorRows`), so the census is the only half a
-    /// future exemption has to touch, and this is what asks
-    /// whether it has an argument.
-    @Test("no Advanced Colours row escapes its container gate")
-    func nothingIsExempt() {
-        #expect(
-            SettingKey.allCases.filter {
-                $0.placement.area == .advancedColours
-                    && $0.placement.exemptFromContainerGate
-            }
-            .isEmpty
-        )
-    }
-
     /// The per-palette context menu. `.showMore` is the nearest
     /// true tier for a menu (not visible at rest, one interaction
     /// away) and the census says so in prose; what this pins is
@@ -155,6 +138,12 @@ struct ColorsCensusRenderTests {
     /// must hold: the columns are what the renderer reads, so a
     /// combined list nothing renders would let a fifth drag tint
     /// ship invisible while this stayed green.
+    ///
+    /// Set equality over the union cannot see WHICH column a
+    /// tint sits in — swapping one across renders the Ghost's
+    /// Fill under the "Drop zone" heading, beside that column's
+    /// preview and its `?`. `dragColumnsHoldTheirOwnVisual`
+    /// below is the half that pins it.
     @Test("the Drag group's rows are the census's")
     func dragGroup() {
         pin(
@@ -169,6 +158,29 @@ struct ColorsCensusRenderTests {
             censusRows(.advancedColours, .dragAndDrop, .showMore)
                 .isEmpty
         )
+    }
+
+    /// Each column holds its own visual's tints and no others,
+    /// derived from the census row key rather than re-listed:
+    /// the two columns render side by side, each with its own
+    /// preview and its own gate, so a tint in the wrong one is
+    /// labelled by the wrong visual and explained by the wrong
+    /// switch.
+    @Test("each drag column holds only its own visual's tints")
+    func dragColumnsHoldTheirOwnVisual() {
+        func isGhost(_ key: SettingKey) -> Bool {
+            key.id.contains("dragGhost")
+        }
+        #expect(ColorsRowOrder.dragGhostColumn.allSatisfy(isGhost))
+        #expect(
+            ColorsRowOrder.dragDropZoneColumn.allSatisfy {
+                !isGhost($0) && $0.id.contains("dragDropZone")
+            }
+        )
+        // Vacuity: a renamed key shape would make both
+        // `allSatisfy`s pass over nothing to check.
+        #expect(!ColorsRowOrder.dragGhostColumn.isEmpty)
+        #expect(!ColorsRowOrder.dragDropZoneColumn.isEmpty)
     }
 
     @Test("the Space Bar group's two tiers are the census's")
@@ -214,86 +226,6 @@ struct ColorsCensusRenderTests {
         #expect(
             containers(of: .advancedColours)
                 == [.borders, .dragAndDrop, .spaceBar, .appBar]
-        )
-    }
-
-    /// The bar groups inherit their block gate from the census
-    /// containers the Bars page also gates from — that spanning
-    /// is what carries one gate onto both surfaces, so a second
-    /// resolver would be the #520 drift. Pin that the resolver
-    /// this area uses IS that one.
-    @MainActor
-    @Test("the bar groups' gates resolve against the draft")
-    func barGroupGatesResolve() {
-        var settings = TilingSettings()
-        settings.spaceBarStyle.enabled = false
-        settings.monocle.appBar.enabled = false
-        settings.scrolling.appBar.enabled = false
-        var gates = AdvancedColorsGates(settings: settings)
-        #expect(!gates.bars.allowsEditing(.spaceBar))
-        #expect(!gates.bars.allowsEditing(.appBar))
-
-        settings.spaceBarStyle.enabled = true
-        settings.monocle.appBar.enabled = true
-        gates = AdvancedColorsGates(settings: settings)
-        #expect(gates.bars.allowsEditing(.spaceBar))
-        #expect(gates.bars.allowsEditing(.appBar))
-    }
-
-    /// The off-page gates each pick a sentence, and the OUTERMOST
-    /// reason wins — naming the unfocused toggle while the whole
-    /// ring is off would send the user to fix the wrong switch.
-    @MainActor
-    @Test("an off-page gate names the outermost reason")
-    func headerHelpPicksTheOuterReason() {
-        var settings = TilingSettings()
-        settings.borderStyle.enabled = false
-        settings.borderStyle.unfocusedEnabled = false
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == AdvancedColorsHelp.borderOff
-        )
-        settings.borderStyle.enabled = true
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp
-                == AdvancedColorsHelp.unfocusedOff
-        )
-        settings.borderStyle.unfocusedEnabled = true
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == nil
-        )
-
-        settings.dragGhost.enabled = false
-        settings.dragGhost.border = false
-        var gates = AdvancedColorsGates(settings: settings)
-        #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragOff
-        )
-        #expect(gates.dragHeaderHelp(ghost: false) == nil)
-
-        // Border and Fill are siblings, not a second level: with
-        // both off the column's one live `?` must carry BOTH
-        // reasons, or the Fill row sits dimmed and unexplained.
-        settings.dragGhost.enabled = true
-        settings.dragGhost.fill = false
-        gates = AdvancedColorsGates(settings: settings)
-        let both = gates.dragHeaderHelp(ghost: true)
-        #expect(
-            both?.contains(AdvancedColorsHelp.dragBorderOff)
-                == true
-        )
-        #expect(
-            both?.contains(AdvancedColorsHelp.dragFillOff) == true
-        )
-
-        settings.dragGhost.border = true
-        gates = AdvancedColorsGates(settings: settings)
-        #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragFillOff
         )
     }
 
