@@ -115,6 +115,28 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("keeping: raised"))
     }
 
+    /// The live restore's policy, which nothing else can see.
+    ///
+    /// `zOrderDrain` is a private helper and no unit test reaches
+    /// it, so handing it `.teardown` passed all 2424 tests
+    /// (guard-prover, 2026-08-03) — and that swap is not cosmetic:
+    /// it would hold the mouse warp for 2.5x as long through
+    /// `zOrderRestoresInFlight`, and DROP the tail whose stamps
+    /// nothing would then consume, which is the click-swallowing
+    /// focus bug `releaseZOrderStamps` exists for.
+    ///
+    /// The unit suites pin what each policy MEANS
+    /// (`exhaustedBudgetIssuesTheRemainder` reds if `.restore`
+    /// stops issuing its tail); this pins which one arrives here.
+    @Test("The float raise drains on the restore policy")
+    func floatRaiseUsesTheRestorePolicy() throws {
+        let source = try body(
+            of: "zOrderDrain",
+            in: "KiwiCore+ZOrderFloats.swift"
+        )
+        #expect(source.contains("policy: .restore"))
+    }
+
     @Test("The float raise derives its floor through the rule")
     func floatRaiseUsesTheFloorRule() throws {
         let source = try body(
@@ -189,6 +211,13 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("AXHelper.isTrusted()"))
         #expect(source.contains("ZOrderDrain.Policy.teardown"))
         #expect(source.contains("policy.limited(to: remaining)"))
+        // The narrowing needle above pins that each group gets
+        // what is LEFT, never what the whole-quit deadline it is
+        // narrowed against was sized from. Sizing that deadline
+        // from `.restore.budget` satisfies every other needle here
+        // and passes the whole suite (guard-prover, 2026-08-03),
+        // so the deadline expression earns its own.
+        #expect(source.contains("+ policy.budget"))
         #expect(
             source.contains(
                 "let unbeatable = trustedFrontmostFocusedWindowID()"
