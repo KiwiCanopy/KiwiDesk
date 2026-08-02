@@ -53,6 +53,13 @@ struct BarsGateContext {
         case .layoutAppBar(.scrollingAppBarEnabled):
             return settings.scrolling.appBar.enabled
         default:
+            // Fail-open in release (a live row beats a locked
+            // editor), loud in debug: a census gate re-homed
+            // onto an owner this resolver doesn't read would
+            // otherwise un-grey silently forever.
+            assertionFailure(
+                "unhandled census gate owner: \(key.id)"
+            )
             return true
         }
     }
