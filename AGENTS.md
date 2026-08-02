@@ -191,6 +191,29 @@ Use the GitHub [issue templates](.github/ISSUE_TEMPLATE/) and
 [PR template](.github/pull_request_template.md). Reference issues
 with `fixes #123`.
 
+**An agent drafting an issue renders the template, rather than
+writing whatever shape it likes.** GitHub only applies a
+`.yml` form when a human opens the *New issue* page, so
+`gh issue create --body-file` — the way an agent files one —
+starts from a blank body and silently keeps none of it. Read the
+template, then reproduce it: each `label:` as a `###` heading in
+declared order, its `labels:` on the command line, its `title:`
+prefix on the title. The reason is not tidiness. Those fields are
+the questions a maintainer needs answered *before* triaging, and
+an agent that skips them is skipping the questions, not just the
+formatting — the templates ask for the macOS version and the
+other AX tools running because that is what half of KiwiDesk's
+bug reports turn on.
+
+Pick the template by what the issue *is*: `bug_report` when
+something shipped behaves wrongly (including a guard that cannot
+fail — the repro is the mutation that ought to red it),
+`feature_request` for new or retuned behavior, `docs_report` for
+prose, `collector` / `roadmap` for grouping. All six are written
+for a **user**, so an internal engineering issue will have fields
+that fit awkwardly — answer them honestly from the dev machine
+rather than dropping them or inventing a seventh shape inline.
+
 ### Commit messages (Angular / Conventional Commits)
 
 `type(scope): subject` — imperative, lower-case, no trailing
@@ -300,7 +323,7 @@ touch a matching path.
 | `Borders` | [borders.md](.claude/rules/borders.md) | `FollowSource` owns which frame the ring AND mark render — never re-implement it beside a call site; mid-animation the commanded tick leads and every state-reading channel (echo, WS re-read, `sync` geometry) stands down; the settle passes are two keys, early visibility and late geometry |
 | `Sources/KiwiDesk` (the GUI) | [gui.md](.claude/rules/gui.md) | North-star and settled conventions; grey don't hide; `NSCursor.set()` never push/pop; keep `body` shallow or the CI type-checker dies |
 | `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; content guards with no exemption file; Core names, the GUI narrates (#96) |
-| `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`) |
+| `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531) and any default a fixture reasons from (#660); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`); a change owes a test that reds when it is reverted, and a new guard owes a `guard-prover` run — runtime is never why a test is removed |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
 | `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32); gate CI's macOS jobs on the `changes` job rather than on a trigger filter, and add a `.github/ci-ignore.txt` entry only when no test, no build step and no lint step reads the path (`CiPathFilterTests`) |
 | `.claude/rules/**`, `.claude/agents/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614); `RuleCitationTests` resolves the citations in all three |
