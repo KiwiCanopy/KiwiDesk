@@ -13,6 +13,17 @@ import Testing
 /// `es` reached 214 pt, nearly double — and each one truncated on
 /// screen in a language no reviewer here reads.
 ///
+/// **This suite retires with the sidebar (#678).** The redesign
+/// replaces the source list with a Home card grid, and when that
+/// lands there is no fixed 190 pt column and no destination row
+/// to measure — delete it and the `SettingsMetrics.sidebar*`
+/// members together, deliberately, rather than leaving a suite
+/// failing for a surface that no longer exists. Its *method* is
+/// worth porting if Home's card titles turn out to need a budget
+/// of their own; its subject is not. `SidebarCrossReferenceTests`
+/// is the half that survives — a breadcrumb naming its
+/// destination is IA-independent.
+///
 /// Like `LocalizationRegistryTests`, this suite walks the shipped
 /// catalogs on purpose. The thing under test *is* the corpus —
 /// "every label we ship fits the column" has no meaning against

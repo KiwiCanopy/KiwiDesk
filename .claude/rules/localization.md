@@ -178,7 +178,12 @@ is why they are here rather than beside the views:
   language. Shorten with the whole meaning intact: the pane's
   heading is that same `destination.title`, so a trimmed label is
   the only name the user ever reads. `SidebarLabelWidthTests`
-  measures every shipped label.
+  measures every shipped label — and retires with the sidebar
+  when #678's Home grid replaces it, so this bullet goes in the
+  same change set. Note the redesign takes the OPPOSITE line for
+  ordinary *row* labels: there the control is fixed and the label
+  flexes and wraps. Single-line and truncating is a property of a
+  source-list row, not a house rule to carry forward.
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own
