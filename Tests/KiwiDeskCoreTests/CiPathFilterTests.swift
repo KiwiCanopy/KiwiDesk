@@ -1,22 +1,21 @@
 import Foundation
 import Testing
 
-/// `ci.yml`'s `paths-ignore` cannot switch off a suite silently.
+/// `.github/ci-ignore.txt` cannot switch off a suite silently.
 ///
-/// The filter skips the whole CI job for a change touching only
-/// listed paths. That is safe exactly while nothing the job does
-/// reads them — and the failure mode is invisible: an entry added
-/// in error does not break a build, it stops one from happening,
-/// and a skipped workflow reports success by never reporting.
+/// The `changes` job in `ci.yml` reads that list and gates the two
+/// macOS jobs on it. A wrong entry does not break a build, it stops
+/// one from happening — and a job that never ran reports nothing to
+/// contradict.
 ///
 /// Five things are checked, in the order they would bite:
 ///
-/// 1. The `push:` and `pull_request:` lists are identical, and are
-///    the lists those two triggers own. The Actions parser rejects
-///    YAML anchors, so the list is hand-mirrored, and drift would
-///    filter the two events differently — a change tested
-///    pre-merge and skipped after, or the reverse
-///    (parity-tests.md).
+/// 1. `ci.yml` still reads the list and still gates on it, and has
+///    not gone back to a trigger-level `paths-ignore`. That older
+///    shape saved the same minutes but skipped the *workflow*, and
+///    a workflow that does not run reports no check at all — which
+///    deadlocks a required status check, unlike a job skipped by
+///    `if:`, which satisfies one (#487).
 /// 2. Every entry is an exact path or `dir/**`. The other checks
 ///    are prefix relations over plain strings, so `*` and `?` are
 ///    ordinary characters to them: `Package.*` would ignore
@@ -31,7 +30,7 @@ import Testing
 ///    resolves every such pin.
 /// 5. The build and lint inputs are never ignored — the clause a
 ///    test-only audit misses, since nothing in `Tests/` reads
-///    `Package.swift`, `.swift-format` or `.swiftlint.yml`.
+///    `Package.swift` or `.swift-format`.
 ///
 /// **What this cannot see**, stated plainly because check (3)
 /// promises more than it delivers: a path written as
@@ -59,7 +58,6 @@ struct CiPathFilterTests {
     static let neverIgnorable = [
         "Package.swift",  // defines what is built at all
         ".swift-format",  // scripts/lint.sh --configuration
-        ".swiftlint.yml",  // SwiftLint SPM build plugin
         "Sources",
         "Tests",
         "Vendor",
@@ -103,26 +101,71 @@ struct CiPathFilterTests {
         }
     }
 
-    @Test("Both paths-ignore lists are identical")
-    func listsMatch() throws {
-        let lists = Self.ignoreLists(try workflow)
-        // #require, not #expect: with no list parsed, every
-        // comparison below is trivially true (nil != [], nil ==
-        // nil) and only the count would red — pointing at the
-        // wrong thing.
-        try #require(
-            lists.count == 2,
-            "found \(lists.count) lists, want 2"
+    @Test("ci.yml still consults the list, and gates on it")
+    func workflowConsultsTheList() throws {
+        let yaml = try workflow
+        // Without this the whole mechanism is decorative: the file
+        // parses, every other check passes over it, and the jobs
+        // run unconditionally — or worse, the filter moves back to
+        // a trigger-level `paths-ignore`, whose skipped workflow
+        // reports no check run and deadlocks a required check.
+        #expect(
+            yaml.contains(".github/ci-ignore.txt"),
+            "ci.yml no longer reads the ignore list"
         )
-        try #require(
-            lists.map(\.trigger).sorted() == ["pull_request", "push"],
-            "lists came from \(lists.map(\.trigger))"
+        // The key, not the word: the comment above the triggers
+        // explains why this shape was abandoned, and naming it
+        // there must not read as using it.
+        let usesTriggerFilter =
+            yaml
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .contains { $0.hasPrefix("paths-ignore:") }
+        #expect(
+            !usesTriggerFilter,
+            """
+            ci.yml filters at the trigger again — a filtered-out \
+            workflow never reports, so a required check waits \
+            forever (#487, scripts/protect-main.sh)
+            """
         )
-        let first = lists.first?.entries ?? []
-        let last = lists.last?.entries ?? []
-        let parsed = first.count
-        try #require(parsed > 0, "a paths-ignore list parsed as empty")
-        #expect(first == last, "the two lists differ")
+        // Per job, not over the whole file. A whole-file
+        // `contains` is satisfied by one job keeping its gate
+        // while the other loses it — which is exactly the mutation
+        // that has to red, and did not until this was split.
+        for job in ["build-lint-test", "release-build"] {
+            let block = Self.jobBlock(job, in: yaml)
+            #expect(
+                block?.contains("needs: changes") == true,
+                "\(job) does not depend on the changes job"
+            )
+            #expect(
+                block?.contains("if: needs.changes.outputs.run == 'true'")
+                    == true,
+                "\(job) is not gated on the changes outcome"
+            )
+        }
+    }
+
+    @Test("Every exemption is still load-bearing")
+    func exemptionsAreLive() throws {
+        // The idiom's other half, which both precedents carry
+        // (`VisibleBoundsRoutingTests`, `BatchSizingRoutingTests`):
+        // an exemption that outlives its reason silently widens the
+        // hole it was cut for. Assert each entry still describes a
+        // file that still contains the component it excuses.
+        let sources = try testSources()
+        for (component, file) in Self.allowed {
+            let source = sources.first { $0.0 == file }
+            let text = try #require(
+                source?.1,
+                "exempted file \(file) is gone"
+            )
+            #expect(
+                text.contains("\"\(component)\""),
+                "\(file) no longer builds a \(component) component"
+            )
+        }
     }
 
     @Test("Every entry is an exact path or a whole subtree")
@@ -150,13 +193,6 @@ struct CiPathFilterTests {
             from every prefix check: \(malformed)
             """
         )
-    }
-
-    /// The ignore entries, refusing an empty parse.
-    func entries() throws -> [String] {
-        let ignored = Self.ignoreLists(try workflow).first?.entries ?? []
-        try #require(!ignored.isEmpty, "no paths-ignore entries")
-        return ignored
     }
 
     @Test("No ignored path is read by the test suite")

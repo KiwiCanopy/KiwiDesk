@@ -75,69 +75,51 @@ extension CiPathFilterTests {
         return out
     }
 
-    /// One YAML list value: either quote style, no trailing
-    /// comment.
+    /// The ignore entries, refusing an empty parse.
     ///
-    /// Stripping only the outer double quotes leaves
-    /// `- "docs/**"  # covered by site.yml` parsed as a path
-    /// nothing can match — and because both hand-mirrored copies
-    /// mangle identically, `listsMatch` stays green while checks
-    /// (2), (3) and (4) quietly stop covering that entry.
-    static func scalar(_ raw: String) -> String {
-        var value = raw.trimmingCharacters(in: .whitespaces)
-        if !value.hasPrefix("#"), let hash = value.range(of: " #") {
-            value = String(value[..<hash.lowerBound])
-        }
-        value = value.trimmingCharacters(in: .whitespaces)
-        for quote in ["\"", "'"] where value.hasPrefix(quote) {
-            value = String(value.dropFirst())
-            if value.hasSuffix(quote) { value = String(value.dropLast()) }
-            break
-        }
-        return value
-    }
-
-    /// Each `paths-ignore:` block with the trigger that owns it.
-    ///
-    /// The trigger is recorded because two lists being equal says
-    /// nothing about *which* events they filter — a block moved
-    /// under a third trigger parses identically.
-    static func ignoreLists(
-        _ text: String
-    ) -> [(trigger: String, entries: [String])] {
-        var out: [(trigger: String, entries: [String])] = []
-        var current: [String]?
-        var trigger = ""
-        var pending = ""
-        for raw in text.split(
+    /// One authority: `.github/ci-ignore.txt`. The old shape kept
+    /// the list twice inside `ci.yml` (the Actions parser rejects
+    /// YAML anchors) and needed a parity check to hold the copies
+    /// equal. Moving it out deleted that whole class.
+    func entries() throws -> [String] {
+        let text = try String(
+            contentsOf: Self.ignoreFile(under: repoRoot),
+            encoding: .utf8
+        )
+        let parsed = text.split(
             separator: "\n",
             omittingEmptySubsequences: false
-        ) {
-            let line = raw.trimmingCharacters(in: .whitespaces)
-            if line.hasSuffix(":"), !line.hasPrefix("-") {
-                let key = String(line.dropLast())
-                if key == "push" || key == "pull_request" {
-                    pending = key
-                }
-            }
-            if line == "paths-ignore:" {
-                if let current { out.append((trigger, current)) }
-                trigger = pending
-                current = []
-                continue
-            }
-            guard current != nil else { continue }
-            if line.hasPrefix("#") { continue }
-            guard line.hasPrefix("- ") else {
-                if !line.isEmpty {
-                    out.append((trigger, current!))
-                    current = nil
-                }
-                continue
-            }
-            current?.append(Self.scalar(String(line.dropFirst(2))))
+        )
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty && !$0.hasPrefix("#") }
+        try #require(!parsed.isEmpty, "no ci-ignore entries")
+        return parsed
+    }
+
+    /// One job's YAML block: its `  name:` line through the line
+    /// before the next key at the same indent.
+    static func jobBlock(_ name: String, in yaml: String) -> String? {
+        let lines = yaml.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        )
+        guard let start = lines.firstIndex(where: { $0 == "  \(name):" })
+        else { return nil }
+        var end = lines.index(after: start)
+        while end < lines.endIndex {
+            let line = lines[end]
+            let isSibling =
+                line.hasPrefix("  ") && !line.hasPrefix("   ")
+                && line.hasSuffix(":")
+            if isSibling { break }
+            end = lines.index(after: end)
         }
-        if let current { out.append((trigger, current)) }
-        return out
+        return lines[start..<end].joined(separator: "\n")
+    }
+
+    static func ignoreFile(under root: URL) -> URL {
+        root
+            .appendingPathComponent(".github")
+            .appendingPathComponent("ci-ignore.txt")
     }
 }

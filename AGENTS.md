@@ -128,11 +128,12 @@ traced at directory altitude — see **`docs/architecture.md`**.
    readable duplication over a deep protocol hierarchy or heavy
    generics. Keep code flat.
 5. **Formatting:** `swift format` with the repo's `.swift-format`
-   config owns all style. SwiftLint (SPM build plugin,
-   `.swiftlint.yml`) owns semantic rules — force casts,
-   complexity, file length — and warns in Xcode during builds.
-   Never enable a SwiftLint style rule that fights swift-format.
-   Run `scripts/lint.sh` before committing — its **exit code**
+   config owns all style, and `scripts/lint.sh` additionally
+   enforces the §2.1 line-length and file-size limits. Linting is
+   its own step, **not** a build-tool plugin — `Package.swift`
+   carries why the SwiftLint prebuild plugin was removed, so
+   `.swiftlint.yml` no longer runs during a build. Run
+   `scripts/lint.sh` before committing — its **exit code**
    decides, not its warnings.
 6. **Concurrency:** AppKit/AX interaction is `@MainActor`. Pure
    state and layout code stays actor-free and unit-testable.
@@ -232,9 +233,10 @@ scripts.
   `--non-interactive` avoids a hang when piped; scope it with
   `--only claude`, `--minimal`, or `--uninstall`.
 - CI (`.github/workflows/ci.yml`) builds, lints and tests on
-  pushes to `main` and on PRs targeting it, unless the change is
-  confined to its `paths-ignore` list. A red build blocks
-  merging. Adding an entry to that list needs
+  pushes to `main` and on PRs targeting it. Its two macOS jobs are
+  gated on a `changes` job, so a change confined to
+  `.github/ci-ignore.txt`'s list leaves them skipped. A red build
+  blocks merging. Adding an entry to that list needs
   [packaging-and-release.md](.claude/rules/packaging-and-release.md)
   — the test suite is not the only thing that reads a path.
 
@@ -300,7 +302,7 @@ touch a matching path.
 | `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; content guards with no exemption file; Core names, the GUI narrates (#96) |
 | `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`) |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
-| `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32); `ci.yml` filters by exclusion and an entry needs no test, no build step and no lint step to read the path (`CiPathFilterTests`) |
+| `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32); gate CI's macOS jobs on the `changes` job rather than on a trigger filter, and add a `.github/ci-ignore.txt` entry only when no test, no build step and no lint step reads the path (`CiPathFilterTests`) |
 | `.claude/rules/**`, `.claude/agents/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614); `RuleCitationTests` resolves the citations in all three |
 | `.claude/agents/**`, `scripts/sync-agents.sh` | [subagents.md](.claude/rules/subagents.md) | An agent routes to the owning rule file and never restates a fact from it; a judging agent gets no `Write`/`Edit` and says so in prose, which is what survives into the Codex mirror; write the `description` as *when to use this*, naming concrete triggers; regenerate the mirror with `scripts/sync-agents.sh` in the same change |
 | `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |

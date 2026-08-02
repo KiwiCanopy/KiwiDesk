@@ -14,9 +14,9 @@ Default to the full gate below. One narrow exception, and it is
 about running the gate that *can* catch something rather than
 about saving time:
 
-- Read `paths-ignore` from `.github/workflows/ci.yml`. Never
-  restate that list here — it is the one authority, and
-  `CiPathFilterTests` is what keeps it honest.
+- Read `.github/ci-ignore.txt`. Never restate that list here — it
+  is the one authority, shared with the `changes` job in `ci.yml`,
+  and `CiPathFilterTests` is what keeps it honest.
 - If `git diff --name-only` against the base is **entirely**
   inside that list, the Swift gate cannot be affected: nothing the
   build, the lint or the suite reads is in it. Skip steps 1–3.
