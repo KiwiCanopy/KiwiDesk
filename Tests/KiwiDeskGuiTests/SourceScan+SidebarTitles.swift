@@ -22,10 +22,16 @@ extension SourceScan {
     ///
     /// Comments are stripped first: a doc-comment example naming
     /// an `L("sidebar.…")` would otherwise inflate the set and
-    /// mask a title that really is missing one. The pattern wants
-    /// the call on one line — a wrapped one drops its pair, which
-    /// fails SHUT on `SidebarLabelWidthTests`' count pin rather
-    /// than silently narrowing either guard.
+    /// mask a title that really is missing one.
+    ///
+    /// The pattern tolerates the call being WRAPPED, because
+    /// `swift format` wraps one the moment the key and English
+    /// cross 79 columns — `sidebar.advanced_colors` arrived that
+    /// way with #678 Phase 3 and red the count pin, which is the
+    /// scan failing shut rather than quietly measuring one label
+    /// fewer. Both literals must still be literals; anything the
+    /// extractor cannot read is not a key either
+    /// (`docs/translating.md`, "Extraction limitations").
     static func sidebarTitles(root: URL) throws -> [SidebarTitle] {
         let source = stripComments(
             try String(
@@ -42,7 +48,8 @@ extension SourceScan {
         )
         return allMatchGroups(
             in: source,
-            pattern: #"L\("(sidebar\.[a-z_]+)", "([^"]+)"\)"#,
+            pattern:
+                #"L\(\s*"(sidebar\.[a-z_]+)",\s*"([^"]+)"\s*\)"#,
             groups: [1, 2]
         )
         .compactMap { found in
