@@ -52,30 +52,17 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        // The floats must clear the TILED PLANE, not merely stand
-        // in order among themselves: the raise that brings them
-        // back on top happens after `focusWindow` raised a tiled
-        // window over them (#418), and nothing ever reorders the
-        // floats relative to each other — so without the floor the
-        // sequence would diff itself down to nothing every time
-        // and leave them buried.
-        //
-        // The focused window is NOT in the floor, and that is the
-        // difference between a floor a raise can clear and one it
-        // cannot: a quiet raise never gets a window above the
-        // frontmost app's key window — measured, 0 of 7 windows
-        // over 600 ms — and after `focusWindow` the key window is
-        // exactly this one. Asking the floats to beat it would
-        // fail every poll and burn the drain's whole budget on
-        // every focus change. Above every OTHER tiled window is
-        // both what #418 promises and what a raise can deliver.
+        // What the floats must clear, and why the focused window
+        // is not part of it, is argued on `floatRaiseFloor`.
         let floor =
             activeSpace.map { space in
-                state.effectiveTiledMembers(
-                    of: space,
-                    activeSpace: space.id
+                Self.floatRaiseFloor(
+                    tiled: state.effectiveTiledMembers(
+                        of: space,
+                        activeSpace: space.id
+                    ),
+                    focused: focused
                 )
-                .filter { $0 != focused }
             } ?? []
         performZOrderSequence(targets: pairs, above: floor) {
             [weak self] in

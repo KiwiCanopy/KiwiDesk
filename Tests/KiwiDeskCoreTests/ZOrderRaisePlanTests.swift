@@ -19,6 +19,30 @@ struct ZOrderRaisePlanTests {
         raw.map(WindowID.init)
     }
 
+    /// The float raise's floor is the tiled plane MINUS the window
+    /// being focused. Keeping the focused window in it would be a
+    /// condition no raise can satisfy — a quiet raise never gets
+    /// above the frontmost app's key window, which after
+    /// `focusWindow` is exactly that one — so every poll would
+    /// fail and the drain would spend its whole budget on every
+    /// focus change.
+    @Test("The float floor is the tiled plane minus the focus")
+    func floatFloorExcludesTheFocusedWindow() {
+        let tiled = ids([1, 2, 3])
+        #expect(
+            KiwiCore.floatRaiseFloor(
+                tiled: tiled,
+                focused: WindowID(2)
+            ) == ids([1, 3])
+        )
+        // Nothing focused (a traveler holds it, or the space is
+        // empty of local focus): the whole plane stands.
+        #expect(
+            KiwiCore.floatRaiseFloor(tiled: tiled, focused: nil)
+                == tiled
+        )
+    }
+
     @Test("A pile already in order raises nothing")
     func correctOrderPlansNothing() {
         // Raise order is deepest-first, so the desired

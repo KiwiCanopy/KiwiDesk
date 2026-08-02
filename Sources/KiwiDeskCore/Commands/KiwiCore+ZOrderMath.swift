@@ -7,6 +7,31 @@ import Foundation
 /// it — the restores in `KiwiCore+ZOrder` are what turn these
 /// answers into raises.
 extension KiwiCore {
+    /// The floor a FLOAT raise must land above: the tiled plane
+    /// of the active space, minus the window being focused.
+    ///
+    /// Both halves are load-bearing. Without a floor the sequence
+    /// diffs itself down to nothing — floats keep their order
+    /// among themselves, so a layer buried under the tile
+    /// `focusWindow` just raised reads as "already correct" and
+    /// nothing is re-raised (#418). And without the exclusion the
+    /// floor is a condition no raise can satisfy: a quiet raise
+    /// never gets a window above the frontmost app's key window
+    /// (measured — 7 windows, none displaced, over 600 ms), and
+    /// after `focusWindow` the key window is exactly this one, so
+    /// every poll would fail and the drain would burn its whole
+    /// budget on every focus change. Above every OTHER tiled
+    /// window is what #418 promises and what a raise can deliver.
+    ///
+    /// Pure so the rule is testable: its call site reaches AX and
+    /// no unit test covers it (`guard-prover`, 2026-08-02).
+    nonisolated static func floatRaiseFloor(
+        tiled: [WindowID],
+        focused: WindowID?
+    ) -> [WindowID] {
+        tiled.filter { $0 != focused }
+    }
+
     /// Raise order for a cascading region: ascending `minY` —
     /// piles always cascade downward, so the most-buried
     /// (topmost) frame raises first and each later raise lands

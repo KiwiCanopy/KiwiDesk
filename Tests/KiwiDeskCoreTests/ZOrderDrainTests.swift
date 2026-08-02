@@ -164,6 +164,12 @@ struct ZOrderDrainTests {
             server.latency[WindowID(2)] = latency
             let drain = server.drain()
             drain.run(ids([4, 3, 2, 1]))
+            // Non-empty first: `Set(raised).count == raised.count`
+            // is also true of a drain that raised nothing, so
+            // without this the guard passes on the very failure
+            // every other test here would catch (guard-prover,
+            // 2026-08-02).
+            #expect(!server.raised.isEmpty)
             #expect(
                 Set(server.raised).count == server.raised.count
             )
