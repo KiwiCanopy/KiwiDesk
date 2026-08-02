@@ -73,6 +73,26 @@ struct ZOrderDrain: Sendable {
     /// a quit that stacks imperfectly, so it is still a ceiling
     /// (#688, `KiwiCore+TeardownRaise`).
     let budget: TimeInterval
+    /// What a spent budget does to the raises the plan has left:
+    /// issue them unverified (true) or drop them (false).
+    ///
+    /// A live restore issues them. Its caller stamped every target
+    /// in the raise echo ledger, so a dropped raise is both a
+    /// window left definitely in the wrong place AND a stamp
+    /// nothing consumes; and the cost of issuing is paid on
+    /// `zOrderQueue`, not anywhere a user is waiting.
+    ///
+    /// The teardown restack drops them, because for it `budget` is
+    /// a WALL CLOCK and issuing is not free: each raise is a
+    /// blocking `AXUIElementPerformAction` bounded only by the
+    /// 0.25 s AX messaging timeout, on the main actor, after the
+    /// budget is already spent. A nine-window tail could add
+    /// seconds to a quit that had promised to stop at one — and
+    /// the quit path has no echo ledger to corrupt, so the reason
+    /// the restores issue does not apply to it (code review,
+    /// 2026-08-03). A quit that hangs is worse than a quit that
+    /// stacks imperfectly.
+    let spendsBudgetOnUnverifiedTail: Bool
 
     /// How long one raise may be waited on before the drain gives
     /// up on it and moves to the next — 6x the 20 ms worst case
@@ -82,6 +102,23 @@ struct ZOrderDrain: Sendable {
     /// A live restore's `budget`, ~5x the ~55 ms a verified
     /// 6-window row measured.
     static let restoreBudget: TimeInterval = 0.4
+    /// The teardown restack's `budget` — the same 1 s the bare
+    /// loop it replaced was capped at, spent across every display
+    /// group rather than per group (#688).
+    ///
+    /// It sits here beside `restoreBudget` rather than on its
+    /// caller so a third sequence has one precedent for where a
+    /// budget lives, not two contradicting ones (architect review,
+    /// 2026-08-03).
+    ///
+    /// More than a restore's, for the reason `budget` states:
+    /// nothing runs after the teardown restack to heal a miss, so
+    /// waiting is worth more there than anywhere else. Still a
+    /// ceiling, because a quit that hangs is worse than a quit
+    /// that stacks imperfectly — and a real one only because that
+    /// path also drops its tail rather than issuing it
+    /// (`spendsBudgetOnUnverifiedTail`).
+    static let teardownBudget: TimeInterval = 1.0
     /// Poll interval while waiting for a raise to land. The read
     /// costs ~0.4 ms, so this spends under a tenth of a core.
     static let pollInterval: TimeInterval = 0.005
@@ -176,6 +213,9 @@ struct ZOrderDrain: Sendable {
             raise(id)
             raised.append(id)
             guard now() < deadline else {
+                guard spendsBudgetOnUnverifiedTail else {
+                    return raised
+                }
                 // Out of budget. Issue the rest without waiting
                 // rather than dropping them: unverified is the
                 // behavior every pile had before this drain, while
@@ -286,37 +326,5 @@ struct ZOrderDrain: Sendable {
         return Array(
             desired.prefix(desired.count - settled).reversed()
         )
-    }
-}
-
-/// The z-order raise generation (#418/#425), in a lock rather
-/// than on the main actor: the drain reads it between raises from
-/// `zOrderQueue` to abandon a sequence a newer one has superseded
-/// (#684), and every other reader is main-actor code that would
-/// otherwise have to hop threads to answer it. It lives beside
-/// the drain rather than in `App/` with the property that holds
-/// it because the off-actor read is the only reason it is not
-/// still an `Int` — a deliberate placement, not an oversight.
-///
-/// **One minting site: `stampZOrderRaise`, on the main actor.**
-/// The compiler used to enforce that by isolation and no longer
-/// can: `@unchecked Sendable` makes a `bump()` from the raise
-/// queue compile, and it would silently invalidate every
-/// in-flight sequence's identity — the identity #684 spent a
-/// round unifying, since one generation now keys the drain's
-/// staleness check, the stamp release and the focus handoff.
-/// Read it anywhere; mint it in one place.
-final class ZOrderGeneration: @unchecked Sendable {
-    private let lock = NSLock()
-    private var current = 0
-
-    var value: Int { lock.withLock { current } }
-
-    /// Starts a new sequence, returning its generation.
-    func bump() -> Int {
-        lock.withLock {
-            current += 1
-            return current
-        }
     }
 }

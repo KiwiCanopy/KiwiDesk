@@ -30,8 +30,8 @@ bite large test PRs:
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
   Six ratified exceptions, none with setup/teardown coupling or
-  assertions of their own, and all but the last *stateless
-  primitives*:
+  assertions of their own, and all but the fake WindowServer
+  *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
     divergent copy would silently weaken a guard, the exact

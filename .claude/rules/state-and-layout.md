@@ -104,15 +104,25 @@ editing here:
   quit-grid restack's raises run after management stops, so no
   later restore can correct a miss and this rule's usual "the
   next restore heals it" does not apply there (#688,
-  `KiwiCore+TeardownRaise`). Then leave the frontmost app's key
-  window OUT of any sequence that would have to raise something
-  above it — a quiet raise cannot beat it, so it does not cost
-  its own slot, it costs every window above it a whole
-  `landingLimit` of unsatisfiable waiting. That is the same
-  measurement `raiseFloor` keeps the focused window out of the
-  float floor for; the two guards are
-  `aPinnedMemberIsDroppedNotAbsorbed` and
-  `floatFloorExcludesTheFocusedWindow`.
+  `KiwiCore+TeardownRaise`). Weigh, for any sequence, what the
+  frontmost app's key window costs inside it: a quiet raise
+  cannot beat that window, so it never costs only its own slot —
+  every window the order puts above it waits out a whole
+  `landingLimit` that can never be satisfied. The two shipped
+  sequences answer that differently *because its role differs*,
+  and a third must say which it is. The teardown restack drops it
+  from its TARGETS, since the circle would otherwise order
+  windows above it. The float raise keeps it out of the FLOOR
+  (`raiseFloor`, which owns the measurement) — and knowingly
+  leaves it among the targets, where a focused float can still
+  buy one unsatisfiable wait, bounded and once per raise, the
+  same class of residue `floatLayerTargets` already records for
+  mixed CGWindow layers. The two guards are
+  `ZOrderTeardownDrainTests`
+  (`aPinnedMemberIsDroppedNotAbsorbed`) and `ZOrderRaisePlanTests`
+  (`floatFloorExcludesTheFocusedWindow`), and
+  `ZOrderSequenceWiringTests` pins that the teardown call site
+  still drops it.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

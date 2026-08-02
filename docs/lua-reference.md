@@ -4320,21 +4320,32 @@ stacking. Windows sharing a cell cascade vertically like
 After placing, KiwiDesk raises every window in a fixed circle —
 cell 1 through the last cell, each pile top slot first and deepest
 slot last — so within a pile every title bar stays visible and
-later cells sit above earlier ones. It waits for each raise to
-actually land before issuing the next, because macOS reports a
-raise as accepted well before the app performs it, and a circle
-fired off in one go settles in whatever order the apps get to it.
-The whole restack is capped at one second, so a wedged app delays
-your quit by at most that; past the cap the remaining raises still
-go out, they are just no longer waited on, and those windows can
-settle out of order.
+later cells sit above earlier ones (one window is exempt; see
+below). It waits for each raise to actually land before issuing
+the next, because macOS reports a raise as accepted well before
+the app performs it, and a circle fired off in one go settles in
+whatever order the apps get to it.
 
-One window is exempt: **whatever had focus when you quit stays on
-top of its pile.** No app can raise a window above the frontmost
-app's key window — measured, not assumed — so KiwiDesk leaves that
-window out of the circle instead of spending the budget failing to
-move it. Everything else lands where the circle puts it regardless
-of the z-order at quit.
+The whole restack is capped at one second across every display, so
+a wedged app cannot delay your quit past that. The cap is a hard
+stop rather than a slow lane: once it is reached, nothing further
+is raised — not the rest of the display being restacked, and not a
+display the restack never got to. Those windows keep whatever
+stacking the moves left them in. Quitting promptly is worth more
+here than a perfect arrangement, because nothing runs afterwards
+that could fix either one.
+
+One window is exempt: **the key window of whichever app is
+frontmost when KiwiDesk stops** — normally the window you were
+last working in. No quiet raise can lift another window above it
+(measured on device, not inferred), so KiwiDesk leaves it out of
+the circle instead of spending the budget failing to move it. It
+keeps the top of its pile, and that is the one place a title bar
+can end up covered: the pile-mates the circle would have stacked
+above it stay behind it instead. Every other window lands where
+the circle puts it regardless of the z-order at quit — and if the
+frontmost window when KiwiDesk stops is one of KiwiDesk's own, no
+grid window is exempt at all.
 
 A pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from

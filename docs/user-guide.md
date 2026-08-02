@@ -1356,7 +1356,7 @@ exists, so the snapshot is discarded and windows are rediscovered
 fresh. On the way out,
 each monitor's windows are spread into an evenly-filled grid —
 windows take turns claiming a cell, and windows sharing a cell
-cascade so every title bar stays clickable. The desktop is usable
+cascade so their title bars stay clickable. The desktop is usable
 the moment KiwiDesk exits, with no window pulled to another
 monitor. (Power users can also tune this via `quit.set_layout` and
 `quit.set_grid_target_depth` in the Lua reference; `grid` is the

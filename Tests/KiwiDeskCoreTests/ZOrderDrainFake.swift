@@ -3,35 +3,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The fake WindowServer the z-order drain suites run against,
-/// shared by `ZOrderDrainTests` (#684) and
-/// `ZOrderTeardownDrainTests` (#688) rather than copied into each.
-///
-/// A **sixth** ratified exception to tests.md's per-file-helper
-/// convention, and the first admitted on the divergence ground
-/// while carrying state — so it is worth saying which part of the
-/// bar it clears and which it argues past.
-///
-/// The divergence harm is the strongest of any helper on that
-/// list, because it has already happened here: a copy that models
-/// every raise as reaching index 0 makes a landing condition no
-/// real raise can satisfy look reachable, and that fake hid an
-/// unachievable check under twelve green tests (#684). `pinned`
-/// is what fixed it, and it is exactly the property #688's
-/// suite depends on. Two copies means one of them can lose it
-/// again, silently, in the suite that needs it most.
-///
-/// It is **not** stateless, which the five before it were. What
-/// that requirement protects against is setup/teardown coupling
-/// between suites, and this has none: every test constructs its
-/// own instance, the state is that instance's fake clock and
-/// window order, and nothing is shared or carried between tests.
-/// It holds no assertions of its own. Statelessness was the proxy;
-/// the isolation it stood for is intact.
-
 /// A WindowServer whose apps perform their raises late, on a fake
 /// clock that only advances when the drain sleeps. Deterministic,
 /// and it never touches a real window.
+///
+/// Shared by `ZOrderDrainTests` (#684) and
+/// `ZOrderTeardownDrainTests` (#688) rather than copied into
+/// each. It is a ratified exception to tests.md's
+/// per-file-helper convention, and **tests.md owns that list and
+/// the grounds it was admitted on** — do not restate them here.
 final class FakeWindowServer: @unchecked Sendable {
     /// Front-to-back, the `CGWindowListCopyWindowInfo` order.
     private var order: [WindowID]
@@ -61,9 +41,40 @@ final class FakeWindowServer: @unchecked Sendable {
         self.pinned = pinned
     }
 
-    func drain(
-        above floor: [WindowID] = [],
-        budget: TimeInterval = ZOrderDrain.restoreBudget
+    /// The drain a live restore builds
+    /// (`KiwiCore.performZOrderSequence`).
+    func restoreDrain(above floor: [WindowID] = []) -> ZOrderDrain {
+        drain(
+            above: floor,
+            budget: ZOrderDrain.restoreBudget,
+            issuingUnverifiedTail: true
+        )
+    }
+
+    /// The drain the quit-grid restack builds
+    /// (`KiwiCore.teardownDrain`, #688).
+    func teardownDrain(
+        budget: TimeInterval = ZOrderDrain.teardownBudget
+    ) -> ZOrderDrain {
+        drain(
+            above: [],
+            budget: budget,
+            issuingUnverifiedTail: false
+        )
+    }
+
+    /// One drain per production sequence, named after it, rather
+    /// than one factory with defaults. `floor`, `budget` and the
+    /// tail policy are all required at the real call sites so a
+    /// new sequence has to decide; a default here would quietly
+    /// hand a future suite a policy its production path does not
+    /// use, and the test would pass while modelling the wrong
+    /// thing (architect review, 2026-08-03). A third sequence adds
+    /// a third factory.
+    private func drain(
+        above floor: [WindowID],
+        budget: TimeInterval,
+        issuingUnverifiedTail: Bool
     ) -> ZOrderDrain {
         ZOrderDrain(
             raise: { [self] id in
@@ -79,7 +90,8 @@ final class FakeWindowServer: @unchecked Sendable {
                 raised.count < currentUntilRaises
             },
             floor: floor,
-            budget: budget
+            budget: budget,
+            spendsBudgetOnUnverifiedTail: issuingUnverifiedTail
         )
     }
 

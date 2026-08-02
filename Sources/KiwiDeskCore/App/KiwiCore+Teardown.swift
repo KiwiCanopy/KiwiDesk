@@ -130,16 +130,18 @@ extension KiwiCore {
     /// area, so windows are not stranded in tiled frames after
     /// KiwiDesk exits.
     ///
-    /// Applies frames synchronously (direct AX IPC) inside a
-    /// SkyLight display-suppression bracket so all moves
-    /// composite as one visual update. A system-wide AX
-    /// messaging timeout (0.25 s) is set once before the loop
-    /// and bounds every AX call in the iteration — EUI reads,
-    /// EUI disable/restore, and setFrame — so Electron/WebKit
-    /// apps (up to ~6 s with the default timeout) cannot stall
-    /// the quit path; wall-clock budgets (~1 s for the moves,
-    /// ~1 s for the raise circle) cap the worst case across
-    /// all windows.
+    /// Two passes. `moveGatheredWindows` applies frames
+    /// synchronously (direct AX IPC) inside a SkyLight
+    /// display-suppression bracket so they composite as one
+    /// visual update; `restackForTeardown` then raises the grid's
+    /// circle, deliberately outside that bracket. A system-wide
+    /// AX messaging timeout (0.25 s) is set once before the move
+    /// loop and bounds every AX call in both passes — EUI reads,
+    /// EUI disable/restore, setFrame and the raises — so
+    /// Electron/WebKit apps (up to ~6 s with the default timeout)
+    /// cannot stall the quit path; wall-clock budgets (~1 s for
+    /// the moves, ~1 s for the raise circle) cap the worst case
+    /// across all windows.
     ///
     /// Called on quit and restart, at the top of `stop()` while
     /// the event loop and AX subsystem are still live. When
@@ -179,6 +181,32 @@ extension KiwiCore {
             targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }
+        // The bracket covers the MOVES ONLY, and the `do` scope is
+        // what bounds it: the raise circle below used to run inside
+        // it too, which cost nothing while it was a bare loop
+        // issuing raises in a few ms, but the drain that replaced
+        // it waits for each landing (#688) — up to its whole 1 s
+        // budget. `SLSDisableUpdate` freezes compositing for the
+        // entire desktop, so holding it across those waits would
+        // freeze the screen for the wait rather than for the
+        // moves. Resuming first costs one extra composite, and
+        // the restack does not need the bracket: it reads the
+        // WindowServer's ordering, which the bracket never
+        // suppressed (probe, 2026-08-03 — see
+        // `restackForTeardown`).
+        moveGatheredWindows(frames)
+        restackForTeardown(
+            groups: groups,
+            frames: frames,
+            targetDepth: targetDepth
+        )
+    }
+
+    /// Applies the gather frames as one visual update, inside the
+    /// display-suppression bracket.
+    private func moveGatheredWindows(
+        _ frames: [WindowID: CGRect]
+    ) {
         SkyLight.suppressDisplay()
         // defer ensures resumeDisplay() runs even if the
         // budget fires a break below.
@@ -237,13 +265,5 @@ extension KiwiCore {
                 )
             }
         }
-        // Second pass: raise every window into the grid's
-        // deterministic circle — verified, not fired and
-        // forgotten. `KiwiCore+TeardownRaise` owns it.
-        restackForTeardown(
-            groups: groups,
-            frames: frames,
-            targetDepth: targetDepth
-        )
     }
 }
