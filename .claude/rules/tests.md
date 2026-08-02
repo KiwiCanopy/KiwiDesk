@@ -248,7 +248,7 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-08-02 — a change adding a residue class extends and
+2026-08-03 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -263,9 +263,15 @@ pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.start()` with faked
 seams (`publishDisplays`; the suites set
 `registersWorkspaceObservers = false`, so no live workspace
-observer outlives the test). The service tests only parse `launchctl`
-strings; nothing spawns it. **Unit tests never need the running
-app**; its run state is irrelevant to them.
+observer outlives the test), and the host's own text metric —
+`NSFont.systemFont` measured through `NSString.size`, by
+`SidebarLabelWidthTests`. That last one is the only host read
+that can red the suite by itself, which is why its calibration
+sits in `measurementIsLive` on a band narrower than the labels'
+own margin: a metric that moves must red as a metric, not as a
+label that needs shortening. The service tests only parse
+`launchctl` strings; nothing spawns it. **Unit tests never need
+the running app**; its run state is irrelevant to them.
 
 **A run writes `KiwiDesk: …` lines to the unified log**, so a
 `log stream` during one shows test diagnostics that read exactly

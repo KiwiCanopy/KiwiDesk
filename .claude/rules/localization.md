@@ -167,6 +167,25 @@ cannot tell "App Bar" from "App-Leiste".
 `merge-keys` runs the per-value guards so contamination never
 lands.
 
+## A translated label still has to fit, and still has to match
+
+Two obligations a translator meets while editing a catalog, which
+is why they are here rather than beside the views:
+
+- **A sidebar destination label past `sidebarLabelColumn` gets a
+  SHORTER LABEL, never a wider column.** The column is a fixed
+  app-wide axis and System Settings' own does not grow per
+  language. Shorten with the whole meaning intact: the pane's
+  heading is that same `destination.title`, so a trimmed label is
+  the only name the user ever reads. `SidebarLabelWidthTests`
+  measures every shipped label.
+- **A `▸` breadcrumb names on-screen labels, so every segment
+  must equal what that segment's own key renders to in YOUR
+  locale** — the destination label for the head, your own
+  `layout.<mode>.name` for a tail naming a mode.
+  `SidebarCrossReferenceTests` holds it, and four catalogs were
+  already violating it when the guard landed.
+
 ## Registering a new locale
 
 Locale policy is keyed by locale in **three** tables; a new locale

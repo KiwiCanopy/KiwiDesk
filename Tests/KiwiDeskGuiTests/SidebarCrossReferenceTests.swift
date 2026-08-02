@@ -101,14 +101,22 @@ struct SidebarCrossReferenceTests {
     /// tail needs no policy opinion about which locales render
     /// a mode name natively: it simply has to agree with that
     /// locale's OWN `layout.<mode>.name`, whatever that says.
+    /// Every `layout.<mode>.name` key and its English value.
+    /// `theCrossReferenceIsDiscovered` pins the values distinct,
+    /// which is what makes the inverted lookup below safe.
+    private static func modeNames() throws -> [String: String] {
+        try catalog("en").filter { key, _ in
+            key.hasPrefix("layout.") && key.hasSuffix(".name")
+        }
+    }
+
     private static func links() throws -> [String: Link] {
         let titles = try SourceScan.sidebarTitles(root: repoRoot)
         let english = try catalog("en")
         // English mode name → its key, so a tail segment can be
         // attributed to the picker entry it must match.
         var modeKeys: [String: String] = [:]
-        for (key, value) in english
-        where key.hasPrefix("layout.") && key.hasSuffix(".name") {
+        for (key, value) in try modeNames() {
             modeKeys[value] = key
         }
         var out: [String: Link] = [:]
@@ -159,6 +167,13 @@ struct SidebarCrossReferenceTests {
                 "sidebar.layout", "layout.scrolling.name",
             ]
         )
+        // The tail lookup is keyed by English mode name and is
+        // last-writer-wins, so two modes sharing one English
+        // name would silently drop a key and leave that tail
+        // unwatched. Derived from the shipped set, not a
+        // hand-listed count.
+        let modes = try Self.modeNames()
+        #expect(Set(modes.values).count == modes.count)
     }
 
     @Test func everyLinkNamesItsDestinationAsShown() throws {

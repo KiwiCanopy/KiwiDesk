@@ -132,6 +132,13 @@ struct SidebarLabelWidthTests {
     /// So the band is TIGHTER than the labels' own margin: 1%
     /// around this datum, measured 2026-08-03 on macOS 26. Host
     /// drift then reds here first, and reds as what it is.
+    ///
+    /// Symmetric on purpose, though only a WIDER metric can
+    /// truncate anything: a narrower one means the budget was
+    /// derived against a metric this host no longer has, so the
+    /// calibration is stale either way. The claim being pinned
+    /// is "the measurement still matches what the budget was
+    /// derived from", not "labels still fit".
     @Test func measurementIsLive() {
         let datum: CGFloat = 94.4
         let reference = Self.width("Layout Defaults")
