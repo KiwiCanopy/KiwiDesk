@@ -282,7 +282,11 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        performZOrderSequence(targets: pairs) {
+        // No floor: a pile's members are ordered against each
+        // other, and the one window that must stand above them all
+        // — the focused one — is left out of the sequence and
+        // re-asserted below.
+        performZOrderSequence(targets: pairs, above: []) {
             [weak self] in
             guard let self,
                 generation == self.zOrderRaiseGeneration.value

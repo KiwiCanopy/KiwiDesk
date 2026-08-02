@@ -52,7 +52,21 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        performZOrderSequence(targets: pairs) {
+        // The floats must clear the TILED PLANE, not merely stand
+        // in order among themselves: the raise that brings them
+        // back on top happens after `focusWindow` raised a tiled
+        // window over them (#418), and nothing ever reorders the
+        // floats relative to each other — so without the floor the
+        // sequence would diff itself down to nothing every time
+        // and leave them buried.
+        let floor =
+            activeSpace.map { space in
+                state.effectiveTiledMembers(
+                    of: space,
+                    activeSpace: space.id
+                )
+            } ?? []
+        performZOrderSequence(targets: pairs, above: floor) {
             [weak self] in
             guard let self,
                 generation == self.zOrderRaiseGeneration.value
@@ -163,6 +177,7 @@ extension KiwiCore {
     /// the main actor), foreign ones on the queue.
     func performZOrderSequence(
         targets: [(WindowID, AXUIElement)],
+        above floor: [WindowID],
         completion: @MainActor @escaping () -> Void
     ) {
         for (_, element) in targets
@@ -191,7 +206,7 @@ extension KiwiCore {
             return
         }
         zOrderRestoresInFlight += 1
-        let drain = zOrderDrain(over: foreign)
+        let drain = zOrderDrain(over: foreign, above: floor)
         let order = foreign.map(\.0)
         zOrderQueue.async {
             drain.run(order)
@@ -223,7 +238,8 @@ extension KiwiCore {
     /// generation live, so a sequence superseded mid-drain
     /// abandons the raises it has left.
     private func zOrderDrain(
-        over targets: [(WindowID, AXUIElement)]
+        over targets: [(WindowID, AXUIElement)],
+        above floor: [WindowID]
     ) -> ZOrderDrain {
         nonisolated(unsafe) let elements = Dictionary(
             targets,
@@ -238,7 +254,8 @@ extension KiwiCore {
             stacking: { AXHelper.onScreenStackingOrder() },
             now: { ProcessInfo.processInfo.systemUptime },
             sleep: { Thread.sleep(forTimeInterval: $0) },
-            isCurrent: { generations.value == generation }
+            isCurrent: { generations.value == generation },
+            floor: floor
         )
     }
 }

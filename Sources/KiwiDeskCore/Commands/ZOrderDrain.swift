@@ -44,6 +44,18 @@ struct ZOrderDrain: Sendable {
     /// so a stale drain abandons the raises it has left instead of
     /// finishing them and fighting the newer sequence.
     let isCurrent: @Sendable () -> Bool
+    /// Windows the sequence must land ABOVE but never raises — the
+    /// tiled plane under a float raise (#418).
+    ///
+    /// Without it the diff below is blind to the only thing that
+    /// raise is for: floats keep their order among themselves, so
+    /// a float layer buried under the tile `focusWindow` just
+    /// raised reads as "already correct" and nothing is re-raised.
+    /// The pile restores pass none — their members are ordered
+    /// against each other, and the focused window sits above them
+    /// by design. Required at every call site rather than
+    /// defaulted, so a new sequence has to decide.
+    let floor: [WindowID]
 
     /// How long one raise may be waited on before the drain gives
     /// up on it and moves to the next — 6x the 20 ms worst case
@@ -72,8 +84,13 @@ struct ZOrderDrain: Sendable {
         for _ in 0..<Self.maxPasses {
             guard isCurrent() else { return }
             let targets = Set(order)
-            let seen = stacking().filter { targets.contains($0) }
-            let plan = Self.plan(raiseOrder: order, observed: seen)
+            let observed = stacking()
+            let seen = observed.filter { targets.contains($0) }
+            let plan = Self.plan(
+                raiseOrder: order,
+                observed: observed,
+                above: floor
+            )
             guard !plan.isEmpty else { return }
             let planned = Set(plan)
             // The windows the plan left alone keep their observed
@@ -124,11 +141,11 @@ struct ZOrderDrain: Sendable {
 
     /// Polls until the windows raised so far stand front-to-back
     /// in the reverse of the order they were raised in, above the
-    /// ones this pass left alone. Relative, never "is it
-    /// frontmost": the focused window sits above the whole pile by
-    /// design (it is re-asserted last), and a window on another
-    /// display is listed among these and can never be beaten.
-    /// Returns false on timeout — the drain then moves on.
+    /// ones this pass left alone and clear of the floor. Relative,
+    /// never "is it frontmost": the focused window sits above the
+    /// whole pile by design (it is re-asserted last), and a window
+    /// on another display is listed among these and can never be
+    /// beaten. Returns false on timeout — the drain then moves on.
     private func awaitLanding(
         raised: [WindowID],
         over untouched: [WindowID],
@@ -136,13 +153,38 @@ struct ZOrderDrain: Sendable {
     ) -> Bool {
         let want = Array(raised.reversed()) + untouched
         let members = Set(want)
+        let below = Set(floor)
         let limit = min(now() + Self.landingLimit, deadline)
         while true {
-            if stacking().filter({ members.contains($0) }) == want {
+            let observed = stacking()
+            if observed.filter({ members.contains($0) }) == want,
+                Self.clears(raised, floor: below, in: observed)
+            {
                 return true
             }
             guard now() < limit else { return false }
             sleep(Self.pollInterval)
+        }
+    }
+
+    /// Whether every one of `raised` stands in front of the whole
+    /// floor. Vacuously true with no floor, which is every pile
+    /// restore.
+    private static func clears(
+        _ raised: [WindowID],
+        floor: Set<WindowID>,
+        in observed: [WindowID]
+    ) -> Bool {
+        guard
+            let ceiling = observed.firstIndex(where: {
+                floor.contains($0)
+            })
+        else { return true }
+        return raised.allSatisfy { id in
+            guard let at = observed.firstIndex(of: id) else {
+                return false
+            }
+            return at < ceiling
         }
     }
 
@@ -155,24 +197,34 @@ struct ZOrderDrain: Sendable {
     /// stand correctly, and the tail check only gets stricter as
     /// it grows, which is why the scan can stop at the first miss.
     ///
+    /// A window standing correctly among the targets but still
+    /// under the `floor` is out of place too — that is the whole
+    /// job of a float raise, and the only reason the floor is a
+    /// parameter here.
+    ///
     /// A target the WindowServer does not list on screen —
     /// minimized, or on another space — is dropped: it has no
     /// stacking to fix and no landing that could ever be
-    /// verified. Pure math, unit-tested.
+    /// verified. `observed` is the full front-to-back list, not
+    /// just the targets, because the floor's position is in it.
+    /// Pure math, unit-tested.
     static func plan(
         raiseOrder: [WindowID],
-        observed: [WindowID]
+        observed: [WindowID],
+        above floor: [WindowID]
     ) -> [WindowID] {
         let onScreen = Set(observed)
         // Desired front-to-back: the last raise lands on top.
         let desired = raiseOrder.reversed().filter {
             onScreen.contains($0)
         }
+        let below = Set(floor)
         var settled = 0
         while settled < desired.count {
             let tail = Array(desired.suffix(settled + 1))
             let members = Set(tail)
-            guard observed.filter({ members.contains($0) }) == tail
+            guard observed.filter({ members.contains($0) }) == tail,
+                clears(tail, floor: below, in: observed)
             else { break }
             settled += 1
         }
