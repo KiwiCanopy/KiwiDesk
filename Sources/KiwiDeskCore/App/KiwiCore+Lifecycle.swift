@@ -5,7 +5,16 @@ import Foundation
 /// restore, and the delayed startup sweep.
 extension KiwiCore {
     /// Loads the config and starts window management.
+    ///
+    /// Phases are signposted and summarized through `onLog`
+    /// (#672): boot cost lives almost entirely in the AX scans
+    /// under `loadConfig` / `eventLoop.start()`, and the field
+    /// evidence for a hung app is a duration, so every boot
+    /// leaves one on record.
     public func start() {
+        let signposter = BootSignpost.signposter
+        let boot = signposter.beginInterval("boot")
+        let bootBegin = ContinuousClock.now
         // Arm the focused-command foreground guard (#292): from now
         // on, an implicit-focused command fails closed unless the OS
         // frontmost app is KiwiDesk's focused managed window. Left
@@ -54,12 +63,28 @@ extension KiwiCore {
         stickyMarks.isWindowServerTracked = { [weak self] id in
             self?.borders.markUsesWindowServerTracking(id) ?? false
         }
+        let config = signposter.beginInterval("loadConfig")
         loadConfig()
+        signposter.endInterval("loadConfig", config)
+        let configDone = ContinuousClock.now
         sleepWake.start()
+        // One retile for the whole scan instead of one per
+        // discovered window (#672): windows fold into state as
+        // the events arrive, geometry lands once below. The
+        // per-event #193 pile restore was suppressed with the
+        // retiles, so re-arm it once here — it self-gates on
+        // track + actual overflow.
+        defersEventRetiles = true
         eventLoop.start()
+        defersEventRetiles = false
+        retile()
+        scheduleTrackZOrderRestoreIfOverflowing()
+        let scanDone = ContinuousClock.now
         mouse.start()
         // The event loop discovered windows in AX order; put
         // back the arrangement of the previous session.
+        let restoreSpan =
+            signposter.beginInterval("sessionRestore")
         if let session = crash.consumeSession() {
             restore(session)
             activateSpaceOfFocusedWindow()
@@ -73,6 +98,7 @@ extension KiwiCore {
             emitSpaceChange()
             onLog("restored previous session arrangement")
         }
+        signposter.endInterval("sessionRestore", restoreSpan)
         crash.start()
         do {
             try socket.start()
@@ -80,6 +106,20 @@ extension KiwiCore {
             onLog("socket server failed: \(error)")
         }
         scheduleStartupSweep()
+        signposter.endInterval("boot", boot)
+        let now = ContinuousClock.now
+        let configMs =
+            bootBegin.duration(to: configDone).wholeMilliseconds
+        let scanMs =
+            configDone.duration(to: scanDone).wholeMilliseconds
+        let tailMs = scanDone.duration(to: now).wholeMilliseconds
+        let totalMs =
+            bootBegin.duration(to: now).wholeMilliseconds
+        onLog(
+            "boot: config \(configMs)ms, scan \(scanMs)ms, "
+                + "restore+services \(tailMs)ms, "
+                + "total \(totalMs)ms"
+        )
     }
 
     /// The startup scan ran against cold AX trees; slow
@@ -89,13 +129,33 @@ extension KiwiCore {
     /// spaces. If the user has not switched away meanwhile,
     /// the landing choice is re-run: the focused window may
     /// only now be resolvable to its space.
-    private func scheduleStartupSweep() {
+    ///
+    /// Internal (not private): the sweep is the promise the
+    /// boot prefilter's warmup skip rests on (#662), so
+    /// `StartupSweepTests` drives it directly and asserts the
+    /// fired task reconciles — `start()` itself is not
+    /// test-drivable.
+    func scheduleStartupSweep() {
         let landed = state.workspaces.activeSpace
         deferred.schedule(.startupSweep, after: .seconds(1)) {
             [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }
+            let signposter = BootSignpost.signposter
+            let sweep = signposter.beginInterval("startupSweep")
+            let begin = ContinuousClock.now
+            // Same batching as the boot scan: what the sweep
+            // discovers lands in one retile, and the #193 pile
+            // restore is re-armed once after it (#672).
+            self.defersEventRetiles = true
             self.eventLoop.reconcileAll()
+            self.defersEventRetiles = false
+            self.retile()
+            self.scheduleTrackZOrderRestoreIfOverflowing()
+            signposter.endInterval("startupSweep", sweep)
+            let ms =
+                begin.duration(to: .now).wholeMilliseconds
+            self.onLog("startup sweep: \(ms)ms")
             if self.state.workspaces.activeSpace == landed {
                 self.activateSpaceOfFocusedWindow()
                 if self.state.workspaces.activeSpace != landed {

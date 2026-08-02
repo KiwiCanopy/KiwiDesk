@@ -248,7 +248,7 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-07-29 — a change adding a residue class extends and
+2026-08-02 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -257,9 +257,13 @@ from animation-keyed suites, repo-script children drained by
 `UserDefaults` suites cleaned on both sides, one live
 `NSEvent.pressedMouseButtons` read —
 `MouseFollowsFocusTests` fails if a human holds a mouse button
-mid-run — and `GeometryUtils.menuBarAutoHides`, a read-only
+mid-run — `GeometryUtils.menuBarAutoHides`, a read-only
 global-defaults lookup that only reaches fixtures which didn't
-pin their bounds. The service tests only parse `launchctl`
+pin their bounds, and one read-only `NSScreen.screens` read per
+lifecycle suite that drives `EventLoop.start()` with faked
+seams (`publishDisplays`; the suites set
+`registersWorkspaceObservers = false`, so no live workspace
+observer outlives the test). The service tests only parse `launchctl`
 strings; nothing spawns it. **Unit tests never need the running
 app**; its run state is irrelevant to them.
 

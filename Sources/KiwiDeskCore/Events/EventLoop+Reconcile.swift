@@ -20,10 +20,26 @@ extension EventLoop {
         app: AppRef,
         coalesceTabs: Bool = true
     ) {
+        // Per-app timing (#672): mirrors `attach` — the window
+        // list and warmup below are the same blocking AX calls,
+        // and the startup sweep runs this for every app.
+        let name = app.bundleID ?? app.name
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval(
+            "reconcile",
+            id: signposter.makeSignpostID(),
+            "\(name, privacy: .public)"
+        )
+        let begin = ContinuousClock.now
+        defer {
+            signposter.endInterval("reconcile", span)
+            let ms = begin.duration(to: .now).wholeMilliseconds
+            if ms >= BootSignpost.slowSpanMs {
+                onLog("slow reconcile: \(name) took \(ms)ms")
+            }
+        }
         let activationPolicy =
-            NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+            self.activationPolicy(pid) ?? .prohibited
         guard
             Self.ownsObservation(
                 hasObserver: observers[pid] != nil,
@@ -48,13 +64,16 @@ extension EventLoop {
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
-        let liveElements = AXHelper.windows(pid: pid)
+        let liveElements = axWindows(pid)
         if activationPolicy == .regular
             || liveElements.contains(where: Self.isStandardWindow)
         {
             // A cold app may not answer the baseline EUI read at
             // attach time. Retry on later reconciles until one
             // succeeds, without taking another window snapshot.
+            // Also the load-bearing half of the boot prefilter:
+            // an app the scan skipped as windowless is warmed
+            // here (StartupWarmupSkipTests, #662).
             warmAccessibilityTree(pid: pid)
         }
         var live: Set<WindowID> = []

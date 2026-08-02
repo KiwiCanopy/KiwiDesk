@@ -59,6 +59,15 @@ public final class KiwiCore {
     /// reconciles and run one pass after the final profile wins.
     var defersWindowRuleReconcile = false
 
+    /// The boot scan and the startup sweep surface N windows in
+    /// one burst, and each `.windowCreated` would run a full
+    /// retile + bars + borders + clamp — N passes for one
+    /// arrangement (#672). While raised, `handle` skips its
+    /// structural retile; the raiser runs one `retile()` after
+    /// lowering it. The `defersWindowRuleReconcile` shape, for
+    /// the same reason.
+    var defersEventRetiles = false
+
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false

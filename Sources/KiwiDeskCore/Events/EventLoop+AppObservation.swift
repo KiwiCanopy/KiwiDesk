@@ -6,23 +6,37 @@ extension EventLoop {
     /// Reconciles app-level observation with the current ignore
     /// rules. An ignored app has no AX observer, no enhanced-UI
     /// flag, and no tracked windows.
+    ///
+    /// `scanWindowsAtAttach: false` is for callers that run a
+    /// `reconcile` of the same app on the same turn: the
+    /// reconcile takes the one window snapshot, so scanning at
+    /// attach too would read every window list twice (#672).
+    /// Safe by the same promise as the boot prefilter — the
+    /// following reconcile warms and tracks whatever attach
+    /// skipped (StartupWarmupSkipTests, #662).
     func syncObservation(
-        for app: NSRunningApplication
+        for app: RunningApp,
+        scanWindowsAtAttach: Bool
     ) {
-        let pid = app.processIdentifier
-        let ref = AppRef(app)
-        let isIgnored = shouldIgnoreApp(bundleID: ref.bundleID)
+        let isIgnored = shouldIgnoreApp(
+            bundleID: app.ref.bundleID
+        )
         guard
             Self.shouldAttach(
-                pid: pid,
+                pid: app.pid,
                 activationPolicy: app.activationPolicy,
                 isIgnored: isIgnored
             )
         else {
-            detach(pid: pid, restoreEnhancedUI: true)
+            detach(pid: app.pid, restoreEnhancedUI: true)
             return
         }
-        attach(app: app, ref: ref)
+        attach(
+            pid: app.pid,
+            activationPolicy: app.activationPolicy,
+            ref: app.ref,
+            scanWindowsAtAttach: scanWindowsAtAttach
+        )
     }
 
     /// Attaches to regular and accessory apps from launch. The
@@ -30,40 +44,59 @@ extension EventLoop {
     /// closing the gap in which an accessory app can create its
     /// first window (#177).
     ///
-    /// `hasVisibleWindows` is a WindowServer pre-filter: when
-    /// false the app had zero layer-0 windows on the server at
-    /// scan time, so the expensive AX window query and EUI/MAI
-    /// warmup are skipped — the AXObserver still fires for
-    /// future window creation, and the 1-second startup sweep
-    /// re-warms via `reconcileAll()`.
+    /// `scanWindowsAtAttach: false` skips the expensive AX
+    /// window query and EUI/MAI warmup here, for one of two
+    /// reasons that share one safety argument: the boot scan's
+    /// WindowServer prefilter says the app is windowless, or
+    /// the caller reconciles this app on the same turn (#672
+    /// scan dedup). Either way the AXObserver still fires for
+    /// future window creation and a following reconcile warms
+    /// and tracks what was skipped — the promise
+    /// `StartupWarmupSkipTests` pins (#662). No default: every
+    /// caller states its answer.
     func attach(
-        app: NSRunningApplication,
-        hasVisibleWindows: Bool = true
-    ) {
-        attach(
-            app: app,
-            ref: AppRef(app),
-            hasVisibleWindows: hasVisibleWindows
-        )
-    }
-
-    private func attach(
-        app: NSRunningApplication,
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
         ref: AppRef,
-        hasVisibleWindows: Bool = true
+        scanWindowsAtAttach: Bool
     ) {
-        let pid = app.processIdentifier
+        // Nothing attaches before `start()` (#672): loadConfig's
+        // pre-start `reconcileAll()` used to reach here and
+        // attach every app with the eager default above, which
+        // made the boot scan's prefilter test nothing — every
+        // app was already attached and warmed by the time
+        // `start()` ran.
+        guard isRunning else { return }
         guard observers[pid] == nil else { return }
         guard
             Self.shouldAttach(
                 pid: pid,
-                activationPolicy: app.activationPolicy,
+                activationPolicy: activationPolicy,
                 isIgnored: shouldIgnoreApp(
                     bundleID: ref.bundleID
                 )
             )
         else { return }
-        guard let observer = AXApplicationObserver(pid: pid)
+        // Per-app timing (#672): every AX round trip below can
+        // block on an unresponsive app, and the boot scan runs
+        // them serially — so each attach is an interval, and a
+        // slow one logs the app's name for field reports.
+        let name = ref.bundleID ?? ref.name
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval(
+            "attach",
+            id: signposter.makeSignpostID(),
+            "\(name, privacy: .public)"
+        )
+        let begin = ContinuousClock.now
+        defer {
+            signposter.endInterval("attach", span)
+            let ms = begin.duration(to: .now).wholeMilliseconds
+            if ms >= BootSignpost.slowSpanMs {
+                onLog("slow attach: \(name) took \(ms)ms")
+            }
+        }
+        guard let observer = makeObserver(pid)
         else { return }
 
         observer.onNotification = { [weak self] note, element in
@@ -71,15 +104,15 @@ extension EventLoop {
         }
         observers[pid] = observer
 
-        // When the WindowServer reports zero layer-0 windows
-        // for this app, skip the slow AX window query and
-        // warmup — the observer above still catches future
-        // window creation, and the 1 s startup sweep
-        // (reconcileAll) re-warms cold apps.
-        guard hasVisibleWindows else { return }
+        // Skip the slow AX window query and warmup when asked
+        // (windowless per the prefilter, or a same-turn
+        // reconcile follows) — the observer above still catches
+        // future window creation, and a following reconcile
+        // re-warms (StartupWarmupSkipTests, #662).
+        guard scanWindowsAtAttach else { return }
 
-        let windows = AXHelper.windows(pid: pid)
-        if app.activationPolicy == .regular
+        let windows = axWindows(pid)
+        if activationPolicy == .regular
             || windows.contains(where: Self.isStandardWindow)
         {
             warmAccessibilityTree(pid: pid)
@@ -111,10 +144,7 @@ extension EventLoop {
     /// re-tried on later reconciles for cold apps.
     func warmAccessibilityTree(pid: pid_t) {
         guard enhancedUIBaselines[pid] == nil else { return }
-        guard
-            let baseline = AXHelper.getEnhancedUserInterface(
-                pid: pid
-            )
+        guard let baseline = readEnhancedUI(pid)
         else {
             // The app does not answer the EUI read. Chromium-family
             // browsers (Chrome, Brave, Edge, Arc, …) behave this way
@@ -127,13 +157,13 @@ extension EventLoop {
             // reconcile, since the EUI read that would record a
             // baseline stays nil for a Chromium app forever (#360).
             guard manualAXApplied.insert(pid).inserted else { return }
-            AXHelper.setManualAccessibility(pid: pid, enabled: true)
+            writeManualAX(pid, true)
             return
         }
         enhancedUIBaselines[pid] = baseline
         guard !baseline else { return }
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
-        AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
+        writeEnhancedUI(pid, true)
     }
 
     func detach(
@@ -144,10 +174,7 @@ extension EventLoop {
         if let baseline = enhancedUIBaselines.removeValue(
             forKey: pid
         ), restoreEnhancedUI, !baseline {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: false
-            )
+            writeEnhancedUI(pid, false)
         }
         // AXManualAccessibility is left set on the app (an eager AX
         // tree is what a managed app wants); only forget the pid so a
@@ -162,29 +189,5 @@ extension EventLoop {
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil
-    }
-
-    /// PIDs that own at least one layer-0 (normal document)
-    /// window according to the WindowServer. One snapshot,
-    /// ~1 ms, no AX.
-    nonisolated static func pidsWithVisibleWindows() -> Set<pid_t> {
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                [.optionAll, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return [] }
-        var result = Set<pid_t>()
-        for info in list {
-            guard
-                let pid = (info[kCGWindowOwnerPID as String] as? NSNumber)?
-                    .int32Value,
-                let layer = (info[kCGWindowLayer as String] as? NSNumber)?
-                    .intValue,
-                layer == 0
-            else { continue }
-            result.insert(pid)
-        }
-        return result
     }
 }

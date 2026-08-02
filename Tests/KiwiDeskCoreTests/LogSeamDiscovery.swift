@@ -55,6 +55,7 @@ extension AnimationEngine: LogSeamOwner {}
 extension BorderManager: LogSeamOwner {}
 extension CrashRecovery: LogSeamOwner {}
 extension EventBus: LogSeamOwner {}
+extension EventLoop: LogSeamOwner {}
 extension ExecLauncher: LogSeamOwner {}
 extension KeybindingManager: LogSeamOwner {}
 extension ProfileManager: LogSeamOwner {}
