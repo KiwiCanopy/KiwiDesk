@@ -130,7 +130,7 @@ public final class EventLoop {
     }
 
     /// The WindowServer prefilter feeding the scan's
-    /// `hasVisibleWindows` answers (see `attach`).
+    /// `scanWindowsAtAttach` answers (see `attach`).
     var visiblePIDs: () -> Set<pid_t> =
         AXHelper.pidsWithNormalWindows
 

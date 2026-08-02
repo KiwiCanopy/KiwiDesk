@@ -16,7 +16,7 @@ extension EventLoop {
     /// skipped (StartupWarmupSkipTests, #662).
     func syncObservation(
         for app: RunningApp,
-        scanWindowsAtAttach: Bool = true
+        scanWindowsAtAttach: Bool
     ) {
         let isIgnored = shouldIgnoreApp(
             bundleID: app.ref.bundleID
