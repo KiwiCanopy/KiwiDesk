@@ -34,6 +34,18 @@ WORKSHEETS_DIRNAME = "locale-worksheets"
 OVERRIDE_ENV = "KIWIDESK_EXTRACT_WORKSHEETS"
 
 
+def _override() -> str | None:
+    """The override's value, or None when it is unset **or set to
+    an empty string**. Both questions below route through this so
+    they cannot disagree: `VAR= ` exported reads as "set" to a
+    membership test and as "" to a `.get` default, which would
+    refuse a `--site` run while resolving a plain one to
+    `Path("")` — writing the worksheet into whatever directory the
+    shell happened to be in."""
+    value = os.environ.get(OVERRIDE_ENV)
+    return value or None
+
+
 def worksheets_dir(root: Path, site: bool = False) -> Path:
     """The directory `missing_<locale>.json` is written to and
     read from. `site` selects the marketing site's sub-tree.
@@ -46,18 +58,14 @@ def worksheets_dir(root: Path, site: bool = False) -> Path:
     `extract-keys` refuses the combination outright rather than
     letting it through here.
     """
-    base = Path(
-        os.environ.get(
-            OVERRIDE_ENV, str(root / WORKSHEETS_DIRNAME)
-        )
-    )
+    base = Path(_override() or str(root / WORKSHEETS_DIRNAME))
     return base / "site" if site else base
 
 
 def site_override_conflict(site: bool) -> str | None:
     """Why a `--site` run must not proceed under the override, or
     None. Called by both scripts before either touches a path."""
-    if site and OVERRIDE_ENV in os.environ:
+    if site and _override():
         return (
             f"{OVERRIDE_ENV} redirects the worksheet tree but "
             "nothing redirects site/src/i18n, so --site would "

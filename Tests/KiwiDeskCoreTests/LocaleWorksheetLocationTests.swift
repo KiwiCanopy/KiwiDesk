@@ -20,11 +20,13 @@ import Testing
 /// whichever key sorted first, with nothing pointing at the
 /// worksheet.
 ///
-/// Two halves, and they fail apart: the first pins where
-/// `extract-keys` writes (revert the write path and it reds); the
-/// second pins that a worksheet found in the catalog directory is
-/// still *rejected* rather than skipped, so the fix cannot decay
-/// into teaching each reader to ignore what it cannot decode.
+/// This suite owns the *write* half — where `extract-keys` puts
+/// a worksheet, and that the directory it puts one in is
+/// gitignored under that same name. The other half, that one
+/// found among the catalogs is still *rejected* rather than
+/// skipped, is `LocaleWorksheetRejectionTests`. They fail apart:
+/// reverting the write path leaves the rejection green, and
+/// deleting the rejection leaves the write path green.
 @Suite("locale worksheet location")
 struct LocaleWorksheetLocationTests {
     private var repoRoot: URL { scriptFixtureRepoRoot() }
@@ -80,6 +82,48 @@ struct LocaleWorksheetLocationTests {
         )
     }
 
+    /// `.gitignore` is the one mirror of the directory name that
+    /// nothing else pins. The Swift fixture copy is forget-proof
+    /// by construction — the tests above run the real script and
+    /// assert on the fixture path, so a rename in
+    /// `scripts/locale_paths.py` reds them — but a rename leaves
+    /// the ignore entry stale in silence, and the symptom is a
+    /// translator's in-progress worksheets becoming visible and
+    /// committable again (parity-tests.md: a shipped mirror
+    /// carries a parity test).
+    ///
+    /// It substring-matches the entry rather than asking git, so
+    /// a later negation (`!/locale-worksheets/`) would still
+    /// satisfy it. That is the shape this file has never had, and
+    /// spawning git to answer it would buy a process per run.
+    @Test("the worksheet directory is gitignored under its name")
+    func worksheetDirectoryIsIgnoredUnderItsRealName() throws {
+        let root = scriptFixtureRepoRoot()
+        let name = try String(
+            contentsOf:
+                root
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("locale_paths.py"),
+            encoding: .utf8
+        )
+        .components(separatedBy: "WORKSHEETS_DIRNAME = \"")
+        .dropFirst().first?
+        .components(separatedBy: "\"").first
+        let dirname = try #require(name, "the constant is gone")
+        #expect(!dirname.isEmpty)
+        let ignores = try String(
+            contentsOf: root.appendingPathComponent(".gitignore"),
+            encoding: .utf8
+        )
+        #expect(
+            ignores.contains("/\(dirname)/"),
+            """
+            \(dirname) is not gitignored — worksheets in \
+            progress would be committable
+            """
+        )
+    }
+
     /// `--site` moved with it. The site's manifests are imported
     /// statically by the Astro components rather than enumerated,
     /// so a worksheet there is the milder half of the same
@@ -130,208 +174,5 @@ struct LocaleWorksheetLocationTests {
             worksheet?["hero.title"]?["source"]
                 == "Tiling, quietly"
         )
-    }
-
-    @Test("--check rejects a worksheet left in Locales")
-    func checkRejectsAWorksheetInTheCatalogDirectory() throws {
-        let result = try runCheck(
-            locales: [
-                "en.json": #"{"gap.hint": "Gap between windows"}"#,
-                "de.json": #"{"gap.hint": "Abstand"}"#,
-                "missing_de.json": #"""
-                {"gap.hint": {"source": "Gap between windows",
-                              "translation": ""}}
-                """#,
-            ]
-        )
-        #expect(result.status != 0)
-        #expect(result.stderr.contains("missing_de.json"))
-        #expect(result.stderr.contains("worksheet"))
-        #expect(
-            result.stderr.contains("locale-worksheets/"),
-            "the diagnosis must say where worksheets belong"
-        )
-    }
-
-    /// The same corpus without the worksheet passes, so the test
-    /// above reds for the worksheet and not for the fixture.
-    @Test("--check passes on the same corpus without one")
-    func checkPassesWithoutTheWorksheet() throws {
-        let result = try runCheck(
-            locales: [
-                "en.json": #"{"gap.hint": "Gap between windows"}"#,
-                "de.json": #"{"gap.hint": "Abstand"}"#,
-            ]
-        )
-        #expect(result.status == 0)
-    }
-
-    /// And rejecting by name did not replace the shape check it
-    /// sits in front of: a genuinely malformed *catalog* — the
-    /// defect that makes `LocaleCatalog` soft-fail to `[:]` and a
-    /// locale silently revert to English — must still hard-fail.
-    @Test("--check still rejects a malformed catalog")
-    func checkStillRejectsAMalformedCatalog() throws {
-        let result = try runCheck(
-            locales: [
-                "en.json": #"{"gap.hint": "Gap between windows"}"#,
-                "de.json": #"""
-                {"gap.hint": {"nested": "Abstand"}}
-                """#,
-            ]
-        )
-        #expect(result.status != 0)
-        // A traceback also exits non-zero. Gutting the shape
-        // check made `check_content` fall over a dict value
-        // instead of diagnosing it, which a bare status check
-        // would have read as a healthy rejection.
-        #expect(!result.stderr.contains("Traceback"))
-        // The needle is the PER-FILE diagnosis, not the shared
-        // header: the header prints whenever the malformed block
-        // prints at all, so a needle it satisfies pins "something
-        // was reported" rather than "the shape was explained".
-        #expect(
-            result.stderr.contains("de.json: non-string value")
-        )
-    }
-
-    /// `--prune` is the one mode that *rewrites* every catalog,
-    /// and it walks the name-filtered `shipped_locale_files()` —
-    /// so without its own validation it would tidy the whole
-    /// directory around a worksheet and report success. The
-    /// unchanged `de.json` is the half that matters: refusing
-    /// late, after the rewrite, would read the same on stderr.
-    @Test("--prune refuses to rewrite around a worksheet")
-    func pruneRejectsAWorksheetInTheCatalogDirectory() throws {
-        var after: [String: String] = [:]
-        let result = try runExtract(
-            ["--prune"],
-            locales: [
-                "en.json": #"{"gap.hint": "Gap between windows"}"#,
-                "de.json": #"""
-                {"gap.hint": "Abstand", "gone.key": "Weg"}
-                """#,
-                "missing_de.json": #"""
-                {"gap.hint": {"source": "Gap between windows",
-                              "translation": ""}}
-                """#,
-            ],
-            inspecting: { directory in
-                after = try JSONDecoder().decode(
-                    [String: String].self,
-                    from: Data(
-                        contentsOf:
-                            directory
-                            .appendingPathComponent("de.json")
-                    )
-                )
-            }
-        )
-        #expect(result.status != 0)
-        #expect(result.stderr.contains("missing_de.json"))
-        // `gone.key` is a genuine orphan: a prune that ran would
-        // have removed it.
-        #expect(after["gone.key"] == "Weg")
-    }
-
-    /// The override redirects the worksheet tree and nothing
-    /// redirects `site/src/i18n`, so a `--site` run under it
-    /// would read — and `--prune` would rewrite — the developer's
-    /// real site catalogs while writing worksheets to a temp
-    /// directory. Half a redirect is worse than none, so both
-    /// scripts refuse the combination before touching a path.
-    @Test(
-        "--site refuses to run under the worksheet override",
-        arguments: ["extract-keys", "merge-keys"]
-    )
-    func siteRefusesUnderTheOverride(script: String) throws {
-        let base = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-worksheet-site-\(UUID().uuidString)"
-            )
-        defer { try? FileManager.default.removeItem(at: base) }
-        let result = try runPythonScript(
-            at: repoRoot.appendingPathComponent("scripts/\(script)"),
-            arguments: ["--site", "de"],
-            environment: [
-                "KIWIDESK_EXTRACT_WORKSHEETS": base.path
-            ]
-        )
-        #expect(result.status != 0)
-        #expect(
-            result.stderr.contains("KIWIDESK_EXTRACT_WORKSHEETS")
-        )
-        // Not the rooted `site/…` form: `CiPathFilterTests` reads
-        // that literal in a test source as this suite reading the
-        // real site tree, and it is right to — the needle only
-        // needs to prove the message names the site catalogs.
-        #expect(result.stderr.contains("src/i18n"))
-        // Refused before reading anything, so the real site
-        // catalogs were never opened.
-        #expect(!result.stderr.contains("Traceback"))
-    }
-
-    // MARK: - Harness
-
-    /// `extract-keys` is the env-var-scoped shape (see
-    /// `ScriptFixture.swift`): the real script runs in place
-    /// against flat temp dirs. `KIWIDESK_EXTRACT_WORKSHEETS` is
-    /// set even for modes that write no worksheet — an unset
-    /// override would point a regression at the developer's own
-    /// checkout. `inspecting` runs against the locales directory
-    /// before the fixture is torn down.
-    private func runCheck(
-        locales files: [String: String]
-    ) throws -> ScriptRun {
-        try runExtract(["--check"], locales: files)
-    }
-
-    private func runExtract(
-        _ arguments: [String],
-        locales files: [String: String],
-        inspecting: ((URL) throws -> Void)? = nil
-    ) throws -> ScriptRun {
-        let base = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-worksheet-check-\(UUID().uuidString)"
-            )
-        let sources = base.appendingPathComponent("Sources")
-        let localesDir = base.appendingPathComponent("Locales")
-        let worksheets = base.appendingPathComponent("Worksheets")
-        defer { try? FileManager.default.removeItem(at: base) }
-        for directory in [sources, localesDir, worksheets] {
-            try FileManager.default.createDirectory(
-                at: directory,
-                withIntermediateDirectories: true
-            )
-        }
-        try #"""
-        let a = L("gap.hint", "Gap between windows")
-        """#
-        .write(
-            to: sources.appendingPathComponent("A.swift"),
-            atomically: true,
-            encoding: .utf8
-        )
-        for (name, content) in files {
-            try content.write(
-                to: localesDir.appendingPathComponent(name),
-                atomically: true,
-                encoding: .utf8
-            )
-        }
-        let run = try runPythonScript(
-            at: repoRoot.appendingPathComponent(
-                "scripts/extract-keys"
-            ),
-            arguments: arguments,
-            environment: [
-                "KIWIDESK_EXTRACT_SOURCES": sources.path,
-                "KIWIDESK_EXTRACT_LOCALES": localesDir.path,
-                "KIWIDESK_EXTRACT_WORKSHEETS": worksheets.path,
-            ]
-        )
-        try inspecting?(localesDir)
-        return run
     }
 }

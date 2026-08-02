@@ -152,4 +152,53 @@ struct AppPlistLocalizationTests {
             )
         )
     }
+
+    /// The glob must REFUSE a translator worksheet, not list it.
+    /// This is the second copy of the `missing_*` rule (the first
+    /// is `validate_locale_files` in `scripts/extract-keys`), it
+    /// is in the one language nothing else here scans, and it
+    /// runs on the one machine `packaging-and-release.md` says
+    /// such a failure is invisible on — a locally built `.app`
+    /// would claim a language called `missing_de` while SwiftPM's
+    /// `.copy` carried the worksheet into the bundle.
+    ///
+    /// Skipping it instead would be worse than not checking: the
+    /// script would print, exit 0, and let `codesign` seal a
+    /// bundle carrying the worksheet, while the plist it emitted
+    /// looked perfectly right. So both halves are pinned — the
+    /// case arm, and that its body **leaves the script** rather
+    /// than `continue`-ing the loop.
+    ///
+    /// The window is bounded by the arm's own `;;` terminator,
+    /// not by a character count. A 400-character window shipped
+    /// here first and was inert: it reached eight lines past the
+    /// `esac` and matched the `exit 1` belonging to the
+    /// empty-list guard below, so the `continue` mutation — the
+    /// actual defect — passed green.
+    ///
+    /// Still a source scan, so the runtime half is out of reach:
+    /// it cannot see a glob that matches nothing on some machine,
+    /// and it says nothing about SwiftPM's `.copy`, which ships
+    /// whatever is in the directory whatever the plist claims.
+    /// Executing this would mean running a signing script from
+    /// the suite; `LocaleWorksheetRejectionTests` covers the
+    /// executable half of the same rule in `extract-keys`.
+    @Test("The locale glob refuses a worksheet")
+    func globRejectsAWorksheet() throws {
+        let script = try source()
+        #expect(script.contains("missing_*)"))
+        let arm =
+            script
+            .components(separatedBy: "missing_*)")
+            .dropFirst().first
+        let body = try #require(arm, "the case arm is gone")
+        let end = try #require(
+            body.range(of: ";;"),
+            "the case arm never terminates"
+        )
+        let head = String(body[body.startIndex..<end.lowerBound])
+        #expect(head.contains("exit 1"))
+        #expect(!head.contains("continue"))
+        #expect(head.contains("locale-worksheets/"))
+    }
 }

@@ -70,23 +70,26 @@ input. A tool that mints a working file writes it under
 `locale-worksheets/` — outside every tree a target ships from,
 and `scripts/locale_paths.py` is the one definition of that path,
 imported by both scripts that touch it rather than re-derived.
-`LocaleWorksheetLocationTests` pins both halves (where
-`extract-keys` writes, and that `extract-keys --check` still
-*rejects* a worksheet found among the catalogs), and
-`validate_locale_files` in `scripts/extract-keys` is the
-rejection itself.
+`LocaleWorksheetLocationTests` pins where `extract-keys` writes
+and `LocaleWorksheetRejectionTests` pins that one found among the
+catalogs is still *rejected*. Two rejections exist, deliberately:
+`validate_locale_files` in `scripts/extract-keys` (reached by
+`--check` and `--prune`) and the `CFBundleLocalizations` glob in
+`scripts/build-app.sh`, which `AppPlistLocalizationTests` pins —
+the packager needs its own because it is the path that produces a
+signed artifact without running the gate.
 
 **A reader that would *decode* a file must never skip one it
-cannot** — name it instead, the way `SettingKeyLocaleTests` does:
-skipping is how a misplaced file survives, and the skip is
-invisible in a green run. A walker that only enumerates locale
-*codes* is the exception and filters `missing_` by name
-(`shipped_locale_files()` is the authority the Swift ones mirror
-— `LocalizationRegistryTests`, `LocalizationModeNamePolicyTests`);
-that filter exists so a walker cannot rewrite or mis-report a
-stray worksheet before the rejection above has named it, and it
-must carry a comment saying so rather than reading as an
-assumption about what lives there.
+cannot** — name it instead, the way `SettingKeyLocaleTests` and
+`LocalizationModeNamePolicyTests` do: skipping is how a misplaced
+file survives, and the skip is invisible in a green run. A walker
+that enumerates locale *codes* and decodes none of them is the
+exception and filters `missing_` by name (`shipped_locale_files()`
+is the authority the Swift one mirrors —
+`LocalizationRegistryTests`); that filter exists so a walker
+cannot rewrite or mis-report a stray worksheet before a rejection
+has named it, and it must carry a comment saying so rather than
+reading as an assumption about what lives there.
 
 The cost of getting this wrong is spread across readers that have
 no idea a translation pass is open: SwiftPM `.copy`s the whole
@@ -188,7 +191,8 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationProductNameGuardTests`,
 `LocalizationOverlapGuardTests`,
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
-`MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`
+`MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
+`LocaleWorksheetRejectionTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.
