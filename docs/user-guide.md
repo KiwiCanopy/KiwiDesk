@@ -974,7 +974,8 @@ running windows.
   to Boxed, which draws no shared plate. The Space Bar has the
   same control.
 - **Position**: the screen edge the bar occupies — top, bottom,
-  left, or right (default top). Absolute for every layout; the
+  left, or right (default bottom, beside the Dock, with the
+  Space Bar on top). Absolute for every layout; the
   preview strip rotates vertical for left/right. When the Space
   Bar shares the edge, an inline note under this control
   explains the stacking order (Space Bar at the screen edge,

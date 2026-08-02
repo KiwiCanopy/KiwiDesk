@@ -1,11 +1,13 @@
 import type { APIRoute } from "astro";
 
 // Hand-rolled sitemap for the custom (non-Starlight) pages that
-// carry locale variants. Starlight's @astrojs/sitemap covers the
-// /docs/* tree in its own sitemap-index.xml; this one covers the
-// marketing landing and guide pages with full hreflang alternates
-// so crawlers see the same graph the <link rel="alternate"> tags
-// declare. Legal pages (imprint, privacy) are noindex and excluded.
+// carry locale variants. @astrojs/sitemap covers the /docs/* tree
+// in its own sitemap-index.xml and is filtered in astro.config.mjs
+// to *only* that tree, so the two files describe disjoint URL sets
+// — this one covers the marketing landing and guide pages with
+// full hreflang alternates so crawlers see the same graph the
+// <link rel="alternate"> tags declare. Legal pages (imprint,
+// privacy) are noindex and excluded from both.
 
 const langs = ["en", "de", "ja"] as const;
 type Lang = (typeof langs)[number];
@@ -23,9 +25,11 @@ function urlFor(base: string, lang: Lang, path: string): string {
 }
 
 export const GET: APIRoute = ({ site }) => {
-  const base = (
-    site?.toString() ?? "https://kiwidesk.kiwicanopy.com"
-  ).replace(/\/$/, "");
+  // No fallback URL here on purpose: `astro.config.mjs` owns the
+  // canonical default (site.md), and a second copy would be
+  // unreachable while `site` is set and silently stale the day the
+  // domain moves. Let a missing `site` throw, as robots.txt does.
+  const base = new URL("/", site).href.replace(/\/$/, "");
 
   const entries = paths
     .map((p) => {

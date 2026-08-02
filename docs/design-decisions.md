@@ -1000,14 +1000,56 @@ frames across monitors before. (#445)
 
 ### Permanent accessory mode (no activation policy switching)
 
+**[Principle]**
+
+**No window controller may change the activation policy.** A
+content window comes forward through `NSApp.forceFront`, which
+shows and activates it from `.accessory`; opening Settings adds no
+Dock tile and no menu bar. This removes the macOS 14+ demotion
+bugs and focus-handoff lockouts wholesale, so shortcuts and focus
+commands stay reliable without any dynamic switching.
+
+Stated as an obligation on controllers rather than as a claim
+about the process, because the claim was the failure. The rule
+used to be promote-on-open / demote-on-close, and a demote had to
+survive being the *last* of {Settings, onboarding, Config Issues}
+to close — one rule spread over three controllers, each holding
+half of it. Removing the demote from Settings while leaving the
+promotion in onboarding left exactly one reachable order
+(onboarding → Settings → close both) that stranded the app
+`.regular` with nothing on screen, which is the invisible-but-
+foreground state that breaks `focusedCommandDenial`'s
+`front == focused.pid` test. Not promoting is the only form of the
+rule with nowhere left to forget it.
+
+**One exception, and it is structural rather than trusted:** the
+already-running alert in `SingleInstanceGuard` raises `.regular`
+so its modal is not buried, and the process `exit(1)`s
+immediately. No window can outlive that promotion, so it cannot
+strand anything.
+
+The menu bar this policy hides is still built (`MainMenu`) —
+AppKit routes key equivalents through `NSApp.mainMenu` whatever
+the policy, and it is what gives the Settings text fields
+Cut/Copy/Paste/Undo.
+
+### No content window is miniaturizable
+
 **[Rationale]**
 
-**KiwiDesk stays permanently in `.accessory` mode (never promoting to
-`.regular`).** Opening the Settings window no longer promotes the app to
-`.regular` or adds a Dock icon. This completely eliminates macOS 14+
-activation policy demotion bugs and focus handoff lockouts, guaranteeing that
-shortcuts and window focus commands remain 100% reliable at all times without
-dynamic policy switching.
+**No KiwiDesk window carries `.miniaturizable` in its style
+mask** — not Settings, not onboarding, not Config Issues. A
+minimized window goes to the Dock, and KiwiDesk has no Dock tile
+to restore it from, because it never leaves `.accessory` (above).
+Minimizing would park the window somewhere the user has no
+affordance to bring it back from; the menu-bar quick menu is the
+only route back, and a disabled yellow button says so up front
+instead of letting them discover it.
+
+This is a consequence of the entry above rather than a taste call
+about any one window, which is why it is stated over all of them:
+a new content window inherits the reason, and giving it a
+minimize button would be the bug.
 
 ### Open at login
 
@@ -1682,9 +1724,10 @@ numbered `bsp` spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go
 already `ensureSpace`s on first press — so the nine existed only to
 back the digits, and every new user stared at nine identical `bsp`
 desktops. The ladder replaces them: **five spaces per connected
-display**, one per layout mode — track (new window → own track),
-stack (single master, 80/20), bsp, grid (3×2), floating — repeating
-whole on each monitor (1–5 main, 6–10 second, 11–15 third). It is a
+display**, one per layout mode — scrolling (the infinite column
+row), stack (single master, 80/20), track (new window → own
+track), grid (3×2), floating — repeating whole on each monitor
+(1–5 main, 6–10 second, 11–15 third). It is a
 guided tour of what KiwiDesk does, sized to the hardware. Because the
 per-space modes, monitor pins, and tuning are **profile-scoped** and
 `gui.json` carries only globals, the ladder is materialized as a real,
@@ -2128,8 +2171,10 @@ way before the rule was written down — `site/src/styles/theme.css`
 themes the Starlight title ink while its header mark stays fixed
 — so this generalizes a precedent rather than importing one. So the kiwi symbol is byte-identical in both
 appearances — there is deliberately **no dark symbol master**,
-and `logo.svg` serves the app sidebar, the Dock icon, the site
-nav and the Starlight header in either theme. (The retired
+and `logo.svg` serves the app sidebar, the bundle's `AppIcon`,
+the site nav and the Starlight header in either theme. (The
+*runtime* Dock icon it once also served is gone with the
+activation-policy promotion — an `.accessory` app has no tile.) (The retired
 `logo_dark.svg` is recoverable at `1c135a4:assets/logo_dark.svg`
 — but a future dark variant should be derived from the current
 green master's geometry, not from a gold recolour authored
@@ -2452,11 +2497,35 @@ two-way picker already solves. (ui-designer, 2026-07-29.)
 
 ### App Bar
 
-**[Principle]**
+**[Rationale]**
+
+**The two bars ship where macOS already puts a persistent
+strip.** (#660.) Space Bar on **top**, App Bar on **bottom**,
+both in the **plain** design language, both filled at **80 %**
+opacity.
+
+Each half of that is the same argument. Top and bottom are where
+the menu bar and the Dock have already taught the eye to look for
+something permanent, so a new user reads the bars as part of the
+system rather than as two panels someone stuck on; the previous
+left-edge Space Bar competed with nothing and matched nothing.
+`plain` — one shared plate rather than a box per item — is what
+the menu bar itself does, and a boxed strip reads as a widget
+floating over the desktop. And the fill moved from 40 % to 80 %
+because a translucent default is a bet on the user's wallpaper:
+40 % was legible on the dark ones it was chosen against and a
+guess everywhere else, while opacity is the one axis where the
+safe default costs the confident user a single setting.
+
+None of this narrows anything — all six values stay reachable
+from Lua and from Settings. It is a claim about which starting
+point is right when we know nothing about the desktop, which is
+exactly the "approachable by default" clause: the default is for
+the user who never opens the editor.
 
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
-edges (`top` / `bottom` / `left` / `right`, default top) and the
+edges (`top` / `bottom` / `left` / `right`, default bottom) and the
 bar renders exactly there in every layout — the earlier
 `start`/`end` values that resolved against the layout's
 orientation are gone. Axis-relativity existed to prevent an

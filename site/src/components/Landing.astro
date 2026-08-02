@@ -481,6 +481,14 @@ const jsonLd = [
         <blockquote class="quote-band__mark reveal">
           <p class="simple-only">{oq}{t.quote_opening}{cq}</p>
           <p class="dev-only">{oq}{t.quote_tagline}{cq}</p>
+          {/* Simple only: the opening note is a first-person
+              statement and needs a name on it. The Nerd tagline
+              in the same slot is a product line, not a quote —
+              attributing it would read as a claim about the maker
+              rather than about the app. */}
+          <footer class="quote-card__byline simple-only">
+            {t.quote_byline_name}
+          </footer>
         </blockquote>
       </div>
     </section>
@@ -896,6 +904,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <blockquote class="quote-aside quote-aside--center
             quote-aside--footer">
             <p>{oq}{t.quote_footer}{cq}</p>
+            <footer class="quote-card__byline">
+              {t.quote_byline_name}
+            </footer>
           </blockquote>
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
