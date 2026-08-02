@@ -9,26 +9,47 @@ import Testing
 /// in error does not break a build, it stops one from happening,
 /// and a skipped workflow reports success by never reporting.
 ///
-/// Three things are checked, in the order they would bite:
+/// Five things are checked, in the order they would bite:
 ///
-/// 1. The `push:` and `pull_request:` lists are identical. The
-///    Actions parser rejects YAML anchors, so the list is
-///    hand-mirrored and drift would filter the two events
-///    differently — a change tested pre-merge and skipped after,
-///    or the reverse (parity-tests.md).
-/// 2. No ignored path is read by anything under `Tests/`.
-/// 3. The build and lint inputs are never ignored. This is the
-///    clause a test-only audit misses: nothing in `Tests/` reads
-///    `Package.swift`, `.swift-format` or `.swiftlint.yml`, and
-///    ignoring any of them would skip CI for a change that alters
-///    what compiles or what lint enforces.
+/// 1. The `push:` and `pull_request:` lists are identical, and are
+///    the lists those two triggers own. The Actions parser rejects
+///    YAML anchors, so the list is hand-mirrored, and drift would
+///    filter the two events differently — a change tested
+///    pre-merge and skipped after, or the reverse
+///    (parity-tests.md).
+/// 2. Every entry is an exact path or `dir/**`. The other checks
+///    are prefix relations over plain strings, so `*` and `?` are
+///    ordinary characters to them: `Package.*` would ignore
+///    `Package.swift` while matching nothing any of them compares
+///    against. Constraining the shape is what makes the rest sound.
+/// 3. No ignored path appears as a literal under `Tests/`.
+/// 4. No ignored path is *pinned* by a rule file's `paths:` block.
+///    The suite reads those from data rather than from source, so
+///    check (3) is blind to them by construction — which is how
+///    `docs/**` reached review: no test opens a docs page, but
+///    `localization.md` pins two, and `InstructionPinTests`
+///    resolves every such pin.
+/// 5. The build and lint inputs are never ignored — the clause a
+///    test-only audit misses, since nothing in `Tests/` reads
+///    `Package.swift`, `.swift-format` or `.swiftlint.yml`.
 ///
-/// **What this cannot see.** A path assembled from a variable
-/// rather than written as a literal, and a path read only by a
-/// `scripts/` tool the suite shells out to. Check (3) is a
-/// hand-listed floor for the same reason — the build's inputs
-/// cannot be derived from `Tests/`, so they are named here, and
-/// naming them is itself a thing to keep current.
+/// **What this cannot see**, stated plainly because check (3)
+/// promises more than it delivers: a path written as
+/// `.appendingPathComponent` chains is invisible unless its first
+/// component is a whole ignored directory, and that is the repo's
+/// normal idiom — `VerifyGateParityTests` assembles
+/// `.github/workflows/release.yml` from three separate literals,
+/// so ignoring that exact path would pass every check here. Also
+/// invisible: a path reached only by a `scripts/` tool the suite
+/// shells out to, and a path reached case-insensitively (`Docs`
+/// resolves `docs/` on APFS). Check (5) is a hand-listed floor for
+/// the same reason — the build's inputs cannot be derived from
+/// `Tests/`.
+///
+/// The practical consequence: a *multi-component* entry earns far
+/// less protection than a whole-directory one. Prefer ignoring a
+/// whole top-level directory, and treat a deep path as needing
+/// human argument rather than a green suite.
 @Suite("CI path filter")
 struct CiPathFilterTests {
     /// Paths whose change must always run CI, whatever else is
@@ -37,7 +58,6 @@ struct CiPathFilterTests {
     /// step the job runs.
     static let neverIgnorable = [
         "Package.swift",  // defines what is built at all
-        "Package.resolved",  // pins the dependency graph
         ".swift-format",  // scripts/lint.sh --configuration
         ".swiftlint.yml",  // SwiftLint SPM build plugin
         "Sources",
@@ -54,18 +74,23 @@ struct CiPathFilterTests {
     /// a same-named directory built somewhere else. `ScriptFixture`
     /// assembles a `site` directory inside a **temp** tree for the
     /// `extract-keys --site` fixtures; it never reaches the repo's
-    /// `site/`. Add an entry only after confirming the same thing,
-    /// and name the file, so a second use elsewhere still fires.
-    static let allowed = ["site": "ScriptFixture.swift"]
+    /// `site/`. Add an entry only after confirming the same thing.
+    ///
+    /// Keyed by the path relative to `Tests/`, not by filename: a
+    /// same-named file in the other target would otherwise inherit
+    /// an exemption nobody granted it.
+    static let allowed = [
+        "site": "KiwiDeskCoreTests/ScriptFixture.swift"
+    ]
 
-    private var repoRoot: URL {
+    var repoRoot: URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // KiwiDeskCoreTests
             .deletingLastPathComponent()  // Tests
             .deletingLastPathComponent()  // repo root
     }
 
-    private var workflow: String {
+    var workflow: String {
         get throws {
             try String(
                 contentsOf:
@@ -81,19 +106,74 @@ struct CiPathFilterTests {
     @Test("Both paths-ignore lists are identical")
     func listsMatch() throws {
         let lists = Self.ignoreLists(try workflow)
-        #expect(lists.count == 2, "found \(lists.count) lists, want 2")
-        #expect(
-            lists.first != [],
-            "a paths-ignore list parsed as empty"
+        // #require, not #expect: with no list parsed, every
+        // comparison below is trivially true (nil != [], nil ==
+        // nil) and only the count would red — pointing at the
+        // wrong thing.
+        try #require(
+            lists.count == 2,
+            "found \(lists.count) lists, want 2"
         )
-        #expect(lists.first == lists.last, "the two lists differ")
+        try #require(
+            lists.map(\.trigger).sorted() == ["pull_request", "push"],
+            "lists came from \(lists.map(\.trigger))"
+        )
+        let first = lists.first?.entries ?? []
+        let last = lists.last?.entries ?? []
+        let parsed = first.count
+        try #require(parsed > 0, "a paths-ignore list parsed as empty")
+        #expect(first == last, "the two lists differ")
+    }
+
+    @Test("Every entry is an exact path or a whole subtree")
+    func entryShapesArePrefixSafe() throws {
+        let ignored = try entries()
+        // Every other check here is a prefix relation over plain
+        // strings, so `*` and `?` are ordinary characters to them:
+        // `Package.*` ignores Package.swift while matching nothing
+        // any check compares against, and `*.md` sweeps AGENTS.md
+        // in past all of them. Rather than teach four checks to
+        // glob, constrain the shape so prefix logic is sound.
+        var malformed: [String] = []
+        for entry in ignored {
+            let body =
+                entry.hasSuffix("/**")
+                ? String(entry.dropLast(3)) : entry
+            if body.contains("*") || body.contains("?") {
+                malformed.append(entry)
+            }
+        }
+        #expect(
+            malformed.isEmpty,
+            """
+            an entry must be an exact path or `dir/**`; these hide \
+            from every prefix check: \(malformed)
+            """
+        )
+    }
+
+    /// The ignore entries, refusing an empty parse.
+    func entries() throws -> [String] {
+        let ignored = Self.ignoreLists(try workflow).first?.entries ?? []
+        try #require(!ignored.isEmpty, "no paths-ignore entries")
+        return ignored
     }
 
     @Test("No ignored path is read by the test suite")
     func ignoredPathsAreUnread() throws {
-        let ignored = try Self.ignoreLists(workflow).first ?? []
-        try #require(!ignored.isEmpty, "no paths-ignore entries")
+        let ignored = try entries()
         let sources = try testSources()
+        // A count alone is a total-failure canary: the margin over
+        // the tree is wide enough that most of the walk could
+        // vanish and still clear it. Requiring both targets catches
+        // a walk that half-failed, which a count cannot.
+        let targets = Set(
+            sources.compactMap { $0.0.split(separator: "/").first }
+        )
+        try #require(
+            targets.count >= 2,
+            "scan covered only \(targets.sorted())"
+        )
         try #require(
             sources.count > 100,
             "only scanned \(sources.count) test files"
@@ -112,19 +192,21 @@ struct CiPathFilterTests {
             // form would give this guard nothing to catch.
             //
             // A deeper entry gets prefix matching only. Its head
-            // says nothing: tests read `.github/workflows/
-            // release.yml` while `.github/workflows/site.yml` is
-            // ignored, so flagging every `.github` would be noise.
+            // says nothing — tests read some paths under `.github`
+            // while others there are ignorable, so flagging every
+            // `.github` would be noise. That weakness is why the
+            // doc comment tells you a deep entry is barely guarded.
             let wholeDirectory = !trimmed.contains("/")
             for (name, text) in sources {
-                if let exempt = Self.allowed[trimmed],
-                    name.hasSuffix(exempt)
-                {
-                    continue
-                }
+                // The exemption covers ONLY the bare-component
+                // needle it was granted for. A rooted `"site/`
+                // literal in the same file is a real read and must
+                // still fire.
+                let exempt = Self.allowed[trimmed] == name
                 let hit =
                     text.contains("\"\(prefix)")
-                    || (wholeDirectory && text.contains("\"\(trimmed)\""))
+                    || (wholeDirectory && !exempt
+                        && text.contains("\"\(trimmed)\""))
                 if hit { violations.append("\(name) reads \(entry)") }
             }
         }
@@ -134,82 +216,35 @@ struct CiPathFilterTests {
         )
     }
 
-    @Test("Build and lint inputs are never ignored")
-    func buildInputsStayWatched() throws {
-        let ignored = try Self.ignoreLists(workflow).first ?? []
-        try #require(!ignored.isEmpty, "no paths-ignore entries")
+    @Test("No ignored path is pinned by a rule file")
+    func ignoredPathsArentRulePins() throws {
+        let ignored = try entries()
+
+        // The suite reads these from *data*, not from a source
+        // literal: `InstructionPinTests` resolves every non-glob
+        // `paths:` entry in every rule file, so each is a path a
+        // change can break — and check (2) cannot see it, because
+        // no `.swift` file contains the string.
+        //
+        // This is what let `docs/**` through review: nothing opens
+        // a docs page, but `localization.md` pins two of them.
+        var pins: [String] = []
+        for (_, text) in try ruleFiles() {
+            pins += InstructionPinTests.pathEntries(text)
+                .filter { !$0.contains("*") && !$0.contains("?") }
+        }
+        try #require(pins.count > 5, "only found \(pins.count) pins")
+
         var violations: [String] = []
         for entry in ignored {
             let prefix = entry.replacingOccurrences(of: "**", with: "")
-            for input in Self.neverIgnorable
-            where input == entry || input.hasPrefix(prefix)
-                || prefix.hasPrefix(input)
-            {
-                violations.append("\(entry) covers \(input)")
+            for pin in pins where pin == entry || pin.hasPrefix(prefix) {
+                violations.append("\(entry) covers the pin \(pin)")
             }
         }
         #expect(
             violations.isEmpty,
-            "paths-ignore covers a build/lint input: \(violations)"
+            "paths-ignore hides a rule-file pin: \(violations)"
         )
-    }
-
-    /// Every `.swift` under `Tests/`, as (relative name, text).
-    private func testSources() throws -> [(String, String)] {
-        let tests = repoRoot.appendingPathComponent("Tests")
-        var out: [(String, String)] = []
-        let walker = FileManager.default.enumerator(atPath: tests.path)
-        let own = (#filePath as NSString).lastPathComponent
-        while let entry = walker?.nextObject() as? String {
-            guard entry.hasSuffix(".swift") else { continue }
-            // This file names ignored paths as data — its `allowed`
-            // map and its doc comment — so scanning it would report
-            // the guard against itself. It reads only `ci.yml` and
-            // `Tests/`, neither of which is ignorable.
-            guard !entry.hasSuffix(own) else { continue }
-            out.append(
-                (
-                    entry,
-                    try String(
-                        contentsOf: tests.appendingPathComponent(entry),
-                        encoding: .utf8
-                    )
-                )
-            )
-        }
-        return out
-    }
-
-    /// Each `paths-ignore:` block's quoted entries, in file order.
-    static func ignoreLists(_ text: String) -> [[String]] {
-        var out: [[String]] = []
-        var current: [String]?
-        for raw in text.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        ) {
-            let line = raw.trimmingCharacters(in: .whitespaces)
-            if line == "paths-ignore:" {
-                if let current { out.append(current) }
-                current = []
-                continue
-            }
-            guard current != nil else { continue }
-            if line.hasPrefix("#") { continue }
-            guard line.hasPrefix("- ") else {
-                if !line.isEmpty {
-                    out.append(current!)
-                    current = nil
-                }
-                continue
-            }
-            let value =
-                line
-                .dropFirst(2)
-                .trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-            current?.append(value)
-        }
-        if let current { out.append(current) }
-        return out
     }
 }

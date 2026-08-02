@@ -20,17 +20,17 @@ about saving time:
 - If `git diff --name-only` against the base is **entirely**
   inside that list, the Swift gate cannot be affected: nothing the
   build, the lint or the suite reads is in it. Skip steps 1–3.
-- Then run the gate that *is* affected. For a change touching
-  `docs/` or `site/`, that is the site build — `npm ci &&
-  npm run build` in `site/`, which is what a missing Starlight
-  frontmatter block breaks. Today the full gate spends minutes on
-  Swift tests that cannot fail and never builds the site, which
-  is backwards for that change.
-- Anything else is the full gate. In particular `AGENTS.md`,
-  `.claude/rules/**` and `.claude/agents/**` are **not** in the
-  ignore list and are **not** exempt: `RuleCitationTests` and
-  `InstructionPinTests` read that tree, and a prose-only edit
-  there has already shipped a dangling citation.
+- **Anything else runs the full gate.** `docs/`, `AGENTS.md`,
+  `.claude/rules/**` and `.claude/agents/**` are deliberately not
+  on the ignore list, so "it's only prose" is not a reason to
+  skip: `RuleCitationTests` and `InstructionPinTests` read that
+  tree — including paths a rule file *pins*, which is why
+  `docs/**` is not ignorable — and a prose-only edit there has
+  already shipped a dangling citation.
+- **Additionally**, when the change touches `docs/` or `site/`,
+  run the site build — `npm ci && npm run build` in `site/`. It
+  is a separate gate, not a substitute: a missing Starlight
+  frontmatter block breaks the site and no Swift test can see it.
 
 Say in the report which gate you ran and why.
 

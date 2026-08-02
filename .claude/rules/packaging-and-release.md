@@ -1,6 +1,7 @@
 ---
 paths:
   - "scripts/build-app.sh"
+  - "scripts/protect-main.sh"
   - "scripts/release.sh"
   - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
@@ -259,17 +260,26 @@ reason the filter exists at all, macOS runners billing at a 10x
 multiplier against the free allowance while the repo is private.
 
 **Add a `paths-ignore` entry only when no test, no build step and
-no lint step reads the path.** The third clause is the one that
-gets skipped: nothing under `Tests/` reads `Package.swift`,
-`.swift-format` or `.swiftlint.yml`, so a test-only audit clears
-them, and ignoring any would skip CI for a change that alters what
-compiles. `CiPathFilterTests` holds all three clauses, pins the
-`push` and `pull_request` copies equal — the Actions parser
-rejects YAML anchors, so the list is hand-mirrored — and states in
-its own doc comment what it cannot see.
+no lint step reads the path** — and audit all three, not just the
+first. `CiPathFilterTests` holds the line, pins the `push` and
+`pull_request` copies equal (the Actions parser rejects YAML
+anchors, so the list is hand-mirrored), and states in its own doc
+comment what it cannot see. Read that before adding an entry; a
+deep multi-component path earns much weaker cover than a whole
+top-level directory.
+
+**A path a rule file pins is a path the suite reads.**
+`InstructionPinTests` resolves every non-glob `paths:` entry in
+`.claude/rules/*.md`, so ignoring one makes its rename a
+CI-skipping change that reds `main` afterwards. `docs/**` looked
+like the safest entry on the list for exactly the wrong reason —
+no test opens a docs page, but `localization.md` pins two — and it
+reached review before the guard grew a check for it.
 
 **A filtered-out workflow does not report at all.** It is not
-skipped-as-success; it produces no check run. Harmless today, and
-the thing to remember when branch protection becomes available
-(#487): a required check naming a filtered workflow waits forever,
-and the fix is a gate job that always runs and reports.
+skipped-as-success; it produces no check run. Harmless while the
+repo is private, and load-bearing the day branch protection
+arrives (#487): `scripts/protect-main.sh` requires two job names,
+and a PR confined to an ignored path would wait forever on a check
+that never appears. That script carries the hazard and the fix —
+a third job with no path filter that always reports.

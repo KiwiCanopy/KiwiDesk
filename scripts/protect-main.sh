@@ -51,6 +51,21 @@
 # Status checks are listed by JOB NAME and must match
 # .github/workflows/ci.yml. This is the setting that finally makes
 # CI block rather than report (#532).
+#
+# BEFORE RUNNING THIS: ci.yml carries a paths-ignore list, and a
+# filtered-out workflow does not report a check run at all — it is
+# not skipped-as-success, it is absent. So every PR confined to an
+# ignored path (site/**, the root prose files, the issue templates)
+# will sit forever on "Expected — waiting for status to be
+# reported" once the jobs below are required, with no way to merge
+# but an admin override.
+#
+# Requiring these two as-is therefore trades a merge deadlock for
+# the blocking gate. The fix is a third job that always runs and
+# reports — no paths filter, exits 0 immediately — with that job
+# required here instead of, or alongside, these two. Decide that
+# before turning protection on, not after the first stuck PR.
+# packaging-and-release.md ("CI") owns the argument.
 set -euo pipefail
 
 REPO="${1:-KiwiCanopy/KiwiDesk}"

@@ -14,15 +14,18 @@ name: CI
 # correctness.
 #
 # An entry belongs here only when NO test, NO build step and NO lint
-# step reads the path. That third clause is the trap: nothing under
-# Tests/ reads Package.swift, .swift-format or .swiftlint.yml, and
-# excluding any of them would skip CI for a change that alters what
-# compiles. CiPathFilterTests holds the line, and states what it
-# cannot see.
+# step reads the path — and a path a rule file pins in its `paths:`
+# block counts as read, because InstructionPinTests resolves those.
+# CiPathFilterTests holds the line and states what it cannot see;
+# packaging-and-release.md ("CI") carries the argument.
 #
-# docs/ and site/ are here because site.yml already covers them —
-# not because they are unimportant. assets/ is deliberately absent:
-# site.yml wants it AND two Core suites read the tree.
+# What is NOT here is as deliberate as what is. assets/ is read by
+# two Core suites. docs/ looked safe — no test opens a docs page —
+# but `.claude/rules/localization.md` pins two of them in its
+# `paths:` block and InstructionPinTests resolves every such pin,
+# so renaming one is a docs-only change that reds main afterwards.
+# `.github/workflows/site.yml` is pinned the same way by site.md.
+# A path a rule file pins is a path the suite reads.
 # The two lists below are identical and must stay that way. A YAML
 # anchor would say so in one place, but the Actions parser rejects
 # anchors, so this is a hand-mirrored list — CiPathFilterTests pins
@@ -32,7 +35,6 @@ on:
     branches: [main]
     paths-ignore:
       - "site/**"
-      - "docs/**"
       - "README.md"
       - "CONTRIBUTING.md"
       - "SECURITY.md"
@@ -40,12 +42,10 @@ on:
       - "LICENSE"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/pull_request_template.md"
-      - ".github/workflows/site.yml"
   pull_request:
     branches: [main]
     paths-ignore:
       - "site/**"
-      - "docs/**"
       - "README.md"
       - "CONTRIBUTING.md"
       - "SECURITY.md"
@@ -53,7 +53,6 @@ on:
       - "LICENSE"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/pull_request_template.md"
-      - ".github/workflows/site.yml"
   # Manual "Run workflow" button in the Actions tab. Additive — the
   # automatic triggers above still fire. Useful while the repo is
   # private, where macOS runners bill at a 10x multiplier against a
