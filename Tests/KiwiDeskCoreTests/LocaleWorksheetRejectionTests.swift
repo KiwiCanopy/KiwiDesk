@@ -138,6 +138,18 @@ struct LocaleWorksheetRejectionTests {
     /// closed the half that writes a scratch file in the wrong
     /// place and left open the half that rewrites shipped
     /// catalogs.
+    ///
+    /// **The status check is inert on the `merge-keys` half** and
+    /// is kept only for symmetry: that script exits 1 anyway with
+    /// "worksheet does not exist". The message needles are what
+    /// carry this test there, so do not trim them as redundant —
+    /// those cases would go green for the wrong reason.
+    ///
+    /// Note when this reds: the `extract-keys` × `_LOCALES` case
+    /// really would run `--site` against the developer's real
+    /// `site/src/i18n` and drop a worksheet into the checkout.
+    /// That is the harm being prevented, and it is invisible to
+    /// `git status` because the worksheet tree is gitignored.
     @Test(
         "--site refuses to run under any extract override",
         arguments: ["extract-keys", "merge-keys"],
@@ -172,7 +184,72 @@ struct LocaleWorksheetRejectionTests {
         #expect(!result.stderr.contains("Traceback"))
     }
 
+    /// The mode the refusal exists for. `--site --prune` under an
+    /// override is the one combination that would *rewrite* the
+    /// real `site/src/i18n` — every other mode only reads it —
+    /// and the case above exercises `--site <locale>` only, where
+    /// a mistake costs a misplaced scratch file. The site
+    /// catalogs are checked byte-for-byte afterwards rather than
+    /// trusting the exit code: this is the assertion that would
+    /// have to fail loudly if the refusal ever moved after the
+    /// first write.
+    ///
+    /// Run against a repo-shaped fixture, not the real `site/`.
+    /// A first draft snapshotted the checkout's own catalogs,
+    /// which reads better and is wrong: `CiPathFilterTests` flags
+    /// a test-tree read of `site/**` because that path is
+    /// CI-ignorable, so a site-only change would skip the macOS
+    /// jobs while this test depended on it. The fixture proves
+    /// the same thing and owes CI nothing.
+    @Test("--site --prune under an override rewrites nothing")
+    func sitePruneRefusesBeforeRewritingAnything() throws {
+        let fx = try makeRepoShapedFixture(
+            prefix: "kiwi-worksheet-prune",
+            locales: [:],
+            siteLocales: [
+                "en.json": #"{"a.key": "A"}"#,
+                // `gone.key` is a genuine orphan, so a prune that
+                // actually ran would rewrite this file.
+                "de.json": #"{"a.key": "Ah", "gone.key": "Weg"}"#,
+            ]
+        )
+        defer { fx.cleanup() }
+        let before = try snapshot(of: fx.siteLocales)
+        #expect(!before.isEmpty, "no site catalogs to protect")
+
+        let base = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-worksheet-prune-\(UUID().uuidString)"
+            )
+        defer { try? FileManager.default.removeItem(at: base) }
+        let result = try runRepoScript(
+            "extract-keys",
+            arguments: ["--site", "--prune"],
+            in: fx,
+            repoRoot: repoRoot,
+            environment: ["KIWIDESK_EXTRACT_LOCALES": base.path]
+        )
+        #expect(result.status != 0)
+        #expect(try snapshot(of: fx.siteLocales) == before)
+    }
+
     // MARK: - Harness
+
+    /// Every `*.json` under `directory`, by name and contents.
+    private func snapshot(of directory: URL) throws
+        -> [String: Data]
+    {
+        var out: [String: Data] = [:]
+        for file in try FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: nil
+        ) where file.pathExtension == "json" {
+            out[file.lastPathComponent] = try Data(
+                contentsOf: file
+            )
+        }
+        return out
+    }
 
     /// `extract-keys` is the env-var-scoped shape (see
     /// `ScriptFixture.swift`): the real script runs in place

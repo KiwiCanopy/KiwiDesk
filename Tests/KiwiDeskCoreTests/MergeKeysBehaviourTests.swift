@@ -171,10 +171,19 @@ struct MergeKeysBehaviourTests {
 
     /// Merging the last worksheet leaves no empty worksheet tree
     /// behind — an existing but empty `locale-worksheets/` reads
-    /// as "a pass is still open" to anyone who looks. Both halves
-    /// are asserted: `rmdir` refuses a non-empty directory, so a
-    /// second locale mid-translation must keep the tree, and
-    /// nothing here may reach above it.
+    /// as "a pass is still open" to anyone who looks. Two halves
+    /// are asserted: the tree goes when it empties, and a second
+    /// locale still mid-translation keeps it.
+    ///
+    /// The third check — that the fixture root is still standing
+    /// — **documents intent and is not a net**, and says so
+    /// rather than reading as coverage: `rmdir` refuses a
+    /// non-empty directory, and a repo-shaped fixture root always
+    /// holds `Sources/` and `scripts/`, so no rmdir walk however
+    /// many levels it adds can remove it. Only a `rmtree` could,
+    /// and that reds the mid-translation half first. Proving the
+    /// upward bound would need a worksheet base under an
+    /// otherwise-empty parent, which this fixture cannot have.
     @Test("the worksheet tree is removed once it empties")
     func emptyWorksheetTreeIsCleanedUp() throws {
         let fx = try fixture(locales: [
@@ -205,10 +214,44 @@ struct MergeKeysBehaviourTests {
             ),
             "an emptied worksheet tree was left behind"
         )
-        // The walk stops at the worksheet base — the fixture root
-        // is still standing.
+        // Intent, not a net — see the docstring.
         #expect(
             FileManager.default.fileExists(atPath: fx.root.path)
+        )
+    }
+
+    /// Site mode is the only caller for which the cleanup's
+    /// deepest-first walk has two entries to dedup
+    /// (`locale-worksheets/site`, then the base); in app mode
+    /// they are the same directory and the branch never runs.
+    @Test("--site removes both levels of the worksheet tree")
+    func siteWorksheetTreeIsCleanedUpToTheBase() throws {
+        let fx = try fixture(
+            locales: [:],
+            siteLocales: [
+                "en.json": #"{"a.key": "A"}"#,
+                "de.json": #"{}"#,
+                "missing_de.json": #"""
+                {"a.key": {"source": "A", "translation": "Ah"}}
+                """#,
+            ]
+        )
+        defer { fx.cleanup() }
+
+        #expect(try run(["--site", "de"], in: fx).status == 0)
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: fx.siteWorksheets.path
+            )
+        )
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: fx.worksheets.path
+            ),
+            """
+            the emptied base was left behind under its own site \
+            sub-tree
+            """
         )
     }
 

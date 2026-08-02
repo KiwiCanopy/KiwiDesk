@@ -56,21 +56,35 @@ struct AppPlistLocalizationTests {
 
     /// `WORKSHEET_PREFIX` as `scripts/locale_paths.py` defines
     /// it — the owner every other reader of the rule imports.
+    ///
+    /// Asked of Python rather than string-split out of the
+    /// module, per `rule-authoring.md` ("a guard over generated
+    /// or rendered output reads the built artifact or uses a
+    /// parser"). The split version was proved fail-open: it took
+    /// the first textual `WORKSHEET_PREFIX = "` in the file at
+    /// any scope, so a comment carrying the OLD literal above a
+    /// renamed constant fed this guard the stale value, which
+    /// then matched the stale bash arm and passed. That module's
+    /// docstring discusses the constant by name, so the shadowing
+    /// shape is live rather than hypothetical.
     static func worksheetPrefix() throws -> String {
-        let module = try String(
-            contentsOf: scriptFixtureRepoRoot()
-                .appendingPathComponent("scripts")
-                .appendingPathComponent("locale_paths.py"),
-            encoding: .utf8
+        let scripts = scriptFixtureRepoRoot()
+            .appendingPathComponent("scripts")
+        let run = try spawn(
+            "/usr/bin/env",
+            [
+                "python3", "-c",
+                "import locale_paths;"
+                    + "print(locale_paths.WORKSHEET_PREFIX)",
+            ],
+            currentDirectory: scripts
         )
-        let value =
-            module
-            .components(separatedBy: "WORKSHEET_PREFIX = \"")
-            .dropFirst().first?
-            .components(separatedBy: "\"").first
-        let prefix = try #require(
-            value,
-            "WORKSHEET_PREFIX is gone from locale_paths.py"
+        #expect(
+            run.status == 0,
+            "locale_paths.WORKSHEET_PREFIX is unreadable"
+        )
+        let prefix = run.stdout.trimmingCharacters(
+            in: .whitespacesAndNewlines
         )
         #expect(!prefix.isEmpty)
         return prefix

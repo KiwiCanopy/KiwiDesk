@@ -276,12 +276,17 @@ func makeRepoShapedFixture(
 /// so a tool that shares a helper module (`merge-keys` and
 /// `extract-keys` both import `localization_guards`) would fail
 /// at import time in a fixture holding only the entry point.
+/// `environment` is merged on top of the cleared copy below, and
+/// exists for the one case that cannot use the default: a test
+/// proving what a script does *under* an override has to set the
+/// variable the clearing removes. Everything else omits it.
 @discardableResult
 func runRepoScript(
     _ name: String,
     arguments: [String],
     in fixture: RepoShapedFixture,
-    repoRoot: URL
+    repoRoot: URL,
+    environment overrides: [String: String] = [:]
 ) throws -> ScriptRun {
     let scriptsDir = fixture.root.appendingPathComponent("scripts")
     let source = repoRoot.appendingPathComponent("scripts")
@@ -324,6 +329,7 @@ func runRepoScript(
     ] {
         environment.removeValue(forKey: key)
     }
+    environment.merge(overrides) { _, new in new }
     return try runPythonScript(
         at: scriptsDir.appendingPathComponent(name),
         arguments: arguments,
