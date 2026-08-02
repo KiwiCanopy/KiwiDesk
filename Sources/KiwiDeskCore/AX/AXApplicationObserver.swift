@@ -23,6 +23,23 @@ private func axCallback(
     }
 }
 
+/// What `EventLoop` needs from a per-app observer — the seam
+/// that lets lifecycle and warmup tests drive the attach and
+/// reconcile funnels without registering real `AXObserver`s on
+/// the host's apps (tests.md; the `HotkeyRegistrar` shape).
+/// Production always goes through `AXApplicationObserver` via
+/// `EventLoop.makeObserver`'s live default.
+@MainActor
+protocol AppObserving: AnyObject {
+    var onNotification: @MainActor (String, AXUIElement) -> Void {
+        get set
+    }
+    func observe(window: AXUIElement)
+    func invalidate()
+}
+
+extension AXApplicationObserver: AppObserving {}
+
 /// Observes Accessibility notifications for one application.
 ///
 /// App-level notifications (window created, focus changed) are

@@ -70,37 +70,27 @@ public enum AXHelper {
         return list ?? []
     }
 
-    /// Counts an app's normal (layer-0) document windows via the
-    /// WindowServer. `.excludeDesktopElements` plus the layer==0
-    /// filter drop Finder's desktop / wallpaper / icon surfaces, so
-    /// only real document windows count. `onScreenOnly` restricts
-    /// to windows on a currently-visible space across ALL displays
-    /// — the signal for "activating this app won't switch Spaces"
-    /// (an off-screen-only app teleports on activate). One snapshot;
-    /// never call in a loop.
-    public static func normalWindowCount(
-        pid: pid_t,
-        onScreenOnly: Bool
-    ) -> Int {
-        let options: CGWindowListOption =
-            onScreenOnly
-            ? [.optionOnScreenOnly, .excludeDesktopElements]
-            : [.optionAll, .excludeDesktopElements]
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                options,
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return 0 }
-        return list.filter { info in
-            let owner =
-                (info[kCGWindowOwnerPID as String]
-                as? NSNumber)?.int32Value
-            let layer =
-                (info[kCGWindowLayer as String]
-                as? NSNumber)?.intValue
-            return owner == pid && layer == 0
-        }.count
+    // WindowServer-side queries (normalWindowCount,
+    // pidsWithNormalWindows) live in
+    // `AXHelper+WindowServer.swift`.
+
+    /// Bounds every AX message this process sends. A message to
+    /// an unresponsive app (stopped, deadlocked, paged out)
+    /// blocks the caller for the system default of ~6 s per
+    /// call; the boot scan makes several sequential main-thread
+    /// calls per app, so one hung helper serializes startup
+    /// into tens of seconds (#672 field report: ~60 s).
+    /// Setting the timeout on the system-wide element makes it
+    /// the process-wide default; an element carrying its own
+    /// timeout keeps it. Deterministic repro for the failure
+    /// this bounds: `kill -STOP` any GUI app, then boot.
+    public static func setGlobalMessagingTimeout(
+        seconds: Float
+    ) {
+        AXUIElementSetMessagingTimeout(
+            AXUIElementCreateSystemWide(),
+            seconds
+        )
     }
 
     /// The window that currently has focus within an app.

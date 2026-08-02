@@ -70,7 +70,10 @@ extension EventLoop {
     }
 
     private func appLaunched(_ app: NSRunningApplication) {
-        syncObservation(for: app)
+        syncObservation(
+            for: RunningApp(app),
+            scanWindowsAtAttach: true
+        )
         onEvent(
             .appLaunched(
                 pid: app.processIdentifier,
@@ -90,7 +93,12 @@ extension EventLoop {
     /// app switch, reconcile the app we just left.
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
-        syncObservation(for: app)
+        // The reconcile below takes this app's window snapshot
+        // on the same turn — no second scan at attach (#672).
+        syncObservation(
+            for: RunningApp(app),
+            scanWindowsAtAttach: false
+        )
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
@@ -152,11 +160,17 @@ extension EventLoop {
     /// trees, and slow responders (Electron/WebKit, see
     /// AGENTS.md) list windows late or mis-report subroles.
     public func reconcileAll() {
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval("reconcileAll")
+        defer { signposter.endInterval("reconcileAll", span) }
         // Rules can detach an already-observed app or make a
         // formerly ignored app observable. Synchronize that
         // app-level boundary without reading ignored AX trees.
-        for app in NSWorkspace.shared.runningApplications {
-            syncObservation(for: app)
+        // The reconcile loop below snapshots every attached
+        // app's windows, so a fresh attach defers its scan to
+        // it rather than reading the list twice (#672).
+        for app in runningApplications() {
+            syncObservation(for: app, scanWindowsAtAttach: false)
         }
         // Suppress native-tab coalescing here: a native-space switch
         // presents the departed space's windows as vanished and the
@@ -176,6 +190,35 @@ extension EventLoop {
             screen.kiwiDisplay
         }
         onEvent(.displaysChanged(displays))
+    }
+}
+
+/// What the app-lifecycle funnels (`syncObservation`, `attach`,
+/// the startup scan, `reconcileAll`) need from a running app.
+/// A snapshot value, not the live `NSRunningApplication`, so a
+/// test can fabricate one for a made-up pid and drive the
+/// funnels through the machine seams (#672 review).
+struct RunningApp {
+    let pid: pid_t
+    let activationPolicy: NSApplication.ActivationPolicy
+    let ref: AppRef
+
+    init(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        ref: AppRef
+    ) {
+        self.pid = pid
+        self.activationPolicy = activationPolicy
+        self.ref = ref
+    }
+
+    init(_ app: NSRunningApplication) {
+        self.init(
+            pid: app.processIdentifier,
+            activationPolicy: app.activationPolicy,
+            ref: AppRef(app)
+        )
     }
 }
 

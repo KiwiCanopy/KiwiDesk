@@ -200,7 +200,9 @@ extension KiwiCore {
         default:
             break
         }
-        let willRetile = TilingEngine.shouldRetile(after: event)
+        let willRetile =
+            TilingEngine.shouldRetile(after: event)
+            && !defersEventRetiles
         if willRetile {
             retile(newlyCreatedWindow: newlyCreatedWindow)
         }
@@ -222,7 +224,7 @@ extension KiwiCore {
         // restore's closing re-focus targets the settled focus,
         // never a stale/nil one (which would clear focus on a
         // minimize).
-        if TilingEngine.shouldRetile(after: event) {
+        if willRetile {
             scheduleTrackZOrderRestoreIfOverflowing()
         }
     }

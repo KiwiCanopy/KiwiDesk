@@ -42,7 +42,7 @@ public final class EventLoop {
     /// Bundle identifiers match case-insensitively.
     public var ignoreRules = IgnoreRules()
 
-    var observers: [pid_t: AXApplicationObserver] = [:]
+    var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop
     /// changed it. An ignore transition or stop restores that
@@ -99,72 +99,88 @@ public final class EventLoop {
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
-    public private(set) var isRunning = false
+    public internal(set) var isRunning = false
+
+    /// Log line consumer — boot diagnostics only (the startup
+    /// scan summary, slow attach/reconcile spans, #672). Wired
+    /// to the core sink in `KiwiCore+Bootstrap`; defaults to the
+    /// syslog write like every Core seam (core-boundaries.md).
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
+
+    // MARK: - Machine seams
+    // Injectable per tests.md ("a test reaches the machine only
+    // through a seam it injects"); production runs the live
+    // defaults, tests swap fakes so `start`, attach and
+    // reconcile are drivable without touching the host's apps.
+
+    /// Creates the per-app AX observer `attach` installs.
+    var makeObserver: @MainActor (pid_t) -> (any AppObserving)? =
+        { AXApplicationObserver(pid: $0) }
+
+    /// The app source the startup scan and `reconcileAll`
+    /// iterate. Descriptor-shaped rather than
+    /// `NSRunningApplication`-shaped so a test can fabricate an
+    /// app — a real `NSRunningApplication` cannot be built for
+    /// a made-up pid, which would leave every wiring below the
+    /// seam unpinnable (#672 review).
+    var runningApplications: () -> [RunningApp] = {
+        NSWorkspace.shared.runningApplications.map(
+            RunningApp.init
+        )
+    }
+
+    /// The WindowServer prefilter feeding the scan's
+    /// `scanWindowsAtAttach` answers (see `attach`).
+    var visiblePIDs: () -> Set<pid_t> =
+        AXHelper.pidsWithNormalWindows
+
+    /// AX window list of an app — `attach`'s snapshot and
+    /// `reconcile`'s live list.
+    var axWindows: (pid_t) -> [AXUIElement] = AXHelper.windows
+
+    /// Activation policy for a pid a reconcile only knows by
+    /// number.
+    var activationPolicy: (pid_t) -> NSApplication.ActivationPolicy? = {
+        NSRunningApplication(processIdentifier: $0)?
+            .activationPolicy
+    }
+
+    /// The warmup taps (#360): the EUI read/write pair and the
+    /// Chromium `AXManualAccessibility` write.
+    var readEnhancedUI: (pid_t) -> Bool? =
+        AXHelper.getEnhancedUserInterface
+    var writeEnhancedUI: (pid_t, Bool) -> Void =
+        AXHelper.setEnhancedUserInterface
+    var writeManualAX: (pid_t, Bool) -> Void =
+        AXHelper.setManualAccessibility
+
+    /// Applies the process-global AX messaging timeout at
+    /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`
+    /// for what it bounds and why.
+    var applyAXMessagingTimeout: (Float) -> Void =
+        AXHelper.setGlobalMessagingTimeout
+
+    /// Whether `start()` registers the live NSWorkspace /
+    /// screen-parameter observers. Default-true (production);
+    /// the lifecycle suites turn it off so driving `start()`
+    /// leaves no observer whose callback could re-enter the
+    /// loop through live defaults mid-test. A forgotten opt-out
+    /// only registers observers that are removed by `stop()` —
+    /// never a missed production registration.
+    var registersWorkspaceObservers = true
+
+    /// ~1 s: comfortably above the slowest healthy responders
+    /// (Electron/WebKit answer lazily in 100–300 ms,
+    /// accessibility.md) yet it caps an unresponsive app at
+    /// ~1 s per call instead of the ~6 s system default that
+    /// turned one hung helper into a ~60 s boot (#672).
+    /// `StartupAXTimeoutTests` pins the boot applying it before
+    /// the first per-app AX call.
+    static let axMessagingTimeoutSeconds: Float = 1.0
 
     public init() {}
 
-    // MARK: - Lifecycle
-
-    /// Starts observing. Requires Accessibility permission.
-    ///
-    /// One `CGWindowListCopyWindowInfo` snapshot before the app
-    /// loop identifies PIDs with at least one layer-0 window.
-    /// Apps without visible windows skip the expensive AX window
-    /// query and warmup — the AXObserver is still installed so
-    /// future `kAXWindowCreatedNotification`s fire, and the
-    /// 1-second startup sweep (`reconcileAll`) re-warms any cold
-    /// app whose window appeared in the interim.
-    public func start() {
-        guard !isRunning else { return }
-        isRunning = true
-        registerWorkspaceObservers()
-        let visible = EventLoop.pidsWithVisibleWindows()
-        for app in NSWorkspace.shared.runningApplications {
-            attach(
-                app: app,
-                hasVisibleWindows: visible.contains(
-                    app.processIdentifier
-                )
-            )
-        }
-        publishDisplays()
-    }
-
-    /// Stops observing and forgets all tracked windows.
-    public func stop() {
-        guard isRunning else { return }
-        isRunning = false
-        let center = NSWorkspace.shared.notificationCenter
-        for token in workspaceTokens {
-            center.removeObserver(token)
-        }
-        workspaceTokens = []
-        if let screenToken {
-            NotificationCenter.default
-                .removeObserver(screenToken)
-        }
-        screenToken = nil
-        for observer in observers.values {
-            observer.invalidate()
-        }
-        for (pid, baseline) in enhancedUIBaselines
-        where !baseline {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: false
-            )
-        }
-        observers = [:]
-        elements = [:]
-        enhancedUIBaselines = [:]
-        manualAXApplied = []
-        detectedFloating = [:]
-        detectedFullscreen = [:]
-        ignorePending = []
-        trackedFrames = [:]
-        tabCarriers = []
-    }
-
+    // Lifecycle (start/stop) lives in `EventLoop+Lifecycle.swift`.
     // Read-only lookups (detectionVerdict, observes, element,
     // isListed) live in `EventLoop+Queries.swift`.
 
