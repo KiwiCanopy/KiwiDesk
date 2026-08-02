@@ -76,13 +76,29 @@ extension StateCoordinator {
         // it (`focused == nil`) — the settle fallback needs a
         // target even when no focus report ever arrives.
         //
-        // A transient overlay takes no create-time focus either
-        // way (#671) — `mayHoldSpaceFocus` carries that argument.
-        // It is asked of STATE, not of the incoming snapshot: a
+        // A TRANSIENT OVERLAY is granted nothing here (#671).
+        // A popup that surfaces as an AX window — a Telegram
+        // context menu, any app's raised-layer panel — was made
+        // `space.focused` by this grant, so its dismissal read as
+        // a `focusLost` and the fallback handoff fired: a real
+        // `kAXRaiseAction` and, under mouse-follows-focus, a
+        // pointer warp off what the user had just clicked. In a
+        // focus-driven mode the grant also panned the space
+        // toward the popup.
+        //
+        // Only the GRANT — the slot itself is untouched. A window
+        // in this class that macOS genuinely focuses still lands
+        // in it through the focus report a moment later, which is
+        // what a layer-0 dialog or panel (also in this class,
+        // #300) needs: those behave correctly and only their ring
+        // is wrong, and #300 settled that the correction belongs
+        // at draw time. What is removed is the focus KiwiDesk
+        // handed out unasked.
+        //
+        // Asked of STATE, not of the incoming snapshot: a
         // remembered-tiled restore above clears the flag
-        // (`setFloating`, #300), and such a window is an ordinary
-        // window again.
-        if mayHoldSpaceFocus(window.id),
+        // (`setFloating`), and such a window is ordinary again.
+        if windows[window.id]?.isTransientOverlay != true,
             !effects.hadRememberedSpace
                 || workspaces[target]?.focused == nil
         {

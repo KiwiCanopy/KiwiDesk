@@ -3,20 +3,20 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// #671: a transient overlay — a context menu, a panel, any
-/// window that floats for a *structural* reason (#300) — must
-/// never occupy a space's `focused` slot. Every fresh window used
-/// to take it with no classification signal consulted, so a popup
-/// became `space.focused` on creation and its dismissal read as a
-/// `focusLost`: the fallback handoff issued a real AX raise plus
-/// a mouse warp (right-clicking in Telegram moved the pointer).
+/// #671: the create fold granted every fresh window its space's
+/// focus with no classification signal consulted. A popup that
+/// surfaces as an AX window — a Telegram context menu — therefore
+/// became `space.focused`, so its dismissal read as a `focusLost`
+/// and the fallback handoff fired a real AX raise plus a mouse
+/// warp off what the user had just clicked.
 ///
-/// The four seams that write the slot are pinned here. Each is
-/// paired with its grant arm, keyed on a window that FLOATS but
-/// is not an overlay — the denial keys on the structural flag,
-/// never on floating-ness, exactly as the ring does.
+/// The grant is what these pin, and only the grant. A window in
+/// this class that macOS genuinely focuses still reaches the slot
+/// through the focus report — which is what a layer-0 dialog
+/// (also `isTransientOverlay`) needs, and what #300 settled by
+/// keeping the correction at draw time.
 @MainActor
-@Suite("Transient-overlay focus inertness (#671)", .serialized)
+@Suite("Transient-overlay focus grant (#671)", .serialized)
 struct TransientOverlayFocusTests {
 
     private func makeCore() -> KiwiCore {
@@ -45,27 +45,6 @@ struct TransientOverlayFocusTests {
         )
     }
 
-    // MARK: - The predicate
-
-    @Test("Only a structural overlay is barred from the slot")
-    func predicateKeysOnTheStructuralFlag() {
-        let core = makeCore()
-        core.state.apply(.windowCreated(window(1)))
-        core.state.apply(
-            .windowCreated(window(2, floating: true))
-        )
-        core.state.apply(
-            .windowCreated(
-                window(3, floating: true, overlay: true)
-            )
-        )
-        #expect(core.state.mayHoldSpaceFocus(WindowID(1)))
-        #expect(core.state.mayHoldSpaceFocus(WindowID(2)))
-        #expect(!core.state.mayHoldSpaceFocus(WindowID(3)))
-    }
-
-    // MARK: - Seam 1: the create fold
-
     @Test("An overlay spawn leaves the space's focus alone")
     func overlayDoesNotTakeFocus() {
         let core = makeCore()
@@ -86,7 +65,36 @@ struct TransientOverlayFocusTests {
         )
     }
 
-    /// The grant arm: a window the user floated through a
+    /// The consequence: with the grant denied, dismissing the
+    /// popup is not a `focusLost`, so `KiwiCore+Events`' fallback
+    /// raise + pointer warp never fires for it. (That wiring also
+    /// gates on `eventLoop.isListed`, which needs live AX, so the
+    /// raise itself is not reachable from here — this is the
+    /// state half, and it is the half #671 broke.)
+    @Test("Dismissing the popup reports no focus loss")
+    func overlayDismissalReportsNoFocusLoss() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        core.state.apply(.windowCreated(window(1)))
+        core.state.apply(.windowFocused(WindowID(1)))
+        core.state.apply(
+            .windowCreated(
+                window(2, floating: true, overlay: true)
+            )
+        )
+        let effects = core.state.apply(
+            .windowDestroyed(WindowID(2), wasMinimized: false)
+        )
+        #expect(effects.removedWindow?.focusLost == false)
+        #expect(
+            core.state.workspaces["1"]?.focused == WindowID(1)
+        )
+    }
+
+    /// The grant arm, and the scope of the signal: the denial
+    /// keys on the STRUCTURAL overlay flag, never on
+    /// floating-ness. A window the user floated through a
     /// `float_rules` entry is ordinary and still takes focus.
     @Test("A plain floating spawn still takes focus")
     func plainFloatStillTakesFocus() {
@@ -101,9 +109,45 @@ struct TransientOverlayFocusTests {
         )
     }
 
+    @Test("An ordinary spawn still takes focus")
+    func ordinarySpawnStillTakesFocus() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        core.handle(.windowCreated(window(1)))
+        core.handle(.windowFocused(WindowID(1)))
+        core.handle(.windowCreated(window(2)))
+        #expect(
+            core.state.workspaces["1"]?.focused == WindowID(2)
+        )
+    }
+
+    /// Only the grant is denied. macOS focusing the window for
+    /// real still moves the slot — the route a long-lived member
+    /// of this class (a layer-0 dialog or panel, #300) depends
+    /// on, and the reason this fix stops at the grant.
+    @Test("An OS focus report still reaches an overlay")
+    func focusReportStillMovesTheSlot() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        core.handle(.windowCreated(window(1)))
+        core.handle(.windowFocused(WindowID(1)))
+        core.handle(
+            .windowCreated(
+                window(2, floating: true, overlay: true)
+            )
+        )
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(
+            core.state.workspaces["1"]?.focused == WindowID(2)
+        )
+    }
+
     /// The flag clears the moment detection heals the window back
-    /// to tiled (`setFloating`, #300), so the create fold must
-    /// ask STATE and not the incoming snapshot.
+    /// to tiled (`setFloating`, #300), so the fold must ask STATE
+    /// — after `upsert` and `restoreFloatOverride` — and not the
+    /// incoming snapshot.
     @Test("A healed overlay takes focus like any window")
     func healedOverlayTakesFocus() {
         let core = makeCore()
@@ -128,160 +172,25 @@ struct TransientOverlayFocusTests {
         )
     }
 
-    // MARK: - Seam 2: the focus report
-
-    /// The route that used to survive the create-fold gate: macOS
-    /// really does focus the popup, and reporting it moved the
-    /// slot. Recording it stranded every consumer of the slot on
-    /// a window that then vanished with no reconciling event.
-    @Test("An OS focus report on an overlay moves nothing")
-    func focusReportOnOverlayIsNotRecorded() {
+    /// The #636 arm the denial must not swallow: a space whose
+    /// members all left with a native switch has `focused == nil`,
+    /// and the first ORDINARY returner still seeds it — the
+    /// settle fallback needs a target even when no focus report
+    /// ever arrives.
+    @Test("A returning window still seeds an empty space")
+    func returningWindowStillSeedsEmptyFocus() {
         let core = makeCore()
         core.state.workspaces.ensureSpace("1")
         core.state.workspaces.activate("1")
         core.handle(.windowCreated(window(1)))
-        core.handle(.windowFocused(WindowID(1)))
+        core.handle(.nativeSpaceChanged)
         core.handle(
-            .windowCreated(
-                window(2, floating: true, overlay: true)
-            )
+            .windowDestroyed(WindowID(1), wasMinimized: false)
         )
-        core.handle(.windowFocused(WindowID(2)))
-        #expect(
-            core.state.workspaces["1"]?.focused == WindowID(1)
-        )
-    }
-
-    @Test("A focus report on a plain float is recorded")
-    func focusReportOnPlainFloatIsRecorded() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
+        core.handle(.nativeSpaceChanged)
         core.handle(.windowCreated(window(1)))
-        core.handle(.windowFocused(WindowID(1)))
-        core.handle(.windowCreated(window(2, floating: true)))
-        core.handle(.windowFocused(WindowID(2)))
-        #expect(
-            core.state.workspaces["1"]?.focused == WindowID(2)
-        )
-    }
-
-    /// The consequence the two seams above buy: an overlay can
-    /// never be the window a removal reports as focus-losing, so
-    /// the wiring's fallback raise + mouse warp cannot fire for
-    /// one. (`focusLost` is the flag `KiwiCore+Events` gates that
-    /// raise on; its `isListed` companion needs live AX, so the
-    /// raise itself is not reachable from here.)
-    @Test("An overlay's removal reports no focus loss")
-    func overlayRemovalReportsNoFocusLoss() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(.windowCreated(window(1)))
-        core.state.apply(
-            .windowCreated(
-                window(2, floating: true, overlay: true)
-            )
-        )
-        core.state.apply(.windowFocused(WindowID(2)))
-        let effects = core.state.apply(
-            .windowDestroyed(WindowID(2), wasMinimized: false)
-        )
-        #expect(effects.removedWindow?.focusLost == false)
         #expect(
             core.state.workspaces["1"]?.focused == WindowID(1)
-        )
-    }
-
-    @Test("A plain float's removal still reports focus loss")
-    func plainFloatRemovalReportsFocusLoss() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(.windowCreated(window(1)))
-        core.state.apply(
-            .windowCreated(window(2, floating: true))
-        )
-        core.state.apply(.windowFocused(WindowID(2)))
-        let effects = core.state.apply(
-            .windowDestroyed(WindowID(2), wasMinimized: false)
-        )
-        #expect(effects.removedWindow?.focusLost == true)
-    }
-
-    // MARK: - Seams 3 & 4: the "take the first member" fallbacks
-
-    @Test("The startup seed skips an overlay-only space")
-    func startupSeedSkipsOverlay() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(
-            .windowCreated(
-                window(1, floating: true, overlay: true)
-            )
-        )
-        core.seedStartupFocus(frontmost: nil)
-        #expect(core.state.workspaces["1"]?.focused == nil)
-    }
-
-    @Test("The startup seed still takes a plain float")
-    func startupSeedTakesPlainFloat() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(
-            .windowCreated(window(1, floating: true))
-        )
-        core.seedStartupFocus(frontmost: nil)
-        #expect(
-            core.state.workspaces["1"]?.focused == WindowID(1)
-        )
-    }
-
-    /// A frontmost probe that lands on a launcher must not seed
-    /// the slot with it either — same wrong answer, other route.
-    @Test("The startup seed ignores an overlay frontmost")
-    func startupSeedIgnoresOverlayFrontmost() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(.windowCreated(window(1)))
-        core.state.apply(
-            .windowCreated(
-                window(2, floating: true, overlay: true)
-            )
-        )
-        core.seedStartupFocus(frontmost: WindowID(2))
-        #expect(
-            core.state.workspaces["1"]?.focused == WindowID(1)
-        )
-    }
-
-    @Test("The space-switch target skips an overlay-only space")
-    func spaceSwitchTargetSkipsOverlay() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(
-            .windowCreated(
-                window(1, floating: true, overlay: true)
-            )
-        )
-        #expect(core.resolveSpaceSwitchFocusTarget() == nil)
-        #expect(core.state.workspaces["1"]?.focused == nil)
-    }
-
-    @Test("The space-switch target still takes a plain float")
-    func spaceSwitchTargetTakesPlainFloat() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.apply(
-            .windowCreated(window(1, floating: true))
-        )
-        #expect(
-            core.resolveSpaceSwitchFocusTarget() == WindowID(1)
         )
     }
 }

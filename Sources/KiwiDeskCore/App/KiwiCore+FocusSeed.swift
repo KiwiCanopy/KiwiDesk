@@ -39,7 +39,7 @@ extension KiwiCore {
     /// never override a real restored or observed focus.
     func seedStartupFocus(frontmost: WindowID?) {
         guard let space = activeSpace else { return }
-        if let frontmost, state.mayHoldSpaceFocus(frontmost) {
+        if let frontmost {
             if space.windows.contains(frontmost) {
                 state.workspaces.focus(frontmost, in: space.id)
                 return
@@ -49,14 +49,9 @@ extension KiwiCore {
             }
         }
         guard focusedWindowID == nil else { return }
-        // The all-floating fallback skips a transient overlay
-        // (#671): a launcher or panel up at startup is what the
-        // frontmost probe sees, and seeding the slot with it is
-        // the same wrong answer as granting it focus. Tiled
-        // members cannot be overlays (overlay ⟹ floating).
         let candidate =
             state.localTiledMembers(of: space).first
-            ?? space.windows.first { state.mayHoldSpaceFocus($0) }
+            ?? space.windows.first
         guard let candidate else { return }
         state.workspaces.focus(candidate, in: space.id)
     }

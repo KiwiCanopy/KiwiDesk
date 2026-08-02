@@ -425,29 +425,29 @@ decision stays AX-free, and it clears the moment detection
 self-heals a window back to tiled — the flag can never outlive the
 float state it depends on (overlay ⟹ floating).
 
-The same class never occupies a space's **focused slot** either,
-on the same reasoning (#671) — not when it appears, and not when
-macOS reports it focused. Focus for such a window belongs to the
-system: it grants focus while the popup is up and returns it
-underneath the moment the popup goes away, and it emits nothing
-on the way out that KiwiDesk could reconcile from. So a slot
-holding a popup is a slot every consumer of it reads wrongly —
-the ring, the App Bar's active item, a focus-driven pan — and
-one that, when the popup closes, gets handed to whichever array
-neighbour slid into the gap, complete with a `kAXRaiseAction`
-that re-activates an app and a pointer warp under
-mouse-follows-focus. Right-click a message and the pointer jumped
-off what you had clicked.
+The same class is also never **granted** a space's focus when it
+appears (#671). KiwiDesk used to hand the focused slot to every
+window it saw created, so a popup that surfaces as an AX window —
+a Telegram context menu — became `space.focused` on arrival, and
+its dismissal therefore read as the focused window closing: the
+fallback handoff fired a `kAXRaiseAction` that re-activates an
+app and, under mouse-follows-focus, warped the pointer off what
+had just been clicked. In a focus-driven layout the grant also
+panned the space toward the popup. A window nobody asked to focus
+should not collect the consequences of being focused.
 
-Keeping the popup out is one rule at the point of writing
-(`StateCoordinator.mayHoldSpaceFocus`), which the four seams that
-write the slot consult; the alternative is a correction at each
-consumer, and the correction is what has to be remembered. The
-pre-popup focus stays correct the whole time it is up, so there
-is nothing to restore afterwards. The signal is deliberately the
-structural overlay flag and not floating-ness, exactly as for the
-ring: a window the user floated through `float_rules` is an
-ordinary window and holds focus like one.
+This stops at the *grant* deliberately, and does not extend to
+the slot: a window in this class that macOS genuinely focuses
+still lands in it through the focus report a moment later. That
+is what the long-lived members need — a layer-0 dialog or panel
+carries the same flag, and the paragraph above is precisely the
+ruling that those windows behave correctly and want their focus,
+with only the ring wrong. Denying them the slot outright would
+put every focused command on the window behind the one being
+typed in. The signal is the structural overlay flag and not
+floating-ness, exactly as for the ring: a window the user floated
+through `float_rules` is an ordinary window and takes focus like
+one when it spawns.
 
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — graduated

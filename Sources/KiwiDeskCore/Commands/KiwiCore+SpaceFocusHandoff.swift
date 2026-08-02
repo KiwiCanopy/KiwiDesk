@@ -22,15 +22,7 @@ extension KiwiCore {
         if let anchor = state.focusAnchor(of: space) {
             return anchor
         }
-        // Skips a transient overlay (#671, `mayHoldSpaceFocus`):
-        // a space whose only member is a popup has nothing to
-        // focus, and handing it the slot is what the switch would
-        // then ring and raise.
-        guard
-            let first = space.windows.first(where: {
-                state.mayHoldSpaceFocus($0)
-            })
-        else { return nil }
+        guard let first = space.windows.first else { return nil }
         state.workspaces.focus(first, in: space.id)
         return first
     }

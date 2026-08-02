@@ -43,11 +43,6 @@ public struct AppliedEffects: Sendable {
         let app: String?
         let bundleID: String?
         let space: SpaceID?
-        /// Whether the gone window held the active space's focus,
-        /// so the fallback the removal picked owes a real AX
-        /// raise. A transient overlay can never have held it
-        /// (`mayHoldSpaceFocus`, #671), so this needs no
-        /// classification test of its own.
         let focusLost: Bool
     }
 }

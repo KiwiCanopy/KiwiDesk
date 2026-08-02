@@ -43,34 +43,4 @@ extension StateCoordinator {
                     && !window.isFullscreen
             }
     }
-
-    /// Whether `id` may occupy a space's `focused` slot (#671).
-    ///
-    /// False for a **transient overlay** — a context menu, a
-    /// panel, any window floating for a structural reason (#300).
-    /// Such a window is the OS's to focus and un-focus: macOS
-    /// grants it focus while it is up and returns focus
-    /// underneath the moment it goes away, and it emits no event
-    /// on the way out that KiwiDesk could reconcile from. Letting
-    /// it into the slot therefore made every consumer of the slot
-    /// — the ring, the App Bar's active item, a focus-driven
-    /// pan, and the close-time fallback handoff with its AX raise
-    /// and pointer warp — track a window the user is not working
-    /// in, and then hand the slot to an arbitrary array neighbour
-    /// when it closed. Keeping it out is one rule at the stamp
-    /// instead of a correction at each consumer.
-    ///
-    /// **Every seam that writes a space's `focused` consults
-    /// this** — the create fold, the focus-report fold, and the
-    /// two "nothing focused, take the first member" fallbacks.
-    /// The rule is in `.claude/rules/state-and-layout.md`;
-    /// `TransientOverlayFocusTests` pins the seams that exist.
-    ///
-    /// Deliberately keyed on the structural flag and not on
-    /// `isFloating`, exactly as the ring is: a window the user
-    /// floated through a `float_rules` entry is an ordinary
-    /// window and holds focus like one.
-    public func mayHoldSpaceFocus(_ id: WindowID) -> Bool {
-        windows[id]?.isTransientOverlay != true
-    }
 }
