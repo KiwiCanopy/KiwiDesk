@@ -81,7 +81,29 @@ Section bodies in `Settings/Sections/`, their widgets in
 SpaceOverrides, Icons, Appearance, Lua, Common). Shell/model files
 and root-composed widgets live at `Settings/` root. `Common/`
 admits only primitives shared across multiple component areas;
-root-owned widgets stay at `Settings/` root.
+root-owned widgets stay at `Settings/` root. `Settings/Census/`
+holds the `SettingKey` settings census (#678) — data enums only,
+never views.
+
+## The settings census (#678, redesign coexistence)
+
+`Settings/Census/` records every setting's redesign placement,
+tier, gate and text keys, and the redesigned GUI will render from
+it (Bars first). Until an area renders from the census, the
+hand-written views stay the behavioral authority — so **a change
+to a Settings row's placement, its `GreyOut`/`disabled` gating,
+or its `L()` keys updates the matching `SettingKey` entry in the
+same change set.** The census's gates were transcribed from the
+live wiring once; nothing mechanical can re-derive them from
+views, which is why the obligation sits here, where every
+`Sources/KiwiDesk` edit loads it. The 4f guards
+(`SettingKeyCensusTests`, `SettingKeyLocaleTests`,
+`SettingKeyModelParityTests`) catch the model and locale halves;
+placement and gating drift only a reviewer — or this rule — can
+catch. Text stays key-only: `scripts/extract-keys` reads the
+views' `L(key, english)` call sites, so a change that deletes a
+view must re-author its keys through a scanner-visible shape in
+the same change or the keys are pruned from every locale.
 
 ## SwiftUI traps
 

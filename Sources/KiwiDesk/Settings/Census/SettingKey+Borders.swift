@@ -1,0 +1,252 @@
+/// Borders, sticky/floating marks and drag visuals
+/// (`BorderStyle`, `StickyStyle`, `FloatingStyle`,
+/// `DragGhost`, `DragDropZone`).
+
+enum BordersKey: String, CaseIterable, Hashable {
+    case borderEnabled = "settings.borderStyle.enabled"
+    case borderFocusedColor = "settings.borderStyle.focusedColor"
+    case borderUnfocusedEnabled = "settings.borderStyle.unfocusedEnabled"
+    case borderUnfocusedColor = "settings.borderStyle.unfocusedColor"
+    case borderWidth = "settings.borderStyle.width"
+    case borderCorner = "settings.borderStyle.cornerStyle"
+    case borderGlow = "settings.borderStyle.glow"
+    case borderGlowSizeAuto = "settings.borderStyle.glowSize (auto)"
+    case borderGlowSize = "settings.borderStyle.glowSize"
+    case borderDrawOrder = "settings.borderStyle.drawOrder"
+    case borderFitGapsExtraSpacing = "(action) border.fit_gaps.extra_spacing"
+    case borderFitGaps = "(action) border.fit_gaps"
+    case stickyMark = "settings.stickyStyle.mark"
+    case stickyColor = "settings.stickyStyle.color"
+    case dragCornerRadius = "settings.dragCornerRadius"
+    case dragGhostEnabled = "settings.dragGhost.enabled"
+    case dragGhostBorder = "settings.dragGhost.border"
+    case dragGhostBorderColor = "settings.dragGhost.borderColor"
+    case dragGhostBorderWidth = "settings.dragGhost.borderWidth"
+    case dragGhostBorderAlignment = "settings.dragGhost.borderAlignment"
+    case dragGhostFill = "settings.dragGhost.fill"
+    case dragGhostFillColor = "settings.dragGhost.fillColor"
+    case dragDropZoneEnabled = "settings.dragDropZone.enabled"
+    case dragDropZoneBorder = "settings.dragDropZone.border"
+    case dragDropZoneBorderColor = "settings.dragDropZone.borderColor"
+    case dragDropZoneBorderWidth = "settings.dragDropZone.borderWidth"
+    case dragDropZoneBorderAlignment = "settings.dragDropZone.borderAlignment"
+    case dragDropZoneFill = "settings.dragDropZone.fill"
+    case dragDropZoneFillColor = "settings.dragDropZone.fillColor"
+    case floatingColor = "settings.floatingStyle.color"
+}
+
+extension BordersKey {
+    var placement: SettingPlacement {
+        switch self {
+        case .borderEnabled:
+            // Owns the .focusBorder container gate — stays
+            // live while the container greys.
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .atRest,
+                exemptFromContainerGate: true
+            )
+        case .borderWidth, .borderFitGapsExtraSpacing:
+            return .row(.gapsAndBorders, .focusBorder, .atRest)
+        // The .borders container carries no block gate
+        // (stickyColor shares it, deliberately ungated), so
+        // the border colors ride borderEnabled on the row.
+        case .borderFocusedColor:
+            return .row(
+                .advancedColours,
+                .borders,
+                .atRest,
+                gate: .setting(.borders(.borderEnabled))
+            )
+        case .borderUnfocusedEnabled, .borderCorner, .borderGlow,
+            .borderGlowSizeAuto:
+            return .row(.gapsAndBorders, .focusBorder, .showMore)
+        case .borderUnfocusedColor:
+            return .row(
+                .advancedColours,
+                .borders,
+                .atRest,
+                gate: .anyOf([
+                    .borders(.borderEnabled),
+                    .borders(.borderUnfocusedEnabled),
+                ])
+            )
+        case .stickyColor:
+            // The table marks this GATED, but the live editor
+            // deliberately leaves it ungated: the color also
+            // paints the on-window mark and the Space Bar's
+            // sticky badge, so it always tints something
+            // (StickyMarkEditor). The Colours phase rules on
+            // the redesign's gate; until then the census
+            // records the wiring.
+            return .row(.advancedColours, .borders, .atRest)
+        case .borderGlowSize:
+            // Glow on, and not auto-sized (AutoGatedGroup).
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .showMore,
+                gate: .anyOf([
+                    .borders(.borderGlow),
+                    .borders(.borderGlowSizeAuto),
+                ])
+            )
+        case .borderDrawOrder:
+            return .luaOnly
+        case .borderFitGaps:
+            // The whole-editor grey off the enable toggle is
+            // the .focusBorder CONTAINER gate.
+            return .row(.gapsAndBorders, .focusBorder, .atRest)
+        case .stickyMark:
+            // Forced on while the Space Bar is off — the only
+            // sticky mark left (StickyMarkEditor).
+            return .row(
+                .gapsAndBorders,
+                .stickyWindows,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarEnabled))
+            )
+        case .dragCornerRadius:
+            return .row(.gapsAndBorders, .dragAndDrop, .showMore)
+        case .dragGhostEnabled, .dragDropZoneEnabled:
+            return .row(.gapsAndBorders, .dragAndDrop, .atRest)
+        // Each drag column greys wholesale off its Enabled
+        // toggle (DragVisualControls' outer GreyOut), so every
+        // row names its column's Enabled owner; sub-rows add
+        // their Border/Fill owner.
+        case .dragGhostBorder, .dragGhostFill:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragGhostEnabled))
+            )
+        case .dragDropZoneBorder, .dragDropZoneFill:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragDropZoneEnabled))
+            )
+        case .dragGhostBorderColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostBorder),
+                ])
+            )
+        case .dragGhostFillColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostFill),
+                ])
+            )
+        case .dragGhostBorderWidth, .dragGhostBorderAlignment:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostBorder),
+                ])
+            )
+        case .dragDropZoneBorderWidth, .dragDropZoneBorderAlignment:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneBorder),
+                ])
+            )
+        case .dragDropZoneBorderColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneBorder),
+                ])
+            )
+        case .dragDropZoneFillColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneFill),
+                ])
+            )
+        case .floatingColor:
+            // Drawn only in the Space Bar (owner ruling
+            // 2026-08-02; the gate item 10 keeps) — carried by
+            // the .spaceBar CONTAINER gate.
+            return .row(.advancedColours, .spaceBar, .atRest)
+        }
+    }
+}
+
+extension BordersKey {
+    var text: SettingRowText {
+        switch self {
+        case .borderEnabled:
+            return .text("border.enabled")
+        case .borderFocusedColor:
+            return .text("border.focused_color")
+        case .borderUnfocusedEnabled:
+            return .text("border.unfocused_enabled")
+        case .borderUnfocusedColor:
+            return .text("border.unfocused_color")
+        case .borderWidth:
+            return .text("border.width")
+        case .borderCorner:
+            return .text("border.corner_style")
+        case .borderGlow:
+            return .text("border.glow")
+        case .borderGlowSizeAuto:
+            return .text("border.glow_size.auto")
+        case .borderGlowSize:
+            return .text("border.glow_size")
+        case .borderDrawOrder:
+            return .none
+        case .borderFitGapsExtraSpacing:
+            return .text("border.fit_gaps.extra_spacing")
+        case .borderFitGaps:
+            return .text("border.fit_gaps.action")
+        case .stickyMark:
+            return .text("sticky.mark", help: "sticky.mark.help")
+        case .stickyColor:
+            return .text("sticky.color")
+        case .dragCornerRadius:
+            return .text("drag.corner_radius")
+        case .dragGhostEnabled, .dragDropZoneEnabled:
+            return .text("drag.enabled")
+        case .dragGhostBorder, .dragDropZoneBorder:
+            return .text("drag.border")
+        case .dragGhostBorderColor, .dragDropZoneBorderColor:
+            return .text("drag.border_color")
+        case .dragGhostBorderWidth, .dragDropZoneBorderWidth:
+            return .text("drag.border_width")
+        case .dragGhostBorderAlignment, .dragDropZoneBorderAlignment:
+            return .text("drag.border_alignment")
+        case .dragGhostFill, .dragDropZoneFill:
+            return .text("drag.fill")
+        case .dragGhostFillColor, .dragDropZoneFillColor:
+            return .text("drag.fill_color")
+        case .floatingColor:
+            return .text("floating.color")
+        }
+    }
+}
