@@ -241,8 +241,35 @@ and locale checks with it.
 
 ## CI
 
-`.github/workflows/ci.yml` builds, lints, and tests on every push
-and on PRs targeting `main`. A red build blocks merging. The
-release build runs as a separate, non-blocking job (#532) — when
-to run it locally instead is decided by the `verify-gate` skill,
-which owns that call.
+`.github/workflows/ci.yml` builds, lints, and tests on pushes to
+`main` and on PRs targeting it, except for changes confined to its
+`paths-ignore` list. A red build blocks merging. The release build
+runs as a separate, non-blocking job (#532) — when to run it
+locally instead is decided by the `verify-gate` skill, which owns
+that call.
+
+**`ci.yml` filters by exclusion; `site.yml` filters by
+inclusion.** Keep it that way. The site build's inputs are a
+closed, small set, so naming them is safe. The app's are open, and
+an include list there fails *open* — add a directory, forget to
+map it, and its suites stop running while CI stays green.
+Excluding is the failure this repo can afford: a missing entry
+costs runner minutes, not correctness. Those minutes are the
+reason the filter exists at all, macOS runners billing at a 10x
+multiplier against the free allowance while the repo is private.
+
+**Add a `paths-ignore` entry only when no test, no build step and
+no lint step reads the path.** The third clause is the one that
+gets skipped: nothing under `Tests/` reads `Package.swift`,
+`.swift-format` or `.swiftlint.yml`, so a test-only audit clears
+them, and ignoring any would skip CI for a change that alters what
+compiles. `CiPathFilterTests` holds all three clauses, pins the
+`push` and `pull_request` copies equal — the Actions parser
+rejects YAML anchors, so the list is hand-mirrored — and states in
+its own doc comment what it cannot see.
+
+**A filtered-out workflow does not report at all.** It is not
+skipped-as-success; it produces no check run. Harmless today, and
+the thing to remember when branch protection becomes available
+(#487): a required check naming a filtered workflow waits forever,
+and the fix is a gate job that always runs and reports.

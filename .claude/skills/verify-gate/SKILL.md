@@ -8,6 +8,32 @@ delegates here — in order, and report the result of each step.
 Stop and surface the failure the moment a step fails; do not
 continue to later steps.
 
+## Which gate the change earns
+
+Default to the full gate below. One narrow exception, and it is
+about running the gate that *can* catch something rather than
+about saving time:
+
+- Read `paths-ignore` from `.github/workflows/ci.yml`. Never
+  restate that list here — it is the one authority, and
+  `CiPathFilterTests` is what keeps it honest.
+- If `git diff --name-only` against the base is **entirely**
+  inside that list, the Swift gate cannot be affected: nothing the
+  build, the lint or the suite reads is in it. Skip steps 1–3.
+- Then run the gate that *is* affected. For a change touching
+  `docs/` or `site/`, that is the site build — `npm ci &&
+  npm run build` in `site/`, which is what a missing Starlight
+  frontmatter block breaks. Today the full gate spends minutes on
+  Swift tests that cannot fail and never builds the site, which
+  is backwards for that change.
+- Anything else is the full gate. In particular `AGENTS.md`,
+  `.claude/rules/**` and `.claude/agents/**` are **not** in the
+  ignore list and are **not** exempt: `RuleCitationTests` and
+  `InstructionPinTests` read that tree, and a prose-only edit
+  there has already shipped a dangling citation.
+
+Say in the report which gate you ran and why.
+
 ## Fast inner loop
 
 1. `swift build`

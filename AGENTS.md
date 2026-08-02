@@ -159,9 +159,9 @@ traced at directory altitude — see **`docs/architecture.md`**.
    ([`.claude/skills/verify-gate`](.claude/skills/verify-gate/SKILL.md))
    — `swift build`, the test run, `scripts/lint.sh`,
    and the release build when the change touches concurrency or
-   `Sendable`. That skill owns the procedure — what to run, in
-   what order, and when CI's `Release Build` job substitutes for
-   a local one.
+   `Sendable`. That skill owns the procedure — which gate a change
+   earns, what to run, in what order, and when CI's `Release
+   Build` job substitutes for a local one.
 5. **Document:** any user-visible behavior change updates the
    matching doc in the same change set — code and docs must
    never describe different behavior. Which doc owns what, and
@@ -232,8 +232,11 @@ scripts.
   `--non-interactive` avoids a hang when piped; scope it with
   `--only claude`, `--minimal`, or `--uninstall`.
 - CI (`.github/workflows/ci.yml`) builds, lints and tests on
-  every push and on PRs targeting `main`. A red build blocks
-  merging.
+  pushes to `main` and on PRs targeting it, unless the change is
+  confined to its `paths-ignore` list. A red build blocks
+  merging. Adding an entry to that list needs
+  [packaging-and-release.md](.claude/rules/packaging-and-release.md)
+  — the test suite is not the only thing that reads a path.
 
 ### Subagent delegation (AI agents)
 
@@ -297,7 +300,7 @@ touch a matching path.
 | `Localization`, `Resources/Locales`, `scripts/*key*` | [localization.md](.claude/rules/localization.md) | Never hand-edit a catalog — the scripts own them; positional specifiers only; content guards with no exemption file; Core names, the GUI narrates (#96) |
 | `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`) |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
-| `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32) |
+| `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32); `ci.yml` filters by exclusion and an entry needs no test, no build step and no lint step to read the path (`CiPathFilterTests`) |
 | `.claude/rules/**`, `.claude/agents/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614); `RuleCitationTests` resolves the citations in all three |
 | `.claude/agents/**`, `scripts/sync-agents.sh` | [subagents.md](.claude/rules/subagents.md) | An agent routes to the owning rule file and never restates a fact from it; a judging agent gets no `Write`/`Edit` and says so in prose, which is what survives into the Codex mirror; write the `description` as *when to use this*, naming concrete triggers; regenerate the mirror with `scripts/sync-agents.sh` in the same change |
 | `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |

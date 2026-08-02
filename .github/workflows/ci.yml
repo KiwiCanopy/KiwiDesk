@@ -4,11 +4,56 @@ name: CI
 # branches. Scoping push to main avoids a duplicate run on every
 # PR-branch push (which would otherwise fire both push and
 # pull_request for the same commit).
+#
+# `paths-ignore` is an EXCLUDE list, deliberately, and the opposite
+# shape from site.yml's includes. The site build has a closed, small
+# input set, so naming it is safe. The app's inputs are open: an
+# include list would fail *open* — add a directory, forget to map
+# it, and its tests silently stop running while CI stays green. An
+# exclude list fails closed; forgetting an entry costs minutes, not
+# correctness.
+#
+# An entry belongs here only when NO test, NO build step and NO lint
+# step reads the path. That third clause is the trap: nothing under
+# Tests/ reads Package.swift, .swift-format or .swiftlint.yml, and
+# excluding any of them would skip CI for a change that alters what
+# compiles. CiPathFilterTests holds the line, and states what it
+# cannot see.
+#
+# docs/ and site/ are here because site.yml already covers them —
+# not because they are unimportant. assets/ is deliberately absent:
+# site.yml wants it AND two Core suites read the tree.
+# The two lists below are identical and must stay that way. A YAML
+# anchor would say so in one place, but the Actions parser rejects
+# anchors, so this is a hand-mirrored list — CiPathFilterTests pins
+# the copies equal (AGENTS.md §5, parity-tests.md).
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "site/**"
+      - "docs/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
+      - "CLAUDE.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".github/workflows/site.yml"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "site/**"
+      - "docs/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
+      - "CLAUDE.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/pull_request_template.md"
+      - ".github/workflows/site.yml"
   # Manual "Run workflow" button in the Actions tab. Additive — the
   # automatic triggers above still fire. Useful while the repo is
   # private, where macOS runners bill at a 10x multiplier against a
