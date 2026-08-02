@@ -3,16 +3,16 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// #673: Open or Focus restores one window when every window of
-/// the app is minimized, and "one" is the most recently
-/// minimized. `minimizedWindows` cannot answer that — an
-/// unordered `Set<WindowID>` whose entries the same fold strips
-/// of their app — so the order and the owner are recorded at the
-/// minimize, while the window snapshot is still live.
+/// #673: `minimizeOrder` records which windows are parked, in
+/// order and with the app that owned them — captured at the
+/// minimize, because the same fold erases the window snapshot
+/// carrying the owner a few lines later.
 ///
-/// The AX half (is anything on screen, which element to write
-/// `kAXMinimizedAttribute` on) needs a real app and is not
-/// reachable here; what these pin is the choice it acts on.
+/// These pin the record itself: its ordering, its scoping to one
+/// app, and every route by which an entry is dropped. What the
+/// record is FOR — the restore decision — is
+/// `OpenOrFocusRestoreTests`, through the seams that stand in for
+/// AX.
 @Suite("Minimize order (#673)")
 struct MinimizeOrderTests {
 

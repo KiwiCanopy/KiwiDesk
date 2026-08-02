@@ -26,25 +26,48 @@ struct OpenOrFocusRestoreTests {
         )
     }
 
-    /// Captures what the restore asked for, if anything.
-    private final class Recorder {
-        var calls: [(pid_t, WindowID)] = []
+    /// One log for both writes, so their ORDER is observable and
+    /// not just their occurrence.
+    private enum Touch: Equatable {
+        case deminiaturize(pid_t, WindowID)
+        case activate(pid_t)
     }
 
+    private final class Recorder {
+        var log: [Touch] = []
+        var calls: [(pid_t, WindowID)] {
+            log.compactMap {
+                if case .deminiaturize(let pid, let id) = $0 {
+                    return (pid, id)
+                }
+                return nil
+            }
+        }
+    }
+
+    /// States the world for a running app at pid 7 and records
+    /// every touch. Nothing here reaches a real app: the lookup
+    /// is seamed too, so no test can activate or launch anything
+    /// (`tests.md` — a test reaches the machine only through a
+    /// seam it injects).
     private func wire(
         _ core: KiwiCore,
         visible: Int,
         minimized: [UInt32]
     ) -> Recorder {
         let recorder = Recorder()
-        core.appWindowCensus = { _ in
+        core.openOrFocus.runningAppPID = { _ in 7 }
+        core.openOrFocus.census = { _ in
             KiwiCore.AppWindowCensus(
                 visible: visible,
                 minimized: minimized.map { WindowID($0) }
             )
         }
-        core.deminiaturizeWindow = { pid, id in
-            recorder.calls.append((pid, id))
+        core.openOrFocus.deminiaturize = { pid, id in
+            recorder.log.append(.deminiaturize(pid, id))
+        }
+        core.openOrFocus.activate = { pid in
+            recorder.log.append(.activate(pid))
         }
         return recorder
     }
@@ -217,26 +240,66 @@ struct OpenOrFocusRestoreTests {
 
     // MARK: - The command path
 
-    /// The restore runs on the shortcut, and before the
-    /// activate: `pull_or_spawn` for a running app with nothing
-    /// up must reach the Dock, not just bring the app forward.
     @Test("pull_or_spawn drives the restore for a running app")
     func commandDrivesTheRestore() {
         let core = makeCore()
         let recorder = wire(core, visible: 0, minimized: [1])
-        // Any bundle id of a process that is actually running,
-        // so `launch` takes its already-running branch without
-        // opening anything. KiwiDesk's own test host qualifies.
-        let bundleID =
-            Bundle.main.bundleIdentifier?.lowercased()
-            ?? "com.apple.finder"
         #expect(
             core.execute(
                 "pull_or_spawn",
-                args: [.string(bundleID)]
+                args: [.string("com.test.a")]
             ).isSuccess
         )
         #expect(recorder.calls.count == 1)
         #expect(recorder.calls.first?.1 == WindowID(1))
+    }
+
+    /// The restore runs BEFORE the activate, so the app comes
+    /// forward with a window already on its way up rather than a
+    /// beat behind it. Both touches share one log precisely so
+    /// this is assertable — recording only that each happened
+    /// leaves the claim in the comments unguarded.
+    @Test("The restore runs before the app is brought forward")
+    func restoreRunsBeforeActivate() {
+        let core = makeCore()
+        let recorder = wire(core, visible: 0, minimized: [1])
+        _ = core.execute(
+            "pull_or_spawn",
+            args: [.string("com.test.a")]
+        )
+        #expect(
+            recorder.log == [
+                .deminiaturize(7, WindowID(1)),
+                .activate(7),
+            ]
+        )
+    }
+
+    /// The app still comes forward when there is nothing to
+    /// restore — the restore is an addition to that branch, not
+    /// a replacement for it.
+    @Test("An app with windows up is still brought forward")
+    func activatesWithoutRestoring() {
+        let core = makeCore()
+        let recorder = wire(core, visible: 2, minimized: [1])
+        _ = core.execute(
+            "pull_or_spawn",
+            args: [.string("com.test.a")]
+        )
+        #expect(recorder.log == [.activate(7)])
+    }
+
+    /// An app that is not running takes the LaunchServices path
+    /// instead, and must not be reported as restored.
+    @Test("A stopped app touches neither seam")
+    func stoppedAppTouchesNothing() {
+        let core = makeCore()
+        let recorder = wire(core, visible: 0, minimized: [1])
+        core.openOrFocus.runningAppPID = { _ in nil }
+        _ = core.execute(
+            "pull_or_spawn",
+            args: [.string("com.test.does.not.exist")]
+        )
+        #expect(recorder.log.isEmpty)
     }
 }

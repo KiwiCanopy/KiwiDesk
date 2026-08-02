@@ -265,15 +265,12 @@ extension KiwiCore {
         }
         // Pull an existing instance forward, matched by bundle
         // id (locale- and rename-proof, unlike the display
-        // name — see AppRef).
+        // name — see AppRef). Through `openOrFocus`, whose four
+        // seams are this branch's every touch of the machine.
         if !newInstance,
-            let running = NSWorkspace.shared
-                .runningApplications
-                .first(where: {
-                    $0.bundleIdentifier?.lowercased() == bundleID
-                })
+            let pid = openOrFocus.runningAppPID(bundleID)
         {
-            // `activate()` does not deminiaturize, so an app with
+            // `activate` does not deminiaturize, so an app with
             // nothing on screen came forward showing nothing at
             // all (#673). Restore one first — BEFORE the
             // activate, so the app comes forward with a window
@@ -281,10 +278,10 @@ extension KiwiCore {
             // and leave the rest parked. Which one, and why only
             // one, is argued in `KiwiCore+LaunchRestore.swift`.
             restoreOneMinimizedIfNothingVisible(
-                pid: running.processIdentifier,
+                pid: pid,
                 bundleID: bundleID
             )
-            running.activate()
+            openOrFocus.activate(pid)
             return .ok()
         }
         // LaunchServices resolves the bundle id to its install

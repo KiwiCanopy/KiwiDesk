@@ -41,6 +41,13 @@ extension StateCoordinator {
     /// lingers for the session. Harmless — a restore that cannot
     /// find the remembered id among the app's live minimized
     /// windows falls back to the first one AX lists.
+    ///
+    /// The `guard` is narrower than the `Set.insert` it replaced,
+    /// which filed an untracked id too. No production path
+    /// reaches it: both `.windowDestroyed` emitters gate on the
+    /// window being in `elements[pid]`
+    /// (`EventLoop+Notifications`, `EventLoop+Tabs`), which is
+    /// the same population `windows` holds.
     mutating func rememberMinimized(_ id: WindowID) {
         guard let window = windows[id] else { return }
         minimizeOrder.removeAll { $0.id == id }

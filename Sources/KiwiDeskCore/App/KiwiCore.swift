@@ -201,22 +201,11 @@ public final class KiwiCore {
     /// activation.
     var desktopFocusYield: (@MainActor () -> Void)?
 
-    /// The AX pair Open or Focus's all-minimized arm reads and
-    /// writes through (#673) — how many windows an app has up
-    /// and which are parked, then the deminiaturize. Both are
-    /// argued in `KiwiCore+LaunchRestore.swift`, which also holds
-    /// their live implementations.
-    ///
-    /// LIVE by default, unlike the two seams above: an inert
-    /// default would silently disable the feature if a wiring
-    /// were ever forgotten (#625), while a live one is harmless
-    /// in tests — AX answers an unknown pid with no windows, so
-    /// the restore no-ops. A test states a census outright and
-    /// records what the write asked for.
-    var appWindowCensus: @MainActor (pid_t) -> AppWindowCensus =
-        KiwiCore.readAppWindowCensus
-    var deminiaturizeWindow: @MainActor (pid_t, WindowID) -> Void =
-        KiwiCore.writeDeminiaturize
+    /// Every machine touch Open or Focus's already-running branch
+    /// makes (#673) — app lookup, window census, deminiaturize,
+    /// activate. Declared and argued as a bundle in
+    /// `KiwiCore+LaunchRestore.swift`, all four live by default.
+    var openOrFocus = OpenOrFocusSeams()
 
     /// Pids of apps currently showing a focused ignored panel
     /// (Ghostty's quick terminal). Set when the event loop

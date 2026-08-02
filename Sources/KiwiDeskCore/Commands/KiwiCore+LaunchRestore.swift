@@ -1,4 +1,46 @@
+import AppKit
 import Foundation
+
+/// Every machine touch Open or Focus makes on its already-running
+/// branch, in one place so a test can state the world and record
+/// what the command did to it (#673).
+///
+/// A bundle rather than four properties on `KiwiCore`: they are
+/// one feature's read/write pair plus the two calls that bracket
+/// them, they are always substituted together, and `KiwiCore`'s
+/// own file is at its §2.1 ceiling. Each defaults LIVE — there is
+/// no wiring step to forget, unlike the `nil`-defaulted guards
+/// (`frontmostPIDProvider`), so the default IS the implementation
+/// and a test overrides what it needs.
+@MainActor
+struct OpenOrFocusSeams {
+    /// Resolves a bundle id to a running app's pid — matched on
+    /// the id, not the display name, which is locale- and
+    /// rename-proof (see `AppRef`). nil when the app is not
+    /// running, which sends the command to LaunchServices.
+    var runningAppPID: @MainActor (String) -> pid_t? = {
+        bundleID in
+        NSWorkspace.shared.runningApplications.first {
+            $0.bundleIdentifier?.lowercased() == bundleID
+        }?.processIdentifier
+    }
+
+    /// How many windows the app has up, and which are parked.
+    var census: @MainActor (pid_t) -> KiwiCore.AppWindowCensus =
+        KiwiCore.readAppWindowCensus
+
+    /// Brings one parked window back.
+    var deminiaturize: @MainActor (pid_t, WindowID) -> Void =
+        KiwiCore.writeDeminiaturize
+
+    /// Brings the app forward. Separate from the deminiaturize so
+    /// a test can pin that the restore runs FIRST — the order is
+    /// the difference between the app arriving with a window on
+    /// its way up and arriving a beat behind it.
+    var activate: @MainActor (pid_t) -> Void = { pid in
+        NSRunningApplication(processIdentifier: pid)?.activate()
+    }
+}
 
 /// The all-minimized arm of Open or Focus (#673).
 ///
@@ -32,12 +74,25 @@ extension KiwiCore {
     /// common press a whole-system `CGWindowListCopyWindowInfo`
     /// snapshot.
     ///
+    /// What the swap gives up, deliberately: `normalWindowCount`
+    /// filtered to `layer == 0` and excluded desktop elements, so
+    /// only document windows counted. A raw `kAXWindows` walk
+    /// counts a dialog, a sheet, an inspector or a floating
+    /// palette as visible too — and that is the wanted ruling
+    /// here, not an oversight. The rule is "nothing on screen",
+    /// and a palette IS on screen: the press brings the app
+    /// forward and the user sees something, which is the failure
+    /// #673 reports. An app whose documents are all parked but
+    /// whose inspector is open therefore keeps its parked windows
+    /// parked.
+    ///
     /// The known blind spot is the other one: a window on another
     /// native desktop is in neither list (#25), so an app with
     /// one there and one parked here reads as all-parked. That is
     /// in `docs/accepted-limitations.md`.
     struct AppWindowCensus: Sendable {
-        /// Windows the app has up on this desktop.
+        /// Windows the app has up on this desktop — every
+        /// non-minimized window AX lists, panels included.
         let visible: Int
         /// Its minimized windows, in the app's own `kAXWindows`
         /// order — which is the fallback ordering when KiwiDesk
@@ -82,14 +137,14 @@ extension KiwiCore {
         pid: pid_t,
         bundleID: String
     ) {
-        let census = appWindowCensus(pid)
+        let census = openOrFocus.census(pid)
         guard census.visible == 0,
             let target = minimizedRestoreTarget(
                 among: census.minimized,
                 bundleID: bundleID
             )
         else { return }
-        deminiaturizeWindow(pid, target)
+        openOrFocus.deminiaturize(pid, target)
     }
 
     /// Which of an app's parked windows to bring back: the one
