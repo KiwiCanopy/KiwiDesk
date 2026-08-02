@@ -125,7 +125,27 @@ public final class EventLoop {
     /// The WindowServer prefilter feeding the scan's
     /// `hasVisibleWindows` answers (see `attach`).
     var visiblePIDs: () -> Set<pid_t> =
-        EventLoop.pidsWithVisibleWindows
+        AXHelper.pidsWithNormalWindows
+
+    /// AX window list of an app — `attach`'s snapshot and
+    /// `reconcile`'s live list.
+    var axWindows: (pid_t) -> [AXUIElement] = AXHelper.windows
+
+    /// Activation policy for a pid a reconcile only knows by
+    /// number.
+    var activationPolicy: (pid_t) -> NSApplication.ActivationPolicy? = {
+        NSRunningApplication(processIdentifier: $0)?
+            .activationPolicy
+    }
+
+    /// The warmup taps (#360): the EUI read/write pair and the
+    /// Chromium `AXManualAccessibility` write.
+    var readEnhancedUI: (pid_t) -> Bool? =
+        AXHelper.getEnhancedUserInterface
+    var writeEnhancedUI: (pid_t, Bool) -> Void =
+        AXHelper.setEnhancedUserInterface
+    var writeManualAX: (pid_t, Bool) -> Void =
+        AXHelper.setManualAccessibility
 
     /// Applies the process-global AX messaging timeout at
     /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`

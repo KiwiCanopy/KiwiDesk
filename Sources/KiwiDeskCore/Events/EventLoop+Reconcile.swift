@@ -39,9 +39,7 @@ extension EventLoop {
             }
         }
         let activationPolicy =
-            NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+            self.activationPolicy(pid) ?? .prohibited
         guard
             Self.ownsObservation(
                 hasObserver: observers[pid] != nil,
@@ -66,13 +64,16 @@ extension EventLoop {
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
-        let liveElements = AXHelper.windows(pid: pid)
+        let liveElements = axWindows(pid)
         if activationPolicy == .regular
             || liveElements.contains(where: Self.isStandardWindow)
         {
             // A cold app may not answer the baseline EUI read at
             // attach time. Retry on later reconciles until one
             // succeeds, without taking another window snapshot.
+            // Also the load-bearing half of the boot prefilter:
+            // an app the scan skipped as windowless is warmed
+            // here (StartupWarmupSkipTests, #662).
             warmAccessibilityTree(pid: pid)
         }
         var live: Set<WindowID> = []

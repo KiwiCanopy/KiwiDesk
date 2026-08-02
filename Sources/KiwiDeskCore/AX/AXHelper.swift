@@ -70,38 +70,9 @@ public enum AXHelper {
         return list ?? []
     }
 
-    /// Counts an app's normal (layer-0) document windows via the
-    /// WindowServer. `.excludeDesktopElements` plus the layer==0
-    /// filter drop Finder's desktop / wallpaper / icon surfaces, so
-    /// only real document windows count. `onScreenOnly` restricts
-    /// to windows on a currently-visible space across ALL displays
-    /// — the signal for "activating this app won't switch Spaces"
-    /// (an off-screen-only app teleports on activate). One snapshot;
-    /// never call in a loop.
-    public static func normalWindowCount(
-        pid: pid_t,
-        onScreenOnly: Bool
-    ) -> Int {
-        let options: CGWindowListOption =
-            onScreenOnly
-            ? [.optionOnScreenOnly, .excludeDesktopElements]
-            : [.optionAll, .excludeDesktopElements]
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                options,
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return 0 }
-        return list.filter { info in
-            let owner =
-                (info[kCGWindowOwnerPID as String]
-                as? NSNumber)?.int32Value
-            let layer =
-                (info[kCGWindowLayer as String]
-                as? NSNumber)?.intValue
-            return owner == pid && layer == 0
-        }.count
-    }
+    // WindowServer-side queries (normalWindowCount,
+    // pidsWithNormalWindows) live in
+    // `AXHelper+WindowServer.swift`.
 
     /// Bounds every AX message this process sends. A message to
     /// an unresponsive app (stopped, deadlocked, paged out)

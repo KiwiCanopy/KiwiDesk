@@ -11,9 +11,10 @@ extension EventLoop {
     /// loop identifies PIDs with at least one layer-0 window.
     /// Apps without visible windows skip the expensive AX window
     /// query and warmup — the AXObserver is still installed so
-    /// future `kAXWindowCreatedNotification`s fire, and the
-    /// 1-second startup sweep (`reconcileAll`) re-warms any cold
-    /// app whose window appeared in the interim.
+    /// future `kAXWindowCreatedNotification`s fire, and a
+    /// following reconcile (at latest the 1-second startup
+    /// sweep) re-warms any cold app whose window appeared in
+    /// the interim (StartupWarmupSkipTests, #662).
     public func start() {
         guard !isRunning else { return }
         isRunning = true
@@ -64,10 +65,7 @@ extension EventLoop {
         }
         for (pid, baseline) in enhancedUIBaselines
         where !baseline {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: false
-            )
+            writeEnhancedUI(pid, false)
         }
         observers = [:]
         elements = [:]

@@ -22,7 +22,11 @@ extension EventLoop {
             detach(pid: pid, restoreEnhancedUI: true)
             return
         }
-        attach(app: app, ref: ref)
+        attach(
+            pid: pid,
+            activationPolicy: app.activationPolicy,
+            ref: ref
+        )
     }
 
     /// Attaches to regular and accessory apps from launch. The
@@ -34,30 +38,43 @@ extension EventLoop {
     /// false the app had zero layer-0 windows on the server at
     /// scan time, so the expensive AX window query and EUI/MAI
     /// warmup are skipped — the AXObserver still fires for
-    /// future window creation, and the 1-second startup sweep
-    /// re-warms via `reconcileAll()`.
+    /// future window creation, and a following reconcile
+    /// re-warms (the promise `StartupWarmupSkipTests` pins,
+    /// #662). No default: the boot scan is its only caller and
+    /// must state its answer.
     func attach(
         app: NSRunningApplication,
-        hasVisibleWindows: Bool = true
+        hasVisibleWindows: Bool
     ) {
         attach(
-            app: app,
+            pid: app.processIdentifier,
+            activationPolicy: app.activationPolicy,
             ref: AppRef(app),
             hasVisibleWindows: hasVisibleWindows
         )
     }
 
-    private func attach(
-        app: NSRunningApplication,
+    /// Internal (not private): the pid-shaped entry the warmup
+    /// and lifecycle suites drive through injected seams — an
+    /// NSRunningApplication cannot be fabricated for a test pid.
+    func attach(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
         ref: AppRef,
         hasVisibleWindows: Bool = true
     ) {
-        let pid = app.processIdentifier
+        // Nothing attaches before `start()` (#672): loadConfig's
+        // pre-start `reconcileAll()` used to reach here and
+        // attach every app with the eager default above, which
+        // made the boot scan's prefilter test nothing — every
+        // app was already attached and warmed by the time
+        // `start()` ran.
+        guard isRunning else { return }
         guard observers[pid] == nil else { return }
         guard
             Self.shouldAttach(
                 pid: pid,
-                activationPolicy: app.activationPolicy,
+                activationPolicy: activationPolicy,
                 isIgnored: shouldIgnoreApp(
                     bundleID: ref.bundleID
                 )
@@ -93,12 +110,12 @@ extension EventLoop {
         // When the WindowServer reports zero layer-0 windows
         // for this app, skip the slow AX window query and
         // warmup — the observer above still catches future
-        // window creation, and the 1 s startup sweep
-        // (reconcileAll) re-warms cold apps.
+        // window creation, and a following reconcile re-warms
+        // (StartupWarmupSkipTests, #662).
         guard hasVisibleWindows else { return }
 
-        let windows = AXHelper.windows(pid: pid)
-        if app.activationPolicy == .regular
+        let windows = axWindows(pid)
+        if activationPolicy == .regular
             || windows.contains(where: Self.isStandardWindow)
         {
             warmAccessibilityTree(pid: pid)
@@ -130,10 +147,7 @@ extension EventLoop {
     /// re-tried on later reconciles for cold apps.
     func warmAccessibilityTree(pid: pid_t) {
         guard enhancedUIBaselines[pid] == nil else { return }
-        guard
-            let baseline = AXHelper.getEnhancedUserInterface(
-                pid: pid
-            )
+        guard let baseline = readEnhancedUI(pid)
         else {
             // The app does not answer the EUI read. Chromium-family
             // browsers (Chrome, Brave, Edge, Arc, …) behave this way
@@ -146,13 +160,13 @@ extension EventLoop {
             // reconcile, since the EUI read that would record a
             // baseline stays nil for a Chromium app forever (#360).
             guard manualAXApplied.insert(pid).inserted else { return }
-            AXHelper.setManualAccessibility(pid: pid, enabled: true)
+            writeManualAX(pid, true)
             return
         }
         enhancedUIBaselines[pid] = baseline
         guard !baseline else { return }
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
-        AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
+        writeEnhancedUI(pid, true)
     }
 
     func detach(
@@ -163,10 +177,7 @@ extension EventLoop {
         if let baseline = enhancedUIBaselines.removeValue(
             forKey: pid
         ), restoreEnhancedUI, !baseline {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: false
-            )
+            writeEnhancedUI(pid, false)
         }
         // AXManualAccessibility is left set on the app (an eager AX
         // tree is what a managed app wants); only forget the pid so a
@@ -181,29 +192,5 @@ extension EventLoop {
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil
-    }
-
-    /// PIDs that own at least one layer-0 (normal document)
-    /// window according to the WindowServer. One snapshot,
-    /// ~1 ms, no AX.
-    nonisolated static func pidsWithVisibleWindows() -> Set<pid_t> {
-        guard
-            let list = CGWindowListCopyWindowInfo(
-                [.optionAll, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
-        else { return [] }
-        var result = Set<pid_t>()
-        for info in list {
-            guard
-                let pid = (info[kCGWindowOwnerPID as String] as? NSNumber)?
-                    .int32Value,
-                let layer = (info[kCGWindowLayer as String] as? NSNumber)?
-                    .intValue,
-                layer == 0
-            else { continue }
-            result.insert(pid)
-        }
-        return result
     }
 }
