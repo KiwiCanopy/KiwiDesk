@@ -185,11 +185,20 @@ extension KiwiCore {
         // arming above it would drain a pile onto `zOrderQueue`
         // before `pendingFocusRaise` was even set, and the
         // immediate `runPendingFocusRaise` would then race it.
-        // Guarded on the in-flight count like the monocle arm —
-        // the restore's closing re-assert calls back in here.
-        if zOrderRestoresInFlight == 0,
-            scrollFocusJumpsSlots(to: id, from: previousFocused)
-        {
+        // Deliberately NOT guarded on `zOrderRestoresInFlight`,
+        // the way the monocle arm above is. Monocle needs that
+        // counter because its arm keys on mode alone, so the
+        // restore's own closing re-assert would re-arm it; here
+        // the jump test already refuses that call — the re-assert
+        // targets the focus that is current, so the distance is
+        // zero. The counter would only ever suppress a REAL jump:
+        // a pile drain walks the AX queue at 1–20 ms a window,
+        // and far slower for an app that answers AX lazily, so a
+        // user stepping back and forth across the row lands
+        // inside that window constantly and would see every
+        // second jump silently skip its restack (owner device QA,
+        // 2026-08-02).
+        if scrollFocusJumpsSlots(to: id, from: previousFocused) {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }
     }

@@ -138,19 +138,35 @@ struct ZOrderFocusJumpTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    /// A restore's own closing re-assert calls `focusWindow`
-    /// (`raiseSequentially(thenFocus:)`) while the in-flight
-    /// counter is still held, so arming there would re-arm the
-    /// restore that is running — the monocle guard's loop, on
-    /// the scrolling path. The counter must gate it.
-    @Test("A focus during a restore does not re-arm it")
-    func inFlightRestoreDoesNotReArm() {
+    /// The loop guard, and the reason the scrolling arm needs no
+    /// in-flight counter: a restore's own closing re-assert
+    /// (`raiseSequentially(thenFocus:)`) focuses the window that
+    /// is ALREADY focused, so the jump distance is zero and the
+    /// arm refuses it by construction.
+    @Test("Re-focusing the focused window arms nothing")
+    func reFocusingTheSameWindowArmsNothing() {
+        let core = makeCore()
+        _ = makeSpace(core, windows: 6, focused: 3)
+        guard startDummyPan(core) else { return }
+        core.focusWindow(WindowID(3), warp: false)
+        #expect(!core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// And the reason it must not borrow monocle's counter
+    /// anyway: a pile drain runs on the AX queue for as long as
+    /// the slowest app takes to answer, and a user stepping back
+    /// and forth across the row lands inside that window
+    /// constantly. Gating on the counter dropped every second
+    /// jump's restack (owner device QA, 2026-08-02).
+    @Test("A jump during a running restore still arms one")
+    func jumpDuringRestoreStillArms() {
         let core = makeCore()
         _ = makeSpace(core, windows: 6, focused: 1)
         guard startDummyPan(core) else { return }
         core.zOrderRestoresInFlight = 1
         core.focusWindow(WindowID(5), warp: false)
-        #expect(!core.pendingZOrderRestore)
+        #expect(core.pendingZOrderRestore)
         core.zOrderRestoresInFlight = 0
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
