@@ -128,7 +128,7 @@ struct GreyOutParityTests {
         ),
         (
             "AdvancedColorRow.swift",
-            "GreyOut(active: containerAllows && inert",
+            "GreyOut(active: ownPredicateLive && inert",
             1
         ),
         // The one row-gate predicate the census cannot express:

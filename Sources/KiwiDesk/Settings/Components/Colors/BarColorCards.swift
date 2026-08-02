@@ -150,7 +150,7 @@ struct AdvancedColorRows: View {
             AdvancedColorRow(
                 model: model,
                 key: key,
-                containerAllows: gate.rowPredicateLive
+                ownPredicateLive: gate.rowPredicateLive
             )
             .modifier(
                 GreyOut(active: gate.containerGrey, help: gateHelp)
@@ -158,17 +158,31 @@ struct AdvancedColorRows: View {
         }
     }
 
-    /// How a row's two gates resolve, lifted out of `body` so the
-    /// rule can be asserted instead of only read.
+    /// How a row's two gates resolve — ONE decision with one
+    /// answer.
     ///
-    /// The exemption means "escape the CONTAINER gate", not
-    /// "escape both". Without the `||` an exempt row loses its
-    /// own predicate as well and ships as an editable swatch
-    /// that tints nothing, with no explanation anywhere on
-    /// screen — the exact opposite of what the exemption asks
-    /// for. Nothing is exempt in this area today, which is why
-    /// this is a seam rather than a comment: the first person to
-    /// add one should not have to rediscover it.
+    /// It is hoisted because the two halves were computed six
+    /// lines apart in `body` and disagreed about the exemption:
+    /// the container grey honored it, the row predicate did not.
+    /// An exempt row under a closed container therefore had its
+    /// block grey lifted AND its own predicate suppressed —
+    /// an editable swatch tinting nothing, explaining nothing,
+    /// the exact opposite of what the exemption asks for. The
+    /// exemption means "escape the CONTAINER gate", not "escape
+    /// both".
+    ///
+    /// That disagreement is the warrant, not testability: a
+    /// two-line expression does not leave a view because a test
+    /// wants a handle on it. Being assertable is what the
+    /// co-location bought, and it matters here because nothing
+    /// in this area is exempt yet — so no rendered behaviour
+    /// distinguishes the two forms, and only a direct assertion
+    /// can hold the rule until the first exemption lands.
+    ///
+    /// The two values are exact complements today. Both are
+    /// named anyway: a future exemption could want the block
+    /// grey lifted WITHOUT re-arming the row's own predicate,
+    /// and only this shape can say so.
     static func gate(
         allows: Bool,
         key: SettingKey

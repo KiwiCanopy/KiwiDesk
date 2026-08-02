@@ -13,11 +13,15 @@ import SwiftUI
 struct AdvancedColorRow: View {
     @ObservedObject var model: SettingsModel
     let key: SettingKey
-    /// False while the group's container gate is active. Every
-    /// row predicate stands down then, so the hover names the
-    /// outer reason instead of a row-specific one that fixing
-    /// wouldn't un-grey anything (the Bars pattern).
-    var containerAllows = true
+    /// Whether this row's OWN predicate may fire. False only
+    /// where the container gate has already claimed the
+    /// explanation — the hover then names the outer reason
+    /// rather than a row-specific one that fixing would not
+    /// un-grey anything (the Bars pattern). Not "the container
+    /// allows": an exempt row escapes the container gate and
+    /// keeps this true, which is the whole point of the
+    /// exemption. Resolved by `AdvancedColorRows.gate`.
+    var ownPredicateLive = true
 
     var settings: Binding<TilingSettings> {
         $model.config.settings
@@ -48,13 +52,13 @@ struct AdvancedColorRow: View {
         }
     }
 
-    /// The row-level grey: only ever active while the container
-    /// gate allows editing, so the two cannot both claim the
-    /// explanation.
+    /// The row-level grey: only ever active while this row's own
+    /// predicate may fire, so a row and its container cannot
+    /// both claim the explanation.
     func gated(
         _ inert: Bool,
         _ help: String
     ) -> GreyOut {
-        GreyOut(active: containerAllows && inert, help: help)
+        GreyOut(active: ownPredicateLive && inert, help: help)
     }
 }

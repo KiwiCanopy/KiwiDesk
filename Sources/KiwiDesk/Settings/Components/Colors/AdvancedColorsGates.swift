@@ -99,6 +99,17 @@ struct AdvancedColorsGates {
 /// required here for the ordinary reason too: a translation
 /// cannot reorder pieces stitched together in Swift, and several
 /// of these locales put the place before the verb.
+///
+/// Only the TITLE is derived. Which destination owns each gate
+/// is still chosen by hand below, and the census already knows
+/// it — `gate: .setting(.borders(.borderEnabled))` resolves to a
+/// row whose `placement.area` is `.gapsAndBorders`. Deriving it
+/// is not available: an area is not a destination (one area
+/// spans two of them), so a map would be a fresh twelve-row
+/// mirror rather than a derivation. So the obligation is stated
+/// instead — **moving a gating control to another destination
+/// updates the sentence that points at it, in the same change
+/// set** — because nothing here will red when it does not.
 @MainActor
 enum AdvancedColorsHelp {
     private static var gapsAndBorders: String {
