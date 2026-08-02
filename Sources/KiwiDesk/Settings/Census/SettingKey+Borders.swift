@@ -53,31 +53,31 @@ extension BordersKey {
                 gate: .setting(.borders(.borderUnfocusedEnabled))
             )
         case .stickyColor:
-            // The mark's color follows the mark being shown
-            // (item 10: the mark paints on the window itself).
-            return .row(
-                .advancedColours,
-                .borders,
-                .atRest,
-                gate: .setting(.borders(.stickyMark))
-            )
+            // The table marks this GATED, but the live editor
+            // deliberately leaves it ungated: the color also
+            // paints the on-window mark and the Space Bar's
+            // sticky badge, so it always tints something
+            // (StickyMarkEditor). The Colours phase rules on
+            // the redesign's gate; until then the census
+            // records the wiring.
+            return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
+            // Glow on, and not auto-sized (AutoGatedGroup).
             return .row(
                 .gapsAndBorders,
                 .focusBorder,
                 .showMore,
-                gate: .setting(.borders(.borderGlow))
+                gate: .anyOf([
+                    .borders(.borderGlow),
+                    .borders(.borderGlowSizeAuto),
+                ])
             )
         case .borderDrawOrder:
             return .luaOnly
         case .borderFitGaps:
-            // The whole editor greys off its enable toggle.
-            return .row(
-                .gapsAndBorders,
-                .focusBorder,
-                .atRest,
-                gate: .setting(.borders(.borderEnabled))
-            )
+            // The whole-editor grey off the enable toggle is
+            // the .focusBorder CONTAINER gate.
+            return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .stickyMark:
             // Forced on while the Space Bar is off — the only
             // sticky mark left (StickyMarkEditor).
@@ -88,8 +88,7 @@ extension BordersKey {
                 gate: .setting(.spaceBar(.spaceBarEnabled))
             )
         case .dragCornerRadius, .dragGhostBorder, .dragGhostFill,
-            .dragDropZoneBorder, .dragDropZoneBorderWidth,
-            .dragDropZoneBorderAlignment, .dragDropZoneFill:
+            .dragDropZoneBorder, .dragDropZoneFill:
             return .row(.gapsAndBorders, .dragAndDrop, .showMore)
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
@@ -114,17 +113,32 @@ extension BordersKey {
                 .showMore,
                 gate: .setting(.borders(.dragGhostBorder))
             )
-        case .dragDropZoneBorderColor, .dragDropZoneFillColor:
-            return .row(.advancedColours, .dragAndDrop, .atRest)
-        case .floatingColor:
-            // Drawn only in the Space Bar (owner ruling
-            // 2026-08-02; the gate item 10 keeps).
+        case .dragDropZoneBorderWidth, .dragDropZoneBorderAlignment:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragDropZoneBorder))
+            )
+        case .dragDropZoneBorderColor:
             return .row(
                 .advancedColours,
-                .spaceBar,
+                .dragAndDrop,
                 .atRest,
-                gate: .setting(.spaceBar(.spaceBarEnabled))
+                gate: .setting(.borders(.dragDropZoneBorder))
             )
+        case .dragDropZoneFillColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .setting(.borders(.dragDropZoneFill))
+            )
+        case .floatingColor:
+            // Drawn only in the Space Bar (owner ruling
+            // 2026-08-02; the gate item 10 keeps) — carried by
+            // the .spaceBar CONTAINER gate.
+            return .row(.advancedColours, .spaceBar, .atRest)
         }
     }
 }

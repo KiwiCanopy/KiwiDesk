@@ -37,10 +37,11 @@ extension SpacesKey {
 extension SpacesKey {
     var text: SettingRowText {
         switch self {
-        case .spaceIcon, .spaceList, .spacesName, .spaceModes, .fallbackSpace:
+        // reset_active's key is "Reset %1$@ Overrides" — the
+        // layout name is interpolated per space, so dynamic.
+        case .spaceIcon, .spaceList, .spacesName, .spaceModes,
+            .fallbackSpace, .spaceOverrideResetActive:
             return .dynamic
-        case .spaceOverrideResetActive:
-            return .text("space_override.reset_active")
         case .spaceOverrideResetAll:
             return .text("space_override.reset_all")
         case .spacesDelete:

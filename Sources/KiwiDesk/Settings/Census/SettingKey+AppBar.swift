@@ -31,34 +31,26 @@ enum AppBarKey: String, CaseIterable, Hashable {
 
 extension AppBarKey {
     var placement: SettingPlacement {
+        // The editor-wide "no layout shows the bar" grey is
+        // the CONTAINER's gate (SettingsContainer.appBar) —
+        // rows here carry only their row-specific gates.
         switch self {
         case .appBarEdge:
-            // The whole editor greys while no layout shows the
-            // bar (AppBarGroups' anyBarShown gate).
-            return .row(
-                .bars,
-                .appBar,
-                .atRest,
-                gate: .anyOf([
-                    .layoutAppBar(.monocleAppBarEnabled),
-                    .layoutAppBar(.scrollingAppBarEnabled),
-                ])
-            )
+            return .row(.bars, .appBar, .atRest)
         case .appBarAlignment, .appBarBackground, .appBarActiveIndicator,
             .appBarItemSizeAuto, .appBarItemGap, .appBarFontSizeAuto,
-            .appBarFontSize, .appBarCornerRoundness:
+            .appBarCornerRoundness:
             return .row(.bars, .appBar, .showMore)
-        case .appBarLiquidGlass:
-            // platform-gated: hidden (not greyed) below macOS 26
+        case .appBarFontSize:
             return .row(
                 .bars,
                 .appBar,
                 .showMore,
-                gate: .anyOf([
-                    .layoutAppBar(.monocleAppBarEnabled),
-                    .layoutAppBar(.scrollingAppBarEnabled),
-                ])
+                gate: .setting(.appBar(.appBarFontSizeAuto))
             )
+        case .appBarLiquidGlass:
+            // platform-gated: hidden (not greyed) below macOS 26
+            return .row(.bars, .appBar, .showMore)
         case .appBarBackgroundFit:
             // Boxed draws no shared plate to size — asked of the
             // bars actually shown, overrides included.
@@ -77,12 +69,15 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarEdge))
             )
         case .appBarIconSource:
-            // Name-only content shows no icons.
+            // Name-only content shows no icons. Deliberately
+            // outside the container gate: the ⌃⌥K panel's Apps
+            // band reads this whether or not any bar renders.
             return .row(
                 .bars,
                 .appBar,
                 .showMore,
-                gate: .setting(.appBar(.appBarContent))
+                gate: .setting(.appBar(.appBarContent)),
+                exemptFromContainerGate: true
             )
         case .appBarItemSize:
             return .row(

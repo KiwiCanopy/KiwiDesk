@@ -14,13 +14,21 @@ extension MonitorsKey {
         case .spacePins, .mainSpaces:
             return .row(.monitors, .spacePlacement, .atRest)
         case .orphanPinClear:
-            // conditional
-            return .row(.monitors, .pinnedToDisconnectedMonitors, .atRest)
+            return .row(
+                .monitors,
+                .pinnedToDisconnectedMonitors,
+                .atRest,
+                gate: .runtime(.orphanPinsExist)
+            )
         case .fingerprints:
             return .row(.monitors, .monitorFingerprints, .showMore)
         case .placementUnavailable:
-            // conditional
-            return .row(.monitors, .spacePlacement, .atRest)
+            return .row(
+                .monitors,
+                .spacePlacement,
+                .atRest,
+                gate: .runtime(.monitorsDisconnected)
+            )
         }
     }
 }

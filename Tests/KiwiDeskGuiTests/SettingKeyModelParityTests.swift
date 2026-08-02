@@ -119,8 +119,13 @@ struct SettingKeyModelParityTests {
     }
 
     /// Model → census: every stored leaf is covered by a row —
-    /// its own, or an ancestor row that owns the whole object
-    /// (`settings.gapsOverride[]` owns its interior).
+    /// its own, or a `[]`-suffixed ancestor row that owns the
+    /// whole dictionary object (`settings.gapsOverride[]` owns
+    /// its interior). Only dictionary owners get ancestor
+    /// coverage: a stripped `(master)` row must NOT own its
+    /// subtree, or a field added to `AnimationSettings` or the
+    /// `Gaps` pair would need no census row and this direction
+    /// would stay green.
     @Test func everyModelLeafHasACensusRow() {
         let walked = Self.walkedModel()
         #expect(
@@ -134,7 +139,10 @@ struct SettingKeyModelParityTests {
         for leaf in walked.leaves {
             let covered =
                 bases.contains(leaf)
-                || bases.contains { leaf.hasPrefix($0 + ".") }
+                || bases.contains {
+                    $0.hasSuffix("[]")
+                        && leaf.hasPrefix($0 + ".")
+                }
             #expect(
                 covered,
                 "model leaf \(leaf) has no census row"

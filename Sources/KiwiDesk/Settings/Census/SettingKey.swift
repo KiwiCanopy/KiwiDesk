@@ -1,6 +1,10 @@
 /// The settings census (#678, spec 4f): one case per row of
 /// the reviewed placement table (see `SettingPlacement.swift`
-/// for the contract). `id` is the verbatim table row key.
+/// for the contract). `id` is the verbatim table row key —
+/// machine-checked identity for the `settings.*` / `config.*`
+/// slices (the model-parity guard parses those); the other
+/// prefixes (`UserDefaults.`, `(action) `, …) are census
+/// prose, held stable by convention only.
 
 enum SettingKey: Hashable, CaseIterable {
     case appBar(AppBarKey)

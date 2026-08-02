@@ -23,17 +23,18 @@ extension ColoursKey {
         switch self {
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .animationsOnSpaceChange:
-            // Follows the master animations toggle.
+        case .animationsOnSpaceChange, .animationsOnWindowResize,
+            .animationsOnWindowSwap, .animationsOnRelayout,
+            .animationsDurationMS:
+            // The whole gated group follows the master toggle
+            // (BehaviorSection.gatedAnimationControls); the
+            // Reduce Motion grey is the .motion CONTAINER gate.
             return .row(
                 .coloursAndMotion,
                 .motion,
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
             )
-        case .animationsOnWindowResize, .animationsOnWindowSwap,
-            .animationsOnRelayout, .animationsDurationMS:
-            return .row(.coloursAndMotion, .motion, .showMore)
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .animationsScrollSpeedMS:
@@ -49,8 +50,12 @@ extension ColoursKey {
             .paletteImport:
             return .row(.coloursAndMotion, .palettes, .showMore)
         case .paletteNeonGlowHint:
-            // conditional
-            return .row(.coloursAndMotion, .palettes, .atRest)
+            return .row(
+                .coloursAndMotion,
+                .palettes,
+                .atRest,
+                gate: .runtime(.paletteGlowPairing)
+            )
         }
     }
 }

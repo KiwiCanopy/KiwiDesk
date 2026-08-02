@@ -41,7 +41,8 @@ extension ProfilesKey {
     var text: SettingRowText {
         switch self {
         case .profileBindings:
-            return .text("native_spaces.desktop")
+            // "Desktop %1$d" — per-instance rows, so dynamic.
+            return .dynamic
         case .profilesLoad:
             return .text("profiles.load")
         case .profilesDelete:

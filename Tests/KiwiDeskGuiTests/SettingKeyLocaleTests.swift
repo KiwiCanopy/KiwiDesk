@@ -59,6 +59,28 @@ struct SettingKeyLocaleTests {
         return out
     }
 
+    /// A LABEL key must be renderable as-is: a key whose value
+    /// carries a positional specifier is a per-instance
+    /// template (`keybinding.focus_dir` = "Focus window %1$@")
+    /// and its row must be `.dynamic` instead. Captions and
+    /// help are prose and may interpolate.
+    @Test func labelKeysCarryNoPositionalSpecifiers() throws {
+        let catalogs = try Self.loadCatalogs()
+        let en = try #require(catalogs["en.json"])
+        var checked = 0
+        for key in SettingKey.allCases {
+            guard case .key(let label) = key.text.label else {
+                continue
+            }
+            checked += 1
+            #expect(
+                en[label]?.contains("%1$") != true,
+                "\(key.id): label \(label) is a template"
+            )
+        }
+        #expect(checked > 100)
+    }
+
     @Test func everyTextKeyResolvesInEveryLocale() throws {
         let catalogs = try Self.loadCatalogs()
         // Guard the fixture itself: an empty or misplaced

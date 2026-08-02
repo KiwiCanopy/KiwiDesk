@@ -44,9 +44,23 @@ extension SpaceBarKey {
             return .row(.bars, .spaceBar, .atRest)
         case .spaceBarAlignment, .spaceBarBackground, .spaceBarActiveIndicator,
             .spaceBarIconSource, .spaceBarSpringDelay, .spaceBarItemSizeAuto,
-            .spaceBarItemSize, .spaceBarItemGap, .spaceBarFontSizeAuto,
-            .spaceBarFontSize, .spaceBarGlyphCap, .spaceBarCornerRoundness:
+            .spaceBarItemGap, .spaceBarFontSizeAuto, .spaceBarGlyphCap,
+            .spaceBarCornerRoundness:
             return .row(.bars, .spaceBar, .showMore)
+        case .spaceBarItemSize:
+            return .row(
+                .bars,
+                .spaceBar,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarItemSizeAuto))
+            )
+        case .spaceBarFontSize:
+            return .row(
+                .bars,
+                .spaceBar,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarFontSizeAuto))
+            )
         case .spaceBarLiquidGlass:
             // platform-gated
             return .row(.bars, .spaceBar, .showMore)
@@ -81,7 +95,16 @@ extension SpaceBarKey {
                 ])
             )
         case .copyAppearance:
-            return .row(.bars, .appBar, .showMore)
+            // Table moves it into the App Bar card (it copies
+            // App Bar → Space Bar); it needs the Space Bar on,
+            // not the App Bar shown.
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarEnabled)),
+                exemptFromContainerGate: true
+            )
         }
     }
 }

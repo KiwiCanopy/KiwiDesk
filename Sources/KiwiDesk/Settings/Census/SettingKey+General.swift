@@ -33,7 +33,10 @@ extension GeneralKey {
             .advancedDiscardArrangement, .advancedResetAll:
             return .row(.general, .advanced, .showMore)
         case .onboardingDiscoveryShown:
-            return .luaOnly
+            // The table writes lua-only, but a UserDefaults
+            // flag has no Lua path — internal storage by the
+            // tier's own definition.
+            return .internalOnly
         case .iconPickerRecents:
             return .internalOnly
         case .onboardingOpenAtLogin:

@@ -46,8 +46,12 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
-            // conditional
-            return .row(.shortcuts, .luaBindings, .showMore)
+            return .row(
+                .shortcuts,
+                .luaBindings,
+                .showMore,
+                gate: .runtime(.luaImportAvailable)
+            )
         }
     }
 }
@@ -55,24 +59,17 @@ extension ShortcutsKey {
 extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
-        case .layers, .openApplications, .advanced:
+        // Family keys (`keybinding.focus_dir` = "Focus window
+        // %1$@" …) carry positional specifiers and are only
+        // ever formatted per instance — a family ROW's title is
+        // runtime-composed, so these are `.dynamic`, not the
+        // template key.
+        case .layers, .openApplications, .advanced, .focusDir,
+            .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
+            .moveToSpace, .moveToSpaceFollow, .switchToMode:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")
-        case .focusDir:
-            return .text("keybinding.focus_dir")
-        case .goToSpace:
-            return .text("keybinding.go_to_space")
-        case .swapDir:
-            return .text("keybinding.swap_dir")
-        case .moveWindowToTrack:
-            return .text("keybinding.move_window_to_track")
-        case .swapWithTrack:
-            return .text("keybinding.swap_with_track")
-        case .moveToSpace:
-            return .text("keybinding.move_to_space")
-        case .moveToSpaceFollow:
-            return .text("keybinding.move_to_space_follow")
         case .growWidth:
             return .text("keybinding.grow_width")
         case .shrinkWidth:
@@ -95,8 +92,6 @@ extension ShortcutsKey {
             )
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
-        case .switchToMode:
-            return .text("keybinding.switch_to_mode")
         case .`import`:
             return .text("shortcuts.import", help: "shortcuts.import.help")
         }

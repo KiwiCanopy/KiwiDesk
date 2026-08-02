@@ -8,8 +8,8 @@ import Testing
 /// area usable at rest. The locale resolution guard lives in
 /// `SettingKeyLocaleTests`, the model parity guard in
 /// `SettingKeyModelParityTests`.
-@Suite("SettingKey catalog structure")
-struct SettingKeyCatalogTests {
+@Suite("SettingKey census structure")
+struct SettingKeyCensusTests {
     private let keys = SettingKey.allCases
 
     /// The tiers that put a row on a Settings surface. Derived
@@ -84,12 +84,37 @@ struct SettingKeyCatalogTests {
                     )
                 }
             }
+            if placement.exemptFromContainerGate {
+                #expect(
+                    placement.container?.gate != nil,
+                    "\(key.id): exempt but container ungated"
+                )
+            }
         }
     }
 
+    /// A container-level gate names only surfaced owner rows,
+    /// and each owner lives where a renderer can find it live
+    /// (the implicit owner-stays-live rule needs the owner in
+    /// scope).
+    @Test func containerGatesNameSurfacedOwners() {
+        var gated = 0
+        for container in SettingsContainer.allCases {
+            guard let gate = container.gate else { continue }
+            gated += 1
+            for owner in gate.settings {
+                #expect(
+                    hasSurface(owner.placement.tier),
+                    "\(container) gated by surfaceless row"
+                )
+            }
+        }
+        #expect(gated > 0)
+    }
+
     /// No container is empty in either mode. A container's mode
-    /// is its area's (`SettingsArea.isNerdOnly` — mode depth is
-    /// per area, never per row), so the reduction is: every
+    /// is its area's (`SettingsArea.minimumMode` — mode depth
+    /// is per area, never per row), so the reduction is: every
     /// declared container carries at least one surfaced row.
     /// A container case nothing places into would render as an
     /// empty card the day views generate from the catalog.
@@ -147,7 +172,7 @@ struct SettingKeyCatalogTests {
             .appendingPathComponent("Sources")
             .appendingPathComponent("KiwiDesk")
             .appendingPathComponent("Settings")
-            .appendingPathComponent("Catalog")
+            .appendingPathComponent("Census")
             .appendingPathComponent("SettingKey.swift")
         let source = try String(contentsOf: file, encoding: .utf8)
         let pattern = /case (\w+)\((\w+Key)\)/

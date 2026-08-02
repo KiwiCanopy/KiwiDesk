@@ -91,20 +91,25 @@ extension LayoutKey {
             .scrollingSlotSizeValue, .scrollingNewWindowPlacement,
             .scrollingWrapFocus:
             return .row(.layoutDefaults, .scrolling, .atRest)
-        case .gridType, .gridSplitDirection, .gridAutoSize, .gridRows,
+        case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:
             return .row(.layoutDefaults, .grid, .atRest)
         case .gridFillEmptySpace:
-            // Inert while the grid is rigid (resolved across
-            // overrides — GridEditor.fillEmptyIsInert).
+            // Inert while the RESOLVED grid type is rigid —
+            // global rigid with no dynamic override
+            // (GridEditor.fillEmptyIsInert), so both owners.
             return .row(
                 .layoutDefaults,
                 .grid,
                 .atRest,
-                gate: .setting(.layout(.gridType))
+                gate: .anyOf([
+                    .layout(.gridType),
+                    .layout(.gridOverrideType),
+                ])
             )
-        case .gridColumns:
-            // Auto-size grid supplies the dimensions.
+        case .gridColumns, .gridRows:
+            // Auto-size grid supplies both dimensions
+            // (AutoGatedGroup greys the pair).
             return .row(
                 .layoutDefaults,
                 .grid,
@@ -130,7 +135,7 @@ extension LayoutKey {
             .stackOverrideMasterRatio, .stackOverrideOverflowStyle,
             .stackOverrideStackPosition, .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
-            .gridOverrideType, .gridOverrideSplitDirection, .gridOverrideRows,
+            .gridOverrideType, .gridOverrideSplitDirection,
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideOverflowStyle:
             return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
@@ -158,7 +163,7 @@ extension LayoutKey {
                     .layout(.gridOverrideType),
                 ])
             )
-        case .gridOverrideColumns:
+        case .gridOverrideColumns, .gridOverrideRows:
             return .row(
                 .spacesAndLayouts,
                 .perSpaceOverrides,
