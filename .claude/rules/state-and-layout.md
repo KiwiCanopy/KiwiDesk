@@ -77,8 +77,9 @@ editing here:
   when the retile belongs to the command dispatcher rather than
   the call site. Arming *before* the retile lets the settle
   callback consume the restore off the pre-mutation frames
-  (#153); every arm site is its own remembering, and three
-  mutations have now shipped without one (#150, #153, #674).
+  (#153). Nothing scans for a mutation that forgot to arm, so
+  each new one owes its own arm deliberately — three have now
+  shipped without one (#150, #153, #674).
   Arm **narrowly**: a restore raises every pile-mate through the
   blocking ordered queue and leaves the tiled plane above the
   float layer until the next genuine focus event (#418), so

@@ -203,8 +203,31 @@ struct ZOrderFocusJumpTests {
     func inactiveSpaceDropSkipsRestore() {
         let core = makeCore()
         let space = makeSpace(core, windows: 6, focused: 1)
+        // The ACTIVE space must itself be a scrolling row that
+        // overflows, or the mode/overflow gate inside the
+        // schedule call answers first and this test proves that
+        // gate instead of the active-space guard it names.
         core.state.workspaces.ensureSpace("2")
         core.state.workspaces.activate("2")
+        for id in 7...12 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        #expect(
+            core.execute(
+                "set_mode",
+                args: [.string("2"), .string("scrolling")]
+            ).isSuccess
+        )
+        core.state.workspaces.focus(WindowID(7), in: "2")
+        #expect(core.state.workspaces["2"]?.windows.count == 6)
         guard startDummyPan(core) else { return }
         core.moveBarItem(space: space, from: 0, to: 4)
         // The reorder itself still lands — only the restack is

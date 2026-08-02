@@ -197,25 +197,33 @@ extension KiwiCore {
     /// Whether a scrolling focus move crosses MORE than one
     /// tiled slot — the case a lone target raise cannot restack
     /// (#674). False for a ±1 step and for a re-focus of the same
-    /// window; true when either end is missing from the tiled row
-    /// (a focus arriving from a float or from another space
-    /// leaves no reference point, so restack rather than guess).
-    /// Compares tiled array indices, like
+    /// window. Compares tiled array indices, like
     /// `scrollFocusStepsBackward`: array order is scroll order.
+    ///
+    /// Also false when EITHER end is missing from the tiled row —
+    /// a first focus, or one arriving from a focused float, which
+    /// is `space.focused` and so never a tiled member. Without
+    /// both indices there is no evidence a jump happened, and the
+    /// two outcomes are not symmetric: a missed restack is pile
+    /// order that the next real jump fixes, while a spurious one
+    /// pays N blocking cross-process raises and leaves the tiled
+    /// plane over the float layer (#418) — over the very float
+    /// the user was just in, on the float→tile case. Guessing
+    /// costs more than waiting.
     private func scrollFocusJumpsSlots(
         to target: WindowID,
         from previous: WindowID?
     ) -> Bool {
-        guard let space = activeSpace else { return false }
+        guard let space = activeSpace, let previous else {
+            return false
+        }
         let tiled = state.effectiveTiledMembers(
             of: space,
             activeSpace: space.id
         )
-        guard let targetIndex = tiled.firstIndex(of: target)
-        else { return false }
-        guard let previous,
+        guard let targetIndex = tiled.firstIndex(of: target),
             let previousIndex = tiled.firstIndex(of: previous)
-        else { return true }
+        else { return false }
         return abs(targetIndex - previousIndex) > 1
     }
 
