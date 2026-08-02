@@ -93,9 +93,17 @@ struct StartupWarmupSkipTests {
         #expect(windowQueries() == 0)
         #expect(euiWrites().isEmpty)
         // The promise half: the next reconcile of the attached
-        // regular app warms it.
+        // regular app warms it — and the attach + reconcile
+        // pair cost exactly one window snapshot, which is the
+        // #672 scan dedup's mechanism (`scanOnAttach: false`
+        // rides this same deferral; the *wiring* of that flag
+        // in `reconcileAll`/`appActivated` is out of this
+        // suite's seam reach — it needs a real
+        // NSRunningApplication, and a headless runner has
+        // none to fabricate).
         loop.reconcile(pid: pid, app: ref)
         #expect(euiWrites() == [true])
+        #expect(windowQueries() == 1)
     }
 
     @Test("a visible app is warmed at attach, not deferred")

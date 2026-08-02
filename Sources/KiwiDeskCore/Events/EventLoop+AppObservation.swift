@@ -6,8 +6,17 @@ extension EventLoop {
     /// Reconciles app-level observation with the current ignore
     /// rules. An ignored app has no AX observer, no enhanced-UI
     /// flag, and no tracked windows.
+    ///
+    /// `scanOnAttach: false` is for callers that run a
+    /// `reconcile` of the same app on the same turn: the
+    /// reconcile takes the one window snapshot, so scanning at
+    /// attach too would read every window list twice (#672).
+    /// Safe by the same promise as the boot prefilter — the
+    /// following reconcile warms and tracks whatever attach
+    /// skipped (StartupWarmupSkipTests, #662).
     func syncObservation(
-        for app: NSRunningApplication
+        for app: NSRunningApplication,
+        scanOnAttach: Bool = true
     ) {
         let pid = app.processIdentifier
         let ref = AppRef(app)
@@ -25,7 +34,8 @@ extension EventLoop {
         attach(
             pid: pid,
             activationPolicy: app.activationPolicy,
-            ref: ref
+            ref: ref,
+            hasVisibleWindows: scanOnAttach
         )
     }
 

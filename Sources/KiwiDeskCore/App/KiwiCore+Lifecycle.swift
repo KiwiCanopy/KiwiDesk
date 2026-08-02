@@ -68,7 +68,13 @@ extension KiwiCore {
         signposter.endInterval("loadConfig", config)
         let configDone = ContinuousClock.now
         sleepWake.start()
+        // One retile for the whole scan instead of one per
+        // discovered window (#672): windows fold into state as
+        // the events arrive, geometry lands once below.
+        defersEventRetiles = true
         eventLoop.start()
+        defersEventRetiles = false
+        retile()
         let scanDone = ContinuousClock.now
         mouse.start()
         // The event loop discovered windows in AX order; put
@@ -128,7 +134,12 @@ extension KiwiCore {
             let signposter = BootSignpost.signposter
             let sweep = signposter.beginInterval("startupSweep")
             let begin = ContinuousClock.now
+            // Same batching as the boot scan: what the sweep
+            // discovers lands in one retile (#672).
+            self.defersEventRetiles = true
             self.eventLoop.reconcileAll()
+            self.defersEventRetiles = false
+            self.retile()
             signposter.endInterval("startupSweep", sweep)
             let ms =
                 begin.duration(to: .now).wholeMilliseconds
