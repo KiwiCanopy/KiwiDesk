@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import sitemap from "@astrojs/sitemap";
 import icon from "astro-icon";
 import mermaid from "astro-mermaid";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
@@ -24,6 +25,24 @@ export default defineConfig({
     // (astro-mermaid ordering requirement). GitHub renders the
     // same fenced blocks natively, so the source stays one form.
     mermaid({ theme: "forest", autoTheme: true }),
+    // Declared rather than inherited. Starlight registers
+    // `@astrojs/sitemap` itself only when the integration list
+    // does not already carry one, so naming it here is how its
+    // options become reachable — and without options it swept up
+    // every route, including the six locale marketing URLs that
+    // `src/pages/sitemap.xml.ts` already submits *with* hreflang
+    // alternates. Two sitemaps listing the same URL, one
+    // annotated and one bare, is not redundancy a crawler
+    // resolves in our favour; it is two answers. It also carried
+    // the noindex legal pages, which is the opposite of what
+    // noindex is for.
+    //
+    // So this one owns `/docs/**` and nothing else. A whitelist,
+    // not a blacklist: a new docs page joins automatically, while
+    // a new marketing route has to be added to that route's
+    // `paths` list, which is where its alternates come from
+    // anyway.
+    sitemap({ filter: (page) => page.includes("/docs/") }),
     icon(),
     starlight({
       title: "KiwiDesk",
