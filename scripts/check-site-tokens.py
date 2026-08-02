@@ -219,19 +219,71 @@ def check_branded_404(dist: pathlib.Path) -> None:
     print(f"{page.relative_to(REPO)} is the branded 4-kiwi-4 page")
 
 
+def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
+    """The site ships two sitemaps, and they must not overlap.
+
+    `src/pages/sitemap.xml.ts` hand-rolls the locale marketing
+    URLs *with* hreflang alternates; `@astrojs/sitemap` covers
+    `/docs/**`, filtered to that in `astro.config.mjs`. Submitting
+    one URL from both — annotated in one file and bare in the
+    other — is not redundancy a crawler resolves in our favour,
+    and it is what shipped between #656 and #660.
+
+    Read off the artifact rather than the config, because the
+    contract is between a `filter` callback and a hand-maintained
+    `paths` array and nothing else can see them disagree.
+    """
+    locs = {}
+    for name in ("sitemap.xml", "sitemap-0.xml"):
+        page = dist / name
+        if not page.is_file():
+            fail(
+                f"{page} is missing. Both sitemaps are declared in "
+                "robots.txt, so a missing one is a 404 handed to "
+                "every crawler that follows it."
+            )
+        locs[name] = set(
+            re.findall(r"<loc>(.*?)</loc>", page.read_text())
+        )
+
+    overlap = locs["sitemap.xml"] & locs["sitemap-0.xml"]
+    if overlap:
+        fail(
+            "the two sitemaps both submit "
+            f"{len(overlap)} URL(s): {sorted(overlap)[:4]}. Either "
+            "the @astrojs/sitemap `filter` in astro.config.mjs "
+            "widened, or a route was added to the hand-rolled "
+            "sitemap that the filter does not exclude."
+        )
+
+    legal = {u for u in locs["sitemap.xml"] | locs["sitemap-0.xml"]
+             if "/imprint/" in u or "/privacy/" in u}
+    if legal:
+        fail(
+            f"noindex legal pages are in a sitemap: {sorted(legal)}."
+        )
+
+    print(
+        f"sitemaps disjoint: {len(locs['sitemap.xml'])} marketing + "
+        f"{len(locs['sitemap-0.xml'])} docs URLs, no overlap"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dist",
         required=True,
-        help="path to the built site (for the 404 artifact check)",
+        help="path to the built site (for the artifact checks)",
     )
     args = parser.parse_args()
 
     tokens = token_map()
     check_token_layer(tokens)
     check_accent(tokens)
-    check_branded_404(pathlib.Path(args.dist).resolve())
+    dist = pathlib.Path(args.dist).resolve()
+    check_branded_404(dist)
+    check_sitemaps_disjoint(dist)
 
 
 if __name__ == "__main__":
