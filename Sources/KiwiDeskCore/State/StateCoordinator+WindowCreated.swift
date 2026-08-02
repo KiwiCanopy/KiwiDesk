@@ -9,8 +9,12 @@ extension StateCoordinator {
         _ window: ManagedWindow,
         effects: inout AppliedEffects
     ) {
-        effects.appearedWasMinimized =
-            minimizedWindows.remove(window.id) != nil
+        // Dropping the record IS the "was this minimized?" test
+        // (#40/#673) — one container, so the answer cannot drift
+        // from the thing it is derived from. Unconditional, so a
+        // recycled `CGWindowID` cannot inherit a dead window's
+        // record either.
+        effects.appearedWasMinimized = forgetMinimized(window.id)
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
         windows.upsert(window)

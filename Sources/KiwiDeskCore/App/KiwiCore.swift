@@ -201,6 +201,12 @@ public final class KiwiCore {
     /// activation.
     var desktopFocusYield: (@MainActor () -> Void)?
 
+    /// Every machine touch Open or Focus's already-running branch
+    /// makes (#673) — app lookup, window census, deminiaturize,
+    /// activate. Declared and argued as a bundle in
+    /// `KiwiCore+LaunchRestore.swift`, all four live by default.
+    var openOrFocus = OpenOrFocusSeams()
+
     /// Pids of apps currently showing a focused ignored panel
     /// (Ghostty's quick terminal). Set when the event loop
     /// filters the panel's own focus report (#21); consumed by

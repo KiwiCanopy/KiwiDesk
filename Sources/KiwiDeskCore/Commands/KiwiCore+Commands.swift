@@ -265,33 +265,34 @@ extension KiwiCore {
         }
         // Pull an existing instance forward, matched by bundle
         // id (locale- and rename-proof, unlike the display
-        // name — see AppRef).
+        // name — see AppRef). Through `openOrFocus`, whose four
+        // seams are this branch's every touch of the machine.
         if !newInstance,
-            let running = NSWorkspace.shared
-                .runningApplications
-                .first(where: {
-                    $0.bundleIdentifier?.lowercased() == bundleID
-                })
+            let pid = openOrFocus.runningAppPID(bundleID)
         {
-            running.activate()
+            // `activate` does not deminiaturize, so an app with
+            // nothing on screen came forward showing nothing at
+            // all (#673). Restore one first — BEFORE the
+            // activate, so the app comes forward with a window
+            // already on its way up rather than a beat behind —
+            // and leave the rest parked. Which one, and why only
+            // one, is argued in `KiwiCore+LaunchRestore.swift`.
+            restoreOneMinimizedIfNothingVisible(
+                pid: pid,
+                bundleID: bundleID
+            )
+            openOrFocus.activate(pid)
             return .ok()
         }
-        // LaunchServices resolves the bundle id to its install
-        // location — finds apps the old /Applications path scan
-        // missed (Finder in CoreServices, apps in ~/Applications).
-        guard
-            let url = NSWorkspace.shared.urlForApplication(
-                withBundleIdentifier: bundleID
-            )
-        else {
+        // Not running (or `newInstance`): LaunchServices resolves
+        // the bundle id to its install location — finding apps the
+        // old /Applications path scan missed (Finder in
+        // CoreServices, apps in ~/Applications). Seamed like the
+        // branch above, so no test can launch a real app by naming
+        // one that happens to be installed.
+        guard openOrFocus.openApp(bundleID, newInstance) else {
             return .fail("app not found: \(bundleID)")
         }
-        let config = NSWorkspace.OpenConfiguration()
-        config.createsNewApplicationInstance = newInstance
-        NSWorkspace.shared.openApplication(
-            at: url,
-            configuration: config
-        )
         return .ok()
     }
 

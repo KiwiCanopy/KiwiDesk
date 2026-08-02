@@ -79,5 +79,17 @@ func makeTestCore(
     // already false — but neutralized here so it stays that way
     // if the lever ever gains a second effect.
     core.borders.windowServerTrackingDisabled = false
+    // Same class, third time (#673): `openOrFocus`'s four seams
+    // default LIVE, and unlike the two above their touch fires on
+    // COMMAND EXECUTION, not on init — so a suite that executes
+    // `pull_or_spawn` inherits a real `NSWorkspace` lookup, a real
+    // `activate()` and a real app launch without naming any of
+    // them. That already shipped once: a command-path test brought
+    // the real Finder forward on every run. Making "no app is
+    // running" the default means the safe state is what a suite
+    // gets by forgetting; a test that wants the branch states a
+    // pid itself.
+    core.openOrFocus.runningAppPID = { _ in nil }
+    core.openOrFocus.openApp = { _, _ in false }
     return core
 }

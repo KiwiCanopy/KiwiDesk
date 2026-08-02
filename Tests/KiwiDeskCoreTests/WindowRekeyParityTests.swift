@@ -12,10 +12,16 @@ import Testing
 // the new one), and a count pin fails red when a container is added
 // to the fixture without being migrated.
 //
-// Limitation (per the parity-test rule): reflection can only see a
-// map once it holds an entry, so an added-but-unpopulated map is not
-// caught here — the behavioral `WindowRekeyTests` are the round-trip
-// backing that a populated map is actually swapped.
+// Two limitations, per the parity-test rule. Reflection can only see
+// a map once it holds an entry, so an added-but-unpopulated map is
+// not caught here — the behavioral `WindowRekeyTests` are the
+// round-trip backing that a populated map is actually swapped. And
+// `windowContainers` does not recurse into collection *elements*, so
+// a container whose element WRAPS the id in a struct
+// (`minimizeOrder`, #673) never reaches the count pin. Only the
+// `String(describing:)` scan sees those, because it renders the
+// nested `WindowID` — so `rekeyMigratesMinimized` is their net here,
+// and the count is not.
 
 private let old = WindowID(9001)
 private let new = WindowID(9002)
@@ -26,8 +32,9 @@ private func window(_ id: WindowID) -> ManagedWindow {
 
 /// A coordinator with the old id populating every WindowID-keyed
 /// container reachable from `StateCoordinator` and its spaces.
-/// `minimizedWindows` is excluded on purpose: a live tracked window
-/// is never also minimized, so that map is covered by its own test.
+/// `minimizeOrder` is excluded on purpose: a live tracked window is
+/// never also minimized, so that container is covered by its own
+/// test below.
 private func trackedFixture() -> StateCoordinator {
     var state = StateCoordinator(defaultSpace: SpaceID(1))
     state.apply(.windowCreated(window(WindowID(1))))
@@ -134,14 +141,15 @@ struct WindowRekeyParityTests {
         )
     }
 
-    @Test("re-key migrates the minimized-windows set too")
+    @Test("re-key migrates the minimize record too")
     func rekeyMigratesMinimized() {
         var state = StateCoordinator(defaultSpace: SpaceID(1))
         state.apply(.windowCreated(window(WindowID(1))))
         state.apply(.windowCreated(window(old)))
-        // A minimize-destroy files old into minimizedWindows and
-        // drops it from the space, so this exercises the one map the
-        // tracked fixture cannot hold.
+        // A minimize-destroy files old into `minimizeOrder` and
+        // drops it from the space, so this exercises the one
+        // container the tracked fixture cannot hold — and the one
+        // the count pin above cannot see (struct element).
         state.apply(.windowDestroyed(old, wasMinimized: true))
         #expect(hasOld(state))
         state.apply(.windowRekeyed(old, new))

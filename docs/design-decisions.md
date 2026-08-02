@@ -1871,6 +1871,35 @@ does not apply). On multiple displays the ring follows the one
 global space order; scope it per display only if device use
 shows the cross-display hop misleads. (#637)
 
+**Open-or-Focus never touches a minimized window while any
+window is visible; when none are, it restores exactly one.** A
+minimize is a parking decision — the user said "not now" about
+that window — and a focus gesture must not undo it. So the
+shortcut works the visible windows only, and reaches into the
+Dock in the single case where the alternative is doing nothing
+at all: the app is running with nothing on screen, where
+`activate()` brings it forward showing an empty screen. It then
+restores the *most recently* minimized window — the one parked
+last is the likeliest one wanted back, and it is an order the
+user themselves created rather than a guess at which window
+matters. That order is best-effort: where KiwiDesk was not
+running to watch the minimize it has none, and the app's own
+window order decides. One window, not all: the user parked them
+individually, and a shortcut that un-parks a session's worth of
+windows at once cannot be undone with one press.
+
+**A time-windowed cycle reset** — treating a press after some
+idle gap as a fresh cycle — was rejected on the same argument
+that rejects MRU above: the target depends on history the user
+cannot see, and the cycle "session" is already delimited by
+something visible, namely the app staying frontmost. **An
+in-cycle unminimize** — letting the cycle walk into minimized
+windows — was rejected because it makes the focus gesture undo a
+parking decision, and an overshoot yanks a parked window back
+into the layout. If demand for reaching minimized windows ever
+materializes it belongs in a Lua-only verb, never in the default
+cycle. (#673)
+
 ### Overrides & appearance
 
 **[Principle]**

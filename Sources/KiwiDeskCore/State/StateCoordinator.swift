@@ -69,17 +69,23 @@ public struct StateCoordinator: Sendable {
     /// split).
     var rememberedSpaces: [WindowID: SpaceID] = [:]
 
-    /// Windows currently minimized, so their deminiaturize
-    /// (`.windowCreated`) classifies as `restored` (#40). Lives
-    /// here beside `rememberedSpaces` — both are memory carried
-    /// across tracking gaps. An entry for a window that closes
-    /// while minimized goes stale (no event fires): session-
-    /// scoped and tiny, but slightly weaker than
-    /// `rememberedSpaces`' staleness — these are DEAD ids, so a
-    /// recycled WindowID could pin `restored` onto an unrelated
-    /// window. The payload is advisory; accepted. Internal for
-    /// the same split as `rememberedSpaces` above.
-    var minimizedWindows: Set<WindowID> = []
+    /// Windows currently minimized, newest last, each with the
+    /// app that owned it — so a deminiaturize classifies as
+    /// `restored` (#40) and Open or Focus can restore this app's
+    /// most recent one (#673). Lives here beside
+    /// `rememberedSpaces`: both are memory carried across
+    /// tracking gaps, and both go stale the same way, an entry
+    /// for a window closed while minimized lingering because no
+    /// event fires. Slightly weaker than `rememberedSpaces`'
+    /// staleness — these are DEAD ids, so a recycled WindowID
+    /// could inherit one — which is why the create fold prunes
+    /// unconditionally. The payload is advisory; accepted.
+    ///
+    /// `StateCoordinator+Minimize.swift` owns its lifetime and
+    /// argument (internal, not private, for that file-ceiling
+    /// split); `rekey` below reaches in directly, alongside the
+    /// other id-keyed containers it migrates.
+    var minimizeOrder: [MinimizedWindow] = []
 
     /// Explicit `make_floating` / `make_tiled` verdicts per
     /// tracked window — the only float state worth carrying
@@ -165,8 +171,18 @@ public struct StateCoordinator: Sendable {
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
         }
-        if minimizedWindows.remove(old) != nil {
-            minimizedWindows.insert(new)
+        // The minimize record's id is a `var` for exactly this
+        // (#673). Know which half of the parity guard reaches it:
+        // its `windowContainers` reflection cannot — the element
+        // is a struct, not a `WindowID` — so the count pin misses
+        // it, while `rekeyMigratesMinimized`'s
+        // `String(describing:)` scan renders the struct and does
+        // catch a forgotten migration. `MinimizeOrderTests` is
+        // the second net.
+        if let index = minimizeOrder.firstIndex(
+            where: { $0.id == old }
+        ) {
+            minimizeOrder[index].id = new
         }
         if let intent = manualFloatOverrides.removeValue(
             forKey: old
@@ -196,6 +212,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
             }
+            forgetMinimized(pid: pid)
 
         case .windowCreated(let window):
             applyWindowCreated(window, effects: &effects)
@@ -204,7 +221,9 @@ public struct StateCoordinator: Sendable {
             effects.removedWindow = removalFacts(id)
             if wasMinimized {
                 rememberedSpaces[id] = nil
-                minimizedWindows.insert(id)
+                // Before `windows.remove(id)` below: the record
+                // needs the snapshot's pid and bundle id (#673).
+                rememberMinimized(id)
             } else if let space = workspaces.space(of: id) {
                 rememberedSpaces[id] = space
             }
