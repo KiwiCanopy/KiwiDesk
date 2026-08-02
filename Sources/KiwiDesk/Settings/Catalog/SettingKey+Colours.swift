@@ -24,16 +24,25 @@ extension ColoursKey {
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .animationsOnSpaceChange:
-            // TODO(#678) gatedBy
-            return .row(.coloursAndMotion, .motion, .showMore)
+            // Follows the master animations toggle.
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .showMore,
+                gate: .setting(.colours(.animationsMaster))
+            )
         case .animationsOnWindowResize, .animationsOnWindowSwap,
             .animationsOnRelayout, .animationsDurationMS:
             return .row(.coloursAndMotion, .motion, .showMore)
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .animationsScrollSpeedMS:
-            // TODO(#678) gatedBy
-            return .row(.layoutDefaults, .scrolling, .atRest)
+            return .row(
+                .layoutDefaults,
+                .scrolling,
+                .atRest,
+                gate: .setting(.colours(.animationsOnScrolling))
+            )
         case .paletteApply:
             return .row(.coloursAndMotion, .palettes, .atRest)
         case .paletteSave, .paletteRename, .paletteExport, .paletteDelete,

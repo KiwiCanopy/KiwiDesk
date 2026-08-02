@@ -151,45 +151,89 @@ struct SettingRowText: Hashable {
     }
 }
 
+/// A runtime condition a row greys on that is not itself a
+/// setting. The tag names the condition; the wiring's help
+/// string stays the authority for the on-screen sentence
+/// (why-you-cannot is always inline, item 19).
+enum SettingRuntimeGate: Hashable {
+    /// The gaps master slider reads "mixed" while the per-edge
+    /// values differ.
+    case perEdgeValuesDiffer
+    /// Desktop bindings are global — dead while a stored
+    /// profile is being edited (switch to Live).
+    case editingStoredProfile
+    /// Presets apply only when the connected screen count
+    /// matches the preset's.
+    case screenCountMismatch
+    /// The login item follows `SMAppService` status — the
+    /// setter is guarded, the picker greys (#342).
+    case loginItemServiceStatus
+    /// The per-space reset action is dead while the space has
+    /// no overrides.
+    case spaceHasNoOverrides
+}
+
+/// What greys a surfaced row (the placement table's GATED
+/// rows). `.setting` / `.anyOf` name the surfaced rows whose
+/// values decide the grey — the exact predicate (resolved
+/// override chains, value comparisons) lives with the wiring,
+/// and gates on resolved values name every surfaced owner
+/// (#406: gate on RESOLVED, not global). `.runtime` names a
+/// condition that is not itself a setting.
+enum SettingGate: Hashable {
+    case setting(SettingKey)
+    case anyOf([SettingKey])
+    case runtime(SettingRuntimeGate)
+
+    /// The setting rows this gate reads, for the guards.
+    var settings: [SettingKey] {
+        switch self {
+        case .setting(let key): return [key]
+        case .anyOf(let keys): return keys
+        case .runtime: return []
+        }
+    }
+}
+
 /// Where one setting lives (item 12): area card, container,
-/// tier, and — for a row greyed behind another setting — its
+/// tier, and — for a row that greys behind something — its
 /// gate. `area`/`container` are nil exactly for the tiers that
 /// have no Settings surface.
 struct SettingPlacement: Hashable {
     var area: SettingsArea?
     var container: SettingsContainer?
     var tier: SettingTier
-    var gatedBy: SettingKey?
+    var gate: SettingGate?
 
     static let luaOnly = SettingPlacement(
         area: nil,
         container: nil,
         tier: .luaOnly,
-        gatedBy: nil
+        gate: nil
     )
     static let internalOnly = SettingPlacement(
         area: nil,
         container: nil,
         tier: .internalOnly,
-        gatedBy: nil
+        gate: nil
     )
     static let outsideSettings = SettingPlacement(
         area: nil,
         container: nil,
         tier: .outsideSettings,
-        gatedBy: nil
+        gate: nil
     )
     static func row(
         _ area: SettingsArea,
         _ container: SettingsContainer,
         _ tier: SettingTier,
-        gatedBy: SettingKey? = nil
+        gate: SettingGate? = nil
     ) -> SettingPlacement {
         SettingPlacement(
             area: area,
             container: container,
             tier: tier,
-            gatedBy: gatedBy
+            gate: gate
         )
     }
 }

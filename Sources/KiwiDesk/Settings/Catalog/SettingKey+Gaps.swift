@@ -19,8 +19,14 @@ extension GapsKey {
             .innerHorizontal, .innerVertical:
             return .row(.gapsAndBorders, .gaps, .showMore)
         case .outer, .inner:
-            // TODO(#678) gatedBy
-            return .row(.gapsAndBorders, .gaps, .atRest)
+            // The unified slider reads "mixed" while its
+            // per-edge values differ (GapsEditor).
+            return .row(
+                .gapsAndBorders,
+                .gaps,
+                .atRest,
+                gate: .runtime(.perEdgeValuesDiffer)
+            )
         case .perSpaceOverride:
             return .luaOnly
         }

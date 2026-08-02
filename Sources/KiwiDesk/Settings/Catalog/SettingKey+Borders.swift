@@ -45,37 +45,86 @@ extension BordersKey {
         case .borderUnfocusedEnabled, .borderCorner, .borderGlow,
             .borderGlowSizeAuto:
             return .row(.gapsAndBorders, .focusBorder, .showMore)
-        case .borderUnfocusedColor, .stickyColor:
-            // TODO(#678) gatedBy
-            return .row(.advancedColours, .borders, .atRest)
+        case .borderUnfocusedColor:
+            return .row(
+                .advancedColours,
+                .borders,
+                .atRest,
+                gate: .setting(.borders(.borderUnfocusedEnabled))
+            )
+        case .stickyColor:
+            // The mark's color follows the mark being shown
+            // (item 10: the mark paints on the window itself).
+            return .row(
+                .advancedColours,
+                .borders,
+                .atRest,
+                gate: .setting(.borders(.stickyMark))
+            )
         case .borderGlowSize:
-            // TODO(#678) gatedBy
-            return .row(.gapsAndBorders, .focusBorder, .showMore)
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .showMore,
+                gate: .setting(.borders(.borderGlow))
+            )
         case .borderDrawOrder:
             return .luaOnly
         case .borderFitGaps:
-            // TODO(#678) gatedBy
-            return .row(.gapsAndBorders, .focusBorder, .atRest)
+            // The whole editor greys off its enable toggle.
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .atRest,
+                gate: .setting(.borders(.borderEnabled))
+            )
         case .stickyMark:
-            // TODO(#678) gatedBy
-            return .row(.gapsAndBorders, .stickyWindows, .showMore)
+            // Forced on while the Space Bar is off — the only
+            // sticky mark left (StickyMarkEditor).
+            return .row(
+                .gapsAndBorders,
+                .stickyWindows,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarEnabled))
+            )
         case .dragCornerRadius, .dragGhostBorder, .dragGhostFill,
             .dragDropZoneBorder, .dragDropZoneBorderWidth,
             .dragDropZoneBorderAlignment, .dragDropZoneFill:
             return .row(.gapsAndBorders, .dragAndDrop, .showMore)
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
-        case .dragGhostBorderColor, .dragGhostFillColor:
-            // TODO(#678) gatedBy
-            return .row(.advancedColours, .dragAndDrop, .atRest)
+        case .dragGhostBorderColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .setting(.borders(.dragGhostBorder))
+            )
+        case .dragGhostFillColor:
+            return .row(
+                .advancedColours,
+                .dragAndDrop,
+                .atRest,
+                gate: .setting(.borders(.dragGhostFill))
+            )
         case .dragGhostBorderWidth, .dragGhostBorderAlignment:
-            // TODO(#678) gatedBy
-            return .row(.gapsAndBorders, .dragAndDrop, .showMore)
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragGhostBorder))
+            )
         case .dragDropZoneBorderColor, .dragDropZoneFillColor:
             return .row(.advancedColours, .dragAndDrop, .atRest)
         case .floatingColor:
-            // TODO(#678) gatedBy
-            return .row(.advancedColours, .spaceBar, .atRest)
+            // Drawn only in the Space Bar (owner ruling
+            // 2026-08-02; the gate item 10 keeps).
+            return .row(
+                .advancedColours,
+                .spaceBar,
+                .atRest,
+                gate: .setting(.spaceBar(.spaceBarEnabled))
+            )
         }
     }
 }

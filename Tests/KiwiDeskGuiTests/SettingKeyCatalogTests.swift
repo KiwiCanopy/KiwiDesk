@@ -62,11 +62,27 @@ struct SettingKeyCatalogTests {
                     "surfaceless row \(key.id) carries GUI data"
                 )
             }
-            if let gate = placement.gatedBy {
+            if let gate = placement.gate {
                 #expect(
-                    hasSurface(gate.placement.tier),
-                    "\(key.id) is gated by a surfaceless row"
+                    hasSurface(placement.tier),
+                    "surfaceless row \(key.id) carries a gate"
                 )
+                for owner in gate.settings {
+                    #expect(
+                        hasSurface(owner.placement.tier),
+                        "\(key.id) gated by surfaceless row"
+                    )
+                    #expect(
+                        owner != key,
+                        "\(key.id) is gated by itself"
+                    )
+                }
+                if case .anyOf(let owners) = gate {
+                    #expect(
+                        owners.count > 1,
+                        "\(key.id): one-element anyOf"
+                    )
+                }
             }
         }
     }

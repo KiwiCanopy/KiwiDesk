@@ -100,8 +100,8 @@ extension LayoutAppBarKey {
             return .luaOnly
         case .monocleAppBarBackgroundFit, .monocleAppBarContent,
             .scrollingAppBarBackgroundFit, .scrollingAppBarContent:
-            // TODO(#678) gatedBy
-            // GUI_REMOVED_2026-08
+            // GUI_REMOVED_2026-08. The table also marks these
+            // GATED; a surfaceless row carries no gate.
             return .luaOnly
         case .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
             .monocleAppBarDimFactor, .scrollingAppBarLiquidGlass,

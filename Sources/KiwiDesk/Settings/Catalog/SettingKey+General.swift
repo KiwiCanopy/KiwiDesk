@@ -21,8 +21,12 @@ extension GeneralKey {
         case .language:
             return .row(.general, .language, .atRest)
         case .startAtLogin:
-            // TODO(#678) gatedBy
-            return .row(.general, .login, .atRest)
+            return .row(
+                .general,
+                .login,
+                .atRest,
+                gate: .runtime(.loginItemServiceStatus)
+            )
         case .about:
             return .row(.general, .about, .atRest)
         case .advancedConfigFile, .advancedEditLua,

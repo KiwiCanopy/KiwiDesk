@@ -80,8 +80,13 @@ extension LayoutKey {
             .stackOverflowStyle, .stackNewWindowPlacement:
             return .row(.layoutDefaults, .stack, .atRest)
         case .stackMasterOrientation:
-            // TODO(#678) gatedBy
-            return .row(.layoutDefaults, .stack, .atRest)
+            // Orientation only matters with several masters.
+            return .row(
+                .layoutDefaults,
+                .stack,
+                .atRest,
+                gate: .setting(.layout(.stackMasterCount))
+            )
         case .scrollingOrientation, .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingNewWindowPlacement,
             .scrollingWrapFocus:
@@ -89,9 +94,23 @@ extension LayoutKey {
         case .gridType, .gridSplitDirection, .gridAutoSize, .gridRows,
             .gridNewWindowPlacement:
             return .row(.layoutDefaults, .grid, .atRest)
-        case .gridFillEmptySpace, .gridColumns:
-            // TODO(#678) gatedBy
-            return .row(.layoutDefaults, .grid, .atRest)
+        case .gridFillEmptySpace:
+            // Inert while the grid is rigid (resolved across
+            // overrides — GridEditor.fillEmptyIsInert).
+            return .row(
+                .layoutDefaults,
+                .grid,
+                .atRest,
+                gate: .setting(.layout(.gridType))
+            )
+        case .gridColumns:
+            // Auto-size grid supplies the dimensions.
+            return .row(
+                .layoutDefaults,
+                .grid,
+                .atRest,
+                gate: .setting(.layout(.gridAutoSize))
+            )
         case .monocleOrientation, .monocleWrapFocus,
             .monocleNewWindowPlacement:
             return .row(.layoutDefaults, .monocle, .atRest)
@@ -99,8 +118,13 @@ extension LayoutKey {
             .trackNewWindowPosition, .trackAutoTracks, .trackWrapFocus:
             return .row(.layoutDefaults, .track, .atRest)
         case .trackLimit:
-            // TODO(#678) gatedBy
-            return .row(.layoutDefaults, .track, .atRest)
+            // Auto track limit pins it.
+            return .row(
+                .layoutDefaults,
+                .track,
+                .atRest,
+                gate: .setting(.layout(.trackAutoTracks))
+            )
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
             .stackOverrideMasterRatio, .stackOverrideOverflowStyle,
@@ -110,10 +134,44 @@ extension LayoutKey {
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideOverflowStyle:
             return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
-        case .stackOverrideMasterOrientation, .gridOverrideFillEmptySpace,
-            .gridOverrideColumns, .trackOverrideLimit:
-            // TODO(#678) gatedBy
-            return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
+        // The override rows grey on the RESOLVED value
+        // (override ?? global, #406), so their gates name both
+        // surfaced owners; where the override side is Lua-only
+        // (auto-size, auto-tracks) only the global row remains.
+        case .stackOverrideMasterOrientation:
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .anyOf([
+                    .layout(.stackMasterCount),
+                    .layout(.stackOverrideMasterCount),
+                ])
+            )
+        case .gridOverrideFillEmptySpace:
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .anyOf([
+                    .layout(.gridType),
+                    .layout(.gridOverrideType),
+                ])
+            )
+        case .gridOverrideColumns:
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .setting(.layout(.gridAutoSize))
+            )
+        case .trackOverrideLimit:
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .setting(.layout(.trackAutoTracks))
+            )
         case .gridOverrideAutoSize, .trackOverrideAutoTracks:
             return .luaOnly
         }

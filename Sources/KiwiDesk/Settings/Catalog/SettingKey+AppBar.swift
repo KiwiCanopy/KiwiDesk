@@ -33,20 +33,64 @@ extension AppBarKey {
     var placement: SettingPlacement {
         switch self {
         case .appBarEdge:
-            // TODO(#678) gatedBy
-            return .row(.bars, .appBar, .atRest)
+            // The whole editor greys while no layout shows the
+            // bar (AppBarGroups' anyBarShown gate).
+            return .row(
+                .bars,
+                .appBar,
+                .atRest,
+                gate: .anyOf([
+                    .layoutAppBar(.monocleAppBarEnabled),
+                    .layoutAppBar(.scrollingAppBarEnabled),
+                ])
+            )
         case .appBarAlignment, .appBarBackground, .appBarActiveIndicator,
             .appBarItemSizeAuto, .appBarItemGap, .appBarFontSizeAuto,
             .appBarFontSize, .appBarCornerRoundness:
             return .row(.bars, .appBar, .showMore)
         case .appBarLiquidGlass:
-            // TODO(#678) gatedBy
-            // platform-gated
-            return .row(.bars, .appBar, .showMore)
-        case .appBarBackgroundFit, .appBarContent, .appBarIconSource,
-            .appBarItemSize:
-            // TODO(#678) gatedBy
-            return .row(.bars, .appBar, .showMore)
+            // platform-gated: hidden (not greyed) below macOS 26
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .anyOf([
+                    .layoutAppBar(.monocleAppBarEnabled),
+                    .layoutAppBar(.scrollingAppBarEnabled),
+                ])
+            )
+        case .appBarBackgroundFit:
+            // Boxed draws no shared plate to size — asked of the
+            // bars actually shown, overrides included.
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.appBar(.appBarBackground))
+            )
+        case .appBarContent:
+            // Vertical bars render icon-only.
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.appBar(.appBarEdge))
+            )
+        case .appBarIconSource:
+            // Name-only content shows no icons.
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.appBar(.appBarContent))
+            )
+        case .appBarItemSize:
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.appBar(.appBarItemSizeAuto))
+            )
         case .appBarGroupAdjacentWindows, .appBarThickness:
             return .row(.bars, .appBar, .atRest)
         case .appBarDimFactor:
@@ -56,8 +100,13 @@ extension AppBarKey {
             .appBarGroupBadgeTextColor:
             return .row(.advancedColours, .appBar, .atRest)
         case .appBarHighlightColor, .appBarActiveItemColor:
-            // TODO(#678) gatedBy
-            return .row(.advancedColours, .appBar, .atRest)
+            // Nothing to tint while the active indicator is Gap.
+            return .row(
+                .advancedColours,
+                .appBar,
+                .atRest,
+                gate: .setting(.appBar(.appBarActiveIndicator))
+            )
         }
     }
 }

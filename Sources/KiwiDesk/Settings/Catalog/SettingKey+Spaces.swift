@@ -20,8 +20,14 @@ extension SpacesKey {
         case .fallbackSpace:
             return .row(.spacesAndLayouts, .spaceList, .showMore)
         case .spaceOverrideResetActive:
-            // TODO(#678) gatedBy
-            return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
+            // Dead while the space has nothing to reset
+            // (SpaceOverrideRows+Footer).
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .runtime(.spaceHasNoOverrides)
+            )
         case .spaceOverrideResetAll:
             return .row(.spacesAndLayouts, .perSpaceOverrides, .atRest)
         }

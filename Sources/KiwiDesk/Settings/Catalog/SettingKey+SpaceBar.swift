@@ -51,8 +51,13 @@ extension SpaceBarKey {
             // platform-gated
             return .row(.bars, .spaceBar, .showMore)
         case .spaceBarBackgroundFit:
-            // TODO(#678) gatedBy
-            return .row(.bars, .spaceBar, .showMore)
+            // Boxed draws no shared plate to size.
+            return .row(
+                .bars,
+                .spaceBar,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarBackground))
+            )
         case .spaceBarDimFactor, .spaceBarActiveDimFactor,
             .spaceBarStickyBadge:
             return .luaOnly
@@ -62,8 +67,19 @@ extension SpaceBarKey {
             .spaceBarGroupBadgeTextColor:
             return .row(.advancedColours, .spaceBar, .atRest)
         case .spaceBarFocusedItemColor:
-            // TODO(#678) gatedBy
-            return .row(.advancedColours, .spaceBar, .atRest)
+            // Nothing to tint when glyphs are native images and
+            // no front-app name renders (icon source + front
+            // app + edge, SpaceBarColorsGroup).
+            return .row(
+                .advancedColours,
+                .spaceBar,
+                .atRest,
+                gate: .anyOf([
+                    .spaceBar(.spaceBarIconSource),
+                    .spaceBar(.spaceBarShowFrontApp),
+                    .spaceBar(.spaceBarEdge),
+                ])
+            )
         case .copyAppearance:
             return .row(.bars, .appBar, .showMore)
         }

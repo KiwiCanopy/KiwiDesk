@@ -14,15 +14,25 @@ extension ProfilesKey {
     var placement: SettingPlacement {
         switch self {
         case .profileBindings:
-            // TODO(#678) gatedBy
-            return .row(.profiles, .profilesPerMacOSSpace, .showMore)
+            // Desktop bindings are global — dead while a
+            // stored profile is being edited.
+            return .row(
+                .profiles,
+                .profilesPerMacOSSpace,
+                .showMore,
+                gate: .runtime(.editingStoredProfile)
+            )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)
         case .isStarterLadder:
             return .luaOnly
         case .presetsApply:
-            // TODO(#678) gatedBy
-            return .row(.profiles, .savedProfiles, .atRest)
+            return .row(
+                .profiles,
+                .savedProfiles,
+                .atRest,
+                gate: .runtime(.screenCountMismatch)
+            )
         }
     }
 }
