@@ -192,7 +192,7 @@ extension KiwiCore {
     /// settled by the drain's first read, but the result only
     /// comes back when the sequence ends, so an unraised window
     /// can still swallow a click for up to `ZOrderDrain
-    /// .totalLimit`. Handing the plan back the moment it is
+    /// .restoreBudget`. Handing the plan back the moment it is
     /// computed would close that; it costs a second callback
     /// across the queue and the residue is bounded, so it is
     /// stated rather than denied (code review, 2026-08-02).
@@ -329,7 +329,11 @@ extension KiwiCore {
             now: { ProcessInfo.processInfo.systemUptime },
             sleep: { Thread.sleep(forTimeInterval: $0) },
             isCurrent: { generations.value == generation },
-            floor: floor
+            floor: floor,
+            // A live restore's budget: this drain runs inside the
+            // `zOrderRestoresInFlight` bracket, which holds the
+            // mouse warp for exactly as long as it takes.
+            budget: ZOrderDrain.restoreBudget
         )
     }
 }

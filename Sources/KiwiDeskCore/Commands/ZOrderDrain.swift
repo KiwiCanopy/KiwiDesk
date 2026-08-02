@@ -58,25 +58,41 @@ struct ZOrderDrain: Sendable {
     /// by design. Required at every call site rather than
     /// defaulted, so a new sequence has to decide.
     let floor: [WindowID]
+    /// Whole-sequence ceiling. A total, not a per-window sum:
+    /// eight windows at `landingLimit` would drain a second.
+    ///
+    /// Required at every call site rather than defaulted, for the
+    /// same reason as `floor` — and here the sequences genuinely
+    /// disagree. A live restore is bounded by
+    /// `zOrderRestoresInFlight`, which holds the mouse warp for
+    /// exactly as long as the drain runs (`restoreBudget`). The
+    /// teardown restack is bounded by the quit path's own wall
+    /// clock instead, and weighs the trade the other way: nothing
+    /// runs after it to heal a miss, so it buys more verification
+    /// than a restore would — but a quit that hangs is worse than
+    /// a quit that stacks imperfectly, so it is still a ceiling
+    /// (#688, `KiwiCore+TeardownRaise`).
+    let budget: TimeInterval
 
     /// How long one raise may be waited on before the drain gives
     /// up on it and moves to the next — 6x the 20 ms worst case
     /// measured. Per-window, so one wedged app cannot stall the
     /// windows behind it in the sequence.
     static let landingLimit: TimeInterval = 0.12
-    /// Whole-sequence ceiling, ~5x the ~55 ms a verified 6-window
-    /// row measured. It has to be a total, not a per-window sum:
-    /// eight windows at the per-window limit would drain 1 s, and
-    /// `zOrderRestoresInFlight` — which holds the mouse warp — is
-    /// raised for exactly this long.
-    static let totalLimit: TimeInterval = 0.4
+    /// A live restore's `budget`, ~5x the ~55 ms a verified
+    /// 6-window row measured.
+    static let restoreBudget: TimeInterval = 0.4
     /// Poll interval while waiting for a raise to land. The read
     /// costs ~0.4 ms, so this spends under a tenth of a core.
     static let pollInterval: TimeInterval = 0.005
     /// Raises `order` — deepest first, each landing on top of the
     /// last — and returns once every raise has been issued or the
     /// budget is spent. Blocking: call it on `zOrderQueue`, never
-    /// on the main actor.
+    /// on the main actor — with one exception, the teardown
+    /// restack, which runs on the main actor because by then
+    /// there is no live session left to block. The whole quit
+    /// gather is already synchronous AX IPC there, and its budget
+    /// is the thing bounding it (#688).
     ///
     /// **Exactly one pass, and never the same window twice.** A
     /// retry pass for the windows that missed their landing was
@@ -100,7 +116,7 @@ struct ZOrderDrain: Sendable {
     /// (`releaseZOrderStamps`).
     func run(_ rawOrder: [WindowID]) -> [WindowID] {
         guard isCurrent() else { return [] }
-        let deadline = now() + Self.totalLimit
+        let deadline = now() + budget
         // Uniqued, because "never twice" must be a property of
         // this loop rather than a hope about its input: a repeated
         // id makes every tail check fail (a filtered observation

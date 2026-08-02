@@ -29,7 +29,7 @@ extension KiwiCore {
     /// re-sync only schedules, so it cannot interleave here —
     /// though its body can still land while a pile raise is
     /// draining, which since #684 means as long as
-    /// `ZOrderDrain.totalLimit` rather than the few milliseconds
+    /// `ZOrderDrain.restoreBudget` rather than the few milliseconds
     /// a fire-and-forget sequence took. Ring and mark are then one
     /// restack behind for that long. Still accepted, but not for
     /// the old reason — "the next event is close" was an argument

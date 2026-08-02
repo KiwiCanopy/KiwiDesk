@@ -100,12 +100,19 @@ editing here:
   order to keep, or a floor the raise must clear; a raise with
   neither needs none of it. Nothing scans for a bare loop, so a
   new ordered raise owes this deliberately. Weigh a teardown
-  raise harder than a live one:
-  [#688](https://github.com/KiwiCanopy/KiwiDesk/issues/688)
-  tracks the quit-grid restack, whose raises run after
-  management stops — so no later restore can correct a miss,
-  which is the one place this rule's usual "the next restore
-  heals it" does not apply.
+  raise harder than a live one, and buy it a bigger budget: the
+  quit-grid restack's raises run after management stops, so no
+  later restore can correct a miss and this rule's usual "the
+  next restore heals it" does not apply there (#688,
+  `KiwiCore+TeardownRaise`). Then leave the frontmost app's key
+  window OUT of any sequence that would have to raise something
+  above it — a quiet raise cannot beat it, so it does not cost
+  its own slot, it costs every window above it a whole
+  `landingLimit` of unsatisfiable waiting. That is the same
+  measurement `raiseFloor` keeps the focused window out of the
+  float floor for; the two guards are
+  `aPinnedMemberIsDroppedNotAbsorbed` and
+  `floatFloorExcludesTheFocusedWindow`.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

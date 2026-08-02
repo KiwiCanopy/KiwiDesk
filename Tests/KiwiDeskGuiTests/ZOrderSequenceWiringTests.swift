@@ -44,10 +44,12 @@ struct ZOrderSequenceWiringTests {
     private func body(
         of function: String,
         in file: String,
+        under directory: String = "Commands",
         _ path: StaticString = #filePath
     ) throws -> String {
         let url = SourceScan.repoRoot(from: "\(path)")
-            .appendingPathComponent("Sources/KiwiDeskCore/Commands")
+            .appendingPathComponent("Sources/KiwiDeskCore")
+            .appendingPathComponent(directory)
             .appendingPathComponent(file)
         let source = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
@@ -139,5 +141,43 @@ struct ZOrderSequenceWiringTests {
             in: "KiwiCore+ZOrder.swift"
         )
         #expect(source.contains("raiseFloor("))
+    }
+
+    /// The teardown restack is the one raise sequence that cannot
+    /// self-heal — nothing runs after it — so it is also the one
+    /// where reverting to a bare `AXHelper.raiseQuietly` loop
+    /// leaves the user looking at the scramble permanently (#688).
+    /// It is unreachable from a unit test for the same reason as
+    /// the three above: `eventLoop.element(for:)` is nil under
+    /// `makeTestCore`, so the function returns before the drain.
+    ///
+    /// Three expectations, because there are three ways to un-fix
+    /// it and only one of them deletes a call.
+    ///
+    /// The budget half matters on its own: handing this drain the
+    /// live-restore budget would cut a quit grid's circle off less
+    /// than halfway through and leave the tail unverified, with
+    /// every test here still green. So does the exclusion —
+    /// `aPinnedMemberIsDroppedNotAbsorbed` proves what leaving the
+    /// frontmost app's key window in the circle costs, and only
+    /// this pins that the circle still takes it out.
+    @Test("The teardown restack drains its raises")
+    func teardownRestackUsesTheDrain() throws {
+        let source = try body(
+            of: "restackForTeardown",
+            in: "KiwiCore+TeardownRaise.swift",
+            under: "App"
+        )
+        #expect(source.contains("drain.run("))
+        #expect(source.contains("budget: remaining"))
+        // The edge, not the two nodes: resolving the key window
+        // and never filtering on it is the shape that ships the
+        // burnt budget with the call still present.
+        #expect(
+            source.contains(
+                "let unbeatable = trustedFrontmostFocusedWindowID()"
+            )
+        )
+        #expect(source.contains("$0 != unbeatable"))
     }
 }

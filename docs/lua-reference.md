@@ -4319,10 +4319,24 @@ stacking. Windows sharing a cell cascade vertically like
 `overflow_all`, in **every** cell, so each title bar stays reachable.
 After placing, KiwiDesk raises every window in a fixed circle —
 cell 1 through the last cell, each pile top slot first and deepest
-slot last — so the final stacking is deterministic: within a pile
-every title bar stays visible, later cells sit above earlier ones,
-and whichever window had focus at quit makes no difference. A
-pile's windows also shrink so the cascade ends at its own cell's
+slot last — so within a pile every title bar stays visible and
+later cells sit above earlier ones. It waits for each raise to
+actually land before issuing the next, because macOS reports a
+raise as accepted well before the app performs it, and a circle
+fired off in one go settles in whatever order the apps get to it.
+The whole restack is capped at one second, so a wedged app delays
+your quit by at most that; past the cap the remaining raises still
+go out, they are just no longer waited on, and those windows can
+settle out of order.
+
+One window is exempt: **whatever had focus when you quit stays on
+top of its pile.** No app can raise a window above the frontmost
+app's key window — measured, not assumed — so KiwiDesk leaves that
+window out of the circle instead of spending the budget failing to
+move it. Everything else lands where the circle puts it regardless
+of the z-order at quit.
+
+A pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from
 spilling into the row below.
 Each display sizes its own grid from its window count `N` and the

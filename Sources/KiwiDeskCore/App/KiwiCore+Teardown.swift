@@ -237,37 +237,13 @@ extension KiwiCore {
                 )
             }
         }
-        // Second pass: raise every window in the grid's
-        // deterministic circle (cell 1 → last, each pile top
-        // slot first, deepest last). The frames alone can't
-        // guarantee readable piles — whatever z-order (and
-        // focus) existed at quit would decide which title
-        // bars survive. Raising defines the stacking instead:
-        // pile order holds within every cell, and later rows
-        // sit above earlier ones. Same wall-clock budget
-        // class as the moves: raiseQuietly is blocking IPC,
-        // but each call is bounded by the 0.25 s messaging
-        // timeout set above.
-        let raiseDeadline = Date().addingTimeInterval(1.0)
-        for group in groups {
-            for id in QuitGridLayout.raiseOrder(
-                for: group.windows,
-                targetDepth: targetDepth
-            ) {
-                if Date() > raiseDeadline {
-                    onLog(
-                        "gatherWindows: raise budget "
-                            + "exceeded — stacking left "
-                            + "partial"
-                    )
-                    return
-                }
-                guard
-                    frames[id] != nil,
-                    let element = eventLoop.element(for: id)
-                else { continue }
-                AXHelper.raiseQuietly(element)
-            }
-        }
+        // Second pass: raise every window into the grid's
+        // deterministic circle — verified, not fired and
+        // forgotten. `KiwiCore+TeardownRaise` owns it.
+        restackForTeardown(
+            groups: groups,
+            frames: frames,
+            targetDepth: targetDepth
+        )
     }
 }
