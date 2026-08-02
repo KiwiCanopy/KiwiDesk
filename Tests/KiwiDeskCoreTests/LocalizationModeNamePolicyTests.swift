@@ -63,6 +63,11 @@ struct LocalizationModeNamePolicyTests {
         )
     }
 
+    /// Mirrors `shipped_locale_files()`, `missing_` filter
+    /// included — deliberate residue, not an assumption that a
+    /// worksheet could be here. It cannot
+    /// (`scripts/locale_paths.py`), and `extract-keys --check`
+    /// owns naming one that is.
     private func shippedLocaleCodes() throws -> [String] {
         try FileManager.default
             .contentsOfDirectory(

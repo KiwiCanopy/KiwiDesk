@@ -63,25 +63,39 @@ drift rather than silently picking one.
 
 ## Only catalogs live in the catalog directory
 
-`Resources/Locales` (and `site/src/i18n`) holds flat
-`{key: string}` catalogs and nothing else. A tool that mints a
-working file writes it under `locale-worksheets/` — outside every
-tree a target ships from — and a reader of the catalog directory
-is never taught to skip a file it cannot decode: skipping is how
-a misplaced file survives. `LocaleWorksheetLocationTests` pins
-both halves (where `extract-keys` writes, and that
-`extract-keys --check` still *rejects* a worksheet found among
-the catalogs), and `validate_locale_files` in that script is the
+Nothing but a flat `{key: string}` catalog may be added to
+`Resources/Locales` (or `site/src/i18n`) under a `*.json` name —
+that glob is how every reader of those directories finds its
+input. A tool that mints a working file writes it under
+`locale-worksheets/` — outside every tree a target ships from,
+and `scripts/locale_paths.py` is the one definition of that path,
+imported by both scripts that touch it rather than re-derived.
+`LocaleWorksheetLocationTests` pins both halves (where
+`extract-keys` writes, and that `extract-keys --check` still
+*rejects* a worksheet found among the catalogs), and
+`validate_locale_files` in `scripts/extract-keys` is the
 rejection itself.
+
+**A reader that would *decode* a file must never skip one it
+cannot** — name it instead, the way `SettingKeyLocaleTests` does:
+skipping is how a misplaced file survives, and the skip is
+invisible in a green run. A walker that only enumerates locale
+*codes* is the exception and filters `missing_` by name
+(`shipped_locale_files()` is the authority the Swift ones mirror
+— `LocalizationRegistryTests`, `LocalizationModeNamePolicyTests`);
+that filter exists so a walker cannot rewrite or mis-report a
+stray worksheet before the rejection above has named it, and it
+must carry a comment saying so rather than reading as an
+assumption about what lives there.
 
 The cost of getting this wrong is spread across readers that have
 no idea a translation pass is open: SwiftPM `.copy`s the whole
 directory into the bundle, `LocaleCatalog.availableLocales()`
-offers every `*.json` stem as a language, `scripts/build-app.sh`
-globs the same directory for `CFBundleLocalizations`, and the
-Swift guards decode all of it as flat maps — which is how one
-`missing_de.json` read as a `DecodingError` naming an innocent
-key.
+offers every `*.json` stem but `en` as a language,
+`scripts/build-app.sh` globs the same directory for
+`CFBundleLocalizations`, and the Swift guards decode all of it as
+flat maps — which is how one `missing_de.json` read as a
+`DecodingError` naming an innocent key.
 
 `extract-keys --check` runs unconditionally in `scripts/lint.sh`
 (so: verify gate, CI, and `pre-commit` whenever a Swift or locale

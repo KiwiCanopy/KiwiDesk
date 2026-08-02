@@ -134,6 +134,10 @@ Sources/KiwiDeskCore/Resources/Locales/
     en.json      # generated manifest — the canonical key list
     de.json      # a shipped locale (translated keys only)
     <code>.json  # one file per shipped language
+
+locale-worksheets/            # at the repo root, gitignored
+    missing_<code>.json       # the app round-trip file
+    site/missing_<code>.json  # the same, under --site
 ```
 
 **`Resources/Locales/*.json` is translation-owned and

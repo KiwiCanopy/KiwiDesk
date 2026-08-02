@@ -158,30 +158,7 @@ struct RepoShapedFixture {
             .appendingPathComponent("i18n")
     }
 
-    /// Where `scripts/extract-keys` leaves a worksheet and
-    /// `scripts/merge-keys` reads it from: `<root>/locale-
-    /// worksheets`, and `/site` under `--site`. A third tree, so
-    /// a fixture cannot pass while the tools have stopped
-    /// agreeing about which directory a worksheet belongs in.
-    var worksheets: URL {
-        root.appendingPathComponent("locale-worksheets")
-    }
-
-    var siteWorksheets: URL {
-        worksheets.appendingPathComponent("site")
-    }
-
     func dir(site: Bool) -> URL { site ? siteLocales : locales }
-
-    /// Routes by FILE NAME, the split the shipped tools make: a
-    /// `missing_*.json` worksheet is not a catalog and never
-    /// shares a directory with one.
-    func dir(forFile name: String, site: Bool) -> URL {
-        guard name.hasPrefix("missing_") else {
-            return dir(site: site)
-        }
-        return site ? siteWorksheets : worksheets
-    }
 
     /// Decodes one locale file as the flat `{key: string}` map
     /// the shipped catalogs use.
@@ -192,39 +169,30 @@ struct RepoShapedFixture {
         try JSONDecoder().decode(
             [String: String].self,
             from: Data(
-                contentsOf: dir(forFile: name, site: site)
+                contentsOf: dir(site: site)
                     .appendingPathComponent(name)
             )
         )
     }
 
-    /// Raw contents of a file under a locales directory, for the
-    /// cases where the shape under test is not a flat map (a
-    /// `missing_<locale>.json` worksheet).
+    /// Raw contents of a file under a CATALOG directory.
     func rawLocaleFile(
         _ name: String,
         site: Bool = false
     ) throws -> Data {
         try Data(
-            contentsOf: dir(forFile: name, site: site)
+            contentsOf: dir(site: site)
                 .appendingPathComponent(name)
         )
     }
 
+    /// Whether `name` exists in the CATALOG directory. The
+    /// worksheet question is `worksheetExists` — separate names
+    /// because the two ask about different directories, and one
+    /// accessor answering both by inspecting the filename read
+    /// identically at every call site while silently changing
+    /// which tree it looked in.
     func localeFileExists(
-        _ name: String,
-        site: Bool = false
-    ) -> Bool {
-        FileManager.default.fileExists(
-            atPath: dir(forFile: name, site: site)
-                .appendingPathComponent(name).path
-        )
-    }
-
-    /// Whether `name` exists in the CATALOG directory, whatever
-    /// its name — the one question `localeFileExists` cannot ask
-    /// once it routes worksheets away.
-    func catalogFileExists(
         _ name: String,
         site: Bool = false
     ) -> Bool {
@@ -340,8 +308,25 @@ func runRepoScript(
             to: destination
         )
     }
+    // Clear the env-var overrides rather than inheriting them.
+    // A repo-shaped fixture's whole promise is that the script's
+    // `__file__`-derived root IS the fixture — but `extract-keys`
+    // honours `KIWIDESK_EXTRACT_*` ahead of that root, so a
+    // developer (or a wrapper) with one exported would silently
+    // point this run's *writes* at the real checkout. Nothing in
+    // the test tree sets them for a repo-shaped run; this makes
+    // that a property of the harness instead of a habit.
+    var environment = ProcessInfo.processInfo.environment
+    for key in [
+        "KIWIDESK_EXTRACT_SOURCES",
+        "KIWIDESK_EXTRACT_LOCALES",
+        "KIWIDESK_EXTRACT_WORKSHEETS",
+    ] {
+        environment.removeValue(forKey: key)
+    }
     return try runPythonScript(
         at: scriptsDir.appendingPathComponent(name),
-        arguments: arguments
+        arguments: arguments,
+        environment: environment
     )
 }

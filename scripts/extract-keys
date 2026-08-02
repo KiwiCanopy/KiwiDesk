@@ -127,6 +127,7 @@ import re
 import sys
 from pathlib import Path
 
+from locale_paths import site_override_conflict, worksheets_dir
 from localization_guards import (
     collapsed_translations,
     dropped_product_names,
@@ -170,23 +171,11 @@ LOCALES_DIR = Path(
 )
 EN_JSON = LOCALES_DIR / "en.json"
 
-# Where `missing_<locale>.json` worksheets are written. NEVER a
-# directory anything ships from: a worksheet is a nested
-# `{key: {"source", "translation"}}` map, so every reader of the
-# catalog directory — `LocaleCatalog` at runtime, the
-# `CFBundleLocalizations` glob in `scripts/build-app.sh`, the
-# Swift guards that decode `Locales/*.json` as a flat map — reads
-# it as a broken catalog or as a locale named `missing_de`, and
-# `SwiftPM` copies the whole `Resources/Locales` directory into
-# the bundle, so a committed one ships. Visible (not a dot-folder)
-# because a translator opens it by hand; gitignored. Overridable
-# for the same reason as the two above — tests only.
-WORKSHEETS_DIR = Path(
-    os.environ.get(
-        "KIWIDESK_EXTRACT_WORKSHEETS",
-        str(ROOT / "locale-worksheets"),
-    )
-)
+# Where `missing_<locale>.json` worksheets are written — outside
+# every tree a target ships from. `scripts/locale_paths.py` owns
+# the path (`merge-keys` reads the same one) and
+# `.claude/rules/localization.md` owns why.
+WORKSHEETS_DIR = worksheets_dir(ROOT)
 
 # The marketing site's flat i18n manifests (issue #63 / Wave 10).
 # Selected by `--site`; unlike the app, this en.json is authored by
@@ -194,7 +183,7 @@ WORKSHEETS_DIR = Path(
 # generated from code, so site mode loads it directly as the key
 # map instead of scanning Swift.
 SITE_LOCALES_DIR = ROOT / "site" / "src" / "i18n"
-SITE_WORKSHEETS_DIR = WORKSHEETS_DIR / "site"
+SITE_WORKSHEETS_DIR = worksheets_dir(ROOT, site=True)
 
 # One string piece: a plain "..." literal or a triple-quoted
 # """...""" block (Swift multi-line string, used for the
@@ -679,11 +668,10 @@ def check(
     malformed = validate_locale_files()
     if malformed:
         print(
-            "extract-keys --check: FAILED — the catalog "
-            "directory holds a file that is not a catalog "
-            "(every shipped <locale>.json must decode as a flat "
-            "{string: string} map, and nothing else may live "
-            "there):",
+            "extract-keys --check: FAILED — every *.json in the "
+            "catalog directory must be a flat {string: string} "
+            "catalog, and a missing_*.json worksheet belongs in "
+            "locale-worksheets/:",
             file=sys.stderr,
         )
         for problem in malformed:
@@ -755,7 +743,24 @@ def prune(mapping: dict[str, str], regen: bool = True) -> int:
     (not via `scripts/rename-key`) in code. `regen=False` (site
     mode) skips the en.json rewrite: the site's en.json is the
     hand-authored source of truth, so re-emitting it sorted would
-    destroy its deliberate grouping."""
+    destroy its deliberate grouping.
+
+    Validates first, because this is the one mode that *rewrites*
+    the catalog directory: it walks `shipped_locale_files()`,
+    which skips a `missing_*.json` by name, so without this a
+    prune would tidy every catalog around a worksheet sitting
+    among them and report success."""
+    malformed = validate_locale_files()
+    if malformed:
+        print(
+            "extract-keys --prune: FAILED — the catalog "
+            "directory holds a file that is not a catalog; "
+            "nothing was pruned:",
+            file=sys.stderr,
+        )
+        for problem in malformed:
+            print(f"    - {problem}", file=sys.stderr)
+        return 1
     orphans = find_orphans(mapping)
     if regen:
         write_en_json(mapping)
@@ -798,7 +803,8 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
     instead of being silently swallowed.
 
     The worksheet lands in `WORKSHEETS_DIR`, never beside the
-    catalogs it was computed from — see that constant."""
+    catalogs it was computed from — `scripts/locale_paths.py`
+    owns that path."""
     locale_file = LOCALES_DIR / f"{locale}.json"
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -877,6 +883,10 @@ def main(argv: list[str]) -> int:
     global LOCALES_DIR, EN_JSON, WORKSHEETS_DIR
     args = argv[1:]
     site = "--site" in args
+    conflict = site_override_conflict(site)
+    if conflict:
+        print(f"extract-keys --site: {conflict}", file=sys.stderr)
+        return 1
     if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = SITE_LOCALES_DIR

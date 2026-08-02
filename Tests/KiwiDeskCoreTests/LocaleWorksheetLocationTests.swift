@@ -56,11 +56,11 @@ struct LocaleWorksheetLocationTests {
         // existence checks so that a violation prints the message
         // that names it; the content check follows.
         #expect(
-            fx.localeFileExists("missing_de.json"),
+            fx.worksheetExists("missing_de.json"),
             "extract-keys wrote no worksheet to locale-worksheets/"
         )
         #expect(
-            !fx.catalogFileExists("missing_de.json"),
+            !fx.localeFileExists("missing_de.json"),
             """
             extract-keys wrote a worksheet into the shipped \
             catalog directory
@@ -68,9 +68,16 @@ struct LocaleWorksheetLocationTests {
         )
         let worksheet =
             try JSONSerialization.jsonObject(
-                with: fx.rawLocaleFile("missing_de.json")
+                with: fx.rawWorksheet("missing_de.json")
             ) as? [String: [String: String]]
-        #expect(worksheet?["gap.hint"]?["source"] != nil)
+        // Equality, not `!= nil`: an empty `source` is non-nil,
+        // so the weaker form left this green under a mutation
+        // that dropped the English on its way into the worksheet
+        // while the `--site` sibling reded.
+        #expect(
+            worksheet?["gap.hint"]?["source"]
+                == "Gap between windows"
+        )
     }
 
     /// `--site` moved with it. The site's manifests are imported
@@ -98,11 +105,11 @@ struct LocaleWorksheetLocationTests {
         )
         #expect(run.status == 0)
         #expect(
-            fx.localeFileExists("missing_de.json", site: true),
+            fx.worksheetExists("missing_de.json", site: true),
             "no site worksheet was written"
         )
         #expect(
-            !fx.catalogFileExists("missing_de.json", site: true),
+            !fx.localeFileExists("missing_de.json", site: true),
             """
             extract-keys --site wrote a worksheet into \
             site/src/i18n
@@ -114,7 +121,7 @@ struct LocaleWorksheetLocationTests {
         // fixture key cannot quietly cost the suite that.
         let worksheet =
             try JSONSerialization.jsonObject(
-                with: fx.rawLocaleFile(
+                with: fx.rawWorksheet(
                     "missing_de.json",
                     site: true
                 )
@@ -188,16 +195,101 @@ struct LocaleWorksheetLocationTests {
         )
     }
 
+    /// `--prune` is the one mode that *rewrites* every catalog,
+    /// and it walks the name-filtered `shipped_locale_files()` —
+    /// so without its own validation it would tidy the whole
+    /// directory around a worksheet and report success. The
+    /// unchanged `de.json` is the half that matters: refusing
+    /// late, after the rewrite, would read the same on stderr.
+    @Test("--prune refuses to rewrite around a worksheet")
+    func pruneRejectsAWorksheetInTheCatalogDirectory() throws {
+        var after: [String: String] = [:]
+        let result = try runExtract(
+            ["--prune"],
+            locales: [
+                "en.json": #"{"gap.hint": "Gap between windows"}"#,
+                "de.json": #"""
+                {"gap.hint": "Abstand", "gone.key": "Weg"}
+                """#,
+                "missing_de.json": #"""
+                {"gap.hint": {"source": "Gap between windows",
+                              "translation": ""}}
+                """#,
+            ],
+            inspecting: { directory in
+                after = try JSONDecoder().decode(
+                    [String: String].self,
+                    from: Data(
+                        contentsOf:
+                            directory
+                            .appendingPathComponent("de.json")
+                    )
+                )
+            }
+        )
+        #expect(result.status != 0)
+        #expect(result.stderr.contains("missing_de.json"))
+        // `gone.key` is a genuine orphan: a prune that ran would
+        // have removed it.
+        #expect(after["gone.key"] == "Weg")
+    }
+
+    /// The override redirects the worksheet tree and nothing
+    /// redirects `site/src/i18n`, so a `--site` run under it
+    /// would read — and `--prune` would rewrite — the developer's
+    /// real site catalogs while writing worksheets to a temp
+    /// directory. Half a redirect is worse than none, so both
+    /// scripts refuse the combination before touching a path.
+    @Test(
+        "--site refuses to run under the worksheet override",
+        arguments: ["extract-keys", "merge-keys"]
+    )
+    func siteRefusesUnderTheOverride(script: String) throws {
+        let base = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-worksheet-site-\(UUID().uuidString)"
+            )
+        defer { try? FileManager.default.removeItem(at: base) }
+        let result = try runPythonScript(
+            at: repoRoot.appendingPathComponent("scripts/\(script)"),
+            arguments: ["--site", "de"],
+            environment: [
+                "KIWIDESK_EXTRACT_WORKSHEETS": base.path
+            ]
+        )
+        #expect(result.status != 0)
+        #expect(
+            result.stderr.contains("KIWIDESK_EXTRACT_WORKSHEETS")
+        )
+        // Not the rooted `site/…` form: `CiPathFilterTests` reads
+        // that literal in a test source as this suite reading the
+        // real site tree, and it is right to — the needle only
+        // needs to prove the message names the site catalogs.
+        #expect(result.stderr.contains("src/i18n"))
+        // Refused before reading anything, so the real site
+        // catalogs were never opened.
+        #expect(!result.stderr.contains("Traceback"))
+    }
+
     // MARK: - Harness
 
     /// `extract-keys` is the env-var-scoped shape (see
     /// `ScriptFixture.swift`): the real script runs in place
     /// against flat temp dirs. `KIWIDESK_EXTRACT_WORKSHEETS` is
-    /// set even though `--check` writes nothing — an unset
+    /// set even for modes that write no worksheet — an unset
     /// override would point a regression at the developer's own
-    /// checkout.
+    /// checkout. `inspecting` runs against the locales directory
+    /// before the fixture is torn down.
     private func runCheck(
         locales files: [String: String]
+    ) throws -> ScriptRun {
+        try runExtract(["--check"], locales: files)
+    }
+
+    private func runExtract(
+        _ arguments: [String],
+        locales files: [String: String],
+        inspecting: ((URL) throws -> Void)? = nil
     ) throws -> ScriptRun {
         let base = FileManager.default.temporaryDirectory
             .appendingPathComponent(
@@ -228,16 +320,18 @@ struct LocaleWorksheetLocationTests {
                 encoding: .utf8
             )
         }
-        return try runPythonScript(
+        let run = try runPythonScript(
             at: repoRoot.appendingPathComponent(
                 "scripts/extract-keys"
             ),
-            arguments: ["--check"],
+            arguments: arguments,
             environment: [
                 "KIWIDESK_EXTRACT_SOURCES": sources.path,
                 "KIWIDESK_EXTRACT_LOCALES": localesDir.path,
                 "KIWIDESK_EXTRACT_WORKSHEETS": worksheets.path,
             ]
         )
+        try inspecting?(localesDir)
+        return run
     }
 }

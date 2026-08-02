@@ -21,6 +21,7 @@ different behavior.
 | `docs/ui-patterns.md` | Shared Settings control conventions |
 | `docs/accepted-limitations.md` | Behavior classified accepted-by-architecture |
 | `docs/translating.md` | Translation workflow |
+| `Sources/KiwiDeskCore/Resources/Locales/TRANSLATION_BRIEF.md` | The mechanical contract handed to a translator, and only that — it sits beside the catalogs because that is what gets handed over. Guidance routes to `docs/translating.md`; it went unowned long enough to ship a per-locale key count that was wrong by dozens, so it states no number `en.json` already answers |
 | `docs/localization-naming.md` | The feature-name / mode-name guard pair |
 | `plan/` | When the design itself shifts (gitignored — never cite it from source or `docs/`) |
 

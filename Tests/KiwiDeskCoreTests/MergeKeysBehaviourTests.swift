@@ -116,7 +116,7 @@ struct MergeKeysBehaviourTests {
         #expect(!result.stderr.contains("Traceback"))
         #expect(result.stderr.contains("merge-keys:"))
         // Nothing merged, worksheet kept for a second attempt.
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
     }
 
     @Test("a malformed en.json reports, it does not traceback")
@@ -134,7 +134,7 @@ struct MergeKeysBehaviourTests {
         #expect(result.status != 0)
         #expect(!result.stderr.contains("Traceback"))
         #expect(result.stderr.contains("en.json"))
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
     }
 
     // MARK: - Pre-existing behaviour the guard must not break
@@ -183,7 +183,7 @@ struct MergeKeysBehaviourTests {
         let result = try run(["de"], in: fx)
         #expect(result.status != 0)
         // Refusing beats merging data no guard could check.
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
         #expect(try fx.decodeLocale("de.json").isEmpty)
     }
 
