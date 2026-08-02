@@ -192,8 +192,11 @@ extension BordersKey {
         case .floatingColor:
             // Drawn only in the Space Bar (owner ruling
             // 2026-08-02; the gate item 10 keeps) — carried by
-            // the .spaceBar CONTAINER gate.
-            return .row(.advancedColours, .spaceBar, .atRest)
+            // the .spaceBar CONTAINER gate. Rides the badge
+            // cluster into that group's "More colors" drawer: it
+            // tints a state badge, not one of the three accents
+            // the bar is read by.
+            return .row(.advancedColours, .spaceBar, .showMore)
         }
     }
 }
