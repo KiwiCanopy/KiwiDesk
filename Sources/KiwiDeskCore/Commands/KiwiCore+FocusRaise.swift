@@ -163,6 +163,77 @@ extension KiwiCore {
                 runPendingFocusRaise()
             }
         }
+        // Scrolling: a multi-slot JUMP leaves every window
+        // between the old and the new focus stacked for the old
+        // one, which the edge piles show (#674). A ±1 step never
+        // does — the raise above fronts the new focus and that is
+        // the whole change — so only a jump arms the restack. An
+        // App Bar item carries an absolute `WindowID`, which is
+        // how a click crosses several slots at once.
+        //
+        // The narrowness is load-bearing, not thrift. The restore
+        // raises every tiled pile-mate through the blocking
+        // ordered queue, and the tiled plane then sits above the
+        // float layer until the next genuine focus event
+        // re-raises it (#418) — arming that on every step would
+        // bury floats routinely and drag ring and mark a restack
+        // behind (`KiwiCore+Settle`).
+        //
+        // LAST in this function, after the deferred-raise block,
+        // for the reason that block states: `scheduleZOrderRestore`
+        // runs the restore inline when nothing is animating, so
+        // arming above it would drain a pile onto `zOrderQueue`
+        // before `pendingFocusRaise` was even set, and the
+        // immediate `runPendingFocusRaise` would then race it.
+        // Deliberately NOT guarded on `zOrderRestoresInFlight`,
+        // the way the monocle arm above is. Monocle needs that
+        // counter because its arm keys on mode alone, so the
+        // restore's own closing re-assert would re-arm it; here
+        // the jump test already refuses that call — the re-assert
+        // targets the focus that is current, so the distance is
+        // zero. The counter would only ever suppress a REAL jump:
+        // a pile drain walks the AX queue at 1–20 ms a window,
+        // and far slower for an app that answers AX lazily, so a
+        // user stepping back and forth across the row lands
+        // inside that window constantly and would see every
+        // second jump silently skip its restack (owner device QA,
+        // 2026-08-02).
+        if scrollFocusJumpsSlots(to: id, from: previousFocused) {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        }
+    }
+
+    /// Whether a scrolling focus move crosses MORE than one
+    /// tiled slot — the case a lone target raise cannot restack
+    /// (#674). False for a ±1 step and for a re-focus of the same
+    /// window. Compares tiled array indices, like
+    /// `scrollFocusStepsBackward`: array order is scroll order.
+    ///
+    /// Also false when EITHER end is missing from the tiled row —
+    /// a first focus, or one arriving from a focused float, which
+    /// is `space.focused` and so never a tiled member. Without
+    /// both indices there is no evidence a jump happened, and the
+    /// two outcomes are not symmetric: a missed restack is pile
+    /// order that the next real jump fixes, while a spurious one
+    /// pays N blocking cross-process raises and leaves the tiled
+    /// plane over the float layer (#418) — over the very float
+    /// the user was just in, on the float→tile case. Guessing
+    /// costs more than waiting.
+    private func scrollFocusJumpsSlots(
+        to target: WindowID,
+        from previous: WindowID?
+    ) -> Bool {
+        guard let space = activeSpace, let previous else {
+            return false
+        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: space.id
+        )
+        guard let targetIndex = tiled.firstIndex(of: target),
+            let previousIndex = tiled.firstIndex(of: previous)
+        else { return false }
+        return abs(targetIndex - previousIndex) > 1
     }
 
     /// Whether a scrolling focus move steps to an earlier slot

@@ -174,12 +174,19 @@ extension KiwiCore {
             !AXHelper.mustRaiseOnMainThread($0)
         }
         // All-own (no foreign) runs the completion synchronously,
-        // skipping the `zOrderRestoresInFlight` bracket. Safe today
-        // because own windows are never focus-driven restore targets
-        // (the monocle re-arm guard keys on that counter but is only
-        // reached via a foreign focused window, so foreign is never
-        // empty there). Revisit if an own window can ever become a
-        // tiled restore member.
+        // skipping the `zOrderRestoresInFlight` bracket. TWO
+        // re-arm guards key on that counter — monocle's
+        // (`KiwiCore+FocusRaise`) and scrolling's (#674) — so the
+        // shortcut is what would let a restore's own closing
+        // re-assert re-arm it. Monocle is safe because it is only
+        // reached via a foreign focused window, so `foreign` is
+        // never empty there. Scrolling does not read the counter
+        // at all: its arm requires the focus to JUMP more than
+        // one slot, and the closing re-assert targets the focus
+        // that is already current, so the distance is zero — as
+        // long as the re-asserted window is the one `focusAnchor`
+        // then returns. Revisit the monocle half if an own window
+        // can ever become a tiled restore member.
         guard !foreign.isEmpty else {
             completion()
             return
