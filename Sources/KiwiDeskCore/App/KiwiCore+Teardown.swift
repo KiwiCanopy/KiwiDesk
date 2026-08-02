@@ -181,19 +181,25 @@ extension KiwiCore {
             targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }
-        // The bracket covers the MOVES ONLY, and the `do` scope is
-        // what bounds it: the raise circle below used to run inside
-        // it too, which cost nothing while it was a bare loop
-        // issuing raises in a few ms, but the drain that replaced
-        // it waits for each landing (#688) — up to its whole 1 s
-        // budget. `SLSDisableUpdate` freezes compositing for the
-        // entire desktop, so holding it across those waits would
-        // freeze the screen for the wait rather than for the
-        // moves. Resuming first costs one extra composite, and
-        // the restack does not need the bracket: it reads the
-        // WindowServer's ordering, which the bracket never
-        // suppressed (probe, 2026-08-03 — see
-        // `restackForTeardown`).
+        // The bracket covers the MOVES ONLY — `moveGatheredWindows`
+        // is what bounds it, so the raise circle runs after the
+        // resume. It used to run inside, which cost nothing while
+        // it was a bare loop issuing raises in a few ms, but the
+        // drain that replaced it waits for each landing (#688) —
+        // up to its whole 1 s budget. `SLSDisableUpdate` freezes
+        // compositing for the entire desktop, so holding it across
+        // those waits would freeze the screen for the wait rather
+        // than for the moves.
+        //
+        // The restack does not need it: it reads the WindowServer's
+        // ordering, which the bracket never suppressed (probe,
+        // 2026-08-03 — see `restackForTeardown`). The price is not
+        // one extra composite but a visible one: with compositing
+        // live, each landing composites on its own, so the piles
+        // re-shuffle on screen after the grid appears instead of
+        // arriving with it. Still the better half of the trade
+        // against a frozen desktop, and the only half that is
+        // bounded by the budget (code review, 2026-08-03).
         moveGatheredWindows(frames)
         restackForTeardown(
             groups: groups,

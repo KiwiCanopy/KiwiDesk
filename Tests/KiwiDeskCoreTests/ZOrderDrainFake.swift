@@ -44,37 +44,32 @@ final class FakeWindowServer: @unchecked Sendable {
     /// The drain a live restore builds
     /// (`KiwiCore.performZOrderSequence`).
     func restoreDrain(above floor: [WindowID] = []) -> ZOrderDrain {
-        drain(
-            above: floor,
-            budget: ZOrderDrain.restoreBudget,
-            issuingUnverifiedTail: true
-        )
+        drain(above: floor, policy: .restore)
     }
 
     /// The drain the quit-grid restack builds
     /// (`KiwiCore.teardownDrain`, #688).
     func teardownDrain(
-        budget: TimeInterval = ZOrderDrain.teardownBudget
+        budget: TimeInterval? = nil
     ) -> ZOrderDrain {
-        drain(
+        let policy = ZOrderDrain.Policy.teardown
+        return drain(
             above: [],
-            budget: budget,
-            issuingUnverifiedTail: false
+            policy: budget.map(policy.limited(to:)) ?? policy
         )
     }
 
-    /// One drain per production sequence, named after it, rather
-    /// than one factory with defaults. `floor`, `budget` and the
-    /// tail policy are all required at the real call sites so a
-    /// new sequence has to decide; a default here would quietly
-    /// hand a future suite a policy its production path does not
-    /// use, and the test would pass while modelling the wrong
-    /// thing (architect review, 2026-08-03). A third sequence adds
-    /// a third factory.
+    /// One drain per production sequence, named after it, and
+    /// each built from the SAME `ZOrderDrain.Policy` value its
+    /// production call site passes — never a copy of that
+    /// policy's fields. A hand-copied policy here would leave the
+    /// suite proving what the drain does with a flag while
+    /// production quietly handed it another, which is exactly
+    /// what shipped once (guard-prover, 2026-08-03). A third
+    /// sequence adds a third factory.
     private func drain(
         above floor: [WindowID],
-        budget: TimeInterval,
-        issuingUnverifiedTail: Bool
+        policy: ZOrderDrain.Policy
     ) -> ZOrderDrain {
         ZOrderDrain(
             raise: { [self] id in
@@ -90,8 +85,7 @@ final class FakeWindowServer: @unchecked Sendable {
                 raised.count < currentUntilRaises
             },
             floor: floor,
-            budget: budget,
-            spendsBudgetOnUnverifiedTail: issuingUnverifiedTail
+            policy: policy
         )
     }
 

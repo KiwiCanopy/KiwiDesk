@@ -70,7 +70,7 @@ struct ZOrderDrainTests {
         #expect(raised == ids([2, 1]))
         #expect(
             server.clock
-                <= ZOrderDrain.restoreBudget + ZOrderDrain.pollInterval
+                <= ZOrderDrain.Policy.restore.budget + ZOrderDrain.pollInterval
         )
     }
 
@@ -143,7 +143,7 @@ struct ZOrderDrainTests {
         // 5 ms steps, so it lands ON the limit, not before it.
         #expect(
             server.clock
-                <= ZOrderDrain.restoreBudget + ZOrderDrain.pollInterval
+                <= ZOrderDrain.Policy.restore.budget + ZOrderDrain.pollInterval
         )
     }
 

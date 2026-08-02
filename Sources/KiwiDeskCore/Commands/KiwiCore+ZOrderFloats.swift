@@ -330,13 +330,7 @@ extension KiwiCore {
             sleep: { Thread.sleep(forTimeInterval: $0) },
             isCurrent: { generations.value == generation },
             floor: floor,
-            // A live restore's budget: this drain runs inside the
-            // `zOrderRestoresInFlight` bracket, which holds the
-            // mouse warp for exactly as long as it takes.
-            budget: ZOrderDrain.restoreBudget,
-            // And it issues its tail: every target is stamped in
-            // the echo ledger, and this runs on `zOrderQueue`.
-            spendsBudgetOnUnverifiedTail: true
+            policy: .restore
         )
     }
 }

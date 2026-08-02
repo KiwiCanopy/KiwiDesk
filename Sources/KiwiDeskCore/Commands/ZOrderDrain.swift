@@ -58,67 +58,16 @@ struct ZOrderDrain: Sendable {
     /// by design. Required at every call site rather than
     /// defaulted, so a new sequence has to decide.
     let floor: [WindowID]
-    /// Whole-sequence ceiling. A total, not a per-window sum:
-    /// eight windows at `landingLimit` would drain a second.
-    ///
-    /// Required at every call site rather than defaulted, for the
-    /// same reason as `floor` — and here the sequences genuinely
-    /// disagree. A live restore is bounded by
-    /// `zOrderRestoresInFlight`, which holds the mouse warp for
-    /// exactly as long as the drain runs (`restoreBudget`). The
-    /// teardown restack is bounded by the quit path's own wall
-    /// clock instead, and weighs the trade the other way: nothing
-    /// runs after it to heal a miss, so it buys more verification
-    /// than a restore would — but a quit that hangs is worse than
-    /// a quit that stacks imperfectly, so it is still a ceiling
-    /// (#688, `KiwiCore+TeardownRaise`).
-    let budget: TimeInterval
-    /// What a spent budget does to the raises the plan has left:
-    /// issue them unverified (true) or drop them (false).
-    ///
-    /// A live restore issues them. Its caller stamped every target
-    /// in the raise echo ledger, so a dropped raise is both a
-    /// window left definitely in the wrong place AND a stamp
-    /// nothing consumes; and the cost of issuing is paid on
-    /// `zOrderQueue`, not anywhere a user is waiting.
-    ///
-    /// The teardown restack drops them, because for it `budget` is
-    /// a WALL CLOCK and issuing is not free: each raise is a
-    /// blocking `AXUIElementPerformAction` bounded only by the
-    /// 0.25 s AX messaging timeout, on the main actor, after the
-    /// budget is already spent. A nine-window tail could add
-    /// seconds to a quit that had promised to stop at one — and
-    /// the quit path has no echo ledger to corrupt, so the reason
-    /// the restores issue does not apply to it (code review,
-    /// 2026-08-03). A quit that hangs is worse than a quit that
-    /// stacks imperfectly.
-    let spendsBudgetOnUnverifiedTail: Bool
+    /// What this sequence may spend and what it does when that
+    /// is gone. Required, like `floor`: `ZOrderDrain.Policy`
+    /// carries the two shipped answers and why they differ.
+    let policy: Policy
 
     /// How long one raise may be waited on before the drain gives
     /// up on it and moves to the next — 6x the 20 ms worst case
     /// measured. Per-window, so one wedged app cannot stall the
     /// windows behind it in the sequence.
     static let landingLimit: TimeInterval = 0.12
-    /// A live restore's `budget`, ~5x the ~55 ms a verified
-    /// 6-window row measured.
-    static let restoreBudget: TimeInterval = 0.4
-    /// The teardown restack's `budget` — the same 1 s the bare
-    /// loop it replaced was capped at, spent across every display
-    /// group rather than per group (#688).
-    ///
-    /// It sits here beside `restoreBudget` rather than on its
-    /// caller so a third sequence has one precedent for where a
-    /// budget lives, not two contradicting ones (architect review,
-    /// 2026-08-03).
-    ///
-    /// More than a restore's, for the reason `budget` states:
-    /// nothing runs after the teardown restack to heal a miss, so
-    /// waiting is worth more there than anywhere else. Still a
-    /// ceiling, because a quit that hangs is worse than a quit
-    /// that stacks imperfectly — and a real one only because that
-    /// path also drops its tail rather than issuing it
-    /// (`spendsBudgetOnUnverifiedTail`).
-    static let teardownBudget: TimeInterval = 1.0
     /// Poll interval while waiting for a raise to land. The read
     /// costs ~0.4 ms, so this spends under a tenth of a core.
     static let pollInterval: TimeInterval = 0.005
@@ -153,7 +102,7 @@ struct ZOrderDrain: Sendable {
     /// (`releaseZOrderStamps`).
     func run(_ rawOrder: [WindowID]) -> [WindowID] {
         guard isCurrent() else { return [] }
-        let deadline = now() + budget
+        let deadline = now() + policy.budget
         // Uniqued, because "never twice" must be a property of
         // this loop rather than a hope about its input: a repeated
         // id makes every tail check fail (a filtered observation
@@ -213,7 +162,7 @@ struct ZOrderDrain: Sendable {
             raise(id)
             raised.append(id)
             guard now() < deadline else {
-                guard spendsBudgetOnUnverifiedTail else {
+                guard policy.spendsBudgetOnUnverifiedTail else {
                     return raised
                 }
                 // Out of budget. Issue the rest without waiting

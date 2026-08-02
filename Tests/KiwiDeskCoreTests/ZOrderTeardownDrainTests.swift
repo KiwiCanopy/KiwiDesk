@@ -65,7 +65,7 @@ struct ZOrderTeardownDrainTests {
     }
 
     /// The budget is the call site's, and buying more of it buys
-    /// real verification — what `ZOrderDrain.teardownBudget` is
+    /// real verification — what `ZOrderDrain.Policy.teardown.budget` is
     /// for.
     ///
     /// One circle, two budgets, identical apps. Under teardown's
@@ -105,13 +105,13 @@ struct ZOrderTeardownDrainTests {
         }
 
         #expect(
-            settle(under: ZOrderDrain.teardownBudget) == settled
+            settle(under: ZOrderDrain.Policy.teardown.budget) == settled
         )
         // 7, 6, 5 and 4 verified; 3 was raised and timed out; 2
         // was raised as the budget ran out; 1 was never reached
         // and stays where the moves left it, at the back.
         #expect(
-            settle(under: ZOrderDrain.restoreBudget)
+            settle(under: ZOrderDrain.Policy.restore.budget)
                 == ids([3, 2, 4, 5, 6, 7, 8, 1])
         )
     }

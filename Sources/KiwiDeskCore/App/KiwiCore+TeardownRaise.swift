@@ -69,9 +69,12 @@ extension KiwiCore {
             )
             return
         }
+        // One reference to the teardown policy, so the whole-quit
+        // deadline and every group's drain cannot be sized from
+        // different things.
+        let policy = ZOrderDrain.Policy.teardown
         let deadline =
-            ProcessInfo.processInfo.systemUptime
-            + ZOrderDrain.teardownBudget
+            ProcessInfo.processInfo.systemUptime + policy.budget
         // The one window the circle cannot place, dropped from it.
         //
         // A quiet raise cannot get a window above the frontmost
@@ -135,7 +138,10 @@ extension KiwiCore {
             }
             guard !pairs.isEmpty else { continue }
             let order = pairs.map(\.0)
-            let drain = teardownDrain(over: pairs, budget: remaining)
+            let drain = teardownDrain(
+                over: pairs,
+                policy: policy.limited(to: remaining)
+            )
             let raised = drain.run(order)
             // A different fact from the one above, so it gets a
             // different line: this display's circle was started
@@ -154,9 +160,13 @@ extension KiwiCore {
             // returns after a single ~0.4 ms read having raised
             // nothing, and would otherwise claim a shortfall if
             // that read crossed the deadline (code review,
-            // 2026-08-03). A drain that finishes exactly ON the
-            // deadline still over-reports; it is one poll
-            // interval wide. What neither line can see is the
+            // It still over-reports a drain that finished its
+            // whole plan right at the deadline, and that window is
+            // `landingLimit` wide rather than one poll interval:
+            // `awaitLanding` caps its own wait at the deadline, so
+            // a last element reached with less than that left can
+            // complete the plan with the clock sitting on it
+            // (code review, 2026-08-03). What neither line can see is the
             // drain's failed-read branch, which issues a whole
             // circle blind in microseconds — `ZOrderDrain`'s to
             // report if it ever earns a line.
@@ -184,7 +194,7 @@ extension KiwiCore {
     /// generation left to bump.
     private func teardownDrain(
         over targets: [(WindowID, AXUIElement)],
-        budget: TimeInterval
+        policy: ZOrderDrain.Policy
     ) -> ZOrderDrain {
         nonisolated(unsafe) let elements = Dictionary(
             targets,
@@ -199,12 +209,7 @@ extension KiwiCore {
             sleep: { Thread.sleep(forTimeInterval: $0) },
             isCurrent: { true },
             floor: [],
-            budget: budget,
-            // Drop the tail rather than issuing it unverified:
-            // here `budget` is a wall clock and every raise is a
-            // blocking AX call on the main actor. The drain's own
-            // property carries the full argument.
-            spendsBudgetOnUnverifiedTail: false
+            policy: policy
         )
     }
 }

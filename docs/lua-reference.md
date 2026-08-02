@@ -4328,9 +4328,10 @@ whatever order the apps get to it.
 
 The whole restack is capped at one second across every display, so
 a wedged app cannot delay your quit past that. The cap is a hard
-stop rather than a slow lane: once it is reached, nothing further
-is raised — not the rest of the display being restacked, and not a
-display the restack never got to. Those windows keep whatever
+stop rather than a slow lane: once it is reached, the restack
+stops after at most one more raise — it does not carry on through
+the rest of the display it was on, and it does not start a display
+it had not reached. Those windows keep whatever
 stacking the moves left them in. Quitting promptly is worth more
 here than a perfect arrangement, because nothing runs afterwards
 that could fix either one.

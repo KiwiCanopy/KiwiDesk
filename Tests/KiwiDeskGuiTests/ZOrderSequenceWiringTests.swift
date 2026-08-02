@@ -151,16 +151,33 @@ struct ZOrderSequenceWiringTests {
     /// the three above: `eventLoop.element(for:)` is nil under
     /// `makeTestCore`, so the function returns before the drain.
     ///
-    /// Three expectations, because there are three ways to un-fix
-    /// it and only one of them deletes a call.
+    /// Five expectations, because there are five ways to un-fix it
+    /// and only one of them deletes a call. Each was proved to red
+    /// on its own by mutating THIS function, not the drain
+    /// (guard-prover, 2026-08-03).
     ///
-    /// The budget half matters on its own: handing this drain the
-    /// live-restore budget would cut a quit grid's circle off less
-    /// than halfway through and leave the tail unverified, with
-    /// every test here still green. So does the exclusion —
-    /// `aPinnedMemberIsDroppedNotAbsorbed` proves what leaving the
+    /// Three of them guard decisions that nothing else in the
+    /// suite can see, each of which was measured green across all
+    /// 2424 tests before its needle existed:
+    ///
+    /// - **The Accessibility gate.** `stop()` also runs on a
+    ///   permission revoke, where no raise can land but the
+    ///   WindowServer read keeps answering — so the drain plans
+    ///   the whole circle and sleeps the entire budget on the main
+    ///   actor. Deleting the gate reinstates that freeze.
+    /// - **The teardown policy.** Naming it is what ties this call
+    ///   site to `ZOrderDrain.Policy.teardown`, which the unit
+    ///   suites do assert on; passing `.restore` instead would cut
+    ///   the circle short and issue an unbounded tail.
+    /// - **Sizing the per-group drain from what is LEFT** of that
+    ///   budget rather than handing each display the whole of it.
+    ///
+    /// The exclusion needles are the remaining two:
+    /// `aPinnedMemberIsDroppedNotAbsorbed` prices what leaving the
     /// frontmost app's key window in the circle costs, and only
-    /// this pins that the circle still takes it out.
+    /// these pin that the circle still takes it out. Resolving the
+    /// window and never filtering on it is a real shape, so they
+    /// match the edge rather than the two nodes.
     @Test("The teardown restack drains its raises")
     func teardownRestackUsesTheDrain() throws {
         let source = try body(
@@ -169,10 +186,9 @@ struct ZOrderSequenceWiringTests {
             under: "App"
         )
         #expect(source.contains("drain.run("))
-        #expect(source.contains("budget: remaining"))
-        // The edge, not the two nodes: resolving the key window
-        // and never filtering on it is the shape that ships the
-        // burnt budget with the call still present.
+        #expect(source.contains("AXHelper.isTrusted()"))
+        #expect(source.contains("ZOrderDrain.Policy.teardown"))
+        #expect(source.contains("policy.limited(to: remaining)"))
         #expect(
             source.contains(
                 "let unbeatable = trustedFrontmostFocusedWindowID()"
