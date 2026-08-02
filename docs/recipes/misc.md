@@ -71,7 +71,7 @@ commands without duplicating logic.
 ## Per-desktop keybindings (hand-written configs)
 
 > **Native support exists now:** A profile can carry a sparse
-> `"modes"` override that shadows individual base shortcuts.
+> `"layers"` override that shadows individual base shortcuts.
 > Combined with `bind_profile_to_native_space`, each desktop
 > gets its own layouts and its own keybinds with no Lua code.
 > See *Config cascade* under
@@ -79,13 +79,13 @@ commands without duplicating logic.
 > hand-written (non-GUI-managed) configs, where Lua owns all
 > keybindings.
 
-For a hand-written config, combine modal modes with the
-`native_space_change` event. Only the active mode's bindings
-fire, so build each desktop's mode by merging shared binds with
+For a hand-written config, combine shortcut layers with the
+`native_space_change` event. Only the active layer's bindings
+fire, so build each desktop's layer by merging shared binds with
 per-desktop overrides:
 
 ```lua
--- Shared binds, active in every mode:
+-- Shared binds, active in every layer:
 local common = {
     ["cmd+alt+1"] = function()
         KiwiDesk.focus_space("1")
@@ -102,8 +102,8 @@ local common = {
     -- ... other shared binds
 }
 
--- Helper: merge common binds with per-mode overrides.
-local function mode(overrides)
+-- Helper: merge common binds with per-layer overrides.
+local function layer(overrides)
     local merged = {}
     for k, v in pairs(common) do
         merged[k] = v
@@ -115,16 +115,16 @@ local function mode(overrides)
 end
 
 -- Desktop 1: standard binds, no overrides.
-KiwiDesk.define_layer("desk1", mode({}))
+KiwiDesk.define_layer("desk1", layer({}))
 
--- Desktop 2: override cmd+alt+m to enter monocle mode.
-KiwiDesk.define_layer("desk2", mode({
+-- Desktop 2: override cmd+alt+m to enter the monocle layout.
+KiwiDesk.define_layer("desk2", layer({
     ["cmd+alt+m"] = function()
         KiwiDesk.set_mode("monocle")
     end,
 }))
 
--- Switch mode when native macOS desktop changes.
+-- Switch layer when the native macOS desktop changes.
 KiwiDesk.on("native_space_change", function(n)
     KiwiDesk.switch_layer(n == 2 and "desk2" or "desk1")
 end)

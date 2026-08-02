@@ -1391,7 +1391,7 @@ row — no collapse to Live.** (#209.) The top **Live** entry
 edits the running/global config; every saved profile lists
 below, the loaded one included. Picking the loaded profile used
 to silently remap to Live, which made it the one profile whose
-*stored* sparse overrides (key modes #55, app rules #109) could
+*stored* sparse overrides (key layers #55, app rules #109) could
 never be edited — you could only touch the live/global config.
 The considered fix — listing the loaded profile **twice**, top
 meaning global and list meaning overrides — was rejected as a
@@ -1670,26 +1670,44 @@ permission. Multi-key chords (⌘J+K) are therefore not
 recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
-**Switch-mode shortcuts sit right under the mode strip.**
-The rows that switch modes render directly beneath the strip
-that defines the modes, ahead of the action groups — the
+**A named alternate keybinding set is a LAYER, never a
+mode.** "Mode" was already carrying two unrelated meanings —
+a space's layout (monocle, grid, …) and the Settings window's
+Simple/Nerd depth — and a third sense made every sentence
+about any of them ambiguous: "switch mode" could mean three
+things, and "only the active mode's shortcuts fire" had to
+name which kind of mode it meant to be read at all. Layer
+also describes the thing better, since what it does is stack
+a second meaning over the same physical keys. The rename runs
+the whole width of the product — the Lua verbs
+(`define_layer` / `switch_layer`), `KeyLayer` and its sparse
+override in Core, the `"layers"` key in `gui.json` and in a
+profile, the GUI, and the strings — because a vocabulary
+split across two names is the ambiguity it was meant to
+remove. Pre-release, single user: no aliases and no migration,
+so an old `"modes"` key reads as *absent* rather than as
+layers, and re-saving is the migration.
+
+**Switch-layer shortcuts sit right under the layer strip.**
+The rows that switch layers render directly beneath the strip
+that defines the layers, ahead of the action groups — the
 definition and its bindings read as one unit. The strip's
-caption also states that "default" is the standard mode and
-always the active one after an app start. Renaming a mode
-shares Delete's gate (base modes are protected in
-profile-override editing, #55) and rewrites the switch-mode
+caption also states that "default" is the standard layer and
+always the active one after an app start. Renaming a layer
+shares Delete's gate (base layers are protected in
+profile-override editing, #55) and rewrites the switch-layer
 rows of the config being edited through the catalog's
 single authority, so writer and import classifier keep
 matching byte-for-byte (#4). Scope: a stored profile whose
 sparse override targets the old name keeps it and
-resurfaces it as a standalone mode — the same accepted
+resurfaces it as a standalone layer — the same accepted
 pre-release gap Delete has (the edit is a draft until Save,
 so stored files can't be chased at click time). Saved
 profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
 native-Space bindings follow, like Delete and make default.
 
-**Modal modes are the layering mechanism**: a mode switch
+**Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
