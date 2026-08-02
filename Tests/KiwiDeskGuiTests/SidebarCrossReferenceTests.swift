@@ -34,6 +34,13 @@ import Testing
 /// `theCrossReferenceIsDiscovered` pins the one link that
 /// exists today; a second one written mid-sentence would be
 /// dropped with nothing noticing.
+///
+/// The two sides also resolve through different authorities —
+/// the link's English through `en.json`, the title's through
+/// the source literal `SourceScan.sidebarTitles` reads. They
+/// agree only because `extract-keys --check` pins `en.json` to
+/// the call sites, and that runs in `scripts/lint.sh`, not
+/// here. Benign, but the symmetry is one gate wide, not zero.
 @Suite("Sidebar cross-reference naming")
 struct SidebarCrossReferenceTests {
     private static let separator = " ▸ "
@@ -114,7 +121,7 @@ struct SidebarCrossReferenceTests {
         let english = try Self.catalog("en")
         let locales = try Self.shippedLocales()
         #expect(locales.count > 1)
-        var checked = 0
+        var translated = 0
         for locale in locales {
             let catalog = try Self.catalog(locale)
             for (linkKey, titleKey) in links {
@@ -133,7 +140,7 @@ struct SidebarCrossReferenceTests {
                     ?? titles.first { $0.key == titleKey }?
                     .english
                 guard let link else { continue }
-                checked += 1
+                if catalog[linkKey] != nil { translated += 1 }
                 #expect(
                     link.components(separatedBy: Self.separator)
                         .first == shown,
@@ -146,10 +153,15 @@ struct SidebarCrossReferenceTests {
                 )
             }
         }
-        // Derived: every locale is examined for every discovered
-        // link, because neither side may be skipped. A shortfall
-        // means the English fallback went missing too, which is
-        // `en.json` being stale rather than a clean locale.
-        #expect(checked == locales.count * links.count)
+        // Counts what is actually TRANSLATED, not what was
+        // examined. An examined-count pin would be inert here:
+        // `links` is built out of `en.json`, so the English
+        // fallback is non-nil by construction and every locale
+        // is always examined — the number could not move. What
+        // can move is coverage, and a corpus where no locale
+        // translates the breadcrumb at all is one where every
+        // comparison above is English against English and this
+        // guard has stopped watching translations.
+        #expect(translated > 0)
     }
 }

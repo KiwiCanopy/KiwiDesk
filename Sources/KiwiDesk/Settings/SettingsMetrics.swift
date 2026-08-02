@@ -106,11 +106,23 @@ enum SettingsMetrics {
     /// budget that stayed put.
     static let sidebarTile: CGFloat = 22
 
-    /// What the sidebar row itself spends around the tile and
-    /// title — the `.sidebar` list style's own row insets plus
-    /// the `Label` icon/title gap. AppKit owns both and no
-    /// constant can truly pin them, so this is a measured
-    /// estimate, the way `checkboxWidth` is.
+    /// The RESIDUAL, stated as one because that is what it is.
+    /// The load-bearing number is `sidebarLabelColumn` = 120:
+    /// the empirical truncation threshold #95/#297 arrived at by
+    /// measuring the shipped corpus against the rendered column,
+    /// not a figure derived from parts. This is what is left of
+    /// `sidebarColumn` once that threshold and the tile are
+    /// accounted for, and it stands in for the `.sidebar` list
+    /// style's row insets and the `Label` icon/title gap, which
+    /// AppKit owns and no constant can pin.
+    ///
+    /// Deliberately NOT decomposed further. An earlier version
+    /// summed a card padding into it, which is wrong twice over
+    /// — `.padding(8)` is applied outside the frame, so it never
+    /// costs the column any text room — and the correction would
+    /// have had to invent a second figure for the insets to keep
+    /// the total. One residual with an honest provenance beats
+    /// two components where one is fabricated.
     static let sidebarRowChrome: CGFloat = 48
 
     /// The text room a sidebar destination label actually gets.

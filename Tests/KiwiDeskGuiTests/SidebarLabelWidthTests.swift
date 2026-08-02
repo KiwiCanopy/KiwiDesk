@@ -31,9 +31,9 @@ import Testing
 ///   whatever the `.sidebar` list style resolves. Adding a
 ///   `.font(…)` to that row diverges the two silently —
 ///   `measurementIsLive` catches a dead metric, not a wrong one.
-/// - The metric is the HOST's. `ru` "Сочетания клавиш" ships at
-///   ~118 pt against a 120 pt budget, so a runner whose SF
-///   metrics differ by more than ~2% reds a label no change
+/// - The metric is the HOST's, and the tightest untouched label
+///   clears `sidebarLabelColumn` by about 2%, so a runner whose
+///   SF metrics differ by more than that reds a label no change
 ///   touched. Re-derive the budget before shortening a label
 ///   that only fails on one machine.
 /// - Only the destination titles. The section headers, the app
@@ -187,6 +187,12 @@ struct SidebarLabelWidthTests {
         // is the English one, and this is where you find out
         // that `englishLabelsFitTheColumn` is the only net left
         // for it.
+        //
+        // So this reds MID-WORKFLOW, by design: between
+        // `scripts/drop-key --locale` and `scripts/merge-keys`
+        // the dropped locale is short a key, and a destination
+        // added ahead of its translations reds it too. Neither
+        // is a width defect — finish the round-trip.
         #expect(measured == keys.count * catalogs.count)
     }
 }
