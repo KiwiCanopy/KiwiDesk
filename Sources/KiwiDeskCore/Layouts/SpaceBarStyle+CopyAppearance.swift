@@ -1,10 +1,12 @@
 import CoreGraphics
 import Foundation
 
-/// The one-shot "Copy App Bar appearance…" action (#293): the
-/// Space Bar takes the App Bar's current values for every field
-/// the two styles share, then stays fully independent — never a
-/// live inherit.
+/// The one-shot "Copy sizes and style to Space Bar…" action
+/// (#293, rescoped with the #678 Phase 2 Bars page): the Space
+/// Bar takes the App Bar's current values for the structural
+/// fields the two styles share — sizes, background, indicator,
+/// content-adjacent style — then stays fully independent, never
+/// a live inherit.
 ///
 /// The copied set is the **CodingKey intersection** of the two
 /// styles minus deliberate exclusions, so a field added to
@@ -17,14 +19,30 @@ import Foundation
 ///   (the global `AppBarStyle` has no `enabled` key; the App
 ///   Bar's toggle is per-layout), listed so the exclusion is
 ///   already in force the day one appears.
+/// - every `*_color` key — colours are the Advanced Colours
+///   area's concern (owner ruling 2026-08-02, with the Bars
+///   redesign): a colours-copy, if it ships at all, lives
+///   there. Derived by suffix, so a new shared colour field
+///   stays out of this copy automatically.
 extension SpaceBarStyle {
     /// JSON key spellings excluded from the copy.
     public static let copyAppearanceExclusions: Set<String> = [
         "enabled", "edge",
     ]
 
+    /// The shared colour spellings, excluded as a class.
+    public static var sharedColorKeys: Set<String> {
+        let ours = Set(CodingKeys.allCases.map(\.stringValue))
+        let theirs = Set(
+            AppBarStyle.CodingKeys.allCases.map(\.stringValue)
+        )
+        return ours.intersection(theirs)
+            .filter { $0.hasSuffix("_color") }
+    }
+
     /// The shared, copyable key spellings (intersection minus
-    /// exclusions) — the parity test's contract surface.
+    /// exclusions minus colours) — the parity test's contract
+    /// surface.
     public static var copyAppearanceKeys: Set<String> {
         let ours = Set(CodingKeys.allCases.map(\.stringValue))
         let theirs = Set(
@@ -32,6 +50,7 @@ extension SpaceBarStyle {
         )
         return ours.intersection(theirs)
             .subtracting(copyAppearanceExclusions)
+            .subtracting(sharedColorKeys)
     }
 
     /// Copies every shared appearance field from `appBar`. The
@@ -68,19 +87,6 @@ extension SpaceBarStyle {
         case "corner_roundness":
             cornerRoundness = appBar.cornerRoundness
         case "dim_factor": dimFactor = appBar.dimFactor
-        case "item_color": itemColor = appBar.itemColor
-        case "active_item_color":
-            activeItemColor = appBar.activeItemColor
-        case "hover_fill_color": hoverFillColor = appBar.hoverFillColor
-        case "hover_item_color":
-            hoverItemColor = appBar.hoverItemColor
-        case "fill_color": fillColor = appBar.fillColor
-        case "highlight_color":
-            highlightColor = appBar.highlightColor
-        case "group_badge_color":
-            groupBadgeColor = appBar.groupBadgeColor
-        case "group_badge_text_color":
-            groupBadgeTextColor = appBar.groupBadgeTextColor
         default:
             // A shared key with no source line: the parity test
             // fails before this ships (`copyAppearanceParity`

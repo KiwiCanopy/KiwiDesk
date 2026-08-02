@@ -48,56 +48,25 @@ struct SidebarSearchAnchorTests {
         #expect(result?.path == ["Layout Defaults"])
     }
 
-    /// The `.bars` limit tier 1 recorded and could not fix: two
-    /// editors behind one switch.
-    @Test("each bar hit carries the side of the switch it is on")
-    func barSurface() {
+    /// The bare bar name is findable via the two cards (#277):
+    /// the one Bars page (turn 7a) means no surface to select —
+    /// searching "App Bar" scrolls to that card. The card entry
+    /// is declared first, so it wins the one-row-per-destination
+    /// cap over its own colour card.
+    @Test("a bare bar-name search lands on the bar's card")
+    func barNameHitsCard() {
         pinEnglish()
         defer { reset() }
-        for (query, editor, side) in [
-            ("Space Bar style", BarEditor.spaceBar, "Space Bar"),
-            ("App Bar style", .appBar, "App Bar"),
+        for (query, anchor) in [
+            ("App Bar", "bars.switch.app_bar"),
+            ("Space Bar", "bars.switch.space_bar"),
         ] {
             let result = SidebarSearch.results(
                 query: query,
                 editingStoredProfile: false
             ).first
             #expect(
-                result?.anchor.surface == .bar(editor),
-                Comment(rawValue: query)
-            )
-            // Both sides are named, including the default one:
-            // which of the two bars was found is the information
-            // the user came for.
-            #expect(
-                result?.path == ["Bars", side],
-                Comment(rawValue: query)
-            )
-        }
-    }
-
-    /// The bare bar name is findable via the indexed switch chips
-    /// (#277): searching "App Bar" selects that editor and lands
-    /// on its chip, not a section below it. The switch entry is
-    /// declared first, so it wins the one-row-per-destination cap
-    /// over the "App Bar style"/"…colors" sections.
-    @Test("a bare bar-name search lands on the switch chip")
-    func barNameHitsSwitch() {
-        pinEnglish()
-        defer { reset() }
-        for (query, editor, anchor) in [
-            ("App Bar", BarEditor.appBar, "bars.switch.app_bar"),
-            (
-                "Space Bar", BarEditor.spaceBar,
-                "bars.switch.space_bar"
-            ),
-        ] {
-            let result = SidebarSearch.results(
-                query: query,
-                editingStoredProfile: false
-            ).first
-            #expect(
-                result?.anchor.surface == .bar(editor),
+                result?.anchor.surface == .main,
                 Comment(rawValue: query)
             )
             #expect(
@@ -133,25 +102,22 @@ struct SidebarSearchAnchorTests {
         #expect(result?.path == ["Appearance", "Per-edge…"])
     }
 
-    /// The twice-mounted shape (`LayoutAppBarGroup` renders
-    /// twice, co-mounted): each mount has its own catalog
-    /// declaration, so the hit's id is instance-qualified and
-    /// `scrollTo` is well-defined. First declaration wins the
-    /// one-row-per-destination cap.
+    /// The twice-mounted shape (both bar cards mount a "Style"
+    /// drawer, co-rendered on the one Bars page): each mount has
+    /// its own catalog declaration, so the hit's id is
+    /// instance-qualified and `scrollTo` is well-defined. First
+    /// declaration wins the one-row-per-destination cap — the
+    /// Space Bar's, the leading card.
     @Test("a per-instance drawer hit carries its instance id")
     func instanceQualifiedHit() {
         pinEnglish()
         defer { reset() }
         let result = SidebarSearch.results(
-            query: "Overrides",
+            query: "Style",
             editingStoredProfile: false
         ).first
         #expect(result?.destination == .bars)
-        #expect(result?.anchor.surface == .bar(.appBar))
-        #expect(
-            result?.anchor.anchor
-                == "monocle/app_bar.layout.overrides"
-        )
+        #expect(result?.anchor.anchor == "space_bar/bars.style")
     }
 
     /// A destination-title hit has no finer target than the tab,
@@ -195,14 +161,14 @@ struct SidebarSearchAnchorTests {
         #expect(live?.surface == .main)
 
         // A surface its destination renders passes through.
-        let bars = SettingsAnchor(
-            destination: .bars,
-            surface: .bar(.spaceBar),
-            anchor: "space_bar.colors.title"
+        let modes = SettingsAnchor(
+            destination: .layoutDefaults,
+            surface: .layoutMode(.monocle),
+            anchor: "layout_mode/monocle"
         )
         .resolved(editingStoredProfile: false)
-        #expect(bars?.surface == .bar(.spaceBar))
-        #expect(bars?.scroll == "space_bar.colors.title")
+        #expect(modes?.surface == .layoutMode(.monocle))
+        #expect(modes?.scroll == "layout_mode/monocle")
 
         // One it cannot degrades to `.main` rather than refusing
         // the whole request: Floating has no tab, so selecting it
@@ -219,7 +185,7 @@ struct SidebarSearchAnchorTests {
         #expect(
             SettingsAnchor(
                 destination: .appearance,
-                surface: .bar(.appBar)
+                surface: .layoutMode(.monocle)
             )
             .resolved(editingStoredProfile: false)?.surface
                 == .main

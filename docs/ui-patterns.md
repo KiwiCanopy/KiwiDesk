@@ -105,12 +105,11 @@ segments. Fixed editor-navigation tabs (the Layout Defaults
 mode strip) may exceed four — they switch the visible editor
 rather than edit a value, so the count cap doesn't apply.
 The *same semantic field uses the same control on comparable
-full-width surfaces*: the App Bar global editor and its
-per-layout override rows both render Position / Background
-style / Active indicator / Content as segments, so the
+full-width surfaces*: the two bar cards both render Position /
+Background style / Active indicator as segments, so the
 two never sit adjacent showing one field two ways. The #291
 audit applied the rule across every editor — converting the
-App Bar fields (global and override), Stack's Master
+App Bar fields, Stack's Master
 orientation / Stack position / Overflow, Track's Overflow,
 Drag's Border alignment, and the Focus border Corners — and
 kept menus where the rule keeps them:
@@ -132,14 +131,14 @@ room left.
 compact-surface exception (#291).** There the inherit
 chrome (a checkbox plus accent bar, `OverrideChrome`) eats
 horizontal width, so its override rows stay menus even for
-2–4-peer fields. `OverridePickerRow` carries a **required**
-`Style` (`.menu` / `.segmented`, no default): the full-width
-App Bar per-layout overrides pass `.segmented`, the per-Space
-popover rows pass `.menu`, and a new override row can't
-silently pick the wrong control for its surface. The
+2–4-peer fields. `OverridePickerRow` renders `.menu` for that
+reason — since the per-layout bar overrides left the GUI
+(GUI_REMOVED_2026-08) the popover is the only override
+surface, so the row's old `.segmented` branch went with them;
+a future *full-width* override surface should restore the
+required-style parameter rather than inherit the menu. The
 inherited (unchecked) state comes free from the chrome's
-existing `.disabled` + `.opacity(0.5)` — the segmented pill
-sits on the resolved global value, dimmed. App Bar Content
+existing `.disabled` + `.opacity(0.5)`. App Bar Content
 ("Icon &amp; name" → German "Symbol &amp; Name") is the one
 segmented label tight enough to warrant a real render at
 minimum width; kept segmented by width headroom, it is a
@@ -742,8 +741,8 @@ still deserves full strength, which is the whole point of "grey,
 don't hide".
 
 Sequencing matters more than the paint. Select the destination,
-then the local surface that *renders* the target (a mode tab, the
-Bars switch), then yield one layout pass before asking the scroll
+then the local surface that *renders* the target (a mode tab),
+then yield one layout pass before asking the scroll
 proxy for the id — a `scrollTo` in the same synchronous pass as
 the state change that mints the view will miss it.
 
@@ -817,9 +816,10 @@ was written down:
   by scope: **the nearest live label that scopes exactly the
   gated content** — the `SettingsSection` header (its `help:`
   parameter) when the whole section body is gated, the drawer's
-  live disclosure label when only the drawer's content is (a
-  header `?` on the per-layout bar section would over-claim:
-  its Show toggle above the drawer stays live). When the gate
+  live disclosure label when only the drawer's content is. A
+  header `?` may scope a card whose census-exempt rows stay
+  live (the App Bar card's Show-it-in switches) exactly when
+  its copy points at them ("turn one on below"). When the gate
   must reach inside a child view to do this, pass it in
   (`NativeSpacesGroup(gatedOff:gateHelp:)`, the
   `SpaceBarColorsGroup` shape) rather than wrapping the child

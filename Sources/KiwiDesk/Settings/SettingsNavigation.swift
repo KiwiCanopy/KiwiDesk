@@ -3,8 +3,8 @@ import KiwiDeskCore
 /// The Settings window's transient navigation state, collapsed
 /// behind one `@Published var nav` on `SettingsModel` (#277).
 ///
-/// A value type on purpose: `$model.nav.barEditor` still projects
-/// a `Binding`, so call sites keep their shape while the model
+/// A value type on purpose: `$model.nav.layoutModeTab` still
+/// projects a `Binding`, so call sites keep their shape while the model
 /// file stays under the 350-line ceiling as part 2 grows this set
 /// (drawer expansions, the Shortcuts mode strip). Everything here
 /// is a one-shot navigation request or a local surface selection —
@@ -60,43 +60,26 @@ struct SettingsNavigation {
     mutating func setRevealTarget(_ id: String?) {
         revealTarget = id
     }
-    /// The Layout Defaults mode tab, and the Bars editor behind
-    /// the App Bar / Space Bar switch.
+    /// The Layout Defaults mode tab (the Bars editor switch it
+    /// sat beside died with the one-page Bars area, #678
+    /// Phase 2).
     ///
-    /// On the model rather than in the owning views' `@State`
-    /// (#277): a search hit on a mode-gated or bar-gated control
-    /// has to select the surface that renders it before there is
+    /// On the model rather than in the owning view's `@State`
+    /// (#277): a search hit on a mode-gated control has to
+    /// select the surface that renders it before there is
     /// anything to scroll to, and view-local state cannot be set
-    /// from outside. `layoutModeTab` starts nil so the section
-    /// can still land on the profile's most-used mode the first
-    /// time it appears; a user's later pick, and a reveal, both
-    /// write it.
+    /// from outside. Starts nil so the section can still land on
+    /// the profile's most-used mode the first time it appears; a
+    /// user's later pick, and a reveal, both write it.
     var layoutModeTab: LayoutMode?
-    var barEditor: BarEditor = .spaceBar
 
-    /// Forgets both surface selections, so they re-derive their
-    /// defaults. For window open, which re-asserts `destination`
-    /// for the same reason.
-    ///
-    /// Needed because moving them off view-local `@State` (#277)
-    /// silently promoted two per-visit landings to
-    /// process-lifetime ones: Layout Defaults re-derived the
-    /// profile's most-used mode on every mount, and Bars always
-    /// opened on the Space Bar (both ui-designer calls).
+    /// Forgets the surface selection, so it re-derives its
+    /// default. For window open, which re-asserts `destination`
+    /// for the same reason, and for an **edit-target switch**,
+    /// where a different profile means a different most-used
+    /// mode. Moving this off view-local `@State` (#277) silently
+    /// promoted a per-visit landing to a process-lifetime one.
     mutating func resetSurfaces() {
-        resetLayoutModeTab()
-        barEditor = .spaceBar
-    }
-
-    /// Just the mode tab — for an **edit-target switch**, where a
-    /// different profile means a different most-used mode.
-    ///
-    /// Separate from `resetSurfaces` because that reasoning covers
-    /// only this one: `barEditor`'s default is a fixed design call
-    /// with no profile dependence, so resetting it here would
-    /// throw a user comparing App Bar colors across profiles back
-    /// to the Space Bar editor mid-task.
-    mutating func resetLayoutModeTab() {
         layoutModeTab = nil
     }
 

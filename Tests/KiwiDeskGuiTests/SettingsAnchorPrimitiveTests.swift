@@ -237,8 +237,8 @@ struct SettingsAnchorPrimitiveTests {
                 rawValue:
                     "searchAnchored is applied at \(sites) "
                     + "site(s); expected at least the two "
-                    + "self-anchoring controls (GapRow, "
-                    + "BarEditorPicker): " + describe(hits)
+                    + "self-anchoring controls (GapRow, the "
+                    + "Show-it-in toggles): " + describe(hits)
             )
         )
     }

@@ -50,11 +50,20 @@ struct GreyOutParityTests {
             "FocusBorderEditor.swift",
             "active: !style.wrappedValue.enabled"
         ),
-        ("SpaceBarGroups.swift", "GreyOut(active: !enabled"),
-        ("AppBarGroups.swift", "GreyOut(active: !anyBarShown"),
+        // The two census-rendered bar cards (#678 Phase 2)
+        // carry their container gates per row, resolved from
+        // the census — the needle is the per-row wrap that
+        // honors `exemptFromContainerGate`.
+        (
+            "SpaceBarCard.swift",
+            "active: !allows"
+        ),
+        (
+            "AppBarCard.swift",
+            "active: !allows"
+        ),
         ("DragVisualsEditor.swift", "active: !visual.enabled"),
         ("StickyMarkEditor.swift", "active: !spaceBarOn"),
-        ("AppBarLayoutGroup.swift", "active: !bar.enabled"),
         // The gate is passed INTO the group (#527) so its
         // section header — and the `?` anchor on it — stays
         // live; the wrap-around form would disable both. Two
@@ -69,11 +78,25 @@ struct GreyOutParityTests {
             "NativeSpacesGroup.swift",
             "GreyOut(active: gatedOff"
         ),
+        // The interim colour cards: the gate is passed INTO
+        // each group (#527) so the "Advanced colors" label
+        // stays live; two needles per side — the caller's
+        // predicate plumbing and the child's actual dim.
+        ("BarsSection.swift", "gatedOff: !on"),
+        ("BarsSection.swift", "gatedOff: !shown"),
+        (
+            "SpaceBarColorsGroup.swift",
+            "GreyOut(active: gatedOff"
+        ),
+        (
+            "AppBarColorsGroup.swift",
+            "GreyOut(active: gatedOff"
+        ),
         (
             "SpaceOverrideRows+ModeRows.swift",
             "active: g.resolvedGrid(for: space).autoSize"
         ),
-        ("AppBarGroups+Colors.swift", "active: gapOnly"),
+        ("AppBarColorsGroup.swift", "active: gapOnly"),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch

@@ -202,7 +202,7 @@ extension View {
     /// The whole pairing for a **self-anchoring control** — a
     /// bespoke recognition control that is its own scroll target,
     /// with no header/card split to place the two halves across
-    /// (`GapRow`'s slider rows, `BarEditorPicker`'s bar chips).
+    /// (`GapRow`'s slider rows, the "Show it in" bar toggles).
     /// Wash and target are the same rect: there is no expanded
     /// content below to tint by accident, which is the only
     /// reason the two container shapes split them at all.

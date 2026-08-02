@@ -38,10 +38,10 @@ final class SettingsModel: ObservableObject {
     @Published var isDirty = false
     /// The window's transient navigation state — the one-shot
     /// reveal request, its two-phase scroll/flash, and the local
-    /// surface selections (Layout mode tab, Bars editor). Behind
-    /// one `@Published` so this file stays under the 350-line
+    /// surface selection (the Layout mode tab). Behind one
+    /// `@Published` so this file stays under the 350-line
     /// ceiling as #277 part 2 grows the set; a value type, so
-    /// `$model.nav.barEditor` still projects a `Binding`.
+    /// `$model.nav.layoutModeTab` still projects a `Binding`.
     @Published var nav = SettingsNavigation()
     /// Which sidebar row is selected.
     ///

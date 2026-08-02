@@ -1022,6 +1022,38 @@ frames across monitors before. (#445)
 
 ## Settings GUI & UX
 
+### "Apple-native" binds behavior, not the Settings GUI's visual idiom
+
+**[Principle]**
+
+**"Apple-native feeling" applies to how the software behaves and
+interacts as a whole — never as a requirement that the Settings
+GUI copy System Settings' visual idiom.** Behavior stays native:
+standard controls that work the standard way, system conventions
+for focus, keyboard, VoiceOver, dark mode, drag and drop. The
+Settings window's *information architecture and look* are
+KiwiDesk's own — the redesign's Home card grid and non-sidebar
+navigation (#678) deliberately break with System Settings, and
+System Settings is explicitly not the bar to clear.
+
+The reason is what the old reading cost: System Settings' sidebar
+idiom fits an OS exposing hundreds of unrelated panes, and
+copying it forced KiwiDesk's ~12 related areas into a shape built
+for a different problem — while the things users actually
+struggled with (where a setting lives, which rows matter in week
+one) are IA problems the borrowed idiom cannot fix. Simplicity
+and intuitiveness stay first, unchanged, and still break ties;
+what changed is that "would Apple draw it this way" no longer
+vetoes a layout that is simpler for *this* app's shape.
+
+What breaks if this is ignored: a reviewer holding a redesign
+screen against System Settings' visual conventions rejects
+exactly the improvements the redesign exists for, or —
+the inverse failure — someone reads "GUI ours" as licence for
+non-standard *controls*, which is the half that stays bound.
+(Owner ruling 2026-08-02, in chat; first applied in the Phase 2
+Bars area.)
+
 ### Permanent accessory mode (no activation policy switching)
 
 **[Principle]**
@@ -2049,7 +2081,38 @@ with the inherited global value until its checkbox unlocks
 it, and carrying a left accent once overridden so active
 overrides form a scannable boundary. Discoverable without an
 "Add override…" hunt, quiet without a wall of enabled inputs.
-(#68 §3.4)
+(#68 §3.4) *Rescoped by the entry below: the rule governs any
+override list that is on screen; it no longer forces every
+override class to have a screen.*
+
+**Visible-but-inherited governs on-screen override lists; it
+does not entitle every override class to a GUI.** Two
+boundaries rescope #68 §3.4 (they do not repeal it — wherever
+an override column renders, the dimmed-inheritance shape above
+still holds exactly). First: Simple mode withholds only the
+*offer* to create a first override; once any override exists,
+the column shows on every peer row in both modes, because an
+existing thing that ran yesterday must never be invisible
+today. Second: a field class whose GUI cost is a **duplicated
+card** may live Lua-only entirely. The per-layout App Bar
+styling rows are the ruling case (GUI_REMOVED_2026-08): each
+override doesn't just add a row, it adds a resolution question
+to every row above it — "why is my bar 44 pt here and 32
+there" is a bug report even when everything works — and the
+GUI price was the whole card again per layout, 40 rows for a
+narrow need (a monocle bar that wants to be icon-only). The
+need is real, so it stays fully available in Lua
+(`monocle.set_app_bar_*` / `scroll.set_app_bar_*`), where the
+precedent already existed: `liquid_glass`, `icon_source` and
+`dim_factor` shipped as per-layout fields that deliberately
+render no row. What breaks if this is ignored: either the Bars
+page grows back its three near-identical cards, or someone
+"fixes" the Lua chain's GUI-lessness by hiding the fields —
+both worse than the boundary. The two per-layout **enabled**
+toggles are not styling and keep their GUI ("Show it in"): they
+are the only way a layout carries a bar at all, and they own
+the App Bar editor's grey. (#678 Phase 2, supersedes the
+GUI half of #68 §3.4's scope; owner sign-off 2026-08-02)
 
 **A per-space override is eligible only when it is
 layout-local.** A field belongs in the Spaces → `Overrides…`
@@ -2363,7 +2426,13 @@ palette.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
-block" note.) Appearance kept only Gaps and Drag & drop —
+block" note; itself superseded on the destination shape — #293
+merged both bars into one **Bars** destination, and the #678
+Phase 2 redesign made it one page of two cards, with the
+per-layout overrides gone per the §3.4 rescope above. What
+survives of this entry is the argument: bar configuration is
+too deep to live inside Appearance, and stays out of it.)
+Appearance kept only Gaps and Drag & drop —
 the everyday controls people revisit — while the App Bar
 (global style + ~10 colors + per-layout overrides) was the
 deepest rabbit hole in that tab and dominated the scroll. It
@@ -2807,15 +2876,31 @@ needs: a `setDragHover` synthetic-hover path, because a foreign
 AX-tracked window drag delivers no `mouseEntered`, so the arrow
 would otherwise go dark during the one gesture it exists for.
 
-**The two bar editors share one canonical row order.** (#374.)
-App Bar's shape is the reference: enable, Position (with the
-same-edge note under it, in both editors), item-look
-(background, indicator, symbol style), content toggles, sizes,
-then colors — signature colors inline, the rest behind a shut
-"Advanced colors" disclosure in both. Differences remain only
-where the bars genuinely differ (per-layout tier, front-app
-segment, copy button). A new bar-editor row must slot into
-this order on both sides, not grow a per-editor one.
+**The two bar cards share one canonical row order.** (#374,
+re-cut by the #678 Phase 2 census render.) At rest: existence
+(the Show toggle / the Show-it-in switches), Position (with the
+same-edge note under it, in both cards), Thickness, the content
+toggles; the Style disclosure then runs background → indicator
+→ symbol style → sizes, and colors live in the colour cards —
+signature colors inline, the rest behind a shut "Advanced
+colors" disclosure in both. Differences remain only where the
+bars genuinely differ (front-app segment, glyph cap, spring
+delay, the copy action). A new bar row must slot into this
+order on both sides — in the census order lists
+(`BarsRowOrder`), not a per-card invention.
+
+**The copy action copies structure, never colours.** "Copy
+sizes and style to Space Bar…" takes the shared structural
+fields (thickness, background, indicator, sizes, roundness,
+symbol style) and deliberately excludes the `*_color` class —
+derived by suffix, so a new shared colour field stays excluded
+automatically (`SpaceBarParityTests.copyAppearanceParity`).
+Colours are the palette's and the Advanced Colours area's
+concern; a colours-copy, if it ever ships, lives there — a
+copy that also painted colors would silently overwrite a
+palette the user applied on purpose, the same category of
+surprise the palette entry below bans in the other direction.
+(Owner ruling 2026-08-02, during Phase 2 device review.)
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to

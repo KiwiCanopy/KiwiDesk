@@ -15,8 +15,7 @@ extension SpaceOverrideRows {
             options: [
                 (.dynamic, L("scroll_grid.dynamic", "Dynamic")),
                 (.rigid, L("scroll_grid.rigid", "Rigid")),
-            ],
-            style: .menu
+            ]
         )
         // Gated on this space's RESOLVED value, like the
         // stack rows do (#520) — the global twin is greyed for
@@ -68,8 +67,7 @@ extension SpaceOverrideRows {
                         "Rows first"
                     )
                 ),
-            ],
-            style: .menu
+            ]
         )
         // Auto-size decides both dimensions, so both rows are
         // inert while it resolves on for this space. The field
@@ -118,8 +116,7 @@ extension SpaceOverrideRows {
                     L("scroll_grid.horizontal", "Horizontal")
                 ),
                 (.vertical, L("scroll_grid.vertical", "Vertical")),
-            ],
-            style: .menu
+            ]
         )
     }
 
@@ -140,8 +137,7 @@ extension SpaceOverrideRows {
                     .horizontal,
                     L("scroll_grid.arrange.rows", "Rows")
                 ),
-            ],
-            style: .menu
+            ]
         )
         // Same shape as the grid dimensions above: automatic
         // tracks makes the limit inert, and the field that says
@@ -194,8 +190,7 @@ extension SpaceOverrideRows {
                         "Cascade all"
                     )
                 ),
-            ],
-            style: .menu
+            ]
         )
     }
 }

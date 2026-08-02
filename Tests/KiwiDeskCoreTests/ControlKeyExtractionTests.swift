@@ -85,9 +85,9 @@ struct ControlKeyExtractionTests {
                     "Gaps"
                 )
                 let styleCard = SettingsControl(
-                    "app_bar.global_style.title",
-                    "Global style",
-                    surface: .bar(.appBar)
+                    "app_bar.global_colors.title",
+                    "App Bar colors",
+                    surface: .main
                 )
             }
             """#
@@ -101,8 +101,8 @@ struct ControlKeyExtractionTests {
         let mapping = try extracted(fixture.locales)
         #expect(mapping["gaps.title"] == "Gaps")
         #expect(
-            mapping["app_bar.global_style.title"]
-                == "Global style"
+            mapping["app_bar.global_colors.title"]
+                == "App Bar colors"
         )
     }
 
@@ -117,10 +117,9 @@ struct ControlKeyExtractionTests {
                     children: GapEdgeControls()
                 )
                 let overrides = SettingsDrawer(
-                    "app_bar.layout.overrides",
-                    "Overrides",
-                    surface: .bar(.appBar),
-                    instance: "monocle"
+                    "bars.style",
+                    "Style",
+                    instance: "space_bar"
                 )
             }
             """#
@@ -133,9 +132,7 @@ struct ControlKeyExtractionTests {
         #expect(result.status == 0)
         let mapping = try extracted(fixture.locales)
         #expect(mapping["gaps.per_edge"] == "Per-edge…")
-        #expect(
-            mapping["app_bar.layout.overrides"] == "Overrides"
-        )
+        #expect(mapping["bars.style"] == "Style")
     }
 
     /// The drift guard must reach across call shapes: one key

@@ -121,8 +121,13 @@ extension LayoutAppBarKey {
 extension LayoutAppBarKey {
     var text: SettingRowText {
         switch self {
-        case .monocleAppBarEnabled, .scrollingAppBarEnabled:
-            return .text("app_bar.layout.show")
+        // The "Show it in" rows are titled by their layout's
+        // name (turn 7a) — the keys `LayoutMode.displayName`
+        // already authors.
+        case .monocleAppBarEnabled:
+            return .text("layout.monocle.name")
+        case .scrollingAppBarEnabled:
+            return .text("layout.scrolling.name")
         case .monocleAppBarEdge, .monocleAppBarAlignment,
             .monocleAppBarBackgroundStyle, .monocleAppBarBackgroundFit,
             .monocleAppBarActiveIndicator, .monocleAppBarContent,

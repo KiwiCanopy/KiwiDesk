@@ -48,12 +48,12 @@ struct SettingsCatalogTests {
     }
 
     /// Pinned totals, so a shrunken enumeration cannot make the
-    /// sweeps above vacuous while still passing. 49 declared
-    /// tuples (incl. the two bar-switch entries) + 6 computed mode
+    /// sweeps above vacuous while still passing. 50 declared
+    /// tuples (incl. the two bar cards) + 6 computed mode
     /// tabs. Update deliberately as the catalog fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        #expect(allEntries.count == 55)
+        #expect(allEntries.count == 56)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
@@ -162,8 +162,6 @@ struct SettingsCatalogTests {
                 #expect(
                     LayoutMode.placementTabs.contains(mode)
                 )
-            case .bar:
-                #expect(destination == .bars)
             }
         }
     }
@@ -207,9 +205,8 @@ struct SettingsCatalogTests {
         #expect(!perEdge.shouldExpand(revealing: nil))
         // A leaf drawer never expands for anything.
         #expect(
-            !SettingsCatalog.bars.advancedColors.shouldExpand(
-                revealing: "gaps.top"
-            )
+            !SettingsCatalog.bars.spaceBarAdvancedColors
+                .shouldExpand(revealing: "gaps.top")
         )
     }
 
@@ -233,23 +230,34 @@ struct SettingsCatalogTests {
         #expect(gaps?.parent == nil)
     }
 
-    /// The two co-mounted `LayoutAppBarGroup` declarations must
-    /// stay distinct — collapsing them back to one shared id is
-    /// exactly the `scrollTo`-undefined shape the instance tag
-    /// exists to prevent.
+    /// The co-mounted drawer declarations must stay distinct —
+    /// both Style drawers (and both Advanced-colors drawers)
+    /// render on the one Bars page, so collapsing either pair
+    /// back to one shared id is exactly the
+    /// `scrollTo`-undefined shape the instance tag exists to
+    /// prevent.
     @Test("co-mounted drawer instances have distinct ids")
     func instanceIdsAreDistinct() {
-        let monocle = SettingsCatalog.bars.monocleBarOverrides
-        let scrolling =
-            SettingsCatalog.bars.scrollingBarOverrides
+        let spaceStyle = SettingsCatalog.bars.spaceBarStyle
+        let appStyle = SettingsCatalog.bars.appBarStyle
+        #expect(spaceStyle.control.id == "space_bar/bars.style")
+        #expect(appStyle.control.id == "app_bar/bars.style")
+        #expect(spaceStyle.control.key == appStyle.control.key)
+
+        let spaceColors =
+            SettingsCatalog.bars.spaceBarAdvancedColors
+        let appColors =
+            SettingsCatalog.bars.appBarAdvancedColors
         #expect(
-            monocle.control.id
-                == "monocle/app_bar.layout.overrides"
+            spaceColors.control.id
+                == "space_bar/bars.advanced_colors"
         )
         #expect(
-            scrolling.control.id
-                == "scrolling/app_bar.layout.overrides"
+            appColors.control.id
+                == "app_bar/bars.advanced_colors"
         )
-        #expect(monocle.control.key == scrolling.control.key)
+        #expect(
+            spaceColors.control.key == appColors.control.key
+        )
     }
 }

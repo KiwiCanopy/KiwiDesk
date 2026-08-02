@@ -49,8 +49,6 @@ extension SettingsView {
             break
         case .layoutMode(let mode):
             model.nav.layoutModeTab = mode
-        case .bar(let editor):
-            model.nav.barEditor = editor
         }
         // Unconditional, including the nil case. Guarding it to
         // avoid a nil→nil publish would mean a destination-only

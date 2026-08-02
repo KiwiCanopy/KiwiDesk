@@ -61,10 +61,7 @@ struct SettingsView: View {
         .onChange(of: model.target) { _, _ in
             // A different profile means a different most-used
             // layout mode, so the mode tab must re-derive (#277).
-            // The mode tab ONLY — the Bars switch has no profile
-            // dependence, and resetting it here would move a user
-            // comparing App Bar colors across profiles.
-            model.nav.resetLayoutModeTab()
+            model.nav.resetSurfaces()
         }
         // A navigation request — the #326 "Edit in Settings…"
         // deep link, or a #277 search hit. Guarded by the same

@@ -125,88 +125,6 @@ func overrideValue<T: Sendable>(
     )
 }
 
-struct OverrideSliderRow: View {
-    let label: String
-    @Binding var value: CGFloat?
-    let global: CGFloat
-    var range: ClosedRange<Double> = 0...100
-    var unit: String = "pt"
-
-    var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            PtSlider(
-                label: label,
-                value: overrideValue($value, global: global),
-                range: range,
-                unit: unit
-            )
-        }
-    }
-}
-
-/// An override slider whose 0 = auto sentinel is exposed as an
-/// Auto toggle (#228 §3), mirroring the global editor. A thin
-/// wrapper over `AutoGatedGroup` inside the override chrome: the
-/// shared component binds the Auto toggle above the slider and
-/// greys it when auto; restoring turns auto off with a sensible
-/// non-zero size (#233 — the pattern's origin site).
-struct OverrideAutoSliderRow: View {
-    let label: String
-    let autoLabel: String
-    @Binding var value: CGFloat?
-    let global: CGFloat
-    let restore: CGFloat
-    /// Floors at 1 pt: 0 is the auto sentinel and only the
-    /// toggle may write it — a slider dragged to its minimum
-    /// must never silently flip Auto on (#293 QA).
-    var range: ClosedRange<Double> = 1...200
-
-    var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            AutoGatedGroup(
-                title: autoLabel,
-                isOn: AutoSentinel.binding(
-                    overrideValue($value, global: global),
-                    restore: restore
-                )
-            ) {
-                PtSlider(
-                    label: label,
-                    value: overrideValue($value, global: global),
-                    range: range,
-                    autoAtZero: true
-                )
-            }
-        }
-    }
-}
-
-struct OverrideColorRow: View {
-    let label: String
-    @Binding var value: String?
-    let global: String
-    /// Defaults to the narrowed grid column (#2): every caller
-    /// is a cell in `AppBarColorGrid`, and the override checkbox
-    /// already eats the prefix `colorLabelColumn` would leave for
-    /// the swatch. `HexColorField` reads its own `labelWidth`,
-    /// not `OverrideChrome`'s `settingsLabelColumn`, so it must
-    /// be passed here rather than via the environment — the
-    /// `settingsLabelColumn` the chrome sets for its other row
-    /// types is inert for a color cell.
-    var labelWidth: CGFloat =
-        SettingsMetrics.overrideColorLabelColumn
-
-    var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            HexColorField(
-                label: label,
-                labelWidth: labelWidth,
-                hex: overrideValue($value, global: global)
-            )
-        }
-    }
-}
-
 struct OverrideToggleRow: View {
     let label: String
     @Binding var value: Bool?
@@ -268,21 +186,18 @@ struct OverrideFractionRow: View {
 }
 
 /// An override picker over any labeled, hashable option set.
+/// Renders a `.menu` dropdown: the per-Space popover — the one
+/// override surface left since the per-layout bar overrides
+/// went Lua-only (GUI_REMOVED_2026-08) — is the documented
+/// compact-surface exception to the #291 segmented norm, its
+/// inherit chrome already eating the width a segment row needs.
+/// A future full-width override surface should restore the
+/// segmented branch this had before the bars deletion.
 struct OverridePickerRow<Value: Hashable & Sendable>: View {
-    /// Which control the row renders (#291). `.segmented` is the
-    /// rule's norm for 2–4 short peers and drives the full-width
-    /// App Bar per-layout overrides; `.menu` is the documented
-    /// compact-surface exception, kept by the narrow per-Space
-    /// popover where the inherit chrome already eats width.
-    /// Required, no default: every call site names its surface so
-    /// a new override row can't silently pick the wrong control.
-    enum Style { case menu, segmented }
-
     let label: String
     @Binding var value: Value?
     let global: Value
     let options: [(Value, String)]
-    let style: Style
     /// Optional `?` popover (#94), rendered by the chrome so
     /// it stays clickable while the row inherits.
     var help: String? = nil
@@ -293,17 +208,6 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
             help: help,
             subject: label
         ) {
-            control
-        }
-    }
-
-    // The menu-vs-segmented branch is the only difference between
-    // the two surfaces; everything above (inherit chrome, help,
-    // label-column narrowing) is shared, so one component with a
-    // one-line branch beats forking the chrome wiring (§5 mirror).
-    @ViewBuilder private var control: some View {
-        switch style {
-        case .menu:
             DropdownRow(label: label) {
                 Picker(
                     label,
@@ -314,14 +218,6 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
                     }
                 }
             }
-        case .segmented:
-            // SegmentedPicker wants (title, value); the override
-            // option lists are (value, title), so flip the pair.
-            SegmentedPicker(
-                label,
-                selection: overrideValue($value, global: global),
-                options: options.map { ($0.1, $0.0) }
-            )
         }
     }
 }
