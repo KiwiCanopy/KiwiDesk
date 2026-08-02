@@ -121,4 +121,23 @@ struct ZOrderSequenceWiringTests {
         )
         #expect(source.contains("raiseFloor("))
     }
+
+    /// Monocle's floor is not an optimization, it is the whole
+    /// raise: a lone target with no floor plans empty, so
+    /// `restoreMonocleZOrder` shipped once raising nothing at all.
+    /// The maths is pinned by `ZOrderRaisePlanTests`; this pins
+    /// that this call site still asks for it, because the function
+    /// is `private`, no unit test reaches it (`eventLoop
+    /// .element(for:)` is nil under `makeTestCore`, so it returns
+    /// before the drain), and reverting the argument to `above: []`
+    /// re-ships the bug with every test green (code review,
+    /// 2026-08-02).
+    @Test("The monocle restore raises against a floor")
+    func monocleRestoreUsesAFloor() throws {
+        let source = try body(
+            of: "restoreMonocleZOrder",
+            in: "KiwiCore+ZOrder.swift"
+        )
+        #expect(source.contains("raiseFloor("))
+    }
 }

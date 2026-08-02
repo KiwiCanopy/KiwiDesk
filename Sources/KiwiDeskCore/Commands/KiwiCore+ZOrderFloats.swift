@@ -127,6 +127,26 @@ extension KiwiCore {
     /// window is a real layout participant (#414 v2) and stays on
     /// the tiled plane. Sorted by id so overlapping floats keep a
     /// stable order across passes.
+    ///
+    /// **Known residue, mixed CGWindow layers (#684).** A float
+    /// may sit at layer 0 (a normal window the user floated) or
+    /// above it (`FloatDetection` floats a panel *because* its
+    /// layer is non-zero). The compositor keeps a raised-layer
+    /// window above every layer-0 one no matter what is raised, so
+    /// whenever this array order asks for a layer-0 float in FRONT
+    /// of a raised-layer one, that pairing cannot be reached: the
+    /// sequence issues one raise that cannot verify and spends
+    /// `ZOrderDrain.landingLimit` finding out. Bounded, once per
+    /// float raise, and only in that mixed configuration — and the
+    /// stacking is still correct, because the raised-layer float
+    /// is above where the user needs it either way.
+    ///
+    /// Fixing it properly means ordering the desired sequence by
+    /// layer, which needs the layer at this call site: it is NOT
+    /// `isTransientOverlay` (that flag also covers layer-0
+    /// dialogs, #300/#671), so it costs either a per-window
+    /// WindowServer query here or a layer-carrying stacking read
+    /// threaded into the drain. Deferred rather than guessed.
     func floatLayerTargets() -> [WindowID] {
         var targets: [WindowID] = []
         if let space = activeSpace {

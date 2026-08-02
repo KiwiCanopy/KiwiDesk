@@ -4,10 +4,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// #684: `AXUIElementPerformAction(kAXRaiseAction)` returns before
-/// a slow app has performed the raise (measured: the call returns
-/// in 0.4-3.8 ms, the window moves 1-20 ms later), so a sequence
-/// issued back to back — ~10 ms for eight windows — settles in
-/// whatever order the apps get to it.
+/// a slow app has performed the raise, so a sequence issued back
+/// to back settles in whatever order the apps get to it.
+/// `ZOrderDrain`'s docstring carries the measurements and the
+/// dates; they are not repeated here.
 ///
 /// The drain's every machine effect is a seam, so the whole loop
 /// runs here against a fake WindowServer whose apps perform their

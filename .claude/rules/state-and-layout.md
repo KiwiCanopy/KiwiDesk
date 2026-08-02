@@ -100,10 +100,13 @@ editing here:
   order to keep, or a floor the raise must clear; a raise with
   neither needs none of it. Nothing scans for a bare loop, so a
   new ordered raise owes this deliberately. #684 converted the
-  pile restores and the float raise and stopped there: the
-  quit-grid restack in `KiwiCore+Teardown` was outside its scope,
-  and its raises are the ones a miss hurts most — they run after
-  management stops, so no later restore can correct one.
+  pile restores and the float raise and stopped there, leaving
+  the quit-grid restack outside its scope and filing what that
+  costs as
+  [#688](https://github.com/KiwiCanopy/KiwiDesk/issues/688) —
+  those raises run after management stops, so no later restore
+  can correct a miss, which is the one place this rule's usual
+  "the next restore heals it" does not apply.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

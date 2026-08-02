@@ -6,9 +6,10 @@ import Foundation
 /// `AXUIElementPerformAction(kAXRaiseAction)` returns once the
 /// target app has accepted the action, not once it has performed
 /// it. Measured on an overflowing scrolling row (Obsidian,
-/// Telegram, Ghostty, Zen, ChatGPT, Notizen, Claude): the call
-/// returns in 0.4-3.8 ms and the window reaches its new stacking
-/// position 1-20 ms later. The whole sequence issues in ~10 ms, so
+/// Telegram, Ghostty, Zen, ChatGPT, Notizen, Claude, on device
+/// 2026-08-02, macOS 26.6): the call returns in 0.4-3.8 ms and
+/// the window reaches its new stacking position 1-20 ms later.
+/// The whole sequence issues in ~10 ms, so
 /// every raise is still in flight when the next goes out and the
 /// apps land them in whatever order they get to them — the pile
 /// settled scrambled in 3 of 3 runs. The window raised FIRST
@@ -111,9 +112,11 @@ struct ZOrderDrain: Sendable {
         let order = rawOrder.filter { seenIDs.insert($0).inserted }
         let targets = seenIDs
         let observed = stacking()
-        // An EMPTY read is the WindowServer query failing, not a
-        // screen with no windows on it — we are here to raise
-        // windows that exist. Diffing against it would drop every
+        // An empty read is `CGWindowListCopyWindowInfo` answering
+        // with nothing at all — a nil return, since the list
+        // otherwise always carries the menu bar. It is never a
+        // screen with no windows: we are here to raise windows
+        // that exist. Diffing against it would drop every
         // raise silently and permanently for as long as the read
         // failed, which is the opposite of what the budget branch
         // below argues: unverified is what every pile did before
