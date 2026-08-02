@@ -77,7 +77,11 @@ import json
 import sys
 from pathlib import Path
 
-from locale_paths import site_override_conflict, worksheets_dir
+from locale_paths import (
+    site_override_conflict,
+    worksheet_name,
+    worksheets_dir,
+)
 from localization_guards import (
     dropped_product_names,
     english_residue,
@@ -192,7 +196,7 @@ def main(argv: list[str]) -> int:
         print(__doc__)
         return 1
     locale = args[0]
-    missing_file = WORKSHEETS_DIR / f"missing_{locale}.json"
+    missing_file = WORKSHEETS_DIR / worksheet_name(locale)
     locale_file = LOCALES_DIR / f"{locale}.json"
 
     if not missing_file.exists():

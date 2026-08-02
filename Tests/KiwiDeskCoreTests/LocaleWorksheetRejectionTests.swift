@@ -125,17 +125,31 @@ struct LocaleWorksheetRejectionTests {
         #expect(after["gone.key"] == "Weg")
     }
 
-    /// The override redirects the worksheet tree and nothing
-    /// redirects `site/src/i18n`, so a `--site` run under it
-    /// would read — and `--prune` would rewrite — the developer's
-    /// real site catalogs while writing worksheets to a temp
-    /// directory. Half a redirect is worse than none, so both
-    /// scripts refuse the combination before touching a path.
+    /// Site mode honours NO override — `site/src/i18n` is derived
+    /// from the script's own location — so a run under any of
+    /// them reads, and under `--prune` rewrites, the developer's
+    /// real site catalogs while believing it is redirected. Half
+    /// a redirect is worse than none, so both scripts refuse
+    /// before touching a path.
+    ///
+    /// Both variables are exercised, and `_LOCALES` is the one
+    /// that matters most: it is the mutating half, and the first
+    /// draft of this refusal checked only `_WORKSHEETS` — which
+    /// closed the half that writes a scratch file in the wrong
+    /// place and left open the half that rewrites shipped
+    /// catalogs.
     @Test(
-        "--site refuses to run under the worksheet override",
-        arguments: ["extract-keys", "merge-keys"]
+        "--site refuses to run under any extract override",
+        arguments: ["extract-keys", "merge-keys"],
+        [
+            "KIWIDESK_EXTRACT_WORKSHEETS",
+            "KIWIDESK_EXTRACT_LOCALES",
+        ]
     )
-    func siteRefusesUnderTheOverride(script: String) throws {
+    func siteRefusesUnderTheOverride(
+        script: String,
+        variable: String
+    ) throws {
         let base = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwi-worksheet-site-\(UUID().uuidString)"
@@ -144,14 +158,10 @@ struct LocaleWorksheetRejectionTests {
         let result = try runPythonScript(
             at: repoRoot.appendingPathComponent("scripts/\(script)"),
             arguments: ["--site", "de"],
-            environment: [
-                "KIWIDESK_EXTRACT_WORKSHEETS": base.path
-            ]
+            environment: [variable: base.path]
         )
         #expect(result.status != 0)
-        #expect(
-            result.stderr.contains("KIWIDESK_EXTRACT_WORKSHEETS")
-        )
+        #expect(result.stderr.contains(variable))
         // Not the rooted `site/…` form: `CiPathFilterTests` reads
         // that literal in a test source as this suite reading the
         // real site tree, and it is right to — the needle only

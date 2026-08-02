@@ -54,6 +54,28 @@ struct AppPlistLocalizationTests {
         )
     }
 
+    /// `WORKSHEET_PREFIX` as `scripts/locale_paths.py` defines
+    /// it — the owner every other reader of the rule imports.
+    static func worksheetPrefix() throws -> String {
+        let module = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("locale_paths.py"),
+            encoding: .utf8
+        )
+        let value =
+            module
+            .components(separatedBy: "WORKSHEET_PREFIX = \"")
+            .dropFirst().first?
+            .components(separatedBy: "\"").first
+        let prefix = try #require(
+            value,
+            "WORKSHEET_PREFIX is gone from locale_paths.py"
+        )
+        #expect(!prefix.isEmpty)
+        return prefix
+    }
+
     /// The array's contents, between its own `<array>` tags.
     private func localizationsArray() throws -> String {
         let script = try source()
@@ -183,13 +205,20 @@ struct AppPlistLocalizationTests {
     /// Executing this would mean running a signing script from
     /// the suite; `LocaleWorksheetRejectionTests` covers the
     /// executable half of the same rule in `extract-keys`.
+    /// The prefix comes from `scripts/locale_paths.py`, not from
+    /// a literal here: bash cannot import it, so this suite is
+    /// the only thing that can hold the two together. Typing
+    /// `"missing_*)"` on both sides compared a literal to itself
+    /// — rename the constant and the packager's arm goes stale
+    /// while this stays green, which is fail-open.
     @Test("The locale glob refuses a worksheet")
     func globRejectsAWorksheet() throws {
+        let prefix = try Self.worksheetPrefix()
         let script = try source()
-        #expect(script.contains("missing_*)"))
+        #expect(script.contains("\(prefix)*)"))
         let arm =
             script
-            .components(separatedBy: "missing_*)")
+            .components(separatedBy: "\(prefix)*)")
             .dropFirst().first
         let body = try #require(arm, "the case arm is gone")
         let end = try #require(

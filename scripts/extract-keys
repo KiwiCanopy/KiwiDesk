@@ -127,7 +127,12 @@ import re
 import sys
 from pathlib import Path
 
-from locale_paths import site_override_conflict, worksheets_dir
+from locale_paths import (
+    WORKSHEET_PREFIX,
+    site_override_conflict,
+    worksheet_name,
+    worksheets_dir,
+)
 from localization_guards import (
     collapsed_translations,
     dropped_product_names,
@@ -382,7 +387,7 @@ def shipped_locale_files() -> list[Path]:
         path
         for path in LOCALES_DIR.glob("*.json")
         if path.name != "en.json"
-        and not path.name.startswith("missing_")
+        and not path.name.startswith(WORKSHEET_PREFIX)
     )
 
 
@@ -434,7 +439,7 @@ def validate_locale_files() -> list[str]:
     bundle."""
     problems: list[str] = []
     if LOCALES_DIR.is_dir():
-        for worksheet in sorted(LOCALES_DIR.glob("missing_*.json")):
+        for worksheet in sorted(LOCALES_DIR.glob(f"{WORKSHEET_PREFIX}*.json")):
             problems.append(
                 f"{worksheet.name}: a translator worksheet in "
                 "the catalog directory — worksheets are nested "
@@ -819,7 +824,7 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         for key, english in mapping.items()
         if not existing.get(key)
     }
-    out = WORKSHEETS_DIR / f"missing_{locale}.json"
+    out = WORKSHEETS_DIR / worksheet_name(locale)
     if not missing:
         if out.exists():
             out.unlink()

@@ -10,8 +10,10 @@ written.
 A worksheet is a NESTED `{key: {"source", "translation"}}` map,
 which is why it may not sit beside the flat catalogs it was
 computed from — `.claude/rules/localization.md` carries that
-argument and the readers it protects. This module owns only the
-location.
+argument and the readers it protects. This module owns the
+worksheet's **path and name, and the env overrides that move
+them** — not the rejection of one found among the catalogs, which
+each reader implements against `WORKSHEET_PREFIX`.
 
 Neither script can import the other (both are hyphenated, so
 neither is a module name), which is why this is a third file
@@ -31,7 +33,27 @@ from pathlib import Path
 # also why it must not be a name any target ships from.
 WORKSHEETS_DIRNAME = "locale-worksheets"
 
+# What marks a file as a worksheet rather than a catalog. Every
+# rejection is written against this — `validate_locale_files` in
+# `scripts/extract-keys`, the walkers that must not mangle a stray
+# one, the `CFBundleLocalizations` glob in `scripts/build-app.sh`
+# (via `AppPlistLocalizationTests`, which derives the needle from
+# here rather than typing it again). Renaming it here without the
+# bash arm following would leave the packager silently listing
+# worksheets as languages.
+WORKSHEET_PREFIX = "missing_"
+
 OVERRIDE_ENV = "KIWIDESK_EXTRACT_WORKSHEETS"
+
+# Every override these scripts honour. Site mode honours NONE of
+# them (`SITE_LOCALES_DIR` is `__file__`-derived), which is what
+# `site_override_conflict` exists to refuse.
+OVERRIDE_PREFIX = "KIWIDESK_EXTRACT_"
+
+
+def worksheet_name(locale: str) -> str:
+    """The worksheet's filename for `locale`."""
+    return f"{WORKSHEET_PREFIX}{locale}.json"
 
 
 def _override() -> str | None:
@@ -63,14 +85,33 @@ def worksheets_dir(root: Path, site: bool = False) -> Path:
 
 
 def site_override_conflict(site: bool) -> str | None:
-    """Why a `--site` run must not proceed under the override, or
-    None. Called by both scripts before either touches a path."""
-    if site and _override():
-        return (
-            f"{OVERRIDE_ENV} redirects the worksheet tree but "
-            "nothing redirects site/src/i18n, so --site would "
-            "read and rewrite the real site catalogs while "
-            "writing worksheets elsewhere. Unset it, or run "
-            "without --site."
-        )
-    return None
+    """Why a `--site` run must not proceed under an override, or
+    None. Called by both scripts before either touches a path.
+
+    Refuses on ANY `KIWIDESK_EXTRACT_*`, not just the worksheet
+    one. Site mode honours none of them — `main()` reassigns
+    `LOCALES_DIR = SITE_LOCALES_DIR`, which is `__file__`-derived
+    — so setting `KIWIDESK_EXTRACT_LOCALES` and adding `--site`
+    reads, and under `--prune` rewrites, the developer's real
+    `site/src/i18n` while the caller believes it is redirected.
+    That is the mutating half of the same "half a redirect is
+    worse than none" failure, so the predicate is over the family
+    rather than over one member of it. An empty value is not
+    set (see `_override`), applied here per variable.
+    """
+    if not site:
+        return None
+    live = sorted(
+        name
+        for name, value in os.environ.items()
+        if name.startswith(OVERRIDE_PREFIX) and value
+    )
+    if not live:
+        return None
+    return (
+        f"{', '.join(live)} set, but --site honours no override "
+        "— site/src/i18n is derived from the script's own "
+        "location. The run would read and rewrite the real site "
+        "catalogs while believing it was redirected. Unset "
+        "them, or run without --site."
+    )
