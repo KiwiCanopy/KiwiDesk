@@ -55,15 +55,14 @@ lighter placeholder gives way to normal text as soon as you type.
 Each result leads with the words that actually matched, and puts
 the trail to them in a smaller line underneath — so a hit on the
 Space Bar's colours reads **Space Bar colors** over
-"Bars ▸ Space Bar", not the other way round. A section name that
+"Bars", not the other way round. A section name that
 matches on its own has no second line.
 
 Clicking a result **takes you to the match**, not just to its
 section: the pane scrolls to that group and tints it for about a
 second so your eye lands on it, and anything that would have
 hidden it is switched first — a hit inside one layout's editor
-opens that layout's tab, and a hit on the Space Bar opens the
-Space Bar side of the Bars switch. If the match sits **inside** a
+opens that layout's tab. If the match sits **inside** a
 collapsed drawer (searching "top" finds the per-edge gap
 sliders), the drawer opens on the way so you land on the row
 itself; a hit on the drawer's own name ("Per-edge…", "Advanced")
@@ -921,22 +920,25 @@ badge visibility toggle is
 
 ## Bars
 
-The **Bars** section hosts both bar editors behind a fixed
-**Space Bar | App Bar** switch at the top — two picker cards,
-each showing a small schematic of the bar it opens (numbered
-space items vs a row of app icons). The Space Bar leads and is
-the default: it appears in every layout, while the App Bar
-only renders in Monocle and Scrolling. Each editor leads with
-its own preview and owns its settings.
+The **Bars** section is one page with a card per bar. The
+Space Bar's card leads: it appears in every layout, while the
+App Bar only renders in Monocle and Scrolling. Each card leads
+with its own preview, shows the settings you'd touch in the
+first week at rest — does the bar exist, where, how thick, and
+the content toggles — and folds the rest behind one **Style**
+disclosure whose subtitle names what it holds. The colour
+cards follow below.
 
 ### App Bar
 
 The App Bar is the strip that shows every window in the current
 space — it only renders in **Monocle** and **Scrolling**, the two
 layouts where a window can hide behind another or scroll off the
-edge, so you always see what's open. Configure it globally (applies
-to every layout that shows a bar) or override individual fields per
-layout.
+edge, so you always see what's open. The card has no on/off row
+because the bar doesn't have one: visibility is per layout, via
+the two **Show it in** switches at the card's foot. Everything
+else applies to every layout that shows a bar; per-layout
+styling lives in Lua (see below).
 
 **Click a tab** to focus that window; **drag a tab** along the
 bar to rearrange the windows. (Settings calls these the bar's
@@ -950,14 +952,15 @@ dragged directly. (Lua: `app_bar.*` setters, and the
 rearrange gesture shares the drop visuals in
 [Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
 
-A **live mock strip** sits at the top of the Global Style section:
-three sample items — one grouped, one active, one plain — drawn with
-your configured position, style, sizes, corner radius, and colors,
-so you can judge a color or size change in place before Save. It is
-a static preview (no hover or interaction) and never touches your
+A **live mock strip** leads the card: three sample items — one
+grouped, one active, one plain — drawn with your configured
+position, style, sizes, corner radius, and colors, so you can
+judge a color or size change in place before Save. It is a
+static preview (no hover or interaction) and never touches your
 running windows.
 
-**Global settings:**
+**The settings** (Position, Thickness and the grouping toggle at
+rest; the rest behind **Style**):
 
 - **Background style**: boxed (a box per item honoring corner
   roundness), plain (names on a shared translucent strip), or
@@ -1015,7 +1018,7 @@ running windows.
   (following the global style — the panel spans all layouts).
 **Controls with nothing to act on are dimmed, not removed.**
 Turn the Space Bar off, or turn off the App Bar in every layout
-that can show one, and that editor's controls stay on screen —
+that can show one, and that card's controls stay on screen —
 disabled and dimmed, with their stored values intact and a
 tooltip saying what to turn back on. The same applies to
 individual settings: the Highlight and Active item colors dim
@@ -1023,9 +1026,8 @@ under the Gap indicator (which hides the active item rather than
 marking it, so neither color is drawn); a drag visual's Border
 and Fill rows dim when that part is switched off; and the
 Floating mark color dims when the Space Bar — its only surface —
-is off. A layout's **Overrides** drawer and the
-**Desktop → profile** bindings are dimmed rather than hidden
-too, so you can still read what they hold.
+is off. The **Desktop → profile** bindings are dimmed rather
+than hidden too, so you can still read what they hold.
 
 - **Font size**: auto or fixed. Auto-gated sliders (item size,
   font size) read "Automatic" while their toggle is on.
@@ -1043,18 +1045,23 @@ transparent Fill means clear, untinted glass. The active item is
 marked by the indicator (outline or edge mark), so there is no
 separate active-fill color.
 
-**Per-layout overrides:**
+**Show it in, and per-layout styling:**
 
-Click a layout to override one field just for that layout — e.g.,
-make scrolling draw a plain background while monocle stays boxed.
-When
-you open a layout's **Overrides**, a compact chip leads the rows:
-color swatches of the layout's *resolved* bar (global overlaid with
-its overrides) and a count of how many fields differ — a quick read
-on whether the layout diverges, without a second full preview. The
-color overrides sit in the same 2-column grid as Global's colors,
-in the same field order; a leading checkbox on each cell unlocks
-that field.
+The **Show it in** switches decide which layouts carry an App
+Bar — Monocle and Scrolling each get one. The other layouts
+keep every window visible, so they show none; the Space Bar is
+unaffected and shows in every layout.
+
+Styling the bar differently *per layout* (a 44 pt icon-only bar
+in Monocle, say) is a Lua-only capability: every `app_bar.*`
+field has a `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
+twin that overrides just that layout, and unset fields keep
+following the global value — see
+[Per-layout App Bar overrides](lua-reference.md#per-layout-app-bar-overrides).
+The GUI shows the merged result in its preview but renders no
+per-layout rows: an override adds a "why is my bar different
+here" question to every row above it, so the narrow-but-real
+need stays in the power layer.
 
 ### Space Bar
 
@@ -1145,26 +1152,29 @@ pinned at the trailing end — only the Spaces scroll behind the
 chevrons — so the focused app is always in view; while the bar
 fits it sits at the row's tail as before.
 
-The editor's order matches the App Bar editor's: preview,
-**Show Space Bar**, **Position** (any of the four screen edges
-— sharing an edge with the App Bar is fine, the Space Bar sits
-at the screen edge and the App Bar next to the windows, and an
-inline note in both editors explains the order when both share
-one), **Alignment** (start / center / end along the bar,
-edge-relative, like the App Bar's — and, like it, the three read
-the same once the bar overflows and scrolls), background style,
-active indicator and **App symbol style**, the two behavior toggles,
-sizes and **Glyphs per Space** (how many app glyphs an item
-shows before the rest collapse into the `+n` badge, 1–12), then
-colors.
+The card's order matches the App Bar card's: preview, then at
+rest **Show Space Bar**, **Position** (any of the four screen
+edges — sharing an edge with the App Bar is fine, the Space Bar
+sits at the screen edge and the App Bar next to the windows,
+and an inline note in both cards explains the order when both
+share one), **Thickness**, and the two behavior toggles. The
+**Style** disclosure holds the rest: background style,
+**Alignment** (start / center / end along the bar,
+edge-relative, like the App Bar's — and, like it, the three
+read the same once the bar overflows and scrolls), active
+indicator, **App symbol style**, sizes and **Glyphs per Space**
+(how many app glyphs an item shows before the rest collapse
+into the `+n` badge, 1–12), and **Spring delay**. Colors live
+in their own card below.
 
 The color ladder is the bar's signature: **Text** paints
 inactive Spaces, **Active space** the Space currently shown on
 the display, and **Focused window** the focused window's glyph
 inside the active Space. The ladder sits inline; the rest of
 the palette collapses behind an **Advanced colors** disclosure,
-shut by default — the App Bar's exact tiering. **Copy App Bar
-appearance…** takes the App Bar's current sizes, style, and
+shut by default — the App Bar's exact tiering. **Copy
+appearance to Space Bar…** (in the App Bar card's Style
+disclosure) takes the App Bar's current sizes, style, and
 colors once — edits afterwards stay independent (position and
 visibility are never copied).
 

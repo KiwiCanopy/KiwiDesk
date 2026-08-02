@@ -139,8 +139,10 @@ traced at directory altitude — see **`docs/architecture.md`**.
    state and layout code stays actor-free and unit-testable.
 7. **GUI north-star — simplicity, intuitiveness, Apple-native
    feeling, in that order**, and **approachable by default,
-   powerful on demand**: the Settings app should feel like it
-   belongs in macOS System Settings, and a new user should get a
+   powerful on demand**: "Apple-native" binds *behavior*
+   (standard controls working the standard way), not the
+   Settings GUI's visual idiom — the window's IA and look are
+   KiwiDesk's own — and a new user should get a
    good setup with almost no configuration without that
    simplicity capping what Lua can reach. The full principle,
    its corollaries and the settled conventions that fall out of

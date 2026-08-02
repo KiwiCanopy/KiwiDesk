@@ -17,9 +17,8 @@ struct GreyOutAnchorTests {
     }
 
     /// `count` pins how many times the anchor expression must
-    /// occur: SpaceBarGroups and AppBarGroups each anchor TWO
-    /// sections with the same expression, and a bare
-    /// `contains` would stay green with one of the pair
+    /// occur: a file anchoring TWO sections with one expression
+    /// would keep a bare `contains` green with one of the pair
     /// deleted — the cannot-fail needle #520 warned about.
     private let anchors: [(file: String, anchor: String, count: Int)] = [
         (
@@ -28,14 +27,26 @@ struct GreyOutAnchorTests {
             1
         ),
         (
-            "SpaceBarGroups.swift",
-            "help: enabled ? nil : offHelp",
-            2
+            "SpaceBarCard.swift",
+            "help: allows ? nil : BarsGateHelp.spaceBarOff",
+            1
         ),
         (
-            "AppBarGroups.swift",
-            "help: anyBarShown ? nil : noBarHelp",
-            2
+            "AppBarCard.swift",
+            "help: allows ? nil : BarsGateHelp.noBarShown",
+            1
+        ),
+        // The interim colour cards' headers, anchored where
+        // their gates are resolved (`BarsSection`).
+        (
+            "BarsSection.swift",
+            "help: on ? nil : BarsGateHelp.spaceBarOff",
+            1
+        ),
+        (
+            "BarsSection.swift",
+            "help: shown ? nil : BarsGateHelp.noBarShown",
+            1
         ),
         (
             "DragVisualsEditor.swift",
@@ -45,16 +56,6 @@ struct GreyOutAnchorTests {
         (
             "NativeSpacesGroup.swift",
             "help: gatedOff && !gateHelp.isEmpty",
-            1
-        ),
-        // The anchor is the live disclosure label, not a
-        // section header — the `?` rides it while the rows
-        // below are dimmed. The needle is the anchor's own
-        // copy wiring, not a bare `HelpButton(`, which any
-        // future per-row help button would satisfy.
-        (
-            "AppBarLayoutGroup.swift",
-            "explanation: overridesDisabledHelp",
             1
         ),
         // Reduce Motion greys the whole Animations card; the

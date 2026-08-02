@@ -143,7 +143,6 @@ extension SettingsSurface {
         switch self {
         case .main: return nil
         case .layoutMode(let mode): return mode.displayName
-        case .bar(let editor): return editor.displayName
         }
     }
 }

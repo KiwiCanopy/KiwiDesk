@@ -32,41 +32,34 @@ struct SettingsCatalogArgumentTests {
         // (`dragGhost` / `dragDropZone`), which the dotted-
         // reference sweep still covers.
         "DragVisualsEditor.swift: control",
-        // `LayoutAppBarGroup` renders twice co-mounted; each
-        // mount receives its own instance declaration from
-        // `BarsSection` (`monocleBarOverrides` /
-        // `scrollingBarOverrides`).
-        "AppBarLayoutGroup.swift: overridesDrawer",
-        // The two self-anchoring controls hand their descriptor
-        // to a private row/chip helper, so the argument at the
+        // The self-anchoring control hands its descriptor to a
+        // private row helper, so the argument at the
         // `.searchAnchored` site is the parameter, not a dotted
-        // path. Both are covered by the dotted-reference sweep in
+        // path. Covered by the dotted-reference sweep in
         // `SettingsCatalogSiteTests`; the count net above bites
         // future DIRECT mounts, which is where a duplicate id
         // would actually come from.
         "GapsEditor.swift: control",
-        "BarEditorPicker.swift: control(editor)",
     ]
 
-    /// The one sanctioned literal-`L()` `SettingsSection` title:
-    /// a computed per-instance heading (`"%1$@ bar"`), which can
-    /// never be a static catalog entry. It renders unanchored.
-    private let literalTitleSites: Set<String> = [
-        "AppBarLayoutGroup.swift: app_bar.layout.title"
-    ]
+    /// Sanctioned literal-`L()` `SettingsSection` titles —
+    /// currently none: the last one (the per-layout `"%1$@
+    /// bar"` heading) died with the per-layout bar override
+    /// GUI (GUI_REMOVED_2026-08). The set stays, fail-shut,
+    /// for the next computed heading.
+    private let literalTitleSites: Set<String> = []
 
     /// Direct catalog references legitimately mounted at two
     /// sites. **Mutual exclusion is the only admissible
     /// reason** — the sites must never co-render, or the shared
     /// id is ambiguous.
     private let alternatelyMounted: [String: Int] = [
-        // The two bar colour drawers mount ONE surface-free
-        // declaration; `BarsSection` renders one editor per
-        // `switch model.nav.barEditor`.
-        "bars.advancedColors": 2,
         // `MonitorsSection`'s cards section and its
         // "not connected" read-only twin are if/else branches.
-        "monitors.spacePlacement": 2,
+        // (The bar colour drawers left this list when the Bars
+        // switch died: they co-render now, so each mounts its
+        // own instance declaration instead.)
+        "monitors.spacePlacement": 2
     ]
 
     /// Every `SettingsSection(` / `SettingsDisclosure(` first
@@ -124,11 +117,11 @@ struct SettingsCatalogArgumentTests {
         )
         // Exact totals, so a needle that silently stops matching
         // cannot pass vacuously (part-1: a guard that cannot fire
-        // is worse than none). 37 = the 41 section/disclosure-
-        // mounted top-level declarations − 6 indirect (gaps/drag/
-        // overrides ×2 each) + 2 double-mounted; the two bar-
-        // switch entries self-anchor, outside this count.
-        #expect(direct.values.reduce(0, +) == 37)
+        // is worse than none). 41 = the 44 section/disclosure-
+        // mounted top-level declarations − 4 indirect (gaps and
+        // drag, ×2 each) + 1 double-mounted (monitors); the
+        // Show-it-in toggles self-anchor, outside this count.
+        #expect(direct.values.reduce(0, +) == 41)
         #expect(
             modeTabs.sorted() == [
                 "bsp", "grid", "monocle", "scrolling", "stack",

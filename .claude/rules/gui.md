@@ -9,10 +9,22 @@ Canonical for this subsystem (AGENTS.md §2.7 and §5 index it).
 
 ## North star — simplicity, intuitiveness, Apple-native, in that order
 
-The Settings app should feel like it belongs in macOS System
-Settings, not like a bespoke control panel. When a native pattern
-exists, use it; when unsure, ask a `ui-designer` consult framed by
-these three priorities before inventing a layout.
+**"Apple-native" binds behavior, not the Settings GUI's visual
+idiom** (owner ruling 2026-08-02, argued in
+`docs/design-decisions.md`). Controls behave the standard way —
+focus, keyboard, VoiceOver, dark mode, drag and drop are system
+conventions, non-negotiable. The window's information
+architecture and look are KiwiDesk's own: the #678 redesign's
+Home card grid and non-sidebar navigation deliberately break
+with System Settings, which is explicitly not the bar. The old
+reading — "should feel like it belongs in macOS System
+Settings" — forced ~12 related areas into a sidebar idiom built
+for hundreds of unrelated panes; don't reject a redesign
+surface for breaking that idiom, and don't read "GUI ours" as
+licence for non-standard controls. Simplicity and intuitiveness
+stay first and still break ties. When unsure, ask a
+`ui-designer` consult framed by these priorities before
+inventing a layout.
 
 **Approachable by default, powerful on demand.** A new user gets a
 good tiling setup with almost no configuration; that simplicity
@@ -88,10 +100,13 @@ never views.
 ## The settings census (#678, redesign coexistence)
 
 `Settings/Census/` records every setting's redesign placement,
-tier, gate and text keys, and the redesigned GUI will render from
-it (Bars first). Until an area renders from the census, the
-hand-written views stay the behavioral authority — so **a change
-to a Settings row's placement, its `GreyOut`/`disabled` gating,
+tier, gate and text keys, and the redesigned GUI renders from
+it. **Bars renders from it now** (#678 Phase 2): `BarsRowOrder`
+holds the display order and `BarsCensusRenderTests` pins it to
+the census, so a Bars row moves by editing the census. Until
+the *other* areas render from the census, their hand-written
+views stay the behavioral authority — so **a change to a
+Settings row's placement, its `GreyOut`/`disabled` gating,
 or its `L()` keys updates the matching `SettingKey` entry in the
 same change set.** The census's gates were transcribed from the
 live wiring once; nothing mechanical can re-derive them from

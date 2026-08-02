@@ -88,88 +88,76 @@ struct AppearanceControls: Sendable {
 }
 
 struct BarsControls: Sendable {
-    /// The App Bar / Space Bar switch chips, indexed so the bare
-    /// bar name is findable — searching "App Bar" selects that
-    /// editor and flashes its chip. Reuses the chips' existing
-    /// `bars.switch.*` label keys (same English), so the chip and
-    /// the search entry name the bar with one string. Declared
-    /// before the sections so a bare bar-name query lands on the
-    /// switch rather than a section below it. `BarEditorPicker`
-    /// carries these ids.
+    /// The two bar cards, one page (turn 7a of the redesign —
+    /// the #293 App Bar / Space Bar switch is gone). The card
+    /// titles keep the old switch chips' `bars.switch.*` keys:
+    /// the English is unchanged ("Space Bar" / "App Bar"), so
+    /// re-keying would only throw away eleven translations.
     ///
     /// Space Bar leads, matching everywhere else it does — the
-    /// default editor, the picker order, the omnipresent bar — so
-    /// a bare "bar" query (which matches both under the one-row
+    /// omnipresent bar, and the first card on the page — so a
+    /// bare "bar" query (which matches both under the one-row
     /// cap) surfaces the leading bar, not App Bar.
-    let spaceBarSwitch = SettingsControl(
+    let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",
-        "Space Bar",
-        surface: .bar(.spaceBar)
+        "Space Bar"
     )
-    let appBarSwitch = SettingsControl(
+    /// One "Style" drawer per card, co-rendered on the one page,
+    /// so each carries its own instance id — the twice-mounted
+    /// shape (#277) that a shared declaration would make
+    /// `scrollTo`-undefined.
+    let spaceBarStyle = SettingsDrawer(
+        "bars.style",
+        "Style",
+        instance: "space_bar"
+    )
+    let appBarCard = SettingsControl(
         "bars.switch.app_bar",
-        "App Bar",
-        surface: .bar(.appBar)
+        "App Bar"
     )
-    /// "App Bar style"/"App Bar colors", not "Global …"
-    /// (ui-designer 2026-07-28): "Global" is KiwiDesk's word for
-    /// the config-vs-override axis (the Profiles system), so
-    /// reusing it here for bar-wide-vs-per-layout collides with
-    /// established vocabulary and reads ambiguously in isolation
-    /// (a search hit or screenshot has no switch chip in view).
-    /// The global-vs-override distinction is already carried by
-    /// structure — the per-layout "Overrides" drawers nested under
-    /// each named layout section — so the word is redundant here.
-    /// Mirrors the Space Bar's own `"<bar> style"` pattern, whose
-    /// key is likewise `…global_style…` but whose display was
-    /// already written bar-named.
-    let appBarStyleCard = SettingsControl(
-        "app_bar.global_style.title",
-        "App Bar style",
-        surface: .bar(.appBar)
+    let appBarStyle = SettingsDrawer(
+        "bars.style",
+        "Style",
+        instance: "app_bar"
+    )
+    /// The two "Show it in" rows, titled by their layout's name
+    /// (the keys `LayoutMode.displayName` authors). Distinct
+    /// keys, so no instance tag is needed.
+    let monocleShowIn = SettingsControl(
+        "layout.monocle.name",
+        "Monocle"
+    )
+    let scrollingShowIn = SettingsControl(
+        "layout.scrolling.name",
+        "Scrolling"
+    )
+    /// The interim colour cards — the census places bar colours
+    /// in Advanced Colours, which the Colours phase renders;
+    /// until then these keep the only colour GUI alive.
+    /// "App Bar colors", not "Global …" (ui-designer
+    /// 2026-07-28): "Global" is KiwiDesk's word for the
+    /// config-vs-override axis (the Profiles system).
+    let spaceBarColorsCard = SettingsControl(
+        "space_bar.colors.title",
+        "Space Bar colors"
+    )
+    /// The two Advanced-colors drawers co-render on the one page
+    /// now, so the old shared surface-free declaration (whose
+    /// justification was the mutual exclusion of the switch)
+    /// splits into per-instance ids, like the Style drawers.
+    let spaceBarAdvancedColors = SettingsDrawer(
+        "bars.advanced_colors",
+        "Advanced colors",
+        instance: "space_bar"
     )
     let appBarColorsCard = SettingsControl(
         "app_bar.global_colors.title",
-        "App Bar colors",
-        surface: .bar(.appBar)
+        "App Bar colors"
     )
-    /// Renders inside BOTH colour groups, so it stays
-    /// surface-free on purpose: pinning it to one side would
-    /// yank a user reading the other bar across the switch to
-    /// an identically-named drawer. Both drawers mount this one
-    /// declaration — only one editor renders at a time, so the
-    /// shared id is never ambiguous, and the reveal lands on
-    /// whichever side is already showing.
-    let advancedColors = SettingsDrawer(
+    let appBarAdvancedColors = SettingsDrawer(
         "bars.advanced_colors",
-        "Advanced colors"
-    )
-    let spaceBarStyleCard = SettingsControl(
-        "space_bar.global_style.title",
-        "Space Bar style",
-        surface: .bar(.spaceBar)
-    )
-    let spaceBarColorsCard = SettingsControl(
-        "space_bar.colors.title",
-        "Space Bar colors",
-        surface: .bar(.spaceBar)
-    )
-    /// One declaration per co-mounted `LayoutAppBarGroup` mount
-    /// (Monocle and Scrolling render together on the App Bar
-    /// side), so each drawer carries its own id — the
-    /// twice-mounted shape the part-1 site guard was blind to,
-    /// now impossible to conflate by construction.
-    let monocleBarOverrides = SettingsDrawer(
-        "app_bar.layout.overrides",
-        "Overrides",
-        surface: .bar(.appBar),
-        instance: "monocle"
-    )
-    let scrollingBarOverrides = SettingsDrawer(
-        "app_bar.layout.overrides",
-        "Overrides",
-        surface: .bar(.appBar),
-        instance: "scrolling"
+        "Advanced colors",
+        instance: "app_bar"
     )
 }
 

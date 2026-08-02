@@ -69,8 +69,6 @@ struct SettingsAnchor: Hashable {
                 destination == .layoutDefaults
                 && LayoutMode.placementTabs.contains(mode)
             return renders ? surface : .main
-        case .bar:
-            return destination == .bars ? surface : .main
         }
     }
 }
@@ -92,26 +90,4 @@ struct SettingsAnchor: Hashable {
 enum SettingsSurface: Hashable {
     case main
     case layoutMode(LayoutMode)
-    case bar(BarEditor)
-}
-
-/// The two editors behind the Bars switch (#293). A top-level
-/// type rather than `BarsSection.Editor` (#277): the selection
-/// now lives on `SettingsModel` so a hit on a `space_bar.*`
-/// header can land in the right editor, and a nested type would
-/// make the model import the view that owns it.
-enum BarEditor: String, CaseIterable, Hashable {
-    case appBar
-    case spaceBar
-
-    /// The switch chip's label, and the breadcrumb segment a
-    /// search result shows — one home, so the two cannot drift.
-    @MainActor var displayName: String {
-        switch self {
-        case .appBar:
-            return L("bars.switch.app_bar", "App Bar")
-        case .spaceBar:
-            return L("bars.switch.space_bar", "Space Bar")
-        }
-    }
 }

@@ -1,14 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Space Bar colors block (#293/#374): copy button, the
-/// three-state accent ladder inline (the two-accent system is
-/// the bar's defining signature, never behind a disclosure),
-/// then the remaining palette shut behind "Advanced colors" —
-/// the App Bar's exact tiering. A standalone struct, not an
-/// extension: the disclosure owns `@State`, which extensions
-/// cannot hold. Expansion resets when the editor is torn down
-/// (tab switch) — the app-wide disclosure precedent.
+/// The Space Bar colors block (#293/#374): the three-state
+/// accent ladder inline (the two-accent system is the bar's
+/// defining signature, never behind a disclosure), then the
+/// remaining palette shut behind "Advanced colors" — the App
+/// Bar's exact tiering. The copy-appearance action moved to the
+/// App Bar card's Style drawer (the census's placement — it
+/// copies App Bar → Space Bar). An interim card: the census
+/// places bar colours in Advanced Colours, which the Colours
+/// phase renders; until then this keeps the only colour GUI
+/// alive.
 struct SpaceBarColorsGroup: View {
     @ObservedObject var model: SettingsModel
     /// Whether the bar is off, and the explanation to show while
@@ -31,22 +33,10 @@ struct SpaceBarColorsGroup: View {
     }
 
     var body: some View {
-        copyAppearance
-            .modifier(gate)
         accentLadder
             .modifier(gate)
-        // LOAD-BEARING, and so is its twin in `AppBarGroups`:
-        // both drawers mount the ONE surface-free
-        // `advancedColors` declaration, so a reveal lands on
-        // whichever bar editor is already open, rather than
-        // yanking a Space Bar reader across the switch to an
-        // identically-named drawer. Only one editor is ever
-        // mounted, so the shared id is never ambiguous — but
-        // deleting this mount silently restores the
-        // scroll-to-nothing bug for this side
-        // (`SettingsCatalogArgumentTests` pins both references).
         SettingsDisclosure(
-            SettingsCatalog.bars.advancedColors,
+            SettingsCatalog.bars.spaceBarAdvancedColors,
             chrome: .inline(font: .subheadline),
             isExpanded: $advancedColorsExpanded,
             scrollHoisted: true
@@ -54,51 +44,6 @@ struct SpaceBarColorsGroup: View {
             AppBarColorGrid { advancedColors }
                 .padding(.top, 8)
                 .modifier(gate)
-        }
-    }
-
-    /// One-shot copy, then fully independent — never a live
-    /// inherit. Excludes enabled and edge (visibility and
-    /// placement are not appearance). Leads the colors section
-    /// (colors are its most consequential effect), leading-
-    /// aligned in the Reset-Overrides button language; the
-    /// one-shot caveat rides a persistent caption, never
-    /// hover alone.
-    private var copyAppearance: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button {
-                model.config.settings.spaceBarStyle
-                    .copyAppearance(
-                        from: model.config.settings.appBarStyle
-                    )
-            } label: {
-                Text(
-                    L(
-                        "space_bar.copy_appearance",
-                        "Copy App Bar appearance…"
-                    )
-                )
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .help(
-                L(
-                    "space_bar.copy_appearance.help",
-                    "Takes the App Bar's current sizes, style, "
-                        + "and colors once; edits afterwards "
-                        + "stay independent."
-                )
-            )
-            Text(
-                L(
-                    "space_bar.copy_appearance.caption",
-                    "Copies the App Bar's current sizes, "
-                        + "style, and colors — a one-time "
-                        + "starting point, not a live link."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
     }
 
