@@ -192,10 +192,11 @@ Use the GitHub [issue templates](.github/ISSUE_TEMPLATE/) and
 with `fixes #123`.
 
 **An agent drafting an issue renders the template, rather than
-writing whatever shape it likes.** GitHub only applies a
-`.yml` form when a human opens the *New issue* page, so
-`gh issue create --body-file` — the way an agent files one —
-starts from a blank body and silently keeps none of it. Read the
+writing whatever shape it likes.** GitHub applies a `.yml` form
+only when a human opens the *New issue* page (observed
+2026-08-02, `gh` 2.x), so `gh issue create --body-file` — the way
+an agent files one — starts from a blank body and silently keeps
+none of it. Read the
 template, then reproduce it: each `label:` as a `###` heading in
 declared order, its `labels:` on the command line, its `title:`
 prefix on the title. The reason is not tidiness. Those fields are
@@ -209,10 +210,13 @@ Pick the template by what the issue *is*: `bug_report` when
 something shipped behaves wrongly (including a guard that cannot
 fail — the repro is the mutation that ought to red it),
 `feature_request` for new or retuned behavior, `docs_report` for
-prose, `collector` / `roadmap` for grouping. All six are written
-for a **user**, so an internal engineering issue will have fields
-that fit awkwardly — answer them honestly from the dev machine
-rather than dropping them or inventing a seventh shape inline.
+prose, `collector` / `roadmap` for grouping. (`config.yml` is not
+a template — it is the chooser, and it turns blank issues off, so
+one of the five above is the only way in.) Every one of them is
+written for a **user**, so an internal engineering issue will have
+fields that fit awkwardly — answer them honestly from the dev
+machine rather than dropping them or inventing a new shape
+inline.
 
 ### Commit messages (Angular / Conventional Commits)
 

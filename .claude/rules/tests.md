@@ -145,9 +145,10 @@ bite large test PRs:
   change is reverted. Those differ more often than they sound.
 - **A guard, canary or parity test owes a `guard-prover` run**
   before the PR: mutate the thing it watches and watch it fail.
-  Repeatedly the expensive defect here has not been a missing
-  guard but a *present* one that could not fail, and the two are
-  indistinguishable from the green tick.
+  The argument is
+  [rule-authoring.md](rule-authoring.md)'s ("Prove a new guard
+  reds") and is not restated here; what this row adds is *who*
+  runs it and *when*.
 - **A perf change owes the correctness half.** A skip, a cache or
   an early return whose safety rests on something else running
   later pins that dependency with a test, never with a comment —
@@ -155,9 +156,12 @@ bite large test PRs:
   not fewer (#662).
 - **A default that other tests reason from owes them a pin.** A
   fixture that inherits a default silently re-derives its
-  expectations when that default moves; #660 shifted a stack
-  resize cliff by exactly the Space Bar's thickness because the
-  suite pinned the display and not the bar.
+  expectations when that default moves. Moving the Space Bar's
+  default edge for #660 shifted a stack-resize cliff by exactly
+  the bar's thickness, in a suite that pinned the display (#531)
+  and not the bar — the strip is carved off the display frame
+  before any layout sees it, so pinning one without the other
+  buys half a fixture.
 
 ### Not owed
 
@@ -166,9 +170,10 @@ bite large test PRs:
 - A test asserting what the type system guarantees.
 - A second test of one invariant at another altitude, unless the
   two fail apart — say so in the docstring when they do
-  (`AppFontResourceTests.kiwiDeskGlyph` asserts the map and the
-  font separately because a map can name a ligature the font
-  lacks).
+  (`AppFontResourceTests`' `kiwiDeskGlyph` asserts the map and
+  the font separately because a map can name a ligature the font
+  lacks — the suite name is its own span so
+  `RuleCitationTests` resolves it).
 
 ### Removal
 
