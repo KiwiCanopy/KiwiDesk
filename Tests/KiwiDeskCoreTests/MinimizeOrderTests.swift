@@ -153,10 +153,11 @@ struct MinimizeOrderTests {
     }
 
     /// A native-tab re-key swaps the id in place here like in
-    /// every other id-keyed container (#308). Reflection cannot
-    /// discover this one — its element is a struct, not a
-    /// `WindowID` — so `WindowRekeyParityTests` does not cover
-    /// it and this is the net.
+    /// every other id-keyed container (#308).
+    /// `WindowRekeyParityTests` reaches this container through
+    /// its `String(describing:)` scan but not through its
+    /// reflection count pin (a struct element hides the key), so
+    /// this is the second net rather than the only one.
     @Test("A re-key moves the minimize record's id")
     func rekeyMovesTheRecord() {
         var state = StateCoordinator()
@@ -168,6 +169,30 @@ struct MinimizeOrderTests {
                 == WindowID(9)
         )
         #expect(state.minimizeOrder.count == 1)
+    }
+
+    /// The one route to a live `windows[id]` that does NOT pass
+    /// through the create fold's prune: `WindowManager.rekey`.
+    /// A window minimized and then closed leaves a record; a
+    /// later re-key onto that recycled id must not double it,
+    /// which is what `rememberMinimized`'s own `removeAll`
+    /// covers and nothing else does.
+    @Test("A re-key onto a stale record does not double it")
+    func rekeyOntoStaleRecordDoesNotDouble() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(window(1)))
+        minimize(&state, 1)
+        #expect(state.minimizeOrder.count == 1)
+        // Window 1 is gone; its record is stale. A native tab
+        // switch now re-keys a live window onto that id.
+        state.apply(.windowCreated(window(2)))
+        state.apply(.windowRekeyed(WindowID(2), WindowID(1)))
+        minimize(&state, 1)
+        #expect(state.minimizeOrder.count == 1)
+        #expect(
+            state.lastMinimized(bundleID: "com.test.a")
+                == WindowID(1)
+        )
     }
 
     /// A window with no bundle id (an unbundled process) records

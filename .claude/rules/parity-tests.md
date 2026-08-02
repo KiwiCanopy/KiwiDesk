@@ -30,6 +30,17 @@ checklist for any code that repeats a struct's field list:
   keypaths). Back it with a round-trip + resolve-every-field test
   so a forgotten merge/encode line also fails — those stay
   hand-listed, so treat them as part of the same mirror.
+- Reflection also only sees a container it can *type*: an empty
+  one has no readable element type, and one whose element
+  **wraps** the mirrored key in a struct reads as an unrelated
+  collection. Either shape passes the parity test by being
+  invisible to it, which is worse than not being covered — the
+  suite goes green having looked. Adding a container of either
+  shape owes a behavioural test of its own in the suite that owns
+  that container, and a line in the parity suite's stated
+  limitations so the next author knows the scan stops there
+  (`WindowRekeyParityTests`, whose struct-element blind spot
+  `MinimizeOrderTests` covers).
 - A keypath/generic merge is justified only when it removes the
   drift, not just the `resolved()` lines. Sparse `Codable` stays
   per-field either way, so generics rarely buy down the real risk

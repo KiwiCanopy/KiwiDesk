@@ -573,7 +573,9 @@ space's focused window, so the first time you switch there it is
 the window you land on — even without `_and_follow`.
 
 **Minimizing** a window removes it from its space entirely.
-Restoring it from the Dock opens it in the virtual space you are
+Restoring it — from the Dock, or via
+[`pull_or_spawn`](#pull_or_spawn) when the app has nothing left on
+screen — opens it in the virtual space you are
 on at that moment (an `app_rules` entry for its app still wins),
 just like a new window — it does not pull you back to the space it
 was minimized from.
@@ -3273,11 +3275,17 @@ desktop are untracked while you are away and rejoin the cycle
 when you return to their desktop — see
 [Accepted limitations](accepted-limitations.md).
 
-If **every** window of the app is minimized, the shortcut restores
-exactly one — the most recently minimized — and brings the app
-forward. While any window is still visible, minimized windows are
-left alone: the shortcut focuses and cycles the visible ones and
-never pulls a window back out of the Dock.
+If the app has **nothing on screen** — typically every one of its
+windows minimized — the shortcut restores exactly one and brings
+the app forward. It picks the window you minimized most recently;
+when KiwiDesk was not running to see the minimize (the windows
+were already parked before it launched, say) there is no such
+record and the app's own window order decides. While any window
+is still visible, minimized windows are left alone: the shortcut
+focuses and cycles the visible ones and never pulls a window back
+out of the Dock. A window on another native macOS desktop does
+not count as on screen — see
+[Accepted limitations](accepted-limitations.md).
 
 **Example:**
 

@@ -273,12 +273,13 @@ extension KiwiCore {
                     $0.bundleIdentifier?.lowercased() == bundleID
                 })
         {
-            // `activate()` does not deminiaturize, so an app whose
-            // windows are ALL minimized came forward showing
-            // nothing at all (#673). Restore exactly one first —
-            // the most recently minimized, the Dock's precedent
-            // for clicking an app icon — and leave the rest
-            // parked.
+            // `activate()` does not deminiaturize, so an app with
+            // nothing on screen came forward showing nothing at
+            // all (#673). Restore one first — BEFORE the
+            // activate, so the app comes forward with a window
+            // already on its way up rather than a beat behind —
+            // and leave the rest parked. Which one, and why only
+            // one, is argued in `KiwiCore+LaunchRestore.swift`.
             restoreOneMinimizedIfNothingVisible(
                 pid: running.processIdentifier,
                 bundleID: bundleID
