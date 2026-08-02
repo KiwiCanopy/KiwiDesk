@@ -293,8 +293,12 @@ struct SettingsView: View {
             LayoutDefaultsSection(model: model)
         case .monitors:
             MonitorsSection(model: model)
-        case .appearance:
-            AppearanceSection(model: model)
+        case .colors:
+            ColorsMotionSection(model: model)
+        case .advancedColors:
+            AdvancedColorsSection(model: model)
+        case .gapsAndBorders:
+            GapsAndBordersSection(model: model)
         case .bars:
             BarsSection(model: model)
         case .behavior:

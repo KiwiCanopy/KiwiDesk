@@ -94,16 +94,32 @@ extension AppBarKey {
             return .row(.bars, .appBar, .atRest)
         case .appBarDimFactor:
             return .luaOnly
-        case .appBarFillColor, .appBarItemColor, .appBarHoverFillColor,
-            .appBarHoverItemColor, .appBarGroupBadgeColor,
-            .appBarGroupBadgeTextColor:
+        // Advanced Colours keeps each group's two or three accent
+        // colors at rest and hides the rest behind one "More
+        // colors" drawer (turn 12b). The split is the one the
+        // live GUI already made — the two the preview strip
+        // reflects most inline, the remaining palette in the
+        // drawer — recorded in the census now that the area
+        // renders from it.
+        case .appBarFillColor:
             return .row(.advancedColours, .appBar, .atRest)
-        case .appBarHighlightColor, .appBarActiveItemColor:
+        case .appBarHighlightColor:
             // Nothing to tint while the active indicator is Gap.
             return .row(
                 .advancedColours,
                 .appBar,
                 .atRest,
+                gate: .setting(.appBar(.appBarActiveIndicator))
+            )
+        case .appBarItemColor, .appBarHoverFillColor,
+            .appBarHoverItemColor, .appBarGroupBadgeColor,
+            .appBarGroupBadgeTextColor:
+            return .row(.advancedColours, .appBar, .showMore)
+        case .appBarActiveItemColor:
+            return .row(
+                .advancedColours,
+                .appBar,
+                .showMore,
                 gate: .setting(.appBar(.appBarActiveIndicator))
             )
         }

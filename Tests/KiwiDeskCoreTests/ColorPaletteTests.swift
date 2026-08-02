@@ -18,13 +18,18 @@ struct ColorPaletteTests {
         )
     }
 
-    @Test("The color surface is the 23 namespaced color paths")
+    @Test("The color surface is the 25 namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 23)
+        #expect(all.count == 25)
         #expect(all.allSatisfy { $0.contains(".") })
-        // Every path is a color key.
-        #expect(all.allSatisfy { $0.hasSuffix("_color") })
+        // Every path is a color key: `_color`-suffixed, or the
+        // bare `color` of a struct that IS one mark.
+        #expect(
+            all.allSatisfy {
+                $0.hasSuffix("_color") || $0.hasSuffix(".color")
+            }
+        )
         // A colliding wire key appears once per bar, disambiguated.
         #expect(all.contains("app_bar.fill_color"))
         #expect(all.contains("space_bar.fill_color"))
@@ -33,6 +38,60 @@ struct ColorPaletteTests {
         #expect(all.contains("border.focused_color"))
         #expect(all.contains("drag.ghost.fill_color"))
         #expect(all.contains("drag.drop_zone.border_color"))
+        // The two mark tints joined in the #678 Colours phase, so
+        // Advanced Colours' "save these as a palette" bridge
+        // carries every row it shows.
+        #expect(all.contains("sticky.color"))
+        #expect(all.contains("floating.color"))
+    }
+
+    /// Only the mark paths admit the empty "Automatic" value, and
+    /// the predicate is derived from the path shape rather than
+    /// hand-listed — a `_color` path taking an empty value would
+    /// write an unrenderable color.
+    @Test("Automatic is a mark-only palette value")
+    func automaticIsMarkOnly() {
+        let automatic = ColorPaletteKeys.all.filter(
+            ColorPaletteKeys.allowsAutomatic
+        )
+        #expect(Set(automatic) == ["sticky.color", "floating.color"])
+    }
+
+    /// Both directions: a palette paints a mark, and a palette
+    /// hands it back to Automatic. The second half is what the
+    /// hex-only guard used to drop — the derived default palette
+    /// extracts the shipped defaults, and both of those are empty.
+    @Test("A mark tint round-trips through Automatic")
+    func markTintRoundTrips() {
+        var settings = TilingSettings()
+        ColorPalette(
+            name: "M",
+            colors: [
+                "sticky.color": "#8B5E3C",
+                "floating.color": "#4A9816",
+            ]
+        ).apply(to: &settings)
+        #expect(settings.stickyStyle.color == "#8B5E3C")
+        #expect(settings.floatingStyle.color == "#4A9816")
+
+        PaletteCatalog.defaultPalette().apply(to: &settings)
+        #expect(settings.stickyStyle.color.isEmpty)
+        #expect(settings.floatingStyle.color.isEmpty)
+    }
+
+    /// The empty value stays mark-only at the APPLY seam too, not
+    /// merely in the predicate: an empty hex aimed at a `_color`
+    /// path is skipped, so no palette can blank a bar color.
+    @Test("An empty hex is skipped on a non-mark path")
+    func emptyHexSkippedElsewhere() {
+        var settings = TilingSettings()
+        let before = settings.appBarStyle.fillColor
+        ColorPalette(
+            name: "E",
+            colors: ["app_bar.fill_color": ""]
+        ).apply(to: &settings)
+        #expect(settings.appBarStyle.fillColor == before)
+        #expect(!before.isEmpty)
     }
 
     @Test("Apply writes every color path (parity via encode)")
@@ -67,7 +126,7 @@ struct ColorPaletteTests {
                     from: TilingSettings()
                 )
         )
-        #expect(def.colors.count == 23)
+        #expect(def.colors.count == 25)
     }
 
     @Test("Applying the default palette restores default colors")
@@ -140,8 +199,15 @@ struct ColorPaletteTests {
                     ColorPaletteKeys.all.contains(path),
                     "\(palette.name): unknown path \(path)"
                 )
+                // Empty is the mark tints' "Automatic" face and
+                // is legal only there — the derived default
+                // palette carries both of them empty.
                 #expect(
-                    DragVisual.parseHex(hex) != nil,
+                    DragVisual.parseHex(hex) != nil
+                        || (hex.isEmpty
+                            && ColorPaletteKeys.allowsAutomatic(
+                                path
+                            )),
                     "\(palette.name): bad hex \(hex) at \(path)"
                 )
             }

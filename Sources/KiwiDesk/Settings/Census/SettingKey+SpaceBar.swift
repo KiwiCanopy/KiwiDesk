@@ -89,15 +89,22 @@ extension SpaceBarKey {
         case .spaceBarDimFactor, .spaceBarActiveDimFactor,
             .spaceBarStickyBadge:
             return .luaOnly
-        case .spaceBarItemColor, .spaceBarActiveItemColor, .spaceBarFillColor,
-            .spaceBarHighlightColor, .spaceBarHoverFillColor,
-            .spaceBarHoverItemColor, .spaceBarGroupBadgeColor,
-            .spaceBarGroupBadgeTextColor:
+        // The three-state accent ladder is the bar's defining
+        // signature, so it stays at rest; the rest of the palette
+        // sits behind the group's one "More colors" drawer (turn
+        // 12b — the split the live GUI already made, recorded in
+        // the census now that Advanced Colours renders from it).
+        case .spaceBarItemColor, .spaceBarActiveItemColor:
             return .row(.advancedColours, .spaceBar, .atRest)
+        case .spaceBarFillColor, .spaceBarHighlightColor,
+            .spaceBarHoverFillColor, .spaceBarHoverItemColor,
+            .spaceBarGroupBadgeColor, .spaceBarGroupBadgeTextColor:
+            return .row(.advancedColours, .spaceBar, .showMore)
         case .spaceBarFocusedItemColor:
             // Nothing to tint when glyphs are native images and
             // no front-app name renders (icon source + front
-            // app + edge, SpaceBarColorsGroup).
+            // app + edge). Predicate:
+            // `AdvancedColorsGates.focusedItemInert`.
             return .row(
                 .advancedColours,
                 .spaceBar,

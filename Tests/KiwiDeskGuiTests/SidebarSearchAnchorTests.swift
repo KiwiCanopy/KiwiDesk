@@ -96,10 +96,12 @@ struct SidebarSearchAnchorTests {
             query: "Top",
             editingStoredProfile: false
         ).first
-        #expect(result?.destination == .appearance)
+        #expect(result?.destination == .gapsAndBorders)
         #expect(result?.anchor.anchor == "gaps.top")
         #expect(result?.primary == "Top")
-        #expect(result?.path == ["Appearance", "Per-edge…"])
+        #expect(
+            result?.path == ["Gaps & Borders", "Per-edge…"]
+        )
     }
 
     /// The twice-mounted shape (both bar cards mount a "Style"
@@ -184,7 +186,7 @@ struct SidebarSearchAnchorTests {
         // Likewise a surface belonging to another destination.
         #expect(
             SettingsAnchor(
-                destination: .appearance,
+                destination: .gapsAndBorders,
                 surface: .layoutMode(.monocle)
             )
             .resolved(editingStoredProfile: false)?.surface

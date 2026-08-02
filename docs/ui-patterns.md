@@ -205,13 +205,28 @@ Three boundaries, because System Settings itself draws them:
 
 **"Advanced" prefixes a disclosure's noun only when a basic tier
 of that same noun is visible above it; otherwise the drawer is
-named for what it holds** (R3, #406). So: "Advanced colors" —
-Fill and Highlight sit one section up, in the same grid, so "the
-advanced ones" is literally what it means. But **"Lua bindings"**
-and **"Monitor fingerprints"**, because there is no such thing as
-a basic Lua binding or a basic fingerprint. The catalog above
+named for what it holds** (R3, #406). So **"Lua bindings"** and
+**"Monitor fingerprints"**, because there is no such thing as a
+basic Lua binding or a basic fingerprint. The catalog above
 Shortcuts' drawer is a different noun (*actions*), and Monitors
 has no lesser fingerprint anywhere.
+
+**A second condition joined the rule when the colour drawers
+moved onto a page called Advanced Colors (#678):** the qualifier
+also has to be unclaimed by the surface AROUND the drawer. The
+bars' colour drawers used to satisfy the tier test — Fill and
+Highlight sat one grid up, so "the advanced ones" was literally
+what it meant — and the same drawers on the new page do not,
+because the adjective now reads as the page's own name rather
+than as a tier inside it. And a row tier and a mode depth must never
+be spelled with one word: Advanced Colors is the deep-mode twin
+of Colours & Motion (`SettingsArea.minimumMode` is `.nerd`
+there), so on that page "advanced" already means *which mode
+you are in* and no drawer may re-use it to mean *which rows are
+hidden*. They are **"More
+colors"**, with the collapsed summary doing the naming the
+adjective used to ("Plate, highlight, hover, badges"). "More"
+cannot be misread as a mode.
 
 The four had drifted onto four formats (bare, `Advanced: …`,
 `Advanced — …`, and the unqualified "Advanced colors"), and the
@@ -491,9 +506,14 @@ controls sit right next to it — never by which tab it's on:
 
 So Layout schematics and the App Bar strip are *both* centered
 (they are the same kind of thing); Gaps and Drag are left —
-that apparent Layout-vs-Appearance inconsistency is really this
-one correct rule. A new preview picks its bucket by asking "are
-its controls right here beside it," not by copying its tab.
+an inconsistency that looks like one between two *pages* is
+really this one correct rule. The colour pages show both in one
+change: Colours & Motion's "Current colors" scene is centered
+with its caption below (nothing is edited on it), while each
+Advanced Colours group's preview leads the swatches it drives
+and sits flush with them. A new preview picks its bucket by
+asking "are its controls right here beside it," not by copying
+its page.
 
 ## Previews & schematics
 
@@ -800,7 +820,9 @@ was written down:
   the label live. That also means a block gate must not wrap a
   section that *contains* a disclosure: push it down to the
   siblings, or pass the gate into the child view
-  (`SpaceBarColorsGroup(gatedOff:gateHelp:)`) so it can place it
+  (`AdvancedColorRows(allows:gateHelp:)`, which the bar colour
+  cards hand the same gate on both sides of their "More colors"
+  drawer) so it can place it
   correctly. Expansion state is deliberately preserved across
   the toggle — with the label live, closing is one click, and
   auto-collapsing would lose a drawer the user opened on purpose.
@@ -821,17 +843,25 @@ was written down:
   live (the App Bar card's Show-it-in switches) exactly when
   its copy points at them ("turn one on below"). When the gate
   must reach inside a child view to do this, pass it in
-  (`NativeSpacesGroup(gatedOff:gateHelp:)`, the
-  `SpaceBarColorsGroup` shape) rather than wrapping the child
+  (`NativeSpacesGroup(gatedOff:gateHelp:)`,
+  `AdvancedColorRows(allows:gateHelp:)`) rather than wrapping
+  the child
   from outside, which would disable the anchor too. A
   *control-scoped* gate — one row, its gating control directly
   adjacent (Background style over Background size, a toggle
   over its slider) — keeps just the `GreyOut` hover string: the
   adjacency answers "why", and a header `?` would gloss a
   single self-explaining row. A *remote* control-scoped gate
-  (the gating field lives on another surface) also stays
-  hover-only while its section is live, but should carry a live
-  state-dependent cue when one exists — the sticky editor's
+  (the gating field lives on another **destination**) has no
+  adjacency to answer "why", so hover text alone is not enough:
+  it takes a live `?` on the nearest live label above the dimmed
+  rows, and **its sentence names the destination to go to**, not
+  just the switch. Advanced Colours is the case that forced
+  this — every gate on the page is remote — and it is why its
+  Borders card and each Drag column carry a header `?` even
+  though neither has a block gate at all
+  (`AdvancedColorsHelp`). Where a live state-dependent cue
+  exists in the flow, use that too — the sticky editor's
   conditional `CrossReferenceRow` naming the Space Bar is the
   model. Per-control `?`s inside a gated block stay
   visible-but-dimmed like every other row member; their fine
@@ -844,10 +874,12 @@ style" stays live even when no bar shows, because `iconSource`
 also drives the shortcuts panel's Apps band — check for a second
 reader before dimming.
 
-The convention is guarded by `GreyOutParityTests`, which scans
-for the *hiding* shape rather than listing the greyed controls:
-a list cannot see the next site, which is how a dozen surfaces
-drifted while the rule sat unenforced.
+The convention is guarded by two suites that both scan for a
+*shape* rather than listing the greyed controls — a list cannot
+see the next site, which is how a dozen surfaces drifted while
+the rule sat unenforced. `GreyOutParityTests` pins the gates
+that must be present; `GreyOutHidingTests` hunts the
+conditional that removes a control instead of dimming it.
 
 **Sentinel values read as words, not numbers.** A slider gated
 by an Auto toggle stores `0` as the sentinel but its readout
@@ -860,7 +892,8 @@ The slider itself stays floored at 1 so dragging can never write the sentinel
 
 **A control may relabel with the mode it serves.** One field,
 one topic, but a mode-dependent role gets a mode-dependent
-name: the bars' Background color relabels to **Tint** while
-Liquid Glass is selected — the same stored field tints the
-glass there. Prefer relabeling an existing control over adding
+name: the scrolling layout's slot size is **Column width** on a
+horizontal axis and **Row height** on a vertical one
+(`SlotSizeRows`) — one stored field, two honest names. Prefer
+relabeling an existing control over adding
 a parallel enum value or a second field.

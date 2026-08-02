@@ -73,13 +73,12 @@ extension BordersKey {
                 ])
             )
         case .stickyColor:
-            // The table marks this GATED, but the live editor
-            // deliberately leaves it ungated: the color also
-            // paints the on-window mark and the Space Bar's
-            // sticky badge, so it always tints something
-            // (StickyMarkEditor). The Colours phase rules on
-            // the redesign's gate; until then the census
-            // records the wiring.
+            // The table marks this GATED; the Colours phase
+            // ruled it UNGATED and it ships that way. The color
+            // also paints the on-window mark, not only the
+            // Space Bar's sticky badge, so it always tints
+            // something — which is why the .borders container
+            // carries no block gate at all.
             return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
             // Glow on, and not auto-sized (AutoGatedGroup).
@@ -192,8 +191,11 @@ extension BordersKey {
         case .floatingColor:
             // Drawn only in the Space Bar (owner ruling
             // 2026-08-02; the gate item 10 keeps) — carried by
-            // the .spaceBar CONTAINER gate.
-            return .row(.advancedColours, .spaceBar, .atRest)
+            // the .spaceBar CONTAINER gate. Rides the badge
+            // cluster into that group's "More colors" drawer: it
+            // tints a state badge, not one of the three accents
+            // the bar is read by.
+            return .row(.advancedColours, .spaceBar, .showMore)
         }
     }
 }
@@ -203,12 +205,17 @@ extension BordersKey {
         switch self {
         case .borderEnabled:
             return .text("border.enabled")
+        // On the Focus-border card each ring tint could be
+        // "Color", the card being the context. In a Borders
+        // group holding three tints, two rows named "Color" name
+        // nothing, so both took the wording their VoiceOver
+        // labels already carried (#678 Phase 3).
         case .borderFocusedColor:
-            return .text("border.focused_color")
+            return .text("border.color.focused")
         case .borderUnfocusedEnabled:
             return .text("border.unfocused_enabled")
         case .borderUnfocusedColor:
-            return .text("border.unfocused_color")
+            return .text("border.color.unfocused")
         case .borderWidth:
             return .text("border.width")
         case .borderCorner:
@@ -235,8 +242,12 @@ extension BordersKey {
             return .text("drag.enabled")
         case .dragGhostBorder, .dragDropZoneBorder:
             return .text("drag.border")
+        // The drag tints go the other way: they reuse their
+        // toggles' labels, because the Border/Fill sub-grouping
+        // that made a bare "Color" readable is not on the colour
+        // page either.
         case .dragGhostBorderColor, .dragDropZoneBorderColor:
-            return .text("drag.border_color")
+            return .text("drag.border")
         case .dragGhostBorderWidth, .dragDropZoneBorderWidth:
             return .text("drag.border_width")
         case .dragGhostBorderAlignment, .dragDropZoneBorderAlignment:
@@ -244,7 +255,7 @@ extension BordersKey {
         case .dragGhostFill, .dragDropZoneFill:
             return .text("drag.fill")
         case .dragGhostFillColor, .dragDropZoneFillColor:
-            return .text("drag.fill_color")
+            return .text("drag.fill")
         case .floatingColor:
             return .text("floating.color")
         }

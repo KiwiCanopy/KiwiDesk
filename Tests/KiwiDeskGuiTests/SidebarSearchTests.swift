@@ -42,18 +42,18 @@ struct SidebarSearchTests {
         pinEnglish()
         defer { reset() }
         let results = SidebarSearch.results(
-            query: "Appearance",
+            query: "Gaps & Borders",
             editingStoredProfile: false
         )
         #expect(
             results
                 == [
                     SidebarSearchResult(
-                        destination: .appearance,
+                        destination: .gapsAndBorders,
                         anchor: SettingsAnchor(
-                            destination: .appearance
+                            destination: .gapsAndBorders
                         ),
-                        primary: "Appearance",
+                        primary: "Gaps & Borders",
                         path: []
                     )
                 ]
@@ -65,20 +65,20 @@ struct SidebarSearchTests {
         pinEnglish()
         defer { reset() }
         let results = SidebarSearch.results(
-            query: "gaps",
+            query: "sticky",
             editingStoredProfile: false
         )
         #expect(
             results
                 == [
                     SidebarSearchResult(
-                        destination: .appearance,
+                        destination: .gapsAndBorders,
                         anchor: SettingsAnchor(
-                            destination: .appearance,
-                            anchor: "gaps.title"
+                            destination: .gapsAndBorders,
+                            anchor: "sticky.title"
                         ),
-                        primary: "Gaps",
-                        path: ["Appearance"]
+                        primary: "Sticky windows",
+                        path: ["Gaps & Borders"]
                     )
                 ]
         )
@@ -92,7 +92,7 @@ struct SidebarSearchTests {
             query: "pp bAr cOlo",
             editingStoredProfile: false
         )
-        #expect(results.map(\.destination) == [.bars])
+        #expect(results.map(\.destination) == [.advancedColors])
         #expect(results.first?.primary == "App Bar colors")
     }
 
@@ -160,17 +160,23 @@ struct SidebarSearchTests {
             query: "advanced",
             editingStoredProfile: false
         )
-        // Sidebar order. Appearance is absent on purpose: its
-        // drawers are "Per-edge…" / "Per-axis…", neither of
+        // Sidebar order. Gaps & Borders is absent on purpose:
+        // its drawers are "Per-edge…" / "Per-axis…", neither of
         // which contains "advanced". Monitors and Shortcuts are
         // absent for a newer reason: their drawers dropped the
         // qualifier, because nothing above them is a lesser
         // fingerprint or a lesser Lua binding — "Advanced"
         // prefixes a noun only where a basic tier of that same
-        // noun is visible above it (#406). They stay reachable
-        // by what they hold, pinned below.
+        // noun is visible above it (#406). Bars left the list in
+        // #678 Phase 3 for exactly that rule: its "Advanced
+        // colors" drawers became "More colors" on a page whose
+        // own NAME is the qualifier, which is where the word
+        // now lands — as a destination title, the better anchor,
+        // since destination titles are indexed and drawer titles
+        // are hand-listed.
         #expect(
-            results.map(\.destination) == [.bars, .general]
+            results.map(\.destination)
+                == [.advancedColors, .general]
         )
         for (query, destination) in [
             ("lua bindings", SettingsDestination.shortcuts),
@@ -192,8 +198,8 @@ struct SidebarSearchTests {
         defer { reset() }
         for (query, destination) in [
             ("fingerprint", SettingsDestination.monitors),
-            ("per-edge", .appearance),
-            ("drop zone", .appearance),
+            ("per-edge", .gapsAndBorders),
+            ("drop zone", .gapsAndBorders),
         ] {
             let results = SidebarSearch.results(
                 query: query,

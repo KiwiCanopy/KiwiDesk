@@ -20,6 +20,12 @@ struct GreyOutAnchorTests {
     /// occur: a file anchoring TWO sections with one expression
     /// would keep a bare `contains` green with one of the pair
     /// deleted — the cannot-fail needle #520 warned about.
+    ///
+    /// EXACT, not a floor. `>=` re-opens the same hole one size
+    /// up: an expression that later gains a third occurrence
+    /// could lose one of three and stay green. A gate or anchor
+    /// gaining an occurrence is a conscious edit, so it updates
+    /// the count.
     private let anchors: [(file: String, anchor: String, count: Int)] = [
         (
             "FocusBorderEditor.swift",
@@ -36,16 +42,27 @@ struct GreyOutAnchorTests {
             "help: allows ? nil : BarsGateHelp.noBarShown",
             1
         ),
-        // The interim colour cards' headers, anchored where
-        // their gates are resolved (`BarsSection`).
+        // Advanced Colours (#678 Phase 3). Every gate on this
+        // page names a switch on ANOTHER page, so the header
+        // anchor is not a nicety here — the hover string on a
+        // dimmed row is the only other channel, and it cannot
+        // say where to go without one.
         (
-            "BarsSection.swift",
-            "help: on ? nil : BarsGateHelp.spaceBarOff",
-            1
+            "BarColorCards.swift",
+            "help: allows ? nil : AdvancedColorsHelp",
+            2
         ),
         (
-            "BarsSection.swift",
-            "help: shown ? nil : BarsGateHelp.noBarShown",
+            "StructureColorCards.swift",
+            "help: gates.bordersHeaderHelp",
+            1
+        ),
+        // The drag columns are subheadings, not sections, so
+        // their live `?` is a `HelpButton` beside the title —
+        // outside the dimmed rows either way.
+        (
+            "StructureColorCards.swift",
+            "HelpButton(explanation: help, subject: title)",
             1
         ),
         (
@@ -59,9 +76,11 @@ struct GreyOutAnchorTests {
             1
         ),
         // Reduce Motion greys the whole Animations card; the
-        // explanation rides the header `?` so it survives the dim.
+        // explanation rides the header `?` so it survives the
+        // dim. The card moved to Colours & Motion in #678
+        // Phase 3, gate and anchor together.
         (
-            "BehaviorSection.swift",
+            "MotionCard.swift",
             "help: reduceMotion ? reduceMotionHelp : nil",
             1
         ),
@@ -83,7 +102,7 @@ struct GreyOutAnchorTests {
                     separatedBy: anchor
                 ).count - 1
             #expect(
-                found >= count,
+                found == count,
                 Comment(
                     rawValue:
                         "\(name) has \(found) of \(count) gate "

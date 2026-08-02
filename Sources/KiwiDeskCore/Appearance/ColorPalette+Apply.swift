@@ -10,9 +10,20 @@ extension ColorPalette {
     /// Absent keys are left untouched (sparse).
     public func apply(to settings: inout TilingSettings) {
         for (path, hex) in colors {
-            guard DragVisual.parseHex(hex) != nil else { continue }
+            guard isPaintable(hex, at: path) else { continue }
             apply(path: path, hex: hex, to: &settings)
         }
+    }
+
+    /// A hex, or the empty "Automatic" value on the one kind of
+    /// path that has an adaptive face
+    /// (`ColorPaletteKeys.allowsAutomatic`). Anything else is
+    /// skipped rather than fatal.
+    private func isPaintable(_ hex: String, at path: String) -> Bool {
+        if hex.isEmpty {
+            return ColorPaletteKeys.allowsAutomatic(path)
+        }
+        return DragVisual.parseHex(hex) != nil
     }
 
     private func apply(
@@ -32,6 +43,12 @@ extension ColorPalette {
             applyBorder(parts[1], hex, to: &settings.borderStyle)
         case "drag" where parts.count == 3:
             applyDrag(parts[1], parts[2], hex, to: &settings)
+        // The two mark tints (#678 Colours phase). Each struct IS
+        // the mark, so its one color key is bare `color`.
+        case "sticky" where parts == ["sticky", "color"]:
+            settings.stickyStyle.color = hex
+        case "floating" where parts == ["floating", "color"]:
+            settings.floatingStyle.color = hex
         default:
             break
         }

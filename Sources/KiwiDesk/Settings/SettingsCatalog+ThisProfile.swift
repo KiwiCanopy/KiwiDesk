@@ -2,7 +2,8 @@ import KiwiDeskCore
 
 // The declaration structs behind the sidebar's **This Profile**
 // group (`SettingsDestination.thisProfile`): Spaces, Layout
-// Defaults, Monitors, Appearance, Bars, Behavior. Split from
+// Defaults, Monitors, Colors & Motion, Advanced Colors, Gaps &
+// Borders, Bars, Behavior. Split from
 // `SettingsCatalog.swift` on the seam the sidebar already
 // draws, so a destination's declarations sit where its
 // neighbours do. The aggregation and the enumeration stay in
@@ -55,11 +56,78 @@ struct GapAxisControls: Sendable {
     let axisVertical = SettingsControl("gaps.vertical", "Vertical")
 }
 
-struct AppearanceControls: Sendable {
+/// Colours & Motion (#678 Phase 3): the palette shelf, the
+/// live-colours scene, and the Motion card that moved here whole
+/// from Behavior.
+struct ColorsControls: Sendable {
     let paletteShelf = SettingsControl(
         "palettes.title",
         "Color palette"
     )
+    let currentScene = SettingsControl(
+        "colors.scene.title",
+        "Current colors"
+    )
+    let motionCard = SettingsControl(
+        "behavior.animations.title",
+        "Animations"
+    )
+    /// Named for what it holds, not "more" or "advanced": this
+    /// area's Nerd twin is a whole separate card, and one word
+    /// must never mean both a row tier and mode depth.
+    let motionMore = SettingsDrawer(
+        "motion.more",
+        "Per-event and duration"
+    )
+}
+
+/// Advanced Colours (#678 Phase 3): four groups matching the four
+/// things on screen. The two drawers co-render on one page, so
+/// each carries its own instance id — the twice-mounted shape
+/// (#277) a shared declaration would make `scrollTo`-undefined.
+struct AdvancedColorsControls: Sendable {
+    /// Each group's title names the SUBSYSTEM plus "colors".
+    /// Bare "Space Bar" / "Drag & drop" would collide in search
+    /// with the cards that own those things' structure: sidebar
+    /// search returns one row per destination, so the query
+    /// would come back as two rows reading identically, with
+    /// nothing to tell the swatch grid from the bar's own card.
+    /// (The ORDER decides which comes first and is settled
+    /// separately, in `SettingsDestination.thisProfile`; it is
+    /// not what makes the titles distinct.) The two bar titles
+    /// are the retired interim cards' keys, so their eleven
+    /// translations carry straight over.
+    let bordersGroup = SettingsControl(
+        "colors.borders.title",
+        "Border colors"
+    )
+    let dragGroup = SettingsControl(
+        "colors.drag.title",
+        "Drag colors"
+    )
+    let spaceBarGroup = SettingsControl(
+        "space_bar.colors.title",
+        "Space Bar colors"
+    )
+    let spaceBarMore = SettingsDrawer(
+        "colors.more",
+        "More colors",
+        instance: "space_bar"
+    )
+    let appBarGroup = SettingsControl(
+        "app_bar.global_colors.title",
+        "App Bar colors"
+    )
+    let appBarMore = SettingsDrawer(
+        "colors.more",
+        "More colors",
+        instance: "app_bar"
+    )
+}
+
+/// Gaps & Borders — the structure half of the old Appearance
+/// destination, renamed with its page in #678 Phase 3.
+struct GapsAndBordersControls: Sendable {
     let gapsCard = SettingsControl("gaps.title", "Gaps")
     let gapsPerEdge = SettingsDrawer(
         "gaps.per_edge",
@@ -131,44 +199,12 @@ struct BarsControls: Sendable {
         "layout.scrolling.name",
         "Scrolling"
     )
-    /// The interim colour cards — the census places bar colours
-    /// in Advanced Colours, which the Colours phase renders;
-    /// until then these keep the only colour GUI alive.
-    /// "App Bar colors", not "Global …" (ui-designer
-    /// 2026-07-28): "Global" is KiwiDesk's word for the
-    /// config-vs-override axis (the Profiles system).
-    let spaceBarColorsCard = SettingsControl(
-        "space_bar.colors.title",
-        "Space Bar colors"
-    )
-    /// The two Advanced-colors drawers co-render on the one page
-    /// now, so the old shared surface-free declaration (whose
-    /// justification was the mutual exclusion of the switch)
-    /// splits into per-instance ids, like the Style drawers.
-    let spaceBarAdvancedColors = SettingsDrawer(
-        "bars.advanced_colors",
-        "Advanced colors",
-        instance: "space_bar"
-    )
-    let appBarColorsCard = SettingsControl(
-        "app_bar.global_colors.title",
-        "App Bar colors"
-    )
-    let appBarAdvancedColors = SettingsDrawer(
-        "bars.advanced_colors",
-        "Advanced colors",
-        instance: "app_bar"
-    )
 }
 
 struct BehaviorControls: Sendable {
     let mouseCard = SettingsControl(
         "behavior.mouse.title",
         "Mouse"
-    )
-    let animationsCard = SettingsControl(
-        "behavior.animations.title",
-        "Animations"
     )
     let quitCard = SettingsControl("behavior.quit.title", "On quit")
 }

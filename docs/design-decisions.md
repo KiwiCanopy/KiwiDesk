@@ -1202,9 +1202,9 @@ single biggest source of confusion. The sidebar makes the
 split part of the navigation, but names the groups by *topic*,
 not scope (System Settings groups by subject, never by
 per-machine/per-user scope): **Design** holds the
-profile-scoped content (Spaces, Layout, Monitors, Appearance,
-Behavior); **System** holds the app-level surfaces (Profiles,
-Shortcuts, App Rules, General). Scope stays the underlying
+profile-scoped content, **System** the app-level surfaces
+(`SettingsDestination.thisProfile` / `.wholeApp` are the
+membership, and the only copy of it). Scope stays the underlying
 model — the header's profile picker shows which profile
 "Design" edits — it's just no longer the group label, since a
 new user can't predict placement from "is this a Profile
@@ -1213,8 +1213,10 @@ Profile" / "Whole App" split; only the labels are topical.
 (#68 §3.1)
 
 **The sidebar is a fixed-width, floating, non-resizable
-column.** (#297) A closed ~9-row icon+label taxonomy never
-needs more or less room, so a draggable divider is the same
+column.** (#297) The taxonomy is **closed** — the sidebar shows
+exactly the `SettingsDestination` cases, never a user-grown list
+— so whatever its length it never needs more or less room than
+its longest label, and a draggable divider is the same
 "bespoke panel" tell that got the collapse toggle removed
 (#68) — and a collapsed sidebar had no affordance to reopen
 it. System Settings, the GUI north star, fixes its sidebar
@@ -2166,6 +2168,29 @@ was dropped — the stored value stays a hex string, and
 copy/paste theme sharing works through the panel. (#68
 §3.14, revised)
 
+**A palette carries every colour, including the two it used to
+miss.** (#678 Phase 3.) The colour surface is reflection-derived
+from `_color`-suffixed keys, which silently excluded the sticky
+and floating mark tints — their key is a bare `color`, because
+each struct IS one mark. That was invisible while the marks were
+edited on a different page from the shelf. Putting all of them on
+one page under a "save these as a palette" promise made it a
+defect: the bridge would have dropped two of its own rows. The
+filter now admits an exact `color` as well, and the empty
+"Automatic" value is accepted on those two paths and nowhere
+else — without that the surface would be one-directional (paint a
+mark, never hand it back), and the derived default palette, which
+extracts the shipped defaults, would carry two values apply
+dropped. The authored palettes in `Resources/Palettes` leave
+both keys out and should keep leaving them out: a mark tint is
+the one colour whose default is *adaptive*, so a palette that
+pins it takes a light/dark-following mark away without saying
+so. The derived default palette is the deliberate exception —
+it carries both, empty, which is what makes a reset reach them.
+This does not soften the colors-only rule below — two more
+COLOURS joined; no palette
+gained a flag, a width or an effect.
+
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
 colors, bundled or user-saved) reads as one system when its
@@ -2431,20 +2456,67 @@ merged both bars into one **Bars** destination, and the #678
 Phase 2 redesign made it one page of two cards, with the
 per-layout overrides gone per the §3.4 rescope above. What
 survives of this entry is the argument: bar configuration is
-too deep to live inside Appearance, and stays out of it.)
+too deep to live inside the structure page — Appearance then,
+Gaps & Borders now — and stays out of it.)
 Appearance kept only Gaps and Drag & drop —
 the everyday controls people revisit — while the App Bar
 (global style + ~10 colors + per-layout overrides) was the
 deepest rabbit hole in that tab and dominated the scroll. It
 became a first-class, deep-linkable destination in the *This
-Profile* group, peer of Appearance. It is **not** a tab
+Profile* group, peer of that page. It is **not** a tab
 strip alongside Gaps/Drag: those are co-active concerns tuned
 together in one session, not a mutually-exclusive set, so a
 strip would misapply the #205 "tabs fit a fixed exclusive
-set" principle. On the new page the ~10 hex colors collapse
-behind an **"Advanced colors" disclosure** (shut by default),
-keeping only Fill / Highlight — the ones the preview strip
-most visibly reflects — inline.
+set" principle. (Superseded in part, #678 Phase 3: the bar
+colors left the Bars page entirely for Advanced Colors, and
+their "Advanced colors" disclosure became "More colors"
+there — see "Colour is its own destination" below. The
+at-rest/behind-a-drawer SPLIT survives verbatim: Fill and
+Highlight are still the two the preview strip most visibly
+reflects, and are still the two at rest.)
+
+**[Principle] Colour is its own destination, and a colour
+renders in exactly one of them.** (#678 Phase 3, 2026-08-02.)
+Filing a colour under the thing it paints — the ring's tint
+under Focus border, a bar's tints on the Bars page, the mark
+tints under Sticky windows — scatters one decision ("what does
+this look like") across every page, and it puts nothing in the
+way of the same hex getting a second editor. That is the failure
+worth naming: two editors for one value keep separate disclosure
+state and separate gates, so they disagree about whether the
+value is even editable, and a user who changes it in one place
+has no way to learn the other exists.
+
+So the split is by KIND, not by subsystem — **structure** (does
+this get drawn, how wide, how round) stays with its feature;
+**colour** (what is it painted with) collects onto two pages.
+A Simple user's whole colour surface is then a shelf of
+palettes and one live scene of what they are running — no
+individual hex, and no reason to open the other page. A user
+who does want the individual tints meets them grouped by
+*where you see it*, because you arrive at that page having
+noticed something on screen is wrong, not looking for
+"highlight colour" in the abstract.
+
+The cost is real and is paid deliberately: every gate on the
+Advanced Colours page now names a switch on another page, so
+"why is this greyed" has to say *where to go*, on a live `?`
+outside the dimmed rows. That is the price of the split, not an
+oversight in it.
+
+Two consequences bind future work. **A destination's title is a
+search key, so content moving out moves the title with it.**
+Sidebar search indexes destination titles, so a page keeping a
+name for content it no longer holds keeps winning the query for
+that content — Appearance, the most colour-sounding word in the
+app, would have gone on answering "where do I change the ring
+colour" after the split left it owning no colour. It is **Gaps
+& Borders**, the name the census already gives that area, so
+the interim sidebar teaches the name that survives. **And the colour pages
+sit after the things they paint** in the sidebar: search returns
+one hit per destination in sidebar order, so a colour page above
+Bars would answer "App Bar" with a grid of swatches instead of
+with the App Bar's own card.
 
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a

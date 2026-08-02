@@ -10,7 +10,9 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case spaces
     case layoutDefaults
     case monitors
-    case appearance
+    case colors
+    case advancedColors
+    case gapsAndBorders
     case bars
     case behavior
     // Whole App
@@ -21,9 +23,22 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Advanced Colors sits DIRECTLY under its Simple twin: with
+    /// no mode toggle until Phase 4, that adjacency is the only
+    /// cue saying "this is the deep version of the page above",
+    /// and when the toggle lands the row leaves the end of a pair
+    /// rather than a gap in the middle of the list.
+    ///
+    /// The pair sits AFTER the things it paints, and the order is
+    /// load-bearing beyond taste: sidebar search returns one hit
+    /// per destination in this order, so a colour page listed
+    /// above Bars would answer "App Bar" with a grid of swatches
+    /// instead of with the App Bar's own card
+    /// (`SidebarSearchAnchorTests`). You arrive at colour having
+    /// noticed something on a surface you already know.
     static let thisProfile: [SettingsDestination] = [
-        .spaces, .layoutDefaults, .monitors, .appearance,
-        .bars, .behavior,
+        .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
+        .bars, .colors, .advancedColors, .behavior,
     ]
     static let wholeApp: [SettingsDestination] = [
         .profiles, .shortcuts, .appRules, .general,
@@ -34,8 +49,15 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return L("sidebar.spaces", "Spaces")
         case .layoutDefaults: return L("sidebar.layout", "Layout Defaults")
         case .monitors: return L("sidebar.monitors", "Monitors")
-        case .appearance:
-            return L("sidebar.appearance", "Appearance")
+        case .colors:
+            return L("sidebar.colors", "Colors & Motion")
+        case .advancedColors:
+            return L(
+                "sidebar.advanced_colors",
+                "Advanced Colors"
+            )
+        case .gapsAndBorders:
+            return L("sidebar.gaps_borders", "Gaps & Borders")
         case .bars: return L("sidebar.bars", "Bars")
         case .behavior: return L("sidebar.behavior", "Behavior")
         case .profiles: return L("sidebar.profiles", "Profiles")
@@ -55,7 +77,11 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return "squares.below.rectangle"
         case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
-        case .appearance: return "paintbrush.fill"
+        // The colour pair reads as a family — one paint glyph
+        // each, the deeper one on the deeper page.
+        case .colors: return "paintbrush.fill"
+        case .advancedColors: return "paintpalette.fill"
+        case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
         case .behavior: return "cursorarrow.motionlines"
         case .profiles: return "square.stack.3d.up"
@@ -77,7 +103,13 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             // Settings style), not a brand hue.
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
-        case .appearance: return .purple
+        // Colours & Motion inherits Appearance's purple with its
+        // meaning; its Nerd twin takes a deeper violet, so the
+        // pairing is legible by hue before either label is read.
+        case .colors: return .purple
+        case .advancedColors:
+            return Color(red: 0.38, green: 0.20, blue: 0.60)
+        case .gapsAndBorders: return .brown
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
