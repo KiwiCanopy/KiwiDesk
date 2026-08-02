@@ -75,6 +75,25 @@ extension StateCoordinator {
         // returner into a space whose members all left with
         // it (`focused == nil`) — the settle fallback needs a
         // target even when no focus report ever arrives.
+        //
+        // A TRANSIENT OVERLAY takes no create-time focus at all
+        // (#671). A context menu, a panel, any window floating
+        // for a structural reason is the OS's to focus and
+        // un-focus; granting it the space's focus made its
+        // dismissal a `focusLost`, and the handoff then issued a
+        // real AX raise plus a mouse warp onto the fallback —
+        // right-clicking in Telegram moved the pointer. In a
+        // focus-driven mode the grant also panned the space
+        // toward the popup. Read the flag back from state, not
+        // from the incoming snapshot: a remembered-tiled restore
+        // above clears it (`setFloating`, #300), and such a
+        // window is an ordinary window again. This is the same
+        // classification the ring suppression uses, so a
+        // user-floated *standard* window still takes focus like
+        // any other spawn.
+        if windows[window.id]?.isTransientOverlay == true {
+            return
+        }
         if !effects.hadRememberedSpace
             || workspaces[target]?.focused == nil
         {

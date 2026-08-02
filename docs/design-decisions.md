@@ -425,6 +425,21 @@ decision stays AX-free, and it clears the moment detection
 self-heals a window back to tiled — the flag can never outlive the
 float state it depends on (overlay ⟹ floating).
 
+The same class is **inert around focus**, on the same reasoning
+(#671). A transient overlay never takes its space's focus when it
+appears, its disappearance owes the space's fallback no handoff,
+and its appearance does not supersede a pending focus follow.
+Focus for such a window belongs to macOS, which grants it while
+the popup is up and returns it underneath the moment the popup
+goes away — so anything KiwiDesk adds on top is not a handoff but
+a second, visible one: a `kAXRaiseAction` that re-activates an
+app, a pointer warp under mouse-follows-focus, and a pan toward
+the popup in a focus-driven layout. Right-clicking a message
+moved the mouse. The signal is deliberately the structural
+overlay flag and not floating-ness, exactly as for the ring: a
+window the user floated through `float_rules` is an ordinary
+window and still takes focus when it spawns.
+
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — graduated
 from draw-time suppression to the **built-in ignore gate** (#448):

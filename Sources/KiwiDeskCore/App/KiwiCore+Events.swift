@@ -46,8 +46,18 @@ extension KiwiCore {
             handleWindowFocused(id, effects: effects)
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
-            // of a hidden window (see above).
-            deferred.cancel(.focusFollow)
+            // of a hidden window (see above) — but a transient
+            // overlay is not the user changing windows, so it
+            // must not drop a legitimate follow either (#671,
+            // the same blind spot as the focus grant). Read the
+            // classification back from state: the fold clears
+            // the flag when a remembered-tiled restore heals the
+            // window (#300).
+            if state.windows[window.id]?
+                .isTransientOverlay != true
+            {
+                deferred.cancel(.focusFollow)
+            }
             newlyCreatedWindow = window.id
             emitWindowCreated(
                 window,
@@ -208,10 +218,13 @@ extension KiwiCore {
         }
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise
-        // makes it real). Only raise windows the app still lists:
+        // makes it real) — unless the gone window was a transient
+        // overlay, which never legitimately held focus (#671, the
+        // `handsOffFocus` docstring). Only raise windows the app
+        // still lists:
         // after a native Space switch the fallback may live on
         // the previous desktop, and raising it would switch back.
-        if effects.removedWindow?.focusLost == true,
+        if effects.removedWindow?.handsOffFocus == true,
             let next = activeSpace?.focused,
             eventLoop.isListed(next)
         {
