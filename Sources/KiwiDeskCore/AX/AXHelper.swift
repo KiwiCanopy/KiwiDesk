@@ -232,10 +232,16 @@ public enum AXHelper {
 
     /// Raises a window without focusing it or activating its
     /// app — z-order only. For a FOREIGN window this is blocking
-    /// IPC (returns after the target app processed the action) and
-    /// safe off the main thread; for an OWN-process window AppKit
-    /// runs the ordering in-process on the calling thread, so the
-    /// caller must gate on `mustRaiseOnMainThread` (#426).
+    /// IPC and safe off the main thread; for an OWN-process window
+    /// AppKit runs the ordering in-process on the calling thread,
+    /// so the caller must gate on `mustRaiseOnMainThread` (#426).
+    ///
+    /// **The return says the app accepted the action, not that it
+    /// performed it** (#684). Anything that needs several raises
+    /// to land in a given ORDER — or one raise to clear a plane it
+    /// must sit above — verifies against the WindowServer through
+    /// `ZOrderDrain`, which owns the measurements; never issue
+    /// them back to back and trust the returns.
     public static func raiseQuietly(_ element: AXUIElement) {
         AXUIElementPerformAction(
             element,

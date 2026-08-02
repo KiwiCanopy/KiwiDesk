@@ -172,7 +172,11 @@ public final class KiwiCore {
     /// `runPendingFocusRaise` staleness pattern). The `zOrderRaise
     /// Echoes` revert keeps focus on the real target, which is what
     /// makes the live-focus half of the guard safe to check.
-    var zOrderRaiseGeneration = 0
+    ///
+    /// A counter object rather than an `Int` because the drain
+    /// re-reads it off the main actor between raises — see
+    /// `ZOrderGeneration`.
+    let zOrderRaiseGeneration = ZOrderGeneration()
 
     /// How long after a z-order raise its focus echo may still arrive
     /// and be reverted (#418/#425). Sized to the slowest AX

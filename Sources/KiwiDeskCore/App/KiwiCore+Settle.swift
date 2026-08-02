@@ -27,11 +27,16 @@ extension KiwiCore {
     /// re-asserting the focused window on top, healing any
     /// interleaving with the synchronous focus raise). The border
     /// re-sync only schedules, so it cannot interleave here —
-    /// though its body can still land while a long pile raise is
-    /// draining (`performZOrderSequence` walks a background AX
-    /// queue at 1–20 ms a window), leaving ring and mark one
-    /// restack behind until the next event. Harmless, and the
-    /// next event is close.
+    /// though its body can still land while a pile raise is
+    /// draining, which since #684 means as long as
+    /// `ZOrderDrain.totalLimit` rather than the few milliseconds
+    /// a fire-and-forget sequence took. Ring and mark are then one
+    /// restack behind for that long. Still accepted, but not for
+    /// the old reason — "the next event is close" was an argument
+    /// about a ~20 ms window. It holds because the overlays trail
+    /// the *stacking* only, never the frame (`follow` and the
+    /// settle passes own that, see borders.md), and the restore
+    /// ends by re-asserting focus, which re-syncs them.
     func animationsDidSettle() {
         runPendingZOrderRestore()
         runPendingFocusRaise()

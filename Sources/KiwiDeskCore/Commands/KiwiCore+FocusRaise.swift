@@ -144,6 +144,18 @@ extension KiwiCore {
         // across apps from a background app. Guard on the in-flight
         // count so the restore's own closing re-assert (which calls
         // back here) can't re-arm and loop (owner 2026-07-20).
+        //
+        // Read the counter as it is now, not as it was: since
+        // #684 a sequence holds it until its landings verify, so
+        // this also drops a GENUINE restore for that whole window
+        // — deterministically, because a monocle restore's floor
+        // holds the frontmost app's key window and a quiet raise
+        // can never clear it, so the drain always pays out its
+        // per-window limit here. #689 tracks it, and its fix is to
+        // give this arm the semantic test the scrolling arm below
+        // already uses (refuse the re-assert because the focus is
+        // unchanged) rather than asking whether a restore is in
+        // flight at all.
         if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0 {
             scheduleZOrderRestore()
         }
@@ -192,12 +204,17 @@ extension KiwiCore {
         // the jump test already refuses that call — the re-assert
         // targets the focus that is current, so the distance is
         // zero. The counter would only ever suppress a REAL jump:
-        // a pile drain walks the AX queue at 1–20 ms a window,
-        // and far slower for an app that answers AX lazily, so a
-        // user stepping back and forth across the row lands
-        // inside that window constantly and would see every
-        // second jump silently skip its restack (owner device QA,
-        // 2026-08-02).
+        // a pile drain holds it for as long as the sequence takes
+        // to verify its landings — bounded since #684 at
+        // `ZOrderDrain.landingLimit` a window and `totalLimit` a
+        // sequence, where it used to be unbounded and set by
+        // whatever an app that answers AX lazily did — so a user
+        // stepping back and forth across the row lands inside
+        // that window constantly and would see every second jump
+        // silently skip its restack (owner device QA,
+        // 2026-08-02). Bounding it did not shorten it: the window
+        // is now longer and deterministic, so the conclusion
+        // holds harder than when it was written.
         if scrollFocusJumpsSlots(to: id, from: previousFocused) {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }

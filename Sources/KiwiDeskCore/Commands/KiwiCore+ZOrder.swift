@@ -1,9 +1,12 @@
 import AppKit
 import Foundation
 
-/// Serial queue for z-order raises. AX raise calls are
-/// blocking IPC; running them here keeps the main thread free
-/// and their order strict.
+/// Serial queue for z-order raises. AX raise calls are blocking
+/// IPC, and the drain that runs on top of them blocks further
+/// still while it waits for each raise to land, so both belong
+/// off the main thread. The queue keeps the sequence serial; what
+/// keeps the resulting STACKING in order is `ZOrderDrain` — the
+/// call itself returns before the app performs the raise (#684).
 let zOrderQueue = DispatchQueue(
     label: "org.kiwidesk.zorder",
     qos: .userInteractive
@@ -19,6 +22,17 @@ extension KiwiCore {
     /// target app's main thread is free, and while frames are
     /// still being applied, slow apps process their raise
     /// late and end up out of order.
+    ///
+    /// NOT deferred past a restore that is still draining, though
+    /// a sequence queued behind another does lag the settle
+    /// (#684's second half, still open). Holding it back and
+    /// running it from the drain's completion was built and
+    /// reverted: it re-raises windows whose first raise echo may
+    /// still be in flight, and `zOrderRaiseEchoes` consumes a
+    /// window's stamp on its FIRST echo — so the second echo
+    /// reads as a deliberate focus change and the row pans onto a
+    /// pile-mate (owner QA, 2026-08-02). Coalescing needs the
+    /// ledger to be re-stamped per sequence before it is safe.
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
         if tiler.animation.activeCount == 0 {
@@ -101,7 +115,18 @@ extension KiwiCore {
         guard let focused = state.focusAnchor(of: space, tiled: tiled),
             state.windows[focused]?.isFloating == false
         else { return }
-        raiseSequentially([focused], thenFocus: focused)
+        // The floor is what makes this raise mean anything. Every
+        // monocle window sits at the same full-screen frame, so
+        // the one thing being asked for is "above the others" —
+        // and with a lone target and no floor the plan is empty
+        // by construction, since one window is trivially in order
+        // among a set of one. That shipped: the restore ran and
+        // raised nothing (architect review, 2026-08-02).
+        raiseSequentially(
+            [focused],
+            thenFocus: focused,
+            above: Self.raiseFloor(tiled: tiled, excluding: focused)
+        )
     }
 
     /// Track (#193): an overflow cascade piles windows — the
@@ -151,39 +176,9 @@ extension KiwiCore {
             thenFocus: state.focusAnchor(
                 of: space,
                 tiled: input.tiled
-            )
+            ),
+            above: []
         )
-    }
-
-    /// Raise order for a cascading region: ascending `minY` —
-    /// piles always cascade downward, so the most-buried
-    /// (topmost) frame raises first and each later raise lands
-    /// on top of it. Frame order, not array order: the render
-    /// can reorder a pile (`OverlapStack.stickyExempt`, #414
-    /// v2), and raising in array order would bury the displaced
-    /// window's title bar under the promoted sticky's full
-    /// slot. Non-overlapping members sort in too (harmless —
-    /// nothing they cover). Ties keep the input order. Pure
-    /// math, unit-tested.
-    nonisolated static func cascadeRaiseOrder(
-        _ ids: [WindowID],
-        frames: [WindowID: CGRect]
-    ) -> [WindowID] {
-        // A frameless id raises LAST (on top): unreachable
-        // today (both callers derive ids and frames from the
-        // same layout), but if a derivation ever drifts, a
-        // window floating above the cascade is visible —
-        // buried under it would be a silent loss.
-        let unknown = CGFloat.greatestFiniteMagnitude
-        return
-            ids.enumerated()
-            .sorted { a, b in
-                let ya = frames[a.element]?.minY ?? unknown
-                let yb = frames[b.element]?.minY ?? unknown
-                if ya != yb { return ya < yb }
-                return a.offset < b.offset
-            }
-            .map(\.element)
     }
 
     /// Schedules a track z-order restore, but only when the
@@ -202,23 +197,6 @@ extension KiwiCore {
             )
         else { return }
         scheduleZOrderRestore()
-    }
-
-    /// Whether any two laid-out frames overlap — the signature
-    /// of an overflow cascade. Tiled tracks never overlap (the
-    /// inner gaps separate them), so this is false whenever the
-    /// space fits without piling. Pure math, unit-tested.
-    nonisolated static func framesCascade(
-        _ frames: [WindowID: CGRect]
-    ) -> Bool {
-        let rects = Array(frames.values)
-        for i in rects.indices {
-            for j in (i + 1)..<rects.count
-            where !rects[i].intersection(rects[j]).isEmpty {
-                return true
-            }
-        }
-        return false
     }
 
     /// Re-raises the stack zone top to bottom, so upper
@@ -251,7 +229,8 @@ extension KiwiCore {
                 Array(tiled[boundary...]),
                 frames: tiler.calculatedFrames(state: state)
             ),
-            thenFocus: state.focusAnchor(of: space, tiled: tiled)
+            thenFocus: state.focusAnchor(of: space, tiled: tiled),
+            above: []
         )
     }
 
@@ -280,34 +259,24 @@ extension KiwiCore {
                 tiled,
                 focusIndex: focusIndex
             ),
-            thenFocus: anchor
+            thenFocus: anchor,
+            above: []
         )
     }
 
-    /// The raise sequence for the scrolling piles: both sides
-    /// run farthest-from-focus first, so every raise lands on
-    /// top of the previous one — the left pile ascending, the
-    /// right pile descending. The focused window itself is
-    /// left out; the closing focus re-assert puts it on top.
-    /// Pure math, unit-tested.
-    nonisolated static func scrollingRaiseOrder(
-        _ windows: [WindowID],
-        focusIndex: Int
-    ) -> [WindowID] {
-        guard windows.indices.contains(focusIndex) else {
-            return windows
-        }
-        return Array(windows[..<focusIndex])
-            + windows[(focusIndex + 1)...].reversed()
-    }
-
-    /// Raises the windows in exactly the given order. Raises
-    /// run sequentially on one queue: each call returns only
-    /// after the target app processed it, which keeps the
-    /// order across apps.
+    /// Raises the windows in exactly the given order, waiting for
+    /// each raise to LAND before issuing the next.
+    ///
+    /// The wait is the whole point (#684): the AX call returns
+    /// before a slow app has performed the raise, so a sequence
+    /// issued back to back — which took ~10 ms for eight windows —
+    /// leaves the apps to land them in whatever order they get to
+    /// them, and the pile settles scrambled. `ZOrderDrain` owns
+    /// the verification, the budget and the measurements.
     private func raiseSequentially(
         _ ids: [WindowID],
-        thenFocus focused: WindowID?
+        thenFocus focused: WindowID?,
+        above floor: [WindowID]
     ) {
         let pairs = ids.compactMap { id in
             eventLoop.element(for: id).map { (id, $0) }
@@ -328,10 +297,14 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        performZOrderSequence(elements: pairs.map(\.1)) {
+        performZOrderSequence(
+            targets: pairs,
+            above: floor,
+            generation: generation
+        ) {
             [weak self] in
             guard let self,
-                generation == self.zOrderRaiseGeneration
+                generation == self.zOrderRaiseGeneration.value
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(focused, warp: false)
