@@ -99,14 +99,13 @@ editing here:
   here. What earns the sequence is a landing worth verifying — an
   order to keep, or a floor the raise must clear; a raise with
   neither needs none of it. Nothing scans for a bare loop, so a
-  new ordered raise owes this deliberately. #684 converted the
-  pile restores and the float raise and stopped there, leaving
-  the quit-grid restack outside its scope and filing what that
-  costs as
-  [#688](https://github.com/KiwiCanopy/KiwiDesk/issues/688) —
-  those raises run after management stops, so no later restore
-  can correct a miss, which is the one place this rule's usual
-  "the next restore heals it" does not apply.
+  new ordered raise owes this deliberately. Weigh a teardown
+  raise harder than a live one:
+  [#688](https://github.com/KiwiCanopy/KiwiDesk/issues/688)
+  tracks the quit-grid restack, whose raises run after
+  management stops — so no later restore can correct a miss,
+  which is the one place this rule's usual "the next restore
+  heals it" does not apply.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

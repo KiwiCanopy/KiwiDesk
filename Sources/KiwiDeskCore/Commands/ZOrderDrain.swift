@@ -9,8 +9,8 @@ import Foundation
 /// Telegram, Ghostty, Zen, ChatGPT, Notizen, Claude, on device
 /// 2026-08-02, macOS 26.6): the call returns in 0.4-3.8 ms and
 /// the window reaches its new stacking position 1-20 ms later.
-/// The whole sequence issues in ~10 ms, so
-/// every raise is still in flight when the next goes out and the
+/// The whole sequence issues in ~10 ms, so every raise is still
+/// in flight when the next goes out and the
 /// apps land them in whatever order they get to them — the pile
 /// settled scrambled in 3 of 3 runs. The window raised FIRST
 /// suffers most, because every later raise has to beat it.
@@ -277,7 +277,19 @@ struct ZOrderDrain: Sendable {
 /// than on the main actor: the drain reads it between raises from
 /// `zOrderQueue` to abandon a sequence a newer one has superseded
 /// (#684), and every other reader is main-actor code that would
-/// otherwise have to hop threads to answer it.
+/// otherwise have to hop threads to answer it. It lives beside
+/// the drain rather than in `App/` with the property that holds
+/// it because the off-actor read is the only reason it is not
+/// still an `Int` — a deliberate placement, not an oversight.
+///
+/// **One minting site: `stampZOrderRaise`, on the main actor.**
+/// The compiler used to enforce that by isolation and no longer
+/// can: `@unchecked Sendable` makes a `bump()` from the raise
+/// queue compile, and it would silently invalidate every
+/// in-flight sequence's identity — the identity #684 spent a
+/// round unifying, since one generation now keys the drain's
+/// staleness check, the stamp release and the focus handoff.
+/// Read it anywhere; mint it in one place.
 final class ZOrderGeneration: @unchecked Sendable {
     private let lock = NSLock()
     private var current = 0
