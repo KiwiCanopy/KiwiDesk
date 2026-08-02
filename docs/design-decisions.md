@@ -613,6 +613,88 @@ the overflow-pile classification are unchanged (the pile is still
 the array-order Track model's fallback), so the table above keeps
 its Track row as-is.
 
+### Raise-echo revert: state-only, and a click is provenance
+
+**[Rationale]**
+
+A z-order raise couples with app activation, so every window a
+restore raises emits a focus report carrying no self-raise
+provenance ([#152](https://github.com/KiwiCanopy/KiwiDesk/issues/152)).
+KiwiDesk stamps the raised windows and **reverts** the first
+report from a stamped window back to the real focus
+(`zOrderRaiseEchoes`,
+[#418](https://github.com/KiwiCanopy/KiwiDesk/issues/418)/[#425](https://github.com/KiwiCanopy/KiwiDesk/issues/425)).
+Two rulings shape that revert
+([#687](https://github.com/KiwiCanopy/KiwiDesk/issues/687)):
+
+**The revert moves state only, never OS focus.** During a
+sequence, macOS key focus genuinely churns window by window as
+each raise's activation lands; the one owner of putting it back
+is the sequence's **closing re-assert** — the
+generation-guarded completion every sequence hands to
+`performZOrderSequence` (`raiseSequentially(thenFocus:)` for
+pile restores, `raiseFloatsAndSticky` for float raises) — so a
+stale sequence cannot steal focus back. Re-asserting inside the
+revert instead — once per echo — would issue a loud raise
+mid-drain for every echo that trails in, fighting the very
+ordering the drain is verifying and re-activating the focused
+app once per pile member. The divergence a state-only revert
+leaves (state on the intended focus, OS still on the echoed
+window) is transient by construction: the closing re-assert
+ends it, and an echo arriving *after* that re-assert finds OS
+focus already restored, so reverting state alone is exactly
+right. The one case where the divergence persisted was a
+wrongly-reverted click — closed by the second ruling, not by
+re-asserting.
+
+**A click that reached the reported window escapes the revert.**
+A genuine click on a stamped window is shaped exactly like the
+raise echo, so it was consumed: keystrokes followed the click
+(macOS focused it) while ring and pan stayed behind — the
+first-click-does-nothing bug. A restore's echoes come from
+windows the user did not click, so a fresh click *that reached
+the reported window* is provenance no echo can forge. "Reached"
+is deliberately stricter than "landed inside its frame":
+edge-pile frames overlap, so a slow pile-mate's late echo can
+contain the click point too, and honoring it would pan the row
+onto a window the user never clicked. Which window a press
+reached is therefore resolved **at press time** (one
+WindowServer stacking read per left press, ~0.4 ms — the
+[#684](https://github.com/KiwiCanopy/KiwiDesk/issues/684)
+measurement): the frontmost *managed* window containing the
+point is, at that instant, exactly the window the press lands
+in. Resolving at echo time instead would read a stacking the
+drain may have churned since — a quiet raise cannot beat
+another app's key window (measured for #684), but raising a
+*same-app* sibling makes it the app's new key window, so a
+stamped sibling could climb above the clicked window and forge
+the escape — against frames a retile may have moved. Skipping
+untracked windows is a known narrowness: a click on a
+non-click-through ignored window overlapping a stamped one can
+still resolve to the window beneath, failing toward honoring a
+focus report, never toward eating one. The escaped report
+keeps its stamp: the raise's real echo may
+still be in flight, and if focus has moved on by the time it
+lands, that echo must still be reverted. What remains eaten is
+a deliberate *clickless* focus of a stamped window (cmd-tab,
+app-driven) inside the ~1 s echo window — once, and strictly
+better than the pre-#418 permanent poisoning.
+
+Two corollaries from the same device QA. **Every echo ledger is
+age-bounded, `outstandingSelfRaises` included**: raising an
+already-key window — the restore's closing re-assert does
+exactly that — emits no echo at all, so an unbounded entry sat
+unconsumed forever and classified the user's *next* click on
+that window as KiwiDesk's own raise echo; an entry counts as an
+echo only while `selfRaiseStamps` says the raise is recent, and
+even a fresh one stands down for click provenance. **A press a
+bar absorbed resolves no window**: the bar is KiwiDesk's own
+overlay, absent from state, and resolving through it handed the
+window beneath a provenance it never earned — which would also
+let a bar click forge the escape for a stamped window under the
+strip. The painted strips (`shownStrips`, the #242 authority)
+are the mask.
+
 ### Layout and resize behavior
 
 **[Rationale]**

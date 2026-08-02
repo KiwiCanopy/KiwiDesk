@@ -1,8 +1,10 @@
 import Foundation
 
-/// Small read-only accessors over the flat window/space state,
-/// split out of `KiwiCore.swift` to keep that file under the
-/// size ceiling (AGENTS.md §2).
+/// Small read-only accessors split out of `KiwiCore.swift` to
+/// keep that file under the size ceiling (AGENTS.md §2) — the
+/// flat window/space state reads, plus the computed config/IPC
+/// paths (`configURL`, `defaultSocketPath`) the same ceiling
+/// pushed out.
 extension KiwiCore {
     public var activeSpace: Space? {
         state.workspaces.activeSpace.flatMap {
@@ -41,5 +43,17 @@ extension KiwiCore {
         !profiles.list().contains {
             $0.caseInsensitiveCompare(name) == .orderedSame
         }
+    }
+
+    public var configURL: URL {
+        configDirectory.appendingPathComponent("init.lua")
+    }
+
+    /// Where the CLI expects the running app's socket.
+    public nonisolated static var defaultSocketPath: String {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                ".config/KiwiDesk/KiwiDesk.sock"
+            ).path
     }
 }

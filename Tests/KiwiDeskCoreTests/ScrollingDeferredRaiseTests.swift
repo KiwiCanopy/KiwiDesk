@@ -118,7 +118,12 @@ struct ScrollingDeferredRaiseTests {
         core.pendingFocusRaise = WindowID(3)
         // The immediate raise of 2 from the previous step now
         // echoes back mid-pan (its AX focus notification lands).
+        // The stamp rides along as `raiseWindow` writes it: the
+        // echo classification is age-bounded (#687 device QA),
+        // so an unstamped entry would model a raise that never
+        // echoed, not this fresh one.
         core.outstandingSelfRaises = [WindowID(2)]
+        core.selfRaiseStamps[WindowID(2)] = Date()
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         // The stale self-echo neither clears the pending raise nor
         // snaps state focus back to 2.
@@ -144,6 +149,10 @@ struct ScrollingDeferredRaiseTests {
         // slot (#152) only remembered the last, so 2's stale echo
         // was misread as a user click and stole focus back.
         core.outstandingSelfRaises = [WindowID(2), WindowID(4)]
+        // Stamps as `raiseWindow` writes them — the echo
+        // classification is age-bounded (#687 device QA).
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.selfRaiseStamps[WindowID(4)] = Date()
         core.state.workspaces.focus(WindowID(4), in: space)
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.activeSpace?.focused == WindowID(4))

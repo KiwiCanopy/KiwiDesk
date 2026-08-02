@@ -117,16 +117,16 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
-    /// Window ids KiwiDesk's own AX raises issued but whose focus
-    /// echoes have not yet landed (#152). A matching echo is
-    /// self-inflicted, not a user action: it must not supersede a
-    /// newer focus nor snap state focus back. A *set*, not one
-    /// slot, because forward focus raises immediately (#158) while
-    /// a backward raise may still be unechoed — two self-raises
-    /// can be outstanding at once. An id is removed on its own
-    /// echo, and when its window is destroyed (WindowIDs can be
-    /// reused). See `handleWindowFocused` in
-    /// `KiwiCore+FocusEvents.swift`.
+    /// Window ids KiwiDesk's own AX raises issued but whose
+    /// focus echoes have not yet landed (#152). A matching echo
+    /// is self-inflicted, not a user action: it must not
+    /// supersede a newer focus nor snap state focus back. A set
+    /// — two can be outstanding at once (#158). An entry counts
+    /// as an echo only while `selfRaiseStamps` says the raise
+    /// is RECENT: an already-key raise echoes never, and an
+    /// unbounded entry ate the next click on that window (#687
+    /// device QA). Removed on echo and destroy (ids reused);
+    /// the classification lives in `handleWindowFocused`.
     var outstandingSelfRaises: Set<WindowID> = []
 
     /// When each self-raise was issued — the recency bound for
@@ -145,10 +145,23 @@ public final class KiwiCore {
     /// a user action, not our raise's echo.
     static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
-    /// Last left press, AX coords (#496): the click
-    /// discriminator for the cross-display sibling distrust —
-    /// see `recentClickInside`. Stamped in `KiwiCore+Lifecycle`.
-    var lastLeftClick: (at: Date, point: CGPoint)?
+    /// Last left press, AX coords: the click discriminator for
+    /// the cross-display sibling distrust (#496,
+    /// `recentClickInside`) and the raise-echo revert's escape
+    /// (#687, `recentClickReached`). `reached` is the managed
+    /// window the press hit, resolved AT PRESS TIME
+    /// (`clickReachedWindow` has the argument). Stamped in
+    /// `KiwiCore+Lifecycle` (`ClickProvenanceWiringTests`).
+    var lastLeftClick: (at: Date, point: CGPoint, reached: WindowID?)?
+
+    /// The WindowServer's front-to-back stacking, resolving
+    /// which window a left press reached (#687) — overlapping
+    /// pile frames make containment alone ambiguous. nil until
+    /// `start()` wires it (`ClickProvenanceWiringTests`), so
+    /// unit tests never read the host's real windows (the
+    /// `frontmostPIDProvider` pattern); nil resolves no
+    /// provenance.
+    var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
     /// Windows we raised purely for z-order, stamped with the raise
     /// time — floats promoted above the tiled plane (#418) AND the
@@ -182,9 +195,10 @@ public final class KiwiCore {
     /// and be reverted (#418/#425). Sized to the slowest AX
     /// responders — Electron/WebKit answer focus queries in
     /// ~100-300 ms (§5) — with ~3x margin, at the cost of a
-    /// deliberate focus of a raised window within the window being
-    /// eaten once (strictly better than the old permanent
-    /// poisoning). Tunable.
+    /// deliberate CLICKLESS focus of a raised window (cmd-tab,
+    /// app-driven) within the window being eaten once — strictly
+    /// better than the old permanent poisoning, and a click
+    /// escapes on provenance (#687). Tunable.
     static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
     /// Resolves the OS foreground app's pid for the focused-command
@@ -304,19 +318,8 @@ public final class KiwiCore {
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
-    public var configURL: URL {
-        configDirectory.appendingPathComponent("init.lua")
-    }
 
     public let socket: SocketServer
-
-    /// Where the CLI expects the running app's socket.
-    public nonisolated static var defaultSocketPath: String {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(
-                ".config/KiwiDesk/KiwiDesk.sock"
-            ).path
-    }
 
     public init(
         configDirectory: URL? = nil,

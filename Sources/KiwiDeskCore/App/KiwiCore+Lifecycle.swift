@@ -23,6 +23,17 @@ extension KiwiCore {
             NSWorkspace.shared.frontmostApplication?
                 .processIdentifier
         }
+        // Arm the raise-echo revert's click-provenance check
+        // (#687): the press stamp below resolves which window
+        // each click reached. Left nil until here so unit
+        // tests never read the host's real windows.
+        // `ClickProvenanceWiringTests` pins this wire and the
+        // stamp's resolution call — the fix's whole delivery
+        // path, which no behavior test can red on (they all
+        // inject).
+        stackingOrderProvider = {
+            AXHelper.onScreenStackingOrder()
+        }
         // Yields key focus to the desktop when a move empties the
         // focused display's space (#446) — Finder owns the desktop,
         // gated so it never teleports the user to another Space.
@@ -35,9 +46,15 @@ extension KiwiCore {
         // sibling distrust (#496) — in AX coordinates, the
         // space window frames live in.
         mouse.onLeftMouseDown = { [weak self] point in
+            let axPoint = GeometryUtils.axPoint(point)
+            // Resolve which window the press reached NOW, not
+            // when a raise echo asks (#687): press time is when
+            // the fact exists — `clickReachedWindow` carries
+            // the argument.
             self?.lastLeftClick = (
                 Date(),
-                GeometryUtils.axPoint(point)
+                axPoint,
+                self?.clickReachedWindow(at: axPoint)
             )
             self?.followDisplayUnderClick(at: point)
         }

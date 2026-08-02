@@ -67,11 +67,26 @@ extension KiwiCore {
         // focus and strand the ring off the truly focused
         // window (#431). The self-echo path below consumes the
         // outstanding entry; the stamp expires on its own.
+        //
+        // Nor for a report with CLICK provenance (#687): a
+        // restore's echoes come from windows the user did not
+        // click, so a fresh click that reached the reported
+        // window is proof no echo can forge — without the
+        // escape, the first click after a restack was consumed
+        // (state reverted while macOS kept the click's focus,
+        // splitting keystrokes from ring and pan until the
+        // next focus event). The revert itself stays
+        // state-only either way: OS focus during a sequence is
+        // owned by its closing re-assert (the
+        // `performZOrderSequence` completion), and
+        // re-asserting per echo would fight the drain
+        // mid-sequence — see docs/design-decisions.md.
         if let stamp = zOrderRaiseEchoes[id],
             Date().timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
             let intended = effects.focusBefore, intended != id,
-            !outstandingSelfRaises.contains(id)
+            !outstandingSelfRaises.contains(id),
+            !recentClickReached(id, now: Date())
         {
             zOrderRaiseEchoes[id] = nil
             if let space = state.workspaces.space(of: intended) {
@@ -157,12 +172,36 @@ extension KiwiCore {
         // would revert to the stale target. Re-assert the
         // intended focus and drop the echo. Consume the id
         // from the outstanding set either way.
-        let selfEcho = outstandingSelfRaises.remove(id) != nil
+        // An outstanding entry is our raise's echo only while
+        // the raise is RECENT (`selfRaiseStamps`, stamped at
+        // raise time, age-pruned): raising an already-key
+        // window emits no echo at all — the restore's closing
+        // re-assert does exactly that — so its entry sat
+        // unconsumed forever and classified the user's NEXT
+        // click on that window as our echo, eating it (device
+        // QA 2026-08-03). `outstandingSelfRaises` was the last
+        // unbounded ledger — the `zOrderRaiseEchoWindow`
+        // lesson again. The entry is consumed either way.
+        let selfEcho =
+            outstandingSelfRaises.remove(id) != nil
+            && selfRaiseStamps[id].map {
+                now.timeIntervalSince($0)
+                    < Self.selfRaiseSiblingWindow
+            } == true
+        // And even a FRESH entry stands down for a report with
+        // click provenance (#687): a click that reached the
+        // reported window is a user action our raise cannot
+        // have forged — without this, a click landing inside
+        // the ~1 s echo window of a no-echo re-assert was
+        // still eaten. Safe against bar clicks forging it:
+        // a press a bar absorbed resolves no window at all
+        // (`clickReachedWindow`).
         if selfEcho,
             activeSpace?.mode.defersFocusRaise == true,
             let intended = effects.focusBefore, intended != id,
             state.workspaces.space(of: id)
-                == state.workspaces.activeSpace
+                == state.workspaces.activeSpace,
+            !recentClickReached(id, now: now)
         {
             if let space = state.workspaces.space(
                 of: intended
