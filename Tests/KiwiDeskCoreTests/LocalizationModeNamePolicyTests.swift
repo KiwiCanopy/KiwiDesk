@@ -63,16 +63,37 @@ struct LocalizationModeNamePolicyTests {
         )
     }
 
+    /// Every shipped locale code. This suite *decodes* what it
+    /// enumerates (`catalog(_:)` below), so it does not get the
+    /// name filter `shipped_locale_files()` and the enumerate-only
+    /// walkers carry: a worksheet here would be skipped silently
+    /// and the suite would stay green over a corpus it never
+    /// fully read. It names one instead, the way
+    /// `SettingKeyLocaleTests` does, and still excludes it from
+    /// the decoded set so the failure is one clear message rather
+    /// than a `DecodingError` per test
+    /// (`.claude/rules/localization.md`, "Only catalogs live in
+    /// the catalog directory").
     private func shippedLocaleCodes() throws -> [String] {
-        try FileManager.default
+        let codes = try FileManager.default
             .contentsOfDirectory(
                 at: Self.localesDirectory,
                 includingPropertiesForKeys: nil
             )
             .filter { $0.pathExtension == "json" }
             .map { $0.deletingPathExtension().lastPathComponent }
-            .filter { !$0.hasPrefix("missing_") }
             .sorted()
+        for code in codes where code.hasPrefix("missing_") {
+            Issue.record(
+                """
+                \(code).json is a translator worksheet, not a \
+                catalog — it belongs in locale-worksheets/. This \
+                suite decodes every locale it finds, so it cannot \
+                pass over one.
+                """
+            )
+        }
+        return codes.filter { !$0.hasPrefix("missing_") }
     }
 
     @Test("only the CJK locales render mode names natively")

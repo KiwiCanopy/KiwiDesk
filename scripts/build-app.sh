@@ -265,6 +265,20 @@ LOCALE_KEYS=""
 for locale_file in "$LOCALES"/*.json; do
     [ -e "$locale_file" ] || continue
     code="$(basename "$locale_file" .json)"
+    # A translator worksheet is not a catalog. It belongs in
+    # locale-worksheets/, and `extract-keys --check` rejects one
+    # here — but that runs from lint, and the documented
+    # device-QA path invokes this script direct. Refusing is the
+    # point: skipping it would ship a bundle whose plist happens
+    # to be right while SwiftPM's .copy carried the worksheet in
+    # anyway, and this is the machine where that is invisible.
+    case "$code" in
+        missing_*)
+            echo "error: $locale_file is a translator worksheet," \
+                 "not a catalog — move it to locale-worksheets/" \
+                 "(see scripts/locale_paths.py)" >&2
+            exit 1 ;;
+    esac
     LOCALE_KEYS="$LOCALE_KEYS
         <string>$code</string>"
 done

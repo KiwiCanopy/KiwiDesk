@@ -183,7 +183,7 @@ struct MergeKeysTests {
         // The worksheet is consumed either way; the key not
         // landing in de.json is what makes extract-keys mint it
         // again, this time carrying the new English.
-        #expect(!fx.localeFileExists("missing_de.json"))
+        #expect(!fx.worksheetExists("missing_de.json"))
         #expect(try fx.decodeLocale("de.json")["gap.hint"] == nil)
     }
 
@@ -234,7 +234,7 @@ struct MergeKeysTests {
         ])
 
         try run(["de"], in: fx)
-        #expect(!fx.localeFileExists("missing_de.json"))
+        #expect(!fx.worksheetExists("missing_de.json"))
 
         let extract = try runRepoScript(
             "extract-keys",
@@ -246,7 +246,7 @@ struct MergeKeysTests {
 
         let worksheet =
             try JSONSerialization.jsonObject(
-                with: fx.rawLocaleFile("missing_de.json")
+                with: fx.rawWorksheet("missing_de.json")
             ) as? [String: [String: String]]
         // Back on the to-translate list, carrying the NEW
         // English — not the one the translator worked from.

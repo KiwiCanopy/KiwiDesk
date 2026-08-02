@@ -46,6 +46,8 @@ import json
 import sys
 from pathlib import Path
 
+from locale_paths import WORKSHEET_PREFIX
+
 ROOT = Path(__file__).resolve().parent.parent
 LOCALES_DIR = (
     ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
@@ -56,14 +58,19 @@ def _translation_files(
     only: list[str] | None = None,
 ) -> list[Path]:
     """Every shipped translation: <locale>.json except the
-    English source and the transient missing_<locale>.json
-    worksheets. `only` narrows it to the named locales."""
+    English source and any missing_<locale>.json. `only` narrows
+    it to the named locales.
+
+    Worksheets are written to locale-worksheets/, never here, so
+    the second exclusion only keeps this from rewriting a stray
+    one before `extract-keys --check` — which owns that
+    diagnosis — has named it."""
     if not LOCALES_DIR.is_dir():
         return []
     return sorted(
         path
         for path in LOCALES_DIR.glob("*.json")
-        if not path.name.startswith("missing_")
+        if not path.name.startswith(WORKSHEET_PREFIX)
         and path.name != "en.json"
         and (only is None or path.stem in only)
     )

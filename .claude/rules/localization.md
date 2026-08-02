@@ -61,6 +61,45 @@ Because the same English text can in principle be authored at two
 call sites for one key, `extract-keys` fails loudly on any such
 drift rather than silently picking one.
 
+## Only catalogs live in the catalog directory
+
+Nothing but a flat `{key: string}` catalog may be added to
+`Resources/Locales` (or `site/src/i18n`) under a `*.json` name —
+that glob is how every reader of those directories finds its
+input. A tool that mints a working file writes it under
+`locale-worksheets/` — outside every tree a target ships from,
+and `scripts/locale_paths.py` is the one definition of that path,
+imported by both scripts that touch it rather than re-derived.
+`LocaleWorksheetLocationTests` pins where `extract-keys` writes
+and `LocaleWorksheetRejectionTests` pins that one found among the
+catalogs is still *rejected*. Two rejections exist, deliberately:
+`validate_locale_files` in `scripts/extract-keys` (reached by
+`--check` and `--prune`) and the `CFBundleLocalizations` glob in
+`scripts/build-app.sh`, which `AppPlistLocalizationTests` pins —
+the packager needs its own because it is the path that produces a
+signed artifact without running the gate.
+
+**A reader that would *decode* a file must never skip one it
+cannot** — name it instead, the way `SettingKeyLocaleTests` and
+`LocalizationModeNamePolicyTests` do: skipping is how a misplaced
+file survives, and the skip is invisible in a green run. A walker
+that enumerates locale *codes* and decodes none of them is the
+exception and filters `missing_` by name (`shipped_locale_files()`
+is the authority the Swift one mirrors —
+`LocalizationRegistryTests`); that filter exists so a walker
+cannot rewrite or mis-report a stray worksheet before a rejection
+has named it, and it must carry a comment saying so rather than
+reading as an assumption about what lives there.
+
+The cost of getting this wrong is spread across readers that have
+no idea a translation pass is open: SwiftPM `.copy`s the whole
+directory into the bundle, `LocaleCatalog.availableLocales()`
+offers every `*.json` stem but `en` as a language,
+`scripts/build-app.sh` globs the same directory for
+`CFBundleLocalizations`, and the Swift guards decode all of it as
+flat maps — which is how one `missing_de.json` read as a
+`DecodingError` naming an innocent key.
+
 `extract-keys --check` runs unconditionally in `scripts/lint.sh`
 (so: verify gate, CI, and `pre-commit` whenever a Swift or locale
 file is staged). It hard-fails if `en.json` is stale, or if any
@@ -152,7 +191,9 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationProductNameGuardTests`,
 `LocalizationOverlapGuardTests`,
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
-`MergeKeysContentGuardTests` — future scripts follow suit, so a
+`MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
+`LocaleWorksheetRejectionTests`
+— future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.
 

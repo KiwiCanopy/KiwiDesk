@@ -244,8 +244,8 @@ struct MergeKeysContentGuardTests {
             in: fixture,
             repoRoot: repoRoot
         )
-        #expect(fixture.localeFileExists("missing_ja.json"))
-        let worksheet = try fixture.rawLocaleFile(
+        #expect(fixture.worksheetExists("missing_ja.json"))
+        let worksheet = try fixture.rawWorksheet(
             "missing_ja.json"
         )
         let text = String(decoding: worksheet, as: UTF8.self)

@@ -41,7 +41,13 @@ struct LocalizationRegistryTests {
     }
 
     /// Every shipped `<locale>.json`, the same set
-    /// `shipped_locale_files()` walks.
+    /// `shipped_locale_files()` walks — including its
+    /// `missing_` filter, which is deliberate residue rather
+    /// than an assumption that worksheets live here. They do
+    /// not (`scripts/locale_paths.py`); the filter keeps this
+    /// walker from reporting a stray one as an unregistered
+    /// locale before `extract-keys --check` has named it as a
+    /// misplaced worksheet.
     private func shippedLocales() throws -> [String] {
         try FileManager.default
             .contentsOfDirectory(atPath: localesDir.path)

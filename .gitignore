@@ -85,5 +85,9 @@ scripts/__pycache__/
 
 # Transient translator worksheets: scripts/extract-keys <locale>
 # mints them, scripts/merge-keys deletes them. Never committed.
-Sources/KiwiDeskCore/Resources/Locales/missing_*.json
-site/src/i18n/missing_*.json
+# The whole directory is ignored, and it is deliberately NOT one
+# any target ships from — the old per-file ignores sat inside the
+# shipped catalog directories, which hid a stray worksheet from
+# `git status` while every reader of those directories still
+# choked on it.
+/locale-worksheets/

@@ -77,8 +77,18 @@ struct CiPathFilterTests {
     /// Keyed by the path relative to `Tests/`, not by filename: a
     /// same-named file in the other target would otherwise inherit
     /// an exemption nobody granted it.
-    static let allowed = [
-        "site": "KiwiDeskCoreTests/ScriptFixture.swift"
+    ///
+    /// A *set* per component, not one file: the fixture's `site`
+    /// tree outgrew a single file when the worksheet accessors
+    /// split off at the size ceiling, and both halves build the
+    /// same temp component. Each member still earns its own
+    /// confirmation and is checked individually below — widening
+    /// the shape is not widening the exemption.
+    static let allowed: [String: Set<String>] = [
+        "site": [
+            "KiwiDeskCoreTests/ScriptFixture.swift",
+            "KiwiDeskCoreTests/ScriptFixture+Worksheets.swift",
+        ]
     ]
 
     var repoRoot: URL {
@@ -155,16 +165,21 @@ struct CiPathFilterTests {
         // hole it was cut for. Assert each entry still describes a
         // file that still contains the component it excuses.
         let sources = try testSources()
-        for (component, file) in Self.allowed {
-            let source = sources.first { $0.0 == file }
-            let text = try #require(
-                source?.1,
-                "exempted file \(file) is gone"
-            )
-            #expect(
-                text.contains("\"\(component)\""),
-                "\(file) no longer builds a \(component) component"
-            )
+        for (component, files) in Self.allowed {
+            for file in files.sorted() {
+                let source = sources.first { $0.0 == file }
+                let text = try #require(
+                    source?.1,
+                    "exempted file \(file) is gone"
+                )
+                #expect(
+                    text.contains("\"\(component)\""),
+                    """
+                    \(file) no longer builds a \(component) \
+                    component
+                    """
+                )
+            }
         }
     }
 
@@ -238,7 +253,8 @@ struct CiPathFilterTests {
                 // needle it was granted for. A rooted `"site/`
                 // literal in the same file is a real read and must
                 // still fire.
-                let exempt = Self.allowed[trimmed] == name
+                let exempt =
+                    Self.allowed[trimmed]?.contains(name) == true
                 let hit =
                     text.contains("\"\(prefix)")
                     || (wholeDirectory && !exempt

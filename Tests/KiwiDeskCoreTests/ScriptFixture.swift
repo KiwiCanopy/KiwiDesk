@@ -175,9 +175,7 @@ struct RepoShapedFixture {
         )
     }
 
-    /// Raw contents of a file under a locales directory, for the
-    /// cases where the shape under test is not a flat map (a
-    /// `missing_<locale>.json` worksheet).
+    /// Raw contents of a file under a CATALOG directory.
     func rawLocaleFile(
         _ name: String,
         site: Bool = false
@@ -188,6 +186,12 @@ struct RepoShapedFixture {
         )
     }
 
+    /// Whether `name` exists in the CATALOG directory. The
+    /// worksheet question is `worksheetExists` — separate names
+    /// because the two ask about different directories, and one
+    /// accessor answering both by inspecting the filename read
+    /// identically at every call site while silently changing
+    /// which tree it looked in.
     func localeFileExists(
         _ name: String,
         site: Bool = false
@@ -223,8 +227,10 @@ struct RepoShapedFixture {
 }
 
 /// Builds a `RepoShapedFixture` and writes `localeFiles` into
-/// its locales directory. `prefix` only names the temp
-/// directory, so a failing run is traceable to its suite.
+/// it — each file into the directory `dir(forFile:site:)` names,
+/// so a `missing_*.json` entry lands in the worksheets tree and
+/// everything else beside the catalogs. `prefix` only names the
+/// temp directory, so a failing run is traceable to its suite.
 func makeRepoShapedFixture(
     prefix: String,
     locales localeFiles: [String: String],
@@ -236,15 +242,20 @@ func makeRepoShapedFixture(
         root: root,
         cleanup: { try? FileManager.default.removeItem(at: root) }
     )
-    for (dir, files) in [
-        (fixture.locales, localeFiles),
-        (fixture.siteLocales, siteFiles),
-    ] where !files.isEmpty || dir == fixture.locales {
-        try FileManager.default.createDirectory(
-            at: dir,
-            withIntermediateDirectories: true
-        )
+    // The app catalog directory exists even when empty: a script
+    // that reports "no locale files found" must be distinguishable
+    // from one that could not find the tree at all.
+    try FileManager.default.createDirectory(
+        at: fixture.locales,
+        withIntermediateDirectories: true
+    )
+    for (files, site) in [(localeFiles, false), (siteFiles, true)] {
         for (name, content) in files {
+            let dir = fixture.dir(forFile: name, site: site)
+            try FileManager.default.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
             try content.write(
                 to: dir.appendingPathComponent(name),
                 atomically: true,
@@ -265,12 +276,17 @@ func makeRepoShapedFixture(
 /// so a tool that shares a helper module (`merge-keys` and
 /// `extract-keys` both import `localization_guards`) would fail
 /// at import time in a fixture holding only the entry point.
+/// `environment` is merged on top of the cleared copy below, and
+/// exists for the one case that cannot use the default: a test
+/// proving what a script does *under* an override has to set the
+/// variable the clearing removes. Everything else omits it.
 @discardableResult
 func runRepoScript(
     _ name: String,
     arguments: [String],
     in fixture: RepoShapedFixture,
-    repoRoot: URL
+    repoRoot: URL,
+    environment overrides: [String: String] = [:]
 ) throws -> ScriptRun {
     let scriptsDir = fixture.root.appendingPathComponent("scripts")
     let source = repoRoot.appendingPathComponent("scripts")
@@ -297,8 +313,26 @@ func runRepoScript(
             to: destination
         )
     }
+    // Clear the env-var overrides rather than inheriting them.
+    // A repo-shaped fixture's whole promise is that the script's
+    // `__file__`-derived root IS the fixture — but `extract-keys`
+    // honours `KIWIDESK_EXTRACT_*` ahead of that root, so a
+    // developer (or a wrapper) with one exported would silently
+    // point this run's *writes* at the real checkout. Nothing in
+    // the test tree sets them for a repo-shaped run; this makes
+    // that a property of the harness instead of a habit.
+    var environment = ProcessInfo.processInfo.environment
+    for key in [
+        "KIWIDESK_EXTRACT_SOURCES",
+        "KIWIDESK_EXTRACT_LOCALES",
+        "KIWIDESK_EXTRACT_WORKSHEETS",
+    ] {
+        environment.removeValue(forKey: key)
+    }
+    environment.merge(overrides) { _, new in new }
     return try runPythonScript(
         at: scriptsDir.appendingPathComponent(name),
-        arguments: arguments
+        arguments: arguments,
+        environment: environment
     )
 }

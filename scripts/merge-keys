@@ -12,10 +12,11 @@ Add `--site` to fold into the marketing site's manifests
 other rule below is identical for both.
 
 Run after `scripts/extract-keys <locale>` produced
-`missing_<locale>.json` — a `{key: {"source": <English>,
-"translation": ""}}` map — and a translator has filled each
-entry's "translation" field in place (do not change the keys or
-the "source" field).
+`locale-worksheets/missing_<locale>.json` — a `{key: {"source":
+<English>, "translation": ""}}` map — and a translator has filled
+each entry's "translation" field in place (do not change the keys
+or the "source" field). The worksheet lives outside the catalog
+directory on purpose; `<locale>.json` is written back into it.
 
 Only entries whose "translation" is non-empty (after trimming
 whitespace) are folded into `<locale>.json`; any left empty are
@@ -76,6 +77,11 @@ import json
 import sys
 from pathlib import Path
 
+from locale_paths import (
+    site_override_conflict,
+    worksheet_name,
+    worksheets_dir,
+)
 from localization_guards import (
     dropped_product_names,
     english_residue,
@@ -89,6 +95,14 @@ ROOT = Path(__file__).resolve().parent.parent
 LOCALES_DIR = (
     ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
 )
+# Where `scripts/extract-keys` leaves the worksheet — read here
+# and unlinked here; `<locale>.json` is still written under
+# `LOCALES_DIR`. `scripts/locale_paths.py` is the one definition,
+# imported rather than re-derived: a second literal would agree
+# only until the override is set, and the symptom is this script
+# reporting "does not exist" for a file just written.
+WORKSHEETS_DIR = worksheets_dir(ROOT)
+SITE_WORKSHEETS_DIR = worksheets_dir(ROOT, site=True)
 
 
 def _load_map(path: Path, label: str) -> dict | None:
@@ -166,24 +180,38 @@ def _content_defect(
 
 
 def main(argv: list[str]) -> int:
-    global LOCALES_DIR
+    global LOCALES_DIR, WORKSHEETS_DIR
     args = argv[1:]
     site = "--site" in args
     flag = "--site " if site else ""
+    conflict = site_override_conflict(site)
+    if conflict:
+        print(f"merge-keys --site: {conflict}", file=sys.stderr)
+        return 1
     if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+        WORKSHEETS_DIR = SITE_WORKSHEETS_DIR
     if len(args) != 1:
         print(__doc__)
         return 1
     locale = args[0]
-    missing_file = LOCALES_DIR / f"missing_{locale}.json"
+    missing_file = WORKSHEETS_DIR / worksheet_name(locale)
     locale_file = LOCALES_DIR / f"{locale}.json"
 
     if not missing_file.exists():
+        # Name the directory, not just the command. A translator
+        # holding a worksheet that is somewhere else — handed
+        # over, or minted before worksheets moved out of the
+        # catalog directory — would otherwise follow the advice
+        # literally, mint an empty one here, and leave the filled
+        # file unread. Moving it is the whole recovery; nothing
+        # but this path is read.
         print(
             f"merge-keys: {missing_file} does not exist — run "
-            f"scripts/extract-keys {flag}{locale} first.",
+            f"scripts/extract-keys {flag}{locale} first, or move "
+            f"an existing worksheet into {missing_file.parent} "
+            "(no other location is read).",
             file=sys.stderr,
         )
         return 1
@@ -298,6 +326,21 @@ def main(argv: list[str]) -> int:
         encoding="utf-8",
     )
     missing_file.unlink()
+    # Leave no empty worksheet tree behind: `locale-worksheets/`
+    # existing but empty reads as "a pass is open" to anyone who
+    # looks. `rmdir` refuses a non-empty directory, so a second
+    # locale still mid-translation keeps it.
+    # Deepest first, deduped: site mode's worksheet sits one
+    # level down, app mode's is the base itself. Never walks
+    # above the base — `rmdir` on a repo root that happened to be
+    # empty is not a thing this script should be able to do.
+    for directory in dict.fromkeys(
+        (missing_file.parent, worksheets_dir(ROOT))
+    ):
+        try:
+            directory.rmdir()
+        except OSError:
+            break
     # The dropped count rides the summary line, because that is
     # the line a human skims and a wrapper captures — a bare
     # "merged 0 key(s)" reads as a clean success.

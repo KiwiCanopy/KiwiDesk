@@ -100,9 +100,13 @@ struct MergeKeysBehaviourTests {
         let latin1 =
             #"{"a.key": {"source": "A", "#
             + #""translation": "gr\#u{00FC}n"}}"#
+        try FileManager.default.createDirectory(
+            at: fx.worksheets,
+            withIntermediateDirectories: true
+        )
         try Data(latin1.compactMap { $0.asciiValue ?? 0xFC })
             .write(
-                to: fx.locales.appendingPathComponent(
+                to: fx.worksheets.appendingPathComponent(
                     "missing_de.json"
                 )
             )
@@ -112,7 +116,7 @@ struct MergeKeysBehaviourTests {
         #expect(!result.stderr.contains("Traceback"))
         #expect(result.stderr.contains("merge-keys:"))
         // Nothing merged, worksheet kept for a second attempt.
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
     }
 
     @Test("a malformed en.json reports, it does not traceback")
@@ -130,7 +134,7 @@ struct MergeKeysBehaviourTests {
         #expect(result.status != 0)
         #expect(!result.stderr.contains("Traceback"))
         #expect(result.stderr.contains("en.json"))
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
     }
 
     // MARK: - Pre-existing behaviour the guard must not break
@@ -165,6 +169,92 @@ struct MergeKeysBehaviourTests {
         #expect(result.stderr.contains("extract-keys"))
     }
 
+    /// Merging the last worksheet leaves no empty worksheet tree
+    /// behind — an existing but empty `locale-worksheets/` reads
+    /// as "a pass is still open" to anyone who looks. Two halves
+    /// are asserted: the tree goes when it empties, and a second
+    /// locale still mid-translation keeps it.
+    ///
+    /// The third check — that the fixture root is still standing
+    /// — **documents intent and is not a net**, and says so
+    /// rather than reading as coverage: `rmdir` refuses a
+    /// non-empty directory, and a repo-shaped fixture root always
+    /// holds `Sources/` and `scripts/`, so no rmdir walk however
+    /// many levels it adds can remove it. Only a `rmtree` could,
+    /// and that reds the mid-translation half first. Proving the
+    /// upward bound would need a worksheet base under an
+    /// otherwise-empty parent, which this fixture cannot have.
+    @Test("the worksheet tree is removed once it empties")
+    func emptyWorksheetTreeIsCleanedUp() throws {
+        let fx = try fixture(locales: [
+            "en.json": #"{"a.key": "A", "b.key": "B"}"#,
+            "de.json": #"{}"#,
+            "fr.json": #"{}"#,
+            "missing_de.json": #"""
+            {"a.key": {"source": "A", "translation": "Ah"}}
+            """#,
+            "missing_fr.json": #"""
+            {"b.key": {"source": "B", "translation": "Bé"}}
+            """#,
+        ])
+        defer { fx.cleanup() }
+
+        #expect(try run(["de"], in: fx).status == 0)
+        // `fr`'s worksheet is still there, so the tree stays.
+        #expect(
+            FileManager.default.fileExists(
+                atPath: fx.worksheets.path
+            )
+        )
+
+        #expect(try run(["fr"], in: fx).status == 0)
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: fx.worksheets.path
+            ),
+            "an emptied worksheet tree was left behind"
+        )
+        // Intent, not a net — see the docstring.
+        #expect(
+            FileManager.default.fileExists(atPath: fx.root.path)
+        )
+    }
+
+    /// Site mode is the only caller for which the cleanup's
+    /// deepest-first walk has two entries to dedup
+    /// (`locale-worksheets/site`, then the base); in app mode
+    /// they are the same directory and the branch never runs.
+    @Test("--site removes both levels of the worksheet tree")
+    func siteWorksheetTreeIsCleanedUpToTheBase() throws {
+        let fx = try fixture(
+            locales: [:],
+            siteLocales: [
+                "en.json": #"{"a.key": "A"}"#,
+                "de.json": #"{}"#,
+                "missing_de.json": #"""
+                {"a.key": {"source": "A", "translation": "Ah"}}
+                """#,
+            ]
+        )
+        defer { fx.cleanup() }
+
+        #expect(try run(["--site", "de"], in: fx).status == 0)
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: fx.siteWorksheets.path
+            )
+        )
+        #expect(
+            !FileManager.default.fileExists(
+                atPath: fx.worksheets.path
+            ),
+            """
+            the emptied base was left behind under its own site \
+            sub-tree
+            """
+        )
+    }
+
     @Test("fails when en.json is absent — nothing is verifiable")
     func failsWithoutEnglish() throws {
         let fx = try fixture(locales: [
@@ -179,7 +269,7 @@ struct MergeKeysBehaviourTests {
         let result = try run(["de"], in: fx)
         #expect(result.status != 0)
         // Refusing beats merging data no guard could check.
-        #expect(fx.localeFileExists("missing_de.json"))
+        #expect(fx.worksheetExists("missing_de.json"))
         #expect(try fx.decodeLocale("de.json").isEmpty)
     }
 

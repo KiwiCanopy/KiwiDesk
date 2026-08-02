@@ -54,6 +54,42 @@ struct AppPlistLocalizationTests {
         )
     }
 
+    /// `WORKSHEET_PREFIX` as `scripts/locale_paths.py` defines
+    /// it — the owner every other reader of the rule imports.
+    ///
+    /// Asked of Python rather than string-split out of the
+    /// module, per `rule-authoring.md` ("a guard over generated
+    /// or rendered output reads the built artifact or uses a
+    /// parser"). The split version was proved fail-open: it took
+    /// the first textual `WORKSHEET_PREFIX = "` in the file at
+    /// any scope, so a comment carrying the OLD literal above a
+    /// renamed constant fed this guard the stale value, which
+    /// then matched the stale bash arm and passed. That module's
+    /// docstring discusses the constant by name, so the shadowing
+    /// shape is live rather than hypothetical.
+    static func worksheetPrefix() throws -> String {
+        let scripts = scriptFixtureRepoRoot()
+            .appendingPathComponent("scripts")
+        let run = try spawn(
+            "/usr/bin/env",
+            [
+                "python3", "-c",
+                "import locale_paths;"
+                    + "print(locale_paths.WORKSHEET_PREFIX)",
+            ],
+            currentDirectory: scripts
+        )
+        #expect(
+            run.status == 0,
+            "locale_paths.WORKSHEET_PREFIX is unreadable"
+        )
+        let prefix = run.stdout.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+        #expect(!prefix.isEmpty)
+        return prefix
+    }
+
     /// The array's contents, between its own `<array>` tags.
     private func localizationsArray() throws -> String {
         let script = try source()
@@ -151,5 +187,61 @@ struct AppPlistLocalizationTests {
                 #"code="$(basename "$locale_file" .json)""#
             )
         )
+    }
+
+    /// The glob must REFUSE a translator worksheet, not list it.
+    /// This is the second copy of the `missing_*` rule (the first
+    /// is `validate_locale_files` in `scripts/extract-keys`), it
+    /// is in the one language nothing else here scans, and it
+    /// runs on the one machine `packaging-and-release.md` says
+    /// such a failure is invisible on — a locally built `.app`
+    /// would claim a language called `missing_de` while SwiftPM's
+    /// `.copy` carried the worksheet into the bundle.
+    ///
+    /// Skipping it instead would be worse than not checking: the
+    /// script would print, exit 0, and let `codesign` seal a
+    /// bundle carrying the worksheet, while the plist it emitted
+    /// looked perfectly right. So both halves are pinned — the
+    /// case arm, and that its body **leaves the script** rather
+    /// than `continue`-ing the loop.
+    ///
+    /// The window is bounded by the arm's own `;;` terminator,
+    /// not by a character count. A 400-character window shipped
+    /// here first and was inert: it reached eight lines past the
+    /// `esac` and matched the `exit 1` belonging to the
+    /// empty-list guard below, so the `continue` mutation — the
+    /// actual defect — passed green.
+    ///
+    /// Still a source scan, so the runtime half is out of reach:
+    /// it cannot see a glob that matches nothing on some machine,
+    /// and it says nothing about SwiftPM's `.copy`, which ships
+    /// whatever is in the directory whatever the plist claims.
+    /// Executing this would mean running a signing script from
+    /// the suite; `LocaleWorksheetRejectionTests` covers the
+    /// executable half of the same rule in `extract-keys`.
+    /// The prefix comes from `scripts/locale_paths.py`, not from
+    /// a literal here: bash cannot import it, so this suite is
+    /// the only thing that can hold the two together. Typing
+    /// `"missing_*)"` on both sides compared a literal to itself
+    /// — rename the constant and the packager's arm goes stale
+    /// while this stays green, which is fail-open.
+    @Test("The locale glob refuses a worksheet")
+    func globRejectsAWorksheet() throws {
+        let prefix = try Self.worksheetPrefix()
+        let script = try source()
+        #expect(script.contains("\(prefix)*)"))
+        let arm =
+            script
+            .components(separatedBy: "\(prefix)*)")
+            .dropFirst().first
+        let body = try #require(arm, "the case arm is gone")
+        let end = try #require(
+            body.range(of: ";;"),
+            "the case arm never terminates"
+        )
+        let head = String(body[body.startIndex..<end.lowerBound])
+        #expect(head.contains("exit 1"))
+        #expect(!head.contains("continue"))
+        #expect(head.contains("locale-worksheets/"))
     }
 }
