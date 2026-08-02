@@ -131,6 +131,14 @@ struct ShortcutsCensusRenderTests {
     /// one. There is no `SettingsContainer` case for it either,
     /// which is what makes the omission checkable rather than
     /// merely intended.
+    ///
+    /// One direction only, and knowingly: this reds on a
+    /// container appearing in the census that nothing mounts, not
+    /// on a card deleted from `ShortcutsSection` while its census
+    /// rows and order list stay. Closing the other half needs the
+    /// renderer to publish its mounted containers as data, which
+    /// no area does yet — until one does, a deleted card is a
+    /// reviewer's catch.
     @Test("Shortcuts holds exactly the seven rendered containers")
     func shortcutsContainers() {
         #expect(
@@ -155,25 +163,65 @@ struct ShortcutsCensusRenderTests {
     /// layers, so the per-space and per-layer families expand to
     /// a count this can reason about rather than to whatever the
     /// host happens to have.
-    @Test("every row-tier family expands to at least one row")
+    ///
+    /// **Which families may answer `nil` is DATA, not a `continue`.**
+    /// The renderer reads `rows(for:) ?? []`, so `nil` and `[]`
+    /// put the same nothing on screen; a loop that skipped `nil`
+    /// would let any family vanish silently — the exact failure
+    /// this suite exists to catch — while every assertion in it
+    /// still passed. `guard-prover` demonstrated that: nilling
+    /// `toggleSticky` left all thirteen tests green. So the
+    /// allow-list is enumerated and the relation asserted in
+    /// BOTH directions.
+    @Test("only the hand-drawn containers expand to no rows")
     @MainActor
     func familiesExpand() {
+        // Every key placed in this area that draws no `NavRow`,
+        // for one of two reasons — both legitimate, and neither
+        // allowed to grow silently:
+        //
+        //  - a container the section draws by hand (the layer
+        //    strip and the icon row that rides it, the app list,
+        //    the raw-Lua list and its Import action);
+        //  - the one row here that is not a shortcut at all —
+        //    the resize-feedback preference, whose census case
+        //    lives in the Behaviour sub-enum and whose control
+        //    the Size & float card draws directly.
+        let handDrawn: Set<SettingKey> = [
+            .shortcuts(.layers),
+            .shortcuts(.layersIcon),
+            .shortcuts(.openApplications),
+            .shortcuts(.advanced),
+            .shortcuts(.import),
+            .behaviour(.resizeFeedback),
+        ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .shortcuts
         }
         #expect(!placed.isEmpty)
+        // Vacuity: the allow-list must name real placed keys, or
+        // the `iff` below holds over a set that isn't there.
+        #expect(handDrawn.isSubset(of: Set(placed)))
         for key in placed {
-            guard let rows = expander.rows(for: key) else {
-                // A hand-drawn container (the layer strip, the
-                // app list, the raw-Lua list) — `nil` is its
-                // documented answer, never a missing case.
-                continue
+            let rows = expander.rows(for: key)
+            if handDrawn.contains(key) {
+                #expect(
+                    rows == nil,
+                    Comment(
+                        rawValue: "\(key.id) is hand-drawn "
+                            + "and must expand to nil"
+                    )
+                )
+            } else {
+                #expect(
+                    rows?.isEmpty == false,
+                    Comment(
+                        rawValue: "\(key.id) claims a row "
+                            + "tier but expands to nothing"
+                    )
+                )
             }
-            #expect(
-                !rows.isEmpty,
-                "\(key.id) expands to no rows"
-            )
         }
     }
 
@@ -191,10 +239,12 @@ struct ShortcutsCensusRenderTests {
             .shortcuts(.moveToSpaceFollow),
         ] {
             #expect(
-                expander.rows(for: key)?.count == 3,
+                expander.rows(for: key)?.count
+                    == expander.spaces.count,
                 "\(key.id) should expand once per space"
             )
         }
+        #expect(expander.spaces.count > 1)
         // Two layers defined, one of them current, so exactly
         // one switch row.
         #expect(
