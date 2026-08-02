@@ -33,7 +33,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// matches the App Bar's edge, the Space Bar is always
     /// screen-facing and the App Bar window-facing (space-first
     /// reservation) — never a conflict.
-    public var edge: AppBarEdge = .left
+    ///
+    /// Top by default (#660), under the menu bar, with the App
+    /// Bar on the bottom beside the Dock.
+    public var edge: AppBarEdge = .top
     /// Item-group placement along the bar (#293 QA); one
     /// shared default with the App Bar — the bar's pre-QA
     /// de-facto start anchoring was an omission, not a
@@ -59,7 +62,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// colors. Apps without a resolvable image fall back to the
     /// App Font `Default` glyph either way.
     public var iconSource: BarAppIconSource = .appImage
-    public var backgroundStyle: BackgroundStyle = .boxed
+    /// Plain by default, like the App Bar (#660).
+    public var backgroundStyle: BackgroundStyle = .plain
     /// Liquid Glass finish (macOS 26+), orthogonal to the shape —
     /// see `AppBarStyle.liquidGlass`. Ignored below 26.
     public var liquidGlass: Bool = false
@@ -138,8 +142,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var hoverItemColor = "#EAF3EE"
     /// The fill under the items — a box per Space (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint (Material).
-    /// A translucent cool-dark surface under the kiwi accent.
-    public var fillColor = "#14201C66"
+    /// A cool-dark surface under the kiwi accent, 80% opaque to
+    /// match the App Bar (#660).
+    public var fillColor = "#14201CCC"
     public var highlightColor = "#8DB354"
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from
