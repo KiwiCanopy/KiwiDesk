@@ -2426,7 +2426,13 @@ palette.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
-block" note.) Appearance kept only Gaps and Drag & drop —
+block" note; itself superseded on the destination shape — #293
+merged both bars into one **Bars** destination, and the #678
+Phase 2 redesign made it one page of two cards, with the
+per-layout overrides gone per the §3.4 rescope above. What
+survives of this entry is the argument: bar configuration is
+too deep to live inside Appearance, and stays out of it.)
+Appearance kept only Gaps and Drag & drop —
 the everyday controls people revisit — while the App Bar
 (global style + ~10 colors + per-layout overrides) was the
 deepest rabbit hole in that tab and dominated the scroll. It

@@ -19,9 +19,9 @@ import KiwiDeskCore
 /// `.id()` churn would tear down rows holding uncommitted
 /// `@State` drafts and keyboard focus mid-edit. The id is the
 /// `L()` key, prefixed by an `instance` tag when one declaration
-/// per co-mounted view is needed (`LayoutAppBarGroup` renders
-/// twice, so each mount takes its own descriptor and `scrollTo`
-/// stays well-defined).
+/// per co-mounted view is needed (the Bars page's two "Style"
+/// and two "Advanced colors" drawers co-render, so each mount
+/// takes its own descriptor and `scrollTo` stays well-defined).
 struct SettingsControl: Hashable, Sendable {
     private enum Label: Hashable, Sendable {
         case tuple(key: String, english: String)

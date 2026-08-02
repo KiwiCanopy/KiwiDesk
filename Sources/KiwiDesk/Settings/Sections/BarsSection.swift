@@ -43,7 +43,7 @@ struct BarsSection: View {
     /// not wrapped around, so each "Advanced colors" disclosure
     /// label stays clickable while its swatches dim.
     private var spaceBarColors: some View {
-        let on = model.config.settings.spaceBarStyle.enabled
+        let on = gates.allowsEditing(.spaceBar)
         return SettingsSection(
             SettingsCatalog.bars.spaceBarColorsCard,
             help: on ? nil : BarsGateHelp.spaceBarOff
@@ -57,7 +57,7 @@ struct BarsSection: View {
     }
 
     private var appBarColors: some View {
-        let shown = gates.anyBarShown
+        let shown = gates.allowsEditing(.appBar)
         return SettingsSection(
             SettingsCatalog.bars.appBarColorsCard,
             help: shown ? nil : BarsGateHelp.noBarShown

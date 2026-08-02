@@ -198,148 +198,15 @@ extension SpaceBarCard {
             .spaceBarHighlightColor, .spaceBarHoverFillColor,
             .spaceBarHoverItemColor, .spaceBarGroupBadgeColor,
             .spaceBarGroupBadgeTextColor:
-            // Lua-only, App-Bar-card, or colour-card rows — the
-            // render-parity guard keeps them out of this card's
-            // order lists.
+            // Lua-only, App-Bar-card, or colour-card rows
+            // today. If a census move places one in this
+            // card, the render-parity guard forces it into the
+            // order lists and it lands here — fail loud in
+            // debug rather than render nothing.
+            let _ = assertionFailure(
+                "unrendered Space Bar census key: \(key.rawValue)"
+            )
             EmptyView()
         }
-    }
-
-    /// Coverage-guard write-through (#414): hiding the bar makes
-    /// the on-window mark the ONLY sticky cue left, so its
-    /// greyed "forced ON" toggle in Appearance must be the real
-    /// stored state, not a display fiction. A write-through
-    /// BINDING, not .onChange: the set fires only on the user's
-    /// gesture, so a profile load that replaces the model's
-    /// config while this section is open cannot overwrite a
-    /// Lua-authored mark=false (Lua stays unclamped).
-    private var showToggle: some View {
-        ToggleRow(
-            label: L("space_bar.enabled", "Show Space Bar"),
-            isOn: Binding(
-                get: { style.wrappedValue.enabled },
-                set: { on in
-                    style.wrappedValue.enabled = on
-                    if !on {
-                        model.config.settings
-                            .stickyStyle.mark = true
-                    }
-                }
-            ),
-            help: L(
-                "space_bar.enabled.help",
-                "One bar per display listing that "
-                    + "display's Spaces — click a Space to "
-                    + "switch to it. The bar reserves its "
-                    + "edge in every layout."
-            )
-        )
-    }
-
-    /// Position plus the shared-edge info row directly under it
-    /// (#374) — the App Bar card shows the same row.
-    @ViewBuilder private var edgeRow: some View {
-        SegmentedPicker(
-            L("space_bar.edge.label", "Position"),
-            selection: style.edge,
-            options: AppBarOptions.edge.map { ($0.1, $0.0) },
-            help: L(
-                "space_bar.edge.label.help",
-                "Which screen edge the Space Bar occupies. "
-                    + "Sharing an edge with the App Bar is "
-                    + "fine — the two stack."
-            )
-        )
-        if model.config.settings.spaceBarSharesEdgeWithAppBar {
-            BarSameEdgeRow(edge: style.wrappedValue.edge)
-        }
-    }
-
-    private var backgroundFitRow: some View {
-        SegmentedPicker(
-            L(
-                "space_bar.background_fit.label",
-                "Background size"
-            ),
-            selection: style.backgroundFit,
-            options: AppBarOptions.backgroundFit
-                .map { ($0.1, $0.0) }
-        )
-        .modifier(
-            GreyOut(
-                // Boxed never draws a shared plate to size —
-                // glass hugs each box, solid draws each box — so
-                // fit is inert for Boxed regardless of the glass
-                // finish. Plain (the shipped default, #660)
-                // un-greys it.
-                active: style.wrappedValue.backgroundStyle
-                    == .boxed,
-                help: L(
-                    "space_bar.background_fit.boxed_only",
-                    "Boxed draws a box per item, not a shared "
-                        + "plate, so there is nothing to size."
-                )
-            )
-        )
-    }
-
-    private var iconSourceRow: some View {
-        DropdownRow(
-            label: L(
-                "space_bar.icon_source.label",
-                "App symbol style"
-            ),
-            help: L(
-                "space_bar.icon_source.help",
-                "How app glyphs are drawn. Glyphs shows a "
-                    + "monochrome symbol colored by the bar's "
-                    + "item colors; apps without a symbol keep "
-                    + "their app icon."
-            )
-        ) {
-            Picker(
-                L(
-                    "space_bar.icon_source.label",
-                    "App symbol style"
-                ),
-                selection: style.iconSource
-            ) {
-                ForEach(
-                    AppBarOptions.iconSource,
-                    id: \.0
-                ) { option in
-                    Text(option.1).tag(option.0)
-                }
-            }
-        }
-    }
-
-    /// The stepper plus a neutral live summary of the current
-    /// cap — a caption that states what shows, not why (#94
-    /// defers the why to `help`). The preview strip is a fixed
-    /// stand-in and cannot honestly render N synthetic glyphs,
-    /// so the fact lives here.
-    @ViewBuilder private var glyphCapRow: some View {
-        StepperRow(
-            label: L("space_bar.glyph_cap", "Glyphs per Space"),
-            value: style.glyphCap,
-            in: SpaceBarStyle.glyphCapRange,
-            help: L(
-                "space_bar.glyph_cap.help",
-                "How many app glyphs a Space shows before the "
-                    + "rest collapse into a +n badge. Adjacent "
-                    + "windows of the same app count as one glyph."
-            )
-        )
-        Text(
-            L(
-                "space_bar.glyph_cap.summary",
-                "Up to %1$d app groups per Space; more collapse "
-                    + "into a +n badge.",
-                style.wrappedValue.resolvedGlyphCap
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
     }
 }

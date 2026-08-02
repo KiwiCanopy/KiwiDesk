@@ -1058,10 +1058,10 @@ field has a `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
 twin that overrides just that layout, and unset fields keep
 following the global value — see
 [Per-layout App Bar overrides](lua-reference.md#per-layout-app-bar-overrides).
-The GUI shows the merged result in its preview but renders no
-per-layout rows: an override adds a "why is my bar different
-here" question to every row above it, so the narrow-but-real
-need stays in the power layer.
+The card keeps editing (and previewing) the global values and
+renders no per-layout rows: an override adds a "why is my bar
+different here" question to every row above it, so the
+narrow-but-real need stays in the power layer.
 
 ### Space Bar
 
@@ -1127,7 +1127,7 @@ either:
   the window now in its live layout so you can drop it exactly
   where you want (the usual drag preview shows the slot).
 
-The hold length is the **Spring delay** (Space Bar editor,
+The hold length is the **Spring delay** (Space Bar card,
 default 1.5 s, adjustable 1–4 s). Move the cursor off the item
 before the ring completes to cancel. The whole item is the target
 (glyphs and the `+n` badge are not separate drop zones), and

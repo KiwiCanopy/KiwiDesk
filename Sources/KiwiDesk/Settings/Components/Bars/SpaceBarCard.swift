@@ -67,9 +67,15 @@ struct SpaceBarCard: View {
         case .spaceBar(let k):
             spaceBarRow(k)
         default:
-            // The render-parity guard pins the order lists to
-            // the census, so a non-Space-Bar key cannot reach
-            // this card without a red test.
+            // The render-parity guard forces every census row
+            // of this container into the order lists — a
+            // cross-family key placed here (the shape
+            // `.spaceBar(.copyAppearance)` in `.appBar`
+            // proves possible) reaches this arm, so it must
+            // fail loud in debug, not vanish.
+            let _ = assertionFailure(
+                "unrendered Bars census key: \(key.id)"
+            )
             EmptyView()
         }
     }

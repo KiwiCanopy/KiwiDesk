@@ -70,8 +70,13 @@ struct AppBarCard: View {
         case .layoutAppBar(let k):
             showInRow(k)
         default:
-            // The render-parity guard pins the order lists to
-            // the census.
+            // The render-parity guard forces every census row
+            // of this container into the order lists — an
+            // unhandled key reaching this arm must fail loud
+            // in debug, not vanish.
+            let _ = assertionFailure(
+                "unrendered Bars census key: \(key.id)"
+            )
             EmptyView()
         }
     }
@@ -130,6 +135,9 @@ struct AppBarCard: View {
             )
             .searchAnchored(SettingsCatalog.bars.scrollingShowIn)
         default:
+            let _ = assertionFailure(
+                "unrendered Show-it-in key: \(key.rawValue)"
+            )
             EmptyView()
         }
     }

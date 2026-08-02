@@ -107,11 +107,14 @@ struct BarsCensusRenderTests {
     }
 
     /// The rows the census exempts from their container's gate
-    /// are exactly the ones that must stay live: the gate's own
-    /// owners (or the lockout is permanent), the symbol-style
-    /// picker the ⌃⌥K panel reads, and the copy action gated on
-    /// the *other* bar. A renderer honors this as data, so the
-    /// set itself is what must not drift.
+    /// are exactly the ones that must stay live. The gate
+    /// owners' half is DERIVED (each container gate's own
+    /// setting rows must escape it, or the lockout is
+    /// permanent); only the two argued-for riders — the
+    /// symbol-style picker the ⌃⌥K panel reads, and the copy
+    /// action gated on the *other* bar — are hand-listed, so a
+    /// red here asks the real question: is this new exemption a
+    /// rider with an argument?
     @Test("the exempt set is the gate owners plus the two riders")
     func exemptSet() {
         let exempt = Set(
@@ -120,14 +123,39 @@ struct BarsCensusRenderTests {
                     && $0.placement.exemptFromContainerGate
             }
         )
-        #expect(
-            exempt == [
-                .spaceBar(.spaceBarEnabled),
-                .layoutAppBar(.monocleAppBarEnabled),
-                .layoutAppBar(.scrollingAppBarEnabled),
-                .appBar(.appBarIconSource),
-                .spaceBar(.copyAppearance),
-            ]
+        let owners = Set(
+            [SettingsContainer.spaceBar, .appBar]
+                .flatMap { $0.gate?.settings ?? [] }
         )
+        let riders: Set<SettingKey> = [
+            .appBar(.appBarIconSource),
+            .spaceBar(.copyAppearance),
+        ]
+        #expect(exempt == owners.union(riders))
+    }
+
+    /// Core's `appBarHost(for:)` is "the one place that decides
+    /// which layouts host an App Bar"; the census's `.appBar`
+    /// container gate re-lists that set as its `anyOf` owners.
+    /// Pin the two together, derived from Core: a third hosting
+    /// layout added in Core must red here until the census gate
+    /// (and `BarsGateContext.isOn`, whose debug assertion then
+    /// fires in `containerGatesResolve`) learns it — otherwise
+    /// the App Bar card greys while a bar renders, the #527
+    /// failure.
+    @Test("the App Bar gate's owners are Core's hosting set")
+    func appBarGateOwnersMatchCoreHosting() {
+        let owners = Set(
+            (SettingsContainer.appBar.gate?.settings ?? [])
+                .map(\.id)
+        )
+        let hosts = Set(
+            LayoutMode.allCases
+                .filter {
+                    TilingSettings().appBarHost(for: $0) != nil
+                }
+                .map { "settings.\($0.rawValue).appBar.enabled" }
+        )
+        #expect(owners == hosts)
     }
 }

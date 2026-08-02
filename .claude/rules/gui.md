@@ -14,16 +14,13 @@ idiom** (owner ruling 2026-08-02, argued in
 `docs/design-decisions.md`). Controls behave the standard way —
 focus, keyboard, VoiceOver, dark mode, drag and drop are system
 conventions, non-negotiable. The window's information
-architecture and look are KiwiDesk's own: the #678 redesign's
-Home card grid and non-sidebar navigation deliberately break
-with System Settings, which is explicitly not the bar. The old
-reading — "should feel like it belongs in macOS System
-Settings" — forced ~12 related areas into a sidebar idiom built
-for hundreds of unrelated panes; don't reject a redesign
-surface for breaking that idiom, and don't read "GUI ours" as
-licence for non-standard controls. Simplicity and intuitiveness
-stay first and still break ties. When unsure, ask a
-`ui-designer` consult framed by these priorities before
+architecture and look are KiwiDesk's own: the #678 redesign
+deliberately breaks with System Settings, which is explicitly
+not the bar. Two obligations follow — don't reject a redesign
+surface for breaking System Settings' idiom, and don't read
+"GUI ours" as licence for non-standard controls. Simplicity and
+intuitiveness stay first and still break ties. When unsure, ask
+a `ui-designer` consult framed by these priorities before
 inventing a layout.
 
 **Approachable by default, powerful on demand.** A new user gets a
@@ -103,7 +100,15 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars renders from it now** (#678 Phase 2): `BarsRowOrder`
 holds the display order and `BarsCensusRenderTests` pins it to
-the census, so a Bars row moves by editing the census. Until
+the census, so a Bars row moves by editing the census.
+Container-level greying is census-driven there (the container
+gate plus `exemptFromContainerGate`), but a ROW's grey
+predicate stays wiring-owned even in a census-rendered area —
+the census `gate:` names the owning setting, the exact
+predicate (resolved shown-bar values, auto sentinels) lives in
+the row builder. A Phase 3+ area copying the Bars shape copies
+that split too; don't expect editing a row's census gate alone
+to change on-screen greying. Until
 the *other* areas render from the census, their hand-written
 views stay the behavioral authority — so **a change to a
 Settings row's placement, its `GreyOut`/`disabled` gating,

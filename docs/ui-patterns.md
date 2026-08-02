@@ -741,8 +741,8 @@ still deserves full strength, which is the whole point of "grey,
 don't hide".
 
 Sequencing matters more than the paint. Select the destination,
-then the local surface that *renders* the target (a mode tab, the
-Bars switch), then yield one layout pass before asking the scroll
+then the local surface that *renders* the target (a mode tab),
+then yield one layout pass before asking the scroll
 proxy for the id — a `scrollTo` in the same synchronous pass as
 the state change that mints the view will miss it.
 

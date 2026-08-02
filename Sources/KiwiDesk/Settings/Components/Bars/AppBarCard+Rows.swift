@@ -153,8 +153,14 @@ extension AppBarCard {
             .appBarActiveItemColor, .appBarHoverFillColor,
             .appBarHoverItemColor, .appBarGroupBadgeColor,
             .appBarGroupBadgeTextColor:
-            // Lua-only or colour-card rows — the render-parity
-            // guard keeps them out of this card's order lists.
+            // Lua-only or colour-card rows today. If a census
+            // move places one in this card, the render-parity
+            // guard forces it into the order lists and it lands
+            // here — fail loud in debug rather than render
+            // nothing.
+            let _ = assertionFailure(
+                "unrendered App Bar census key: \(key.rawValue)"
+            )
             EmptyView()
         }
     }

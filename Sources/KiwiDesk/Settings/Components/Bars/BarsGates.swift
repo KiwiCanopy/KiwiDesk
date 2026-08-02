@@ -15,10 +15,12 @@ import SwiftUI
 /// resolve, so a gate keyed on the global would grey the only
 /// editor for a value an overriding layout still reads.
 ///
-/// All row predicates are false while their card's block gate is
-/// active, so none can compound with it: nested `GreyOut`s
-/// multiply their 0.5 opacity to 0.25 and read as broken rather
-/// than disabled. Keep that property when adding one.
+/// All row predicates are also false while their card's block
+/// gate is active — not to keep opacity from stacking
+/// (`GreyOut` dims once by construction via its
+/// `isInsideGreyOut` environment), but so the row's hover help
+/// names the *outer* reason while the whole card is off instead
+/// of a row-specific one that fixing wouldn't un-grey anything.
 struct BarsGateContext {
     let settings: TilingSettings
 
@@ -35,8 +37,14 @@ struct BarsGateContext {
         case .anyOf(let keys):
             return keys.contains { isOn($0) }
         case .runtime:
-            // No bar container carries a runtime gate; surface
-            // the row live rather than guessing a condition.
+            // Fail-open in release, loud in debug — the same
+            // treatment as the unknown-owner default below: a
+            // bar container re-gated onto a runtime condition
+            // this resolver cannot read would otherwise un-grey
+            // silently forever.
+            assertionFailure(
+                "unhandled runtime container gate on \(container)"
+            )
             return true
         }
     }
