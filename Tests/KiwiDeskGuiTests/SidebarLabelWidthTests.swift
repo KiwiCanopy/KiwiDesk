@@ -104,6 +104,17 @@ struct SidebarLabelWidthTests {
     /// Every shipped `<locale>.json`, `en.json` excluded — its
     /// values are the generated manifest of the same English
     /// that lives at the call sites.
+    ///
+    /// This DECODES, so it filters nothing but `en.json` (#692):
+    /// a reader that would decode a file must never skip one it
+    /// cannot, because skipping is how a misplaced worksheet
+    /// survives and the skip is invisible in a green run.
+    ///
+    /// It names the file rather than letting the raw
+    /// `DecodingError` through, the way `SettingKeyLocaleTests`
+    /// does — unnamed, the error blames whichever KEY sorted
+    /// first, which reads as a corrupt translation in a suite
+    /// with no connection to the worksheet that caused it.
     private static func catalogs() throws
         -> [String: [String: String]]
     {
@@ -112,20 +123,32 @@ struct SidebarLabelWidthTests {
             includingPropertiesForKeys: nil
         )
         .filter { $0.pathExtension == "json" }
-        .filter { !$0.lastPathComponent.hasPrefix("missing_") }
         .filter { $0.lastPathComponent != "en.json" }
         var out: [String: [String: String]] = [:]
         for file in files {
+            guard
+                let decoded = try? JSONDecoder().decode(
+                    [String: String].self,
+                    from: Data(contentsOf: file)
+                )
+            else {
+                Issue.record(
+                    """
+                    \(file.lastPathComponent) is not a flat \
+                    {key: string} catalog. Everything in \
+                    Resources/Locales must be; a translator \
+                    worksheet belongs in locale-worksheets/.
+                    """
+                )
+                continue
+            }
             out[
                 String(
                     file.lastPathComponent.dropLast(
                         ".json".count
                     )
                 )
-            ] = try JSONDecoder().decode(
-                [String: String].self,
-                from: Data(contentsOf: file)
-            )
+            ] = decoded
         }
         return out
     }

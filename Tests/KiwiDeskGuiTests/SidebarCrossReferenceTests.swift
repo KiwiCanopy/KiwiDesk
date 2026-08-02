@@ -74,6 +74,14 @@ struct SidebarCrossReferenceTests {
         )
     }
 
+    /// Enumerates locale CODES and decodes none of them, which is
+    /// the one shape allowed to filter `missing_` by name (#692,
+    /// mirroring `shipped_locale_files()`). The filter is not an
+    /// assumption that worksheets live here — they belong under
+    /// `locale-worksheets/` — it is so this walker cannot
+    /// mis-report a stray one as a shipped locale before the
+    /// rejection in `extract-keys --check` has named it. The
+    /// decoding side of this suite deliberately does NOT filter.
     private static func shippedLocales() throws -> [String] {
         try FileManager.default
             .contentsOfDirectory(atPath: localesDirectory.path)
