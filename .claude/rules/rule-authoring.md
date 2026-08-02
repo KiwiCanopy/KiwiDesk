@@ -1,6 +1,7 @@
 ---
 paths:
   - ".claude/rules/**"
+  - ".claude/agents/**"
   - "AGENTS.md"
 ---
 
@@ -100,6 +101,13 @@ it fail before you trust it. Several here have passed vacuously on
 their first draft, including one pinned at the single duration
 where an unrelated net rescued the bug it named.
 
+The sharpest instance, because it survived review three rounds
+running: a guard that matched a **regex against source** and
+matched nothing, so it passed for having found no violations
+rather than for there being none. A guard over generated or
+rendered output reads the **built artifact** or uses a parser, and
+asserts its input is non-empty before asserting anything about it.
+
 ## State a fact once
 
 A count or a list copied into a second file rots in both on one
@@ -123,8 +131,15 @@ danger, not the table.
 
 ## Scope
 
-All of the above binds `.claude/rules/*.md` and AGENTS.md. It
-applies to a **Swift doc comment** too whenever that comment
+All of the above binds `.claude/rules/*.md`, AGENTS.md and
+`.claude/agents/*.md`. The agent files are in scope for the same
+reason the rule files are — they load as instructions, an agent
+reasons from a claim in one without checking it, and
+`RuleCitationTests` resolves their citations alongside the rest.
+[subagents.md](subagents.md) owns what is additionally true of an
+agent file.
+
+It applies to a **Swift doc comment** too whenever that comment
 argues from numbers: the #599 stability margins lived in
 `Spring.swift`, were load-bearing, and were guarded by nothing
 until #614.

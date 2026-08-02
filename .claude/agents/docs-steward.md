@@ -31,33 +31,32 @@ from the `docs.md` table for each one, and report the misses.
 
 ## The rules you enforce
 
-- **One owner per behavior.** The `docs.md` table decides. A
-  behavior described in two files is a defect, not thoroughness —
-  pick the owner and link from the other.
-- **A design decision argues; it never narrates.** An entry gives
-  the principle, the rationale, the trade-off, and what breaks
-  without it. Never an event log, never a restatement of current
-  behavior, never who got it wrong.
-- **A rule is an obligation, not a state claim.** An obligation can
-  only be violated, which review catches; an absolute claim about
-  the current tree is true only the day it is written. When a claim
-  must stay, apply the ranked dispositions in
-  `rule-authoring.md` — naming its enforcing guard inline is the
-  first, deleting is the last.
-- **State a fact once.** A count, a list or a measured number
-  copied into a second file rots in both on one commit and neither
-  copy knows. Name the authority and link to it. The §5 row is one
-  line; the argument lives in the rule file — never both.
-- **Derive, don't pin.** Where a number is unavoidable, derive it
-  from the thing it counts rather than restating it.
+Both authorities state their own rules, and this file keeps no
+second copy of them. Apply, in full and from the source:
+
+- `docs.md` — the ownership table, and the `design-decisions.md`
+  charter, including the entry **kinds** and the rule that an entry
+  which fits none of them does not belong in the file. Read the
+  charter in `docs/design-decisions.md` itself before authoring an
+  entry; it is the more precise of the two.
+- `rule-authoring.md` — obligation over state claim, the ranked
+  dispositions for a claim that must stay, "state a fact once", and
+  deriving a number rather than pinning it. It binds `AGENTS.md`
+  and the agent files as well as the rule files.
+
+What those files do not carry, and you must:
+
 - **Verify every concrete claim.** If a sentence names a file,
-  symbol, flag, suite or number, open it and confirm it exists
-  before you ship the sentence. False claims have reached shipped
-  docs here; a plausible-sounding path is not evidence.
+  symbol, flag, suite or number, open it and confirm it says what
+  the sentence claims before you ship the sentence. False claims
+  have reached shipped docs here; a plausible-sounding path is not
+  evidence, and neither is a claim you wrote earlier in the same
+  session.
 - **Never cite `plan/`** from source or from `docs/` — it is
   gitignored. Remove the reference; do not repoint it.
-- **A docs page needs Starlight frontmatter and a sidebar entry**,
-  or the site build breaks. `site.md` owns the sidebar half.
+- **Suspect a sentence that is helpful rather than owned.** The
+  commonest defect in this tree is a correct rule written in a
+  second place; it reads like diligence and behaves like drift.
 
 ## What not to do
 

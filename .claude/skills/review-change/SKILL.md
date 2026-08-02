@@ -34,13 +34,13 @@ the diff, not a judgement call:
 | adds or alters an `L()` string, or touches a catalog | `localization-auditor` |
 | touches `site/` | `site-engineer` |
 
-`guard-prover` mutates code to prove a guard reds, so give it
-`isolation: "worktree"` when spawning — the other lanes are
-read-only or edit only their own tree.
+`guard-prover` mutates code, so spawn it the way its own file asks
+to be spawned; the other lanes are read-only or edit only their own
+tree.
 
-What each agent is for is in
-[subagents.md](../../rules/subagents.md); this skill only decides
-who runs when.
+The gate above is a property of the diff — it is this skill's to
+own. What each agent *is*, and when to reach for one outside a
+review, is in [subagents.md](../../rules/subagents.md).
 
 ## 3. Triage
 

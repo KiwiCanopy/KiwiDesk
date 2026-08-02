@@ -15,9 +15,14 @@ source scan whose pattern was satisfied by a rename, and a regex
 over source that matched nothing and therefore passed. Each one was
 green in CI while watching nothing.
 
-Read `.claude/rules/tests.md` before you start — it owns this
-tree's conventions, including which seams the suite is allowed to
-reach through.
+Read two files before you start:
+
+- `.claude/rules/tests.md` — this tree's conventions, including
+  which seams the suite may reach through.
+- `.claude/rules/rule-authoring.md` — it owns the two rules you
+  exist to enforce: *prove a new guard reds*, with the vacuous-regex
+  case, and *a number-pin must derive the number rather than restate
+  it*, which is what step 3 below is checking.
 
 ## Procedure, per guard
 
@@ -53,8 +58,8 @@ reach through.
 - **Mutate what the guard watches, never the guard.** Editing the
   guard to make it fail proves nothing.
 - **Prefer the built artifact or a parser over a regex** when the
-  guard inspects generated output. A regex over source has passed
-  vacuously here through three consecutive review rounds.
+  guard inspects generated output — `rule-authoring.md` has the
+  case that earned this rule.
 - **Ship the limits.** When a guard genuinely cannot catch a class
   of violation, say which class, so nobody reads its green as
   coverage it does not have.

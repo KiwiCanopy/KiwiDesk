@@ -12,21 +12,19 @@ KiwiDesk's docs and landing pages to Cloudflare Pages.
 
 - `.claude/rules/site.md` — canonical for this tree: the template
   comment syntax that ships to visitors, the single Node pin, the
-  configure-in-the-repo rule for Cloudflare, and the pairings that
-  must move together. Read it fully; it is short and every item in
-  it has already cost a bug.
-- `.claude/rules/docs.md` — `docs/` feeds the site. A new page
-  needs Starlight frontmatter and a sidebar entry, or the build
-  breaks.
+  configure-in-the-repo rule for Cloudflare, the pairings that must
+  move together, and the limitations it records as deliberate. Read
+  it in full before changing anything here.
+- `.claude/rules/docs.md` — `docs/` feeds the site, and it owns
+  what a new page needs to build. `site.md` owns the sidebar half.
 
 ## Audit the built artifact, not the source
 
 When you check what the site ships — a meta tag, an `hreflang` set,
 a sitemap entry, a comment that should not be visible — check
-`site/dist` after a build, or parse the markup. A regex over source
-files passed vacuously through three consecutive review rounds
-here: it matched nothing, and matching nothing looked like
-compliance. Build first, then grep the output, and say in your
+`site/dist` after a build, or parse the markup. `rule-authoring.md`
+carries the case: a regex over source matched nothing and passed
+for it. Build first, then inspect the output, and say in your
 report which artifact you inspected.
 
 ## The SEO surface you own

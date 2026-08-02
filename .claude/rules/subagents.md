@@ -20,53 +20,75 @@ The roster used to be fetched per clone from a third-party catalog
 and patched by appending a KiwiDesk context block. Both halves of
 that failed, and both failures are the reason for the rules below.
 
-The generic bodies invented gates the project had never adopted —
-coverage percentages, complexity ceilings — so the appended block
-spent its opening paragraph cancelling them. They addressed a
-"context manager" agent that does not exist, declared MCP tools
-that do not resolve here, and closed with a template delivery line
-quoting an invented quality score. Sixteen of eighteen carried no
-KiwiDesk context at all, and several described stacks this repo
-does not contain.
+As observed when it was retired, the generic bodies invented gates
+the project had never adopted — coverage percentages, complexity
+ceilings — so the appended block spent its opening paragraph
+cancelling them. They addressed a "context manager" agent that does
+not exist, declared MCP tools that do not resolve here, and closed
+with a template delivery line quoting an invented quality score.
+Sixteen of eighteen carried no KiwiDesk context at all, and several
+described stacks this repo does not contain.
 
 The append was worse, because it worked by copying rules out of
-their owning files. The copy baked into the generated
-`code-reviewer` and the copy in the context block it was appended
-from had already drifted apart on what a profile may own — two
-live statements of one rule, disagreeing, both loading as
-instructions.
+their owning files into an artifact nothing regenerated. The
+context block was corrected on 2026-07-28 to say that a profile
+owns tiling **plus sparse behavior overrides**; the generated
+agents on disk dated from 19 July and still said tiling **only**.
+For the nine days between, a reviewer loaded as instruction a rule
+its own source had already fixed, and no diff anywhere showed it —
+the generated copy was gitignored, and regenerating was a step a
+contributor had to remember.
 
-An agent definition is repo policy. Keep it in git, next to the
-rules it enforces, and write it by hand.
+That is the shape to avoid, and it is why the fix is not "keep the
+copies in sync". An agent definition is repo policy: keep it in
+git, next to the rules it enforces, write it by hand, and have it
+point at the rule rather than restate it.
 
 ## The roster
 
 The directory is the truth; this table is the index. When they
-disagree, the row is what to fix. Adding an agent loads this file,
-so keep the table current in the same change.
+disagree, the row is what to fix. Adding or editing an agent loads
+this file, so keep the table current in the same change.
 
-| Agent | Reach for it when |
-|---|---|
-| `code-reviewer` | A finished diff needs a line-level pass before a PR |
-| `architect-reviewer` | The same diff needs a seam-level pass, in parallel |
-| `guard-prover` | A change adds or edits a test, guard, canary or assertion |
-| `swift-expert` | The hard part is the language — isolation, `Sendable`, view identity, AppKit interop |
-| `ui-designer` | A Settings surface is being designed, or a proposed panel needs grading |
-| `docs-steward` | Prose needs writing or auditing — `docs/`, a rule file, a §5 row |
-| `localization-auditor` | User-facing strings changed, or new keys need translating |
-| `site-engineer` | `site/` changed, or the shipped pages need auditing |
+Deleting or renaming one does **not** load it — the loader has no
+file to match — and that is where a roster rots. Open this table
+by hand whenever you remove an agent.
 
-Each agent's `description` is canonical for what it does; the row
-above is only the routing hint.
+| Agent | Domain | Posture |
+|---|---|---|
+| `code-reviewer` | A diff, at the line | judges |
+| `architect-reviewer` | A diff, at the seam | judges |
+| `guard-prover` | Tests, guards, canaries, assertions | mutates and restores |
+| `swift-expert` | Swift, SwiftUI, AppKit, concurrency | advises, edits on hand-off |
+| `ui-designer` | The Settings app's surfaces | judges |
+| `docs-steward` | `docs/`, rule files, `AGENTS.md` | audits or authors |
+| `localization-auditor` | `L()` sites and the locale catalogs | audits or authors |
+| `site-engineer` | `site/` and its shipped output | audits or authors |
+
+The column is the agent's territory, deliberately not its trigger.
+**When** to reach for one is the `description` field, which is what
+actually routes and therefore the only copy that can be wrong
+without anyone noticing; inside a review round it is the
+`review-change` lane gate. Do not add a third statement of it here.
 
 ## Writing an agent file
 
 - **Route, never restate.** An agent points at the owning
   `.claude/rules/*.md` and reads it; it does not carry a copy of
-  the rule. A copy is a second live statement that drifts, which is
-  exactly how the retired setup failed. `rule-authoring.md` binds
-  agent files for the same reason it binds rule files: they load as
-  instructions.
+  the rule. A copy is a second live statement that goes stale, which
+  is exactly how the retired setup failed.
+  [rule-authoring.md](rule-authoring.md) covers agent files — see
+  its Scope — so everything it says about a claim in a rule file
+  binds a claim in an agent file too.
+- **Where "route" and "calibrate" collide, split on kind.** An
+  agent's most useful section is what *not* to flag, and some of
+  that reads like the rule it is calibrating against. The line is
+  the one `rule-authoring.md` already draws: an **obligation** may
+  be repeated verbatim, because a copy of an obligation cannot go
+  out of sync with itself. A **fact** may not — a count, a list, a
+  threshold, a tool inventory, a named exemption. Those get a
+  pointer, and if the pointer has nowhere to land, the fact is
+  missing from its rule file and that is the bug to fix.
 - **Derive, never pin.** Where a number or a set is unavoidable —
   a locale list, a language version, a platform floor — say which
   file to read it from. A pinned count is wrong on the commit that
@@ -76,9 +98,17 @@ above is only the routing hint.
   third person, naming concrete triggers. A description that
   describes the agent's expertise instead of its trigger will not
   route.
-- **Give the fewest tools that let it finish.** A review agent gets
-  no `Write` or `Edit` — the retired reviewers held both, which
-  bought nothing and let a reviewer rewrite what it was judging.
+- **Give the fewest tools that let it finish.** The round-1 review
+  pair — `code-reviewer` and `architect-reviewer` — plus any agent
+  whose whole job is to judge get no `Write` or `Edit`; the retired
+  reviewers held both, which bought nothing and let a reviewer
+  rewrite what it was judging. An agent that also authors
+  (`docs-steward`, `localization-auditor`, `site-engineer`) keeps
+  them and says in its own body when it is in audit mode.
+  Frontmatter `tools:` does **not** cross into the Codex mirror,
+  which has no equivalent field, so an agent that must not edit
+  says so in its prose as well — that is what survives the
+  crossing.
 - **Carry the calibration, not the checklist.** The highest-value
   section is *what not to flag*: the thresholds this project has
   not adopted, the sanctioned exceptions, the neighbouring agent's
@@ -106,10 +136,12 @@ above is only the routing hint.
   inline — a cold agent re-deriving what the session already knows
   costs more than it saves (AGENTS.md §4).
 - Run `./scripts/sync-agents.sh` after any change here, so the
-  Codex mirror under `.codex/agents/` cannot drift from the
-  Markdown. Its `--check` mode is a local convenience for whoever
-  maintains that mirror, not an enforced gate: the mirror is
-  generated and gitignored, so a fresh clone — CI included — has
-  none to check.
+  Codex mirror under `.codex/agents/` cannot fall behind the
+  Markdown the way the retired generated agents did. Two limits
+  the script states in its own header and cannot close: the mirror
+  carries name, description and body but not `tools:`, and its
+  `--check` mode is a local convenience for whoever maintains the
+  mirror rather than an enforced gate — the mirror is generated and
+  gitignored, so a fresh clone, CI included, has none to check.
 - Update this table and, when the roster's shape changes, the §5
   row that points here.

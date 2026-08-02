@@ -12,10 +12,12 @@ not decide KiwiDesk policy; the rule files do.
 
 ## Read before you answer
 
-- `Package.swift` — the tools version, language mode and platform
-  floor. Derive them from the manifest; never assume a Swift
-  version or a deployment target, and never recommend an API
-  younger than the floor it declares.
+- `Package.swift` — the tools version and the platform floor.
+  Derive both from the manifest; never assume a Swift version or a
+  deployment target, and never recommend an API younger than the
+  floor it declares. The manifest sets no explicit language mode,
+  so the mode follows from the tools version — say which you are
+  reasoning from rather than asserting one.
 - `AGENTS.md` §2 — in particular §2.4 (flat and readable beats
   deep generics) and §2.6 (the actor split).
 - `.claude/rules/gui.md` when the question is SwiftUI; it owns the

@@ -40,31 +40,21 @@ being asked.
 
 ## The rules you enforce
 
-- **Never hand-edit a catalog.** `scripts/extract-keys`,
-  `merge-keys`, `rename-key` and `drop-key` own
-  `Resources/Locales/*.json`. The only JSON you may write by hand
-  is a `missing_*.json` worksheet, which is transient and never
-  committed.
-- **Every user-facing string goes through `L("key", "English")`**,
-  with the English inlined at the call site as the source of truth.
-- **Interpolation uses positional specifiers** — `%1$@`, `%1$d` —
-  through the `L(key, english, args...)` overload. Never
-  `+`-concatenated fragments: a translation cannot reorder pieces
-  Swift already stitched together, and many languages must.
-- **Core names, the GUI narrates.** A pre-rendered English sentence
-  must not cross the Core→GUI seam; Core returns structure. CLI and
-  IPC errors are the exception and stay English.
-- **A meaning change drops the key.** A cosmetic English edit keeps
-  its translations; a change in meaning runs `scripts/drop-key` in
-  the same change set, or every locale silently ships the old
-  sentence.
-- **Terminology follows the name policy**, not your instinct for
-  what reads well: `docs/localization-naming.md` decides which
-  names are verbatim everywhere and which stay English outside the
-  families it lists. Follow the file, and if it is silent on a new
-  name, say so rather than choosing.
-- **The content guards have no exemption file.** A guard violation
-  is fixed, never exempted.
+`localization.md` states them, including the tool table and which
+guards admit no exemption; `docs/localization-naming.md` decides
+terminology. Read both and apply what they say — this file
+deliberately keeps no second copy, because the one it replaced had
+already fallen behind its source.
+
+What those files cannot tell you, and you must supply:
+
+- **Follow the naming policy over your ear.** A name that reads
+  awkwardly in a locale is still the name if the policy says so.
+  Where the policy is silent on a new name, say it is silent
+  rather than choosing — a coined term is much harder to retract
+  than a blocked review.
+- **A guard violation is a fix, never an exemption request.** Do
+  not propose adding a baseline, an allowlist or a skip.
 
 ## Translating well
 

@@ -65,8 +65,9 @@ plan/
 # Claude Code and Codex customizations
 # Team-shared workflow config — agents, skills, rules — is committed
 # via the negations below. `.codex/agents/` is generated from the
-# committed Markdown by scripts/sync-agents.sh, so it stays ignored,
-# as does `.agents/skills/`, where third-party skill installs land.
+# committed Markdown by scripts/sync-agents.sh, so it stays ignored.
+# `.agents/skills/` is where the optional per-developer skill
+# installs land (AGENTS.md §4), so it stays ignored too.
 .claude/*
 !.claude/agents/
 !.claude/skills/

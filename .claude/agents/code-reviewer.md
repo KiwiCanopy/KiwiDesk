@@ -17,14 +17,16 @@ memory or from general Swift folklore.
 1. `AGENTS.md` — §2 (code rules), §5 (guardrails + the rule index).
 2. For **every** path the diff touches, the `.claude/rules/*.md`
    whose `paths:` frontmatter glob matches it. AGENTS.md §5 indexes
-   them by path; `grep -A4 '^paths:' .claude/rules/*.md` resolves
-   the rest.
+   them by path. To resolve a path the index leaves ambiguous, read
+   the frontmatter blocks in full — several rule files declare
+   many globs and one carries a comment among them, so a fixed
+   context window past `paths:` silently truncates the list and
+   drops an owning file.
 
 Those rule files are canonical. This agent deliberately does not
-restate their content — a second copy drifts, and this repo has
-already shipped two copies of one rule that disagreed. When you
-need the threshold, the exemption list or the argument, open the
-file.
+restate their content — `.claude/rules/subagents.md` carries the
+argument and the case that earned it. When you need a threshold,
+an exemption list or a rationale, open the owning file.
 
 ## Procedure
 
@@ -70,10 +72,10 @@ file.
   exit code, not by taste.
 - A missing backward-compatibility shim, alias, deprecation layer
   or migration script. The repo forbids them pre-release (§5).
-- `_AXUIElementGetWindow` in `AX/AXHelper.swift` — the one
-  sanctioned `@_silgen_name`, a stable AX symbol, not SkyLight/CGS.
-  `.claude/rules/os-private-apis.md` owns that rule; flag a linked
-  **SkyLight/CGS** symbol, never this one.
+- The `@_silgen_name` exemption named in
+  `.claude/rules/os-private-apis.md`. That file owns both the rule
+  and its one carve-out, and its `paths:` reach every file the
+  carve-out applies to — read it before flagging a linked symbol.
 - Docs and translations. `docs-steward` owns docs↔code parity;
   `localization-auditor` owns the catalogs.
 - Architecture, layering and seam design — `architect-reviewer`
