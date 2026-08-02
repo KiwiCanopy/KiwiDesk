@@ -119,15 +119,31 @@ struct SidebarLabelWidthTests {
         return out
     }
 
-    /// Non-vacuity for the measurement itself: a font that failed
-    /// to resolve, or a metric that changed under us, would
-    /// report every label at 0 pt and pass the budget silently.
-    /// A sane band, not a pinned datum — the exact figure lives
-    /// in `SettingsSidebar.swift` and is not restated here.
+    /// Non-vacuity AND attribution for the measurement itself. A
+    /// font that failed to resolve would report every label at
+    /// 0 pt and pass the budget silently — but a band wide
+    /// enough to only catch that is the wrong shape here,
+    /// because the tightest shipped label clears the budget by
+    /// about 2%. A looser canary would stay green while host
+    /// metric drift red the budget test instead, and the message
+    /// there says "shorten the label" about a string no commit
+    /// touched (#523 is what a host-inherited assertion costs).
+    ///
+    /// So the band is TIGHTER than the labels' own margin: 1%
+    /// around this datum, measured 2026-08-03 on macOS 26. Host
+    /// drift then reds here first, and reds as what it is.
     @Test func measurementIsLive() {
+        let datum: CGFloat = 94.4
         let reference = Self.width("Layout Defaults")
-        #expect(reference > 80)
-        #expect(reference < 110)
+        #expect(
+            abs(reference - datum) < datum / 100,
+            """
+            "Layout Defaults" measures \(reference) pt, not the \
+            \(datum) pt this host was calibrated at — the text \
+            metric moved, so re-derive the budget before \
+            treating any width failure as a label defect
+            """
+        )
     }
 
     @Test func titleKeysCoverEveryDestination() throws {

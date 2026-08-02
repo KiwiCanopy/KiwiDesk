@@ -19,13 +19,17 @@ import Testing
 /// macOS System Settings panes, whose first segment matches no
 /// destination, and are skipped by the same rule.
 ///
-/// Reach, stated so a green run is not over-read: the FIRST
-/// segment only. The tail names a layout mode, and whether a
-/// locale renders that natively is
-/// `docs/localization-naming.md`'s question, not this one —
-/// `zh-Hant` ships the English "Scrolling" in its picker while
-/// translating the word in twelve prose strings, which this
-/// guard neither sees nor should decide.
+/// Every segment is held, not just the head. The tail names a
+/// layout mode, and the check needs no opinion about which
+/// locales render mode names natively: the segment must equal
+/// that locale's OWN `layout.<mode>.name`, whatever it says.
+/// That is deliberately not the mode-name policy — which
+/// `scripts/localization_guards.py` owns, and enforces in one
+/// direction only (translated picker, English prose), leaving
+/// the polarity that actually shipped here unreachable:
+/// `zh-Hant`'s picker keeps the English "Scrolling" while its
+/// breadcrumb said 捲動, so the guard skipped the locale by
+/// construction and nothing else was looking.
 ///
 /// A breadcrumb authored MID-SENTENCE is also outside the net:
 /// its first segment is the prose before it, which matches no
@@ -80,36 +84,80 @@ struct SidebarCrossReferenceTests {
             .sorted()
     }
 
-    /// Link key → the destination key whose title heads it,
-    /// derived by matching each `▸` string's English first
-    /// segment against the destination titles.
-    private static func links() throws -> [String: String] {
+    /// A discovered breadcrumb: its English text, and the
+    /// catalog key that owns each segment.
+    struct Link {
+        let english: String
+        /// One entry per `▸` segment — the destination title key
+        /// for the head, a `layout.<mode>.name` for a tail
+        /// segment naming a mode, `nil` where no key owns it.
+        let segmentKeys: [String?]
+    }
+
+    /// Every `▸` string whose English HEAD is a destination
+    /// title, with each segment resolved to the key that owns
+    /// it. Both halves are derived the same way — by matching
+    /// the English against a set the app already ships — so the
+    /// tail needs no policy opinion about which locales render
+    /// a mode name natively: it simply has to agree with that
+    /// locale's OWN `layout.<mode>.name`, whatever that says.
+    private static func links() throws -> [String: Link] {
         let titles = try SourceScan.sidebarTitles(root: repoRoot)
         let english = try catalog("en")
-        var out: [String: String] = [:]
+        // English mode name → its key, so a tail segment can be
+        // attributed to the picker entry it must match.
+        var modeKeys: [String: String] = [:]
+        for (key, value) in english
+        where key.hasPrefix("layout.") && key.hasSuffix(".name") {
+            modeKeys[value] = key
+        }
+        var out: [String: Link] = [:]
         for (key, value) in english {
+            let segments = value.components(
+                separatedBy: separator
+            )
             guard
-                let head = value.components(
-                    separatedBy: separator
-                ).first,
-                head != value,
+                segments.count > 1,
+                let head = segments.first,
                 let title = titles.first(where: {
                     $0.english == head
                 })
             else { continue }
-            out[key] = title.key
+            out[key] = Link(
+                english: value,
+                segmentKeys: [title.key]
+                    + segments.dropFirst().map { modeKeys[$0] }
+            )
         }
         return out
+    }
+
+    /// A key's English: `en.json` for a catalog key, the scanned
+    /// call-site literal for a destination title (which is where
+    /// English actually lives for those).
+    private static func englishFor(
+        key: String,
+        english: [String: String],
+        titles: [SourceScan.SidebarTitle]
+    ) -> String? {
+        english[key]
+            ?? titles.first { $0.key == key }?.english
     }
 
     @Test func theCrossReferenceIsDiscovered() throws {
         let links = try Self.links()
         // Not a floor for its own sake: if the derivation stops
         // finding the one link that exists, every per-locale
-        // assertion below passes over an empty set.
-        #expect(
+        // assertion below passes over an empty set. Both
+        // segments must resolve — a tail that stops matching a
+        // picker entry would otherwise silently go unwatched.
+        let link = try #require(
             links["behavior.animations.scrolling_xref_link"]
-                == "sidebar.layout"
+        )
+        #expect(
+            link.segmentKeys == [
+                "sidebar.layout", "layout.scrolling.name",
+            ]
         )
     }
 
@@ -124,7 +172,7 @@ struct SidebarCrossReferenceTests {
         var translated = 0
         for locale in locales {
             let catalog = try Self.catalog(locale)
-            for (linkKey, titleKey) in links {
+            for (linkKey, link) in links {
                 // NEITHER side is skipped when absent. Both fall
                 // back to English per-key at runtime, so what
                 // reaches the screen is a mismatch between what
@@ -134,23 +182,47 @@ struct SidebarCrossReferenceTests {
                 // translated row. `drop-key --locale` produces
                 // exactly that state, so skipping the missing
                 // side would fail open on a documented workflow.
-                let link = catalog[linkKey] ?? english[linkKey]
-                let shown =
-                    catalog[titleKey]
-                    ?? titles.first { $0.key == titleKey }?
-                    .english
-                guard let link else { continue }
+                //
+                // `link.english` rather than `english[linkKey]`:
+                // the value came OUT of `en.json`, so an
+                // optional here would be dead code the way the
+                // retired count pin was.
+                let shownLink = catalog[linkKey] ?? link.english
                 if catalog[linkKey] != nil { translated += 1 }
+                let segments = shownLink.components(
+                    separatedBy: Self.separator
+                )
                 #expect(
-                    link.components(separatedBy: Self.separator)
-                        .first == shown,
+                    segments.count == link.segmentKeys.count,
                     """
-                    \(locale) \(linkKey) "\(link)" names a \
-                    destination the sidebar shows as \
-                    "\(shown ?? "—")" — a breadcrumb has to \
-                    name the label on screen
+                    \(locale) \(linkKey) "\(shownLink)" has \
+                    \(segments.count) segments, not \
+                    \(link.segmentKeys.count)
                     """
                 )
+                for (segment, key) in zip(
+                    segments,
+                    link.segmentKeys
+                ) {
+                    // A segment no key owns is prose the
+                    // translation may word freely.
+                    guard let key else { continue }
+                    let shown =
+                        catalog[key]
+                        ?? Self.englishFor(
+                            key: key,
+                            english: english,
+                            titles: titles
+                        )
+                    #expect(
+                        segment == shown,
+                        """
+                        \(locale) \(linkKey) "\(shownLink)" \
+                        names \(key) as "\(segment)" — on \
+                        screen that reads "\(shown ?? "—")"
+                        """
+                    )
+                }
             }
         }
         // Counts what is actually TRANSLATED, not what was

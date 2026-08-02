@@ -1,10 +1,17 @@
 import SwiftUI
 
-/// Shared row metrics for the settings tabs: every labeled
-/// control row hangs its control off the same leading axis,
-/// and every slider readout shares one column width, so
-/// controls start and end on one line across sections instead
-/// of each row picking its own label width.
+/// Shared layout metrics for the Settings window. Chiefly the
+/// row axes: every labeled control row hangs its control off the
+/// same leading axis, and every slider readout shares one column
+/// width, so controls start and end on one line across sections
+/// instead of each row picking its own label width.
+///
+/// It also holds the surface-scoped columns that ride those
+/// axes or stand beside them — the override chrome's, the
+/// facet control's, the sidebar's. They live here rather than
+/// on their views for discoverability and because each is a
+/// *budget* something else must fit: a constant on a view is
+/// one nobody measures against.
 enum SettingsMetrics {
     /// The label column in front of sliders, segmented pickers
     /// and dropdowns. Holds the label-adjacent help `?` (#94
@@ -107,14 +114,21 @@ enum SettingsMetrics {
     static let sidebarTile: CGFloat = 22
 
     /// The RESIDUAL, stated as one because that is what it is.
-    /// The load-bearing number is `sidebarLabelColumn` = 120:
-    /// the empirical truncation threshold #95/#297 arrived at by
-    /// measuring the shipped corpus against the rendered column,
-    /// not a figure derived from parts. This is what is left of
-    /// `sidebarColumn` once that threshold and the tile are
-    /// accounted for, and it stands in for the `.sidebar` list
-    /// style's row insets and the `Label` icon/title gap, which
-    /// AppKit owns and no constant can pin.
+    /// The load-bearing quantity is `sidebarLabelColumn` — the
+    /// empirical truncation threshold #95/#297 arrived at by
+    /// measuring the shipped corpus against the rendered
+    /// column, not a figure derived from parts. This is what is
+    /// left of `sidebarColumn` once that threshold and the tile
+    /// are accounted for, and it stands in for the `.sidebar`
+    /// list style's row insets and the `Label` icon/title gap,
+    /// which AppKit owns and no constant can pin.
+    ///
+    /// **Never re-tuned to hold a total.** Narrowing
+    /// `sidebarColumn` must be allowed to carry
+    /// `sidebarLabelColumn` down with it — restoring the old
+    /// budget by shrinking this number is the repair
+    /// `SidebarLabelWidthTests` exists to prevent, dressed as
+    /// arithmetic.
     ///
     /// Deliberately NOT decomposed further. An earlier version
     /// summed a card padding into it, which is wrong twice over
