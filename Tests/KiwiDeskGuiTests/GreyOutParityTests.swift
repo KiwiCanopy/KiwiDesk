@@ -45,10 +45,21 @@ struct GreyOutParityTests {
     /// outright with the suite still green. A needle that cannot
     /// fail is worse than no needle, because it reads like
     /// coverage.
-    private let gatedEditors: [(file: String, gate: String)] = [
+    ///
+    /// `count` is how many times the expression must occur, and
+    /// it exists for the same reason `GreyOutAnchorTests` grew
+    /// one: a file gating TWO rows with one expression keeps a
+    /// bare `contains` green with either of the pair deleted.
+    /// That shipped here — the App Bar's Gap-indicator gate
+    /// guards both Highlight and Active item with an identical
+    /// call, and a guard-prover run deleting only Highlight's
+    /// left the suite green while the swatch stayed editable
+    /// with nothing to tint (#678 Phase 3).
+    private let gatedEditors: [(file: String, gate: String, count: Int)] = [
         (
             "FocusBorderEditor.swift",
-            "active: !style.wrappedValue.enabled"
+            "active: !style.wrappedValue.enabled",
+            1
         ),
         // The two census-rendered bar cards (#678 Phase 2)
         // carry their container gates per row, resolved from
@@ -56,20 +67,22 @@ struct GreyOutParityTests {
         // honors `exemptFromContainerGate`.
         (
             "SpaceBarCard.swift",
-            "active: !allows"
+            "active: !allows",
+            1
         ),
         (
             "AppBarCard.swift",
-            "active: !allows"
+            "active: !allows",
+            1
         ),
-        ("DragVisualsEditor.swift", "active: !visual.enabled"),
+        ("DragVisualsEditor.swift", "active: !visual.enabled", 1),
         // The mark tints left in #678 Phase 3, and with them the
         // editor's only `GreyOut`. What remains is the coverage
         // guard the card exists for: with the Space Bar off this
         // is the ONLY sticky mark, so the toggle renders forced
         // ON and disabled rather than editable-and-ignored.
         // Sticky state must never be invisible from the GUI.
-        ("StickyMarkEditor.swift", ".disabled(!spaceBarOn)"),
+        ("StickyMarkEditor.swift", ".disabled(!spaceBarOn)", 1),
         // The gate is passed INTO the group (#527) so its
         // section header — and the `?` anchor on it — stays
         // live; the wrap-around form would disable both. Two
@@ -78,50 +91,68 @@ struct GreyOutParityTests {
         // the invariant, so both must pin.
         (
             "ProfilesSection.swift",
-            "gatedOff: model.editingStoredProfile"
+            "gatedOff: model.editingStoredProfile",
+            1
         ),
         (
             "NativeSpacesGroup.swift",
-            "GreyOut(active: gatedOff"
+            "GreyOut(active: gatedOff",
+            1
         ),
         (
             "SpaceOverrideRows+ModeRows.swift",
-            "active: g.resolvedGrid(for: space).autoSize"
+            "active: g.resolvedGrid(for: space).autoSize",
+            1
         ),
         // Advanced Colours (#678 Phase 3), which replaced the
-        // interim colour cards. Two needles: the container gate
-        // each group's rows carry in parallel, honoring the
-        // census exemption as data, and the row-level gate that
-        // stands down while the container gate is active — drop
-        // either and a swatch claims to matter while the thing
-        // it tints is not drawn.
+        // interim colour cards.
+        //
+        // The first is a SHAPE pin, not behavioural coverage,
+        // and its green must not be read as one: no
+        // `.advancedColours` census row sets
+        // `exemptFromContainerGate` today
+        // (`ColorsCensusRenderTests.nothingIsExempt` pins
+        // that), so deleting the term reds this needle and
+        // changes nothing on screen. It is here so the renderer
+        // honors the flag as data BEFORE anyone sets it —
+        // whoever adds the first exemption should find the
+        // renderer already ready, not discover it silently
+        // ignored.
+        //
+        // The second IS behavioural: without it a row gate
+        // fires alongside its container gate and the hover
+        // names a row-specific reason that fixing would not
+        // un-grey anything.
         (
             "BarColorCards.swift",
-            "&& !key.placement.exemptFromContainerGate"
+            "&& !key.placement.exemptFromContainerGate",
+            1
         ),
         (
             "AdvancedColorRow.swift",
-            "GreyOut(active: containerAllows && inert"
+            "GreyOut(active: containerAllows && inert",
+            1
         ),
         // The one row-gate predicate the census cannot express:
         // the Gap indicator hides the active item outright, so
         // neither ink is painted.
         (
             "AdvancedColorRow+Bars.swift",
-            "gated(gates.bars.gapOnly, BarsGateHelp.gapOnly)"
+            "gated(gates.bars.gapOnly, BarsGateHelp.gapOnly)",
+            2
         ),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch
         // the live layout while the header promises it won't
         // (#518).
-        ("PresetsSection.swift", "model.editingStoredProfile"),
+        ("PresetsSection.swift", "model.editingStoredProfile", 1),
     ]
 
     @Test("every gated editor still greys off its own switch")
     func gatedEditorsCarryTheirGate() throws {
         let files = try SourceScan.swiftSources(under: settingsDir)
-        for (name, gate) in gatedEditors {
+        for (name, gate, count) in gatedEditors {
             let file = try #require(
                 files.first { $0.lastPathComponent == name },
                 "gated editor file is gone: \(name)"
@@ -129,11 +160,13 @@ struct GreyOutParityTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
+            let found =
+                source.components(separatedBy: gate).count - 1
             #expect(
-                source.contains(gate),
+                found >= count,
                 Comment(
                     rawValue:
-                        "\(name) lost its gate "
+                        "\(name) has \(found) of \(count) gate(s) "
                         + "`\(gate)` — a control with no effect "
                         + "must be greyed, never left live (#171)"
                 )
@@ -141,99 +174,10 @@ struct GreyOutParityTests {
         }
     }
 
-    // The #527 block-gate help-anchor guard lives in its own
-    // suite (`GreyOutAnchorTests`) — split per §5 before this
-    // file reached the ceiling.
-
-    /// The hiding shape, discovered rather than enumerated.
-    /// `if <predicate> {` around settings content removes it from
-    /// the tree, which loses the cue that the stored value is
-    /// preserved (`docs/ui-patterns.md`). Findings A7
-    /// (`if bar.enabled`) and A8 (`if !model.editingStoredProfile`)
-    /// were both exactly this.
-    private let hidingPredicates = [
-        "if bar.enabled {",
-        "if !model.editingStoredProfile {",
-        "if model.editingStoredProfile {",
-        "if style.wrappedValue.enabled {",
-        "if visual.enabled {",
-    ]
-
-    /// Fail-shut exemptions, one line of reason each. The scan
-    /// stays broad ON PURPOSE — narrowing the needles to the two
-    /// shapes this sweep fixed would turn the lens back into a
-    /// list, and site ten would be invisible again. So a NEW
-    /// `if <predicate> {` in Settings fails here until someone
-    /// states why it removes rather than dims.
-    ///
-    /// Every entry below was examined when the guard was
-    /// written; all three predate #520 and none of them hides a
-    /// control that exists in the other mode.
-    private let hidingExempt: [String: String] = [
-        // ADDS an explanatory banner in stored-profile mode.
-        // Additive, so there is nothing being taken away.
-        "ShortcutsSection.swift":
-            "adds a banner; removes nothing",
-        // Not a view at all — a `String?` computed property
-        // choosing which status sentence to return.
-        "ProfileHeader.swift":
-            "String? branch, not a rendered control",
-        // An either/or slot: every branch renders a control (or
-        // EmptyView in raw-Lua mode, where a profile-copy verb
-        // has no referent). Nothing is hidden that exists in the
-        // other branch.
-        "SettingsFooter.swift":
-            "either/or slot; each mode renders its own verb",
-    ]
-
-    /// OS-capability gates are the one legitimate reason to
-    /// remove rather than dim: a control for a rendering path
-    /// this macOS cannot perform is not "off", it does not
-    /// exist. Settled in #390.
-    private let capabilityGate = "AppBarStyle.glassAvailable"
-
-    @Test("no settings view hides a control it should grey")
-    func noHidingPredicatesRemain() throws {
-        var scanned = 0
-        let files = try SourceScan.swiftSources(
-            under: settingsDir
-        )
-        for file in files {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            scanned += 1
-            let name = file.lastPathComponent
-            if hidingExempt[name] != nil { continue }
-            for shape in hidingPredicates {
-                #expect(
-                    !source.contains(shape),
-                    Comment(
-                        rawValue:
-                            "\(name) hides a control with "
-                            + "`\(shape)` — grey it instead "
-                            + "(#171), or add it to hidingExempt "
-                            + "with a stated reason"
-                    )
-                )
-            }
-        }
-        // A scan over nothing passes vacuously.
-        #expect(scanned > 40)
-        // An exemption for a file that no longer exists is a
-        // stale excuse quietly widening the net.
-        let names = Set(files.map(\.lastPathComponent))
-        for (file, reason) in hidingExempt {
-            #expect(
-                names.contains(file),
-                Comment(
-                    rawValue: "stale hiding exemption: \(file)"
-                )
-            )
-            #expect(!reason.isEmpty)
-        }
-        #expect(!capabilityGate.isEmpty)
-    }
+    // Two sibling suites, split off before this file reached
+    // the 350-line ceiling (§5, split early): the #527
+    // block-gate help-anchor guard is `GreyOutAnchorTests`, and
+    // the hide-instead-of-dim scan is `GreyOutHidingTests`.
 
     /// The real invariant, tested on the primitive instead of
     /// on every call site: `GreyOut` dims ONCE however deeply it

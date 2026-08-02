@@ -162,7 +162,7 @@
   "color_field.swatch.help_auto": "自动 — 跟随浅色和深色外观",
   "color_panel.done": "完成",
   "colors.app_bar_off.help": "没有布局显示 App Bar，因此不会绘制其颜色。请在“信息栏”中打开其中一个。",
-  "colors.border_off.help": "焦点边框已关闭，因此不会绘制它的两种颜色。请在“间距与边框”中打开它。",
+  "colors.border_off.help": "焦点边框已关闭，因此不会绘制聚焦窗口和非焦点窗口的颜色。请在“间距与边框”中打开它。",
   "colors.borders.caption": "焦点窗口周围的边框，以及 Sticky 窗口上的标记。",
   "colors.borders.title": "边框颜色",
   "colors.drag.caption": "你拿起的窗口，以及它将落入的位置。",

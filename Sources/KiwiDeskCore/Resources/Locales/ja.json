@@ -162,7 +162,7 @@
   "color_field.swatch.help_auto": "自動 — ライトモードとダークモードに合わせます",
   "color_panel.done": "完了",
   "colors.app_bar_off.help": "App Barを表示するレイアウトがないため、そのカラーは描画されません。「情報バー」でいずれかをオンにしてください。",
-  "colors.border_off.help": "フォーカスの境界線がオフのため、その2つのカラーは描画されません。「ギャップとボーダー」でオンにしてください。",
+  "colors.border_off.help": "フォーカスボーダーがオフのため、フォーカス中／フォーカスされていないウインドウのカラーは描画されません。「ギャップとボーダー」でオンにしてください。",
   "colors.borders.caption": "フォーカス中のウインドウを囲む枠と、Stickyウインドウに付くマークです。",
   "colors.borders.title": "ボーダーのカラー",
   "colors.drag.caption": "つかんだウインドウと、それが収まるドロップ先です。",

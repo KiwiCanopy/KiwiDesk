@@ -162,7 +162,7 @@
   "color_field.swatch.help_auto": "자동 — 밝은 모드와 어두운 모드를 따릅니다",
   "color_panel.done": "완료",
   "colors.app_bar_off.help": "App Bar를 표시하는 레이아웃이 없어 그 색상은 그려지지 않습니다. 정보 바에서 하나를 켜십시오.",
-  "colors.border_off.help": "포커스 테두리가 꺼져 있어 그 두 가지 색상은 그려지지 않습니다. 갭과 테두리에서 켜십시오.",
+  "colors.border_off.help": "포커스 테두리가 꺼져 있어 포커스된 윈도우와 포커스되지 않은 윈도우의 색상은 그려지지 않습니다. 갭과 테두리에서 켜십시오.",
   "colors.borders.caption": "포커스된 윈도우를 감싸는 테두리와 Sticky 윈도우에 표시되는 마크입니다.",
   "colors.borders.title": "테두리 색상",
   "colors.drag.caption": "집어 든 윈도우와, 그 윈도우가 놓일 자리입니다.",
