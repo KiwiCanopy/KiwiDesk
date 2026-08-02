@@ -43,26 +43,11 @@ public struct AppliedEffects: Sendable {
         let app: String?
         let bundleID: String?
         let space: SpaceID?
+        /// Whether the gone window held the active space's focus,
+        /// so the fallback the removal picked owes a real AX
+        /// raise. A transient overlay can never have held it
+        /// (`mayHoldSpaceFocus`, #671), so this needs no
+        /// classification test of its own.
         let focusLost: Bool
-        /// The gone window was a transient overlay — a context
-        /// menu, a panel, a launcher bar (#300's classification).
-        let wasTransientOverlay: Bool
-
-        /// Whether the removal owes the space's fallback a real
-        /// focus handoff: an AX raise, and a pointer warp when
-        /// mouse-follows-focus is on.
-        ///
-        /// Holding the focus is not enough — the window must
-        /// also have been one the user meaningfully focused. A
-        /// transient overlay never was (#671): macOS returns
-        /// focus to whatever was underneath the moment the popup
-        /// goes away, so our handoff adds nothing and costs a
-        /// visible raise plus a mouse warp. Composed here rather
-        /// than at the call site so the whole decision is
-        /// reachable from a state-only test — the wiring's own
-        /// `isListed` gate needs live AX.
-        var handsOffFocus: Bool {
-            focusLost && !wasTransientOverlay
-        }
     }
 }

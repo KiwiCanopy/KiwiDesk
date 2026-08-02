@@ -425,20 +425,29 @@ decision stays AX-free, and it clears the moment detection
 self-heals a window back to tiled — the flag can never outlive the
 float state it depends on (overlay ⟹ floating).
 
-The same class is **inert around focus**, on the same reasoning
-(#671). A transient overlay never takes its space's focus when it
-appears, its disappearance owes the space's fallback no handoff,
-and its appearance does not supersede a pending focus follow.
-Focus for such a window belongs to macOS, which grants it while
-the popup is up and returns it underneath the moment the popup
-goes away — so anything KiwiDesk adds on top is not a handoff but
-a second, visible one: a `kAXRaiseAction` that re-activates an
-app, a pointer warp under mouse-follows-focus, and a pan toward
-the popup in a focus-driven layout. Right-clicking a message
-moved the mouse. The signal is deliberately the structural
-overlay flag and not floating-ness, exactly as for the ring: a
-window the user floated through `float_rules` is an ordinary
-window and still takes focus when it spawns.
+The same class never occupies a space's **focused slot** either,
+on the same reasoning (#671) — not when it appears, and not when
+macOS reports it focused. Focus for such a window belongs to the
+system: it grants focus while the popup is up and returns it
+underneath the moment the popup goes away, and it emits nothing
+on the way out that KiwiDesk could reconcile from. So a slot
+holding a popup is a slot every consumer of it reads wrongly —
+the ring, the App Bar's active item, a focus-driven pan — and
+one that, when the popup closes, gets handed to whichever array
+neighbour slid into the gap, complete with a `kAXRaiseAction`
+that re-activates an app and a pointer warp under
+mouse-follows-focus. Right-click a message and the pointer jumped
+off what you had clicked.
+
+Keeping the popup out is one rule at the point of writing
+(`StateCoordinator.mayHoldSpaceFocus`), which the four seams that
+write the slot consult; the alternative is a correction at each
+consumer, and the correction is what has to be remembered. The
+pre-popup focus stays correct the whole time it is up, so there
+is nothing to restore afterwards. The signal is deliberately the
+structural overlay flag and not floating-ness, exactly as for the
+ring: a window the user floated through `float_rules` is an
+ordinary window and holds focus like one.
 
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — graduated

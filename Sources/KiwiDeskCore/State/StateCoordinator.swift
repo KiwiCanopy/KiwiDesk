@@ -227,7 +227,17 @@ public struct StateCoordinator: Sendable {
         case .windowFocused(let id):
             effects.focusBefore = workspaces.activeSpace
                 .flatMap { workspaces[$0]?.focused }
-            if let space = workspaces.space(of: id) {
+            // A transient overlay is left out of the slot even
+            // when the OS reports it focused (#671,
+            // `mayHoldSpaceFocus`): the popup's dismissal emits
+            // no event to reconcile from, so recording it here
+            // would strand every consumer of the slot on a dead
+            // window and then hand the slot to an array
+            // neighbour. The pre-popup focus is still correct
+            // throughout, which is exactly what stays in it.
+            if mayHoldSpaceFocus(id),
+                let space = workspaces.space(of: id)
+            {
                 workspaces.focus(id, in: space)
             }
 

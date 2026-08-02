@@ -2,10 +2,9 @@ import Foundation
 
 extension StateCoordinator {
     /// The facts a `.windowDestroyed` will erase: the window's app
-    /// and space, whether it held the active space's focus (so
-    /// the caller can raise the fallback) and whether it was a
-    /// transient overlay (which owes no handoff, #671). Read
-    /// before the removal mutates state.
+    /// and space, and whether it held the active space's focus (so
+    /// the caller can raise the fallback). Read before the removal
+    /// mutates state.
     func removalFacts(
         _ id: WindowID
     ) -> AppliedEffects.RemovedWindow {
@@ -16,9 +15,7 @@ extension StateCoordinator {
             app: windows[id]?.appName,
             bundleID: windows[id]?.appBundleID,
             space: workspaces.space(of: id),
-            focusLost: focused == id,
-            wasTransientOverlay: windows[id]?
-                .isTransientOverlay == true
+            focusLost: focused == id
         )
     }
 

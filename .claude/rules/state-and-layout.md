@@ -53,6 +53,21 @@ editing here:
   subsystem rule that owns it
   ([input-and-animation.md](input-and-animation.md)) only loads
   under `Animation/`.
+- Every write of a space's **`focused` slot** goes through
+  `StateCoordinator.mayHoldSpaceFocus` — the create fold, the
+  focus-report fold, and each "nothing is focused, take the first
+  member" fallback. It bars a transient overlay
+  (`ManagedWindow.isTransientOverlay`, #300), and it asks
+  **state** rather than an incoming snapshot, because the create
+  fold clears the flag when a remembered-tiled restore heals the
+  window. Correct the slot, never its consumers: four seams wrote
+  it and three had no classification test at all (#671), while
+  the ring, the bar's active item and the close-time fallback
+  raise each read it and would each have needed their own. The
+  product argument — why the OS owns a popup's focus — lives in
+  `docs/design-decisions.md`. `TransientOverlayFocusTests` pins
+  the seams that exist; nothing scans for a fifth, so the
+  obligation is the net.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
