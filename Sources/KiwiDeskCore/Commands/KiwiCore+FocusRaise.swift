@@ -147,24 +147,6 @@ extension KiwiCore {
         if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0 {
             scheduleZOrderRestore()
         }
-        // Scrolling: a focus JUMP leaves the row stacked for the
-        // window that USED to be focused. A ±1 step masks it —
-        // the raise above fronts the new focus and nothing else
-        // moved — but an App Bar item carries an absolute
-        // `WindowID`, so a click can cross several slots at once
-        // and every window between the two keeps the old
-        // stacking, which the edge piles show (#674). Restack
-        // canonically instead. Cheap to arm on a plain step too:
-        // `rowOverflows` skips an all-visible row outright, and a
-        // side already stacked canonically re-raises to the order
-        // it is already in, so nothing moves visibly. After the
-        // retile, like every other arm site (#153), and behind
-        // the monocle guard's twin — a restore's closing
-        // re-assert calls back in here, and re-arming there would
-        // loop.
-        if zOrderRestoresInFlight == 0 {
-            scheduleScrollingZOrderRestoreIfOverflowing()
-        }
         // Armed only AFTER the retile: retiling cancels
         // in-tolerance animations one by one, and the settle
         // callback fires synchronously the moment the count
@@ -181,6 +163,60 @@ extension KiwiCore {
                 runPendingFocusRaise()
             }
         }
+        // Scrolling: a multi-slot JUMP leaves every window
+        // between the old and the new focus stacked for the old
+        // one, which the edge piles show (#674). A ±1 step never
+        // does — the raise above fronts the new focus and that is
+        // the whole change — so only a jump arms the restack. An
+        // App Bar item carries an absolute `WindowID`, which is
+        // how a click crosses several slots at once.
+        //
+        // The narrowness is load-bearing, not thrift. The restore
+        // raises every tiled pile-mate through the blocking
+        // ordered queue, and the tiled plane then sits above the
+        // float layer until the next genuine focus event
+        // re-raises it (#418) — arming that on every step would
+        // bury floats routinely and drag ring and mark a restack
+        // behind (`KiwiCore+Settle`).
+        //
+        // LAST in this function, after the deferred-raise block,
+        // for the reason that block states: `scheduleZOrderRestore`
+        // runs the restore inline when nothing is animating, so
+        // arming above it would drain a pile onto `zOrderQueue`
+        // before `pendingFocusRaise` was even set, and the
+        // immediate `runPendingFocusRaise` would then race it.
+        // Guarded on the in-flight count like the monocle arm —
+        // the restore's closing re-assert calls back in here.
+        if zOrderRestoresInFlight == 0,
+            scrollFocusJumpsSlots(to: id, from: previousFocused)
+        {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        }
+    }
+
+    /// Whether a scrolling focus move crosses MORE than one
+    /// tiled slot — the case a lone target raise cannot restack
+    /// (#674). False for a ±1 step and for a re-focus of the same
+    /// window; true when either end is missing from the tiled row
+    /// (a focus arriving from a float or from another space
+    /// leaves no reference point, so restack rather than guess).
+    /// Compares tiled array indices, like
+    /// `scrollFocusStepsBackward`: array order is scroll order.
+    private func scrollFocusJumpsSlots(
+        to target: WindowID,
+        from previous: WindowID?
+    ) -> Bool {
+        guard let space = activeSpace else { return false }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: space.id
+        )
+        guard let targetIndex = tiled.firstIndex(of: target)
+        else { return false }
+        guard let previous,
+            let previousIndex = tiled.firstIndex(of: previous)
+        else { return true }
+        return abs(targetIndex - previousIndex) > 1
     }
 
     /// Whether a scrolling focus move steps to an earlier slot

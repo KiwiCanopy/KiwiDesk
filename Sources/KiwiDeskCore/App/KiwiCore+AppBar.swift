@@ -214,8 +214,18 @@ extension KiwiCore {
         // The drop is the same array mutation as `scrollingStep`'s
         // swap — which arms this — so it can land a window in an
         // overflowing edge pile whose stacking still reads for the
-        // pre-drop order (#674). Self-gated on scrolling plus
-        // actual overflow, and armed after the retile (#153).
-        scheduleScrollingZOrderRestoreIfOverflowing()
+        // pre-drop order (#674). Armed after the retile (#153).
+        //
+        // ONLY for the active space. The restore path is
+        // active-space-only throughout (`layoutInput`,
+        // `runPendingZOrderRestore`), while a bar belongs to
+        // whichever space is showing on ITS display — so a drop on
+        // a second display's bar would restack the space the user
+        // is not in and still leave the dropped row stale. The
+        // secondary-display half of #674 is a separate decision,
+        // not something to fake from here.
+        if id == state.workspaces.activeSpace {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        }
     }
 }

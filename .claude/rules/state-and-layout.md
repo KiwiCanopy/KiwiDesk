@@ -68,6 +68,22 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
+- A mutation that can change **which windows overlap** — a
+  reorder, a swap, a focus move that crosses more than one slot —
+  **arms the matching z-order restore after its own retile**
+  (`scheduleScrollingZOrderRestoreIfOverflowing`,
+  `scheduleTrackZOrderRestoreIfOverflowing`, or
+  `scheduleZOrderRestore`), or `requestZOrderRestoreAfterDispatch`
+  when the retile belongs to the command dispatcher rather than
+  the call site. Arming *before* the retile lets the settle
+  callback consume the restore off the pre-mutation frames
+  (#153); every arm site is its own remembering, and three
+  mutations have now shipped without one (#150, #153, #674).
+  Arm **narrowly**: a restore raises every pile-mate through the
+  blocking ordered queue and leaves the tiled plane above the
+  float layer until the next genuine focus event (#418), so
+  "harmless, it re-raises the same order" is not an argument for
+  arming on a mutation that scrambled nothing.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
