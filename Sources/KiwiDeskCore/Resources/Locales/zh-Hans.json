@@ -102,7 +102,7 @@
   "behavior.animations.reduce_motion.help": "系统设置 ▸ 辅助功能 ▸ 减弱动态效果已开启，因此无论此设置如何，动画都将保持关闭。",
   "behavior.animations.relayout": "为布局重排添加动画",
   "behavior.animations.scrolling_xref": "滚动布局的焦点切换有独立的开关和速度，位于",
-  "behavior.animations.scrolling_xref_link": "布局默认值 ▸ 滚动",
+  "behavior.animations.scrolling_xref_link": "默认布局 ▸ 滚动",
   "behavior.animations.space_change": "为虚拟空间切换添加动画",
   "behavior.animations.space_change.caption": "窗口会从你离开的空间滑出，并滑入你切换到的空间。",
   "behavior.animations.title": "动画",

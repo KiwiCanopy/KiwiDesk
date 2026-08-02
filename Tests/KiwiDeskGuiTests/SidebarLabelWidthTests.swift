@@ -22,25 +22,34 @@ import Testing
 ///
 /// Where the net stops, so the next author does not read a green
 /// run as more than it is:
-/// - `SettingsSidebar.labelChrome` is hand-measured. The budget
-///   tracks the *column*, proven by mutation, but widening
-///   `SidebarTile` or the row insets shrinks the real text room
-///   without moving the chrome, and this stays green.
+/// - `SettingsMetrics.sidebarRowChrome` is a measured estimate of
+///   AppKit's own row insets. The budget tracks the column and
+///   the tile, both proven by mutation, but a `.sidebar` list
+///   style that changes its insets moves the real text room
+///   without moving the estimate, and this stays green.
 /// - It measures `systemFont(ofSize: 13)`; the row renders
 ///   whatever the `.sidebar` list style resolves. Adding a
 ///   `.font(…)` to that row diverges the two silently —
 ///   `measurementIsLive` catches a dead metric, not a wrong one.
+/// - The metric is the HOST's. `ru` "Сочетания клавиш" ships at
+///   ~118 pt against a 120 pt budget, so a runner whose SF
+///   metrics differ by more than ~2% reds a label no change
+///   touched. Re-derive the budget before shortening a label
+///   that only fails on one machine.
 /// - Only the destination titles. The section headers, the app
-///   name and the empty-search line share the column and are
-///   unmeasured.
+///   name, the empty-search line and `SidebarSearchRow`'s
+///   primary + breadcrumb — the longest text in the column —
+///   share it and are unmeasured. The search row's truncation is
+///   deliberate; the destination rows' is not.
 @Suite("Sidebar label width budget")
 struct SidebarLabelWidthTests {
-    /// Past this a label truncates. Derived from the column
-    /// rather than restated: narrowing `SettingsSidebar` tightens
-    /// the budget here in the same move, instead of leaving this
-    /// guard enforcing a tolerance the column no longer has.
+    /// Past this a label truncates. Read from the metric rather
+    /// than restated, so narrowing the column or widening the
+    /// tile tightens the budget here in the same move instead of
+    /// leaving this guard enforcing a tolerance the column no
+    /// longer has.
     private static var budget: CGFloat {
-        SettingsSidebar.columnWidth - SettingsSidebar.labelChrome
+        SettingsMetrics.sidebarLabelColumn
     }
 
     /// The point size a sidebar row's `Label` title renders at.
@@ -68,48 +77,17 @@ struct SidebarLabelWidthTests {
             .appendingPathComponent("Locales")
     }
 
-    /// The `L(key, english)` pairs `SettingsDestination.title`
-    /// names, read from the source rather than re-listed here —
-    /// a hand-listed key set is one more place to forget a new
-    /// destination, and `titleKeysCoverEveryDestination` pins
-    /// the count so a missed one reds rather than going unread.
-    ///
-    /// Comments are stripped first: a doc-comment example naming
-    /// an `L("sidebar.…")` would otherwise inflate the count and
-    /// mask a title that really is missing one.
-    private static func titles() throws -> [(
-        key: String, english: String
-    )] {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf:
-                    repoRoot
-                    .appendingPathComponent("Sources")
-                    .appendingPathComponent("KiwiDesk")
-                    .appendingPathComponent("Settings")
-                    .appendingPathComponent(
-                        "SettingsDestination.swift"
-                    ),
-                encoding: .utf8
-            )
-        )
-        let pattern = #"L\("(sidebar\.[a-z_]+)", "([^"]+)"\)"#
-        let regex = try NSRegularExpression(pattern: pattern)
-        let range = NSRange(source.startIndex..., in: source)
-        return regex.matches(in: source, range: range)
-            .compactMap { match in
-                guard
-                    let key = Range(
-                        match.range(at: 1),
-                        in: source
-                    ).map({ String(source[$0]) }),
-                    let english = Range(
-                        match.range(at: 2),
-                        in: source
-                    ).map({ String(source[$0]) })
-                else { return nil }
-                return (key, english)
-            }
+    /// The destinations' `L(key, english)` pairs, scanned from
+    /// the source rather than re-listed here — a hand-listed key
+    /// set is one more place to forget a new destination, and
+    /// `titleKeysCoverEveryDestination` pins the count so a
+    /// missed one reds rather than going unread. The scan is
+    /// shared with `SidebarCrossReferenceTests`, which matches
+    /// breadcrumbs against the same set.
+    private static func titles() throws
+        -> [SourceScan.SidebarTitle]
+    {
+        try SourceScan.sidebarTitles(root: repoRoot)
     }
 
     /// Every shipped `<locale>.json`, `en.json` excluded — its
@@ -202,6 +180,13 @@ struct SidebarLabelWidthTests {
                 )
             }
         }
-        #expect(measured > 50)
+        // Derived, not a hand-picked floor: every shipped
+        // catalog carries every destination key today, so the
+        // coverage is exactly the product. A locale MAY omit a
+        // key — per-key fallback is legal — but then its label
+        // is the English one, and this is where you find out
+        // that `englishLabelsFitTheColumn` is the only net left
+        // for it.
+        #expect(measured == keys.count * catalogs.count)
     }
 }

@@ -92,6 +92,39 @@ enum SettingsMetrics {
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 
+    /// The Settings sidebar's fixed, non-resizable column
+    /// (#297) — `SettingsSidebar` frames itself to it, and
+    /// `sidebarLabelColumn` rides it, so narrowing the column
+    /// tightens the label budget in the same move. The card's
+    /// own `.padding(8)` sits OUTSIDE this frame, so it costs
+    /// the window width, never the column's text room.
+    static let sidebarColumn: CGFloat = 190
+
+    /// `SidebarTile`, the icon square in front of every sidebar
+    /// row. Consumed by the row, so widening the tile shrinks
+    /// `sidebarLabelColumn` rather than silently eating into a
+    /// budget that stayed put.
+    static let sidebarTile: CGFloat = 22
+
+    /// What the sidebar row itself spends around the tile and
+    /// title — the `.sidebar` list style's own row insets plus
+    /// the `Label` icon/title gap. AppKit owns both and no
+    /// constant can truly pin them, so this is a measured
+    /// estimate, the way `checkboxWidth` is.
+    static let sidebarRowChrome: CGFloat = 48
+
+    /// The text room a sidebar destination label actually gets.
+    /// A label measuring past it truncates — `lineLimit(1)`
+    /// makes that visible rather than a quiet wrap — and the
+    /// fix is a SHORTER LABEL, never a wider column, because
+    /// the column is a fixed app-wide axis and System Settings'
+    /// own does not grow per language.
+    ///
+    /// `SidebarLabelWidthTests` enforces that against every
+    /// shipped locale, deriving its budget from here.
+    static let sidebarLabelColumn: CGFloat =
+        sidebarColumn - (sidebarTile + sidebarRowChrome)
+
     /// The label column for the Drag & drop editor's two
     /// half-width columns (#231). Narrower than the shared 150,
     /// pushed onto every row in a column via the

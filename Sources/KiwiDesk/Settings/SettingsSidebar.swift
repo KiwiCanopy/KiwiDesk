@@ -5,17 +5,6 @@ import SwiftUI
 /// the scope split (§0): "This Profile" follows the banner's
 /// edit target, "Whole App" is always live state.
 struct SettingsSidebar: View {
-    /// The fixed column width (#297). Public to the module so
-    /// `SidebarLabelWidthTests` can derive the label budget from
-    /// it — narrowing the column must tighten the budget, not
-    /// leave a guard enforcing a tolerance the column outgrew.
-    static let columnWidth: CGFloat = 190
-    /// What the column spends on everything that is not the
-    /// label: the 8 pt card padding either side, the sidebar
-    /// row's own insets, the 22 pt `SidebarTile` and its gap.
-    /// `columnWidth - labelChrome` is the text budget.
-    static let labelChrome: CGFloat = 70
-
     @Binding var selection: SettingsDestination
     /// Hides the global-only destinations while a stored
     /// profile is being edited (#18).
@@ -78,21 +67,21 @@ struct SettingsSidebar: View {
         // "bespoke panel" tell we killed the collapse toggle for
         // (#68).
         //
-        // Re-measured across all ten locales when #95 landed: the
-        // worst case is now `ru` "Сочетания клавиш" at ~118 pt,
-        // up from de "Erscheinungsbild" at ~104 pt, and 190 pt
-        // still clears it. Fifteen labels in eight locales did
-        // *not* fit and were shortened instead of widening the
-        // column — a sidebar destination wants a short noun (the
-        // section header inside carries the full title), and
+        // Fifteen labels in eight locales did *not* fit when #95
+        // landed and were shortened instead of widening the
+        // column — a sidebar destination wants a short noun, and
         // System Settings' own column does not grow per language.
-        // Keep that the fix: a new locale whose destination label
-        // measures past the text budget gets a shorter label, not
-        // a wider sidebar. `SidebarLabelWidthTests` enforces it,
-        // and derives the budget from `columnWidth` below rather
-        // than restating a number this comment would have to keep
-        // in step.
-        .frame(width: Self.columnWidth)
+        // Keep that the fix: a destination label past
+        // `sidebarLabelColumn` gets a shorter label, not a wider
+        // sidebar. `SidebarLabelWidthTests` enforces it and
+        // derives its budget from the metric, so neither the
+        // column nor the budget is restated here.
+        //
+        // The short noun has to carry the whole meaning: the pane
+        // header is this same `destination.title`
+        // (`SettingsView.chrome`), not a longer twin, so a label
+        // trimmed to fit is the ONLY name the user ever reads.
+        .frame(width: SettingsMetrics.sidebarColumn)
         // Floating pane, the macOS 26 System Settings look: a
         // rounded translucent card in near-window-background
         // gray, carrying a soft shadow, with the traffic lights
@@ -284,10 +273,12 @@ struct SettingsSidebar: View {
         _ destination: SettingsDestination
     ) -> some View {
         Label {
-            // Single-line insurance (#297): the column is now a
-            // fixed 190pt, so an over-long translated label
-            // truncates on one line instead of wrapping to two —
-            // matching System Settings' single-line rows.
+            // Single-line insurance (#297): the column is fixed,
+            // so an over-long translated label truncates on one
+            // line instead of wrapping to two — matching System
+            // Settings' single-line rows. Truncation is the
+            // symptom `SidebarLabelWidthTests` exists to catch
+            // before a user sees it, never the intended fit.
             Text(destination.title)
                 .lineLimit(1)
         } icon: {

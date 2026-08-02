@@ -11,7 +11,10 @@ struct SidebarTile: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
             .fill(destination.tint)
-            .frame(width: 22, height: 22)
+            .frame(
+                width: SettingsMetrics.sidebarTile,
+                height: SettingsMetrics.sidebarTile
+            )
             .overlay {
                 Image(systemName: destination.symbol)
                     .font(.system(size: 11, weight: .medium))

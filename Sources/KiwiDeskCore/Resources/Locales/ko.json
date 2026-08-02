@@ -102,7 +102,7 @@
   "behavior.animations.reduce_motion.help": "시스템 설정 ▸ 손쉬운 사용 ▸ 동작 줄이기가 켜져 있으므로 이 설정과 관계없이 애니메이션은 꺼진 상태로 유지됩니다.",
   "behavior.animations.relayout": "레이아웃 재배치 애니메이션",
   "behavior.animations.scrolling_xref": "스크롤 레이아웃의 포커스 이동에는 별도의 설정과 속도가 있습니다:",
-  "behavior.animations.scrolling_xref_link": "레이아웃 기본값 ▸ 스크롤",
+  "behavior.animations.scrolling_xref_link": "기본 레이아웃 ▸ 스크롤",
   "behavior.animations.space_change": "가상 공간 전환 애니메이션",
   "behavior.animations.space_change.caption": "윈도우가 떠나는 공간에서 미끄러져 나가고 전환하는 공간으로 들어옵니다.",
   "behavior.animations.title": "애니메이션",
