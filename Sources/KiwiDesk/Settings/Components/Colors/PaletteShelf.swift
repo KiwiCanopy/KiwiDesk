@@ -1,8 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The color palette shelf (#375): the top of the Appearance
-/// destination. Bundled palettes (read-only) and the user's saved
+/// The color palette shelf (#375): the top of the Colours &
+/// Motion destination (#678 Phase 3 — it moved with the rest of
+/// the colour story). Bundled palettes (read-only) and the user's saved
 /// palettes each render as composite scene thumbnails; clicking one
 /// paints its colors onto the staged config in one shot (never a
 /// live link). Save-current, rename, delete, and export/import act
@@ -23,7 +24,7 @@ struct PaletteShelf: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.appearance.paletteShelf,
+            SettingsCatalog.colors.paletteShelf,
             caption: L(
                 "palettes.caption",
                 "Apply a bundled or saved set of colors to the "
@@ -109,8 +110,12 @@ struct PaletteShelf: View {
     private var neonGlowLink: some View {
         Button {
             model.nav.pendingReveal = SettingsAnchor(
-                destination: .appearance,
-                anchor: SettingsCatalog.appearance.focusBorder.id
+                // The Glow toggle moved with the ring's
+                // structure — this link ships on Colours &
+                // Motion and has to reach across to it.
+                destination: .gapsAndBorders,
+                anchor: SettingsCatalog.gapsAndBorders
+                    .focusBorder.id
             )
         } label: {
             Text(L("palettes.neon_glow_hint", "Pair with Glow"))
@@ -153,18 +158,49 @@ struct PaletteShelf: View {
         }
     }
 
+    /// The per-palette context menu, built from the census's
+    /// `.palettes` show-more rows (#678 Phase 3) — the one part
+    /// of this shelf that IS a uniform list, so it is the one
+    /// part that renders from the census.
     @ViewBuilder
     private func userMenu(_ palette: ColorPalette) -> some View {
-        Button(L("palettes.rename", "Rename…")) {
-            renameDraft = palette.name
-            renaming = palette.name
+        ForEach(
+            ColorsRowOrder.palettesContextMenu,
+            id: \.id
+        ) { key in
+            menuItem(key, palette)
         }
-        Button(L("palettes.export", "Export…")) {
-            exportPalette(palette)
-        }
-        Divider()
-        Button(L("palettes.delete", "Delete"), role: .destructive) {
-            deletePalette(palette.name)
+    }
+
+    @ViewBuilder
+    private func menuItem(
+        _ key: SettingKey,
+        _ palette: ColorPalette
+    ) -> some View {
+        switch key {
+        case .colours(.paletteRename):
+            Button(L("palettes.rename", "Rename…")) {
+                renameDraft = palette.name
+                renaming = palette.name
+            }
+        case .colours(.paletteExport):
+            Button(L("palettes.export", "Export…")) {
+                exportPalette(palette)
+            }
+        case .colours(.paletteDelete):
+            // Last and separated: the destructive one.
+            Divider()
+            Button(
+                L("palettes.delete", "Delete"),
+                role: .destructive
+            ) {
+                deletePalette(palette.name)
+            }
+        default:
+            let _ = assertionFailure(
+                "unrendered palette menu key: \(key.id)"
+            )
+            EmptyView()
         }
     }
 

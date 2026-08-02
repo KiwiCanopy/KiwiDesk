@@ -205,13 +205,25 @@ Three boundaries, because System Settings itself draws them:
 
 **"Advanced" prefixes a disclosure's noun only when a basic tier
 of that same noun is visible above it; otherwise the drawer is
-named for what it holds** (R3, #406). So: "Advanced colors" —
-Fill and Highlight sit one section up, in the same grid, so "the
-advanced ones" is literally what it means. But **"Lua bindings"**
-and **"Monitor fingerprints"**, because there is no such thing as
-a basic Lua binding or a basic fingerprint. The catalog above
+named for what it holds** (R3, #406). So **"Lua bindings"** and
+**"Monitor fingerprints"**, because there is no such thing as a
+basic Lua binding or a basic fingerprint. The catalog above
 Shortcuts' drawer is a different noun (*actions*), and Monitors
 has no lesser fingerprint anywhere.
+
+**A second condition joined the rule when the colour drawers
+moved onto a page called Advanced Colors (#678):** the qualifier
+also has to be unclaimed by the surface AROUND the drawer. The
+bars' colour drawers used to satisfy the tier test — Fill and
+Highlight sat one grid up, so "the advanced ones" was literally
+what it meant — and the same drawers on the new page do not,
+because the adjective now reads as the page's own name rather
+than as a tier inside it. That collision is the one the
+redesign's decision log forbids by name: a row tier and a mode
+depth must never be spelled with one word. They are **"More
+colors"**, with the collapsed summary doing the naming the
+adjective used to ("Plate, highlight, hover, badges"). "More"
+cannot be misread as a mode.
 
 The four had drifted onto four formats (bare, `Advanced: …`,
 `Advanced — …`, and the unqualified "Advanced colors"), and the

@@ -63,7 +63,13 @@ struct GreyOutParityTests {
             "active: !allows"
         ),
         ("DragVisualsEditor.swift", "active: !visual.enabled"),
-        ("StickyMarkEditor.swift", "active: !spaceBarOn"),
+        // The mark tints left in #678 Phase 3, and with them the
+        // editor's only `GreyOut`. What remains is the coverage
+        // guard the card exists for: with the Space Bar off this
+        // is the ONLY sticky mark, so the toggle renders forced
+        // ON and disabled rather than editable-and-ignored.
+        // Sticky state must never be invisible from the GUI.
+        ("StickyMarkEditor.swift", ".disabled(!spaceBarOn)"),
         // The gate is passed INTO the group (#527) so its
         // section header — and the `?` anchor on it — stays
         // live; the wrap-around form would disable both. Two
@@ -78,25 +84,32 @@ struct GreyOutParityTests {
             "NativeSpacesGroup.swift",
             "GreyOut(active: gatedOff"
         ),
-        // The interim colour cards: the gate is passed INTO
-        // each group (#527) so the "Advanced colors" label
-        // stays live; two needles per side — the caller's
-        // predicate plumbing and the child's actual dim.
-        ("BarsSection.swift", "gatedOff: !on"),
-        ("BarsSection.swift", "gatedOff: !shown"),
-        (
-            "SpaceBarColorsGroup.swift",
-            "GreyOut(active: gatedOff"
-        ),
-        (
-            "AppBarColorsGroup.swift",
-            "GreyOut(active: gatedOff"
-        ),
         (
             "SpaceOverrideRows+ModeRows.swift",
             "active: g.resolvedGrid(for: space).autoSize"
         ),
-        ("AppBarColorsGroup.swift", "active: gapOnly"),
+        // Advanced Colours (#678 Phase 3), which replaced the
+        // interim colour cards. Two needles: the container gate
+        // each group's rows carry in parallel, honoring the
+        // census exemption as data, and the row-level gate that
+        // stands down while the container gate is active — drop
+        // either and a swatch claims to matter while the thing
+        // it tints is not drawn.
+        (
+            "BarColorCards.swift",
+            "&& !key.placement.exemptFromContainerGate"
+        ),
+        (
+            "AdvancedColorRow.swift",
+            "GreyOut(active: containerAllows && inert"
+        ),
+        // The one row-gate predicate the census cannot express:
+        // the Gap indicator hides the active item outright, so
+        // neither ink is painted.
+        (
+            "AdvancedColorRow+Bars.swift",
+            "gated(gates.bars.gapOnly, BarsGateHelp.gapOnly)"
+        ),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch

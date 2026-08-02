@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Appearance ▸ Sticky windows (#414): the
+/// This Profile ▸ Gaps & Borders ▸ Sticky windows (#414): the
 /// on-window mark's toggle. Sits below the focus border — the
 /// mark is its overlay sibling.
 ///
@@ -23,7 +23,7 @@ struct StickyMarkEditor: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.appearance.stickyWindows,
+            SettingsCatalog.gapsAndBorders.stickyWindows,
             caption: L(
                 "sticky.caption",
                 "Sticky windows stay visible on every "
@@ -65,52 +65,6 @@ struct StickyMarkEditor: View {
                     destination: .bars
                 )
             }
-            Divider()
-            markColors
         }
-    }
-
-    /// The sticky/floating mark tints (#429): the sticky color
-    /// paints the on-window mark glyph and the Space Bar sticky
-    /// badge; the floating color paints the Space Bar floating
-    /// badge. Both default to Automatic (the adaptive system
-    /// label color) — colors gate nothing, so they group as a
-    /// small pair for scannability (AGENTS §2.7 carve-out).
-    @ViewBuilder private var markColors: some View {
-        Text(L("sticky.mark_color", "Mark color"))
-            .font(.subheadline.weight(.semibold))
-        HexColorField(
-            label: L("sticky.color", "Sticky"),
-            a11yLabel: L(
-                "sticky.color.a11y",
-                "Sticky window mark color"
-            ),
-            automatic: true,
-            hex: $model.config.settings.stickyStyle.color
-        )
-        // The floating mark's ONLY surface is the Space Bar
-        // badge (`KiwiCore+SpaceBar`), so this tints nothing
-        // while the bar is off — greyed, not hidden (#171).
-        // The sticky color above is deliberately NOT gated: it
-        // also paints the on-window mark, so it stays live.
-        HexColorField(
-            label: L("floating.color", "Floating"),
-            a11yLabel: L(
-                "floating.color.a11y",
-                "Floating window mark color"
-            ),
-            automatic: true,
-            hex: $model.config.settings.floatingStyle.color
-        )
-        .modifier(
-            GreyOut(
-                active: !spaceBarOn,
-                help: L(
-                    "floating.color.space_bar_only",
-                    "The floating mark is drawn only in the "
-                        + "Space Bar, which is off."
-                )
-            )
-        )
     }
 }

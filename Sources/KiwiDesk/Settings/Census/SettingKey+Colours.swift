@@ -44,10 +44,21 @@ extension ColoursKey {
                 .atRest,
                 gate: .setting(.colours(.animationsOnScrolling))
             )
-        case .paletteApply:
+        case .paletteApply, .paletteSave, .paletteImport:
+            // The shelf's own affordances: a tile applies, the
+            // trailing tile saves, Import sits on the group
+            // header. All three are visible at rest, which is
+            // what the tier means.
             return .row(.coloursAndMotion, .palettes, .atRest)
-        case .paletteSave, .paletteRename, .paletteExport, .paletteDelete,
-            .paletteImport:
+        case .paletteRename, .paletteExport, .paletteDelete:
+            // The per-palette CONTEXT MENU. `.showMore` is the
+            // nearest true tier — not visible at rest, one
+            // interaction away — and the tier vocabulary has no
+            // case of its own for a menu. Recorded here rather
+            // than left as a wiring detail the census cannot
+            // see: `ColorsCensusRenderTests` pins this set
+            // against the menu's own list, so an action added
+            // to the menu without a census row still reds.
             return .row(.coloursAndMotion, .palettes, .showMore)
         case .paletteNeonGlowHint:
             return .row(

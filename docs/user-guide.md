@@ -31,7 +31,8 @@ Open Settings from the KiwiDesk menu in the menu bar, or press
 two-group sidebar on the left:
 
 - **Design** — sections scoped to the active profile (Spaces,
-  Layout, Monitors, Appearance, Bars, Behavior).
+  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
+  Advanced Colors, Behavior).
 - **System** — global settings that apply everywhere (Profiles,
   Shortcuts, App Rules, General).
 
@@ -48,14 +49,14 @@ Revert, Save a Copy As…, and Save.
 A search field sits at the top of the sidebar, under the app
 name. Typing filters the sidebar to the sections that match —
 by section name or by any of the titled groups inside a section
-(searching "gaps" finds Appearance, "focus" finds Shortcuts).
+(searching "gaps" finds Gaps & Borders, "focus" finds Shortcuts).
 While active, a subtle blue outline marks keyboard focus; the
 lighter placeholder gives way to normal text as soon as you type.
 
 Each result leads with the words that actually matched, and puts
 the trail to them in a smaller line underneath — so a hit on the
 Space Bar's colours reads **Space Bar colors** over
-"Bars", not the other way round. A section name that
+"Advanced Colors", not the other way round. A section name that
 matches on its own has no second line.
 
 Clicking a result **takes you to the match**, not just to its
@@ -507,7 +508,8 @@ mode). Floating has no tunables, so it has no tab.
 Each mode's tab leads with a small **schematic** — a static
 mini-diagram that redraws as you change ratios, counts, and
 orientation, so you can judge what a value looks like before you
-save (the same idea as the Gaps diagram in Appearance). It is a
+save (the same idea as the Gaps diagram in Gaps & Borders). It
+is a
 preview only; nothing applies to your live windows until you Save.
 
 Adjust each mode's defaults:
@@ -689,50 +691,15 @@ monitor** is simply the one you last clicked — clicking a window
 window, and a global sticky window, then appear on that monitor's
 space. Clicking the menu bar or the Dock does not move focus.
 
-## Appearance
+## Gaps & Borders
 
-The **Appearance** section (in the **Design** group) customizes
-visual feedback.
-
-Color controls pair a swatch with an exact hex field. Clicking the
-swatch opens the native Colors panel and updates the staged value as
-you pick; **Done** or the red window close button closes the panel and
-keeps the selected color.
-
-### Color Palette
-
-At the top of Appearance, the **Color palette** shelf paints a whole
-set of colors across the App Bar, Space Bar, focus borders, and drag
-visuals in one click. Each palette shows a small scene thumbnail —
-a mock bar, a bordered window, and a drag swatch — in its own
-colors,
-so you judge the whole look, not isolated chips. Applying a palette
-is a **one-time paint**, not a live link: it overwrites the current
-colors (you can still tweak any individual color afterward), and the
-change is staged until you Save the profile like any other edit.
-Below the shelf, a compact pair of bar previews mirrors the staged
-App Bar and Space Bar — the bars take most of a palette's paint but
-are edited on their own tab, so the mirror shows a click landing
-without leaving Appearance.
-
-- **Bundled** palettes (Kiwi, Kiwi Gold, Kiwi Neon, Clean Light,
-  Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in
-  and marked "Built-in" — they can't be renamed or deleted. "Kiwi"
-  is the shipped default, so applying it is a reset to the default
-  colors. **Kiwi Neon** is a bright dark theme built to show off the
-  focus-border **glow** — picking it also switches the glow on (you
-  can turn it back off in Focus border); other palettes leave your
-  glow setting alone.
-- **My palettes** are yours. The **＋** tile saves the current
-  colors as a new palette; right-click a saved palette to **Rename**,
-  **Export…**, or **Delete** it. **Import…** loads a palette file
-  someone shared (unknown keys are ignored, and the name is made
-  unique so it can't shadow a bundled one).
-
-The palette library is **global** — the same saved palettes are
-available whichever profile you're editing (a palette is a color
-recipe; a Profile is the configuration that owns the colors after
-you apply one).
+The **Gaps & Borders** section (in the **Design** group) sets the
+STRUCTURE of everything KiwiDesk draws around your windows: the
+spacing, the drag overlays' shape, the focus ring's width and
+glow, and whether a sticky window carries a mark. What any of it
+is *painted* with lives in the two colour sections below — every
+colour KiwiDesk has renders in exactly one place, and this is not
+it.
 
 ### Drag Visuals
 
@@ -767,10 +734,13 @@ preview, and dropping one over a tiled slot does nothing. Use
 
 Toggle each visual on/off and customize:
 
-- **Border**: show/hide, color, thickness (pt), and alignment
-  (inside or outside the slot edge).
-- **Fill**: show/hide, color (with optional transparency).
+- **Border**: show/hide, thickness (pt), and alignment (inside or
+  outside the slot edge).
+- **Fill**: show/hide.
 - **Corner radius**: match your windows' corner rounding.
+
+Both overlays' colours are in **Advanced Colors ▸ Drag colors**,
+laid out as the same two columns.
 
 ### Focus Border
 
@@ -901,18 +871,12 @@ invisible. (From Lua both marks are freely configurable —
 Space Bar shows its own sticky badge either way, and floating
 windows get a bar badge too — see the Space Bar section.
 
-Under the toggle, **Mark color** tints the marks. **Sticky**
-colors both the on-window mark and the Space Bar sticky badge
-(one mark, one color everywhere); **Floating** colors the
-Space Bar floating badge (floating windows have no on-window
-mark). The mark becomes a **filled disc** in the chosen color
-with a legible black or white glyph picked automatically for
-contrast. Both default to **Automatic** — the swatch shows a
-diagonal light/dark split, and the mark keeps its default look
-(the Space Bar badge stays the count-badge color; the on-window
-mark is a neutral glyph on glass that adapts to light and dark).
-Pick a color to override; right-click the swatch (or clear the
-hex field) to return to Automatic. (Lua:
+The marks' colours are in **Advanced Colors** — **Sticky** in
+Border colors (it paints both the on-window mark and the Space
+Bar sticky badge: one mark, one colour everywhere) and
+**Floating** in the Space Bar's badge cluster (floating windows
+have no on-window mark). Both default to **Automatic**, where
+the mark keeps its default look. (Lua:
 [`sticky.set_color`](lua-reference.md#stickyset_color) and
 [`floating.set_color`](lua-reference.md#floatingset_color); the
 badge visibility toggle is
@@ -1021,12 +985,12 @@ Turn the Space Bar off, or turn off the App Bar in every layout
 that can show one, and that card's controls stay on screen —
 disabled and dimmed, with their stored values intact and a
 tooltip saying what to turn back on. The same applies to
-individual settings: the Highlight and Active item colors dim
-under the Gap indicator (which hides the active item rather than
-marking it, so neither color is drawn); a drag visual's Border
-and Fill rows dim when that part is switched off; and the
-Floating mark color dims when the Space Bar — its only surface —
-is off. The **Desktop → profile** bindings are dimmed rather
+individual settings: in Advanced Colors the Highlight and Active
+item colors dim under the Gap indicator (which hides the active
+item rather than marking it, so neither color is drawn), a drag
+visual's colours dim when that part is switched off, and the
+whole Space Bar group — the Floating mark tint with it — dims
+when the bar is off. The **Desktop → profile** bindings are dimmed rather
 than hidden too, so you can still read what they hold.
 
 - **Font size**: auto or fixed. Auto-gated sliders (item size,
@@ -1035,10 +999,9 @@ than hidden too, so you can still read what they hold.
   Rounds the boxed items, or the shared plate under Plain and
   Liquid Glass.
 
-**Colors:** Fill and Highlight — the ones the preview strip most
-visibly reflects — sit inline. The rest of the palette (item,
-active item, hover states, and group badge) collapses behind an
-**Advanced colors** disclosure, shut by default. **Fill** is one
+**Colors** are not on this page — every App Bar tint lives in
+**Advanced Colors ▸ App Bar colors**, with Fill and Highlight at
+rest and the rest behind **More colors**. **Fill** is one
 knob for every filled surface: the box per item (Boxed), the shared
 plate (Plain), or the Liquid Glass **tint** (Material) — a
 transparent Fill means clear, untinted glass. The active item is
@@ -1165,20 +1128,20 @@ read the same once the bar overflows and scrolls), active
 indicator, **App symbol style**, sizes and **Glyphs per Space**
 (how many app glyphs an item shows before the rest collapse
 into the `+n` badge, 1–12), and **Spring delay**. Colors live
-in their own card below.
+in **Advanced Colors ▸ Space Bar colors**.
 
-The color ladder is the bar's signature: **Text** paints
+The color ladder there is the bar's signature: **Item** paints
 inactive Spaces, **Active space** the Space currently shown on
 the display, and **Focused window** the focused window's glyph
-inside the active Space. The ladder sits inline; the rest of
-the palette collapses behind an **Advanced colors** disclosure,
-shut by default — the App Bar's exact tiering. **Copy sizes
+inside the active Space. The ladder sits at rest; the rest of
+the palette collapses behind **More colors** — the App Bar's
+exact tiering. **Copy sizes
 and style to Space Bar…** (in the App Bar card's Style
 disclosure) takes the App Bar's current sizes and style once —
 thickness, background, indicator and the rest — and edits
 afterwards stay independent. Colors, position and visibility
-are never copied: colors are the palette's and the colour
-cards' concern.
+are never copied: colors are the palette's and Advanced Colors'
+concern.
 
 Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by
@@ -1188,34 +1151,133 @@ focused window of the Space each display currently shows
 dragged window must hover a Space before the view springs to it
 (default 1.5 s, 1–4 s).
 
-## Behavior
+## Colors & Motion
 
-The **Behavior** section (in the **Design** group) adjusts timing and
-interaction.
+The **Colors & Motion** section (in the **Design** group) is the
+whole colour story for most people: pick a palette, see what you
+are running, and set how windows move. Nothing here asks you to
+choose an individual colour — that is the next section, and you
+never have to open it.
 
-### Animations
+Color controls pair a swatch with an exact hex field. Clicking the
+swatch opens the native Colors panel and updates the staged value
+as you pick; **Done** or the red window close button closes the
+panel and keeps the selected color.
 
-- **Animate windows**: the master switch. Turn it off and windows
-  snap into place instantly; the per-event toggles and duration below
-  it grey out. Turning it back on restores the defaults. macOS
+### Color Palette
+
+At the top of the section, the **Color palette** shelf paints a
+whole set of colors across the App Bar, Space Bar, focus borders,
+drag visuals and the sticky/floating marks in one click. Each palette shows a small scene thumbnail —
+a mock bar, a bordered window, and a drag swatch — in its own
+colors,
+so you judge the whole look, not isolated chips. Applying a palette
+is a **one-time paint**, not a live link: it overwrites the current
+colors (you can still tweak any individual color afterward), and the
+change is staged until you Save the profile like any other edit.
+Below the shelf, **Current colors** shows the same scene painted in
+the colors you are actually running — the bar plate and its active
+item, the focus ring, and the drag ghost. It is the shelf's own
+tile at a larger size, so what a palette promises and what you have
+can never be drawn two different ways. Edit any individual color in
+Advanced Colors and this scene follows.
+
+- **Bundled** palettes (Kiwi, Kiwi Gold, Kiwi Neon, Clean Light,
+  Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in
+  and marked "Built-in" — they can't be renamed or deleted. "Kiwi"
+  is the shipped default, so applying it is a reset to the default
+  colors. **Kiwi Neon** is a bright dark theme built to show off the
+  focus-border **glow** — a link under its tile takes you to the
+  Glow toggle in Gaps & Borders; picking the palette never switches
+  it on for you (a palette carries colors and nothing else).
+- **My palettes** are yours. The **＋** tile saves the current
+  colors as a new palette; right-click a saved palette to **Rename**,
+  **Export…**, or **Delete** it. **Import…** loads a palette file
+  someone shared (unknown keys are ignored, and the name is made
+  unique so it can't shadow a bundled one).
+
+A palette carries **only colors** — never a width, a toggle or an
+effect. That is why it can be applied to any profile without
+surprises, and why the two mark tints joining the surface changed
+nothing you already had: no bundled palette carries them, so
+applying one leaves your marks exactly as they were. Saving your
+own colors captures all of them.
+
+The palette library is **global** — the same saved palettes are
+available whichever profile you're editing (a palette is a color
+recipe; a Profile is the configuration that owns the colors after
+you apply one).
+
+### Motion
+
+- **Animate windows**: the master switch, and the only row visible
+  at rest — the four per-event toggles and the duration sit behind
+  **Per-event and duration**. Turn the master off and windows snap
+  into place instantly; the rows in the drawer grey out. Turning it
+  back on restores the defaults. macOS
   **System Settings ▸ Accessibility ▸ Reduce Motion** also keeps
-  animations off — with it on, the whole section greys out, since the
+  animations off — with it on, the whole card greys out, since the
   system setting wins regardless of this one.
 - **Duration** (ms): how fast windows move and resize (50–1000, default
   150).
-- **Scroll speed** (ms): scrolling-layout slide speed when focus moves
-  (50–1000, default 150).
 - **On space change**: animate virtual space switches as a coordinated
   transition — windows slide out of the space you're leaving while the
   new space's windows slide in from the hiding corner (default off;
   both spaces animate at once, which can be slow on older machines).
   Native macOS Space switches are never animated — see
   [Accepted limitations](accepted-limitations.md).
-- **On scrolling**: animate the slide in scrolling layout (default on).
 - **On window resize**: animate when splits adjust (default on).
 - **On window swap**: animate when two tiles swap (default on).
 - **On relayout**: animate when windows open/close or layout parameters
   change (default on).
+
+The scrolling layout's own focus animation and its speed are not
+here — they live with that layout's parameters, in **Layout
+Defaults ▸ Scrolling**, and a link on this card goes there.
+
+## Advanced Colors
+
+The **Advanced Colors** section holds every colour KiwiDesk has —
+25 of them — **grouped by where you see it**, not by what it is.
+You arrive here having noticed that something on screen is the
+wrong colour, so the four groups match the four things that can
+be: **Border colors**, **Drag colors**, **Space Bar colors**,
+**App Bar colors**. Each group leads with the same live preview
+its own editor uses, so you are always looking at the thing you
+are tinting.
+
+Each colour renders in **exactly one place**. If a colour is not
+in this section, it does not exist as a setting.
+
+- **Border colors** — **Focused window** and **Unfocused
+  windows** (the focus ring), plus **Sticky** (the on-window mark
+  and the Space Bar's sticky badge, one colour for both).
+- **Drag colors** — the ghost's and the drop zone's **Border** and
+  **Fill**, in the same two columns the drag editor uses.
+- **Space Bar colors** — the three-state accent ladder at rest
+  (**Item**, **Active space**, **Focused window**, the bar's
+  signature), with plate, highlight, hover and the badge cluster
+  behind **More colors**. The **Floating** mark tint rides that
+  cluster: the Space Bar badge is its only surface.
+- **App Bar colors** — **Fill** and **Highlight** at rest (the two
+  the preview strip reflects most), the rest behind **More
+  colors**.
+
+**A colour whose thing is switched off is dimmed, not removed**,
+and because the switch usually lives on another page, the group's
+`?` says which page: turn the focus border off and the two ring
+colours dim with "turn it on in Gaps & Borders"; turn the Space
+Bar off and its whole group dims pointing at Bars. The stored
+value is untouched either way.
+
+Anything you set here can be kept: **Save current colors as…** on
+the palette shelf turns an afternoon of tinkering into a palette
+you can re-apply anywhere.
+
+## Behavior
+
+The **Behavior** section (in the **Design** group) adjusts
+mouse interaction and what happens on quit.
 
 ### Mouse & Window Behavior
 
@@ -1294,7 +1356,8 @@ global config; every saved profile is listed below, one row each
   adopts your changes into the loaded profile as usual.
 - **Edit** a saved profile **without switching** — the Settings
   sidebar becomes profile-scoped: the Design sections (Spaces,
-  Layout, Monitors, Appearance, Bars, Behavior) edit this profile, and
+  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
+  Advanced Colors, Behavior) edit this profile, and
   **General is hidden** — it holds global state a profile edit
   never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the

@@ -48,12 +48,13 @@ struct SettingsCatalogTests {
     }
 
     /// Pinned totals, so a shrunken enumeration cannot make the
-    /// sweeps above vacuous while still passing. 50 declared
-    /// tuples (incl. the two bar cards) + 6 computed mode
+    /// sweeps above vacuous while still passing. 54 declared
+    /// tuples (incl. the two bar cards and the two colour
+    /// destinations added in #678 Phase 3) + 6 computed mode
     /// tabs. Update deliberately as the catalog fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        #expect(allEntries.count == 56)
+        #expect(allEntries.count == 60)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
@@ -173,7 +174,7 @@ struct SettingsCatalogTests {
     /// opening it is one honest click, part-1 design call).
     @Test("a drawer expands for its children and nothing else")
     func drawerExpansionDecision() {
-        let perEdge = SettingsCatalog.appearance.gapsPerEdge
+        let perEdge = SettingsCatalog.gapsAndBorders.gapsPerEdge
         let edges = perEdge.children
         for child in [
             edges.edgeTop, edges.edgeBottom,
@@ -184,7 +185,7 @@ struct SettingsCatalogTests {
                 Comment(rawValue: child.id)
             )
         }
-        let perAxis = SettingsCatalog.appearance.gapsPerAxis
+        let perAxis = SettingsCatalog.gapsAndBorders.gapsPerAxis
         let axes = perAxis.children
         #expect(
             perAxis.shouldExpand(
@@ -205,7 +206,7 @@ struct SettingsCatalogTests {
         #expect(!perEdge.shouldExpand(revealing: nil))
         // A leaf drawer never expands for anything.
         #expect(
-            !SettingsCatalog.bars.spaceBarAdvancedColors
+            !SettingsCatalog.advancedColors.spaceBarMore
                 .shouldExpand(revealing: "gaps.top")
         )
     }
@@ -214,8 +215,8 @@ struct SettingsCatalogTests {
     /// drawer — the breadcrumb and the reveal both lean on it.
     @Test("drawer children carry their parent")
     func drawerChildrenCarryParent() {
-        let appearance = SettingsCatalog.entries(of: .appearance)
-        let top = appearance.first {
+        let gaps = SettingsCatalog.entries(of: .gapsAndBorders)
+        let top = gaps.first {
             $0.control.id == "gaps.top"
         }
         #expect(top?.parent?.id == "gaps.per_edge")
@@ -223,18 +224,18 @@ struct SettingsCatalogTests {
             top?.propertyPath == ["gapsPerEdge", "edgeTop"]
         )
         // Top-level entries carry none.
-        let gaps = appearance.first {
+        let gapsCard = gaps.first {
             $0.control.id == "gaps.title"
         }
-        #expect(gaps != nil)
-        #expect(gaps?.parent == nil)
+        #expect(gapsCard != nil)
+        #expect(gapsCard?.parent == nil)
     }
 
     /// The co-mounted drawer declarations must stay distinct —
-    /// both Style drawers (and both Advanced-colors drawers)
-    /// render on the one Bars page, so collapsing either pair
-    /// back to one shared id is exactly the
-    /// `scrollTo`-undefined shape the instance tag exists to
+    /// both Style drawers render on the one Bars page and both
+    /// "More colors" drawers on the one Advanced Colours page, so
+    /// collapsing either pair back to one shared id is exactly
+    /// the `scrollTo`-undefined shape the instance tag exists to
     /// prevent.
     @Test("co-mounted drawer instances have distinct ids")
     func instanceIdsAreDistinct() {
@@ -245,16 +246,15 @@ struct SettingsCatalogTests {
         #expect(spaceStyle.control.key == appStyle.control.key)
 
         let spaceColors =
-            SettingsCatalog.bars.spaceBarAdvancedColors
+            SettingsCatalog.advancedColors.spaceBarMore
         let appColors =
-            SettingsCatalog.bars.appBarAdvancedColors
+            SettingsCatalog.advancedColors.appBarMore
         #expect(
             spaceColors.control.id
-                == "space_bar/bars.advanced_colors"
+                == "space_bar/colors.more"
         )
         #expect(
-            appColors.control.id
-                == "app_bar/bars.advanced_colors"
+            appColors.control.id == "app_bar/colors.more"
         )
         #expect(
             spaceColors.control.key == appColors.control.key

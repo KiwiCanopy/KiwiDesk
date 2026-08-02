@@ -49,7 +49,13 @@ to invert the dim ladder).
   control it gates are one decision, so the toggle sits directly
   *above* the control it gates, never in a separate "toggles"
   block. Colors, which gate nothing, may group by type for grid
-  scannability.
+  scannability — and since #678 Phase 3 they do so wholesale, on
+  their own destinations. **A colour renders in exactly one
+  area**, which is Advanced Colours; adding a `HexColorField`
+  anywhere else in `Settings/` reds
+  `SettingsColorSurfaceTests`, whose allow-list is the one copy
+  of who may. Structure (is it drawn, how wide, how round) stays
+  with its feature; only the tint moves.
 - **Grey, don't hide** a control with no effect in the current
   mode (#171) — keep it visible and dimmed. This covers a control
   that *would* work in another mode, so dimming says "switch that
@@ -87,8 +93,9 @@ controllers rather than as a claim about the process, is
 
 Section bodies in `Settings/Sections/`, their widgets in
 `Settings/Components/<area>/` (Layouts, Keybindings, Bars,
-SpaceOverrides, Icons, Appearance, Lua, Common). Shell/model files
-and root-composed widgets live at `Settings/` root. `Common/`
+Colors, GapsAndBorders, SpaceOverrides, Icons, Lua, Common).
+Shell/model files and root-composed widgets live at `Settings/`
+root. `Common/`
 admits only primitives shared across multiple component areas;
 root-owned widgets stay at `Settings/` root. `Settings/Census/`
 holds the `SettingKey` settings census (#678) — data enums only,
@@ -98,9 +105,11 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars renders from it now** (#678 Phase 2): `BarsRowOrder`
-holds the display order and `BarsCensusRenderTests` pins it to
-the census, so a Bars row moves by editing the census.
+it. **Bars, Colours & Motion and Advanced Colours render from
+it now** (#678 Phases 2-3): `BarsRowOrder` / `ColorsRowOrder`
+hold the display order and `BarsCensusRenderTests` /
+`ColorsCensusRenderTests` pin them to the census, so a row in
+those areas moves by editing the census.
 Container-level greying is census-driven there (the container
 gate plus `exemptFromContainerGate`), but a ROW's grey
 predicate stays wiring-owned even in a census-rendered area —

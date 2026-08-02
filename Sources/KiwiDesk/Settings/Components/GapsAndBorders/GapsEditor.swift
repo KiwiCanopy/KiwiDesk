@@ -18,15 +18,15 @@ struct GapsEditor: View {
     /// index enumerates, so a reveal targeting an edge row knows
     /// its drawer by construction.
     private var perEdge: SettingsDrawer<GapEdgeControls> {
-        SettingsCatalog.appearance.gapsPerEdge
+        SettingsCatalog.gapsAndBorders.gapsPerEdge
     }
 
     private var perAxis: SettingsDrawer<GapAxisControls> {
-        SettingsCatalog.appearance.gapsPerAxis
+        SettingsCatalog.gapsAndBorders.gapsPerAxis
     }
 
     var body: some View {
-        SettingsSection(SettingsCatalog.appearance.gapsCard) {
+        SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
             GapsDiagram(outer: outer, inner: inner)
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
