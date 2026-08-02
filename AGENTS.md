@@ -172,10 +172,11 @@ traced at directory altitude — see **`docs/architecture.md`**.
    and committed, run the **`review-change` skill**
    ([`.claude/skills/review-change`](.claude/skills/review-change/SKILL.md))
    — `code-reviewer` and `architect-reviewer` on the diff since
-   the last review point. Address or consciously dismiss every
-   finding before opening a PR. That skill owns the sequencing
-   (parallel first round, sequential re-review of a substantial
-   fix batch) and the agent-reuse rules.
+   the last review point, plus the specialist lanes the diff
+   opens. Address or consciously dismiss every finding before
+   opening a PR. That skill owns the sequencing (parallel first
+   round, which lanes a diff earns, sequential re-review of a
+   substantial fix batch) and the agent-reuse rules.
 
 ### Branching & Pull Requests
 
@@ -220,9 +221,11 @@ scripts.
   tag fires `.github/workflows/release.yml`, which re-verifies
   the tag, builds the artifact and drafts the release — same
   rule file.
-- `./scripts/install-subagents.sh --claude` (Claude Code agents +
-  workspace skills) or `--codex` (project-scoped Codex agents),
-  per clone, one explicit target.
+- `./scripts/sync-agents.sh` regenerates the Codex mirror
+  (`.codex/agents/*.toml`) from the committed Claude Code agents in
+  `.claude/agents/`, which are the source of truth and need no
+  install step. `--check` fails when the mirror is stale — see
+  [subagents.md](.claude/rules/subagents.md).
 - Optional, per-developer: the `caveman` skill compresses agent
   output — not a build dependency, needs Node `>= 18`:
   `npx -y github:JuliusBrussee/caveman --non-interactive`.
@@ -239,12 +242,19 @@ need to wait to be asked. A subagent starts with zero
 conversation context, so delegate work that does not depend on
 it: broad fan-out searches where only the conclusion matters
 (`Explore`), independent review passes on a finished change
-(`code-reviewer`, `architect-reviewer`), and parallel isolated
+(`code-reviewer`, `architect-reviewer`), proving a new guard
+actually reds (`guard-prover`), and parallel isolated
 implementation work that would otherwise serialize.
 
 Stay inline for anything small, sequential, or dependent on
 conversation context: a cold agent re-deriving what the session
 already knows costs more than it saves.
+
+The delegation call is made here, while editing something else,
+which is why it lives in this file. The roster itself — who
+exists, what each one is for, and how an agent file must be
+written — is in [subagents.md](.claude/rules/subagents.md), which
+loads when you edit one.
 
 ## 5. Guardrails (Known Pitfalls)
 
@@ -279,7 +289,7 @@ touch a matching path.
 | `Config`, `Profiles`, `Commands` | [profiles.md](.claude/rules/profiles.md) | A profile owns tiling plus *sparse behavior overrides*, never anything that routes or selects the profile itself; `isGuiManaged` is the one ownership predicate |
 | Any setting name, `CodingKeys`, user-facing noun | [config-vocabulary.md](.claude/rules/config-vocabulary.md) | Pick the Lua name first and derive the JSON key from it; groups are singular; reuse the noun glossary instead of coining a synonym |
 | `AX` | [accessibility.md](.claude/rules/accessibility.md) | AX calls are slow and can block — snapshot before layout math; Electron/WebKit answer lazily, so `AXEnhancedUserInterface` stays |
-| `OS`, `SkyLight*.swift` | [os-private-apis.md](.claude/rules/os-private-apis.md) | Resolve private symbols with `dlsym`, never `@_silgen_name`; every private path needs a public fallback |
+| `OS`, `SkyLight*.swift`, `AX/AXHelper.swift` | [os-private-apis.md](.claude/rules/os-private-apis.md) | Resolve private symbols with `dlsym`, never `@_silgen_name` — the rule file names the one exempt symbol and why it does not generalise; every private path needs a public fallback |
 | `Lua` | [lua.md](.claude/rules/lua.md) | The watchdog cannot interrupt blocking C calls; registry refs never cross interpreters |
 | `Keys`, `Events`, `Animation` | [input-and-animation.md](.claude/rules/input-and-animation.md) | Carbon hotkeys (no Input Monitoring permission), one `DisplayLink` per monitor; the spring integrator must stay inside its stability bound — an animation that never settles kills the settle signal for the whole session (#599), so `tick` force-settles one that outlives its age bound (#611); a shrink snaps on frame 1 unless the pass promised `BatchSizing.allSpringSized` (#593) — opt-in, never inferred, and the guard's `allowed` map is the one copy of who may |
 | `Borders` | [borders.md](.claude/rules/borders.md) | `FollowSource` owns which frame the ring AND mark render — never re-implement it beside a call site; mid-animation the commanded tick leads and every state-reading channel (echo, WS re-read, `sync` geometry) stands down; the settle passes are two keys, early visibility and late geometry |
@@ -288,7 +298,8 @@ touch a matching path.
 | `Tests/**` | [tests.md](.claude/rules/tests.md) | Pin the display in every geometry fixture (#531); split suites early; generous hang-guards, never tight deadlines (#344); reach the machine only through injected seams (hotkeys #565, menu-bar slots — `MachineTouchTests`, `StatusItemSeamGuardTests`) |
 | Any hand-mirrored field list | [parity-tests.md](.claude/rules/parity-tests.md) | Past two mirrors, ship a forget-proof parity test — reflection over a hand-listed one |
 | `scripts/build-app.sh`, `scripts/release.sh`, `Package.swift`, workflows | [packaging-and-release.md](.claude/rules/packaging-and-release.md) | Every distributable artifact needs its own notarization ticket, and the build machine is the one place that failure is invisible; cut a release with `scripts/release.sh` — it stamps the version before creating the tag, so the two cannot disagree (#32) |
-| `.claude/rules/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614) |
+| `.claude/rules/**`, `.claude/agents/**`, `AGENTS.md` | [rule-authoring.md](.claude/rules/rule-authoring.md) | Write an obligation, not a state claim — a claim that stays names its guard inline, and a number-pin derives the number rather than restating it (#614); `RuleCitationTests` resolves the citations in all three |
+| `.claude/agents/**`, `scripts/sync-agents.sh` | [subagents.md](.claude/rules/subagents.md) | An agent routes to the owning rule file and never restates a fact from it; a judging agent gets no `Write`/`Edit` and says so in prose, which is what survives into the Codex mirror; write the `description` as *when to use this*, naming concrete triggers; regenerate the mirror with `scripts/sync-agents.sh` in the same change |
 | `docs/**` | [docs.md](.claude/rules/docs.md) | Which doc owns what, and the design-decisions charter (argue the rule, never log the event) |
 | `site/**` | [site.md](.claude/rules/site.md) | `{/* */}` not `<!-- -->` — template comments ship to visitors (#557); `site/.nvmrc` is the one Node pin and never a second file; configure Cloudflare Pages in the repo, not the dashboard; `src/pages/404.astro` and `disable404Route` move together (#635) |
 

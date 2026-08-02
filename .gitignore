@@ -63,10 +63,13 @@ fastlane/test_output
 plan/
 
 # Claude Code and Codex customizations
-# Third-party agents are regenerated per-clone via
-# scripts/install-subagents.sh, so they stay ignored. Team-shared
-# workflow config (skills, rules) is committed via the negations.
+# Team-shared workflow config — agents, skills, rules — is committed
+# via the negations below. `.codex/agents/` is generated from the
+# committed Markdown by scripts/sync-agents.sh, so it stays ignored.
+# `.agents/skills/` is where the optional per-developer skill
+# installs land (AGENTS.md §4), so it stays ignored too.
 .claude/*
+!.claude/agents/
 !.claude/skills/
 !.claude/rules/
 .agents/skills/

@@ -1,5 +1,5 @@
 ---
-description: Run KiwiDesk's two-agent review workflow (code-reviewer + architect-reviewer) with the AGENTS.md §3 (Review step) sequencing. Use on a finished, verified, committed change before opening a PR.
+description: Run KiwiDesk's review workflow — code-reviewer and architect-reviewer in parallel, plus whichever specialist lanes the diff opens — with the AGENTS.md §3 (Review step) sequencing. Use on a finished, verified, committed change before opening a PR.
 argument-hint: "[optional: base ref, e.g. main or a commit/PR]"
 ---
 
@@ -18,10 +18,29 @@ merge base with `main`.
 
 ## 2. First round — parallel
 
-Spawn **both** `code-reviewer` and `architect-reviewer` on the diff
-**in parallel** (one message, two Agent calls): the diff is
-finished and the perspectives are independent, so serializing only
-costs time. Brief each with the review range.
+Spawn `code-reviewer` and `architect-reviewer` on the diff **in
+parallel** (one message, one Agent call each): the diff is finished
+and the perspectives are independent, so serializing only costs
+time. Brief each with the review range.
+
+Open the additional lanes the diff earns — in the **same**
+message, since they are independent too. The gate is a property of
+the diff, not a judgement call:
+
+| The diff… | also spawn |
+|---|---|
+| adds or edits a test, guard, canary or assertion | `guard-prover` |
+| changes user-visible behavior | `docs-steward` |
+| adds or alters an `L()` string, or touches a catalog | `localization-auditor` |
+| touches `site/` | `site-engineer` |
+
+`guard-prover` mutates code, so spawn it the way its own file asks
+to be spawned; the other lanes are read-only or edit only their own
+tree.
+
+The gate above is a property of the diff — it is this skill's to
+own. What each agent *is*, and when to reach for one outside a
+review, is in [subagents.md](../../rules/subagents.md).
 
 ## 3. Triage
 

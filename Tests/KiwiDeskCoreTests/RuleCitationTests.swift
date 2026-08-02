@@ -138,8 +138,13 @@ struct RuleCitationTests {
         #expect(seen > 10, "only saw \(seen) path citations")
     }
 
-    /// AGENTS.md plus every rule file — both are in scope for the
-    /// convention, so both are in scope for its citations.
+    /// AGENTS.md, every rule file, and every agent file — all three
+    /// are in scope for the convention (`rule-authoring.md` §Scope),
+    /// so all three are in scope for its citations.
+    ///
+    /// The agent files joined late: they load as instructions the
+    /// same way, and they cite `scripts/…` paths that nothing else
+    /// resolves.
     private func ruleDocuments() throws -> [(String, String)] {
         var out: [(String, String)] = [
             (
@@ -152,31 +157,45 @@ struct RuleCitationTests {
                 )
             )
         ]
-        let rules =
+        // A fail-open guard is the thing this file exists to
+        // prevent, so refuse to pass on an empty scan. The rules
+        // floor is a real floor; the roster is meant to grow and
+        // shrink, so its only honest floor is "not none".
+        try out.append(
+            contentsOf: instructionFiles("rules", atLeast: 15)
+        )
+        try out.append(
+            contentsOf: instructionFiles("agents", atLeast: 1)
+        )
+        return out
+    }
+
+    /// Every `.md` under `.claude/<directory>`, as (name, text).
+    private func instructionFiles(
+        _ directory: String,
+        atLeast floor: Int
+    ) throws -> [(String, String)] {
+        let root =
             repoRoot
             .appendingPathComponent(".claude")
-            .appendingPathComponent("rules")
+            .appendingPathComponent(directory)
         let names = try FileManager.default
-            .contentsOfDirectory(atPath: rules.path)
+            .contentsOfDirectory(atPath: root.path)
             .filter { $0.hasSuffix(".md") }
             .sorted()
-        // A fail-open guard is the thing this file exists to
-        // prevent, so refuse to pass on an empty scan.
-        #expect(names.count >= 15, "only found \(names.count) rules")
-        for name in names {
-            out.append(
-                (
-                    name,
-                    try String(
-                        contentsOf:
-                            rules
-                            .appendingPathComponent(name),
-                        encoding: .utf8
-                    )
+        #expect(
+            names.count >= floor,
+            "only found \(names.count) files in \(directory)"
+        )
+        return try names.map { name in
+            (
+                "\(directory)/\(name)",
+                try String(
+                    contentsOf: root.appendingPathComponent(name),
+                    encoding: .utf8
                 )
             )
         }
-        return out
     }
 
     /// Type and function names declared under `Tests/`.
