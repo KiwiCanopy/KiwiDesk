@@ -49,15 +49,23 @@ enum SettingsArea: CaseIterable, Hashable {
     }
 }
 
-/// How deep a setting sits (decision-log item 12). "Show more"
-/// rows and nerd-only cards are different things — never
-/// conflate them in copy or code (item 7): `.showMore` is a
+/// How deep a setting sits. "Show more" rows and nerd-only cards
+/// are different things — never conflate them in copy or code:
+/// `.showMore` is a
 /// row-level disclosure; mode depth is
 /// `SettingsArea.minimumMode`.
 enum SettingTier: Hashable {
     /// Visible at rest in its container.
     case atRest
-    /// Behind the container's "Show more" disclosure.
+    /// Not visible at rest, one interaction away: behind the
+    /// container's "Show more" disclosure, or — where the
+    /// container's affordance is a menu rather than a drawer —
+    /// in that menu. The palette actions are the second kind
+    /// (Rename / Export / Delete, on a saved palette's context
+    /// menu), and the definition is stated HERE rather than
+    /// only at that use site: the mode-mechanics phase renders
+    /// from this enum, and a renderer trusting the narrower
+    /// wording would put those three in a drawer.
     case showMore
     /// Surfaces without disclosure the moment its gate allows.
     /// No census row uses it yet: the placement table encodes

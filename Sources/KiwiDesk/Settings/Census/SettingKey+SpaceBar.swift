@@ -103,7 +103,8 @@ extension SpaceBarKey {
         case .spaceBarFocusedItemColor:
             // Nothing to tint when glyphs are native images and
             // no front-app name renders (icon source + front
-            // app + edge, SpaceBarColorsGroup).
+            // app + edge). Predicate:
+            // `AdvancedColorsGates.focusedItemInert`.
             return .row(
                 .advancedColours,
                 .spaceBar,

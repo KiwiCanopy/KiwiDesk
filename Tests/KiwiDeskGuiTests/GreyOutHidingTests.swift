@@ -28,6 +28,14 @@ struct GreyOutHidingTests {
         "if visual.enabled {",
     ]
 
+    /// OS-capability gates are the one legitimate reason to
+    /// remove rather than dim: a control for a rendering path
+    /// this macOS cannot perform is not "off", it does not
+    /// exist (`AppBarStyle.glassAvailable`, settled in #390).
+    /// Stated as prose, not as a constant: the old constant was
+    /// asserted non-empty and scanned for nothing, which read
+    /// like coverage of the carve-out and was not.
+    ///
     /// Fail-shut exemptions, one line of reason each. The scan
     /// stays broad ON PURPOSE — narrowing the needles to the two
     /// shapes this sweep fixed would turn the lens back into a
@@ -54,12 +62,6 @@ struct GreyOutHidingTests {
         "SettingsFooter.swift":
             "either/or slot; each mode renders its own verb",
     ]
-
-    /// OS-capability gates are the one legitimate reason to
-    /// remove rather than dim: a control for a rendering path
-    /// this macOS cannot perform is not "off", it does not
-    /// exist. Settled in #390.
-    private let capabilityGate = "AppBarStyle.glassAvailable"
 
     @Test("no settings view hides a control it should grey")
     func noHidingPredicatesRemain() throws {
@@ -101,6 +103,5 @@ struct GreyOutHidingTests {
             )
             #expect(!reason.isEmpty)
         }
-        #expect(!capabilityGate.isEmpty)
     }
 }

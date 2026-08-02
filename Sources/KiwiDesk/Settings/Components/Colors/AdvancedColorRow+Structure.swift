@@ -87,6 +87,14 @@ extension AdvancedColorRow {
     /// One drag column's Border or Fill tint. Both columns edit
     /// the same `DragVisual` shape, so one builder covers four
     /// census rows.
+    /// `labelWidth` is passed EXPLICITLY, not read from the
+    /// environment: `HexColorField.labelWidth` is a plain
+    /// parameter, so the `settingsLabelColumn` value the twin
+    /// columns publish reaches every other row type and not this
+    /// one. Dropping it renders the half-width columns on the
+    /// full 140 pt axis — which is what happened when these rows
+    /// moved off the structure editor, where the old call site
+    /// did pass it.
     @ViewBuilder private func dragRow(
         ghost: Bool,
         fill: Bool
@@ -107,6 +115,7 @@ extension AdvancedColorRow {
             a11yLabel: fill
                 ? L("drag.fill_color.a11y", "Fill color")
                 : L("drag.border_color.a11y", "Border color"),
+            labelWidth: SettingsMetrics.dragColumnLabelColumn,
             hex: fill ? visual.fillColor : visual.borderColor
         )
         .modifier(gated(inert, help))

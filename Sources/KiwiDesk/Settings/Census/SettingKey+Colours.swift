@@ -27,8 +27,8 @@ extension ColoursKey {
             .animationsOnWindowSwap, .animationsOnRelayout,
             .animationsDurationMS:
             // The whole gated group follows the master toggle
-            // (BehaviorSection.gatedAnimationControls); the
-            // Reduce Motion grey is the .motion CONTAINER gate.
+            // (`MotionCard.disclosure`); the Reduce Motion grey
+            // is the .motion CONTAINER gate.
             return .row(
                 .coloursAndMotion,
                 .motion,

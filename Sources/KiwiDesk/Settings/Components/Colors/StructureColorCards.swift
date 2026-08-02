@@ -80,18 +80,12 @@ struct DragColorCard: View {
                 column(
                     title: L("drag.ghost", "Ghost"),
                     ghost: true,
-                    keys: [
-                        .borders(.dragGhostBorderColor),
-                        .borders(.dragGhostFillColor),
-                    ]
+                    keys: ColorsRowOrder.dragGhostColumn
                 )
                 column(
                     title: L("drag.drop_zone", "Drop zone"),
                     ghost: false,
-                    keys: [
-                        .borders(.dragDropZoneBorderColor),
-                        .borders(.dragDropZoneFillColor),
-                    ]
+                    keys: ColorsRowOrder.dragDropZoneColumn
                 )
             }
         }

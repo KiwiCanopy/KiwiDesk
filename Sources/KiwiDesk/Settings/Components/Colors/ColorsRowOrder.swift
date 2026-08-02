@@ -55,12 +55,19 @@ enum ColorsRowOrder {
         .borders(.stickyColor),
     ]
 
-    /// Drag visuals, read as the #231 twin columns: ghost's
-    /// border and fill, then the drop zone's. Four rows, no
-    /// drawer.
-    static let dragAtRest: [SettingKey] = [
+    /// Drag visuals, as the #231 twin columns. One list PER
+    /// COLUMN, and each is what its column actually renders —
+    /// a single combined list would be compared against the
+    /// census by the parity guard while the renderer hand-listed
+    /// its keys inline, so a fifth drag tint could be added to
+    /// both the census and the list and still ship invisible.
+    /// Four rows total, no drawer.
+    static let dragGhostColumn: [SettingKey] = [
         .borders(.dragGhostBorderColor),
         .borders(.dragGhostFillColor),
+    ]
+
+    static let dragDropZoneColumn: [SettingKey] = [
         .borders(.dragDropZoneBorderColor),
         .borders(.dragDropZoneFillColor),
     ]

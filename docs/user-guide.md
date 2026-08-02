@@ -49,7 +49,8 @@ Revert, Save a Copy As…, and Save.
 A search field sits at the top of the sidebar, under the app
 name. Typing filters the sidebar to the sections that match —
 by section name or by any of the titled groups inside a section
-(searching "gaps" finds Gaps & Borders, "focus" finds Shortcuts).
+(searching "sticky" finds Gaps & Borders, "focus" finds
+Shortcuts).
 While active, a subtle blue outline marks keyboard focus; the
 lighter placeholder gives way to normal text as soon as you type.
 
@@ -509,8 +510,8 @@ Each mode's tab leads with a small **schematic** — a static
 mini-diagram that redraws as you change ratios, counts, and
 orientation, so you can judge what a value looks like before you
 save (the same idea as the Gaps diagram in Gaps & Borders). It
-is a
-preview only; nothing applies to your live windows until you Save.
+is a preview only; nothing applies to your live windows until
+you Save.
 
 Adjust each mode's defaults:
 
@@ -549,7 +550,12 @@ Adjust each mode's defaults:
   off by default, so
   stepping focus past a row end stops there; turn it on to wrap
   from the last window back to the first (and vice versa). Swap
-  never wraps.
+  never wraps. This card also owns the layout's own motion:
+  **Animate focus shifts** (on by default) and the **Scroll
+  speed** it uses (50–1000 ms, default 150; greys out while the
+  toggle is off). They sit here rather than on Colors & Motion
+  because they are this layout's parameters — Colors & Motion
+  links across to them.
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits), wrap focus, and **New window**
   placement. Wrap focus is **off** by default, the same as
@@ -761,11 +767,9 @@ your current color, width, and corner style before it touches real
 windows. Below it:
 
 - **Show focus border**: the master on/off switch.
-- **Color**: the focused window's border color (a swatch plus hex
-  field, the same control as every other KiwiDesk color).
 - **Show border on unfocused windows**: off by default — when on,
   every other tiled window gets a border too, including every member
-  of an overflow cascade, in its own (greyed until enabled) color.
+  of an overflow cascade, in its own color.
   Floating windows get no border when unfocused (only the focused
   window does, whether tiled or floating); monocle always shows
   only the focused border.
@@ -795,6 +799,11 @@ windows. Below it:
   action applies or persists them. Extra spacing is an action
   parameter, not another saved setting. The action can grow or
   shrink gaps. (Lua: `border.fit_gaps(remaining)`.)
+
+The ring's two colours — **Focused window** and **Unfocused
+windows** — are in **Advanced Colors ▸ Border colors**. They dim
+there while the matching switch on this page is off, with a `?`
+saying to come back here.
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a border, even while you type into them — only genuine windows do.
@@ -890,8 +899,8 @@ App Bar only renders in Monocle and Scrolling. Each card leads
 with its own preview, shows the settings you'd touch in the
 first week at rest — does the bar exist, where, how thick, and
 the content toggles — and folds the rest behind one **Style**
-disclosure whose subtitle names what it holds. The colour
-cards follow below.
+disclosure whose subtitle names what it holds. Neither card
+holds a colour: every bar tint is in **Advanced Colors**.
 
 ### App Bar
 
@@ -906,7 +915,8 @@ styling lives in Lua (see below).
 
 **Click a tab** to focus that window; **drag a tab** along the
 bar to rearrange the windows. (Settings calls these the bar's
-**items** — hence Item size, Item gap and Item color below.)
+**items** — hence Item size and Item gap below, and Item color
+in Advanced Colors.)
 Because Monocle and Scrolling don't lay windows out side by
 side, the App Bar is where you reorder them: drag a tab left or
 right (or up/down on a vertical bar) and the underlying window
@@ -990,8 +1000,9 @@ item colors dim under the Gap indicator (which hides the active
 item rather than marking it, so neither color is drawn), a drag
 visual's colours dim when that part is switched off, and the
 whole Space Bar group — the Floating mark tint with it — dims
-when the bar is off. The **Desktop → profile** bindings are dimmed rather
-than hidden too, so you can still read what they hold.
+when the bar is off. The **Desktop → profile** bindings are
+dimmed rather than hidden too, so you can still read what they
+hold.
 
 - **Font size**: auto or fixed. Auto-gated sliders (item size,
   font size) read "Automatic" while their toggle is on.
@@ -1072,7 +1083,8 @@ At a glance, the marks you may see and what each means:
 
 Every mark is a **filled disc** in its state color with a legible
 black-or-white glyph auto-picked for contrast; sticky and floating
-each get their own color (see **Mark color**, above). Floating shows
+each get their own color (see [Advanced
+Colors](#advanced-colors)). Floating shows
 no on-window mark — in the bar is the only place a tiled and a
 floating window look different. (Lua:
 [`sticky.set_mark`](lua-reference.md#stickyset_mark),
@@ -1135,8 +1147,8 @@ inactive Spaces, **Active space** the Space currently shown on
 the display, and **Focused window** the focused window's glyph
 inside the active Space. The ladder sits at rest; the rest of
 the palette collapses behind **More colors** — the App Bar's
-exact tiering. **Copy sizes
-and style to Space Bar…** (in the App Bar card's Style
+exact tiering. **Copy sizes and style to Space Bar…**
+(in the App Bar card's Style
 disclosure) takes the App Bar's current sizes and style once —
 thickness, background, indicator and the rest — and edits
 afterwards stay independent. Colors, position and visibility
@@ -1167,8 +1179,10 @@ panel and keeps the selected color.
 ### Color Palette
 
 At the top of the section, the **Color palette** shelf paints a
-whole set of colors across the App Bar, Space Bar, focus borders,
-drag visuals and the sticky/floating marks in one click. Each palette shows a small scene thumbnail —
+whole set of colors — the App Bar, the Space Bar, focus borders,
+drag visuals and the sticky/floating marks are all colors a
+palette *can* carry — in one click. Each palette shows a small
+scene thumbnail —
 a mock bar, a bordered window, and a drag swatch — in its own
 colors,
 so you judge the whole look, not isolated chips. Applying a palette
@@ -1182,13 +1196,17 @@ tile at a larger size, so what a palette promises and what you have
 can never be drawn two different ways. Edit any individual color in
 Advanced Colors and this scene follows.
 
-- **Bundled** palettes (Kiwi, Kiwi Gold, Kiwi Neon, Clean Light,
+- **Bundled** palettes (Kiwi (Default), Kiwi Gold, Kiwi Neon,
+  Clean Light,
   Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in
-  and marked "Built-in" — they can't be renamed or deleted. "Kiwi"
-  is the shipped default, so applying it is a reset to the default
-  colors. **Kiwi Neon** is a bright dark theme built to show off the
-  focus-border **glow** — a link under its tile takes you to the
-  Glow toggle in Gaps & Borders; picking the palette never switches
+  and marked "Built-in" — they can't be renamed or deleted.
+  **Kiwi (Default)** is derived from the shipped defaults, so
+  applying it is a reset to the default
+  colors — including handing both mark tints back to Automatic.
+  **Kiwi Neon** is a bright dark theme built to show off the
+  focus-border **glow** — while glow is off, a **Pair with Glow**
+  link under its tile takes you to the Focus border card in
+  Gaps & Borders; picking the palette never switches
   it on for you (a palette carries colors and nothing else).
 - **My palettes** are yours. The **＋** tile saves the current
   colors as a new palette; right-click a saved palette to **Rename**,
@@ -1246,8 +1264,12 @@ be: **Border colors**, **Drag colors**, **Space Bar colors**,
 its own editor uses, so you are always looking at the thing you
 are tinting.
 
-Each colour renders in **exactly one place**. If a colour is not
-in this section, it does not exist as a setting.
+Each colour renders in **exactly one place**: no colour on this
+page is also editable somewhere else in Settings, and no colour
+Settings offers is missing from it. (Lua reaches a little
+further: the [per-layout App Bar
+overrides](lua-reference.md#per-layout-app-bar-overrides) include
+the bar's eight colours and have no GUI control at all.)
 
 - **Border colors** — **Focused window** and **Unfocused
   windows** (the focus ring), plus **Sticky** (the on-window mark

@@ -22,7 +22,7 @@ struct SettingsCatalogArgumentTests {
     /// is safe. Fail-shut: a new indirect site must be listed
     /// here consciously or the scan fails loud.
     private let indirectSites: Set<String> = [
-        // Aliases of `SettingsCatalog.appearance.gapsPerEdge` /
+        // Aliases of `SettingsCatalog.gapsAndBorders.gapsPerEdge` /
         // `.gapsPerAxis` — the same values, hoisted so the six
         // `GapRow`s can reach the children tersely.
         "GapsEditor.swift: perEdge",

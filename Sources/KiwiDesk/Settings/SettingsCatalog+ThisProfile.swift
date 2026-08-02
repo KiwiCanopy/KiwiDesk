@@ -73,8 +73,8 @@ struct ColorsControls: Sendable {
         "Animations"
     )
     /// Named for what it holds, not "more" or "advanced": this
-    /// area's Nerd twin is a whole separate card, and item 7
-    /// forbids one word meaning both a row tier and mode depth.
+    /// area's Nerd twin is a whole separate card, and one word
+    /// must never mean both a row tier and mode depth.
     let motionMore = SettingsDrawer(
         "motion.more",
         "Per-event and duration"
@@ -88,11 +88,14 @@ struct ColorsControls: Sendable {
 struct AdvancedColorsControls: Sendable {
     /// Each group's title names the SUBSYSTEM plus "colors".
     /// Bare "Space Bar" / "Drag & drop" would collide in search
-    /// with the cards that own those things' structure, and the
-    /// colour page would win the ambiguity by sitting higher in
-    /// the sidebar — sending "space bar" to a grid of swatches
-    /// instead of to the bar's own card. The two bar titles are
-    /// the retired interim cards' keys, so their eleven
+    /// with the cards that own those things' structure: sidebar
+    /// search returns one row per destination, so the query
+    /// would come back as two rows reading identically, with
+    /// nothing to tell the swatch grid from the bar's own card.
+    /// (The ORDER decides which comes first and is settled
+    /// separately, in `SettingsDestination.thisProfile`; it is
+    /// not what makes the titles distinct.) The two bar titles
+    /// are the retired interim cards' keys, so their eleven
     /// translations carry straight over.
     let bordersGroup = SettingsControl(
         "colors.borders.title",

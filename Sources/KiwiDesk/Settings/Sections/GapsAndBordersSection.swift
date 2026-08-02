@@ -7,16 +7,14 @@ import SwiftUI
 /// glow, the sticky mark's presence. Every colour on it moved to
 /// the two Colours areas.
 ///
-/// The rename is the point of the change, not a side effect. The
-/// page was called Appearance, which is the most colour-sounding
-/// word in the app; after the split it owns no colour, so leaving
-/// the name would have made it the wrong answer to "where do I
-/// change the ring colour" — and the sidebar search indexes
-/// destination titles, so it would have kept giving that answer.
-/// The new name is the one the census already gives this area
+/// The name is the census's own for this area
 /// (`SettingsArea.gapsAndBorders`), so the interim sidebar
-/// pre-teaches the Home card that eventually replaces it rather
-/// than teaching a name that dies.
+/// teaches the name that survives into the Home card rather than
+/// one that dies with the sidebar. Why the rename was owed at
+/// all — a destination title is a search key, so a page must not
+/// keep a name for content it no longer has — is argued in
+/// `docs/design-decisions.md` under "Colour is its own
+/// destination".
 struct GapsAndBordersSection: View {
     @ObservedObject var model: SettingsModel
 

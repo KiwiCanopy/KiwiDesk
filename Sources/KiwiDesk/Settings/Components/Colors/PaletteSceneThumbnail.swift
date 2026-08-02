@@ -14,10 +14,16 @@ import SwiftUI
 /// about what a palette paints.
 struct PaletteSceneThumbnail: View {
     let palette: ColorPalette
+    /// The height every internal metric is expressed against.
+    /// Named, because `scale` divides by it: restating 72 in
+    /// both places would silently rescale the whole drawing by
+    /// the wrong factor the day the tile is retuned.
+    static let baseHeight: CGFloat = 72
+
     /// Tile height on the shelf; the page-level scene passes a
     /// larger one. Every element inside is laid out relative to
     /// the frame, so one number scales the whole picture.
-    var height: CGFloat = 72
+    var height: CGFloat = baseHeight
 
     private static let fallback = ColorPaletteKeys.extract(
         from: TilingSettings()
@@ -33,7 +39,7 @@ struct PaletteSceneThumbnail: View {
     /// Everything inside is expressed against the shelf tile's
     /// 72 pt, so one `height` scales the whole scene rather than
     /// stretching a fixed drawing inside a taller box.
-    private var scale: CGFloat { height / 72 }
+    private var scale: CGFloat { height / Self.baseHeight }
 
     var body: some View {
         ZStack {

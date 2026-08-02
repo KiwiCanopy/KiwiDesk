@@ -38,10 +38,14 @@ struct ColorsMotionSection: View {
     private var currentScene: some View {
         SettingsSection(
             SettingsCatalog.colors.currentScene,
+            // Not "everything a palette paints" — the scene
+            // draws six of the twenty-five paths a palette
+            // carries, and this phase is what grew it to
+            // twenty-five. A caption labels what is shown.
             caption: L(
                 "colors.scene.caption",
-                "Everything a palette paints, in one picture: the "
-                    + "bar plate and its active item, the focus "
+                "A sample of what a palette paints: the bar "
+                    + "plate and its active item, the focus "
                     + "ring, and the drag ghost."
             )
         ) {

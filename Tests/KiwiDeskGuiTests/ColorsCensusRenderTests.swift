@@ -151,10 +151,15 @@ struct ColorsCensusRenderTests {
         )
     }
 
+    /// One list per column, and the union is what the census
+    /// must hold: the columns are what the renderer reads, so a
+    /// combined list nothing renders would let a fifth drag tint
+    /// ship invisible while this stayed green.
     @Test("the Drag group's rows are the census's")
     func dragGroup() {
         pin(
-            ColorsRowOrder.dragAtRest,
+            ColorsRowOrder.dragGhostColumn
+                + ColorsRowOrder.dragDropZoneColumn,
             .advancedColours,
             .dragAndDrop,
             .atRest,
@@ -262,12 +267,34 @@ struct ColorsCensusRenderTests {
 
         settings.dragGhost.enabled = false
         settings.dragGhost.border = false
-        let gates = AdvancedColorsGates(settings: settings)
+        var gates = AdvancedColorsGates(settings: settings)
         #expect(
             gates.dragHeaderHelp(ghost: true)
                 == AdvancedColorsHelp.dragOff
         )
         #expect(gates.dragHeaderHelp(ghost: false) == nil)
+
+        // Border and Fill are siblings, not a second level: with
+        // both off the column's one live `?` must carry BOTH
+        // reasons, or the Fill row sits dimmed and unexplained.
+        settings.dragGhost.enabled = true
+        settings.dragGhost.fill = false
+        gates = AdvancedColorsGates(settings: settings)
+        let both = gates.dragHeaderHelp(ghost: true)
+        #expect(
+            both?.contains(AdvancedColorsHelp.dragBorderOff)
+                == true
+        )
+        #expect(
+            both?.contains(AdvancedColorsHelp.dragFillOff) == true
+        )
+
+        settings.dragGhost.border = true
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.dragHeaderHelp(ghost: true)
+                == AdvancedColorsHelp.dragFillOff
+        )
     }
 
     private func containers(

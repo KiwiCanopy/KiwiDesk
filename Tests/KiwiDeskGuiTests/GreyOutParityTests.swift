@@ -14,13 +14,13 @@ import Testing
 /// hand-written "these nine controls are greyed" would repeat
 /// that mistake in a new place — it cannot see site ten.
 ///
-/// So this scans for the shapes that *hide* instead:
+/// So this scans for shapes rather than listing controls: every
+/// editor with an enable toggle must still carry a gate keyed on
+/// that toggle, present the required number of times.
 ///
-/// 1. Every editor with an enable toggle greys its dependent
-///    block (checked by presence of a gate keyed on the toggle).
-/// 2. No Settings view removes a control with `if <flag> { … }`
-///    where the flag is one of the known visibility predicates —
-///    the shape that produced findings A7 and A8.
+/// The companion half — no Settings view REMOVES a control with
+/// `if <flag> { … }` — moved to `GreyOutHidingTests` when the
+/// count field pushed this file to the 350-line ceiling.
 ///
 /// Deliberate exceptions are listed with their reason and are
 /// fail-shut: a new one is a conscious edit.

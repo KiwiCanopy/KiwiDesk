@@ -8,9 +8,11 @@ import SwiftUI
 ///
 /// "More colors", never "Advanced colors": inside an area whose
 /// own name is Advanced Colors, that adjective re-scopes onto the
-/// area and reads as mode depth, which is exactly the conflation
-/// decision-log item 7 forbids. The drawer's collapsed summary
-/// does the naming instead.
+/// area and reads as mode depth — a row tier and a mode depth
+/// must never be spelled with one word. The drawer's collapsed
+/// summary does the naming instead. Argued in
+/// `docs/ui-patterns.md` ("Advanced" prefixes a disclosure's
+/// noun only when…).
 struct SpaceBarColorCard: View {
     @ObservedObject var model: SettingsModel
     @State private var moreExpanded = false
@@ -147,7 +149,13 @@ struct AdvancedColorRows: View {
             AdvancedColorRow(
                 model: model,
                 key: key,
+                // An exempt row skips the CONTAINER gate below,
+                // so it must not also have its own predicate
+                // neutralised — without the `||` it would ship
+                // with both gates off, which is the opposite of
+                // what the exemption asks for.
                 containerAllows: allows
+                    || key.placement.exemptFromContainerGate
             )
             .modifier(
                 GreyOut(

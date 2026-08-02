@@ -16,7 +16,8 @@ import SwiftUI
 /// hover string is documented as sufficient only where the gating
 /// control is adjacent, and here it never is. So each group also
 /// renders the reason as a live `?` on its section header (#527),
-/// and every sentence below names the destination to go to.
+/// and every sentence below names the destination to go to —
+/// by INTERPOLATING its live title, never by spelling it out.
 /// `@MainActor` unlike `BarsGateContext`, which resolves gates
 /// only: this one also picks the SENTENCE, and the localized
 /// strings are main-actor state.
@@ -47,14 +48,27 @@ struct AdvancedColorsGates {
         ghost ? settings.dragGhost : settings.dragDropZone
     }
 
-    /// One column's header reason. Enabled outranks Border/Fill
-    /// for the same reason as the ring above.
+    /// One column's header reason. `enabled` genuinely outranks
+    /// the other two — with the visual off, neither part is
+    /// drawn whatever they say. Border and Fill are SIBLINGS,
+    /// though, not a second level: with both off, two rows are
+    /// dimmed for two different reasons, and the column's one
+    /// live `?` is the only place either can be read (help
+    /// inside a `GreyOut` is dead, #527). So both sentences are
+    /// carried, not the first one found — reporting Border
+    /// alone would leave the Fill row dimmed and unexplained.
     func dragHeaderHelp(ghost: Bool) -> String? {
         let visual = dragVisual(ghost)
         if !visual.enabled { return AdvancedColorsHelp.dragOff }
-        if !visual.border { return AdvancedColorsHelp.dragBorderOff }
-        if !visual.fill { return AdvancedColorsHelp.dragFillOff }
-        return nil
+        let reasons = [
+            visual.border ? nil : AdvancedColorsHelp.dragBorderOff,
+            visual.fill ? nil : AdvancedColorsHelp.dragFillOff,
+        ]
+        .compactMap { $0 }
+        // Whole localized sentences, joined — never assembled
+        // from fragments, which a translation could not reorder.
+        return reasons.isEmpty
+            ? nil : reasons.joined(separator: "\n")
     }
 
     // MARK: - Space Bar
@@ -74,8 +88,26 @@ struct AdvancedColorsGates {
 /// The why-and-where sentences. Every one names the page that
 /// owns the switch, because Advanced Colours is the first area
 /// whose gates all live somewhere else.
+///
+/// The page name is interpolated positionally from
+/// `SettingsDestination.title`, not written into the English.
+/// Spelling it out would put the same page name in seven
+/// sentences × eleven catalogs with nothing pinning the copies,
+/// and this very change renamed one of those pages — the next
+/// rename would leave seventy-seven sentences pointing at a
+/// destination that no longer exists. Positional specifiers are
+/// required here for the ordinary reason too: a translation
+/// cannot reorder pieces stitched together in Swift, and several
+/// of these locales put the place before the verb.
 @MainActor
 enum AdvancedColorsHelp {
+    private static var gapsAndBorders: String {
+        SettingsDestination.gapsAndBorders.title
+    }
+    private static var bars: String {
+        SettingsDestination.bars.title
+    }
+
     static var borderOff: String {
         L(
             "colors.border_off.help",
@@ -83,7 +115,8 @@ enum AdvancedColorsHelp {
             // this card and is drawn either way, so the plural
             // has to name the ring's own pair.
             "The focus border is off, so its two colors aren't "
-                + "drawn. Turn it on in Gaps & Borders."
+                + "drawn. Turn it on in %1$@.",
+            gapsAndBorders
         )
     }
 
@@ -91,7 +124,8 @@ enum AdvancedColorsHelp {
         L(
             "colors.unfocused_off.help",
             "Unfocused windows get no border, so this color "
-                + "isn't drawn. Turn it on in Gaps & Borders."
+                + "isn't drawn. Turn it on in %1$@.",
+            gapsAndBorders
         )
     }
 
@@ -99,7 +133,8 @@ enum AdvancedColorsHelp {
         L(
             "colors.drag_off.help",
             "This drag visual is off, so its colors aren't "
-                + "drawn. Turn it on in Gaps & Borders."
+                + "drawn. Turn it on in %1$@.",
+            gapsAndBorders
         )
     }
 
@@ -107,15 +142,16 @@ enum AdvancedColorsHelp {
         L(
             "colors.drag_border_off.help",
             "This visual draws no border. Turn Border on in "
-                + "Gaps & Borders."
+                + "%1$@.",
+            gapsAndBorders
         )
     }
 
     static var dragFillOff: String {
         L(
             "colors.drag_fill_off.help",
-            "This visual draws no fill. Turn Fill on in "
-                + "Gaps & Borders."
+            "This visual draws no fill. Turn Fill on in %1$@.",
+            gapsAndBorders
         )
     }
 
@@ -126,7 +162,8 @@ enum AdvancedColorsHelp {
         L(
             "colors.space_bar_off.help",
             "The Space Bar is off, so its colors aren't drawn. "
-                + "Turn it on in Bars."
+                + "Turn it on in %1$@.",
+            bars
         )
     }
 
@@ -134,7 +171,8 @@ enum AdvancedColorsHelp {
         L(
             "colors.app_bar_off.help",
             "No layout shows an App Bar, so its colors aren't "
-                + "drawn. Turn one on in Bars."
+                + "drawn. Turn one on in %1$@.",
+            bars
         )
     }
 }

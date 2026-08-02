@@ -92,8 +92,11 @@ controllers rather than as a claim about the process, is
 ## File layout
 
 Section bodies in `Settings/Sections/`, their widgets in
-`Settings/Components/<area>/` (Layouts, Keybindings, Bars,
-Colors, GapsAndBorders, SpaceOverrides, Icons, Lua, Common).
+`Settings/Components/<area>/` — one directory per area, and
+where that area is a destination the directory carries the
+destination's name, so **renaming a destination renames its
+directory in the same change set** (Appearance became
+GapsAndBorders with its page in #678 Phase 3).
 Shell/model files and root-composed widgets live at `Settings/`
 root. `Common/`
 admits only primitives shared across multiple component areas;

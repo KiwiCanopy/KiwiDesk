@@ -98,13 +98,28 @@ struct SettingsColorSurfaceTests {
         }
     }
 
-    /// The other half of "exactly one": every colour the census
-    /// places must actually be rendered. The render-parity suite
-    /// pins the order lists against the census; this pins that
-    /// the area's census rows are the whole colour surface a
-    /// palette can paint, so a colour reachable from Lua and from
-    /// a palette can never be missing from the one page that
-    /// claims to hold all of them.
+    /// The other half of "exactly one": the page that claims to
+    /// hold every colour has as many rows as there are colours a
+    /// palette can carry.
+    ///
+    /// **Two counts, not two sets** — state the limit rather
+    /// than let the docstring over-claim. The census's row keys
+    /// (`settings.spaceBarStyle.itemColor`) and the palette's
+    /// paths (`space_bar.item_color`) are different vocabularies,
+    /// and deriving one from the other here would be a second
+    /// copy of `ColorPaletteKeys`' own mapping — worse than the
+    /// gap it closes. So a census row with no palette path AND a
+    /// palette path with no row would cancel out and pass. What
+    /// this does catch is either one alone, which is the way it
+    /// actually goes wrong.
+    ///
+    /// Both halves earn their place, proven to fail apart: drop
+    /// a palette path and only the derived comparison reds; grow
+    /// the census and the palette surface together — which is
+    /// what adding a colour setting does — and only the literal
+    /// notices the page got bigger. The literal is a
+    /// conscious-edit tripwire over a derived value, not a
+    /// restated constant.
     @Test("every palette colour has a census row in the area")
     func everyPaletteColorIsPlaced() {
         let placed = SettingKey.allCases.filter {
@@ -114,5 +129,32 @@ struct SettingsColorSurfaceTests {
         // plus the two mark tints it gained with it.
         #expect(placed.count == 25)
         #expect(placed.count == ColorPaletteKeys.all.count)
+    }
+
+    /// Which colours accept the empty "Automatic" value has two
+    /// homes: `ColorPaletteKeys.allowsAutomatic` in Core, and the
+    /// `automatic: true` the row builder hands its swatch. Only
+    /// the Core half was pinned, so a `_color` row given the flag
+    /// would let the GUI write an empty value that `apply`
+    /// silently drops on the next palette round-trip. Pin the
+    /// count of GUI call sites against the derived set.
+    @Test("only the mark rows offer Automatic")
+    func automaticFlagMatchesTheColorSurface() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Colors/"
+                    + "AdvancedColorRow+Structure.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let flags =
+            source.components(separatedBy: "automatic: true").count
+            - 1
+        let automaticPaths = ColorPaletteKeys.all.filter(
+            ColorPaletteKeys.allowsAutomatic
+        )
+        #expect(flags == automaticPaths.count)
+        #expect(flags == 2)
     }
 }

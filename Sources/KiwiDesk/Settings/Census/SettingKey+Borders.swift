@@ -73,13 +73,12 @@ extension BordersKey {
                 ])
             )
         case .stickyColor:
-            // The table marks this GATED, but the live editor
-            // deliberately leaves it ungated: the color also
-            // paints the on-window mark and the Space Bar's
-            // sticky badge, so it always tints something
-            // (StickyMarkEditor). The Colours phase rules on
-            // the redesign's gate; until then the census
-            // records the wiring.
+            // The table marks this GATED; the Colours phase
+            // ruled it UNGATED and it ships that way. The color
+            // also paints the on-window mark, not only the
+            // Space Bar's sticky badge, so it always tints
+            // something — which is why the .borders container
+            // carries no block gate at all.
             return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
             // Glow on, and not auto-sized (AutoGatedGroup).

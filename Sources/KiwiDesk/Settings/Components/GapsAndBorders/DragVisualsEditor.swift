@@ -111,9 +111,11 @@ struct DragVisualControls: View {
     /// beside them, so the controls were the only surface still
     /// claiming to matter. Greyed, never hidden (#171).
     ///
-    /// Each inner gate carries `visual.enabled &&` so nested
-    /// `GreyOut`s can't multiply their 0.5 opacity to 0.25 —
-    /// the outer gate already covers the visual-off case.
+    /// The one remaining inner gate needs no `visual.enabled &&`
+    /// conjunction: `GreyOut` dims once however deeply it nests
+    /// (`AutoGatedGroup`), and the colour rows that used to make
+    /// the hover-string shadowing matter here have moved to
+    /// Advanced Colours.
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()

@@ -123,8 +123,11 @@ struct BarsGateContext {
     }
 }
 
-/// The block-gate explanations, shared by the cards and the
-/// interim colour cards.
+/// The block-gate explanations for the Bars page. Advanced
+/// Colours needs the same conditions worded differently — its
+/// sentences must say WHICH page to go to — so it authors its
+/// own in `AdvancedColorsHelp` and shares only `gapOnly`, whose
+/// sentence is about the indicator rather than about a place.
 @MainActor
 enum BarsGateHelp {
     static var noBarShown: String {
