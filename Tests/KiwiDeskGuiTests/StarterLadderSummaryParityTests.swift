@@ -21,6 +21,17 @@ import Testing
 /// picking Starter is how someone learns what the layouts *are*, so
 /// a rung that does not match its label teaches the wrong name for
 /// the layout they are looking at.
+///
+/// **What this does not watch.** The rung list has four copies, and
+/// this guard closes one pair: `blockModes` against the rendered
+/// Settings summary. `StarterLadder`'s own docstring table,
+/// `docs/user-guide.md`'s preset list and the #466 entry in
+/// `docs/design-decisions.md` are prose, and all three were found
+/// stale when this suite was written — the design-decisions one
+/// since `cb817c52`, which is two shipped ladders ago. Scanning
+/// prose for a mode list is brittle enough to be its own
+/// false-confidence problem, so they stay on review instead. Read
+/// that as a scope statement, not as coverage.
 @Suite("Starter ladder summary parity", .serialized)
 @MainActor
 struct StarterLadderSummaryParityTests {

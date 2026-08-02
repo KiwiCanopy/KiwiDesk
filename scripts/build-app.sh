@@ -279,11 +279,12 @@ cat > "$PLIST" <<PLISTEOF
     <string>$VERSION</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
-    <!-- Launch as an agent: no Dock tile, no menu bar. The app
-         still promotes itself to .regular at runtime while a
-         content window is open (DockPresentation.swift). Drop
-         this key and every launch flashes a Dock tile before
-         the code demotes it. -->
+    <!-- Launch as an agent: no Dock tile, no menu bar, and the
+         app never leaves .accessory at runtime either (see
+         "Permanent accessory mode" in docs/design-decisions.md).
+         The key is still load-bearing on its own: without it
+         every launch would start .regular and flash a Dock tile
+         before main.swift set the policy. -->
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>

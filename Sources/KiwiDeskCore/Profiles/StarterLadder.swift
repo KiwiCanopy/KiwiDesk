@@ -8,7 +8,7 @@ import Foundation
 /// | Position in block | Mode | Shown off |
 /// |---|---|---|
 /// | 1 | scrolling | the infinite Niri-style column row |
-/// | 2 | bsp | binary space partitioning (classic split) |
+/// | 2 | stack | a master pane beside a stacked column |
 /// | 3 | track | new window → its own new track |
 /// | 4 | grid | a 3×2 grid |
 /// | 5 | floating | untiled |
