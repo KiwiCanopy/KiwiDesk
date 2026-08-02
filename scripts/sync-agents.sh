@@ -5,12 +5,12 @@
 # that stays gitignored. Run this after editing any agent so the two
 # cannot drift (.claude/rules/subagents.md).
 #
-# The mirror carries name, description and the instruction body. It
-# does NOT carry `tools:` — the Codex agent format has no equivalent
-# field, so a tool restriction expressed in frontmatter cannot
-# survive the crossing. That is why the read-only reviewers also say
-# so in their prose, which does survive; subagents.md records the
-# limit.
+# The mirror carries name, description and the instruction body,
+# and deliberately not `tools:` — as of 2026-08-02 the Codex agent
+# format had no field to carry it, so a tool restriction expressed
+# in frontmatter cannot survive the crossing. That is why the
+# judging agents also say so in their prose, which does survive;
+# subagents.md records the limit.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -42,31 +42,47 @@ render_toml() {
     # macOS awk does not honour \x hex escapes, and three quotes
     # cannot be written inside a single-quoted awk program.
     awk -v expected="$expected" -v tq="'''" '
-        # Undo YAML double-quote escaping in one left-to-right pass.
-        # Two gsubs cannot do this: unescaping \\ first turns
-        # \\" into \" and the second pass then eats a quote that was
-        # meant to stay literal.
-        function unquote(s,   out, i, c, n) {
+        # Undo the two YAML double-quote escapes a description can
+        # legitimately carry, in one left-to-right pass. Two gsubs
+        # cannot do this: unescaping \\ first turns \\" into \" and
+        # the second pass then eats a quote meant to stay literal.
+        #
+        # Every other escape is rejected rather than passed through.
+        # A permissive walk maps \t to t and \u00e9 to u00e9 —
+        # silent corruption, in the one field that routes.
+        function unquote(s, key,   out, i, c, nxt, n) {
             n = length(s)
             out = ""
             for (i = 1; i <= n; i++) {
                 c = substr(s, i, 1)
-                if (c == "\\" && i < n) {
-                    i++
-                    out = out substr(s, i, 1)
-                } else {
+                if (c != "\\") {
                     out = out c
+                    continue
                 }
+                nxt = (i < n) ? substr(s, i + 1, 1) : ""
+                if (nxt != "\\" && nxt != "\"") {
+                    printf "%s: unsupported escape \\%s\n",
+                        key, nxt > "/dev/stderr"
+                    exit 3
+                }
+                out = out nxt
+                i++
             }
             return out
         }
         # TOML basic strings take backslash escapes, so a quote or a
         # backslash left raw would end the value early or invent an
-        # escape sequence.
-        function escape(s) {
-            gsub(/\\/, "\\\\", s)
-            gsub(/"/, "\\\"", s)
-            return s
+        # escape sequence. Walked rather than gsub-ed: POSIX reads
+        # `\\` in a gsub replacement as one literal backslash while
+        # macOS awk doubles it, so the same gsub is not portable.
+        function escape(s,   out, i, c, n) {
+            n = length(s)
+            out = ""
+            for (i = 1; i <= n; i++) {
+                c = substr(s, i, 1)
+                out = out ((c == "\\" || c == "\"") ? "\\" c : c)
+            }
+            return out
         }
         # A scalar this script can carry: one line, plain or double
         # quoted. A folded (>) or literal (|) block would silently
@@ -81,11 +97,15 @@ render_toml() {
             quoted = (value ~ /^".*"$/)
             sub(/^"/, "", value)
             sub(/"$/, "", value)
-            return quoted ? unquote(value) : value
+            return quoted ? unquote(value, key) : value
         }
         BEGIN { fence = 0 }
         /^---[[:space:]]*$/ && fence < 2 { fence++; next }
         fence == 1 {
+            # The sibling rule files comment inside their `paths:`
+            # block, so an author copying that shape here must not
+            # hit the wrapped-value stop below.
+            if ($0 ~ /^[[:space:]]*#/) next
             if ($0 ~ /^[A-Za-z_][A-Za-z0-9_-]*:/) {
                 key = $0
                 sub(/:.*$/, "", key)

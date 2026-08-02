@@ -31,13 +31,16 @@ described stacks this repo does not contain.
 
 The append was worse, because it worked by copying rules out of
 their owning files into an artifact nothing regenerated. The
-context block was corrected on 2026-07-28 to say that a profile
-owns tiling **plus sparse behavior overrides**; the generated
-agents on disk dated from 19 July and still said tiling **only**.
-For the nine days between, a reviewer loaded as instruction a rule
-its own source had already fixed, and no diff anywhere showed it —
-the generated copy was gitignored, and regenerating was a step a
-contributor had to remember.
+generated agents were last produced at `7ddc105f` (2026-07-19),
+when the context block still said a profile owns tiling **only** —
+copy and source agreed. `bcfb3d26` (2026-07-28) corrected the
+block to tiling **plus sparse behavior overrides**, and nobody
+re-ran the installer. For the four days until the roster was
+replaced, a reviewer loaded as instruction a rule its own source
+had already fixed; the artifact was nine days old by the time the
+correction it missed even landed. No diff anywhere showed either,
+because the generated copy was gitignored and regenerating was a
+step a contributor had to remember.
 
 That is the shape to avoid, and it is why the fix is not "keep the
 copies in sync". An agent definition is repo policy: keep it in
@@ -98,17 +101,16 @@ without anyone noticing; inside a review round it is the
   third person, naming concrete triggers. A description that
   describes the agent's expertise instead of its trigger will not
   route.
-- **Give the fewest tools that let it finish.** The round-1 review
-  pair — `code-reviewer` and `architect-reviewer` — plus any agent
-  whose whole job is to judge get no `Write` or `Edit`; the retired
-  reviewers held both, which bought nothing and let a reviewer
-  rewrite what it was judging. An agent that also authors
-  (`docs-steward`, `localization-auditor`, `site-engineer`) keeps
-  them and says in its own body when it is in audit mode.
-  Frontmatter `tools:` does **not** cross into the Codex mirror,
-  which has no equivalent field, so an agent that must not edit
-  says so in its prose as well — that is what survives the
-  crossing.
+- **Give the fewest tools that let it finish.** An agent whose
+  posture in the roster above is *judges* gets no `Write` or
+  `Edit` — the retired reviewers held both, which bought nothing
+  and let a reviewer rewrite what it was judging. One that also
+  authors keeps them and declares audit mode in its own body.
+  Frontmatter `tools:` does **not** cross into the Codex mirror:
+  `scripts/sync-agents.sh` emits name, description and body only,
+  and as of 2026-08-02 the Codex agent format had no field to
+  carry it. So an agent that must not edit says so in its prose
+  as well — that is what survives the crossing.
 - **Carry the calibration, not the checklist.** The highest-value
   section is *what not to flag*: the thresholds this project has
   not adopted, the sanctioned exceptions, the neighbouring agent's

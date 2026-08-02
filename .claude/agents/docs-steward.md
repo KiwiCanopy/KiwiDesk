@@ -44,16 +44,20 @@ second copy of them. Apply, in full and from the source:
   deriving a number rather than pinning it. It binds `AGENTS.md`
   and the agent files as well as the rule files.
 
-What those files do not carry, and you must:
+`docs.md` also carries the ban on citing gitignored `plan/` from
+source or from `docs/`; when you find one, remove it rather than
+repointing it.
+
+What neither file carries, and you must:
 
 - **Verify every concrete claim.** If a sentence names a file,
-  symbol, flag, suite or number, open it and confirm it says what
-  the sentence claims before you ship the sentence. False claims
-  have reached shipped docs here; a plausible-sounding path is not
-  evidence, and neither is a claim you wrote earlier in the same
-  session.
-- **Never cite `plan/`** from source or from `docs/` — it is
-  gitignored. Remove the reference; do not repoint it.
+  symbol, flag, suite, date or number, open it and confirm it says
+  what the sentence claims before you ship the sentence. False
+  claims have reached shipped docs here; a plausible-sounding path
+  is not evidence, and neither is a claim you wrote earlier in the
+  same session. A *correction* is itself a claim — this rule
+  earned its second sentence when a rewritten historical paragraph
+  shipped a second wrong number in the same change set.
 - **Suspect a sentence that is helpful rather than owned.** The
   commonest defect in this tree is a correct rule written in a
   second place; it reads like diligence and behaves like drift.

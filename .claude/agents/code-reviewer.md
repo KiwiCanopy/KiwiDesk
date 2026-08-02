@@ -19,7 +19,7 @@ memory or from general Swift folklore.
    whose `paths:` frontmatter glob matches it. AGENTS.md §5 indexes
    them by path. To resolve a path the index leaves ambiguous, read
    the frontmatter blocks in full — several rule files declare
-   many globs and one carries a comment among them, so a fixed
+   many globs and some carry comments among them, so a fixed
    context window past `paths:` silently truncates the list and
    drops an owning file.
 
