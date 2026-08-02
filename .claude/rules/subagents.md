@@ -30,17 +30,20 @@ Sixteen of eighteen carried no KiwiDesk context at all, and several
 described stacks this repo does not contain.
 
 The append was worse, because it worked by copying rules out of
-their owning files into an artifact nothing regenerated. The
-generated agents were last produced at `7ddc105f` (2026-07-19),
-when the context block still said a profile owns tiling **only** —
-copy and source agreed. `bcfb3d26` (2026-07-28) corrected the
-block to tiling **plus sparse behavior overrides**, and nobody
-re-ran the installer. For the four days until the roster was
-replaced, a reviewer loaded as instruction a rule its own source
-had already fixed; the artifact was nine days old by the time the
-correction it missed even landed. No diff anywhere showed either,
-because the generated copy was gitignored and regenerating was a
-step a contributor had to remember.
+their owning files into an artifact nothing regenerated. As found
+on 2026-08-02, the generated `code-reviewer` on disk still said a
+profile owns tiling **only**, though `bcfb3d26` had corrected the
+context block it was copied from to tiling **plus sparse behavior
+overrides** on 2026-07-28. The last commit to touch the installer
+before that was `7ddc105f` (2026-07-19), when copy and source did
+still agree — so the artifact had gone at least four days stale,
+and was around nine days old, before anyone noticed.
+
+Those dates are the floor, not the measurement: the copy was
+gitignored, so neither its age nor a regeneration left any trace
+to check. That is the actual defect. The window could have been
+zero and the shape would still be wrong — nothing could have told
+you either way.
 
 That is the shape to avoid, and it is why the fix is not "keep the
 copies in sync". An agent definition is repo policy: keep it in
@@ -100,7 +103,10 @@ without anyone noticing; inside a review round it is the
   agent is ever selected, so write it as *when to use this*, in the
   third person, naming concrete triggers. A description that
   describes the agent's expertise instead of its trigger will not
-  route.
+  route. The frontmatter `name` must equal the filename — Claude
+  Code routes on the former and the mirror is written from the
+  latter, so a mismatch ships a roster answering to a name nobody
+  calls; `sync-agents.sh` refuses it.
 - **Give the fewest tools that let it finish.** An agent whose
   posture in the roster above is *judges* gets no `Write` or
   `Edit` — the retired reviewers held both, which bought nothing

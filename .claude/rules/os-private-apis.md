@@ -2,6 +2,13 @@
 paths:
   - "Sources/KiwiDeskCore/OS/**"
   - "**/SkyLight*.swift"
+  # Not an AX rule: this one file holds the sanctioned
+  # `@_silgen_name`, so the carve-out below has to arrive with the
+  # rule it excepts. `accessibility.md` is silent on it, so a
+  # reviewer loading only that file would see neither. Pinned to
+  # the file, not `AX/**`, which would tell every AX editor that
+  # private window-server rules bind their file. `InstructionPinTests`
+  # fails if the pin stops resolving.
   - "Sources/KiwiDeskCore/AX/AXHelper.swift"
 ---
 
@@ -20,9 +27,7 @@ editing here:
   SkyLight/CGS — the crash argument above is about the private
   window-server surface, which churns across releases. Do not read
   it as licence for a second linked symbol, and do not "fix" this
-  one to `dlsym`. This file's `paths:` reaches `AXHelper.swift`
-  precisely so the exemption arrives with the rule; a reviewer
-  looking only at `accessibility.md` would see neither.
+  one to `dlsym`.
 - **Every** private fast path must have a public-API fallback
   (`AXUIElement`). No fallback = not acceptable.
 - Never disable SIP, and never ask the user to.
