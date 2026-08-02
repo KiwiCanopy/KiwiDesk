@@ -52,10 +52,10 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        performZOrderSequence(elements: pairs.map(\.1)) {
+        performZOrderSequence(targets: pairs) {
             [weak self] in
             guard let self,
-                generation == self.zOrderRaiseGeneration
+                generation == self.zOrderRaiseGeneration.value
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(
@@ -146,8 +146,7 @@ extension KiwiCore {
         for id in ids where id != focused {
             zOrderRaiseEchoes[id] = now
         }
-        zOrderRaiseGeneration += 1
-        return zOrderRaiseGeneration
+        return zOrderRaiseGeneration.bump()
     }
 
     /// Runs a serial Z-order raise sequence on `zOrderQueue`,
@@ -163,15 +162,15 @@ extension KiwiCore {
     /// our main thread. So own windows are raised here (this runs on
     /// the main actor), foreign ones on the queue.
     func performZOrderSequence(
-        elements: [AXUIElement],
+        targets: [(WindowID, AXUIElement)],
         completion: @MainActor @escaping () -> Void
     ) {
-        for element in elements
+        for (_, element) in targets
         where AXHelper.mustRaiseOnMainThread(element) {
             AXHelper.raiseQuietly(element)
         }
-        let foreign = elements.filter {
-            !AXHelper.mustRaiseOnMainThread($0)
+        let foreign = targets.filter {
+            !AXHelper.mustRaiseOnMainThread($0.1)
         }
         // All-own (no foreign) runs the completion synchronously,
         // skipping the `zOrderRestoresInFlight` bracket. TWO
@@ -192,15 +191,54 @@ extension KiwiCore {
             return
         }
         zOrderRestoresInFlight += 1
-        nonisolated(unsafe) let foreignRaises = foreign
-        zOrderQueue.async { [weak self] in
-            for element in foreignRaises {
-                AXHelper.raiseQuietly(element)
-            }
+        let drain = zOrderDrain(over: foreign)
+        let order = foreign.map(\.0)
+        zOrderQueue.async {
+            drain.run(order)
             Task { @MainActor [weak self] in
                 completion()
-                self?.zOrderRestoresInFlight -= 1
+                guard let self else { return }
+                zOrderRestoresInFlight -= 1
+                // A restore armed WHILE this one drained was held
+                // back rather than queued behind it (see
+                // `scheduleZOrderRestore`); run it now, once, off
+                // the order the drain actually left behind. Still
+                // behind the animation gate: if frames started
+                // landing again meanwhile, the settle callback
+                // owns it, and running here would raise off
+                // half-applied frames (#153).
+                if zOrderRestoresInFlight == 0,
+                    tiler.animation.activeCount == 0
+                {
+                    runPendingZOrderRestore()
+                }
             }
         }
+    }
+
+    /// The drain for one foreign raise sequence, with every
+    /// machine effect bound to the real one (`ZOrderDrain` carries
+    /// the argument, and the seams are what let it be tested
+    /// without a WindowServer). The staleness seam reads the
+    /// generation live, so a sequence superseded mid-drain
+    /// abandons the raises it has left.
+    private func zOrderDrain(
+        over targets: [(WindowID, AXUIElement)]
+    ) -> ZOrderDrain {
+        nonisolated(unsafe) let elements = Dictionary(
+            targets,
+            uniquingKeysWith: { first, _ in first }
+        )
+        let generations = zOrderRaiseGeneration
+        let generation = generations.value
+        return ZOrderDrain(
+            raise: { id in
+                elements[id].map(AXHelper.raiseQuietly)
+            },
+            stacking: { AXHelper.onScreenStackingOrder() },
+            now: { ProcessInfo.processInfo.systemUptime },
+            sleep: { Thread.sleep(forTimeInterval: $0) },
+            isCurrent: { generations.value == generation }
+        )
     }
 }

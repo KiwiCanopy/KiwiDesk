@@ -171,6 +171,26 @@ struct ZOrderFocusJumpTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
+    /// Armed during a drain, but not RUN during one (#684): a
+    /// second sequence started there would queue behind the first
+    /// on the serial raise queue and then fight it over the same
+    /// pile. The arm survives — dropping it is the bug the test
+    /// above pins — and the drain's completion runs it once, off
+    /// the order the drain actually left behind.
+    @Test("A restore armed during a drain waits for it")
+    func armDuringDrainDoesNotRunUntilItEnds() {
+        let core = makeCore()
+        _ = makeSpace(core, windows: 6, focused: 1)
+        // No pan: with animations settled, the only thing holding
+        // the restore back is the in-flight drain.
+        core.zOrderRestoresInFlight = 1
+        core.scheduleZOrderRestore()
+        #expect(core.pendingZOrderRestore)
+        core.zOrderRestoresInFlight = 0
+        core.runPendingZOrderRestore()
+        #expect(!core.pendingZOrderRestore)
+    }
+
     // MARK: - The bar drop
 
     @Test("A bar-item drop in an overflowing row arms a restore")

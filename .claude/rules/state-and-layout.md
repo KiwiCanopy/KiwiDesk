@@ -85,6 +85,18 @@ editing here:
   float layer until the next genuine focus event (#418), so
   "harmless, it re-raises the same order" is not an argument for
   arming on a mutation that scrambled nothing.
+- **Several raises that must land in a given ORDER go through
+  `raiseSequentially` / `performZOrderSequence`** — never a loop
+  of bare `AXHelper.raiseQuietly` calls. The AX call returns once
+  the app has *accepted* the raise, not once it has performed it
+  (measured: it returns in 0.4-3.8 ms, the window moves 1-20 ms
+  later), so a loop issues the whole sequence inside the window
+  where none of it has happened yet and the apps land it in
+  whatever order they reach it — the pile settles scrambled, and
+  the window raised FIRST suffers most because every later raise
+  has to beat it (#684). `ZOrderDrain` is where the verification,
+  the budget and the measurements live; a *single* raise has no
+  order to keep and needs none of it.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

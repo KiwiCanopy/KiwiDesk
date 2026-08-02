@@ -2,9 +2,14 @@ import AppKit
 import ApplicationServices
 
 /// WindowServer-side window queries — no AX, one
-/// `CGWindowListCopyWindowInfo` snapshot each (~1 ms), never
-/// called in a loop. Here rather than in `Events/` because the
-/// §1 subsystem map gives WindowServer queries to `AX/` (#662).
+/// `CGWindowListCopyWindowInfo` snapshot each. Here rather than
+/// in `Events/` because the §1 subsystem map gives WindowServer
+/// queries to `AX/` (#662).
+///
+/// Keep the census queries out of loops (~1 ms each). The one
+/// deliberate exception is `onScreenStackingOrder`, which the
+/// z-order drain polls; its own doc carries the measured cost and
+/// the argument.
 extension AXHelper {
     /// Counts an app's normal (layer-0) document windows via the
     /// WindowServer. `.excludeDesktopElements` plus the layer==0
@@ -36,6 +41,37 @@ extension AXHelper {
                 options: [.optionAll, .excludeDesktopElements]
             )
         )
+    }
+
+    /// The front-to-back stacking of the normal (layer-0) windows
+    /// on the currently visible spaces — the WindowServer's own
+    /// answer to "which window is really on top", which is the
+    /// only thing that can tell whether a raise has landed yet
+    /// (#684): the AX call returns before the app performs it.
+    ///
+    /// `WindowID.raw` IS the `CGWindowID` this list is keyed by,
+    /// so no lookup is needed to compare it against a raise order.
+    ///
+    /// The one query here that IS polled — the z-order drain reads
+    /// it every 5 ms while waiting for a raise to land — which the
+    /// measured ~0.4 ms per snapshot is what pays for.
+    public static func onScreenStackingOrder() -> [WindowID] {
+        guard
+            let list = CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]]
+        else { return [] }
+        return list.compactMap { info in
+            guard
+                (info[kCGWindowLayer as String] as? NSNumber)?
+                    .intValue == 0,
+                let raw =
+                    (info[kCGWindowNumber as String] as? NSNumber)?
+                    .uint32Value
+            else { return nil }
+            return WindowID(raw)
+        }
     }
 
     /// One owner pid per normal (layer-0) window in the
