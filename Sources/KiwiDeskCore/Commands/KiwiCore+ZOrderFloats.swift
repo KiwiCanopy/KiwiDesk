@@ -53,18 +53,22 @@ extension KiwiCore {
             excluding: focused
         )
         // What the floats must clear, and why the focused window
-        // is not part of it, is argued on `floatRaiseFloor`.
+        // is not part of it, is argued on `raiseFloor`.
         let floor =
             activeSpace.map { space in
-                Self.floatRaiseFloor(
+                Self.raiseFloor(
                     tiled: state.effectiveTiledMembers(
                         of: space,
                         activeSpace: space.id
                     ),
-                    focused: focused
+                    excluding: focused
                 )
             } ?? []
-        performZOrderSequence(targets: pairs, above: floor) {
+        performZOrderSequence(
+            targets: pairs,
+            above: floor,
+            generation: generation
+        ) {
             [weak self] in
             guard let self,
                 generation == self.zOrderRaiseGeneration.value
@@ -161,8 +165,17 @@ extension KiwiCore {
         return zOrderRaiseGeneration.bump()
     }
 
-    /// Drops the raise stamps of the targets the drain decided NOT
-    /// to raise, as soon as it is done deciding.
+    /// Drops the raise stamps of the targets the drain did NOT
+    /// raise, once it has finished.
+    ///
+    /// Once it has FINISHED, not once it has decided: the plan is
+    /// settled by the drain's first read, but the result only
+    /// comes back when the sequence ends, so an unraised window
+    /// can still swallow a click for up to `ZOrderDrain
+    /// .totalLimit`. Handing the plan back the moment it is
+    /// computed would close that; it costs a second callback
+    /// across the queue and the residue is bounded, so it is
+    /// stated rather than denied (code review, 2026-08-02).
     ///
     /// A stamp is a promise that a raise echo is coming, and it is
     /// consumed by the first echo that arrives. Since the sequence
@@ -179,10 +192,22 @@ extension KiwiCore {
     /// because the plan is decided on the raise queue after this
     /// runs, and a raise whose window was NOT stamped is the worse
     /// failure — its echo moves the ring onto a pile-mate.
+    ///
+    /// Guarded on the sequence's generation, like the focus
+    /// handoff beside it: a drain that finishes after a NEWER
+    /// sequence stamped the same windows would otherwise clear
+    /// that sequence's fresh stamps, leaving its raises' echoes
+    /// unabsorbed — which is the focus slide this branch already
+    /// shipped once. The newer sequence owns the ledger; a stale
+    /// drain releases nothing (architect review, 2026-08-02).
     func releaseZOrderStamps(
         of targets: [WindowID],
-        keeping raised: [WindowID]
+        keeping raised: [WindowID],
+        generation: Int
     ) {
+        guard generation == zOrderRaiseGeneration.value else {
+            return
+        }
         let awaited = Set(raised)
         for id in targets where !awaited.contains(id) {
             zOrderRaiseEchoes[id] = nil
@@ -201,9 +226,17 @@ extension KiwiCore {
     /// blocking IPC to another process's main thread and belong off
     /// our main thread. So own windows are raised here (this runs on
     /// the main actor), foreign ones on the queue.
+    /// `generation` is the one the caller's `stampZOrderRaise`
+    /// returned — passed in rather than re-read here, so the
+    /// sequence has ONE identity: the drain's staleness check, the
+    /// stamp release and the focus handoff all key on the same
+    /// value. Re-reading it agreed only for as long as nothing ran
+    /// between the stamp and this call (architect review,
+    /// 2026-08-02).
     func performZOrderSequence(
         targets: [(WindowID, AXUIElement)],
         above floor: [WindowID],
+        generation: Int,
         completion: @MainActor @escaping () -> Void
     ) {
         for (_, element) in targets
@@ -232,12 +265,20 @@ extension KiwiCore {
             return
         }
         zOrderRestoresInFlight += 1
-        let drain = zOrderDrain(over: foreign, above: floor)
+        let drain = zOrderDrain(
+            over: foreign,
+            above: floor,
+            generation: generation
+        )
         let order = foreign.map(\.0)
         zOrderQueue.async {
             let raised = drain.run(order)
             Task { @MainActor [weak self] in
-                self?.releaseZOrderStamps(of: order, keeping: raised)
+                self?.releaseZOrderStamps(
+                    of: order,
+                    keeping: raised,
+                    generation: generation
+                )
                 completion()
                 self?.zOrderRestoresInFlight -= 1
             }
@@ -252,14 +293,14 @@ extension KiwiCore {
     /// abandons the raises it has left.
     private func zOrderDrain(
         over targets: [(WindowID, AXUIElement)],
-        above floor: [WindowID]
+        above floor: [WindowID],
+        generation: Int
     ) -> ZOrderDrain {
         nonisolated(unsafe) let elements = Dictionary(
             targets,
             uniquingKeysWith: { first, _ in first }
         )
         let generations = zOrderRaiseGeneration
-        let generation = generations.value
         return ZOrderDrain(
             raise: { id in
                 elements[id].map(AXHelper.raiseQuietly)

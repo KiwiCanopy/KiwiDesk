@@ -237,11 +237,11 @@ public enum AXHelper {
     /// so the caller must gate on `mustRaiseOnMainThread` (#426).
     ///
     /// **The return says the app accepted the action, not that it
-    /// performed it** (#684): measured, the call returns in 0.4-3.8
-    /// ms and the window reaches its new stacking position 1-20 ms
-    /// later. Anything that needs several raises to land in a
-    /// given ORDER must verify each one against the WindowServer
-    /// (`ZOrderDrain`), never issue them back to back.
+    /// performed it** (#684). Anything that needs several raises
+    /// to land in a given ORDER — or one raise to clear a plane it
+    /// must sit above — verifies against the WindowServer through
+    /// `ZOrderDrain`, which owns the measurements; never issue
+    /// them back to back and trust the returns.
     public static func raiseQuietly(_ element: AXUIElement) {
         AXUIElementPerformAction(
             element,

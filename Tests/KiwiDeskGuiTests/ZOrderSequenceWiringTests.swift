@@ -18,7 +18,7 @@ import Testing
 ///   proves `releaseZOrderStamps` does the right thing; nothing
 ///   but this proves it is called.
 /// - **The float raise must derive its floor through
-///   `floatRaiseFloor`.** Its argument — that the floor excludes
+///   `raiseFloor`.** Its argument — that the floor excludes
 ///   the focused window because no quiet raise can beat the key
 ///   window — lives on that function with the measurement behind
 ///   it. Inlining a floor here would be invisible: no test in
@@ -119,6 +119,6 @@ struct ZOrderSequenceWiringTests {
             of: "raiseFloatsAndSticky",
             in: "KiwiCore+ZOrderFloats.swift"
         )
-        #expect(source.contains("floatRaiseFloor("))
+        #expect(source.contains("raiseFloor("))
     }
 }

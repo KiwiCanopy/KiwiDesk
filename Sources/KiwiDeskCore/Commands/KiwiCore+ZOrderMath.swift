@@ -7,8 +7,11 @@ import Foundation
 /// it — the restores in `KiwiCore+ZOrder` are what turn these
 /// answers into raises.
 extension KiwiCore {
-    /// The floor a FLOAT raise must land above: the tiled plane
-    /// of the active space, minus the window being focused.
+    /// The floor a raise sequence must land above: the plane it
+    /// is being lifted over, minus the window that legitimately
+    /// sits on top of it. Two callers, one rule — the float raise
+    /// passes the active space's tiled members (#418), and the
+    /// monocle restore passes the space's OTHER windows.
     ///
     /// Both halves are load-bearing. Without a floor the sequence
     /// diffs itself down to nothing — floats keep their order
@@ -17,19 +20,29 @@ extension KiwiCore {
     /// nothing is re-raised (#418). And without the exclusion the
     /// floor is a condition no raise can satisfy: a quiet raise
     /// never gets a window above the frontmost app's key window
-    /// (measured — 7 windows, none displaced, over 600 ms), and
+    /// (measured on device 2026-08-02, macOS 26.6 — 7 windows,
+    /// none displaced, over 600 ms), and
     /// after `focusWindow` the key window is exactly this one, so
     /// every poll would fail and the drain would burn its whole
     /// budget on every focus change. Above every OTHER tiled
     /// window is what #418 promises and what a raise can deliver.
     ///
-    /// Pure so the rule is testable: its call site reaches AX and
-    /// no unit test covers it (`guard-prover`, 2026-08-02).
-    nonisolated static func floatRaiseFloor(
+    /// Monocle needs it for a second reason, and that one is not
+    /// about the key window at all: it raises exactly ONE window,
+    /// and a lone target is trivially "already in order" among a
+    /// target set of one, so with no floor the plan comes back
+    /// empty and the restore does nothing whatever. Every window
+    /// in monocle sits at the same full-screen frame, so the
+    /// windows it must clear are the only thing that makes its
+    /// raise meaningful.
+    ///
+    /// Pure so the rule is testable: its call sites reach AX and
+    /// no unit test covers them (`guard-prover`, 2026-08-02).
+    nonisolated static func raiseFloor(
         tiled: [WindowID],
-        focused: WindowID?
+        excluding raised: WindowID?
     ) -> [WindowID] {
-        tiled.filter { $0 != focused }
+        tiled.filter { $0 != raised }
     }
 
     /// Raise order for a cascading region: ascending `minY` —

@@ -30,15 +30,15 @@ struct ZOrderRaisePlanTests {
     func floatFloorExcludesTheFocusedWindow() {
         let tiled = ids([1, 2, 3])
         #expect(
-            KiwiCore.floatRaiseFloor(
+            KiwiCore.raiseFloor(
                 tiled: tiled,
-                focused: WindowID(2)
+                excluding: WindowID(2)
             ) == ids([1, 3])
         )
         // Nothing focused (a traveler holds it, or the space is
         // empty of local focus): the whole plane stands.
         #expect(
-            KiwiCore.floatRaiseFloor(tiled: tiled, focused: nil)
+            KiwiCore.raiseFloor(tiled: tiled, excluding: nil)
                 == tiled
         )
     }
@@ -150,6 +150,31 @@ struct ZOrderRaisePlanTests {
                 observed: ids([1, 2, 9]),
                 above: ids([9])
             ).isEmpty
+        )
+    }
+
+    /// **A lone target plans NOTHING without a floor** — one
+    /// window is trivially in order among a set of one — which is
+    /// why the monocle restore, whose whole job is to raise a
+    /// single window over the others, must pass the space's other
+    /// windows as its floor. It shipped without one and the
+    /// restore ran and raised nothing at all (code review and
+    /// architect review, 2026-08-02).
+    @Test("A lone target needs a floor to be raised at all")
+    func loneTargetIsInertWithoutAFloor() {
+        #expect(
+            ZOrderDrain.plan(
+                raiseOrder: ids([7]),
+                observed: ids([1, 2, 7]),
+                above: []
+            ).isEmpty
+        )
+        #expect(
+            ZOrderDrain.plan(
+                raiseOrder: ids([7]),
+                observed: ids([1, 2, 7]),
+                above: ids([1, 2])
+            ) == ids([7])
         )
     }
 

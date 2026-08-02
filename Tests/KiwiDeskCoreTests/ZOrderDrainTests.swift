@@ -176,6 +176,35 @@ struct ZOrderDrainTests {
         }
     }
 
+    /// An empty stacking read is the WindowServer query failing,
+    /// not a screen with no windows — the drain is here to raise
+    /// windows that exist. Diffing against it would drop every
+    /// raise silently for as long as the read failed, so the
+    /// sequence falls back to issuing them unverified, which is
+    /// what every pile did before this drain existed.
+    @Test("A failed stacking read still issues every raise")
+    func emptyReadFallsBackToUnverified() {
+        let server = FakeWindowServer(order: [])
+        let drain = server.drain()
+        let order = ids([3, 2, 1])
+        #expect(drain.run(order) == order)
+        #expect(server.raised == order)
+    }
+
+    /// A duplicate id would make every tail check fail, so `plan`
+    /// would hand the same window back twice and the loop would
+    /// raise it twice — the focus slide, arriving through a
+    /// caller's bug rather than this loop's. No caller can produce
+    /// one today; the loop does not depend on that.
+    @Test("A duplicated target is still raised only once")
+    func duplicateTargetIsRaisedOnce() {
+        let server = FakeWindowServer(order: ids([3, 2, 1]))
+        let drain = server.drain()
+        _ = drain.run(ids([3, 2, 2, 1]))
+        #expect(!server.raised.isEmpty)
+        #expect(Set(server.raised).count == server.raised.count)
+    }
+
     /// A jump landing mid-drain supersedes the sequence: it must
     /// abandon the raises it has left rather than finish them and
     /// fight the newer one.

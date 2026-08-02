@@ -83,17 +83,42 @@ struct ZOrderScheduleTests {
     func unraisedStampsAreReleased() {
         let core = makeCore()
         let targets = [WindowID(1), WindowID(2), WindowID(3)]
-        _ = core.stampZOrderRaise(targets, excluding: nil)
+        let generation = core.stampZOrderRaise(
+            targets,
+            excluding: nil
+        )
         #expect(core.zOrderRaiseEchoes.count == 3)
         core.releaseZOrderStamps(
             of: targets,
-            keeping: [WindowID(2)]
+            keeping: [WindowID(2)],
+            generation: generation
         )
         // Only the raised one still awaits an echo; the other two
         // must not swallow a click that lands on them.
         #expect(
             Set(core.zOrderRaiseEchoes.keys) == [WindowID(2)]
         )
+    }
+
+    /// A drain that finishes after a NEWER sequence has stamped
+    /// the same windows must release nothing: those stamps belong
+    /// to the live sequence, and clearing them would leave its own
+    /// raises' echoes unabsorbed — the focus slide this branch
+    /// already shipped once, arriving by the back door
+    /// (code review and architect review, 2026-08-02).
+    @Test("A stale drain releases no stamps")
+    func staleDrainReleasesNothing() {
+        let core = makeCore()
+        let targets = [WindowID(1), WindowID(2), WindowID(3)]
+        let stale = core.stampZOrderRaise(targets, excluding: nil)
+        // A newer sequence stamps the same windows.
+        _ = core.stampZOrderRaise(targets, excluding: nil)
+        core.releaseZOrderStamps(
+            of: targets,
+            keeping: [WindowID(2)],
+            generation: stale
+        )
+        #expect(core.zOrderRaiseEchoes.count == 3)
     }
 
     @Test("A scrolling swap in an overflowing row arms a restore")

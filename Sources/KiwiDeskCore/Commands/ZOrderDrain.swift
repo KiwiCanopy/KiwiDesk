@@ -97,11 +97,32 @@ struct ZOrderDrain: Sendable {
     /// echo ledger, and a window that is never raised emits no
     /// echo to consume its stamp — so the caller drops the rest
     /// (`releaseZOrderStamps`).
-    func run(_ order: [WindowID]) -> [WindowID] {
+    func run(_ rawOrder: [WindowID]) -> [WindowID] {
         guard isCurrent() else { return [] }
         let deadline = now() + Self.totalLimit
-        let targets = Set(order)
+        // Uniqued, because "never twice" must be a property of
+        // this loop rather than a hope about its input: a repeated
+        // id makes every tail check fail (a filtered observation
+        // can never reproduce a duplicate), so `plan` would return
+        // it twice and raise it twice — the focus slide above, via
+        // a caller's bug instead of ours. No caller can produce
+        // one today (code review, 2026-08-02).
+        var seenIDs = Set<WindowID>()
+        let order = rawOrder.filter { seenIDs.insert($0).inserted }
+        let targets = seenIDs
         let observed = stacking()
+        // An EMPTY read is the WindowServer query failing, not a
+        // screen with no windows on it — we are here to raise
+        // windows that exist. Diffing against it would drop every
+        // raise silently and permanently for as long as the read
+        // failed, which is the opposite of what the budget branch
+        // below argues: unverified is what every pile did before
+        // this drain, a dropped raise is a window left definitely
+        // in the wrong place (architect review, 2026-08-02).
+        guard !observed.isEmpty else {
+            order.forEach(raise)
+            return order
+        }
         let seen = observed.filter { targets.contains($0) }
         let plan = Self.plan(
             raiseOrder: order,

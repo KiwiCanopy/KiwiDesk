@@ -115,7 +115,18 @@ extension KiwiCore {
         guard let focused = state.focusAnchor(of: space, tiled: tiled),
             state.windows[focused]?.isFloating == false
         else { return }
-        raiseSequentially([focused], thenFocus: focused)
+        // The floor is what makes this raise mean anything. Every
+        // monocle window sits at the same full-screen frame, so
+        // the one thing being asked for is "above the others" —
+        // and with a lone target and no floor the plan is empty
+        // by construction, since one window is trivially in order
+        // among a set of one. That shipped: the restore ran and
+        // raised nothing (architect review, 2026-08-02).
+        raiseSequentially(
+            [focused],
+            thenFocus: focused,
+            above: Self.raiseFloor(tiled: tiled, excluding: focused)
+        )
     }
 
     /// Track (#193): an overflow cascade piles windows — the
@@ -165,7 +176,8 @@ extension KiwiCore {
             thenFocus: state.focusAnchor(
                 of: space,
                 tiled: input.tiled
-            )
+            ),
+            above: []
         )
     }
 
@@ -217,7 +229,8 @@ extension KiwiCore {
                 Array(tiled[boundary...]),
                 frames: tiler.calculatedFrames(state: state)
             ),
-            thenFocus: state.focusAnchor(of: space, tiled: tiled)
+            thenFocus: state.focusAnchor(of: space, tiled: tiled),
+            above: []
         )
     }
 
@@ -246,7 +259,8 @@ extension KiwiCore {
                 tiled,
                 focusIndex: focusIndex
             ),
-            thenFocus: anchor
+            thenFocus: anchor,
+            above: []
         )
     }
 
@@ -261,7 +275,8 @@ extension KiwiCore {
     /// the verification, the budget and the measurements.
     private func raiseSequentially(
         _ ids: [WindowID],
-        thenFocus focused: WindowID?
+        thenFocus focused: WindowID?,
+        above floor: [WindowID]
     ) {
         let pairs = ids.compactMap { id in
             eventLoop.element(for: id).map { (id, $0) }
@@ -282,11 +297,11 @@ extension KiwiCore {
             pairs.map(\.0),
             excluding: focused
         )
-        // No floor: a pile's members are ordered against each
-        // other, and the one window that must stand above them all
-        // — the focused one — is left out of the sequence and
-        // re-asserted below.
-        performZOrderSequence(targets: pairs, above: []) {
+        performZOrderSequence(
+            targets: pairs,
+            above: floor,
+            generation: generation
+        ) {
             [weak self] in
             guard let self,
                 generation == self.zOrderRaiseGeneration.value

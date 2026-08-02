@@ -43,11 +43,22 @@ extension AXHelper {
         )
     }
 
-    /// The front-to-back stacking of the normal (layer-0) windows
-    /// on the currently visible spaces — the WindowServer's own
-    /// answer to "which window is really on top", which is the
-    /// only thing that can tell whether a raise has landed yet
-    /// (#684): the AX call returns before the app performs it.
+    /// The front-to-back stacking of the windows on the currently
+    /// visible spaces — the WindowServer's own answer to "which
+    /// window is really on top", which is the only thing that can
+    /// tell whether a raise has landed yet (#684): the AX call
+    /// returns before the app performs it.
+    ///
+    /// **Every layer, deliberately**, unlike the census queries
+    /// below. `FloatDetection.shouldFloat(role:subrole:layer:)`
+    /// floats a window *because* its layer is non-zero — panels
+    /// and overlays sit at layer 3 — so a layer-0 filter would
+    /// hide exactly the float targets the #418 raise exists to
+    /// lift, and the plan would drop each one as "not on screen"
+    /// and never raise it again. Windows above layer 0 are also
+    /// genuinely above the tiled plane by compositor level, so
+    /// including them makes the diff read that correctly instead
+    /// of re-raising them forever.
     ///
     /// `WindowID.raw` IS the `CGWindowID` this list is keyed by,
     /// so no lookup is needed to compare it against a raise order.
@@ -64,8 +75,6 @@ extension AXHelper {
         else { return [] }
         return list.compactMap { info in
             guard
-                (info[kCGWindowLayer as String] as? NSNumber)?
-                    .intValue == 0,
                 let raw =
                     (info[kCGWindowNumber as String] as? NSNumber)?
                     .uint32Value
