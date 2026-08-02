@@ -195,8 +195,18 @@ translate for language names.
    This does two things: it rebuilds `en.json` from every
    `L(key, english[, args...])` call site in `Sources/KiwiDesk`
    and `Sources/KiwiDeskCore` (the canonical key list), then
-   writes `Resources/Locales/missing_fr.json` with every key
+   writes `locale-worksheets/missing_fr.json` with every key
    `fr.json` doesn't have yet (all of them, the first time).
+
+   Worksheets live in `locale-worksheets/` at the repo root —
+   never beside the catalogs in `Resources/Locales`. A worksheet
+   is a *nested* `{key: {source, translation}}` map, and
+   everything that reads the catalog directory expects a flat
+   one; a worksheet sitting there is read as a broken catalog or
+   as a language called `missing_fr`, and it would be copied
+   into the app bundle. The directory is gitignored, and
+   `scripts/extract-keys --check` fails if a worksheet turns up
+   among the catalogs.
 3. Fill in the translations. `missing_fr.json` maps each pending
    key to a `source`/`translation` pair:
 
@@ -270,9 +280,10 @@ English strings have been added elsewhere in the code only
 pulls in the delta:
 
 ```
-scripts/extract-keys de      # writes missing_de.json with only
-                              # what de.json doesn't cover yet
-# fill in each entry's "translation" field in missing_de.json
+scripts/extract-keys de      # writes locale-worksheets/
+                              # missing_de.json with only what
+                              # de.json doesn't cover yet
+# fill in each entry's "translation" field in the worksheet
 scripts/merge-keys de        # folds the non-empty ones into de.json
 ```
 
@@ -305,14 +316,15 @@ Everything else is the identical round-trip:
 
 ```
 # add a new language (e.g. French) — writes
-# site/src/i18n/missing_fr.json with all keys to fill:
+# locale-worksheets/site/missing_fr.json with all keys to fill:
 scripts/extract-keys --site fr
 
 # top up an existing one after new English keys were added to
 # en.json — writes only the delta de.json is still missing:
 scripts/extract-keys --site de
 
-# ...fill each entry's "translation" in missing_<locale>.json...
+# ...fill each entry's "translation" in the worksheet
+# (locale-worksheets/site/missing_<locale>.json)...
 
 # fold the finished translations into <locale>.json:
 scripts/merge-keys --site de

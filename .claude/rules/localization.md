@@ -61,6 +61,28 @@ Because the same English text can in principle be authored at two
 call sites for one key, `extract-keys` fails loudly on any such
 drift rather than silently picking one.
 
+## Only catalogs live in the catalog directory
+
+`Resources/Locales` (and `site/src/i18n`) holds flat
+`{key: string}` catalogs and nothing else. A tool that mints a
+working file writes it under `locale-worksheets/` — outside every
+tree a target ships from — and a reader of the catalog directory
+is never taught to skip a file it cannot decode: skipping is how
+a misplaced file survives. `LocaleWorksheetLocationTests` pins
+both halves (where `extract-keys` writes, and that
+`extract-keys --check` still *rejects* a worksheet found among
+the catalogs), and `validate_locale_files` in that script is the
+rejection itself.
+
+The cost of getting this wrong is spread across readers that have
+no idea a translation pass is open: SwiftPM `.copy`s the whole
+directory into the bundle, `LocaleCatalog.availableLocales()`
+offers every `*.json` stem as a language, `scripts/build-app.sh`
+globs the same directory for `CFBundleLocalizations`, and the
+Swift guards decode all of it as flat maps — which is how one
+`missing_de.json` read as a `DecodingError` naming an innocent
+key.
+
 `extract-keys --check` runs unconditionally in `scripts/lint.sh`
 (so: verify gate, CI, and `pre-commit` whenever a Swift or locale
 file is staged). It hard-fails if `en.json` is stale, or if any
@@ -152,7 +174,8 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationProductNameGuardTests`,
 `LocalizationOverlapGuardTests`,
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
-`MergeKeysContentGuardTests` — future scripts follow suit, so a
+`MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`
+— future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.
 

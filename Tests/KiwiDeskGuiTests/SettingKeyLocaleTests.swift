@@ -31,10 +31,31 @@ struct SettingKeyLocaleTests {
         var catalogs: [String: [String: String]] = [:]
         for file in files {
             let data = try Data(contentsOf: file)
-            let decoded = try JSONDecoder().decode(
-                [String: String].self,
-                from: data
-            )
+            // Nothing is skipped here — a file in this directory
+            // that is not a flat catalog is a defect, and the
+            // suite must red on it. What the name buys is the
+            // diagnosis: the raw `DecodingError` names whichever
+            // KEY sorted first, which reads as a corrupt
+            // translation. A `missing_*.json` worksheet left here
+            // by `scripts/extract-keys` presented exactly that
+            // way, twice over, in a suite with no connection to
+            // it (`LocaleWorksheetLocationTests`).
+            guard
+                let decoded = try? JSONDecoder().decode(
+                    [String: String].self,
+                    from: data
+                )
+            else {
+                Issue.record(
+                    """
+                    \(file.lastPathComponent) is not a flat \
+                    {key: string} catalog. Everything in \
+                    Resources/Locales must be; a translator \
+                    worksheet belongs in locale-worksheets/.
+                    """
+                )
+                continue
+            }
             catalogs[file.lastPathComponent] = decoded
         }
         return catalogs

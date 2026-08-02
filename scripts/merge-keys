@@ -12,10 +12,11 @@ Add `--site` to fold into the marketing site's manifests
 other rule below is identical for both.
 
 Run after `scripts/extract-keys <locale>` produced
-`missing_<locale>.json` — a `{key: {"source": <English>,
-"translation": ""}}` map — and a translator has filled each
-entry's "translation" field in place (do not change the keys or
-the "source" field).
+`locale-worksheets/missing_<locale>.json` — a `{key: {"source":
+<English>, "translation": ""}}` map — and a translator has filled
+each entry's "translation" field in place (do not change the keys
+or the "source" field). The worksheet lives outside the catalog
+directory on purpose; `<locale>.json` is written back into it.
 
 Only entries whose "translation" is non-empty (after trimming
 whitespace) are folded into `<locale>.json`; any left empty are
@@ -89,6 +90,12 @@ ROOT = Path(__file__).resolve().parent.parent
 LOCALES_DIR = (
     ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
 )
+# Where `scripts/extract-keys` leaves the worksheet — outside
+# every shipped resource directory, and the same two paths that
+# script derives (see its `WORKSHEETS_DIR`). Read here, unlinked
+# here; `<locale>.json` is still written under `LOCALES_DIR`.
+WORKSHEETS_DIR = ROOT / "locale-worksheets"
+SITE_WORKSHEETS_DIR = WORKSHEETS_DIR / "site"
 
 
 def _load_map(path: Path, label: str) -> dict | None:
@@ -166,18 +173,19 @@ def _content_defect(
 
 
 def main(argv: list[str]) -> int:
-    global LOCALES_DIR
+    global LOCALES_DIR, WORKSHEETS_DIR
     args = argv[1:]
     site = "--site" in args
     flag = "--site " if site else ""
     if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+        WORKSHEETS_DIR = SITE_WORKSHEETS_DIR
     if len(args) != 1:
         print(__doc__)
         return 1
     locale = args[0]
-    missing_file = LOCALES_DIR / f"missing_{locale}.json"
+    missing_file = WORKSHEETS_DIR / f"missing_{locale}.json"
     locale_file = LOCALES_DIR / f"{locale}.json"
 
     if not missing_file.exists():

@@ -6,7 +6,7 @@ locale manifest (issue #9).
 Usage:
     scripts/extract-keys              Rebuild en.json only.
     scripts/extract-keys <locale>     Rebuild en.json, then write
-                                       Resources/Locales/missing_
+                                       locale-worksheets/missing_
                                        <locale>.json with every
                                        key that locale's file is
                                        missing (or has empty),
@@ -20,7 +20,8 @@ Usage:
                                        locale or --check/--prune:
                                        `scripts/extract-keys --site
                                        fr` writes
-                                       site/src/i18n/missing_fr.json.
+                                       locale-worksheets/site/
+                                       missing_fr.json.
                                        The site's en.json is the
                                        hand-authored source of truth
                                        (the Astro components read
@@ -169,12 +170,31 @@ LOCALES_DIR = Path(
 )
 EN_JSON = LOCALES_DIR / "en.json"
 
+# Where `missing_<locale>.json` worksheets are written. NEVER a
+# directory anything ships from: a worksheet is a nested
+# `{key: {"source", "translation"}}` map, so every reader of the
+# catalog directory — `LocaleCatalog` at runtime, the
+# `CFBundleLocalizations` glob in `scripts/build-app.sh`, the
+# Swift guards that decode `Locales/*.json` as a flat map — reads
+# it as a broken catalog or as a locale named `missing_de`, and
+# `SwiftPM` copies the whole `Resources/Locales` directory into
+# the bundle, so a committed one ships. Visible (not a dot-folder)
+# because a translator opens it by hand; gitignored. Overridable
+# for the same reason as the two above — tests only.
+WORKSHEETS_DIR = Path(
+    os.environ.get(
+        "KIWIDESK_EXTRACT_WORKSHEETS",
+        str(ROOT / "locale-worksheets"),
+    )
+)
+
 # The marketing site's flat i18n manifests (issue #63 / Wave 10).
 # Selected by `--site`; unlike the app, this en.json is authored by
 # hand (the Astro components read `t.<key>` from it) rather than
 # generated from code, so site mode loads it directly as the key
 # map instead of scanning Swift.
 SITE_LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+SITE_WORKSHEETS_DIR = WORKSHEETS_DIR / "site"
 
 # One string piece: a plain "..." literal or a triple-quoted
 # """...""" block (Swift multi-line string, used for the
@@ -355,10 +375,18 @@ def extract() -> dict[str, str]:
 
 def shipped_locale_files() -> list[Path]:
     """Every `<locale>.json` under `LOCALES_DIR`, excluding
-    `en.json` (the generated manifest) and any leftover
-    `missing_*.json` scratch file. Shared by `--check`'s orphan
-    warning and `--prune` so both agree on what "a locale file"
-    means."""
+    `en.json` (the generated manifest) and any `missing_*.json`.
+    Shared by `--check`'s orphan warning and `--prune` so both
+    agree on what "a locale file" means.
+
+    Worksheets are not written here any more (`WORKSHEETS_DIR`),
+    so the second exclusion hides nothing: one that turns up in
+    this directory is rejected by name in
+    `validate_locale_files()`, which `check()` runs first. The
+    exclusion survives so the walkers that come after it —
+    `--prune` rewriting a file, `find_orphans` diffing keys —
+    cannot mangle a stray worksheet before that diagnosis is
+    printed."""
     if not LOCALES_DIR.is_dir():
         return []
     return sorted(
@@ -403,8 +431,28 @@ def validate_locale_files() -> list[str]:
     whole locale silently reverts to all-English — a feature
     dying quietly — so this is a hard-fail check, unlike the
     orphan-key warning. Returns one human-readable problem
-    description per broken file (empty list = all valid)."""
+    description per broken file (empty list = all valid).
+
+    A `missing_<locale>.json` worksheet is rejected by NAME, not
+    by failing to decode. Both would fail here today, but only
+    the name says which mistake was made: the decode error names
+    whichever key happens to sort first and reads as a corrupt
+    translation, which is how one worksheet left in this
+    directory presented as a suite-wide failure with no visible
+    connection to a translation pass. This is deliberately not a
+    skip — `WORKSHEETS_DIR` is where these belong, so one here is
+    a defect, and a shipped `.app` would carry it into the
+    bundle."""
     problems: list[str] = []
+    if LOCALES_DIR.is_dir():
+        for worksheet in sorted(LOCALES_DIR.glob("missing_*.json")):
+            problems.append(
+                f"{worksheet.name}: a translator worksheet in "
+                "the catalog directory — worksheets are nested "
+                '{"source", "translation"} maps and belong in '
+                "locale-worksheets/ (scripts/extract-keys writes "
+                "them there). Move or delete it."
+            )
     for locale_file in shipped_locale_files():
         try:
             text = locale_file.read_text(encoding="utf-8")
@@ -615,11 +663,13 @@ def check(
     diff) means en.json is stale — someone edited/added/removed
     an `L(...)` call site and forgot to re-run extract-keys.
     Also HARD-FAILS if any shipped `<locale>.json` doesn't
-    decode as a flat `{string: string}` map (a broken file makes
-    `LocaleCatalog` soft-fail to `[:]` at runtime — the locale
-    reverts to all-English silently, so this must block, not
-    warn) — checked first, so a translator gets the clearest
-    signal, and because `check_content` assumes flat string maps.
+    decode as a flat `{string: string}` map, or if a
+    `missing_*.json` worksheet is sitting in the catalog
+    directory (a broken file makes `LocaleCatalog` soft-fail to
+    `[:]` at runtime — the locale reverts to all-English
+    silently, so this must block, not warn) — checked first, so
+    a translator gets the clearest signal, and because
+    `check_content` assumes flat string maps.
     Broken *content* (`check_content`) blocks next, ahead of the
     staleness diff: a contaminated value is wrong however fresh
     en.json is. Separately WARNS (without affecting the exit code)
@@ -629,9 +679,11 @@ def check(
     malformed = validate_locale_files()
     if malformed:
         print(
-            "extract-keys --check: FAILED — malformed locale "
-            "file(s) (every shipped <locale>.json must decode "
-            "as a flat {string: string} map):",
+            "extract-keys --check: FAILED — the catalog "
+            "directory holds a file that is not a catalog "
+            "(every shipped <locale>.json must decode as a flat "
+            "{string: string} map, and nothing else may live "
+            "there):",
             file=sys.stderr,
         )
         for problem in malformed:
@@ -743,7 +795,10 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
     "still needs translating" signal — `merge-keys` only folds
     a key back in once its `translation` is non-empty, so an
     untranslated entry keeps re-surfacing on every extract run
-    instead of being silently swallowed."""
+    instead of being silently swallowed.
+
+    The worksheet lands in `WORKSHEETS_DIR`, never beside the
+    catalogs it was computed from — see that constant."""
     locale_file = LOCALES_DIR / f"{locale}.json"
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -758,7 +813,7 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         for key, english in mapping.items()
         if not existing.get(key)
     }
-    out = LOCALES_DIR / f"missing_{locale}.json"
+    out = WORKSHEETS_DIR / f"missing_{locale}.json"
     if not missing:
         if out.exists():
             out.unlink()
@@ -767,6 +822,7 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
             f"(nothing written)."
         )
         return
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(
             missing, indent=2, sort_keys=True, ensure_ascii=False
@@ -818,13 +874,14 @@ def _site_mapping() -> dict[str, str]:
 
 
 def main(argv: list[str]) -> int:
-    global LOCALES_DIR, EN_JSON
+    global LOCALES_DIR, EN_JSON, WORKSHEETS_DIR
     args = argv[1:]
     site = "--site" in args
     if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = SITE_LOCALES_DIR
         EN_JSON = LOCALES_DIR / "en.json"
+        WORKSHEETS_DIR = SITE_WORKSHEETS_DIR
     if len(args) > 1:
         print(__doc__)
         return 1

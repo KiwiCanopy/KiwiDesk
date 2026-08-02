@@ -42,6 +42,10 @@ LOCALES_DIR = (
 
 
 def _locale_files() -> list[Path]:
+    # Worksheets live in locale-worksheets/, not here; the
+    # exclusion only keeps a stray one from being rewritten
+    # before `extract-keys --check` names it (see that script's
+    # `validate_locale_files`).
     if not LOCALES_DIR.is_dir():
         return []
     return sorted(

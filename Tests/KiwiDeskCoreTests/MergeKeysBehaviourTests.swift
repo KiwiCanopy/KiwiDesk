@@ -100,9 +100,13 @@ struct MergeKeysBehaviourTests {
         let latin1 =
             #"{"a.key": {"source": "A", "#
             + #""translation": "gr\#u{00FC}n"}}"#
+        try FileManager.default.createDirectory(
+            at: fx.worksheets,
+            withIntermediateDirectories: true
+        )
         try Data(latin1.compactMap { $0.asciiValue ?? 0xFC })
             .write(
-                to: fx.locales.appendingPathComponent(
+                to: fx.worksheets.appendingPathComponent(
                     "missing_de.json"
                 )
             )

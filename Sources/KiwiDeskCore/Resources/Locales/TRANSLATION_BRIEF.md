@@ -3,8 +3,12 @@
 Ten locales ship complete at 810 keys each: `de`, `es`, `fr`, `it`,
 `ja`, `ko`, `pt-BR`, `ru`, `zh-Hans`, `zh-Hant`. A round of work
 starts by generating worksheets — `scripts/extract-keys <locale>`
-writes `missing_<locale>.json` here with whatever that locale is
-missing, and nothing when it is complete.
+writes `missing_<locale>.json` into **`locale-worksheets/`** at
+the repo root (not this directory) with whatever that locale is
+missing, and nothing when it is complete. Only flat
+`{key: string}` catalogs live here; a worksheet's nested shape
+breaks every reader of this directory, so `extract-keys --check`
+rejects one that turns up.
 
 **Read `docs/translating.md` first** — its *Translating well* and
 *Tone & voice* sections are the actual guidance (plain register,

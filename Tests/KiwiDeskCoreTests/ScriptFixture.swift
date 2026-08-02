@@ -158,7 +158,30 @@ struct RepoShapedFixture {
             .appendingPathComponent("i18n")
     }
 
+    /// Where `scripts/extract-keys` leaves a worksheet and
+    /// `scripts/merge-keys` reads it from: `<root>/locale-
+    /// worksheets`, and `/site` under `--site`. A third tree, so
+    /// a fixture cannot pass while the tools have stopped
+    /// agreeing about which directory a worksheet belongs in.
+    var worksheets: URL {
+        root.appendingPathComponent("locale-worksheets")
+    }
+
+    var siteWorksheets: URL {
+        worksheets.appendingPathComponent("site")
+    }
+
     func dir(site: Bool) -> URL { site ? siteLocales : locales }
+
+    /// Routes by FILE NAME, the split the shipped tools make: a
+    /// `missing_*.json` worksheet is not a catalog and never
+    /// shares a directory with one.
+    func dir(forFile name: String, site: Bool) -> URL {
+        guard name.hasPrefix("missing_") else {
+            return dir(site: site)
+        }
+        return site ? siteWorksheets : worksheets
+    }
 
     /// Decodes one locale file as the flat `{key: string}` map
     /// the shipped catalogs use.
@@ -169,7 +192,7 @@ struct RepoShapedFixture {
         try JSONDecoder().decode(
             [String: String].self,
             from: Data(
-                contentsOf: dir(site: site)
+                contentsOf: dir(forFile: name, site: site)
                     .appendingPathComponent(name)
             )
         )
@@ -183,12 +206,25 @@ struct RepoShapedFixture {
         site: Bool = false
     ) throws -> Data {
         try Data(
-            contentsOf: dir(site: site)
+            contentsOf: dir(forFile: name, site: site)
                 .appendingPathComponent(name)
         )
     }
 
     func localeFileExists(
+        _ name: String,
+        site: Bool = false
+    ) -> Bool {
+        FileManager.default.fileExists(
+            atPath: dir(forFile: name, site: site)
+                .appendingPathComponent(name).path
+        )
+    }
+
+    /// Whether `name` exists in the CATALOG directory, whatever
+    /// its name — the one question `localeFileExists` cannot ask
+    /// once it routes worksheets away.
+    func catalogFileExists(
         _ name: String,
         site: Bool = false
     ) -> Bool {
@@ -223,8 +259,10 @@ struct RepoShapedFixture {
 }
 
 /// Builds a `RepoShapedFixture` and writes `localeFiles` into
-/// its locales directory. `prefix` only names the temp
-/// directory, so a failing run is traceable to its suite.
+/// it — each file into the directory `dir(forFile:site:)` names,
+/// so a `missing_*.json` entry lands in the worksheets tree and
+/// everything else beside the catalogs. `prefix` only names the
+/// temp directory, so a failing run is traceable to its suite.
 func makeRepoShapedFixture(
     prefix: String,
     locales localeFiles: [String: String],
@@ -236,15 +274,20 @@ func makeRepoShapedFixture(
         root: root,
         cleanup: { try? FileManager.default.removeItem(at: root) }
     )
-    for (dir, files) in [
-        (fixture.locales, localeFiles),
-        (fixture.siteLocales, siteFiles),
-    ] where !files.isEmpty || dir == fixture.locales {
-        try FileManager.default.createDirectory(
-            at: dir,
-            withIntermediateDirectories: true
-        )
+    // The app catalog directory exists even when empty: a script
+    // that reports "no locale files found" must be distinguishable
+    // from one that could not find the tree at all.
+    try FileManager.default.createDirectory(
+        at: fixture.locales,
+        withIntermediateDirectories: true
+    )
+    for (files, site) in [(localeFiles, false), (siteFiles, true)] {
         for (name, content) in files {
+            let dir = fixture.dir(forFile: name, site: site)
+            try FileManager.default.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
             try content.write(
                 to: dir.appendingPathComponent(name),
                 atomically: true,
