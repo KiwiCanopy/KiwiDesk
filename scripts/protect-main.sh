@@ -51,6 +51,15 @@
 # Status checks are listed by JOB NAME and must match
 # .github/workflows/ci.yml. This is the setting that finally makes
 # CI block rather than report (#532).
+#
+# Both named jobs are gated on ci.yml's `changes` job rather than
+# on a trigger filter, which is what makes requiring them safe: a
+# PR touching only ignored paths leaves them *skipped*, and GitHub
+# counts a skipped job as satisfying a required check. Filtering at
+# the trigger instead would leave the workflow unreported and every
+# such PR stuck on "Expected". CiPathFilterTests keeps that shape;
+# packaging-and-release.md ("CI") carries the argument.
+
 set -euo pipefail
 
 REPO="${1:-KiwiCanopy/KiwiDesk}"

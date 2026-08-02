@@ -1,6 +1,7 @@
 ---
 paths:
   - "scripts/build-app.sh"
+  - "scripts/protect-main.sh"
   - "scripts/release.sh"
   - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
@@ -241,8 +242,46 @@ and locale checks with it.
 
 ## CI
 
-`.github/workflows/ci.yml` builds, lints, and tests on every push
-and on PRs targeting `main`. A red build blocks merging. The
-release build runs as a separate, non-blocking job (#532) — when
-to run it locally instead is decided by the `verify-gate` skill,
-which owns that call.
+`.github/workflows/ci.yml` builds, lints, and tests on pushes to
+`main` and on PRs targeting it. Both jobs are gated on a `changes`
+job, so a change confined to `.github/ci-ignore.txt`'s list leaves
+them skipped. A red build blocks merging. The release build runs
+as a separate, non-blocking job (#532) — when to run it locally
+instead is decided by the `verify-gate` skill, which owns that
+call.
+
+**`ci.yml` filters by exclusion; `site.yml` filters by
+inclusion.** Keep it that way. The site build's inputs are a
+closed, small set, so naming them is safe. The app's are open, and
+an include list there fails *open* — add a directory, forget to
+map it, and its suites stop running while CI stays green.
+Excluding is the failure this repo can afford: a missing entry
+costs runner minutes, not correctness. Those minutes are the
+reason the filter exists at all, macOS runners billing at a 10x
+multiplier against the free allowance while the repo is private.
+
+**Gate the expensive jobs, never the trigger.** A workflow filtered
+out by `paths-ignore` never reports a check run at all — not
+skipped-as-success, absent — so a required status check waits
+forever on it. A job skipped by `if:` satisfies one. Both shapes
+save the same macOS minutes; only the second survives
+`scripts/protect-main.sh` (#487). `ci.yml` therefore always
+triggers, and a cheap `ubuntu-latest` `changes` job reads
+`.github/ci-ignore.txt` and gates the two macOS jobs on its
+output.
+
+**Add an entry to `.github/ci-ignore.txt` only when no test, no
+build step and no lint step reads the path** — and audit all three,
+not just the first. `CiPathFilterTests` holds the line, checks the
+workflow still consults the list and still gates on it, and states
+in its own doc comment what it cannot see. Read that before adding
+an entry; a deep multi-component path earns much weaker cover than
+a whole top-level directory.
+
+**A path a rule file pins is a path the suite reads.**
+`InstructionPinTests` resolves every non-glob `paths:` entry in
+`.claude/rules/*.md`, so ignoring one makes its rename a
+CI-skipping change that reds `main` afterwards. `docs/**` looked
+like the safest entry on the list for exactly the wrong reason —
+no test opens a docs page, but `localization.md` pins two — and it
+reached review before the guard grew a check for it.

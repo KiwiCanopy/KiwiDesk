@@ -1,0 +1,27 @@
+# Paths whose change alone cannot affect the CI build, lint or test
+# jobs. The `changes` job in ci.yml reads this file and gates the two
+# macOS jobs on it; CiPathFilterTests guards the contents.
+#
+# This is an EXCLUDE list, deliberately the opposite shape from
+# site.yml's includes. The site build's inputs are a closed, small
+# set, so naming them is safe. The app's are open, and an include
+# list there fails open — add a directory, forget to map it, and its
+# suites stop running while CI stays green. Excluding fails closed.
+#
+# An entry belongs here only when NO test, NO build step and NO lint
+# step reads the path — and a path a rule file pins in its `paths:`
+# block counts as read. packaging-and-release.md ("CI") carries the
+# argument and the cases that have already caught someone out.
+#
+# One entry per line. An entry must be an exact repo-relative path
+# or `dir/**`; any other glob shape is rejected, because everything
+# that checks this file compares by prefix.
+
+site/**
+README.md
+CONTRIBUTING.md
+SECURITY.md
+CLAUDE.md
+LICENSE
+.github/ISSUE_TEMPLATE/**
+.github/pull_request_template.md

@@ -4,6 +4,19 @@ name: CI
 # branches. Scoping push to main avoids a duplicate run on every
 # PR-branch push (which would otherwise fire both push and
 # pull_request for the same commit).
+#
+# The expensive jobs are gated on a `changes` job rather than on a
+# trigger-level `paths-ignore`, and that is the whole point: a
+# workflow filtered out at the trigger never reports a check run at
+# all, so a required status check would wait forever on it. A job
+# *skipped* by `if:` satisfies a required check. Same macOS minutes
+# saved either way; only this shape survives branch protection
+# (#487, scripts/protect-main.sh).
+#
+# The list itself lives in .github/ci-ignore.txt — one authority,
+# read by the job below, by CiPathFilterTests and by the
+# verify-gate skill. packaging-and-release.md ("CI") owns when an
+# entry may be added.
 on:
   push:
     branches: [main]
@@ -21,7 +34,83 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect relevant changes
+    # ubuntu, not macOS: this runs on every push and bills at 1x.
+    # It exists to stop the two 10x jobs below, so it has to be
+    # cheap enough that the trade is never in question.
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Both diff bases below are commits on this repo, and a
+          # shallow clone would not contain them.
+          fetch-depth: 0
+
+      - name: Decide whether the build jobs must run
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # Every unknown resolves to "run". A false negative here
+          # skips CI on a real change and is invisible; a false
+          # positive costs one build.
+          case "$EVENT" in
+            pull_request) base="$BASE" ;;
+            push)         base="$BEFORE" ;;
+            *)            base="" ;;
+          esac
+          if [ -z "$base" ] \
+            || [ "$base" = "0000000000000000000000000000000000000000" ] \
+            || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "no usable base for $EVENT — running everything"
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$EVENT" = "pull_request" ]; then
+            changed="$(git diff --name-only "$base"...HEAD)"
+          else
+            changed="$(git diff --name-only "$base" HEAD)"
+          fi
+          if [ -z "$changed" ]; then
+            echo "empty diff — running everything"
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          run=false
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            ignored=false
+            while IFS= read -r pattern; do
+              case "$pattern" in ''|\#*) continue ;; esac
+              case "$pattern" in
+                */'**')
+                  case "$file" in
+                    "${pattern%/\*\*}"/*) ignored=true ;;
+                  esac
+                  ;;
+                *)
+                  [ "$file" = "$pattern" ] && ignored=true
+                  ;;
+              esac
+              [ "$ignored" = true ] && break
+            done < .github/ci-ignore.txt
+            if [ "$ignored" = false ]; then
+              echo "not ignored: $file"
+              run=true
+              break
+            fi
+          done <<< "$changed"
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+
   build-lint-test:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
     name: Build, Lint & Test
     # macos-26 (Tahoe), not macos-15: the tree uses macOS 26 SDK
     # symbols (NSGlassEffectView, #390). `if #available` gates
@@ -57,6 +146,8 @@ jobs:
         run: swift test --filter ExecTests
 
   release-build:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
     name: Release Build
     # A sibling job, not a fourth step in build-lint-test: `swift
     # test` there already compiles the tree in debug, so building
