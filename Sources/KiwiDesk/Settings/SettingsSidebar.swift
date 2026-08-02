@@ -5,6 +5,17 @@ import SwiftUI
 /// the scope split (§0): "This Profile" follows the banner's
 /// edit target, "Whole App" is always live state.
 struct SettingsSidebar: View {
+    /// The fixed column width (#297). Public to the module so
+    /// `SidebarLabelWidthTests` can derive the label budget from
+    /// it — narrowing the column must tighten the budget, not
+    /// leave a guard enforcing a tolerance the column outgrew.
+    static let columnWidth: CGFloat = 190
+    /// What the column spends on everything that is not the
+    /// label: the 8 pt card padding either side, the sidebar
+    /// row's own insets, the 22 pt `SidebarTile` and its gap.
+    /// `columnWidth - labelChrome` is the text budget.
+    static let labelChrome: CGFloat = 70
+
     @Binding var selection: SettingsDestination
     /// Hides the global-only destinations while a stored
     /// profile is being edited (#18).
@@ -76,9 +87,12 @@ struct SettingsSidebar: View {
         // section header inside carries the full title), and
         // System Settings' own column does not grow per language.
         // Keep that the fix: a new locale whose destination label
-        // measures past ~120 pt gets a shorter label, not a wider
-        // sidebar.
-        .frame(width: 190)
+        // measures past the text budget gets a shorter label, not
+        // a wider sidebar. `SidebarLabelWidthTests` enforces it,
+        // and derives the budget from `columnWidth` below rather
+        // than restating a number this comment would have to keep
+        // in step.
+        .frame(width: Self.columnWidth)
         // Floating pane, the macOS 26 System Settings look: a
         // rounded translucent card in near-window-background
         // gray, carrying a soft shadow, with the traffic lights
@@ -301,45 +315,5 @@ struct SettingsSidebar: View {
             "sidebar.profiles.badge_ax",
             "start here"
         )
-    }
-}
-
-/// A System-Settings-style icon tile: white glyph on a flat
-/// rounded-rect color (§6.1).
-struct SidebarTile: View {
-    let destination: SettingsDestination
-    /// Accent dot on the tile's top-trailing corner — the
-    /// native "something to look at in this section" cue.
-    var badged = false
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 6)
-            .fill(destination.tint)
-            .frame(width: 22, height: 22)
-            .overlay {
-                Image(systemName: destination.symbol)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white)
-            }
-            .overlay(alignment: .topTrailing) {
-                if badged {
-                    Circle()
-                        .fill(Color.accentColor)
-                        .frame(width: 7, height: 7)
-                        .offset(x: 2, y: -2)
-                }
-            }
-            // The soft lift System Settings gives its sidebar
-            // icons — kept inside `inactiveDimmed` so the
-            // shadow fades with the tile.
-            .shadow(
-                color: .black.opacity(0.25),
-                radius: 1.5,
-                y: 1
-            )
-            // The colored fill has no notion of window key
-            // state; System Settings' tiles fade, hue kept
-            // (#297).
-            .inactiveDimmed()
     }
 }
