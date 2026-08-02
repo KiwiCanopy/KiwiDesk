@@ -2497,11 +2497,35 @@ two-way picker already solves. (ui-designer, 2026-07-29.)
 
 ### App Bar
 
-**[Principle]**
+**[Rationale]**
+
+**The two bars ship where macOS already puts a persistent
+strip.** (#660.) Space Bar on **top**, App Bar on **bottom**,
+both in the **plain** design language, both filled at **80 %**
+opacity.
+
+Each half of that is the same argument. Top and bottom are where
+the menu bar and the Dock have already taught the eye to look for
+something permanent, so a new user reads the bars as part of the
+system rather than as two panels someone stuck on; the previous
+left-edge Space Bar competed with nothing and matched nothing.
+`plain` — one shared plate rather than a box per item — is what
+the menu bar itself does, and a boxed strip reads as a widget
+floating over the desktop. And the fill moved from 40 % to 80 %
+because a translucent default is a bet on the user's wallpaper:
+40 % was legible on the dark ones it was chosen against and a
+guess everywhere else, while opacity is the one axis where the
+safe default costs the confident user a single setting.
+
+None of this narrows anything — all six values stay reachable
+from Lua and from Settings. It is a claim about which starting
+point is right when we know nothing about the desktop, which is
+exactly the "approachable by default" clause: the default is for
+the user who never opens the editor.
 
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
-edges (`top` / `bottom` / `left` / `right`, default top) and the
+edges (`top` / `bottom` / `left` / `right`, default bottom) and the
 bar renders exactly there in every layout — the earlier
 `start`/`end` values that resolved against the layout's
 orientation are gone. Axis-relativity existed to prevent an

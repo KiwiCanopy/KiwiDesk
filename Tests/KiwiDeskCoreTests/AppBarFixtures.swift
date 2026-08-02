@@ -14,10 +14,10 @@ import Foundation
 enum AppBarFixtures {
     static func everyGlobalField() -> AppBarStyle {
         var style = AppBarStyle()
-        style.edge = .bottom
+        style.edge = .left
         style.alignment = .end
         style.thickness = 44
-        style.backgroundStyle = .plain
+        style.backgroundStyle = .boxed
         style.liquidGlass = true
         style.backgroundFit = .full
         style.activeIndicator = .gap
@@ -46,7 +46,7 @@ enum AppBarFixtures {
         bar.edge = .right
         bar.alignment = .start
         bar.thickness = 50
-        bar.backgroundStyle = .boxed
+        bar.backgroundStyle = .plain
         // Differs from the global fixture (true) so resolve parity
         // sees the override write.
         bar.liquidGlass = false
