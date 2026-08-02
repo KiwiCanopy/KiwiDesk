@@ -211,5 +211,11 @@ extension KiwiCore {
             }
         }
         retile()
+        // The drop is the same array mutation as `scrollingStep`'s
+        // swap — which arms this — so it can land a window in an
+        // overflowing edge pile whose stacking still reads for the
+        // pre-drop order (#674). Self-gated on scrolling plus
+        // actual overflow, and armed after the retile (#153).
+        scheduleScrollingZOrderRestoreIfOverflowing()
     }
 }

@@ -147,6 +147,24 @@ extension KiwiCore {
         if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0 {
             scheduleZOrderRestore()
         }
+        // Scrolling: a focus JUMP leaves the row stacked for the
+        // window that USED to be focused. A ±1 step masks it —
+        // the raise above fronts the new focus and nothing else
+        // moved — but an App Bar item carries an absolute
+        // `WindowID`, so a click can cross several slots at once
+        // and every window between the two keeps the old
+        // stacking, which the edge piles show (#674). Restack
+        // canonically instead. Cheap to arm on a plain step too:
+        // `rowOverflows` skips an all-visible row outright, and a
+        // side already stacked canonically re-raises to the order
+        // it is already in, so nothing moves visibly. After the
+        // retile, like every other arm site (#153), and behind
+        // the monocle guard's twin — a restore's closing
+        // re-assert calls back in here, and re-arming there would
+        // loop.
+        if zOrderRestoresInFlight == 0 {
+            scheduleScrollingZOrderRestoreIfOverflowing()
+        }
         // Armed only AFTER the retile: retiling cancels
         // in-tolerance animations one by one, and the settle
         // callback fires synchronously the moment the count
