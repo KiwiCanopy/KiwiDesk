@@ -31,10 +31,10 @@ struct ProfileSaveAsymmetryTests {
         return core
     }
 
-    private var modesOverride: KeyModeOverride {
-        KeyModeOverride(
-            modes: [
-                KeyMode(
+    private var layersOverride: KeyLayerOverride {
+        KeyLayerOverride(
+            layers: [
+                KeyLayer(
                     name: "default",
                     bindings: [
                         KeyBinding(
@@ -63,7 +63,7 @@ struct ProfileSaveAsymmetryTests {
 
     private func saveWork(
         _ core: KiwiCore,
-        modes: KeyModeOverride? = nil,
+        layers: KeyLayerOverride? = nil,
         appRules: AppRuleOverride? = nil,
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil
@@ -76,7 +76,7 @@ struct ProfileSaveAsymmetryTests {
                 ],
                 spaceModes: [:],
                 settings: TilingSettings(),
-                modes: modes,
+                layers: layers,
                 appRules: appRules,
                 floatRules: floatRules,
                 ignoreRules: ignoreRules
@@ -84,16 +84,16 @@ struct ProfileSaveAsymmetryTests {
         )
     }
 
-    @Test("Live-adopt preserves the profile's modes override")
+    @Test("Live-adopt preserves the profile's layers override")
     func liveAdoptPreservesModes() throws {
         let core = makeCore()
         attachDisplay(core)
-        try saveWork(core, modes: modesOverride)
+        try saveWork(core, layers: layersOverride)
 
         try core.persistProfile(named: "Work")
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.modes == modesOverride)
+        #expect(saved.layers == layersOverride)
     }
 
     @Test("Live-adopt preserves the profile's app-rule override")
@@ -138,7 +138,7 @@ struct ProfileSaveAsymmetryTests {
     func buildProfileHasNoDiffs() {
         let core = makeCore()
         let built = core.buildProfile(name: "Work")
-        #expect(built.modes == nil)
+        #expect(built.layers == nil)
         #expect(built.appRules == nil)
         #expect(built.floatRules == nil)
         #expect(built.ignoreRules == nil)

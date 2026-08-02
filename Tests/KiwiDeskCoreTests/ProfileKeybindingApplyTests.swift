@@ -5,7 +5,7 @@ import Testing
 
 /// Integration tests for the per-profile keybinding tier
 /// (#55 phase 6): `apply(profile:)` re-registers keybindings
-/// with the applied profile's `KeyModeOverride`, and the O4
+/// with the applied profile's `KeyLayerOverride`, and the O4
 /// soft base layer guarantees every base binding the profile
 /// does not rebind stays live — the switch-key-trap invariant,
 /// exercised end to end (profile JSON → apply → Carbon-less
@@ -44,8 +44,8 @@ struct ProfileKeybindingApplyTests {
     /// combo (alt+h) in the default mode.
     private func baseConfig() -> GuiConfig {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     binding(
@@ -68,9 +68,9 @@ struct ProfileKeybindingApplyTests {
             ],
             spaceModes: [:],
             settings: TilingSettings(),
-            modes: KeyModeOverride(
-                modes: [
-                    KeyMode(
+            layers: KeyLayerOverride(
+                layers: [
+                    KeyLayer(
                         name: "default",
                         bindings: [
                             binding(

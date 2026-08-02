@@ -64,7 +64,7 @@ extension KiwiCore {
         }
     }
 
-    /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`.
+    /// `KiwiDesk.bind`, `define_layer`, and `switch_layer`.
     private func registerKeybindingAPI(
         on lua: LuaInterpreter
     ) {
@@ -83,14 +83,14 @@ extension KiwiCore {
             self.keys.bind(combo, ref: ref)
             return .none
         }
-        lua.register("define_mode") { [weak self] args in
+        lua.register("define_layer") { [weak self] args in
             guard let self,
                 let name = args.first?.stringValue,
                 case .table(let table) =
                     args.dropFirst().first ?? .none
             else {
                 self?.onLog(
-                    "define_mode(): expected name and table"
+                    "define_layer(): expected name and table"
                 )
                 return .none
             }
@@ -100,7 +100,7 @@ extension KiwiCore {
                     case .functionRef(let ref) = value
                 else {
                     self.onLog(
-                        "define_mode('\(name)'): bad key "
+                        "define_layer('\(name)'): bad key "
                             + "'\(key)'"
                     )
                     continue
@@ -110,26 +110,26 @@ extension KiwiCore {
             let icon = Self.modeIcon(
                 from: args.dropFirst(2).first
             )
-            self.keys.defineMode(
+            self.keys.defineLayer(
                 name,
                 bindings: bindings,
                 icon: icon
             )
             return .none
         }
-        lua.register("switch_mode") { [weak self] args in
+        lua.register("switch_layer") { [weak self] args in
             guard let name = args.first?.stringValue else {
                 self?.onLog(
-                    "switch_mode(): expected mode name"
+                    "switch_layer(): expected layer name"
                 )
                 return .none
             }
-            self?.keys.switchMode(name)
+            self?.keys.switchLayer(name)
             return .none
         }
     }
 
-    /// Reads `{ icon = "..." }` from `define_mode`'s optional
+    /// Reads `{ icon = "..." }` from `define_layer`'s optional
     /// third argument.
     private static func modeIcon(
         from value: LuaValue?

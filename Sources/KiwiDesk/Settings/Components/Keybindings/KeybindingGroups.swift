@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The Shortcuts intent groups (#68 §3.6.1): flat sections,
 /// one level of hierarchy — Focus, Move windows, Size & float,
-/// Switch modes — rendered as plain titled sections (the old
+/// Switch layers — rendered as plain titled sections (the old
 /// double-nested disclosures are gone). Space rows generate
 /// from the defined spaces, so adding a space adds its
 /// commands. Recording upserts a `.navigation` row keyed by
@@ -209,25 +209,25 @@ struct GeneralShortcutsGroup: View {
     }
 }
 
-/// Switch modes: one row per other mode, binding a
-/// `switch_mode` shortcut. Shown only when more than one mode
+/// Switch layers: one row per other layer, binding a
+/// `switch_layer` shortcut. Shown only when more than one layer
 /// exists.
-struct ChangeModesGroup: View {
+struct SwitchLayersGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
-    let modeNames: [String]
+    let layerNames: [String]
     let current: String
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.shortcuts.switchModes
+            SettingsCatalog.shortcuts.switchLayers
         ) {
             ForEach(others, id: \.self) { name in
                 NavRow(
                     model: model,
                     bindings: $bindings,
                     command:
-                        KeybindingCatalog.switchModeCommand(
+                        KeybindingCatalog.switchLayerCommand(
                             name
                         )
                 )
@@ -236,6 +236,6 @@ struct ChangeModesGroup: View {
     }
 
     private var others: [String] {
-        modeNames.filter { $0 != current }
+        layerNames.filter { $0 != current }
     }
 }

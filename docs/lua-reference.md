@@ -73,7 +73,7 @@ Settings app offers **Adopt into the GUI** instead. Settings are:
   `app_bar.*`, `animations.*`, `mouse.*`, `quit.*` — plus
   `border.fit_gaps`.
 - Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
-- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_mode`,
+- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_native_space`.
 
 ```lua
@@ -3401,16 +3401,16 @@ is never registered and the Shortcuts section flags the row with ⚠
 Define vim-style modes; only the active mode's bindings fire:
 
 ```lua
-KiwiDesk.define_mode("resize", {
+KiwiDesk.define_layer("resize", {
     ["h"]      = function() KiwiDesk.resize("x", -50) end,
     ["l"]      = function() KiwiDesk.resize("x", 50) end,
     ["j"]      = function() KiwiDesk.resize("y", -50) end,
     ["k"]      = function() KiwiDesk.resize("y", 50) end,
-    ["escape"] = function() KiwiDesk.switch_mode("default") end,
+    ["escape"] = function() KiwiDesk.switch_layer("default") end,
 })
 
 KiwiDesk.bind("ctrl+alt+r", function()
-    KiwiDesk.switch_mode("resize")
+    KiwiDesk.switch_layer("resize")
 end)
 ```
 
@@ -3500,7 +3500,7 @@ KiwiDesk.resize("y", 50)
 
 #### Mode Icons
 
-An optional third argument to `define_mode` sets a menu bar
+An optional third argument to `define_layer` sets a menu bar
 indicator — an SF Symbol name or a flat emoji. While the mode is
 active, the KiwiDesk status item swaps to it. The default mode
 (`KiwiDesk.bind`) never takes an icon — it always shows the
@@ -3509,9 +3509,9 @@ standard KiwiDesk glyph.
 **Example:**
 
 ```lua
-KiwiDesk.define_mode("resize", { --[[ bindings ]] },
+KiwiDesk.define_layer("resize", { --[[ bindings ]] },
     { icon = "arrow.left.and.right" })
-KiwiDesk.define_mode("service", { --[[ bindings ]] },
+KiwiDesk.define_layer("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 

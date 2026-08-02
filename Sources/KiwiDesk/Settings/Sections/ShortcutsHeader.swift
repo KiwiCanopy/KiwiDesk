@@ -1,10 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Shortcuts header (#68 §3.6.1): the mode strip (chips +
+/// The Shortcuts header (#68 §3.6.1): the layer strip (chips +
 /// "+" popover), the Import button — placed here, visible
 /// without scrolling, where the new user it serves can find it
-/// — and the selected non-default mode's compact icon/delete
+/// — and the selected non-default layer's compact icon/delete
 /// row.
 struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
@@ -53,12 +53,12 @@ struct ShortcutsHeader: View {
 
     private var modesCaption: String {
         L(
-            "shortcuts.modes.caption",
-            "Modes are alternate shortcut sets — only the "
-                + "active mode's shortcuts fire. Bind a "
+            "shortcuts.layers.caption",
+            "Layers are alternate shortcut sets — only the "
+                + "active layer's shortcuts fire. Bind a "
                 + "key below to switch between them. "
                 + "\u{201C}default\u{201D} is the standard "
-                + "mode and is always the active one after "
+                + "layer and is always the active one after "
                 + "the app starts."
         )
     }
@@ -70,19 +70,19 @@ struct ShortcutsHeader: View {
         )
     }
 
-    // MARK: - Mode strip
+    // MARK: - Layer strip
 
     private var modeStrip: some View {
         HStack(spacing: 6) {
-            ForEach(model.config.modes) { mode in
-                modeChip(mode.name)
+            ForEach(model.config.layers) { layer in
+                layerChip(layer.name)
             }
             addModeChip
         }
     }
 
-    private func modeChip(_ name: String) -> some View {
-        ShortcutModeChip(
+    private func layerChip(_ name: String) -> some View {
+        ShortcutLayerChip(
             name: name,
             selected: selected == name
         ) {
@@ -90,7 +90,7 @@ struct ShortcutsHeader: View {
         }
     }
 
-    /// Defining a mode is rare — the "+" chip's popover
+    /// Defining a layer is rare — the "+" chip's popover
     /// replaces the old always-visible text field (§3.6.1).
     private var addModeChip: some View {
         Button {
@@ -111,7 +111,7 @@ struct ShortcutsHeader: View {
         }
         .buttonStyle(.plain)
         .onHover { addModeHovered = isEnabled && $0 }
-        .help(L("shortcuts.add_mode.help", "Add a mode"))
+        .help(L("shortcuts.add_layer.help", "Add a layer"))
         .popover(isPresented: $addingMode) {
             HStack {
                 TextField(modeNamePlaceholder, text: $newMode)
@@ -127,7 +127,7 @@ struct ShortcutsHeader: View {
     }
 
     private var modeNamePlaceholder: String {
-        L("shortcuts.mode_name", "Mode name")
+        L("shortcuts.layer_name", "Layer name")
     }
 
     private var hoverAnimation: Animation? {
@@ -139,10 +139,10 @@ struct ShortcutsHeader: View {
     private var importButton: some View {
         Button {
             model.importCurrentShortcuts()
-            if !model.config.modes.contains(where: {
+            if !model.config.layers.contains(where: {
                 $0.name == selected
             }) {
-                selected = KeyMode.defaultName
+                selected = KeyLayer.defaultName
             }
             importedNote = true
         } label: {
@@ -154,7 +154,7 @@ struct ShortcutsHeader: View {
                 systemImage: "square.and.arrow.down"
             )
         }
-        // Small: it sits inline beside the mode chips and
+        // Small: it sits inline beside the layer chips and
         // must not read as a peer tab.
         .controlSize(.small)
         .help(importHelp)
@@ -171,33 +171,33 @@ struct ShortcutsHeader: View {
         )
     }
 
-    // MARK: - Selected-mode row
+    // MARK: - Selected-layer row
 
-    /// A selected non-default mode gets a compact header: its
-    /// menu-bar icon and Delete (base modes protected, #55).
+    /// A selected non-default layer gets a compact header: its
+    /// menu-bar icon and Delete (base layers protected, #55).
     @ViewBuilder private var selectedModeHeader: some View {
-        if selected != KeyMode.defaultName {
+        if selected != KeyLayer.defaultName {
             HStack(spacing: 10) {
                 Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
                     .foregroundStyle(.secondary)
                 IconPicker(icon: iconBinding, preview: .menuBar)
                 Spacer()
                 if canDeleteSelected {
-                    renameModeButton
+                    renameLayerButton
                     Button(
-                        L("shortcuts.delete_mode", "Delete mode"),
+                        L("shortcuts.delete_layer", "Delete layer"),
                         role: .destructive,
                         action: deleteMode
                     )
                 } else {
-                    // O4 soft: a base mode the profile
+                    // O4 soft: a base layer the profile
                     // doesn't mention always survives —
                     // removal is not expressible per profile
                     // (#55 phase 7).
                     Text(
                         L(
-                            "shortcuts.base_mode_protected",
-                            "Base modes can't be removed here"
+                            "shortcuts.base_layer_protected",
+                            "Base layers can't be removed here"
                         )
                     )
                     .font(.caption)
@@ -209,7 +209,7 @@ struct ShortcutsHeader: View {
     }
 
     private var modeIndex: Int {
-        model.config.modes.firstIndex {
+        model.config.layers.firstIndex {
             $0.name == selected
         } ?? 0
     }
@@ -217,25 +217,25 @@ struct ShortcutsHeader: View {
     private var iconBinding: Binding<String> {
         Binding(
             get: {
-                model.config.modes[modeIndex].icon ?? ""
+                model.config.layers[modeIndex].icon ?? ""
             },
             set: {
-                model.config.modes[modeIndex].icon =
+                model.config.layers[modeIndex].icon =
                     $0.isEmpty ? nil : $0
             }
         )
     }
 
-    /// Rename shares Delete's gate (base modes are protected
+    /// Rename shares Delete's gate (base layers are protected
     /// in profile-override editing, #55). Scope: the rewrite
-    /// covers THIS config's modes and switch-mode rows; a
-    /// stored profile whose sparse override (`Profile.modes`)
+    /// covers THIS config's layers and switch-layer rows; a
+    /// stored profile whose sparse override (`Profile.layers`)
     /// targets the old name keeps it and resurfaces it as a
-    /// standalone mode — the same accepted gap Delete has
+    /// standalone layer — the same accepted gap Delete has
     /// (pre-release, single user; the edit here is a draft
     /// until Save, so chasing stored files at click time
     /// would desync them from an unsaved base).
-    private var renameModeButton: some View {
+    private var renameLayerButton: some View {
         Button(L("shortcuts.rename_ellipsis", "Rename…")) {
             renameDraft = selected
             renamingMode = true
@@ -245,10 +245,10 @@ struct ShortcutsHeader: View {
                 TextField(modeNamePlaceholder, text: $renameDraft)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 140)
-                    .onSubmit(renameMode)
+                    .onSubmit(renameLayer)
                 Button(
                     L("shortcuts.rename", "Rename"),
-                    action: renameMode
+                    action: renameLayer
                 )
                 .buttonStyle(.borderedProminent)
                 .disabled(!canRenameMode)
@@ -260,16 +260,16 @@ struct ShortcutsHeader: View {
     private var canRenameMode: Bool {
         let name = renameDraft.trimmed
         return !name.isEmpty && name != selected
-            && !model.config.modes.contains {
+            && !model.config.layers.contains {
                 $0.name == name
             }
     }
 
-    private func renameMode() {
+    private func renameLayer() {
         guard canRenameMode else { return }
         let new = renameDraft.trimmed
-        model.config.modes = KeybindingCatalog.renameMode(
-            in: model.config.modes,
+        model.config.layers = KeybindingCatalog.renameLayer(
+            in: model.config.layers,
             from: selected,
             to: new
         )
@@ -277,16 +277,16 @@ struct ShortcutsHeader: View {
         renamingMode = false
     }
 
-    // MARK: - Mode mutations
+    // MARK: - Layer mutations
 
-    /// Live editing: any non-default mode. Override mode:
-    /// only modes the PROFILE added — base modes always pass
+    /// Live editing: any non-default layer. Override layer:
+    /// only layers the PROFILE added — base layers always pass
     /// through (O4 soft), so deleting one is inexpressible.
     private var canDeleteSelected: Bool {
-        guard selected != KeyMode.defaultName else {
+        guard selected != KeyLayer.defaultName else {
             return false
         }
-        guard let base = model.profileEditingBaseModes else {
+        guard let base = model.profileEditingBaseLayers else {
             return true
         }
         return !base.contains { $0.name == selected }
@@ -295,7 +295,7 @@ struct ShortcutsHeader: View {
     private var canAddMode: Bool {
         let name = newMode.trimmed
         return !name.isEmpty
-            && !model.config.modes.contains {
+            && !model.config.layers.contains {
                 $0.name == name
             }
     }
@@ -303,11 +303,11 @@ struct ShortcutsHeader: View {
     private func addMode() {
         let name = newMode.trimmed
         guard canAddMode else { return }
-        // Seed the ⌃⌥K "Show shortcuts panel" row so a fresh mode
+        // Seed the ⌃⌥K "Show shortcuts panel" row so a fresh layer
         // can open the cheat-sheet from the keyboard, not only via
-        // the menu bar (#602). Deletable per mode like any default.
-        model.config.modes.append(
-            KeyMode(
+        // the menu bar (#602). Deletable per layer like any default.
+        model.config.layers.append(
+            KeyLayer(
                 name: name,
                 bindings: [DefaultKeybindings.showShortcutsRow()]
             )
@@ -318,10 +318,10 @@ struct ShortcutsHeader: View {
     }
 
     private func deleteMode() {
-        guard selected != KeyMode.defaultName else { return }
-        model.config.modes.removeAll {
+        guard selected != KeyLayer.defaultName else { return }
+        model.config.layers.removeAll {
             $0.name == selected
         }
-        selected = KeyMode.defaultName
+        selected = KeyLayer.defaultName
     }
 }

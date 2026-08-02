@@ -51,8 +51,8 @@ struct LiveApplyKeybindingStatusTests {
 
     private func configWithTwoDefaults() -> GuiConfig {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     binding("alt+h", lua: "left = true"),
@@ -63,28 +63,28 @@ struct LiveApplyKeybindingStatusTests {
         return config
     }
 
-    @Test("Inactive-mode recording never claims Active now")
+    @Test("Inactive-layer recording never claims Active now")
     func inactiveModeStatus() throws {
         let registrar = TrackingLiveRegistrar()
         let core = makeCore(registrar: registrar)
         var config = configWithTwoDefaults()
-        config.modes.append(
-            KeyMode(
+        config.layers.append(
+            KeyLayer(
                 name: "resize",
                 bindings: [binding("h", lua: "small = true")]
             )
         )
         try core.saveGuiConfig(config)
 
-        var edited = config.modes
+        var edited = config.layers
         edited[1].bindings[0].combo = "j"
         let target = edited[1].bindings[0]
         let result = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "resize", binding: target)
+            layers: edited,
+            target: .init(layer: "resize", binding: target)
         )
 
-        guard case .success(.inactiveMode("resize")) = result
+        guard case .success(.inactiveLayer("resize")) = result
         else {
             Issue.record("expected inactive resize status")
             return
@@ -100,15 +100,15 @@ struct LiveApplyKeybindingStatusTests {
         let config = configWithTwoDefaults()
         try core.saveGuiConfig(config)
 
-        var edited = config.modes
+        var edited = config.layers
         let invalid = binding(
             "alt+j",
             lua: "this is not valid Lua !!"
         )
         edited[0].bindings.append(invalid)
         let result = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: invalid)
+            layers: edited,
+            target: .init(layer: "default", binding: invalid)
         )
 
         guard case .success(.compileFailed) = result else {
@@ -128,14 +128,14 @@ struct LiveApplyKeybindingStatusTests {
         let config = configWithTwoDefaults()
         try core.saveGuiConfig(config)
 
-        var edited = config.modes
+        var edited = config.layers
         let denied = binding("alt+j", lua: "hit = true")
         edited[0].bindings.append(denied)
         let parsed = try #require(KeyCombo.parse("alt+j"))
         registrar.deniedKeyCodes = [parsed.keyCode]
         let result = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: denied)
+            layers: edited,
+            target: .init(layer: "default", binding: denied)
         )
 
         guard case .success(.denied) = result else {
@@ -145,7 +145,7 @@ struct LiveApplyKeybindingStatusTests {
         #expect(core.keys.activationFailures.contains(parsed))
     }
 
-    @Test("One live swap registers the active mode once")
+    @Test("One live swap registers the active layer once")
     func batchRegistrationIsLinear() throws {
         let registrar = TrackingLiveRegistrar()
         let core = makeCore(registrar: registrar)
@@ -153,14 +153,14 @@ struct LiveApplyKeybindingStatusTests {
         try core.saveGuiConfig(config)
         registrar.resetCounts()
         var modeEvents: [String] = []
-        core.keys.onModeChange = { modeEvents.append($0) }
+        core.keys.onLayerChange = { modeEvents.append($0) }
 
-        var edited = config.modes
+        var edited = config.layers
         let added = binding("alt+j", lua: "middle = true")
         edited[0].bindings.append(added)
         _ = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
 
         #expect(registrar.registrationCalls == 3)

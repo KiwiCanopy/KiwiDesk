@@ -40,7 +40,7 @@ public final class KiwiCore {
     /// installed in `keys`. Kept so a recorder-only live edit
     /// can capture an in-memory rollback point without reading
     /// gui.json or a profile again (#123 review).
-    var appliedStructuredModes: [KeyMode]?
+    var appliedStructuredLayers: [KeyLayer]?
     /// Changes whenever `loadConfig()` replaces the Lua VM and
     /// hotkey table. Recorder snapshots are valid only within
     /// the generation that captured them.

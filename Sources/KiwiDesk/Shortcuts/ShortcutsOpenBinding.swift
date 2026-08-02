@@ -15,7 +15,7 @@ enum ShortcutsOpenBinding {
     /// the live snapshot is unavailable (paused / init.lua-owned):
     /// there is no live combo to advertise then.
     ///
-    /// Read from the RESOLVED active mode (post profile-override),
+    /// Read from the RESOLVED active layer (post profile-override),
     /// not raw `gui.json` — the displayed combo must match what
     /// Carbon actually has installed.
     @MainActor static func comboGlyphs(core: KiwiCore) -> String? {
@@ -33,12 +33,12 @@ enum ShortcutsOpenBinding {
         guard let snapshot = core.liveKeybindingSnapshot() else {
             return nil
         }
-        let mode =
-            snapshot.keyModes.first {
-                $0.name == snapshot.activeModeName
-            } ?? snapshot.keyModes.first
+        let layer =
+            snapshot.keyLayers.first {
+                $0.name == snapshot.activeLayerName
+            } ?? snapshot.keyLayers.first
         guard
-            let combo = mode?.bindings.first(where: {
+            let combo = layer?.bindings.first(where: {
                 $0.lua == lua && !$0.combo.isEmpty
             })?.combo,
             let parsed = KeyCombo.parse(combo)

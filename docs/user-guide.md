@@ -1898,7 +1898,7 @@ In the **Shortcuts** header, click **+ Mode** to define a vim-style
 mode — a mode where only its bindings fire. Each mode has a name
 (e.g., "resize"), an optional menu bar icon (SF Symbol or emoji), and
 a set of bindings that shadow the base shortcuts when the mode is
-active. Use `KiwiDesk.switch_mode` to switch modes (see
+active. Use `KiwiDesk.switch_layer` to switch modes (see
 [lua-reference.md](lua-reference.md)).
 
 ### Per-Profile Shortcut Overrides

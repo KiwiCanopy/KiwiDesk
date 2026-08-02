@@ -3,14 +3,14 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Pins `KeybindingCatalog.renameMode` — the pure core of the
-/// Shortcuts header's mode rename: the mode itself and every
-/// switch-mode row targeting it rewrite together, through the
+/// Pins `KeybindingCatalog.renameLayer` — the pure core of the
+/// Shortcuts header's layer rename: the layer itself and every
+/// switch-layer row targeting it rewrite together, through the
 /// same catalog authority the import classifier matches (#4).
 @Suite("Mode rename")
 struct ModeRenameTests {
     private func switchRow(_ name: String) -> KeyBinding {
-        let cmd = KeybindingCatalog.switchModeCommand(name)
+        let cmd = KeybindingCatalog.switchLayerCommand(name)
         return KeyBinding(
             combo: "alt+m",
             lua: cmd.lua,
@@ -19,11 +19,11 @@ struct ModeRenameTests {
         )
     }
 
-    @Test("renames the mode and rewrites switch rows")
+    @Test("renames the layer and rewrites switch rows")
     func renameRewritesRows() {
-        var focus = KeyMode(name: "focus")
+        var focus = KeyLayer(name: "focus")
         focus.bindings = [switchRow("default")]
-        var base = KeyMode(name: KeyMode.defaultName)
+        var base = KeyLayer(name: KeyLayer.defaultName)
         base.bindings = [
             switchRow("focus"),
             KeyBinding(
@@ -33,46 +33,46 @@ struct ModeRenameTests {
                 label: "left"
             ),
         ]
-        let renamed = KeybindingCatalog.renameMode(
+        let renamed = KeybindingCatalog.renameLayer(
             in: [base, focus],
             from: "focus",
             to: "deep work"
         )
         #expect(renamed[1].name == "deep work")
         let expected =
-            KeybindingCatalog.switchModeCommand("deep work")
+            KeybindingCatalog.switchLayerCommand("deep work")
         #expect(renamed[0].bindings[0].lua == expected.lua)
         #expect(
             renamed[0].bindings[0].label == expected.label
         )
-        // Non-switch rows and rows targeting other modes
+        // Non-switch rows and rows targeting other layers
         // pass through untouched.
         #expect(
             renamed[0].bindings[1].lua
                 == "KiwiDesk.focus(\"left\")"
         )
         let unchanged =
-            KeybindingCatalog.switchModeCommand("default")
+            KeybindingCatalog.switchLayerCommand("default")
         #expect(renamed[1].bindings[0].lua == unchanged.lua)
     }
 
-    @Test("the default mode can never be renamed")
-    func defaultModeIsAnchored() {
-        var base = KeyMode(name: KeyMode.defaultName)
-        base.bindings = [switchRow(KeyMode.defaultName)]
-        let out = KeybindingCatalog.renameMode(
+    @Test("the default layer can never be renamed")
+    func defaultLayerIsAnchored() {
+        var base = KeyLayer(name: KeyLayer.defaultName)
+        base.bindings = [switchRow(KeyLayer.defaultName)]
+        let out = KeybindingCatalog.renameLayer(
             in: [base],
-            from: KeyMode.defaultName,
+            from: KeyLayer.defaultName,
             to: "base"
         )
         #expect(out == [base])
     }
 
-    @Test("renaming an absent mode changes nothing")
+    @Test("renaming an absent layer changes nothing")
     func absentModeIsNoOp() {
-        var base = KeyMode(name: KeyMode.defaultName)
+        var base = KeyLayer(name: KeyLayer.defaultName)
         base.bindings = [switchRow("focus")]
-        let out = KeybindingCatalog.renameMode(
+        let out = KeybindingCatalog.renameLayer(
             in: [base],
             from: "ghost",
             to: "phantom"

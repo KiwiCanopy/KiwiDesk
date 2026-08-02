@@ -14,8 +14,8 @@ struct NavRow: View {
     let command: NavCommand
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
-    @Environment(\.keybindingModeName)
-    private var modeName
+    @Environment(\.keybindingLayerName)
+    private var layerName
 
     var body: some View {
         HStack {
@@ -59,7 +59,7 @@ struct NavRow: View {
         }
     }
 
-    /// Override mode: bound-and-equal to the base row, or
+    /// Override layer: bound-and-equal to the base row, or
     /// unbound on both sides. Always false while editing live.
     private var isInherited: Bool {
         guard let base = overrideBase else { return false }
@@ -114,7 +114,7 @@ struct NavRow: View {
         }) {
             model.noteRecordedCombo(updated, in: bindings)
             return model.liveApplyRecorded(
-                modeName: modeName,
+                layerName: layerName,
                 bindingID: updated.id,
                 combo: combo
             )
@@ -129,7 +129,7 @@ struct NavRow: View {
         // Live target: the removed hotkey unregisters now
         // (#123); no caption for a clear.
         _ = model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: nil
         )

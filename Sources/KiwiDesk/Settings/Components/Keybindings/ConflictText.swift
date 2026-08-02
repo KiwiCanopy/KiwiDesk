@@ -34,7 +34,7 @@ enum ConflictText {
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.tooltip.other_binding",
-                "Already bound in this mode: %1$@",
+                "Already bound in this layer: %1$@",
                 who
             )
         case .systemShortcut(let shortcut):

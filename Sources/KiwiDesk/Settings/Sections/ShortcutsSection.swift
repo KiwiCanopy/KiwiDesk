@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Shortcuts (#68 §3.6): a mode strip (chips, "+"
+/// Whole App ▸ Shortcuts (#68 §3.6): a layer strip (chips, "+"
 /// popover), flat intent groups (Focus / Move windows / Size &
-/// Float / Switch modes / Open applications), the raw-Lua rows
+/// Float / Switch layers / Open applications), the raw-Lua rows
 /// demoted to a collapsed Advanced drawer, and Import moved to
 /// the header where a new user can see it. One recorder can be
 /// active at a time (#33), duplicates hard-block with Steal /
@@ -11,7 +11,7 @@ import SwiftUI
 /// bindings on every render (#35).
 struct ShortcutsSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var selected = KeyMode.defaultName
+    @State private var selected = KeyLayer.defaultName
     @State private var advancedExpanded = false
     @StateObject private var coordinator =
         RecorderCoordinator()
@@ -27,14 +27,14 @@ struct ShortcutsSection: View {
                         selected: $selected
                     )
                     // Right under the strip that defines the
-                    // modes — the switch shortcuts belong
+                    // layers — the switch shortcuts belong
                     // beside their definition, not buried
                     // below the action groups.
-                    if model.config.modes.count > 1 {
-                        ChangeModesGroup(
+                    if model.config.layers.count > 1 {
+                        SwitchLayersGroup(
                             model: model,
                             bindings: bindingsBinding,
-                            modeNames: model.config.modes.map(
+                            layerNames: model.config.layers.map(
                                 \.name
                             ),
                             current: selected
@@ -77,9 +77,9 @@ struct ShortcutsSection: View {
                 .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
                 .environment(
                     \.keybindingOverrideBase,
-                    model.overrideBaseRows(mode: selected)
+                    model.overrideBaseRows(layer: selected)
                 )
-                .environment(\.keybindingModeName, selected)
+                .environment(\.keybindingLayerName, selected)
                 .environmentObject(coordinator)
             }
             .onChange(of: coordinator.scrollTarget) {
@@ -102,10 +102,10 @@ struct ShortcutsSection: View {
             }
         }
         // The section stays mounted across reloads and edit-
-        // target switches; a vanished mode must never leave
-        // `selected` pointing at modes[0] under a phantom
+        // target switches; a vanished layer must never leave
+        // `selected` pointing at layers[0] under a phantom
         // header (#68 review M1).
-        .onChange(of: model.config.modes.map(\.name)) {
+        .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
             ensureSelection()
@@ -119,10 +119,10 @@ struct ShortcutsSection: View {
         }
     }
 
-    // MARK: - Override mode (#55 phase 7)
+    // MARK: - Override layer (#55 phase 7)
 
     /// Shown while editing a stored profile: the section
-    /// renders the RESOLVED modes; only rows diverging from
+    /// renders the RESOLVED layers; only rows diverging from
     /// the base are saved into the profile's sparse override.
     @ViewBuilder private var overrideBanner: some View {
         if model.editingStoredProfile {
@@ -225,30 +225,30 @@ struct ShortcutsSection: View {
         )
     }
 
-    // MARK: - Bindings into the selected mode
+    // MARK: - Bindings into the selected layer
 
     private var modeIndex: Int {
-        model.config.modes.firstIndex {
+        model.config.layers.firstIndex {
             $0.name == selected
         } ?? 0
     }
 
     private var bindingsBinding: Binding<[KeyBinding]> {
         Binding(
-            get: { model.config.modes[modeIndex].bindings },
+            get: { model.config.layers[modeIndex].bindings },
             set: {
-                model.config.modes[modeIndex].bindings = $0
+                model.config.layers[modeIndex].bindings = $0
             }
         )
     }
 
-    /// Falls back to the default mode if the remembered
+    /// Falls back to the default layer if the remembered
     /// selection no longer exists (e.g. after a reload).
     private func ensureSelection() {
-        if !model.config.modes.contains(
+        if !model.config.layers.contains(
             where: { $0.name == selected }
         ) {
-            selected = KeyMode.defaultName
+            selected = KeyLayer.defaultName
         }
     }
 }

@@ -39,8 +39,8 @@ struct LiveApplyKeybindingsTests {
 
     private func baseConfig() -> GuiConfig {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     binding("alt+h", lua: "marker = 'base'")
@@ -52,11 +52,11 @@ struct LiveApplyKeybindingsTests {
 
     private func registered(
         _ combo: String,
-        mode: String = "default",
+        layer: String = "default",
         core: KiwiCore
     ) throws -> Bool {
         let parsed = try #require(KeyCombo.parse(combo))
-        return core.keys.bindings(for: mode)[parsed] != nil
+        return core.keys.bindings(for: layer)[parsed] != nil
     }
 
     private func fire(
@@ -73,17 +73,17 @@ struct LiveApplyKeybindingsTests {
         return lua.global(name)
     }
 
-    @Test("Edited modes register live; gui.json stays untouched")
+    @Test("Edited layers register live; gui.json stays untouched")
     func editedModesRegisterWithoutPersisting() throws {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
 
-        var edited = baseConfig().modes
+        var edited = baseConfig().layers
         let added = binding("alt+j", lua: "hit = true")
         edited[0].bindings.append(added)
         let result = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
 
         guard case .success(.active) = result else {
@@ -96,7 +96,7 @@ struct LiveApplyKeybindingsTests {
         )
         #expect(try registered("alt+h", core: core))
         let saved = try #require(core.guiConfigStore.load())
-        #expect(saved.modes == baseConfig().modes)
+        #expect(saved.layers == baseConfig().layers)
     }
 
     @Test("A suspended recorder never live-applies as active")
@@ -104,7 +104,7 @@ struct LiveApplyKeybindingsTests {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
 
-        var edited = baseConfig().modes
+        var edited = baseConfig().layers
         let added = binding("alt+j", lua: "hit = true")
         edited[0].bindings.append(added)
 
@@ -112,8 +112,8 @@ struct LiveApplyKeybindingsTests {
         // is registered, so `.active` would be a lie (#213).
         core.suspendHotkeysForRecording()
         let armed = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
         guard case .failure(.unavailable) = armed else {
             Issue.record("suspended apply must refuse, not lie")
@@ -123,8 +123,8 @@ struct LiveApplyKeybindingsTests {
         // Disarm, then the same apply registers and reports active.
         core.resumeHotkeysForRecording()
         let live = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
         guard case .success(.active) = live else {
             Issue.record("expected active after resume")
@@ -140,12 +140,12 @@ struct LiveApplyKeybindingsTests {
             core.liveKeybindingSnapshot()
         )
 
-        var edited = baseConfig().modes
+        var edited = baseConfig().layers
         let added = binding("alt+j", lua: "hit = true")
         edited[0].bindings.append(added)
         _ = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
         #expect(try registered("alt+j", core: core))
 
@@ -153,8 +153,8 @@ struct LiveApplyKeybindingsTests {
         #expect(!(try registered("alt+j", core: core)))
 
         _ = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: added)
+            layers: edited,
+            target: .init(layer: "default", binding: added)
         )
         #expect(core.restoreLiveKeybindings(snapshot).isSuccess)
         #expect(!(try registered("alt+j", core: core)))
@@ -177,9 +177,9 @@ struct LiveApplyKeybindingsTests {
                 ],
                 spaceModes: [:],
                 settings: TilingSettings(),
-                modes: KeyModeOverride(
-                    modes: [
-                        KeyMode(
+                layers: KeyLayerOverride(
+                    layers: [
+                        KeyLayer(
                             name: "default",
                             bindings: [override]
                         )
@@ -194,12 +194,12 @@ struct LiveApplyKeybindingsTests {
             ).isSuccess
         )
 
-        var edited = baseConfig().modes
+        var edited = baseConfig().layers
         edited[0].bindings[0].lua = "marker = 'edited'"
         let target = edited[0].bindings[0]
         let result = core.liveApplyKeybindings(
-            modes: edited,
-            target: .init(mode: "default", binding: target)
+            layers: edited,
+            target: .init(layer: "default", binding: target)
         )
 
         guard case .success(.profileShadowed) = result else {
@@ -215,45 +215,45 @@ struct LiveApplyKeybindingsTests {
         )
     }
 
-    @Test("Surviving active mode is preserved")
+    @Test("Surviving active layer is preserved")
     func activeModeSurvives() throws {
         let core = makeGuiCore()
         var config = baseConfig()
-        config.modes.append(
-            KeyMode(
+        config.layers.append(
+            KeyLayer(
                 name: "resize",
                 bindings: [binding("h", lua: "shrunk = true")]
             )
         )
         try core.saveGuiConfig(config)
-        core.keys.switchMode("resize")
+        core.keys.switchLayer("resize")
 
         _ = core.liveApplyKeybindings(
-            modes: config.modes,
+            layers: config.layers,
             target: .init(
-                mode: "default",
-                binding: config.modes[0].bindings[0]
+                layer: "default",
+                binding: config.layers[0].bindings[0]
             )
         )
-        #expect(core.keys.currentMode == "resize")
+        #expect(core.keys.currentLayer == "resize")
     }
 
-    @Test("Removing the active mode falls back to default")
+    @Test("Removing the active layer falls back to default")
     func removedActiveModeFallsBack() throws {
         let core = makeGuiCore()
         var config = baseConfig()
-        config.modes.append(KeyMode(name: "resize"))
+        config.layers.append(KeyLayer(name: "resize"))
         try core.saveGuiConfig(config)
-        core.keys.switchMode("resize")
+        core.keys.switchLayer("resize")
 
         _ = core.liveApplyKeybindings(
-            modes: baseConfig().modes,
+            layers: baseConfig().layers,
             target: .init(
-                mode: "default",
-                binding: baseConfig().modes[0].bindings[0]
+                layer: "default",
+                binding: baseConfig().layers[0].bindings[0]
             )
         )
-        #expect(core.keys.currentMode == "default")
+        #expect(core.keys.currentLayer == "default")
     }
 }
 

@@ -70,7 +70,7 @@ struct EditTargetTests {
         #expect(!model.placementEditable)
         // Override-mode baselines for the Shortcuts and App
         // Rules tabs (#55/#109).
-        #expect(model.profileEditingBaseModes != nil)
+        #expect(model.profileEditingBaseLayers != nil)
         #expect(model.profileEditingBaseAppRules != nil)
         #expect(model.profileEditingBaseFloatRules != nil)
         // Pending edits are discarded on switch.
@@ -88,7 +88,7 @@ struct EditTargetTests {
         #expect(model.target == .live)
         #expect(!model.editingStoredProfile)
         #expect(model.placementEditable)
-        #expect(model.profileEditingBaseModes == nil)
+        #expect(model.profileEditingBaseLayers == nil)
         #expect(model.profileEditingBaseAppRules == nil)
         #expect(model.profileEditingBaseFloatRules == nil)
         // GUI-managed: the sidecar baseline is back.
@@ -134,7 +134,7 @@ struct EditTargetTests {
 
         #expect(model.target == .live)
         #expect(model.placementEditable)
-        #expect(model.profileEditingBaseModes == nil)
+        #expect(model.profileEditingBaseLayers == nil)
         #expect(model.profileEditingBaseAppRules == nil)
         #expect(model.profileEditingBaseFloatRules == nil)
     }

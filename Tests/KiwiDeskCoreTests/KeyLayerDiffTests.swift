@@ -18,35 +18,35 @@ private func binding(
     )
 }
 
-private func mode(
+private func layer(
     _ name: String,
     icon: String? = nil,
     combos: [(String, String)] = []
-) -> KeyMode {
-    KeyMode(
+) -> KeyLayer {
+    KeyLayer(
         name: name,
         icon: icon,
         bindings: combos.map { binding(combo: $0.0, lua: $0.1) }
     )
 }
 
-/// `KeyModeOverride.diff(base:edited:)` — the inverse of
-/// `resolved(onto:)` used by the override-mode Shortcuts tab
+/// `KeyLayerOverride.diff(base:edited:)` — the inverse of
+/// `resolved(onto:)` used by the override-layer Shortcuts tab
 /// (#55 phase 7). Deletion is intentionally NOT expressible
 /// (O4 soft): a base row missing from `edited` is absent from
 /// the diff and reappears on resolve.
-@Suite("KeyModeOverride.diff — sparse inverse (#55 phase 7)")
-struct KeyModeDiffTests {
+@Suite("KeyLayerOverride.diff — sparse inverse (#55 phase 7)")
+struct KeyLayerDiffTests {
 
-    private let base: [KeyMode] = [
-        mode(
+    private let base: [KeyLayer] = [
+        layer(
             "default",
             combos: [
                 ("alt+p", "load_profile"),
                 ("alt+h", "focus_left"),
             ]
         ),
-        mode("resize", icon: "🔧", combos: [("alt+l", "grow")]),
+        layer("resize", icon: "🔧", combos: [("alt+l", "grow")]),
     ]
 
     // MARK: - Sparsity
@@ -54,7 +54,7 @@ struct KeyModeDiffTests {
     @Test("Identical edited set diffs to nil (fully inherited)")
     func identicalDiffsToNil() {
         #expect(
-            KeyModeOverride.diff(base: base, edited: base)
+            KeyLayerOverride.diff(base: base, edited: base)
                 == nil
         )
     }
@@ -67,27 +67,27 @@ struct KeyModeDiffTests {
             lua: "CUSTOM"
         )
         let over = try #require(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.modes.count == 1)
-        #expect(over.modes[0].name == "default")
-        #expect(over.modes[0].bindings.count == 1)
-        #expect(over.modes[0].bindings[0].lua == "CUSTOM")
-        // Untouched mode/icon carry nothing.
-        #expect(over.modes[0].icon == nil)
+        #expect(over.layers.count == 1)
+        #expect(over.layers[0].name == "default")
+        #expect(over.layers[0].bindings.count == 1)
+        #expect(over.layers[0].bindings[0].lua == "CUSTOM")
+        // Untouched layer/icon carry nothing.
+        #expect(over.layers[0].icon == nil)
     }
 
     @Test("Mode absent from base is carried whole")
     func newModeCarriedWhole() throws {
         let edited =
             base + [
-                mode("nav", combos: [("alt+x", "noop")])
+                layer("nav", combos: [("alt+x", "noop")])
             ]
         let over = try #require(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.modes.count == 1)
-        #expect(over.modes[0].name == "nav")
+        #expect(over.layers.count == 1)
+        #expect(over.layers[0].name == "nav")
     }
 
     @Test("Changed icon alone produces an icon-only override")
@@ -95,12 +95,12 @@ struct KeyModeDiffTests {
         var edited = base
         edited[1].icon = "📐"
         let over = try #require(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
         )
-        #expect(over.modes.count == 1)
-        #expect(over.modes[0].name == "resize")
-        #expect(over.modes[0].icon == "📐")
-        #expect(over.modes[0].bindings.isEmpty)
+        #expect(over.layers.count == 1)
+        #expect(over.layers[0].name == "resize")
+        #expect(over.layers[0].icon == "📐")
+        #expect(over.layers[0].bindings.isEmpty)
     }
 
     @Test("kind/label-only differences are inherited (no diff)")
@@ -118,7 +118,7 @@ struct KeyModeDiffTests {
             label: "Focus left"
         )
         #expect(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
                 == nil
         )
     }
@@ -131,7 +131,7 @@ struct KeyModeDiffTests {
         var edited = base
         edited[1].icon = nil
         #expect(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
                 == nil
         )
     }
@@ -143,7 +143,7 @@ struct KeyModeDiffTests {
         // Nothing else diverges → no override at all; the row
         // reappears on resolve (delete-inherited = revert).
         #expect(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
                 == nil
         )
     }
@@ -162,22 +162,22 @@ struct KeyModeDiffTests {
         )
         edited[1].icon = "📐"
         let over = try #require(
-            KeyModeOverride.diff(base: base, edited: edited)
+            KeyLayerOverride.diff(base: base, edited: edited)
         )
         #expect(over.resolved(onto: base) == edited)
     }
 
     @Test("diff(base, over.resolved(onto: base)) == over")
     func diffOfResolvedReproducesOverride() {
-        let over = KeyModeOverride(
-            modes: [
-                mode("default", combos: [("alt+h", "CUSTOM")]),
-                mode("nav", combos: [("alt+x", "noop")]),
+        let over = KeyLayerOverride(
+            layers: [
+                layer("default", combos: [("alt+h", "CUSTOM")]),
+                layer("nav", combos: [("alt+x", "noop")]),
             ]
         )
         let resolved = over.resolved(onto: base)
         #expect(
-            KeyModeOverride.diff(base: base, edited: resolved)
+            KeyLayerOverride.diff(base: base, edited: resolved)
                 == over
         )
     }

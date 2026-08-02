@@ -23,8 +23,8 @@ struct ProfileCopyTests {
                 )
         )
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -57,9 +57,9 @@ struct ProfileCopyTests {
             spaces: [SpaceID("code"), SpaceID("web")],
             spaceModes: [SpaceID("code"): .stack],
             settings: TilingSettings(),
-            modes: KeyModeOverride(
-                modes: [
-                    KeyMode(
+            layers: KeyLayerOverride(
+                layers: [
+                    KeyLayer(
                         name: "default",
                         bindings: [
                             KeyBinding(
@@ -99,7 +99,7 @@ struct ProfileCopyTests {
             ]
         )
         // The sparse keybinding override survives.
-        #expect(copy.modes == sourceProfile().modes)
+        #expect(copy.layers == sourceProfile().layers)
         // Spaces and modes survive.
         #expect(copy.spaces == sourceProfile().spaces)
         #expect(copy.spaceModes[SpaceID("code")] == .stack)
@@ -140,11 +140,11 @@ struct ProfileCopyTests {
         var edited = try core.loadGuiConfig(editing: "Dock")
         // Rebind alt+h differently in the edit session.
         let at = try #require(
-            edited.modes[0].bindings.firstIndex {
+            edited.layers[0].bindings.firstIndex {
                 $0.combo == "alt+h"
             }
         )
-        edited.modes[0].bindings[at].lua = "EDITED"
+        edited.layers[0].bindings[at].lua = "EDITED"
 
         try core.copyProfile(
             named: "Dock",
@@ -154,12 +154,12 @@ struct ProfileCopyTests {
 
         let copy = try core.profiles.read(name: "Variant")
         #expect(
-            copy.modes?.modes[0].bindings[0].lua == "EDITED"
+            copy.layers?.layers[0].bindings[0].lua == "EDITED"
         )
         // The source keeps its own override untouched.
         let source = try core.profiles.read(name: "Dock")
         #expect(
-            source.modes?.modes[0].bindings[0].lua
+            source.layers?.layers[0].bindings[0].lua
                 == "OVERRIDE"
         )
     }

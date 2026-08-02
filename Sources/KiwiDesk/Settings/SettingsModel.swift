@@ -168,11 +168,11 @@ final class SettingsModel: ObservableObject {
     /// mode (#55 phase 7). nil during live editing. Updated
     /// only inside the reload cycle, which republishes
     /// `config`, so views recompute together.
-    var profileEditingBaseModes: [KeyMode]?
+    var profileEditingBaseLayers: [KeyLayer]?
     /// The base gui.json app→space rules while editing a
     /// stored profile — the App Rules tab's override-mode
     /// baseline (#109), same lifecycle as
-    /// `profileEditingBaseModes`. nil during live editing.
+    /// `profileEditingBaseLayers`. nil during live editing.
     var profileEditingBaseAppRules: [String: SpaceID]?
     /// Global float rules used to resolve and diff a stored profile.
     var profileEditingBaseFloatRules: [String]?

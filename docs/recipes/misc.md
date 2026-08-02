@@ -115,10 +115,10 @@ local function mode(overrides)
 end
 
 -- Desktop 1: standard binds, no overrides.
-KiwiDesk.define_mode("desk1", mode({}))
+KiwiDesk.define_layer("desk1", mode({}))
 
 -- Desktop 2: override cmd+alt+m to enter monocle mode.
-KiwiDesk.define_mode("desk2", mode({
+KiwiDesk.define_layer("desk2", mode({
     ["cmd+alt+m"] = function()
         KiwiDesk.set_mode("monocle")
     end,
@@ -126,11 +126,11 @@ KiwiDesk.define_mode("desk2", mode({
 
 -- Switch mode when native macOS desktop changes.
 KiwiDesk.on("native_space_change", function(n)
-    KiwiDesk.switch_mode(n == 2 and "desk2" or "desk1")
+    KiwiDesk.switch_layer(n == 2 and "desk2" or "desk1")
 end)
 
 -- Start on desktop 1.
-KiwiDesk.switch_mode("desk1")
+KiwiDesk.switch_layer("desk1")
 ```
 
 Pair this with `bind_profile_to_native_space` (see

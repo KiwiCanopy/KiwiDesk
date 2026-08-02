@@ -241,7 +241,7 @@ enum KeybindingCatalog {
     /// (#330): a GUI action verb (`KiwiDesk.show_shortcuts()`).
     /// Seeded to **⌃⌥K** by default (#602) — reachable from the
     /// keyboard out of the box — but editable or clearable per
-    /// mode like any default. The Lua comes from
+    /// layer like any default. The Lua comes from
     /// `ShortcutsOpenBinding` so the row, the classifier, and the
     /// quick-menu combo all speak of one binding.
     static let showShortcuts = NavCommand(
@@ -252,19 +252,19 @@ enum KeybindingCatalog {
         }
     )
 
-    // MARK: - Change-mode & application commands (single source)
+    // MARK: - Change-layer & application commands (single source)
 
-    /// The Change-Modes row that switches to `name`. The one
-    /// authority for this Lua so the writer (`ChangeModesGroup`)
+    /// The Change-Layers row that switches to `name`. The one
+    /// authority for this Lua so the writer (`SwitchLayersGroup`)
     /// and the import classifier match byte-for-byte — a drift
     /// here would silently demote imports to Custom (#4).
-    static func switchModeCommand(_ name: String) -> NavCommand {
+    static func switchLayerCommand(_ name: String) -> NavCommand {
         NavCommand(
             label: "Switch to \(name)",
-            lua: "KiwiDesk.switch_mode(\(quote(name)))",
+            lua: "KiwiDesk.switch_layer(\(quote(name)))",
             displayLabel: {
                 L(
-                    "keybinding.switch_to_mode",
+                    "keybinding.switch_to_layer",
                     "Switch to %1$@",
                     name
                 )
@@ -272,26 +272,26 @@ enum KeybindingCatalog {
         )
     }
 
-    /// Renames a mode across `modes`: the mode itself plus
-    /// every switch-mode row targeting it, rewritten through
-    /// `switchModeCommand` so writer and import classifier
+    /// Renames a layer across `layers`: the layer itself plus
+    /// every switch-layer row targeting it, rewritten through
+    /// `switchLayerCommand` so writer and import classifier
     /// keep matching byte-for-byte (#4). Pure — the tested
     /// core of the Shortcuts header's rename.
-    static func renameMode(
-        in modes: [KeyMode],
+    static func renameLayer(
+        in layers: [KeyLayer],
         from old: String,
         to new: String
-    ) -> [KeyMode] {
-        // `default` is the config's anchor mode ("always the
+    ) -> [KeyLayer] {
+        // `default` is the config's anchor layer ("always the
         // active one after the app starts") — no entry point
         // may rename it, today's UI gate or a future CLI's.
-        guard old != KeyMode.defaultName else { return modes }
-        let oldCmd = switchModeCommand(old)
-        let newCmd = switchModeCommand(new)
-        return modes.map { mode in
-            var mode = mode
-            if mode.name == old { mode.name = new }
-            mode.bindings = mode.bindings.map { binding in
+        guard old != KeyLayer.defaultName else { return layers }
+        let oldCmd = switchLayerCommand(old)
+        let newCmd = switchLayerCommand(new)
+        return layers.map { layer in
+            var layer = layer
+            if layer.name == old { layer.name = new }
+            layer.bindings = layer.bindings.map { binding in
                 var binding = binding
                 if binding.lua == oldCmd.lua {
                     binding.lua = newCmd.lua
@@ -299,7 +299,7 @@ enum KeybindingCatalog {
                 }
                 return binding
             }
-            return mode
+            return layer
         }
     }
 }

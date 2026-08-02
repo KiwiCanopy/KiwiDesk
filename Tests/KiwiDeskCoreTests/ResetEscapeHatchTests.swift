@@ -166,9 +166,9 @@ struct ResetEscapeHatchTests {
         config.spaceModes[SpaceID("poison")] = .stack
         config.floatRules.append("com.example.poison")
         config.appRules["com.example.app"] = SpaceID("poison")
-        var mode = KeyMode.defaultMode
+        var mode = KeyLayer.defaultLayer
         mode.name = "poison-mode"
-        config.modes.append(mode)
+        config.layers.append(mode)
         try core.saveGuiConfig(config)
         core.tiler.settings.gapsGlobal.outer.top = 42
         core.execute(

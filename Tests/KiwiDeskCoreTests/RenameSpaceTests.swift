@@ -18,8 +18,8 @@ struct RenameSpaceTests {
         config.mainSpaces = [SpaceID("mail")]
         config.settings.gapsOverride[SpaceID("2")] = .uniform(12)
         config.settings.placementOverride[SpaceID("2")] = .last
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -64,7 +64,7 @@ struct RenameSpaceTests {
                 == "LG:2560x1440"
         )
         #expect(config.spacePins[SpaceID("2")] == nil)
-        let lua = config.modes[0].bindings.map(\.lua)
+        let lua = config.layers[0].bindings.map(\.lua)
         #expect(
             lua.contains(
                 "KiwiDesk.focus_space(\"main\")"
@@ -142,7 +142,7 @@ struct RenameSpaceTests {
             to: SpaceID("main")
         )
         // No binding should keep the old id in any variant.
-        for binding in config.modes[0].bindings {
+        for binding in config.layers[0].bindings {
             #expect(!binding.lua.contains("\"2\""))
         }
     }

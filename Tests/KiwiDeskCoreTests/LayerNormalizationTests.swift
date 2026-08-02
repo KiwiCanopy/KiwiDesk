@@ -3,20 +3,20 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Decode-time normalization of untrusted mode lists (#31):
-/// duplicate names, a default-mode icon, and empty names are
+/// Decode-time normalization of untrusted layer lists (#31):
+/// duplicate names, a default-layer icon, and empty names are
 /// cleaned predictably at the two JSON boundaries —
-/// `GuiConfig.modes` (full list) and `KeyModeOverride`
+/// `GuiConfig.layers` (full list) and `KeyLayerOverride`
 /// (sparse override). One shared helper serves both.
 @Suite("Mode list normalization (#31)")
 struct ModeNormalizationTests {
 
-    private func mode(
+    private func layer(
         _ name: String,
         icon: String? = nil,
         combo: String? = nil
-    ) -> KeyMode {
-        KeyMode(
+    ) -> KeyLayer {
+        KeyLayer(
             name: name,
             icon: icon,
             bindings: combo.map {
@@ -27,12 +27,12 @@ struct ModeNormalizationTests {
 
     // MARK: - Shared core (via the full flavor)
 
-    @Test("Duplicate mode names: first occurrence wins")
+    @Test("Duplicate layer names: first occurrence wins")
     func duplicateNamesFirstWins() {
-        let result = KeyMode.normalized(full: [
-            mode("default"),
-            mode("resize", combo: "alt+r"),
-            mode("resize", combo: "alt+x"),
+        let result = KeyLayer.normalized(full: [
+            layer("default"),
+            layer("resize", combo: "alt+r"),
+            layer("resize", combo: "alt+x"),
         ])
         #expect(result.map(\.name) == ["default", "resize"])
         #expect(result[1].bindings.first?.combo == "alt+r")
@@ -40,9 +40,9 @@ struct ModeNormalizationTests {
 
     @Test("Second 'default' entry is dropped, its icon lost")
     func duplicateDefaultDropped() {
-        let result = KeyMode.normalized(full: [
-            mode("default", combo: "alt+h"),
-            mode("default", icon: "gear"),
+        let result = KeyLayer.normalized(full: [
+            layer("default", combo: "alt+h"),
+            layer("default", icon: "gear"),
         ])
         #expect(result.count == 1)
         #expect(result[0].isDefault)
@@ -50,57 +50,57 @@ struct ModeNormalizationTests {
         #expect(result[0].bindings.first?.combo == "alt+h")
     }
 
-    @Test("Icon on the default mode is stripped")
+    @Test("Icon on the default layer is stripped")
     func defaultIconStripped() {
-        let result = KeyMode.normalized(full: [
-            mode("default", icon: "gear"),
-            mode("resize", icon: "arrow.left.and.right"),
+        let result = KeyLayer.normalized(full: [
+            layer("default", icon: "gear"),
+            layer("resize", icon: "arrow.left.and.right"),
         ])
         #expect(result[0].icon == nil)
-        // Non-default modes keep their icon untouched.
+        // Non-default layers keep their icon untouched.
         #expect(result[1].icon == "arrow.left.and.right")
     }
 
-    @Test("Empty-named modes are dropped")
+    @Test("Empty-named layers are dropped")
     func emptyNamesDropped() {
-        let result = KeyMode.normalized(full: [
-            mode("default"),
-            mode("", combo: "alt+z"),
+        let result = KeyLayer.normalized(full: [
+            layer("default"),
+            layer("", combo: "alt+z"),
         ])
         #expect(result.map(\.name) == ["default"])
     }
 
     @Test("Valid input passes through untouched")
     func validInputUntouched() {
-        let modes = [
-            mode("default", combo: "alt+h"),
-            mode("resize", icon: "📐", combo: "alt+r"),
+        let layers = [
+            layer("default", combo: "alt+h"),
+            layer("resize", icon: "📐", combo: "alt+r"),
         ]
-        #expect(KeyMode.normalized(full: modes) == modes)
-        #expect(KeyMode.normalized(sparse: modes) == modes)
+        #expect(KeyLayer.normalized(full: layers) == layers)
+        #expect(KeyLayer.normalized(sparse: layers) == layers)
     }
 
-    // MARK: - Full flavor (GuiConfig.modes)
+    // MARK: - Full flavor (GuiConfig.layers)
 
-    @Test("Empty list falls back to [KeyMode.defaultMode]")
+    @Test("Empty list falls back to [KeyLayer.defaultLayer]")
     func emptyFallsBackToDefault() {
-        let result = KeyMode.normalized(full: [])
-        #expect(result == [KeyMode.defaultMode])
+        let result = KeyLayer.normalized(full: [])
+        #expect(result == [KeyLayer.defaultLayer])
     }
 
-    @Test("Missing default mode is inserted first")
+    @Test("Missing default layer is inserted first")
     func missingDefaultInserted() {
-        let result = KeyMode.normalized(full: [
-            mode("resize", combo: "alt+r")
+        let result = KeyLayer.normalized(full: [
+            layer("resize", combo: "alt+r")
         ])
         #expect(result.map(\.name) == ["default", "resize"])
     }
 
-    @Test("A default mode not first is moved to the front")
+    @Test("A default layer not first is moved to the front")
     func defaultMovedToFront() {
-        let result = KeyMode.normalized(full: [
-            mode("resize", combo: "alt+r"),
-            mode("default", combo: "alt+h"),
+        let result = KeyLayer.normalized(full: [
+            layer("resize", combo: "alt+r"),
+            layer("default", combo: "alt+h"),
         ])
         #expect(result.map(\.name) == ["default", "resize"])
         #expect(result[0].bindings.first?.combo == "alt+h")
@@ -108,9 +108,9 @@ struct ModeNormalizationTests {
 
     @Test("Whitespace-only names are dropped like empty ones")
     func whitespaceNamesDropped() {
-        let result = KeyMode.normalized(full: [
-            mode("default"),
-            mode("  ", combo: "alt+z"),
+        let result = KeyLayer.normalized(full: [
+            layer("default"),
+            layer("  ", combo: "alt+z"),
         ])
         #expect(result.map(\.name) == ["default"])
     }
@@ -120,33 +120,33 @@ struct ModeNormalizationTests {
         // The review's worst case in one input: the FIRST
         // default wins (keeps alt+h, later bindings are
         // dropped with their entry), then moves to the front.
-        let result = KeyMode.normalized(full: [
-            mode("resize", combo: "alt+r"),
-            mode("default", combo: "alt+h"),
-            mode("default", icon: "gear", combo: "alt+z"),
+        let result = KeyLayer.normalized(full: [
+            layer("resize", combo: "alt+r"),
+            layer("default", combo: "alt+h"),
+            layer("default", icon: "gear", combo: "alt+z"),
         ])
         #expect(result.map(\.name) == ["default", "resize"])
         #expect(result[0].bindings.map(\.combo) == ["alt+h"])
         #expect(result[0].icon == nil)
     }
 
-    // MARK: - Sparse flavor (KeyModeOverride)
+    // MARK: - Sparse flavor (KeyLayerOverride)
 
     @Test("Sparse: no default entry is inserted")
     func sparseInsertsNoDefault() {
-        let result = KeyMode.normalized(sparse: [
-            mode("resize", combo: "alt+r")
+        let result = KeyLayer.normalized(sparse: [
+            layer("resize", combo: "alt+r")
         ])
         #expect(result.map(\.name) == ["resize"])
-        #expect(KeyMode.normalized(sparse: []).isEmpty)
+        #expect(KeyLayer.normalized(sparse: []).isEmpty)
     }
 
     @Test("Sparse: duplicates dropped, default icon stripped")
     func sparseSanitizes() {
-        let result = KeyMode.normalized(sparse: [
-            mode("resize", combo: "alt+r"),
-            mode("default", icon: "gear"),
-            mode("resize", combo: "alt+x"),
+        let result = KeyLayer.normalized(sparse: [
+            layer("resize", combo: "alt+r"),
+            layer("default", icon: "gear"),
+            layer("resize", combo: "alt+x"),
         ])
         // Order preserved as stored — never reordered.
         #expect(result.map(\.name) == ["resize", "default"])
@@ -156,14 +156,14 @@ struct ModeNormalizationTests {
 }
 
 /// The normalization applied at the real decode boundaries:
-/// hand-edited JSON through `GuiConfig` and `KeyModeOverride`.
+/// hand-edited JSON through `GuiConfig` and `KeyLayerOverride`.
 @Suite("Mode normalization at the decode boundaries (#31)")
 struct ModeNormalizationDecodeTests {
 
     @Test("GuiConfig decode normalizes a hand-edited sidecar")
     func guiConfigDecodeNormalizes() throws {
         let json = """
-            {"modes":[
+            {"layers":[
               {"name":"resize","bindings":[]},
               {"name":"default","icon":"gear","bindings":[]},
               {"name":"resize","bindings":[]},
@@ -175,26 +175,26 @@ struct ModeNormalizationDecodeTests {
             from: Data(json.utf8)
         )
         #expect(
-            config.modes.map(\.name) == ["default", "resize"]
+            config.layers.map(\.name) == ["default", "resize"]
         )
-        #expect(config.modes[0].icon == nil)
+        #expect(config.layers[0].icon == nil)
     }
 
-    @Test("GuiConfig decode: empty modes fall back to default")
+    @Test("GuiConfig decode: empty layers fall back to default")
     func guiConfigEmptyModesFallBack() throws {
-        for json in ["{}", "{\"modes\":[]}"] {
+        for json in ["{}", "{\"layers\":[]}"] {
             let config = try JSONDecoder().decode(
                 GuiConfig.self,
                 from: Data(json.utf8)
             )
-            #expect(config.modes == [KeyMode.defaultMode])
+            #expect(config.layers == [KeyLayer.defaultLayer])
         }
     }
 
     @Test("GuiConfig round-trip stays normalized")
     func guiConfigRoundTripStaysNormalized() throws {
         let json = """
-            {"modes":[
+            {"layers":[
               {"name":"default","icon":"gear","bindings":[]},
               {"name":"default","bindings":[]}
             ]}
@@ -208,11 +208,11 @@ struct ModeNormalizationDecodeTests {
             GuiConfig.self,
             from: data
         )
-        #expect(second.modes == first.modes)
-        #expect(second.modes == [KeyMode.defaultMode])
+        #expect(second.layers == first.layers)
+        #expect(second.layers == [KeyLayer.defaultLayer])
     }
 
-    @Test("KeyModeOverride decode normalizes, stays sparse")
+    @Test("KeyLayerOverride decode normalizes, stays sparse")
     func overrideDecodeNormalizes() throws {
         let json = """
             [
@@ -222,16 +222,16 @@ struct ModeNormalizationDecodeTests {
             ]
             """
         let over = try JSONDecoder().decode(
-            KeyModeOverride.self,
+            KeyLayerOverride.self,
             from: Data(json.utf8)
         )
         #expect(
-            over.modes.map(\.name) == ["resize", "default"]
+            over.layers.map(\.name) == ["resize", "default"]
         )
-        #expect(over.modes[1].icon == nil)
+        #expect(over.layers[1].icon == nil)
         // Resolving onto a base never gives default an icon.
         let resolved = over.resolved(
-            onto: [KeyMode.defaultMode]
+            onto: [KeyLayer.defaultLayer]
         )
         let def = resolved.first { $0.isDefault }
         #expect(def?.icon == nil)

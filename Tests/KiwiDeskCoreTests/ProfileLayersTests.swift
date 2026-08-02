@@ -3,11 +3,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Tests pinning `Profile.modes` — nil→absent sparse encoding
+/// Tests pinning `Profile.layers` — nil→absent sparse encoding
 /// (O3) and round-trip correctness (AGENTS.md §5).
-/// Parity with the `KeyModeOverride` vocabulary tests lives in
-/// `KeyModeOverrideTests`; these focus on the Profile wrapper.
-@Suite("Profile.modes — sparse encoding and round-trip (#55)")
+/// Parity with the `KeyLayerOverride` vocabulary tests lives in
+/// `KeyLayerOverrideTests`; these focus on the Profile wrapper.
+@Suite("Profile.layers — sparse encoding and round-trip (#55)")
 struct ProfileModesTests {
 
     private let encoder: JSONEncoder = {
@@ -23,7 +23,7 @@ struct ProfileModesTests {
     }()
 
     private func baseProfile(
-        modes: KeyModeOverride? = nil
+        layers: KeyLayerOverride? = nil
     ) -> Profile {
         Profile(
             name: "test",
@@ -33,24 +33,24 @@ struct ProfileModesTests {
             spaceModes: [:],
             settings: TilingSettings(),
             savedAt: Date(timeIntervalSince1970: 1_780_000_000),
-            modes: modes
+            layers: layers
         )
     }
 
     // MARK: - Sparse nil encoding (O3)
 
-    @Test("nil modes: key is ABSENT from JSON (not null)")
+    @Test("nil layers: key is ABSENT from JSON (not null)")
     func nilModesKeyAbsent() throws {
-        let profile = baseProfile(modes: nil)
+        let profile = baseProfile(layers: nil)
         let data = try encoder.encode(profile)
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
-        // The key must be completely absent — never "modes":null.
-        #expect(!json.contains("\"modes\""))
+        // The key must be completely absent — never "layers":null.
+        #expect(!json.contains("\"layers\""))
     }
 
-    @Test("nil modes decodes from JSON without modes key")
+    @Test("nil layers decodes from JSON without layers key")
     func nilModesMissingKeyDecodesOK() throws {
         let json = """
             {"name":"p",
@@ -63,16 +63,16 @@ struct ProfileModesTests {
             Profile.self,
             from: Data(json.utf8)
         )
-        #expect(profile.modes == nil)
+        #expect(profile.layers == nil)
     }
 
-    // MARK: - Round-trip with modes present
+    // MARK: - Round-trip with layers present
 
-    @Test("Present modes round-trip: encode→decode equals original")
+    @Test("Present layers round-trip: encode→decode equals original")
     func presentModesRoundTrip() throws {
-        let override = KeyModeOverride(
-            modes: [
-                KeyMode(
+        let override = KeyLayerOverride(
+            layers: [
+                KeyLayer(
                     name: "default",
                     bindings: [
                         KeyBinding(
@@ -85,37 +85,37 @@ struct ProfileModesTests {
                 )
             ]
         )
-        let profile = baseProfile(modes: override)
+        let profile = baseProfile(layers: override)
         let data = try encoder.encode(profile)
         let back = try decoder.decode(Profile.self, from: data)
-        #expect(back.modes == override)
+        #expect(back.layers == override)
     }
 
     // MARK: - JSON shape pin (SettingsCodingTests vocabulary rule)
 
-    @Test("modes key encodes as a bare JSON array (not object)")
+    @Test("layers key encodes as a bare JSON array (not object)")
     func modesKeyIsBareArray() throws {
-        let override = KeyModeOverride(
-            modes: [
-                KeyMode(name: "default", bindings: [])
+        let override = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: "default", bindings: [])
             ]
         )
-        let profile = baseProfile(modes: override)
+        let profile = baseProfile(layers: override)
         let data = try encoder.encode(profile)
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
-        // Must be "modes":[...] not "modes":{...}
-        #expect(json.contains("\"modes\":["))
-        #expect(!json.contains("\"modes\":{"))
+        // Must be "layers":[...] not "layers":{...}
+        #expect(json.contains("\"layers\":["))
+        #expect(!json.contains("\"layers\":{"))
     }
 
-    @Test("modes array shape matches GuiConfig.modes vocabulary")
+    @Test("layers array shape matches GuiConfig.layers vocabulary")
     func modesArrayMatchesGuiConfig() throws {
-        // Profile "modes" must decode from the same JSON shape
-        // that GuiConfig.modes encodes — one vocabulary (#5).
-        let guiModes: [KeyMode] = [
-            KeyMode(
+        // Profile "layers" must decode from the same JSON shape
+        // that GuiConfig.layers encodes — one vocabulary (#5).
+        let guiModes: [KeyLayer] = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -128,21 +128,21 @@ struct ProfileModesTests {
             )
         ]
         var config = GuiConfig()
-        config.modes = guiModes
+        config.layers = guiModes
         let guiEncoder = JSONEncoder()
         let guiData = try guiEncoder.encode(config)
         let guiDecoded = try JSONDecoder().decode(
             GuiConfig.self,
             from: guiData
         )
-        // Same modes encoded via GuiConfig must survive as
-        // KeyModeOverride when wrapped in a bare array.
-        let asOverride = KeyModeOverride(modes: guiDecoded.modes)
+        // Same layers encoded via GuiConfig must survive as
+        // KeyLayerOverride when wrapped in a bare array.
+        let asOverride = KeyLayerOverride(layers: guiDecoded.layers)
         let overData = try JSONEncoder().encode(asOverride)
         let overBack = try JSONDecoder().decode(
-            KeyModeOverride.self,
+            KeyLayerOverride.self,
             from: overData
         )
-        #expect(overBack.modes == guiDecoded.modes)
+        #expect(overBack.layers == guiDecoded.layers)
     }
 }

@@ -16,9 +16,9 @@ struct ResizeStepImportTests {
 
     private func config(luas: [String]) -> GuiConfig {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: luas.map(customRow)
             )
         ]
@@ -43,7 +43,7 @@ struct ResizeStepImportTests {
         var config = config(lua: "KiwiDesk.resize(\"x\", -75)")
         // Classification is not gated (only the step read-back is).
         KeybindingImportClassifier.classify(&config)
-        let row = config.modes[0].bindings[0]
+        let row = config.layers[0].bindings[0]
         // Old code demoted any non-±50 resize to Custom; now the
         // shape match upgrades it and keeps the canonical label.
         #expect(row.kind == .navigation)
@@ -60,7 +60,7 @@ struct ResizeStepImportTests {
         )
         #expect(config.settings.resizeStep == 120)
         #expect(
-            config.modes[0].bindings[0].label == "Grow width"
+            config.layers[0].bindings[0].label == "Grow width"
         )
     }
 
@@ -76,10 +76,10 @@ struct ResizeStepImportTests {
         )
         #expect(config.settings.resizeStep == 90)
         #expect(
-            config.modes[0].bindings[0].label == "Shrink width"
+            config.layers[0].bindings[0].label == "Shrink width"
         )
         #expect(
-            config.modes[0].bindings[1].label == "Grow width"
+            config.layers[0].bindings[1].label == "Grow width"
         )
     }
 
@@ -91,7 +91,7 @@ struct ResizeStepImportTests {
         var config = config(lua: "KiwiDesk.resize(\"x\", 120)")
         KeybindingImportClassifier.classify(&config)
         #expect(config.settings.resizeStep == 50)
-        #expect(config.modes[0].bindings[0].kind == .navigation)
+        #expect(config.layers[0].bindings[0].kind == .navigation)
     }
 
     @Test("No resize row leaves the step at its default")

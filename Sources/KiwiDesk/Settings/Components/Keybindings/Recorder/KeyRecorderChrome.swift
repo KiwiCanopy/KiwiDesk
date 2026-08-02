@@ -70,7 +70,7 @@ struct LiveApplyCaption: View {
     private var icon: String {
         switch feedback.status {
         case .applied: "checkmark.circle.fill"
-        case .inactiveMode: "clock.badge.checkmark"
+        case .inactiveLayer: "clock.badge.checkmark"
         case .denied, .profileShadowed, .compileFailed,
             .unavailable:
             "exclamationmark.circle.fill"
@@ -80,7 +80,7 @@ struct LiveApplyCaption: View {
     private var color: Color {
         switch feedback.status {
         case .applied: .green
-        case .inactiveMode: .secondary
+        case .inactiveLayer: .secondary
         case .denied, .profileShadowed, .compileFailed,
             .unavailable:
             .orange
@@ -94,11 +94,11 @@ struct LiveApplyCaption: View {
                 "key_recorder.live_applied",
                 "Active now — Save to keep it"
             )
-        case .inactiveMode(let mode):
+        case .inactiveLayer(let layer):
             L(
-                "key_recorder.live_inactive_mode",
-                "Updated for \u{201C}%1$@\u{201D} mode",
-                mode
+                "key_recorder.live_inactive_layer",
+                "Updated for \u{201C}%1$@\u{201D} layer",
+                layer
             )
         case .denied:
             L(

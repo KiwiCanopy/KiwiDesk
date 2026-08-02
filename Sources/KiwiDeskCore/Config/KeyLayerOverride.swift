@@ -1,77 +1,77 @@
 import Foundation
 
-// MARK: - KeyModeOverride
+// MARK: - KeyLayerOverride
 
 /// Sparse per-profile keybinding override (#55). nil (absent)
-/// inherits the base `modes` (gui.json) entirely; present, it
-/// shadows the base by mode name then by combo — the override's
+/// inherits the base `layers` (gui.json) entirely; present, it
+/// shadows the base by layer name then by combo — the override's
 /// binding for a combo wins, base combos it does not mention
-/// survive (the switch-key-trap safeguard, O4 soft). A mode the
-/// base lacks is appended. Every base mode the override does not
-/// mention passes through unchanged, so the default mode and any
+/// survive (the switch-key-trap safeguard, O4 soft). A layer the
+/// base lacks is appended. Every base layer the override does not
+/// mention passes through unchanged, so the default layer and any
 /// profile-switch binding are never dropped.
 ///
-/// Keyed merge (mode name × combo), NOT a struct field-mirror —
+/// Keyed merge (layer name × combo), NOT a struct field-mirror —
 /// so no reflection parity net applies (AGENTS.md §5); guarded
-/// instead by a round-trip + resolve + default-mode-invariant
-/// test in `KeyModeOverrideTests`.
-public struct KeyModeOverride: Sendable, Equatable {
-    /// Sparse: only modes that diverge from the base.
-    public var modes: [KeyMode]
+/// instead by a round-trip + resolve + default-layer-invariant
+/// test in `KeyLayerOverrideTests`.
+public struct KeyLayerOverride: Sendable, Equatable {
+    /// Sparse: only layers that diverge from the base.
+    public var layers: [KeyLayer]
 
-    public init(modes: [KeyMode] = []) {
-        self.modes = modes
+    public init(layers: [KeyLayer] = []) {
+        self.layers = layers
     }
 
-    /// True when no mode diverges — a fully-inherited profile
+    /// True when no layer diverges — a fully-inherited profile
     /// needs no stored override (drives sparse encoding).
-    public var isEmpty: Bool { modes.isEmpty }
+    public var isEmpty: Bool { layers.isEmpty }
 
     /// Resolves this override onto `base`, producing the merged
-    /// mode list. Returns `base` unchanged when empty.
+    /// layer list. Returns `base` unchanged when empty.
     ///
     /// Merge rule (O4 soft base layer):
-    /// - For each override mode matching a base mode by `name`:
+    /// - For each override layer matching a base layer by `name`:
     ///   per-combo merge (override wins IN PLACE, so the base
     ///   row order survives for GUI rendering; base combos not
     ///   in the override survive). Override `icon` wins when
     ///   non-nil; otherwise the base icon is kept.
-    /// - An override mode absent from `base` is appended.
-    /// - Base modes not in the override pass through unchanged
-    ///   (default mode and switch-key bindings always survive).
+    /// - An override layer absent from `base` is appended.
+    /// - Base layers not in the override pass through unchanged
+    ///   (default layer and switch-key bindings always survive).
     ///
     /// Sibling keyed merge: `KeybindingMerge` (GUI shortcut
     /// import) folds by the same name×combo key but with the
     /// OPPOSITE icon precedence (existing-wins). Both are
     /// correct for their direction — do not unify them.
     public func resolved(
-        onto base: [KeyMode]
-    ) -> [KeyMode] {
+        onto base: [KeyLayer]
+    ) -> [KeyLayer] {
         guard !isEmpty else { return base }
-        // Index override modes by name for O(n) lookup. The
+        // Index override layers by name for O(n) lookup. The
         // assignment is last-wins, but duplicate names cannot
         // reach here: decode sanitizes them FIRST-wins
-        // (`KeyMode.normalized`), and `diff` keys by name.
-        var overrideByName: [String: KeyMode] = [:]
-        for mode in modes {
-            overrideByName[mode.name] = mode
+        // (`KeyLayer.normalized`), and `diff` keys by name.
+        var overrideByName: [String: KeyLayer] = [:]
+        for layer in layers {
+            overrideByName[layer.name] = layer
         }
-        var result: [KeyMode] = []
+        var result: [KeyLayer] = []
         var consumed: Set<String> = []
-        for baseMode in base {
-            guard let over = overrideByName[baseMode.name] else {
+        for baseLayer in base {
+            guard let over = overrideByName[baseLayer.name] else {
                 // Not in override — pass through unchanged.
-                result.append(baseMode)
+                result.append(baseLayer)
                 continue
             }
             // Merge bindings in base order: an overridden
             // combo replaces its base row in place (the GUI
-            // renders resolved modes — rows must not jump);
-            // combos new to the mode append at the end. EVERY
+            // renders resolved layers — rows must not jump);
+            // combos new to the layer append at the end. EVERY
             // matching base row is replaced — a hand-edited
             // duplicate base combo must not let a stale copy
             // outlive the override (registration is last-wins).
-            var merged = baseMode.bindings
+            var merged = baseLayer.bindings
             for row in over.bindings {
                 var replaced = false
                 for at in merged.indices
@@ -84,18 +84,18 @@ public struct KeyModeOverride: Sendable, Equatable {
                 }
             }
             result.append(
-                KeyMode(
-                    name: baseMode.name,
-                    icon: over.icon ?? baseMode.icon,
+                KeyLayer(
+                    name: baseLayer.name,
+                    icon: over.icon ?? baseLayer.icon,
                     bindings: merged
                 )
             )
-            consumed.insert(baseMode.name)
+            consumed.insert(baseLayer.name)
         }
-        // Append override modes absent from base.
-        for mode in modes
-        where !consumed.contains(mode.name) {
-            result.append(mode)
+        // Append override layers absent from base.
+        for layer in layers
+        where !consumed.contains(layer.name) {
+            result.append(layer)
         }
         return result
     }
@@ -103,14 +103,14 @@ public struct KeyModeOverride: Sendable, Equatable {
 
 // MARK: - Diff (inverse of resolved)
 
-extension KeyModeOverride {
+extension KeyLayerOverride {
     /// Inverse of `resolved(onto:)`: the sparse override that,
     /// resolved onto `base`, yields `edited`. Rows matching a
     /// base row SEMANTICALLY (`sameAction`: combo + lua —
     /// display-only kind/label differences from the GUI
     /// classifier never read as divergence) are inherited and
     /// omitted; a row whose combo is absent from base or whose
-    /// action diverges is included. A mode absent from base is
+    /// action diverges is included. A layer absent from base is
     /// included whole. An edited icon differing from the base
     /// icon is carried (nil inherits — CLEARING a base icon
     /// per profile is therefore not expressible; it reverts,
@@ -125,23 +125,23 @@ extension KeyModeOverride {
     /// inherited row as revert, never removal; rebind to a
     /// no-op to disable a combo in one profile. No tombstones.
     public static func diff(
-        base: [KeyMode],
-        edited: [KeyMode]
-    ) -> KeyModeOverride? {
-        var baseByName: [String: KeyMode] = [:]
-        for mode in base {
-            baseByName[mode.name] = mode
+        base: [KeyLayer],
+        edited: [KeyLayer]
+    ) -> KeyLayerOverride? {
+        var baseByName: [String: KeyLayer] = [:]
+        for layer in base {
+            baseByName[layer.name] = layer
         }
-        var modes: [KeyMode] = []
-        for mode in edited {
-            guard let baseMode = baseByName[mode.name] else {
-                // New mode: carried whole.
-                modes.append(mode)
+        var layers: [KeyLayer] = []
+        for layer in edited {
+            guard let baseLayer = baseByName[layer.name] else {
+                // New layer: carried whole.
+                layers.append(layer)
                 continue
             }
             var rows: [KeyBinding] = []
-            for row in mode.bindings {
-                let inherited = baseMode.bindings.contains {
+            for row in layer.bindings {
+                let inherited = baseLayer.bindings.contains {
                     $0.sameAction(as: row)
                 }
                 if !inherited {
@@ -149,42 +149,42 @@ extension KeyModeOverride {
                 }
             }
             let icon =
-                mode.icon != baseMode.icon ? mode.icon : nil
+                layer.icon != baseLayer.icon ? layer.icon : nil
             if !rows.isEmpty || icon != nil {
-                modes.append(
-                    KeyMode(
-                        name: mode.name,
+                layers.append(
+                    KeyLayer(
+                        name: layer.name,
                         icon: icon,
                         bindings: rows
                     )
                 )
             }
         }
-        let over = KeyModeOverride(modes: modes)
+        let over = KeyLayerOverride(layers: layers)
         return over.isEmpty ? nil : over
     }
 }
 
 // MARK: - Codable
 
-extension KeyModeOverride: Codable {
-    /// Transparent to [KeyMode]: encode/decode as a bare JSON
-    /// array, matching the `GuiConfig.modes` shape so both
+extension KeyLayerOverride: Codable {
+    /// Transparent to [KeyLayer]: encode/decode as a bare JSON
+    /// array, matching the `GuiConfig.layers` shape so both
     /// surfaces share one vocabulary (AGENTS.md §5).
     /// Decoded input is untrusted (hand-edited profile JSON,
-    /// #31): duplicate names and a default-mode icon are
+    /// #31): duplicate names and a default-layer icon are
     /// normalized away. Sparse flavor — a default entry is
     /// never inserted (absence means inherit).
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        modes = KeyMode.normalized(
-            sparse: try container.decode([KeyMode].self)
+        layers = KeyLayer.normalized(
+            sparse: try container.decode([KeyLayer].self)
         )
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(modes)
+        try container.encode(layers)
     }
 }
 
@@ -195,14 +195,14 @@ extension KeyModeOverride: Codable {
 /// `apply()` replaces base, `TilingSettings.resolvedX(for:)`
 /// handles per-space — those are not re-implemented here.
 public enum ConfigResolver {
-    /// Returns the effective mode list: `base` (from gui.json)
+    /// Returns the effective layer list: `base` (from gui.json)
     /// when `profile` is nil or empty; keyed name×combo merge
     /// otherwise. Mirrors `reapplyActiveProfileState` ordering
     /// — declarative Lua is the seed, profile wins.
-    public static func resolvedModes(
-        base: [KeyMode],
-        profile: KeyModeOverride?
-    ) -> [KeyMode] {
+    public static func resolvedLayers(
+        base: [KeyLayer],
+        profile: KeyLayerOverride?
+    ) -> [KeyLayer] {
         profile?.resolved(onto: base) ?? base
     }
 }

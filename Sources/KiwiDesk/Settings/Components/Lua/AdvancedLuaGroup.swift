@@ -10,8 +10,8 @@ struct AdvancedLuaGroup: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
-    @Environment(\.keybindingModeName)
-    private var modeName
+    @Environment(\.keybindingLayerName)
+    private var layerName
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -79,7 +79,7 @@ struct AdvancedLuaGroup: View {
                     binding.wrappedValue.combo = ""
                     // Live target: unregister now (#123).
                     _ = model.liveApplyRecorded(
-                        modeName: modeName,
+                        layerName: layerName,
                         bindingID: id,
                         combo: nil
                     )
@@ -121,7 +121,7 @@ struct AdvancedLuaGroup: View {
             )
         }
         return model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: combo
         )
@@ -145,7 +145,7 @@ struct AdvancedLuaGroup: View {
             in: bindings
         )
         return model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: combo
         )
@@ -160,7 +160,7 @@ struct AdvancedLuaGroup: View {
     private func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
         _ = model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: nil
         )

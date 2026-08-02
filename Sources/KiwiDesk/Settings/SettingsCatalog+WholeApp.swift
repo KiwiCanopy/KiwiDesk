@@ -19,9 +19,9 @@ struct ProfilesControls: Sendable {
 }
 
 struct ShortcutsControls: Sendable {
-    let switchModes = SettingsControl(
-        "shortcuts.section.switch_modes",
-        "Switch modes"
+    let switchLayers = SettingsControl(
+        "shortcuts.section.switch_layers",
+        "Switch layers"
     )
     let focusKeys = SettingsControl(
         "shortcuts.section.focus",

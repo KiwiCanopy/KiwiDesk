@@ -14,7 +14,7 @@ extension SettingsModel {
         guard keybindingWarning != nil else { return nil }
         return Self.formatConflicts(
             KeybindingConflicts.conflicts(
-                in: config.modes
+                in: config.layers
             )
         )
     }
@@ -33,7 +33,7 @@ extension SettingsModel {
         in bindings: [KeyBinding]
     ) {
         let list = KeybindingConflicts.conflicts(
-            in: config.modes
+            in: config.layers
         )
         if KeybindingConflicts.conflict(
             for: binding,
@@ -54,7 +54,7 @@ extension SettingsModel {
     /// own `saveLuaSource()` / `adoptIntoGui()`.
     func warnIfAnyConflict() {
         let list = KeybindingConflicts.conflicts(
-            in: config.modes
+            in: config.layers
         )
         keybindingWarning =
             list.isEmpty ? nil : Self.formatConflicts(list)

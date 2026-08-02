@@ -28,8 +28,8 @@ struct LiveApplySettingsModelTests {
             hotkeyRegistrar: SettingsLiveRegistrar()
         )
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -45,18 +45,18 @@ struct LiveApplySettingsModelTests {
 
     private func defaultBinding(
         in model: SettingsModel
-    ) throws -> (mode: Int, binding: Int) {
-        let mode = try #require(
-            model.config.modes.firstIndex {
-                $0.name == KeyMode.defaultName
+    ) throws -> (layer: Int, binding: Int) {
+        let layer = try #require(
+            model.config.layers.firstIndex {
+                $0.name == KeyLayer.defaultName
             }
         )
         let binding = try #require(
-            model.config.modes[mode].bindings.firstIndex {
+            model.config.layers[layer].bindings.firstIndex {
                 $0.combo == "alt+h"
             }
         )
-        return (mode, binding)
+        return (layer, binding)
     }
 
     private func isRegistered(
@@ -71,15 +71,15 @@ struct LiveApplySettingsModelTests {
     func stagedActionStaysStaged() throws {
         let (model, core) = try makeModel()
         let index = try defaultBinding(in: model)
-        let id = model.config.modes[index.mode]
+        let id = model.config.layers[index.layer]
             .bindings[index.binding].id
-        model.config.modes[index.mode]
+        model.config.layers[index.layer]
             .bindings[index.binding].lua = "marker = 'staged'"
-        model.config.modes[index.mode]
+        model.config.layers[index.layer]
             .bindings[index.binding].combo = "alt+j"
 
         let feedback = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: id,
             combo: "alt+j"
         )
@@ -93,7 +93,7 @@ struct LiveApplySettingsModelTests {
         _ = lua.call(ref: ref)
         #expect(lua.global("marker") == .string("clean"))
         #expect(
-            model.config.modes[index.mode]
+            model.config.layers[index.layer]
                 .bindings[index.binding].lua
                 == "marker = 'staged'"
         )
@@ -103,12 +103,12 @@ struct LiveApplySettingsModelTests {
     func corruptSidecarRollback() throws {
         let (model, core) = try makeModel()
         let index = try defaultBinding(in: model)
-        let id = model.config.modes[index.mode]
+        let id = model.config.layers[index.layer]
             .bindings[index.binding].id
-        model.config.modes[index.mode]
+        model.config.layers[index.layer]
             .bindings[index.binding].combo = "alt+j"
         _ = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: id,
             combo: "alt+j"
         )
@@ -130,12 +130,12 @@ struct LiveApplySettingsModelTests {
     func rollbackRetry() throws {
         let (model, core) = try makeModel()
         let index = try defaultBinding(in: model)
-        let id = model.config.modes[index.mode]
+        let id = model.config.layers[index.layer]
             .bindings[index.binding].id
-        model.config.modes[index.mode]
+        model.config.layers[index.layer]
             .bindings[index.binding].combo = "alt+j"
         _ = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: id,
             combo: "alt+j"
         )
@@ -157,10 +157,10 @@ struct LiveApplySettingsModelTests {
     func rawLuaSaveWins() throws {
         let (model, core) = try makeModel()
         let index = try defaultBinding(in: model)
-        let id = model.config.modes[index.mode]
+        let id = model.config.layers[index.layer]
             .bindings[index.binding].id
         _ = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: id,
             combo: "alt+j"
         )
@@ -181,15 +181,15 @@ struct LiveApplySettingsModelTests {
     @Test("Alias steal removes the clean runtime holder")
     func aliasSteal() throws {
         let (model, core) = try makeModel()
-        model.config.modes[0].bindings[0].combo = ""
+        model.config.layers[0].bindings[0].combo = ""
         let target = KeyBinding(
             combo: "option+h",
             lua: "marker = 'target'"
         )
-        model.config.modes[0].bindings.append(target)
+        model.config.layers[0].bindings.append(target)
 
         let feedback = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: target.id,
             combo: target.combo
         )
@@ -208,10 +208,10 @@ struct LiveApplySettingsModelTests {
     func rawReloadSupersedesSnapshot() throws {
         let (model, core) = try makeModel()
         let index = try defaultBinding(in: model)
-        let id = model.config.modes[index.mode]
+        let id = model.config.layers[index.layer]
             .bindings[index.binding].id
         _ = model.liveApplyRecorded(
-            modeName: "default",
+            layerName: "default",
             bindingID: id,
             combo: "alt+j"
         )

@@ -18,7 +18,7 @@ extension KiwiCore {
     // MARK: - Entry point
 
     /// Applies rules and keybindings directly from `GuiConfig`
-    /// (+ active profile `KeyModeOverride`) when GUI-managed.
+    /// (+ active profile `KeyLayerOverride`) when GUI-managed.
     /// A no-op otherwise.
     func applyStructuredConfig() {
         guard isGuiManaged else { return }
@@ -39,8 +39,8 @@ extension KiwiCore {
         // so mint and release cannot diverge.
         guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
-            modes: config.modes,
-            profile: profile?.modes,
+            layers: config.layers,
+            profile: profile?.layers,
             lua: lua
         )
     }
@@ -57,7 +57,7 @@ extension KiwiCore {
     /// owner; only the keybinding half is GUI-managed and needs
     /// a live VM.
     func reapplyStructuredOverrides(
-        profileModes: KeyModeOverride?,
+        profileModes: KeyLayerOverride?,
         profileAppRules: AppRuleOverride?,
         profileFloatRules: RuleListOverride?,
         profileIgnoreRules: RuleListOverride?
@@ -79,7 +79,7 @@ extension KiwiCore {
         guard let lua = keys.lua else { return }
         guard let config = structured else { return }
         applyStructuredKeybindings(
-            modes: config.modes,
+            layers: config.layers,
             profile: profileModes,
             lua: lua
         )

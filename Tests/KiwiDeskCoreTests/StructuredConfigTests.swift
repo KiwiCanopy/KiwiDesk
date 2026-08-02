@@ -95,8 +95,8 @@ struct StructuredConfigTests {
     func structuredBindingNoBlock() throws {
         let core = makeGuiCore()
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -125,9 +125,9 @@ struct StructuredConfigTests {
     func namedModeIconPreserved() throws {
         let core = makeGuiCore()
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(name: "default", bindings: []),
-            KeyMode(
+        config.layers = [
+            KeyLayer(name: "default", bindings: []),
+            KeyLayer(
                 name: "resize",
                 icon: "📐",
                 bindings: [
@@ -198,8 +198,8 @@ struct StructuredConfigTests {
     func noDoubleRegistration() throws {
         let core = makeGuiCore()
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -244,8 +244,8 @@ struct StructuredConfigTests {
     @Test("init.lua bind refs do not leak (slot-reuse canary)")
     func noLeakedRefsAfterLoad() throws {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -304,8 +304,8 @@ struct StructuredConfigTests {
     @Test("Reloading a GUI-managed config releases prior refs")
     func structuredReloadReleasesRefs() throws {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(

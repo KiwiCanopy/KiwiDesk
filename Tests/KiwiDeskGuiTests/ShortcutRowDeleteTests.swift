@@ -40,9 +40,9 @@ struct ShortcutRowDeleteTests {
             hotkeyRegistrar: DeleteRegistrar()
         )
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     KeyBinding(
                         combo: "alt+h",
@@ -61,7 +61,7 @@ struct ShortcutRowDeleteTests {
     ) throws -> Bool {
         let parsed = try #require(KeyCombo.parse(combo))
         return core.keys
-            .bindings(for: KeyMode.defaultName)[parsed] != nil
+            .bindings(for: KeyLayer.defaultName)[parsed] != nil
     }
 
     /// Adds a live-registered row, then deletes it the way the
@@ -71,24 +71,24 @@ struct ShortcutRowDeleteTests {
     func deleteUnregisters() throws {
         let (model, core) = try makeModel()
         let mode = try #require(
-            model.config.modes.firstIndex {
-                $0.name == KeyMode.defaultName
+            model.config.layers.firstIndex {
+                $0.name == KeyLayer.defaultName
             }
         )
         let added = KeyBinding(combo: "", lua: "marker = 'gone'")
-        model.config.modes[mode].bindings.append(added)
+        model.config.layers[mode].bindings.append(added)
         _ = model.liveApplyRecorded(
-            modeName: KeyMode.defaultName,
+            layerName: KeyLayer.defaultName,
             bindingID: added.id,
             combo: "alt+j"
         )
         #expect(try isRegistered("alt+j", core: core))
 
-        model.config.modes[mode].bindings.removeAll {
+        model.config.layers[mode].bindings.removeAll {
             $0.id == added.id
         }
         _ = model.liveApplyRecorded(
-            modeName: KeyMode.defaultName,
+            layerName: KeyLayer.defaultName,
             bindingID: added.id,
             combo: nil
         )
@@ -108,19 +108,19 @@ struct ShortcutRowDeleteTests {
     func removalAloneLeavesHotkeyLive() throws {
         let (model, core) = try makeModel()
         let mode = try #require(
-            model.config.modes.firstIndex {
-                $0.name == KeyMode.defaultName
+            model.config.layers.firstIndex {
+                $0.name == KeyLayer.defaultName
             }
         )
         let added = KeyBinding(combo: "", lua: "marker = 'gone'")
-        model.config.modes[mode].bindings.append(added)
+        model.config.layers[mode].bindings.append(added)
         _ = model.liveApplyRecorded(
-            modeName: KeyMode.defaultName,
+            layerName: KeyLayer.defaultName,
             bindingID: added.id,
             combo: "alt+j"
         )
 
-        model.config.modes[mode].bindings.removeAll {
+        model.config.layers[mode].bindings.removeAll {
             $0.id == added.id
         }
 
@@ -134,7 +134,7 @@ struct ShortcutRowDeleteTests {
         let (model, _) = try makeModel()
         model.target = .storedProfile("whatever")
         let feedback = model.liveApplyRecorded(
-            modeName: KeyMode.defaultName,
+            layerName: KeyLayer.defaultName,
             bindingID: UUID(),
             combo: nil
         )

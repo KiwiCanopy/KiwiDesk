@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The read-only shortcuts reference panel (#326): a live mirror
-/// of the active key mode's bindings, grouped into Controls / Apps
+/// of the active key layer's bindings, grouped into Controls / Apps
 /// / Custom bands. No editing — rebinding stays in Settings, which
 /// the single footer button bridges to. `reference` is nil when
 /// live shortcuts can't be read (config owned by init.lua, or the
@@ -29,19 +29,19 @@ struct ShortcutsPanelView: View {
         )
     }
 
-    // MARK: - Mode label
+    // MARK: - Layer label
 
-    /// The active mode's name, centered in the footer and shown only
-    /// for a non-default mode — the default is the implicit case. It
+    /// The active layer's name, centered in the footer and shown only
+    /// for a non-default layer — the default is the implicit case. It
     /// sits in the footer rather than a top header so it costs no
     /// vertical space above the bands.
     @ViewBuilder private var modeLabel: some View {
-        if let name = reference?.modeName,
-            name != KeyMode.defaultName
+        if let name = reference?.layerName,
+            name != KeyLayer.defaultName
         {
-            // Capsule treatment (the Shortcuts editor's mode-chip
+            // Capsule treatment (the Shortcuts editor's layer-chip
             // vocabulary) so it reads as state, not chrome — it's the
-            // only mode indicator now. Bounded + truncated so a long
+            // only layer indicator now. Bounded + truncated so a long
             // custom name can't collide with the hint or the button.
             Text(name)
                 .font(.caption.weight(.medium))
@@ -117,7 +117,7 @@ struct ShortcutsPanelView: View {
         }
     }
 
-    /// Empty-state: a mode with nothing bound, or a config the
+    /// Empty-state: a layer with nothing bound, or a config the
     /// panel can't read live. Distinct messages, same quiet frame.
     private func placeholder(unavailable: Bool) -> some View {
         Text(

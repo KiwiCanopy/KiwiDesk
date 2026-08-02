@@ -3,8 +3,8 @@ import KiwiDeskCore
 
 /// The stored-profile editing surface of the dashboard model
 /// (#18, #55 phase 7): the non-adopting save actions and the
-/// Shortcuts tab's override-mode baseline/affordance helpers.
-/// The edit-mode reload path lives in
+/// Shortcuts tab's override-layer baseline/affordance helpers.
+/// The edit-layer reload path lives in
 /// `SettingsModel+EditTarget.swift` (#64).
 extension SettingsModel {
     /// Save copy as… (#82): duplicates the edited stored
@@ -60,13 +60,13 @@ extension SettingsModel {
         reload()
     }
 
-    // MARK: - Override-mode Shortcuts affordance (#55)
+    // MARK: - Override-layer Shortcuts affordance (#55)
 
-    /// The selected mode's base rows for the Shortcuts tab's
+    /// The selected layer's base rows for the Shortcuts tab's
     /// override affordance; nil during live editing, empty
-    /// when the mode only exists in the profile.
-    func overrideBaseRows(mode name: String) -> [KeyBinding]? {
-        guard let base = profileEditingBaseModes else {
+    /// when the layer only exists in the profile.
+    func overrideBaseRows(layer name: String) -> [KeyBinding]? {
+        guard let base = profileEditingBaseLayers else {
             return nil
         }
         return base.first { $0.name == name }?.bindings ?? []
@@ -76,12 +76,12 @@ extension SettingsModel {
     /// the base — drives the "overrides base keybindings"
     /// indicator (#55 phase 7).
     var editedProfileOverridesKeys: Bool {
-        guard let base = profileEditingBaseModes else {
+        guard let base = profileEditingBaseLayers else {
             return false
         }
-        return KeyModeOverride.diff(
+        return KeyLayerOverride.diff(
             base: base,
-            edited: config.modes
+            edited: config.layers
         ) != nil
     }
 

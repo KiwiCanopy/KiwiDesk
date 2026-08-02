@@ -4,11 +4,11 @@ import Foundation
 /// the recorder-only runtime action, which can intentionally
 /// differ from other staged edits in the Settings model.
 public struct LiveKeybindingTarget: Sendable {
-    public let mode: String
+    public let layer: String
     public let binding: KeyBinding
 
-    public init(mode: String, binding: KeyBinding) {
-        self.mode = mode
+    public init(layer: String, binding: KeyBinding) {
+        self.layer = layer
         self.binding = binding
     }
 }
@@ -17,7 +17,7 @@ public struct LiveKeybindingTarget: Sendable {
 /// registered this exact action in the runtime-active mode.
 public enum LiveKeybindingApplyStatus: Equatable, Sendable {
     case active
-    case inactiveMode(String)
+    case inactiveLayer(String)
     case denied
     case profileShadowed
     case compileFailed
@@ -39,17 +39,17 @@ public enum LiveKeybindingApplyError: Error, Equatable,
 /// mutation. It survives a deleted/corrupt sidecar, avoiding a
 /// clean Settings model with ghost hotkeys still registered.
 public struct LiveKeybindingSnapshot: Sendable {
-    let modes: [KeyMode]
-    let activeMode: String
+    let layers: [KeyLayer]
+    let activeLayer: String
     let generation: UInt64
 
     /// The resolved key modes currently installed — read by the
     /// read-only shortcuts reference panel (#326). The rollback
     /// token (`generation`) stays internal; only the display data
     /// is exposed.
-    public var keyModes: [KeyMode] { modes }
+    public var keyLayers: [KeyLayer] { layers }
     /// The runtime-active mode's name.
-    public var activeModeName: String { activeMode }
+    public var activeLayerName: String { activeLayer }
 }
 
 extension KiwiCore {
@@ -60,11 +60,11 @@ extension KiwiCore {
         -> LiveKeybindingSnapshot?
     {
         guard isGuiManaged, keys.lua != nil,
-            let modes = appliedStructuredModes
+            let layers = appliedStructuredLayers
         else { return nil }
         return LiveKeybindingSnapshot(
-            modes: modes,
-            activeMode: keys.currentMode,
+            layers: layers,
+            activeLayer: keys.currentLayer,
             generation: keybindingRuntimeGeneration
         )
     }
@@ -75,7 +75,7 @@ extension KiwiCore {
     /// scoped to its effective action and runtime mode; absence
     /// from `activationFailures` alone never proves success.
     public func liveApplyKeybindings(
-        modes base: [KeyMode],
+        layers base: [KeyLayer],
         target: LiveKeybindingTarget?
     ) -> Result<
         LiveKeybindingApplyStatus?,
@@ -92,7 +92,7 @@ extension KiwiCore {
         // rather than lie — this is the enforced tripwire behind
         // that ordering invariant (#213).
         guard !keys.isSuspended else { return .failure(.unavailable) }
-        let profile: KeyModeOverride?
+        let profile: KeyLayerOverride?
         switch activeProfileModesForLiveApply() {
         case .success(let modes):
             profile = modes
@@ -100,7 +100,7 @@ extension KiwiCore {
             return .failure(error)
         }
 
-        let resolved = ConfigResolver.resolvedModes(
+        let resolved = ConfigResolver.resolvedLayers(
             base: base,
             profile: profile
         )
@@ -117,7 +117,7 @@ extension KiwiCore {
         if let target,
             !shadowed,
             prepared.failures.contains(where: {
-                $0.mode == target.mode
+                $0.layer == target.layer
                     && $0.binding.sameAction(
                         as: target.binding
                     )
@@ -127,12 +127,12 @@ extension KiwiCore {
             return .success(.compileFailed)
         }
 
-        let active = keys.currentMode
-        install(prepared, preferredMode: active)
+        let active = keys.currentLayer
+        install(prepared, preferredLayer: active)
         guard let target else { return .success(nil) }
         if shadowed { return .success(.profileShadowed) }
-        guard target.mode == keys.currentMode else {
-            return .success(.inactiveMode(target.mode))
+        guard target.layer == keys.currentLayer else {
+            return .success(.inactiveLayer(target.layer))
         }
         guard let combo = KeyCombo.parse(target.binding.combo)
         else { return .success(.compileFailed) }
@@ -155,19 +155,19 @@ extension KiwiCore {
         guard let config = loadStructuredConfig() else {
             return .failure(.unreadableConfig)
         }
-        let profile: KeyModeOverride?
+        let profile: KeyLayerOverride?
         switch activeProfileModesForLiveApply() {
         case .success(let modes):
             profile = modes
         case .failure(let error):
             return .failure(error)
         }
-        let resolved = ConfigResolver.resolvedModes(
-            base: config.modes,
+        let resolved = ConfigResolver.resolvedLayers(
+            base: config.layers,
             profile: profile
         )
         let prepared = prepareKeybindings(resolved, lua: lua)
-        install(prepared, preferredMode: keys.currentMode)
+        install(prepared, preferredLayer: keys.currentLayer)
         return .success(())
     }
 
@@ -183,7 +183,7 @@ extension KiwiCore {
             return .failure(.unavailable)
         }
         let prepared = prepareKeybindings(
-            snapshot.modes,
+            snapshot.layers,
             lua: lua
         )
         guard prepared.failures.isEmpty else {
@@ -192,7 +192,7 @@ extension KiwiCore {
         }
         install(
             prepared,
-            preferredMode: snapshot.activeMode
+            preferredLayer: snapshot.activeLayer
         )
         return .success(())
     }
@@ -212,13 +212,13 @@ extension KiwiCore {
     }
 
     private func activeProfileModesForLiveApply()
-        -> Result<KeyModeOverride?, LiveKeybindingApplyError>
+        -> Result<KeyLayerOverride?, LiveKeybindingApplyError>
     {
         guard let name = profiles.currentName else {
             return .success(nil)
         }
         do {
-            return .success(try profiles.read(name: name).modes)
+            return .success(try profiles.read(name: name).layers)
         } catch {
             onLog(
                 "structured: active profile '\(name)' "
@@ -231,9 +231,9 @@ extension KiwiCore {
 
     private func effectiveBinding(
         for target: LiveKeybindingTarget,
-        in modes: [KeyMode]
+        in layers: [KeyLayer]
     ) -> KeyBinding? {
-        modes.first(where: { $0.name == target.mode })?
+        layers.first(where: { $0.name == target.layer })?
             .bindings.last(where: {
                 KeyCombo.equivalent(
                     $0.combo,

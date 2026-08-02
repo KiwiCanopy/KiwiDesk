@@ -47,8 +47,8 @@ private func richConfig() -> GuiConfig {
     config.floatRules = ["Calculator", "Finder:Get Info"]
     config.ignoreRules = ["io.tailscale.ipn.macos"]
     config.profileBindings = [2: "Studio"]
-    config.modes = [
-        KeyMode(
+    config.layers = [
+        KeyLayer(
             name: "default",
             bindings: [
                 KeyBinding(
@@ -59,7 +59,7 @@ private func richConfig() -> GuiConfig {
                 )
             ]
         ),
-        KeyMode(
+        KeyLayer(
             name: "resize",
             icon: "📐",
             bindings: [

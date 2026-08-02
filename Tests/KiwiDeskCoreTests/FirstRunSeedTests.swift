@@ -56,7 +56,7 @@ struct FirstRunSeedTests {
         #expect(core.guiConfigStore.exists)
         #expect(core.isGuiManaged)
         let config = core.guiConfigStore.load()
-        let base = config?.modes.first { $0.isDefault }
+        let base = config?.layers.first { $0.isDefault }
         #expect(base?.bindings.isEmpty == false)
         // Every seeded per-space row targets a space that is
         // in the seeded list — no dead rows (#91).
@@ -78,7 +78,7 @@ struct FirstRunSeedTests {
         // default mode's combos are Carbon-parseable and bound.
         #expect(
             !core.keys.bindings(
-                for: KeybindingManager.defaultMode
+                for: KeybindingManager.defaultLayer
             ).isEmpty
         )
     }
@@ -152,7 +152,7 @@ struct FirstRunSeedTests {
     func existingSidecarUntouched() throws {
         let core = makeCore()
         var config = GuiConfig()
-        var mode = KeyMode.defaultMode
+        var mode = KeyLayer.defaultLayer
         mode.bindings = [
             KeyBinding(
                 combo: "control+option+r",
@@ -161,12 +161,12 @@ struct FirstRunSeedTests {
                 label: ""
             )
         ]
-        config.modes = [mode]
+        config.layers = [mode]
         try core.guiConfigStore.save(config)
         core.loadConfig()
 
         let loaded = core.guiConfigStore.load()
-        let base = loaded?.modes.first { $0.isDefault }
+        let base = loaded?.layers.first { $0.isDefault }
         #expect(base?.bindings.count == 1)
         #expect(
             base?.bindings.first?.lua
@@ -188,7 +188,7 @@ struct FirstRunSeedTests {
         core.loadConfig()
 
         let seed = core.guiConfigSeed()
-        let base = seed.modes.first { $0.isDefault }
+        let base = seed.layers.first { $0.isDefault }
         // The recovered Lua bind is the only row — the seed
         // guard saw an authored binding and stayed out.
         #expect(base?.bindings.count == 1)
@@ -209,7 +209,7 @@ struct FirstRunSeedTests {
         core.loadConfig()
 
         let seed = core.guiConfigSeed()
-        let base = seed.modes.first { $0.isDefault }
+        let base = seed.layers.first { $0.isDefault }
         #expect(
             (base?.bindings ?? []).contains {
                 $0.lua == "KiwiDesk.focus(\"left\")"
@@ -239,7 +239,7 @@ struct FirstRunSeedTests {
         for n in 1...10 {
             #expect(spaces.contains("\(n)"), "missing space \(n)")
         }
-        let base = seed.modes.first { $0.isDefault }
+        let base = seed.layers.first { $0.isDefault }
         #expect(
             (base?.bindings ?? []).contains {
                 $0.combo == "control+option+0"

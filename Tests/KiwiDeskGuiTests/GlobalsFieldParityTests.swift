@@ -33,9 +33,9 @@ struct GlobalsFieldParityTests {
         config.floatRules = ["com.example.floaty"]
         config.ignoreRules = ["com.example.ignored"]
         config.profileBindings = [3: "Desk"]
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     KeyBinding(combo: "alt+q", lua: "x = 1")
                 ]

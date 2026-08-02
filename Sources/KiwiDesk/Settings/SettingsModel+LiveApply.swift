@@ -3,7 +3,7 @@ import KiwiDeskCore
 
 enum LiveApplyStatus: Equatable {
     case applied
-    case inactiveMode(String)
+    case inactiveLayer(String)
     case denied
     case profileShadowed
     case compileFailed
@@ -22,7 +22,7 @@ struct LiveApplyFeedback: Equatable {
 /// Lua/app/mode edits therefore cannot hitchhike live. The
 /// snapshot is the disk-independent Revert fallback.
 struct RecorderLiveSession {
-    var modes: [KeyMode]
+    var layers: [KeyLayer]
     let snapshot: LiveKeybindingSnapshot
 }
 
@@ -45,7 +45,7 @@ extension SettingsModel {
     /// newly created for this recording carries its current
     /// action because no earlier runnable action exists.
     func liveApplyRecorded(
-        modeName: String,
+        layerName: String,
         bindingID: UUID,
         combo: String?
     ) -> LiveApplyFeedback? {
@@ -63,23 +63,23 @@ extension SettingsModel {
                 )
             }
             session = RecorderLiveSession(
-                modes: cleanConfig.modes,
+                layers: cleanConfig.layers,
                 snapshot: snapshot
             )
         }
 
         let target = applyRecorderMutation(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: bindingID,
             combo: combo,
-            to: &session.modes
+            to: &session.layers
         )
         if combo != nil, target == nil {
             return feedback(for: combo, status: .unavailable)
         }
 
         switch core.liveApplyKeybindings(
-            modes: session.modes,
+            layers: session.layers,
             target: target
         ) {
         case .success(let status):
@@ -139,10 +139,10 @@ extension SettingsModel {
     }
 
     private func applyRecorderMutation(
-        modeName: String,
+        layerName: String,
         bindingID: UUID,
         combo: String?,
-        to modes: inout [KeyMode]
+        to modes: inout [KeyLayer]
     ) -> LiveKeybindingTarget? {
         // Existing row: find by transient edit-session id across
         // every mode. A staged mode rename stays staged; runtime
@@ -160,7 +160,7 @@ extension SettingsModel {
             )
             guard combo != nil else { return nil }
             return LiveKeybindingTarget(
-                mode: modes[modeIndex].name,
+                layer: modes[modeIndex].name,
                 binding: modes[modeIndex].bindings[
                     bindingIndex
                 ]
@@ -171,8 +171,8 @@ extension SettingsModel {
         // recording. Later non-recorder edits stay staged because
         // subsequent recordings find this session copy by id.
         guard let combo,
-            let editedMode = config.modes.first(where: {
-                $0.name == modeName
+            let editedMode = config.layers.first(where: {
+                $0.name == layerName
             }),
             var binding = editedMode.bindings.first(where: {
                 $0.id == bindingID
@@ -181,11 +181,11 @@ extension SettingsModel {
         binding.combo = combo
         let modeIndex: Int
         if let existing = modes.firstIndex(where: {
-            $0.name == modeName
+            $0.name == layerName
         }) {
             modeIndex = existing
         } else {
-            modes.append(KeyMode(name: modeName))
+            modes.append(KeyLayer(name: layerName))
             modeIndex = modes.index(before: modes.endIndex)
         }
         clearCombo(
@@ -195,7 +195,7 @@ extension SettingsModel {
         )
         modes[modeIndex].bindings.append(binding)
         return LiveKeybindingTarget(
-            mode: modes[modeIndex].name,
+            layer: modes[modeIndex].name,
             binding: binding
         )
     }
@@ -204,7 +204,7 @@ extension SettingsModel {
         _ combo: String?,
         bindingIndex: Int,
         modeIndex: Int,
-        modes: inout [KeyMode]
+        modes: inout [KeyLayer]
     ) {
         if let combo {
             let id = modes[modeIndex].bindings[bindingIndex].id
@@ -238,7 +238,7 @@ extension SettingsModel {
     ) -> LiveApplyStatus? {
         switch status {
         case .active: .applied
-        case .inactiveMode(let name): .inactiveMode(name)
+        case .inactiveLayer(let name): .inactiveLayer(name)
         case .denied: .denied
         case .profileShadowed: .profileShadowed
         case .compileFailed: .compileFailed

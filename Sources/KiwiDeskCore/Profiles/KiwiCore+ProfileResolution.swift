@@ -101,7 +101,7 @@ extension KiwiCore {
         // explicitly — callers adopt after apply, so
         // `currentName` may still be the old profile.
         reapplyStructuredOverrides(
-            profileModes: profile.modes,
+            profileModes: profile.layers,
             profileAppRules: profile.appRules,
             profileFloatRules: profile.floatRules,
             profileIgnoreRules: profile.ignoreRules

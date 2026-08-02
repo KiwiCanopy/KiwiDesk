@@ -46,7 +46,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// number -> profile name).
     public var profileBindings: [Int: String] = [:]
     /// Keybinding modes; the first is always the default mode.
-    public var modes: [KeyMode] = [KeyMode.defaultMode]
+    public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
 
     public init() {}
 
@@ -91,9 +91,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         for (app, space) in appRules where space == from {
             appRules[app] = to
         }
-        modes = modes.map { mode in
-            var mode = mode
-            mode.bindings = mode.bindings.map { binding in
+        layers = layers.map { layer in
+            var layer = layer
+            layer.bindings = layer.bindings.map { binding in
                 var binding = binding
                 binding.lua = SpaceLuaArg.rename(
                     in: binding.lua,
@@ -102,7 +102,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 )
                 return binding
             }
-            return mode
+            return layer
         }
         return true
     }
@@ -153,7 +153,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case profileBindings = "profile_bindings"
-        case modes
+        case layers
     }
 
     /// Lenient decoding: a field missing from an older sidecar
@@ -189,11 +189,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         // sidecar can carry duplicate mode names or an icon on
         // the default mode (#31) — cleaned here so invalid
         // entries never reach the loader or the GUI. Empty
-        // input falls back to [KeyMode.defaultMode] as before.
-        modes = KeyMode.normalized(
+        // input falls back to [KeyLayer.defaultLayer] as before.
+        layers = KeyLayer.normalized(
             full: try container.decodeIfPresent(
-                [KeyMode].self,
-                forKey: .modes
+                [KeyLayer].self,
+                forKey: .layers
             ) ?? []
         )
         dropEmptyNamedSpaces()
@@ -245,6 +245,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             bindings,
             forKey: .profileBindings
         )
-        try container.encode(modes, forKey: .modes)
+        try container.encode(layers, forKey: .layers)
     }
 }
