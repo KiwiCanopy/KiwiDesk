@@ -40,8 +40,16 @@ extension BordersKey {
         switch self {
         case .borderEnabled, .borderWidth, .borderFitGapsExtraSpacing:
             return .row(.gapsAndBorders, .focusBorder, .atRest)
+        // The .borders container carries no block gate
+        // (stickyColor shares it, deliberately ungated), so
+        // the border colors ride borderEnabled on the row.
         case .borderFocusedColor:
-            return .row(.advancedColours, .borders, .atRest)
+            return .row(
+                .advancedColours,
+                .borders,
+                .atRest,
+                gate: .setting(.borders(.borderEnabled))
+            )
         case .borderUnfocusedEnabled, .borderCorner, .borderGlow,
             .borderGlowSizeAuto:
             return .row(.gapsAndBorders, .focusBorder, .showMore)
@@ -50,7 +58,10 @@ extension BordersKey {
                 .advancedColours,
                 .borders,
                 .atRest,
-                gate: .setting(.borders(.borderUnfocusedEnabled))
+                gate: .anyOf([
+                    .borders(.borderEnabled),
+                    .borders(.borderUnfocusedEnabled),
+                ])
             )
         case .stickyColor:
             // The table marks this GATED, but the live editor
@@ -87,52 +98,87 @@ extension BordersKey {
                 .showMore,
                 gate: .setting(.spaceBar(.spaceBarEnabled))
             )
-        case .dragCornerRadius, .dragGhostBorder, .dragGhostFill,
-            .dragDropZoneBorder, .dragDropZoneFill:
+        case .dragCornerRadius:
             return .row(.gapsAndBorders, .dragAndDrop, .showMore)
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
+        // Each drag column greys wholesale off its Enabled
+        // toggle (DragVisualControls' outer GreyOut), so every
+        // row names its column's Enabled owner; sub-rows add
+        // their Border/Fill owner.
+        case .dragGhostBorder, .dragGhostFill:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragGhostEnabled))
+            )
+        case .dragDropZoneBorder, .dragDropZoneFill:
+            return .row(
+                .gapsAndBorders,
+                .dragAndDrop,
+                .showMore,
+                gate: .setting(.borders(.dragDropZoneEnabled))
+            )
         case .dragGhostBorderColor:
             return .row(
                 .advancedColours,
                 .dragAndDrop,
                 .atRest,
-                gate: .setting(.borders(.dragGhostBorder))
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostBorder),
+                ])
             )
         case .dragGhostFillColor:
             return .row(
                 .advancedColours,
                 .dragAndDrop,
                 .atRest,
-                gate: .setting(.borders(.dragGhostFill))
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostFill),
+                ])
             )
         case .dragGhostBorderWidth, .dragGhostBorderAlignment:
             return .row(
                 .gapsAndBorders,
                 .dragAndDrop,
                 .showMore,
-                gate: .setting(.borders(.dragGhostBorder))
+                gate: .anyOf([
+                    .borders(.dragGhostEnabled),
+                    .borders(.dragGhostBorder),
+                ])
             )
         case .dragDropZoneBorderWidth, .dragDropZoneBorderAlignment:
             return .row(
                 .gapsAndBorders,
                 .dragAndDrop,
                 .showMore,
-                gate: .setting(.borders(.dragDropZoneBorder))
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneBorder),
+                ])
             )
         case .dragDropZoneBorderColor:
             return .row(
                 .advancedColours,
                 .dragAndDrop,
                 .atRest,
-                gate: .setting(.borders(.dragDropZoneBorder))
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneBorder),
+                ])
             )
         case .dragDropZoneFillColor:
             return .row(
                 .advancedColours,
                 .dragAndDrop,
                 .atRest,
-                gate: .setting(.borders(.dragDropZoneFill))
+                gate: .anyOf([
+                    .borders(.dragDropZoneEnabled),
+                    .borders(.dragDropZoneFill),
+                ])
             )
         case .floatingColor:
             // Drawn only in the Space Bar (owner ruling

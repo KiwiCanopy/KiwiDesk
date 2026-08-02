@@ -232,10 +232,15 @@ enum SettingRuntimeGate: Hashable {
     /// monitor is absent.
     case monitorsDisconnected
     /// The neon "Pair with Glow" link shows only for palettes
-    /// that carry the glow pairing (#578).
+    /// that carry the glow pairing (#578) — and only while
+    /// Glow itself is off (`borderGlow` is the setting half of
+    /// this condition; one gate slot per row, so the runtime
+    /// tag carries the whole conjunction).
     case paletteGlowPairing
     /// The import row shows only while `init.lua` holds
-    /// bindings the GUI can adopt.
+    /// bindings the GUI can adopt AND the live profile is
+    /// being edited (same one-slot conjunction:
+    /// `editingStoredProfile` is its other half).
     case luaImportAvailable
 }
 

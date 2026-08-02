@@ -93,10 +93,7 @@ struct SettingKeyCensusTests {
         }
     }
 
-    /// A container-level gate names only surfaced owner rows,
-    /// and each owner lives where a renderer can find it live
-    /// (the implicit owner-stays-live rule needs the owner in
-    /// scope).
+    /// A container-level gate names only surfaced owner rows.
     @Test func containerGatesNameSurfacedOwners() {
         var gated = 0
         for container in SettingsContainer.allCases {
@@ -117,7 +114,7 @@ struct SettingKeyCensusTests {
     /// is per area, never per row), so the reduction is: every
     /// declared container carries at least one surfaced row.
     /// A container case nothing places into would render as an
-    /// empty card the day views generate from the catalog.
+    /// empty card the day views generate from the census.
     @Test func noContainerIsEmpty() {
         let used = Set(
             keys.compactMap { $0.placement.container }
