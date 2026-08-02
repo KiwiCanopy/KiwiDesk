@@ -41,21 +41,23 @@ the subsystem you're touching. The short version:
 AI coding assistants are **welcome and encouraged** here. Much of
 the repo is set up specifically to make them productive:
 [AGENTS.md](AGENTS.md) at the repo root, plus the committed
-`.claude/rules/` (path-scoped conventions) and `.claude/skills/`
-(verify/review workflows), teach an assistant KiwiDesk's
-conventions so its output lands on-style instead of generic. The
-project-tailored review agents themselves are *not* committed —
-they are regenerated per-clone from the matching VoltAgent catalog.
-Choose the assistant you use:
+`.claude/rules/` (path-scoped conventions), `.claude/skills/`
+(verify/review workflows) and `.claude/agents/` (the review and
+specialist agents), teach an assistant KiwiDesk's conventions so
+its output lands on-style instead of generic.
 
-- `./scripts/install-subagents.sh --claude` installs Claude Code
-  Markdown agents in `.claude/agents/` and their workspace skills in
-  `.agents/skills/`.
-- `./scripts/install-subagents.sh --codex` installs Codex-native TOML
-  agents in `.codex/agents/`.
+All three are committed and need no install step — Claude Code
+picks them up from the clone. If you work in Codex, run
+`./scripts/sync-agents.sh` once to generate the TOML mirror in
+`.codex/agents/` from the same Markdown; re-run it after editing
+an agent. Cursor and other assistants read `AGENTS.md` and the
+rule files directly.
 
-Both commands append the committed
-`scripts/kiwidesk-review-context.md` tailoring to the review agents.
+The agents are hand-written for this repo rather than pulled from
+a catalog, and each one routes to the rule file that owns a
+subsystem instead of carrying its own copy of the rules — see
+[`.claude/rules/subagents.md`](.claude/rules/subagents.md) before
+adding or editing one.
 
 One rule, though: **understand what you submit.** A pull request is
 yours regardless of how it was written — know what your change does
