@@ -108,7 +108,11 @@ the census `gate:` names the owning setting, the exact
 predicate (resolved shown-bar values, auto sentinels) lives in
 the row builder. A Phase 3+ area copying the Bars shape copies
 that split too; don't expect editing a row's census gate alone
-to change on-screen greying. Until
+to change on-screen greying — and the reverse obligation holds
+in census-rendered areas: **retargeting a row's grey predicate
+updates that row's census `gate:` in the same change set**, or
+the declared owner and the wiring drift apart with every test
+green. Until
 the *other* areas render from the census, their hand-written
 views stay the behavioral authority — so **a change to a
 Settings row's placement, its `GreyOut`/`disabled` gating,
