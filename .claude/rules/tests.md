@@ -136,6 +136,79 @@ bite large test PRs:
 - Mirrored field lists need a forget-proof parity test — see
   [parity-tests.md](parity-tests.md).
 
+## What a change owes, and what a test must earn to be removed
+
+### Owed
+
+- **A behavior change owes a test that fails without it.** Not a
+  test that exercises the new code — one that reds when the
+  change is reverted. Those differ more often than they sound.
+- **A guard, canary or parity test owes a `guard-prover` run**
+  before the PR: mutate the thing it watches and watch it fail.
+  The argument is
+  [rule-authoring.md](rule-authoring.md)'s ("Prove a new guard
+  reds") and is not restated here; what this row adds is *who*
+  runs it and *when*.
+- **A perf change owes the correctness half.** A skip, a cache or
+  an early return whose safety rests on something else running
+  later pins that dependency with a test, never with a comment —
+  three prose copies of a promise is three places to forget it,
+  not fewer (#662).
+- **A default that other tests reason from owes them a pin.** A
+  fixture that inherits a default silently re-derives its
+  expectations when that default moves. Moving the Space Bar's
+  default edge for #660 shifted a stack-resize cliff by exactly
+  the bar's thickness, in a suite that pinned the display (#531)
+  and not the bar — the strip is carved off the display frame
+  before any layout sees it, so pinning one without the other
+  buys half a fixture.
+
+### Not owed
+
+- A test per branch of a `switch` the compiler already
+  enumerates.
+- A test asserting what the type system guarantees.
+- A second test of one invariant at another altitude, unless the
+  two fail apart — say so in the docstring when they do
+  (`AppFontResourceTests`' `kiwiDeskGlyph` asserts the map and
+  the font separately because a map can name a ligature the font
+  lacks — the suite name is its own span so
+  `RuleCitationTests` resolves it).
+
+### Removal
+
+**Runtime is not the criterion, and a test that merely looks
+trivial is not a candidate.** A periodic impulse to delete the
+sleep-heavy suites is worth resisting once, in writing: a
+`Task.sleep` inside a hang-guard costs a passing run nothing (the
+poll exits the instant the condition holds — see the async
+section below), and where a suite sleeps *deliberately long*, the
+gap between a short watchdog and a long sleep **is** the
+assertion. `ExecTests`' dedup coverage is the case in point: it
+is the only thing holding the #467 contract that caps a wedged
+receiver at one stuck child instead of thousands, and its cost is
+seconds on a suite already bounded by its slowest suite, not its
+sum.
+
+Pure-maths and enum-mapping suites are likewise cheap and are
+only "unbreakable" as a claim about today's implementation.
+
+Three questions actually decide it:
+
+1. **Would it have failed on a defect this repo shipped?**
+2. **Does anything else watch the same invariant?** A test that
+   is the only net is load-bearing however thin it reads.
+3. **Does it test the code, or the fixture?** This is the real
+   removal criterion and has nothing to do with runtime — a
+   classify-change once flipped fixture ownership and left two
+   canaries green while testing nothing (#116).
+
+A scan for a **retired** API is not dead-path coverage; it is
+what keeps the path retired, and the same holds for the
+first-run and managed-config adoption suites — "no user reaches
+that phase any more" is precisely why nothing but a test would
+notice it breaking.
+
 ## Async tests: a generous hang-guard, never a tight deadline (#344)
 
 A test that spawns a real subprocess (`ExecTests`) or schedules an

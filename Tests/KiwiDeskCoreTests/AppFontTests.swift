@@ -40,14 +40,14 @@ struct AppFontResourceTests {
         #expect(AppFont.font(size: 12) != nil)
     }
 
-    /// The drop is currently built from a fork branch precisely
-    /// to carry KiwiDesk's own glyph (see
-    /// `Resources/AppFont/UPSTREAM.md`). Both halves are
-    /// asserted because they fail apart: the map can name a
-    /// ligature the font has no glyph for, which renders as a
-    /// blank App Bar slot rather than falling back to the app
-    /// image. Keep this after the fork pin is lifted — it is
-    /// what proves the upstream release actually carries it.
+    /// The drop carried KiwiDesk's own glyph from a fork branch
+    /// until upstream shipped it in a release (v2.0.69); this
+    /// test is what let that pin be lifted, and what keeps a
+    /// later re-vendor from silently dropping the glyph again.
+    /// Both halves are asserted because they fail apart: the map
+    /// can name a ligature the font has no glyph for, which
+    /// renders as a blank App Bar slot rather than falling back
+    /// to the app image.
     @Test("Bundled map and TTF both carry the KiwiDesk glyph")
     func kiwiDeskGlyph() throws {
         let map = AppFontGlyphMap.loadBundled()

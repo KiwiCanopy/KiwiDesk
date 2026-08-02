@@ -15,13 +15,21 @@ import Foundation
 public struct AppBarStyle: Sendable, Equatable {
     /// The absolute screen edge the bar occupies (#293) — no
     /// longer derived from the layout's axis.
-    public var edge: AppBarEdge = .top
+    ///
+    /// Bottom by default (#660), mirroring the Dock, while the
+    /// Space Bar takes the top beside the menu bar. The two
+    /// persistent strips land where macOS has already taught the
+    /// eye to look for one.
+    public var edge: AppBarEdge = .bottom
     /// Item-group placement along the bar; center matches the
     /// pre-#293-QA shipped behavior.
     public var alignment: BarAlignment = .center
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
-    public var backgroundStyle: BackgroundStyle = .boxed
+    /// Plain by default (#660): one shared plate reads as a
+    /// system strip the way the menu bar and Dock do, where a
+    /// box per item reads as a widget laid over the desktop.
+    public var backgroundStyle: BackgroundStyle = .plain
     /// Liquid Glass finish (macOS 26+), orthogonal to the shape:
     /// a colorless glass material laid over the Boxed boxes or the
     /// Plain plate. Ignored below macOS 26 (`glassEnabled`). Fill
@@ -81,7 +89,13 @@ public struct AppBarStyle: Sendable, Equatable {
     /// The fill under the items — a box per item (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint
     /// (Material). One knob, three renders.
-    public var fillColor = "#14201C66"
+    ///
+    /// 80% opaque (#660). The old 40% was legible over a dark
+    /// wallpaper and a guess anywhere else, and which wallpaper
+    /// a user has is not something a default can know — so the
+    /// default takes the reading that holds over all of them and
+    /// leaves the translucent look to anyone who wants it.
+    public var fillColor = "#14201CCC"
     public var activeItemColor = "#8DB354"
     public var highlightColor = "#8DB354"
     /// Hover feedback on clickable (non-active) items: a

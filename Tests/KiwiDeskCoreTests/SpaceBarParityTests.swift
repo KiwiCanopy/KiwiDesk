@@ -106,7 +106,7 @@ struct SpaceBarCommandParityTests {
         .thickness(44),
         .itemSize(120), .itemGap(3), .fontSize(15),
         .glyphCap(8),
-        .iconSource(.appFont), .backgroundStyle(.plain),
+        .iconSource(.appFont), .backgroundStyle(.boxed),
         .liquidGlass(true),
         .backgroundFit(.full),
         .activeIndicator(.gap), .cornerRoundness(5),
@@ -192,7 +192,7 @@ struct SpaceBarCommandParityTests {
         case .edge: return [.string("bottom")]
         case .alignment: return [.string("end")]
         case .iconSource: return [.string("app_font")]
-        case .backgroundStyle: return [.string("plain")]
+        case .backgroundStyle: return [.string("boxed")]
         case .backgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
         case .thickness, .itemSize, .itemGap, .fontSize,

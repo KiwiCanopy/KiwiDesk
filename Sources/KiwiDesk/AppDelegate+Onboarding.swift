@@ -18,10 +18,6 @@ extension AppDelegate {
 
     func showOnboarding() {
         if let window = onboardingWindow {
-            // No `activateAsRegular()` here (unlike Settings' reuse
-            // branch): `windowWillClose` nils `onboardingWindow` on
-            // close, so a non-nil window is guaranteed still
-            // `.regular` and the promotion never needs repeating.
             NSApp.forceFront(window)
             return
         }
@@ -95,7 +91,9 @@ extension AppDelegate {
         // step sends the user to (#331).
         onboardingWindow = window
 
-        NSApp.activateAsRegular()
+        // No promotion to `.regular` — `forceFront` shows and
+        // activates the window from `.accessory` on its own, which
+        // is the whole reason it exists.
         NSApp.forceFront(window)
     }
 
@@ -110,17 +108,25 @@ extension AppDelegate {
     }
 
     func closeOnboarding() {
-        // Closing routes through `windowWillClose`, which does
-        // the demote + teardown (also covers the red-button
-        // close, which the "finish" button used to bypass).
+        // Closing routes through `windowWillClose`, which does the
+        // teardown (and covers the red-button close, which the
+        // "finish" button used to bypass).
         onboardingWindow?.close()
     }
 
     /// The closing card's "Open Settings": open the dashboard on
     /// Layout (its schematic preview is the most persuasive first
-    /// impression) *before* closing onboarding, so the still-open
-    /// dashboard keeps the app `.regular` and the close doesn't
-    /// demote it.
+    /// impression) *before* closing onboarding.
+    ///
+    /// The order used to be about the activation policy — keeping
+    /// a content window on screen so the close could not demote
+    /// the app. That reason is gone with the promotion, and the
+    /// order stays for the one below it: onboarding may be at
+    /// `.floating` (`floatOnboardingAboveManagedWindows`), so
+    /// showing Settings second would put it *under* a window that
+    /// is about to disappear, and the user would watch the
+    /// dashboard surface after the wizard vanished rather than
+    /// behind it.
     func openSettingsFromOnboarding() {
         dashboard.show(navigatingTo: .layoutDefaults)
         closeOnboarding()
@@ -128,8 +134,9 @@ extension AppDelegate {
 
     /// The discovery panel's Edit bridge must not leave the
     /// floating onboarding window above the requested Settings
-    /// destination. Show Settings first, then close onboarding so
-    /// the app stays regular throughout the handoff.
+    /// destination. Show Settings first, then close onboarding —
+    /// the floating level is the whole reason, and it outlived
+    /// the activation-policy argument that used to sit beside it.
     func openShortcutsSettings() {
         dashboard.show(navigatingTo: .shortcuts)
         if onboardingWindow != nil {
@@ -148,6 +155,5 @@ extension AppDelegate {
         {
             OnboardingDiscovery.markShown()
         }
-        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 }

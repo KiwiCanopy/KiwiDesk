@@ -48,17 +48,16 @@ enum BrandAssets {
         Bundle.kiwiDeskGui.image(forResource: "WordmarkDark")
 
     /// The full-colour app mark from `logo.svg`, in **both**
-    /// appearances. Two uses: the Settings sidebar identity
-    /// header, and the runtime Dock icon
-    /// (`NSApp.applicationIconImage`) so the **bare executable**
-    /// shows the real logo whenever it raises to `.regular`.
+    /// appearances. One use: the Settings sidebar identity
+    /// header.
     ///
-    /// That Dock use is for the bare binary only, and it is not
-    /// self-limiting: assigning `applicationIconImage`
-    /// *overrides* a bundle's own icon rather than deferring to
-    /// it, so `activateAsRegular` gates it on `CFBundleIconName`.
-    /// Left ungated it replaced the packaged `.app`'s real
-    /// AppIcon with this flat raster (#89).
+    /// It was also assigned to `NSApp.applicationIconImage` while
+    /// the app still promoted to `.regular`, and that use is
+    /// gone with the promotion. Do not restore it casually:
+    /// assigning `applicationIconImage` *overrides* a bundle's
+    /// own icon rather than deferring to it, so left ungated it
+    /// replaced the packaged `.app`'s real AppIcon — squircle,
+    /// layers, the lot — with this flat raster (#89).
     ///
     /// There is deliberately **no dark variant** (#479). A mark
     /// that changes hue per appearance reads as a different

@@ -28,6 +28,17 @@ struct StackFocusResizeTests {
             )
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
+        // Pinning the display is only half of it (#531): the
+        // Space Bar carves its strip out of that frame before any
+        // layout sees it, so the span these tests reason about is
+        // the display MINUS the bar. It cost nothing while the bar
+        // defaulted to the left edge and the arithmetic here is
+        // vertical — then #660 moved it to the top and the cliff
+        // cap moved by exactly 32/300. Turned off rather than
+        // re-pinned to an edge: this suite is about stack resize
+        // maths, and a bar on any edge is one more thing for it to
+        // be quietly wrong about.
+        core.tiler.settings.spaceBarStyle.enabled = false
         return core
     }
 
