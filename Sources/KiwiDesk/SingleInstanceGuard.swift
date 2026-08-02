@@ -32,9 +32,13 @@ func surfaceRunningInstanceAndExit() -> Never {
             "Another KiwiDesk instance is already managing "
                 + "your windows, so this one will quit."
         )
-        // Menu bar app: without a raised policy the modal
-        // would open behind everything (cf. onboarding in
-        // main.swift).
+        // The one place KiwiDesk leaves `.accessory`, and it is
+        // safe precisely because there is no way back from here:
+        // the process calls `exit(1)` a few lines down, so no
+        // window can outlive the promotion and strand the app
+        // `.regular` the way the old promote/demote pair did.
+        // Without it a menu-bar app's modal opens behind
+        // everything and the second launch looks like a no-op.
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()

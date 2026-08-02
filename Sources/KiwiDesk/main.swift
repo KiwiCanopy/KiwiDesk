@@ -7,9 +7,10 @@ if CommandLine.arguments.count > 1 {
     exit(runCLI(CommandLine.arguments))
 }
 
-// KiwiDesk runs as a menu bar app (no Dock icon). The activation
-// policy is raised to .regular temporarily while the onboarding
-// window is visible.
+// KiwiDesk runs as a menu bar app (no Dock icon), and holds
+// `.accessory` for its whole life — content windows come forward
+// through `NSApp.forceFront` rather than through a policy flip.
+// See "Permanent accessory mode" in docs/design-decisions.md.
 let app = NSApplication.shared
 
 // Single-instance guard (#196). Held at top level so the flock

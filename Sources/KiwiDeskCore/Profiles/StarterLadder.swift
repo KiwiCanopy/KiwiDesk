@@ -8,7 +8,7 @@ import Foundation
 /// | Position in block | Mode | Shown off |
 /// |---|---|---|
 /// | 1 | scrolling | the infinite Niri-style column row |
-/// | 2 | bsp | binary space partitioning (classic split) |
+/// | 2 | stack | a master pane beside a stacked column |
 /// | 3 | track | new window → its own new track |
 /// | 4 | grid | a 3×2 grid |
 /// | 5 | floating | untiled |
@@ -29,7 +29,7 @@ public enum StarterLadder {
 
     /// The mode for each 1-based position within a block.
     private static let blockModes: [LayoutMode] = [
-        .scrolling, .bsp, .track, .grid, .floating,
+        .scrolling, .stack, .track, .grid, .floating,
     ]
 
     /// Total spaces for `displayCount` displays (floored at one —
@@ -44,7 +44,10 @@ public enum StarterLadder {
             .map { SpaceID($0) }
     }
 
-    /// Sparse per-space modes.
+    /// A mode for **every** space, not a sparse diff against the
+    /// fallback: the ladder's whole point is that each rung is
+    /// stated, so changing the global fallback must not silently
+    /// move one of them.
     public static func spaceModes(
         displayCount: Int
     ) -> [SpaceID: LayoutMode] {

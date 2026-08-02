@@ -142,10 +142,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         NSApp.forceFront(window)
     }
 
-    /// Closing the dashboard returns KiwiDesk to menu-bar-only,
-    /// so the Dock tile raised in `show()` disappears again —
-    /// without this the process keeps a `.regular` Dock icon
-    /// after the window is gone. The window itself survives
+    /// Teardown only — there is no activation policy to release,
+    /// because `show()` raises none (see "Permanent accessory
+    /// mode" in `docs/design-decisions.md`). What this does is
+    /// disarm state the window would otherwise carry into its
+    /// next appearance: the window itself survives
     /// (`isReleasedWhenClosed = false`) for the next `show()`.
     func windowWillClose(_ notification: Notification) {
         // Guaranteed disarm net (#213): the recorder normally
