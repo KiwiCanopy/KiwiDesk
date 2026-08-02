@@ -102,7 +102,7 @@
   "behavior.animations.reduce_motion.help": "Ajustes do Sistema ▸ Acessibilidade ▸ Reduzir movimento está ativado, então as animações permanecem desativadas independentemente desta configuração.",
   "behavior.animations.relayout": "Animar os rearranjos do layout",
   "behavior.animations.scrolling_xref": "As mudanças de foco do layout com rolagem têm ajuste e velocidade próprios em",
-  "behavior.animations.scrolling_xref_link": "Padrões de layout ▸ Scrolling",
+  "behavior.animations.scrolling_xref_link": "Layout padrão ▸ Scrolling",
   "behavior.animations.space_change": "Animar as trocas de espaço virtual",
   "behavior.animations.space_change.caption": "As janelas saem deslizando do espaço que você deixa e entram naquele para o qual você vai.",
   "behavior.animations.title": "Animações",

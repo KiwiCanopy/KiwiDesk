@@ -67,18 +67,21 @@ struct SettingsSidebar: View {
         // "bespoke panel" tell we killed the collapse toggle for
         // (#68).
         //
-        // Re-measured across all ten locales when #95 landed: the
-        // worst case is now `ru` "Сочетания клавиш" at ~118 pt,
-        // up from de "Erscheinungsbild" at ~104 pt, and 190 pt
-        // still clears it. Fifteen labels in eight locales did
-        // *not* fit and were shortened instead of widening the
-        // column — a sidebar destination wants a short noun (the
-        // section header inside carries the full title), and
+        // Fifteen labels in eight locales did *not* fit when #95
+        // landed and were shortened instead of widening the
+        // column — a sidebar destination wants a short noun, and
         // System Settings' own column does not grow per language.
-        // Keep that the fix: a new locale whose destination label
-        // measures past ~120 pt gets a shorter label, not a wider
-        // sidebar.
-        .frame(width: 190)
+        // Keep that the fix: a destination label past
+        // `sidebarLabelColumn` gets a shorter label, not a wider
+        // sidebar. `SidebarLabelWidthTests` enforces it and
+        // derives its budget from the metric, so neither the
+        // column nor the budget is restated here.
+        //
+        // The short noun has to carry the whole meaning: the pane
+        // header is this same `destination.title`
+        // (`SettingsView.chrome`), not a longer twin, so a label
+        // trimmed to fit is the ONLY name the user ever reads.
+        .frame(width: SettingsMetrics.sidebarColumn)
         // Floating pane, the macOS 26 System Settings look: a
         // rounded translucent card in near-window-background
         // gray, carrying a soft shadow, with the traffic lights
@@ -270,10 +273,12 @@ struct SettingsSidebar: View {
         _ destination: SettingsDestination
     ) -> some View {
         Label {
-            // Single-line insurance (#297): the column is now a
-            // fixed 190pt, so an over-long translated label
-            // truncates on one line instead of wrapping to two —
-            // matching System Settings' single-line rows.
+            // Single-line insurance (#297): the column is fixed,
+            // so an over-long translated label truncates on one
+            // line instead of wrapping to two — matching System
+            // Settings' single-line rows. Truncation is the
+            // symptom `SidebarLabelWidthTests` exists to catch
+            // before a user sees it, never the intended fit.
             Text(destination.title)
                 .lineLimit(1)
         } icon: {
@@ -301,45 +306,5 @@ struct SettingsSidebar: View {
             "sidebar.profiles.badge_ax",
             "start here"
         )
-    }
-}
-
-/// A System-Settings-style icon tile: white glyph on a flat
-/// rounded-rect color (§6.1).
-struct SidebarTile: View {
-    let destination: SettingsDestination
-    /// Accent dot on the tile's top-trailing corner — the
-    /// native "something to look at in this section" cue.
-    var badged = false
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 6)
-            .fill(destination.tint)
-            .frame(width: 22, height: 22)
-            .overlay {
-                Image(systemName: destination.symbol)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white)
-            }
-            .overlay(alignment: .topTrailing) {
-                if badged {
-                    Circle()
-                        .fill(Color.accentColor)
-                        .frame(width: 7, height: 7)
-                        .offset(x: 2, y: -2)
-                }
-            }
-            // The soft lift System Settings gives its sidebar
-            // icons — kept inside `inactiveDimmed` so the
-            // shadow fades with the tile.
-            .shadow(
-                color: .black.opacity(0.25),
-                radius: 1.5,
-                y: 1
-            )
-            // The colored fill has no notion of window key
-            // state; System Settings' tiles fade, hue kept
-            // (#297).
-            .inactiveDimmed()
     }
 }

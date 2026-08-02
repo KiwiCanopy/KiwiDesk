@@ -102,7 +102,7 @@
   "behavior.animations.reduce_motion.help": "系統設定 ▸ 輔助使用 ▸ 減少動態效果已開啟，因此無論此設定為何，動畫都將保持關閉。",
   "behavior.animations.relayout": "為佈局重排加上動畫",
   "behavior.animations.scrolling_xref": "捲動佈局的焦點移動有自己的開關與速度，位於",
-  "behavior.animations.scrolling_xref_link": "預設佈局 ▸ 捲動",
+  "behavior.animations.scrolling_xref_link": "預設佈局 ▸ Scrolling",
   "behavior.animations.space_change": "為虛擬空間切換加上動畫",
   "behavior.animations.space_change.caption": "視窗會滑出你正離開的空間，並滑入你要切換到的空間。",
   "behavior.animations.title": "動畫",
