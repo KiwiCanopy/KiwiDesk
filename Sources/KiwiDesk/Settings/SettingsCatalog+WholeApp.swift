@@ -35,6 +35,13 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.size_float",
         "Size & float"
     )
+    /// Size & float's disclosure. Named for what it hides
+    /// rather than "Show more" — a disclosure row names its
+    /// contents (the redesign's GUI rules).
+    let sizeFloatMore = SettingsDrawer(
+        "shortcuts.size_float.more",
+        "Resize feedback"
+    )
     let openApplications = SettingsControl(
         "shortcuts.section.open_applications",
         "Open applications"

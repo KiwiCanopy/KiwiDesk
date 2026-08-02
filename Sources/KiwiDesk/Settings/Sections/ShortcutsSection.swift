@@ -1,14 +1,26 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Shortcuts (#68 §3.6): a layer strip (chips, "+"
-/// popover), flat intent groups (Focus / Move windows / Size &
-/// Float / Switch layers / Open applications), the raw-Lua rows
-/// demoted to a collapsed Advanced drawer, and Import moved to
-/// the header where a new user can see it. One recorder can be
-/// active at a time (#33), duplicates hard-block with Steal /
-/// Go to (#34), and conflict state derives live from the
-/// bindings on every render (#35).
+/// Whole App ▸ Shortcuts (#68 §3.6), rendered FROM the settings
+/// census (#678 Phase 3): a layer strip (chips, "+" popover),
+/// flat intent groups (Focus / Move windows / Size & Float /
+/// Switch layers / Open applications), the raw-Lua rows demoted
+/// to a collapsed Advanced drawer, and Import moved to the header
+/// where a new user can see it. One recorder can be active at a
+/// time (#33), duplicates hard-block with Steal / Go to (#34),
+/// and conflict state derives live from the bindings on every
+/// render (#35).
+///
+/// The census owns placement, `ShortcutsRowOrder` owns display
+/// order and `ShortcutsFamilyRows` owns the family→rows
+/// expansion; `ShortcutsCensusRenderTests` pins all three
+/// together. What the census does NOT place is the Inactive
+/// shortcuts card: its rows are instances of the `goToSpace` and
+/// `moveToSpace` families already censused under Focus and Move
+/// windows, surfaced a second time because their space left the
+/// list. A census row for it would be a second placement of a
+/// setting that already has one, so the card is hand-mounted and
+/// the guard states why it holds no census keys.
 struct ShortcutsSection: View {
     @ObservedObject var model: SettingsModel
     @State private var selected = KeyLayer.defaultName
@@ -20,61 +32,14 @@ struct ShortcutsSection: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    KeybindingConflictBanner(model: model)
-                    overrideBanner
-                    ShortcutsHeader(
-                        model: model,
-                        selected: $selected
-                    )
-                    // Right under the strip that defines the
-                    // layers — the switch shortcuts belong
-                    // beside their definition, not buried
-                    // below the action groups.
-                    if model.config.layers.count > 1 {
-                        SwitchLayersGroup(
-                            model: model,
-                            bindings: bindingsBinding,
-                            layerNames: model.config.layers.map(
-                                \.name
-                            ),
-                            current: selected
-                        )
-                    }
-                    FocusGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    MoveWindowsGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    SizeFloatGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    ApplicationsGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    GeneralShortcutsGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    // Orphaned space-targeting rows (#92):
-                    // rendered so "Go to" from a rejected
-                    // recording can reach the holder — the
-                    // per-space groups above only render
-                    // live spaces.
-                    OrphanedShortcutsGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    advancedDrawer
+                    header
+                    actionGroups
+                    tail
                 }
-                .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+                .padding(
+                    [.horizontal, .bottom],
+                    SettingsMetrics.paneInset
+                )
                 .environment(
                     \.keybindingOverrideBase,
                     model.overrideBaseRows(layer: selected)
@@ -117,6 +82,65 @@ struct ShortcutsSection: View {
         .onChange(of: selected) { _, _ in
             coordinator.invalidate()
         }
+    }
+
+    // MARK: - Body pieces
+    //
+    // Split out of `body` rather than nested in it: a single
+    // expression holding every group blew the type-checker's
+    // budget, which fails on the slower CI runner while
+    // compiling fine locally (gui.md's shallow-body rule).
+
+    @ViewBuilder private var header: some View {
+        KeybindingConflictBanner(model: model)
+        overrideBanner
+        ShortcutsHeader(model: model, selected: $selected)
+        // Right under the strip that defines the layers — the
+        // switch shortcuts belong beside their definition, not
+        // buried below the action groups.
+        if model.config.layers.count > 1 {
+            SwitchLayersGroup(
+                model: model,
+                bindings: bindingsBinding,
+                expander: expander
+            )
+        }
+    }
+
+    @ViewBuilder private var actionGroups: some View {
+        FocusGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        MoveWindowsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        SizeFloatGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        ApplicationsGroup(model: model, bindings: bindingsBinding)
+        GeneralShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+    }
+
+    @ViewBuilder private var tail: some View {
+        // Orphaned space-targeting rows (#92): rendered so "Go
+        // to" from a rejected recording can reach the holder —
+        // the per-space groups above only render live spaces.
+        OrphanedShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            spaces: model.config.spaces
+        )
+        advancedDrawer
     }
 
     // MARK: - Override layer (#55 phase 7)
@@ -222,6 +246,20 @@ struct ShortcutsSection: View {
                 + "power-user escape hatch — the "
                 + "groups above cover the built-in "
                 + "actions."
+        )
+    }
+
+    /// The family→rows expansion every group reads. Built once
+    /// per render from live state, so the per-space and
+    /// per-layer families expand against what is actually
+    /// configured right now.
+    private var expander: ShortcutsFamilyRows {
+        ShortcutsFamilyRows(
+            spaces: model.config.spaces,
+            icons: model.config.settings.spaceIcons,
+            resizeStep: Int(model.config.settings.resizeStep),
+            layerNames: model.config.layers.map(\.name),
+            currentLayer: selected
         )
     }
 

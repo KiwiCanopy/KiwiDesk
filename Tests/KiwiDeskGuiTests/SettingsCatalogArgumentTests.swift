@@ -117,14 +117,14 @@ struct SettingsCatalogArgumentTests {
         )
         // Exact totals, so a needle that silently stops matching
         // cannot pass vacuously (part-1: a guard that cannot fire
-        // is worse than none). 45 = the 48 section/disclosure-
+        // is worse than none). 46 = the 49 section/disclosure-
         // mounted top-level declarations − 4 indirect (gaps and
         // drag, ×2 each) + 1 double-mounted (monitors); the
         // Show-it-in toggles self-anchor, outside this count.
-        // #678 Phase 3 is +4 net: eight new colour declarations
-        // in, the two interim colour cards and their two
-        // Advanced-colors drawers out.
-        #expect(direct.values.reduce(0, +) == 45)
+        // #678 Phase 3 is +5 net: eight new colour declarations
+        // plus Size & float's disclosure in, the two interim
+        // colour cards and their two Advanced-colors drawers out.
+        #expect(direct.values.reduce(0, +) == 46)
         #expect(
             modeTabs.sorted() == [
                 "bsp", "grid", "monocle", "scrolling", "stack",

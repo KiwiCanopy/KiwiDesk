@@ -158,44 +158,70 @@ enum KeybindingCatalog {
             )
         }
 
-    /// The per-space "Move to …" / "… & follow" row pairs. The
-    /// space name is user data, passed as a positional arg.
+    /// The per-space "Move to …" / "… & follow" row pairs,
+    /// interleaved per space — the order the import classifier
+    /// and the old flat group both read.
+    ///
+    /// Composed from the two half-builders below rather than
+    /// repeating their commands: "Move to space" and "Move to
+    /// space & follow" are two census families (#678 Phase 3),
+    /// so the Shortcuts area renders each half on its own, and a
+    /// second copy of either Lua here would be the byte-for-byte
+    /// drift that silently demotes an import to Custom (#4).
     static func moveToSpace(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
     ) -> [NavCommand] {
-        spaces.flatMap { space -> [NavCommand] in
-            let arg = spaceArg(space)
-            return [
-                NavCommand(
-                    label: "Move to Space \(space.raw)",
-                    lua:
-                        "KiwiDesk.move_to_space(\(arg))",
-                    icon: icons[space],
-                    displayLabel: {
-                        L(
-                            "keybinding.move_to_space",
-                            "Move to Space %1$@",
-                            space.raw
-                        )
-                    }
-                ),
-                NavCommand(
-                    label:
-                        "Move to Space \(space.raw) & follow",
-                    lua: "KiwiDesk."
-                        + "move_to_space_and_follow"
-                        + "(\(arg))",
-                    icon: icons[space],
-                    displayLabel: {
-                        L(
-                            "keybinding.move_to_space_follow",
-                            "Move to Space %1$@ & follow",
-                            space.raw
-                        )
-                    }
-                ),
-            ]
+        zip(
+            moveToSpaceRows(spaces, icons: icons),
+            moveToSpaceFollowRows(spaces, icons: icons)
+        )
+        .flatMap { [$0, $1] }
+    }
+
+    /// One "Move to Space …" row per space. The space name is
+    /// user data, passed as a positional arg.
+    static func moveToSpaceRows(
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
+    ) -> [NavCommand] {
+        spaces.map { space in
+            NavCommand(
+                label: "Move to Space \(space.raw)",
+                lua:
+                    "KiwiDesk.move_to_space(\(spaceArg(space)))",
+                icon: icons[space],
+                displayLabel: {
+                    L(
+                        "keybinding.move_to_space",
+                        "Move to Space %1$@",
+                        space.raw
+                    )
+                }
+            )
+        }
+    }
+
+    /// One "Move to Space … & follow" row per space.
+    static func moveToSpaceFollowRows(
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
+    ) -> [NavCommand] {
+        spaces.map { space in
+            NavCommand(
+                label: "Move to Space \(space.raw) & follow",
+                lua: "KiwiDesk."
+                    + "move_to_space_and_follow"
+                    + "(\(spaceArg(space)))",
+                icon: icons[space],
+                displayLabel: {
+                    L(
+                        "keybinding.move_to_space_follow",
+                        "Move to Space %1$@ & follow",
+                        space.raw
+                    )
+                }
+            )
         }
     }
 
