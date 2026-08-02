@@ -29,6 +29,7 @@ extension KiwiCore {
             self?.onLog($0)
         }
         crash.onLog = log
+        eventLoop.onLog = log
         keys.onLog = log
         exec.onLog = log
         profiles.onLog = log

@@ -30,6 +30,7 @@ enum SeamRegister {
         "BorderManager",
         "CrashRecovery",
         "EventBus",
+        "EventLoop",
         "ExecLauncher",
         "KeybindingManager",
         "ProfileManager",

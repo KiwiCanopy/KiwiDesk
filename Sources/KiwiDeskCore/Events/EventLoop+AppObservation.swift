@@ -63,6 +63,25 @@ extension EventLoop {
                 )
             )
         else { return }
+        // Per-app timing (#672): every AX round trip below can
+        // block on an unresponsive app, and the boot scan runs
+        // them serially — so each attach is an interval, and a
+        // slow one logs the app's name for field reports.
+        let name = ref.bundleID ?? ref.name
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval(
+            "attach",
+            id: signposter.makeSignpostID(),
+            "\(name, privacy: .public)"
+        )
+        let begin = ContinuousClock.now
+        defer {
+            signposter.endInterval("attach", span)
+            let ms = begin.duration(to: .now).wholeMilliseconds
+            if ms >= BootSignpost.slowSpanMs {
+                onLog("slow attach: \(name) took \(ms)ms")
+            }
+        }
         guard let observer = AXApplicationObserver(pid: pid)
         else { return }
 

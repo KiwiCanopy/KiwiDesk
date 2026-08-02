@@ -99,72 +99,17 @@ public final class EventLoop {
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
-    public private(set) var isRunning = false
+    public internal(set) var isRunning = false
+
+    /// Log line consumer — boot diagnostics only (the startup
+    /// scan summary, slow attach/reconcile spans, #672). Wired
+    /// to the core sink in `KiwiCore+Bootstrap`; defaults to the
+    /// syslog write like every Core seam (core-boundaries.md).
+    public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     public init() {}
 
-    // MARK: - Lifecycle
-
-    /// Starts observing. Requires Accessibility permission.
-    ///
-    /// One `CGWindowListCopyWindowInfo` snapshot before the app
-    /// loop identifies PIDs with at least one layer-0 window.
-    /// Apps without visible windows skip the expensive AX window
-    /// query and warmup — the AXObserver is still installed so
-    /// future `kAXWindowCreatedNotification`s fire, and the
-    /// 1-second startup sweep (`reconcileAll`) re-warms any cold
-    /// app whose window appeared in the interim.
-    public func start() {
-        guard !isRunning else { return }
-        isRunning = true
-        registerWorkspaceObservers()
-        let visible = EventLoop.pidsWithVisibleWindows()
-        for app in NSWorkspace.shared.runningApplications {
-            attach(
-                app: app,
-                hasVisibleWindows: visible.contains(
-                    app.processIdentifier
-                )
-            )
-        }
-        publishDisplays()
-    }
-
-    /// Stops observing and forgets all tracked windows.
-    public func stop() {
-        guard isRunning else { return }
-        isRunning = false
-        let center = NSWorkspace.shared.notificationCenter
-        for token in workspaceTokens {
-            center.removeObserver(token)
-        }
-        workspaceTokens = []
-        if let screenToken {
-            NotificationCenter.default
-                .removeObserver(screenToken)
-        }
-        screenToken = nil
-        for observer in observers.values {
-            observer.invalidate()
-        }
-        for (pid, baseline) in enhancedUIBaselines
-        where !baseline {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: false
-            )
-        }
-        observers = [:]
-        elements = [:]
-        enhancedUIBaselines = [:]
-        manualAXApplied = []
-        detectedFloating = [:]
-        detectedFullscreen = [:]
-        ignorePending = []
-        trackedFrames = [:]
-        tabCarriers = []
-    }
-
+    // Lifecycle (start/stop) lives in `EventLoop+Lifecycle.swift`.
     // Read-only lookups (detectionVerdict, observes, element,
     // isListed) live in `EventLoop+Queries.swift`.
 

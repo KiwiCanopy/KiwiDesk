@@ -5,7 +5,16 @@ import Foundation
 /// restore, and the delayed startup sweep.
 extension KiwiCore {
     /// Loads the config and starts window management.
+    ///
+    /// Phases are signposted and summarized through `onLog`
+    /// (#672): boot cost lives almost entirely in the AX scans
+    /// under `loadConfig` / `eventLoop.start()`, and the field
+    /// evidence for a hung app is a duration, so every boot
+    /// leaves one on record.
     public func start() {
+        let signposter = BootSignpost.signposter
+        let boot = signposter.beginInterval("boot")
+        let bootBegin = ContinuousClock.now
         // Arm the focused-command foreground guard (#292): from now
         // on, an implicit-focused command fails closed unless the OS
         // frontmost app is KiwiDesk's focused managed window. Left
@@ -54,12 +63,18 @@ extension KiwiCore {
         stickyMarks.isWindowServerTracked = { [weak self] id in
             self?.borders.markUsesWindowServerTracking(id) ?? false
         }
+        let config = signposter.beginInterval("loadConfig")
         loadConfig()
+        signposter.endInterval("loadConfig", config)
+        let configDone = ContinuousClock.now
         sleepWake.start()
         eventLoop.start()
+        let scanDone = ContinuousClock.now
         mouse.start()
         // The event loop discovered windows in AX order; put
         // back the arrangement of the previous session.
+        let restoreSpan =
+            signposter.beginInterval("sessionRestore")
         if let session = crash.consumeSession() {
             restore(session)
             activateSpaceOfFocusedWindow()
@@ -73,6 +88,7 @@ extension KiwiCore {
             emitSpaceChange()
             onLog("restored previous session arrangement")
         }
+        signposter.endInterval("sessionRestore", restoreSpan)
         crash.start()
         do {
             try socket.start()
@@ -80,6 +96,20 @@ extension KiwiCore {
             onLog("socket server failed: \(error)")
         }
         scheduleStartupSweep()
+        signposter.endInterval("boot", boot)
+        let now = ContinuousClock.now
+        let configMs =
+            bootBegin.duration(to: configDone).wholeMilliseconds
+        let scanMs =
+            configDone.duration(to: scanDone).wholeMilliseconds
+        let tailMs = scanDone.duration(to: now).wholeMilliseconds
+        let totalMs =
+            bootBegin.duration(to: now).wholeMilliseconds
+        onLog(
+            "boot: config \(configMs)ms, scan \(scanMs)ms, "
+                + "restore+services \(tailMs)ms, "
+                + "total \(totalMs)ms"
+        )
     }
 
     /// The startup scan ran against cold AX trees; slow
@@ -95,7 +125,14 @@ extension KiwiCore {
             [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }
+            let signposter = BootSignpost.signposter
+            let sweep = signposter.beginInterval("startupSweep")
+            let begin = ContinuousClock.now
             self.eventLoop.reconcileAll()
+            signposter.endInterval("startupSweep", sweep)
+            let ms =
+                begin.duration(to: .now).wholeMilliseconds
+            self.onLog("startup sweep: \(ms)ms")
             if self.state.workspaces.activeSpace == landed {
                 self.activateSpaceOfFocusedWindow()
                 if self.state.workspaces.activeSpace != landed {

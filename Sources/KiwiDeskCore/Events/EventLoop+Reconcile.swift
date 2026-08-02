@@ -20,6 +20,24 @@ extension EventLoop {
         app: AppRef,
         coalesceTabs: Bool = true
     ) {
+        // Per-app timing (#672): mirrors `attach` — the window
+        // list and warmup below are the same blocking AX calls,
+        // and the startup sweep runs this for every app.
+        let name = app.bundleID ?? app.name
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval(
+            "reconcile",
+            id: signposter.makeSignpostID(),
+            "\(name, privacy: .public)"
+        )
+        let begin = ContinuousClock.now
+        defer {
+            signposter.endInterval("reconcile", span)
+            let ms = begin.duration(to: .now).wholeMilliseconds
+            if ms >= BootSignpost.slowSpanMs {
+                onLog("slow reconcile: \(name) took \(ms)ms")
+            }
+        }
         let activationPolicy =
             NSRunningApplication(
                 processIdentifier: pid
