@@ -162,6 +162,11 @@ enum SettingRuntimeGate: Hashable {
     /// being edited (same one-slot conjunction:
     /// `editingStoredProfile` is its other half).
     case luaImportAvailable
+    /// Liquid Glass is offered only where it can render
+    /// (macOS 26+) — hidden, never greyed, matching the OS
+    /// capability gate (#390); the `#available` check itself
+    /// belongs to the renderer.
+    case liquidGlassUnavailable
 }
 
 /// What greys a surfaced row (the placement table's GATED
@@ -169,7 +174,10 @@ enum SettingRuntimeGate: Hashable {
 /// values decide the grey — the exact predicate (resolved
 /// override chains, value comparisons) lives with the wiring,
 /// and gates on resolved values name every surfaced owner
-/// (#406: gate on RESOLVED, not global). `.runtime` names a
+/// (#406: gate on RESOLVED, not global) — EXCEPT the two
+/// documented one-slot conjunctions (`paletteGlowPairing`,
+/// `luaImportAvailable`), whose runtime tag carries the owner
+/// half that a single gate slot cannot. `.runtime` names a
 /// condition that is not itself a setting.
 enum SettingGate: Hashable {
     case setting(SettingKey)

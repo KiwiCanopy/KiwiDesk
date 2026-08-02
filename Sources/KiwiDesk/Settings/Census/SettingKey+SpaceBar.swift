@@ -39,7 +39,17 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
 extension SpaceBarKey {
     var placement: SettingPlacement {
         switch self {
-        case .spaceBarEnabled, .spaceBarEdge, .spaceBarHideEmpty,
+        case .spaceBarEnabled:
+            // Owns the .spaceBar container gate — must stay
+            // live while the container greys, or the editor
+            // could never be re-enabled.
+            return .row(
+                .bars,
+                .spaceBar,
+                .atRest,
+                exemptFromContainerGate: true
+            )
+        case .spaceBarEdge, .spaceBarHideEmpty,
             .spaceBarShowFrontApp, .spaceBarThickness:
             return .row(.bars, .spaceBar, .atRest)
         case .spaceBarAlignment, .spaceBarBackground, .spaceBarActiveIndicator,
@@ -62,8 +72,12 @@ extension SpaceBarKey {
                 gate: .setting(.spaceBar(.spaceBarFontSizeAuto))
             )
         case .spaceBarLiquidGlass:
-            // platform-gated
-            return .row(.bars, .spaceBar, .showMore)
+            return .row(
+                .bars,
+                .spaceBar,
+                .showMore,
+                gate: .runtime(.liquidGlassUnavailable)
+            )
         case .spaceBarBackgroundFit:
             // Boxed draws no shared plate to size.
             return .row(

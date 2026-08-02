@@ -38,7 +38,16 @@ enum BordersKey: String, CaseIterable, Hashable {
 extension BordersKey {
     var placement: SettingPlacement {
         switch self {
-        case .borderEnabled, .borderWidth, .borderFitGapsExtraSpacing:
+        case .borderEnabled:
+            // Owns the .focusBorder container gate — stays
+            // live while the container greys.
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .atRest,
+                exemptFromContainerGate: true
+            )
+        case .borderWidth, .borderFitGapsExtraSpacing:
             return .row(.gapsAndBorders, .focusBorder, .atRest)
         // The .borders container carries no block gate
         // (stickyColor shares it, deliberately ungated), so

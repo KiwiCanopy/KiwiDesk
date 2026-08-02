@@ -49,8 +49,12 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarFontSizeAuto))
             )
         case .appBarLiquidGlass:
-            // platform-gated: hidden (not greyed) below macOS 26
-            return .row(.bars, .appBar, .showMore)
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .runtime(.liquidGlassUnavailable)
+            )
         case .appBarBackgroundFit:
             // Boxed draws no shared plate to size — asked of the
             // bars actually shown, overrides included.

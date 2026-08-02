@@ -1,4 +1,10 @@
-/// A titled card or group within an area.
+/// A titled card or group within an area. Several containers
+/// deliberately span TWO areas (`.appBar`, `.spaceBar`,
+/// `.borders`, `.dragAndDrop`, `.scrolling` appear in both a
+/// home area and Advanced Colours / Layout Defaults), and the
+/// spanning is load-bearing: it is what carries a container
+/// gate onto both surfaces. Never normalize to per-area
+/// containers.
 enum SettingsContainer: CaseIterable, Hashable {
     case about
     case advanced
@@ -43,12 +49,15 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// Space Bar editors off their bar-shown switches, Focus
     /// border off its enable toggle, the animations card under
     /// macOS Reduce Motion). Composes with each row's own
-    /// `SettingPlacement.gate` (both apply); a row that OWNS
-    /// the container gate stays live implicitly, and a row the
-    /// live wiring deliberately leaves outside the block gate
-    /// sets `exemptFromContainerGate`. Containers whose greys
-    /// have no single owning switch (Drag & drop's two halves)
-    /// record nothing here — the row gates carry the owners.
+    /// `SettingPlacement.gate` (both apply). There is ONE
+    /// escape and it is data, never prose: any row that must
+    /// stay live while its container greys — the gate's own
+    /// owner toggles included, or a lockout follows — sets
+    /// `exemptFromContainerGate`, and the census guards pin
+    /// that every in-container owner does. Containers whose
+    /// greys have no single owning switch (Drag & drop's two
+    /// halves) record nothing here — the row gates carry the
+    /// owners.
     var gate: SettingGate? {
         switch self {
         case .appBar:

@@ -76,7 +76,14 @@ extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
         case .monocleAppBarEnabled, .scrollingAppBarEnabled:
-            return .row(.bars, .appBar, .atRest)
+            // These own the .appBar container gate — they stay
+            // live while the editor greys.
+            return .row(
+                .bars,
+                .appBar,
+                .atRest,
+                exemptFromContainerGate: true
+            )
         case .monocleAppBarEdge, .monocleAppBarAlignment,
             .monocleAppBarBackgroundStyle, .monocleAppBarActiveIndicator,
             .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,

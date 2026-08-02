@@ -93,7 +93,11 @@ struct SettingKeyCensusTests {
         }
     }
 
-    /// A container-level gate names only surfaced owner rows.
+    /// A container-level gate names only surfaced owner rows,
+    /// and an owner placed INSIDE the container it gates must
+    /// carry `exemptFromContainerGate` — the escape is data,
+    /// never an implicit rule, because a renderer that greys
+    /// the owner with its container locks the gate shut.
     @Test func containerGatesNameSurfacedOwners() {
         var gated = 0
         for container in SettingsContainer.allCases {
@@ -104,6 +108,12 @@ struct SettingKeyCensusTests {
                     hasSurface(owner.placement.tier),
                     "\(container) gated by surfaceless row"
                 )
+                if owner.placement.container == container {
+                    #expect(
+                        owner.placement.exemptFromContainerGate,
+                        "gate owner \(owner.id) not exempt"
+                    )
+                }
             }
         }
         #expect(gated > 0)
