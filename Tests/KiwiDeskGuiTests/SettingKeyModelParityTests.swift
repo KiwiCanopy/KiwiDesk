@@ -148,7 +148,10 @@ struct SettingKeyModelParityTests {
     @Test func everyCensusRowHasAModelPath() {
         let walked = Self.walkedModel()
         let known = walked.leaves.union(walked.nodes)
-        for base in Self.censusBases() {
+        let bases = Self.censusBases()
+        // Vacuity pin — an empty census would pass the loop.
+        #expect(bases.count > 100)
+        for base in bases {
             #expect(
                 known.contains(base),
                 "census row \(base) names no model path"

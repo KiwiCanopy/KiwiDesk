@@ -133,4 +133,37 @@ struct SettingKeyCatalogTests {
             )
         }
     }
+
+    /// `SettingKey.allCases` is a hand concatenation —
+    /// `CaseIterable` cannot synthesize it over associated
+    /// values — so a sub-enum wired into the wrapper but
+    /// forgotten there would compile (the id/placement/text
+    /// switches force an arm, the static list does not) and its
+    /// whole slice would silently drop out of every guard in
+    /// these suites. Source pin: every wrapper case's sub-enum
+    /// appears in the concatenation.
+    @Test func allCasesConcatenatesEverySubEnum() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDesk")
+            .appendingPathComponent("Settings")
+            .appendingPathComponent("Catalog")
+            .appendingPathComponent("SettingKey.swift")
+        let source = try String(contentsOf: file, encoding: .utf8)
+        let pattern = /case (\w+)\((\w+Key)\)/
+        var wrapperCases = 0
+        for match in source.matches(of: pattern) {
+            wrapperCases += 1
+            let needle =
+                "\(match.2).allCases.map(Self.\(match.1))"
+            #expect(
+                source.contains(needle),
+                "\(match.2) missing from SettingKey.allCases"
+            )
+        }
+        // Vacuity pin: the wrapper declares its sub-enums in
+        // this shape today; zero matches means the scan broke,
+        // not that the census shrank.
+        #expect(wrapperCases > 10)
+    }
 }
