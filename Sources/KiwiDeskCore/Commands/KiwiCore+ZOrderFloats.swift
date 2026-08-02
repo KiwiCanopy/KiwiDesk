@@ -174,6 +174,34 @@ extension KiwiCore {
         return zOrderRaiseGeneration.bump()
     }
 
+    /// Drops the raise stamps of the targets the drain decided NOT
+    /// to raise, as soon as it is done deciding.
+    ///
+    /// A stamp is a promise that a raise echo is coming, and it is
+    /// consumed by the first echo that arrives. Since the sequence
+    /// started raising only what is out of place (#684), most of a
+    /// pile is stamped and never raised — and nothing would ever
+    /// consume those stamps, so for the next second a genuine
+    /// CLICK on one of those windows was read as the echo and
+    /// reverted: the click did nothing and the user had to click
+    /// twice (owner QA, 2026-08-02). Keyboard focus was unaffected,
+    /// which is the tell — it never emits the report this ledger
+    /// inspects.
+    ///
+    /// Stamping is still the wide set rather than the plan,
+    /// because the plan is decided on the raise queue after this
+    /// runs, and a raise whose window was NOT stamped is the worse
+    /// failure — its echo moves the ring onto a pile-mate.
+    func releaseZOrderStamps(
+        of targets: [WindowID],
+        keeping raised: [WindowID]
+    ) {
+        let awaited = Set(raised)
+        for id in targets where !awaited.contains(id) {
+            zOrderRaiseEchoes[id] = nil
+        }
+    }
+
     /// Runs a serial Z-order raise sequence on `zOrderQueue`,
     /// holding `zOrderRestoresInFlight` until the main-actor
     /// completion block finishes (#415 architect follow-up).
@@ -220,8 +248,9 @@ extension KiwiCore {
         let drain = zOrderDrain(over: foreign, above: floor)
         let order = foreign.map(\.0)
         zOrderQueue.async {
-            drain.run(order)
+            let raised = drain.run(order)
             Task { @MainActor [weak self] in
+                self?.releaseZOrderStamps(of: order, keeping: raised)
                 completion()
                 self?.zOrderRestoresInFlight -= 1
             }

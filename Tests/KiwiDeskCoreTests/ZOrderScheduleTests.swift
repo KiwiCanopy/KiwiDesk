@@ -70,6 +70,32 @@ private func startDummyPan(_ core: KiwiCore) -> Bool {
 @Suite("Z-order restore scheduling", .serialized)
 @MainActor
 struct ZOrderScheduleTests {
+    /// A raise stamp is a promise that an echo is coming, and the
+    /// first echo consumes it. Since the sequence raises only what
+    /// is out of place (#684), most of a pile is stamped and never
+    /// raised — and an unconsumed stamp eats the user's next CLICK
+    /// on that window for a whole second, because the click's
+    /// focus report is read as the echo and reverted (owner QA,
+    /// 2026-08-02: the click did nothing and had to be repeated).
+    /// So the stamps of the windows the drain did not raise are
+    /// dropped the moment it says so.
+    @Test("Stamps of unraised windows are released")
+    func unraisedStampsAreReleased() {
+        let core = makeCore()
+        let targets = [WindowID(1), WindowID(2), WindowID(3)]
+        _ = core.stampZOrderRaise(targets, excluding: nil)
+        #expect(core.zOrderRaiseEchoes.count == 3)
+        core.releaseZOrderStamps(
+            of: targets,
+            keeping: [WindowID(2)]
+        )
+        // Only the raised one still awaits an echo; the other two
+        // must not swallow a click that lands on them.
+        #expect(
+            Set(core.zOrderRaiseEchoes.keys) == [WindowID(2)]
+        )
+    }
+
     @Test("A scrolling swap in an overflowing row arms a restore")
     func scrollingSwapSchedulesRestore() {
         let core = makeCore()

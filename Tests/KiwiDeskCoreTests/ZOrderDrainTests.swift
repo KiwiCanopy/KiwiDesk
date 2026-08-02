@@ -62,7 +62,12 @@ struct ZOrderDrainTests {
             pinned: WindowID(7)
         )
         let drain = server.drain(above: ids([7]))
-        drain.run(ids([2, 1]))
+        let raised = drain.run(ids([2, 1]))
+        // Both halves: it really did the work (a drain that ran
+        // nothing would satisfy the bound trivially), and it
+        // reports the raises so their stamps are not dropped
+        // while the echoes are still coming.
+        #expect(raised == ids([2, 1]))
         #expect(
             server.clock
                 <= ZOrderDrain.totalLimit + ZOrderDrain.pollInterval
@@ -124,11 +129,16 @@ struct ZOrderDrainTests {
         let server = FakeWindowServer(order: order)
         for id in order { server.latency[id] = .infinity }
         let drain = server.drain()
-        drain.run(order)
+        let raised = drain.run(order)
         // Window 8 belongs at the back and is already there, so
         // the plan is the other seven — every one of them issued,
         // none dropped, inside the total budget.
         #expect(Set(server.raised) == Set(order.dropFirst()))
+        // And the unverified tail is REPORTED as raised, not just
+        // issued: its echoes are still coming, so a caller that
+        // dropped those stamps would let one move the ring onto a
+        // pile-mate.
+        #expect(Set(raised) == Set(server.raised))
         // A poll interval of slack: the fake clock accumulates in
         // 5 ms steps, so it lands ON the limit, not before it.
         #expect(

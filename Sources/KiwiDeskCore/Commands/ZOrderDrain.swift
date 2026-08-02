@@ -20,8 +20,9 @@ import Foundation
 /// raise once the last one is visibly above its predecessors. With
 /// that wait the same row settled correctly, the whole sequence
 /// costing ~55 ms. No raise was ever *lost* in measurement — the
-/// waits never timed out at a 400 ms cap — so the second pass
-/// below is a backstop, not the mechanism.
+/// waits never timed out at a 400 ms cap — which is why a window
+/// that misses its landing is left to the next restore instead of
+/// being retried here (`run` carries that argument).
 ///
 /// It also raises only what is out of place (`plan`): stacking is
 /// by distance from focus, so a short focus jump leaves most pairs
@@ -90,8 +91,14 @@ struct ZOrderDrain: Sendable {
     /// retry ever earns its place; measurement says it has not —
     /// no raise was ever LOST, only late, and a late one is put
     /// right by the next restore.
-    func run(_ order: [WindowID]) {
-        guard isCurrent() else { return }
+    ///
+    /// Returns the windows it actually raised, which is not the
+    /// whole order: the caller stamped every target in the raise
+    /// echo ledger, and a window that is never raised emits no
+    /// echo to consume its stamp — so the caller drops the rest
+    /// (`releaseZOrderStamps`).
+    func run(_ order: [WindowID]) -> [WindowID] {
+        guard isCurrent() else { return [] }
         let deadline = now() + Self.totalLimit
         let targets = Set(order)
         let observed = stacking()
@@ -101,26 +108,31 @@ struct ZOrderDrain: Sendable {
             observed: observed,
             above: floor
         )
-        guard !plan.isEmpty else { return }
+        guard !plan.isEmpty else { return [] }
         let planned = Set(plan)
         // The windows the plan left alone keep their observed
         // order and belong below every raised one — that is
         // what makes them safe to leave alone, so they are
         // part of what each landing is checked against.
         let untouched = seen.filter { !planned.contains($0) }
-        issue(plan, over: untouched, deadline: deadline)
+        return issue(plan, over: untouched, deadline: deadline)
     }
 
     /// Issues the plan, waiting for each raise to land before the
-    /// next. Every window here is raised exactly once — see `run`.
+    /// next. Every window here is raised exactly once — see `run`
+    /// — and every one of them comes back in the return value,
+    /// including the unverified tail: the caller keys the echo
+    /// ledger off this, and a raise left out of it would have its
+    /// stamp dropped while its echo was still in flight, which is
+    /// the focus jump all over again.
     private func issue(
         _ plan: [WindowID],
         over untouched: [WindowID],
         deadline: TimeInterval
-    ) {
+    ) -> [WindowID] {
         var raised: [WindowID] = []
         for (index, id) in plan.enumerated() {
-            guard isCurrent() else { return }
+            guard isCurrent() else { return raised }
             raise(id)
             raised.append(id)
             guard now() < deadline else {
@@ -129,8 +141,9 @@ struct ZOrderDrain: Sendable {
                 // behavior every pile had before this drain, while
                 // a dropped raise is a window left definitely in
                 // the wrong place.
-                for rest in plan.dropFirst(index + 1) { raise(rest) }
-                return
+                let rest = plan.dropFirst(index + 1)
+                rest.forEach(raise)
+                return raised + rest
             }
             _ = awaitLanding(
                 raised: raised,
@@ -138,6 +151,7 @@ struct ZOrderDrain: Sendable {
                 deadline: deadline
             )
         }
+        return raised
     }
 
     /// Polls until the windows raised so far stand front-to-back
