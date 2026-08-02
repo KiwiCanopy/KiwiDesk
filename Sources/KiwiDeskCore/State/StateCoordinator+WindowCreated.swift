@@ -11,6 +11,10 @@ extension StateCoordinator {
     ) {
         effects.appearedWasMinimized =
             minimizedWindows.remove(window.id) != nil
+        // Unconditional, not only on a deminiaturize: a recycled
+        // `CGWindowID` must not inherit a dead window's minimize
+        // record (#673).
+        forgetMinimized(window.id)
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
         windows.upsert(window)

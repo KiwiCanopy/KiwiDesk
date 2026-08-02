@@ -81,6 +81,14 @@ public struct StateCoordinator: Sendable {
     /// the same split as `rememberedSpaces` above.
     var minimizedWindows: Set<WindowID> = []
 
+    /// The same minimizes, in order and carrying the owning app —
+    /// what "restore this app's most recently minimized window"
+    /// needs and the unordered set above cannot give (#673).
+    /// Newest last; written and read only through
+    /// `StateCoordinator+Minimize.swift`, which owns its
+    /// lifetime and its staleness argument.
+    var minimizeOrder: [MinimizedWindow] = []
+
     /// Explicit `make_floating` / `make_tiled` verdicts per
     /// tracked window — the only float state worth carrying
     /// across close/reopen; detection re-derives the rest.
@@ -168,6 +176,16 @@ public struct StateCoordinator: Sendable {
         if minimizedWindows.remove(old) != nil {
             minimizedWindows.insert(new)
         }
+        // The minimize record's id is a `var` for exactly this
+        // (#673). Reflection cannot discover it — its element is
+        // a struct, not a `WindowID` — so `WindowRekeyTests`'
+        // behavioural round-trip is its only net, not
+        // `WindowRekeyParityTests`.
+        if let index = minimizeOrder.firstIndex(
+            where: { $0.id == old }
+        ) {
+            minimizeOrder[index].id = new
+        }
         if let intent = manualFloatOverrides.removeValue(
             forKey: old
         ) {
@@ -196,6 +214,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
             }
+            forgetMinimized(pid: pid)
 
         case .windowCreated(let window):
             applyWindowCreated(window, effects: &effects)
@@ -205,6 +224,9 @@ public struct StateCoordinator: Sendable {
             if wasMinimized {
                 rememberedSpaces[id] = nil
                 minimizedWindows.insert(id)
+                // Before `windows.remove(id)` below: the record
+                // needs the snapshot's pid and bundle id (#673).
+                rememberMinimized(id)
             } else if let space = workspaces.space(of: id) {
                 rememberedSpaces[id] = space
             }

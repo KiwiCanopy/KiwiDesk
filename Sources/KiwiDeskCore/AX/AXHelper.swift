@@ -153,6 +153,23 @@ public enum AXHelper {
         ) ?? false
     }
 
+    /// Brings a minimized window back out of the Dock — the
+    /// setter twin of `isMinimized`, writing the same attribute
+    /// (#673). Activating an app does NOT deminiaturize, so this
+    /// is the only way to make an all-minimized app show
+    /// something. Returns whether AX accepted the write; a
+    /// window that is already restored accepts it as a no-op.
+    @discardableResult
+    public static func unminimize(
+        _ element: AXUIElement
+    ) -> Bool {
+        AXUIElementSetAttributeValue(
+            element,
+            kAXMinimizedAttribute as CFString,
+            kCFBooleanFalse
+        ) == .success
+    }
+
     /// Whether a window is in native (green-button) fullscreen.
     /// Standard AX attribute string; the SDK header exposes no
     /// Swift constant for it. Snapshot at track/reconcile only —

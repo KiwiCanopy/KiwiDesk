@@ -3273,6 +3273,12 @@ desktop are untracked while you are away and rejoin the cycle
 when you return to their desktop — see
 [Accepted limitations](accepted-limitations.md).
 
+If **every** window of the app is minimized, the shortcut restores
+exactly one — the most recently minimized — and brings the app
+forward. While any window is still visible, minimized windows are
+left alone: the shortcut focuses and cycles the visible ones and
+never pulls a window back out of the Dock.
+
 **Example:**
 
 ```lua

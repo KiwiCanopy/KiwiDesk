@@ -273,6 +273,16 @@ extension KiwiCore {
                     $0.bundleIdentifier?.lowercased() == bundleID
                 })
         {
+            // `activate()` does not deminiaturize, so an app whose
+            // windows are ALL minimized came forward showing
+            // nothing at all (#673). Restore exactly one first —
+            // the most recently minimized, the Dock's precedent
+            // for clicking an app icon — and leave the rest
+            // parked.
+            restoreOneMinimizedIfNothingVisible(
+                pid: running.processIdentifier,
+                bundleID: bundleID
+            )
             running.activate()
             return .ok()
         }
