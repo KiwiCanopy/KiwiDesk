@@ -18,10 +18,6 @@ extension AppDelegate {
 
     func showOnboarding() {
         if let window = onboardingWindow {
-            // No `activateAsRegular()` here (unlike Settings' reuse
-            // branch): `windowWillClose` nils `onboardingWindow` on
-            // close, so a non-nil window is guaranteed still
-            // `.regular` and the promotion never needs repeating.
             NSApp.forceFront(window)
             return
         }
@@ -95,7 +91,9 @@ extension AppDelegate {
         // step sends the user to (#331).
         onboardingWindow = window
 
-        NSApp.activateAsRegular()
+        // No promotion to `.regular` — `forceFront` shows and
+        // activates the window from `.accessory` on its own, which
+        // is the whole reason it exists.
         NSApp.forceFront(window)
     }
 
@@ -148,6 +146,5 @@ extension AppDelegate {
         {
             OnboardingDiscovery.markShown()
         }
-        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 }

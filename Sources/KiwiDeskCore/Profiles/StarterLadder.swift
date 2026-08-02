@@ -29,7 +29,7 @@ public enum StarterLadder {
 
     /// The mode for each 1-based position within a block.
     private static let blockModes: [LayoutMode] = [
-        .scrolling, .bsp, .track, .grid, .floating,
+        .scrolling, .stack, .track, .grid, .floating,
     ]
 
     /// Total spaces for `displayCount` displays (floored at one —
@@ -44,7 +44,10 @@ public enum StarterLadder {
             .map { SpaceID($0) }
     }
 
-    /// Sparse per-space modes.
+    /// A mode for **every** space, not a sparse diff against the
+    /// fallback: the ladder's whole point is that each rung is
+    /// stated, so changing the global fallback must not silently
+    /// move one of them.
     public static func spaceModes(
         displayCount: Int
     ) -> [SpaceID: LayoutMode] {

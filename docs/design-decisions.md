@@ -1000,14 +1000,50 @@ frames across monitors before. (#445)
 
 ### Permanent accessory mode (no activation policy switching)
 
+**[Principle]**
+
+**No window controller may change the activation policy.** A
+content window comes forward through `NSApp.forceFront`, which
+shows and activates it from `.accessory`; opening Settings adds no
+Dock tile and no menu bar. This removes the macOS 14+ demotion
+bugs and focus-handoff lockouts wholesale, so shortcuts and focus
+commands stay reliable without any dynamic switching.
+
+Stated as an obligation on controllers rather than as a claim
+about the process, because the claim was the failure. The rule
+used to be promote-on-open / demote-on-close, and a demote had to
+survive being the *last* of {Settings, onboarding, Config Issues}
+to close — one rule spread over three controllers, each holding
+half of it. Removing the demote from Settings while leaving the
+promotion in onboarding left exactly one reachable order
+(onboarding → Settings → close both) that stranded the app
+`.regular` with nothing on screen, which is the invisible-but-
+foreground state that breaks `focusedCommandDenial`'s
+`front == focused.pid` test. Not promoting is the only form of the
+rule with nowhere left to forget it.
+
+**One exception, and it is structural rather than trusted:** the
+already-running alert in `SingleInstanceGuard` raises `.regular`
+so its modal is not buried, and the process `exit(1)`s
+immediately. No window can outlive that promotion, so it cannot
+strand anything.
+
+The menu bar this policy hides is still built (`MainMenu`) —
+AppKit routes key equivalents through `NSApp.mainMenu` whatever
+the policy, and it is what gives the Settings text fields
+Cut/Copy/Paste/Undo.
+
+### Settings window is not miniaturizable
+
 **[Rationale]**
 
-**KiwiDesk stays permanently in `.accessory` mode (never promoting to
-`.regular`).** Opening the Settings window no longer promotes the app to
-`.regular` or adds a Dock icon. This completely eliminates macOS 14+
-activation policy demotion bugs and focus handoff lockouts, guaranteeing that
-shortcuts and window focus commands remain 100% reliable at all times without
-dynamic policy switching.
+**The Settings window omits `.miniaturizable` from its style
+mask.** A minimized window goes to the Dock — and KiwiDesk has no
+Dock tile to restore it from, because it never leaves `.accessory`
+(above). Minimizing would therefore park the dashboard somewhere
+the user has no affordance to bring it back from; reopening from
+the menu-bar quick menu is the only route, and a disabled yellow
+button says that up front instead of letting them discover it.
 
 ### Open at login
 
