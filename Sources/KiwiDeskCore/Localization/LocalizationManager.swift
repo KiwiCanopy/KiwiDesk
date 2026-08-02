@@ -40,15 +40,24 @@ public final class LocalizationManager: ObservableObject {
     /// "System default" reads `Locale.preferredLanguages` — the
     /// user's ordered language list — and not
     /// `Locale.current.language`, which is the *resolved* locale
-    /// for this process and so answers whatever the bundle can
-    /// serve. Inside the packaged `.app` that made the branch
-    /// dead: `scripts/build-app.sh` declares
-    /// `CFBundleLocalizations`, and until it did, macOS resolved
-    /// every launch to `CFBundleDevelopmentRegion` (English) no
-    /// matter the system language. Both halves are needed and
-    /// neither is sufficient — a `swift run` build has no
-    /// `Info.plist` at all, and the plist alone still leaves the
-    /// script/region matching in `LocaleMatch` to do.
+    /// for this process. Inside the packaged `.app` that
+    /// resolution answered `CFBundleDevelopmentRegion` (English)
+    /// whatever the system language was, because the bundle
+    /// declared no other localization, so this branch could not
+    /// return anything else (#659). It never reproduced under
+    /// `swift run`, which has no `Info.plist` at all.
+    ///
+    /// `scripts/build-app.sh` now also declares
+    /// `CFBundleLocalizations`, and the two changes ship
+    /// together. Scoping the claim honestly: `preferredLanguages`
+    /// is documented as the *user's* list rather than the
+    /// bundle-resolved one, so the matcher change alone may well
+    /// be what fixes this path — that was not measured inside a
+    /// packaged build. The plist is independently right (it is
+    /// what makes macOS treat KiwiDesk as multilingual at all,
+    /// including its per-app language entry in System Settings),
+    /// which is why it is not worth unpicking which half carries
+    /// the fix.
     public var effectiveLocale: String? {
         if let selection {
             // Explicit English: no `en.json` ships (English lives

@@ -31,6 +31,18 @@ silently, but only the plist's does so dangerously (an app
 declaring a lower minimum than it runs on, versus a wrong
 rendition set).
 
+**The plist must declare `CFBundleLocalizations`, derived from
+`Sources/KiwiDeskCore/Resources/Locales`.** A bundle that names
+one localization gets that one back: macOS resolves the process
+locale to `CFBundleDevelopmentRegion` and every shipped catalog
+becomes unreachable except by picking it by hand in Settings
+(#659). Nothing crashes and nothing logs, and it cannot reproduce
+under `swift run`, which has no plist at all — so the only signal
+is a user reporting the app is English. `AppPlistLocalizationTests`
+holds both halves: that the key is there, and that its array is
+the glob's expansion rather than a typed list that would go stale
+on the next locale.
+
 It **discovers the signing identity** from the keychain. That
 string is not a secret (any user can read it out of a shipped
 binary with `codesign -dv`), so it is never hardcoded to a

@@ -76,12 +76,44 @@ struct LocaleMatchTests {
                 available: catalogs
             ) == "pt-BR"
         )
-        // Alphabetically first, so a bare `zh` is deterministic.
+        // A bare `zh` does NOT exercise widening, despite looking
+        // like the obvious case: `maximalIdentifier` turns it into
+        // `zh-Hans-CN`, which truncates onto the `zh-Hans` catalog
+        // exactly. Kept as a regression on that, not as evidence
+        // about `widen`.
         #expect(
             LocaleMatch.best(
                 preferences: ["zh"],
                 available: catalogs
             ) == "zh-Hans"
+        )
+    }
+
+    /// Widening picks the alphabetically first refinement, so the
+    /// answer cannot depend on the order a directory listing
+    /// happened to yield.
+    ///
+    /// This needs two refining catalogs to say anything: with one
+    /// `pt-*` shipped, dropping the `.sorted()` the docstring
+    /// argues for changes no result, and the shipped set has
+    /// exactly one. So the fixture supplies both Portuguese
+    /// catalogs and passes them in the *wrong* order.
+    @Test("Widening is ordered, not whatever came first")
+    func widenIsDeterministic() {
+        let reversed = ["pt-PT", "pt-BR"]
+        #expect(
+            LocaleMatch.best(
+                preferences: ["pt"],
+                available: reversed
+            ) == "pt-BR"
+        )
+        // And the same answer from the other input order, which is
+        // the whole claim.
+        #expect(
+            LocaleMatch.best(
+                preferences: ["pt"],
+                available: ["pt-BR", "pt-PT"]
+            ) == "pt-BR"
         )
     }
 

@@ -37,11 +37,12 @@ import Testing
 ///   of `Resources/Locales`.
 @Suite("App plist localizations")
 struct AppPlistLocalizationTests {
+    /// Routed through the shared helper rather than re-deriving
+    /// the root: the sibling script-reading suites all use it, and
+    /// a hand-counted `deletingLastPathComponent` chain is exactly
+    /// the depth hazard it exists to hold in one place.
     private static var buildScript: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
+        scriptFixtureRepoRoot()
             .appendingPathComponent("scripts")
             .appendingPathComponent("build-app.sh")
     }
@@ -136,6 +137,13 @@ struct AppPlistLocalizationTests {
             )
         )
         #expect(script.contains(#""$LOCALES"/*.json"#))
+        // The heredoc delimiter must stay UNQUOTED. Quote it
+        // (`<<'PLISTEOF'`) and the shell stops expanding the body,
+        // so the plist ships the literal text `$LOCALE_KEYS` while
+        // every other check here still passes — the array is
+        // present, derived-looking, and completely inert.
+        #expect(script.contains(#"<<PLISTEOF"#))
+        #expect(!script.contains(#"<<'PLISTEOF'"#))
         // The appended value is the globbed filename's stem, not
         // a literal — the link between the loop and the list.
         #expect(
