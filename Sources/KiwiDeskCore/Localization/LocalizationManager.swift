@@ -36,6 +36,19 @@ public final class LocalizationManager: ObservableObject {
     /// shipped, else English (`nil` meaning English — there is
     /// no `en.json` to load; English lives inline at call
     /// sites).
+    ///
+    /// "System default" reads `Locale.preferredLanguages` — the
+    /// user's ordered language list — and not
+    /// `Locale.current.language`, which is the *resolved* locale
+    /// for this process and so answers whatever the bundle can
+    /// serve. Inside the packaged `.app` that made the branch
+    /// dead: `scripts/build-app.sh` declares
+    /// `CFBundleLocalizations`, and until it did, macOS resolved
+    /// every launch to `CFBundleDevelopmentRegion` (English) no
+    /// matter the system language. Both halves are needed and
+    /// neither is sufficient — a `swift run` build has no
+    /// `Info.plist` at all, and the plist alone still leaves the
+    /// script/region matching in `LocaleMatch` to do.
     public var effectiveLocale: String? {
         if let selection {
             // Explicit English: no `en.json` ships (English lives
@@ -46,11 +59,10 @@ public final class LocalizationManager: ObservableObject {
             return available.contains(selection)
                 ? selection : nil
         }
-        let system = String(
-            Locale.current.language.languageCode?
-                .identifier ?? ""
+        return LocaleMatch.best(
+            preferences: Locale.preferredLanguages,
+            available: available
         )
-        return available.contains(system) ? system : nil
     }
 
     /// Looks up `key` in the effective locale; returns `english`

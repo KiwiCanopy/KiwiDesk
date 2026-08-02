@@ -272,7 +272,13 @@ setting the level here is equivalent to running that command.
 Go to **General** (in the **System** group) and pick a display
 language. It covers the Settings window, the dashboard, and the
 menu-bar quick menu. "System default" follows your macOS language
-if KiwiDesk ships a translation, otherwise English. Your choice
+if KiwiDesk ships a translation, otherwise English — and it walks
+your whole preferred-language list, not just the first entry, so a
+language KiwiDesk doesn't speak yet falls through to the next one
+you actually read rather than straight to English. Regional and
+script variants resolve to the closest catalog that ships: a
+Traditional Chinese system gets `zh-Hant` (never Simplified), and a
+European Portuguese one gets the Brazilian catalog. Your choice
 applies instantly, touches no Lua or profile files, and persists
 in app preferences only (`UserDefaults`, key `"language"`) — it
 never flips the app to raw-editor mode. To add or fix a
