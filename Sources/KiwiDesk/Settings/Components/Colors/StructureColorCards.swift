@@ -91,9 +91,14 @@ struct DragColorCard: View {
         }
     }
 
-    /// One column: subheading, preview, its two tints — on the
-    /// narrowed Drag label axis (#231) so a half-width row keeps
-    /// its label readable.
+    /// One column: subheading, preview, its two tints.
+    ///
+    /// The narrowed label axis (#231) is passed by `dragRow`
+    /// itself, NOT published here as an environment value:
+    /// `HexColorField.labelWidth` is a plain parameter that
+    /// reads no environment, so a publish would reach nothing —
+    /// which is precisely how these columns came to render on
+    /// the full-width axis in the first place.
     private func column(
         title: String,
         ghost: Bool,
@@ -115,10 +120,6 @@ struct DragColorCard: View {
             AdvancedColorRows(model: model, keys: keys)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .environment(
-            \.settingsLabelColumn,
-            SettingsMetrics.dragColumnLabelColumn
-        )
     }
 
     private var caption: String {

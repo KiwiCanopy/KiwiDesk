@@ -153,13 +153,22 @@ struct SettingsColorSurfaceTests {
     /// restated constant.
     @Test("only the mark rows offer Automatic")
     func automaticFlagMatchesTheColorSurface() throws {
+        // The ARGUMENT, not the literal `automatic: true`: a
+        // swatch given `automatic: someExpression` would
+        // contribute zero to a literal count and pass silently,
+        // which is a fail-open in a guard whose whole job is to
+        // catch a wrongly-flagged row. `ColorField.swift`
+        // declares the parameter and plumbs it through, so it is
+        // the one file excluded — every other occurrence in the
+        // tree is a call site handing a swatch the flag.
         var flags = 0
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        for file in try SourceScan.swiftSources(under: settingsDir)
+        where file.lastPathComponent != "ColorField.swift" {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
             flags +=
-                source.components(separatedBy: "automatic: true")
+                source.components(separatedBy: "automatic:")
                 .count - 1
         }
         let automaticPaths = ColorPaletteKeys.all.filter(

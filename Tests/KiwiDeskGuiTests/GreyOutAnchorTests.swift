@@ -20,6 +20,12 @@ struct GreyOutAnchorTests {
     /// occur: a file anchoring TWO sections with one expression
     /// would keep a bare `contains` green with one of the pair
     /// deleted — the cannot-fail needle #520 warned about.
+    ///
+    /// EXACT, not a floor. `>=` re-opens the same hole one size
+    /// up: an expression that later gains a third occurrence
+    /// could lose one of three and stay green. A gate or anchor
+    /// gaining an occurrence is a conscious edit, so it updates
+    /// the count.
     private let anchors: [(file: String, anchor: String, count: Int)] = [
         (
             "FocusBorderEditor.swift",
@@ -96,7 +102,7 @@ struct GreyOutAnchorTests {
                     separatedBy: anchor
                 ).count - 1
             #expect(
-                found >= count,
+                found == count,
                 Comment(
                     rawValue:
                         "\(name) has \(found) of \(count) gate "

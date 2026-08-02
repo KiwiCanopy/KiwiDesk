@@ -113,7 +113,7 @@ struct GreyOutParityTests {
         // and nothing else — used to live inline here as a
         // shape pin whose green was not coverage; it is now a
         // pure function with a behavioural test
-        // (`ColorsCensusRenderTests`,
+        // (`ColorsGateTests`,
         // `exemptionEscapesOnlyTheContainerGate`), so this
         // needle no longer has to stand in for it.
         //
