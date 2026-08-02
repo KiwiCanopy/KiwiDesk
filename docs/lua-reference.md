@@ -1537,7 +1537,7 @@ be **dragged** along the bar to reorder the windows.
 ### app_bar.set_edge
 
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
+(default `"bottom"`).
 
 **Does:** sets the screen edge the bar occupies, for every layout
 that shows a bar. The edge is absolute — it no longer follows the
@@ -1583,7 +1583,7 @@ app_bar.set_thickness(32)
 
 ### app_bar.set_background_style
 
-**Expects:** `"boxed"` or `"plain"`.
+**Expects:** `"boxed"` or `"plain"` (default `"plain"`).
 
 **Does:** sets WHERE the background is drawn:
 - **boxed** — a box per item honoring the corner roundness
@@ -1799,8 +1799,8 @@ app_bar.set_item_color("#EAF3EE")
 **Expects:** a hex color.
 
 **Does:** sets the fill under the items — a box per item
-(`boxed`) or one shared plate (`plain`). Default `#14201C66`,
-translucent dark moss. With the `liquid_glass` finish on, it
+(`boxed`) or one shared plate (`plain`). Default `#14201CCC`,
+dark moss at 80% opacity. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
 refracts it into its hue (see `app_bar.set_liquid_glass`). Under
 glass the backdrop's opacity is held at ~65 % so the blur stays
@@ -1810,7 +1810,7 @@ full).
 **Example:**
 
 ```lua
-app_bar.set_fill_color("#14201C66")
+app_bar.set_fill_color("#14201CCC")
 ```
 
 ### app_bar.set_active_item_color
@@ -1957,7 +1957,7 @@ space_bar.set_enabled(true)
 ### space_bar.set_edge
 
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"left"`).
+(default `"top"`).
 
 **Does:** sets the screen edge the bar occupies. Sharing an
 edge with the App Bar is supported: the Space Bar stays
@@ -2069,7 +2069,7 @@ space_bar.set_icon_source("app_font")
 
 ### space_bar.set_background_style
 
-**Expects:** `"boxed"` or `"plain"` (default `"boxed"`).
+**Expects:** `"boxed"` or `"plain"` (default `"plain"`).
 
 **Does:** boxes each Space item, or draws all items on one
 shared strip — same vocabulary as the App Bar. Liquid Glass is a

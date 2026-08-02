@@ -261,7 +261,12 @@ struct SpaceBarSameEdgeTests {
         // Space Bar off → never.
         #expect(!settings.spaceBarSharesEdgeWithAppBar)
         settings.spaceBarStyle.enabled = true
-        // Defaults: space left, app bars top → no.
+        // Both edges are pinned rather than inherited: this suite
+        // is about the predicate, not about which edges happen to
+        // ship, and #660 moved both defaults.
+        settings.spaceBarStyle.edge = .left
+        settings.appBarStyle.edge = .top
+        // Diverging → no.
         #expect(!settings.spaceBarSharesEdgeWithAppBar)
         // Global App Bar moves to left → yes.
         settings.appBarStyle.edge = .left

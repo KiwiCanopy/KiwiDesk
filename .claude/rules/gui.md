@@ -60,6 +60,20 @@ Shared control conventions (help affordance, control choice, row
 tiers) are elaborated in `docs/ui-patterns.md`; the durable
 product/UX rulings behind them in `docs/design-decisions.md`.
 
+## No window controller changes the activation policy
+
+A content window comes forward with `NSApp.forceFront`, which
+shows and activates it from `.accessory`. Never
+`setActivationPolicy` from a controller, and never a helper that
+wraps one.
+
+`ActivationPolicySeamTests` holds the line and **its `allowed` map
+is the one copy of who may** — today launch and the
+single-instance alert, each for a reason stated there. The
+argument, and why the rule is phrased as an obligation on
+controllers rather than as a claim about the process, is
+"Permanent accessory mode" in `docs/design-decisions.md`.
+
 ## File layout
 
 Section bodies in `Settings/Sections/`, their widgets in

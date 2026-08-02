@@ -4,14 +4,17 @@ import KiwiDeskCore
 /// Builds KiwiDesk's application menu bar.
 ///
 /// A bare SwiftPM executable ships no `MainMenu.nib`, so
-/// `NSApp.mainMenu` is nil until we install one. That gap is
-/// invisible while the app is `.accessory` (menu-bar-only apps
-/// show no menu bar), but the moment it promotes to `.regular`
-/// for the Settings/onboarding window it becomes the *active*
-/// app — and macOS's auto-hide menu bar has nothing to reveal on
-/// a top-edge hover, so the bar never slides down (#329). A real
-/// menu bar also restores the standard Edit shortcuts
-/// (Cut/Copy/Paste/Undo) the Settings text fields otherwise lack.
+/// `NSApp.mainMenu` is nil until we install one.
+///
+/// **It is still needed even though the app never leaves
+/// `.accessory` and so never displays a menu bar.** AppKit
+/// dispatches menu key equivalents through `NSApp.mainMenu` for
+/// the key window whatever the activation policy, so this is what
+/// gives the Settings text fields their standard Edit shortcuts
+/// (Cut/Copy/Paste/Undo) — without it they have none. It
+/// originally also fixed an auto-hide menu bar with nothing to
+/// reveal on a top-edge hover (#329), which the permanent
+/// `.accessory` policy now prevents outright.
 ///
 /// Titles route through `L(_:_:)` like every GUI string (#9);
 /// the items use AppKit's standard first-responder selectors so
