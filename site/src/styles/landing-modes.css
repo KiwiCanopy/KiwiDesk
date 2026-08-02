@@ -35,32 +35,18 @@
 :root[data-mode="dev"] section.dev-only {
   display: block;
 }
-/* Ko-fi support controls are Nerd-only above the footer: the icon
-   button in the nav and the ghost button in the final CTA. The
-   footer Ko-fi stays in both modes. These two elements set their
-   own `display` (inline-grid / inline-flex), which ties with and
-   beats the generic `.dev-only { display: none }` in the cascade
-   (landing.css @imports this file first). So hide them explicitly
-   in Simple with a higher-specificity rule, and restore the right
-   display in Nerd (generic `initial` would compute to inline). */
-:root[data-mode="simple"] a.nav__support.dev-only,
+/* A `.btn` carrying `.dev-only` — today the repo CTA in the final
+   section — sets its own `display: inline-flex`, which ties with
+   and beats the generic `.dev-only { display: none }` in the
+   cascade (landing.css @imports this file first). So hide it
+   explicitly in Simple at higher specificity, and restore the
+   right display in Nerd (generic `initial` computes to inline on
+   an <a>). */
 :root[data-mode="simple"] a.btn.dev-only {
   display: none;
 }
-:root[data-mode="dev"] a.nav__support.dev-only {
-  display: inline-grid;
-}
 :root[data-mode="dev"] a.btn.dev-only {
   display: inline-flex;
-}
-/* The Nerd restore above (specificity 0,4,1) would otherwise beat
-   the ≤460px phone hide of the nav Ko-fi button (landing.css, a
-   media query adds no specificity), making it reappear and re-crowd
-   the nav on phones. Re-assert the hide at matching specificity. */
-@media (max-width: 460px) {
-  :root[data-mode="dev"] a.nav__support.dev-only {
-    display: none;
-  }
 }
 :root[data-mode="dev"] .simple-only {
   display: none;
@@ -850,6 +836,14 @@
   color: var(--text-faint);
   font-size: 0.88rem;
   font-weight: 600;
+}
+/* The hero and footer quotes carry no card padding to separate a
+   byline from the line above it, so give it its own gap. Scoped
+   rather than folded into the rule above, which sits inside a card
+   that already provides one. */
+.quote-band__mark .quote-card__byline,
+.quote-aside--footer .quote-card__byline {
+  margin-top: 0.75rem;
 }
 .quote-card--dev p {
   font-family: var(--font);
