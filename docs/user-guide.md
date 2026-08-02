@@ -477,7 +477,7 @@ windows land in the first space of the profile's list.
 The **Layout Defaults** section (in the **Design** group) controls
 tiling for every space in this profile.
 
-### Modes & Gaps
+### Modes
 
 Pick a layout mode for each space:
 
@@ -492,10 +492,12 @@ Pick a layout mode for each space:
   (#128).
 - **Floating**: every window floats freely, no tiling.
 
-Set gaps with sliders (uniform gap, or per-edge: top, bottom, left,
-right, plus inner gaps between windows). Gaps are carved out of the
-layout — windows never overlap them. The app bar (if shown) also
-carves its space from the layout.
+Gaps are carved out of the layout — windows never overlap them —
+and the app bar, if shown, carves its space the same way. The
+sliders that set them (uniform, or per-edge: top, bottom, left,
+right, plus inner gaps between windows) are not on this page:
+they live in **Gaps & Borders**, with the rest of the structure
+KiwiDesk draws around a window.
 
 ### Per-Layout Tuning
 
