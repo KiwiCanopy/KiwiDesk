@@ -284,22 +284,15 @@ extension KiwiCore {
             openOrFocus.activate(pid)
             return .ok()
         }
-        // LaunchServices resolves the bundle id to its install
-        // location — finds apps the old /Applications path scan
-        // missed (Finder in CoreServices, apps in ~/Applications).
-        guard
-            let url = NSWorkspace.shared.urlForApplication(
-                withBundleIdentifier: bundleID
-            )
-        else {
+        // Not running (or `newInstance`): LaunchServices resolves
+        // the bundle id to its install location — finding apps the
+        // old /Applications path scan missed (Finder in
+        // CoreServices, apps in ~/Applications). Seamed like the
+        // branch above, so no test can launch a real app by naming
+        // one that happens to be installed.
+        guard openOrFocus.openApp(bundleID, newInstance) else {
             return .fail("app not found: \(bundleID)")
         }
-        let config = NSWorkspace.OpenConfiguration()
-        config.createsNewApplicationInstance = newInstance
-        NSWorkspace.shared.openApplication(
-            at: url,
-            configuration: config
-        )
         return .ok()
     }
 

@@ -8,10 +8,12 @@ import Testing
 /// deminiaturize. It now restores exactly one, the most recently
 /// minimized, and only when the app has nothing up.
 ///
-/// The AX walk and the attribute write sit behind two seams
-/// (`appWindowCensus`, `deminiaturizeWindow`), so the two
-/// decisions — *whether* to reach into the Dock and *which*
-/// window to bring back — are reachable without a real app.
+/// Every machine touch of the already-running branch sits behind
+/// `openOrFocus` — the app lookup, the window census, the
+/// deminiaturize, the activate and the launch — so the two
+/// decisions (*whether* to reach into the Dock, and *which*
+/// window to bring back) are reachable without a real app, and
+/// their ORDER is observable through one shared log.
 @MainActor
 @Suite("Open or Focus restore (#673)", .serialized)
 struct OpenOrFocusRestoreTests {
@@ -46,10 +48,11 @@ struct OpenOrFocusRestoreTests {
     }
 
     /// States the world for a running app at pid 7 and records
-    /// every touch. Nothing here reaches a real app: the lookup
-    /// is seamed too, so no test can activate or launch anything
-    /// (`tests.md` — a test reaches the machine only through a
-    /// seam it injects).
+    /// every touch. Both branches of `launch` are seamed — the
+    /// running one and the LaunchServices fall-through — so a
+    /// test can neither activate nor start a real app, whatever
+    /// bundle id it names (`tests.md`: a test reaches the machine
+    /// only through a seam it injects).
     private func wire(
         _ core: KiwiCore,
         visible: Int,

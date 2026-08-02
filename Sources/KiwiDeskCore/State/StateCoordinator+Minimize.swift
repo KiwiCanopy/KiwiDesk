@@ -44,10 +44,12 @@ extension StateCoordinator {
     ///
     /// The `guard` is narrower than the `Set.insert` it replaced,
     /// which filed an untracked id too. No production path
-    /// reaches it: both `.windowDestroyed` emitters gate on the
-    /// window being in `elements[pid]`
-    /// (`EventLoop+Notifications`, `EventLoop+Tabs`), which is
-    /// the same population `windows` holds.
+    /// reaches the difference: an emitter can only get here by
+    /// reporting `wasMinimized: true`, and every one that does
+    /// gates on the window being in `elements[pid]` — the same
+    /// population `windows` holds. (The detach emitter in
+    /// `EventLoop+AppObservation` hardcodes `false`, so it never
+    /// arrives.)
     mutating func rememberMinimized(_ id: WindowID) {
         guard let window = windows[id] else { return }
         minimizeOrder.removeAll { $0.id == id }

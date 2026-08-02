@@ -1,14 +1,14 @@
 import AppKit
 import Foundation
 
-/// Every machine touch Open or Focus makes on its already-running
-/// branch, in one place so a test can state the world and record
-/// what the command did to it (#673).
+/// Every machine touch Open or Focus makes — both branches of
+/// `launch` — in one place, so a test can state the world and
+/// record what the command did to it (#673).
 ///
-/// A bundle rather than four properties on `KiwiCore`: they are
-/// one feature's read/write pair plus the two calls that bracket
-/// them, they are always substituted together, and `KiwiCore`'s
-/// own file is at its §2.1 ceiling. Each defaults LIVE — there is
+/// A bundle rather than separate properties on `KiwiCore`: they
+/// are one feature's seams, always substituted together, and the
+/// fixture proves it — a test replaces a struct's fields instead
+/// of assigning five closures. Each defaults LIVE — there is
 /// no wiring step to forget, unlike the `nil`-defaulted guards
 /// (`frontmostPIDProvider`), so the default IS the implementation
 /// and a test overrides what it needs.
@@ -39,6 +39,32 @@ struct OpenOrFocusSeams {
     /// its way up and arriving a beat behind it.
     var activate: @MainActor (pid_t) -> Void = { pid in
         NSRunningApplication(processIdentifier: pid)?.activate()
+    }
+
+    /// Launches the app — the branch taken when it is not running,
+    /// or when `spawn_new` asks for a fresh instance. Returns
+    /// false when LaunchServices cannot resolve the bundle id,
+    /// which is the command's "app not found".
+    ///
+    /// Seamed for the same reason as the rest and not because
+    /// #673 needs it: without it a test naming any INSTALLED
+    /// bundle id launches that app for real, which is how the
+    /// suite came to activate Finder on every run.
+    var openApp: @MainActor (String, Bool) -> Bool = {
+        bundleID,
+        newInstance in
+        guard
+            let url = NSWorkspace.shared.urlForApplication(
+                withBundleIdentifier: bundleID
+            )
+        else { return false }
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = newInstance
+        NSWorkspace.shared.openApplication(
+            at: url,
+            configuration: config
+        )
+        return true
     }
 }
 
@@ -100,7 +126,7 @@ extension KiwiCore {
         let minimized: [WindowID]
     }
 
-    /// The live `appWindowCensus`, one `kAXWindows` walk.
+    /// The live `census`, one `kAXWindows` walk.
     @MainActor
     static func readAppWindowCensus(
         pid: pid_t
@@ -113,7 +139,7 @@ extension KiwiCore {
         )
     }
 
-    /// The live `deminiaturizeWindow`. Re-finds the element from
+    /// The live `deminiaturize`. Re-finds the element from
     /// the id — a second short walk on a press that is already
     /// reaching into the Dock, in exchange for a seam whose
     /// payload is a plain value.
