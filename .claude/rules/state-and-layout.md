@@ -53,8 +53,9 @@ editing here:
   subsystem rule that owns it
   ([input-and-animation.md](input-and-animation.md)) only loads
   under `Animation/`.
-- Focus KiwiDesk **grants unasked** — the create fold's, not one
-  macOS reported — consults `ManagedWindow.isTransientOverlay`
+- The **create fold's spawn grant** — the focus a fresh window
+  gets for existing, not one macOS reported — consults
+  `ManagedWindow.isTransientOverlay`
   first, and asks **state** rather than the incoming snapshot,
   because the create fold clears the flag when a remembered-tiled
   restore heals the window. A popup that surfaces as an AX window
