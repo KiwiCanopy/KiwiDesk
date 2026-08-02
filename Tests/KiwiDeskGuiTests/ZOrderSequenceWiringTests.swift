@@ -28,6 +28,16 @@ import Testing
 /// polarity that works: a containment guard is inert when the
 /// failure is a missing element, and here the failure IS the
 /// missing call.
+///
+/// **What it still cannot see**, stated so the next reader does
+/// not mistake green here for coverage: it matches source text,
+/// so it verifies that the named call appears with the named
+/// argument, never that the value is *correct*. A right call with
+/// a wrong argument, or a same-named helper doing something else,
+/// passes. The semantics live in the unit tests
+/// (`floatFloorExcludesTheFocusedWindow`,
+/// `unraisedStampsAreReleased`) — this suite only answers "is it
+/// wired", which is the half that was free to regress.
 @Suite("Z-order sequence wiring (#684)")
 struct ZOrderSequenceWiringTests {
 
@@ -55,14 +65,26 @@ struct ZOrderSequenceWiringTests {
             Issue.record("\(function) not found in \(file)")
             return ""
         }
-        // Past the signature, then the balanced body.
-        var cursor = start
-        _ = SourceScan.balanced(
-            characters,
-            from: &cursor,
-            open: "(",
-            close: ")"
-        )
+        // Past the signature, then the balanced body. The cursor
+        // must land ON the opening paren first: `balanced` returns
+        // nil without advancing when the next non-space character
+        // is not its opener, which would silently reduce the walk
+        // below to "the first `{` after the `func` keyword" — and
+        // a signature carrying a brace (a defaulted closure
+        // parameter) would then capture that instead of the body
+        // (guard-prover, 2026-08-02).
+        var cursor = start + marker.count - 1
+        guard
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            ) != nil
+        else {
+            Issue.record("\(function): signature not balanced")
+            return ""
+        }
         while cursor < characters.count, characters[cursor] != "{" {
             cursor += 1
         }
@@ -80,10 +102,15 @@ struct ZOrderSequenceWiringTests {
             of: "performZOrderSequence",
             in: "KiwiCore+ZOrderFloats.swift"
         )
-        // The raised set has to be taken from the drain and handed
-        // to the release — either half alone is the bug.
-        #expect(source.contains("drain.run("))
-        #expect(source.contains("releaseZOrderStamps("))
+        // Match the EDGE, not the two nodes. Both calls present
+        // with nothing flowing between them is not a contrived
+        // shape: `keeping: []` releases every stamp, including
+        // those of windows whose echoes are still in flight, which
+        // is the focus jump this branch already shipped once. A
+        // two-string presence check passed that mutation
+        // (guard-prover, 2026-08-02).
+        #expect(source.contains("let raised = drain.run("))
+        #expect(source.contains("keeping: raised"))
     }
 
     @Test("The float raise derives its floor through the rule")
