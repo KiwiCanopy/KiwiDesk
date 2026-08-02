@@ -11,7 +11,7 @@ an asset catalog — `swift build` on CI does not run actool).
 | `og-banner.svg` | `og-banner.jpg` (1200×630) | Social link-preview card; embeds `logo.svg` by relative href — run `./generate-og.sh` |
 | `logo_wordmark.svg` | `Wordmark.png` (512 px) | Settings ▸ General ▸ About (light mode) |
 | `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | Settings ▸ General ▸ About (dark mode) |
-| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances) + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
+| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances). No longer a runtime Dock icon — the app never leaves `.accessory`, so there is no tile to paint |
 | `logo.svg` | `AppIcon.icon/Assets/*.svg` | App icon — see [App icon](#app-icon-appiconicon) below (#89) |
 
 ## Website-only assets
