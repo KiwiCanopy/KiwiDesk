@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Guard the site's shared brand decisions (#635, #106).
 
-Four checks, all of which DERIVE what they assert from the tree
-rather than restating it here — a literal in this file would just
-be one more copy to drift.
+The checks below all DERIVE what they assert from the tree rather
+than restating it here — a literal in this file would just be one
+more copy to drift. They are numbered as a reader's map, not as a
+register: add one and give it a number, rather than keeping a
+count in this sentence for the next author to falsify.
 
 1. `brand-tokens.css` is the one raw brand-color layer. Its hexes
    appear nowhere else under `site/src`, and both role-mapping
@@ -31,6 +33,11 @@ be one more copy to drift.
    serves its own generic 404 forever. Asserting on the artifact
    catches both, plus a rename of the page and an upstream rename
    of the option, which a config-pair check cannot.
+5. The two sitemaps submit disjoint URL sets, and neither carries
+   a noindex legal page. Also artifact-read: that contract lives
+   between a `filter` callback in astro.config.mjs and a
+   hand-maintained `paths` array, and nothing else can see the two
+   disagree.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -39,7 +46,7 @@ two role-mapping stylesheets by hand; add any future consumer there.
 Usage: scripts/check-site-tokens.py --dist site/dist
 
 Paths are resolved against the repo root, so it runs from
-anywhere. --dist is required for check 3 and takes a path rather
+anywhere. --dist is required by the artifact checks and takes a path rather
 than defaulting, so a missing build directory is an error instead
 of a silently skipped assertion.
 """
