@@ -77,10 +77,10 @@ extension KiwiCore {
         // splitting keystrokes from ring and pan until the
         // next focus event). The revert itself stays
         // state-only either way: OS focus during a sequence is
-        // owned by its closing re-assert
-        // (`raiseSequentially(thenFocus:)`), and re-asserting
-        // per echo would fight the drain mid-sequence — see
-        // docs/design-decisions.md.
+        // owned by its closing re-assert (the
+        // `performZOrderSequence` completion), and
+        // re-asserting per echo would fight the drain
+        // mid-sequence — see docs/design-decisions.md.
         if let stamp = zOrderRaiseEchoes[id],
             Date().timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
@@ -295,35 +295,52 @@ extension KiwiCore {
     /// containment alone is ambiguous here, because edge-pile
     /// frames overlap, so a slow pile-mate's late echo can
     /// contain the click point too — honoring it would pan the
-    /// row onto a window the user did not click. The stacking
-    /// read resolves the tie: the click reached the frontmost
-    /// window at its point, and a pile-mate the drain raised
-    /// after the click still cannot sit above it (a quiet raise
-    /// never beats the frontmost app's key window — measured
-    /// for #684). An unwired provider answers "unknown", which
-    /// is no provenance — the revert then behaves as before.
-    /// The containment check ahead of the provider call is a
-    /// SHORT-CIRCUIT, not load-bearing (the loop re-checks it):
-    /// it skips the stacking read for reports whose window the
-    /// click plainly missed.
+    /// row onto a window the user did not click. Which window
+    /// the press hit was resolved at press time
+    /// (`clickReachedWindow` carries the argument); this only
+    /// asks whether that click is fresh and hit `id`.
     private func recentClickReached(
         _ id: WindowID,
         now: Date
     ) -> Bool {
         guard let click = lastLeftClick,
             now.timeIntervalSince(click.at)
-                < Self.zOrderRaiseEchoWindow,
-            state.windows[id]?.frame.contains(click.point)
-                == true,
-            let stacking = stackingOrderProvider?()
+                < Self.zOrderRaiseEchoWindow
         else { return false }
+        return click.reached == id
+    }
+
+    /// The managed window a left press at `point` (AX coords)
+    /// hit: the frontmost stacking entry whose state frame
+    /// contains the point. Called by the `KiwiCore+Lifecycle`
+    /// press stamp, AT PRESS TIME deliberately: provenance is a
+    /// press-time fact. Resolving it when the echo arrives read
+    /// a stacking a drain may have churned since — a quiet
+    /// raise of a same-app sibling reorders above the app's key
+    /// window (`restoreMonocleZOrder`'s churn note) — against
+    /// frames a retile may have moved, so a stamped sibling
+    /// could forge the escape (architect review, 2026-08-03).
+    /// At press time the frontmost window at the point IS the
+    /// window the press lands in.
+    ///
+    /// Frontmost MANAGED window, deliberately: candidates the
+    /// state does not track are skipped, so a click on a
+    /// non-click-through IGNORED window (a quick-terminal
+    /// panel) overlapping a stamped window can still resolve to
+    /// the window beneath. Accepted: narrow, and it fails
+    /// toward honoring a focus report, never toward eating one.
+    /// An unwired provider answers nil — no provenance.
+    func clickReachedWindow(at point: CGPoint) -> WindowID? {
+        guard let stacking = stackingOrderProvider?() else {
+            return nil
+        }
         for candidate in stacking {
             guard
                 let frame = state.windows[candidate]?.frame,
-                frame.contains(click.point)
+                frame.contains(point)
             else { continue }
-            return candidate == id
+            return candidate
         }
-        return false
+        return nil
     }
 }

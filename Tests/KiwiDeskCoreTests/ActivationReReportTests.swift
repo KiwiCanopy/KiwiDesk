@@ -191,7 +191,8 @@ struct ActivationReReportTests {
         core.selfRaiseStamps[WindowID(2)] = Date()
         core.lastLeftClick = (
             Date(),
-            CGPoint(x: 2500, y: 600)
+            CGPoint(x: 2500, y: 600),
+            nil
         )
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.state.workspaces.lastFocused == WindowID(1))

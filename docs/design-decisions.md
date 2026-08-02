@@ -630,8 +630,10 @@ Two rulings shape that revert
 **The revert moves state only, never OS focus.** During a
 sequence, macOS key focus genuinely churns window by window as
 each raise's activation lands; the one owner of putting it back
-is the sequence's **closing re-assert**
-(`raiseSequentially(thenFocus:)`), generation-guarded so a
+is the sequence's **closing re-assert** — the
+generation-guarded completion every sequence hands to
+`performZOrderSequence` (`raiseSequentially(thenFocus:)` for
+pile restores, `raiseFloatsAndSticky` for float raises) — so a
 stale sequence cannot steal focus back. Re-asserting inside the
 revert instead — once per echo — would issue a loud raise
 mid-drain for every echo that trails in, fighting the very
@@ -655,14 +657,23 @@ the reported window* is provenance no echo can forge. "Reached"
 is deliberately stricter than "landed inside its frame":
 edge-pile frames overlap, so a slow pile-mate's late echo can
 contain the click point too, and honoring it would pan the row
-onto a window the user never clicked. The escape therefore also
-requires the reported window to be the frontmost managed window
-at the click point (one WindowServer stacking read, ~0.4 ms) —
-safe against the drain's own later raises, because a quiet
-raise can never lift a pile-mate above the frontmost app's key
-window (measured for
-[#684](https://github.com/KiwiCanopy/KiwiDesk/issues/684)).
-The escaped report keeps its stamp: the raise's real echo may
+onto a window the user never clicked. Which window a press
+reached is therefore resolved **at press time** (one
+WindowServer stacking read per left press, ~0.4 ms — the
+[#684](https://github.com/KiwiCanopy/KiwiDesk/issues/684)
+measurement): the frontmost *managed* window containing the
+point is, at that instant, exactly the window the press lands
+in. Resolving at echo time instead would read a stacking the
+drain may have churned since — a quiet raise cannot beat
+another app's key window (measured for #684), but raising a
+*same-app* sibling makes it the app's new key window, so a
+stamped sibling could climb above the clicked window and forge
+the escape — against frames a retile may have moved. Skipping
+untracked windows is a known narrowness: a click on a
+non-click-through ignored window overlapping a stamped one can
+still resolve to the window beneath, failing toward honoring a
+focus report, never toward eating one. The escaped report
+keeps its stamp: the raise's real echo may
 still be in flight, and if focus has moved on by the time it
 lands, that echo must still be reverted. What remains eaten is
 a deliberate *clickless* focus of a stamped window (cmd-tab,

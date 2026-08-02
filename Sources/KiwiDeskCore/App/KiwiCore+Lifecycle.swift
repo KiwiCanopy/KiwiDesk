@@ -24,10 +24,13 @@ extension KiwiCore {
                 .processIdentifier
         }
         // Arm the raise-echo revert's click-provenance check
-        // (#687): which window a click actually reached, where
-        // overlapping pile frames make containment ambiguous.
-        // Left nil until here so unit tests never read the
-        // host's real windows.
+        // (#687): the press stamp below resolves which window
+        // each click reached. Left nil until here so unit
+        // tests never read the host's real windows.
+        // `ClickProvenanceWiringTests` pins this wire and the
+        // stamp's resolution call — the fix's whole delivery
+        // path, which no behavior test can red on (they all
+        // inject).
         stackingOrderProvider = {
             AXHelper.onScreenStackingOrder()
         }
@@ -43,9 +46,15 @@ extension KiwiCore {
         // sibling distrust (#496) — in AX coordinates, the
         // space window frames live in.
         mouse.onLeftMouseDown = { [weak self] point in
+            let axPoint = GeometryUtils.axPoint(point)
+            // Resolve which window the press reached NOW, not
+            // when a raise echo asks (#687): press time is when
+            // the fact exists — `clickReachedWindow` carries
+            // the argument.
             self?.lastLeftClick = (
                 Date(),
-                GeometryUtils.axPoint(point)
+                axPoint,
+                self?.clickReachedWindow(at: axPoint)
             )
             self?.followDisplayUnderClick(at: point)
         }

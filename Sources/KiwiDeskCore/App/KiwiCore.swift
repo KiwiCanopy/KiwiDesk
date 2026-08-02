@@ -145,19 +145,22 @@ public final class KiwiCore {
     /// a user action, not our raise's echo.
     static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
-    /// Last left press, AX coords (#496): the click
-    /// discriminator for the cross-display sibling distrust —
-    /// see `recentClickInside`. Stamped in `KiwiCore+Lifecycle`.
-    var lastLeftClick: (at: Date, point: CGPoint)?
+    /// Last left press, AX coords: the click discriminator for
+    /// the cross-display sibling distrust (#496,
+    /// `recentClickInside`) and the raise-echo revert's escape
+    /// (#687, `recentClickReached`). `reached` is the managed
+    /// window the press hit, resolved AT PRESS TIME
+    /// (`clickReachedWindow` has the argument). Stamped in
+    /// `KiwiCore+Lifecycle` (`ClickProvenanceWiringTests`).
+    var lastLeftClick: (at: Date, point: CGPoint, reached: WindowID?)?
 
-    /// The WindowServer's front-to-back stacking, for the
-    /// raise-echo revert's click-provenance check (#687) — which
-    /// window a click actually reached, where overlapping pile
-    /// frames make containment alone ambiguous. nil until
-    /// `start()` wires `AXHelper.onScreenStackingOrder`, so unit
-    /// tests exercising focus events never read the host's real
-    /// windows (the `frontmostPIDProvider` pattern); nil answers
-    /// "unknown", which the revert treats as no provenance.
+    /// The WindowServer's front-to-back stacking, resolving
+    /// which window a left press reached (#687) — overlapping
+    /// pile frames make containment alone ambiguous. nil until
+    /// `start()` wires it (`ClickProvenanceWiringTests`), so
+    /// unit tests never read the host's real windows (the
+    /// `frontmostPIDProvider` pattern); nil resolves no
+    /// provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
     /// Windows we raised purely for z-order, stamped with the raise
