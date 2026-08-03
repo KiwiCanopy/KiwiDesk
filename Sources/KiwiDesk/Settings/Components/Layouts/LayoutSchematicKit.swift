@@ -33,6 +33,49 @@ enum LayoutSchematic {
     /// story and starts drawing slivers.
     static let defaultWindowCount = 5
     static let windowCountRange = 2...12
+
+    /// How far a piled tile reveals the one beneath it. The
+    /// engine's `OverlapStack` uses 40 pt against a real display;
+    /// on a canvas this size that would throw tiles off the frame,
+    /// so the reveal is scaled to the canvas. Shared by every
+    /// schematic that piles — Stack's zone, Track's overflow track
+    /// and Grid's last cell — because a pile that reads as a pile
+    /// in one and as a colour in another is the same picture
+    /// telling two stories (#712).
+    static let cascadeOffset: CGFloat = 9
+
+    /// The cell ceiling a schematic stands in for when the real
+    /// one is **screen-derived** — `auto_size`, where
+    /// `GridLayout.capDimensions` fits as many minimum-size cells
+    /// as the display allows. The canvas is not a display and has
+    /// no minimum window size, so it cannot compute that; it
+    /// draws a plausible one instead and says so here.
+    ///
+    /// With auto-size **off** no stand-in is needed: the ceiling
+    /// is the user's own typed columns × rows, and the preview
+    /// uses it (#712).
+    static let autoSizeCap = (columns: 3, rows: 3)
+
+    /// The most cells a canvas can draw before a cell stops
+    /// reading as a window.
+    ///
+    /// **This is the picture's limit, not the layout's.** The
+    /// layout's ceiling is `cap` on the schematic — the typed
+    /// columns × rows, which decides where the pile starts. This
+    /// one only decides what fits on screen, and conflating the
+    /// two is what let a 6 × 5 caption sit over a 4 × 4 drawing
+    /// (#712). Where this one wins, the caption says so.
+    ///
+    /// The two values are the two canvas sizes: a `tile` is the
+    /// 132 × 84 thumbnail in the layout strip, where columns and
+    /// rows set to their maximum of 10 would be 13 × 8 pt cells;
+    /// a `panel` is the full-width live preview at 240 tall, with
+    /// room for more.
+    static func drawableCells(
+        for scale: SchematicScale
+    ) -> (columns: Int, rows: Int) {
+        scale == .tile ? (columns: 4, rows: 4) : (columns: 6, rows: 6)
+    }
 }
 
 /// How large a schematic draws — and therefore what it is *for*
@@ -176,6 +219,52 @@ struct SchematicNewWindow: View {
                 .font(.system(size: 7, weight: .bold))
                 .foregroundStyle(.white)
                 .padding(2)
+        }
+    }
+}
+
+/// **Piled tile** — one window in an `OverlapStack` cascade, where
+/// only its top edge shows above the next.
+///
+/// Drawn **opaque**: a solid base under the accent fill, so
+/// stacking never sums the accent alpha. That is the whole reason
+/// this is a type rather than a `SchematicTile` drawn twice — the
+/// Grid preview piled translucent tiles at one rect and the last
+/// cell simply *got bluer* with the count instead of showing
+/// windows (#712), the same compounding-opacity trap as #406.
+/// Stack and Track each had a correct private copy; Grid needed a
+/// third, which is one more than a look this load-bearing should
+/// have (§2.4).
+///
+/// The front tile of a pile carries the dominant colour and the
+/// buried ones read as lighter slivers behind it.
+struct SchematicPileTile: View {
+    /// A heavier stroke for the focused window in the pile.
+    var active = false
+    /// The "+" badge, when this piled window is the incoming one.
+    var isNew = false
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .fill(Color(nsColor: .textBackgroundColor))
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .fill(
+                    isNew
+                        ? Color.accentColor.opacity(0.45)
+                        : LayoutSchematic.fill
+                )
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .strokeBorder(
+                    LayoutSchematic.stroke,
+                    lineWidth: active ? 2 : 1
+                )
+            if isNew {
+                Image(systemName: "plus")
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(2)
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ extension TrackSchematic {
             let slots = overflowSlots(geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
-                    overflowTile
+                    SchematicPileTile()
                         .frame(
                             width: slots[i].width,
                             height: slots[i].height
@@ -34,7 +34,7 @@ extension TrackSchematic {
         let n = overflowWindows
         let w = size.width
         let h = size.height
-        let off: CGFloat = 6
+        let off = LayoutSchematic.cascadeOffset
         if overflowStyle == .cascadeAll {
             let tileH = max(6, h - off * CGFloat(n - 1))
             return (0..<n).map {
@@ -79,17 +79,4 @@ extension TrackSchematic {
         return rects
     }
 
-    /// An opaque cascade tile (own solid base, so overlapping never
-    /// sums the accent alpha) — same look as the Stack pile.
-    private var overflowTile: some View {
-        let corner = LayoutSchematic.corner
-        return ZStack {
-            RoundedRectangle(cornerRadius: corner)
-                .fill(Color(nsColor: .textBackgroundColor))
-            RoundedRectangle(cornerRadius: corner)
-                .fill(LayoutSchematic.fill)
-            RoundedRectangle(cornerRadius: corner)
-                .strokeBorder(LayoutSchematic.stroke, lineWidth: 1)
-        }
-    }
 }
