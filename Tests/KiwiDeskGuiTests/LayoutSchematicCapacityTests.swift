@@ -28,13 +28,18 @@ struct LayoutSchematicCapacityTests {
     @Test("the typed dimensions cap a dynamic grid too")
     func dynamicStopsAtTheTypedCeiling() {
         for count in LayoutSchematic.windowCountRange {
+            // 8 x 1 on purpose: above BOTH clamps the deleted
+            // legibility ceiling used (tile 4, panel 6), so the
+            // invariance assertions below are load-bearing. A
+            // 2 x 2 fixture sat under both and stayed green under
+            // the very code it names (guard-prover, 2026-08-03).
             let schematic = grid(
-                columns: 2,
-                rows: 2,
+                columns: 8,
+                rows: 1,
                 type: .dynamic,
                 windows: count
             )
-            #expect(schematic.cap == (columns: 2, rows: 2))
+            #expect(schematic.cap == (columns: 8, rows: 1))
             // Scale-invariant: the ceiling is the layout's rule,
             // so a thumbnail and the panel must agree about it.
             // An earlier cut clamped the rule to what the canvas
@@ -44,8 +49,8 @@ struct LayoutSchematicCapacityTests {
             #expect(panel.cap == schematic.cap)
             #expect(panel.capacity == schematic.capacity)
             #expect(panel.piledCount == schematic.piledCount)
-            #expect(schematic.dims.columns <= 2)
-            #expect(schematic.dims.rows <= 2)
+            #expect(schematic.dims.columns <= 8)
+            #expect(schematic.dims.rows <= 1)
         }
         // And it genuinely balances *below* the ceiling rather
         // than snapping to it: a cap is not a floor.
@@ -95,6 +100,7 @@ struct LayoutSchematicCapacityTests {
     @Test("the surplus piles, and the pile deepens")
     func theSurplusPiles() {
         var previous = 0
+        var overflowed = 0
         for count in LayoutSchematic.windowCountRange {
             let schematic = grid(
                 columns: 2,
@@ -111,11 +117,15 @@ struct LayoutSchematicCapacityTests {
                 // catching it (code review, 2026-08-03).
                 #expect(piled == 0)
             } else {
+                overflowed += 1
                 #expect(piled > 1)
                 #expect(piled > previous)
             }
             previous = piled
         }
+        // The else branch has to have run, or the loop asserted
+        // `0 == 0` twelve times and called it coverage.
+        #expect(overflowed > 0)
     }
 
     /// Every piled tile gets its own rect. Identical rects are
@@ -150,6 +160,10 @@ struct LayoutSchematicCapacityTests {
             if case .piled = $0.kind { return true }
             return false
         }
+        // A filter result with no floor passes over zero
+        // elements — every assertion below would then hold
+        // vacuously (guard-prover, 2026-08-03).
+        #expect(piled.count > 0)
         #expect(piled.count == schematic.piledCount)
         let origins = piled.map(\.rect.origin.y)
         #expect(Set(origins).count == origins.count)
@@ -194,14 +208,99 @@ struct LayoutSchematicCapacityTests {
             #expect(cell.rect.maxY <= size.height + 0.5)
             #expect(cell.rect.maxX <= size.width + 0.5)
         }
-        // What did not fit is accounted for, not dropped.
+        // What did not fit is accounted for, not dropped — and
+        // something did not fit, or this proves nothing.
         let piled = cells.compactMap { cell -> Int? in
             if case .piled(_, let hidden) = cell.kind {
                 return hidden
             }
             return nil
         }
+        #expect(piled.count > 0)
+        #expect(piled.reduce(0, +) > 0)
         #expect(piled.reduce(0, +) + piled.count == schematic.piledCount)
+    }
+
+    /// The captions state the ceiling in words. Nothing else
+    /// stops them stating a different one from the picture, and
+    /// two of #712's three arms were exactly that — a caption
+    /// promising a ceiling the drawing did not have. Both were
+    /// silently reintroducible until this (guard-prover,
+    /// 2026-08-03).
+    @Test("every caption states the ceiling the grid actually uses")
+    func captionsStateTheRealCeiling() {
+        // Rigid, typed: the caption's numbers are the ceiling's.
+        let rigid = grid(
+            columns: 5,
+            rows: 3,
+            type: .rigid,
+            windows: 6
+        )
+        #expect(rigid.caption.contains("5 × 3"))
+        // Dynamic reads the same ceiling — it balances up to it.
+        let dynamic = grid(
+            columns: 5,
+            rows: 3,
+            type: .dynamic,
+            windows: 6
+        )
+        #expect(dynamic.caption.contains("5 × 3"))
+        // Auto-size states the stand-in, derived rather than
+        // written out: a literal here is what would leave eleven
+        // catalogs quoting a number the code no longer uses.
+        let auto = grid(
+            columns: 5,
+            rows: 3,
+            type: .rigid,
+            windows: 6,
+            autoSize: true
+        )
+        let cap = LayoutSchematic.gridAutoSizeCap
+        #expect(
+            auto.caption.contains("\(cap.columns) × \(cap.rows)")
+        )
+        #expect(!auto.caption.contains("5 × 3"))
+    }
+
+    /// The engine's OVERFLOW branch lays its tiled prefix out
+    /// row-major whatever `splitDirection` says, unlike its
+    /// normal fill. Only a rows-first grid past capacity can tell
+    /// the two apart — every other fixture here is columns-first,
+    /// where the expressions coincide, so this was watched by
+    /// nothing tree-wide (guard-prover, 2026-08-03).
+    @Test("a rows-first grid overflows the way the engine does")
+    func rowsFirstOverflowFollowsTheEngine() {
+        let schematic = GridSchematic(
+            columns: 3,
+            rows: 2,
+            type: .rigid,
+            fillEmptySpace: false,
+            autoSize: false,
+            splitDirection: .vertical,
+            placement: .last,
+            windows: 12
+        )
+        let size = CGSize(width: 600, height: 228)
+        let cells = schematic.gridCells(
+            size,
+            cols: schematic.dims.columns,
+            rows: schematic.dims.rows,
+            ids: schematic.ids
+        )
+        let tiled = cells.filter {
+            if case .window = $0.kind { return true }
+            return false
+        }
+        #expect(tiled.count == schematic.capacity - 1)
+        // Row-major: the first `cols` tiles share a row, so their
+        // y origins repeat before x does. Column-major would put
+        // the first `rows` in one column instead.
+        let firstRow = tiled.prefix(schematic.dims.columns)
+        #expect(Set(firstRow.map(\.rect.origin.y)).count == 1)
+        #expect(
+            Set(firstRow.map(\.rect.origin.x)).count
+                == schematic.dims.columns
+        )
     }
 
     private func grid(

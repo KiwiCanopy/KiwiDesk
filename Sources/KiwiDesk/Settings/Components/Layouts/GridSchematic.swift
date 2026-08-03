@@ -251,7 +251,11 @@ struct GridSchematic: View {
         }
     }
 
-    private var caption: String {
+    /// Internal so the guard can read it: the captions state the
+    /// ceiling in words, and nothing else stops them stating a
+    /// different one from the picture — which was two of #712's
+    /// three arms (guard-prover, 2026-08-03).
+    var caption: String {
         type == .rigid ? rigidCaption : dynamicCaption
     }
 
