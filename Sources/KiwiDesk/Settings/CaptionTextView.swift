@@ -83,7 +83,7 @@ final class CaptionTextView: NSTextView {
     }
 
     override func mouseMoved(with event: NSEvent) {
-        apply(isOverLink(location(of: event)))
+        apply(wantsPointingHand(at: location(of: event)))
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -91,7 +91,7 @@ final class CaptionTextView: NSTextView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard isLive, isOverLink(location(of: event)) else {
+        guard wantsPointingHand(at: location(of: event)) else {
             super.mouseDown(with: event)
             return
         }
@@ -120,14 +120,23 @@ final class CaptionTextView: NSTextView {
             window.mouseLocationOutsideOfEventStream,
             from: nil
         )
-        apply(bounds.contains(point) && isOverLink(point))
+        apply(bounds.contains(point) && wantsPointingHand(at: point))
     }
 
-    private func apply(_ overLink: Bool) {
-        let live = overLink && isLive
-        guard live != self.overLink else { return }
-        self.overLink = live
-        (live ? NSCursor.pointingHand : NSCursor.arrow).set()
+    /// The cursor DECISION, lifted out of the event path so it
+    /// can be asserted without a machine. Every route into
+    /// `apply` differs only in where the point comes from, and
+    /// all of them need a window — so with this inline, the
+    /// pointing hand, which is the reason this class exists, was
+    /// reachable by no test at all (guard-prover, 2026-08-03).
+    func wantsPointingHand(at point: NSPoint) -> Bool {
+        isLive && isOverLink(point)
+    }
+
+    private func apply(_ pointing: Bool) {
+        guard pointing != overLink else { return }
+        overLink = pointing
+        (pointing ? NSCursor.pointingHand : NSCursor.arrow).set()
         paintLink()
     }
 
@@ -169,8 +178,19 @@ final class CaptionTextView: NSTextView {
 
     /// The ring hugs the LINK, not the whole caption: the
     /// sentence is not the target, one phrase inside it is.
+    ///
+    /// Seeded with the FIRST rect, never `.zero`. `NSRect.zero`
+    /// is a real rect at the origin rather than an empty one, so
+    /// `reduce(.zero)` unions in the point (0,0) and the mask
+    /// stretched from the view's left edge across the whole
+    /// leading prose — the opposite of what the sentence above
+    /// promises, shipped and green because the test computed its
+    /// expectation with this same expression (guard-prover,
+    /// 2026-08-03).
     override var focusRingMaskBounds: NSRect {
-        linkRects().reduce(NSRect.zero) { $0.union($1) }
+        let rects = linkRects()
+        guard let first = rects.first else { return .zero }
+        return rects.dropFirst().reduce(first) { $0.union($1) }
     }
 
     override func drawFocusRingMask() {
