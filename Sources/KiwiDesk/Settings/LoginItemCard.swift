@@ -183,7 +183,23 @@ struct LoginItemCard: View {
         }
     }
 
+    /// The row's standing caption, from the design's own words
+    /// (digest 14b): it says where the setting LIVES, which is
+    /// what makes the read-through behaviour legible — flip it in
+    /// System Settings and this row follows, because there is no
+    /// second copy here. The conditional captions below add to
+    /// it rather than replace it; approval and unavailability are
+    /// states of the same fact.
     @ViewBuilder private var caption: some View {
+        Text(
+            L(
+                "general.login_item.stored_by_macos",
+                "Read live from macOS, stored there too — may "
+                    + "need approval in System Settings."
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
         if model.autoStart.requiresApproval {
             HStack(spacing: 8) {
                 Text(

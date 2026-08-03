@@ -152,8 +152,14 @@ enum SettingRuntimeGate: Hashable {
     /// matches the preset's.
     case screenCountMismatch
     /// The login item follows `SMAppService` status — the
-    /// setter is guarded, the picker greys (#342).
+    /// setter is guarded, the control greys (#342).
     case loginItemServiceStatus
+    /// Crash-restart is the LaunchAgent, whose RunAtLoad and
+    /// KeepAlive are one unit — so it is dead unless KiwiDesk
+    /// also starts at login (#678 item 16). Greying says so;
+    /// `AutoStartLevel.level(openAtLogin:restartOnCrash:)` is
+    /// what actually refuses the pair.
+    case autoStartLoginOff
     /// The per-space reset action is dead while the space has
     /// no overrides.
     case spaceHasNoOverrides

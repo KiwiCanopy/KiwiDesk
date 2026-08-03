@@ -310,6 +310,7 @@
   "general.login_item.requires_approval": "Requires approval in System Settings",
   "general.login_item.start": "Start KiwiDesk when I log in",
   "general.login_item.start_help": "KiwiDesk opens when you sign in, so your windows are arranged from the start. It also keeps itself running if it ever stops — switch that off under Advanced if you would rather it did not.",
+  "general.login_item.stored_by_macos": "Read live from macOS, stored there too — may need approval in System Settings.",
   "general.login_item.unavailable": "Move KiwiDesk to your Applications folder to turn this on.",
   "general.login_item.unavailable_binary": "Available only when running the KiwiDesk app.",
   "general.login_item.updating": "Updating…",
