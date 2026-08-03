@@ -27,9 +27,12 @@ struct GreyOutAnchorTests {
     /// gaining an occurrence is a conscious edit, so it updates
     /// the count.
     private let anchors: [(file: String, anchor: String, count: Int)] = [
+        // The header `?` anchor now reads the resolver's reason
+        // (#678 Phase 3): nil while the ring is on, the block
+        // sentence while it is off — outside the greyed block.
         (
             "FocusBorderEditor.swift",
-            "help: style.wrappedValue.enabled ? nil : offHelp",
+            "help: blockReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
         (
@@ -65,9 +68,12 @@ struct GreyOutAnchorTests {
             "HelpButton(explanation: help, subject: title)",
             1
         ),
+        // The column header `?` anchor reads the resolver's
+        // enabled reason (#678 Phase 3): one call site, both
+        // columns route through it.
         (
             "DragVisualsEditor.swift",
-            "help: visual.wrappedValue.enabled",
+            "help: enabledReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
         (

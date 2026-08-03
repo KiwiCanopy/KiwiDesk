@@ -18,6 +18,27 @@ struct FocusBorderEditor: View {
         $model.config.settings.borderStyle
     }
 
+    private var gates: GapsBordersGates {
+        GapsBordersGates(settings: model.config.settings)
+    }
+
+    /// The block gate: the whole card is inert while the ring is
+    /// off. Resolved once at the container so its grey and its
+    /// sentence stay one decision (#678).
+    private var blockReason: GapsBordersGates.InertReason? {
+        gates.containerReason(for: .focusBorder)
+    }
+
+    private var blockHelp: String {
+        blockReason.map(GapsBordersGateHelp.sentence) ?? ""
+    }
+
+    /// The glow-size row's gate, inside a live block: greyed while
+    /// the glow effect is off.
+    private var glowSizeReason: GapsBordersGates.InertReason? {
+        gates.inertReason(for: .borders(.borderGlowSize))
+    }
+
     var body: some View {
         // The header `?` is the gate's live anchor (#527): every
         // help affordance inside the greyed block is dead, so the
@@ -29,7 +50,7 @@ struct FocusBorderEditor: View {
                 "Outlines the focused window so it stands out "
                     + "in a gapped layout."
             ),
-            help: style.wrappedValue.enabled ? nil : offHelp
+            help: blockReason.map(GapsBordersGateHelp.sentence)
         ) {
             Toggle(
                 L("border.enabled", "Show focus border"),
@@ -37,20 +58,9 @@ struct FocusBorderEditor: View {
             )
             FocusBorderPreview(style: style.wrappedValue)
             controls.modifier(
-                GreyOut(
-                    active: !style.wrappedValue.enabled,
-                    help: offHelp
-                )
+                GreyOut(active: blockReason != nil, help: blockHelp)
             )
         }
-    }
-
-    private var offHelp: String {
-        L(
-            "border.controls.disabled",
-            "Turn on Show focus border to edit "
-                + "these settings."
-        )
     }
 
     @ViewBuilder private var controls: some View {
@@ -114,7 +124,14 @@ struct FocusBorderEditor: View {
                 restore: BorderStyle.glowBlur(
                     for: style.wrappedValue.clampedWidth
                 ).rounded()
-            )
+            ),
+            // Glow off greys the group (resolver reason); with
+            // glow on, `nil` hands greying back to the auto
+            // sentinel, so auto-size still dims its own slider.
+            gatedIsInert: glowSizeReason != nil ? true : nil,
+            gatedHelp:
+                glowSizeReason
+                .map(GapsBordersGateHelp.sentence) ?? ""
         ) {
             PtSlider(
                 label: L("border.glow_size", "Glow size"),
@@ -123,16 +140,6 @@ struct FocusBorderEditor: View {
                 autoAtZero: true
             )
         }
-        .modifier(
-            GreyOut(
-                active: style.wrappedValue.enabled
-                    && !style.wrappedValue.glow,
-                help: L(
-                    "border.glow_size.disabled",
-                    "Turn on Glow effect to adjust its size."
-                )
-            )
-        )
         Divider()
         FitGapsAction(model: model)
     }

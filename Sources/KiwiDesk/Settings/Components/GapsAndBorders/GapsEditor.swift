@@ -25,6 +25,10 @@ struct GapsEditor: View {
         SettingsCatalog.gapsAndBorders.gapsPerAxis
     }
 
+    private var gates: GapsBordersGates {
+        GapsBordersGates(settings: model.config.settings)
+    }
+
     var body: some View {
         SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
             GapsDiagram(outer: outer, inner: inner)
@@ -130,11 +134,7 @@ struct GapsEditor: View {
             .minimumScaleFactor(0.75)
             .help(
                 mixed
-                    ? L(
-                        "gaps.mixed.help",
-                        "Edges differ — edit them "
-                            + "individually below."
-                    )
+                    ? GapsBordersGateHelp.sentence(for: .gapsDiffer)
                     : ""
             )
         }
@@ -150,14 +150,16 @@ struct GapsEditor: View {
         model.config.settings.gapsGlobal.inner
     }
 
+    // The master slider is inert while its edges / axes differ.
+    // The predicate is the census's, resolved once in
+    // `GapsBordersGates`, so the view never re-derives "differ"
+    // beside the gate that declares it (#678, gui.md).
     private var outerMixed: Bool {
-        !(outer.top == outer.bottom
-            && outer.top == outer.left
-            && outer.top == outer.right)
+        gates.inertReason(for: .gaps(.outer)) != nil
     }
 
     private var innerMixed: Bool {
-        inner.horizontal != inner.vertical
+        gates.inertReason(for: .gaps(.inner)) != nil
     }
 
     /// The master slider: reads the shared value, writes every
