@@ -565,7 +565,7 @@ shortcuts) behind a global `set_track_advanced` switch, default
 off, with the shortcut rows inert and hidden until it flipped
 (#181). That was reversed: every track surface is always
 visible and always works. Newcomers are oriented with copy
-instead — a caption at the top of Layout Defaults ▸ Track marks
+instead — the header caption on Layout Defaults ▸ Track marks
 it a more advanced layout, and the "Move to track" shortcut
 subheader carries "(only relevant if you're using the track
 layout)". A blocking flag bought guidance at the cost of a
@@ -573,6 +573,10 @@ whole machinery — inert-but-stored keybindings, a resolution
 clamp, silent-steal conflict handling — and made unbound track
 rows in another layout read as broken rather than simply
 irrelevant. Copy carries the same message with none of that.
+The obligation the copy carries is not "Track has a caption" —
+since #678 turn 10 every layout card does — but that Track's
+own says what the others' do not: that this layout is the
+harder one. Reword it and the guidance goes with it.
 
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
@@ -1303,6 +1307,59 @@ lock.
 ### Navigation & saving
 
 **[Principle]**
+
+**A layout is chosen by its picture, not by its name.** Layout
+Defaults selects one of the tunable layouts — every layout but
+Floating, which has nothing to tune — and "Track" and
+"Scrolling" and "Monocle" are words only somebody who already
+uses a tiling window manager knows — which makes a strip of
+those words the worst possible label on the one page where a
+beginner is most lost. So the selector draws each layout
+instead, and the tile doubles as the answer to the question the
+reader actually has, which is not "which of these is called
+Track" but "which of these do I want". Each tile also carries
+the count of spaces using it, so a layout nothing runs is
+visibly not worth tuning — the page edits *defaults*, and a
+default with nothing reading it is an hour spent on nothing.
+The obligation this creates: the tiles are the same schematics
+the page's own preview draws, from the same staged settings —
+a strip of stylised mock drawings would be a second, quietly
+disagreeing picture of the same configuration.
+
+**A preview that takes a window count simulates; one that does
+not illustrates.** Several Layout Defaults settings are
+invisible at any fixed number of windows. Cascade overflow and
+Cascade all draw the identical frame until the stack is deep
+enough to overflow; a track limit means nothing until there are
+more windows than tracks; a dynamic grid's balance only shows
+as it rebalances. A still frame at a baked-in count therefore
+cannot teach the setting it is under, and the reader has to
+save, watch real windows, and come back. So the count is an
+input on a slider, and each schematic runs its real fill logic
+against it. The obligation that carries: **call the engine
+wherever the engine can answer**, so that much of the picture
+cannot drift — BSP tiles through `BspLayout` and a dynamic grid
+takes its balance from `GridLayout.balanced` rather than a copy
+of the arithmetic. The rest is hand-drawn for two different
+reasons, and they want different remedies: some of the engine's
+constants do not suit a mini canvas at all (the cascade's 40 pt
+title-bar reveal would throw tiles off it), while some rules —
+a grid's fill order, its capacity clamp, the leftover span —
+have no such obstacle and are simply not exported apart from
+`calculateGeometry`. The second kind is the standing reason to
+widen the seam rather than the licence not to: a schematic
+reproducing a rule the engine already owns is a picture that
+stops agreeing with the layout the day the rule moves. Two consequences worth stating, because both
+look like regressions in isolation: the two-frame "4 windows →
+a 5th opens" growth pair retired, since a reader who can add
+the fifth window themselves does not need it staged; and the
+count is view state that resets on leaving, because it is a
+question asked of the preview rather than a setting — writing
+it to the config would be a second, invisible knob. What the
+count does **not** buy is a render of the user's actual
+windows: that needs live window state, which is exactly the
+live-apply coupling #123 rejects (see
+[accepted limitations](accepted-limitations.md)).
 
 **Two-group sidebar, topic-named: "Design" vs "System".**
 Every control either travels with the profile being edited or

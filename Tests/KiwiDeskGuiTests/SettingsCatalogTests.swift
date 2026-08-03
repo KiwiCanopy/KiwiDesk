@@ -52,12 +52,13 @@ struct SettingsCatalogTests {
     /// tuples (incl. the two bar cards, the two colour
     /// destinations, and Size & float's disclosure — the one
     /// declaration #678 Phase 3's Shortcuts area adds, its
-    /// drawer now holding the census's `.showMore` row) + 6
+    /// drawer now holding the census's `.showMore` row), plus
+    /// turn 10's live-preview and spaces-using cards = 57, + 6
     /// computed mode tabs. Update deliberately as the catalog
     /// fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        #expect(allEntries.count == 61)
+        #expect(allEntries.count == 63)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

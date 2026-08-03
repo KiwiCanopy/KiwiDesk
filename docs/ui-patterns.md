@@ -55,7 +55,7 @@ name bold, one line each) — never a `?` per segment. Two
 scope guards: help is optional reading (a label must stay
 understandable without it — must-know info never lives only
 in the popover), and a field already taught by its live
-preview or schematic (App Bar colors, layout-tab
+preview or schematic (App Bar colors, a layout card's
 geometry) gets no `?` at all. Copy is a normal `L()` string
 under the `<key>.help` suffix convention; when a *label* key
 is shared by fields with divergent semantics (Stack's and
@@ -63,8 +63,8 @@ Track's Overflow both use `layout_params.overflow`), the
 help key scopes itself (`layout_params.overflow.stack.help`)
 so each field can carry its own text. Shared help copy —
 one string rendered on two surfaces, like a Layout Defaults
-tab and the per-space Customize popover — is authored once
-in a per-domain namespace (`LayoutHelp`); single-call-site
+layout card and the per-space Customize popover — is authored
+once in a per-domain namespace (`LayoutHelp`); single-call-site
 copy stays inline at its call site (namespace membership =
 2+ call sites, or an override pair like
 `newWindowPlacement`/`trackPosition` — not "it felt
@@ -101,9 +101,17 @@ when any of: five or more choices; dynamic or user-generated
 choices; long, explanatory, or localization-risk labels; or
 a constrained repeated surface where showing every choice
 would crowd or truncate. A binary is a **toggle**, never two
-segments. Fixed editor-navigation tabs (the Layout Defaults
-mode strip) may exceed four — they switch the visible editor
-rather than edit a value, so the count cap doesn't apply.
+segments. Fixed editor-navigation tabs (the icon picker's
+Emoji / Symbol / Glyph strip) may exceed four — they switch the
+visible editor rather than edit a value, so the count cap
+doesn't apply. Layout Defaults' layout selector used to be the
+other instance and is no longer a segmented control at all: it
+became a strip of live schematic thumbnails, on the argument
+that seven layout NAMES are the one label a beginner cannot
+read (#678 turn 10, argued in
+[Design decisions](design-decisions.md)). The exemption is
+about editor navigation, not about that surface — a future
+navigation strip past four segments still qualifies.
 The *same semantic field uses the same control on comparable
 full-width surfaces*: the two bar cards both render Position /
 Background style / Active indicator as segments, so the
@@ -161,18 +169,24 @@ loud?* — not by which pane it lives in:
 
 Minimum window size migrated slider → `StepperRow` on this
 rule (#204): it is a precise pt threshold, not a feel knob.
-**Layout Defaults is a per-mode tab strip, not a stacked
-scroll (#204).** The layout modes are a fixed, small,
-mutually-exclusive set (`LayoutMode` minus Floating), so they
-get a segmented tab strip — one mode's editor visible at a
-time — instead of every mode stacked in one `ScrollView`. The
-strip lands on the profile's most-used mode. The global
-minimum window size is pinned *above* the strip because it
-feeds every mode (and gates the `OverlapStack` overflow
-cascade), so it belongs to none of them. The formerly bundled
-`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
-(Scrolling+Grid) were split at the mode boundary so each mode
-owns one tab and one schematic.
+**Layout Defaults picks one layout at a time, and picks it by
+its picture (#204, #678 turn 10).** The layout modes are a
+fixed, small, mutually-exclusive set (`LayoutMode` minus
+Floating), so one mode's editor is visible at a time instead of
+every mode stacked in one `ScrollView`. What selects it is a
+strip of **live schematic thumbnails**, not a segmented strip of
+words: the words are ones only a tiler user knows, so on the
+page where a beginner is most lost the drawing is the label —
+each tile also carrying the count of spaces using it, so an
+unused layout is visibly not worth tuning. The strip lands on
+the profile's most-used layout. The global minimum window size
+is pinned *above* the strip because it feeds every layout (and
+gates the `OverlapStack` overflow cascade), so it belongs to
+none of them. The formerly bundled `LayoutParamsEditor`
+(BSP+Stack) and `ScrollGridEditor` (Scrolling+Grid) were split
+at the mode boundary; since turn 10 the rows come from the
+settings census and one `LayoutCard` renders whichever layout
+is selected.
 
 ## Shared visual language
 
@@ -517,53 +531,68 @@ its page.
 
 ## Previews & schematics
 
-**Layout schematics are static previews of staged values, not
-live (#125).** Every layout mode's tab leads with a small
-`GapsDiagram`-family schematic (`LayoutSchematicKit` /
-`LayoutSchematicCanvas` hold the shared canvas, tile, and ghost
-language) that redraws from the *staged* config as the user
-edits — never from live window state, no AX calls. This is the
-one non-negotiable: it upholds the #123 never-live-apply
-principle (a preview answers "what would this look like" without
-mutating the session). No hover, no tap-to-inspect, no
-drag-to-preview, and **no animation** — a looping animation
-would be architecturally legal (canned, config-driven) but was
-rejected on cost: a timer/reduce-motion state machine in every
-tile for a pane open seconds at a time. *All six modes get a
-schematic, Monocle included* — it draws the **navigation model**
-(a fan of full-screen cards + `orientation` cycle chevrons), not
-geometry, which both honours its one real knob and removes the
-"why is this the one blank tab" inconsistency. Schematics are
-deliberate approximations (a handful of tiles, capped with
-"+N"), never a simulation of the user's real desktop.
+**Layout schematics draw staged values, never live windows
+(#125).** Each layout has one `GapsDiagram`-family schematic
+(`LayoutSchematicKit` / `LayoutSchematicCanvas` hold the shared
+canvas, tile, and ghost language) that redraws from the *staged*
+config as the user edits — never from live window state, no AX
+calls. This is the one non-negotiable: it upholds the #123
+never-live-apply principle (a preview answers "what would this
+look like" without mutating the session). No hover, no
+tap-to-inspect, no drag-to-preview, and **no animation** — a
+looping animation would be architecturally legal (canned,
+config-driven) but was rejected on cost: a timer/reduce-motion
+state machine in every tile for a pane open seconds at a time.
+*Every tunable layout gets a schematic, Monocle included* — it
+draws the **navigation model** (a fan of full-screen cards +
+`orientation` cycle chevrons), not geometry, which both honours
+its one real knob and removes the "why is this the one blank
+layout" inconsistency.
+
+One schematic serves two surfaces at two scales
+(`SchematicScale`): a thumbnail in the "Choose a layout" strip
+and the full-width drawing in the Live preview card, which is
+the one that carries the caption. Both take a **window count**
+the reader drives from that card's slider, so the drawing
+simulates the layout at a count rather than illustrating it at a
+baked-in one. Why the count is an input, and why it is view
+state rather than a setting, is ruled in
+`docs/design-decisions.md`; what it still does *not* buy — a
+render of the reader's real windows — is in
+[accepted limitations](accepted-limitations.md). Tile counts
+are still capped for legibility with a "+N" chip.
 
 **Intuitiveness over strict Apple-native, where they conflict
 (#125, owner call).** The first cut held to Apple's "one static
 frame per control" idiom, but that under-delivered on the knobs
 whose whole meaning is a transition. So the family uses a
 **mixed, deliberately legible grammar**: a **two-frame sequence**
-(mini-screen → arrow → mini-screen) for the modes whose meaning is
-a *transition* — **BSP** (strategy divergence and new-window
-placement only appear once a third window arrives), **Grid** in
-its dynamic mode (the grid rebalances as a fifth window opens),
-and **Scrolling**'s `follow` anchor (#239 — the viewport pans the
-minimum to reveal the focus, leaving the side you came from open);
-**single frames** for the rest,
+(mini-screen → arrow → mini-screen) for a layout whose meaning is
+a *transition* — today only **Scrolling**'s `follow` anchor
+(#239 — the viewport pans the minimum to reveal the focus,
+leaving the side you came from open), the one place
+`SchematicPair` is still mounted; **single frames** for the rest,
 carrying the conditional fact with one of a small shared
 **ghost vocabulary** — a **spawn ghost** (dashed accent tile +
-"+", "the next window lands here": BSP's third window, Track's
+"+", "the next window lands here": BSP's incoming window, Track's
 own-vs-focused track), an **off-monitor ghost** (solid gray,
 straddling a drawn screen edge, "a real window scrolled
 off-screen": Scrolling), and the pre-existing **empty-cell gap**
-(dashed gray, "unused grid space": rigid Grid). Grid draws five
-windows so the columns-first/rows-first wrap is visible; Stack's
+(dashed gray, "unused grid space": rigid Grid). Stack's
 overflow is a small iconic fanned-pile badge, not a permanently
 cascading column. The two-frame motif is gated by a *principle*,
-not a headcount: a mode earns a second frame only when it must
-teach a fact **inexpressible in one frame** — a transition or a
-rebalance, not a steady resting state. Modes whose meaning is a
-still position (Scrolling's center/start/end anchors, rigid Grid)
-stay single-frame; if every mode had two frames, "why two frames"
+not a headcount: a layout earns a second frame only when it must
+teach a fact **inexpressible in one frame at any window count**.
+That bar rose when the count became an input: a fact the reader
+can reach by dragging the slider — a grid rebalancing as a fifth
+window opens — is now expressible in one frame, which is why
+dynamic Grid's sequence pair retired. Only a *transition between
+two states of the same count* still earns a pair. BSP was
+already one wide frame before the count arrived: its strategy
+divergence needs several windows, not two moments. Layouts
+whose meaning is a still position (Scrolling's
+center/start/end anchors, rigid Grid) stay single-frame; if
+every layout had two frames, "why two frames"
 would stop reading. The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`
@@ -761,7 +790,8 @@ still deserves full strength, which is the whole point of "grey,
 don't hide".
 
 Sequencing matters more than the paint. Select the destination,
-then the local surface that *renders* the target (a mode tab),
+then the local surface that *renders* the target (a layout's
+card, `SettingsSurface.layoutMode`),
 then yield one layout pass before asking the scroll
 proxy for the id — a `scrollTo` in the same synchronous pass as
 the state change that mints the view will miss it.

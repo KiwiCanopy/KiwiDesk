@@ -213,7 +213,14 @@ public struct GridLayout: LayoutSystem {
     /// count, before any cap. Column-first (horizontal split)
     /// grows columns first: 1x1, 2x1, 2x2, 3x2, 3x3, …;
     /// row-first mirrors it.
-    static func balanced(
+    ///
+    /// Public because the Settings preview balances its own
+    /// window count through it (#678 turn 10) rather than
+    /// reproducing the arithmetic: a preview holding a private
+    /// copy of this rule is a picture of the layout that stops
+    /// agreeing with it the day the rule changes. Pure and
+    /// screen-free, so exposing it hands out no state.
+    public static func balanced(
         count: Int,
         splitDirection: GridParams.SplitDirection
     ) -> (columns: Int, rows: Int) {

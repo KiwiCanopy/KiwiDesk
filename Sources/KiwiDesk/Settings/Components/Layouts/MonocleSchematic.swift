@@ -11,16 +11,34 @@ import SwiftUI
 /// inconsistency honestly, without inventing spatial content.
 struct MonocleSchematic: View {
     let orientation: MonocleParams.Orientation
+    /// Windows on screen. Monocle's fill logic is that there
+    /// isn't any — every window is full-screen — so the count
+    /// changes the DEPTH of the fan and nothing else, which is
+    /// the honest answer to "what do more windows do here".
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     private var horizontal: Bool { orientation == .horizontal }
 
+    /// Cards drawn behind the focused one. Capped so the fan
+    /// stays a fan: past four the offsets march off the canvas
+    /// and say nothing a fourth card didn't.
+    var depth: Int { min(max(windows, 1), 4) - 1 }
+
     var body: some View {
-        SchematicCanvas(caption: caption, axLabel: axLabel) {
+        SchematicCanvas(
+            width: scale.width,
+            height: scale.height,
+            caption: caption,
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
+        ) {
             ZStack {
                 cards
                 chevrons
             }
             .animation(LayoutSchematic.damping, value: orientation)
+            .animation(LayoutSchematic.damping, value: windows)
         }
     }
 
@@ -28,12 +46,15 @@ struct MonocleSchematic: View {
     /// behind it toward the top-trailing corner.
     private var cards: some View {
         ZStack {
-            ForEach([2, 1, 0], id: \.self) { depth in
-                card(front: depth == 0)
+            ForEach(
+                Array((0...depth).reversed()),
+                id: \.self
+            ) { level in
+                card(front: level == 0)
                     .padding(10)
                     .offset(
-                        x: CGFloat(depth) * 5,
-                        y: -CGFloat(depth) * 5
+                        x: CGFloat(level) * 5,
+                        y: -CGFloat(level) * 5
                     )
             }
         }

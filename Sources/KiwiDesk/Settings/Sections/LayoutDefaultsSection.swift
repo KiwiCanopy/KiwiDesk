@@ -1,28 +1,33 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Layout Defaults (#68 §3.2): the global
-/// per-mode placement tuning the Spaces rows' per-space
-/// overrides deviate from, plus the minimum window size.
-/// Splitting this out of Spaces keeps "define your spaces"
-/// (short, daily-adjacent) separate from "tune how a mode
-/// behaves" (occasional, denser). Gaps live in Appearance —
-/// spacing is a visual, not placement logic (§3.14).
+/// Layout Defaults, rendered from the settings census (#678
+/// Phase 3, turn 10): how each layout behaves before any space
+/// overrides it.
 ///
-/// The modes are a small fixed set, one edited at a time, so a
-/// per-mode tab strip replaces the former stacked scroll (#204):
-/// the global minimum window size is pinned above the strip (it
-/// feeds every mode), then one tab per mode shows only that
-/// mode's editor. Floating has no tunables, so it has no tab.
+/// Thirty-six rows live here, and nobody ever wants more than
+/// one layout's worth. So the page is a **strip of live layout
+/// thumbnails** — not a strip of words — and picking one
+/// swaps the whole body: only the selected layout's rows are
+/// ever mounted, so the most anyone sees is eight.
+///
+/// The minimum window size sits ABOVE the strip because it
+/// governs every layout and silently caps auto-sized grids and
+/// track limits; inside a layout's card it would read as that
+/// layout's setting. Anything shared by every layout belongs
+/// above the selector.
+///
+/// Gaps live in Gaps & Borders — spacing is a visual, not
+/// placement logic (§3.14).
 struct LayoutDefaultsSection: View {
     @ObservedObject var model: SettingsModel
 
-    /// The selected tab, on the model rather than in `@State`
-    /// (#277): a search hit on a mode-gated control has to open
-    /// that mode's tab before there is anything to scroll to, and
-    /// view-local state cannot be written from outside. `nil`
+    /// The selected layout, on the model rather than in `@State`
+    /// (#277): a search hit on a layout-scoped control has to
+    /// select that layout before there is anything to scroll to,
+    /// and view-local state cannot be written from outside. `nil`
     /// still means "the user has not picked yet", so the
-    /// most-used-mode landing below survives.
+    /// most-used-layout landing below survives.
     private var selected: Binding<LayoutMode> {
         Binding(
             get: { model.nav.layoutModeTab ?? initialMode },
@@ -30,35 +35,41 @@ struct LayoutDefaultsSection: View {
         )
     }
 
-    /// Tab order (#204) lives on `LayoutMode.placementTabs` —
-    /// the sidebar search index renders the same list, so the
-    /// curated order has exactly one home.
-    private let modes = LayoutMode.placementTabs
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
-                // No `Divider()` (#275): every other top-level
-                // pane separates sibling regions with the stack
-                // spacing alone — a rule between top-level
-                // regions exists nowhere else in the app. The
-                // min-size card's own background already reads as
-                // a region boundary, and the segmented strip
-                // self-announces the pivot (Trackpad/Displays
-                // precedent), so whitespace is the native + most
-                // consistent break.
-                tabStrip
-                editor
+                LayoutStrip(model: model, selection: selected)
+                // The live preview LEADS its editor, the way
+                // every schematic led the editor it belonged to
+                // (gui.md; `docs/ui-patterns.md` row-order tier
+                // 1). The strip above does not discharge that:
+                // it is the selector, drawing every layout at
+                // one fixed count, while this panel is the
+                // selected layout's own preview and the only
+                // thing the count slider moves.
+                LayoutPreviewPanel(
+                    model: model,
+                    mode: selected.wrappedValue
+                )
+                LayoutCard(
+                    model: model,
+                    mode: selected.wrappedValue
+                )
+                SpacesUsingLayout(
+                    model: model,
+                    mode: selected.wrappedValue
+                )
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
-        // Land on the profile's most-used mode, then leave the tab
-        // alone (mirrors `ShortcutsSection.ensureSelection`).
-        // Latched by writing the model once rather than by a
-        // separate flag: without the write, `selected` would keep
-        // re-deriving `initialMode`, so adding a space in another
-        // tab could move this one under the user.
+        // Land on the profile's most-used layout, then leave the
+        // selection alone (mirrors
+        // `ShortcutsSection.ensureSelection`). Latched by writing
+        // the model once rather than by a separate flag: without
+        // the write, `selected` would keep re-deriving
+        // `initialMode`, so adding a space in another area could
+        // move this one under the user.
         //
         // The latch is cleared by
         // `SettingsNavigation.resetSurfaces()` — on window open
@@ -72,48 +83,39 @@ struct LayoutDefaultsSection: View {
         }
     }
 
-    private var tabStrip: some View {
-        SegmentedPicker(
-            selection: selected,
-            options: modes.map { ($0.displayName, $0) }
-        )
-        .accessibilityLabel(
-            L("layout_defaults.mode_tabs", "Layout mode")
-        )
-    }
-
-    @ViewBuilder
-    private var editor: some View {
-        switch selected.wrappedValue {
-        case .bsp: BspEditor(model: model)
-        case .stack: StackEditor(model: model)
-        case .scrolling: ScrollingEditor(model: model)
-        case .grid: GridEditor(model: model)
-        case .monocle: MonocleEditor(model: model)
-        case .track: TrackEditor(model: model)
-        case .floating: EmptyView()
-        }
-    }
-
-    /// The most common mode across the profile's spaces, falling
-    /// back to BSP — so a user who lives in one mode lands on its
-    /// tab. Floating (no tunables) never wins; it has no tab.
+    /// The most common layout across the profile's spaces, so a
+    /// user who lives in one layout lands on it — read from the
+    /// same place the strip reads its per-tile counts, or the
+    /// page lands on one layout while the strip beside it
+    /// credits the spaces to another.
     private var initialMode: LayoutMode {
-        let counts = model.config.spaceModes.values
-            .filter { modes.contains($0) }
-            .reduce(into: [LayoutMode: Int]()) { $0[$1, default: 0] += 1 }
-        return counts.max { $0.value < $1.value }?.key ?? .bsp
+        LayoutUsage.mostUsed(in: model.config)
     }
 
+    /// The one row above the strip. Rendered through the same
+    /// order list as every other row here, so it is census-owned
+    /// too — its container is `.general`, which is what "shared
+    /// by every layout" looks like in the census.
     private var minSizeSection: some View {
         SettingsSection(
             SettingsCatalog.layoutDefaults.minWindowSize,
             caption: L(
                 "layout_defaults.min_window_size_caption",
-                "Windows never tile smaller than this. It also "
-                    + "sets the auto-size grid's cell size."
+                "Windows never tile smaller than this — it also "
+                    + "caps auto-sized grids and track limits."
             )
         ) {
+            ForEach(LayoutDefaultsRowOrder.general, id: \.id) {
+                key in
+                generalRow(key)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func generalRow(_ key: SettingKey) -> some View {
+        switch key {
+        case .behaviour(.minWindowSize):
             // Label hidden (#275): the section header already
             // names this sole control, so the row shows value +
             // unit only (Dock "Size" pattern). `label` still
@@ -129,6 +131,11 @@ struct LayoutDefaultsSection: View {
                 suffix: "pt",
                 labelHidden: true
             )
+        default:
+            let _ = assertionFailure(
+                "unrendered Layout Defaults general row: \(key.id)"
+            )
+            EmptyView()
         }
     }
 

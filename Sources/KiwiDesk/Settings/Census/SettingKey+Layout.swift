@@ -80,12 +80,20 @@ extension LayoutKey {
             .stackOverflowStyle, .stackNewWindowPlacement:
             return .row(.layoutDefaults, .stack, .atRest)
         case .stackMasterOrientation:
-            // Orientation only matters with several masters.
+            // Orientation only matters with several masters —
+            // and "several" is the RESOLVED count (#406), since
+            // a space overriding the count to 3 is reading this
+            // orientation whatever the global says. Both owners
+            // are surfaced, so both are named, exactly as the
+            // per-space twin below already does.
             return .row(
                 .layoutDefaults,
                 .stack,
                 .atRest,
-                gate: .setting(.layout(.stackMasterCount))
+                gate: .anyOf([
+                    .layout(.stackMasterCount),
+                    .layout(.stackOverrideMasterCount),
+                ])
             )
         case .scrollingOrientation, .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingNewWindowPlacement,

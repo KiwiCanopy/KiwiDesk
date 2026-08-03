@@ -21,8 +21,36 @@ import SwiftUI
 struct ScrollingFollowPair: View {
     let orientation: ScrollingParams.Orientation
     let slotSize: ScrollSize
+    /// Windows in the row. The pair's subject is the *pan*, not
+    /// the fill, so the count changes only how long the row is —
+    /// but it has to change that, or a three-window space is
+    /// shown panning through six slots that do not exist.
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     private var horizontal: Bool { orientation == .horizontal }
+
+    /// The finite row's slot indices, focus at 0. Frame 2 steps
+    /// the focus to index 1, which the floor of two windows
+    /// always provides.
+    var slots: ClosedRange<Int> {
+        let count = max(2, windows)
+        let focusPos = (count - 1) / 2
+        return -focusPos...(count - 1 - focusPos)
+    }
+
+    /// Two panes share the width, so a panel-wide pair takes half
+    /// each — `nil` from `SchematicScale` means "fill", and the
+    /// `HStack` does the halving. A thumbnail keeps the fixed
+    /// per-orientation frames, which are already tile-sized.
+    private var paneWidth: CGFloat? {
+        scale == .panel ? nil : (horizontal ? 128 : 92)
+    }
+
+    private var paneHeight: CGFloat {
+        scale == .panel
+            ? scale.height : (horizontal ? 76 : 104)
+    }
 
     /// Slot length as a fraction of the along axis. Kept on the
     /// thin side so both neighbours stay visible — the pan, not
@@ -40,8 +68,8 @@ struct ScrollingFollowPair: View {
 
     var body: some View {
         SchematicPair(
-            frameWidth: horizontal ? 128 : 92,
-            frameHeight: horizontal ? 76 : 104,
+            frameWidth: paneWidth,
+            frameHeight: paneHeight,
             firstCaption: L(
                 "layout.schematic.scrolling.follow_a",
                 "Focus here"
@@ -51,7 +79,8 @@ struct ScrollingFollowPair: View {
                 "When focus steps to the next window"
             ),
             caption: caption,
-            axLabel: axLabel
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
         ) {
             frame(stepped: false)
         } second: {
@@ -67,6 +96,7 @@ struct ScrollingFollowPair: View {
         }
         .animation(LayoutSchematic.damping, value: orientation)
         .animation(LayoutSchematic.damping, value: slotSize)
+        .animation(LayoutSchematic.damping, value: windows)
     }
 
     /// The row of slots for one frame. Frame 1 rests the focus
@@ -89,7 +119,7 @@ struct ScrollingFollowPair: View {
             ? max(0, center + stride + slot / 2 - along)
             : 0
         return ZStack {
-            ForEach(-2...3, id: \.self) { i in
+            ForEach(slots, id: \.self) { i in
                 let p = center + CGFloat(i) * stride - pan
                 SchematicTile(active: i == focus)
                     .frame(

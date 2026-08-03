@@ -30,12 +30,36 @@ struct ScrollingSchematic: View {
     let anchor: ScrollingParams.Anchor
     let slotSize: ScrollSize
     let placement: SpawnPlacement
+    /// Windows in the row, the incoming one included. The row is
+    /// **finite** since turn 10: a Scrolling space with three
+    /// windows and a narrow slot has nothing off either edge, and
+    /// an endlessly-continuing row said otherwise at every count.
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     /// The monitor is a fixed slice of a wider canvas, so the
     /// off-screen ghosts always have room to show.
     private let screenFraction: CGFloat = 0.5
 
     private var horizontal: Bool { orientation == .horizontal }
+
+    /// The row's slot indices, focus at 0. The row is finite, so
+    /// the focus sits mid-array and the row extends both ways as
+    /// far as the count allows; first / last then land the `+` on
+    /// the row's real ends rather than on whichever tile the
+    /// canvas happened to crop.
+    ///
+    /// Internal rather than private so `LayoutSchematicCountTests`
+    /// can assert the arithmetic. A source scan for the count as
+    /// an input is satisfiable by a schematic that takes it and
+    /// draws a constant — guard-prover demonstrated exactly that
+    /// — so the guard has to read the derived value, and the
+    /// derived value has to be reachable.
+    var slotIndices: ClosedRange<Int> {
+        let count = max(2, windows)
+        let focusPos = (count - 1) / 2
+        return -focusPos...(count - 1 - focusPos)
+    }
 
     /// The slot's real width as a fraction of the screen axis — a
     /// wide slot fills most of the frame (one window plus slivers),
@@ -57,14 +81,17 @@ struct ScrollingSchematic: View {
             // (#239), like GridSchematic's `.dynamic` pair.
             ScrollingFollowPair(
                 orientation: orientation,
-                slotSize: slotSize
+                slotSize: slotSize,
+                windows: windows,
+                scale: scale
             )
         } else {
             SchematicCanvas(
-                width: 320,
-                height: 96,
+                width: scale.width,
+                height: scale.height,
                 caption: caption,
-                axLabel: axLabel
+                axLabel: axLabel,
+                showsCaption: scale.showsCaption
             ) {
                 GeometryReader { geo in
                     strip(geo.size)
@@ -79,6 +106,7 @@ struct ScrollingSchematic: View {
                     LayoutSchematic.damping,
                     value: placement
                 )
+                .animation(LayoutSchematic.damping, value: windows)
             }
         }
     }
@@ -115,18 +143,8 @@ struct ScrollingSchematic: View {
         case .end:
             focusCenter = screenStart + screenLen - slot / 2
         }
-        // Range = the windows actually visible in the canvas (the
-        // outermost straddle its edges). So the monitor sits mid-row
-        // with ghosts off both edges, and first / last land the `+`
-        // on the outermost *rendered* window, not one drawn beyond
-        // the canvas.
-        let low =
-            Int(((-slot / 2 - focusCenter) / step).rounded(.up))
-        let high =
-            Int(
-                ((along + slot / 2 - focusCenter) / step)
-                    .rounded(.down)
-            )
+        let low = slotIndices.lowerBound
+        let high = slotIndices.upperBound
         let newIdx = newWindowIndex(low: low, high: high)
         return Metrics(
             slot: slot,
@@ -135,8 +153,8 @@ struct ScrollingSchematic: View {
             screenLen: screenLen,
             focusCenter: focusCenter,
             newIdx: newIdx,
-            low: min(low, newIdx),
-            high: max(high, newIdx)
+            low: low,
+            high: high
         )
     }
 
@@ -219,14 +237,18 @@ struct ScrollingSchematic: View {
 
     /// Where the new window opens, as a strip index (focus = 0):
     /// beside the focus for the relative placements, or at the very
-    /// first / last end of the whole row.
+    /// first / last end of the whole row. Clamped into the row —
+    /// at two windows the focus IS an end, so "before focused" has
+    /// nowhere further to go and lands on the end itself.
     private func newWindowIndex(low: Int, high: Int) -> Int {
+        let raw: Int
         switch placement {
-        case .first: return low
-        case .last: return high
-        case .beforeFocused: return -1
-        case .afterFocused: return 1
+        case .first: raw = low
+        case .last: raw = high
+        case .beforeFocused: raw = -1
+        case .afterFocused: raw = 1
         }
+        return min(max(raw, low), high)
     }
 
     private var caption: String {
