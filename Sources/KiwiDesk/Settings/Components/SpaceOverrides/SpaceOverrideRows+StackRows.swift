@@ -123,7 +123,18 @@ extension SpaceOverrideRows {
         )
         // Greyed at a resolved master count of 1, like the
         // Layout Defaults picker (§2.7 grey-don't-hide) — this
-        // space's own override decides, not the global.
-        .disabled(g.resolvedStack(for: space).masterCount <= 1)
+        // space's own override decides, not the global. The
+        // predicate is the census's, resolved once in `SpacesGates`
+        // so the row never re-derives it beside the gate.
+        .disabled(
+            gates.inertReason(
+                for: .layout(.stackOverrideMasterOrientation)
+            ) != nil
+        )
+        .help(
+            gates.inertReason(
+                for: .layout(.stackOverrideMasterOrientation)
+            ).map(SpacesGateHelp.sentence) ?? ""
+        )
     }
 }

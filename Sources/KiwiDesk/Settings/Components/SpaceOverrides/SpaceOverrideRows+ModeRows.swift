@@ -34,12 +34,12 @@ extension SpaceOverrideRows {
         )
         .modifier(
             GreyOut(
-                active: g.resolvedGrid(for: space).type == .rigid,
-                help: L(
-                    "scroll_grid.fill_empty_space.rigid_only",
-                    "A rigid grid keeps every cell, so there is "
-                        + "no empty space to fill."
-                )
+                active: gates.inertReason(
+                    for: .layout(.gridOverrideFillEmptySpace)
+                ) != nil,
+                help: gates.inertReason(
+                    for: .layout(.gridOverrideFillEmptySpace)
+                ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
         // "Arrange: Columns first / Rows first" (#217) — GUI
@@ -88,14 +88,20 @@ extension SpaceOverrideRows {
                 range: 1...10
             )
         }
+        // One grey over both steppers (they share the auto-size
+        // predicate), but each gate is consulted by name so the
+        // wiring guard sees both.
         .modifier(
             GreyOut(
-                active: g.resolvedGrid(for: space).autoSize,
-                help: L(
-                    "scroll_grid.auto_size.gates",
-                    "Auto-size grid is on for this space, so the "
-                        + "screen decides the columns and rows."
-                )
+                active: gates.inertReason(
+                    for: .layout(.gridOverrideColumns)
+                ) != nil
+                    || gates.inertReason(
+                        for: .layout(.gridOverrideRows)
+                    ) != nil,
+                help: gates.inertReason(
+                    for: .layout(.gridOverrideColumns)
+                ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
     }
@@ -159,12 +165,12 @@ extension SpaceOverrideRows {
         )
         .modifier(
             GreyOut(
-                active: g.resolvedTrack(for: space).autoTracks,
-                help: L(
-                    "track.auto_tracks.gates",
-                    "Auto track limit is on for this space, so "
-                        + "the screen decides how many open."
-                )
+                active: gates.inertReason(
+                    for: .layout(.trackOverrideLimit)
+                ) != nil,
+                help: gates.inertReason(
+                    for: .layout(.trackOverrideLimit)
+                ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
         OverridePickerRow(

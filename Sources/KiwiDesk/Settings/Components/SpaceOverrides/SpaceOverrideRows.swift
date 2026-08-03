@@ -63,6 +63,16 @@ struct SpaceOverrideRows: View {
     /// each file under the line ceiling, can read it.
     var g: TilingSettings { model.config.settings }
 
+    /// The census-resolved greying for this space's override rows
+    /// and reset action (#678 Phase 3). One per-instance resolver,
+    /// keyed on the space and its active layout, so a row never
+    /// re-derives "is this space rigid / auto-sized" beside the
+    /// gate that declares it. Internal so the mode-row and footer
+    /// extensions consult the same instance.
+    var gates: SpacesGates {
+        SpacesGates(settings: g, space: space, mode: mode)
+    }
+
     private func placeholder(_ text: String) -> some View {
         Text(text)
             .font(.caption)
