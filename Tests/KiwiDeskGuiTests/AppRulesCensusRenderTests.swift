@@ -152,7 +152,23 @@ struct AppRulesCensusRenderTests {
     /// than the literal text `HStack(spacing: 0)`: `swift-format`
     /// wraps a declaration past 79 columns, and a scan for one
     /// spelling walks past the other.
-    @Test("the sentence stack adds no spacing of its own")
+    ///
+    /// It reads EVERY `HStack` in the body, not the outer one.
+    /// The first cut read only the first, and guard-prover
+    /// walked straight through it: nesting the segment `ForEach`
+    /// in an inner `HStack(spacing: 6)` reintroduces the exact
+    /// shipped defect with the outer stack still at 0, and the
+    /// suite went green. The claim has to be "no stack in this
+    /// sentence adds spacing", because that is what the harm
+    /// above is about.
+    ///
+    /// Stated residue, so a green here is not read as more than
+    /// it is: per-segment `.padding` inside the `ForEach` would
+    /// space the row the same way and no stack argument would
+    /// change, and the icon's own `.padding(.trailing, 6)` is
+    /// unguarded — deleting it abuts the icon against the app
+    /// name with this suite still green.
+    @Test("no stack in the sentence adds spacing of its own")
     func sentenceStackAddsNoSpacing() throws {
         let source = SourceScan.stripComments(
             try String(
@@ -186,33 +202,46 @@ struct AppRulesCensusRenderTests {
         #expect(body.contains("ForEach(frame.segments)"))
 
         characters = Array(body)
-        cursor = try #require(
-            body.range(of: "HStack").map {
-                body.distance(
-                    from: body.startIndex,
-                    to: $0.upperBound
-                )
-            },
+        var stacks: [String] = []
+        var search = body.startIndex
+        while let token = body.range(
+            of: "HStack",
+            range: search..<body.endIndex
+        ) {
+            search = token.upperBound
+            var at = body.distance(
+                from: body.startIndex,
+                to: token.upperBound
+            )
+            // A bare `HStack {` has no argument list at all,
+            // which is SwiftUI's default spacing — the same bug
+            // by omission — so a nil here is a failure, never a
+            // stack to skip.
+            stacks.append(
+                SourceScan.balanced(
+                    characters,
+                    from: &at,
+                    open: "(",
+                    close: ")"
+                ) ?? "<no argument list>"
+            )
+        }
+        #expect(
+            !stacks.isEmpty,
             "the sentence must still lay out in an HStack"
         )
-        let arguments = try #require(
-            SourceScan.balanced(
-                characters,
-                from: &cursor,
-                open: "(",
-                close: ")"
-            ),
-            "the HStack must carry an argument list"
-        )
-        #expect(
-            arguments.filter { !$0.isWhitespace } == "spacing:0",
-            Comment(
-                rawValue:
-                    "the sentence's HStack must add no spacing — "
-                    + "the frame's literals own it, and a gap "
-                    + "detaches the ja/ko particle from the noun "
-                    + "it attaches to"
+        for arguments in stacks {
+            #expect(
+                arguments.filter { !$0.isWhitespace }
+                    == "spacing:0",
+                Comment(
+                    rawValue:
+                        "every HStack in the sentence must add "
+                        + "no spacing — the frame's literals own "
+                        + "it, and a gap detaches the ja/ko "
+                        + "particle from the noun it attaches to"
+                )
             )
-        )
+        }
     }
 }
