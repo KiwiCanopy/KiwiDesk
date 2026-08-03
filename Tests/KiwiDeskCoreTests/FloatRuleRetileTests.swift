@@ -253,6 +253,17 @@ struct FloatRuleTests {
                 )
             )
         )
+        // A fullscreen flip changes layout membership the same
+        // way (#670): entering exempts the slot, leaving must
+        // re-place the window into it.
+        #expect(
+            TilingEngine.shouldRetile(
+                after: .windowFullscreenChanged(
+                    w1,
+                    isFullscreen: true
+                )
+            )
+        )
         // Focus retiles are gated by the layout mode instead
         // (only Scrolling and Monocle are focus-driven).
         #expect(

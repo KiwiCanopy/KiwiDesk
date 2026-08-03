@@ -508,6 +508,27 @@ from `AXFullScreen` at track time and refreshed change-only on
 reconcile, keeping AX out of the border path; it is orthogonal to
 floating, so float mutations never touch it.
 
+The same flag exempts the window from the whole tiled working set
+while it is away (#670): it keeps its slot in `space.windows`
+(fullscreen is not a destroy), but both tiled-member derivations
+drop it, so no layout pass computes a frame for it, no navigation
+step lands on it, no z-order raise targets it, and the
+inactive-space stash never parks it — an AX poke at a window
+macOS moved to its own Space either fights the fullscreen app or
+raises it under the user without intent. Exiting fullscreen is a
+membership change like a float flip, so it retiles and the window
+re-enters its kept slot. On a **fullscreen space itself** KiwiDesk
+stands down: the bar panels join every Space by construction
+(`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so both bars gate
+per display on the space-type verdict, and the native-switch
+settle skips its retile and refocus — the raise
+would yank the desktop's focused window up behind the fullscreen
+app. That verdict is `NativeSpaces.isUser`,
+never the nil Mission Control number, which is
+indistinguishable from "SkyLight unavailable" — and unavailable
+must keep the single-space fallback fully alive, so a lookup miss
+always counts as a user space.
+
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order

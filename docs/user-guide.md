@@ -814,6 +814,12 @@ App or Space Bars, never tile, and stay put when you switch spaces.
 Windows in native (green-button) fullscreen get none either:
 they fill the display, so a border would peek out only at the
 corners. The border returns when the window leaves fullscreen.
+While a window is in native fullscreen, KiwiDesk stands down
+around it entirely: macOS gives it its own Space, so the App and
+Space Bars hide there, no layout pass or focus raise targets the
+fullscreened window, and the space it came from tiles as if it
+were away. It keeps its place in that space — leave fullscreen
+and it tiles back into its old position.
 Popovers, sheets, emoji pickers, and other windows above a bordered
 window stay above its border, which is pinned to the focused window's
 stacking level; the window stays focused and keeps its full border.
@@ -909,7 +915,10 @@ holds a colour: every bar tint is in **Advanced Colors**.
 The App Bar is the strip that shows every window in the current
 space — it only renders in **Monocle** and **Scrolling**, the two
 layouts where a window can hide behind another or scroll off the
-edge, so you always see what's open. The card has no on/off row
+edge, so you always see what's open. A window you take into
+native (green-button) fullscreen loses its item while it's away
+— macOS gives it its own Space — and the item returns when it
+exits. The card has no on/off row
 because the bar doesn't have one: visibility is per layout, via
 the two **Show it in** switches at the card's foot. Everything
 else applies to every layout that shows a bar; per-layout
@@ -1041,9 +1050,10 @@ narrow-but-real need stays in the power layer.
 
 ### Space Bar
 
-The **Space Bar** is an always-visible overview of your Spaces,
-**on by default** — it's the one place your virtual Spaces are
-visible at all: one bar per display, listing that display's
+The **Space Bar** is an overview of your Spaces, visible on
+every regular Space (on a fullscreen Space it stands down, like
+the App Bar) and **on by default** — it's the one place your
+virtual Spaces are visible at all: one bar per display, listing that display's
 Spaces in profile order. Each item shows the Space's identifier
 (its configured icon, else its plain number or a two-letter
 monogram), a thin divider, then a compact glyph per window —

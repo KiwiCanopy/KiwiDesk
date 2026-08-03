@@ -160,7 +160,15 @@ extension KiwiCore {
             trackPosition: params.newWindowPosition,
             spillCapacity: nil,
             trackCap: params.trackCap,
-            isTiled: { windows[$0]?.isFloating == false }
+            isTiled: { id in
+                guard let window = windows[id] else {
+                    return false
+                }
+                // Mirrors the create fold's occupancy (#670):
+                // a fullscreen member fills no track slot.
+                return !window.isFloating
+                    && !window.isFullscreen
+            }
         )
     }
 

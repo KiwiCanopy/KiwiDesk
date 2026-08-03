@@ -40,6 +40,14 @@ extension KiwiCore {
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
         guard
+            // A fullscreen space hosts the panels by
+            // construction (`.canJoinAllSpaces` +
+            // `.fullScreenAuxiliary`), so the stand-down (#670)
+            // gates here: nil retires the overlay through the
+            // manager, keeping `shownStrips` consistent with
+            // `clampFloatsClearOfBars` — a panel-level-only
+            // hide would not.
+            NativeSpaces.currentSpaceIsUser(display: display.id),
             let id = state.workspaces.currentSpace(on: display.id),
             let space = state.workspaces[id],
             let host = barHost(for: space),
@@ -60,7 +68,8 @@ extension KiwiCore {
     private func mainScreenFallback(
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
-        guard let space = activeSpace,
+        guard NativeSpaces.activeSpaceIsUser(),
+            let space = activeSpace,
             let host = barHost(for: space),
             host.appBar.enabled,
             let screen = NSScreen.main ?? NSScreen.screens.first,

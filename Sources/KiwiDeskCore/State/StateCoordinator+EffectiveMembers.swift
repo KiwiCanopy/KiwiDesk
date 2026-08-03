@@ -11,15 +11,26 @@ import Foundation
 
 extension StateCoordinator {
     /// Ordered tiled members a space actually OWNS
-    /// (`space.windows` minus floating) — no sticky injection.
-    /// The derivation for anything that writes positions back
-    /// into `space.windows` (the App Bar drag reorder), where
-    /// an injected traveler with no local slot would overwrite
-    /// a real window's slot (#414 v2).
+    /// (`space.windows` minus floating and native-fullscreen)
+    /// — no sticky injection. The derivation for anything that
+    /// writes positions back into `space.windows` (the App Bar
+    /// drag reorder), where an injected traveler with no local
+    /// slot would overwrite a real window's slot (#414 v2).
+    ///
+    /// Native-fullscreen exemption (#670): the window keeps
+    /// its slot in `space.windows` (fullscreen is not a
+    /// destroy — the design ruling `FullscreenStateTests`
+    /// pins), but macOS moved it to its own Space, so no
+    /// layout pass, navigation step, or z-order raise may
+    /// target it until it returns. The `.windowFullscreenChanged`
+    /// retile re-places it on exit.
     public func localTiledMembers(
         of space: Space
     ) -> [WindowID] {
-        space.windows.filter { windows[$0]?.isFloating == false }
+        space.windows.filter { id in
+            guard let window = windows[id] else { return false }
+            return !window.isFloating && !window.isFullscreen
+        }
     }
 
     /// Ordered tiled members of a space for layout, navigation,
@@ -260,6 +271,17 @@ extension StateCoordinator {
         var result: [WindowID] = []
         var next = 0
         for id in space.windows {
+            // Fullscreen first (#670): appended in place like a
+            // float — absent from `injected`, so the tiled
+            // cursor below would drain past it and duplicate
+            // every later member. Before the sticky skip: a
+            // fullscreen sticky travels nowhere (both
+            // injections exclude it), so its one glyph stays
+            // home instead of vanishing from every bar.
+            if let window = windows[id], window.isFullscreen {
+                result.append(id)
+                continue
+            }
             if let window = windows[id], window.isSticky,
                 stickyRenderSpace(of: window, focused: focused)
                     != space.id
@@ -280,7 +302,9 @@ extension StateCoordinator {
         result.append(contentsOf: injected[next...])
         let floating = windows.all
             .filter {
-                $0.isSticky && $0.isFloating
+                // Fullscreen stickies stay home (loop above);
+                // appending here too would double the glyph.
+                $0.isSticky && $0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
                     && stickyRenderSpace(of: $0, focused: focused)
                         == space.id
@@ -302,7 +326,11 @@ extension StateCoordinator {
     ) -> [(id: WindowID, homeIndex: Int)] {
         windows.all
             .filter {
-                $0.isSticky && !$0.isFloating
+                // A fullscreen sticky travels nowhere (#670);
+                // the `firstIndex` below would drop it anyway
+                // (it has no local tiled slot), stated here so
+                // the exemption is deliberate, not incidental.
+                $0.isSticky && !$0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
                     && stickyRenderSpace(of: $0, focused: focused)
                         == space.id

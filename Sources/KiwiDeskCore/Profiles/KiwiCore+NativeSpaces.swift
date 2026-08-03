@@ -59,6 +59,15 @@ extension KiwiCore {
             // (re)appeared, there is nothing to fly around.
             retile(animated: false, force: true)
             emitSpaceChange()
+        } else if !NativeSpaces.activeSpaceIsUser() {
+            // Arrived on a fullscreen/system space (#670): the
+            // nil number skipped the retile above and the
+            // settle stands down, so sync the bars directly —
+            // the per-display verdict retires them instead of
+            // leaving the panels painted over the fullscreen
+            // app for the 600 ms until the settle's own sync.
+            updateAppBar()
+            updateSpaceBar()
         }
         emitNativeSpaceChange()
         settleAfterNativeSwitch(number)
@@ -85,23 +94,46 @@ extension KiwiCore {
             .nativeSpaceSettle,
             after: .milliseconds(600)
         ) { [weak self] in
-            guard let self, self.lastNativeSpace == number
-            else { return }
-            self.retile(animated: false, force: true)
-            // The switch rebuilt this desktop's windows with
-            // arbitrary stacking; put the overlapping
-            // layouts' z-order back before handing focus over.
-            self.scheduleZOrderRestore()
-            if let focused = self.activeSpace?.focused {
-                // The instant retile above already placed the
-                // windows; re-tiling on focus would fly them
-                // from stale frames (issue #11).
-                self.focusWindow(
-                    focused,
-                    refocusRetile: false,
-                    warp: true
-                )
-            }
+            self?.nativeSpaceSettle(ifStill: number)
+        }
+    }
+
+    /// The settle body, split out so tests can fire it without
+    /// waiting out the 600 ms schedule.
+    func nativeSpaceSettle(ifStill number: Int?) {
+        guard lastNativeSpace == number else { return }
+        // A fullscreen/system space: the retile, z-order
+        // restore and refocus stand down (#670) — the refocus
+        // would AX-raise the desktop's focused window behind
+        // the fullscreen app. The bars must still sync: the
+        // panels join every Space by construction, the switch
+        // handler skipped its retile on the nil number, so
+        // this sync is what retires them (review 2026-08-03).
+        guard NativeSpaces.activeSpaceIsUser() else {
+            updateAppBar()
+            updateSpaceBar()
+            return
+        }
+        retile(animated: false, force: true)
+        // The switch rebuilt this desktop's windows with
+        // arbitrary stacking; put the overlapping
+        // layouts' z-order back before handing focus over.
+        scheduleZOrderRestore()
+        if let focused = activeSpace?.focused,
+            state.windows[focused]?.isFullscreen != true
+        {
+            // The instant retile above already placed the
+            // windows; re-tiling on focus would fly them
+            // from stale frames (issue #11). A fullscreen
+            // window can still hold the focused slot (the
+            // fold never clears it, #670 review) — raising
+            // it would switch the user to its Space, so it
+            // is the one focus this settle never re-asserts.
+            focusWindow(
+                focused,
+                refocusRetile: false,
+                warp: true
+            )
         }
     }
 

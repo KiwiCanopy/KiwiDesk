@@ -91,12 +91,13 @@ public enum WindowGather {
                     primaryHeight: primaryHeight
                 )
             }
-            for windowID in space.windows {
-                guard
-                    let window = state.windows[windowID],
-                    !window.isFloating,
-                    window.frame.size != .zero
-                else { continue }
+            // The owning derivation, not an open-coded filter
+            // (#670 re-review): the gather's domain IS the
+            // tiled members — floats keep their frames and a
+            // fullscreen window lives on its own macOS Space,
+            // where the grid can neither reach nor place it.
+            for windowID in state.localTiledMembers(of: space)
+            where state.windows[windowID]?.frame.size != .zero {
                 gathered[display.id, default: []]
                     .append(windowID)
             }
