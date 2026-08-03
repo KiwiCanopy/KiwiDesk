@@ -3,16 +3,23 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The first-run keymap the day-one Settings screen rests on
-/// (#678 turn 14c).
+/// The first-run keymap contract: a fresh install is USABLE
+/// from the keyboard before the user configures anything.
 ///
-/// That screen's whole claim is "you are already set up —
-/// nothing below needs your attention", with no setup task
-/// anywhere on it. **It holds only because a real keymap is
-/// already seeded**: the welcome tour SHOWS the keys rather
-/// than asking the user to create them, and a Shortcuts card
-/// reading "18 bound · no conflicts" on a fresh install is a
-/// statement of fact about this seed.
+/// This is a Core promise about `DefaultKeybindings` and stands
+/// on its own — nothing else in the tree watches it, so it is
+/// the only net under "a new install can focus, swap and switch
+/// spaces out of the box". Read it that way, not as a fixture
+/// for any one screen: a seed that quietly stops covering a
+/// family breaks the product, whatever Settings happens to be
+/// drawing that week.
+///
+/// The #678 day-one Home screen is the most VISIBLE consumer —
+/// its claim is "you are already set up", with no setup task
+/// anywhere on it, and a Shortcuts card reading "18 bound · no
+/// conflicts" on a fresh install is a statement of fact about
+/// this seed. If that screen is later redesigned away, these
+/// assertions stay: the consumer changed, the contract did not.
 ///
 /// So the thing that would falsify the screen is not a Settings
 /// bug at all — it is a seed that quietly stops covering a

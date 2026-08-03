@@ -277,14 +277,10 @@ slots opens with a particle that must hug the noun before it
 frame exists for. So the spacing is the translator's too, and a
 row drawing one owes an allow-list naming any stack that may
 space its children and why — `AppRuleSentenceLayoutTests`, whose
-`allowed` map is the one copy of who may. Scope such a guard to
-the row's FILES rather than to the sentence property:
-guard-prover walked through a body-scoped cut twice, the second
-time with a spacing helper declared outside the property and
-composed into it. What no source scan can reach is per-segment
-spacing that is not a stack argument — a `.padding`, a
-`Spacer`, a `.frame` — so that residue is stated in the suite
-rather than chased.
+`allowed` map is the one copy of who may. What no source scan
+can reach is per-segment spacing that is not a stack argument —
+a `.padding`, a `Spacer`, a `.frame` — so that residue is
+stated in the suite rather than chased.
 
 **A capability unlocked in one list stays scoped to that list**
 (#678). Once a profile carries a single shortcut override, the

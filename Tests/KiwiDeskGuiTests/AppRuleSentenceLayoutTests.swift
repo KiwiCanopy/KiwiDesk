@@ -22,12 +22,43 @@ import Testing
 /// the two the sentence's spacing has exactly one owner.
 @Suite("App Rules sentence layout")
 struct AppRuleSentenceLayoutTests {
-    /// The row's files. Pinned at two so a rename or a split
-    /// cannot silently shrink the scan to nothing.
-    private static let rowFiles = [
-        "AppRuleRow.swift",
-        "AppRuleRow+Facets.swift",
-    ]
+    /// The `AppRuleRow` family, DISCOVERED rather than listed —
+    /// the row that draws the sentence, and any extension of it.
+    ///
+    /// A hand-list re-opens the hole file-scoping was adopted to
+    /// close: the mutation that drove this scan out of the
+    /// `sentence` property was a spacing helper declared beside
+    /// it and composed in, and declaring that helper in a file
+    /// the list does not name walks past it while every derived
+    /// check still agrees. `AppRuleRow+Anything.swift` is where
+    /// such a helper lands, and enumeration catches it.
+    ///
+    /// Scoped to `AppRuleRow`, NOT to `AppRule` — the wider
+    /// prefix pulls in `AppRuleTitledEditor` and
+    /// `AppRulesSection`, which are chrome rather than sentence
+    /// and space their children correctly. Exempting them would
+    /// trade this guard's one honest exemption for an allow-list
+    /// that grows with every file in the area, and each entry is
+    /// a place to wave a real gap through.
+    ///
+    /// Residue: a spacing helper declared OUTSIDE this family and
+    /// composed into the row is invisible here. That is a smaller
+    /// hole than the hand-list it replaces, not an absent one.
+    private static func rowFiles() throws -> [URL] {
+        let files = try SourceScan.swiftSources(
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Sections"
+                )
+        ).filter {
+            $0.lastPathComponent.hasPrefix("AppRuleRow")
+        }
+        // A floor, because an enumerator over a moved or renamed
+        // directory yields [] and every check downstream would
+        // then pass for having looked at nothing.
+        #expect(files.count >= 2)
+        return files
+    }
 
     /// The one stack in these files that may space its children,
     /// and why — the single copy of who is exempt.
@@ -63,19 +94,12 @@ struct AppRuleSentenceLayoutTests {
     /// tree has no view-render harness.
     @Test("no stack in the row spaces the sentence")
     func rowStacksAddNoSpacing() throws {
-        let directory = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections"
-            )
+        let files = try Self.rowFiles()
         var seen: [String] = []
-        for file in Self.rowFiles {
+        for url in files {
+            let file = url.lastPathComponent
             let source = SourceScan.blankingCommentsAndLiterals(
-                try String(
-                    contentsOf:
-                        directory
-                        .appendingPathComponent(file),
-                    encoding: .utf8
-                )
+                try String(contentsOf: url, encoding: .utf8)
             )
             var search = source.startIndex
             while let token = source.range(
@@ -147,12 +171,12 @@ struct AppRuleSentenceLayoutTests {
         // here; it is `2 * m > 2` wearing a non-vacuity check's
         // clothes. Every file must CONTRIBUTE a stack instead.
         #expect(
-            seen.count >= Self.rowFiles.count,
+            seen.count >= files.count,
             Comment(
                 rawValue:
                     "each row file lays something out "
                     + "horizontally; \(seen.count) stack(s) found "
-                    + "across \(Self.rowFiles.count) file(s) means "
+                    + "across \(files.count) file(s) means "
                     + "one stopped contributing, or the needle "
                     + "stopped matching"
             )
