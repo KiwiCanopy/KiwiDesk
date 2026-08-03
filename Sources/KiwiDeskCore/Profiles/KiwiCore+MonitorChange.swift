@@ -11,6 +11,17 @@ extension KiwiCore {
     func handleMonitorChange() {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return }
+        // No exit may leave a space orphaned (#676): the state
+        // fold already ran, and a display id that churned (an
+        // AirPlay connect can reassign even the built-in's id)
+        // took every `spaceDisplay` entry on the old id with it.
+        // A branch that skips re-resolving — `.countDefault`
+        // with the profile already current did — leaves both
+        // bars' display keys unresolvable, so the trailing
+        // retile retires them with nothing to heal. Resolve on
+        // every exit; the call is idempotent, so branches that
+        // already resolved pay nothing.
+        defer { resolveSpaceDisplays() }
         let fingerprints = displays.map(\.fingerprint)
 
         // A native-Space binding wins over matching (#7); a
