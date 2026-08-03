@@ -298,11 +298,16 @@ struct LayersCard: View {
     let expander: ShortcutsFamilyRows
     @State private var expanded = false
 
-    /// The gate behind the `.immediate` tier. `default` always
-    /// exists, so a second entry is what "the user configured a
-    /// layer" means.
+    /// The gate behind the `.immediate` tier — resolved through
+    /// the census's own gate rather than re-derived here, so the
+    /// declaration and the screen cannot disagree. Hiding a
+    /// user's configured layers is what disagreement looks like,
+    /// and this area shipped it once.
     private var layersExist: Bool {
-        model.config.layers.count > 1
+        ShortcutsRuntimeGate.isSatisfied(
+            .layersExist,
+            in: model.config
+        )
     }
 
     /// One declaration, two chromes — force-expanded once a
