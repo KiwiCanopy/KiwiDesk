@@ -1494,7 +1494,8 @@ track.set_overflow_style_override("code", "cascade_overflow")
 The **app bar** lists every window in the current space — for
 layouts where windows can hide each other (**monocle**) or scroll
 off-screen (**scrolling**) — so you always see what's there. Click
-an item to focus its window; drag to reorder.
+an item to focus its window; drag to reorder. A window in native
+fullscreen has no item until it returns.
 
 With **multiple monitors** each display shows its own bar for the
 space currently on it, all at once — a bar-hosting space on a
@@ -1914,7 +1915,7 @@ scroll.set_app_bar_background_style("plain")  -- override for scrolling
 
 ## Space Bar
 
-The Space Bar (#293) is an always-visible overview of your
+The Space Bar (#293) is an overview of your
 Spaces: one bar per display, listing that display's Spaces in
 profile order — each item shows the Space's identifier
 (configured icon, else the plain digits for numeric ids or a
@@ -1935,7 +1936,8 @@ The bar is **layout-independent** and reserves real screen area
 on its edge before any layout runs. It may share an edge with
 the App Bar: the Space Bar always sits at the screen edge, the
 App Bar next to the windows, and the insets add. All settings
-are global — there are no per-layout overrides.
+are global — there are no per-layout overrides. On a fullscreen
+macOS Space the bar hides; it returns with the desktop.
 
 Two accents distinguish states: `item_color` paints inactive
 Spaces, `active_item_color` the active Space, and

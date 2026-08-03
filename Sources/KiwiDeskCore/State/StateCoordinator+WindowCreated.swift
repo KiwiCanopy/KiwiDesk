@@ -40,8 +40,15 @@ extension StateCoordinator {
                 trackPosition: track.newWindowPosition,
                 spillCapacity: trackCapacities[target],
                 trackCap: track.trackCap,
-                isTiled: { [windows] in
-                    windows[$0]?.isFloating == false
+                isTiled: { [windows] id in
+                    guard let window = windows[id] else {
+                        return false
+                    }
+                    // A fullscreen member occupies no slot
+                    // (#670): it left the tiled derivations,
+                    // so fill-then-spill must not count it.
+                    return !window.isFloating
+                        && !window.isFullscreen
                 }
             )
         } else {

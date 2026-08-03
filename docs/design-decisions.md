@@ -520,11 +520,11 @@ membership change like a float flip, so it retiles and the window
 re-enters its kept slot. On a **fullscreen space itself** KiwiDesk
 stands down: the bar panels join every Space by construction
 (`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so both bars gate
-per display on the space-type verdict, and the 600 ms
-native-switch settle skips its retile and refocus — the raise
+per display on the space-type verdict, and the native-switch
+settle skips its retile and refocus — the raise
 would yank the desktop's focused window up behind the fullscreen
-app. That verdict is `NativeSpaces.isUser` (SkyLight space
-`type == 0`), never the nil Mission Control number, which is
+app. That verdict is `NativeSpaces.isUser`,
+never the nil Mission Control number, which is
 indistinguishable from "SkyLight unavailable" — and unavailable
 must keep the single-space fallback fully alive, so a lookup miss
 always counts as a user space.

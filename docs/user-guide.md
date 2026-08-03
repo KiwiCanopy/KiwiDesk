@@ -915,7 +915,10 @@ holds a colour: every bar tint is in **Advanced Colors**.
 The App Bar is the strip that shows every window in the current
 space — it only renders in **Monocle** and **Scrolling**, the two
 layouts where a window can hide behind another or scroll off the
-edge, so you always see what's open. The card has no on/off row
+edge, so you always see what's open. A window you take into
+native (green-button) fullscreen loses its item while it's away
+— macOS gives it its own Space — and the item returns when it
+exits. The card has no on/off row
 because the bar doesn't have one: visibility is per layout, via
 the two **Show it in** switches at the card's foot. Everything
 else applies to every layout that shows a bar; per-layout
@@ -1047,9 +1050,10 @@ narrow-but-real need stays in the power layer.
 
 ### Space Bar
 
-The **Space Bar** is an always-visible overview of your Spaces,
-**on by default** — it's the one place your virtual Spaces are
-visible at all: one bar per display, listing that display's
+The **Space Bar** is an overview of your Spaces, visible on
+every regular Space (on a fullscreen Space it stands down, like
+the App Bar) and **on by default** — it's the one place your
+virtual Spaces are visible at all: one bar per display, listing that display's
 Spaces in profile order. Each item shows the Space's identifier
 (its configured icon, else its plain number or a two-letter
 monogram), a thin divider, then a compact glyph per window —

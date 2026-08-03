@@ -39,9 +39,10 @@ extension KiwiCore {
                 == .focusedTrack
         else { return nil }
         let capacity = tiler.trackCapacity(for: space, state: state)
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        // The owning derivation, not an open-coded filter: a
+        // fullscreen member gets no seed slot (#670) — the
+        // layout would never fill it, shifting every break.
+        let tiled = state.localTiledMembers(of: space)
         return TrackLayout.fillSeed(
             tiled: tiled,
             capacity: capacity

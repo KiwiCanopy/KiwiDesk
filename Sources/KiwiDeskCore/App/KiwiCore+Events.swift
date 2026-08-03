@@ -215,7 +215,11 @@ extension KiwiCore {
         // the previous desktop, and raising it would switch back.
         if effects.removedWindow?.focusLost == true,
             let next = activeSpace?.focused,
-            eventLoop.isListed(next)
+            eventLoop.isListed(next),
+            // Belt to the fold's re-pick (#670): never raise a
+            // fullscreen fallback — it would switch the user
+            // to its Space on a plain window close.
+            state.windows[next]?.isFullscreen != true
         {
             focusWindow(next, warp: true)
         }

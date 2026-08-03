@@ -88,192 +88,121 @@ struct FullscreenLayoutExemptionTests {
         // exempt id (which would duplicate every later member).
         #expect(state.effectiveMembers(of: space) == [w1, w2, w3])
     }
-}
 
-/// The stand-down half: the user-space verdict and the surfaces
-/// it gates (both bars, the 600 ms native-switch settle).
-/// Serialized: the DEBUG overrides are process-global.
-@Suite(
-    "Fullscreen space stand-down (#670)",
-    .serialized,
-    .enabled(if: NSScreen.main != nil)
-)
-@MainActor
-struct FullscreenStandDownTests {
-    private func makeCore() -> KiwiCore {
-        makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-fullscreen-\(UUID().uuidString)"
-                )
+    @Test("A fullscreen sticky keeps its one glyph at home")
+    func fullscreenStickyGlyphStaysHome() {
+        var state = makeState()
+        state.workspaces.ensureSpace(SpaceID(2))
+        state.setSticky(w2, .global)
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
         )
-    }
-
-    private func space(
-        _ id: UInt64,
-        isUser: Bool
-    ) -> NativeSpace {
-        NativeSpace(
-            id: id,
-            displayUUID: "D",
-            isCurrent: false,
-            isUser: isUser
-        )
-    }
-
-    @Test("The verdict reads isUser; a lookup miss counts user")
-    func isUserSpaceVerdict() {
-        let spaces = [
-            space(1, isUser: true),
-            space(9, isUser: false),
-        ]
-        #expect(NativeSpaces.isUserSpace(1, in: spaces))
-        #expect(!NativeSpaces.isUserSpace(9, in: spaces))
-        // Standing down needs positive evidence of a
-        // fullscreen/system space — never a miss (an unknown id
-        // must not hide the bars or kill the settle).
-        #expect(NativeSpaces.isUserSpace(42, in: spaces))
-    }
-
-    @Test("The native-switch settle stands down on a fullscreen space")
-    func settleStandsDown() {
-        let core = makeCore()
-        core.state.apply(.windowCreated(makeWindow(w1)))
-        core.state.apply(.windowCreated(makeWindow(w2)))
-        let spaceID = core.state.workspaces.space(of: w1)!
-        core.state.workspaces.focus(w2, in: spaceID)
-        // Destroying the focused window hands `focused` to the
-        // fallback but clears the global `lastFocused` — the
-        // settle's refocus is then the only thing that can set
-        // it, which makes it the probe.
-        core.state.apply(
-            .windowDestroyed(w2, wasMinimized: false)
+        // Focus lives on space 2: a non-fullscreen global
+        // sticky would render (and list) there. Fullscreen
+        // excludes it from both traveler injections, so
+        // without the home-space keep it would vanish from
+        // every bar at once.
+        state.workspaces.activate(SpaceID(2))
+        let home = state.workspaces[SpaceID(1)]!
+        let away = state.workspaces[SpaceID(2)]!
+        #expect(
+            state.effectiveMembers(
+                of: home,
+                activeSpace: SpaceID(2)
+            ).contains(w2)
         )
         #expect(
-            core.state.workspaces[spaceID]?.focused == w1
+            !state.effectiveMembers(
+                of: away,
+                activeSpace: SpaceID(2)
+            ).contains(w2)
         )
-        #expect(core.state.workspaces.lastFocused == nil)
+    }
+}
 
-        NativeSpaces.activeSpaceIsUserOverride = false
-        defer { NativeSpaces.activeSpaceIsUserOverride = nil }
-        core.nativeSpaceSettle(ifStill: core.lastNativeSpace)
-        // Stood down: no retile, no refocus behind the
-        // fullscreen app.
-        #expect(core.state.workspaces.lastFocused == nil)
-
-        // Back on a user desktop the same settle refocuses —
-        // proving the gate, not a broken settle body.
-        NativeSpaces.activeSpaceIsUserOverride = true
-        core.nativeSpaceSettle(ifStill: core.lastNativeSpace)
-        #expect(core.state.workspaces.lastFocused == w1)
+/// The close fallback: `Space.remove` hands `focused` to the
+/// slot neighbor, which can be a fullscreen member — the close
+/// handler's raise would then switch the user to its Space, so
+/// the fold re-picks (#670 review).
+@Suite("Fullscreen close-fallback re-pick (#670)")
+struct FullscreenCloseFallbackTests {
+    @Test("A close never hands focus to a fullscreen neighbor")
+    func closeRePicksPastFullscreen() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        state.apply(.windowCreated(makeWindow(w3)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.focus(w1, in: space)
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
+        )
+        state.apply(.windowDestroyed(w1, wasMinimized: false))
+        // The slot neighbor is w2 (fullscreen) — the fold must
+        // step past it to the first surfaceable member.
+        #expect(state.workspaces[space]?.focused == w3)
     }
 
-    @Test("The inactive-space stash skips a fullscreen window")
-    func stashSkipsFullscreen() {
-        guard let screen = NSScreen.main else { return }
-        // A floating member of an inactive space is captured on
-        // its first stash — the probe: a fullscreen one must be
-        // skipped before that capture (it lives on its own
-        // macOS Space; there is nothing here to park).
-        func makeState(fullscreen: Bool) -> StateCoordinator {
-            var state = StateCoordinator()
-            state.apply(.windowCreated(makeWindow(w1)))
-            state.workspaces.ensureSpace(SpaceID(2))
-            state.workspaces.activate(SpaceID(2))
-            state.apply(
-                .windowCreated(
-                    ManagedWindow(
-                        id: w2,
-                        pid: 2,
-                        appName: "App2",
-                        frame: CGRect(
-                            x: 100,
-                            y: 100,
-                            width: 800,
-                            height: 600
-                        ),
-                        isFloating: true,
-                        isFullscreen: fullscreen
+    @Test("The plain slot-neighbor fallback is untouched")
+    func plainNeighborFallbackKept() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.focus(w1, in: space)
+        state.apply(.windowDestroyed(w1, wasMinimized: false))
+        #expect(state.workspaces[space]?.focused == w2)
+    }
+}
+
+/// The quit grid gathers every tracked tiled window — except a
+/// fullscreen one, which lives on its own macOS Space where the
+/// grid can neither reach nor place it, and no post-quit restore
+/// heals the poke (#670 review).
+@Suite("Fullscreen quit-grid exemption (#670)")
+struct FullscreenQuitGridTests {
+    @Test("The gather skips a fullscreen window")
+    func gatherSkipsFullscreen() {
+        var state = StateCoordinator()
+        state.apply(
+            .displaysChanged([
+                Display(
+                    id: DisplayID(1),
+                    name: "Main",
+                    frame: CGRect(
+                        x: 0,
+                        y: 0,
+                        width: 1920,
+                        height: 1080
                     )
                 )
+            ])
+        )
+        func tracked(_ id: WindowID) -> ManagedWindow {
+            ManagedWindow(
+                id: id,
+                pid: pid_t(id.raw),
+                appName: "App\(id.raw)",
+                frame: CGRect(
+                    x: 10,
+                    y: 10,
+                    width: 400,
+                    height: 300
+                )
             )
-            state.workspaces.activate(SpaceID(1))
-            return state
         }
-        // Control arm first: the same fixture without the flag
-        // captures, so the skip below is the guard passing —
-        // not a fixture that never reached the stash.
-        let engine = TilingEngine()
-        engine.stashInactive(
-            state: makeState(fullscreen: false),
-            fallback: screen,
-            force: true
+        state.apply(.windowCreated(tracked(w1)))
+        state.apply(.windowCreated(tracked(w2)))
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
         )
-        #expect(engine.stashedFrames[w2] != nil)
-
-        let exempt = TilingEngine()
-        exempt.stashInactive(
-            state: makeState(fullscreen: true),
-            fallback: screen,
-            force: true
-        )
-        #expect(exempt.stashedFrames[w2] == nil)
-    }
-
-    @Test("The App Bar's cold-start fallback hides on a fullscreen space")
-    func appBarFallbackHides() {
-        let core = makeCore()
-        core.state.apply(.windowCreated(makeWindow(w1)))
-        core.state.apply(.windowCreated(makeWindow(w2)))
-        let spaceID = core.state.workspaces.space(of: w1)!
-        _ = core.execute(
-            "set_mode",
-            args: [.string(spaceID.raw), .string("monocle")]
-        )
-        defer { NativeSpaces.activeSpaceIsUserOverride = nil }
-
-        // On a user desktop the fixture paints a bar — the
-        // stand-down below must be the gate, not a bar that
-        // never rendered.
-        NativeSpaces.activeSpaceIsUserOverride = true
-        core.updateAppBar()
-        #expect(!core.appBars.shownStrips.isEmpty)
-
-        NativeSpaces.activeSpaceIsUserOverride = false
-        core.updateAppBar()
-        #expect(core.appBars.shownStrips.isEmpty)
-    }
-
-    @Test("Both per-display bars hide on a fullscreen space")
-    func perDisplayBarsHide() {
-        let core = makeCore()
-        guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay
-        else { return }
-        core.state.apply(.displaysChanged([display]))
-        core.state.apply(.windowCreated(makeWindow(w1)))
-        core.state.apply(.windowCreated(makeWindow(w2)))
-        // The event pump normally follows a display change with
-        // this; applying the raw state event skips KiwiCore.
-        core.resolveSpaceDisplays(mainID: display.id)
-        let spaceID = core.state.workspaces.space(of: w1)!
-        _ = core.execute(
-            "set_mode",
-            args: [.string(spaceID.raw), .string("monocle")]
-        )
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-
-        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateAppBar()
-        core.updateSpaceBar()
-        #expect(!core.appBars.shownStrips.isEmpty)
-        #expect(!core.spaceBars.shownDisplays.isEmpty)
-
-        NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        core.updateAppBar()
-        core.updateSpaceBar()
-        #expect(core.appBars.shownStrips.isEmpty)
-        #expect(core.spaceBars.shownDisplays.isEmpty)
+        let gathered = WindowGather.collect(
+            state: state,
+            primaryHeight: 1080
+        ).flatMap(\.windows)
+        // Control arm in the same fixture: the plain window IS
+        // gathered, so the skip below is the guard passing.
+        #expect(gathered.contains(w1))
+        #expect(!gathered.contains(w2))
     }
 }

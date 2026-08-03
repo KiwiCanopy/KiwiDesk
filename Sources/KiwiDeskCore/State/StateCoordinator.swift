@@ -234,8 +234,23 @@ public struct StateCoordinator: Sendable {
                 rememberFloatOverride(of: window)
                 rememberStickyIntent(of: window)
             }
+            let home = workspaces.space(of: id)
             windows.remove(id)
             workspaces.remove(id)
+            // The slot-neighbor fallback can land on a
+            // fullscreen member (#670 review): the close
+            // handler's raise would then switch the user to
+            // its Space. Re-pick the first member the layout
+            // can actually surface.
+            if let home,
+                let picked = workspaces[home]?.focused,
+                windows[picked]?.isFullscreen == true
+            {
+                let next = workspaces[home]?.windows.first {
+                    windows[$0]?.isFullscreen == false
+                }
+                workspaces.withSpace(home) { $0.focused = next }
+            }
 
         case .windowMoved(let id, let frame):
             windows.updateFrame(id, frame: frame)

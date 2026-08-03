@@ -271,20 +271,24 @@ extension StateCoordinator {
         var result: [WindowID] = []
         var next = 0
         for id in space.windows {
+            // Fullscreen first (#670): appended in place like a
+            // float — absent from `injected`, so the tiled
+            // cursor below would drain past it and duplicate
+            // every later member. Before the sticky skip: a
+            // fullscreen sticky travels nowhere (both
+            // injections exclude it), so its one glyph stays
+            // home instead of vanishing from every bar.
+            if let window = windows[id], window.isFullscreen {
+                result.append(id)
+                continue
+            }
             if let window = windows[id], window.isSticky,
                 stickyRenderSpace(of: window, focused: focused)
                     != space.id
             {
                 continue
             }
-            // Fullscreen rides the float branch (#670): it is
-            // absent from `injected` (layout-exempt), so the
-            // tiled cursor below would drain past it — append
-            // in place instead, keeping its glyph and the
-            // cursor aligned.
-            guard let window = windows[id],
-                !window.isFloating, !window.isFullscreen
-            else {
+            guard windows[id]?.isFloating == false else {
                 result.append(id)
                 continue
             }
@@ -298,7 +302,9 @@ extension StateCoordinator {
         result.append(contentsOf: injected[next...])
         let floating = windows.all
             .filter {
-                $0.isSticky && $0.isFloating
+                // Fullscreen stickies stay home (loop above);
+                // appending here too would double the glyph.
+                $0.isSticky && $0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
                     && stickyRenderSpace(of: $0, focused: focused)
                         == space.id

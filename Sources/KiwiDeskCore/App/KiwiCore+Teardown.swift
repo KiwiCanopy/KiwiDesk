@@ -95,6 +95,10 @@ public enum WindowGather {
                 guard
                     let window = state.windows[windowID],
                     !window.isFloating,
+                    // Lives on its own macOS Space (#670): the
+                    // quit grid can neither reach nor place it,
+                    // and no post-quit restore heals the poke.
+                    !window.isFullscreen,
                     window.frame.size != .zero
                 else { continue }
                 gathered[display.id, default: []]
