@@ -120,17 +120,23 @@ struct SidebarSearchTests {
         #expect(destinations == expected)
     }
 
+    /// The subject is the reachability filter, not the word. The
+    /// query names a CARD, because that is what the index holds
+    /// (destination titles, then catalog declarations — rows are
+    /// Phase 4's). It moved off "Language" when turn 14b merged
+    /// General's Language and Login cards into one "Applies
+    /// immediately" card.
     @Test("editing a stored profile hides General (#18)")
     func reachabilityFilter() {
         pinEnglish()
         defer { reset() }
         let live = SidebarSearch.results(
-            query: "Language",
+            query: "Applies immediately",
             editingStoredProfile: false
         )
         #expect(live.map(\.destination) == [.general])
         let editing = SidebarSearch.results(
-            query: "Language",
+            query: "Applies immediately",
             editingStoredProfile: true
         )
         #expect(editing.isEmpty)

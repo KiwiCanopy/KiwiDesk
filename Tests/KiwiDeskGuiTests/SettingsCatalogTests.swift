@@ -58,7 +58,11 @@ struct SettingsCatalogTests {
     /// fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        #expect(allEntries.count == 63)
+        // 62 since turn 14b: General's Language and Login
+        // cards merge into one "Applies immediately" card,
+        // because those rows group by the RULE they share —
+        // not part of a profile, untouched by Save.
+        #expect(allEntries.count == 62)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
