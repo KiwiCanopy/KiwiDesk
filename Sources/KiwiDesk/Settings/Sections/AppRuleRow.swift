@@ -68,9 +68,23 @@ struct AppRuleRow: View {
     /// specifiers; `SentenceFrame` splits it on those and this
     /// emits the pieces in whatever order the translation put
     /// them.
+    ///
+    /// **The stack adds no spacing; the frame's literals own it.**
+    /// A per-segment gap looks harmless in English, whose
+    /// literals already carry their own spaces (`" opens in "`),
+    /// and merely double-spaces the row. It is wrong outright in
+    /// ja and ko, where the literal between two slots begins
+    /// with a particle — `は`, `에` — that must hug the noun it
+    /// attaches to, and a stack gap tears it off. So spacing is
+    /// 0 here and the icon carries its own trailing padding.
+    /// `SentenceFrameTests` pins the other half — `splitsInOrder`
+    /// asserts the literal arrives as `" opens in "`, spaces
+    /// intact, so a splitter that trimmed would strand every
+    /// word against its neighbour.
     private var sentence: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 0) {
             appIcon
+                .padding(.trailing, 6)
             ForEach(frame.segments) { segment in
                 switch segment.slot {
                 case .text(let words):

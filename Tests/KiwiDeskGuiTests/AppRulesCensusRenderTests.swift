@@ -133,4 +133,86 @@ struct AppRulesCensusRenderTests {
             )
         }
     }
+
+    /// The stack that lays the sentence out adds NO spacing of
+    /// its own — the frame's literals carry it.
+    ///
+    /// A per-segment gap is invisible as a bug in English, whose
+    /// literals already have their own spaces (`" opens in "`),
+    /// so it merely reads a little wide. In ja and ko the
+    /// literal between two slots STARTS with a particle — `は`,
+    /// `에` — that must hug the noun before it, and a stack gap
+    /// tears it off; those are the four verb-final locales the
+    /// whole `SentenceFrame` design exists for, so shipping a
+    /// gap would undo the point of it in exactly the languages
+    /// it was built for. It shipped as `spacing: 6` and the
+    /// localization round caught it, not this suite.
+    ///
+    /// The needle is the ARGUMENT, whitespace-normalised, rather
+    /// than the literal text `HStack(spacing: 0)`: `swift-format`
+    /// wraps a declaration past 79 columns, and a scan for one
+    /// spelling walks past the other.
+    @Test("the sentence stack adds no spacing of its own")
+    func sentenceStackAddsNoSpacing() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        let marker = "private var sentence: some View"
+        let start = try #require(
+            source.range(of: marker),
+            "AppRuleRow must still draw the sentence itself"
+        )
+        var characters = Array(source[start.upperBound...])
+        var cursor = 0
+        let body = try #require(
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "the sentence property must have a readable body"
+        )
+        // Assert the input before asserting about it: an empty
+        // body would satisfy "contains no spacing: 6" for the
+        // wrong reason.
+        #expect(body.contains("ForEach(frame.segments)"))
+
+        characters = Array(body)
+        cursor = try #require(
+            body.range(of: "HStack").map {
+                body.distance(
+                    from: body.startIndex,
+                    to: $0.upperBound
+                )
+            },
+            "the sentence must still lay out in an HStack"
+        )
+        let arguments = try #require(
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            ),
+            "the HStack must carry an argument list"
+        )
+        #expect(
+            arguments.filter { !$0.isWhitespace } == "spacing:0",
+            Comment(
+                rawValue:
+                    "the sentence's HStack must add no spacing — "
+                    + "the frame's literals own it, and a gap "
+                    + "detaches the ja/ko particle from the noun "
+                    + "it attaches to"
+            )
+        )
+    }
 }
