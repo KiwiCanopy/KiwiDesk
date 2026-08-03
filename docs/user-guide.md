@@ -240,10 +240,10 @@ path is offered instead.
 
 Whether KiwiDesk launches itself is **two switches**, not one
 control, because the two halves live in two places. The main one,
-**Start KiwiDesk when I log in**, sits at the top of **General**
-in the **Applies immediately** group; the supervision half,
-**Restart if it stops unexpectedly**, sits first among
-**General ▸ Advanced**.
+**Start KiwiDesk when I log in**, sits in **General**'s **Applies
+immediately** group (below the language and appearance picks); the
+supervision half, **Restart if it stops unexpectedly**, sits first
+among **General ▸ Advanced**.
 
 - **Start KiwiDesk when I log in** — off, KiwiDesk never starts on
   its own; on, it launches when you sign in, so your windows are
