@@ -66,6 +66,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             LocalizationPreference.read()
         )
 
+        // The appearance pick (#678 item 8), read the same way
+        // and for the same reasons: a scalar app preference, not
+        // gui.json state. Applied to `NSApp` at launch so every
+        // window the app opens later — Settings, the bars, the
+        // border overlays — inherits it, rather than only the
+        // one view that happens to carry a modifier.
+        AppearancePreference.read().apply()
+
         // Install the application menu bar. A bare executable
         // ships none, so without this the auto-hide menu bar
         // never reveals while KiwiDesk is the active `.regular`

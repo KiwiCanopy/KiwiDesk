@@ -21,8 +21,7 @@ struct GeneralSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                languageSection
-                LoginItemCard()
+                appliesImmediatelySection
                 aboutSection
                 advancedSection
             }
@@ -34,9 +33,15 @@ struct GeneralSection: View {
     /// shipped locale by its own native name — the picker itself
     /// is the live control, no Save button (`setLanguage`
     /// persists immediately).
-    private var languageSection: some View {
+    /// Turn 14b's first group: ONE card, because these rows are
+    /// grouped by the RULE they share rather than by topic —
+    /// none is part of a profile, none is touched by the
+    /// footer's Save. Splitting them into a Language card and a
+    /// Login card is what let Revert look as though it would
+    /// undo them (the 6b audit's fourth finding).
+    private var appliesImmediatelySection: some View {
         SettingsSection(
-            SettingsCatalog.general.languageCard
+            SettingsCatalog.general.appliesImmediatelyCard
         ) {
             // Uses the house `DropdownRow` (shared label axis,
             // `.menu` style, large control) like every other
@@ -75,7 +80,56 @@ struct GeneralSection: View {
                     }
                 }
             }
+            Text(
+                L(
+                    "general.language.applies",
+                    "Changes the moment you pick one."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            appearanceRow
+            LoginItemCard(model: model)
         }
+    }
+
+    /// Item 8. Sits beside the language pick because the two
+    /// share a rule rather than a topic: both apply the instant
+    /// you choose, neither is part of a profile, and neither is
+    /// touched by the footer's Save. Turn 14b makes that the
+    /// group's heading, because a row Revert appears to undo and
+    /// does not is the 6b audit's fourth finding.
+    ///
+    /// A segmented control rather than a dropdown: three fixed,
+    /// mutually exclusive choices whose whole set fits on one
+    /// line is the case `docs/ui-patterns.md` gives segmented,
+    /// and unlike the locale list it can never grow.
+    private var appearanceRow: some View {
+        DropdownRow(
+            label: L("general.appearance", "Appearance")
+        ) {
+            Picker(
+                L("general.appearance", "Appearance"),
+                selection: appearanceBinding
+            ) {
+                ForEach(
+                    AppearanceChoice.allCases,
+                    id: \.rawValue
+                ) { choice in
+                    Text(choice.label).tag(choice)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+        }
+    }
+
+    private var appearanceBinding: Binding<AppearanceChoice> {
+        Binding(
+            get: { model.appearance },
+            set: { model.setAppearance($0) }
+        )
     }
 
     private var languageBinding: Binding<String?> {
@@ -171,6 +225,8 @@ struct GeneralSection: View {
             isExpanded: $advancedExpanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                restartOnCrashRow
+                Divider()
                 Text(
                     L(
                         "general.advanced.config_file",

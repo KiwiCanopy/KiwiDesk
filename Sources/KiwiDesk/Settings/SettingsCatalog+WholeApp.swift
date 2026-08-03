@@ -85,16 +85,14 @@ struct AppRulesControls: Sendable {
 }
 
 struct GeneralControls: Sendable {
-    let languageCard = SettingsControl(
-        "general.language.title",
-        "Language"
-    )
-    // Terse topic-noun heading; the dropdown inside carries the
-    // verb "Start KiwiDesk" (#576), as every card pairs a noun
-    // with an action.
-    let loginItemCard = SettingsControl(
-        "general.login_item.title",
-        "Login"
+    // Turn 14b's first group. These rows are grouped by the RULE
+    // they share, not by topic: none is part of a profile and
+    // none is touched by the footer's Save. The heading says so,
+    // because otherwise Revert appears to undo them and does not
+    // — the 6b audit's fourth finding.
+    let appliesImmediatelyCard = SettingsControl(
+        "general.applies_immediately.title",
+        "Applies immediately"
     )
     let aboutCard = SettingsControl(
         "general.about.title",

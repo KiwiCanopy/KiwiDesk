@@ -18,9 +18,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case general
     case generalKeys
     case grid
-    case language
+    case appliesImmediately
     case layers
-    case login
     case luaBindings
     case monitorFingerprints
     case monocle
@@ -73,7 +72,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .runtime(.reduceMotion)
         case .about, .advanced, .borders, .bsp, .dragAndDrop,
             .focus, .gaps, .general, .generalKeys, .grid,
-            .language, .layers, .login, .luaBindings,
+            .appliesImmediately, .layers, .luaBindings,
             .monitorFingerprints, .monocle, .mouse,
             .moveWindows, .onQuit, .openApplications,
             .palettes, .perSpaceOverrides,

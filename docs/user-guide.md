@@ -238,40 +238,62 @@ path is offered instead.
 
 ## Start KiwiDesk
 
-At the top of **General** (in the **System** group), **Start
-KiwiDesk** chooses when KiwiDesk launches itself, with three
-levels:
+Whether KiwiDesk launches itself is **two switches**, not one
+control, because the two halves live in two places. The main one,
+**Start KiwiDesk when I log in**, sits in **General**'s **Applies
+immediately** group (below the language and appearance picks); the
+supervision half, **Restart if it stops unexpectedly**, sits first
+among **General ▸ Advanced**.
 
-- **Never** — KiwiDesk never starts on its own.
-- **At Login** — it launches automatically when you sign in, so
-  your windows are arranged from the start rather than floating
-  loose until you open it by hand.
-- **At Login + Restart on Crash** — as above, plus a background
-  helper that relaunches KiwiDesk if it ever crashes.
+- **Start KiwiDesk when I log in** — off, KiwiDesk never starts on
+  its own; on, it launches when you sign in, so your windows are
+  arranged from the start rather than floating loose until you
+  open it by hand. Turning it on also switches on crash-restart,
+  because that is the obvious setup for someone who just wants
+  KiwiDesk running — the `?` beside the switch says so.
+- **Restart if it stops unexpectedly** (Advanced) — a background
+  helper that relaunches KiwiDesk if it ever *crashes*; a
+  deliberate Quit is never resurrected. It comes on with login;
+  switch it off here if you want KiwiDesk to open at login but not
+  be supervised.
 
-First-launch setup offers **At Login** pre-selected on its final
-step, so a standard new install ends up launching at login;
-auto-restart is opt-in, chosen here when you want it. The `?`
-beside the control explains all three.
+The two are one setting to macOS: the supervising helper also
+launches KiwiDesk at login, so "restart but don't start at login"
+is not a state macOS can hold. The Advanced switch therefore greys
+out while login is off, and its caption names the dependency
+rather than leaving a dimmed switch unexplained.
 
-The control reflects the real macOS state — you can also revoke
-the login item from **System Settings ▸ General ▸ Login Items**,
-and it follows. If macOS shows *Requires approval in System
-Settings*, click **Open Login Items** and enable KiwiDesk there.
-The control greys out when KiwiDesk is run from a spot it can't
-register from (a still-quarantined download, or the bare binary) —
-only "Never" would be valid there; the caption names the fix, and
-the `?` stays readable.
+Because both switches read the real macOS state and store nothing
+of their own, one thing is worth knowing: **a login-without-restart
+choice is not remembered once you switch login off and on again.**
+Switch login off and the distinction is gone — a copy that never
+wanted restart and one that was simply never started both read as
+"off" — so switching login back on takes the default (login *and*
+restart) rather than restoring a prior "just login" answer. Switch
+restart back off in Advanced when you want that state again.
 
-The auto-restart level is the same crash-restart supervision the
-advanced `kiwidesk service` command installs, so the two stay in
-sync — `kiwidesk service status` reports the same state, and
-setting the level here is equivalent to running that command.
+First-launch setup offers login pre-selected on its final step
+(the plain login level, without crash-restart), so a standard new
+install launches at login; the supervision is opt-in from Advanced.
+
+Both switches reflect the real macOS state — revoke the login item
+from **System Settings ▸ General ▸ Login Items** and they follow.
+If macOS shows *Requires approval in System Settings*, click
+**Open Login Items** and enable KiwiDesk there. Both grey out when
+KiwiDesk is run from a spot it can't register from (a
+still-quarantined download, or the bare binary) — only "off" is
+valid there; the caption names the fix, and each switch's `?`
+stays readable.
+
+Restart-on-crash is the same supervision the advanced `kiwidesk
+service` command installs, so the two stay in sync — `kiwidesk
+service status` reports the same state, and switching the Advanced
+row on is equivalent to running that command.
 
 ## GUI Language
 
-Go to **General** (in the **System** group) and pick a display
-language. It covers the Settings window, the dashboard, and the
+Go to **General** (in the **Applies immediately** group) and pick
+a display language. It covers the Settings window, the dashboard, and the
 menu-bar quick menu. "System default" follows your macOS language
 if KiwiDesk ships a translation, otherwise English — and it walks
 your whole preferred-language list, not just the first entry, so a
@@ -284,6 +306,25 @@ applies instantly, touches no Lua or profile files, and persists
 in app preferences only (`UserDefaults`, key `"language"`) — it
 never flips the app to raw-editor mode. To add or fix a
 translation, see [translating.md](translating.md).
+
+## Appearance
+
+**General ▸ Appearance** (in the **Applies immediately** group)
+chooses whether KiwiDesk follows the system's light/dark setting
+or pins one:
+
+- **System** — follow macOS. The default, and the only choice
+  KiwiDesk stores nothing for: pick it and KiwiDesk tracks your Mac
+  from then on, flipping when the system does.
+- **Light** / **Dark** — hold that appearance whatever the system
+  is doing, and for every KiwiDesk surface at once: the Settings
+  window, the App and Space Bars, and the focus and drag overlays.
+
+Like the language pick, it applies the instant you choose, is not
+part of a profile, touches no Lua or `gui.json`, and lives in app
+preferences only. Choosing **System** removes the stored value
+entirely, so "follow macOS" is the true default with nothing left
+behind.
 
 ## When Things Act Up: Discard & Reset
 

@@ -35,7 +35,8 @@ struct SettingsCatalogSiteTests {
         let names = SettingsDestination.allCases
             .flatMap { SettingsCatalog.entries(of: $0) }
             .compactMap { $0.propertyPath.last }
-        #expect(names.count == 57)
+        // 56 since turn 14b merged General's two cards.
+        #expect(names.count == 56)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
