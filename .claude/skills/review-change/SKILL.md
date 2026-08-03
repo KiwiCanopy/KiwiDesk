@@ -18,6 +18,20 @@ merge base with `main`.
 
 ## 2. First round — parallel
 
+**A logic-free diff skips the pair.** Before spawning anything,
+gate on what the diff *can be wrong about*. When its entire content
+is string edits, catalog JSON, or doc prose — **no Swift logic
+changed** — the `code-reviewer` / `architect-reviewer` pair has
+nothing to bite on: `scripts/lint.sh` already owns style and line
+length, and the only real failure mode is wrong *content*. Do not
+spawn the pair. Run the specialist lane the diff earns and stop —
+`localization-auditor` (a drafter, then a **separate** read-only
+audit) for strings and catalogs, `docs-steward` for prose — that
+lane **is** the review, not a supplement to it. `guard-prover`
+still runs if the diff adds or edits a test (the table below). The
+moment any Swift logic changes, the pair is back, exactly as
+follows.
+
 Spawn `code-reviewer` and `architect-reviewer` on the diff **in
 parallel** (one message, one Agent call each): the diff is finished
 and the perspectives are independent, so serializing only costs
