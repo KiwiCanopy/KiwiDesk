@@ -23,7 +23,8 @@ struct SpacesUsingLayout: View {
                     L(
                         "layout_defaults.spaces_using.none",
                         "No space uses this layout yet — set one "
-                            + "to it in Spaces & Layouts."
+                            + "to it in %1$@.",
+                        SettingsDestination.spaces.title
                     )
                 )
                 .font(.caption)
@@ -36,10 +37,13 @@ struct SpacesUsingLayout: View {
             if overriding > 0 {
                 CrossReferenceRow(
                     prose: overrideProse,
-                    linkTitle: L(
-                        "layout_defaults.spaces_using.link",
-                        "Spaces & Layouts"
-                    ),
+                    // The destination's OWN title, never a second
+                    // copy of it: a link naming a pane the app
+                    // does not call that sends the reader looking
+                    // for something that is not in the sidebar,
+                    // and the ▸-shaped cross-reference guard
+                    // cannot see a one-segment name to catch it.
+                    linkTitle: SettingsDestination.spaces.title,
                     destination: .spaces
                 )
             }

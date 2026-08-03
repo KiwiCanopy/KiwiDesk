@@ -21,9 +21,7 @@ struct LayoutStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SettingsGroupHeader(
-                L("layout_defaults.choose", "Choose a layout")
-            )
+            SettingsGroupHeader(chooseTitle)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 10) {
                     ForEach(
@@ -36,10 +34,16 @@ struct LayoutStrip: View {
                 .padding(.bottom, 4)
             }
         }
+        // The same string the header shows: a container VoiceOver
+        // names one thing while the screen reads another is two
+        // names for one control, and the old key's English still
+        // described the tab strip this area no longer has.
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(
-            L("layout_defaults.mode_tabs", "Layout mode")
-        )
+        .accessibilityLabel(chooseTitle)
+    }
+
+    private var chooseTitle: String {
+        L("layout_defaults.choose", "Choose a layout")
     }
 
     private func tile(_ mode: LayoutMode) -> some View {

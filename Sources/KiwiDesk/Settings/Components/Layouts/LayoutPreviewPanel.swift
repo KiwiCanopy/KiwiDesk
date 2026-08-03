@@ -37,11 +37,21 @@ struct LayoutPreviewPanel: View {
 
     private var countRow: some View {
         HStack {
-            Text(L("layout_defaults.preview_windows", "Windows"))
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
+            // "Window count", not a bare "Windows": beside a
+            // slider and a numeric readout the short form is
+            // unambiguous on screen, but a translator reading the
+            // key alone cannot tell it from the OS's own name for
+            // a window.
+            Text(
+                L(
+                    "layout_defaults.preview_windows",
+                    "Window count"
                 )
+            )
+            .frame(
+                width: SettingsMetrics.labelColumn,
+                alignment: .leading
+            )
             SettingsSlider(
                 value: Binding(
                     get: { Double(windows) },
