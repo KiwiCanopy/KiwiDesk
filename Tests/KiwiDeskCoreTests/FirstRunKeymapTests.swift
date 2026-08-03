@@ -98,9 +98,20 @@ struct FirstRunKeymapTests {
     /// No two seeded rows collide, which is what lets the
     /// day-one Shortcuts card say "no conflicts" without
     /// checking anything.
+    ///
+    /// Compared as PARSED chords, not as strings. `"ctrl+alt+f"`
+    /// and `"control+option+f"` are the same chord to
+    /// `KeyCombo.parse` and to the user's keyboard, and a raw
+    /// string dedup calls them two rows — which is a conflict
+    /// shipped under a green test (guard-prover).
+    /// `DefaultKeybindings.digitTopUp` already parses for this
+    /// reason; the guard had not caught up.
     @Test("the seeded rows carry no conflicts")
     func noSeededConflicts() {
-        let combos = seededBindings().map(\.combo)
-        #expect(combos.count == Set(combos).count)
+        let parsed = seededBindings().compactMap {
+            KeyCombo.parse($0.combo)
+        }
+        #expect(parsed.count == seededBindings().count)
+        #expect(parsed.count == Set(parsed).count)
     }
 }

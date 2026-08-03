@@ -99,7 +99,14 @@ struct AppRuleMatchPreview: View {
 
     /// The engine's verdict for one title, over the staged rules
     /// plus whatever is half-typed.
-    private func floats(_ title: String) -> Bool {
+    ///
+    /// Internal rather than private so the guard can assert the
+    /// PREVIEW's verdict rather than only scanning for the call:
+    /// a scan is one spelling deep, and guard-prover slipped a
+    /// plausible "fast path while typing" (`title.range(of:)`)
+    /// past it — which disagrees with the engine on exactly the
+    /// pending pattern the user is watching.
+    func floats(_ title: String) -> Bool {
         var staged = model.config.floatRules
         let typed = pending.trimmed
         if !typed.isEmpty {

@@ -42,6 +42,24 @@ struct AppRulesCensusRenderTests {
             Set(AppRulesRowOrder.rulesShowMore)
                 == censusRows(.showMore)
         )
+        // The dedup twin `atRest` carries — its absence here let
+        // a duplicated key pass (guard-prover). A set-equality
+        // check cannot see a repeat on the list side.
+        #expect(
+            AppRulesRowOrder.rulesShowMore.count
+                == Set(AppRulesRowOrder.rulesShowMore).count
+        )
+    }
+
+    /// Both order lists are non-empty. Set equality is satisfied
+    /// by two empty sides, so an area that lost every census row
+    /// would pass every membership check above while rendering
+    /// nothing — the floor is what makes those checks mean
+    /// something.
+    @Test("the area still has rows to render")
+    func listsAreNotEmpty() {
+        #expect(!AppRulesRowOrder.rulesAtRest.isEmpty)
+        #expect(!AppRulesRowOrder.rulesShowMore.isEmpty)
     }
 
     /// The area's one container, derived from the census rather
@@ -83,18 +101,30 @@ struct AppRulesCensusRenderTests {
         #expect(space.text.label == .key("app_rules.space"))
         #expect(float.text.label == .key("app_rules.float"))
 
-        let source = try String(
-            contentsOf: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDesk/Settings/Sections/"
-                        + "AppRuleRow+Facets.swift"
-                ),
-            encoding: .utf8
+        // The needle is the `.accessibilityLabel(L(...))` SHAPE,
+        // not a mention of the key. An earlier cut allowed
+        // either, and guard-prover swapped the modifier for a
+        // `.help(...)` carrying the same key: the menu lost its
+        // accessibility name entirely — the exact harm named
+        // above — and the guard stayed green because the key was
+        // still somewhere in the file. Comments are stripped for
+        // the same reason: a commented-out call site also
+        // satisfied the weak half.
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow+Facets.swift"
+                    ),
+                encoding: .utf8
+            )
         )
         for key in ["app_rules.space", "app_rules.float"] {
             #expect(
-                source.contains("accessibilityLabel(L(\"\(key)\"")
-                    || source.contains("L(\"\(key)\""),
+                source.contains(
+                    "accessibilityLabel(L(\"\(key)\""
+                ),
                 Comment(
                     rawValue:
                         "\(key) is the census label for a facet "

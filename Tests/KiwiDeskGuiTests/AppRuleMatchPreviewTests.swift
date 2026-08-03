@@ -85,11 +85,48 @@ struct AppRuleMatchPreviewTests {
         )
     }
 
+    /// The PREVIEW's own verdict, asserted against the engine's
+    /// over the inputs where a re-derivation diverges. The scan
+    /// below is one spelling deep — guard-prover slipped a
+    /// plausible "fast path while typing" past it, which
+    /// disagreed with the engine on exactly the pending pattern
+    /// the user is watching — so the agreement is asserted as
+    /// arithmetic and the scan kept only for a preview that
+    /// never called the engine at all.
+    @MainActor
+    @Test("the preview's verdict is the engine's")
+    func previewVerdictMatchesEngine() {
+        let model = SettingsModel(core: makeTestCore())
+        model.config.floatRules = ["\(app):Info"]
+        let preview = AppRuleMatchPreview(model: model, app: app)
+        for title in [
+            "Get Info", "Information", "Documents", "info", "",
+        ] {
+            #expect(
+                preview.floats(title)
+                    == FloatRules(model.config.floatRules)
+                    .matches(bundleID: app, title: title),
+                Comment(rawValue: "diverged on \(title)")
+            )
+        }
+        // And with a pattern still being typed — the branch the
+        // scan could not defend, and the one the reader trusts
+        // most because it answers as they type.
+        let typing = AppRuleMatchPreview(
+            model: model,
+            app: app,
+            pending: "Down"
+        )
+        #expect(typing.floats("Downloads"))
+        #expect(!typing.floats("down"))
+        #expect(!typing.floats("Documents"))
+    }
+
     /// The preview calls the engine rather than re-deriving it.
-    /// A source scan, because the agreement is the whole point
-    /// and the assertions above would keep passing over a
-    /// hand-rolled `contains` that happened to agree on these
-    /// five inputs.
+    /// Kept beside the arithmetic above for the case arithmetic
+    /// cannot see: a preview rewritten to never consult
+    /// `FloatRules` at all, which would still agree on any
+    /// fixture chosen to match it.
     @Test("the preview asks the engine for its verdict")
     func previewCallsTheEngine() throws {
         let source = SourceScan.stripComments(
