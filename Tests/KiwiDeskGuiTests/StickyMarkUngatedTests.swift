@@ -79,10 +79,10 @@ struct StickyMarkUngatedTests {
     /// The editor greys nothing, reads nothing off the bar, and
     /// displays no value but the stored one.
     ///
-    /// `allowsEditing` and `.constant(` are needles because the
+    /// `containerReason` and `.constant(` are needles because the
     /// coupling does not have to come back in the spelling it
     /// left in: a resolver-routed grey is the house style for
-    /// gates here (`BarsGateContext`), and the forced-ON ternary
+    /// gates here (`BarsGates`), and the forced-ON ternary
     /// is separable from the greying — on its own it is the half
     /// that made the toggle misreport the stored value, which is
     /// worse than dimming it.
@@ -93,7 +93,7 @@ struct StickyMarkUngatedTests {
         )
         let needles = [
             "spaceBarStyle", "GreyOut", ".disabled(",
-            "allowsEditing", ".constant(",
+            "containerReason", ".constant(",
         ]
         for needle in needles {
             #expect(

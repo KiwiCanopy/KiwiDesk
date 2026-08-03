@@ -92,14 +92,18 @@ struct ColorsGateTests {
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
         var gates = AdvancedColorsGates(settings: settings)
-        #expect(!gates.bars.allowsEditing(.spaceBar))
-        #expect(!gates.bars.allowsEditing(.appBar))
+        #expect(
+            gates.bars.containerReason(for: .spaceBar) == .spaceBarOff
+        )
+        #expect(
+            gates.bars.containerReason(for: .appBar) == .noBarShown
+        )
 
         settings.spaceBarStyle.enabled = true
         settings.monocle.appBar.enabled = true
         gates = AdvancedColorsGates(settings: settings)
-        #expect(gates.bars.allowsEditing(.spaceBar))
-        #expect(gates.bars.allowsEditing(.appBar))
+        #expect(gates.bars.containerReason(for: .spaceBar) == nil)
+        #expect(gates.bars.containerReason(for: .appBar) == nil)
     }
 
     /// The off-page gates each pick a sentence, and the OUTERMOST

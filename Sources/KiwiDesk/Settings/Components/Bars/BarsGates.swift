@@ -1,78 +1,64 @@
 import KiwiDeskCore
-import SwiftUI
 
 /// The Bars area's greying, resolved from the census (#678
-/// Phase 2): each card's block gate is its census container's
-/// `SettingsContainer.gate`, and a row escapes it exactly when
-/// its `SettingPlacement.exemptFromContainerGate` says so — the
-/// census is the one copy of who may. Row-specific gates keep
-/// their predicates here (the census names the owning setting;
-/// the exact predicate lives with the wiring).
+/// Phase 2), folded onto the reason-case shape the redesigned
+/// areas share (`GapsBordersGates`, `GeneralGates`,
+/// `LayoutDefaultsGates`, 2026-08-03 convergence): the block gate
+/// returns a REASON case rather than a Bool, so the grey and the
+/// sentence explaining it are one decision (`BarsGateHelp.sentence`
+/// renders it), never two that can disagree.
 ///
-/// Every "shown bar" predicate asks about the bars actually
-/// SHOWN rather than the global value (#520): per-layout
-/// overrides are Lua-only now (GUI_REMOVED_2026-08) but still
-/// resolve, so a gate keyed on the global would grey the only
-/// editor for a value an overriding layout still reads.
+/// Each card's block gate is its census container's own greying
+/// condition, and a row escapes it exactly when its
+/// `SettingPlacement.exemptFromContainerGate` says so — the census
+/// is the one copy of who may. Row-specific gates keep their
+/// predicates here as WIRING (the census names the owning setting;
+/// the exact predicate lives with the wiring), because they read
+/// the bars actually SHOWN, which a per-layout Lua override can
+/// change and no single declared owner can answer.
 ///
-/// All row predicates are also false while their card's block
-/// gate is active — not to keep opacity from stacking
-/// (`GreyOut` dims once by construction via its
-/// `isInsideGreyOut` environment), but so the row's hover help
-/// names the *outer* reason while the whole card is off instead
-/// of a row-specific one that fixing wouldn't un-grey anything.
-struct BarsGateContext {
+/// Every "shown bar" predicate asks about the bars actually SHOWN
+/// rather than the global value (#520): per-layout overrides are
+/// Lua-only now (GUI_REMOVED_2026-08) but still resolve, so a gate
+/// keyed on the global would grey the only editor for a value an
+/// overriding layout still reads.
+struct BarsGates {
     let settings: TilingSettings
 
-    /// Resolves a census container's gate to "may edit" against
-    /// the live draft. The two bar containers are the only ones
+    /// Why a bar block — or a shown-bar-gated colour row — is
+    /// inert. The two block reasons plus `.gapOnly`, whose
+    /// PREDICATE is wiring (a resolved shown-bar value) but whose
+    /// sentence belongs with the rest, authored once.
+    enum InertReason: Hashable {
+        /// No layout shows an App Bar.
+        case noBarShown
+        /// The Space Bar is switched off.
+        case spaceBarOff
+        /// The active indicator is Gap — it hides the active item
+        /// instead of marking it, so the highlight/active colours
+        /// are never painted.
+        case gapOnly
+    }
+
+    /// Resolves a bar container's block gate to a reason, or nil
+    /// while it is live. The two bar containers are the only ones
     /// this area renders; a Bars row placed in a new container
     /// fails the render-parity guard before this is reached.
-    func allowsEditing(_ container: SettingsContainer) -> Bool {
-        switch container.gate {
-        case nil:
-            return true
-        case .setting(let key):
-            return isOn(key)
-        case .anyOf(let keys):
-            return keys.contains { isOn($0) }
-        case .runtime:
-            // Fail-open in release, loud in debug — the same
-            // treatment as the unknown-owner default below: a
-            // bar container re-gated onto a runtime condition
-            // this resolver cannot read would otherwise un-grey
-            // silently forever.
-            assertionFailure(
-                "unhandled runtime container gate on \(container)"
-            )
-            return true
-        }
-    }
-
-    /// The census gate owners this area can resolve — all
-    /// boolean switches by construction (a container gate is an
-    /// on/off owner, per `SettingsContainer.gate`'s contract).
-    private func isOn(_ key: SettingKey) -> Bool {
-        switch key {
-        case .spaceBar(.spaceBarEnabled):
+    func containerReason(
+        for container: SettingsContainer
+    ) -> InertReason? {
+        switch container {
+        case .appBar:
+            return anyBarShown ? nil : .noBarShown
+        case .spaceBar:
             return settings.spaceBarStyle.enabled
-        case .layoutAppBar(.monocleAppBarEnabled):
-            return settings.monocle.appBar.enabled
-        case .layoutAppBar(.scrollingAppBarEnabled):
-            return settings.scrolling.appBar.enabled
+                ? nil : .spaceBarOff
         default:
-            // Fail-open in release (a live row beats a locked
-            // editor), loud in debug: a census gate re-homed
-            // onto an owner this resolver doesn't read would
-            // otherwise un-grey silently forever.
-            assertionFailure(
-                "unhandled census gate owner: \(key.id)"
-            )
-            return true
+            return nil
         }
     }
 
-    // MARK: - App Bar row predicates
+    // MARK: - App Bar row predicates (wiring)
 
     var shownBars: [LayoutAppBar] {
         settings.appBarHosts.filter(\.enabled)
@@ -123,32 +109,39 @@ struct BarsGateContext {
     }
 }
 
-/// The block-gate explanations for the Bars page. Advanced
-/// Colours needs the same conditions worded differently — its
-/// sentences must say WHICH page to go to — so it authors its
-/// own in `AdvancedColorsHelp` and shares only `gapOnly`, whose
-/// sentence is about the indicator rather than about a place.
+/// The inline sentence each `BarsGates.InertReason` renders — the
+/// "why you can't edit this" a greyed block or row shows on hover.
+/// Split from the resolver so the resolver stays assertable off the
+/// main actor; the reason and its sentence are one decision, never
+/// two that can disagree (#678, gui.md). Every key here is reused
+/// from the hand-wired gate this conversion replaced, so the
+/// English is unchanged and no translation is dropped.
+///
+/// Advanced Colours needs the two block conditions worded
+/// differently — its sentences must say WHICH page to go to — so it
+/// authors its own in `AdvancedColorsHelp` and shares only the
+/// `.gapOnly` sentence, whose wording is about the indicator
+/// rather than a place.
 @MainActor
 enum BarsGateHelp {
-    static var noBarShown: String {
-        L(
-            "app_bar.no_layout.help",
-            "No layout shows an App Bar — turn one on below."
-        )
-    }
-
-    static var spaceBarOff: String {
-        L(
-            "space_bar.disabled.help",
-            "Turn on Show Space Bar to edit these settings."
-        )
-    }
-
-    static var gapOnly: String {
-        L(
-            "app_bar.color.gap_only",
-            "The Gap indicator hides the active item instead of "
-                + "marking it, so these colors aren't drawn."
-        )
+    static func sentence(for reason: BarsGates.InertReason) -> String {
+        switch reason {
+        case .noBarShown:
+            return L(
+                "app_bar.no_layout.help",
+                "No layout shows an App Bar — turn one on below."
+            )
+        case .spaceBarOff:
+            return L(
+                "space_bar.disabled.help",
+                "Turn on Show Space Bar to edit these settings."
+            )
+        case .gapOnly:
+            return L(
+                "app_bar.color.gap_only",
+                "The Gap indicator hides the active item instead "
+                    + "of marking it, so these colors aren't drawn."
+            )
+        }
     }
 }

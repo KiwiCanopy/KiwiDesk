@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Advanced Colours' greying (#678 Phase 3). The two bar groups
 /// take their block gate from the census container's own
-/// `SettingsContainer.gate`, resolved by `BarsGateContext` — the
+/// `SettingsContainer.gate`, resolved by `BarsGates` — the
 /// SAME resolver the Bars page uses, never a second copy: the
 /// containers deliberately span both areas, which is what carries
 /// one gate onto both surfaces, and a re-derived "which bars are
@@ -18,7 +18,7 @@ import SwiftUI
 /// renders the reason as a live `?` on its section header (#527),
 /// and every sentence below names the destination to go to —
 /// by INTERPOLATING its live title, never by spelling it out.
-/// `@MainActor` unlike `BarsGateContext`, which resolves gates
+/// `@MainActor` unlike `BarsGates`, which resolves gates
 /// only: this one also picks the SENTENCE, and the localized
 /// strings are main-actor state.
 @MainActor
@@ -26,7 +26,7 @@ struct AdvancedColorsGates {
     let settings: TilingSettings
 
     /// The bar halves, delegated whole.
-    var bars: BarsGateContext { BarsGateContext(settings: settings) }
+    var bars: BarsGates { BarsGates(settings: settings) }
 
     // MARK: - Borders
 

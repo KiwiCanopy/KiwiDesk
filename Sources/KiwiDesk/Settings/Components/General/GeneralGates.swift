@@ -22,8 +22,8 @@ import KiwiDeskCore
 /// what made this file possible.
 ///
 /// Fail-OPEN on a gate this type does not own — loud in debug,
-/// live in release — matching `BarsGateContext`,
-/// `ShortcutsRuntimeGate` and `LayoutDefaultsGates`. Of the two
+/// live in release — matching `BarsGates`,
+/// `ShortcutsGates` and `LayoutDefaultsGates`. Of the two
 /// silent readings, a live row the user can ignore beats a dead
 /// one they cannot explain.
 struct GeneralGates {

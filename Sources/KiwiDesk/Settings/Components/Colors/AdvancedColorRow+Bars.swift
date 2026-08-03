@@ -19,7 +19,12 @@ extension AdvancedColorRow {
                 label: L("app_bar.color.highlight", "Highlight"),
                 hex: style.highlightColor
             )
-            .modifier(gated(gates.bars.gapOnly, BarsGateHelp.gapOnly))
+            .modifier(
+                gated(
+                    gates.bars.gapOnly,
+                    BarsGateHelp.sentence(for: .gapOnly)
+                )
+            )
         case .appBarItemColor:
             HexColorField(
                 label: L("app_bar.color.item", "Item"),
@@ -30,7 +35,12 @@ extension AdvancedColorRow {
                 label: L("app_bar.color.active_item", "Active item"),
                 hex: style.activeItemColor
             )
-            .modifier(gated(gates.bars.gapOnly, BarsGateHelp.gapOnly))
+            .modifier(
+                gated(
+                    gates.bars.gapOnly,
+                    BarsGateHelp.sentence(for: .gapOnly)
+                )
+            )
         case .appBarHoverFillColor:
             HexColorField(
                 label: L("app_bar.color.hover_fill", "Hover fill"),

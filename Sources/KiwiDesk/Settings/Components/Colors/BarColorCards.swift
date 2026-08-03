@@ -20,7 +20,9 @@ struct SpaceBarColorCard: View {
     private var gates: AdvancedColorsGates {
         AdvancedColorsGates(settings: model.config.settings)
     }
-    private var allows: Bool { gates.bars.allowsEditing(.spaceBar) }
+    private var allows: Bool {
+        gates.bars.containerReason(for: .spaceBar) == nil
+    }
 
     var body: some View {
         // The header `?` is the block gate's live anchor (#527),
@@ -84,7 +86,9 @@ struct AppBarColorCard: View {
     private var gates: AdvancedColorsGates {
         AdvancedColorsGates(settings: model.config.settings)
     }
-    private var allows: Bool { gates.bars.allowsEditing(.appBar) }
+    private var allows: Bool {
+        gates.bars.containerReason(for: .appBar) == nil
+    }
 
     var body: some View {
         SettingsSection(
