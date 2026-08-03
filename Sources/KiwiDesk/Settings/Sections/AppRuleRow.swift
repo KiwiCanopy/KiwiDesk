@@ -2,9 +2,27 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// One app's rules (#68 §3.11): icon + name, then the Space
-/// facet (Automatic or a pinned space) and the Float facet
-/// (Never / All windows / Windows titled… with pattern chips).
+/// One app's rules as a **sentence** (turn 14a): "Spotify opens
+/// in media ▾ and floats ▾", with the title patterns as chips
+/// underneath when the float facet asks for them.
+///
+/// The sentence IS the control. The row used to be an app
+/// header over two labelled facet columns — "Space [ media ▾ ]
+/// Float [ Windows titled… ▾ ]" — which reads as a form about
+/// an app rather than as the rule itself, and made the user
+/// assemble the meaning from three fragments. A rule is a
+/// statement about what an app does, so the row states it and
+/// the two menus sit inside the statement where their values
+/// complete it.
+///
+/// The facet values became verb phrases with that move
+/// ("floats", "tiles normally") because a menu inside a
+/// sentence has to read as part of it; "Never" completed
+/// nothing. The labels the values replaced are not lost —
+/// they are the menus' accessibility labels, which is also
+/// what keeps them findable in search, since a sentence has no
+/// visible label for a screen reader or a search index to name
+/// the facet by.
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
@@ -24,19 +42,46 @@ struct AppRuleRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            header
-            facetRows
+            sentence
             if floatFacet == .titled || editingTitles {
                 AppRuleTitledEditor(
                     model: model,
                     app: app,
                     editingTitles: $editingTitles
                 )
-                .padding(.leading, 90)
+                .padding(.leading, 28)
                 .opacity(floatInherited ? 0.55 : 1)
             }
         }
     }
+
+    /// The sentence, in one row: icon, app name, then the two
+    /// facets joined by the words that make it read as English.
+    /// The connectives are their own strings rather than a
+    /// format with two `%@`s, because each menu is a control
+    /// and cannot be interpolated into a `Text`.
+    private var sentence: some View {
+        HStack(spacing: 6) {
+            appIcon
+            Text(KeybindingCatalog.displayName(forBundleID: app))
+                .fontWeight(.medium)
+            connective(L("app_rules.sentence.opens_in", "opens in"))
+            spaceMenu
+                .opacity(spaceInherited ? 0.55 : 1)
+            connective(L("app_rules.sentence.and", "and"))
+            floatMenu
+                .opacity(floatInherited ? 0.55 : 1)
+            Spacer()
+            deleteButton
+        }
+        .font(.callout)
+    }
+
+    private func connective(_ word: String) -> some View {
+        Text(word).foregroundStyle(.secondary)
+    }
+
+    // MARK: - Inheritance (override mode)
 
     private var spaceInherited: Bool {
         guard let base = overrideBase, !isDraft else {
@@ -58,28 +103,22 @@ struct AppRuleRow: View {
             )
     }
 
-    // MARK: - Header
+    // MARK: - Chrome
 
-    private var header: some View {
-        HStack(spacing: 8) {
-            appIcon
-            Text(KeybindingCatalog.displayName(forBundleID: app))
-                .fontWeight(.medium)
-            Spacer()
-            Button {
-                onDelete()
-            } label: {
-                Image(systemName: "trash")
-            }
-            .buttonStyle(.borderless)
-            .iconButtonAffordance(removeHelp)
-            .disabled(
-                overrideBase != nil
-                    && model.config.appRules[app] == nil
-                    && floatFacet == .never
-                    && !isDraft
-            )
+    private var deleteButton: some View {
+        Button {
+            onDelete()
+        } label: {
+            Image(systemName: "trash")
         }
+        .buttonStyle(.borderless)
+        .iconButtonAffordance(removeHelp)
+        .disabled(
+            overrideBase != nil
+                && model.config.appRules[app] == nil
+                && floatFacet == .never
+                && !isDraft
+        )
     }
 
     private var removeHelp: String {
@@ -120,153 +159,12 @@ struct AppRuleRow: View {
         )
     }
 
-    // MARK: - Facets
-
-    private var facetRows: some View {
-        HStack(spacing: 24) {
-            HStack(spacing: 6) {
-                Text(L("app_rules.space", "Space"))
-                    .foregroundStyle(.secondary)
-                spaceMenu
-                    .frame(
-                        width: SettingsMetrics.facetControlColumn,
-                        alignment: .leading
-                    )
-            }
-            .opacity(spaceInherited ? 0.55 : 1)
-            HStack(spacing: 6) {
-                HStack(spacing: 4) {
-                    Text(L("app_rules.float", "Float"))
-                        .foregroundStyle(.secondary)
-                    HelpButton(
-                        explanation: floatHelp,
-                        subject: L("app_rules.float", "Float")
-                    )
-                }
-                floatPicker
-                    .frame(
-                        width: SettingsMetrics.facetControlColumn,
-                        alignment: .leading
-                    )
-            }
-            .opacity(floatInherited ? 0.55 : 1)
-            Spacer()
-        }
-        .font(.callout)
-        .padding(.leading, 28)
-    }
-
-    /// Optional "why" depth for the Float facet (#260): what
-    /// floating a window actually does, plus the per-app-vs-
-    /// layout-mode disambiguation (same English word, two
-    /// mechanisms). Must-know scope stays in the section caption;
-    /// the titled-pattern mechanics stay in `AppRuleTitledEditor`
-    /// — don't restate them here or the two drift.
-    private var floatHelp: String {
-        L(
-            "app_rules.float.help",
-            "Floating takes this app's matching windows out of "
-                + "tiling: each keeps its last position and size "
-                + "and appears on every space, instead of living "
-                + "in one space's grid.\n\nThis is per-app "
-                + "floating — not the **Floating** layout mode, "
-                + "which floats every window in a space."
-        )
-    }
-
-    /// `app_rules[app]`; Automatic deletes the entry.
-    private var spaceMenu: some View {
-        let automatic = L("app_rules.automatic", "Automatic")
-        return Menu {
-            Button(automatic) {
-                model.config.appRules[app] = nil
-            }
-            Divider()
-            ForEach(model.config.spaces, id: \.raw) { space in
-                Button(space.raw) {
-                    model.config.appRules[app] = space
-                }
-            }
-        } label: {
-            menuLabel(
-                model.config.appRules[app]?.raw ?? automatic
-            )
-        }
-        .menuStyle(.borderlessButton)
-    }
-
-    private var floatFacet: FloatFacet {
+    var floatFacet: FloatFacet {
         FloatFacet.current(
             model.config.floatRules,
             app: app
         )
     }
 
-    private var floatPicker: some View {
-        Menu {
-            Button(L("app_rules.float.never", "Never")) {
-                setNever()
-            }
-            Button(
-                L("app_rules.float.all_windows", "All windows")
-            ) { setAll() }
-            Button(titledLabel) {
-                // Re-selecting the active choice must not
-                // wipe the pattern list (#68 review m3).
-                if floatFacet != .titled {
-                    setNever()
-                }
-                editingTitles = true
-            }
-        } label: {
-            menuLabel(floatLabel)
-        }
-        .menuStyle(.borderlessButton)
-    }
-
-    /// The borderless-menu signature (`ProfileEditTargetMenu`):
-    /// a trailing chevron on the label so a bare-text menu
-    /// still reads as "this opens a menu". `lineLimit(1)` lets a
-    /// long value truncate inside the fixed facet slot (#260)
-    /// instead of overflowing it — the menus dropped `.fixedSize`
-    /// so the enclosing `.frame(width:)` constrains them.
-    private func menuLabel(_ text: String) -> some View {
-        HStack(spacing: 4) {
-            Text(text)
-                .lineLimit(1)
-            Image(systemName: "chevron.up.chevron.down")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private var titledLabel: String {
-        L("app_rules.float.titled", "Windows titled…")
-    }
-
-    private var floatLabel: String {
-        switch floatFacet {
-        case .never:
-            return editingTitles
-                ? titledLabel
-                : L("app_rules.float.never", "Never")
-        case .all:
-            return L("app_rules.float.all_windows", "All windows")
-        case .titled: return titledLabel
-        }
-    }
-
-    // MARK: - Mutations (GUI assembles the colon syntax)
-
-    private func setNever() {
-        editingTitles = false
-        model.config.floatRules.removeAll {
-            FloatFacet.appSegment(of: $0) == app
-        }
-    }
-
-    private func setAll() {
-        setNever()
-        model.config.floatRules.append(app)
-    }
+    var titlesEditing: Binding<Bool> { $editingTitles }
 }

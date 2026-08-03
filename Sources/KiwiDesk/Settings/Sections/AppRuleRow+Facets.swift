@@ -1,0 +1,141 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// The two menus inside the rule sentence, and the mutations
+/// behind them (see `AppRuleRow` for the sentence itself).
+///
+/// **The values are verb phrases** — "floats", "tiles
+/// normally", "floats when titled…" — because each one has to
+/// complete the sentence it sits in. The nouns they replaced
+/// ("All windows", "Never") were correct beside a "Float:"
+/// label and read as nothing at all inside a statement.
+///
+/// Each menu carries the facet's old label as its
+/// **accessibility label**. That is not a consolation prize for
+/// the deleted labels: a sentence gives a screen reader no name
+/// for the control, and the settings census names this row by
+/// the same key, so `app_rules.space` / `app_rules.float` have
+/// to stay authored at a call site the key scanner can see or
+/// they are pruned from every locale.
+extension AppRuleRow {
+    /// `app_rules[app]`; Automatic deletes the entry.
+    var spaceMenu: some View {
+        let automatic = L("app_rules.automatic", "Automatic")
+        return Menu {
+            Button(automatic) {
+                model.config.appRules[app] = nil
+            }
+            Divider()
+            ForEach(model.config.spaces, id: \.raw) { space in
+                Button(space.raw) {
+                    model.config.appRules[app] = space
+                }
+            }
+        } label: {
+            menuLabel(
+                model.config.appRules[app]?.raw ?? automatic
+            )
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .accessibilityLabel(L("app_rules.space", "Space"))
+    }
+
+    var floatMenu: some View {
+        Menu {
+            Button(neverLabel) { setNever() }
+            Button(allLabel) { setAll() }
+            Button(titledLabel) {
+                // Re-selecting the active choice must not
+                // wipe the pattern list (#68 review m3).
+                if floatFacet != .titled {
+                    setNever()
+                }
+                titlesEditing.wrappedValue = true
+            }
+        } label: {
+            menuLabel(floatLabel)
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .accessibilityLabel(L("app_rules.float", "Float"))
+        .help(floatHelp)
+    }
+
+    /// The borderless-menu signature (`ProfileEditTargetMenu`):
+    /// a trailing chevron on the label so a bare-text menu
+    /// still reads as "this opens a menu". Inside a sentence
+    /// the menu hugs its value (`fixedSize`) rather than
+    /// filling a fixed facet column — the words on either side
+    /// are what it has to line up with now, not a grid.
+    private func menuLabel(_ text: String) -> some View {
+        HStack(spacing: 4) {
+            Text(text)
+                .lineLimit(1)
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Float facet vocabulary
+
+    private var neverLabel: String {
+        L("app_rules.float.never", "tiles normally")
+    }
+
+    private var allLabel: String {
+        L("app_rules.float.all_windows", "floats")
+    }
+
+    private var titledLabel: String {
+        L("app_rules.float.titled", "floats when titled…")
+    }
+
+    private var floatLabel: String {
+        switch floatFacet {
+        case .never:
+            return titlesEditing.wrappedValue
+                ? titledLabel : neverLabel
+        case .all: return allLabel
+        case .titled: return titledLabel
+        }
+    }
+
+    /// Optional "why" depth for the Float facet (#260): what
+    /// floating a window actually does, plus the per-app-vs-
+    /// layout-mode disambiguation (same English word, two
+    /// mechanisms). Must-know scope stays in the section
+    /// caption; the titled-pattern mechanics stay in
+    /// `AppRuleTitledEditor` — don't restate them here or the
+    /// two drift.
+    ///
+    /// A hover string rather than the `?` affordance it used to
+    /// be: a `?` button inside the sentence would break the
+    /// sentence, which is the one thing this row is for.
+    private var floatHelp: String {
+        L(
+            "app_rules.float.help",
+            "Floating takes this app's matching windows out of "
+                + "tiling: each keeps its last position and size "
+                + "and appears on every space, instead of living "
+                + "in one space's grid.\n\nThis is per-app "
+                + "floating — not the **Floating** layout mode, "
+                + "which floats every window in a space."
+        )
+    }
+
+    // MARK: - Mutations (GUI assembles the colon syntax)
+
+    private func setNever() {
+        titlesEditing.wrappedValue = false
+        model.config.floatRules.removeAll {
+            FloatFacet.appSegment(of: $0) == app
+        }
+    }
+
+    private func setAll() {
+        setNever()
+        model.config.floatRules.append(app)
+    }
+}
