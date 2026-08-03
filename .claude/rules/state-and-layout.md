@@ -87,6 +87,16 @@ editing here:
   genuine focus event (#418), so "harmless, it re-raises the same
   order" is not an argument for arming on a mutation that
   scrambled nothing.
+  An arm in `focusWindow` guards against its own re-arm (the
+  restore's closing re-assert calls back in) **semantically** —
+  refuse because the focus is unchanged (`previousFocused !=
+  id`, the jump test), never by gating on
+  `zOrderRestoresInFlight`: that counter is warp-scoped, a
+  drain holds it for its whole verified span, and a counter
+  gate then drops GENUINE restores for exactly the window a
+  double-target correction clicks into — the monocle arm
+  shipped that way twice (#689). `ZOrderMonocleArmTests` and
+  `ZOrderFocusJumpTests` pin one arm each.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

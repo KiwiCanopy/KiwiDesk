@@ -146,6 +146,35 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("raiseFloor("))
     }
 
+    /// The held-warp re-fire (#689) is the same
+    /// unreachable-completion class as the stamp release above:
+    /// no unit test reaches the foreign branch, so deleting the
+    /// call silently re-ships the warp loss on every real drain
+    /// with every behavior test green (guard-prover,
+    /// 2026-08-03). The EDGE matters too: firing before the
+    /// decrement finds the counter still up and keeps holding
+    /// past the LAST drain — the warp is then lost exactly as
+    /// before #689 — so the order is asserted, not just
+    /// presence.
+    @Test("The drain's completion re-fires the held warp")
+    func sequenceRefiresHeldWarp() throws {
+        let source = try body(
+            of: "performZOrderSequence",
+            in: "KiwiCore+ZOrderFloats.swift"
+        )
+        let decrement = source.range(
+            of: "zOrderRestoresInFlight -= 1"
+        )
+        let refire = source.range(
+            of: "runPendingMouseWarp()"
+        )
+        #expect(decrement != nil)
+        #expect(refire != nil)
+        if let decrement, let refire {
+            #expect(decrement.lowerBound < refire.lowerBound)
+        }
+    }
+
     /// Monocle's floor is not an optimization, it is the whole
     /// raise: a lone target with no floor plans empty, so
     /// `restoreMonocleZOrder` shipped once raising nothing at all.

@@ -20,12 +20,11 @@ public final class KiwiCore {
     let spaceBarDrop = SpaceBarDropCoordinator()
     /// Live cross-display make-room gesture state (#504).
     let dragCrossing = DragCrossingCoordinator()
-    /// Glyph-vs-image icon decisions for bar items (#294),
-    /// shared by the App Bar, the Space Bar (#293) and the
-    /// shortcuts panel.
+    /// Glyph-vs-image icon decisions for bar items (#294) —
+    /// App Bar, Space Bar (#293), shortcuts panel.
     public let appFont = AppFontResolver()
-    /// Focus-window border overlays (#278), one ring per bordered
-    /// window. Driven by `updateBorders()` inside `retile()`.
+    /// Focus-window border overlays (#278), driven by
+    /// `updateBorders()` inside `retile()`.
     public let borders = BorderManager()
     /// On-window sticky marks (#414): a border sibling,
     /// driven by `updateStickyMarks()` inside `retile()`.
@@ -68,8 +67,8 @@ public final class KiwiCore {
     /// the same reason.
     var defersEventRetiles = false
 
-    /// A stack z-order restore is waiting for the current
-    /// animations to settle (see restoreStackZOrder).
+    /// A z-order restore is waiting for the current animations
+    /// to settle (`runPendingZOrderRestore`).
     var pendingZOrderRestore = false
 
     /// A command reordered windows but its paired retile is the
@@ -130,20 +129,11 @@ public final class KiwiCore {
     var outstandingSelfRaises: Set<WindowID> = []
 
     /// When each self-raise was issued — the recency bound for
-    /// the same-app activation re-report distrust (#465 QA):
-    /// only a raise younger than `selfRaiseSiblingWindow` makes
-    /// a sibling's hidden-space focus report suspect. Purely
-    /// age-compared (pruned on write, never consumed), so a
-    /// raise that never echoes cannot poison the app's hidden
-    /// windows forever — the `zOrderRaiseEchoWindow` lesson.
+    /// the sibling-report distrust (#465) and for the self-echo
+    /// classification itself (#687). Age-compared and pruned on
+    /// write, never consumed, so a raise that never echoes
+    /// cannot poison anything forever.
     var selfRaiseStamps: [WindowID: Date] = [:]
-
-    /// Sized like `zOrderRaiseEchoWindow`, and for the same
-    /// reason: Electron/WebKit apps answer AX lazily (100–300
-    /// ms), so their activation re-report can trail our raise
-    /// by several hundred ms; beyond ~1 s a same-app report is
-    /// a user action, not our raise's echo.
-    static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
     /// Last left press, AX coords: the click discriminator for
     /// the cross-display sibling distrust (#496,
@@ -163,43 +153,27 @@ public final class KiwiCore {
     /// provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
-    /// Windows we raised purely for z-order, stamped with the raise
-    /// time — floats promoted above the tiled plane (#418) AND the
-    /// overflow-pile members a cascade restore re-raises (#425). A
-    /// raise (`kAXRaiseAction`) couples with app activation, so it
-    /// emits a focus echo carrying no self-raise provenance (#152);
-    /// an echo on a stamped member within `zOrderRaiseEchoWindow`
-    /// whose id differs from the focus the user actually reached is
-    /// that echo — reverted, not honored, so the ring stays on the
-    /// real focus while the raise keeps its z-order. The stamp bounds
-    /// the ambiguity: a *deliberate* focus of such a window outside
-    /// the window is never mistaken for the echo (a bare set poisoned
-    /// a lingering entry forever when a raise emitted no echo).
-    /// Stamped per sequence (restamped, pruned by age), consumed on
-    /// echo, cleaned on destroy/rekey.
+    /// Windows raised purely for z-order, stamped with the
+    /// raise time — floats promoted above the tiled plane
+    /// (#418) and the pile members a restore re-raises (#425).
+    /// A raise couples with app activation and echoes a focus
+    /// report with no self-raise provenance (#152); a fresh
+    /// stamped report that is not the intended focus is that
+    /// echo — reverted, unless it carries click provenance
+    /// (#687; the design-decisions entry owns the ruling).
+    /// Stamped per sequence, age-pruned, consumed on echo,
+    /// cleaned on destroy/rekey.
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// Bumped per z-order raise sequence (float raise or pile
-    /// restore) so a stale sequence's focus handoff cannot steal
-    /// focus back after a newer focus has superseded it (the
-    /// `runPendingFocusRaise` staleness pattern). The `zOrderRaise
-    /// Echoes` revert keeps focus on the real target, which is what
-    /// makes the live-focus half of the guard safe to check.
-    ///
-    /// A counter object rather than an `Int` because the drain
-    /// re-reads it off the main actor between raises — see
-    /// `ZOrderGeneration`.
+    /// restore) so a stale sequence's focus handoff cannot
+    /// steal focus back (the `runPendingFocusRaise` staleness
+    /// pattern) — safe to pair with a live-focus check only
+    /// because the `zOrderRaiseEchoes` revert keeps focus on
+    /// the real target. A counter OBJECT rather than an `Int`
+    /// because the drain re-reads it off the main actor between
+    /// raises — `ZOrderGeneration` carries that argument.
     let zOrderRaiseGeneration = ZOrderGeneration()
-
-    /// How long after a z-order raise its focus echo may still arrive
-    /// and be reverted (#418/#425). Sized to the slowest AX
-    /// responders — Electron/WebKit answer focus queries in
-    /// ~100-300 ms (§5) — with ~3x margin, at the cost of a
-    /// deliberate CLICKLESS focus of a raised window (cmd-tab,
-    /// app-driven) within the window being eaten once — strictly
-    /// better than the old permanent poisoning, and a click
-    /// escapes on provenance (#687). Tunable.
-    static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
     /// Resolves the OS foreground app's pid for the focused-command
     /// preflight (#292). `nil` disables the guard — the default, so
@@ -242,10 +216,26 @@ public final class KiwiCore {
     /// (#152's provenance gap), so mouse-follows-focus holds its
     /// warp while any restore is in flight. A count, not a flag:
     /// back-to-back restores overlap on the serial raise queue.
-    /// Warp-scoped by design (`mouseWarpEligible` is the only
-    /// reader); a second consumer is the signal to close #152's
-    /// gap properly — pile-raise provenance — not to extend this.
+    /// WARP-scoped by design, and again in fact since #689
+    /// retired the monocle arm's read: the hold in
+    /// `warpMouseToFocused` and its release
+    /// (`runPendingMouseWarp`) are the only readers. A consumer
+    /// outside the warp is the signal to close #152's gap
+    /// properly, not to extend this.
     var zOrderRestoresInFlight = 0
+
+    /// The warp a draining restore held (#689): recorded while
+    /// the counter above is up, fired when the last drain ends,
+    /// staleness-checked (the `runPendingFocusRaise` pattern).
+    /// Without it, a focus change landing inside a drain lost
+    /// its warp forever.
+    var pendingMouseWarp: WindowID?
+
+    /// The machine tail of the warp (#186): reads the live
+    /// cursor, moves the pointer. nil until `start()` wires it,
+    /// so unit tests never move the developer's pointer (the
+    /// `frontmostPIDProvider` pattern).
+    var pointerWarp: (@MainActor (CGRect) -> Void)?
 
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all

@@ -11,7 +11,7 @@ import Testing
 /// re-ships (architect review, 2026-08-03; the #684-class
 /// "helper watched, wiring untested" hole).
 ///
-/// Two needles, both against comment-stripped source:
+/// Needles, all against comment-stripped source:
 /// 1. `start()` wires `stackingOrderProvider` to
 ///    `AXHelper.onScreenStackingOrder`.
 /// 2. the left-press stamp resolves `reached` through
@@ -19,6 +19,9 @@ import Testing
 ///    assignment — press-time resolution is the fix's load
 ///    -bearing choice, so an echo-time refactor must trip this
 ///    and re-argue.
+/// 3. `start()` wires `pointerWarp` to the CoreGraphics
+///    pointer move (#689 — the same seam class, one function
+///    over).
 ///
 /// Known limits of the scan (shipped, not denied — the #635
 /// practice): a wire assigned in `start()` and nulled later
@@ -71,6 +74,31 @@ struct ClickProvenanceWiringTests {
             + "onScreenStackingOrder — every click "
             + "resolves no provenance and #687 re-ships "
             + "with all behavior tests green."
+        #expect(wired, Comment(rawValue: message))
+    }
+
+    /// The `pointerWarp` seam's wiring (#689) — same class as
+    /// the needles beside it: every warp test injects the seam,
+    /// so deleting the `start()` assignment leaves the whole
+    /// suite green while `pointerWarp?` stays nil and
+    /// mouse-follows-focus silently never moves the pointer.
+    @Test("start() wires the pointer warp")
+    func pointerWarpIsWired() throws {
+        let source = try strippedSource()
+        let pattern =
+            #"pointerWarp\s*=\s*\{[\s\S]"#
+            + #"{0,600}?CGWarpMouseCursorPosition"#
+        let wired =
+            source.range(
+                of: pattern,
+                options: .regularExpression
+            ) != nil
+        let message =
+            "KiwiCore+Lifecycle no longer wires pointerWarp "
+            + "to the CoreGraphics pointer move — "
+            + "mouse.follows_focus silently never moves the "
+            + "pointer while every warp test stays green "
+            + "(they all inject the seam)."
         #expect(wired, Comment(rawValue: message))
     }
 

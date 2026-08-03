@@ -20,12 +20,14 @@ extension KiwiCore {
     /// so the intended focus must be re-asserted after the raises).
     /// The raised floats are recorded in `zOrderRaiseEchoes` so
     /// their focus echoes are reverted rather than moving the ring
-    /// onto them (see `KiwiCore+Events`); the re-assert never warps
-    /// — it runs while `zOrderRestoresInFlight` holds, where
-    /// `mouseWarpEligible` swallows warps by design — so callers
-    /// that want the pointer to follow warp at INTENT time, before
-    /// calling this (as `focusSpace` does). With nothing to raise,
-    /// focus is handed over directly.
+    /// onto them (see `KiwiCore+Events`); the re-assert never
+    /// warps — it passes `warp: false`, marking a focus change
+    /// that is maintenance, not intent (#689 made that flag the
+    /// mechanism: a warp reaching `warpMouseToFocused` mid-drain
+    /// is now HELD and re-fired, no longer swallowed) — so
+    /// callers that want the pointer to follow warp at INTENT
+    /// time, before calling this (as `focusSpace` does). With
+    /// nothing to raise, focus is handed over directly.
     func raiseFloatsAndSticky(
         thenFocus focused: WindowID?
     ) {
@@ -267,19 +269,15 @@ extension KiwiCore {
             !AXHelper.mustRaiseOnMainThread($0.1)
         }
         // All-own (no foreign) runs the completion synchronously,
-        // skipping the `zOrderRestoresInFlight` bracket. TWO
-        // re-arm guards key on that counter — monocle's
-        // (`KiwiCore+FocusRaise`) and scrolling's (#674) — so the
-        // shortcut is what would let a restore's own closing
-        // re-assert re-arm it. Monocle is safe because it is only
-        // reached via a foreign focused window, so `foreign` is
-        // never empty there. Scrolling does not read the counter
-        // at all: its arm requires the focus to JUMP more than
-        // one slot, and the closing re-assert targets the focus
-        // that is already current, so the distance is zero — as
-        // long as the re-asserted window is the one `focusAnchor`
-        // then returns. Revisit the monocle half if an own window
-        // can ever become a tiled restore member.
+        // skipping the `zOrderRestoresInFlight` bracket. Safe
+        // against re-arm loops since #689 made BOTH restore
+        // arms semantic: the closing re-assert targets the
+        // focus that is already current, so monocle's
+        // `previousFocused != id` and scrolling's jump test
+        // (#674) each refuse it without asking the counter —
+        // as long as the re-asserted window is the one
+        // `focusAnchor` then returns. The counter is
+        // warp-scoped only.
         guard !foreign.isEmpty else {
             completion()
             return
@@ -301,6 +299,11 @@ extension KiwiCore {
                 )
                 completion()
                 self?.zOrderRestoresInFlight -= 1
+                // Fire the warp this drain (or an overlapping
+                // one) held — after the decrement, so the
+                // counter reads zero only once every sequence
+                // has re-asserted (#689).
+                self?.runPendingMouseWarp()
             }
         }
     }
