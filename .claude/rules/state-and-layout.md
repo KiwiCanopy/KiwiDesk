@@ -74,9 +74,8 @@ editing here:
   through `localTiledMembers` / `effectiveTiledMembers` and
   never re-checks `isFullscreen` at its own call site; only a
   walker whose domain is wider than the tiled members (the
-  stash and the quit-grid gather, which also handle floats, and
-  a focus fallback reading `space.focused`) carries its own
-  check. macOS moved the window to its own Space, so a
+  stash, which also parks floats, and a focus fallback reading
+  `space.focused`) carries its own check. macOS moved the window to its own Space, so a
   frame-set, navigation step or raise aimed at it fights the
   fullscreen app or yanks the user into its Space. Nothing
   scans for a fresh open-coded `!isFloating` partition, so each
