@@ -33,7 +33,7 @@ import Testing
 /// The scan that remains does only what asserting values cannot:
 /// notice a call site whose prose is not in the asserted set —
 /// a NEW cross-reference. `everyRowIsAsserted` is the coupling,
-/// and it reds on the fifth row rather than covering it.
+/// and it reds on the fourth row rather than covering it.
 ///
 /// **These assertions do not read English, and cannot say which
 /// locale they DO read.** `L()` resolves through the shipped
@@ -54,7 +54,8 @@ import Testing
 /// English"), which `extract-keys --check` runs inside
 /// `scripts/lint.sh` — so pre-commit, the verify gate and CI all
 /// refuse it. Verified by mutation 2026-08-03: reverting
-/// `sticky.mark.forced` to its shipped dangling English redded
+/// `sticky.mark.forced` — a fourth row since retired with its
+/// coverage guard — to its shipped dangling English redded
 /// lint on every shipped locale at exit 1 while this suite
 /// stayed green.
 ///
@@ -84,7 +85,7 @@ struct CrossReferenceRowSlotTests {
     /// without a matching assertion reds instead of being
     /// silently exempt. The other side is derived from source.
     ///
-    /// Keyed by FILE, not by expression alone. Three of these
+    /// Keyed by FILE, not by expression alone. Two of these
     /// are `Self.`-scoped, which names a different type in every
     /// file — so on expression alone a second view declaring its
     /// own `forcedProse` without a slot matched an entry already
@@ -103,11 +104,10 @@ struct CrossReferenceRowSlotTests {
     /// comparison identical while
     /// `theAppBarProsePlacesItsLink` went on asserting an
     /// orphaned `LayoutCardText.appBarState`. Named here rather
-    /// than papered over: the other three entries do carry their
+    /// than papered over: the other two entries do carry their
     /// producer, so only this row has the gap.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
-        "StickyMarkEditor.swift:Self.forcedProse",
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
     ]
@@ -118,10 +118,6 @@ struct CrossReferenceRowSlotTests {
         #expect(
             MotionCard.scrollingXrefProse.contains(Self.slot)
         )
-    }
-
-    @Test func theStickyMarkProsePlacesItsLink() {
-        #expect(StickyMarkEditor.forcedProse.contains(Self.slot))
     }
 
     /// Both arms. The singular one renders whenever exactly one

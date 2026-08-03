@@ -9,9 +9,10 @@ import Foundation
 ///
 /// The setter applies unconditionally: turning the glyph off
 /// with the Space Bar also off is a valid deliberate
-/// zero-mark state from Lua (the `dim_factor` precedent).
-/// The GUI's forced-ON coverage guard is presentation only,
-/// never a clamp here.
+/// zero-mark state (the `dim_factor` precedent). The GUI once
+/// forced the glyph back on there and no longer does, so no
+/// surface clamps this — reaching a zero-mark setup takes two
+/// deliberate acts and is allowed to.
 public struct StickyStyle: Sendable, Equatable {
     /// The sticky mark — ONE glyph everywhere (#414): the
     /// on-window mark and the Space Bar badge both read this,

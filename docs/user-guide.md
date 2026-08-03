@@ -959,13 +959,14 @@ the one that explains why.
 Because a sticky window can look identical to a normal one,
 KiwiDesk draws a small mark in its top-right
 corner. **Show mark on sticky windows** (on by default) turns
-the mark off — unless the Space Bar is hidden, in which case
-the toggle greys out and stays on: with the bar off the mark
-is the only one there is, and sticky state must never be
-invisible. (From Lua both marks are freely configurable —
-`sticky.set_mark`, `space_bar.set_sticky_badge`.) The
-Space Bar shows its own sticky badge either way, and floating
-windows get a bar badge too — see the Space Bar section.
+the mark off. The Space Bar shows its own sticky badge as
+well, and floating windows get a bar badge too — see the Space
+Bar section. The mark is painted on the window itself, so it
+is the sticky signal that survives hiding the Space Bar; turn
+both off and a sticky window looks like any other, which
+KiwiDesk lets you do rather than talking you out of. (From Lua
+the same two switches are `sticky.set_mark` and
+`space_bar.set_sticky_badge`.)
 
 The marks' colours are in **Advanced Colors** — **Sticky** in
 Border colors (it paints both the on-window mark and the Space

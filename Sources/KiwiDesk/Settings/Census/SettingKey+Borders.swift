@@ -98,13 +98,14 @@ extension BordersKey {
             // the .focusBorder CONTAINER gate.
             return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .stickyMark:
-            // Forced on while the Space Bar is off — the only
-            // sticky mark left (StickyMarkEditor).
+            // Ungated. The mark paints on the window, so it is
+            // what survives the Space Bar going off — a gate on
+            // the bar would generate a "Needs the Space Bar"
+            // caption that is false (StickyMarkEditor).
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,
-                .showMore,
-                gate: .setting(.spaceBar(.spaceBarEnabled))
+                .showMore
             )
         case .dragCornerRadius:
             return .row(.gapsAndBorders, .dragAndDrop, .showMore)

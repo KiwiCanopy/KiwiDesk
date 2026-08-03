@@ -6,27 +6,15 @@ import SwiftUI
 /// (not private) only because the `row(for:)` switch lives in
 /// the sibling extension file.
 extension SpaceBarCard {
-    /// Coverage-guard write-through (#414): hiding the bar makes
-    /// the on-window mark the ONLY sticky cue left, so its
-    /// greyed "forced ON" toggle in Appearance must be the real
-    /// stored state, not a display fiction. A write-through
-    /// BINDING, not .onChange: the set fires only on the user's
-    /// gesture, so a profile load that replaces the model's
-    /// config while this section is open cannot overwrite a
-    /// Lua-authored mark=false (Lua stays unclamped).
+    /// A plain binding. It wrote `stickyStyle.mark = true`
+    /// through on the way off until #678 Phase 3, to back the
+    /// sticky-mark toggle's forced-ON greying; that gate is gone
+    /// (`StickyMarkEditor`), and with it the only reason this
+    /// switch had to reach into another setting.
     var showToggle: some View {
         ToggleRow(
             label: L("space_bar.enabled", "Show Space Bar"),
-            isOn: Binding(
-                get: { style.wrappedValue.enabled },
-                set: { on in
-                    style.wrappedValue.enabled = on
-                    if !on {
-                        model.config.settings
-                            .stickyStyle.mark = true
-                    }
-                }
-            ),
+            isOn: style.enabled,
             help: L(
                 "space_bar.enabled.help",
                 "One bar per display listing that "

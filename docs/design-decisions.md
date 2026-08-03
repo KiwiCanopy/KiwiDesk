@@ -2294,15 +2294,35 @@ floating are otherwise indistinguishable — on the window
 itself floating is self-evident. Badges are Space-Bar-only
 (the per-layout App Bar shows no state badges), survive
 grouping as an "at least one" aggregate, and have no GUI
-toggle. The coverage guard: the on-window mark's toggle greys
-out and renders forced ON while the Space Bar is off, because
-it is then the only sticky mark there is and — unlike a
-focus border, which duplicates an OS cue — sticky has no
-native fallback. The guard is presentation-only; Lua's
-`sticky.set_mark` and `space_bar.set_sticky_badge` apply
-unclamped, so a deliberate zero-mark setup stays
-reachable from the open layer (`dim_factor` precedent).
-(#414)
+toggle. The principle binds what KiwiDesk **ships** — both
+marks default on, and sticky, unlike focus, duplicates no OS
+cue to fall back to — and it is not enforced by greying the
+on-window mark's toggle, which stands alone.
+
+**A greyed row makes a claim, so it must be read aloud before
+it is written.** Greying says "turn B on and I act", and the
+mark's relationship to the Space Bar runs the other way: the
+mark paints on the window, so it is precisely what survives
+the bar being hidden. A gate there states a dependency
+backwards, and a surface that generates a row's caption from
+its gate prints "Needs the Space Bar" under a control that
+needs nothing of the sort — teaching a user something the app
+will contradict the moment they hide the bar and watch the
+marks stay. What earns a gate is the **Floating** tint, which
+paints only the Space Bar's badge: floating has no on-window
+mark, so with the bar off there is genuinely nothing left for
+it to colour.
+
+No softer warning replaces the greying either. **A floor
+guards a trap, not a choice**, and zero marks is not a trap
+one falls into: it takes two deliberate acts on two different
+surfaces, and the floor was porous by design in any case —
+Lua's `sticky.set_mark` and `space_bar.set_sticky_badge` apply
+unclamped (`dim_factor` precedent), so the state was always
+reachable from the open layer. A caution invented for one row,
+with no precedent anywhere else in Settings, buys nothing the
+`?` help does not — which is where the fact now lives, that
+being what a *concept* earns. (#414)
 
 **One word for the dot — "mark" — with two deliberate
 carve-outs.** (R6/#406.) Five words named one thing: indicator,

@@ -3207,10 +3207,10 @@ end)
 
 **Does:** shows or hides the on-window sticky mark — the small
 glyph at a sticky window's top-right corner. Applies exactly
-what you set: turning it off while the Space Bar is also off
-leaves sticky state with no mark at all, which is a valid
-power-user choice from Lua (the Settings app, by contrast,
-keeps the mark forced on while the Space Bar is off).
+what you set, as does the Settings app's own toggle: turning it
+off while the Space Bar is also off leaves sticky state with no
+mark at all, which is a valid choice and neither surface
+argues with it.
 
 **Example:**
 
