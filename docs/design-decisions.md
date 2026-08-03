@@ -2316,7 +2316,9 @@ inconsistency.
 no warning, only an honest `?`. Turning the mark off costs
 more than the label implies: the mark also carries sticky's
 refusal pills (home-space, can't-pile, move-blocked), so a
-refused drag stops explaining itself. A cost a row's own label
+refused move stops explaining itself — and not only a dragged
+one, since `refuseSwapOntoTraveler` and `stickyMoveRefused`
+gate the keyboard and CLI paths too. A cost a row's own label
 does not imply has to be *said* somewhere, which is why
 `sticky.mark.help` states it — the row is the surface, and
 Lua's unclamped setters (`sticky.set_mark`,

@@ -966,7 +966,9 @@ is the sticky signal that survives hiding the Space Bar.
 
 Switching the mark off costs more than the resting glyph: the
 pills described above ride the same mark, so with it off a
-snapped-back drag simply snaps back and explains nothing. The
+refused move simply fails and explains nothing — a snapped-back
+drag, and equally a swap or **Move to space** refused from the
+keyboard. The
 Space Bar's badge keeps showing *which* windows are sticky
 either way, but only the mark answers *why that gesture just
 failed* — which is why the toggle's own `?` says so before you

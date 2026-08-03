@@ -858,7 +858,7 @@
   "sticky.home.pill": "ホームスペース %1$@ 内でのみ移動可能",
   "sticky.mark": "Stickyウインドウにマークを表示",
   "sticky.mark.ax": "Stickyウインドウ",
-  "sticky.mark.help": "Sticky ウインドウは通常のウインドウと見分けがつかないことがあるため、KiwiDesk はウインドウの右上隅に小さなマークを描画します。このマークは、移動が拒否された理由を短く示すヒントも兼ねているため、オフにするとそれらも表示されなくなります。Space Bar は独自の Sticky バッジをどちらの場合でも表示しますが、Space Bar も非表示にすると、Sticky であることを示す手がかりは何も残りません。",
+  "sticky.mark.help": "Sticky ウインドウは通常のウインドウと見分けがつかないことがあるため、KiwiDesk はウインドウの右上隅に小さなマークを描画します。移動が拒否された理由を短く伝えるのもこのマークで、ドラッグでもキーボードショートカットでも同じです。マークをオフにすると、これらのメッセージも表示されなくなります。Space Bar は独自の Sticky バッジをどちらの場合でも表示しますが、Space Bar も非表示にすると、Sticky であることを示す手がかりは何も残りません。",
   "sticky.pile.pill": "Sticky ウインドウはスタックへ移動できません",
   "sticky.title": "Stickyウインドウ",
   "system_shortcut.app_switcher": "アプリケーションスイッチャー",

@@ -47,12 +47,13 @@ struct StickyMarkEditor: View {
             "sticky.mark.help",
             "A sticky window can look identical to a normal "
                 + "one, so KiwiDesk draws a small mark in its "
-                + "top-right corner. The mark also carries the "
-                + "brief pills that explain a refused drag, so "
-                + "turning it off silences those too. The Space "
-                + "Bar shows its own sticky badge either way; "
-                + "hide the bar as well and no sticky signal is "
-                + "left."
+                + "top-right corner. The mark is also how a "
+                + "refused move explains itself, whether you "
+                + "dragged the window or used a shortcut, so "
+                + "turning the mark off silences those messages "
+                + "too. The Space Bar shows its own sticky badge "
+                + "either way; hide the bar as well and no "
+                + "sticky signal is left."
         )
     }
 }

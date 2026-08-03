@@ -858,7 +858,7 @@
   "sticky.home.pill": "Spostabile solo nel suo spazio di origine %1$@",
   "sticky.mark": "Mostra marcatore sulle finestre sticky",
   "sticky.mark.ax": "Finestra Sticky",
-  "sticky.mark.help": "Una finestra Sticky può sembrare identica a una normale, perciò KiwiDesk disegna un piccolo marcatore nel suo angolo in alto a destra. Il marcatore mostra anche i brevi avvisi che spiegano un trascinamento rifiutato, quindi disattivandolo si perdono anche quelli. La Space Bar mostra comunque il proprio badge Sticky; nascondendo anche la barra non resta alcun segnale di Sticky.",
+  "sticky.mark.help": "Una finestra Sticky può sembrare identica a una normale, perciò KiwiDesk disegna un piccolo marcatore nell'angolo in alto a destra della finestra. Il marcatore è anche ciò che spiega uno spostamento rifiutato, sia che tu abbia trascinato la finestra sia che tu abbia usato una scorciatoia: se disattivi il marcatore, spariscono anche quei messaggi. La Space Bar mostra comunque il proprio badge Sticky; nascondendo anche la barra non resta alcun segnale di Sticky.",
   "sticky.pile.pill": "Le finestre Sticky non possono essere spostate nella pila",
   "sticky.title": "Finestre Sticky",
   "system_shortcut.app_switcher": "Selettore applicazioni",
