@@ -124,13 +124,19 @@ struct SettingsCatalogArgumentTests {
         // #678 Phase 3 is +5 net: eight new colour declarations
         // plus Size & float's disclosure in, the two interim
         // colour cards and their two Advanced-colors drawers out.
-        #expect(direct.values.reduce(0, +) == 46)
-        #expect(
-            modeTabs.sorted() == [
-                "bsp", "grid", "monocle", "scrolling", "stack",
-                "track",
-            ]
-        )
+        // Turn 10 adds Layout Defaults' live-preview and
+        // spaces-using cards: 48.
+        #expect(direct.values.reduce(0, +) == 48)
+        // One parameterized layout-mode mount, not six literal
+        // ones: turn 10's strip mounts the SELECTED layout's card
+        // and nothing else, so the six anchor ids come from
+        // `LayoutMode.placementTabs` at run time. That the strip
+        // really walks that list — and so that every layout is
+        // reachable — is
+        // `LayoutDefaultsCensusRenderTests.stripWalksEveryLayout`;
+        // this half only pins that no SECOND mount reintroduces a
+        // duplicate id.
+        #expect(modeTabs == ["*"])
         for (path, count) in direct.sorted(by: { $0.key < $1.key }) {
             let allowed = alternatelyMounted[path] ?? 1
             #expect(
@@ -206,12 +212,21 @@ struct SettingsCatalogArgumentTests {
         )
     }
 
+    /// A layout-mode mount, literal (`.bsp`) or parameterized
+    /// (`mode`). Since #678 turn 10 there is exactly one card and
+    /// it takes the selected layout, so the parameterized form is
+    /// the shipping shape and reports as `*`; the literal form
+    /// stays recognised because a second, per-layout mount would
+    /// otherwise read as an unresolvable argument rather than as
+    /// what it is.
     private func layoutModeArgument(
         _ argument: String
     ) -> String? {
         SourceScan.firstMatch(
             in: argument,
-            pattern: #"^SettingsCatalog\.layoutMode\(\.(\w+)\)$"#
+            pattern:
+                #"^SettingsCatalog\.layoutMode\(\.?(\w+)\)$"#
         )
+        .map { $0 == "mode" ? "*" : $0 }
     }
 }

@@ -1,0 +1,163 @@
+import Foundation
+import KiwiDeskCore
+import Testing
+
+@testable import KiwiDesk
+
+/// The Layout Defaults area renders FROM the census (#678 Phase
+/// 3, turn 10): the census owns placement, `LayoutDefaultsRowOrder`
+/// owns display order. These pin the two together — every
+/// `.layoutDefaults`-area census key appears in exactly the order
+/// list its placement names, so a census row added, retiered or
+/// moved without a renderer update is a red test, not a silently
+/// missing control.
+@Suite("Layout Defaults render ↔ census parity")
+struct LayoutDefaultsCensusRenderTests {
+    private func censusRows(
+        _ container: SettingsContainer,
+        _ tier: SettingTier = .atRest
+    ) -> Set<SettingKey> {
+        Set(
+            SettingKey.allCases.filter {
+                $0.placement.area == .layoutDefaults
+                    && $0.placement.container == container
+                    && $0.placement.tier == tier
+            }
+        )
+    }
+
+    /// Membership and freedom-from-duplicates for every list at
+    /// once, driven by the mode → container map rather than by a
+    /// hand-written case per layout: a seventh tuned layout is
+    /// then covered by existing code, and one that forgot its
+    /// order list reds here instead of rendering an empty card.
+    @Test("each layout's rows are that container's census rows")
+    func everyLayoutMatchesItsContainer() {
+        for mode in LayoutMode.placementTabs {
+            let container = try? #require(
+                LayoutDefaultsRowOrder.container(for: mode)
+            )
+            guard let container else { continue }
+            let rendered = LayoutDefaultsRowOrder.rows(for: mode)
+            #expect(
+                Set(rendered) == censusRows(container),
+                Comment(
+                    rawValue:
+                        "\(mode) renders \(rendered.count) rows, "
+                        + "census says "
+                        + "\(censusRows(container).count)"
+                )
+            )
+            #expect(rendered.count == Set(rendered).count)
+        }
+    }
+
+    /// The row above the strip — shared by all seven layouts, so
+    /// it sits in its own container and not inside one of them.
+    @Test("the shared row is the general container's census row")
+    func generalRow() {
+        #expect(
+            Set(LayoutDefaultsRowOrder.general)
+                == censusRows(.general)
+        )
+    }
+
+    /// The area's render knows exactly these containers; one more
+    /// would mount nowhere, so it must fail loud here rather than
+    /// ship an unreachable row. Derived from the mode map plus
+    /// the shared container, so adding a layout to
+    /// `placementTabs` and to `container(for:)` is enough.
+    @Test("the area holds only the containers it renders")
+    func onlyRenderedContainers() {
+        let declared = Set(
+            SettingKey.allCases
+                .filter { $0.placement.area == .layoutDefaults }
+                .compactMap { $0.placement.container }
+        )
+        let rendered = Set(
+            LayoutMode.placementTabs.compactMap {
+                LayoutDefaultsRowOrder.container(for: $0)
+            }
+        )
+        #expect(declared == rendered.union([.general]))
+    }
+
+    /// Tier ↔ chrome. A set-equality guard is blind to chrome: it
+    /// would stay green with rows tiered `.showMore` and drawn at
+    /// rest, because both sides are the same set either way. The
+    /// area draws no disclosure at all, so a `.showMore` row here
+    /// would render at rest while claiming to be hidden — pin the
+    /// tier, and pin that no disclosure appears in the area's
+    /// views to render one with.
+    @Test("nothing in this area is behind a disclosure")
+    func noRowIsBehindADisclosure() throws {
+        let deeper = SettingKey.allCases.filter {
+            $0.placement.area == .layoutDefaults
+                && $0.placement.tier != .atRest
+        }
+        #expect(
+            deeper.isEmpty,
+            Comment(
+                rawValue:
+                    "tiered past .atRest with no chrome to draw "
+                    + "them: \(deeper.map(\.id))"
+            )
+        )
+        for file in try areaSources() {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                !source.contains("SettingsDisclosure("),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) draws a "
+                        + "disclosure — the tier pin above stops "
+                        + "meaning anything the moment one exists"
+                )
+            )
+        }
+    }
+
+    /// Ruling 5: a guard over a literal restated against a
+    /// literal documents, it does not detect. So the "every
+    /// layout is reachable" claim is read off the TREE — the
+    /// strip's own `ForEach` over `LayoutMode.placementTabs` —
+    /// rather than off a copy of the list. Paired with
+    /// `SettingsCatalogArgumentTests`, which pins that the card
+    /// is mounted once and parameterized, this is what makes the
+    /// six per-layout search anchors reachable.
+    @Test("the strip walks every layout")
+    func stripWalksEveryLayout() throws {
+        let strip = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Layouts/"
+                    + "LayoutStrip.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: strip, encoding: .utf8)
+        )
+        #expect(
+            source.contains("ForEach(")
+                && source.contains("LayoutMode.placementTabs")
+        )
+        // And the list itself is the six tuned layouts —
+        // Floating has nothing to tune, so a tile for it would
+        // open an empty card.
+        #expect(
+            Set(LayoutMode.placementTabs)
+                == Set(LayoutMode.allCases).subtracting([
+                    .floating
+                ])
+        )
+    }
+
+    private func areaSources() throws -> [URL] {
+        try SourceScan.swiftSources(
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Layouts"
+                )
+        )
+    }
+}

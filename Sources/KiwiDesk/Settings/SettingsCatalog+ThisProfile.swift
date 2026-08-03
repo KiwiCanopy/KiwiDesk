@@ -18,11 +18,25 @@ struct SpacesControls: Sendable {
 
 struct LayoutDefaultsControls: Sendable {
     /// The min-size card sits above the strip and feeds every
-    /// mode, so it is surface-free; the mode tabs are appended
-    /// from `LayoutMode.placementTabs` in `entries(of:)`.
+    /// layout, so it is surface-free; the layout tiles are
+    /// appended from `LayoutMode.placementTabs` in
+    /// `entries(of:)`.
     let minWindowSize = SettingsControl(
         "layout_defaults.min_window_size",
         "Minimum window size"
+    )
+    /// The live preview and the spaces list are cards a reveal
+    /// can land on, so they are declared rather than rendered
+    /// with a computed title — a reader searching "preview"
+    /// should reach the one that answers "what will this look
+    /// like".
+    let livePreview = SettingsControl(
+        "layout_defaults.live_preview",
+        "Live preview"
+    )
+    let spacesUsing = SettingsControl(
+        "layout_defaults.spaces_using",
+        "Spaces using this layout"
     )
 }
 

@@ -1,0 +1,115 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// The "Choose a layout" strip (turn 10): a row of **live
+/// thumbnails**, not a tab strip of words.
+///
+/// This is the area's structural move. "Track" and "Scrolling"
+/// and "Monocle" are words only a tiler user knows, and this is
+/// the card where a beginner is most lost — a drawing of the
+/// layout is the only honest label, so the strip doubles as the
+/// answer to "which of these do I want?". Each tile also says
+/// how many spaces use it, so a layout nothing runs is visibly
+/// not worth tuning.
+///
+/// The tiles draw the *staged* settings, like every other
+/// preview here: they are the same schematics the panel below
+/// renders, at `SchematicScale.tile`.
+struct LayoutStrip: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var selection: LayoutMode
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SettingsGroupHeader(
+                L("layout_defaults.choose", "Choose a layout")
+            )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(
+                        LayoutMode.placementTabs,
+                        id: \.self
+                    ) { mode in
+                        tile(mode)
+                    }
+                }
+                .padding(.bottom, 4)
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(
+            L("layout_defaults.mode_tabs", "Layout mode")
+        )
+    }
+
+    private func tile(_ mode: LayoutMode) -> some View {
+        let selected = mode == selection
+        return Button {
+            selection = mode
+        } label: {
+            VStack(spacing: 4) {
+                LayoutSchematicView(
+                    mode: mode,
+                    settings: model.config.settings,
+                    scale: .tile
+                )
+                Label(mode.displayName, systemImage: mode.glyph)
+                    .font(.subheadline)
+                    .labelStyle(.titleAndIcon)
+                Text(usageText(mode))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(6)
+            .background(selectionChrome(selected))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(
+            selected ? [.isButton, .isSelected] : .isButton
+        )
+    }
+
+    /// The selected tile is marked by a filled, accent-bordered
+    /// plate rather than by tinting the drawing: the thumbnail is
+    /// the layout's own picture, and recolouring it would make
+    /// "selected" and "this is what the accent colour paints"
+    /// the same signal.
+    private func selectionChrome(_ selected: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(
+                selected
+                    ? Color.accentColor.opacity(0.12)
+                    : Color(nsColor: .controlBackgroundColor)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                        selected
+                            ? Color.accentColor
+                            : Color.secondary.opacity(0.25),
+                        lineWidth: selected ? 2 : 1
+                    )
+            )
+    }
+
+    /// How many spaces run this layout. A space with no recorded
+    /// mode runs the default, exactly as everywhere else reads
+    /// it (`?? .bsp`), so BSP's count includes the untouched
+    /// spaces rather than under-reporting them.
+    private func usageText(_ mode: LayoutMode) -> String {
+        let count = model.config.spaces.filter {
+            (model.config.spaceModes[$0] ?? .bsp) == mode
+        }.count
+        if count == 0 {
+            return L("layout_defaults.uses.none", "No spaces")
+        }
+        if count == 1 {
+            return L("layout_defaults.uses.one", "1 space")
+        }
+        return L(
+            "layout_defaults.uses.many",
+            "%1$d spaces",
+            count
+        )
+    }
+}

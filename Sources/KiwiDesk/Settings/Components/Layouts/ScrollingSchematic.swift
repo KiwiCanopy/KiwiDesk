@@ -64,6 +64,7 @@ struct ScrollingSchematic: View {
             ScrollingFollowPair(
                 orientation: orientation,
                 slotSize: slotSize,
+                windows: windows,
                 scale: scale
             )
         } else {
