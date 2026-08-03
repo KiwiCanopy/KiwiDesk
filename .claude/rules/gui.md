@@ -130,15 +130,14 @@ never views.
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
-Layout Defaults and App Rules render from it now** (#678 Phases
-2-3):
-`BarsRowOrder` / `ColorsRowOrder` / `ShortcutsRowOrder` /
-`LayoutDefaultsRowOrder`
-hold the display order and `BarsCensusRenderTests` /
-`ColorsCensusRenderTests` / `ShortcutsCensusRenderTests` /
-`LayoutDefaultsCensusRenderTests` pin
-them to the census, so a row in
-those areas moves by editing the census.
+Layout Defaults, App Rules, General and Gaps & Borders render
+from it now** (#678 Phases 2-3): each carries its own order list
+and a census-render suite pinning that order to the census
+(`GapsBordersRowOrder` / `GapsAndBordersCensusRenderTests` is the
+newest pair), so a row in a `ForEach`-rendered container moves by
+editing the census — with the bespoke edge below. This bold list is itself a hand-kept claim with no guard,
+so an added area joins it here in the same change that ships its
+`*RowOrder` (General was silently dropped from it once).
 
 That promise has a stated edge in Shortcuts, and reading it as
 unqualified will waste your afternoon: three containers there
@@ -150,6 +149,13 @@ MEMBERSHIP, but editing one moves nothing on screen. Which
 three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
+
+General and Gaps & Borders push that edge wider: EVERY container
+in them is bespoke (`GeneralRowOrder.bespokeContainers` /
+`GapsBordersRowOrder.bespokeContainers`, each the whole set,
+asserted by `bespokeMeansNoForEach` in each area's render suite),
+so their order lists are membership-and-search only and editing
+one moves nothing on screen.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -188,17 +194,25 @@ The rule that needs no guessing:
   the gap stays deliberate and a new gate landing in neither
   set reds.
 
-The resolvers still take different shapes — one keys on
-`SettingsContainer.gate` over `TilingSettings`, another on
-`SettingRuntimeGate` over `GuiConfig`, a third
-(`LayoutDefaultsGates`) on a row's own `SettingKey` over
-`TilingSettings`. **Converge them before a fourth shape
-appears**; the split is why one legitimate gate is "resolved
-elsewhere" today. Layout Defaults did not force the
-convergence and does not discharge it: it answers only ROW
-gates, so it had nothing to converge *with* — **give this area
-a container gate or a `.runtime` one and converge the
-resolvers rather than teaching this one a second shape.**
+The resolvers still take different shapes — `BarsGateContext`
+keys on `SettingsContainer.gate` over `TilingSettings`,
+`ShortcutsRuntimeGate` on `SettingRuntimeGate` over `GuiConfig`,
+and the reason-case family (`LayoutDefaultsGates`, `GeneralGates`,
+`GapsBordersGates`) on a row's own `SettingKey`. **Converge the
+first two onto that reason-case shape before a fourth shape
+appears.** The "it had nothing to converge with" excuse is now
+spent: `GapsBordersGates` answers a container gate
+(`containerReason(for:)`, held by `GapsAndBordersGateTests`'
+`containerGateIsResolved`) AND a saved-config `.runtime` gate
+(the gap masters) on the SAME `SettingKey`-keyed struct — so the
+shared shape demonstrably carries all three gate flavours. Folding
+`BarsGateContext` and `ShortcutsRuntimeGate` onto it is
+**consciously deferred** (owner ruling 2026-08-03, the Gaps &
+Borders lane kept low-risk) and stays an obligation on the next
+author who touches those two resolvers.
+`ShortcutsRuntimeGate.resolvedElsewhere` sits elsewhere because
+its one gate (`.luaImportAvailable`) is a live-state predicate the
+saved config cannot answer — not because of the shape split.
 `LayoutDefaultsGateTests`' `everyGatedRowIsResolved` holds both
 halves: it reds when a ROW gate this resolver does not answer
 appears, and it pins that no container in the area declares a

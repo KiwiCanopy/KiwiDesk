@@ -56,9 +56,12 @@ struct GreyOutParityTests {
     /// left the suite green while the swatch stayed editable
     /// with nothing to tint (#678 Phase 3).
     private let gatedEditors: [(file: String, gate: String, count: Int)] = [
+        // The block gate now resolves through `GapsBordersGates`
+        // (#678 Phase 3): the needle is the resolver-driven wrap
+        // on the controls block, not the old inline predicate.
         (
             "FocusBorderEditor.swift",
-            "active: !style.wrappedValue.enabled",
+            "GreyOut(active: blockReason != nil",
             1
         ),
         // The two census-rendered bar cards (#678 Phase 2)
@@ -75,7 +78,14 @@ struct GreyOutParityTests {
             "active: !allows",
             1
         ),
-        ("DragVisualsEditor.swift", "active: !visual.enabled", 1),
+        // Each drag column's outer gate resolves through
+        // `GapsBordersGates` (#678 Phase 3) — the enabled reason
+        // wraps border, width, alignment and fill.
+        (
+            "DragVisualsEditor.swift",
+            "active: enabledReason != nil",
+            1
+        ),
         // `StickyMarkEditor` is deliberately absent: its coverage
         // guard was dropped in #678 Phase 3, the mark being what
         // survives the Space Bar rather than what depends on it.
