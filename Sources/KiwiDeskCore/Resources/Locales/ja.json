@@ -291,6 +291,8 @@
   "general.advanced.reset_all.confirm.message": "保存されたすべてのプロファイル、操作スペース、レイアウト、キーボードショートカットを削除し、記憶されたウインドウ配置も消去します。その後、KiwiDeskは初回起動時と同じ初期状態から再開します。init.luaとカラーパレットは保持されます。古いファイルはゴミ箱に移動します。",
   "general.advanced.reset_all.confirm.title": "KiwiDeskのすべての設定をリセットしますか？",
   "general.advanced.reset_all.help": "保存された配置を破棄しても直らないときの最終手段です。すべてが初回起動時と同じ、正常なデフォルト状態に戻ります。",
+  "general.advanced.restart_on_crash": "予期せず終了した場合に再起動",
+  "general.advanced.restart_on_crash.needs_login": "「KiwiDesk を起動」をオンにする必要があります。macOS ではこの 2 つが 1 つの設定だからです。",
   "general.advanced.reveal": "表示",
   "general.advanced.title": "詳細設定",
   "general.appearance": "外観",

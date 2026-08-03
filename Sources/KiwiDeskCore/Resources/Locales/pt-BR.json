@@ -291,6 +291,8 @@
   "general.advanced.reset_all.confirm.message": "Isto apaga todos os perfis salvos, seus espaços, layouts e atalhos de teclado, e esquece qualquer disposição de janelas memorizada — depois o KiwiDesk recomeça com seus padrões iniciais, como na primeira execução. Seu init.lua e suas paletas de cores são mantidos. Os arquivos antigos vão para o Lixo.",
   "general.advanced.reset_all.confirm.title": "Redefinir todos os ajustes do KiwiDesk?",
   "general.advanced.reset_all.help": "O último recurso quando o KiwiDesk continua se comportando mal e descartar a disposição salva não resolveu: tudo volta a um padrão íntegro, como na primeira execução.",
+  "general.advanced.restart_on_crash": "Reiniciar se encerrar inesperadamente",
+  "general.advanced.restart_on_crash.needs_login": "Requer “Iniciar o KiwiDesk”, porque para o macOS os dois são um único ajuste.",
   "general.advanced.reveal": "Mostrar",
   "general.advanced.title": "Avançado",
   "general.appearance": "Aparência",

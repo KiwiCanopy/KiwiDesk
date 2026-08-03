@@ -291,6 +291,8 @@
   "general.advanced.reset_all.confirm.message": "Dies löscht alle gespeicherten Profile, deine Spaces, Layouts und Tastenkürzel und vergisst jede gemerkte Fensteranordnung — danach beginnt KiwiDesk mit seinen Startvorgaben, wie beim ersten Start. init.lua und deine Farbpaletten bleiben erhalten. Die alten Dateien wandern in den Papierkorb.",
   "general.advanced.reset_all.confirm.title": "Alle KiwiDesk-Einstellungen zurücksetzen?",
   "general.advanced.reset_all.help": "Der letzte Ausweg, wenn KiwiDesk sich weiter merkwürdig verhält und das Verwerfen der gespeicherten Anordnung nicht geholfen hat: Alles kehrt zu einem funktionierenden Standardzustand zurück, wie beim ersten Start.",
+  "general.advanced.restart_on_crash": "Nach unerwartetem Beenden neu starten",
+  "general.advanced.restart_on_crash.needs_login": "Erfordert „KiwiDesk starten“, denn für macOS sind beide zusammen eine einzige Einstellung.",
   "general.advanced.reveal": "Im Finder anzeigen",
   "general.advanced.title": "Erweitert",
   "general.appearance": "Erscheinungsbild",

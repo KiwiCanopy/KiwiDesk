@@ -291,6 +291,8 @@
   "general.advanced.reset_all.confirm.message": "此操作将删除所有已存储的配置文件、你的空间、布局和键盘快捷键，并忘记任何已记住的窗口排列——随后 KiwiDesk 将以初始默认值重新开始，如同首次启动。你的 init.lua 和调色板会保留。旧文件将移到废纸篓。",
   "general.advanced.reset_all.confirm.title": "要还原 KiwiDesk 的所有设置吗？",
   "general.advanced.reset_all.help": "当 KiwiDesk 持续异常、丢弃已存储的排列也无济于事时的最后手段：一切将恢复到正常的默认状态，如同首次启动。",
+  "general.advanced.restart_on_crash": "意外退出时重新启动",
+  "general.advanced.restart_on_crash.needs_login": "需要先开启“启动 KiwiDesk”，因为对 macOS 来说这两者是同一项设置。",
   "general.advanced.reveal": "显示",
   "general.advanced.title": "高级设置",
   "general.appearance": "外观",
