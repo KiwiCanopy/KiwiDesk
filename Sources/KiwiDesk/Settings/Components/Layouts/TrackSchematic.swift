@@ -90,6 +90,19 @@ struct TrackSchematic: View {
         }
     }
 
+    /// The strip's tracks as it draws them: which slot holds the
+    /// new track and which holds the focused one. Read off
+    /// `specs` rather than recomputed, so a splice that lands
+    /// somewhere other than `newTrackIndex` — or never runs —
+    /// shows up in the guard (`LayoutSchematicPlacementTests`).
+    var trackSlots: (incoming: Int, focus: Int) {
+        let drawn = specs
+        return (
+            drawn.firstIndex { $0.isNew } ?? -1,
+            drawn.firstIndex { $0.focused } ?? -1
+        )
+    }
+
     /// Normal tracks with the new *track* spliced in (for
     /// `own_track`) at its placement slot; `focused_track` instead
     /// nests the new window inside the focused track.
@@ -163,38 +176,44 @@ struct TrackSchematic: View {
     /// slot around it — first / last on the ends, before / after
     /// right beside it.
     private func focusedTrack(nested: Bool) -> some View {
-        // `focusedRun` windows; one more slot appears for the
-        // joining window, and a landing at or before the focus
-        // pushes the focus into the next slot along.
-        let run = focusedRun
-        let plus = nested ? focusedSlots.incoming : -1
-        let focus = nested ? focusedSlots.focus : (run - 1) / 2
+        let drawn = focusedSlots(nested: nested)
         return axisStack {
-            ForEach(0..<(nested ? run + 1 : run), id: \.self) { i in
+            ForEach(0..<drawn.count, id: \.self) { i in
                 trackWindow(
-                    i == plus ? .new : i == focus ? .focus : .plain
+                    i == drawn.incoming
+                        ? .new
+                        : i == drawn.focus ? .focus : .plain
                 )
             }
         }
     }
 
-    /// The joining window's slot inside the focused track, and
-    /// the slot the focus ends up in once it has landed — both
-    /// read off the engine's splice (#702).
+    /// The focused track exactly as it is drawn: how many slots,
+    /// which one the joining window takes and which one holds the
+    /// focus. One slot appears for the joining window, and a
+    /// landing at or before the focus pushes the focus along.
     ///
-    /// The focus is **not** pinned. Its own copy of the rule
-    /// returned splice coordinates and the run drew in fixed
-    /// slot coordinates, so `first` marked the wrong window and
-    /// `before focused` resolved the `+` and the focus to one
+    /// The focus is **not** pinned, and this returns the drawn
+    /// numbers rather than the placement rule's so that a guard
+    /// reading it sees what the strip renders. Its own copy of
+    /// the rule returned splice coordinates while the run drew in
+    /// fixed slot coordinates, so `first` marked the wrong window
+    /// and `before focused` resolved the `+` and the focus to one
     /// slot, where the `+` won the ternary and the run drew no
-    /// focused tile at all. Only meaningful when something joins
-    /// this track; an untouched run keeps its middle focus.
-    var focusedSlots: (incoming: Int, focus: Int) {
-        SchematicPlacement.splice(
+    /// focused tile at all (#702). With nothing joining, the
+    /// incoming slot is `-1` — no index the run draws — and the
+    /// focus keeps the middle.
+    func focusedSlots(nested: Bool) -> (
+        count: Int, incoming: Int, focus: Int
+    ) {
+        let run = focusedRun
+        guard nested else { return (run, -1, (run - 1) / 2) }
+        let placed = SchematicPlacement.splice(
             placement,
-            count: focusedRun,
-            focus: (focusedRun - 1) / 2
+            count: run,
+            focus: (run - 1) / 2
         )
+        return (run + 1, placed.incoming, placed.focus)
     }
 
     @ViewBuilder
@@ -216,93 +235,6 @@ struct TrackSchematic: View {
             VStack(spacing: 2) { content() }
         } else {
             HStack(spacing: 2) { content() }
-        }
-    }
-
-    /// The far-edge overflow track: an always-vertical title-bar
-    /// pile. `cascade_all` piles every window; `cascade_overflow`
-    /// keeps the first tiled and piles the rest.
-    private var overflowTrack: some View {
-        GeometryReader { geo in
-            let slots = overflowSlots(geo.size)
-            ZStack(alignment: .topLeading) {
-                ForEach(slots.indices, id: \.self) { i in
-                    overflowTile
-                        .frame(
-                            width: slots[i].width,
-                            height: slots[i].height
-                        )
-                        .position(x: slots[i].midX, y: slots[i].midY)
-                }
-            }
-        }
-    }
-
-    /// The overflowed windows piling down the overflow track
-    /// (always vertical), the same shape as the Stack cascade:
-    /// `cascade_all` piles all of them; `cascade_overflow` tiles
-    /// the ones that fit and piles the rest. Only reached with at
-    /// least one window to draw.
-    private func overflowSlots(_ size: CGSize) -> [CGRect] {
-        let n = overflowWindows
-        let w = size.width
-        let h = size.height
-        let off: CGFloat = 6
-        if overflowStyle == .cascadeAll {
-            let tileH = max(6, h - off * CGFloat(n - 1))
-            return (0..<n).map {
-                CGRect(
-                    x: 0,
-                    y: CGFloat($0) * off,
-                    width: w,
-                    height: tileH
-                )
-            }
-        }
-        let tiled = min(3, max(0, n - 1))
-        let piled = n - tiled
-        let g: CGFloat = 3
-        let rowH = max(
-            8,
-            (h - g * CGFloat(tiled) - off * CGFloat(piled - 1))
-                / CGFloat(tiled + 1)
-        )
-        var rects: [CGRect] = []
-        for i in 0..<tiled {
-            rects.append(
-                CGRect(
-                    x: 0,
-                    y: CGFloat(i) * (rowH + g),
-                    width: w,
-                    height: rowH
-                )
-            )
-        }
-        let top = CGFloat(tiled) * (rowH + g)
-        for k in 0..<piled {
-            rects.append(
-                CGRect(
-                    x: 0,
-                    y: top + CGFloat(k) * off,
-                    width: w,
-                    height: rowH
-                )
-            )
-        }
-        return rects
-    }
-
-    /// An opaque cascade tile (own solid base, so overlapping never
-    /// sums the accent alpha) — same look as the Stack pile.
-    private var overflowTile: some View {
-        let corner = LayoutSchematic.corner
-        return ZStack {
-            RoundedRectangle(cornerRadius: corner)
-                .fill(Color(nsColor: .textBackgroundColor))
-            RoundedRectangle(cornerRadius: corner)
-                .fill(LayoutSchematic.fill)
-            RoundedRectangle(cornerRadius: corner)
-                .strokeBorder(LayoutSchematic.stroke, lineWidth: 1)
         }
     }
 

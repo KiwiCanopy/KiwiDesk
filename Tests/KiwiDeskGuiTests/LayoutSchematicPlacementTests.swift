@@ -56,9 +56,11 @@ struct LayoutSchematicPlacementTests {
         }
     }
 
-    /// Stack partitions the array at `masters`, so a `+` in the
-    /// wrong slot lands in the wrong *zone*. Across master counts
-    /// too: at `masterCount: 1` the clamp is inert.
+    /// Stack's array order, across master counts as well as
+    /// window counts: at `masterCount: 1` the masters clamp is
+    /// inert. This is the flat array only — *which* zone each
+    /// window is drawn in is `masterWins` / `stackWins`'
+    /// partition of it, and nothing asserts that yet.
     @Test("Stack opens the window where the engine does")
     func stackPlacement() {
         for placement in placements {
@@ -113,8 +115,11 @@ struct LayoutSchematicPlacementTests {
     }
 
     /// A new *track* splices into the spec array, so the focused
-    /// spec travels with it — reconstructed here the way
-    /// `TrackSchematic.specs` builds it, then read for the promise.
+    /// spec travels with it. Read off `trackSlots` — the strip's
+    /// own array — rather than rebuilt here from
+    /// `newTrackIndex`: a guard that recomputes the render proves
+    /// the number is right and never proves it is used, which is
+    /// the failure this suite's docstring names one level up.
     @Test("Track opens a new track where the engine does")
     func trackPlacement() {
         for placement in placements {
@@ -124,17 +129,11 @@ struct LayoutSchematicPlacementTests {
                     newWindow: .ownTrack,
                     windows: count
                 )
-                var marks = Array(
-                    repeating: false,
-                    count: schematic.trackCount
-                )
-                marks[schematic.focusIdx] = true
-                let incoming = schematic.newTrackIndex
-                marks.insert(false, at: incoming)
+                let drawn = schematic.trackSlots
                 check(
-                    incoming: incoming,
-                    focus: marks.firstIndex(of: true) ?? -1,
-                    slots: 0...(marks.count - 1),
+                    incoming: drawn.incoming,
+                    focus: drawn.focus,
+                    slots: 0...schematic.trackCount,
                     placement: placement,
                     what: "Track at \(count)"
                 )
@@ -157,12 +156,11 @@ struct LayoutSchematicPlacementTests {
                     newWindow: .focusedTrack,
                     windows: count
                 )
-                let run = schematic.focusedRun
-                let slots = schematic.focusedSlots
+                let drawn = schematic.focusedSlots(nested: true)
                 check(
-                    incoming: slots.incoming,
-                    focus: slots.focus,
-                    slots: 0...run,
+                    incoming: drawn.incoming,
+                    focus: drawn.focus,
+                    slots: 0...(drawn.count - 1),
                     placement: placement,
                     what: "focused track at \(count)"
                 )
@@ -171,9 +169,16 @@ struct LayoutSchematicPlacementTests {
                 // collision erases the focus rather than
                 // overlapping it.
                 #expect(
-                    slots.incoming != slots.focus,
+                    drawn.incoming != drawn.focus,
                     "focused track at \(count) drew no focus"
                 )
+                // A run nothing joins keeps its length and its
+                // middle focus, and draws no `+` at all — the
+                // arm the strip takes for every other track.
+                let plain = schematic.focusedSlots(nested: false)
+                #expect(plain.count == schematic.focusedRun)
+                #expect(plain.incoming < 0)
+                #expect(plain.focus == (plain.count - 1) / 2)
             }
         }
     }
