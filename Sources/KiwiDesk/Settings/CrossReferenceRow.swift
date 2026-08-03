@@ -44,10 +44,14 @@ extension EnvironmentValues {
 /// site passes one — without the slot the link falls to the end
 /// and the defect is back, silently.
 ///
-/// One `Text` rather than an `HStack` of three: a sentence with
-/// something in the middle of it has to wrap as a paragraph,
-/// which three siblings in a row cannot do whatever a
-/// translation's word order asks for.
+/// The sentence renders through ``LinkedCaption`` rather than a
+/// SwiftUI `Text`, and rather than an `HStack` of three: a
+/// sentence with something in the middle of it has to wrap as a
+/// paragraph, which siblings in a row cannot do whatever a
+/// translation's word order asks for. That file carries why it
+/// is AppKit — a SwiftUI `.link` run navigates but gives no
+/// pointing-hand cursor, and `NSLayoutManager` is what breaks
+/// the lines correctly for the languages this change is for.
 struct CrossReferenceRow: View {
     /// The formatted sentence, carrying ``linkSlot`` where the
     /// destination's name belongs.
@@ -64,40 +68,13 @@ struct CrossReferenceRow: View {
     static let linkSlot = "\u{FFFC}"
 
     var body: some View {
-        Text(sentence)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .environment(
-                \.openURL,
-                // The URL below exists only so the run IS a
-                // link; with exactly one per row there is
-                // nothing to disambiguate, so the destination
-                // comes from the stored property rather than
-                // from parsing it back out.
-                OpenURLAction { _ in
-                    navigate(destination)
-                    return .handled
-                }
-            )
-    }
-
-    private var sentence: AttributedString {
         let (leading, trailing) = split
-        return AttributedString(leading) + link
-            + AttributedString(trailing)
-    }
-
-    private var link: AttributedString {
-        var run = AttributedString(linkTitle)
-        run.link = URL(
-            string: "kiwidesk-settings://\(destination.rawValue)"
+        LinkedCaption(
+            leading: leading,
+            linkTitle: linkTitle,
+            trailing: trailing,
+            navigate: { navigate(destination) }
         )
-        run.underlineStyle = .single
-        // The caption's own colour, never the system link blue:
-        // these pointers are prose the reader may follow, not
-        // calls to action, and the underline is the affordance.
-        run.foregroundColor = .secondary
-        return run
     }
 
     /// The prose either side of the slot. A prose WITHOUT one
