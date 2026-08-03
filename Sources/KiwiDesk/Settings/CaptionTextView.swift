@@ -15,6 +15,37 @@ final class CaptionTextView: NSTextView {
         didSet { if isLive != oldValue { refreshCursor() } }
     }
 
+    /// Every property that makes this view a caption rather
+    /// than an editor, in ONE place. `LinkedCaption.makeNSView`
+    /// and the test fixture both build through here: a fixture
+    /// that hand-rebuilt this configuration went green while
+    /// `isSelectable` was flipped back to `true`, which is the
+    /// single thing the class exists to avoid.
+    static func configured() -> CaptionTextView {
+        let view = CaptionTextView()
+        view.isEditable = false
+        view.isSelectable = false
+        view.drawsBackground = false
+        view.textContainerInset = .zero
+        view.textContainer?.lineFragmentPadding = 0
+        view.textContainer?.widthTracksTextView = true
+        view.isVerticallyResizable = false
+        view.isHorizontallyResizable = false
+        view.focusRingType = .exterior
+        return view
+    }
+
+    /// Not `private` only because the AX overrides that read
+    /// it live one file over (`CaptionTextViewAX.swift`) — a
+    /// stored property cannot go in an extension.
+    lazy var linkElement: LinkAccessibilityElement = {
+        let element = LinkAccessibilityElement()
+        element.onPress = { [weak self] in self?.activateLink() }
+        element.setAccessibilityRole(.link)
+        element.setAccessibilityParent(self)
+        return element
+    }()
+
     private var hover: NSTrackingArea?
     private var linkRange = NSRange(location: 0, length: 0)
     private var overLink = false
@@ -32,7 +63,10 @@ final class CaptionTextView: NSTextView {
         // not itself moved, so the memo in `apply` would keep
         // whatever it last decided. Re-ask.
         refreshCursor()
-        setAccessibilityChildren(nil)
+        // AppKit CACHES the focus-ring mask, so a caption that
+        // is first responder while the text or the wrap changes
+        // would keep ringing the link's old rects.
+        noteFocusRingMaskChanged()
     }
 
     /// Secondary at rest, primary under the pointer — the same
@@ -52,11 +86,21 @@ final class CaptionTextView: NSTextView {
         }
         storage.addAttribute(
             .foregroundColor,
-            value: overLink && isLive
-                ? NSColor.labelColor
-                : NSColor.secondaryLabelColor,
+            value: linkColor(pointing: overLink),
             range: linkRange
         )
+    }
+
+    /// The colour DECISION, lifted out for the same reason
+    /// `wantsPointingHand(at:)` is: the lift only ever happens
+    /// under a pointer, every route to which needs a window, so
+    /// a test asserting the painted storage can only ever see
+    /// the at-rest value and cannot fail differently when the
+    /// caption greys.
+    func linkColor(pointing: Bool) -> NSColor {
+        pointing && isLive
+            ? .labelColor
+            : .secondaryLabelColor
     }
 
     // MARK: - Pointer
@@ -112,6 +156,7 @@ final class CaptionTextView: NSTextView {
     override func layout() {
         super.layout()
         refreshCursor()
+        noteFocusRingMaskChanged()
     }
 
     private func refreshCursor() {
@@ -154,7 +199,11 @@ final class CaptionTextView: NSTextView {
         isLive && linkRange.length > 0
     }
 
-    override var canBecomeKeyView: Bool { acceptsFirstResponder }
+    /// `super`, not a bare `acceptsFirstResponder`: the
+    /// default also requires the view to be un-hidden and in a
+    /// window, and dropping those leaves an invisible tab stop
+    /// inside a hidden ancestor.
+    override var canBecomeKeyView: Bool { super.canBecomeKeyView }
 
     override func keyDown(with event: NSEvent) {
         // Return, Enter, Space — what a `.plain` Button answered
@@ -195,29 +244,6 @@ final class CaptionTextView: NSTextView {
 
     override func drawFocusRingMask() {
         for rect in linkRects() { rect.fill() }
-    }
-
-    override func accessibilityRole() -> NSAccessibility.Role? {
-        .group
-    }
-
-    override func accessibilityLabel() -> String? {
-        textStorage?.string
-    }
-
-    /// One child, the link, so VoiceOver reads the sentence and
-    /// then offers exactly the thing that can be activated —
-    /// which a bare `AXTextArea` offered not at all.
-    override func accessibilityChildren() -> [Any]? {
-        guard let rect = linkRects().first, !linkLabel.isEmpty
-        else { return nil }
-        let element = LinkAccessibilityElement()
-        element.onPress = { [weak self] in self?.activateLink() }
-        element.setAccessibilityRole(.link)
-        element.setAccessibilityLabel(linkLabel)
-        element.setAccessibilityParent(self)
-        element.setAccessibilityFrameInParentSpace(rect)
-        return [element]
     }
 
     // MARK: - Geometry
@@ -262,18 +288,4 @@ final class CaptionTextView: NSTextView {
         }
         return rects
     }
-}
-
-/// The activation target VoiceOver sees. `NSAccessibilityElement`
-/// carries no action of its own, so the press is a stored
-/// closure back to the view.
-final class LinkAccessibilityElement: NSAccessibilityElement {
-    var onPress: (() -> Void)?
-
-    override func accessibilityPerformPress() -> Bool {
-        onPress?()
-        return true
-    }
-
-    override func isAccessibilityElement() -> Bool { true }
 }

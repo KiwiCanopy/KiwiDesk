@@ -44,23 +44,19 @@ struct LinkedCaption: NSViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeNSView(context: Context) -> CaptionTextView {
-        let view = CaptionTextView()
-        view.delegate = context.coordinator
-        view.isEditable = false
-        // A SELECTABLE text view cannot be talked out of the
+        // Every caption property lives in `configured()`, which
+        // the test fixture builds through as well — a fixture
+        // that hand-rebuilt them stayed green with
+        // `isSelectable` flipped back to `true`, which is the
+        // one thing this whole class exists to avoid. A
+        // SELECTABLE text view cannot be talked out of the
         // I-beam: it drives the cursor from its own tracking
         // area, which outranks the cursor rects a subclass can
         // set, and an I-beam over a caption says "type here"
         // (observed on device 2026-08-03, after
         // `resetCursorRects` was tried and lost).
-        view.isSelectable = false
-        view.drawsBackground = false
-        view.textContainerInset = .zero
-        view.textContainer?.lineFragmentPadding = 0
-        view.textContainer?.widthTracksTextView = true
-        view.isVerticallyResizable = false
-        view.isHorizontallyResizable = false
-        view.focusRingType = .exterior
+        let view = CaptionTextView.configured()
+        view.delegate = context.coordinator
         return view
     }
 

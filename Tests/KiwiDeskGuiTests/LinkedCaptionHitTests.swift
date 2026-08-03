@@ -42,11 +42,14 @@ struct LinkedCaptionHitTests {
         linkTitle: String = link,
         label: String = link
     ) -> CaptionTextView {
-        let view = CaptionTextView()
-        view.isEditable = false
-        view.isSelectable = false
+        // Through the SHARED factory, never hand-rebuilt: this
+        // fixture once configured its own view and stayed green
+        // with production's `isSelectable` flipped back to
+        // `true`, which is the single thing the class exists to
+        // avoid. Only the inset is overridden, and deliberately
+        // — see above.
+        let view = CaptionTextView.configured()
         view.textContainerInset = inset
-        view.textContainer?.lineFragmentPadding = 0
         view.frame = NSRect(x: 0, y: 0, width: width, height: 60)
         view.linkLabel = label
         view.textContainer?.containerSize = CGSize(
@@ -86,7 +89,7 @@ struct LinkedCaptionHitTests {
         return view
     }
 
-    private static func linkColor(
+    private static func paintedLinkColor(
         _ view: CaptionTextView
     ) -> NSColor? {
         view.textStorage?.attribute(
@@ -224,13 +227,29 @@ struct LinkedCaptionHitTests {
 
     /// Nothing in the tree asserted a caption's COLOUR, so a
     /// `setSentence` that never painted would ship the link as
-    /// plain prose with every test still green — and the greyed
-    /// half of `isLive` is a colour claim too.
-    @Test func theLinkIsPaintedAndGreysWithTheCaption() {
+    /// plain prose with every test still green.
+    @Test func theLinkIsPainted() {
+        #expect(
+            Self.paintedLinkColor(Self.caption())
+                == .secondaryLabelColor
+        )
+    }
+
+    /// The LIFT, and the greyed caption's refusal of it.
+    ///
+    /// Asserted through the decision rather than the painted
+    /// storage: the lift only happens under a pointer, every
+    /// route to which needs a window, so a windowless fixture
+    /// reads the at-rest value whatever `isLive` says — the
+    /// first cut of this test asserted `.secondaryLabelColor` on
+    /// both sides of `isLive = false` and could not fail
+    /// differently.
+    @Test func theLinkLiftsUnderThePointerUnlessGreyed() {
         let view = Self.caption()
-        #expect(Self.linkColor(view) == .secondaryLabelColor)
+        #expect(view.linkColor(pointing: false) == .secondaryLabelColor)
+        #expect(view.linkColor(pointing: true) == .labelColor)
         view.isLive = false
-        #expect(Self.linkColor(view) == .secondaryLabelColor)
+        #expect(view.linkColor(pointing: true) == .secondaryLabelColor)
     }
 
     /// VoiceOver gets a link child with the destination's name
