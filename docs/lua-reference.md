@@ -3519,8 +3519,8 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
 
 ### Config Cascade (Per-Profile Keybindings)
 
-Keybindings resolve through a two-tier cascade, mirroring how
-tiling layers (global settings ← profile):
+Keybindings resolve through a two-level cascade, mirroring
+how tiling resolves (global settings ← profile):
 
 > **The base config is the seed; the profile wins.** The base
 > shortcuts (the app's `gui.json`, or your Lua-declared binds

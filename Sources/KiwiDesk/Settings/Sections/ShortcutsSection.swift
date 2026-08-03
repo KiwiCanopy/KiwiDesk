@@ -130,9 +130,10 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             spaces: model.config.spaces
         )
-        // The advanced half, all census `.showMore`: the layers
-        // that define alternate key sets, then the raw-Lua
-        // escape hatch.
+        // The layers that define alternate key sets — at rest
+        // once one exists, the offer to create the first behind
+        // its disclosure — then the raw-Lua escape hatch, which
+        // is `.showMore` outright.
         LayersCard(
             model: model,
             bindings: bindingsBinding,

@@ -1671,6 +1671,29 @@ recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
 
+**Config presence expands the Simple surface.** The simple
+mode is not a smaller product, it is a smaller *offer*. Anything
+already in the user's config — a shortcut layer, an imported Lua
+binding, a per-profile override — shows in both modes and makes
+the simple one richer; what Simple withholds is only the
+invitation to create the first one, and that invitation retires
+itself the moment it is accepted.
+
+The failure this prevents is the one worth naming, because the
+Shortcuts area shipped it: a user who created a layer, then
+found the Layers card gone because they were in the simple mode.
+Hiding a control the user has never used is curation. Hiding
+something they *made* is losing their work as far as they can
+tell, and it teaches them that the mode switch is dangerous —
+which costs the mode its whole purpose. Nothing a user has
+configured is ever hidden by a mode.
+
+It follows that "which mode is this row in" is the wrong
+question for such a row; the right one is "does the thing
+exist yet", which is a runtime gate rather than a depth. That is
+what `SettingTier.immediate` is for, and why an `.immediate` row
+without a gate is meaningless.
+
 **Overrides always resolve; the Simple/Nerd mode never
 changes what runs.** There is no stored flag deciding whether a profile's
 shortcut overrides apply — an early draft of the redesign

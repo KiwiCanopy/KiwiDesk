@@ -27,10 +27,16 @@ import KiwiDeskCore
 enum ShortcutsRuntimeGate {
     /// Whether `gate` currently allows its row to surface.
     ///
-    /// Traps on a gate this type does not own rather than
-    /// returning a default: a silent `false` would hide a row and
-    /// a silent `true` would surface one, and both read as a
-    /// rendering bug far from the missing case.
+    /// Fail-OPEN on a gate this type does not own — loud in
+    /// debug, surfacing in release — matching `BarsGates` and the
+    /// renderers' unhandled-census-key arms, which is the one
+    /// policy this codebase has for this failure class. A missing
+    /// case must not crash a shipped Settings window, and of the
+    /// two silent readings, surfacing a row the user can ignore
+    /// beats hiding one they cannot find.
+    ///
+    /// `everyRuntimeGateIsAccountedFor` keeps this arm
+    /// unreachable rather than merely believed to be.
     static func isSatisfied(
         _ gate: SettingRuntimeGate,
         in config: GuiConfig
@@ -45,9 +51,10 @@ enum ShortcutsRuntimeGate {
             // the first one is withheld.
             return config.layers.count > 1
         default:
-            preconditionFailure(
+            assertionFailure(
                 "ShortcutsRuntimeGate does not own \(gate)"
             )
+            return true
         }
     }
 

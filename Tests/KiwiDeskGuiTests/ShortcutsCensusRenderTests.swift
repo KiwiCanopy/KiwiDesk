@@ -148,19 +148,104 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
-    /// Which containers are drawn by bespoke views is data, so
-    /// the weaker promise cannot quietly widen: a fourth bespoke
-    /// container has to edit the set this asserts over.
-    @Test("the bespoke containers are the three declared")
-    func bespokeContainersAreDeclared() {
+    /// Which containers are drawn by bespoke views is DERIVED
+    /// from the source, not restated here.
+    ///
+    /// An earlier draft compared the declared set to a literal
+    /// copy of itself, which reds only when someone edits the
+    /// set — the very action it exists to compel — and stays
+    /// green on the failure it names: a container quietly going
+    /// bespoke with the set untouched. `gui.md` claimed it was
+    /// enforced, so the claim had to become true or go.
+    ///
+    /// The signal is the renderer's own shape: a census-driven
+    /// container's order list is walked by a `ForEach` somewhere
+    /// under `Sources/KiwiDesk`; a bespoke one's is read only by
+    /// this suite. So the scan asks which `ShortcutsRowOrder`
+    /// lists appear inside a `ForEach(` and maps them back to
+    /// their containers.
+    @Test("bespoke containers are the ones no ForEach walks")
+    func bespokeContainersAreDeclared() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var rendered = ""
+        for file in try SourceScan.swiftSources(under: root) {
+            rendered += SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+        }
+        // Each order list, and the container it serves.
+        let lists: [(String, SettingsContainer)] = [
+            ("focusAtRest", .focus),
+            ("moveWindowsAtRest", .moveWindows),
+            ("sizeAndFloatAtRest", .sizeAndFloat),
+            ("sizeAndFloatMore", .sizeAndFloat),
+            ("generalKeysMore", .generalKeys),
+            ("openApplicationsAtRest", .openApplications),
+            ("layersMore", .layers),
+            ("luaBindingsMore", .luaBindings),
+            ("luaBindingsAtRest", .luaBindings),
+        ]
+        // Vacuity: the scan must have read something, and every
+        // list named must exist in the source it read.
+        #expect(!rendered.isEmpty)
+        for (name, _) in lists {
+            #expect(
+                rendered.contains("ShortcutsRowOrder.\(name)")
+                    || rendered.contains("static let \(name)"),
+                Comment(rawValue: "unknown order list \(name)")
+            )
+        }
+        var walked: Set<SettingsContainer> = []
+        for (name, container) in lists
+        where isWalked(name, in: rendered) {
+            walked.insert(container)
+        }
+        let all = Set(lists.map(\.1))
         #expect(
             ShortcutsRowOrder.bespokeContainers
-                == [.openApplications, .layers, .luaBindings]
+                == all.subtracting(walked)
         )
         #expect(
             ShortcutsRowOrder.bespokeContainers
                 .isSubset(of: containers(of: .shortcuts))
         )
+    }
+
+    /// Whether a `ForEach(` anywhere in `source` walks the named
+    /// order list. Matched within the `ForEach`'s own balanced
+    /// parentheses so an unrelated mention nearby cannot count.
+    private func isWalked(
+        _ list: String,
+        in source: String
+    ) -> Bool {
+        let characters = Array(source)
+        let needle = Array("ForEach")
+        var index = 0
+        while index + needle.count < characters.count {
+            guard
+                Array(
+                    characters[index..<(index + needle.count)]
+                ) == needle
+            else {
+                index += 1
+                continue
+            }
+            var cursor = index + needle.count
+            let body = SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            )
+            if body?.contains("ShortcutsRowOrder.\(list)")
+                == true
+            {
+                return true
+            }
+            index += needle.count
+        }
+        return false
     }
 
     /// The area's render knows exactly these containers; one more

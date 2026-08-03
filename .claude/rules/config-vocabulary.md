@@ -81,10 +81,12 @@ synonym:
   so a third sense made "switch mode" ambiguous three ways.
   Reserve *mode* for those two; the ruling is
   `docs/design-decisions.md` ▸ Shortcuts.
-- **tier** — a level of the config cascade (global ← profile).
-  Prefer it to "layer" in cascade prose now that *layer* names
-  the keybinding set: `docs/lua-reference.md`'s Config Cascade
-  section is where the two senses collide.
+- **cascade level** — one step of the global ← profile
+  resolution. Say this, not "layer", now that *layer* names the
+  keybinding set (`docs/lua-reference.md`'s Config Cascade
+  section is where the two collide), and not "tier" either:
+  *tier* is already spoken for twice over by `SettingTier` /
+  row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename
