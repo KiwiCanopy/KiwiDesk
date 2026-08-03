@@ -52,9 +52,24 @@ struct LayoutCard: View {
         {
             CrossReferenceRow(
                 prose: appBarProse,
+                // A BREADCRUMB, not the section name alone. The
+                // sentence says where the toggle lives, and
+                // "App Bar" names no row any sidebar shows —
+                // that row reads "Bars" / "Leisten" / "情報バー"
+                // — so the reader was sent looking for a pane
+                // that is not there, the way #678's spaces card
+                // was until c35407fa. Now that the link sits
+                // INSIDE the sentence the German said "wird
+                // unter App Bar konfiguriert", naming the thing
+                // twice. The head is the destination's own
+                // title, which also brings this link inside
+                // `SidebarCrossReferenceTests` — its subjects
+                // are derived from `▸`-shaped values, so a
+                // one-segment link never entered the set and
+                // nothing was watching this at all.
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
-                    "App Bar"
+                    "Bars ▸ App Bar"
                 ),
                 destination: .bars
             )
@@ -187,7 +202,7 @@ enum LayoutCardText {
         case .monocle:
             return L(
                 "monocle.app_bar_xref_state",
-                "The monocle app bar (currently %1$@) is "
+                "The monocle App Bar (currently %1$@) is "
                     + "configured in %2$@.",
                 state,
                 CrossReferenceRow.linkSlot
@@ -195,7 +210,7 @@ enum LayoutCardText {
         case .scrolling:
             return L(
                 "scroll_grid.app_bar_xref_state",
-                "The scrolling app bar (currently %1$@) is "
+                "The scrolling App Bar (currently %1$@) is "
                     + "configured in %2$@.",
                 state,
                 CrossReferenceRow.linkSlot

@@ -637,7 +637,7 @@
   "scroll_grid.anchor.start_v": "Сверху",
   "scroll_grid.animate_focus_shifts": "Анимировать смену фокуса",
   "scroll_grid.animate_focus_shifts.help": "Плавно перемещает окна при смене фокуса в пространстве Scrolling. Отключи это, чтобы раскладка перемещалась мгновенно. Скорость прокрутки задаёт длительность перемещения и не действует, пока анимация отключена.",
-  "scroll_grid.app_bar_xref_link": "App Bar",
+  "scroll_grid.app_bar_xref_link": "Панели ▸ App Bar",
   "scroll_grid.app_bar_xref_state": "App Bar для Scrolling (сейчас %1$@) настраивается в разделе %2$@.",
   "scroll_grid.arrange": "Расставить",
   "scroll_grid.arrange.columns": "Столбцы",

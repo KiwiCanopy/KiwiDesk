@@ -31,8 +31,23 @@ struct MotionCard: View {
             help: reduceMotion ? reduceMotionHelp : nil
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                rows(ColorsRowOrder.motionAtRest)
-                disclosure
+                VStack(alignment: .leading, spacing: 8) {
+                    rows(ColorsRowOrder.motionAtRest)
+                    disclosure
+                }
+                .modifier(GreyOut(active: reduceMotion))
+                // OUTSIDE the grey deliberately. Reduce Motion
+                // makes these animation settings inert; it has
+                // no authority over a signpost, and a greyed
+                // pointer would be the worst pairing available —
+                // #171 says a dim means "switch that on and I
+                // act", so a dimmed thing that still navigates
+                // teaches the reader that grey means nothing
+                // here. (`GreyOut`'s `.disabled` is
+                // environment-only and does not reach an AppKit
+                // subview by itself; `LinkedCaption` reads
+                // `isEnabled` so a future wrap cannot silently
+                // re-open that gap.)
                 CrossReferenceRow(
                     prose: Self.scrollingXrefProse,
                     linkTitle: L(
@@ -42,7 +57,6 @@ struct MotionCard: View {
                     destination: .layoutDefaults
                 )
             }
-            .modifier(GreyOut(active: reduceMotion))
         }
     }
 

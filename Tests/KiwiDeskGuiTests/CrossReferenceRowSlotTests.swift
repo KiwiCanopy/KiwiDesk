@@ -35,29 +35,37 @@ import Testing
 /// a NEW cross-reference. `everyRowIsAsserted` is the coupling,
 /// and it reds on the fifth row rather than covering it.
 ///
-/// **These assertions read whichever locale the RUNNER resolves,
-/// not English.** `L()` goes through the shipped catalogs, so on
-/// a `de-DE` machine every string below is German; on CI it is
-/// the inline English. That is not a hole, but it is only not a
-/// hole because of a guard in another tool, so read the coupling
-/// before trusting a green run: a call site whose ENGLISH
-/// literal loses its specifier while a translation keeps one
-/// fails `scripts/localization_guards.py`'s specifier-drift
-/// contract ("adds %1$@ relative to the English"), which
-/// `extract-keys --check` runs inside `scripts/lint.sh` — so
-/// pre-commit, the verify gate and CI all refuse it. Verified by
-/// mutation 2026-08-03: reverting `sticky.mark.forced` to its
-/// shipped dangling English redded lint on all ten locales at
-/// exit 1 while this suite stayed green on a German runner.
+/// **These assertions do not read English, and cannot say which
+/// locale they DO read.** `L()` resolves through the shipped
+/// catalogs, and the locale is not merely the runner's: SwiftPM
+/// links every test target into one process, and several GUI
+/// suites call `LocalizationManager.shared.select(…)`
+/// concurrently, some without restoring. What these strings are
+/// in is whatever a concurrent suite last set. Coverage survives
+/// that — every catalog carries the specifier, so the slot lands
+/// whichever one answers — but do not read a green run as a
+/// statement about the English.
 ///
-/// Re-selecting the locale here instead was rejected: it is
-/// `LocalizationManager.shared` global state, `.serialized`
-/// orders tests only within a suite, and `LocalizationManagerTests`
-/// drives the same singleton in the same process.
+/// The English is held by another tool, and that coupling is
+/// what makes the gap safe rather than merely unnoticed: a call
+/// site whose ENGLISH literal loses its specifier while a
+/// translation keeps one fails the specifier-drift contract in
+/// `scripts/localization_guards.py` ("adds %1$@ relative to the
+/// English"), which `extract-keys --check` runs inside
+/// `scripts/lint.sh` — so pre-commit, the verify gate and CI all
+/// refuse it. Verified by mutation 2026-08-03: reverting
+/// `sticky.mark.forced` to its shipped dangling English redded
+/// lint on every shipped locale at exit 1 while this suite
+/// stayed green.
 ///
-/// Out of scope for the same reason and by the same authority: a
-/// CATALOG value that drops its `%N$@` restores the identical
-/// dangling render for that one locale.
+/// Pinning a locale here instead was rejected for the reason
+/// above — `LocalizationManager.shared` is global state that
+/// concurrent suites already fight over, and `.serialized`
+/// orders tests only within one suite.
+///
+/// Out of scope by the same authority: a CATALOG value that
+/// drops its `%N$@` restores the identical dangling render for
+/// that one locale.
 /// `@MainActor` because the prose producers are: they are
 /// members of SwiftUI views and of a type beside them, and
 /// reading one off the main actor does not fail an expectation —
@@ -86,6 +94,17 @@ struct CrossReferenceRowSlotTests {
     /// break was, so `swift format` re-wrapping a call — which a
     /// rename past 79 chars forces — redded a guard that nothing
     /// had broken.
+    ///
+    /// One entry names a BINDING rather than a producer, and the
+    /// file+expression key does not close the hole there:
+    /// `LayoutCard`'s row needs `if let` for an optional
+    /// sentence, so the scan sees `appBarProse` and re-pointing
+    /// that binding at a different producer would leave this
+    /// comparison identical while
+    /// `theAppBarProsePlacesItsLink` went on asserting an
+    /// orphaned `LayoutCardText.appBarState`. Named here rather
+    /// than papered over: the other three entries do carry their
+    /// producer, so only this row has the gap.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
         "StickyMarkEditor.swift:Self.forcedProse",

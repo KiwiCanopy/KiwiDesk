@@ -637,7 +637,7 @@
   "scroll_grid.anchor.start_v": "Superior",
   "scroll_grid.animate_focus_shifts": "Animar as mudanças de foco",
   "scroll_grid.animate_focus_shifts.help": "Move as janelas suavemente quando o foco muda em um espaço com rolagem. Desative para mover o layout imediatamente. A velocidade de rolagem define a duração do movimento e não tem efeito enquanto a animação estiver desativada.",
-  "scroll_grid.app_bar_xref_link": "App Bar",
+  "scroll_grid.app_bar_xref_link": "Barras ▸ App Bar",
   "scroll_grid.app_bar_xref_state": "A App Bar do Scrolling (atualmente %1$@) é configurada em %2$@.",
   "scroll_grid.arrange": "Organizar",
   "scroll_grid.arrange.columns": "Colunas",

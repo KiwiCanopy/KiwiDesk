@@ -77,14 +77,21 @@ struct CrossReferenceRow: View {
         )
     }
 
-    /// The prose either side of the slot. A prose WITHOUT one
-    /// puts the link at the end — the shape this row had before
-    /// the sentence could place it. Kept so a missed call site
-    /// still renders a followable pointer rather than losing
-    /// navigation outright; `CrossReferenceRowSlotTests` is what
-    /// stops it being reached.
+    /// The prose either side of the slot.
+    ///
+    /// A prose WITHOUT one is a programming error, not a shape
+    /// to support: it is the dangling layout this row retired,
+    /// and §5 bans a pre-release compatibility path for exactly
+    /// the reason it would apply here — a silent branch makes a
+    /// future regression invisible rather than loud. Both doors
+    /// are already shut (`CrossReferenceRowSlotTests` reds on a
+    /// new call site, `placeholder_drift` on a catalog value
+    /// that loses its `%N$@`), so this asserts in debug and
+    /// still renders a followable pointer in release rather than
+    /// dropping navigation on a user.
     private var split: (String, String) {
         guard let slot = prose.range(of: Self.linkSlot) else {
+            assertionFailure("cross-reference prose has no slot")
             return (prose + " ", "")
         }
         return (

@@ -82,12 +82,47 @@ spare, and the user already met the field (with its
 label-adjacent `?`) on the global surface. Do not "fix" it
 back inside the row: that re-enters the disabled scope.
 
-**"Lives elsewhere" pointers are links.** Prose that names
-another tab ("configured in the App Bar tab") is a dead end;
-those pointers are `CrossReferenceLink`s in the
-make-default link's quiet style, jumping the sidebar
+**"Lives elsewhere" pointers are links, and the link sits
+where the sentence puts it.** Prose that names another tab
+("configured in the App Bar tab") is a dead end; those
+pointers are `CrossReferenceRow`s, jumping the sidebar
 selection through an injected `settingsNavigate` environment
 action.
+
+The destination's name is a **positional specifier** in the
+prose key, filled with `CrossReferenceRow.linkSlot`, so a
+translation may place it wherever its own word order wants.
+It is not appended after the sentence: a row that renders
+`Text(prose)` and then a link as siblings can only ever park
+the name at the end, which forces every key to be authored
+dangling ("… — edit them in") and is the same defect as a
+`+`-concatenated fragment, with a view doing the stitching.
+Five locales had already ended these captions on a colon or
+a bare preposition before this was fixed.
+
+Resting style is an underline in the caption's own secondary
+grey — never the system link blue, since these are prose the
+reader may follow rather than calls to action — lifting to
+primary under the pointer, which is `linkHover()`'s treatment
+for the tree's other inline links (the make-default link, the
+rename pencil). One idiom, two implementations: a
+`CrossReferenceRow` renders through `LinkedCaption`, an
+`NSTextView` bridge, because SwiftUI's `Text` gives a `.link`
+run no pointing-hand cursor and because `NSLayoutManager` is
+what breaks lines correctly around a name sitting mid-sentence
+in a language that does not break on spaces. That view owes
+its own keyboard activation, focus ring and accessibility
+child — a `Button` gave those away free and an `NSTextView`
+gives none of them.
+
+A pointer whose sentence names a **location** takes a
+breadcrumb headed by the destination's own title
+("Bars ▸ App Bar"), not the section name alone: a link
+reading "App Bar" names no row any sidebar shows, and only a
+`▸`-shaped value enters `SidebarCrossReferenceTests`. A
+pointer whose sentence names the **feature itself** ("the
+Space Bar is off") links that mention instead, and stays
+one segment.
 
 ## Choosing a control
 
