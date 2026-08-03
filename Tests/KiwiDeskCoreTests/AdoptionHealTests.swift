@@ -276,7 +276,12 @@ struct AdoptionHealTests {
             )
             _ = loop.drainPendingRetrack()
         }
+        // Pin the positive side too: every pre-cap drop fired
+        // (each ran from an idle queue), so a dead wire cannot
+        // pass this test as 0 == 0. Derived from the constant,
+        // never restated.
         let fires = box.drops
+        #expect(fires == EventLoop.transientRetryCap)
         loop.markTransientDrop(pid: pid, id: WindowID(1))
         #expect(box.drops == fires)
         #expect(loop.drainPendingRetrack().isEmpty)
