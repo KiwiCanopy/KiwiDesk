@@ -60,7 +60,7 @@ struct TrackSchematic: View {
         min(4, max(1, established - trackCount + 1))
     }
 
-    private var focusIdx: Int { trackCount / 2 }
+    var focusIdx: Int { trackCount / 2 }
 
     private struct TrackSpec {
         var focused = false
@@ -106,13 +106,19 @@ struct TrackSchematic: View {
         return s
     }
 
-    private var newTrackIndex: Int {
-        switch placement {
-        case .first: return 0
-        case .last: return trackCount
-        case .beforeFocused: return focusIdx
-        case .afterFocused: return focusIdx + 1
-        }
+    /// Where the new *track* slots in, asked of the engine
+    /// through `SchematicPlacement` rather than reproduced here
+    /// (#702). The specs array is spliced, so the focused spec
+    /// travels with it and needs no correction — unlike the run
+    /// inside the focused track, which draws fixed slots.
+    ///
+    /// Internal so `LayoutSchematicPlacementTests` can read it.
+    var newTrackIndex: Int {
+        SchematicPlacement.splice(
+            placement,
+            count: trackCount,
+            focus: focusIdx
+        ).incoming
     }
 
     @ViewBuilder
@@ -152,20 +158,19 @@ struct TrackSchematic: View {
     }
 
     /// The focused track holds several windows so multi-window
-    /// tracks read. The focus is pinned to the middle slot; when new
-    /// windows join here, the `+` lands at its placement slot around
-    /// it (first / last on the ends, before / after right beside
-    /// it) — the focus stays put so the placement reads relative to
-    /// a fixed reference, not a drifting one.
+    /// tracks read, the focus starting in the middle of the run.
+    /// When new windows join here the `+` lands at its placement
+    /// slot around it — first / last on the ends, before / after
+    /// right beside it.
     private func focusedTrack(nested: Bool) -> some View {
-        // `focusedRun` windows (the focus in the middle of them);
-        // one more slot appears for the joining window.
+        // `focusedRun` windows; one more slot appears for the
+        // joining window, and a landing at or before the focus
+        // pushes the focus into the next slot along.
         let run = focusedRun
-        let slots = nested ? run + 1 : run
-        let focus = (run - 1) / 2
-        let plus = nested ? focusedPlusIndex(run: run) : -1
+        let plus = nested ? focusedSlots.incoming : -1
+        let focus = nested ? focusedSlots.focus : (run - 1) / 2
         return axisStack {
-            ForEach(0..<slots, id: \.self) { i in
+            ForEach(0..<(nested ? run + 1 : run), id: \.self) { i in
                 trackWindow(
                     i == plus ? .new : i == focus ? .focus : .plain
                 )
@@ -173,17 +178,23 @@ struct TrackSchematic: View {
         }
     }
 
-    /// Slot for the joining window. The focus stays put so the
-    /// placement reads against a fixed reference; `first`/`last`
-    /// take the run's ends whatever its length.
-    private func focusedPlusIndex(run: Int) -> Int {
-        let focus = (run - 1) / 2
-        switch placement {
-        case .first: return 0
-        case .last: return run
-        case .beforeFocused: return max(0, focus)
-        case .afterFocused: return min(run, focus + 1)
-        }
+    /// The joining window's slot inside the focused track, and
+    /// the slot the focus ends up in once it has landed — both
+    /// read off the engine's splice (#702).
+    ///
+    /// The focus is **not** pinned. Its own copy of the rule
+    /// returned splice coordinates and the run drew in fixed
+    /// slot coordinates, so `first` marked the wrong window and
+    /// `before focused` resolved the `+` and the focus to one
+    /// slot, where the `+` won the ternary and the run drew no
+    /// focused tile at all. Only meaningful when something joins
+    /// this track; an untouched run keeps its middle focus.
+    var focusedSlots: (incoming: Int, focus: Int) {
+        SchematicPlacement.splice(
+            placement,
+            count: focusedRun,
+            focus: (focusedRun - 1) / 2
+        )
     }
 
     @ViewBuilder

@@ -43,23 +43,42 @@ struct ScrollingSchematic: View {
 
     private var horizontal: Bool { orientation == .horizontal }
 
-    /// The row's slot indices, focus at 0. The row is finite, so
-    /// the focus sits mid-array and the row extends both ways as
-    /// far as the count allows; first / last then land the `+` on
-    /// the row's real ends rather than on whichever tile the
-    /// canvas happened to crop.
+    /// The row's slots and the incoming window's slot among
+    /// them, all read relative to the focused window at 0. The
+    /// row is finite, so the focus sits mid-array and the row
+    /// extends both ways as far as the count allows; first /
+    /// last then land the `+` on the row's real ends rather than
+    /// on whichever tile the canvas happened to crop.
+    ///
+    /// Where the `+` lands is the engine's answer, asked through
+    /// `SchematicPlacement` rather than reproduced here (#702).
+    /// The splice can push the focus a slot along, and since
+    /// this schematic pins the focus to 0 it is the *row* that
+    /// shifts instead — which is why the bounds come from the
+    /// same splice and not from a separate midpoint.
     ///
     /// Internal rather than private so `LayoutSchematicCountTests`
-    /// can assert the arithmetic. A source scan for the count as
-    /// an input is satisfiable by a schematic that takes it and
-    /// draws a constant — guard-prover demonstrated exactly that
-    /// — so the guard has to read the derived value, and the
-    /// derived value has to be reachable.
-    var slotIndices: ClosedRange<Int> {
-        let count = max(2, windows)
-        let focusPos = (count - 1) / 2
-        return -focusPos...(count - 1 - focusPos)
+    /// and `LayoutSchematicPlacementTests` can assert the
+    /// arithmetic. A source scan for the count as an input is
+    /// satisfiable by a schematic that takes it and draws a
+    /// constant — guard-prover demonstrated exactly that — so
+    /// the guard has to read the derived value, and the derived
+    /// value has to be reachable.
+    var row: (slots: ClosedRange<Int>, incoming: Int) {
+        let total = max(2, windows)
+        let established = total - 1
+        let placed = SchematicPlacement.splice(
+            placement,
+            count: established,
+            focus: (established - 1) / 2
+        )
+        return (
+            (0 - placed.focus)...(total - 1 - placed.focus),
+            placed.incoming - placed.focus
+        )
     }
+
+    var slotIndices: ClosedRange<Int> { row.slots }
 
     /// The slot's real width as a fraction of the screen axis — a
     /// wide slot fills most of the frame (one window plus slivers),
@@ -143,9 +162,10 @@ struct ScrollingSchematic: View {
         case .end:
             focusCenter = screenStart + screenLen - slot / 2
         }
-        let low = slotIndices.lowerBound
-        let high = slotIndices.upperBound
-        let newIdx = newWindowIndex(low: low, high: high)
+        let placed = row
+        let low = placed.slots.lowerBound
+        let high = placed.slots.upperBound
+        let newIdx = placed.incoming
         return Metrics(
             slot: slot,
             step: step,
@@ -233,22 +253,6 @@ struct ScrollingSchematic: View {
                 x: horizontal ? center : cross / 2,
                 y: horizontal ? cross / 2 : center
             )
-    }
-
-    /// Where the new window opens, as a strip index (focus = 0):
-    /// beside the focus for the relative placements, or at the very
-    /// first / last end of the whole row. Clamped into the row —
-    /// at two windows the focus IS an end, so "before focused" has
-    /// nowhere further to go and lands on the end itself.
-    private func newWindowIndex(low: Int, high: Int) -> Int {
-        let raw: Int
-        switch placement {
-        case .first: raw = low
-        case .last: raw = high
-        case .beforeFocused: raw = -1
-        case .afterFocused: raw = 1
-        }
-        return min(max(raw, low), high)
     }
 
     private var caption: String {
