@@ -147,12 +147,14 @@ extension KiwiCore {
                 retile()
             }
         case .windowFullscreenChanged:
-            // Ring only: a native-fullscreen window fills the
-            // display, so a ring would show only at the corners —
-            // drop it now, restore it when fullscreen ends. The
-            // state fold already flipped the snapshot flag; no
-            // retile (the window keeps its home-space slot).
-            updateBorders()
+            // The state fold already flipped the snapshot flag;
+            // the generic `shouldRetile` retile re-partitions
+            // the layout around it (#670: entering fullscreen
+            // exempts the slot, leaving re-places it) and that
+            // retile refreshes the bars and the ring (fills the
+            // display, so a ring would show only at the
+            // corners — drop it now, restore on exit).
+            break
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
         case .windowRekeyed(let old, let new):

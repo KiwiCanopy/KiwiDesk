@@ -68,6 +68,21 @@ editing here:
   behind the one being typed in.
   `TransientOverlayFocusTests` pins both arms; the product
   argument lives in `docs/design-decisions.md`.
+- A **native-fullscreen window keeps its `space.windows` slot
+  but leaves both tiled-member derivations** (#670) — exempt it
+  through `localTiledMembers` / `effectiveTiledMembers`, never
+  with a per-call-site `isFullscreen` check: macOS moved it to
+  its own Space, so a layout frame-set, navigation step or
+  z-order raise aimed at it fights the fullscreen app or yanks
+  it under the user. A fullscreen flip is therefore a
+  membership change and retiles (`shouldRetile`), and the
+  **fullscreen-space verdict comes from `NativeSpaces.isUser`**
+  — never from the nil Mission Control number, which cannot be
+  told apart from "SkyLight unavailable", where the
+  single-space fallback must keep bars and settles running.
+  `FullscreenLayoutExemptionTests` pins the membership half and
+  `FullscreenStandDownTests` the verdict and the gated surfaces;
+  the argument lives in `docs/design-decisions.md`.
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**

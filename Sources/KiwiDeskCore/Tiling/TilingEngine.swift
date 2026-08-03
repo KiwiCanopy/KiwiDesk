@@ -133,18 +133,19 @@ public final class TilingEngine {
         switch event {
         case .windowCreated, .windowDestroyed, .appTerminated,
             .displaysChanged, .windowFloatChanged,
-            .windowRekeyed:
+            .windowRekeyed, .windowFullscreenChanged:
             // A re-key swaps the tracked id in one slot; the newly
             // active tab must be placed into that slot's frame
             // (#308), so retile even though the array shape is
             // unchanged.
+            // A fullscreen flip changes layout membership like a
+            // float flip (#670): entering exempts the slot (the
+            // window keeps it, but macOS moved it to its own
+            // Space), leaving must re-place it.
             return true
         case .appLaunched, .windowFocused, .windowMoved,
             .windowResized, .windowTitleChanged,
-            .nativeSpaceChanged, .windowFullscreenChanged:
-            // A fullscreen flip changes only the ring (the
-            // window keeps its slot on its home space); KiwiCore
-            // refreshes borders directly, no retile.
+            .nativeSpaceChanged:
             return false
         }
     }

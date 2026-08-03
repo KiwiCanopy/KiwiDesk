@@ -85,23 +85,35 @@ extension KiwiCore {
             .nativeSpaceSettle,
             after: .milliseconds(600)
         ) { [weak self] in
-            guard let self, self.lastNativeSpace == number
-            else { return }
-            self.retile(animated: false, force: true)
-            // The switch rebuilt this desktop's windows with
-            // arbitrary stacking; put the overlapping
-            // layouts' z-order back before handing focus over.
-            self.scheduleZOrderRestore()
-            if let focused = self.activeSpace?.focused {
-                // The instant retile above already placed the
-                // windows; re-tiling on focus would fly them
-                // from stale frames (issue #11).
-                self.focusWindow(
-                    focused,
-                    refocusRetile: false,
-                    warp: true
-                )
-            }
+            self?.nativeSpaceSettle(ifStill: number)
+        }
+    }
+
+    /// The settle body, split out so tests can fire it without
+    /// waiting out the 600 ms schedule.
+    func nativeSpaceSettle(ifStill number: Int?) {
+        guard lastNativeSpace == number else { return }
+        // A fullscreen/system space: stand down (#670). The
+        // retile below would repaint the bars onto the
+        // fullscreen space and the refocus would AX-raise the
+        // desktop's focused window behind the fullscreen app.
+        // Switching back to a user desktop fires its own
+        // settle, so nothing is owed here.
+        guard NativeSpaces.activeSpaceIsUser() else { return }
+        retile(animated: false, force: true)
+        // The switch rebuilt this desktop's windows with
+        // arbitrary stacking; put the overlapping
+        // layouts' z-order back before handing focus over.
+        scheduleZOrderRestore()
+        if let focused = activeSpace?.focused {
+            // The instant retile above already placed the
+            // windows; re-tiling on focus would fly them
+            // from stale frames (issue #11).
+            focusWindow(
+                focused,
+                refocusRetile: false,
+                warp: true
+            )
         }
     }
 

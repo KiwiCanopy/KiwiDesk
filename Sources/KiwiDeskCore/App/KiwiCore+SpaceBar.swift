@@ -29,9 +29,14 @@ extension KiwiCore {
         for display: Display,
         style: SpaceBarStyle
     ) -> SpaceBarManager.Bar? {
-        guard let screen = screen(for: display.id) else {
-            return nil
-        }
+        // Same fullscreen-space stand-down as the App Bar
+        // (#670): the panel joins every space by construction,
+        // so the per-display verdict gates the build and nil
+        // retires the overlay through the manager.
+        guard
+            NativeSpaces.currentSpaceIsUser(display: display.id),
+            let screen = screen(for: display.id)
+        else { return nil }
         let items = spaceBarItems(
             display: display.id,
             style: style

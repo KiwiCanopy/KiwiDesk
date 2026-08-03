@@ -11,15 +11,26 @@ import Foundation
 
 extension StateCoordinator {
     /// Ordered tiled members a space actually OWNS
-    /// (`space.windows` minus floating) — no sticky injection.
-    /// The derivation for anything that writes positions back
-    /// into `space.windows` (the App Bar drag reorder), where
-    /// an injected traveler with no local slot would overwrite
-    /// a real window's slot (#414 v2).
+    /// (`space.windows` minus floating and native-fullscreen)
+    /// — no sticky injection. The derivation for anything that
+    /// writes positions back into `space.windows` (the App Bar
+    /// drag reorder), where an injected traveler with no local
+    /// slot would overwrite a real window's slot (#414 v2).
+    ///
+    /// Native-fullscreen exemption (#670): the window keeps
+    /// its slot in `space.windows` (fullscreen is not a
+    /// destroy — the design ruling `FullscreenStateTests`
+    /// pins), but macOS moved it to its own Space, so no
+    /// layout pass, navigation step, or z-order raise may
+    /// target it until it returns. The `.windowFullscreenChanged`
+    /// retile re-places it on exit.
     public func localTiledMembers(
         of space: Space
     ) -> [WindowID] {
-        space.windows.filter { windows[$0]?.isFloating == false }
+        space.windows.filter { id in
+            guard let window = windows[id] else { return false }
+            return !window.isFloating && !window.isFullscreen
+        }
     }
 
     /// Ordered tiled members of a space for layout, navigation,
@@ -266,7 +277,14 @@ extension StateCoordinator {
             {
                 continue
             }
-            guard windows[id]?.isFloating == false else {
+            // Fullscreen rides the float branch (#670): it is
+            // absent from `injected` (layout-exempt), so the
+            // tiled cursor below would drain past it — append
+            // in place instead, keeping its glyph and the
+            // cursor aligned.
+            guard let window = windows[id],
+                !window.isFloating, !window.isFullscreen
+            else {
                 result.append(id)
                 continue
             }
@@ -302,7 +320,11 @@ extension StateCoordinator {
     ) -> [(id: WindowID, homeIndex: Int)] {
         windows.all
             .filter {
-                $0.isSticky && !$0.isFloating
+                // A fullscreen sticky travels nowhere (#670);
+                // the `firstIndex` below would drop it anyway
+                // (it has no local tiled slot), stated here so
+                // the exemption is deliberate, not incidental.
+                $0.isSticky && !$0.isFloating && !$0.isFullscreen
                     && !space.windows.contains($0.id)
                     && stickyRenderSpace(of: $0, focused: focused)
                         == space.id
