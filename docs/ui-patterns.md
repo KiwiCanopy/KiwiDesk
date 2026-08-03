@@ -974,12 +974,15 @@ style" stays live even when no bar shows, because `iconSource`
 also drives the shortcuts panel's Apps band — check for a second
 reader before dimming.
 
-The convention is guarded by two suites that both scan for a
-*shape* rather than listing the greyed controls — a list cannot
-see the next site, which is how a dozen surfaces drifted while
-the rule sat unenforced. `GreyOutParityTests` pins the gates
-that must be present; `GreyOutHidingTests` hunts the
-conditional that removes a control instead of dimming it.
+The tree-wide half of the convention is guarded by suites that
+scan for a *shape* rather than listing the greyed controls — a
+list cannot see the next site, which is how a dozen surfaces
+drifted while the rule sat unenforced. `GreyOutParityTests`
+pins the gates that must be present; `GreyOutHidingTests` hunts
+the conditional that removes a control instead of dimming it.
+The absence side is necessarily per-row — no scan can know
+which control *should* carry no gate — so a row that earns one
+cites its own guard where the bullets above do.
 
 **Sentinel values read as words, not numbers.** A slider gated
 by an Auto toggle stores `0` as the sentinel but its readout

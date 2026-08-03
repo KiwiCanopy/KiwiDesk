@@ -969,11 +969,11 @@ pills described above ride the same mark, so with it off a
 snapped-back drag simply snaps back and explains nothing. The
 Space Bar's badge keeps showing *which* windows are sticky
 either way, but only the mark answers *why that gesture just
-failed*. Turn the mark off and hide the bar and a sticky
-window is indistinguishable from any other — KiwiDesk lets you
-do that rather than talking you out of it, and this paragraph
-is what it says instead. (From Lua the two switches are
-`sticky.set_mark` and `space_bar.set_sticky_badge`.)
+failed* — which is why the toggle's own `?` says so before you
+use it. Turn the mark off and hide the bar and a sticky window
+is indistinguishable from any other; KiwiDesk lets you do that
+rather than talking you out of it. (From Lua the two switches
+are `sticky.set_mark` and `space_bar.set_sticky_badge`.)
 
 The marks' colours are in **Advanced Colors** — **Sticky** in
 Border colors (it paints both the on-window mark and the Space

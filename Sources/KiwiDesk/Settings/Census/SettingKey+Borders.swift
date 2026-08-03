@@ -104,8 +104,9 @@ extension BordersKey {
             // Ungated. The mark paints on the window, so it is
             // what survives the Space Bar going off — a gate
             // here would record a dependency that runs the
-            // other way, for every reader of the census
-            // (StickyMarkEditor, StickyMarkUngatedTests).
+            // other way, for every reader of the census. The
+            // row is drawn by StickyMarkEditor and held ungated
+            // by StickyMarkUngatedTests; neither reads this.
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,

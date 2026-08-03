@@ -2309,24 +2309,30 @@ row carries none on either axis. What earns a gate is the
 **Floating** tint: it paints only the Space Bar's badge, so
 with the bar off there is genuinely nothing left for it to
 colour. The two rows sit one card apart and their gates
-differ, which is the test working, not an inconsistency.
+differ, which is that reading applied honestly rather than an
+inconsistency.
 
-**A floor guards a trap, not a choice** — so no softer warning
-replaces the greying either. Turning the mark off is a real
-cost and the `?` help is where it is stated: the mark is also
-the carrier for sticky's refusal feedback, so switching it off
-silences the home-space, can't-pile and move-blocked pills
-along with the resting glyph. But it is a cost a user chooses
-deliberately, on a row that says so, and the floor was porous
-by design in any case — `sticky.set_mark` and
-`space_bar.set_sticky_badge` apply unclamped (`dim_factor`
-precedent), so the state was always reachable from the open
-layer. Settings does warn about valid-but-surprising choices
+**A floor guards a trap, not a choice** — so the switch gets
+no warning, only an honest `?`. Turning the mark off costs
+more than the label implies: the mark also carries sticky's
+refusal pills (home-space, can't-pile, move-blocked), so a
+refused drag stops explaining itself. A cost a row's own label
+does not imply has to be *said* somewhere, which is why
+`sticky.mark.help` states it — the row is the surface, and
+Lua's unclamped setters (`sticky.set_mark`,
+`space_bar.set_sticky_badge`, the `dim_factor` precedent) mean
+a floor would only have moved the state one layer down anyway.
+
+Settings does warn about valid-but-surprising choices
 elsewhere (`native_spaces.separate_warning`,
-`profiles.overlap_warning`); what rules those out here is that
-both of them flag a setup whose consequence is invisible at
-the point of choosing, and this one's consequence is the row's
-own subject. (#414)
+`profiles.overlap_warning`), and the line between them is
+**proximity, not subject matter**: those two surface a
+consequence that lands somewhere the user is not — at profile
+load, on another destination — whereas this one is one click
+away at the moment of choosing, in the `?` beside the switch.
+Which is why that help text is load-bearing rather than
+decorative: shorten it back to the glyph and this entry's
+argument stops being true. (#414)
 
 **One word for the dot — "mark" — with two deliberate
 carve-outs.** (R6/#406.) Five words named one thing: indicator,
