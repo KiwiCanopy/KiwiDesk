@@ -44,12 +44,14 @@ struct LayoutCard: View {
     /// one, so the destination always exists in the mode the
     /// reader is already in (item 14).
     @ViewBuilder private var appBarCrossReference: some View {
-        if let host = model.config.settings.appBarHost(for: mode) {
+        if let host = model.config.settings.appBarHost(for: mode),
+            let appBarProse = LayoutCardText.appBarState(
+                mode,
+                on: host.appBar.enabled
+            )
+        {
             CrossReferenceRow(
-                prose: LayoutCardText.appBarState(
-                    mode,
-                    on: host.appBar.enabled
-                ),
+                prose: appBarProse,
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
                     "App Bar"
@@ -164,10 +166,21 @@ enum LayoutCardText {
     /// layout fails to COMPILE — which is the discipline this
     /// area states everywhere else, and a `default:` here would
     /// quietly give that layout Scrolling's sentence.
+    ///
+    /// Returns `nil` for a layout with no sentence rather than
+    /// asserting and handing back `""`. That axis is the one the
+    /// exhaustive switch does NOT defend — granting Grid a host
+    /// compiles, because Grid is already listed — and an
+    /// `assertionFailure` here reports it by KILLING the test
+    /// process (signal 5, no attribution), which is what
+    /// guard-prover hit driving this from
+    /// `CrossReferenceRowSlotTests`. A nil fails as a value: the
+    /// suite reds naming the mode, and the caller draws no row
+    /// rather than an empty sentence beside a live link.
     static func appBarState(
         _ mode: LayoutMode,
         on: Bool
-    ) -> String {
+    ) -> String? {
         let state =
             on ? L("common.on", "on") : L("common.off", "off")
         switch mode {
@@ -190,16 +203,10 @@ enum LayoutCardText {
         case .bsp, .stack, .grid, .track, .floating:
             // Unreachable while Core's `appBarHost(for:)` — the
             // one copy of who may show a bar — grants no host to
-            // these. That is the axis the exhaustive switch does
-            // NOT defend: granting Grid a host compiles, because
-            // Grid is already listed, and would ship an empty
-            // sentence beside a live link in every locale. Loud
-            // in debug, silent in release, like every other
-            // unreachable arm in this area.
-            assertionFailure(
-                "app bar host with no sentence: \(mode)"
-            )
-            return ""
+            // these. `CrossReferenceRowSlotTests` reds naming
+            // the mode if one of them ever gains a host, which
+            // is why this returns nil instead of asserting.
+            return nil
         }
     }
 }

@@ -35,12 +35,29 @@ import Testing
 /// a NEW cross-reference. `everyRowIsAsserted` is the coupling,
 /// and it reds on the fifth row rather than covering it.
 ///
-/// Out of scope, deliberately: a CATALOG value that drops the
-/// `%N$@` restores the identical dangling render for that one
-/// locale. `scripts/localization_guards.py`'s specifier-drift
-/// contract owns that axis for every key at once, and runs in
-/// `scripts/lint.sh` — a second copy here would guard six keys
-/// and imply the rest were covered.
+/// **These assertions read whichever locale the RUNNER resolves,
+/// not English.** `L()` goes through the shipped catalogs, so on
+/// a `de-DE` machine every string below is German; on CI it is
+/// the inline English. That is not a hole, but it is only not a
+/// hole because of a guard in another tool, so read the coupling
+/// before trusting a green run: a call site whose ENGLISH
+/// literal loses its specifier while a translation keeps one
+/// fails `scripts/localization_guards.py`'s specifier-drift
+/// contract ("adds %1$@ relative to the English"), which
+/// `extract-keys --check` runs inside `scripts/lint.sh` — so
+/// pre-commit, the verify gate and CI all refuse it. Verified by
+/// mutation 2026-08-03: reverting `sticky.mark.forced` to its
+/// shipped dangling English redded lint on all ten locales at
+/// exit 1 while this suite stayed green on a German runner.
+///
+/// Re-selecting the locale here instead was rejected: it is
+/// `LocalizationManager.shared` global state, `.serialized`
+/// orders tests only within a suite, and `LocalizationManagerTests`
+/// drives the same singleton in the same process.
+///
+/// Out of scope for the same reason and by the same authority: a
+/// CATALOG value that drops its `%N$@` restores the identical
+/// dangling render for that one locale.
 /// `@MainActor` because the prose producers are: they are
 /// members of SwiftUI views and of a type beside them, and
 /// reading one off the main actor does not fail an expectation —
@@ -51,20 +68,29 @@ import Testing
 struct CrossReferenceRowSlotTests {
     private static var slot: String { CrossReferenceRow.linkSlot }
 
-    /// The `prose:` expression of every `CrossReferenceRow(`
-    /// application in the GUI tree, as written. Whitespace is
-    /// collapsed so a line break inside a call cannot change the
-    /// text a comparison sees.
+    /// Every rendered cross-reference, as `file:expression` with
+    /// ALL whitespace stripped.
     ///
     /// Hand-listed on the ONE side that has to be: this is the
     /// set the value assertions below cover, so a row added
     /// without a matching assertion reds instead of being
     /// silently exempt. The other side is derived from source.
+    ///
+    /// Keyed by FILE, not by expression alone. Three of these
+    /// are `Self.`-scoped, which names a different type in every
+    /// file — so on expression alone a second view declaring its
+    /// own `forcedProse` without a slot matched an entry already
+    /// present and was covered by nothing (guard-prover, first
+    /// cut). Whitespace is stripped rather than collapsed for a
+    /// duller reason: collapsing leaves a space where a line
+    /// break was, so `swift format` re-wrapping a call — which a
+    /// rename past 79 chars forces — redded a guard that nothing
+    /// had broken.
     private static let asserted: Set<String> = [
-        "Self.scrollingXrefProse",
-        "Self.forcedProse",
-        "Self.overrideProse(overriding)",
-        "LayoutCardText.appBarState( mode, on: host.appBar.enabled )",
+        "MotionCard.swift:Self.scrollingXrefProse",
+        "StickyMarkEditor.swift:Self.forcedProse",
+        "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
+        "LayoutCard.swift:appBarProse",
     ]
 
     // MARK: - The values
@@ -82,7 +108,15 @@ struct CrossReferenceRowSlotTests {
     /// Both arms. The singular one renders whenever exactly one
     /// space overrides — the common case — and was the arm
     /// guard-prover gutted with the suite still green.
-    @Test(arguments: [1, 2, 7])
+    ///
+    /// `overriding` is an unbounded `Int` and the `1`/not-`1`
+    /// split is today's implementation, not the type's: a third
+    /// arm keyed on, say, `>= 10` is invisible both to a sampled
+    /// domain and to `everyRowIsAsserted`, whose call-site
+    /// expression would not change. The range below is wide
+    /// enough to cross any threshold worth writing; an arm above
+    /// it owes a case here in the same change set.
+    @Test(arguments: 0...12)
     func theSpacesUsingProsePlacesItsLink(_ overriding: Int) {
         #expect(
             SpacesUsingLayout.overrideProse(overriding)
@@ -94,8 +128,10 @@ struct CrossReferenceRowSlotTests {
     /// The modes come from `appBarHost(for:)` — Core's one copy
     /// of who may show a bar, and the same authority the switch
     /// in `appBarState` is exhaustive over — so a third hosting
-    /// layout arrives here without this list being edited.
-    @Test func theAppBarProsePlacesItsLink() {
+    /// layout arrives here without this list being edited, and
+    /// reds as a nil rather than killing the process the way the
+    /// `assertionFailure` this replaced did.
+    @Test func theAppBarProsePlacesItsLink() throws {
         let settings = TilingSettings()
         let hosting = LayoutMode.allCases.filter {
             settings.appBarHost(for: $0) != nil
@@ -103,9 +139,12 @@ struct CrossReferenceRowSlotTests {
         #expect(!hosting.isEmpty)
         for mode in hosting {
             for on in [true, false] {
+                let prose = try #require(
+                    LayoutCardText.appBarState(mode, on: on),
+                    "\(mode) hosts a bar with no sentence"
+                )
                 #expect(
-                    LayoutCardText.appBarState(mode, on: on)
-                        .contains(Self.slot),
+                    prose.contains(Self.slot),
                     "\(mode) on=\(on) never places its link"
                 )
             }
@@ -141,7 +180,9 @@ struct CrossReferenceRowSlotTests {
             )
             for call in calls("CrossReferenceRow(", in: source) {
                 if let prose = argument("prose", in: call) {
-                    out.insert(prose)
+                    out.insert(
+                        "\(file.lastPathComponent):\(prose)"
+                    )
                 }
             }
         }
@@ -181,7 +222,8 @@ struct CrossReferenceRowSlotTests {
         return out
     }
 
-    /// The argument labelled `label`, whitespace-collapsed.
+    /// The argument labelled `label`, with ALL whitespace
+    /// stripped so that reformatting the call cannot move it.
     private static func argument(
         _ label: String,
         in arguments: String
@@ -220,12 +262,9 @@ struct CrossReferenceRowSlotTests {
             parts
             .map {
                 $0.split(whereSeparator: \.isWhitespace)
-                    .joined(separator: " ")
+                    .joined()
             }
             .first { $0.hasPrefix(prefix) }
-            .map {
-                String($0.dropFirst(prefix.count))
-                    .trimmingCharacters(in: .whitespaces)
-            }
+            .map { String($0.dropFirst(prefix.count)) }
     }
 }
