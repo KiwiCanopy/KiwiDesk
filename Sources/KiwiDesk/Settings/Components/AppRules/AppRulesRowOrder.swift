@@ -1,51 +1,36 @@
 import KiwiDeskCore
 
-/// The App Rules area's display order (turn 14a of the
-/// redesign, #678 Phase 3). The census owns *placement* — which
-/// container and tier each row sits in — but records no display
-/// order, so the renderer declares it here as data.
+/// What the App Rules area declares about its own rendering
+/// (turn 14a of the redesign, #678 Phase 3).
 ///
-/// **This area's list is BESPOKE**, and the distinction matters
-/// before anyone edits these lists expecting the screen to
-/// move. The census's unit is a SETTING, and here one setting
-/// draws a row per APP: `appRules` and `floatRules` are two
-/// facets of one sentence, repeated once per app that has a
-/// rule, with the add action and the delete action riding the
-/// same list. So there is no `ForEach` over an order list to
-/// reorder — `AppRulesSection` walks the user's apps, not the
-/// census — and these lists exist so the census still records
-/// the rows for the placement table and for search, with
-/// `AppRulesCensusRenderTests` holding their MEMBERSHIP.
+/// **It declares one thing, and deliberately not an order
+/// list.** The other census-rendered areas hold `[SettingKey]`
+/// lists because the census records placement but not display
+/// order, so a `ForEach` needs somewhere to read the order from.
+/// This area has no such `ForEach`: its repeating unit is the
+/// user's app list, not a static set of settings, and one census
+/// setting draws a row per app. An order list here would be a
+/// second copy of `SettingKey.allCases.filter { area ==
+/// .appRules && tier == … }` — derivable from the census, read
+/// by nothing but its own parity test, and maintained so that
+/// test could compare the copy against what it was copied from.
 ///
-/// The same shape, and the same stated weakness, as the
-/// Shortcuts area's app list, layer strip and raw-Lua drawer
-/// (`ShortcutsRowOrder.bespokeContainers`).
+/// So the census is the sole record of these rows for the
+/// placement table and for search, and what stays here is the
+/// fact a reader of `gui.md`'s census promise needs: editing the
+/// census moves nothing on this screen.
 enum AppRulesRowOrder {
     /// Containers this area draws with a bespoke view rather
     /// than a `ForEach` over an order list. Data, not prose, so
     /// a second container going bespoke has to edit this set —
-    /// which the render guard asserts over, and the limitation
-    /// cannot quietly widen.
+    /// which `AppRulesCensusRenderTests` asserts against the
+    /// tree rather than against a restatement of it, so a
+    /// container that *stops* being bespoke reds too.
+    ///
+    /// The same shape, and the same stated weakness, as the
+    /// Shortcuts area's app list, layer strip and raw-Lua drawer
+    /// (`ShortcutsRowOrder.bespokeContainers`).
     static let bespokeContainers: Set<SettingsContainer> = [
         .rulesPerApp
-    ]
-
-    /// The per-app sentence, at rest: which space the app opens
-    /// in, whether it floats, and the two actions that add and
-    /// remove a row.
-    static let rulesAtRest: [SettingKey] = [
-        .appRules(.appRules),
-        .appRules(.floatRules),
-        .appRules(.appRulesAdd),
-        .appRules(.appRulesDelete),
-    ]
-
-    /// The title patterns, which surface only once the float
-    /// facet is "floats when titled…" — one interaction away
-    /// from the row, which is what `.showMore` means here. They
-    /// are chips UNDER the sentence rather than a drawer beside
-    /// it, because they qualify the facet that revealed them.
-    static let rulesShowMore: [SettingKey] = [
-        .appRules(.floatRulesPattern)
     ]
 }

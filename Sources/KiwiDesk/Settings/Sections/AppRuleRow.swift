@@ -55,30 +55,54 @@ struct AppRuleRow: View {
         }
     }
 
-    /// The sentence, in one row: icon, app name, then the two
-    /// facets joined by the words that make it read as English.
-    /// The connectives are their own strings rather than a
-    /// format with two `%@`s, because each menu is a control
-    /// and cannot be interpolated into a `Text`.
+    /// The sentence, in one row: icon, then the frame with the
+    /// app name and the two facet menus dropped into it.
+    ///
+    /// **The word order is the translator's, not this stack's.**
+    /// An earlier cut emitted "opens in" and "and" as separate
+    /// keys between fixed `HStack` positions, which is the harm
+    /// localization.md names — a translation cannot reorder
+    /// pieces stitched together in Swift, and ja/ko are
+    /// verb-final, so no catalog edit could have produced a
+    /// grammatical row. The frame is one key with positional
+    /// specifiers; `SentenceFrame` splits it on those and this
+    /// emits the pieces in whatever order the translation put
+    /// them.
     private var sentence: some View {
         HStack(spacing: 6) {
             appIcon
-            Text(KeybindingCatalog.displayName(forBundleID: app))
-                .fontWeight(.medium)
-            connective(L("app_rules.sentence.opens_in", "opens in"))
-            spaceMenu
-                .opacity(spaceInherited ? 0.55 : 1)
-            connective(L("app_rules.sentence.and", "and"))
-            floatMenu
-                .opacity(floatInherited ? 0.55 : 1)
+            ForEach(frame.segments) { segment in
+                switch segment.slot {
+                case .text(let words):
+                    Text(words).foregroundStyle(.secondary)
+                case .argument(1):
+                    Text(
+                        KeybindingCatalog.displayName(
+                            forBundleID: app
+                        )
+                    )
+                    .fontWeight(.medium)
+                case .argument(2):
+                    spaceMenu
+                        .opacity(spaceInherited ? 0.55 : 1)
+                default:
+                    floatMenu
+                        .opacity(floatInherited ? 0.55 : 1)
+                }
+            }
             Spacer()
             deleteButton
         }
         .font(.callout)
     }
 
-    private func connective(_ word: String) -> some View {
-        Text(word).foregroundStyle(.secondary)
+    private var frame: SentenceFrame {
+        SentenceFrame(
+            L(
+                "app_rules.sentence",
+                "%1$@ opens in %2$@ and %3$@"
+            )
+        )
     }
 
     // MARK: - Inheritance (override mode)

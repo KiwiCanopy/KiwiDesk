@@ -8,63 +8,18 @@ import Testing
 /// 14a).
 ///
 /// The promise here is WEAKER than in Bars or Layout Defaults,
-/// and the guard says so rather than implying otherwise: this
-/// area's one container is bespoke, because one census setting
-/// draws a row per app. So these pin MEMBERSHIP — every
-/// `.appRules` census key is recorded in an order list, and the
-/// bespoke set is data — and nothing here claims that editing a
-/// list moves anything on screen.
+/// and these say so rather than implying otherwise: this area's
+/// one container is bespoke, because one census setting draws a
+/// row per app. There is no order list to pin — an order list
+/// here would be a second copy of a census filter — so what is
+/// guarded is that the bespoke declaration stays true of the
+/// tree, and that the sentence keeps naming its facets somewhere
+/// a screen reader and the search index can reach.
 @Suite("App Rules render ↔ census parity")
 struct AppRulesCensusRenderTests {
-    private func censusRows(_ tier: SettingTier) -> Set<SettingKey> {
-        Set(
-            SettingKey.allCases.filter {
-                $0.placement.area == .appRules
-                    && $0.placement.tier == tier
-            }
-        )
-    }
-
-    @Test("the at-rest rows are the census's")
-    func atRest() {
-        #expect(
-            Set(AppRulesRowOrder.rulesAtRest) == censusRows(.atRest)
-        )
-        #expect(
-            AppRulesRowOrder.rulesAtRest.count
-                == Set(AppRulesRowOrder.rulesAtRest).count
-        )
-    }
-
-    @Test("the title patterns are the census's show-more set")
-    func showMore() {
-        #expect(
-            Set(AppRulesRowOrder.rulesShowMore)
-                == censusRows(.showMore)
-        )
-        // The dedup twin `atRest` carries — its absence here let
-        // a duplicated key pass (guard-prover). A set-equality
-        // check cannot see a repeat on the list side.
-        #expect(
-            AppRulesRowOrder.rulesShowMore.count
-                == Set(AppRulesRowOrder.rulesShowMore).count
-        )
-    }
-
-    /// Both order lists are non-empty. Set equality is satisfied
-    /// by two empty sides, so an area that lost every census row
-    /// would pass every membership check above while rendering
-    /// nothing — the floor is what makes those checks mean
-    /// something.
-    @Test("the area still has rows to render")
-    func listsAreNotEmpty() {
-        #expect(!AppRulesRowOrder.rulesAtRest.isEmpty)
-        #expect(!AppRulesRowOrder.rulesShowMore.isEmpty)
-    }
-
-    /// The area's one container, derived from the census rather
-    /// than restated — a second container would mount nowhere,
-    /// since the section draws exactly one card.
+    /// The area's one container, derived from the census — a
+    /// second one would mount nowhere, since the section draws
+    /// exactly one card.
     @Test("the area holds only the container it renders")
     func onlyOneContainer() {
         let declared = Set(
@@ -73,16 +28,44 @@ struct AppRulesCensusRenderTests {
                 .compactMap { $0.placement.container }
         )
         #expect(declared == [.rulesPerApp])
-        // And it is declared bespoke: the guard above holds
-        // membership only, and this is the data that says so.
+    }
+
+    /// The bespoke claim, read off the TREE rather than restated
+    /// against another literal (Phase 3 ruling 5: a guard over a
+    /// literal restated against a literal documents, it does not
+    /// detect). A container is bespoke exactly when nothing
+    /// `ForEach`es an order list for it — so the check is that
+    /// this area's views declare no such list to walk.
+    @Test("the bespoke container really has no order list")
+    func bespokeMeansNoOrderList() throws {
         #expect(
-            AppRulesRowOrder.bespokeContainers == declared,
+            AppRulesRowOrder.bespokeContainers == [.rulesPerApp]
+        )
+        let root = SourceScan.repoRoot(from: #filePath)
+        var declaresList = false
+        for dir in [
+            "Sources/KiwiDesk/Settings/Components/AppRules",
+            "Sources/KiwiDesk/Settings/Sections",
+        ] {
+            for file in try SourceScan.swiftSources(
+                under: root.appendingPathComponent(dir)
+            ) where file.lastPathComponent.hasPrefix("AppRule") {
+                let source = SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                if source.contains(": [SettingKey] = [") {
+                    declaresList = true
+                }
+            }
+        }
+        #expect(
+            !declaresList,
             Comment(
                 rawValue:
-                    "a container of this area that is NOT bespoke "
-                    + "would need a ForEach over an order list — "
-                    + "and then the membership-only caveat in "
-                    + "AppRulesRowOrder stops being true of it"
+                    "an App Rules file declares a [SettingKey] "
+                    + "order list — if a container here is now "
+                    + "rendered from one it is no longer bespoke, "
+                    + "and bespokeContainers must say so"
             )
         )
     }
@@ -92,8 +75,7 @@ struct AppRulesCensusRenderTests {
     /// has no visible labels. The census names both rows by
     /// those keys, so losing the call sites would prune them
     /// from every locale — which `SettingKeyLocaleTests` catches
-    /// only after the fact. Assert the keys are still the
-    /// census's, and that the row authors them.
+    /// only after the fact.
     @Test("the facets keep their names for search and VoiceOver")
     func facetsKeepTheirLabels() throws {
         let space = SettingKey.appRules(.appRules)

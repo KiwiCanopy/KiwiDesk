@@ -18,11 +18,17 @@ import SwiftUI
 /// to stay authored at a call site the key scanner can see or
 /// they are pruned from every locale.
 extension AppRuleRow {
-    /// `app_rules[app]`; Automatic deletes the entry.
+    /// `app_rules[app]`; the unset state deletes the entry.
+    ///
+    /// Its label is a phrase, not "Automatic". The unset state
+    /// is the one every float-only rule shows — "Finder opens in
+    /// Automatic and floats" is the DEFAULT reading of this row,
+    /// and a noun there leaves the sentence half-converted. The
+    /// menu ITEM keeps a noun, because a menu is a list of
+    /// choices rather than a sentence.
     var spaceMenu: some View {
-        let automatic = L("app_rules.automatic", "Automatic")
         return Menu {
-            Button(automatic) {
+            Button(L("app_rules.automatic", "Automatic")) {
                 model.config.appRules[app] = nil
             }
             Divider()
@@ -33,7 +39,11 @@ extension AppRuleRow {
             }
         } label: {
             menuLabel(
-                model.config.appRules[app]?.raw ?? automatic
+                model.config.appRules[app]?.raw
+                    ?? L(
+                        "app_rules.space.anywhere",
+                        "whichever space you open it in"
+                    )
             )
         }
         .menuStyle(.borderlessButton)
@@ -59,7 +69,14 @@ extension AppRuleRow {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .accessibilityLabel(L("app_rules.float", "Float"))
-        .help(floatHelp)
+        .help(
+            // The catalog string carries Markdown emphasis for
+            // the `?` popover that renders it richly. A tooltip
+            // renders none, so the markers would ship literally
+            // in all eleven locales — `HelpButton` strips them
+            // for its own hover fallback and this must too.
+            floatHelp.replacingOccurrences(of: "**", with: "")
+        )
     }
 
     /// The borderless-menu signature (`ProfileEditTargetMenu`):
@@ -92,13 +109,22 @@ extension AppRuleRow {
         L("app_rules.float.titled", "floats when titled…")
     }
 
+    /// The resting VALUE drops the ellipsis the menu item
+    /// carries: an ellipsis promises further UI, which is right
+    /// on a choice that opens the pattern editor and wrong on a
+    /// statement — "Spotify opens in media and floats when
+    /// titled…" reads as a sentence that was cut off.
+    private var restingTitledLabel: String {
+        L("app_rules.float.titled.resting", "floats when titled")
+    }
+
     private var floatLabel: String {
         switch floatFacet {
         case .never:
             return titlesEditing.wrappedValue
-                ? titledLabel : neverLabel
+                ? restingTitledLabel : neverLabel
         case .all: return allLabel
-        case .titled: return titledLabel
+        case .titled: return restingTitledLabel
         }
     }
 

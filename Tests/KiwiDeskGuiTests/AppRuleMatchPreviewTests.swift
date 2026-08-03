@@ -100,15 +100,30 @@ struct AppRuleMatchPreviewTests {
         model.config.floatRules = ["\(app):Info"]
         let preview = AppRuleMatchPreview(model: model, app: app)
         for title in [
-            "Get Info", "Information", "Documents", "info", "",
+            "Get Info", "Information", "Documents", "info",
         ] {
+            let window = AppRuleMatchPreview.PreviewWindow(
+                title: title,
+                isFloating: false
+            )
+            let engine = FloatRules(model.config.floatRules)
+                .matches(bundleID: app, title: title)
             #expect(
-                preview.floats(title)
-                    == FloatRules(model.config.floatRules)
-                    .matches(bundleID: app, title: title),
+                (preview.verdict(for: window) == .floatsByRule)
+                    == engine,
                 Comment(rawValue: "diverged on \(title)")
             )
         }
+        // A window the ENGINE floats with no rule — a dialog, a
+        // panel — reads as floating for its own reason, never as
+        // tiling. Saying "tiles" there is the defect this view
+        // shipped in its first cut, and it contradicted the user
+        // guide on the same screen.
+        let dialog = AppRuleMatchPreview.PreviewWindow(
+            title: "Documents",
+            isFloating: true
+        )
+        #expect(preview.verdict(for: dialog) == .floatsAnyway)
         // And with a pattern still being typed — the branch the
         // scan could not defend, and the one the reader trusts
         // most because it answers as they type.
@@ -117,9 +132,16 @@ struct AppRuleMatchPreviewTests {
             app: app,
             pending: "Down"
         )
-        #expect(typing.floats("Downloads"))
-        #expect(!typing.floats("down"))
-        #expect(!typing.floats("Documents"))
+        func typed(
+            _ title: String
+        ) -> AppRuleMatchPreview.Verdict {
+            typing.verdict(
+                for: .init(title: title, isFloating: false)
+            )
+        }
+        #expect(typed("Downloads") == .floatsByRule)
+        #expect(typed("down") == .tiles)
+        #expect(typed("Documents") == .tiles)
     }
 
     /// The preview calls the engine rather than re-deriving it.
@@ -140,6 +162,7 @@ struct AppRuleMatchPreviewTests {
             )
         )
         #expect(source.contains("FloatRules(staged)"))
+        #expect(source.contains("window.isFloating"))
         #expect(source.contains(".matches(bundleID:"))
         #expect(
             !source.contains("title.contains("),

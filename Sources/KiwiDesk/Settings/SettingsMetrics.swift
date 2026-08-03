@@ -164,18 +164,6 @@ enum SettingsMetrics {
     /// would truncate.
     static let dragColumnLabelColumn: CGFloat = 80
 
-    /// The fixed slot for each App Rules facet menu (#260).
-    /// Reserving one width stops the Float facet's x drifting row
-    /// to row with the current Space value's length, so the list
-    /// column-aligns like a native list-style pane. Sized for the
-    /// widest Float option ("Windows titled…") plus the chevron;
-    /// longer Space values truncate (`lineLimit(1)`) rather than
-    /// push the column. Off the shared `settingsLabelColumn` axis
-    /// (the facet grid is self-contained), so it lives here for
-    /// discoverability beside the other feature-scoped column
-    /// constants, not because it shares that axis.
-    static let facetControlColumn: CGFloat = 140
-
     /// The trailing readout of a slider row. Sized for the
     /// widest STRING in use — which is no longer a number: an
     /// Auto-sentinel slider prints "Automatic" there (R6/#406),
