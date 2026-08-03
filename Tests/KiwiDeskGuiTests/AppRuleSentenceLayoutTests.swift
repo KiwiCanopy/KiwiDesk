@@ -39,73 +39,6 @@ struct AppRuleSentenceLayoutTests {
     /// does.
     private static let allowed = ["menuLabel": "spacing:4"]
 
-    /// Strips comments, then string literals — a literal is
-    /// erased rather than removed so offsets stay usable.
-    ///
-    /// Without this a stack could be "found" inside a string:
-    /// guard-prover satisfied the non-vacuity check with a
-    /// `.accessibilityLabel("HStack(spacing: 0)")` while the row
-    /// was laid out by a `VStack`.
-    private func scrubbed(_ url: URL) throws -> String {
-        let source = SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
-        )
-        var out = ""
-        var inString = false
-        var escaped = false
-        for character in source {
-            if escaped {
-                escaped = false
-                continue
-            }
-            if character == "\\", inString {
-                escaped = true
-                continue
-            }
-            if character == "\"" {
-                inString.toggle()
-                out.append(character)
-                continue
-            }
-            out.append(inString ? " " : character)
-        }
-        return out
-    }
-
-    /// The declaration a source offset sits in — the nearest
-    /// preceding `var`/`func` name. That is what lets the exempt
-    /// map key on a MEMBER rather than on a file, so a helper
-    /// added beside `menuLabel` does not inherit its exemption.
-    private func enclosingMember(
-        of source: String,
-        at offset: String.Index
-    ) -> String {
-        var name = "<file scope>"
-        var cursor = source.startIndex
-        while cursor < offset {
-            let lineEnd =
-                source[cursor...].firstIndex(of: "\n")
-                ?? source.endIndex
-            let line = source[cursor..<lineEnd]
-            for keyword in ["var ", "func "] {
-                guard let range = line.range(of: keyword) else {
-                    continue
-                }
-                let rest = line[range.upperBound...]
-                let identifier = rest.prefix {
-                    $0.isLetter || $0.isNumber || $0 == "_"
-                }
-                if !identifier.isEmpty {
-                    name = String(identifier)
-                }
-            }
-            cursor =
-                lineEnd < source.endIndex
-                ? source.index(after: lineEnd) : source.endIndex
-        }
-        return name
-    }
-
     /// Every horizontal stack in the row's files adds no spacing
     /// but the one exemption above.
     ///
@@ -134,20 +67,23 @@ struct AppRuleSentenceLayoutTests {
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Sections"
             )
-        var scanned = 0
         var seen: [String] = []
         for file in Self.rowFiles {
-            let source = try scrubbed(
-                directory.appendingPathComponent(file)
+            let source = SourceScan.blankingCommentsAndLiterals(
+                try String(
+                    contentsOf:
+                        directory
+                        .appendingPathComponent(file),
+                    encoding: .utf8
+                )
             )
-            scanned += 1
             var search = source.startIndex
             while let token = source.range(
                 of: "HStack",
                 range: search..<source.endIndex
             ) {
                 search = token.upperBound
-                let member = enclosingMember(
+                let member = SourceScan.enclosingMember(
                     of: source,
                     at: token.lowerBound
                 )
@@ -198,16 +134,32 @@ struct AppRuleSentenceLayoutTests {
                 )
             }
         }
-        #expect(scanned == Self.rowFiles.count)
         // Assert the scan found something before trusting that it
         // found nothing wrong: the loop above is vacuously green
         // if no stack is matched at all, which is how a broken
         // needle passes for the wrong reason.
         //
-        // Both halves are derived rather than counted. Every
-        // exempt member must actually have been seen — a stale
-        // exemption is a hole with a reason attached — and at
-        // least one NON-exempt stack must exist, or the only
+        // NOT `scanned == rowFiles.count` — `scanned` is
+        // incremented unconditionally inside the loop over
+        // `rowFiles`, so the two sides are equal by construction
+        // and the failing branch is unreachable (a missing file
+        // throws first). guard-prover proved that shape dead
+        // here; it is `2 * m > 2` wearing a non-vacuity check's
+        // clothes. Every file must CONTRIBUTE a stack instead.
+        #expect(
+            seen.count >= Self.rowFiles.count,
+            Comment(
+                rawValue:
+                    "each row file lays something out "
+                    + "horizontally; \(seen.count) stack(s) found "
+                    + "across \(Self.rowFiles.count) file(s) means "
+                    + "one stopped contributing, or the needle "
+                    + "stopped matching"
+            )
+        )
+        // Every exempt member must actually have been seen — a
+        // stale exemption is a hole with a reason attached — and
+        // at least one NON-exempt stack must exist, or the only
         // thing this suite is watching is its own allow-list.
         for member in Self.allowed.keys {
             #expect(
@@ -226,19 +178,69 @@ struct AppRuleSentenceLayoutTests {
         )
     }
 
-    /// The sentence is still drawn by walking the frame, so the
+    /// The sentence is still drawn by WALKING the frame, so the
     /// scan above is looking at a row that renders a translation
     /// rather than a fixed stack of labels.
+    ///
+    /// Scoped to the property's own body, and note the inversion
+    /// against the test above: that one must be FILE-scoped,
+    /// because a spacing helper can be declared outside the
+    /// sentence and composed into it; this one must be
+    /// BODY-scoped, because a `contains` over the file stays
+    /// green on a DEAD `ForEach(frame.segments)` left anywhere
+    /// while `sentence` stitches `control(at: 1)` /
+    /// `Text(" opens in ")` / `control(at: 2)` — which is the
+    /// exact regression turn 14a exists to prevent, and which
+    /// the spacing test cannot see because a stitched stack
+    /// still declares `spacing: 0`. guard-prover shipped it.
+    ///
+    /// The marker is `var sentence`, not the full declaration:
+    /// matching `private var sentence: some View` would red on a
+    /// reflow that `swift-format` could legitimately produce,
+    /// and a formatting-only edit owes nothing (`tests.md`).
     @Test("the sentence is still emitted from the frame")
     func sentenceWalksTheFrame() throws {
-        let source = try scrubbed(
-            SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDesk/Settings/Sections/"
-                        + "AppRuleRow.swift"
-                )
+        let source = SourceScan.blankingCommentsAndLiterals(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow.swift"
+                    ),
+                encoding: .utf8
+            )
         )
-        #expect(source.contains("private var sentence: some View"))
-        #expect(source.contains("ForEach(frame.segments)"))
+        let marker = try #require(
+            source.range(of: "var sentence"),
+            "AppRuleRow must still draw the sentence itself"
+        )
+        let brace = try #require(
+            source[marker.upperBound...].firstIndex(of: "{"),
+            "the sentence must have a body"
+        )
+        var cursor = source.distance(
+            from: source.startIndex,
+            to: brace
+        )
+        let body = try #require(
+            SourceScan.balanced(
+                Array(source),
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "the sentence's body must be readable"
+        )
+        #expect(
+            body.contains("ForEach(frame.segments)"),
+            Comment(
+                rawValue:
+                    "the sentence must emit its pieces by walking "
+                    + "the frame — a row that names positions in "
+                    + "a fixed order cannot be reordered by any "
+                    + "catalog, which is the whole point of "
+                    + "SentenceFrame"
+            )
+        )
     }
 }
