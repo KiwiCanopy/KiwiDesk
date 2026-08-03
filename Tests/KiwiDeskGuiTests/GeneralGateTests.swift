@@ -143,6 +143,17 @@ struct GeneralGateTests {
     /// could then drift with every gate test still green. This
     /// reds if either row stops asking the resolver, or authors a
     /// gate sentence itself instead of reading `GeneralGateHelp`.
+    ///
+    /// Where a substring scan stops, stated so it is not mistaken
+    /// for more: a gate key renamed to a SUPERSTRING (a suffix
+    /// appended in `GeneralGateHelp`) is invisible to the
+    /// `help.contains` half — `scripts/extract-keys` catches that
+    /// key change instead, since `en.json` would no longer match.
+    /// A re-authored key in a VIEW is still caught, because a
+    /// superstring there also contains the checked stem. And the
+    /// presence checks prove the two symbols are TEXT in the file,
+    /// not that the live greying path reaches them — the resolver
+    /// tests above own the behaviour; this owns the wiring.
     @Test("both rows consult the resolver, not an inline copy")
     func rowsConsultTheResolver() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
