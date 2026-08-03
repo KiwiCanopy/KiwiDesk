@@ -40,6 +40,26 @@ extension KiwiCore {
         desktopFocusYield = { [weak self] in
             self?.yieldFocusToDesktop()
         }
+        // The warp's machine tail (#186): target geometry is
+        // pure (`MouseWarp.target`), the cursor read and the
+        // pointer move are not. Left nil until here so unit
+        // tests never move the developer's pointer.
+        pointerWarp = { frame in
+            guard
+                let target = MouseWarp.target(
+                    frame: frame,
+                    cursor: CGEvent(source: nil)?.location
+                )
+            else { return }
+            CGWarpMouseCursorPosition(target)
+            // A programmatic warp decouples the hardware mouse
+            // for the local-events suppression interval
+            // (~250 ms) — a dead mouse right when "the next
+            // click lands where the keyboard works" is the
+            // whole point. Re-associate immediately so the
+            // pointer is live.
+            CGAssociateMouseAndMouseCursorPosition(1)
+        }
         // A bare left click on another monitor's empty desktop
         // moves the focused display (#446). The press also
         // stamps the click discriminator for the cross-display

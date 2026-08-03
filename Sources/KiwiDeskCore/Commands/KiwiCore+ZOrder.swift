@@ -27,12 +27,13 @@ extension KiwiCore {
     /// a sequence queued behind another does lag the settle
     /// (#684's second half, still open). Holding it back and
     /// running it from the drain's completion was built and
-    /// reverted: it re-raises windows whose first raise echo may
-    /// still be in flight, and `zOrderRaiseEchoes` consumes a
-    /// window's stamp on its FIRST echo — so the second echo
-    /// reads as a deliberate focus change and the row pans onto a
-    /// pile-mate (owner QA, 2026-08-02). Coalescing needs the
-    /// ledger to be re-stamped per sequence before it is safe.
+    /// reverted: it re-raised windows whose echoes were still in
+    /// flight, and the ledger then consumed a stamp on its FIRST
+    /// echo, so the second echo read as a deliberate focus
+    /// change (owner QA, 2026-08-02). #689 retired consumption
+    /// (stamps expire by age), which removes that specific
+    /// blocker — re-attempting the coalesce now needs its own
+    /// red-proof, not this comment's permission.
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
         if tiler.animation.activeCount == 0 {

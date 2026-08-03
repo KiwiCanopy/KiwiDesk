@@ -8,6 +8,35 @@ import Foundation
 /// press stamp in `KiwiCore+Lifecycle` and the two echo reverts
 /// in `KiwiCore+FocusEvents` are the consumers.
 extension KiwiCore {
+    /// How long after a z-order raise its focus echo may still
+    /// arrive and be reverted (#418/#425). Sized to the slowest
+    /// AX responders (Electron/WebKit, ~100-300 ms, §5) with
+    /// ~3x margin; a deliberate CLICKLESS focus of a stamped
+    /// window inside it is eaten once — clicks escape on
+    /// provenance (#687). Tunable.
+    static let zOrderRaiseEchoWindow: TimeInterval = 1.0
+
+    /// Sized like `zOrderRaiseEchoWindow`, for the same reason
+    /// (lazy AX answers trail by several hundred ms); beyond
+    /// ~1 s a report is a user action, not our raise's echo.
+    static let selfRaiseSiblingWindow: TimeInterval = 1.0
+
+    /// Whether `id` carries a LIVE self-raise: an outstanding
+    /// entry whose raise `selfRaiseStamps` says is recent. The
+    /// one shape that may veto the raise-echo revert (#431) and
+    /// classify a report as our own echo — a stale entry (a
+    /// no-echo raise's leftover) is neither (#687/#689 QA).
+    func freshSelfRaise(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        outstandingSelfRaises.contains(id)
+            && selfRaiseStamps[id].map {
+                now.timeIntervalSince($0)
+                    < Self.selfRaiseSiblingWindow
+            } == true
+    }
+
     /// Whether a left click within the echo window actually
     /// REACHED `id` — the raise-echo revert's provenance escape
     /// (#687). Deliberately stricter than `recentClickInside`:

@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import Testing
@@ -10,7 +11,14 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-mouse-warp-\(UUID().uuidString)"
         )
-    return makeTestCore(configDirectory: directory)
+    let core = makeTestCore(configDirectory: directory)
+    // Pin the display (tests.md / #531): the warp-hold tests
+    // resolve the focused window's SLOT, which must not be the
+    // host's screen.
+    core.tiler.visibleBounds = { _ in
+        CGRect(x: 0, y: 25, width: 1440, height: 875)
+    }
+    return core
 }
 
 /// Mouse follows focus (#186). The warp itself is a
@@ -47,7 +55,7 @@ struct MouseFollowsFocusTests {
         )
     }
 
-    @Test("The warp guard chain gates on toggle, space, piles")
+    @Test("The warp guard chain gates on toggle and space")
     func eligibility() {
         // NSEvent.pressedMouseButtons is assumed 0 while the
         // suite runs (nobody is clicking during `swift test`).
@@ -62,12 +70,12 @@ struct MouseFollowsFocusTests {
         #expect(!core.mouseWarpEligible(id))
         core.tiler.settings.mouse.followsFocus = true
         #expect(core.mouseWarpEligible(id))
-        // A z-order restore in flight holds the warp: its pile
-        // raises steal focus without user intent (#186).
+        // The in-flight restore hold is deliberately NOT part
+        // of this chain (#689): it defers a warp rather than
+        // refusing one — the pending tests below own it.
         core.zOrderRestoresInFlight = 1
-        #expect(!core.mouseWarpEligible(id))
-        core.zOrderRestoresInFlight = 0
         #expect(core.mouseWarpEligible(id))
+        core.zOrderRestoresInFlight = 0
         // A window on no (or an inactive) space never warps.
         #expect(!core.mouseWarpEligible(WindowID(99)))
     }

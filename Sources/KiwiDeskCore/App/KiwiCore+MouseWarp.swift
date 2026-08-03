@@ -33,16 +33,16 @@ extension KiwiCore {
     /// real pointer: the toggle, any held mouse button (the
     /// user is mid-click or mid-drag — yanking the pointer
     /// would hijack the gesture, and a mouse-made focus change
-    /// needs no warp anyway), an in-flight z-order restore
-    /// (whose pile raises steal focus without user intent),
-    /// and the active space (a focus landing on a stashed
-    /// window has no on-screen frame worth warping to — the
-    /// deferred focus follow warps once the space is pulled
-    /// forward).
+    /// needs no warp anyway), and the active space (a focus
+    /// landing on a stashed window has no on-screen frame
+    /// worth warping to — the deferred focus follow warps once
+    /// the space is pulled forward). The in-flight restore
+    /// hold is NOT part of this chain since #689: it defers a
+    /// warp rather than refusing one, so `warpMouseToFocused`
+    /// owns it.
     func mouseWarpEligible(_ id: WindowID) -> Bool {
         tiler.settings.mouse.followsFocus
             && NSEvent.pressedMouseButtons == 0
-            && zOrderRestoresInFlight == 0
             && (state.workspaces.space(of: id)
                 == state.workspaces.activeSpace
                 // A sticky window is visible on EVERY space
@@ -62,16 +62,51 @@ extension KiwiCore {
     /// KiwiDesk's own process (#174) or unmanaged windows, so
     /// no extra filter is needed here.
     ///
+    /// A restore in flight HOLDS the warp rather than dropping
+    /// it (#186's guard, #689's fix): the pile raises churn
+    /// focus without user intent, so the pointer must not
+    /// chase them — but the focus change that landed mid-drain
+    /// is real, and before #689 its warp was lost outright
+    /// (#684 stretched the drain from ~10 ms to 50-400 ms,
+    /// which made that loss routine). The pending slot re-fires
+    /// on the last drain's end, staleness-checked.
+    ///
     /// Tiled windows warp to the layout's *assigned* slot, not
     /// the live AX frame: in focus-driven layouts (scrolling,
     /// monocle) the window is still sliding when the warp
     /// runs, and the AX frame would be a stale mid-flight
     /// position. Floating windows have no slot and fall back
     /// to the AX frame (one snapshot, not a loop — §5). Both
-    /// are top-left global coordinates, the space
-    /// `CGWarpMouseCursorPosition` expects.
+    /// are top-left global coordinates, the space the pointer
+    /// warp expects.
     func warpMouseToFocused(_ id: WindowID) {
         guard mouseWarpEligible(id) else { return }
+        guard zOrderRestoresInFlight == 0 else {
+            // Hold only CLICKLESS intent (cmd-tab, keyboard
+            // focus-nav) — the case whose warp the drain
+            // genuinely loses (#689). A fresh left press means
+            // the mouse made this focus change (a bar click's
+            // intent warp lands here whenever the previous
+            // jump's restore is still draining), and a held
+            // warp firing hundreds of ms after the click reads
+            // as a spurious pointer jump (device QA,
+            // 2026-08-03); dropping it is the pre-#689
+            // behavior, and the pointer already sits where the
+            // user's hand put it. The trade: keyboard nav
+            // within ~1 s of a press, mid-drain, loses its
+            // warp too — pre-#689 every such warp was lost.
+            let now = Date()
+            let mouseMade =
+                lastLeftClick.map {
+                    now.timeIntervalSince($0.at)
+                        < Self.selfRaiseSiblingWindow
+                } == true
+            if !mouseMade {
+                pendingMouseWarp = id
+            }
+            return
+        }
+        pendingMouseWarp = nil
         let frame: CGRect
         if let slot = tiler.calculatedFrames(
             state: state
@@ -82,18 +117,24 @@ extension KiwiCore {
         } else {
             return
         }
-        guard
-            let target = MouseWarp.target(
-                frame: frame,
-                cursor: CGEvent(source: nil)?.location
-            )
+        pointerWarp?(frame)
+    }
+
+    /// Fires the warp a draining restore held, once the LAST
+    /// overlapping drain ends (#689) — called by
+    /// `performZOrderSequence` after its counter drop. Fire-time
+    /// re-validation, the `runPendingFocusRaise` pattern: a
+    /// pending target the focus has moved off is dropped, not
+    /// warped. A held sticky-traveler warp is dropped too
+    /// (`activeSpace.focused` never holds a traveler, #431) —
+    /// conservative, and still strictly more than the
+    /// pre-#689 behavior of dropping every held warp.
+    func runPendingMouseWarp() {
+        guard zOrderRestoresInFlight == 0,
+            let id = pendingMouseWarp
         else { return }
-        CGWarpMouseCursorPosition(target)
-        // A programmatic warp decouples the hardware mouse for
-        // the local-events suppression interval (~250 ms) —
-        // a dead mouse right when "the next click lands where
-        // the keyboard works" is the whole point. Re-associate
-        // immediately so the pointer is live.
-        CGAssociateMouseAndMouseCursorPosition(1)
+        pendingMouseWarp = nil
+        guard id == activeSpace?.focused else { return }
+        warpMouseToFocused(id)
     }
 }

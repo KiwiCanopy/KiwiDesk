@@ -79,8 +79,31 @@ struct RaiseEchoClickTests {
         let (intended, top, _) = makePile(core)
         core.handle(.windowFocused(top))
         #expect(focused(core) == intended)
-        // Consumed: the echo the stamp promised has arrived.
-        #expect(core.zOrderRaiseEchoes[top] == nil)
+        // NOT consumed: lazy apps re-report a raised window,
+        // and an unstamped duplicate was honored as deliberate
+        // focus — the snap-back of #689's device trace. The
+        // stamp expires by age instead.
+        #expect(core.zOrderRaiseEchoes[top] != nil)
+        // The duplicate report inside the window reverts too.
+        core.handle(.windowFocused(top))
+        #expect(focused(core) == intended)
+    }
+
+    /// The veto is age-bounded (#689 device trace): a STALE
+    /// outstanding entry — a no-echo re-assert's leftover —
+    /// must not block the ledger revert, or a lazy app's late
+    /// re-report threads both nets (the stale entry vetoes the
+    /// ledger; the age bound rightly says it is no self-echo)
+    /// and focus snaps back to the pile-mate.
+    @Test("A stale self-raise entry cannot veto the revert")
+    func staleSelfRaiseEntryDoesNotVeto() {
+        let core = makeCore()
+        let (intended, top, _) = makePile(core)
+        // Outstanding but never echoed and long unstamped —
+        // the shape a no-echo raise leaves behind.
+        core.outstandingSelfRaises.insert(top)
+        core.handle(.windowFocused(top))
+        #expect(focused(core) == intended)
     }
 
     @Test("A click that reached the window escapes the revert")

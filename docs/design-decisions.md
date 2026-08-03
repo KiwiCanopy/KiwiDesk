@@ -673,12 +673,18 @@ untracked windows is a known narrowness: a click on a
 non-click-through ignored window overlapping a stamped one can
 still resolve to the window beneath, failing toward honoring a
 focus report, never toward eating one. The escaped report
-keeps its stamp: the raise's real echo may
-still be in flight, and if focus has moved on by the time it
-lands, that echo must still be reverted. What remains eaten is
-a deliberate *clickless* focus of a stamped window (cmd-tab,
-app-driven) inside the ~1 s echo window — once, and strictly
-better than the pre-#418 permanent poisoning.
+keeps its stamp — in fact no echo ever consumes one: stamps
+expire by age alone, because lazy apps re-report a raised
+window a second time hundreds of ms after the first echo, and
+a consumed stamp let that duplicate through as deliberate
+focus (ring, pan and pointer snapped back to the pile-mate —
+the [#689](https://github.com/KiwiCanopy/KiwiDesk/issues/689)
+device trace). The deliberate-refocus case consumption used to
+protect has real discriminators now: clicks escape on
+provenance, commands route through the self-raise path, and
+only a clickless app-driven or cmd-tab focus inside the ~1 s
+window is eaten — strictly better than the pre-#418 permanent
+poisoning.
 
 Two corollaries from the same device QA. **Every echo ledger is
 age-bounded, `outstandingSelfRaises` included**: raising an

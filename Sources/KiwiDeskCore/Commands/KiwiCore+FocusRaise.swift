@@ -125,7 +125,9 @@ extension KiwiCore {
         // self-echo that must not warp twice. `warp: false`
         // marks mouse-made focus (drag drop, resize settle),
         // where the button is already up.
-        if warp { warpMouseToFocused(id) }
+        if warp {
+            warpMouseToFocused(id)
+        }
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
         else {
@@ -141,22 +143,30 @@ extension KiwiCore {
         // their own on their nav paths), so a focus change must
         // re-assert stacking through the reliable ordered raise —
         // the lone `AXHelper.raise` above works only intermittently
-        // across apps from a background app. Guard on the in-flight
-        // count so the restore's own closing re-assert (which calls
-        // back here) can't re-arm and loop (owner 2026-07-20).
+        // across apps from a background app.
         //
-        // Read the counter as it is now, not as it was: since
-        // #684 a sequence holds it until its landings verify, so
-        // this also drops a GENUINE restore for that whole window
-        // — deterministically, because a monocle restore's floor
-        // holds the frontmost app's key window and a quiet raise
-        // can never clear it, so the drain always pays out its
-        // per-window limit here. #689 tracks it, and its fix is to
-        // give this arm the semantic test the scrolling arm below
-        // already uses (refuse the re-assert because the focus is
-        // unchanged) rather than asking whether a restore is in
-        // flight at all.
-        if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0 {
+        // SEMANTIC loop guard, the scrolling arm's shape (#689):
+        // the restore's own closing re-assert (which calls back
+        // here) targets the focus that is already current, so
+        // `previousFocused == id` refuses it by construction.
+        // This arm keyed on `zOrderRestoresInFlight == 0` until
+        // #689: since #684 a sequence holds that counter until
+        // its landings verify — and a monocle restore's floor
+        // contains the frontmost app's key window, which a quiet
+        // raise can never clear, so the drain always paid its
+        // per-window limit (`ZOrderDrain.landingLimit`) and the
+        // counter suppressed a GENUINE second restore for that
+        // whole limit after every monocle bar click. A
+        // same-window re-focus arms nothing, which is
+        // also correct: the raise above already fronted it, and
+        // its floor clearance is what the previous restore
+        // verified. One residue: a re-assert while a tiled-
+        // sticky traveler holds the system focus reads
+        // `previousFocused` as the traveler and arms once more —
+        // that restore's plan is empty (the traveler is already
+        // frontmost) and its own re-assert is skipped by the
+        // completion's focus guard, so it cannot loop.
+        if activeSpace?.mode == .monocle, previousFocused != id {
             scheduleZOrderRestore()
         }
         // Armed only AFTER the retile: retiling cancels
@@ -197,24 +207,19 @@ extension KiwiCore {
         // arming above it would drain a pile onto `zOrderQueue`
         // before `pendingFocusRaise` was even set, and the
         // immediate `runPendingFocusRaise` would then race it.
-        // Deliberately NOT guarded on `zOrderRestoresInFlight`,
-        // the way the monocle arm above is. Monocle needs that
-        // counter because its arm keys on mode alone, so the
-        // restore's own closing re-assert would re-arm it; here
-        // the jump test already refuses that call — the re-assert
-        // targets the focus that is current, so the distance is
-        // zero. The counter would only ever suppress a REAL jump:
-        // a pile drain holds it for as long as the sequence takes
-        // to verify its landings — bounded since #684 at
+        // Deliberately NOT guarded on `zOrderRestoresInFlight`
+        // — the same semantic refusal as the monocle arm above
+        // (#689): the restore's own closing re-assert targets
+        // the focus that is current, so the jump distance is
+        // zero and the jump test refuses it. The counter would
+        // only ever suppress a REAL jump: a pile drain holds it
+        // for as long as the sequence takes to verify its
+        // landings — bounded since #684 at
         // `ZOrderDrain.landingLimit` a window and `restoreBudget`
-        // a sequence, where it used to be unbounded and set by
-        // whatever an app that answers AX lazily did — so a user
-        // stepping back and forth across the row lands inside
-        // that window constantly and would see every second jump
-        // silently skip its restack (owner device QA,
-        // 2026-08-02). Bounding it did not shorten it: the window
-        // is now longer and deterministic, so the conclusion
-        // holds harder than when it was written.
+        // a sequence — so a user stepping back and forth across
+        // the row lands inside that window constantly and would
+        // see every second jump silently skip its restack
+        // (owner device QA, 2026-08-02).
         if scrollFocusJumpsSlots(to: id, from: previousFocused) {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }
