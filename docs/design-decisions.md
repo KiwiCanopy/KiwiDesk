@@ -3504,6 +3504,64 @@ identity + order is enough here. (#68 §3.13)
 
 ### App rules
 
+**[Principle]**
+
+**A rule is a sentence, and the sentence is the control.** An app
+rule states what an app does — "Spotify opens in media and
+floats" — so the row states it, with the two menus sitting inside
+the statement where their values complete it. The shape it
+replaced was a form *about* an app: a name header over two
+labelled facet columns, which made the reader assemble the
+meaning out of three fragments and read "Float: Never" as a
+setting rather than as behaviour. Three consequences bind
+anything added here, and the first is the one that is easy to
+get wrong twice.
+
+**The word order is the translator's.** A sentence with controls
+in it is one localized frame with positional specifiers, split
+on those specifiers and emitted in whatever order the
+translation put them — never connectives authored as their own
+keys between fixed stack positions. That shortcut is the harm
+`.claude/rules/localization.md` names by title, and it is not
+theoretical here: ja and ko are verb-final, so no catalog edit
+could have produced a grammatical row. `SentenceFrame` is the
+split, `SentenceFrameTests` holds it, and the next area that
+wants a sentence inherits both.
+
+**The values are verb phrases, in EVERY facet.** A menu inside a
+sentence has to read as part of one — a noun that completed a
+"Float:" label completes nothing in a statement. Converting one
+facet and not the other leaves the row half-built in exactly the
+state most rows are in: the unset space facet is what every
+float-only rule shows.
+
+**The labels the sentence stopped showing become the controls'
+accessibility names.** A sentence gives a screen reader no name
+for its controls, and the settings census names those rows by
+the same keys — so the call site is load-bearing three ways at
+once, and dropping it is silent in all three until a locale
+prunes the key.
+
+**A rule whose effect you cannot read off the rule gets a live
+check.** A title fragment is that case: "Windows titled Info"
+looks obviously right until it also catches "Information", or
+misses "Get Info" because the match is case-sensitive. Neither
+failure is visible in the rule's own text, and both are visible
+in the user's actual window titles — so the editor lists the
+app's open windows with the verdict beside each, updating as the
+pattern is typed, and a rule is verified before it is saved
+rather than after it misfires. The obligation that carries: the
+verdict comes from the ENGINE's matcher, never from a `contains`
+written beside the preview. A preview that disagrees with the
+engine is worse than no preview, because it is trusted — and the
+two details a re-implementation gets wrong are exactly the two
+the check exists to show.
+
+This is a read of live window state from Settings, which is not
+the live-*apply* coupling #123 rejects: it reaches the snapshot
+the app already keeps, never the accessibility layer, so a
+keystroke costs a filter over an array the GUI holds.
+
 **[Rationale]**
 
 **One row per app, two facets.** "Finder lives on space 2

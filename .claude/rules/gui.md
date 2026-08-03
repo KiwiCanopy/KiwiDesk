@@ -129,8 +129,9 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion, Advanced Colours, Shortcuts and
-Layout Defaults render from it now** (#678 Phases 2-3):
+it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
+Layout Defaults and App Rules render from it now** (#678 Phases
+2-3):
 `BarsRowOrder` / `ColorsRowOrder` / `ShortcutsRowOrder` /
 `LayoutDefaultsRowOrder`
 hold the display order and `BarsCensusRenderTests` /
@@ -242,6 +243,44 @@ is knowingly unguarded and stated so it is not mistaken for
 coverage: nothing pins that a schematic's `body` still *draws*
 the quantity it derives, so a correct derivation feeding a
 constant frame passes.
+
+**A census-named row that draws no visible label authors its
+label key as an `.accessibilityLabel`.** The App Rules sentence
+is the worked case: its two menus sit inside a statement with no
+label beside them, and the census still names those rows by
+`app_rules.space` / `app_rules.float`. That one call site is
+load-bearing three ways — VoiceOver has nothing else to call the
+control, `SettingKeyLocaleTests` requires the key in every
+locale, and search indexes it — and dropping it is silent in all
+three until a locale prunes the key.
+`AppRulesCensusRenderTests`' `facetsKeepTheirLabels` matches the
+modifier's SHAPE over stripped source, because an earlier cut
+accepted any mention of the key and went green when the
+modifier became a `.help()`, leaving the menu with no
+accessibility name at all.
+
+**A sentence with controls in it is one localized frame, not
+connectives between fixed stack positions.** Author the frame
+with positional specifiers, split on them, and emit the pieces
+in the translation's order (`SentenceFrame`,
+`SentenceFrameTests`) — a row assembled from `"opens in"` and
+`"and"` keys placed by an `HStack` cannot be reordered by any
+catalog, and this app ships four verb-final locales. The
+argument is in `docs/design-decisions.md` ▸ App rules.
+
+**And the stack that lays such a frame out adds no spacing —
+the frame's own literals carry it.** A per-segment gap reads as
+merely wide in English, whose literals already carry their
+spaces, and is wrong outright wherever the literal between two
+slots opens with a particle that must hug the noun before it
+(`は`, `에`): the gap tears it off, in exactly the languages the
+frame exists for. So the spacing is the translator's too, and a
+row drawing one owes an allow-list naming any stack that may
+space its children and why — `AppRuleSentenceLayoutTests`, whose
+`allowed` map is the one copy of who may. What no source scan
+can reach is per-segment spacing that is not a stack argument —
+a `.padding`, a `Spacer`, a `.frame` — so that residue is
+stated in the suite rather than chased.
 
 **A capability unlocked in one list stays scoped to that list**
 (#678). Once a profile carries a single shortcut override, the

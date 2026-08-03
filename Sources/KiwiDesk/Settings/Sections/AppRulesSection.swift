@@ -30,12 +30,13 @@ struct AppRulesSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SettingsSection(
-                    SettingsCatalog.appRules.rulesPerApp
+                    SettingsCatalog.appRules.rulesPerApp,
+                    caption: rulesCaption
                 ) {
                     overrideIndicator
-                    Text(rulesCaption)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if apps.isEmpty {
+                        emptyNote
+                    }
                     ForEach(apps, id: \.self) { app in
                         AppRuleRow(
                             model: model,
@@ -84,12 +85,15 @@ struct AppRulesSection: View {
                     + "loaded profile in the header's picker."
             )
         }
+        // States the card's SUBJECT, not its instructions
+        // (turn 14a). The rows are sentences now, so they teach
+        // what a rule can say better than a caption listing the
+        // options could; and "deleting a row removes all of the
+        // app's rules" moved to the delete button's own help,
+        // where it is read at the moment it matters.
         return L(
             "app_rules.section.caption",
-            "Pin an app's windows to a space, "
-                + "keep them floating, or both. "
-                + "Deleting a row removes all of "
-                + "the app's rules."
+            "What an app should do when it opens."
         )
     }
 
@@ -130,6 +134,23 @@ struct AppRulesSection: View {
             if order == .orderedSame { return lhs < rhs }
             return order == .orderedAscending
         }
+    }
+
+    /// What happens to an app with no rule — the answer to the
+    /// question an empty list otherwise leaves open. It states
+    /// the default behaviour rather than inviting an action,
+    /// because having no rules is a perfectly good state and the
+    /// "Add app…" control below is already the invitation.
+    private var emptyNote: some View {
+        Text(
+            L(
+                "app_rules.empty",
+                "Apps with no rule tile normally, in whichever "
+                    + "space you open them."
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 
     private var addRow: some View {
