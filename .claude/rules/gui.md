@@ -130,11 +130,11 @@ never views.
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
-Layout Defaults, App Rules, General and Gaps & Borders render
-from it now** (#678 Phases 2-3): each carries its own order list
-and a census-render suite pinning that order to the census
-(`GapsBordersRowOrder` / `GapsAndBordersCensusRenderTests` is the
-newest pair), so a row in a `ForEach`-rendered container moves by
+Layout Defaults, App Rules, General, Gaps & Borders and Spaces &
+Layouts render from it now** (#678 Phases 2-3): each carries its
+own order list and a census-render suite pinning that order to the
+census (`SpacesRowOrder` / `SpacesCensusRenderTests` is the newest
+pair), so a row in a `ForEach`-rendered container moves by
 editing the census — with the bespoke edge below. This bold list is itself a hand-kept claim with no guard,
 so an added area joins it here in the same change that ships its
 `*RowOrder` (General was silently dropped from it once).
@@ -150,12 +150,14 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General and Gaps & Borders push that edge wider: EVERY container
-in them is bespoke (`GeneralRowOrder.bespokeContainers` /
-`GapsBordersRowOrder.bespokeContainers`, each the whole set,
-asserted by `bespokeMeansNoForEach` in each area's render suite),
-so their order lists are membership-and-search only and editing
-one moves nothing on screen.
+General, Gaps & Borders and Spaces & Layouts push that edge
+wider: EVERY container in them is bespoke
+(`GeneralRowOrder.bespokeContainers` /
+`GapsBordersRowOrder.bespokeContainers` /
+`SpacesRowOrder.bespokeContainers`, each the whole set, asserted
+by `bespokeMeansNoForEach` in each area's render suite), so their
+order lists are membership-and-search only and editing one moves
+nothing on screen.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is

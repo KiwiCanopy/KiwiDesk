@@ -108,10 +108,18 @@ struct GreyOutParityTests {
             "GreyOut(active: gatedOff",
             1
         ),
+        // The per-space grid and track override greys now resolve
+        // through `SpacesGates` (#678 Phase 3, turn 8): all three
+        // GreyOut blocks (fill-empty, the Columns/Rows pair, the
+        // track limit) wrap on a resolver call rather than an
+        // inline `resolvedGrid`/`resolvedTrack` predicate. The
+        // count pins that every one still greys — dropping any
+        // one would leave a control live with nothing to act on.
+        // `SpacesGateWiringTests` holds WHICH gate each consults.
         (
             "SpaceOverrideRows+ModeRows.swift",
-            "active: g.resolvedGrid(for: space).autoSize",
-            1
+            "active: gates.inertReason(",
+            3
         ),
         // Advanced Colours (#678 Phase 3), which replaced the
         // interim colour cards.

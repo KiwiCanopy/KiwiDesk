@@ -96,7 +96,14 @@ extension SpaceOverrideRows {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
-        .disabled(g.overrideFieldCount(mode, for: space) == 0)
+        .disabled(
+            gates.inertReason(for: .spaces(.spaceOverrideResetActive))
+                != nil
+        )
+        .help(
+            gates.inertReason(for: .spaces(.spaceOverrideResetActive))
+                .map(SpacesGateHelp.sentence) ?? ""
+        )
 
         if !dormantLayouts.isEmpty {
             Button(

@@ -819,6 +819,7 @@
   "space_override.dormant.label": "Saved for other layouts (%1$d)",
   "space_override.floating.none": "Floating has no per-space overrides.",
   "space_override.reset_active": "Reset %1$@ Overrides",
+  "space_override.reset_active.none": "There are no overrides to reset.",
   "space_override.reset_all": "Reset All Layout Overrides",
   "space_override.reset_all_confirm.action": "Reset All",
   "space_override.reset_all_confirm.message": "This clears every layout's saved overrides for this space, not just the current one. This can't be undone.",
