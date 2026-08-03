@@ -79,19 +79,17 @@ struct AutoGatedGroup<Gated: View>: View {
 /// adjacency already answers "why", the way the toggle above an
 /// `AutoGatedGroup` does.
 ///
-/// **That fallback was not observed to render** (device check
-/// 2026-08-03, the greyed Columns/Rows steppers under Grid's
-/// Auto-size toggle: the string reached this modifier and no
-/// tooltip appeared). The likely cause is that SwiftUI stops
-/// delivering hover to what `.disabled()` disables, but that has
-/// not been confirmed and no workaround has been tested — so
-/// treat the hover as unavailable rather than as diagnosed.
-/// The adjacency above is therefore not a nicety: it is the
-/// whole explanation a control-scoped gate ships today, and a
-/// gate whose reason is NOT answered by an adjacent control
-/// needs a live `?` outside the gated subtree rather than a
-/// `help:` here. The strings that exist are kept for the day the
-/// hover works, not relied on now.
+/// **A "no tooltip" report is AppKit's tooltip delay until
+/// proven otherwise** (2026-08-03): the greyed Columns/Rows
+/// steppers under Grid's Auto-size toggle read as having no
+/// hover string at all, and the cause was the default delay,
+/// not the gate. `.disabled()` does NOT suppress `.help()`.
+/// Hover long enough and the sentence appears.
+///
+/// That is worth a line here because the wrong reading is the
+/// tempting one — the string is on a disabled control, so the
+/// control looks like the culprit — and it sent one change down
+/// a workaround that fixed nothing. Reach for the delay first.
 ///
 /// **Dims once, however deeply it nests.** Opacity multiplies,
 /// so a row inside an already-dimmed block used to land at
