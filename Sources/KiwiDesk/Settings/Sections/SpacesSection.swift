@@ -159,6 +159,7 @@ struct SpacesSection: View {
                         )
                     )
                 }
+                pinBadge(space)
                 Spacer()
                 modePicker(space)
                 customizeButton(space)
@@ -209,6 +210,9 @@ struct SpacesSection: View {
             }
         )
     }
+
+    // `pinBadge` lives in `SpacesSection+PinBadge.swift`
+    // (turn 8a display-pin badge; file-size split).
 
     // `modePicker` and its binding live in
     // `SpacesSection+ModePicker.swift` (#123 file-size split).
