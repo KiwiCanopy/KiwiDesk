@@ -175,9 +175,16 @@ struct ShortcutsCapabilityUnlockTests {
         #expect(model.editingStoredProfile)
 
         #expect(model.editedProfileOverridesKeys)
-        // Vacuity: the app-rules list must be non-empty, or
-        // "does not diverge" is a comparison of two nothings.
+        // Vacuity, BOTH sides. `editedProfileOverridesAppRules`
+        // short-circuits to false on a missing baseline, so the
+        // assertion below is satisfied by the app-rules base
+        // being absent as readily as by scoping holding — a
+        // fail-open `guard-prover` caught by nilling the
+        // baseline and watching this suite stay green. The
+        // layers half needs no such pin: its baseline is
+        // self-checking, because the line above asserts it TRUE.
         #expect(model.config.appRules.count == 2)
+        #expect(model.profileEditingBaseAppRules?.isEmpty == false)
         // The neighbouring list with the same override shape is
         // untouched — the capability stayed in its own list.
         #expect(!model.editedProfileOverridesAppRules)
