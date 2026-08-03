@@ -133,6 +133,15 @@ struct TeardownRestackTests {
 
     // MARK: - The wall clock
 
+    /// The shipped whole-quit budget, read rather than restated:
+    /// every expectation below is derived from it, so moving the
+    /// policy moves the fixture instead of reddening it for a
+    /// reason that has nothing to do with the invariant
+    /// (guard-prover, 2026-08-03).
+    private var budget: TimeInterval {
+        ZOrderDrain.Policy.teardown.budget
+    }
+
     /// Each display gets what is LEFT of the whole-quit budget, not
     /// a fresh copy of it — otherwise three displays could spend
     /// three seconds on a quit that promised one.
@@ -144,46 +153,86 @@ struct TeardownRestackTests {
             (display: UInt32(2), order: ids([4, 3])),
             (display: UInt32(3), order: ids([6, 5])),
         ]
-        restack(recorder, raising: [], costing: 0.3).run(circles)
+        let cost = budget / 4
+        restack(recorder, raising: [], costing: cost).run(circles)
         #expect(
-            recorder.runs.map(\.budget) == [1.0, 0.7, 0.4]
+            recorder.runs.map(\.budget)
+                == [budget, budget - cost, budget - 2 * cost]
         )
     }
 
-    /// Once the clock is spent the restack stops dead rather than
-    /// issuing raises it can no longer verify — each of those is a
+    /// Once the clock is spent the restack STOPS rather than
+    /// skipping the group and carrying on — each further raise is a
     /// blocking AX call the budget has no room left to pay for.
-    /// The remaining displays are never reached, which is what the
-    /// long-standing "stacking left partial" line has always meant.
-    @Test("A spent budget stops the restack, and says so")
+    ///
+    /// The over-budget group is deliberately not the last one, and
+    /// the log COUNT is asserted: with the group last, `return` and
+    /// `continue` are indistinguishable, and that is how the first
+    /// draft of this test passed against a `continue` (guard-prover,
+    /// 2026-08-03). A `continue` would visit displays 3 and 4 too
+    /// and log the partial line three times.
+    @Test("A spent budget stops the restack, and says so once")
     func spentBudgetStopsAndLogsPartial() {
         let recorder = Recorder()
         let circles = [
             (display: UInt32(1), order: ids([2, 1])),
             (display: UInt32(2), order: ids([4, 3])),
             (display: UInt32(3), order: ids([6, 5])),
+            (display: UInt32(4), order: ids([8, 7])),
         ]
-        restack(recorder, raising: [], costing: 0.6).run(circles)
-        // Two groups fit inside the second; the third is not
-        // raised at all.
+        // Two groups exhaust it, so the loop must end at the third.
+        restack(recorder, raising: [], costing: budget * 0.6)
+            .run(circles)
         #expect(recorder.runs.count == 2)
-        #expect(
-            recorder.logs.last
-                == "gatherWindows: raise budget exceeded — "
-                + "stacking left partial"
-        )
+        let partial =
+            "gatherWindows: raise budget exceeded — "
+            + "stacking left partial"
+        // Exactly once, and last. Group 2 legitimately logs its own
+        // shortfall before this, so the whole log is not the
+        // discriminator — the COUNT is: a `continue` would reach
+        // displays 3 and 4 and emit this line three times.
+        #expect(recorder.logs.filter { $0 == partial }.count == 1)
+        #expect(recorder.logs.last == partial)
     }
 
-    /// A restack that fits inside its budget says nothing. The
-    /// shortfall line is keyed on the clock, so a quiet quit
-    /// claiming a shortfall would be the false positive that
-    /// matters most.
+    /// A restack that fits inside its budget says nothing.
     @Test("A restack inside its budget logs nothing")
     func restackInsideBudgetIsSilent() {
         let recorder = Recorder()
         let circles = [(display: UInt32(1), order: ids([2, 1]))]
-        restack(recorder, raising: ids([2, 1]), costing: 0.1)
+        restack(recorder, raising: ids([2, 1]), costing: budget / 10)
             .run(circles)
+        // Both halves: silent, and it really did the work. Without
+        // the second, an empty `run` passes this test
+        // (guard-prover, 2026-08-03).
+        #expect(recorder.logs.isEmpty)
+        #expect(recorder.runs.count == 1)
+    }
+
+    /// The false positive `!raised.isEmpty` exists to remove, with
+    /// a fixture that actually reaches it.
+    ///
+    /// An already-correct group plans nothing, so the drain returns
+    /// having raised none of the circle — after a single ~0.4 ms
+    /// read. If that read is what tips the clock past the deadline,
+    /// the clock arm alone would report a shortfall on a group that
+    /// had nothing to do. Modelled by letting the group's stacking
+    /// already match its circle while the read spends the whole
+    /// budget.
+    ///
+    /// The suite's other silent test never reaches this term — its
+    /// drain does raise, so the clock arm decides and dropping
+    /// `!raised.isEmpty` left the whole suite green (guard-prover,
+    /// 2026-08-03).
+    @Test("A group with nothing to do claims no shortfall")
+    func alreadyCorrectGroupClaimsNoShortfall() {
+        let recorder = Recorder()
+        let circle = ids([2, 1])
+        // Stacking already equals the circle's desired front-to-back
+        // order, so `plan` is empty and `run` raises nothing.
+        restack(recorder, raising: ids([1, 2]), costing: budget)
+            .run([(display: UInt32(1), order: circle)])
+        #expect(recorder.runs.count == 1)
         #expect(recorder.logs.isEmpty)
     }
 }
