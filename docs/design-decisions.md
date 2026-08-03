@@ -1167,6 +1167,39 @@ non-standard *controls*, which is the half that stays bound.
 (Owner ruling 2026-08-02, in chat; first applied in the Phase 2
 Bars area.)
 
+### Hover help appears sooner than AppKit's default
+
+**[Trade-off]**
+
+**KiwiDesk registers a shorter `NSInitialToolTipDelay` (700 ms)
+than AppKit's default of roughly two seconds.** Registered as a
+fallback, never set: a user who has chosen their own delay keeps
+it.
+
+This is a deliberate deviation from "standard controls work the
+standard way", taken because the default makes a specific
+explanation channel unreadable. A greyed control's "why can't I
+touch this" sentence is a hover string; at two seconds, a user
+who moves the pointer onto a dimmed stepper and pauses to read
+sees nothing, concludes there is nothing to see, and leaves. The
+sentence was written, translated into eleven locales, and
+delivered to nobody. Shortening the delay is what makes the
+fallback a fallback rather than dead copy.
+
+It does not promote hover to the primary affordance. A block
+gate still explains itself through a live `?` outside the gated
+subtree, and a control-scoped gate still leans first on the
+gating control sitting directly above it (#527) — hover remains
+the last of the three, and a surface that needs hover to be
+understood is mis-designed.
+
+The floor matters as much as the ceiling: below roughly half a
+second, tooltips fire while the pointer merely *crosses* a row on
+its way elsewhere, and Settings becomes a field of popping
+yellow. Late help is better than that. 700 ms is chosen to be
+clearly faster than a pause-and-give-up while still requiring
+the pointer to actually rest.
+
 ### Permanent accessory mode (no activation policy switching)
 
 **[Principle]**
