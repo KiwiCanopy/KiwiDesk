@@ -1340,13 +1340,16 @@ against it. The obligation that carries: **call the engine
 wherever the engine can answer**, so that much of the picture
 cannot drift — BSP tiles through `BspLayout` and a dynamic grid
 takes its balance from `GridLayout.balanced` rather than a copy
-of the arithmetic. The rest is hand-drawn against a mini canvas
-the engine's own constants do not suit (the cascade's 40 pt
-title-bar reveal would throw tiles off it), and that residue is
-the standing reason to widen the seam rather than the licence
-not to: a schematic reproducing a rule the engine already
-exports is a picture that stops agreeing with the layout the
-day the rule moves. Two consequences worth stating, because both
+of the arithmetic. The rest is hand-drawn for two different
+reasons, and they want different remedies: some of the engine's
+constants do not suit a mini canvas at all (the cascade's 40 pt
+title-bar reveal would throw tiles off it), while some rules —
+a grid's fill order, its capacity clamp, the leftover span —
+have no such obstacle and are simply not exported apart from
+`calculateGeometry`. The second kind is the standing reason to
+widen the seam rather than the licence not to: a schematic
+reproducing a rule the engine already owns is a picture that
+stops agreeing with the layout the day the rule moves. Two consequences worth stating, because both
 look like regressions in isolation: the two-frame "4 windows →
 a 5th opens" growth pair retired, since a reader who can add
 the fifth window themselves does not need it staged; and the

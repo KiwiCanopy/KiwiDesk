@@ -177,10 +177,12 @@ convergence and does not discharge it: it answers only ROW
 gates, so it had nothing to converge *with* — **give this area
 a container gate or a `.runtime` one and converge the
 resolvers rather than teaching this one a second shape.**
-`LayoutDefaultsGateTests`' `everyGatedRowIsResolved` reds when
-a ROW gate this resolver does not answer appears; a CONTAINER
-gate here sits under no such net, so that half is a reviewer's
-to catch. A resolver returns the *reason*
+`LayoutDefaultsGateTests`' `everyGatedRowIsResolved` holds both
+halves: it reds when a ROW gate this resolver does not answer
+appears, and it pins that no container in the area declares a
+gate at all — because the resolver has no `allowsEditing` arm,
+so a container gate here would grey nothing, silently, and the
+row-gate net cannot see one. A resolver returns the *reason*
 rather than a Bool where the area greys with an explanation
 (`LayoutDefaultsGates.InertReason`, rendered by
 `LayoutDefaultsGateHelp`) — why-you-cannot is always inline, so
