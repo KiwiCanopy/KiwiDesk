@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -10,160 +11,159 @@ import Testing
 /// `HStack` shape — and the key has to be authored dangling
 /// ("… — edit them in"), which is what forced `ja`, `ko`,
 /// `zh-Hans`, `zh-Hant` and `ru` to end their translations on a
-/// colon or a bare preposition.
+/// colon or a bare preposition. That fallback is deliberate (a
+/// missed call site still renders a followable pointer rather
+/// than losing navigation) and therefore silent.
 ///
-/// That fallback is deliberate (a missed call site still renders
-/// a followable pointer rather than losing navigation), so it is
-/// also silent. This suite is what stops it being reached.
+/// **The prose is ASSERTED, not scanned for.** The first cut of
+/// this suite resolved each call site's `prose:` expression to
+/// its declaration and asked whether that source mentioned the
+/// slot. guard-prover shipped two mutations straight past it:
+/// `overrideProse` and `appBarState` both branch, and one
+/// `contains` over a whole body is satisfied by whichever arm
+/// still carries a slot — so the singular-space sentence and the
+/// monocle sentence could each go back to dangling under a green
+/// suite. That is the shipped defect reproducing, and it is the
+/// same failure `LayoutSchematicCountTests` was red-proofed
+/// against: a substring a scan can find while the branch beside
+/// it answers nothing (gui.md, the live-preview clause). The
+/// producers are `internal` and `static` for that reason, and
+/// every branch is driven below.
 ///
-/// **The prose is rarely written at the row.** Three of the four
-/// call sites pass a computed property or a static helper —
-/// `body` cannot hold a `+`-concatenated literal inside a
-/// conditional without dying on the CI type-checker (gui.md,
-/// SwiftUI traps) — so scanning the call's own argument text
-/// would find no `L(` and pass having looked at an identifier.
-/// The scan therefore RESOLVES the expression: an inline `L(` is
-/// read where it stands, a name is looked up as a `var`/`func`
-/// in the same tree and its body read instead.
+/// The scan that remains does only what asserting values cannot:
+/// notice a call site whose prose is not in the asserted set —
+/// a NEW cross-reference. `everyRowIsAsserted` is the coupling,
+/// and it reds on the fifth row rather than covering it.
 ///
-/// Every unresolvable shape fails SHUT, the direction the
-/// `SourceScan` walkers are written for: a prose expression this
-/// scan cannot attribute reds with a message asking for the
-/// shape to be taught, rather than being skipped. Two stated
-/// limits, both fail-shut: the body is taken from the first `{`
-/// after the declaration, so a default-argument closure in the
-/// signature would be read as the body; and a helper that
-/// delegates to a SECOND helper is not followed.
+/// Out of scope, deliberately: a CATALOG value that drops the
+/// `%N$@` restores the identical dangling render for that one
+/// locale. `scripts/localization_guards.py`'s specifier-drift
+/// contract owns that axis for every key at once, and runs in
+/// `scripts/lint.sh` — a second copy here would guard six keys
+/// and imply the rest were covered.
+/// `@MainActor` because the prose producers are: they are
+/// members of SwiftUI views and of a type beside them, and
+/// reading one off the main actor does not fail an expectation —
+/// it refuses to compile, which is the good version of the trap
+/// this repo has hit at runtime.
+@MainActor
 @Suite("Cross-reference link position")
 struct CrossReferenceRowSlotTests {
-    private static let needle = "CrossReferenceRow("
-    private static let slot = "CrossReferenceRow.linkSlot"
+    private static var slot: String { CrossReferenceRow.linkSlot }
 
-    private static var guiTree: URL {
-        SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDesk")
+    /// The `prose:` expression of every `CrossReferenceRow(`
+    /// application in the GUI tree, as written. Whitespace is
+    /// collapsed so a line break inside a call cannot change the
+    /// text a comparison sees.
+    ///
+    /// Hand-listed on the ONE side that has to be: this is the
+    /// set the value assertions below cover, so a row added
+    /// without a matching assertion reds instead of being
+    /// silently exempt. The other side is derived from source.
+    private static let asserted: Set<String> = [
+        "Self.scrollingXrefProse",
+        "Self.forcedProse",
+        "Self.overrideProse(overriding)",
+        "LayoutCardText.appBarState( mode, on: host.appBar.enabled )",
+    ]
+
+    // MARK: - The values
+
+    @Test func theMotionCardProsePlacesItsLink() {
+        #expect(
+            MotionCard.scrollingXrefProse.contains(Self.slot)
+        )
     }
 
-    /// One rendered cross-reference: where it is written, and the
-    /// source its `prose:` argument resolves to.
-    struct Site {
-        let file: String
-        /// The `prose:` argument as written.
-        let expression: String
-        /// The source that argument resolves to — itself when it
-        /// is an inline `L(`, the named declaration's body
-        /// otherwise.
-        let resolved: String
+    @Test func theStickyMarkProsePlacesItsLink() {
+        #expect(StickyMarkEditor.forcedProse.contains(Self.slot))
     }
 
-    private static func sources() throws -> [(String, String)] {
-        try SourceScan.swiftSources(under: guiTree)
-            .map {
-                (
-                    $0.lastPathComponent,
-                    SourceScan.stripComments(
-                        try String(contentsOf: $0, encoding: .utf8)
-                    )
+    /// Both arms. The singular one renders whenever exactly one
+    /// space overrides — the common case — and was the arm
+    /// guard-prover gutted with the suite still green.
+    @Test(arguments: [1, 2, 7])
+    func theSpacesUsingProsePlacesItsLink(_ overriding: Int) {
+        #expect(
+            SpacesUsingLayout.overrideProse(overriding)
+                .contains(Self.slot)
+        )
+    }
+
+    /// Every layout that hosts an App Bar, in both bar states.
+    /// The modes come from `appBarHost(for:)` — Core's one copy
+    /// of who may show a bar, and the same authority the switch
+    /// in `appBarState` is exhaustive over — so a third hosting
+    /// layout arrives here without this list being edited.
+    @Test func theAppBarProsePlacesItsLink() {
+        let settings = TilingSettings()
+        let hosting = LayoutMode.allCases.filter {
+            settings.appBarHost(for: $0) != nil
+        }
+        #expect(!hosting.isEmpty)
+        for mode in hosting {
+            for on in [true, false] {
+                #expect(
+                    LayoutCardText.appBarState(mode, on: on)
+                        .contains(Self.slot),
+                    "\(mode) on=\(on) never places its link"
                 )
             }
+        }
     }
 
-    /// Every `CrossReferenceRow(` application in the GUI tree,
-    /// with its `prose:` argument resolved.
-    private static func sites() throws -> [Site] {
-        let files = try sources()
-        var out: [Site] = []
-        for (name, source) in files {
-            for arguments in calls(needle, in: source) {
-                let expression = try #require(
-                    argument("prose", in: arguments),
-                    "\(name): CrossReferenceRow with no prose:"
-                )
-                out.append(
-                    Site(
-                        file: name,
-                        expression: expression,
-                        resolved: try resolve(
-                            expression,
-                            in: files,
-                            from: name
-                        )
-                    )
-                )
+    // MARK: - The coupling
+
+    /// Every rendered row's prose is one the assertions above
+    /// cover. A fifth cross-reference reds here — which is the
+    /// point, since nothing else would notice it was authored
+    /// without a slot.
+    @Test func everyRowIsAsserted() throws {
+        let found = try Self.proseExpressions()
+        // An enumerator over a missing directory yields nothing
+        // and a set comparison against an empty set would pass
+        // by matching nothing on either side. This repo has
+        // shipped a source scan that read zero files and passed.
+        #expect(!found.isEmpty, "no CrossReferenceRow call sites")
+        #expect(found == Self.asserted)
+    }
+
+    // MARK: - Scanning
+
+    private static func proseExpressions() throws -> Set<String> {
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDesk")
+        var out: Set<String> = []
+        for file in try SourceScan.swiftSources(under: tree) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            for call in calls("CrossReferenceRow(", in: source) {
+                if let prose = argument("prose", in: call) {
+                    out.insert(prose)
+                }
             }
         }
         return out
     }
 
-    /// The prose either IS an `L(` call or NAMES one. A name is
-    /// resolved to the body of its declaration; anything else is
-    /// a shape this scan cannot attribute, and reds.
-    private static func resolve(
-        _ expression: String,
-        in files: [(String, String)],
-        from file: String
-    ) throws -> String {
-        if expression.contains("L(") { return expression }
-        let head =
-            expression.split(separator: "(").first.map(String.init)
-            ?? expression
-        let name = try #require(
-            head.split(separator: ".").last.map(String.init)?
-                .trimmingCharacters(in: .whitespaces),
-            "\(file): unreadable prose expression \(expression)"
-        )
-        for keyword in ["var ", "func "] {
-            for (_, source) in files {
-                if let body = declaration(
-                    keyword + name,
-                    in: source
-                ) {
-                    return body
-                }
-            }
-        }
-        Issue.record(
-            """
-            \(file): prose \(expression) resolves to no var or \
-            func named \(name) — teach this scan the shape \
-            rather than leaving the call site unwatched
-            """
-        )
-        return ""
-    }
-
-    /// The brace body of the first declaration matching `header`.
-    private static func declaration(
-        _ header: String,
-        in source: String
-    ) -> String? {
-        let text = Array(source)
-        guard let start = range(of: header, in: text) else {
-            return nil
-        }
-        var brace = start
-        while brace < text.count, text[brace] != "{" { brace += 1 }
-        guard brace < text.count else { return nil }
-        var cursor = brace
-        return SourceScan.balanced(
-            text,
-            from: &cursor,
-            open: "{",
-            close: "}"
-        )
-    }
-
-    /// Each `needle` application's balanced argument list.
+    /// Each application's balanced argument list.
     private static func calls(
         _ needle: String,
         in source: String
     ) -> [String] {
         let text = Array(source)
+        let wanted = Array(needle)
         var out: [String] = []
         var i = 0
-        while let hit = range(of: needle, in: text, from: i) {
-            var cursor = hit + needle.count - 1
+        while i + wanted.count <= text.count {
+            guard Array(text[i..<(i + wanted.count)]) == wanted
+            else {
+                i += 1
+                continue
+            }
+            var cursor = i + wanted.count - 1
             guard
                 let arguments = SourceScan.balanced(
                     text,
@@ -172,7 +172,7 @@ struct CrossReferenceRowSlotTests {
                     close: ")"
                 )
             else {
-                i = hit + needle.count
+                i += wanted.count
                 continue
             }
             out.append(arguments)
@@ -181,7 +181,7 @@ struct CrossReferenceRowSlotTests {
         return out
     }
 
-    /// The argument labelled `label`, split at top-level commas.
+    /// The argument labelled `label`, whitespace-collapsed.
     private static func argument(
         _ label: String,
         in arguments: String
@@ -218,75 +218,14 @@ struct CrossReferenceRowSlotTests {
         let prefix = "\(label):"
         return
             parts
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .map {
+                $0.split(whereSeparator: \.isWhitespace)
+                    .joined(separator: " ")
+            }
             .first { $0.hasPrefix(prefix) }
             .map {
                 String($0.dropFirst(prefix.count))
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .trimmingCharacters(in: .whitespaces)
             }
-    }
-
-    private static func range(
-        of needle: String,
-        in text: [Character],
-        from start: Int = 0
-    ) -> Int? {
-        let wanted = Array(needle)
-        var i = max(0, start)
-        while i + wanted.count <= text.count {
-            if Array(text[i..<(i + wanted.count)]) == wanted {
-                return i
-            }
-            i += 1
-        }
-        return nil
-    }
-
-    /// The walk finds the call sites at all, and finds ALL of
-    /// them. Both halves matter: an enumerator over a missing
-    /// directory yields nothing and every assertion below then
-    /// passes over an empty set, and a walker that resolves only
-    /// the inline shape would silently drop the three call sites
-    /// whose prose is a named helper — the majority.
-    ///
-    /// The expected count is DERIVED from the same tree rather
-    /// than written here: a hand-listed number would agree with
-    /// this file and with nothing else.
-    @Test func everyRowIsDiscovered() throws {
-        let sites = try Self.sites()
-        let written = try Self.sources()
-            .map { $0.1.occurrences(of: Self.needle) }
-            .reduce(0, +)
-        #expect(written > 0, "no CrossReferenceRow call sites")
-        #expect(sites.count == written)
-        // The named-helper shape is the one a naive scan misses,
-        // so pin that the resolver is still exercising it.
-        #expect(
-            sites.contains { !$0.expression.contains("L(") }
-        )
-        // A resolution that returned nothing would satisfy
-        // `contains` below only by failing it, but an empty body
-        // means the lookup found a declaration and read no
-        // source — worth separating from a real violation.
-        for site in sites {
-            #expect(
-                !site.resolved.isEmpty,
-                "\(site.file): \(site.expression) resolved empty"
-            )
-        }
-    }
-
-    @Test func everyProseCarriesTheLinkSlot() throws {
-        for site in try Self.sites() {
-            #expect(
-                site.resolved.contains(Self.slot),
-                """
-                \(site.file): prose \(site.expression) never \
-                passes \(Self.slot), so its link falls to the \
-                end of the sentence and every locale has to \
-                author the key dangling
-                """
-            )
-        }
     }
 }

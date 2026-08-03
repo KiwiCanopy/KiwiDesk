@@ -29,7 +29,7 @@ struct SpacesUsingLayout: View {
             }
             if overriding > 0 {
                 CrossReferenceRow(
-                    prose: overrideProse,
+                    prose: Self.overrideProse(overriding),
                     // The destination's OWN title, never a second
                     // copy of it: a link naming a pane the app
                     // does not call that sends the reader looking
@@ -90,7 +90,13 @@ struct SpacesUsingLayout: View {
     /// `CrossReferenceRow`, whose fixed-order `HStack` is what
     /// forced the dangling "… edit them in" these keys used to
     /// be authored as.
-    private var overrideProse: String {
+    ///
+    /// Takes the count rather than reading `overriding`, and is
+    /// internal, so `CrossReferenceRowSlotTests` can drive BOTH
+    /// arms with no model: one `contains` over the whole body of
+    /// a two-arm helper passes with either arm gutted, which
+    /// guard-prover demonstrated against this exact property.
+    static func overrideProse(_ overriding: Int) -> String {
         overriding == 1
             ? L(
                 "layout_defaults.spaces_using.overridden_one",
