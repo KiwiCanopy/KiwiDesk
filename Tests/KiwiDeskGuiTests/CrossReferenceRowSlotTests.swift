@@ -87,10 +87,15 @@ struct CrossReferenceRowSlotTests {
     ///
     /// Keyed by FILE, not by expression alone. Two of these
     /// are `Self.`-scoped, which names a different type in every
-    /// file — so on expression alone a second view declaring its
-    /// own `forcedProse` without a slot matched an entry already
-    /// present and was covered by nothing (guard-prover, first
-    /// cut). Whitespace is stripped rather than collapsed for a
+    /// file — so on expression alone a second view declaring an
+    /// identically-named producer without a slot matched an
+    /// entry already present and was covered by nothing
+    /// (guard-prover, first cut; the colliding pair was
+    /// `StickyMarkEditor`'s `Self.forcedProse`, since retired
+    /// with its coverage guard, but two `Self.`-scoped entries
+    /// remain and the collision is still reachable).
+    ///
+    /// Whitespace is stripped rather than collapsed for a
     /// duller reason: collapsing leaves a space where a line
     /// break was, so `swift format` re-wrapping a call — which a
     /// rename past 79 chars forces — redded a guard that nothing
@@ -169,7 +174,7 @@ struct CrossReferenceRowSlotTests {
     // MARK: - The coupling
 
     /// Every rendered row's prose is one the assertions above
-    /// cover. A fifth cross-reference reds here — which is the
+    /// cover. A fourth cross-reference reds here — which is the
     /// point, since nothing else would notice it was authored
     /// without a slot.
     @Test func everyRowIsAsserted() throws {

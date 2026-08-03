@@ -10,38 +10,48 @@ import Testing
 /// on the reasoning that the mark was then the only sticky cue
 /// left. The fact is true; the DEPENDENCY it was expressed as
 /// runs the other way — the mark paints on the window, so it is
-/// precisely what survives the bar going. Under the #678
-/// redesign a gated row generates its own caption, and this
-/// one's would read "Needs the Space Bar · Bars": a statement
-/// the app would contradict the moment a user hid the bar and
-/// watched the marks stay. It is dropped rather than softened,
-/// with the fact moved into the row's `?` help; the argument is
-/// in `docs/design-decisions.md` under "Sticky state must never
-/// be invisible from the GUI".
+/// precisely what survives the bar going. Greying says *turn
+/// that on and I act*, and a census `gate:` records the same
+/// claim as data for whatever reads the census, so the row
+/// carries neither. It is dropped rather than softened, with
+/// the fact moved into the row's `?` help; the argument is in
+/// `docs/design-decisions.md` under "Sticky has no native cue".
 ///
 /// So this is a **retired-coupling** scan (tests.md, Removal):
 /// nothing else would notice the gate coming back. Three ways
-/// it could, one assertion each — the census declaration that
-/// the redesign renders from, the greying in the editor itself,
-/// and the write-through that used to keep a forced-ON toggle
-/// honest by storing what it displayed.
+/// it could, one assertion each — the census declaration, the
+/// greying in the editor itself, and the write-through that used
+/// to keep a forced-ON toggle honest by storing what it
+/// displayed.
 ///
 /// The census has TWO gate axes and a row is greyed by either,
 /// so both are asserted: a container gate on `.stickyWindows`
 /// re-greys this row exactly as a row gate would — it is not
-/// `exemptFromContainerGate` — and generates the same false
-/// caption. Reading one axis and calling the census covered is
-/// how this suite passed its own worst mutation (guard-prover,
-/// first cut).
+/// `exemptFromContainerGate`. Reading one axis and calling the
+/// census covered is how this suite passed its own worst
+/// mutation (guard-prover, first cut).
 ///
-/// What it does NOT cover, stated so it is not mistaken for
-/// coverage: a gate re-introduced from OUTSIDE these two files —
-/// a parent view greying the section, a resolver answering for
-/// this row — is invisible here, as is greying, or a forced-ON
-/// display value, spelled without one of the needles below.
-/// The needles cover the shape the gate had when it shipped and
-/// the shape the house style would give it today (a resolver
-/// answering `allowsEditing`); a third spelling is not netted.
+/// **What it does not cover**, stated per test so it is not
+/// mistaken for coverage:
+///
+/// - `editorHasNoGate` reads ONE file. A gate applied from the
+///   COMPOSITION site — `GapsAndBordersSection` wrapping
+///   `StickyMarkEditor(model:)` in a `GreyOut`, or passing a
+///   `gatedOff:` in — is a fourth axis and is not netted here;
+///   `ui-patterns.md`'s own block-gate convention pushes gates
+///   there, so it is the likely spelling, not an exotic one.
+///   It is left to review rather than scanned because the
+///   section composes four editors and pinning its exact
+///   spelling would red on any reordering of them.
+/// - The needles cover the shape the gate had when it shipped
+///   and the shape the house style would give it today (a
+///   resolver answering `allowsEditing`). A third spelling —
+///   `opacity` computed inline, a custom `ViewModifier` — is
+///   not netted.
+/// - `nothingWritesTheMark` nets ONE spelling: the field name
+///   followed by `=` after whitespace packing. A `.toggle()`, a
+///   keypath write, or a setter assigning through a local copy
+///   of `settings` all pass green.
 @Suite("The sticky mark's toggle is ungated")
 struct StickyMarkUngatedTests {
     private var guiTree: URL {
@@ -49,9 +59,8 @@ struct StickyMarkUngatedTests {
             .appendingPathComponent("Sources/KiwiDesk")
     }
 
-    /// The census is where a gate would become a rendered
-    /// caption, so it is the half worth asserting as a value
-    /// rather than scanning for.
+    /// The census declares the dependency as data, so it is the
+    /// half worth asserting as a value rather than scanning for.
     @Test("the census row declares no gate")
     func censusRowIsUngated() {
         let placement = SettingKey.borders(.stickyMark).placement
@@ -111,6 +120,12 @@ struct StickyMarkUngatedTests {
     /// (`…settings\n.stickyStyle.mark = true` is one line to the
     /// compiler and two to a needle). The toggle's own binding
     /// carries no `=` and so does not match.
+    ///
+    /// `==` is excluded explicitly rather than left to fail
+    /// shut. A READ of the field is legitimate and imminent —
+    /// a census-rendered Gaps & Borders resolves gates by
+    /// comparing settings — so a comparison must not red under
+    /// a message that says "assigns".
     @Test("no view writes the mark behind the user's back")
     func nothingWritesTheMark() throws {
         let files = try SourceScan.swiftSources(under: guiTree)
@@ -125,8 +140,14 @@ struct StickyMarkUngatedTests {
             let packed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
+            let after = packed.components(
+                separatedBy: "stickyStyle.mark="
+            )
+            let assigns = after.dropFirst().contains {
+                !$0.hasPrefix("=")
+            }
             #expect(
-                !packed.contains("stickyStyle.mark="),
+                !assigns,
                 Comment(
                     rawValue:
                         "\(file.lastPathComponent) assigns "

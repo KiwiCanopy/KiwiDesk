@@ -8,12 +8,13 @@ import SwiftUI
 /// The toggle stands alone: it carries no gate on the Space Bar.
 /// The greying it used to carry asserted a dependency that runs
 /// the wrong way — the mark paints on the window, so it is
-/// exactly what SURVIVES the bar going off — and the fact it was
-/// reaching for is a concept, which belongs in the row's `?`
-/// help (`docs/ui-patterns.md`). Why the gate went, and why no
-/// softer warning replaced it, is argued in
-/// `docs/design-decisions.md` under "Sticky state must never be
-/// invisible from the GUI".
+/// exactly what SURVIVES the bar going off. What the greying was
+/// reaching for is timeless rather than live, so it belongs in
+/// the row's `?` help (`docs/ui-patterns.md` ▸ Help &
+/// cross-references, "A concept goes in the `?`"). Why the gate
+/// went, and why no softer warning replaced it, is argued in
+/// `docs/design-decisions.md` under "Sticky has no native cue".
+/// `StickyMarkUngatedTests` is what keeps it ungated.
 struct StickyMarkEditor: View {
     @ObservedObject var model: SettingsModel
 

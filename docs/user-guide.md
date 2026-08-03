@@ -962,11 +962,18 @@ corner. **Show mark on sticky windows** (on by default) turns
 the mark off. The Space Bar shows its own sticky badge as
 well, and floating windows get a bar badge too — see the Space
 Bar section. The mark is painted on the window itself, so it
-is the sticky signal that survives hiding the Space Bar; turn
-both off and a sticky window looks like any other, which
-KiwiDesk lets you do rather than talking you out of. (From Lua
-the same two switches are `sticky.set_mark` and
-`space_bar.set_sticky_badge`.)
+is the sticky signal that survives hiding the Space Bar.
+
+Switching the mark off costs more than the resting glyph: the
+pills described above ride the same mark, so with it off a
+snapped-back drag simply snaps back and explains nothing. The
+Space Bar's badge keeps showing *which* windows are sticky
+either way, but only the mark answers *why that gesture just
+failed*. Turn the mark off and hide the bar and a sticky
+window is indistinguishable from any other — KiwiDesk lets you
+do that rather than talking you out of it, and this paragraph
+is what it says instead. (From Lua the two switches are
+`sticky.set_mark` and `space_bar.set_sticky_badge`.)
 
 The marks' colours are in **Advanced Colors** — **Sticky** in
 Border colors (it paints both the on-window mark and the Space
@@ -1090,7 +1097,7 @@ individual settings: in Advanced Colors the Highlight and Active
 item colors dim under the Gap indicator (which hides the active
 item rather than marking it, so neither color is drawn), a drag
 visual's colours dim when that part is switched off, and the
-whole Space Bar group — the Floating mark tint with it — dims
+whole Space Bar group — the Floating badge tint with it — dims
 when the bar is off. The **Desktop → profile** bindings are
 dimmed rather than hidden too, so you can still read what they
 hold.
@@ -1371,7 +1378,7 @@ the bar's eight colours and have no GUI control at all.)
 - **Space Bar colors** — the three-state accent ladder at rest
   (**Item**, **Active space**, **Focused window**, the bar's
   signature), with plate, highlight, hover and the badge cluster
-  behind **More colors**. The **Floating** mark tint rides that
+  behind **More colors**. The **Floating** badge tint rides that
   cluster: the Space Bar badge is its only surface.
 - **App Bar colors** — **Fill** and **Highlight** at rest (the two
   the preview strip reflects most), the rest behind **More

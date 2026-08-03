@@ -5,9 +5,10 @@ import Foundation
 /// `layoutCommand`'s forced retile applies it (the mark
 /// sync runs inside the retile path, like the borders).
 ///
-/// Applies unconditionally — no surface clamps the mark, the
-/// GUI's "forced ON while the Space Bar is off" greying having
-/// been dropped (Lua is open; `dim_factor` precedent).
+/// Applies unconditionally, and no surface may clamp the mark
+/// back (Lua is open; `dim_factor` precedent). The GUI toggle
+/// that once did is held ungated by `StickyMarkUngatedTests`,
+/// which this module cannot see for itself.
 extension KiwiCore {
     func stickyCommand(
         _ command: String,

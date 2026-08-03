@@ -81,6 +81,7 @@ struct GreyOutParityTests {
         // survives the Space Bar rather than what depends on it.
         // The opposite invariant — that no gate returns — is
         // `StickyMarkUngatedTests`.
+        //
         // The gate is passed INTO the group (#527) so its
         // section header — and the `?` anchor on it — stays
         // live; the wrap-around form would disable both. Two
