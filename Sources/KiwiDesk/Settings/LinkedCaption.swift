@@ -44,11 +44,9 @@ struct LinkedCaption: NSViewRepresentable {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeNSView(context: Context) -> CaptionTextView {
-        // Every caption property lives in `configured()`, which
-        // the test fixture builds through as well — a fixture
-        // that hand-rebuilt them stayed green with
-        // `isSelectable` flipped back to `true`, which is the
-        // one thing this whole class exists to avoid. A
+        // Every caption property lives in `configured()`,
+        // which the test fixture builds through as well and
+        // `LinkedCaptionHitTests` asserts. A
         // SELECTABLE text view cannot be talked out of the
         // I-beam: it drives the cursor from its own tracking
         // area, which outranks the cursor rects a subclass can

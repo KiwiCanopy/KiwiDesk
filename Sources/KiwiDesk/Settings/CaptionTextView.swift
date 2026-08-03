@@ -17,10 +17,11 @@ final class CaptionTextView: NSTextView {
 
     /// Every property that makes this view a caption rather
     /// than an editor, in ONE place. `LinkedCaption.makeNSView`
-    /// and the test fixture both build through here: a fixture
-    /// that hand-rebuilt this configuration went green while
-    /// `isSelectable` was flipped back to `true`, which is the
-    /// single thing the class exists to avoid.
+    /// and the test fixture both build through here, and
+    /// `LinkedCaptionHitTests`' `theCaptionIsConfiguredAsACaption`
+    /// asserts what it sets — the factory alone buys one copy,
+    /// not coverage, and flipping `isSelectable` back to `true`
+    /// stayed green until that test existed.
     static func configured() -> CaptionTextView {
         let view = CaptionTextView()
         view.isEditable = false

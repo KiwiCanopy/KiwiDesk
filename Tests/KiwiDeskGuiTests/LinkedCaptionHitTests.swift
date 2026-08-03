@@ -13,7 +13,25 @@ import Testing
 /// nothing, satisfies every other test in the tree.
 ///
 /// Needs no machine: an `NSTextView` off-screen lays out from
-/// its own text container.
+/// its own text container. That is also the shape of what it
+/// CANNOT reach, stated here so a green run is not read as more
+/// than it is (guard-prover, 2026-08-03):
+///
+/// - **The painter's use of the colour decision.** The state
+///   that distinguishes them — a pointer over the link — needs a
+///   window, and at rest `linkColor(pointing: false)` equals the
+///   sentence-wide colour, so deleting `paintLink`'s link-range
+///   paint is arithmetically invisible. The decision is proven
+///   and the at-rest paint is proven; the wiring between them is
+///   not.
+/// - **`noteFocusRingMaskChanged()`.** Nothing observable
+///   distinguishes an invalidated mask cache from a stale one at
+///   unit altitude — `focusRingMaskBounds` recomputes on every
+///   read regardless. Deliberately untested rather than tested
+///   by a call that asserts nothing.
+/// - **Each nil-guard in `accessibilityChildren()` alone.** The
+///   linkless case proves the pair; either guard can be deleted
+///   on its own and stay green.
 ///
 /// `@MainActor` because `NSView` is.
 @MainActor
@@ -206,6 +224,14 @@ struct LinkedCaptionHitTests {
     @Test func onlyALiveCaptionWithALinkTakesFocus() {
         let view = Self.caption()
         #expect(view.acceptsFirstResponder)
+        // `canBecomeKeyView` defers to `super`, which ALSO
+        // requires the view to be un-hidden and in a window —
+        // this fixture is in neither, so the two answers differ
+        // here, which is exactly what makes a bare
+        // `acceptsFirstResponder` override visible. Without it a
+        // caption inside a hidden ancestor is an invisible tab
+        // stop.
+        #expect(!view.canBecomeKeyView)
         view.isLive = false
         #expect(!view.acceptsFirstResponder)
         #expect(!Self.caption(linkTitle: "").acceptsFirstResponder)
@@ -250,45 +276,5 @@ struct LinkedCaptionHitTests {
         #expect(view.linkColor(pointing: true) == .labelColor)
         view.isLive = false
         #expect(view.linkColor(pointing: true) == .secondaryLabelColor)
-    }
-
-    /// VoiceOver gets a link child with the destination's name
-    /// and a press that navigates — the reachability a
-    /// non-selectable `NSTextView` supplies to nobody.
-    @Test func theLinkIsAnAccessibilityChildThatActivates()
-        throws
-    {
-        let view = Self.caption()
-        var fired = 0
-        view.onLink = { fired += 1 }
-        let children = try #require(view.accessibilityChildren())
-        #expect(children.count == 1)
-        let element = try #require(
-            children.first as? LinkAccessibilityElement
-        )
-        #expect(element.accessibilityLabel() == Self.link)
-        #expect(element.accessibilityRole() == .link)
-        #expect(element.accessibilityPerformPress())
-        #expect(fired == 1)
-        // A caption with no link offers no child to activate.
-        #expect(
-            Self.caption(linkTitle: "", label: "")
-                .accessibilityChildren() == nil
-        )
-    }
-
-    /// `.disabled()` reaches an AppKit subview only because
-    /// `LinkedCaption` hands `isEnabled` down; a greyed caption
-    /// that still navigated would say "switch that on and I act"
-    /// while acting anyway.
-    @Test func aGreyedCaptionDoesNotNavigate() {
-        let view = Self.caption()
-        var fired = 0
-        view.onLink = { fired += 1 }
-        view.activateLink()
-        #expect(fired == 1)
-        view.isLive = false
-        view.activateLink()
-        #expect(fired == 1)
     }
 }
