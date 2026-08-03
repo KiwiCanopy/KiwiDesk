@@ -43,6 +43,15 @@ final class SettingsModel: ObservableObject {
     /// ceiling as #277 part 2 grows the set; a value type, so
     /// `$model.nav.layoutModeTab` still projects a `Binding`.
     @Published var nav = SettingsNavigation()
+    /// Which appearance the window follows (#678 item 8).
+    ///
+    /// Read from `UserDefaults` at init and written back through
+    /// `setAppearance`, so it never enters the dirty-tracked
+    /// config — it is app-wide, not part of a profile, and the
+    /// footer's Save has nothing to do with it. Storage lives in
+    /// `AppearancePreference`, which argues why it is not
+    /// `gui.json`.
+    @Published var appearance = AppearancePreference.read()
     /// Which sidebar row is selected.
     ///
     /// Held here rather than as `@State` in `SettingsView`

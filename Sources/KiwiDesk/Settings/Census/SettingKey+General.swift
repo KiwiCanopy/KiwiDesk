@@ -3,6 +3,7 @@
 
 enum GeneralKey: String, CaseIterable, Hashable {
     case language = "UserDefaults.language"
+    case appearance = "UserDefaults.appearance"
     case startAtLogin = "AutoStartManager (no stored pref)"
     case about = "(readonly) general.about"
     case advancedConfigFile = "(readonly) general.advanced.config_file"
@@ -19,11 +20,13 @@ extension GeneralKey {
     var placement: SettingPlacement {
         switch self {
         case .language:
-            return .row(.general, .language, .atRest)
+            return .row(.general, .appliesImmediately, .atRest)
+        case .appearance:
+            return .row(.general, .appliesImmediately, .atRest)
         case .startAtLogin:
             return .row(
                 .general,
-                .login,
+                .appliesImmediately,
                 .atRest,
                 gate: .runtime(.loginItemServiceStatus)
             )
@@ -50,6 +53,8 @@ extension GeneralKey {
         switch self {
         case .language:
             return .text("general.language.display")
+        case .appearance:
+            return .text("general.appearance")
         case .startAtLogin:
             return .text("general.login_item.start")
         case .about:

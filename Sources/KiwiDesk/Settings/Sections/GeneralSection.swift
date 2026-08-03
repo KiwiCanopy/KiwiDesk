@@ -75,7 +75,47 @@ struct GeneralSection: View {
                     }
                 }
             }
+            appearanceRow
         }
+    }
+
+    /// Item 8. Sits beside the language pick because the two
+    /// share a rule rather than a topic: both apply the instant
+    /// you choose, neither is part of a profile, and neither is
+    /// touched by the footer's Save. Turn 14b makes that the
+    /// group's heading, because a row Revert appears to undo and
+    /// does not is the 6b audit's fourth finding.
+    ///
+    /// A segmented control rather than a dropdown: three fixed,
+    /// mutually exclusive choices whose whole set fits on one
+    /// line is the case `docs/ui-patterns.md` gives segmented,
+    /// and unlike the locale list it can never grow.
+    private var appearanceRow: some View {
+        DropdownRow(
+            label: L("general.appearance", "Appearance")
+        ) {
+            Picker(
+                L("general.appearance", "Appearance"),
+                selection: appearanceBinding
+            ) {
+                ForEach(
+                    AppearanceChoice.allCases,
+                    id: \.rawValue
+                ) { choice in
+                    Text(choice.label).tag(choice)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+        }
+    }
+
+    private var appearanceBinding: Binding<AppearanceChoice> {
+        Binding(
+            get: { model.appearance },
+            set: { model.setAppearance($0) }
+        )
     }
 
     private var languageBinding: Binding<String?> {

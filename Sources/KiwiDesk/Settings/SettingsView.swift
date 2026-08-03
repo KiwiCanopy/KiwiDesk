@@ -34,6 +34,12 @@ struct SettingsView: View {
         // ~16pt of column width in insets, so the old minimum
         // squeezed the detail pane (settled by eye).
         .frame(minWidth: 840, minHeight: 540)
+        // Item 8. Applied at the SHELL, above both arms, so the
+        // raw Lua editor follows the pick too — it is the same
+        // window. `nil` for `.system` is what hands the decision
+        // back to macOS; a hardcoded `.light`/`.dark` default
+        // here would make "System" mean "whatever I shipped".
+        .preferredColorScheme(model.appearance.colorScheme)
         // The one discard dialog (#515). Hosted HERE, above the
         // `editingLua` branch, not inside `chrome` — `chrome` is
         // instantiated in both arms, and two of the gated actions
