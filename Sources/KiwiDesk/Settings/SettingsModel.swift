@@ -52,6 +52,31 @@ final class SettingsModel: ObservableObject {
     /// `AppearancePreference`, which argues why it is not
     /// `gui.json`.
     @Published var appearance = AppearancePreference.read()
+    /// The live auto-start status (#678 item 16).
+    ///
+    /// Held here, not in `LoginItemCard`, because turn 14b draws
+    /// two rows from it in two different containers — see
+    /// `SettingsModel+AutoStart` for why that forces the lift and
+    /// what it buys. The default is a cheap literal, never a
+    /// probe: `refreshAutoStart()` replaces it with the live read
+    /// before the first paint the user reads.
+    @Published var autoStart = AutoStartStatus(
+        level: .atLogin,
+        unavailable: nil,
+        requiresApproval: false
+    )
+    /// False until the first async read lands; both rows stay
+    /// pending until then.
+    @Published var autoStartLoaded = false
+    /// A write is in flight, so neither row may be driven.
+    @Published var autoStartBusy = false
+    /// The level the OS last adopted, shown as the transient
+    /// live-apply confirmation (there is no Save to press).
+    @Published var autoStartApplied: AutoStartLevel?
+    /// Guards the confirmation's fade so a newer change
+    /// cancels an older timer instead of clearing the latest
+    /// confirmation early.
+    var autoStartFlashToken = 0
     /// Which sidebar row is selected.
     ///
     /// Held here rather than as `@State` in `SettingsView`

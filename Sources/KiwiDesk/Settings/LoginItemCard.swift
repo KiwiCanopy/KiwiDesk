@@ -2,109 +2,74 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The "Start KiwiDesk" card in App ▸ General (#576).
+/// The "Start KiwiDesk when I log in" row (#576, resplit for
+/// #678 item 16).
 ///
-/// A single 3-level control replacing #342's plain login toggle:
-/// *Never / At Login / At Login, With Auto-Restart*. The upper
-/// level is the `kiwidesk service` LaunchAgent (crash-restart) that
-/// used to be CLI-only; folding it in over one merged status avoids
-/// the two-toggle dishonesty (see `AutoStartManager`).
+/// #576 folded #342's login toggle and the `kiwidesk service`
+/// LaunchAgent into ONE 3-level picker, because the two-toggle
+/// shape could render *login off + restart on*, which names no
+/// reachable state. Turn 14b asks for two rows again — the
+/// crash-restart half belongs among Advanced's five — and the
+/// constraint moved rather than went away: both rows write
+/// through `AutoStartLevel.level(openAtLogin:restartOnCrash:)`,
+/// which discards the restart flag when login is off. Read
+/// `AutoStartManager`'s header for why that pair is impossible
+/// at the OS, and `SettingsModel+AutoStart` for why the status
+/// no longer lives in this view.
 ///
 /// A **read-through**, **async** control: it stores no preference,
 /// it reads `AutoStartManager.current()` off the main actor on
-/// appear and on every `didBecomeActive`, and a level change writes
+/// appear and on every `didBecomeActive`, and a change writes
 /// through `AutoStartManager.set(_:)` and adopts the state it reads
 /// back. launchctl is a blocking spawn, so the read/write happen on
-/// a detached task and publish to `@State` on main; `loaded` gates
-/// the pending window before the first read lands.
+/// a detached task and publish on main; `autoStartLoaded` gates the
+/// pending window before the first read lands.
 ///
-/// Core hands us structure (`AutoStartStatus`); the level labels and
-/// captions are rendered here (#96). Levels 2 and 3 grey out (grey,
-/// don't hide, #171) when the running copy can't register — a bare
-/// binary or a translocated download — leaving only "Never", the
-/// exact shape #342's whole-toggle grey took.
+/// Core hands us structure (`AutoStartStatus`); the labels and
+/// captions are rendered here (#96). The toggle greys (grey, don't
+/// hide, #171) when the running copy can't register — a bare
+/// binary or a translocated download — which is the shape #342's
+/// whole-toggle grey took.
 struct LoginItemCard: View {
-    // Seeded at the opt-in default (At Login); `refresh()` replaces
-    // it with the live read before the first paint the user reads.
-    // A `@State` default re-runs on every `GeneralSection.body`
-    // recompute, so it must stay a cheap literal, never a probe.
-    @State private var status = AutoStartStatus(
-        level: .atLogin,
-        unavailable: nil,
-        requiresApproval: false
-    )
-    // False until the first async read lands; the control is
-    // pending (disabled) until then. `busy` covers a `set(_:)` in
-    // flight so the menu can't be driven mid-write.
-    @State private var loaded = false
-    @State private var busy = false
-    // The just-applied level, shown as a transient green-check
-    // confirmation that fades on its own (the changes apply live, so
-    // there is no Save to press). `flashToken` lets a newer change
-    // cancel an older fade so a quick succession doesn't clear the
-    // latest confirmation early.
-    @State private var applied: AutoStartLevel?
-    @State private var flashToken = 0
+    @ObservedObject var model: SettingsModel
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
         SettingsSection(SettingsCatalog.general.loginItemCard) {
             VStack(alignment: .leading, spacing: 6) {
                 DropdownRow(
-                    // Card heading is the noun "Login"; the control
-                    // carries the verb "Start KiwiDesk".
+                    // Card heading is the noun "Login"; the row
+                    // carries the verb.
                     label: startLabel,
                     help: startHelp
                 ) {
-                    Picker(startLabel, selection: levelBinding) {
-                        Text(
-                            L("general.login_item.level.never", "Never")
-                        )
-                        .tag(AutoStartLevel.off)
-                        Text(
-                            L(
-                                "general.login_item.level.at_login",
-                                "At Login"
-                            )
-                        )
-                        .tag(AutoStartLevel.atLogin)
-                        Text(
-                            L(
-                                "general.login_item.level"
-                                    + ".at_login_restart",
-                                "At Login + Restart on Crash"
-                            )
-                        )
-                        .tag(AutoStartLevel.atLoginWithAutoRestart)
-                    }
-                    // Grey the Picker only, not the whole row — the
-                    // label's `?` (which explains what the three
-                    // levels do) stays live even when the control is
-                    // greyed, since that help is useful regardless of
-                    // whether the levels can be picked right now.
-                    //
-                    // Levels 2 and 3 both need a stable `.app` path,
-                    // so an unregisterable copy (translocated / bare
-                    // binary) greys the control; the caption below
-                    // names the fix. A per-item `.disabled()` on a
-                    // `.menu` Picker blocks selection but AppKit's
-                    // NSPopUpButton won't render the item greyed, so
-                    // it wouldn't *read* as "grey, don't hide" (#171)
-                    // — greying the whole Picker does, matching #342.
-                    .disabled(
-                        !loaded || busy || !status.registerable
-                    )
+                    // A Toggle, not the #576 Picker: this row now
+                    // asks ONE yes/no question, and the second
+                    // question (restart on crash) is its own row
+                    // among Advanced's five. `gui.md` gives a
+                    // toggle the binary case.
+                    Toggle("", isOn: loginBinding)
+                        .labelsHidden()
+                        // Grey the control only, never the row —
+                        // the label's `?` stays live because that
+                        // help is useful whether or not the
+                        // toggle can be driven right now. An
+                        // unregisterable copy (bare binary,
+                        // translocated download) cannot register
+                        // at all, and the caption below names the
+                        // fix (#342, #171).
+                        .disabled(!model.autoStartEditable)
                 }
                 confirmation
                 caption
             }
         }
-        .onAppear { refresh() }
+        .onAppear { model.refreshAutoStart() }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: NSApplication.didBecomeActiveNotification
             )
-        ) { _ in refresh() }
+        ) { _ in model.refreshAutoStart() }
     }
 
     private var startLabel: String {
@@ -128,39 +93,31 @@ struct LoginItemCard: View {
     }
 
     /// Writing a level routes through the facade and adopts the
-    /// state it reports back; a no-op selection (same level) is
-    /// dropped so re-rendering the picker can't kick a spurious
-    /// write.
+    /// This row's half of the folded level: does KiwiDesk start
+    /// itself at all.
     ///
-    /// The `registerable` guard is the real gate on the upper
-    /// levels, not the per-item `.disabled()` on the menu — that
-    /// disable is a visual hint SwiftUI does not reliably honor for
-    /// individual `.menu`-Picker rows, and the harm it guards
-    /// against is a filesystem/launchd side effect, not a cosmetic
-    /// one: `apply(.atLoginWithAutoRestart)` would `writePlist()` a
-    /// LaunchAgent pointing at the *ephemeral* translocated /
-    /// `.build` path, which read-through can't undo (a bootstrapped
-    /// service reads back as level 3, so the broken agent persists).
-    /// So the setter refuses any level but "Never" on an
-    /// unregisterable copy — defense independent of the view layer.
-    private var levelBinding: Binding<AutoStartLevel> {
+    /// Writing preserves the OTHER row's answer rather than
+    /// clearing it — turning login off and on again must not
+    /// silently drop crash-restart — and the fold in
+    /// `AutoStartLevel.level(openAtLogin:restartOnCrash:)` is
+    /// what makes "off + restart" collapse instead of persisting
+    /// as a contradiction.
+    ///
+    /// The refusal on an unregisterable copy lives in
+    /// `SettingsModel.setAutoStart`, not here: the harm is a
+    /// filesystem/launchd side effect (a LaunchAgent written
+    /// against an ephemeral `.build` or translocated path, which
+    /// read-through cannot undo), so it must not depend on a view
+    /// having disabled the control.
+    private var loginBinding: Binding<Bool> {
         Binding(
-            get: { status.level },
-            set: { newLevel in
-                guard newLevel != status.level else { return }
-                guard status.registerable || newLevel == .off
-                else { return }
-                busy = true
-                Task {
-                    let result = await AutoStartManager.set(newLevel)
-                    status = result
-                    loaded = true
-                    busy = false
-                    // Confirm the level the OS actually adopted, not
-                    // the requested one — a failed apply re-reads to
-                    // a different level and should say so.
-                    flash(result.level)
-                }
+            get: { model.autoStart.level.opensAtLogin },
+            set: { on in
+                model.setAutoStart(
+                    openAtLogin: on,
+                    restartOnCrash:
+                        model.autoStart.level.restartsOnCrash
+                )
             }
         )
     }
@@ -173,11 +130,11 @@ struct LoginItemCard: View {
     /// user-driven change, because the changes apply live and there
     /// is no Save to press.
     @ViewBuilder private var confirmation: some View {
-        if busy {
+        if model.autoStartBusy {
             Text(L("general.login_item.updating", "Updating…"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-        } else if let applied {
+        } else if let applied = model.autoStartApplied {
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
                 Text(confirmationText(applied))
@@ -212,29 +169,8 @@ struct LoginItemCard: View {
         }
     }
 
-    /// Shows the confirmation for `level` and schedules its fade.
-    /// `flashToken` guards the fade so a newer change cancels an
-    /// older timer rather than clearing the latest confirmation.
-    ///
-    /// 2.5 s, longer than the key recorder's 1.5 s
-    /// (`KeyRecorderField`) on purpose: that caption is a short
-    /// phrase read mid-interaction while the user watches for the
-    /// next chord, whereas these are full sentences read once after
-    /// a single click, so the reading load is ~double. Don't "align"
-    /// it back to 1.5 s.
-    private func flash(_ level: AutoStartLevel) {
-        flashToken += 1
-        let token = flashToken
-        withAnimation { applied = level }
-        Task {
-            try? await Task.sleep(for: .seconds(2.5))
-            guard flashToken == token else { return }
-            withAnimation { applied = nil }
-        }
-    }
-
     @ViewBuilder private var caption: some View {
-        if status.requiresApproval {
+        if model.autoStart.requiresApproval {
             HStack(spacing: 8) {
                 Text(
                     L(
@@ -254,7 +190,7 @@ struct LoginItemCard: View {
                 }
                 .controlSize(.small)
             }
-        } else if status.unavailable == .translocated {
+        } else if model.autoStart.unavailable == .translocated {
             unavailableCaption(
                 L(
                     "general.login_item.unavailable",
@@ -262,7 +198,7 @@ struct LoginItemCard: View {
                         + "to turn this on."
                 )
             )
-        } else if status.unavailable == .notBundled {
+        } else if model.autoStart.unavailable == .notBundled {
             unavailableCaption(
                 L(
                     "general.login_item.unavailable_binary",
@@ -277,20 +213,5 @@ struct LoginItemCard: View {
         Text(text)
             .font(.caption)
             .foregroundStyle(.secondary)
-    }
-
-    /// Kicks a fresh off-main dual read and publishes it on main.
-    /// Skipped while a `set(_:)` is in flight: a `didBecomeActive`
-    /// landing mid-write could otherwise publish a pre-write read
-    /// after the write's own re-read, transiently showing a stale
-    /// level. The write's re-read already refreshes from OS truth,
-    /// so nothing is lost by deferring to the next event.
-    private func refresh() {
-        guard !busy else { return }
-        Task {
-            let result = await AutoStartManager.current()
-            status = result
-            loaded = true
-        }
     }
 }

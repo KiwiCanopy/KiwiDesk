@@ -22,7 +22,7 @@ struct GeneralSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 languageSection
-                LoginItemCard()
+                LoginItemCard(model: model)
                 aboutSection
                 advancedSection
             }
