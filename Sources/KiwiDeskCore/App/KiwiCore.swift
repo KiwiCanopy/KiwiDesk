@@ -161,8 +161,10 @@ public final class KiwiCore {
     /// stamped report that is not the intended focus is that
     /// echo — reverted, unless it carries click provenance
     /// (#687; the design-decisions entry owns the ruling).
-    /// Stamped per sequence, age-pruned, consumed on echo,
-    /// cleaned on destroy/rekey.
+    /// Stamped per sequence, age-pruned, cleaned on
+    /// destroy/rekey — and NEVER consumed by an echo: lazy
+    /// apps re-report a raised window, and the unstamped
+    /// duplicate was honored as deliberate focus (#689 QA).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
     /// Bumped per z-order raise sequence (float raise or pile

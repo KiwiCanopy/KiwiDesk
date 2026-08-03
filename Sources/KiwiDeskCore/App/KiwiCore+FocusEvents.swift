@@ -81,14 +81,36 @@ extension KiwiCore {
         // `performZOrderSequence` completion), and
         // re-asserting per echo would fight the drain
         // mid-sequence — see docs/design-decisions.md.
+        // The stamp is NOT consumed here — it expires by age.
+        // Lazy apps (Electron-class) re-report a raised window
+        // a second time hundreds of ms after the first echo;
+        // consume-on-first left that duplicate unstamped, and
+        // it was honored as deliberate focus — the ring, pan
+        // and pointer snapped back to the pile-mate ~0.5 s
+        // after a bar click (#689 device trace, 2026-08-03).
+        // The deliberate-refocus case consumption used to
+        // protect now has real discriminators: a click escapes
+        // on provenance (#687), a command routes through the
+        // self-raise path — only a clickless app/cmd-tab focus
+        // inside the window is eaten, the documented trade.
+        // The self-raise veto below respects only a FRESH
+        // outstanding entry: the #431 case it protects — a
+        // keyboard focus landing on a window a restore stamped
+        // — is by definition a fresh raise. A STALE entry (a
+        // no-echo re-assert's leftover) must not veto this
+        // revert, or a lazy app's late re-report of a stamped
+        // pile-mate threads BOTH nets: the stale entry blocks
+        // the ledger here, and the age bound below rightly says
+        // it is no self-echo — honored, and the ring, pan and
+        // pointer snap back (#689 device trace, 2026-08-03).
+        let now = Date()
         if let stamp = zOrderRaiseEchoes[id],
-            Date().timeIntervalSince(stamp)
+            now.timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
             let intended = effects.focusBefore, intended != id,
-            !outstandingSelfRaises.contains(id),
-            !recentClickReached(id, now: Date())
+            !freshSelfRaise(id, now: now),
+            !recentClickReached(id, now: now)
         {
-            zOrderRaiseEchoes[id] = nil
             if let space = state.workspaces.space(of: intended) {
                 state.workspaces.focus(intended, in: space)
             }
@@ -124,7 +146,6 @@ extension KiwiCore {
         // distrusted sibling (cmd-tab, in-app cross-display
         // cycle) inside the ~1 s window is the accepted trade —
         // the next focus event follows normally.
-        let now = Date()
         if !outstandingSelfRaises.contains(id),
             let pid = state.windows[id]?.pid,
             state.windows[id]?.isSticky != true,
@@ -182,12 +203,8 @@ extension KiwiCore {
         // QA 2026-08-03). `outstandingSelfRaises` was the last
         // unbounded ledger — the `zOrderRaiseEchoWindow`
         // lesson again. The entry is consumed either way.
-        let selfEcho =
-            outstandingSelfRaises.remove(id) != nil
-            && selfRaiseStamps[id].map {
-                now.timeIntervalSince($0)
-                    < Self.selfRaiseSiblingWindow
-            } == true
+        let selfEcho = freshSelfRaise(id, now: now)
+        outstandingSelfRaises.remove(id)
         // And even a FRESH entry stands down for a report with
         // click provenance (#687): a click that reached the
         // reported window is a user action our raise cannot
@@ -237,7 +254,18 @@ extension KiwiCore {
         // self-raise already warped at intent time in
         // `focusWindow`, and an echo that moved no focus
         // (same-window re-focus) is not a change (#186).
-        if !selfEcho, effects.focusBefore != id {
+        // A report with CLICK provenance is mouse-made focus
+        // and needs no warp — the pointer is exactly where
+        // the user put it. The fire-time inside check cannot
+        // cover this: in a focus-driven layout the click PANS
+        // the row, so the clicked window's settled slot slides
+        // out from under the cursor and the "warp" yanks the
+        // pointer after it (#689 device QA — pre-#689 that
+        // warp was dropped by the in-flight hold; the re-fire
+        // surfaced it).
+        if !selfEcho, effects.focusBefore != id,
+            !recentClickReached(id, now: Date())
+        {
             warpMouseToFocused(id)
         }
         // cmd+tab (or a click) can reach a window hidden

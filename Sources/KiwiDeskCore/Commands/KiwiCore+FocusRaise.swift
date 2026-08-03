@@ -125,7 +125,9 @@ extension KiwiCore {
         // self-echo that must not warp twice. `warp: false`
         // marks mouse-made focus (drag drop, resize settle),
         // where the button is already up.
-        if warp { warpMouseToFocused(id) }
+        if warp {
+            warpMouseToFocused(id)
+        }
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
         else {

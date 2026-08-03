@@ -82,18 +82,17 @@ struct ZOrderDrain: Sendable {
     ///
     /// **Exactly one pass, and never the same window twice.** A
     /// retry pass for the windows that missed their landing was
-    /// built and removed on device evidence: the raise echo ledger
-    /// (`zOrderRaiseEchoes`) consumes a window's stamp on its
-    /// FIRST echo, so a second raise of that window inside one
-    /// sequence emits an echo nothing reverts, and it reads as a
-    /// deliberate focus change — focus lands on the pile-mate and
-    /// a scrolling row pans to it. The last window raised is the
-    /// one next to the focus, so the visible symptom is the focus
-    /// sliding one slot after every restore (owner QA,
-    /// 2026-08-02). Re-stamping per pass would be the fix if a
-    /// retry ever earns its place; measurement says it has not —
-    /// no raise was ever LOST, only late, and a late one is put
-    /// right by the next restore.
+    /// built and removed on device evidence: the raise echo
+    /// ledger then consumed a window's stamp on its FIRST echo,
+    /// so a retried raise's second echo read as a deliberate
+    /// focus change — focus slid one slot after every restore
+    /// (owner QA, 2026-08-02). #689 retired consumption (a
+    /// stamp now expires by age, because lazy apps re-report a
+    /// raised window and the unstamped duplicate was honored),
+    /// which removes that specific hazard — but the one-pass
+    /// rule stands on the measurement alone: no raise was ever
+    /// LOST, only late, and a late one is put right by the next
+    /// restore, so a retry buys nothing.
     ///
     /// Returns the windows it actually raised, which is not the
     /// whole order: the caller stamped every target in the raise

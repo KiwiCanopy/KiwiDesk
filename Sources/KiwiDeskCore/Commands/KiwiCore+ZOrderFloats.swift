@@ -199,16 +199,18 @@ extension KiwiCore {
     /// across the queue and the residue is bounded, so it is
     /// stated rather than denied (code review, 2026-08-02).
     ///
-    /// A stamp is a promise that a raise echo is coming, and it is
-    /// consumed by the first echo that arrives. Since the sequence
-    /// started raising only what is out of place (#684), most of a
-    /// pile is stamped and never raised — and nothing would ever
-    /// consume those stamps, so for the next second a genuine
-    /// CLICK on one of those windows was read as the echo and
-    /// reverted: the click did nothing and the user had to click
-    /// twice (owner QA, 2026-08-02). Keyboard focus was unaffected,
-    /// which is the tell — it never emits the report this ledger
-    /// inspects.
+    /// A stamp is a promise that raise echoes are coming — held
+    /// until it AGES out, never consumed (#689). Since the
+    /// sequence raises only what is out of place (#684), most of
+    /// a pile is stamped and never raised, and before this
+    /// release a genuine CLICK on one of those windows was read
+    /// as the echo for the stamp's whole second: the click did
+    /// nothing and the user clicked twice (owner QA,
+    /// 2026-08-02). Keyboard focus was unaffected, which is the
+    /// tell — it never emits the report this ledger inspects.
+    /// (#687's click-provenance escape has since narrowed what a
+    /// lingering stamp can eat, but an unraised window's stamp
+    /// is still a lie and still goes.)
     ///
     /// Stamping is still the wide set rather than the plan,
     /// because the plan is decided on the raise queue after this

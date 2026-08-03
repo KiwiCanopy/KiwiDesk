@@ -21,6 +21,22 @@ extension KiwiCore {
     /// ~1 s a report is a user action, not our raise's echo.
     static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
+    /// Whether `id` carries a LIVE self-raise: an outstanding
+    /// entry whose raise `selfRaiseStamps` says is recent. The
+    /// one shape that may veto the raise-echo revert (#431) and
+    /// classify a report as our own echo — a stale entry (a
+    /// no-echo raise's leftover) is neither (#687/#689 QA).
+    func freshSelfRaise(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        outstandingSelfRaises.contains(id)
+            && selfRaiseStamps[id].map {
+                now.timeIntervalSince($0)
+                    < Self.selfRaiseSiblingWindow
+            } == true
+    }
+
     /// Whether a left click within the echo window actually
     /// REACHED `id` — the raise-echo revert's provenance escape
     /// (#687). Deliberately stricter than `recentClickInside`:

@@ -82,7 +82,28 @@ extension KiwiCore {
     func warpMouseToFocused(_ id: WindowID) {
         guard mouseWarpEligible(id) else { return }
         guard zOrderRestoresInFlight == 0 else {
-            pendingMouseWarp = id
+            // Hold only CLICKLESS intent (cmd-tab, keyboard
+            // focus-nav) — the case whose warp the drain
+            // genuinely loses (#689). A fresh left press means
+            // the mouse made this focus change (a bar click's
+            // intent warp lands here whenever the previous
+            // jump's restore is still draining), and a held
+            // warp firing hundreds of ms after the click reads
+            // as a spurious pointer jump (device QA,
+            // 2026-08-03); dropping it is the pre-#689
+            // behavior, and the pointer already sits where the
+            // user's hand put it. The trade: keyboard nav
+            // within ~1 s of a press, mid-drain, loses its
+            // warp too — pre-#689 every such warp was lost.
+            let now = Date()
+            let mouseMade =
+                lastLeftClick.map {
+                    now.timeIntervalSince($0.at)
+                        < Self.selfRaiseSiblingWindow
+                } == true
+            if !mouseMade {
+                pendingMouseWarp = id
+            }
             return
         }
         pendingMouseWarp = nil
