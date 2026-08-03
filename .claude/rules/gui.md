@@ -268,6 +268,24 @@ in the translation's order (`SentenceFrame`,
 catalog, and this app ships four verb-final locales. The
 argument is in `docs/design-decisions.md` ▸ App rules.
 
+**And the stack that lays such a frame out adds no spacing —
+the frame's own literals carry it.** A per-segment gap reads as
+merely wide in English, whose literals already carry their
+spaces, and is wrong outright wherever the literal between two
+slots opens with a particle that must hug the noun before it
+(`は`, `에`): the gap tears it off, in exactly the languages the
+frame exists for. So the spacing is the translator's too, and a
+row drawing one owes an allow-list naming any stack that may
+space its children and why — `AppRuleSentenceLayoutTests`, whose
+`allowed` map is the one copy of who may. Scope such a guard to
+the row's FILES rather than to the sentence property:
+guard-prover walked through a body-scoped cut twice, the second
+time with a spacing helper declared outside the property and
+composed into it. What no source scan can reach is per-segment
+spacing that is not a stack argument — a `.padding`, a
+`Spacer`, a `.frame` — so that residue is stated in the suite
+rather than chased.
+
 **A capability unlocked in one list stays scoped to that list**
 (#678). Once a profile carries a single shortcut override, the
 override affordance is live on every row of that list — never
