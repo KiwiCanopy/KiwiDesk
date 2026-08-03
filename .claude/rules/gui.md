@@ -320,6 +320,30 @@ authoring rules apply here even though the catalogs live in Core:
   `%1$@` / `%1$d` specifiers — never `+`-concatenated fragments.
   A translation cannot reorder pieces stitched together in Swift,
   and many languages need to.
+- **That holds when the pieces are sibling VIEWS, not just
+  string fragments.** `HStack { Text(prose); <the value> }` is
+  the same defect with a layout container doing the stitching:
+  the value can only ever land at one end, so every key must be
+  authored dangling, and a translation still cannot move it.
+  Nothing catches this — `extract-keys` sees one well-formed
+  key, the specifier-drift and content guards see nothing wrong
+  with it, and it reads as ordinary SwiftUI. It shipped for four
+  cross-reference captions until `CrossReferenceRow` was made to
+  render its link AT a positional specifier, by which point
+  `ja`, `ko`, `zh-Hans`, `zh-Hant` and `ru` had each ended their
+  translation on a colon or a bare preposition, having no way to
+  write a sentence. So: a value that belongs INSIDE a sentence
+  is interpolated into it, whatever kind of thing renders it.
+  `CrossReferenceRowSlotTests` holds the cross-reference family;
+  a second family of stitched sentence owes its own guard, since
+  that one is scoped to `CrossReferenceRow(` call sites.
+- Replacing a SwiftUI control with an AppKit one **re-earns what
+  the control gave away free** — focus, keyboard activation,
+  VoiceOver, and `isEnabled`, which `.disabled()` sets in the
+  environment and which no `NSView` inside an
+  `NSViewRepresentable` reads on its own. `LinkedCaption` and
+  `LinkedCaptionHitTests` are the worked example, and the first
+  cut of it shipped none of the four.
 - **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
   regenerated from real call sites; the other catalogs are
   translation-owned and edited only through `scripts/*-key(s)`.

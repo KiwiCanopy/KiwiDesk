@@ -53,11 +53,7 @@ struct StickyMarkEditor: View {
                 // A live state-dependent fact → caption, not
                 // the `?` popover (#94).
                 CrossReferenceRow(
-                    prose: L(
-                        "sticky.mark.forced",
-                        "On — the Space Bar is off, so this "
-                            + "is the only sticky mark."
-                    ),
+                    prose: Self.forcedProse,
                     linkTitle: L(
                         "sticky.mark.forced_link",
                         "Space Bar"
@@ -66,5 +62,25 @@ struct StickyMarkEditor: View {
                 )
             }
         }
+    }
+
+    /// The sentence NAMES the Space Bar, so the link is that
+    /// mention rather than a second copy trailing the full stop
+    /// — which is what the row's old fixed-order `HStack` left
+    /// on screen. Hoisted out of `body` for the type-checker:
+    /// a `+`-concatenated literal inside a conditional inside a
+    /// `ViewBuilder` is the shape that compiles here and dies on
+    /// the slower CI runner (gui.md, SwiftUI traps).
+    ///
+    /// Internal and `static` so `CrossReferenceRowSlotTests` can
+    /// assert the string itself rather than scanning for the
+    /// slot's name in source.
+    static var forcedProse: String {
+        L(
+            "sticky.mark.forced",
+            "On — the %1$@ is off, so this is the only sticky "
+                + "mark.",
+            CrossReferenceRow.linkSlot
+        )
     }
 }

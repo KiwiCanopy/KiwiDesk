@@ -44,15 +44,32 @@ struct LayoutCard: View {
     /// one, so the destination always exists in the mode the
     /// reader is already in (item 14).
     @ViewBuilder private var appBarCrossReference: some View {
-        if let host = model.config.settings.appBarHost(for: mode) {
+        if let host = model.config.settings.appBarHost(for: mode),
+            let appBarProse = LayoutCardText.appBarState(
+                mode,
+                on: host.appBar.enabled
+            )
+        {
             CrossReferenceRow(
-                prose: LayoutCardText.appBarState(
-                    mode,
-                    on: host.appBar.enabled
-                ),
+                prose: appBarProse,
+                // A BREADCRUMB, not the section name alone. The
+                // sentence says where the toggle lives, and
+                // "App Bar" names no row any sidebar shows —
+                // that row reads "Bars" / "Leisten" / "情報バー"
+                // — so the reader was sent looking for a pane
+                // that is not there, the way #678's spaces card
+                // was until c35407fa. Now that the link sits
+                // INSIDE the sentence the German said "wird
+                // unter App Bar konfiguriert", naming the thing
+                // twice. The head is the destination's own
+                // title, which also brings this link inside
+                // `SidebarCrossReferenceTests` — its subjects
+                // are derived from `▸`-shaped values, so a
+                // one-segment link never entered the set and
+                // nothing was watching this at all.
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
-                    "App Bar"
+                    "Bars ▸ App Bar"
                 ),
                 destination: .bars
             )
@@ -153,47 +170,58 @@ enum LayoutCardText {
     }
 
     /// The App Bar cross-reference's prose, with the bar's live
-    /// state read into the sentence. One key per layout, because
+    /// state AND the destination link read into the sentence —
+    /// the link as `CrossReferenceRow.linkSlot`, so a
+    /// translation may put the pane's name wherever its word
+    /// order wants it rather than dangling off the end.
+    /// One key per layout, because
     /// the layout's name is inside it and a language that
     /// inflects around that name cannot be handed a bare noun.
     /// Exhaustive rather than defaulted, so a third hosting
     /// layout fails to COMPILE — which is the discipline this
     /// area states everywhere else, and a `default:` here would
     /// quietly give that layout Scrolling's sentence.
+    ///
+    /// Returns `nil` for a layout with no sentence rather than
+    /// asserting and handing back `""`. That axis is the one the
+    /// exhaustive switch does NOT defend — granting Grid a host
+    /// compiles, because Grid is already listed — and an
+    /// `assertionFailure` here reports it by KILLING the test
+    /// process (signal 5, no attribution), which is what
+    /// guard-prover hit driving this from
+    /// `CrossReferenceRowSlotTests`. A nil fails as a value: the
+    /// suite reds naming the mode, and the caller draws no row
+    /// rather than an empty sentence beside a live link.
     static func appBarState(
         _ mode: LayoutMode,
         on: Bool
-    ) -> String {
+    ) -> String? {
         let state =
             on ? L("common.on", "on") : L("common.off", "off")
         switch mode {
         case .monocle:
             return L(
                 "monocle.app_bar_xref_state",
-                "The monocle app bar (currently %1$@) is "
-                    + "configured in",
-                state
+                "The monocle App Bar (currently %1$@) is "
+                    + "configured in %2$@.",
+                state,
+                CrossReferenceRow.linkSlot
             )
         case .scrolling:
             return L(
                 "scroll_grid.app_bar_xref_state",
-                "The scrolling app bar (currently %1$@) is "
-                    + "configured in",
-                state
+                "The scrolling App Bar (currently %1$@) is "
+                    + "configured in %2$@.",
+                state,
+                CrossReferenceRow.linkSlot
             )
         case .bsp, .stack, .grid, .track, .floating:
             // Unreachable while Core's `appBarHost(for:)` — the
             // one copy of who may show a bar — grants no host to
-            // these. That is the axis the exhaustive switch does
-            // NOT defend: granting Grid a host compiles, because
-            // Grid is already listed, and would ship an empty
-            // sentence beside a live link in every locale. Loud
-            // in debug, silent in release, like every other
-            // unreachable arm in this area.
-            assertionFailure(
-                "app bar host with no sentence: \(mode)"
-            )
-            return ""
+            // these. `CrossReferenceRowSlotTests` reds naming
+            // the mode if one of them ever gains a host, which
+            // is why this returns nil instead of asserting.
+            return nil
         }
     }
 }
