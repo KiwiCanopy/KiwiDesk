@@ -41,21 +41,37 @@ struct AppRulesCensusRenderTests {
         #expect(
             AppRulesRowOrder.bespokeContainers == [.rulesPerApp]
         )
+        // Whitespace-normalised, and the AppRules directory is
+        // scanned WHOLE rather than by filename: guard-prover
+        // walked three spellings past the first cut — a missing
+        // space (`:[SettingKey]`, which lints as a warning and
+        // ships, since the exit code decides), a declaration
+        // wrapped across lines (which is what swift-format
+        // itself produces past 79 columns, with no warning at
+        // all), and a list in a file whose name does not start
+        // with "AppRule".
         let root = SourceScan.repoRoot(from: #filePath)
+        var files: [URL] = try SourceScan.swiftSources(
+            under: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/AppRules"
+            )
+        )
+        files += try SourceScan.swiftSources(
+            under: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections"
+            )
+        ).filter { $0.lastPathComponent.hasPrefix("AppRule") }
+        #expect(files.count >= 5)
         var declaresList = false
-        for dir in [
-            "Sources/KiwiDesk/Settings/Components/AppRules",
-            "Sources/KiwiDesk/Settings/Sections",
-        ] {
-            for file in try SourceScan.swiftSources(
-                under: root.appendingPathComponent(dir)
-            ) where file.lastPathComponent.hasPrefix("AppRule") {
-                let source = SourceScan.stripComments(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
-                if source.contains(": [SettingKey] = [") {
-                    declaresList = true
-                }
+        for file in files {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let squashed = source.split(
+                whereSeparator: \.isWhitespace
+            ).joined()
+            if squashed.contains("[SettingKey]=[") {
+                declaresList = true
             }
         }
         #expect(

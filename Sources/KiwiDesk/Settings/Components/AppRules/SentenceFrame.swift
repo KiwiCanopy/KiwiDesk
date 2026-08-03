@@ -80,6 +80,36 @@ struct SentenceFrame {
         self.segments = segments
     }
 
+    /// Which control an argument slot draws. A pure function so
+    /// a guard can assert it: the row's own `switch` cannot be,
+    /// and a `default:` arm there silently gave every
+    /// unrecognized position the float menu — so a catalog
+    /// carrying `%4$@` drew a SECOND float menu rather than
+    /// anything a reader would spot as a translation bug,
+    /// defeating the preservation promise above at its only
+    /// consumer.
+    enum Control: Hashable {
+        case appName
+        case space
+        case float
+    }
+
+    /// `nil` for a position the row has no control for — which
+    /// the row must draw as nothing, never as its last case.
+    static func control(at position: Int) -> Control? {
+        switch position {
+        case 1: return .appName
+        case 2: return .space
+        case 3: return .float
+        default: return nil
+        }
+    }
+
+    /// The controls this frame draws, in its own order.
+    var controls: [Control] {
+        argumentPositions.compactMap(Self.control(at:))
+    }
+
     /// The argument positions the frame actually uses, so a
     /// guard can hold a translation to the slots its view draws
     /// rather than trusting the catalog.

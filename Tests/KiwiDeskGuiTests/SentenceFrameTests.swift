@@ -87,12 +87,57 @@ struct SentenceFrameTests {
     /// The shipped English frame draws exactly the three
     /// controls the row has, each once — a frame that lost one
     /// would drop a menu off the row entirely.
+    ///
+    /// Read from the ROW's source, not restated here. An earlier
+    /// cut passed its own copy of the format string to `L()`,
+    /// which on an English host returns the caller's literal
+    /// unchanged — so the test parsed its own argument and
+    /// asserted about that. Editing the real frame in both the
+    /// call site and `en.json` left it green (guard-prover): the
+    /// number-pin failure, applied to a string.
     @Test("the shipped frame carries all three controls once")
-    @MainActor
-    func shippedFrameIsComplete() {
-        let frame = SentenceFrame(
-            L("app_rules.sentence", "%1$@ opens in %2$@ and %3$@")
+    func shippedFrameIsComplete() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow.swift"
+                    ),
+                encoding: .utf8
+            )
         )
+        let shipped = try #require(
+            SourceScan.firstMatch(
+                in: source,
+                pattern: #""app_rules\.sentence",\s*\n?\s*"([^"]+)""#
+            ),
+            "AppRuleRow no longer authors app_rules.sentence"
+        )
+        let frame = SentenceFrame(shipped)
         #expect(frame.argumentPositions.sorted() == [1, 2, 3])
+        // …and each position maps to a distinct control, so the
+        // row cannot draw one menu twice or lose one.
+        #expect(
+            frame.controls == [.appName, .space, .float],
+            Comment(rawValue: "shipped frame: \(shipped)")
+        )
+    }
+
+    /// The slot → control mapping the row draws through. Made a
+    /// pure function because the row's `switch` had a `default:`
+    /// arm: replacing it with `EmptyView()` dropped the float
+    /// menu and the WHOLE SUITE stayed green (guard-prover), and
+    /// an out-of-range `%4$@` drew a second float menu rather
+    /// than the visible oddity `SentenceFrame` preserves it for.
+    @Test("every drawn position maps to its own control")
+    func controlMapping() {
+        #expect(SentenceFrame.control(at: 1) == .appName)
+        #expect(SentenceFrame.control(at: 2) == .space)
+        #expect(SentenceFrame.control(at: 3) == .float)
+        // An unmapped position draws NOTHING — never the last
+        // case a `default:` arm happens to name.
+        #expect(SentenceFrame.control(at: 4) == nil)
+        #expect(SentenceFrame.control(at: 0) == nil)
     }
 }

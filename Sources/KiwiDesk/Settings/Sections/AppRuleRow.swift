@@ -75,25 +75,33 @@ struct AppRuleRow: View {
                 switch segment.slot {
                 case .text(let words):
                     Text(words).foregroundStyle(.secondary)
-                case .argument(1):
-                    Text(
-                        KeybindingCatalog.displayName(
-                            forBundleID: app
-                        )
-                    )
-                    .fontWeight(.medium)
-                case .argument(2):
-                    spaceMenu
-                        .opacity(spaceInherited ? 0.55 : 1)
-                default:
-                    floatMenu
-                        .opacity(floatInherited ? 0.55 : 1)
+                case .argument(let position):
+                    control(at: position)
                 }
             }
             Spacer()
             deleteButton
         }
         .font(.callout)
+    }
+
+    /// The control a slot draws, mapped through
+    /// `SentenceFrame.control(at:)` so the mapping is assertable
+    /// and an unrecognized position draws NOTHING — never the
+    /// last case a `default:` arm happens to name.
+    @ViewBuilder
+    private func control(at position: Int) -> some View {
+        switch SentenceFrame.control(at: position) {
+        case .appName:
+            Text(KeybindingCatalog.displayName(forBundleID: app))
+                .fontWeight(.medium)
+        case .space:
+            spaceMenu.opacity(spaceInherited ? 0.55 : 1)
+        case .float:
+            floatMenu.opacity(floatInherited ? 0.55 : 1)
+        case nil:
+            EmptyView()
+        }
     }
 
     private var frame: SentenceFrame {

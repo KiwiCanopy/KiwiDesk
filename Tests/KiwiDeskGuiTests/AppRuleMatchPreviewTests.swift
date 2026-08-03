@@ -161,8 +161,12 @@ struct AppRuleMatchPreviewTests {
                 encoding: .utf8
             )
         )
+        // No `window.isFloating` needle: the expression occurs
+        // twice in this file, so deleting the one that decides
+        // the verdict left it green (guard-prover). The
+        // arithmetic test above reds on exactly that, which is
+        // where the coverage actually lives.
         #expect(source.contains("FloatRules(staged)"))
-        #expect(source.contains("window.isFloating"))
         #expect(source.contains(".matches(bundleID:"))
         #expect(
             !source.contains("title.contains("),
