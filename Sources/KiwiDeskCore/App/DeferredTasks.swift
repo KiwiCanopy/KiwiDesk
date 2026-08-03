@@ -48,6 +48,14 @@ final class DeferredTasks {
         /// on a tiled window (`raiseFloatsAbove`) — a burst of focus
         /// changes collapses to one raise for the final target.
         case floatRaise
+        /// Self-rearming adoption-heal sweep re-adopting windows
+        /// every event path missed (`scheduleAdoptionHeal`,
+        /// #675).
+        case adoptionHeal
+        /// One-shot re-track of windows the transient filters
+        /// dropped mid-launch (`scheduleTransientRetrack`,
+        /// #675).
+        case transientRetrack
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

@@ -120,6 +120,9 @@ extension KiwiCore {
         eventLoop.onIgnoredPanelFocus = { [weak self] pid in
             self?.ignoredPanelActive.insert(pid)
         }
+        eventLoop.onTransientDrop = { [weak self] in
+            self?.scheduleTransientRetrack()
+        }
         sleepWake.captureState = { [weak self] in
             self?.state.snapshot()
         }

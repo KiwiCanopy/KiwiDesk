@@ -180,6 +180,12 @@ extension EventLoop {
         // tree is what a managed app wants); only forget the pid so a
         // re-attach re-applies the warm-up (#360).
         manualAXApplied.remove(pid)
+        // The heal ledgers are per-app state too (#675): a
+        // relaunch reusing the pid starts with a fresh retry
+        // budget and an unquieted gate.
+        healQuiet[pid] = nil
+        transientRetried[pid] = nil
+        pendingRetrack.remove(pid)
         for id in Array(elements[pid, default: [:]].keys) {
             detectedFloating[id] = nil
             detectedFullscreen[id] = nil

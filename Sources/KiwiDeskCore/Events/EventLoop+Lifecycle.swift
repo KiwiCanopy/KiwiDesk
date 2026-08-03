@@ -78,5 +78,8 @@ extension EventLoop {
         ignorePending = []
         trackedFrames = [:]
         tabCarriers = []
+        healQuiet = [:]
+        transientRetried = [:]
+        pendingRetrack = []
     }
 }

@@ -245,6 +245,13 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
+    /// Adoption-heal timings (#675); tests assign milliseconds.
+    /// 5 s: a healthy tick is one ~1 ms census, so the cadence
+    /// only bounds worst-case adoption latency. 750 ms: outlasts
+    /// a Dock-stack zoom or fade-in, still feels immediate.
+    var adoptionHealInterval: Duration = .seconds(5)
+    var transientRetrackDelay: Duration = .milliseconds(750)
+
     /// Windows just moved without follow, whose focus re-reports
     /// must not space-follow (#482/#483) — see the type doc.
     let moveLatch = MoveIntentLatch()

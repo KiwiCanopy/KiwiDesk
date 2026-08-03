@@ -31,6 +31,12 @@ public final class EventLoop {
     public var onIgnoredPanelFocus: @MainActor (pid_t) -> Void = { _ in
     }
 
+    /// Fired when a transient filter drops a window mid-launch
+    /// (#675). The pid is already queued in `pendingRetrack`;
+    /// the core schedules the one-shot re-track that drains it
+    /// (`scheduleTransientRetrack`).
+    var onTransientDrop: @MainActor () -> Void = {}
+
     /// User float rules from the Lua config (`float_rules`).
     /// Assigning does NOT resync `detectedFloating`: rules
     /// change hands inside loadConfig's reset→reassign
@@ -96,6 +102,21 @@ public final class EventLoop {
     /// reconcile coalesces tabs. A genuine tab switch within it
     /// falls back to destroy + create (self-healing), which is rare.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
+    /// Census window ids a heal pass failed to adopt, per pid —
+    /// the sweep stays quiet for exactly those ids, so a window
+    /// it can never adopt (an ignored layer-0 panel) costs one
+    /// reconcile total instead of one per tick, while any NEW
+    /// census id still opens the gate (#675). Pruned to the
+    /// live census each pass.
+    var healQuiet: [pid_t: Set<WindowID>] = [:]
+    /// Windows the transient filters dropped that already spent
+    /// their one re-track, per pid (cleared on detach) — bounds
+    /// the retry so a permanent invisible helper (#309) cannot
+    /// schedule forever (#675).
+    var transientRetried: [pid_t: Set<WindowID>] = [:]
+    /// Pids owed a one-shot re-track for a transient drop
+    /// (#675); drained by the scheduled task.
+    var pendingRetrack: Set<pid_t> = []
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -133,6 +154,11 @@ public final class EventLoop {
     /// `scanWindowsAtAttach` answers (see `attach`).
     var visiblePIDs: () -> Set<pid_t> =
         AXHelper.pidsWithNormalWindows
+
+    /// The adoption-heal gate's census (#675): on-screen layer-0
+    /// window ids per owning pid, one snapshot per sweep.
+    var onScreenNormalWindowIDs: () -> [pid_t: Set<WindowID>] =
+        AXHelper.onScreenNormalWindowIDs
 
     /// AX window list of an app — `attach`'s snapshot and
     /// `reconcile`'s live list.
@@ -181,160 +207,9 @@ public final class EventLoop {
     public init() {}
 
     // Lifecycle (start/stop) lives in `EventLoop+Lifecycle.swift`.
-    // Read-only lookups (detectionVerdict, observes, element,
-    // isListed) live in `EventLoop+Queries.swift`.
-
-    // MARK: - Window tracking
-
-    func track(
-        _ element: AXUIElement,
-        pid: pid_t,
-        app: AppRef,
-        displayBounds: [CGRect]? = nil
-    ) {
-        let role = AXHelper.role(of: element)
-        guard role == kAXWindowRole,
-            !AXHelper.isMinimized(element),
-            var window = AXHelper.snapshot(
-                element: element,
-                pid: pid,
-                app: app
-            )
-        else { return }
-        guard elements[pid]?[window.id] == nil else { return }
-        let subrole = AXHelper.subrole(of: element)
-        // One WindowServer round trip feeds every
-        // classification below (layer, alpha, bounds).
-        let server = FloatDetection.serverSnapshot(
-            of: window.id
-        )
-        let layer = server.layer
-        let displays =
-            layer == nil || layer == 0
-            ? []
-            : displayBounds
-                ?? FloatDetection.activeDisplayBounds()
-        guard
-            !FloatDetection.isUnbackedAuxiliary(
-                role: role,
-                subrole: subrole,
-                layer: layer
-            )
-        else { return }
-        // #309: an invisible raised-layer helper (alpha-0 or
-        // fully off-screen lifecycle keepalive) never enters
-        // state — tracked, it would earn a Space slot and an
-        // App Bar item and read as an open app. A genuine
-        // overlay caught mid fade-in is re-tracked by a later
-        // reconcile pass once visible.
-        guard
-            !FloatDetection.isInvisibleHelper(
-                layer: layer,
-                alpha: server.alpha,
-                bounds: server.bounds,
-                displays: displays
-            )
-        else { return }
-        // Some panels must never be managed at all — merely
-        // floating them still pins them to a space (issue #21;
-        // #448 extends this to accessory apps' raised-layer
-        // command bars).
-        let isAccessory = classifiesAsOverlay(pid: pid)
-        guard
-            !shouldIgnore(
-                element,
-                pid: pid,
-                app: app,
-                layer: layer ?? 0,
-                isAccessory: isAccessory
-            )
-        else {
-            return
-        }
-        window.isFloating =
-            shouldForceFloat(pid: pid)
-            || FloatDetection.shouldFloat(
-                element: element,
-                bundleID: app.bundleID,
-                layer: layer,
-                rules: floatRules
-            )
-        // A transient overlay floats for a *structural* reason
-        // (third-party accessory app, panel subrole, or raised
-        // layer), never just because a float rule matched — so a
-        // user-floated standard window keeps its ring while a
-        // launcher does not (#300). Our own Settings window is
-        // exempt (#315, see `classifiesAsOverlay`).
-        window.isTransientOverlay =
-            isAccessory
-            || FloatDetection.shouldFloat(
-                role: role,
-                subrole: subrole,
-                layer: layer ?? 0
-            )
-        // Native fullscreen suppresses the focus ring (a ring
-        // around a display-filling window shows only at the
-        // corners); snapshot it here, refresh on reconcile.
-        window.isFullscreen = AXHelper.isFullscreen(element)
-        detectedFloating[window.id] = window.isFloating
-        detectedFullscreen[window.id] = window.isFullscreen
-        elements[pid, default: [:]][window.id] = element
-        observers[pid]?.observe(window: element)
-        // Remember every window's frame, and which windows carry a
-        // native tab group, so a later switch (this window vanishing
-        // as a sibling appears at the same frame) coalesces into a
-        // re-key instead of a destroy + create (#308).
-        trackedFrames[window.id] = window.frame
-        if AXHelper.hasNativeTabs(element) {
-            tabCarriers.insert(window.id)
-        }
-        onEvent(.windowCreated(window))
-    }
-
-    /// Re-runs float detection on an already-tracked window.
-    /// A window scanned mid-launch or mid-animation can report
-    /// a wrong subrole once (Ghostty's quick terminal during
-    /// the startup scan) and would otherwise stay misclassified
-    /// until it closes. Only a changed detection verdict emits,
-    /// so manual make_floating overrides survive reconciles.
-    // Internal (not private): also called by `handle` in
-    // EventLoop+Notifications.swift.
-    func recheckFloat(
-        _ element: AXUIElement,
-        id: WindowID,
-        pid: pid_t,
-        app: AppRef
-    ) {
-        recheckFullscreen(element, id: id)
-        let floating =
-            shouldForceFloat(pid: pid)
-            || FloatDetection.shouldFloat(
-                element: element,
-                bundleID: app.bundleID,
-                rules: floatRules
-            )
-        guard detectedFloating[id] != floating else { return }
-        detectedFloating[id] = floating
-        onEvent(.windowFloatChanged(id, isFloating: floating))
-    }
-
-    /// Re-reads native-fullscreen state on reconcile so a
-    /// green-button transition (no destroy/create pair) flips
-    /// the snapshot flag and the focus ring follows. Change-only,
-    /// like the float recheck above.
-    private func recheckFullscreen(
-        _ element: AXUIElement,
-        id: WindowID
-    ) {
-        let fullscreen = AXHelper.isFullscreen(element)
-        guard detectedFullscreen[id] != fullscreen else { return }
-        detectedFullscreen[id] = fullscreen
-        onEvent(
-            .windowFullscreenChanged(
-                id,
-                isFullscreen: fullscreen
-            )
-        )
-    }
-
+    // Window tracking (track, recheckFloat) lives in
+    // `EventLoop+Tracking.swift`; the adoption heal (#675) in
+    // `EventLoop+Heal.swift`. Read-only lookups (detectionVerdict,
+    // observes, element, isListed) live in
+    // `EventLoop+Queries.swift`.
 }
