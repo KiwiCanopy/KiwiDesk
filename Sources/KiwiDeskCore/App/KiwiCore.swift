@@ -245,11 +245,10 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
-    /// The adoption-heal timings (#675), stored like every
-    /// other machine seam: the production default lives at the
-    /// declaration, tests assign milliseconds so the tasks fire
-    /// inside a run. Why the values are what they are is on
-    /// `scheduleAdoptionHeal` / `scheduleTransientRetrack`.
+    /// Adoption-heal timings (#675); tests assign milliseconds.
+    /// 5 s: a healthy tick is one ~1 ms census, so the cadence
+    /// only bounds worst-case adoption latency. 750 ms: outlasts
+    /// a Dock-stack zoom or fade-in, still feels immediate.
     var adoptionHealInterval: Duration = .seconds(5)
     var transientRetrackDelay: Duration = .milliseconds(750)
 

@@ -214,10 +214,9 @@ extension KiwiCore {
     /// registration emits nothing, ever), so this re-arms
     /// itself for the whole session. The work it schedules is
     /// gated — `EventLoop.healSweep` reconciles only where the
-    /// WindowServer census names an untracked window — so a
-    /// healthy tick costs one ~1 ms snapshot; 5 s keeps the
-    /// worst-case adoption latency human-tolerable without the
-    /// census ever mattering in a profile. `stop()`'s
+    /// WindowServer census names an untracked window — and the
+    /// stored `adoptionHealInterval` carries the cadence and its
+    /// argument beside the value. `stop()`'s
     /// `deferred.cancelAll()` ends the chain; a later `start()`
     /// re-arms it.
     func scheduleAdoptionHeal() {
@@ -234,11 +233,11 @@ extension KiwiCore {
     }
 
     /// One-shot re-track for windows the transient filters
-    /// dropped mid-launch (#675): 750 ms is long enough for a
-    /// Dock-stack zoom or fade-in to finish, short enough to
-    /// feel immediate. Drains every pid queued since the fire
-    /// was armed (`markTransientDrop` arms only from idle, so
-    /// a drip of drops cannot push the deadline back).
+    /// dropped mid-launch (#675); the stored
+    /// `transientRetrackDelay` carries the delay and its
+    /// argument beside the value. Drains every pid queued since
+    /// the fire was armed (`markTransientDrop` arms only from
+    /// idle, so a drip of drops cannot push the deadline back).
     func scheduleTransientRetrack() {
         deferred.schedule(
             .transientRetrack,
