@@ -1591,32 +1591,50 @@ reverts to its Standard on the next monitor change.
 The **App Rules** section (in the **System** group) controls where
 windows of specific apps land and whether they tile.
 
-### App Launch Assignment
+### One rule, one sentence
 
-Click **+** to add a rule. Choose an app from the list — start
-typing to filter it by name, and each app shows its icon. Apps are
-remembered by their bundle identifier, so a rule keeps working
-across system-language changes and app renames — then pick a
-space. New windows of that app will
-open in the chosen space. For an app that isn't installed right
-now, use **Custom…** and enter its bundle identifier by hand (see
+Each rule is a sentence you complete: **"Spotify opens in media
+and floats"**. The two underlined words are menus — where the
+app's windows open, and whether they tile — so the row states
+what the app does rather than asking you to assemble it from
+labelled fields.
+
+Click **Add app rule** to add one. Choose an app from the list —
+start typing to filter it by name, and each app shows its icon.
+Apps are remembered by their bundle identifier, so a rule keeps
+working across system-language changes and app renames. For an
+app that isn't installed right now, use **Custom…** and enter
+its bundle identifier by hand (see
 [Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
+Use a row's trash button to delete it, which removes every rule
+for that app. Rows are ordered alphabetically by the app's
+display name so a long list stays scannable.
 
-Click an app row to edit it, or use its trash button to delete.
-Rows are ordered alphabetically by the app's display name so a long
-list stays scannable.
+Apps with no rule tile normally, in whichever space you open
+them — an empty list is a perfectly good state.
 
-To **match only certain windows** of an app (not all), the Float
-picker's **Windows titled…** option lets you add title fragments —
-e.g. a "Get Info" fragment floats only Finder's Get Info dialog,
-not every Finder window.
+### Where it opens, and whether it floats
 
-### Float Rules
+The first menu pins the app's new windows to a space, or leaves
+it **Automatic**.
 
-In the same section, the **Float** picker makes an app's windows
-never tile — **All windows** floats every window of the app, or
-**Windows titled…** floats only those whose title contains a
-fragment you add.
+The second decides tiling: **tiles normally**, **floats** (every
+window of the app), or **floats when titled…** — which floats
+only the windows whose title contains a fragment you add.
+
+### Checking a title rule before you trust it
+
+A title fragment is the one part of a rule whose effect you
+cannot read off the rule itself. "Windows titled Info" looks
+obviously right until it also catches "Information" — or misses
+"Get Info", because **the title match is case-sensitive**.
+
+So the pattern chips sit under a live list of that app's
+currently open windows, each marked **floats** or **tiles** by
+the rule as it stands — updating while you type. Nothing is
+saved to check it; the list simply answers the question the rule
+cannot. If the app has no windows open, it says so rather than
+implying everything matches.
 
 Dialogs, sheets, and picture-in-picture windows float automatically —
 you do not need a rule for them. Windows belonging to apps that remain

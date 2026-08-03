@@ -3504,6 +3504,44 @@ identity + order is enough here. (#68 §3.13)
 
 ### App rules
 
+**[Principle]**
+
+**A rule is a sentence, and the sentence is the control.** An app
+rule states what an app does — "Spotify opens in media and
+floats" — so the row states it, with the two menus sitting inside
+the statement where their values complete it. The shape it
+replaced was a form *about* an app: a name header over two
+labelled facet columns, which made the reader assemble the
+meaning out of three fragments and read "Float: Never" as a
+setting rather than as behaviour. Two consequences bind anything
+added here. The facet values are verb phrases, because a menu
+inside a sentence has to read as part of one — a noun that
+completed a "Float:" label completes nothing in a statement. And
+the labels the sentence no longer shows do not disappear: they
+become the menus' accessibility names, since a sentence gives a
+screen reader no name for its controls and the settings census
+names those rows by the same keys.
+
+**A rule whose effect you cannot read off the rule gets a live
+check.** A title fragment is that case: "Windows titled Info"
+looks obviously right until it also catches "Information", or
+misses "Get Info" because the match is case-sensitive. Neither
+failure is visible in the rule's own text, and both are visible
+in the user's actual window titles — so the editor lists the
+app's open windows with the verdict beside each, updating as the
+pattern is typed, and a rule is verified before it is saved
+rather than after it misfires. The obligation that carries: the
+verdict comes from the ENGINE's matcher, never from a `contains`
+written beside the preview. A preview that disagrees with the
+engine is worse than no preview, because it is trusted — and the
+two details a re-implementation gets wrong are exactly the two
+the check exists to show.
+
+This is a read of live window state from Settings, which is not
+the live-*apply* coupling #123 rejects: it reaches the snapshot
+the app already keeps, never the accessibility layer, so a
+keystroke costs a filter over an array the GUI holds.
+
 **[Rationale]**
 
 **One row per app, two facets.** "Finder lives on space 2
