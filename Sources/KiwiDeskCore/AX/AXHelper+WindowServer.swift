@@ -31,6 +31,47 @@ extension AXHelper {
             .count { $0 == pid }
     }
 
+    /// Per-owner ids of on-screen normal (layer-0) document
+    /// windows, from one snapshot — the adoption-heal gate's
+    /// census (#675). Ids rather than counts on purpose: the
+    /// tracked set legitimately holds windows this census
+    /// excludes (raised-layer transient overlays, and tracking
+    /// keeps other-desktop windows the on-screen list drops),
+    /// so a count comparison lets one such window permanently
+    /// shadow a missed document window — membership cannot be
+    /// shadowed. On-screen-only deliberately, unlike the boot
+    /// prefilter below: AX lists only the current desktop's
+    /// windows, so counting other desktops would make the gate
+    /// fire reconciles it can never satisfy. `WindowID.raw` IS
+    /// the `CGWindowID` this list is keyed by.
+    public static func onScreenNormalWindowIDs()
+        -> [pid_t: Set<WindowID>]
+    {
+        guard
+            let list = CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]]
+        else { return [:] }
+        var ids: [pid_t: Set<WindowID>] = [:]
+        for info in list {
+            guard
+                let pid =
+                    (info[kCGWindowOwnerPID as String]
+                    as? NSNumber)?.int32Value,
+                let layer =
+                    (info[kCGWindowLayer as String]
+                    as? NSNumber)?.intValue,
+                layer == 0,
+                let raw =
+                    (info[kCGWindowNumber as String]
+                    as? NSNumber)?.uint32Value
+            else { continue }
+            ids[pid, default: []].insert(WindowID(raw))
+        }
+        return ids
+    }
+
     /// PIDs owning at least one normal (layer-0) document window
     /// — the all-pids sibling of `normalWindowCount`, same
     /// options, same layer filter. The boot scan's

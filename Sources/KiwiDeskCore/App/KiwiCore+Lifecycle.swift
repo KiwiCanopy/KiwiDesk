@@ -143,6 +143,7 @@ extension KiwiCore {
             onLog("socket server failed: \(error)")
         }
         scheduleStartupSweep()
+        scheduleAdoptionHeal()
         signposter.endInterval("boot", boot)
         let now = ContinuousClock.now
         let configMs =
@@ -204,6 +205,52 @@ extension KiwiCore {
             // a hotkey space switch fires no focus event, so
             // the seed is still the only anchor source (#442).
             self.seedStartupFocus()
+        }
+    }
+
+    /// The steady-state net under the one-shot sweep above
+    /// (#675): every event-driven adoption path can go silent
+    /// at once for a fresh-launch app (a failed observer
+    /// registration emits nothing, ever), so this re-arms
+    /// itself for the whole session. The work it schedules is
+    /// gated — `EventLoop.healSweep` reconciles only where the
+    /// WindowServer census names an untracked window — and the
+    /// stored `adoptionHealInterval` carries the cadence and its
+    /// argument beside the value. `stop()`'s
+    /// `deferred.cancelAll()` ends the chain; a later `start()`
+    /// re-arms it.
+    func scheduleAdoptionHeal() {
+        deferred.schedule(
+            .adoptionHeal,
+            after: adoptionHealInterval
+        ) { [weak self] in
+            guard let self else { return }
+            if self.eventLoop.isRunning {
+                self.eventLoop.healSweep()
+            }
+            self.scheduleAdoptionHeal()
+        }
+    }
+
+    /// One-shot re-track for windows the transient filters
+    /// dropped mid-launch (#675); the stored
+    /// `transientRetrackDelay` carries the delay and its
+    /// argument beside the value. Drains every pid queued since
+    /// the fire was armed (`markTransientDrop` arms only from
+    /// idle, so a drip of drops cannot push the deadline back).
+    func scheduleTransientRetrack() {
+        deferred.schedule(
+            .transientRetrack,
+            after: transientRetrackDelay
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            for pid in self.eventLoop.drainPendingRetrack() {
+                self.eventLoop.reconcile(
+                    pid: pid,
+                    app: AppRef(pid: pid)
+                )
+            }
         }
     }
 
