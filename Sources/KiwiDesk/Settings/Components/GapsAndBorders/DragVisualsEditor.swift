@@ -15,6 +15,10 @@ import SwiftUI
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
+    private var gates: GapsBordersGates {
+        GapsBordersGates(settings: model.config.settings)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(
@@ -40,7 +44,13 @@ struct DragVisualsEditor: View {
                         "Marks the position your window is "
                             + "dragged from."
                     ),
-                    visual: $model.config.settings.dragGhost
+                    visual: $model.config.settings.dragGhost,
+                    enabledReason: gates.inertReason(
+                        for: .borders(.dragGhostBorder)
+                    ),
+                    borderReason: gates.inertReason(
+                        for: .borders(.dragGhostBorderWidth)
+                    )
                 )
                 column(
                     control: SettingsCatalog.gapsAndBorders
@@ -50,7 +60,13 @@ struct DragVisualsEditor: View {
                         "Marks the position your window will "
                             + "snap into when dropped."
                     ),
-                    visual: $model.config.settings.dragDropZone
+                    visual: $model.config.settings.dragDropZone,
+                    enabledReason: gates.inertReason(
+                        for: .borders(.dragDropZoneBorder)
+                    ),
+                    borderReason: gates.inertReason(
+                        for: .borders(.dragDropZoneBorderWidth)
+                    )
                 )
             }
         }
@@ -62,7 +78,9 @@ struct DragVisualsEditor: View {
     private func column(
         control: SettingsControl,
         caption: String,
-        visual: Binding<DragVisual>
+        visual: Binding<DragVisual>,
+        enabledReason: GapsBordersGates.InertReason?,
+        borderReason: GapsBordersGates.InertReason?
     ) -> some View {
         // The header `?` is the gate's live anchor (#527): with
         // the visual off the column below the Enabled toggle is
@@ -71,19 +89,18 @@ struct DragVisualsEditor: View {
             control,
             caption: caption,
             subsection: true,
-            help: visual.wrappedValue.enabled
-                ? nil
-                : L(
-                    "drag.disabled.help",
-                    "Turn on Enabled to edit this visual."
-                )
+            help: enabledReason.map(GapsBordersGateHelp.sentence)
         ) {
             DragVisualPreview(
                 visual: visual.wrappedValue,
                 cornerRadius: model.config.settings
                     .dragCornerRadius
             )
-            DragVisualControls(visual: visual)
+            DragVisualControls(
+                visual: visual,
+                enabledReason: enabledReason,
+                borderReason: borderReason
+            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .environment(
@@ -103,6 +120,8 @@ struct DragVisualsEditor: View {
 /// with is Advanced Colours'.
 struct DragVisualControls: View {
     @Binding var visual: DragVisual
+    let enabledReason: GapsBordersGates.InertReason?
+    let borderReason: GapsBordersGates.InertReason?
 
     /// Two gates the column already implies and none of it
     /// enforced (#520): with the visual off nothing it draws
@@ -141,8 +160,10 @@ struct DragVisualControls: View {
             }
             .modifier(
                 GreyOut(
-                    active: !visual.border,
-                    help: borderOffHelp
+                    active: borderReason != nil,
+                    help:
+                        borderReason
+                        .map(GapsBordersGateHelp.sentence) ?? ""
                 )
             )
             Divider()
@@ -150,20 +171,11 @@ struct DragVisualControls: View {
         }
         .modifier(
             GreyOut(
-                active: !visual.enabled,
-                help: L(
-                    "drag.disabled.help",
-                    "Turn on Enabled to edit this visual."
-                )
+                active: enabledReason != nil,
+                help:
+                    enabledReason
+                    .map(GapsBordersGateHelp.sentence) ?? ""
             )
-        )
-    }
-
-    private var borderOffHelp: String {
-        L(
-            "drag.border.off_help",
-            "Turn on Border to edit its width and "
-                + "alignment."
         )
     }
 
