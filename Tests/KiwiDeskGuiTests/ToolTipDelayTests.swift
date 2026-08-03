@@ -16,6 +16,26 @@ struct ToolTipDelayTests {
         return UserDefaults(suiteName: suite)!
     }
 
+    /// Both sides of an `install`-then-read assertion derive from
+    /// the same two symbols, so on its own it pins neither. The
+    /// key is an **AppKit** contract — restating the literal is
+    /// the derivation, the authority being AppKit and not a
+    /// second copy in this repo — and a typo there ships a
+    /// permanently ~2s delay with everything else green.
+    @Test("the key is the one AppKit reads")
+    func keyMatchesAppKit() {
+        #expect(ToolTipDelay.key == "NSInitialToolTipDelay")
+    }
+
+    /// The band `ToolTipDelay` itself argues for: fast enough that
+    /// a reader who pauses is not left concluding there is nothing
+    /// to read, slow enough that a pointer merely crossing a row
+    /// doesn't fire it. Prose nothing guards is prose that drifts.
+    @Test("the delay stays in its defended band")
+    func delayInBand() {
+        #expect((500...1000).contains(ToolTipDelay.milliseconds))
+    }
+
     @Test("installs the shortened delay")
     func installsDelay() {
         let defaults = scratchDefaults("install")
@@ -50,6 +70,11 @@ struct ToolTipDelayTests {
 
     /// The value is inert unless launch installs it, and nothing
     /// about `ToolTipDelay` compiling proves that it does.
+    ///
+    /// Scoped to the launch method's **body**, not the file: a
+    /// count over the whole file is satisfied by the call sitting
+    /// in `applicationWillTerminate` (proven), where it would run
+    /// after every window has already closed.
     @Test("launch installs it")
     func launchInstallsIt() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -57,9 +82,35 @@ struct ToolTipDelayTests {
             "Sources/KiwiDesk/AppDelegate.swift"
         )
         let source = try String(contentsOf: delegate, encoding: .utf8)
+        let head = "func applicationDidFinishLaunching"
+        let range = try #require(
+            source.range(of: head),
+            "launch method not found — repoint this guard"
+        )
+        let characters = Array(source)
+        var cursor = source.distance(
+            from: source.startIndex,
+            to: range.upperBound
+        )
+        // Step over the parameter list, then take the body.
+        _ = SourceScan.balanced(
+            characters,
+            from: &cursor,
+            open: "(",
+            close: ")"
+        )
+        let body = try #require(
+            SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "could not read the launch method's body"
+        )
         // A guard over source that read nothing would pass for
         // having found no violations (.claude/rules/tests.md).
-        #expect(source.contains("applicationDidFinishLaunching"))
-        #expect(source.occurrences(of: "ToolTipDelay.install(") == 1)
+        #expect(!body.isEmpty)
+        #expect(body.occurrences(of: "ToolTipDelay.install(") == 1)
     }
 }
