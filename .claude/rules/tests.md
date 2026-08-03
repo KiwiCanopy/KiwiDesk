@@ -127,6 +127,17 @@ bite large test PRs:
   named way that a divergent copy would weaken a guard or
   change what a suite observes, plus statelessness. Duplication
   that merely costs lines stays duplicated (§2.4).
+- **A test that touches process-global state proves itself alone
+  AND in a full run.** The bar above governs what suites share
+  on purpose; this governs what they share without meaning to.
+  A scratch suite does not isolate a test that registers
+  defaults, sets an environment variable or writes a shared
+  domain — the worked case is
+  `UserDefaults.register(defaults:)`, whose mechanism and
+  passed-locally/red-on-CI history `ToolTipDelayTests` owns
+  (2026-08-03). Neither a `--filter` run nor a `guard-prover`
+  mutation can reach this class: both observe the test on its
+  own, which is the state it passes in.
 - **A production default that grabs live host state gets an
   injection seam, a fake in tests, and a guard.** An `init`
   that seizes a real resource drags that seizure into every
@@ -162,12 +173,37 @@ bite large test PRs:
 - **A behavior change owes a test that fails without it.** Not a
   test that exercises the new code — one that reds when the
   change is reverted. Those differ more often than they sound.
-- **A guard, canary or parity test owes a `guard-prover` run**
-  before the PR: mutate the thing it watches and watch it fail.
-  The argument is
+- **A test whose assertions are new or changed owes a
+  `guard-prover` run** before the PR: mutate the thing each one
+  watches and watch it fail. Keyed on what the assertions claim
+  and on what feeds them, never on their text: renaming or
+  reflowing the test itself owes nothing, but a split that
+  repoints a test at a different fixture, fake or helper — or a
+  rename sweep that moves a scan guard's needle — changes what
+  it claims with its bytes untouched — that is how a canary ends up aimed at a
+  fixture no longer feeding the consumer. Why the run is owed at
+  all is
   [rule-authoring.md](rule-authoring.md)'s ("Prove a new guard
   reds") and is not restated here; what this row adds is *who*
   runs it and *when*.
+
+  The *when* is the change, not the test's shape — guard, canary,
+  parity test and plain behavior suite alike — because the bullet
+  above cannot stand in for any of them. A
+  behavior suite over a fake reds on a reverted change whatever
+  its assertions do, so a revert-red proves the test **reads**
+  the feature, not that it discriminates the behavior it names.
+  What has slipped through that gap here was always a sub-diff
+  mutation — the smallest edit that violates the invariant, which
+  is what the agent designs for and a revert never is.
+  `TeardownRestackTests` shipped a draft that could not tell a
+  `return` from a `continue`, and another whose silence passed on
+  a run that did nothing; `FullscreenLayoutExemptionTests`'
+  fixture never reached the filter term it named;
+  `ShortcutsFamilyRowsTests` read a `nil` the same as an empty
+  list. `ZOrderSequenceWiringTests` is the outer case — its two
+  catches were *production* decisions no unit test could reach,
+  found by removing them and watching the whole suite stay green.
 - **A perf change owes the correctness half.** A skip, a cache or
   an early return whose safety rests on something else running
   later pins that dependency with a test, never with a comment —
