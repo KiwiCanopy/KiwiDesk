@@ -85,17 +85,25 @@ struct SpacesUsingLayout: View {
         )
     }
 
+    /// Both forms carry the link as a specifier rather than
+    /// trailing off the end of the sentence — see
+    /// `CrossReferenceRow`, whose fixed-order `HStack` is what
+    /// forced the dangling "… edit them in" these keys used to
+    /// be authored as.
     private var overrideProse: String {
         overriding == 1
             ? L(
                 "layout_defaults.spaces_using.overridden_one",
-                "1 of them overrides these values — edit it in"
+                "1 of them overrides these values — edit it in "
+                    + "%1$@.",
+                CrossReferenceRow.linkSlot
             )
             : L(
                 "layout_defaults.spaces_using.overridden_many",
                 "%1$d of them override these values — edit them "
-                    + "in",
-                overriding
+                    + "in %2$@.",
+                overriding,
+                CrossReferenceRow.linkSlot
             )
     }
 }

@@ -153,7 +153,11 @@ enum LayoutCardText {
     }
 
     /// The App Bar cross-reference's prose, with the bar's live
-    /// state read into the sentence. One key per layout, because
+    /// state AND the destination link read into the sentence —
+    /// the link as `CrossReferenceRow.linkSlot`, so a
+    /// translation may put the pane's name wherever its word
+    /// order wants it rather than dangling off the end.
+    /// One key per layout, because
     /// the layout's name is inside it and a language that
     /// inflects around that name cannot be handed a bare noun.
     /// Exhaustive rather than defaulted, so a third hosting
@@ -171,15 +175,17 @@ enum LayoutCardText {
             return L(
                 "monocle.app_bar_xref_state",
                 "The monocle app bar (currently %1$@) is "
-                    + "configured in",
-                state
+                    + "configured in %2$@.",
+                state,
+                CrossReferenceRow.linkSlot
             )
         case .scrolling:
             return L(
                 "scroll_grid.app_bar_xref_state",
                 "The scrolling app bar (currently %1$@) is "
-                    + "configured in",
-                state
+                    + "configured in %2$@.",
+                state,
+                CrossReferenceRow.linkSlot
             )
         case .bsp, .stack, .grid, .track, .floating:
             // Unreachable while Core's `appBarHost(for:)` — the
