@@ -31,6 +31,24 @@ extension AXHelper {
             .count { $0 == pid }
     }
 
+    /// Per-owner counts of on-screen normal (layer-0) document
+    /// windows, from one snapshot — the adoption-heal gate's
+    /// census (#675). On-screen-only deliberately, unlike the
+    /// boot prefilter below: AX lists only the current desktop's
+    /// windows, so counting other desktops would make the gate
+    /// fire reconciles it can never satisfy.
+    public static func onScreenNormalWindowCounts()
+        -> [pid_t: Int]
+    {
+        var counts: [pid_t: Int] = [:]
+        for pid in normalWindowOwners(
+            options: [.optionOnScreenOnly, .excludeDesktopElements]
+        ) {
+            counts[pid, default: 0] += 1
+        }
+        return counts
+    }
+
     /// PIDs owning at least one normal (layer-0) document window
     /// — the all-pids sibling of `normalWindowCount`, same
     /// options, same layer filter. The boot scan's

@@ -53,6 +53,16 @@ extension EventLoop {
             detach(pid: pid, restoreEnhancedUI: true)
             return
         }
+        // A fresh-launch app can refuse the app-level
+        // notification adds and then sit silent forever (#675).
+        // Every reconcile touchpoint retries the failed adds, so
+        // an activation — or the adoption-heal sweep — restores
+        // the event stream; the sweep cadence is the backoff.
+        if let observer = observers[pid],
+            observer.needsRegistrationRepair
+        {
+            observer.repairRegistration()
+        }
         let isAccessory = Self.classifiesAsOverlay(
             pid: pid,
             activationPolicy: activationPolicy

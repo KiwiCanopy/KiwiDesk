@@ -34,8 +34,21 @@ protocol AppObserving: AnyObject {
     var onNotification: @MainActor (String, AXUIElement) -> Void {
         get set
     }
+    /// True while any app-level notification add is still
+    /// unregistered (#675) — a fresh-launch app can refuse the
+    /// adds, after which the observer sits installed and silent.
+    var needsRegistrationRepair: Bool { get }
     func observe(window: AXUIElement)
+    /// Re-attempts the app-level adds that failed (#675).
+    func repairRegistration()
     func invalidate()
+}
+
+/// Most fakes model a healthy observer; only the heal suites
+/// override these (#675).
+extension AppObserving {
+    var needsRegistrationRepair: Bool { false }
+    func repairRegistration() {}
 }
 
 extension AXApplicationObserver: AppObserving {}
@@ -56,6 +69,14 @@ public final class AXApplicationObserver {
     public var onNotification: Handler = { _, _ in }
 
     private var observer: AXObserver?
+    /// App-level names whose `AXObserverAddNotification` did not
+    /// succeed (#675). A fresh-launch app whose AX tree is not
+    /// ready yet refuses the add; discarding that result left the
+    /// observer installed but deaf — no `windowCreated` AND no
+    /// `focusedWindowChanged`, so both the primary path and its
+    /// safety net were dead, and the non-nil `observers[pid]`
+    /// entry blocked any re-attach forever.
+    private var failedAppNotifications: Set<String> = []
 
     /// Registered on the app element: delivered app-wide for
     /// all (including future) windows. Miniaturize events are
@@ -88,18 +109,50 @@ public final class AXApplicationObserver {
 
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         for name in Self.appNotifications {
-            AXObserverAddNotification(
+            let result = AXObserverAddNotification(
                 created,
                 appElement,
                 name as CFString,
                 refcon
             )
+            if !Self.registered(result) {
+                failedAppNotifications.insert(name)
+            }
         }
         CFRunLoopAddSource(
             CFRunLoopGetMain(),
             AXObserverGetRunLoopSource(created),
             .defaultMode
         )
+    }
+
+    private static func registered(_ result: AXError) -> Bool {
+        result == .success
+            || result == .notificationAlreadyRegistered
+    }
+
+    public var needsRegistrationRepair: Bool {
+        !failedAppNotifications.isEmpty
+    }
+
+    /// Re-attempts the app-level adds that failed at init (#675).
+    /// Driven from every reconcile touchpoint and the adoption
+    /// heal sweep, whose cadence is the retry backoff — no timer
+    /// of its own.
+    public func repairRegistration() {
+        guard let observer else { return }
+        let refcon = Unmanaged.passUnretained(self).toOpaque()
+        for name in failedAppNotifications {
+            let result = AXObserverAddNotification(
+                observer,
+                appElement,
+                name as CFString,
+                refcon
+            )
+            if Self.registered(result) {
+                failedAppNotifications.remove(name)
+            }
+        }
     }
 
     /// Registers per-window notifications for a window element.

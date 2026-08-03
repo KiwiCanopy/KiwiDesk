@@ -245,6 +245,13 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
+    /// Test-only overrides for the adoption-heal timings (#675):
+    /// nil in production, so the shipped cadence is the one the
+    /// `scheduleAdoptionHeal` doc argues; a suite sets them to
+    /// milliseconds so the tasks fire inside a test run.
+    var adoptionHealIntervalOverride: Duration?
+    var transientRetrackDelayOverride: Duration?
+
     /// Windows just moved without follow, whose focus re-reports
     /// must not space-follow (#482/#483) — see the type doc.
     let moveLatch = MoveIntentLatch()

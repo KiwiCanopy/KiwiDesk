@@ -25,6 +25,24 @@ editing AX code:
   value. Red-prove the stall itself on-device (`kill -STOP` any
   GUI app, then boot), never with a real SIGSTOP in CI —
   tests.md's hang-guard rule.
+- **Never assume an installed observer delivers (#675).**
+  `AXObserverAddNotification` can refuse a fresh-launch app whose
+  AX tree is not ready, and the refusal used to be discarded —
+  the observer then sat installed and deaf (no `windowCreated`,
+  no `focusedWindowChanged`) while its non-nil `observers[pid]`
+  entry blocked any re-attach, which is how a Spotlight-launched
+  app's windows were never adopted. `AXApplicationObserver`
+  records the failed adds; every reconcile touchpoint and the
+  adoption-heal sweep call `repairRegistration()`, and the sweep
+  (`EventLoop.healSweep`) is the pass *guaranteed* to come —
+  census-gated so a healthy tick costs one WindowServer snapshot
+  and no AX. `AdoptionHealTests` pins the gate and both repair
+  funnels; `AdoptionHealScheduleTests` pins the scheduled tasks.
+  Nothing machine-checks that `KiwiCore.start()` still calls
+  `scheduleAdoptionHeal()` — the same unpinnable link as the
+  `scheduleStartupSweep()` bullet below — so do not drop or
+  re-time that call without adding the pin and re-deriving the
+  `docs/accepted-limitations.md` heal-latency row.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Three links
