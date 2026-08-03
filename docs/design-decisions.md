@@ -1257,14 +1257,17 @@ minimize button would be the bug.
 
 **[Principle]**
 
-**Auto-start is one 3-level control, not a toggle and never a
-per-launch prompt.** (#342, #576) "Start KiwiDesk" in General
-offers *Never / At Login / At Login + Restart on Crash* — folding
-the crash-restart mechanism that used to be CLI-only into the same
-control that owns login-launch. Onboarding's closing card keeps
-the simpler pre-checked "open at login" box (the plain login
-level); auto-restart is advanced, not first-run material. Rulings
-a contributor might otherwise undo:
+**Auto-start is one folded level shown as two switches, never a
+per-launch prompt — and never two *independent* toggles.** (#342,
+#576, #678 item 16) General shows a login switch — "Start KiwiDesk
+when I log in" — in the "Applies immediately" group, and a
+crash-restart switch — "Restart if it stops unexpectedly" — first
+among Advanced's five. Both write through one `AutoStartLevel`, so
+the two-switch *presentation* never re-opens the contradiction the
+fold closes (the honesty argument below). Onboarding's closing
+card keeps the simpler pre-checked "open at login" box (the plain
+login level); auto-restart is advanced, not first-run material.
+Rulings a contributor might otherwise undo:
 
 - **Default At Login, auto-restart opt-in.** Most apps default
   login-launch to opt-in because "not running yet" is a neutral
@@ -1285,24 +1288,56 @@ a contributor might otherwise undo:
   there is no informative third case. Ask once, then the durable
   control owns the decision.
 
-**One folded control, not two toggles — the honesty argument.**
-The service is `RunAtLoad` + `KeepAlive` as one indivisible unit,
-so "restart on crash" is a *superset* of "open at login." Two
-independent read-through toggles could therefore render *Open at
-Login: OFF + Restart: ON* — a state where the first control's own
-label is false while the app still launches at login. It also
-doesn't fit the "toggle sits above the control it gates"
-convention: that gating is one-directional, not a child forcing
-its rendered parent on. Folding into one level over one merged
-status makes the contradictory pair unrepresentable. The
-`AutoStartManager` facade owns that coupling (the GUI analog of
-`CLIMain.runService`): `ServiceManager` stays a pure launchctl
+**Two switches, one folded level — and the impossible pair is
+refused, not made unrepresentable.** The service is `RunAtLoad` +
+`KeepAlive` as one indivisible unit, so "restart on crash" is a
+*superset* of "open at login," and two independent toggles can
+render *Open at Login: OFF + Restart: ON* — a state whose first
+control's own label is false while the app still launches at
+login. #576 answered that by folding both into ONE three-level
+picker, which made the pair *unrepresentable*. Turn 14b (#678
+item 16) splits the picker back into two switches, because the
+supervision half is advanced and does not belong beside the
+language pick — which re-opens the shape #576 closed. So the
+constraint had to move rather than disappear, and it moved down a
+layer to where it is total: `AutoStartLevel.level(openAtLogin:
+restartOnCrash:)` **discards** the restart flag whenever login is
+off, and both switches write through it, so no caller can express
+the contradiction whatever its two toggles say. That is the layer
+that holds for a CLI verb, a restored preference or a test —
+anything that never passes through the view. The Advanced switch
+*also* greys while login is off, but `gui.md` forbids a grey as
+the sole gate on a side effect (this one writes a launchd plist),
+so the grey is the courtesy that *explains* the refusal to a
+reader, never the refusal itself. Making the pair unrepresentable
+in one control was #576's answer; refusing it in the fold is the
+answer that survives the control being split.
+
+The `AutoStartManager` facade owns that coupling (the GUI analog
+of `CLIMain.runService`): `ServiceManager` stays a pure launchctl
 path and never imports `SMAppService`, and the facade folds the
 two into an `AutoStartLevel`. Because launchctl is a blocking
-spawn, `current()`/`set()` are `async` off the main actor and the
-control shows a transient pending state — a blocking `Process` in
-a SwiftUI `body` would be the AGENTS.md violation the CLI-only
+spawn, `current()`/`set()` are `async` off the main actor and each
+switch shows a transient pending state — a blocking `Process` in a
+SwiftUI `body` would be the AGENTS.md violation the CLI-only
 fallback existed to avoid.
+
+**Turning login on brings crash-restart with it, and that choice
+is not remembered once login is off.** "On" sets both halves,
+because login + restart is the obvious setup for someone who just
+wants KiwiDesk running; the third state — login without
+supervision — is reconstructed by switching the Advanced row off
+afterwards, without making every user read three options to pick
+the obvious one. The cost is accepted deliberately: because the
+control is read-through and caches nothing, a *login-without-
+restart* choice does not survive being switched off and on again.
+`.off` erases the distinction — a copy that never wanted restart
+and one that was simply never started both read as `.off` — so
+re-enabling login has no prior answer to restore and takes the
+default. Storing one would mean holding a preference the OS itself
+does not have, which is the exact drift read-through exists to
+prevent; the Advanced row is where that state is re-chosen, by
+design.
 
 **The control is read-through, and the two subsystems are the
 authority.** It never caches a bool — every level is derived from
@@ -1315,14 +1350,12 @@ At-Login level (the user's intent) with a jump to Login Items,
 reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
 is the *pre-registration* state macOS reports for `mainApp`, so it
 reads as off-but-registerable, not as an error. A copy that
-genuinely cannot register greys out the **whole** control (grey,
-don't hide) — because levels 2 and 3 both need a stable `.app`
-path (level 2 is the `SMAppService` item, level 3 a LaunchAgent),
-so with only "Never" left there is no live 3-way choice to
-preserve; a per-item disable can't render greyed on AppKit's
-`NSPopUpButton` anyway, and whole-control grey matches the #171
-"inapplicable control is greyed, not hidden" precedent. Its `?`
-help is hoisted outside the disable so it stays readable, and the
+genuinely cannot register greys out **both** switches (grey,
+don't hide) — the login item needs a stable `.app` path and the
+LaunchAgent needs one just as much, so neither switch has a valid
+"on" and only "off" remains, matching the #171 "inapplicable
+control is greyed, not hidden" precedent. Each switch is greyed
+rather than its row, so its `?` help stays readable, and the
 reason-specific caption (a live sibling) names the fix for the
 specific cause: **move to Applications** for a
 Gatekeeper-translocated
@@ -1331,11 +1364,50 @@ download, **run the packaged app** for a bare non-bundled binary
 is a *location* fact, evaluated before the OS status, so it holds
 even if a prior install left a stale registration. The service's
 `KeepAlive { SuccessfulExit = false }` restarts only a *crash*, so
-the label "restart if it crashes" is literally accurate — a
-deliberate Quit is never resurrected. The overlap that used to be
+the label "Restart if it stops unexpectedly" is literally
+accurate — a deliberate Quit is never resurrected. The overlap that used to be
 invisible (a loaded service's `RunAtLoad` also launches at login)
 is now *the* top level, made runtime-safe by the #196 instance
 lock.
+
+### Appearance (light / dark override)
+
+**[Trade-off]**
+
+**The appearance pick is stored in app preferences and applied to
+`NSApp`, never in `gui.json` and never through SwiftUI's
+`preferredColorScheme`.** (#678 item 8) General offers *System /
+Light / Dark*; System is the default and stores nothing.
+
+- **Storage is `UserDefaults`, not `gui.json`** — the same
+  reasoning as the GUI language pick. It is an app-wide display
+  choice, not part of any profile, and writing it must never
+  create a config sidecar: that would flip `KiwiCore.isGuiManaged`
+  and hand config ownership to the structured loader for a user
+  who never adopted the GUI (`profiles.md`: a profile may not
+  override a setting that lives outside config ownership).
+  `.system` removes the key entirely, so "follow macOS" leaves no
+  trace, and an unknown stored value — a hand-edited domain, a
+  case removed later — reads as `.system` rather than trapping,
+  because this runs at window construction and refusing to open
+  Settings over a bad preference string is the worse failure.
+- **Applied to `NSApp.appearance`, not `.preferredColorScheme`.**
+  The SwiftUI modifier sets only the hosting window, which fails
+  two ways. It is too narrow — item 8 asks that every surface have
+  a dark counterpart, and the bars and border overlays are their
+  own windows a Settings-view modifier never reaches. And it does
+  not cleanly revert: AppKit-backed subviews (`NSViewRepresentable`
+  captions, the visual-effect sidebar) resolve their appearance
+  when made and do not re-read it when the modifier returns to
+  `nil`, so *Dark → System* stranded them dark while *Dark → Light*
+  — a new concrete value — looked fine (found on device before it
+  shipped). Assigning `NSApp.appearance = nil` hands the decision
+  back to macOS, and AppKit propagates it to every window,
+  including ones opened later.
+- **Core carries the choice, the GUI maps it** (the #96 seam
+  applied to a value type). `AppearanceChoice` is a case with no
+  AppKit in it; the mapping onto `NSAppearance` lives where AppKit
+  does.
 
 ### Navigation & saving
 
