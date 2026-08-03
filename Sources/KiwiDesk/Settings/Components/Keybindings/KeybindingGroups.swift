@@ -243,9 +243,13 @@ struct GeneralShortcutsGroup: View {
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
 
+    @State private var expanded = false
+
     var body: some View {
-        SettingsSection(
-            SettingsCatalog.shortcuts.generalKeys
+        SettingsDisclosure(
+            SettingsCatalog.shortcuts.generalKeys,
+            chrome: .card,
+            isExpanded: $expanded
         ) {
             ForEach(
                 ShortcutsRowOrder.generalKeysMore,
@@ -258,28 +262,50 @@ struct GeneralShortcutsGroup: View {
                     expander: expander
                 )
             }
+            .padding(.top, 8)
         }
     }
 }
 
-/// Switch layers: one row per other layer, binding a
-/// `switch_layer` shortcut. Shown only when more than one layer
-/// exists — with just `default` there is nothing to switch to.
-struct SwitchLayersGroup: View {
+/// The Layers card: the chip strip that defines the layers, and
+/// the rows that switch between them.
+///
+/// One card because the census places all three families in one
+/// container — the strip, its menu-bar icon and the switch rows —
+/// and because the switch shortcuts belong beside the definition
+/// they act on rather than among the action groups.
+///
+/// Behind a disclosure because the census tiers every one of them
+/// `.showMore`: alternate key sets are the area's advanced half,
+/// and a first-week user should meet the shortcut list without
+/// meeting layers at all. The header keeps a quiet label naming
+/// the layer being edited, so the fact survives the control
+/// moving in here.
+struct LayersCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
+    @Binding var selected: String
     let expander: ShortcutsFamilyRows
+    @State private var expanded = false
 
     var body: some View {
-        SettingsSection(
-            SettingsCatalog.shortcuts.switchLayers
+        SettingsDisclosure(
+            SettingsCatalog.shortcuts.layersCard,
+            chrome: .card,
+            isExpanded: $expanded
         ) {
-            KeybindingFamilyRows(
-                model: model,
-                bindings: $bindings,
-                key: .shortcuts(.switchToLayer),
-                expander: expander
-            )
+            VStack(alignment: .leading, spacing: 12) {
+                LayerStripEditor(model: model, selected: $selected)
+                if model.config.layers.count > 1 {
+                    KeybindingFamilyRows(
+                        model: model,
+                        bindings: $bindings,
+                        key: .shortcuts(.switchToLayer),
+                        expander: expander
+                    )
+                }
+            }
+            .padding(.top, 8)
         }
     }
 }

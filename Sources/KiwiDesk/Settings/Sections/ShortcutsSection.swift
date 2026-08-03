@@ -95,16 +95,6 @@ struct ShortcutsSection: View {
         KeybindingConflictBanner(model: model)
         overrideBanner
         ShortcutsHeader(model: model, selected: $selected)
-        // Right under the strip that defines the layers — the
-        // switch shortcuts belong beside their definition, not
-        // buried below the action groups.
-        if model.config.layers.count > 1 {
-            SwitchLayersGroup(
-                model: model,
-                bindings: bindingsBinding,
-                expander: expander
-            )
-        }
     }
 
     @ViewBuilder private var actionGroups: some View {
@@ -139,6 +129,15 @@ struct ShortcutsSection: View {
             model: model,
             bindings: bindingsBinding,
             spaces: model.config.spaces
+        )
+        // The advanced half, all census `.showMore`: the layers
+        // that define alternate key sets, then the raw-Lua
+        // escape hatch.
+        LayersCard(
+            model: model,
+            bindings: bindingsBinding,
+            selected: $selected,
+            expander: expander
         )
         advancedDrawer
     }

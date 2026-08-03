@@ -19,9 +19,19 @@ struct ProfilesControls: Sendable {
 }
 
 struct ShortcutsControls: Sendable {
-    let switchLayers = SettingsControl(
-        "shortcuts.section.switch_layers",
-        "Switch layers"
+    /// The Layers card. A drawer, not a plain section: the
+    /// census tiers every family in this container `.showMore`,
+    /// so alternate key sets are one interaction away rather
+    /// than in a first-week user's path.
+    ///
+    /// Titled for the container, not for one of its parts — it
+    /// holds the strip that DEFINES the layers as well as the
+    /// rows that switch between them. The ⌃⌥K panel keeps
+    /// `shortcuts.section.switch_layers` for its band, which
+    /// really is only the switch rows.
+    let layersCard = SettingsDrawer(
+        "shortcuts.section.layers",
+        "Layers"
     )
     let focusKeys = SettingsControl(
         "shortcuts.section.focus",
@@ -46,7 +56,10 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
-    let generalKeys = SettingsControl(
+    /// Also a drawer: its one row (`showShortcuts`) is census
+    /// `.showMore`, being app chrome rather than a workspace
+    /// action.
+    let generalKeys = SettingsDrawer(
         "shortcuts.section.general",
         "General"
     )
