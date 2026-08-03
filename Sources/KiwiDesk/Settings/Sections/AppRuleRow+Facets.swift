@@ -144,10 +144,10 @@ extension AppRuleRow {
             "app_rules.float.help",
             "Floating takes this app's matching windows out of "
                 + "tiling: each keeps its last position and size "
-                + "and appears on every space, instead of living "
-                + "in one space's grid.\n\nThis is per-app "
-                + "floating — not the **Floating** layout mode, "
-                + "which floats every window in a space."
+                + "and stays above the tiled windows, instead of "
+                + "snapping into one space's grid.\n\nThis is "
+                + "per-app floating — not the **Floating** layout "
+                + "mode, which floats every window in a space."
         )
     }
 

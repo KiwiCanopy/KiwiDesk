@@ -70,7 +70,7 @@
   "app_rules.empty": "沒有規則的 App 會正常並排，並留在你開啟它的空間。",
   "app_rules.float": "浮動",
   "app_rules.float.all_windows": "浮動",
-  "app_rules.float.help": "「浮動」會把這個 App 符合條件的視窗移出並排佈局：每個視窗保留最後的位置與尺寸，並出現在所有空間，而不是待在某個空間的格線中。\n\n這是以 App 為單位的浮動，並不是 **Floating** 佈局模式，後者會讓某個空間中的每個視窗都浮動。",
+  "app_rules.float.help": "浮動會將這個 App 的符合視窗移出並排：每個視窗保持上次的位置與大小，並停留在並排視窗之上，而不是嵌入某個空間的網格中。\n\n這是各 App 的浮動，而非 **Floating** 佈局模式（該模式會讓一個空間中的所有視窗都浮動）。",
   "app_rules.float.never": "正常並排",
   "app_rules.float.titled": "在標題符合時浮動…",
   "app_rules.float.titled.resting": "在標題符合時浮動",
