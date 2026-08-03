@@ -29,7 +29,7 @@ the diff, not a judgement call:
 
 | The diff… | also spawn |
 |---|---|
-| adds or edits a test, guard, canary or assertion | `guard-prover` |
+| adds or edits a test | `guard-prover` |
 | changes user-visible behavior | `docs-steward` |
 | adds or alters an `L()` string, or touches a catalog | `localization-auditor` |
 | touches `site/` | `site-engineer` |

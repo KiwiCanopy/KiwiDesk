@@ -63,6 +63,12 @@ Read two files before you start:
 - **Ship the limits.** When a guard genuinely cannot catch a class
   of violation, say which class, so nobody reads its green as
   coverage it does not have.
+- **Say so when yours is one of them.** You mutate, run the guard
+  under `--filter` and restore, so a test that passes on what
+  another test left behind is outside anything you can observe.
+  When a guard you prove touches process-global state, put it
+  under `blind to:` and route the caller to `tests.md`, which
+  owns what that test then owes.
 - Do not widen scope. You prove the guards you were handed; you do
   not review the feature, refactor the suite, or add tests.
 
@@ -71,6 +77,11 @@ Read two files before you start:
 Prefer spawning this agent with `isolation: "worktree"` so a
 mutation can never reach the working tree. When that is not
 available, step 5 is the whole safety net — do not skip it.
+
+Hand over **every** guard in the change set in one spawn. The
+procedure above is already per-guard and the output contract is
+already a row each, so a spawn apiece buys nothing and re-pays
+the cold read of `tests.md` and `rule-authoring.md` each time.
 
 ## Output
 
