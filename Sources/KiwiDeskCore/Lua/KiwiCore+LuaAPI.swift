@@ -107,7 +107,7 @@ extension KiwiCore {
                 }
                 bindings[combo] = ref
             }
-            let icon = Self.modeIcon(
+            let icon = Self.layerIcon(
                 from: args.dropFirst(2).first
             )
             self.keys.defineLayer(
@@ -131,7 +131,7 @@ extension KiwiCore {
 
     /// Reads `{ icon = "..." }` from `define_layer`'s optional
     /// third argument.
-    private static func modeIcon(
+    private static func layerIcon(
         from value: LuaValue?
     ) -> String? {
         guard case .table(let opts)? = value else {

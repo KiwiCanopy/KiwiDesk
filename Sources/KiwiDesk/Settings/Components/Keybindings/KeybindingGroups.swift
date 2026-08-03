@@ -29,7 +29,7 @@ struct KeybindingFamilyRows: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
-        let commands = expander.rows(for: key) ?? []
+        let commands = renderedRows
         if !commands.isEmpty {
             if let heading = ShortcutsFamilyHeading.title(for: key) {
                 Text(heading)
@@ -52,6 +52,10 @@ struct KeybindingFamilyRows: View {
                 )
             }
         }
+    }
+
+    private var renderedRows: [NavCommand] {
+        expander.renderedRows(for: key)
     }
 }
 

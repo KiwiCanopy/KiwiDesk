@@ -36,6 +36,44 @@ enum ShortcutsRowOrder {
         .shortcuts(.moveToSpaceFollow),
     ]
 
+    /// Families whose INSTANCES interleave instead of stacking.
+    ///
+    /// An order list orders FAMILIES, which is almost always the
+    /// whole story — but "Move to Space 2" and "Move to Space 2
+    /// & follow" are one decision about one space, and drawing
+    /// every plain row and then every follow row makes the user
+    /// cross-reference two lists to make it. So the per-space
+    /// pair renders per space: plain, follow, plain, follow.
+    ///
+    /// Data rather than a special case inside the renderer,
+    /// because it is a design decision about instance order and
+    /// the render guard compares SETS — set equality cannot see
+    /// interleaving, which is exactly how splitting these two
+    /// families into two census cases un-paired them on screen
+    /// with every test green.
+    ///
+    /// Each run's members must share a container and tier;
+    /// `ShortcutsCensusRenderTests` pins that, and the runs stay
+    /// short by construction — a run is a row shape, not a
+    /// grouping mechanism.
+    static let interleavedRuns: [[SettingKey]] = [
+        [.shortcuts(.moveToSpace), .shortcuts(.moveToSpaceFollow)]
+    ]
+
+    /// The run `key` leads, if it leads one. A non-leading member
+    /// draws nothing: its rows were emitted with the leader's.
+    static func interleavedRun(
+        startingAt key: SettingKey
+    ) -> [SettingKey]? {
+        interleavedRuns.first { $0.first == key }
+    }
+
+    static func isInterleavedFollower(_ key: SettingKey) -> Bool {
+        interleavedRuns.contains {
+            $0.dropFirst().contains(key)
+        }
+    }
+
     /// Size & float: the four resize rows in grow/shrink pairs
     /// per axis, then the three state toggles.
     static let sizeAndFloatAtRest: [SettingKey] = [

@@ -660,7 +660,6 @@
   "shortcuts.advanced.caption": "Associez tout code Lua à un raccourci. C'est l'échappatoire pour utilisateurs avancés — les groupes ci-dessus couvrent les actions intégrées.",
   "shortcuts.advanced.title": "Raccourcis Lua",
   "shortcuts.app_behavior": "Comportement de lancement",
-  "shortcuts.app_behavior.help": "**Ouvrir ou Activer** amène la fenêtre existante de l'app dans l'espace actuel, ou lance l'app si elle n'est pas ouverte. Appuyer à nouveau pendant que cette fenêtre a le focus fait défiler une à une les autres fenêtres de l'app. Si toutes les fenêtres de l'app sont réduites, le raccourci restaure la dernière réduite ; sinon, les fenêtres réduites restent dans le Dock.\n\n**Ouvrir nouveau** lance toujours une nouvelle instance, même si l'app est déjà ouverte.",
   "shortcuts.app_behavior.open_new": "Ouvrir nouveau",
   "shortcuts.app_behavior.open_new.badge": "Ouvre une nouvelle instance",
   "shortcuts.app_behavior.open_or_focus": "Ouvrir ou Activer",

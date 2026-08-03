@@ -147,21 +147,21 @@ extension SettingsModel {
         // Existing row: find by transient edit-session id across
         // every mode. A staged mode rename stays staged; runtime
         // ownership remains with the row's clean mode.
-        for modeIndex in modes.indices {
+        for layerIndex in modes.indices {
             guard
-                let bindingIndex = modes[modeIndex].bindings
+                let bindingIndex = modes[layerIndex].bindings
                     .firstIndex(where: { $0.id == bindingID })
             else { continue }
             updateCombo(
                 combo,
                 bindingIndex: bindingIndex,
-                modeIndex: modeIndex,
+                layerIndex: layerIndex,
                 modes: &modes
             )
             guard combo != nil else { return nil }
             return LiveKeybindingTarget(
-                layer: modes[modeIndex].name,
-                binding: modes[modeIndex].bindings[
+                layer: modes[layerIndex].name,
+                binding: modes[layerIndex].bindings[
                     bindingIndex
                 ]
             )
@@ -171,31 +171,31 @@ extension SettingsModel {
         // recording. Later non-recorder edits stay staged because
         // subsequent recordings find this session copy by id.
         guard let combo,
-            let editedMode = config.layers.first(where: {
+            let editedLayer = config.layers.first(where: {
                 $0.name == layerName
             }),
-            var binding = editedMode.bindings.first(where: {
+            var binding = editedLayer.bindings.first(where: {
                 $0.id == bindingID
             })
         else { return nil }
         binding.combo = combo
-        let modeIndex: Int
+        let layerIndex: Int
         if let existing = modes.firstIndex(where: {
             $0.name == layerName
         }) {
-            modeIndex = existing
+            layerIndex = existing
         } else {
             modes.append(KeyLayer(name: layerName))
-            modeIndex = modes.index(before: modes.endIndex)
+            layerIndex = modes.index(before: modes.endIndex)
         }
         clearCombo(
             combo,
             except: bindingID,
-            in: &modes[modeIndex].bindings
+            in: &modes[layerIndex].bindings
         )
-        modes[modeIndex].bindings.append(binding)
+        modes[layerIndex].bindings.append(binding)
         return LiveKeybindingTarget(
-            layer: modes[modeIndex].name,
+            layer: modes[layerIndex].name,
             binding: binding
         )
     }
@@ -203,18 +203,18 @@ extension SettingsModel {
     private func updateCombo(
         _ combo: String?,
         bindingIndex: Int,
-        modeIndex: Int,
+        layerIndex: Int,
         modes: inout [KeyLayer]
     ) {
         if let combo {
-            let id = modes[modeIndex].bindings[bindingIndex].id
+            let id = modes[layerIndex].bindings[bindingIndex].id
             clearCombo(
                 combo,
                 except: id,
-                in: &modes[modeIndex].bindings
+                in: &modes[layerIndex].bindings
             )
         }
-        modes[modeIndex].bindings[bindingIndex].combo = combo ?? ""
+        modes[layerIndex].bindings[bindingIndex].combo = combo ?? ""
     }
 
     private func clearCombo(

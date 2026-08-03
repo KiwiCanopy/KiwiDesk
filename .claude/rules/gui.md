@@ -116,6 +116,17 @@ hold the display order and `BarsCensusRenderTests` /
 them to the census, so a row in
 those areas moves by editing the census.
 
+That promise has a stated edge in Shortcuts, and reading it as
+unqualified will waste your afternoon: three containers there
+are BESPOKE views, not `ForEach`es over an order list — the
+layer strip, the app list and the raw-Lua drawer. Their order
+lists exist so the census still records those rows for the
+placement table and for search, and the guard holds their
+MEMBERSHIP, but editing one moves nothing on screen. Which
+containers actually render from the census is what
+`ShortcutsCensusRenderTests` walks; check there before
+assuming an edit will show up.
+
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
 one census case that puts four rows on screen and `goToSpace`
@@ -135,10 +146,14 @@ goes green on exactly the disappearance it exists to catch
 override affordance is live on every row of that list — never
 re-earned per row — and it turns nothing on elsewhere in the
 app. Do not gate such an affordance on a Settings mode: mode
-depth is per AREA (`SettingsArea.minimumMode`) and never
-per row, nothing is read-only because of the mode, and the
-resolver takes no mode input at all.
-`ShortcutsCapabilityUnlockTests` holds all three.
+depth is per AREA (`SettingsArea.minimumMode`), never per row,
+and nothing is read-only because of the mode.
+`ShortcutsCapabilityUnlockTests` holds those three.
+The fourth clause has no guard because it needs no code —
+**never give an override resolver a mode parameter**;
+`KeyLayerOverride.resolved(onto:)` takes a base list and
+nothing else, and a flag deciding which shortcuts fire is a
+second config the user cannot see.
 Container-level greying is census-driven there (the container
 gate plus `exemptFromContainerGate`), but a ROW's grey
 predicate stays wiring-owned even in a census-rendered area —

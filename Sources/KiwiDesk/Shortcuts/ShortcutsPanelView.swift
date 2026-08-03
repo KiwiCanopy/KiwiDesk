@@ -35,7 +35,7 @@ struct ShortcutsPanelView: View {
     /// for a non-default layer — the default is the implicit case. It
     /// sits in the footer rather than a top header so it costs no
     /// vertical space above the bands.
-    @ViewBuilder private var modeLabel: some View {
+    @ViewBuilder private var layerLabel: some View {
         if let name = reference?.layerName,
             name != KeyLayer.defaultName
         {
@@ -179,7 +179,7 @@ struct ShortcutsPanelView: View {
         }
         // Centered in the full footer width, independent of the
         // hint / button widths on either side.
-        .overlay(alignment: .center) { modeLabel }
+        .overlay(alignment: .center) { layerLabel }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }

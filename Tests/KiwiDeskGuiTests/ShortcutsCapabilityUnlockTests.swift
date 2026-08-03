@@ -67,6 +67,14 @@ struct ShortcutsCapabilityUnlockTests {
             hotkeyRegistrar: UnlockRegistrar()
         )
         var config = GuiConfig()
+        // A non-empty app-rules base, so `scopeIsTheListNotTheApp`
+        // asserts that the profile does not diverge from a real
+        // list. With both sides empty the predicate is false by
+        // construction and the test says nothing.
+        config.appRules = [
+            "com.apple.Safari": "1",
+            "com.apple.Terminal": "2",
+        ]
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
@@ -167,9 +175,11 @@ struct ShortcutsCapabilityUnlockTests {
         #expect(model.editingStoredProfile)
 
         #expect(model.editedProfileOverridesKeys)
+        // Vacuity: the app-rules list must be non-empty, or
+        // "does not diverge" is a comparison of two nothings.
+        #expect(model.config.appRules.count == 2)
         // The neighbouring list with the same override shape is
-        // untouched. Vacuity: the shortcuts side must actually be
-        // on, or this asserts nothing (checked above).
+        // untouched — the capability stayed in its own list.
         #expect(!model.editedProfileOverridesAppRules)
     }
 

@@ -382,9 +382,20 @@ Save persists the normalized list.
 
 > This key was called `"modes"` in earlier pre-release builds.
 > A file still using the old name loads as *no shortcuts at
-> all* — every layer, `default` included — so rename it once
-> with `sed -i '' 's/"modes"/"layers"/' ~/.config/KiwiDesk/gui.json`,
-> and the same in any profile carrying a keybinding override.
+> all* — every layer, `default` included — and the next Save
+> writes that emptiness back, so do this **before** opening
+> Settings:
+>
+> ```bash
+> sed -i '' 's/"modes"/"layers"/' ~/.config/KiwiDesk/gui.json
+> ```
+>
+> Repeat it for any file in `~/.config/KiwiDesk/profiles/` that
+> carries a keybinding override. A hand-written `init.lua` needs
+> the verbs renamed too — `KiwiDesk.define_mode` and
+> `switch_mode` no longer exist, so a config still calling them
+> errors on load. If you would rather start clean, **Reset all
+> settings…** trashes `gui.json` and reseeds the defaults.
 
 To reset the app to what your `init.lua` declares, delete `gui.json`.
 Treat it like `init.lua` — do not import it from an untrusted source,
@@ -1676,7 +1687,12 @@ combos to actions. Every shortcut lives in a **layer** — normally
 the **default** layer (active at startup), plus optional extra
 layers (vim-style); only the active layer's bindings fire at a
 time. ("Layer" and not "mode": *mode* already names a space's
-layout and the Settings window's own Simple/Nerd depth.)
+layout, and one word for two things is one too many.)
+
+> **Upgrading and every shortcut is gone?** The `gui.json` key
+> that stores them was renamed from `"modes"` to `"layers"`.
+> See [The gui.json File](#the-guijson-file) for the
+> one-line fix — do it before opening Settings.
 
 ### Your first run
 
@@ -1845,7 +1861,8 @@ Each row has an action. Built-in actions live under headings:
   caption notes they only matter in the track layout).
 - **Size & float** — the per-axis Grow/Shrink rows, Make
   floating, the resize step, and **Alert sound when resize
-  can't apply** (default on): a resize shortcut pressed in a
+  can't apply** (default on, behind the card's **Resize
+  feedback** disclosure): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
   space) plays the system alert instead of failing silently.
 - **Applications** — launch an app. Each row carries a **Launch
@@ -1904,7 +1921,8 @@ If your `init.lua` holds custom keybindings:
 
 ### Shortcut Layers
 
-In the **Shortcuts** header, click **+ Layer** to define a vim-style
+In the **Shortcuts** header, click the **+** beside the layer
+chips to define a vim-style
 layer — a layer where only its bindings fire. Each layer has a name
 (e.g., "resize"), an optional menu bar icon (SF Symbol or emoji), and
 a set of bindings that shadow the base shortcuts while the layer is

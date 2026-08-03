@@ -13,7 +13,7 @@ private struct KeybindingOverrideBaseKey: EnvironmentKey {
     static let defaultValue: [KeyBinding]? = nil
 }
 
-private struct KeybindingModeNameKey: EnvironmentKey {
+private struct KeybindingLayerNameKey: EnvironmentKey {
     static let defaultValue = KeyLayer.defaultName
 }
 
@@ -29,8 +29,8 @@ extension EnvironmentValues {
     /// live-apply seam uses it without threading another value
     /// through every intent-section wrapper.
     var keybindingLayerName: String {
-        get { self[KeybindingModeNameKey.self] }
-        set { self[KeybindingModeNameKey.self] = newValue }
+        get { self[KeybindingLayerNameKey.self] }
+        set { self[KeybindingLayerNameKey.self] = newValue }
     }
 }
 

@@ -21,12 +21,15 @@ import KiwiDeskCore
 /// guard alone — the guard catches a family missing from an order
 /// list, the compiler catches one missing from the expansion.
 ///
-/// The four families with no keybinding rows of their own return
-/// `nil`: they are containers the renderer draws by hand (the
-/// layer strip, the icon row, the app list, the raw-Lua list) and
-/// the census places them so search and the placement table can
-/// still see them. `nil` means "this family is not a NavRow
-/// list", never "unhandled".
+/// A family with no keybinding rows of its own returns `nil`:
+/// the renderer draws that container by hand (the layer strip and
+/// its icon row, the app list, the raw-Lua list and its Import
+/// action), and the census still places it so search and the
+/// placement table can see it. `nil` means "this family is not a
+/// NavRow list", never "unhandled" — and WHICH families may
+/// answer it is enumerated in `ShortcutsCensusRenderTests`, not
+/// counted here, because a count in prose is a second copy that
+/// rots (this one shipped saying four over five cases).
 @MainActor
 struct ShortcutsFamilyRows {
     /// The spaces the per-space families expand over.
@@ -108,5 +111,36 @@ struct ShortcutsFamilyRows {
         _ row: KeybindingCatalog.ResizeRow
     ) -> NavCommand {
         KeybindingCatalog.resizeRow(row, step: resizeStep)
+    }
+
+    /// The rows a key contributes once interleaving is applied:
+    /// its own, or — when it LEADS an interleaved run — the run's
+    /// columns zipped per instance. A non-leading member of a run
+    /// contributes nothing; the leader already emitted its rows.
+    ///
+    /// Here rather than in the view because interleaving is a
+    /// statement about ROWS, which is what this type owns; the
+    /// view's job is to draw whatever it is handed. That it also
+    /// becomes reachable from a test is a consequence, not the
+    /// reason — set equality cannot see instance order, so this
+    /// is the only place a guard could hold it.
+    func renderedRows(for key: SettingKey) -> [NavCommand] {
+        if ShortcutsRowOrder.isInterleavedFollower(key) {
+            return []
+        }
+        guard
+            let run = ShortcutsRowOrder.interleavedRun(
+                startingAt: key
+            )
+        else { return rows(for: key) ?? [] }
+        let columns = run.map { rows(for: $0) ?? [] }
+        // Zip by instance index. Ragged columns cannot happen —
+        // every family in a run expands over the same instance
+        // list — but truncating to the shortest is the safe read
+        // if one ever does, rather than trapping on a subscript.
+        let depth = columns.map(\.count).min() ?? 0
+        return (0..<depth).flatMap { row in
+            columns.map { $0[row] }
+        }
     }
 }

@@ -182,13 +182,13 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     /// just not live right now) rather than a misleading placeholder.
     private func buildReference() -> ShortcutsReference? {
         let layers: [KeyLayer]
-        let activeMode: String
+        let activeLayer: String
         let config: GuiConfig
         if let snapshot = core.liveKeybindingSnapshot() {
             // Live: the running engine's spaces match the resolved
             // bindings, so the live-overlaid config is correct.
             layers = snapshot.keyLayers
-            activeMode = snapshot.activeLayerName
+            activeLayer = snapshot.activeLayerName
             config = core.loadGuiConfig()
         } else if core.isGuiManaged,
             let raw = core.persistedGuiConfig()
@@ -199,13 +199,13 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             // Read the persisted gui.json directly — it keeps the
             // authored spaces and layers.
             layers = raw.layers
-            activeMode = raw.layers.first?.name ?? KeyLayer.defaultName
+            activeLayer = raw.layers.first?.name ?? KeyLayer.defaultName
             config = raw
         } else {
             return nil
         }
         let layer =
-            layers.first { $0.name == activeMode }
+            layers.first { $0.name == activeLayer }
             ?? layers.first
             ?? KeyLayer.defaultLayer
         // Two-source read: the layers supply the bindings; the config

@@ -75,7 +75,7 @@ enum ShortcutsReferenceBuilder {
         }
 
         let controls = buildControls(
-            activeMode: layer.name,
+            activeLayer: layer.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
             resizeStep: resizeStep,
@@ -95,15 +95,28 @@ enum ShortcutsReferenceBuilder {
 
     // MARK: - Bands
 
-    /// Membership twin of the editor's `FocusGroup` /
-    /// `MoveWindowsGroup` / `SizeFloatGroup` / `SwitchLayersGroup`
-    /// (`KeybindingGroups.swift`) and `KeybindingCatalog`'s
-    /// `navigationGroups`. Row identity (label / icon / Lua) is
-    /// single-sourced from the catalog, so only the *grouping* is
-    /// mirrored here — and a forgotten command degrades to Custom via
-    /// the fallthrough, never vanishes. Keep the three in step.
+    /// Membership twin of the editor's grouping. Row identity
+    /// (label / icon / Lua) is single-sourced from
+    /// `KeybindingCatalog`, so only the *grouping* is mirrored
+    /// here — and a forgotten command degrades to Custom via the
+    /// fallthrough, never vanishes.
+    ///
+    /// Since #678 Phase 3 the editor's grouping has an OWNER —
+    /// the settings census, read through `ShortcutsRowOrder` and
+    /// expanded by `ShortcutsFamilyRows` — and this builder is
+    /// now the copy rather than a peer. It still reads the
+    /// catalog directly, which is why the panel and the editor
+    /// can disagree about ORDER (they did, over the per-space
+    /// move pair) even while agreeing about membership.
+    ///
+    /// **A family added to the census owes this builder a band
+    /// too**, until it consumes the expander. Consuming it is the
+    /// real fix and is available — this is `@MainActor` and
+    /// GUI-side — but it is a behavioural change to the panel and
+    /// belongs in its own change, not in the one that created the
+    /// owner.
     private static func buildControls(
-        activeMode: String,
+        activeLayer: String,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         resizeStep: Int,
@@ -126,7 +139,7 @@ enum ShortcutsReferenceBuilder {
         // filters it out the same way — keep the two in parity.
         let switchLayers =
             layerNames
-            .filter { $0 != activeMode }
+            .filter { $0 != activeLayer }
             .map { KeybindingCatalog.switchLayerCommand($0) }
         return [
             ShortcutSubgroup(

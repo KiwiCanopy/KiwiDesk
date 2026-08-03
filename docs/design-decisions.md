@@ -1043,7 +1043,7 @@ is inert. (#8)
 ones.** A profile owns tiling, and may also carry a sparse
 override of a global setting that shapes how the workspace
 *behaves while the profile is active* — keybindings
-(`Profile.modes`) and the three window-rule families:
+(`Profile.layers`) and the three window-rule families:
 app→space (`Profile.appRules`), float (`Profile.floatRules`),
 and ignore (`Profile.ignoreRules`). The global base lives in
 the active config owner (`gui.json` or hand-written `init.lua`).
@@ -1429,7 +1429,7 @@ layers of the sparse-override model, not the same data twice:
   Ignore rules have no GUI control yet, so that hidden diff is
   preserved verbatim rather than reconstructed from resolved state.
 
-So "Live leaves `profile.modes` frozen while the row rewrites
+So "Live leaves `profile.layers` frozen while the row rewrites
 it" is the model working, not divergence: one door edits the
 base, the other edits the per-profile diff over it. The trap to
 avoid is "fixing" `buildProfile`/`persistProfile` to also adopt
@@ -1645,7 +1645,7 @@ its own list. Ours is curated *with search tags* ("mail" finds
 names ever could. The full catalog stays reachable: any valid
 SF Symbol name typed into the search appears as a result, and
 any single character (incl. emoji) works via "Use as text".
-One `IconPicker` serves mode icons and space icons. (#68 §6.4)
+One `IconPicker` serves layer icons and space icons. (#68 §6.4)
 
 **Browsing is tabbed (Emoji first); search is global.** The
 picker's popover splits Emoji and Symbols into segmented
@@ -1670,8 +1670,9 @@ permission. Multi-key chords (⌘J+K) are therefore not
 recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
-**Overrides always resolve; the mode never changes what
-runs.** There is no stored flag deciding whether a profile's
+
+**Overrides always resolve; the Simple/Nerd mode never
+changes what runs.** There is no stored flag deciding whether a profile's
 shortcut overrides apply — an early draft of the redesign
 specified one, with a default and an upgrade migration, and it
 was cut before any of it was built. The reason it must stay
@@ -1693,10 +1694,14 @@ not the app**: overriding a shortcut must not turn a deeper
 surface on in App Rules or anywhere else, or the mode becomes
 something users lose by accident and stop trusting.
 `ShortcutsCapabilityUnlockTests` holds both halves plus the
-mode-independence, because all three already hold by
-construction and the cheapest way to build mode mechanics later
-is to gate the column on a mode — which would break all three
-and, until that suite existed, no test.
+mode-independence. All three already hold by construction, and
+the suite exists because the cheapest way to build mode
+mechanics later is to gate the override column on a mode —
+which would break every one of them while breaking no test.
+The resolver clause is guarded by the signature rather than by
+that suite: `KeyLayerOverride.resolved(onto:)` takes a base
+list and nothing else, so the obligation is simply never to
+add a mode parameter to it.
 
 **A named alternate keybinding set is a LAYER, never a
 mode.** "Mode" was already carrying two unrelated meanings —
@@ -1777,8 +1782,8 @@ combo you are about to bind is often already bound to a window
 action, so pressing it to test it would fire that action
 mid-capture. While any recorder is open, the manager
 unregisters every KiwiDesk Carbon hotkey and re-registers the
-current mode when it closes — the suspend/resume round-trip the
-exact table, so a mode change made while armed is honored on
+current layer when it closes — the suspend/resume round-trip the
+exact table, so a layer change made while armed is honored on
 resume. The `RecorderCoordinator` drives this on the idle↔armed
 edge only, so hopping between fields never bounces the
 registration. It never touches macOS/system shortcuts (not ours
@@ -1800,7 +1805,7 @@ successfully committed recording (or clear) on the live edit
 target re-registers the running Carbon hotkeys immediately,
 with no file writes. The runtime source starts from the clean
 Settings baseline and accumulates **recorder combo mutations
-only**: staged Lua bodies, app choices, mode edits, and other
+only**: staged Lua bodies, app choices, layer edits, and other
 shortcut fields never hitchhike on a recording. A new row's
 action is required payload for its first recording; later
 non-recorder edits to it stay staged. The base then resolves
@@ -1811,10 +1816,10 @@ in `gui.json`, while stored-profile editing owns sparse profile
 overrides.
 
 Re-registration prepares every Lua callback before one atomic
-mode-table swap, then activates the preserved runtime mode once
+layer-table swap, then activates the preserved runtime layer once
 (profile/config applies still reset to default). Feedback is
-scoped to the exact row and mode: "Active now" only after that
-combo registered in the active mode; inactive-mode, profile-
+scoped to the exact row and layer: "Active now" only after that
+combo registered in the active layer; inactive-layer, profile-
 shadowed, compile-failed, and Carbon-denied states say so instead.
 Revert first re-applies persisted state; if the sidecar/profile
 became unreadable, an in-memory pre-edit snapshot removes ghost
@@ -1869,14 +1874,14 @@ cannot see needs a test (two cases resolving to the same string,
 
 **First run seeds a starter shortcut set — base tier, only
 into emptiness.** A fresh install used to boot with zero
-shortcuts (the default mode existed but was empty): a GUI-first
+shortcuts (the default layer existed but was empty): a GUI-first
 user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
 / move-and-follow, `⌃⌥⌘` arrows resize, `⌃⌥F` float, `⌃⌥S` display
 sticky, `⌃⌥⇧S` global sticky — with one guard everywhere: **only
-when no mode carries a single binding** — a user- or Lua-authored
+when no layer carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive.
 
@@ -1892,7 +1897,7 @@ and remappable to Caps Lock; `⌘⌥` was rejected because it collides
 with always-on system shortcuts (Force Quit, Dock, Hide/Minimize).
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`
-modes**, never a profile override (profiles stay
+layers**, never a profile override (profiles stay
 tiling-plus-sparse-behavior, #55): on first launch the seeded
 model is persisted so the very first boot is GUI-managed and the
 shortcuts actually fire.
@@ -2014,7 +2019,7 @@ The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
 **The reference panel never lists its own opener.** The
-`show_shortcuts` binding (⌃⌥K, seeded per mode since #602) is
+`show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
 dropped from the panel builder's working set and renders in no
 band — the one deliberate exception to the panel's "no bound
 shortcut is ever invisible" contract. The footer's dismiss hint
@@ -2032,7 +2037,7 @@ read, ahead of the actions the user opened the panel to look
 up. The editor's General section likewise stays low — macOS's
 own Keyboard pane puts "Keyboard Shortcuts…" below the content,
 and the menu bar's "View Shortcuts…" plus the onboarding hint
-already carry discovery. Consequence to keep: a fresh mode
+already carry discovery. Consequence to keep: a fresh layer
 (seeded with only the opener) honestly shows the "nothing
 bound" placeholder while the footer teaches ⌃⌥K.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing

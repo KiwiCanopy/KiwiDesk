@@ -660,7 +660,6 @@
   "shortcuts.advanced.caption": "Associa qualsiasi codice Lua a un tasto di scelta rapida. È la via di fuga per gli utenti esperti: i gruppi qui sopra coprono le azioni integrate.",
   "shortcuts.advanced.title": "Scorciatoie Lua",
   "shortcuts.app_behavior": "Comportamento all'avvio",
-  "shortcuts.app_behavior.help": "**Apri o porta in primo piano** porta la finestra esistente dell'app nello spazio attuale, o avvia l'app se non è in esecuzione. Premendo di nuovo mentre quella finestra è attiva si passa in ordine alle altre finestre dell'app. Se tutte le finestre dell'app sono ridotte a icona, premendo l'abbreviazione si ripristina l'ultima ridotta; altrimenti le finestre ridotte restano nel Dock.\n\n**Apri nuova** avvia sempre una nuova istanza, anche se l'app è già aperta.",
   "shortcuts.app_behavior.open_new": "Apri nuova",
   "shortcuts.app_behavior.open_new.badge": "Apre una nuova istanza",
   "shortcuts.app_behavior.open_or_focus": "Apri o porta in primo piano",

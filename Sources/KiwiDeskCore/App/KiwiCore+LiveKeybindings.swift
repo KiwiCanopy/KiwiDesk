@@ -93,7 +93,7 @@ extension KiwiCore {
         // that ordering invariant (#213).
         guard !keys.isSuspended else { return .failure(.unavailable) }
         let profile: KeyLayerOverride?
-        switch activeProfileModesForLiveApply() {
+        switch activeProfileLayersForLiveApply() {
         case .success(let modes):
             profile = modes
         case .failure(let error):
@@ -156,7 +156,7 @@ extension KiwiCore {
             return .failure(.unreadableConfig)
         }
         let profile: KeyLayerOverride?
-        switch activeProfileModesForLiveApply() {
+        switch activeProfileLayersForLiveApply() {
         case .success(let modes):
             profile = modes
         case .failure(let error):
@@ -211,7 +211,7 @@ extension KiwiCore {
         keys.resume()
     }
 
-    private func activeProfileModesForLiveApply()
+    private func activeProfileLayersForLiveApply()
         -> Result<KeyLayerOverride?, LiveKeybindingApplyError>
     {
         guard let name = profiles.currentName else {

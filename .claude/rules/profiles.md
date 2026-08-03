@@ -17,7 +17,7 @@ A profile serializes **tiling state** — that belongs *inside*
 
 Beyond tiling, a profile may carry a **sparse override of a global
 _behavior_ setting** — one that shapes how the workspace behaves
-*while the profile is active*: keybindings (`Profile.modes`),
+*while the profile is active*: keybindings (`Profile.layers`),
 app→space rules (`Profile.appRules`), float rules
 (`Profile.floatRules`) and ignore rules (`Profile.ignoreRules`).
 `Profile`'s `…Override?`-typed properties are the register of

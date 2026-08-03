@@ -44,7 +44,7 @@ struct KeybindingConflictsTests {
             ),
         ]
         #expect(
-            !KeybindingConflicts.hasAnyAcrossModes(layers)
+            !KeybindingConflicts.hasAnyAcrossLayers(layers)
         )
     }
 
@@ -63,7 +63,7 @@ struct KeybindingConflictsTests {
                 ]
             ),
         ]
-        #expect(KeybindingConflicts.hasAnyAcrossModes(layers))
+        #expect(KeybindingConflicts.hasAnyAcrossLayers(layers))
     }
 
     @Test("conflicts(in:) names a system-shortcut clash")

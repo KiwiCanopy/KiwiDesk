@@ -7,7 +7,7 @@ import Foundation
 /// `KeyBinding`/`KeyLayer`, with no GUI dependency.
 public enum KeybindingConflicts {
     /// Whether any row in the set carries a conflict. This is
-    /// the per-layer primitive `hasAnyAcrossModes` reduces over:
+    /// the per-layer primitive `hasAnyAcrossLayers` reduces over:
     /// layers are independent keymaps, so each is checked
     /// against its own rows only, never across layers.
     public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
@@ -20,7 +20,7 @@ public enum KeybindingConflicts {
     /// the in-app warning shown after recording a conflicting
     /// shortcut, adopting a config, or saving from the raw Lua
     /// editor (see `SettingsModel`).
-    public static func hasAnyAcrossModes(
+    public static func hasAnyAcrossLayers(
         _ layers: [KeyLayer]
     ) -> Bool {
         layers.contains { hasAny($0.bindings) }

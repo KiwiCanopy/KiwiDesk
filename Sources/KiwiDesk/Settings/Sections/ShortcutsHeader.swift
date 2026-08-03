@@ -9,12 +9,12 @@ import SwiftUI
 struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
-    @State private var addingMode = false
-    @State private var newMode = ""
+    @State private var addingLayer = false
+    @State private var newLayer = ""
     @State private var importedNote = false
-    @State private var renamingMode = false
+    @State private var renamingLayer = false
     @State private var renameDraft = ""
-    @State private var addModeHovered = false
+    @State private var addLayerHovered = false
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
@@ -22,7 +22,7 @@ struct ShortcutsHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                modeStrip
+                layerStrip
                 Spacer()
                 // Import only offers itself when init.lua has
                 // custom Lua (the same condition as the
@@ -36,7 +36,7 @@ struct ShortcutsHeader: View {
                     importButton
                 }
             }
-            Text(modesCaption)
+            Text(layersCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
             if importedNote {
@@ -44,14 +44,14 @@ struct ShortcutsHeader: View {
                     .font(.caption)
                     .foregroundStyle(.green)
             }
-            selectedModeHeader
+            selectedLayerHeader
         }
         .onChange(of: isEnabled) { _, now in
-            if !now { addModeHovered = false }
+            if !now { addLayerHovered = false }
         }
     }
 
-    private var modesCaption: String {
+    private var layersCaption: String {
         L(
             "shortcuts.layers.caption",
             "Layers are alternate shortcut sets — only the "
@@ -72,12 +72,12 @@ struct ShortcutsHeader: View {
 
     // MARK: - Layer strip
 
-    private var modeStrip: some View {
+    private var layerStrip: some View {
         HStack(spacing: 6) {
             ForEach(model.config.layers) { layer in
                 layerChip(layer.name)
             }
-            addModeChip
+            addLayerChip
         }
     }
 
@@ -92,9 +92,9 @@ struct ShortcutsHeader: View {
 
     /// Defining a layer is rare — the "+" chip's popover
     /// replaces the old always-visible text field (§3.6.1).
-    private var addModeChip: some View {
+    private var addLayerChip: some View {
         Button {
-            addingMode = true
+            addingLayer = true
         } label: {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
@@ -102,31 +102,31 @@ struct ShortcutsHeader: View {
                 .background(
                     Capsule().fill(
                         Color.secondary.opacity(
-                            isEnabled && addModeHovered
+                            isEnabled && addLayerHovered
                                 ? 0.18 : 0.12
                         )
                     )
                 )
-                .animation(hoverAnimation, value: addModeHovered)
+                .animation(hoverAnimation, value: addLayerHovered)
         }
         .buttonStyle(.plain)
-        .onHover { addModeHovered = isEnabled && $0 }
+        .onHover { addLayerHovered = isEnabled && $0 }
         .help(L("shortcuts.add_layer.help", "Add a layer"))
-        .popover(isPresented: $addingMode) {
+        .popover(isPresented: $addingLayer) {
             HStack {
-                TextField(modeNamePlaceholder, text: $newMode)
+                TextField(layerNamePlaceholder, text: $newLayer)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 140)
-                    .onSubmit(addMode)
-                Button(L("shortcuts.add", "Add"), action: addMode)
+                    .onSubmit(addLayer)
+                Button(L("shortcuts.add", "Add"), action: addLayer)
                     .buttonStyle(.borderedProminent)
-                    .disabled(!canAddMode)
+                    .disabled(!canAddLayer)
             }
             .padding(10)
         }
     }
 
-    private var modeNamePlaceholder: String {
+    private var layerNamePlaceholder: String {
         L("shortcuts.layer_name", "Layer name")
     }
 
@@ -175,7 +175,7 @@ struct ShortcutsHeader: View {
 
     /// A selected non-default layer gets a compact header: its
     /// menu-bar icon and Delete (base layers protected, #55).
-    @ViewBuilder private var selectedModeHeader: some View {
+    @ViewBuilder private var selectedLayerHeader: some View {
         if selected != KeyLayer.defaultName {
             HStack(spacing: 10) {
                 Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
@@ -187,7 +187,7 @@ struct ShortcutsHeader: View {
                     Button(
                         L("shortcuts.delete_layer", "Delete layer"),
                         role: .destructive,
-                        action: deleteMode
+                        action: deleteLayer
                     )
                 } else {
                     // O4 soft: a base layer the profile
@@ -208,7 +208,7 @@ struct ShortcutsHeader: View {
         }
     }
 
-    private var modeIndex: Int {
+    private var layerIndex: Int {
         model.config.layers.firstIndex {
             $0.name == selected
         } ?? 0
@@ -217,10 +217,10 @@ struct ShortcutsHeader: View {
     private var iconBinding: Binding<String> {
         Binding(
             get: {
-                model.config.layers[modeIndex].icon ?? ""
+                model.config.layers[layerIndex].icon ?? ""
             },
             set: {
-                model.config.layers[modeIndex].icon =
+                model.config.layers[layerIndex].icon =
                     $0.isEmpty ? nil : $0
             }
         )
@@ -238,11 +238,11 @@ struct ShortcutsHeader: View {
     private var renameLayerButton: some View {
         Button(L("shortcuts.rename_ellipsis", "Rename…")) {
             renameDraft = selected
-            renamingMode = true
+            renamingLayer = true
         }
-        .popover(isPresented: $renamingMode) {
+        .popover(isPresented: $renamingLayer) {
             HStack {
-                TextField(modeNamePlaceholder, text: $renameDraft)
+                TextField(layerNamePlaceholder, text: $renameDraft)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 140)
                     .onSubmit(renameLayer)
@@ -251,13 +251,13 @@ struct ShortcutsHeader: View {
                     action: renameLayer
                 )
                 .buttonStyle(.borderedProminent)
-                .disabled(!canRenameMode)
+                .disabled(!canRenameLayer)
             }
             .padding(10)
         }
     }
 
-    private var canRenameMode: Bool {
+    private var canRenameLayer: Bool {
         let name = renameDraft.trimmed
         return !name.isEmpty && name != selected
             && !model.config.layers.contains {
@@ -266,7 +266,7 @@ struct ShortcutsHeader: View {
     }
 
     private func renameLayer() {
-        guard canRenameMode else { return }
+        guard canRenameLayer else { return }
         let new = renameDraft.trimmed
         model.config.layers = KeybindingCatalog.renameLayer(
             in: model.config.layers,
@@ -274,7 +274,7 @@ struct ShortcutsHeader: View {
             to: new
         )
         selected = new
-        renamingMode = false
+        renamingLayer = false
     }
 
     // MARK: - Layer mutations
@@ -292,17 +292,17 @@ struct ShortcutsHeader: View {
         return !base.contains { $0.name == selected }
     }
 
-    private var canAddMode: Bool {
-        let name = newMode.trimmed
+    private var canAddLayer: Bool {
+        let name = newLayer.trimmed
         return !name.isEmpty
             && !model.config.layers.contains {
                 $0.name == name
             }
     }
 
-    private func addMode() {
-        let name = newMode.trimmed
-        guard canAddMode else { return }
+    private func addLayer() {
+        let name = newLayer.trimmed
+        guard canAddLayer else { return }
         // Seed the ⌃⌥K "Show shortcuts panel" row so a fresh layer
         // can open the cheat-sheet from the keyboard, not only via
         // the menu bar (#602). Deletable per layer like any default.
@@ -313,11 +313,11 @@ struct ShortcutsHeader: View {
             )
         )
         selected = name
-        newMode = ""
-        addingMode = false
+        newLayer = ""
+        addingLayer = false
     }
 
-    private func deleteMode() {
+    private func deleteLayer() {
         guard selected != KeyLayer.defaultName else { return }
         model.config.layers.removeAll {
             $0.name == selected

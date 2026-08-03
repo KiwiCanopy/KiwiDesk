@@ -660,7 +660,7 @@
   "shortcuts.advanced.caption": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.",
   "shortcuts.advanced.title": "Lua bindings",
   "shortcuts.app_behavior": "Launch behavior",
-  "shortcuts.app_behavior.help": "**Open or Focus** brings the app's existing window to the current space, or launches it if the app isn't running. Pressing again while that window is focused cycles through the app's other windows. If every window of the app is minimized, pressing the shortcut restores the most recently minimized one; otherwise minimized windows stay in the Dock.\n\n**Open New** always launches a fresh instance, even when the app is already open.",
+  "shortcuts.app_behavior.help": "**Open or Focus** brings the app's existing window to the current space, or launches it if the app isn't running. Pressing again while that window is focused cycles through the app's other windows. If the app has nothing on screen, pressing the shortcut restores its most recently minimized window; otherwise minimized windows stay in the Dock.\n\n**Open New** always launches a fresh instance, even when the app is already open.",
   "shortcuts.app_behavior.open_new": "Open New",
   "shortcuts.app_behavior.open_new.badge": "Opens a new instance",
   "shortcuts.app_behavior.open_or_focus": "Open or Focus",

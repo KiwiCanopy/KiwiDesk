@@ -3525,7 +3525,7 @@ tiling layers (global settings ← profile):
 > **The base config is the seed; the profile wins.** The base
 > shortcuts (the app's `gui.json`, or your Lua-declared binds
 > in a hand-written config) apply first. When the loaded
-> > profile carries a `"layers"` override, each of its rows
+> profile carries a `"layers"` override, each of its rows
 > shadows the base row with the same combo in the same layer;
 > everything the profile does not mention stays active.
 > Event hooks fire on their event — they are never a cascade
@@ -3822,7 +3822,7 @@ end)
 
 **Does:**
 
-- `save_profile` persists the current layout (gaps, layouts,
+- `save_profile` persists the current layout (gaps, modes,
   parameters, animations, window positions, and optionally a sparse
   keybinding override).
 - `load_profile` switches to the named profile and reconciles spaces

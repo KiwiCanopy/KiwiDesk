@@ -265,7 +265,7 @@ struct ShortcutsSection: View {
 
     // MARK: - Bindings into the selected layer
 
-    private var modeIndex: Int {
+    private var layerIndex: Int {
         model.config.layers.firstIndex {
             $0.name == selected
         } ?? 0
@@ -273,9 +273,9 @@ struct ShortcutsSection: View {
 
     private var bindingsBinding: Binding<[KeyBinding]> {
         Binding(
-            get: { model.config.layers[modeIndex].bindings },
+            get: { model.config.layers[layerIndex].bindings },
             set: {
-                model.config.layers[modeIndex].bindings = $0
+                model.config.layers[layerIndex].bindings = $0
             }
         )
     }
