@@ -40,6 +40,11 @@ struct AppRuleTitledEditor: View {
                     .disabled(customPattern.trimmed.isEmpty)
                 }
             }
+            AppRuleMatchPreview(
+                model: model,
+                app: app,
+                pending: addingCustom ? customPattern : ""
+            )
             Text(titledPatternCaption)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
