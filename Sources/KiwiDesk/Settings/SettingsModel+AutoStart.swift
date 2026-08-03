@@ -107,4 +107,21 @@ extension SettingsModel {
     var autoStartEditable: Bool {
         autoStartLoaded && !autoStartBusy && autoStart.registerable
     }
+
+    /// A transient block that is NOT a gate reason: the first read
+    /// has not landed, or a write is in flight. The rows grey while
+    /// it holds, but there is no sentence — nothing is wrong, the
+    /// live value is simply not known yet.
+    var autoStartLoading: Bool {
+        !autoStartLoaded || autoStartBusy
+    }
+
+    /// The area's gate resolver over the live status. The rows
+    /// consult THIS for their durable greying and its sentence,
+    /// rather than re-deriving each predicate inline — the same
+    /// shape `LayoutCard` takes with `LayoutDefaultsGates`, so the
+    /// census-declared owner and the on-screen grey cannot drift.
+    var generalGates: GeneralGates {
+        GeneralGates(autoStart: autoStart)
+    }
 }

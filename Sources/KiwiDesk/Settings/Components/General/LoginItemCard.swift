@@ -52,12 +52,15 @@ struct LoginItemCard: View {
                     // Grey the control only, never the row —
                     // the label's `?` stays live because that
                     // help is useful whether or not the
-                    // toggle can be driven right now. An
-                    // unregisterable copy (bare binary,
-                    // translocated download) cannot register
-                    // at all, and the caption below names the
-                    // fix (#342, #171).
-                    .disabled(!model.autoStartEditable)
+                    // toggle can be driven right now. The
+                    // durable reason (an unregisterable copy —
+                    // bare binary or translocated download)
+                    // comes from the gate resolver, not a
+                    // predicate re-derived here, so the grey and
+                    // the census-declared gate cannot drift; the
+                    // transient load/write block is added on top
+                    // (#342, #171).
+                    .disabled(loginInert)
             }
             confirmation
             caption
@@ -124,6 +127,15 @@ struct LoginItemCard: View {
     /// against an ephemeral `.build` or translocated path, which
     /// read-through cannot undo), so it must not depend on a view
     /// having disabled the control.
+    /// The toggle's greyed state: the resolver's durable reason
+    /// for this row (an unregisterable copy), or the transient
+    /// load/write block that is not a gate reason.
+    private var loginInert: Bool {
+        model.autoStartLoading
+            || model.generalGates
+                .inertReason(for: .general(.startAtLogin)) != nil
+    }
+
     private var loginBinding: Binding<Bool> {
         Binding(
             get: { model.autoStart.level.opensAtLogin },
@@ -220,21 +232,14 @@ struct LoginItemCard: View {
                 }
                 .controlSize(.small)
             }
-        } else if model.autoStart.unavailable == .translocated {
-            unavailableCaption(
-                L(
-                    "general.login_item.unavailable",
-                    "Move KiwiDesk to your Applications folder "
-                        + "to turn this on."
-                )
-            )
-        } else if model.autoStart.unavailable == .notBundled {
-            unavailableCaption(
-                L(
-                    "general.login_item.unavailable_binary",
-                    "Available only when running the KiwiDesk app."
-                )
-            )
+        } else if let reason = model.generalGates.inertReason(
+            for: .general(.startAtLogin)
+        ) {
+            // The unavailable sentence, named once by the gate
+            // help for the specific cause — the same source the
+            // Advanced row reads, so the two rows cannot describe
+            // one status two ways.
+            unavailableCaption(GeneralGateHelp.sentence(for: reason))
         }
     }
 

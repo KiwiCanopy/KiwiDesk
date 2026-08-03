@@ -32,29 +32,34 @@ extension GeneralSection {
                 ),
                 isOn: restartBinding
             )
-            .disabled(!restartEditable)
-            if !model.autoStart.level.opensAtLogin {
-                Text(
-                    L(
-                        "general.advanced.restart_on_crash.needs_login",
-                        "Needs “Start KiwiDesk when I log in”, "
-                            + "because the two are one setting to "
-                            + "macOS."
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .disabled(restartInert)
+            if let reason = model.generalGates.inertReason(
+                for: .general(.advancedRestartOnCrash)
+            ) {
+                // The resolver names WHY, so an unregisterable
+                // copy reads the "move to Applications" fix rather
+                // than the login dependency — the two used to
+                // disagree, the row greying on cannotRegister
+                // while the caption still said "needs login".
+                Text(GeneralGateHelp.sentence(for: reason))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 
-    /// Editable only when the login half is on AND the copy can
-    /// register at all — the same unregisterable condition the
-    /// login row greys on, since a LaunchAgent needs the stable
-    /// `.app` path just as much as the login item does.
-    var restartEditable: Bool {
-        model.autoStartEditable
-            && model.autoStart.level.opensAtLogin
+    /// Greyed by the resolver's durable reason for this row (login
+    /// off, or an unregisterable copy — a LaunchAgent needs the
+    /// stable `.app` path just as much as the login item does),
+    /// plus the transient load/write block that is not a gate
+    /// reason. Consulting the resolver rather than re-deriving the
+    /// predicate is what keeps this grey and the census-declared
+    /// gate from drifting.
+    var restartInert: Bool {
+        model.autoStartLoading
+            || model.generalGates
+                .inertReason(for: .general(.advancedRestartOnCrash))
+                != nil
     }
 
     var restartBinding: Binding<Bool> {

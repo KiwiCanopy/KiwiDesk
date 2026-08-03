@@ -13,14 +13,21 @@ enum GeneralGateHelp {
         for reason: GeneralGates.InertReason
     ) -> String {
         switch reason {
-        case .cannotRegister:
-            // The exact English the card already authors for
-            // this key — `extract-keys` fails loudly when one key
-            // carries two strings, rather than picking one.
+        case .cannotRegister(.translocated):
+            // A read-only translocated copy — the fix is to move it
+            // out of quarantine into Applications.
             return L(
                 "general.login_item.unavailable",
                 "Move KiwiDesk to your Applications folder "
                     + "to turn this on."
+            )
+        case .cannotRegister(.notBundled):
+            // A bare binary (the device-QA `.build/release` path) —
+            // there is no `.app` to register, so the fix is to run
+            // the packaged app.
+            return L(
+                "general.login_item.unavailable_binary",
+                "Available only when running the KiwiDesk app."
             )
         case .loginOff:
             return L(

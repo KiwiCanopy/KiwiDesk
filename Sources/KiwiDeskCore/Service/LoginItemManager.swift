@@ -153,7 +153,7 @@ public enum LoginItemState: Equatable, Sendable {
 /// Why `SMAppService` can't register the running copy — each maps to
 /// a different caption at the GUI boundary (#96), because the fix
 /// differs.
-public enum LoginItemUnavailable: Equatable, Sendable {
+public enum LoginItemUnavailable: Hashable, Sendable {
     /// A bare executable with no `.app` wrapper — the device-QA
     /// `.build/release` path. Fix: run the packaged app.
     case notBundled

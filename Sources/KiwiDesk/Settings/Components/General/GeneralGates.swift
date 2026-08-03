@@ -35,8 +35,11 @@ struct GeneralGates {
     enum InertReason: Hashable {
         /// This copy cannot register a login item at all — a bare
         /// binary or a translocated download, neither of which
-        /// has the stable `.app` path `SMAppService` needs.
-        case cannotRegister
+        /// has the stable `.app` path `SMAppService` needs. Carries
+        /// the cause so the caption names the right fix (move to
+        /// Applications vs run the packaged app), which the two
+        /// rows would otherwise re-split inline.
+        case cannotRegister(LoginItemUnavailable)
         /// Crash-restart is dead unless KiwiDesk also starts at
         /// login: the LaunchAgent writes `RunAtLoad` and
         /// `KeepAlive` as one unit.
@@ -49,12 +52,14 @@ struct GeneralGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .general(.startAtLogin):
-            return autoStart.registerable ? nil : .cannotRegister
+            return autoStart.unavailable.map(InertReason.cannotRegister)
         case .general(.advancedRestartOnCrash):
             // Order matters: an unregisterable copy cannot do
             // either half, and naming the login dependency there
             // would send the reader to a row that is itself dead.
-            if !autoStart.registerable { return .cannotRegister }
+            if let cause = autoStart.unavailable {
+                return .cannotRegister(cause)
+            }
             return autoStart.level.opensAtLogin ? nil : .loginOff
         default:
             assertionFailure(

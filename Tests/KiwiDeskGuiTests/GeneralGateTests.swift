@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -65,14 +66,14 @@ struct GeneralGateTests {
         )
         #expect(
             gates.inertReason(for: .general(.startAtLogin))
-                == .cannotRegister
+                == .cannotRegister(.notBundled)
         )
         // Not `.loginOff`: naming the login dependency would send
         // the reader to a row that is itself dead.
         #expect(
             gates.inertReason(
                 for: .general(.advancedRestartOnCrash)
-            ) == .cannotRegister
+            ) == .cannotRegister(.notBundled)
         )
     }
 
@@ -132,5 +133,96 @@ struct GeneralGateTests {
                 )
             )
         }
+    }
+
+    /// The resolver is not merely declared — the two rows CONSULT
+    /// it. A round-1 cut of turn 14b shipped `GeneralGates` and
+    /// `GeneralGateHelp` constructed only in tests, while the views
+    /// re-derived each greying predicate and re-authored each
+    /// sentence inline; the census gate and the on-screen grey
+    /// could then drift with every gate test still green. This
+    /// reds if either row stops asking the resolver, or authors a
+    /// gate sentence itself instead of reading `GeneralGateHelp`.
+    @Test("both rows consult the resolver, not an inline copy")
+    func rowsConsultTheResolver() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/General"
+            )
+        let rows = [
+            "LoginItemCard.swift", "GeneralRestartRow.swift",
+        ]
+        func read(_ name: String) throws -> String {
+            try String(
+                contentsOf: dir.appendingPathComponent(name),
+                encoding: .utf8
+            )
+        }
+        for name in rows {
+            let source = try read(name)
+            #expect(
+                source.contains("generalGates.inertReason"),
+                Comment(
+                    rawValue:
+                        "\(name) no longer asks the gate resolver "
+                        + "for its greying"
+                )
+            )
+            #expect(
+                source.contains("GeneralGateHelp.sentence"),
+                Comment(
+                    rawValue:
+                        "\(name) does not read GeneralGateHelp for "
+                        + "its inert caption"
+                )
+            )
+        }
+        // Every gate sentence is authored ONCE, in GeneralGateHelp;
+        // a row that re-authors one is the duplication that let the
+        // two rows describe one status two ways.
+        let help = try read("GeneralGateHelp.swift")
+        for key in [
+            "general.advanced.restart_on_crash.needs_login",
+            "general.login_item.unavailable",
+            "general.login_item.unavailable_binary",
+        ] {
+            #expect(
+                help.contains(key),
+                Comment(rawValue: "GeneralGateHelp lost \(key)")
+            )
+            for name in rows {
+                #expect(
+                    !(try read(name)).contains(key),
+                    Comment(
+                        rawValue:
+                            "\(name) re-authors \(key) — it must "
+                            + "come from GeneralGateHelp"
+                    )
+                )
+            }
+        }
+    }
+
+    /// The newly-live help names the RIGHT fix per cause: the two
+    /// unregisterable causes must not collapse to one sentence, or
+    /// a bare-binary copy reads "move to Applications", advice that
+    /// does not apply. Distinct, non-empty, and distinct from the
+    /// login-dependency line.
+    @MainActor
+    @Test("each inert reason renders its own sentence")
+    func eachReasonHasItsOwnSentence() {
+        let translocated = GeneralGateHelp.sentence(
+            for: .cannotRegister(.translocated)
+        )
+        let notBundled = GeneralGateHelp.sentence(
+            for: .cannotRegister(.notBundled)
+        )
+        let loginOff = GeneralGateHelp.sentence(for: .loginOff)
+        for sentence in [translocated, notBundled, loginOff] {
+            #expect(!sentence.isEmpty)
+        }
+        #expect(translocated != notBundled)
+        #expect(translocated != loginOff)
+        #expect(notBundled != loginOff)
     }
 }
