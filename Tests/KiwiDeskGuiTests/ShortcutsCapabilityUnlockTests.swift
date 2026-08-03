@@ -208,7 +208,18 @@ struct ShortcutsCapabilityUnlockTests {
         // tier enum carries none — assert the tiers actually used
         // instead, so a tier invented to mean "nerd only" fails
         // here rather than shipping as row-level mode depth.
+        //
+        // `.immediate` is in the set and is the opposite of mode
+        // depth: it surfaces a row the moment the user's config
+        // contains the thing, in BOTH modes. That is the rule it
+        // carries — config presence expands the simple surface —
+        // so its presence here is the point, not an exception.
         let tiers = Set(placed.map(\.placement.tier))
-        #expect(tiers.isSubset(of: [.atRest, .showMore]))
+        #expect(
+            tiers.isSubset(of: [.atRest, .showMore, .immediate])
+        )
+        // Vacuity: `.immediate` must actually be in use, or the
+        // sentence above describes nothing.
+        #expect(tiers.contains(.immediate))
     }
 }

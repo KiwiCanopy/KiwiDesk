@@ -1,23 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Shortcuts header (#68 §3.6.1): the layer strip (chips +
-/// "+" popover), the Import button — placed here, visible
-/// without scrolling, where the new user it serves can find it
-/// — and the selected non-default layer's compact icon/delete
-/// row.
+/// The Shortcuts header: the Import button — placed here,
+/// visible without scrolling, where the new user it serves can
+/// find it — and a label naming which layer the groups below
+/// bind into.
+///
+/// The layer strip itself lives in the Layers card
+/// (`LayerStripEditor`), which is where the census places it.
 struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
-    @State private var addingLayer = false
-    @State private var newLayer = ""
     @State private var importedNote = false
-    @State private var renamingLayer = false
-    @State private var renameDraft = ""
-    @State private var addLayerHovered = false
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -41,9 +35,6 @@ struct ShortcutsHeader: View {
                     .font(.caption)
                     .foregroundStyle(.green)
             }
-        }
-        .onChange(of: isEnabled) { _, now in
-            if !now { addLayerHovered = false }
         }
     }
 

@@ -11,6 +11,14 @@ import SwiftUI
 /// silently does nothing. Splitting here also puts the header
 /// back under the file-size target without widening any
 /// `private` — the seam is real, not a line-count dodge.
+///
+/// At 268 lines this sits above the 100–250 target and below the
+/// 350 ceiling, and it stays that way deliberately: the only
+/// seam left (rename / add / delete) reads all four `@State`
+/// properties, so extracting it means widening them to
+/// `internal`. A soft size guideline does not buy a real seal,
+/// and review reached the same conclusion for `ShortcutsHeader`
+/// before this file existed.
 struct LayerStripEditor: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String

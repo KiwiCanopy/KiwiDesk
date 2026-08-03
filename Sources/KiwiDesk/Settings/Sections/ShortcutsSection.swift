@@ -2,11 +2,11 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Whole App ▸ Shortcuts (#68 §3.6), rendered FROM the settings
-/// census (#678 Phase 3): a layer strip (chips, "+" popover),
-/// flat intent groups (Focus / Move windows / Size & Float /
-/// Switch layers / Open applications), the raw-Lua rows demoted
-/// to a collapsed Advanced drawer, and Import moved to the header
-/// where a new user can see it. One recorder can be active at a
+/// census (#678 Phase 3): flat intent groups (Focus / Move
+/// windows / Size & float / Open applications), then the
+/// advanced half — the Layers card and the raw-Lua drawer — with
+/// Import in the header where a new user can see it. One
+/// recorder can be active at a
 /// time (#33), duplicates hard-block with Steal / Go to (#34),
 /// and conflict state derives live from the bindings on every
 /// render (#35).

@@ -8,7 +8,15 @@ import Testing
 /// order. These pin the two together — every `.shortcuts`-area
 /// census key appears in exactly the order list its placement
 /// names, so a census row added, retiered or moved without a
-/// renderer update is a red test, not a silently missing control.
+/// renderer update is a red test.
+///
+/// **The promise is weaker for three containers**, and reading
+/// it as unqualified is how a control ships invisible: the app
+/// list, the layer strip and the raw-Lua drawer are bespoke
+/// views, so their lists guard membership and nothing checks
+/// that a family added to one reaches the screen. Which three
+/// is data (`ShortcutsRowOrder.bespokeContainers`), asserted by
+/// `bespokeContainersAreDeclared`.
 ///
 /// Set equality, not sequence: ORDER is the renderer's to own and
 /// is deliberately not pinned here, exactly as in
@@ -78,19 +86,7 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
-    /// Three lists cover HAND-DRAWN containers: the app list, the
-    /// layer strip and the raw-Lua drawer are bespoke views, not
-    /// `ForEach`es over an order list, so nothing but this suite
-    /// reads them.
-    ///
-    /// Say that plainly rather than let the file's promise
-    /// over-reach: for these three, membership is guarded and the
-    /// RENDER half is a reviewer's catch. A family added to one of
-    /// them compiles, satisfies the expansion switch, greens this
-    /// suite, and appears nowhere. They are kept because the
-    /// alternative is no census record of those containers at all
-    /// — which is how a row goes missing from the placement table
-    /// and from search.
+    /// Bespoke container — membership only (see the suite note).
     @Test("Open applications renders the census's family")
     func openApplicationsTier() {
         pin(
@@ -112,23 +108,58 @@ struct ShortcutsCensusRenderTests {
         #expect(censusRows(.generalKeys, .atRest).isEmpty)
     }
 
-    @Test("Layers renders the census's show-more families")
+    /// `.immediate`, not `.showMore`: a configured layer is the
+    /// user's own setup, so the card surfaces at rest the moment
+    /// one exists (config presence expands the simple surface).
+    /// Reading these as show-more hides a user's configuration
+    /// from them, which an earlier draft of this area did.
+    /// Bespoke container — membership only (see the suite note).
+    @Test("Layers renders the census's immediate families")
     func layersTier() {
         pin(
             ShortcutsRowOrder.layersMore,
             .layers,
-            .showMore,
+            .immediate,
             "layers"
         )
+        #expect(censusRows(.layers, .showMore).isEmpty)
+        #expect(censusRows(.layers, .atRest).isEmpty)
     }
 
-    @Test("Lua bindings renders the census's show-more families")
+    /// Two tiers in one container: the raw-Lua rows hide behind
+    /// the Advanced drawer, while Import draws at rest in the
+    /// header — the affordance a new user needs, kept absent
+    /// until `init.lua` holds something to adopt by its runtime
+    /// gate rather than by a disclosure.
+    /// Bespoke container — membership only (see the suite note).
+    @Test("Lua bindings splits across its two census tiers")
     func luaBindingsTier() {
         pin(
             ShortcutsRowOrder.luaBindingsMore,
             .luaBindings,
             .showMore,
-            "lua bindings"
+            "lua bindings drawer"
+        )
+        pin(
+            ShortcutsRowOrder.luaBindingsAtRest,
+            .luaBindings,
+            .atRest,
+            "import row"
+        )
+    }
+
+    /// Which containers are drawn by bespoke views is data, so
+    /// the weaker promise cannot quietly widen: a fourth bespoke
+    /// container has to edit the set this asserts over.
+    @Test("the bespoke containers are the three declared")
+    func bespokeContainersAreDeclared() {
+        #expect(
+            ShortcutsRowOrder.bespokeContainers
+                == [.openApplications, .layers, .luaBindings]
+        )
+        #expect(
+            ShortcutsRowOrder.bespokeContainers
+                .isSubset(of: containers(of: .shortcuts))
         )
     }
 

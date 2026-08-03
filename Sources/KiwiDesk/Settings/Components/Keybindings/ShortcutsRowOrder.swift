@@ -18,6 +18,22 @@
 /// added to the census must be placed in a list here AND given
 /// an expansion there before it compiles and passes.
 enum ShortcutsRowOrder {
+    /// Containers the section draws with BESPOKE views rather
+    /// than a `ForEach` over an order list: the app list, the
+    /// layer strip and the raw-Lua drawer.
+    ///
+    /// Data, not prose, because the promise above is weaker for
+    /// these three — their order lists guard MEMBERSHIP and
+    /// nothing checks that a family added to one reaches the
+    /// screen. A fourth container going bespoke has to edit this
+    /// set, which `ShortcutsCensusRenderTests` asserts over, so
+    /// the limitation cannot quietly widen.
+    static let bespokeContainers: Set<SettingsContainer> = [
+        .openApplications,
+        .layers,
+        .luaBindings,
+    ]
+
     /// Focus: the four directions, then one row per live space.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
@@ -119,10 +135,16 @@ enum ShortcutsRowOrder {
         .shortcuts(.switchToLayer),
     ]
 
-    /// The power-user escape hatch, and the Import row that only
-    /// surfaces while `init.lua` holds adoptable bindings.
+    /// The power-user escape hatch, behind the Advanced drawer.
     static let luaBindingsMore: [SettingKey] = [
-        .shortcuts(.advanced),
-        .shortcuts(.import),
+        .shortcuts(.advanced)
+    ]
+
+    /// Import draws at rest, in the header — the same container
+    /// as the raw-Lua rows, a different tier. Its runtime gate,
+    /// not a disclosure, is what keeps it out of the way until
+    /// `init.lua` holds something to adopt.
+    static let luaBindingsAtRest: [SettingKey] = [
+        .shortcuts(.import)
     ]
 }

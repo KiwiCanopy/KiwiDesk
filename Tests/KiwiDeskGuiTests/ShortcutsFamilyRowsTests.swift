@@ -28,12 +28,12 @@ struct ShortcutsFamilyRowsTests {
     /// host happens to have.
     ///
     /// **Which families may answer `nil` is DATA, not a `continue`.**
-    /// The renderer reads `rows(for:) ?? []`, so `nil` and `[]`
+    /// The renderer reads `renderedRows(for:)`, so `nil` and `[]`
     /// put the same nothing on screen; a loop that skipped `nil`
     /// would let any family vanish silently — the exact failure
     /// this suite exists to catch — while every assertion in it
     /// still passed. `guard-prover` demonstrated that: nilling
-    /// `toggleSticky` left all thirteen tests green. So the
+    /// `toggleSticky` left every test in the suite green. So the
     /// allow-list is enumerated and the relation asserted in
     /// BOTH directions.
     @Test("only the hand-drawn containers expand to no rows")

@@ -30,7 +30,16 @@ extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
         case .layers, .layersIcon, .switchToLayer:
-            return .row(.shortcuts, .layers, .showMore)
+            // `.immediate`, not `.showMore`: a configured layer
+            // is the user's own setup, so the card surfaces at
+            // rest the moment one exists. Only the offer to
+            // create the first one is withheld.
+            return .row(
+                .shortcuts,
+                .layers,
+                .immediate,
+                gate: .runtime(.layersExist)
+            )
         case .focusDir, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveWindowToTrack, .swapWithTrack, .moveToSpace,
@@ -46,10 +55,17 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
+            // At rest, in the header, not in the Lua drawer: the
+            // row it belongs to conceptually is the raw-Lua one,
+            // but Import is the affordance a NEW user needs and
+            // the one thing on this page that must not be behind
+            // a disclosure. Its `.runtime` gate already keeps it
+            // absent until `init.lua` holds something to adopt,
+            // which is what makes surfacing it at rest safe.
             return .row(
                 .shortcuts,
                 .luaBindings,
-                .showMore,
+                .atRest,
                 gate: .runtime(.luaImportAvailable)
             )
         }

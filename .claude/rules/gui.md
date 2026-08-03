@@ -123,9 +123,9 @@ layer strip, the app list and the raw-Lua drawer. Their order
 lists exist so the census still records those rows for the
 placement table and for search, and the guard holds their
 MEMBERSHIP, but editing one moves nothing on screen. Which
-containers actually render from the census is what
-`ShortcutsCensusRenderTests` walks; check there before
-assuming an edit will show up.
+three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
+by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
+to edit that set; check it before assuming an edit will show up.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is

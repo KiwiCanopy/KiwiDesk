@@ -275,12 +275,22 @@ struct GeneralShortcutsGroup: View {
 /// and because the switch shortcuts belong beside the definition
 /// they act on rather than among the action groups.
 ///
-/// Behind a disclosure because the census tiers every one of them
-/// `.showMore`: alternate key sets are the area's advanced half,
-/// and a first-week user should meet the shortcut list without
-/// meeting layers at all. The header keeps a quiet label naming
-/// the layer being edited, so the fact survives the control
-/// moving in here.
+/// **Config presence expands the simple surface.** The census
+/// tiers these `.immediate` behind a `layersExist` gate, which is
+/// the tier's whole point: a configured layer is the user's own
+/// setup, so the card is AT REST the moment one exists — in both
+/// Settings modes, never re-earned. Only the offer to create the
+/// first layer is withheld, and it stays behind a disclosure so
+/// it is reachable rather than gone.
+///
+/// Getting this backwards hides a user's own configuration from
+/// them, which is the failure the rule exists to prevent; an
+/// earlier draft of this card did exactly that by reading the
+/// tier as `.showMore`.
+///
+/// The header carries a label naming the layer being edited
+/// whenever more than one exists, so which layer the rows below
+/// belong to is answered even while this card is scrolled past.
 struct LayersCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -288,15 +298,29 @@ struct LayersCard: View {
     let expander: ShortcutsFamilyRows
     @State private var expanded = false
 
+    /// The gate behind the `.immediate` tier. `default` always
+    /// exists, so a second entry is what "the user configured a
+    /// layer" means.
+    private var layersExist: Bool {
+        model.config.layers.count > 1
+    }
+
+    /// One declaration, two chromes — force-expanded once a
+    /// layer exists, collapsible before that. The
+    /// force-expansion binding is the drawer-with-its-own-rules
+    /// seam `SettingsDisclosure` already carries for Gaps, which
+    /// is also why this stays a single catalog declaration: a
+    /// card that is sometimes at rest must not become two search
+    /// anchors for one thing.
     var body: some View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.layersCard,
             chrome: .card,
-            isExpanded: $expanded
+            isExpanded: layersExist ? .constant(true) : $expanded
         ) {
             VStack(alignment: .leading, spacing: 12) {
                 LayerStripEditor(model: model, selected: $selected)
-                if model.config.layers.count > 1 {
+                if layersExist {
                     KeybindingFamilyRows(
                         model: model,
                         bindings: $bindings,
