@@ -56,7 +56,7 @@ struct StackSchematic: View {
     var masters: Int {
         min(max(1, masterCount), max(1, windows - 1))
     }
-    private var newWindow: WindowID {
+    var newWindow: WindowID {
         WindowID(UInt32(max(1, windows - 1) + 1))
     }
 
@@ -66,32 +66,35 @@ struct StackSchematic: View {
         max(0, windows - 1 - masters)
     }
 
-    /// The first stack window is the focused one.
-    private var focused: WindowID {
-        WindowID(UInt32(masters + 1))
+    /// The first stack window is the focused one — or, where the
+    /// count leaves no stack zone at all, the last established
+    /// window, so the relative placements keep a reference. They
+    /// had none at two windows: the focus id was not in the
+    /// array, the old `if let` found no index and the incoming
+    /// window was dropped from the preview outright (#702).
+    var focused: WindowID {
+        WindowID(UInt32(min(masters + 1, max(1, windows - 1))))
     }
 
-    /// The windows in array order with the new one spliced in per
-    /// `placement` (focus = first stack window) — the same rule as
-    /// `SpaceModel.insert`. Partitioning at `masters` then sorts
-    /// them into the two zones exactly as `StackLayout` does.
-    private var order: [WindowID] {
+    /// The windows in array order with the new one spliced in
+    /// where `placement` opens it (focus = first stack window),
+    /// asked of the engine through `SchematicPlacement` rather
+    /// than reproduced here (#702). Partitioning at `masters`
+    /// then sorts them into the two zones exactly as
+    /// `StackLayout` does.
+    ///
+    /// Internal so `LayoutSchematicPlacementTests` can read the
+    /// landing: a scan for the call cannot tell a live splice
+    /// from one whose result is thrown away.
+    var order: [WindowID] {
         var w = (1...max(1, masters + stackWindows))
             .map { WindowID(UInt32($0)) }
-        switch placement {
-        case .first:
-            w.insert(newWindow, at: 0)
-        case .last:
-            w.append(newWindow)
-        case .beforeFocused:
-            if let i = w.firstIndex(of: focused) {
-                w.insert(newWindow, at: i)
-            }
-        case .afterFocused:
-            if let i = w.firstIndex(of: focused) {
-                w.insert(newWindow, at: i + 1)
-            }
-        }
+        let index = SchematicPlacement.splice(
+            placement,
+            count: w.count,
+            focus: w.firstIndex(of: focused) ?? 0
+        ).incoming
+        w.insert(newWindow, at: index)
         return w
     }
 

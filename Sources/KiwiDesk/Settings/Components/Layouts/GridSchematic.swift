@@ -37,11 +37,16 @@ struct GridSchematic: View {
         splitDirection == .horizontal
     }
 
-    /// The focused window (a stable id so it keeps focus as the
-    /// grid rebalances) and the incoming one, which sorts above
+    /// The focused window — a stable id so it keeps focus as the
+    /// grid rebalances — and the incoming one, which sorts above
     /// every established id at any count.
-    private let focusID = 2
-    private let newID = 9_999
+    ///
+    /// The focus falls back to the single established window
+    /// where the count leaves no second one, so the relative
+    /// placements keep a reference. Pinned at 2, they had none at
+    /// two windows and the grid drew a `+` beside nothing (#702).
+    var focusID: Int { min(2, max(1, windows - 1)) }
+    let newID = 9_999
 
     var body: some View {
         SchematicCanvas(
@@ -101,18 +106,19 @@ struct GridSchematic: View {
         )
     }
 
-    /// The window array with the new window spliced in per
-    /// placement, relative to the focus — the same rule as
-    /// `SpaceModel.insert`.
+    /// The window array with the new window spliced in where
+    /// `placement` opens it, asked of the engine through
+    /// `SchematicPlacement` rather than reproduced here (#702).
+    /// Cells are keyed by id, so the focus follows its window
+    /// when the splice pushes it along.
     var ids: [Int] {
         var ids = Array(1...max(1, windows - 1))
-        let f = ids.firstIndex(of: focusID) ?? 0
-        switch placement {
-        case .first: ids.insert(newID, at: 0)
-        case .last: ids.append(newID)
-        case .beforeFocused: ids.insert(newID, at: f)
-        case .afterFocused: ids.insert(newID, at: f + 1)
-        }
+        let index = SchematicPlacement.splice(
+            placement,
+            count: ids.count,
+            focus: ids.firstIndex(of: focusID) ?? 0
+        ).incoming
+        ids.insert(newID, at: index)
         return ids
     }
 

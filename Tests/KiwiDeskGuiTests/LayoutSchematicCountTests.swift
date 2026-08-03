@@ -177,10 +177,14 @@ struct LayoutSchematicCountTests {
         }
     }
 
-    /// Scrolling's row is finite: exactly `windows` slots, with
-    /// the focus mid-row so it extends both ways where the count
-    /// allows. The follow pair, a second frame of the same
-    /// layout, spans the same row.
+    /// Scrolling's row is finite: exactly `windows` slots, always
+    /// containing the focus at 0 and extending both ways as far
+    /// as the count and the placement allow. How far each way is
+    /// the *placement's* business, not the count's — the row
+    /// shifts by a slot when the incoming window lands ahead of
+    /// the focus (#702), which is `LayoutSchematicPlacementTests`'
+    /// half. The follow pair, a second frame of the same layout,
+    /// spans the same row.
     @Test("Scrolling draws a finite row of the count")
     func scrollingRow() {
         for count in LayoutSchematic.windowCountRange {
@@ -191,7 +195,7 @@ struct LayoutSchematicCountTests {
                 placement: .last,
                 windows: count
             )
-            #expect(schematic.slotIndices.count == count)
+            #expect(schematic.row.slots.count == count)
             let follow = ScrollingFollowPair(
                 orientation: .horizontal,
                 slotSize: .auto,

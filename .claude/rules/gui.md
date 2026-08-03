@@ -66,6 +66,27 @@ to invert the dim ladder).
   badge, removed rather than greyed — permanently, the store being
   out of scope; see `docs/design-decisions.md`).
 - **The live preview leads** its editor.
+- **A preview that claims to show engine behavior asks the
+  engine.** Never re-implement a rule the engine owns beside the
+  drawing of it — call it, and where the shape does not fit, wrap
+  the call once (`SchematicPlacement.splice` over
+  `Space.insert(_:placement:)`). A copy is right the day it is
+  written and drifts the day the rule moves, and a preview that
+  drifts is worse than no preview: it teaches the user something
+  the app does not do. It also has to survive whatever the
+  preview's own controls can reach — the five schematics' copies
+  of the placement rule were constants until a window-count
+  slider made them arithmetic across 2…12, and two arms of one of
+  them then marked the wrong window as focused (#702).
+  `LayoutSchematicPlacementTests` holds each schematic to what
+  its frame promises and
+  `LayoutSchematicPlacementScanTests` reds on the next copy.
+  Check *which* engine owns the rule before calling one: track
+  spawn is `Space.insertIntoTrack`'s, not
+  `Space.insert(_:placement:)`'s, and the two agree on position
+  only because `LayoutSchematicTrackEngineTests` now requires it.
+  Where a preview models part of an engine's rule, say which part
+  and file the rest (#708 for the unmodelled spill).
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to

@@ -41,11 +41,11 @@ struct BspSchematic: View {
     private var base: [WindowID] {
         (1...max(1, windows - 1)).map { WindowID(UInt32($0)) }
     }
-    private var focused: WindowID {
+    var focused: WindowID {
         base.count >= 2 ? WindowID(2) : WindowID(1)
     }
     /// Above every established id, whatever the count.
-    private var newWindow: WindowID {
+    var newWindow: WindowID {
         WindowID(UInt32(max(1, windows - 1) + 1))
     }
 
@@ -101,24 +101,18 @@ struct BspSchematic: View {
     }
 
     /// The windows in array order, with the new one spliced in
-    /// per `placement` — the same rule as `SpaceModel.insert`
-    /// (kept in step with it; small, self-contained duplication).
+    /// where `placement` opens it — asked of the engine through
+    /// `SchematicPlacement` rather than reproduced here (#702).
+    /// Tiles are keyed by id, so the focus follows its window
+    /// when the splice pushes it along.
     var order: [WindowID] {
         var windows = base
-        switch placement {
-        case .first:
-            windows.insert(newWindow, at: 0)
-        case .last:
-            windows.append(newWindow)
-        case .beforeFocused:
-            if let i = windows.firstIndex(of: focused) {
-                windows.insert(newWindow, at: i)
-            }
-        case .afterFocused:
-            if let i = windows.firstIndex(of: focused) {
-                windows.insert(newWindow, at: i + 1)
-            }
-        }
+        let index = SchematicPlacement.splice(
+            placement,
+            count: windows.count,
+            focus: windows.firstIndex(of: focused) ?? 0
+        ).incoming
+        windows.insert(newWindow, at: index)
         return windows
     }
 
