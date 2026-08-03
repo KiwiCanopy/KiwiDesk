@@ -43,6 +43,24 @@ struct ScrollingSchematic: View {
 
     private var horizontal: Bool { orientation == .horizontal }
 
+    /// The row's slot indices, focus at 0. The row is finite, so
+    /// the focus sits mid-array and the row extends both ways as
+    /// far as the count allows; first / last then land the `+` on
+    /// the row's real ends rather than on whichever tile the
+    /// canvas happened to crop.
+    ///
+    /// Internal rather than private so `LayoutSchematicCountTests`
+    /// can assert the arithmetic. A source scan for the count as
+    /// an input is satisfiable by a schematic that takes it and
+    /// draws a constant — guard-prover demonstrated exactly that
+    /// — so the guard has to read the derived value, and the
+    /// derived value has to be reachable.
+    var slotIndices: ClosedRange<Int> {
+        let count = max(2, windows)
+        let focusPos = (count - 1) / 2
+        return -focusPos...(count - 1 - focusPos)
+    }
+
     /// The slot's real width as a fraction of the screen axis — a
     /// wide slot fills most of the frame (one window plus slivers),
     /// a thin one lets several show.
@@ -125,15 +143,8 @@ struct ScrollingSchematic: View {
         case .end:
             focusCenter = screenStart + screenLen - slot / 2
         }
-        // Range = the row itself, which is finite. The focus sits
-        // mid-array so the row extends both ways where the count
-        // allows; first / last then land the `+` on the row's real
-        // ends rather than on whichever tile the canvas happened
-        // to crop.
-        let count = max(2, windows)
-        let focusPos = (count - 1) / 2
-        let low = -focusPos
-        let high = count - 1 - focusPos
+        let low = slotIndices.lowerBound
+        let high = slotIndices.upperBound
         let newIdx = newWindowIndex(low: low, high: high)
         return Metrics(
             slot: slot,

@@ -23,7 +23,7 @@ struct MonocleSchematic: View {
     /// Cards drawn behind the focused one. Capped so the fan
     /// stays a fan: past four the offsets march off the canvas
     /// and say nothing a fourth card didn't.
-    private var depth: Int { min(max(windows, 1), 4) - 1 }
+    var depth: Int { min(max(windows, 1), 4) - 1 }
 
     var body: some View {
         SchematicCanvas(

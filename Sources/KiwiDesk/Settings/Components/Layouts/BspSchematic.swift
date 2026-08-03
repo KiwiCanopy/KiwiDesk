@@ -103,7 +103,7 @@ struct BspSchematic: View {
     /// The windows in array order, with the new one spliced in
     /// per `placement` — the same rule as `SpaceModel.insert`
     /// (kept in step with it; small, self-contained duplication).
-    private var order: [WindowID] {
+    var order: [WindowID] {
         var windows = base
         switch placement {
         case .first:

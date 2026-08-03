@@ -103,7 +103,8 @@ struct LayoutDefaultsCensusRenderTests {
                     + "them: \(deeper.map(\.id))"
             )
         )
-        for file in try areaSources() {
+        let files = try areaSources()
+        for file in files {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -117,6 +118,23 @@ struct LayoutDefaultsCensusRenderTests {
                 )
             )
         }
+        // A floor, because the enumerator behind `areaSources()`
+        // yields an EMPTY sequence for a missing directory rather
+        // than throwing — so a rename of the area's directory,
+        // which gui.md makes an obligation when a destination is
+        // renamed, would leave this half passing having scanned
+        // nothing (guard-prover, 2026-08-03). The number is the
+        // schematics plus the row/gate/render files; it only has
+        // to be high enough that an empty scan cannot reach it.
+        #expect(
+            files.count >= 12,
+            Comment(
+                rawValue:
+                    "scanned \(files.count) files — the area's "
+                    + "directory has moved and this guard is "
+                    + "looking at nothing"
+            )
+        )
     }
 
     /// Ruling 5: a guard over a literal restated against a
@@ -137,9 +155,24 @@ struct LayoutDefaultsCensusRenderTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: strip, encoding: .utf8)
         )
+        // The `ForEach`'s OWN first argument, not two independent
+        // `contains` over the file: with the loop walking
+        // `allCases` and `placementTabs` merely mentioned
+        // elsewhere in the same file, a substring pair goes green
+        // over a strip that mounts a Floating tile whose card has
+        // no container (guard-prover, 2026-08-03).
+        let sources = SourceScan.firstArguments(
+            of: "ForEach(",
+            in: source
+        )
         #expect(
-            source.contains("ForEach(")
-                && source.contains("LayoutMode.placementTabs")
+            sources.contains("LayoutMode.placementTabs"),
+            Comment(
+                rawValue:
+                    "LayoutStrip's ForEach walks \(sources) — not "
+                    + "the curated layout list, so the tiles and "
+                    + "the search index no longer agree"
+            )
         )
         // And the list itself is the six tuned layouts —
         // Floating has nothing to tune, so a tile for it would

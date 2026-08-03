@@ -53,7 +53,7 @@ struct StackSchematic: View {
     /// Masters cannot outnumber the established windows: at two
     /// windows a master count of ten still leaves the stack zone
     /// on screen, which is what the two-zone split is *for*.
-    private var masters: Int {
+    var masters: Int {
         min(max(1, masterCount), max(1, windows - 1))
     }
     private var newWindow: WindowID {
@@ -62,7 +62,7 @@ struct StackSchematic: View {
 
     /// Established windows that land in the stack zone: the count
     /// less the masters and less the incoming one.
-    private var stackWindows: Int {
+    var stackWindows: Int {
         max(0, windows - 1 - masters)
     }
 

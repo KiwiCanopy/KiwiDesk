@@ -10,10 +10,22 @@ import Testing
 /// illustrate — Cascade overflow and Cascade all draw the same
 /// frame until the stack is deep enough to overflow, and a track
 /// limit means nothing until there are more windows than tracks.
-/// A schematic that took the count and ignored it would look
-/// entirely correct on screen at the default, which is why these
-/// assert the arithmetic rather than the drawing.
+///
+/// **These assert each schematic's count-derived arithmetic, not
+/// that its source mentions the input.** A first cut scanned for
+/// `var windows` and `value: windows`, and guard-prover put a
+/// constant in the drawing while leaving both substrings in
+/// place: the scan passed on a schematic that had stopped
+/// answering the slider. So each derived quantity is internal
+/// rather than private, and read here.
+/// `@MainActor` because the derived quantities are properties of
+/// `View`s, which are main-actor isolated: off the main actor
+/// the first read traps in the concurrency runtime rather than
+/// failing an expectation, and it does so nondeterministically —
+/// it depends which executor swift-testing lands the test on, so
+/// the suite passed alone and killed the runner in a full run.
 @Suite("Layout preview window count")
+@MainActor
 struct LayoutSchematicCountTests {
     /// The floor is 2, not 1: at one window every layout draws
     /// the same full-screen rectangle, and several schematics
@@ -29,39 +41,169 @@ struct LayoutSchematicCountTests {
         )
     }
 
-    /// A dynamic grid balances through the ENGINE's own rule, so
-    /// the preview rebalances exactly when KiwiDesk does. Pinned
-    /// at the boundary the balance moves: four windows are a 2×2
-    /// and a fifth adds a column (columns-first) or a row
-    /// (rows-first).
-    @Test("a dynamic grid balances the way the engine does")
-    func gridBalance() {
-        let four = GridLayout.balanced(
-            count: 4,
-            splitDirection: .horizontal
-        )
-        #expect(four.columns == 2 && four.rows == 2)
-        let five = GridLayout.balanced(
-            count: 5,
-            splitDirection: .horizontal
-        )
-        #expect(five.columns == 3 && five.rows == 2)
-        let fiveRowsFirst = GridLayout.balanced(
-            count: 5,
-            splitDirection: .vertical
-        )
+    /// BSP hands the engine exactly `windows` windows, incoming
+    /// tile included — the engine then does the tiling, so this
+    /// is the whole of BSP's count contract.
+    @Test("BSP tiles the whole count")
+    func bspCount() {
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = BspSchematic(
+                splitRatioH: 0.5,
+                splitRatioV: 0.5,
+                strategy: .longestSide,
+                placement: .last,
+                windows: count
+            )
+            #expect(schematic.order.count == count)
+        }
+    }
+
+    /// Stack partitions the count into the two zones: masters,
+    /// the stack run, and the one incoming window. The masters
+    /// are clamped so a big master count over few windows still
+    /// leaves a stack zone — the two-zone split is the point.
+    @Test("Stack partitions the count into its two zones")
+    func stackPartition() {
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = stack(masterCount: 1, windows: count)
+            #expect(
+                schematic.masters + schematic.stackWindows + 1
+                    == count
+            )
+            #expect(schematic.masters >= 1)
+        }
+        // The clamp: ten masters over three windows is two
+        // masters, not ten, so the stack zone survives.
+        let crowded = stack(masterCount: 10, windows: 3)
+        #expect(crowded.masters == 2)
+        #expect(crowded.stackWindows == 0)
+    }
+
+    /// The stack run is what makes the two overflow styles
+    /// diverge, so it has to actually deepen with the count.
+    @Test("a bigger count deepens the stack run")
+    func stackDeepens() {
         #expect(
-            fiveRowsFirst.columns == 2 && fiveRowsFirst.rows == 3
+            stack(masterCount: 1, windows: 8).stackWindows
+                > stack(masterCount: 1, windows: 4).stackWindows
         )
     }
 
-    /// Every schematic reads the count. A schematic that dropped
-    /// the input would still compile and still draw — this is the
-    /// scan that says it did not, and it walks the tree rather
-    /// than restating a list of file names, so a seventh
-    /// schematic is covered by existing code.
-    @Test("every schematic takes the window count")
-    func everySchematicTakesTheCount() throws {
+    /// Track opens tracks up to the limit and spills the rest
+    /// into the overflow track — which does not exist until
+    /// something overflows, and does once the count passes what
+    /// the tracks hold.
+    @Test("Track fills its tracks before it overflows")
+    func trackOverflow() {
+        #expect(track(limit: 3, windows: 2).overflowWindows == 0)
+        #expect(track(limit: 3, windows: 12).overflowWindows > 0)
+        // Tracks never outnumber the windows that open them.
+        #expect(track(limit: 4, windows: 2).trackCount == 1)
+        #expect(track(limit: 4, windows: 12).trackCount == 4)
+        // Auto-tracks is its own ceiling, and the count still
+        // bounds it from below.
+        #expect(
+            track(limit: 9, windows: 12, auto: true).trackCount
+                == 3
+        )
+    }
+
+    /// A dynamic grid balances through the ENGINE's own rule, so
+    /// the preview rebalances exactly when KiwiDesk does. Asserted
+    /// through the SCHEMATIC, not through `GridLayout.balanced`
+    /// directly: an earlier cut called the engine here and let the
+    /// schematic reproduce the arithmetic inline, which is the one
+    /// thing the schematic's docstring promises it does not do.
+    @Test("a dynamic grid balances the way the engine does")
+    func gridBalance() {
+        // Four windows are a 2×2; a fifth adds a column
+        // columns-first, a row rows-first. `windows` counts the
+        // incoming tile, so five on screen is `windows: 5`.
+        let four = grid(windows: 4, columnsFirst: true)
+        #expect(four.ids.count == 4)
+        #expect(
+            four.dynamicDims.columns == 2
+                && four.dynamicDims.rows == 2
+        )
+        let five = grid(windows: 5, columnsFirst: true)
+        #expect(
+            five.dynamicDims.columns == 3
+                && five.dynamicDims.rows == 2
+        )
+        let rowsFirst = grid(windows: 5, columnsFirst: false)
+        #expect(
+            rowsFirst.dynamicDims.columns == 2
+                && rowsFirst.dynamicDims.rows == 3
+        )
+        // And the schematic's dims ARE the engine's, at every
+        // count in the band — so an inlined copy that happens to
+        // agree at five still reds somewhere.
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = grid(
+                windows: count,
+                columnsFirst: true
+            )
+            let engine = GridLayout.balanced(
+                count: schematic.ids.count,
+                splitDirection: .horizontal
+            )
+            #expect(schematic.dynamicDims.columns == engine.columns)
+            #expect(schematic.dynamicDims.rows == engine.rows)
+        }
+    }
+
+    /// Scrolling's row is finite: exactly `windows` slots, with
+    /// the focus mid-row so it extends both ways where the count
+    /// allows. The follow pair, a second frame of the same
+    /// layout, spans the same row.
+    @Test("Scrolling draws a finite row of the count")
+    func scrollingRow() {
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = ScrollingSchematic(
+                orientation: .horizontal,
+                anchor: .center,
+                slotSize: .auto,
+                placement: .last,
+                windows: count
+            )
+            #expect(schematic.slotIndices.count == count)
+            let follow = ScrollingFollowPair(
+                orientation: .horizontal,
+                slotSize: .auto,
+                windows: count
+            )
+            #expect(follow.slots.count == count)
+            // Frame 2 steps the focus to slot 1, so that slot
+            // has to exist at every count in the band.
+            #expect(follow.slots.contains(1))
+        }
+    }
+
+    /// Monocle has no fill logic — every window is full-screen —
+    /// so the count changes the depth of the fan, capped where
+    /// the offsets would march off the canvas.
+    @Test("Monocle deepens its fan with the count")
+    func monocleFan() {
+        #expect(
+            MonocleSchematic(orientation: .horizontal, windows: 2)
+                .depth == 1
+        )
+        #expect(
+            MonocleSchematic(orientation: .horizontal, windows: 3)
+                .depth == 2
+        )
+        #expect(
+            MonocleSchematic(orientation: .horizontal, windows: 12)
+                .depth == 3
+        )
+    }
+
+    /// The scan half: every schematic still *declares* the input.
+    /// Kept beside the arithmetic above rather than instead of
+    /// it — this is what catches a NEW schematic that never took
+    /// the count, which no assertion over existing types can see.
+    @Test("every schematic declares the window count")
+    func everySchematicDeclaresTheCount() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Layouts"
@@ -85,20 +227,63 @@ struct LayoutSchematicCountTests {
                         + "would move nothing in it"
                 )
             )
-            #expect(
-                source.contains("value: windows"),
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) never reads "
-                        + "its window count into the drawing"
-                )
-            )
         }
         // A floor would let the scan pass having looked at
-        // nothing. Seven: the six tuned layouts (Floating has
-        // nothing to draw) plus Scrolling's follow pair, which
-        // is a second frame of the same layout and needs the
-        // count for the same reason.
-        #expect(checked == 7)
+        // nothing — and a directory rename is exactly how that
+        // happens, since the file enumerator yields an empty
+        // sequence for a missing path rather than throwing. The
+        // tuned layouts are derived; the one rider is Scrolling's
+        // follow pair, a second frame of the same layout that
+        // needs the count for the same reason.
+        #expect(checked == LayoutMode.placementTabs.count + 1)
+    }
+
+    // MARK: - Fixtures
+
+    private func stack(
+        masterCount: Int,
+        windows: Int
+    ) -> StackSchematic {
+        StackSchematic(
+            masterCount: masterCount,
+            masterRatio: 0.5,
+            overflowStyle: .cascadeOverflow,
+            masterOrientation: .vertical,
+            stackPosition: .right,
+            placement: .last,
+            windows: windows
+        )
+    }
+
+    private func track(
+        limit: Int,
+        windows: Int,
+        auto: Bool = false
+    ) -> TrackSchematic {
+        TrackSchematic(
+            axis: .vertical,
+            overflowStyle: .cascadeAll,
+            newWindow: .ownTrack,
+            placement: .last,
+            limit: limit,
+            autoTracks: auto,
+            windows: windows
+        )
+    }
+
+    private func grid(
+        windows: Int,
+        columnsFirst: Bool
+    ) -> GridSchematic {
+        GridSchematic(
+            columns: 2,
+            rows: 2,
+            type: .dynamic,
+            fillEmptySpace: false,
+            autoSize: false,
+            splitDirection: columnsFirst ? .horizontal : .vertical,
+            placement: .last,
+            windows: windows
+        )
     }
 }

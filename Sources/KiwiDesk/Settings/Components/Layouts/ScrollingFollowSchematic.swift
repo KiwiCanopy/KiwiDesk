@@ -33,7 +33,7 @@ struct ScrollingFollowPair: View {
     /// The finite row's slot indices, focus at 0. Frame 2 steps
     /// the focus to index 1, which the floor of two windows
     /// always provides.
-    private var slots: ClosedRange<Int> {
+    var slots: ClosedRange<Int> {
         let count = max(2, windows)
         let focusPos = (count - 1) / 2
         return -focusPos...(count - 1 - focusPos)

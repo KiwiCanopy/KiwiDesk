@@ -94,7 +94,7 @@ struct GridSchematic: View {
     /// dynamic grid moves the preview with it. Uncapped on
     /// purpose: the cap is a function of the real screen and the
     /// minimum window size, and this canvas is neither.
-    private var dynamicDims: (columns: Int, rows: Int) {
+    var dynamicDims: (columns: Int, rows: Int) {
         GridLayout.balanced(
             count: ids.count,
             splitDirection: splitDirection
@@ -104,7 +104,7 @@ struct GridSchematic: View {
     /// The window array with the new window spliced in per
     /// placement, relative to the focus — the same rule as
     /// `SpaceModel.insert`.
-    private var ids: [Int] {
+    var ids: [Int] {
         var ids = Array(1...max(1, windows - 1))
         let f = ids.firstIndex(of: focusID) ?? 0
         switch placement {

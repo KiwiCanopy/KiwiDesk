@@ -37,7 +37,7 @@ struct TrackSchematic: View {
     /// windows to put in them: a limit of four over two windows
     /// draws two tracks, because the fourth track does not exist
     /// until a window opens it.
-    private var trackCount: Int {
+    var trackCount: Int {
         let ceiling = autoTracks ? 3 : min(max(limit, 1), 4)
         return min(ceiling, max(1, established))
     }
@@ -49,14 +49,14 @@ struct TrackSchematic: View {
     /// normal track plus the focused track's own run is the
     /// capacity; anything beyond falls to the overflow track,
     /// which is empty until it does.
-    private var overflowWindows: Int {
+    var overflowWindows: Int {
         max(0, established - trackCount - focusedRun + 1)
     }
 
     /// Windows in the focused track. It holds several so that
     /// multi-window tracks read, but never more than the count
     /// can pay for.
-    private var focusedRun: Int {
+    var focusedRun: Int {
         min(4, max(1, established - trackCount + 1))
     }
 
