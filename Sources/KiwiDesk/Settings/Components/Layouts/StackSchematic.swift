@@ -28,6 +28,13 @@ struct StackSchematic: View {
     let masterOrientation: StackParams.Orientation
     let stackPosition: StackParams.StackPosition
     let placement: SpawnPlacement
+    /// Windows on screen, the incoming one included. This is the
+    /// input that makes the two overflow styles diverge (turn
+    /// 10): below the tiled run they draw the same picture, and
+    /// only a stack deep enough to overflow separates "pile the
+    /// surplus" from "pile the lot".
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     /// Derived, like the engine (`StackPosition.stackOrientation`).
     /// Internal (not private) for `StackSchematic+Slots.swift`.
@@ -35,13 +42,6 @@ struct StackSchematic: View {
         stackPosition.stackOrientation
     }
 
-    /// Existing windows before the new one arrives. Five, because
-    /// the new window always lands in the stack zone here (with one
-    /// master, even placement=first displaces the old master into
-    /// it), so the stack settles at a steady six: a deep pile for
-    /// `cascade_all`, a fixed 3 tiled + 3 piled for
-    /// `cascade_overflow`.
-    private static let stackWindows = 5
     /// Tiled windows kept beside the cascade-overflow pile; the
     /// rest (the surplus) pile. Internal (not private), with
     /// the offset below and `stackWins`, for the slot math in
@@ -50,8 +50,21 @@ struct StackSchematic: View {
     /// Scaled-down title-bar reveal (the engine uses 40 pt).
     static let cascadeOffset: CGFloat = 9
 
-    private var masters: Int { max(1, masterCount) }
-    private let newWindow = WindowID(99)
+    /// Masters cannot outnumber the established windows: at two
+    /// windows a master count of ten still leaves the stack zone
+    /// on screen, which is what the two-zone split is *for*.
+    private var masters: Int {
+        min(max(1, masterCount), max(1, windows - 1))
+    }
+    private var newWindow: WindowID {
+        WindowID(UInt32(max(1, windows - 1) + 1))
+    }
+
+    /// Established windows that land in the stack zone: the count
+    /// less the masters and less the incoming one.
+    private var stackWindows: Int {
+        max(0, windows - 1 - masters)
+    }
 
     /// The first stack window is the focused one.
     private var focused: WindowID {
@@ -63,7 +76,7 @@ struct StackSchematic: View {
     /// `SpaceModel.insert`. Partitioning at `masters` then sorts
     /// them into the two zones exactly as `StackLayout` does.
     private var order: [WindowID] {
-        var w = (1...(masters + Self.stackWindows))
+        var w = (1...max(1, masters + stackWindows))
             .map { WindowID(UInt32($0)) }
         switch placement {
         case .first:
@@ -104,10 +117,17 @@ struct StackSchematic: View {
     }
 
     var body: some View {
-        SchematicCanvas(caption: caption, axLabel: axLabel) {
+        SchematicCanvas(
+            width: scale.width,
+            height: scale.height,
+            caption: caption,
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
+        ) {
             GeometryReader { geo in
                 zones(in: geo.size)
             }
+            .animation(LayoutSchematic.damping, value: windows)
             .animation(LayoutSchematic.damping, value: masterCount)
             .animation(LayoutSchematic.damping, value: masterRatio)
             .animation(
@@ -285,13 +305,17 @@ struct StackSchematic: View {
         }
     }
 
+    /// Speaks `masters`, not the staged `masterCount`: the count
+    /// is clamped to the windows on screen, so reading the
+    /// setting aloud would claim ten masters over a frame
+    /// drawing one.
     private var axLabel: String {
         L(
             "layout.schematic.stack.ax",
             "Stack preview: %1$d master windows, master ratio "
                 + "%2$d percent; the plus tile is where the next "
                 + "window lands.",
-            masterCount,
+            masters,
             SchematicMath.pct(masterRatio)
         )
     }

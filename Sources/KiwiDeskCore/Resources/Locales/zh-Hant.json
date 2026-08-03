@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "固定的網格",
   "layout.schematic.grid.caption_rigid": "固定的 %1$d × %2$d 網格；每個視窗縮到一格，多出的視窗層疊在最後一格。",
   "layout.schematic.grid.caption_rigid_auto": "依你的螢幕決定大小的固定網格（約 3 × 3）；每個視窗縮到一格。",
-  "layout.schematic.grid.dyn_frame_a": "4 個視窗",
-  "layout.schematic.grid.dyn_frame_b": "開啟第 5 個",
   "layout.schematic.grid.order_columns": "新視窗會沿著一列橫向填入，再換到下一列。",
   "layout.schematic.grid.order_rows": "新視窗會沿著一欄向下填入，再換到下一欄。",
   "layout.schematic.monocle.ax": "Monocle 預覽：一個視窗填滿螢幕；焦點在其餘視窗之間輪替。",

@@ -12,7 +12,14 @@ import SwiftUI
 ///
 /// A limit shows that many normal tracks; auto-tracks shows three
 /// (the count is a magnitude, bounded by the minimum window size —
-/// stated in the editor caption, not counted out here).
+/// stated in the row caption, not counted out here).
+///
+/// The **window count** (turn 10) is what opens and collapses
+/// tracks: windows fill the normal tracks up to the limit and
+/// the surplus falls into the overflow track, so dragging the
+/// count past the limit is the moment the overflow track earns
+/// its name — and the moment `cascade_all` and
+/// `cascade_overflow` stop drawing the same picture.
 struct TrackSchematic: View {
     let axis: TrackParams.Axis
     let overflowStyle: StackParams.OverflowStyle
@@ -20,11 +27,39 @@ struct TrackSchematic: View {
     let placement: SpawnPlacement
     let limit: Int
     let autoTracks: Bool
+    /// Windows on screen, the incoming one included.
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     private var vertical: Bool { axis == .vertical }
+
+    /// Normal tracks, never more than there are established
+    /// windows to put in them: a limit of four over two windows
+    /// draws two tracks, because the fourth track does not exist
+    /// until a window opens it.
     private var trackCount: Int {
-        autoTracks ? 3 : min(max(limit, 1), 4)
+        let ceiling = autoTracks ? 3 : min(max(limit, 1), 4)
+        return min(ceiling, max(1, established))
     }
+
+    /// Windows already open — the count less the incoming one.
+    private var established: Int { max(1, windows - 1) }
+
+    /// Windows past the normal tracks' capacity. One window per
+    /// normal track plus the focused track's own run is the
+    /// capacity; anything beyond falls to the overflow track,
+    /// which is empty until it does.
+    private var overflowWindows: Int {
+        max(0, established - trackCount - focusedRun + 1)
+    }
+
+    /// Windows in the focused track. It holds several so that
+    /// multi-window tracks read, but never more than the count
+    /// can pay for.
+    private var focusedRun: Int {
+        min(4, max(1, established - trackCount + 1))
+    }
+
     private var focusIdx: Int { trackCount / 2 }
 
     private struct TrackSpec {
@@ -34,7 +69,13 @@ struct TrackSchematic: View {
     }
 
     var body: some View {
-        SchematicCanvas(caption: caption, axLabel: axLabel) {
+        SchematicCanvas(
+            width: scale.width,
+            height: scale.height,
+            caption: caption,
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
+        ) {
             strip
                 .animation(LayoutSchematic.damping, value: axis)
                 .animation(
@@ -45,6 +86,7 @@ struct TrackSchematic: View {
                 .animation(LayoutSchematic.damping, value: placement)
                 .animation(LayoutSchematic.damping, value: limit)
                 .animation(LayoutSchematic.damping, value: autoTracks)
+                .animation(LayoutSchematic.damping, value: windows)
         }
     }
 
@@ -87,7 +129,13 @@ struct TrackSchematic: View {
         ForEach(specs.indices, id: \.self) { i in
             trackView(specs[i])
         }
-        overflowTrack
+        // No overflow track until something overflows. Drawing an
+        // empty one at every count would say the far edge is
+        // always reserved, which is the opposite of what the
+        // track limit does.
+        if overflowWindows > 0 {
+            overflowTrack
+        }
     }
 
     private enum TrackWindow { case plain, focus, new }
@@ -110,11 +158,12 @@ struct TrackSchematic: View {
     /// it) — the focus stays put so the placement reads relative to
     /// a fixed reference, not a drifting one.
     private func focusedTrack(nested: Bool) -> some View {
-        // 4 windows normally (focus = 3rd); a 5th slot appears for
-        // the joining window, keeping the focus centred.
-        let slots = nested ? 5 : 4
-        let focus = 2
-        let plus = nested ? focusedPlusIndex() : -1
+        // `focusedRun` windows (the focus in the middle of them);
+        // one more slot appears for the joining window.
+        let run = focusedRun
+        let slots = nested ? run + 1 : run
+        let focus = (run - 1) / 2
+        let plus = nested ? focusedPlusIndex(run: run) : -1
         return axisStack {
             ForEach(0..<slots, id: \.self) { i in
                 trackWindow(
@@ -124,13 +173,16 @@ struct TrackSchematic: View {
         }
     }
 
-    /// Slot for the joining window, with the focus fixed at index 2.
-    private func focusedPlusIndex() -> Int {
+    /// Slot for the joining window. The focus stays put so the
+    /// placement reads against a fixed reference; `first`/`last`
+    /// take the run's ends whatever its length.
+    private func focusedPlusIndex(run: Int) -> Int {
+        let focus = (run - 1) / 2
         switch placement {
         case .first: return 0
-        case .last: return 4
-        case .beforeFocused: return 1
-        case .afterFocused: return 3
+        case .last: return run
+        case .beforeFocused: return max(0, focus)
+        case .afterFocused: return min(run, focus + 1)
         }
     }
 
@@ -175,12 +227,13 @@ struct TrackSchematic: View {
         }
     }
 
-    /// Six windows piling down the overflow track (always vertical),
-    /// the same shape as the Stack cascade: `cascade_all` piles all
-    /// six; `cascade_overflow` tiles the first three and piles the
-    /// last three.
+    /// The overflowed windows piling down the overflow track
+    /// (always vertical), the same shape as the Stack cascade:
+    /// `cascade_all` piles all of them; `cascade_overflow` tiles
+    /// the ones that fit and piles the rest. Only reached with at
+    /// least one window to draw.
     private func overflowSlots(_ size: CGSize) -> [CGRect] {
-        let n = 6
+        let n = overflowWindows
         let w = size.width
         let h = size.height
         let off: CGFloat = 6
@@ -195,7 +248,7 @@ struct TrackSchematic: View {
                 )
             }
         }
-        let tiled = 3
+        let tiled = min(3, max(0, n - 1))
         let piled = n - tiled
         let g: CGFloat = 3
         let rowH = max(

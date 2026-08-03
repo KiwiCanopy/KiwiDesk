@@ -22,6 +22,53 @@ enum LayoutSchematic {
     /// lag; still smooths stepper/typed jumps. Mirrors
     /// `GapsDiagram`.
     static let damping = Animation.easeOut(duration: 0.12)
+
+    /// The window count the live preview opens on, and the band
+    /// the slider offers. The floor is **2**, not 1: with a
+    /// single window every one of the seven layouts draws the
+    /// same full-screen rectangle, so a 1 tells the reader
+    /// nothing about the layout they picked — and it is the one
+    /// count at which several schematics have no second zone to
+    /// draw. The ceiling is where the canvas stops telling a
+    /// story and starts drawing slivers.
+    static let defaultWindowCount = 5
+    static let windowCountRange = 2...12
+}
+
+/// How large a schematic draws — and therefore what it is *for*
+/// (turn 10 of the #678 redesign).
+///
+/// `tile` is a thumbnail in the "Choose a layout" strip: one
+/// fixed size for every layout so the strip reads as a row
+/// rather than a ransom note, with the schematic's own caption
+/// suppressed — a tile is titled by its layout's name and the
+/// count of spaces using it, which the strip owns. `panel` is
+/// the live preview below the rows: it fills the pane, so a
+/// layout has room to be *read* rather than merely recognised.
+///
+/// One deliberate loss at `tile`: the schematics that widen
+/// their own canvas to make an argument — BSP's 3:1 frame,
+/// where "cut the longer side" and "alternate" only diverge
+/// after several cuts, and Scrolling's over-wide strip — draw
+/// that argument at the panel and not on the thumbnail. A
+/// thumbnail answers "which of these do I want?"; the argument
+/// is one click away, and a strip of seven different-shaped
+/// tiles would answer neither question.
+enum SchematicScale: Hashable {
+    case tile
+    case panel
+
+    /// `nil` means "fill the width available" — the panel spans
+    /// its pane, so the preview grows with the window.
+    var width: CGFloat? {
+        self == .tile ? 132 : nil
+    }
+
+    var height: CGFloat {
+        self == .tile ? 84 : 240
+    }
+
+    var showsCaption: Bool { self == .panel }
 }
 
 /// Value-domain math shared by the schematics, kept apart from

@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "una cuadrícula fija",
   "layout.schematic.grid.caption_rigid": "Una cuadrícula fija de %1$d × %2$d; cada ventana se reduce a una celda y las sobrantes se apilan en la última.",
   "layout.schematic.grid.caption_rigid_auto": "Una cuadrícula fija ajustada a tu pantalla (unos 3 × 3); cada ventana se reduce a una celda.",
-  "layout.schematic.grid.dyn_frame_a": "4 ventanas",
-  "layout.schematic.grid.dyn_frame_b": "se abre una quinta",
   "layout.schematic.grid.order_columns": "Las ventanas nuevas llenan una fila y luego bajan a la siguiente.",
   "layout.schematic.grid.order_rows": "Las ventanas nuevas llenan una columna y luego pasan a la siguiente.",
   "layout.schematic.monocle.ax": "Vista previa de monóculo: una ventana llena la pantalla; el foco va pasando por las demás.",

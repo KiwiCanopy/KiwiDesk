@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "une grille fixe",
   "layout.schematic.grid.caption_rigid": "Une grille fixe de %1$d × %2$d ; chaque fenêtre se réduit à une cellule, les surplus s'empilent dans la dernière.",
   "layout.schematic.grid.caption_rigid_auto": "Une grille fixe dimensionnée pour votre écran (environ 3 × 3) ; chaque fenêtre se réduit à une cellule.",
-  "layout.schematic.grid.dyn_frame_a": "4 fenêtres",
-  "layout.schematic.grid.dyn_frame_b": "une 5e s'ouvre",
   "layout.schematic.grid.order_columns": "Les nouvelles fenêtres remplissent une ligne, puis passent à la suivante.",
   "layout.schematic.grid.order_rows": "Les nouvelles fenêtres remplissent une colonne, puis passent à la suivante.",
   "layout.schematic.monocle.ax": "Aperçu monocle : une fenêtre remplit l'écran ; le focus passe successivement par les autres.",

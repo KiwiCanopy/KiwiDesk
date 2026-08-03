@@ -4,8 +4,11 @@ import SwiftUI
 /// outline with the content clipped inside. Reused by the single-
 /// frame `SchematicCanvas` and each pane of the two-frame
 /// `SchematicPair`, so every frame in the family reads the same.
+/// A `nil` width means "fill the width available" — the panel
+/// scale spans its pane rather than sitting at a fixed size, so
+/// the live preview grows with the Settings window.
 struct SchematicScreen<Content: View>: View {
-    var width: CGFloat = LayoutSchematic.canvasWidth
+    var width: CGFloat? = LayoutSchematic.canvasWidth
     var height: CGFloat = LayoutSchematic.canvasHeight
     @ViewBuilder let content: Content
 
@@ -17,6 +20,7 @@ struct SchematicScreen<Content: View>: View {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(Color.secondary.opacity(0.6))
         }
+        .frame(maxWidth: width == nil ? .infinity : nil)
         .frame(width: width, height: height)
     }
 }
@@ -45,10 +49,15 @@ struct SchematicArrow: View {
 /// *does* sit beside its controls (GapsDiagram, the Drag columns)
 /// is left-aligned instead.
 struct SchematicCanvas<Content: View>: View {
-    var width: CGFloat = LayoutSchematic.canvasWidth
+    var width: CGFloat? = LayoutSchematic.canvasWidth
     var height: CGFloat = LayoutSchematic.canvasHeight
     let caption: String
     let axLabel: String
+    /// A thumbnail suppresses the caption — the strip titles it
+    /// (`SchematicScale.showsCaption`). The a11y label stays
+    /// either way: a tile with no caption would otherwise read
+    /// as an unlabelled image.
+    var showsCaption = true
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -58,10 +67,12 @@ struct SchematicCanvas<Content: View>: View {
             }
             .accessibilityElement()
             .accessibilityLabel(axLabel)
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            if showsCaption {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -72,13 +83,14 @@ struct SchematicCanvas<Content: View>: View {
 /// gutter reads as a side-by-side comparison. Each pane may carry
 /// its own sub-caption; a shared caption sits below both.
 struct SchematicPair<First: View, Second: View>: View {
-    var frameWidth: CGFloat = 120
+    var frameWidth: CGFloat? = 120
     var frameHeight: CGFloat = 96
     var sequence: Bool = true
     var firstCaption: String? = nil
     var secondCaption: String? = nil
     let caption: String
     let axLabel: String
+    var showsCaption = true
     @ViewBuilder let first: First
     @ViewBuilder let second: Second
 
@@ -93,10 +105,12 @@ struct SchematicPair<First: View, Second: View>: View {
             }
             .accessibilityElement()
             .accessibilityLabel(axLabel)
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            if showsCaption {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
     }
@@ -112,7 +126,10 @@ struct SchematicPair<First: View, Second: View>: View {
             ) {
                 content
             }
-            if let sub {
+            // A sub-caption only ever appears with the shared one
+            // (both are the pair's prose), so a thumbnail drops
+            // both rather than keeping a dangling half-label.
+            if let sub, showsCaption {
                 Text(sub)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

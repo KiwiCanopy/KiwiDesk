@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "фиксированная сетка",
   "layout.schematic.grid.caption_rigid": "Фиксированная сетка %1$d × %2$d; каждое окно сжимается до ячейки, лишние накладываются в последней.",
   "layout.schematic.grid.caption_rigid_auto": "Фиксированная сетка по размеру твоего экрана (примерно 3 × 3); каждое окно сжимается до ячейки.",
-  "layout.schematic.grid.dyn_frame_a": "4 окна",
-  "layout.schematic.grid.dyn_frame_b": "открывается 5-е",
   "layout.schematic.grid.order_columns": "Новые окна заполняют строку, затем переходят на следующую.",
   "layout.schematic.grid.order_rows": "Новые окна заполняют столбец, затем переходят на следующий.",
   "layout.schematic.monocle.ax": "Предпросмотр Monocle: одно окно заполняет экран; фокус перебирает остальные.",

@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "固定网格",
   "layout.schematic.grid.caption_rigid": "%1$d × %2$d 的固定网格；每个窗口缩至一个单元格，多出的窗口堆叠在最后一格。",
   "layout.schematic.grid.caption_rigid_auto": "按屏幕大小确定的固定网格（约 3 × 3）；每个窗口缩至一个单元格。",
-  "layout.schematic.grid.dyn_frame_a": "4 个窗口",
-  "layout.schematic.grid.dyn_frame_b": "打开第 5 个",
   "layout.schematic.grid.order_columns": "新窗口先填满一行，再换到下一行。",
   "layout.schematic.grid.order_rows": "新窗口先填满一列，再换到下一列。",
   "layout.schematic.monocle.ax": "单窗预览：一个窗口铺满屏幕，焦点在其余窗口之间循环。",

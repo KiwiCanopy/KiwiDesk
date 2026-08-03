@@ -381,8 +381,6 @@
   "layout.schematic.grid.ax_rigid": "固定のグリッド",
   "layout.schematic.grid.caption_rigid": "%1$d × %2$dの固定グリッドです。各ウインドウは1つのセルに収まり、あふれた分は最後のセルに重なります。",
   "layout.schematic.grid.caption_rigid_auto": "画面に合わせたサイズの固定グリッド（およそ3 × 3）です。各ウインドウは1つのセルに収まります。",
-  "layout.schematic.grid.dyn_frame_a": "ウインドウ4つ",
-  "layout.schematic.grid.dyn_frame_b": "5つ目が開く",
   "layout.schematic.grid.order_columns": "新しいウインドウは横一列を埋めてから、下の行へ折り返します。",
   "layout.schematic.grid.order_rows": "新しいウインドウは縦一列を埋めてから、隣の列へ折り返します。",
   "layout.schematic.monocle.ax": "モノクルのプレビュー: 1つのウインドウが画面全体を覆い、フォーカスがほかのウインドウを順に巡ります。",

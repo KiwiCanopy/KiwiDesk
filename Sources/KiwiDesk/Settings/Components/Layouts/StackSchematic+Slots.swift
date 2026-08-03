@@ -14,8 +14,10 @@ extension StackSchematic {
     /// their top edge shows above the next.
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
-        // Fixed at 6 by construction today; the guard keeps
-        // the divisions below safe if that ever goes dynamic.
+        // Driven by the preview's window count since turn 10, so
+        // the divisions below are live arithmetic rather than a
+        // formality: an empty stack zone (every window a master)
+        // draws nothing at all.
         guard n > 0 else { return [] }
         let w = size.width
         let h = size.height

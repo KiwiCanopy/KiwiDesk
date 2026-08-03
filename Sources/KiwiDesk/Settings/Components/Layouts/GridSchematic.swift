@@ -1,19 +1,26 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Grid schematic (#125):
+/// The Grid schematic (#125, recount turn 10):
 ///
-/// - **Dynamic** is a two-frame sequence showing how the grid
-///   *grows*: four windows balance into a 2×2, then a fifth opens
-///   and the grid rebalances — Columns first adds a column (3×2),
-///   Rows first adds a row (2×3). The new window sits where the
-///   placement opens it (relative to the focused tile), and
-///   fill-empty-space makes the last window span the leftover cell.
-/// - **Rigid** is a single fixed grid of the configured columns ×
-///   rows (or a screen-fit 3×3 when auto-size is on): one full line
-///   is filled — a row for Columns first, a column for Rows first —
-///   with the focus in the middle and the new window at its
-///   placement slot; the rest of the grid stays empty.
+/// - **Dynamic** balances the window count into a square-ish
+///   grid through the engine's own `GridLayout.balanced`, so the
+///   preview rebalances as the count slider moves — Columns
+///   first grows a column before a row, Rows first mirrors it.
+///   The new window sits where the placement opens it (relative
+///   to the focused tile), and fill-empty-space makes the last
+///   window span the leftover cell.
+/// - **Rigid** is a fixed grid of the configured columns × rows
+///   (or a screen-fit 3×3 when auto-size is on) filled in the
+///   engine's fill order; cells past the window count stay
+///   empty, and a count past the grid's capacity stacks its
+///   surplus in the last cell — the real behaviour, which is
+///   exactly what a count the reader can drive is for.
+///
+/// The two frames the dynamic arm used to draw ("4 windows" →
+/// "a 5th opens") retired with the slider: a reader who can add
+/// the fifth window themselves does not need it staged, and one
+/// frame that answers every count beats two that answer one.
 struct GridSchematic: View {
     let columns: Int
     let rows: Int
@@ -22,81 +29,83 @@ struct GridSchematic: View {
     let autoSize: Bool
     let splitDirection: GridParams.SplitDirection
     let placement: SpawnPlacement
+    /// Windows on screen, the incoming one included.
+    var windows = LayoutSchematic.defaultWindowCount
+    var scale: SchematicScale = .tile
 
     private var columnsFirst: Bool {
         splitDirection == .horizontal
     }
 
-    /// The focused window in the dynamic frames (a stable id so it
-    /// keeps focus as the grid rebalances).
+    /// The focused window (a stable id so it keeps focus as the
+    /// grid rebalances) and the incoming one, which sorts above
+    /// every established id at any count.
     private let focusID = 2
-    private let newID = 99
+    private let newID = 9_999
 
     var body: some View {
+        SchematicCanvas(
+            width: scale.width,
+            height: scale.height,
+            caption: caption,
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
+        ) {
+            frame
+                .padding(6)
+                .animation(LayoutSchematic.damping, value: windows)
+                .animation(LayoutSchematic.damping, value: columns)
+                .animation(LayoutSchematic.damping, value: rows)
+                .animation(LayoutSchematic.damping, value: type)
+                .animation(
+                    LayoutSchematic.damping,
+                    value: autoSize
+                )
+                .animation(
+                    LayoutSchematic.damping,
+                    value: splitDirection
+                )
+                .animation(
+                    LayoutSchematic.damping,
+                    value: placement
+                )
+        }
+    }
+
+    @ViewBuilder
+    private var frame: some View {
         if type == .dynamic {
-            dynamicPair
+            gridFrame(
+                cols: dynamicDims.columns,
+                rows: dynamicDims.rows,
+                ids: ids
+            )
         } else {
-            SchematicCanvas(caption: caption, axLabel: axLabel) {
-                rigidGrid
-                    .padding(6)
-                    .animation(LayoutSchematic.damping, value: columns)
-                    .animation(LayoutSchematic.damping, value: rows)
-                    .animation(
-                        LayoutSchematic.damping,
-                        value: autoSize
-                    )
-                    .animation(
-                        LayoutSchematic.damping,
-                        value: splitDirection
-                    )
-                    .animation(
-                        LayoutSchematic.damping,
-                        value: placement
-                    )
-            }
+            rigidGrid
         }
     }
 
     private enum CellKind { case tile, focus, new, gap }
 
-    // MARK: - Dynamic (two-frame growth)
+    // MARK: - Dynamic (balanced against the count)
 
-    private var dynamicPair: some View {
-        SchematicPair(
-            frameWidth: 118,
-            frameHeight: 88,
-            firstCaption: L(
-                "layout.schematic.grid.dyn_frame_a",
-                "4 windows"
-            ),
-            secondCaption: L(
-                "layout.schematic.grid.dyn_frame_b",
-                "a 5th opens"
-            ),
-            caption: dynamicCaption,
-            axLabel: axLabel
-        ) {
-            gridFrame(cols: 2, rows: 2, ids: [1, 2, 3, 4])
-        } second: {
-            // The 4→5 balanced dims (2×2 → 3×2 columns-first / 2×3
-            // rows-first) mirror `GridLayout.balanced`; the fill
-            // order in `gridCells` mirrors its columnFirst branch.
-            // Both are pinned by `GridDimensionTests` (balance) and
-            // `GridLayoutTests` (fill order / rigidArrange) — keep
-            // these constants in step with the engine.
-            gridFrame(
-                cols: columnsFirst ? 3 : 2,
-                rows: columnsFirst ? 2 : 3,
-                ids: frameBIDs
-            )
-        }
+    /// The engine's own balance for this count — called rather
+    /// than reproduced, so a change to how KiwiDesk balances a
+    /// dynamic grid moves the preview with it. Uncapped on
+    /// purpose: the cap is a function of the real screen and the
+    /// minimum window size, and this canvas is neither.
+    private var dynamicDims: (columns: Int, rows: Int) {
+        GridLayout.balanced(
+            count: ids.count,
+            splitDirection: splitDirection
+        )
     }
 
-    /// The five-window array with the new window spliced in per
+    /// The window array with the new window spliced in per
     /// placement, relative to the focus — the same rule as
     /// `SpaceModel.insert`.
-    private var frameBIDs: [Int] {
-        var ids = [1, 2, 3, 4]
+    private var ids: [Int] {
+        var ids = Array(1...max(1, windows - 1))
         let f = ids.firstIndex(of: focusID) ?? 0
         switch placement {
         case .first: ids.insert(newID, at: 0)
@@ -138,10 +147,22 @@ struct GridSchematic: View {
         .animation(LayoutSchematic.damping, value: placement)
     }
 
+    /// Whether the last window spans the leftover cell. Only a
+    /// dynamic grid has leftovers to absorb — the same rule the
+    /// row itself greys on (`LayoutDefaultsGates.fillEmptyIsInert`
+    /// asks the resolved type, since a space may override it) —
+    /// so the rigid arm draws its empty cells whatever the toggle
+    /// says, which is the behaviour the toggle's grey describes.
+    private var spansLeftover: Bool {
+        fillEmptySpace && type == .dynamic
+    }
+
     /// Cell rects for the windows in `ids` (drawn in array order,
     /// mirroring `GridLayout`'s fill: columns-first row-major,
     /// rows-first column-major), plus any trailing empty cell. The
-    /// last window spans the leftover when fill-empty-space is on.
+    /// last window spans the leftover when fill-empty-space is on,
+    /// and windows past the grid's capacity — which only a rigid
+    /// grid has — stack in the last cell, later ones on top.
     private func gridCells(
         _ size: CGSize,
         cols: Int,
@@ -160,14 +181,17 @@ struct GridSchematic: View {
                 height: ch * CGFloat(rs) + gap * CGFloat(rs - 1)
             )
         }
+        let capacity = max(1, cols * rows)
         func at(_ i: Int) -> (Int, Int) {
-            columnsFirst
-                ? (i % cols, i / cols) : (i / rows, i % rows)
+            let slot = min(i, capacity - 1)
+            return columnsFirst
+                ? (slot % cols, slot / cols)
+                : (slot / rows, slot % rows)
         }
         var cells: [(CGRect, CellKind)] = []
         for (i, id) in ids.enumerated() {
             let (c, r) = at(i)
-            if i == ids.count - 1 && fillEmptySpace {
+            if i == ids.count - 1 && spansLeftover {
                 let cs = columnsFirst ? cols - c : 1
                 let rs = columnsFirst ? 1 : rows - r
                 cells.append((rect(c, r, cs, rs), kind(id)))
@@ -175,8 +199,8 @@ struct GridSchematic: View {
                 cells.append((rect(c, r, 1, 1), kind(id)))
             }
         }
-        if !fillEmptySpace {
-            for i in ids.count..<(cols * rows) {
+        if !spansLeftover, ids.count < capacity {
+            for i in ids.count..<capacity {
                 let (c, r) = at(i)
                 cells.append((rect(c, r, 1, 1), .gap))
             }
@@ -188,7 +212,7 @@ struct GridSchematic: View {
         id == newID ? .new : id == focusID ? .focus : .tile
     }
 
-    // MARK: - Rigid (single fixed grid, one line filled)
+    // MARK: - Rigid (a fixed grid the count fills)
 
     /// Auto-size resolves to a screen-fit grid (drawn as 3×3); a
     /// plain rigid grid uses the typed dims, clamped for legibility.
@@ -196,62 +220,7 @@ struct GridSchematic: View {
     private var rigidRows: Int { autoSize ? 3 : min(max(rows, 1), 4) }
 
     private var rigidGrid: some View {
-        let lineCount = columnsFirst ? rigidCols : rigidRows
-        let focus = lineCount / 2
-        let newIdx = rigidNewIndex(lineCount, focus: focus)
-        return VStack(spacing: 3) {
-            ForEach(0..<rigidRows, id: \.self) { row in
-                HStack(spacing: 3) {
-                    ForEach(0..<rigidCols, id: \.self) { col in
-                        rigidCell(
-                            col: col,
-                            row: row,
-                            focus: focus,
-                            newIdx: newIdx
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func rigidCell(
-        col: Int,
-        row: Int,
-        focus: Int,
-        newIdx: Int
-    ) -> some View {
-        let inLine = columnsFirst ? row == 0 : col == 0
-        let lineIdx = columnsFirst ? col : row
-        if inLine {
-            if lineIdx == newIdx {
-                SchematicNewWindow()
-            } else {
-                SchematicTile(active: lineIdx == focus)
-            }
-        } else {
-            emptyCell
-        }
-    }
-
-    private func rigidNewIndex(_ n: Int, focus: Int) -> Int {
-        let raw: Int
-        switch placement {
-        case .first: raw = 0
-        case .last: raw = n - 1
-        case .beforeFocused: raw = focus - 1
-        case .afterFocused: raw = focus + 1
-        }
-        return min(max(raw, 0), n - 1)
-    }
-
-    private var emptyCell: some View {
-        RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-            .strokeBorder(
-                Color.secondary.opacity(0.2),
-                lineWidth: 1
-            )
+        gridFrame(cols: rigidCols, rows: rigidRows, ids: ids)
     }
 
     // MARK: - Cell view + caption / a11y

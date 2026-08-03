@@ -21,8 +21,22 @@ import SwiftUI
 struct ScrollingFollowPair: View {
     let orientation: ScrollingParams.Orientation
     let slotSize: ScrollSize
+    var scale: SchematicScale = .tile
 
     private var horizontal: Bool { orientation == .horizontal }
+
+    /// Two panes share the width, so a panel-wide pair takes half
+    /// each — `nil` from `SchematicScale` means "fill", and the
+    /// `HStack` does the halving. A thumbnail keeps the fixed
+    /// per-orientation frames, which are already tile-sized.
+    private var paneWidth: CGFloat? {
+        scale == .panel ? nil : (horizontal ? 128 : 92)
+    }
+
+    private var paneHeight: CGFloat {
+        scale == .panel
+            ? scale.height : (horizontal ? 76 : 104)
+    }
 
     /// Slot length as a fraction of the along axis. Kept on the
     /// thin side so both neighbours stay visible — the pan, not
@@ -40,8 +54,8 @@ struct ScrollingFollowPair: View {
 
     var body: some View {
         SchematicPair(
-            frameWidth: horizontal ? 128 : 92,
-            frameHeight: horizontal ? 76 : 104,
+            frameWidth: paneWidth,
+            frameHeight: paneHeight,
             firstCaption: L(
                 "layout.schematic.scrolling.follow_a",
                 "Focus here"
@@ -51,7 +65,8 @@ struct ScrollingFollowPair: View {
                 "When focus steps to the next window"
             ),
             caption: caption,
-            axLabel: axLabel
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
         ) {
             frame(stepped: false)
         } second: {
