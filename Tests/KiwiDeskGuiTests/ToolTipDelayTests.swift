@@ -27,10 +27,13 @@ struct ToolTipDelayTests {
         #expect(ToolTipDelay.key == "NSInitialToolTipDelay")
     }
 
-    /// The band `ToolTipDelay` itself argues for: fast enough that
-    /// a reader who pauses is not left concluding there is nothing
-    /// to read, slow enough that a pointer merely crossing a row
-    /// doesn't fire it. Prose nothing guards is prose that drifts.
+    /// The band argued for in `docs/design-decisions.md` ▸ "Hover
+    /// help appears sooner than AppKit's default": fast enough
+    /// that a reader who pauses isn't left concluding there is
+    /// nothing to read, slow enough that a pointer merely
+    /// crossing a row doesn't fire it. Prose nothing guards is
+    /// prose that drifts, and both edges of that argument are
+    /// reachable here.
     @Test("the delay stays in its defended band")
     func delayInBand() {
         #expect((500...1000).contains(ToolTipDelay.milliseconds))
