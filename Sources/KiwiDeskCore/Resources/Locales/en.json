@@ -70,7 +70,7 @@
   "app_rules.empty": "Apps with no rule tile normally, in whichever space you open them.",
   "app_rules.float": "Float",
   "app_rules.float.all_windows": "floats",
-  "app_rules.float.help": "Floating takes this app's matching windows out of tiling: each keeps its last position and size and appears on every space, instead of living in one space's grid.\n\nThis is per-app floating — not the **Floating** layout mode, which floats every window in a space.",
+  "app_rules.float.help": "Floating takes this app's matching windows out of tiling: each keeps its last position and size and stays above the tiled windows, instead of snapping into one space's grid.\n\nThis is per-app floating — not the **Floating** layout mode, which floats every window in a space.",
   "app_rules.float.never": "tiles normally",
   "app_rules.float.titled": "floats when titled…",
   "app_rules.float.titled.resting": "floats when titled",
