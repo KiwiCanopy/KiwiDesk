@@ -60,7 +60,7 @@ struct TrackSchematic: View {
         min(4, max(1, established - trackCount + 1))
     }
 
-    var focusIdx: Int { trackCount / 2 }
+    private var focusIdx: Int { trackCount / 2 }
 
     private struct TrackSpec {
         var focused = false
@@ -125,8 +125,14 @@ struct TrackSchematic: View {
     /// travels with it and needs no correction — unlike the run
     /// inside the focused track, which draws fixed slots.
     ///
-    /// Internal so `LayoutSchematicPlacementTests` can read it.
-    var newTrackIndex: Int {
+    /// The engine that governs track-mode spawn is really
+    /// `Space.insertIntoTrack` (#128/#188), whose `insertOwnTrack`
+    /// arm positions among tracks by the same splice rule this
+    /// asks for; `LayoutSchematicTrackEngineTests` pins the two
+    /// together rather than leaving it to arithmetic. Its
+    /// fill-then-spill arm (#437) is *not* modelled here — see
+    /// #708.
+    private var newTrackIndex: Int {
         SchematicPlacement.splice(
             placement,
             count: trackCount,
@@ -157,7 +163,7 @@ struct TrackSchematic: View {
         }
     }
 
-    private enum TrackWindow { case plain, focus, new }
+    enum TrackWindow { case plain, focus, new }
 
     @ViewBuilder
     private func trackView(_ spec: TrackSpec) -> some View {
@@ -176,15 +182,28 @@ struct TrackSchematic: View {
     /// slot around it — first / last on the ends, before / after
     /// right beside it.
     private func focusedTrack(nested: Bool) -> some View {
-        let drawn = focusedSlots(nested: nested)
+        let kinds = focusedTrackKinds(nested: nested)
         return axisStack {
-            ForEach(0..<drawn.count, id: \.self) { i in
-                trackWindow(
-                    i == drawn.incoming
-                        ? .new
-                        : i == drawn.focus ? .focus : .plain
-                )
+            ForEach(kinds.indices, id: \.self) { i in
+                trackWindow(kinds[i])
             }
+        }
+    }
+
+    /// The focused track's tiles, in the order the run draws them.
+    ///
+    /// This is the line #702 lived on, so it is a value the guard
+    /// can read rather than a ternary inside `body`: a correct
+    /// `focusedSlots` feeding a wrong pick reproduces the whole
+    /// symptom, and reading the tuple alone left that green
+    /// (guard-prover, 2026-08-03). `.new` deliberately wins a tie
+    /// — but `LayoutSchematicPlacementTests` requires there is
+    /// never a tie to win, since swallowing the focus is the bug.
+    func focusedTrackKinds(nested: Bool) -> [TrackWindow] {
+        let drawn = focusedSlots(nested: nested)
+        return (0..<drawn.count).map { i in
+            i == drawn.incoming
+                ? .new : i == drawn.focus ? .focus : .plain
         }
     }
 

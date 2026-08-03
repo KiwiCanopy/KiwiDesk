@@ -78,8 +78,6 @@ struct ScrollingSchematic: View {
         )
     }
 
-    var slotIndices: ClosedRange<Int> { row.slots }
-
     /// The slot's real width as a fraction of the screen axis — a
     /// wide slot fills most of the frame (one window plus slivers),
     /// a thin one lets several show.

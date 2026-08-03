@@ -15,9 +15,14 @@ import KiwiDeskCore
 /// `.claude/rules/parity-tests.md` stops paying for it past two
 /// mirrors, and a call is cheaper here than either a mirror or
 /// the parity test a mirror would owe.
-/// `LayoutSchematicPlacementTests` holds both halves — each
-/// schematic against `Space.insert`, and a scan that reds on a
-/// schematic switching over `SpawnPlacement` again.
+/// Two suites hold it, and they fail apart:
+/// `LayoutSchematicPlacementTests` holds each schematic to the
+/// promise its frame makes a reader — stated independently of
+/// both the engine and this helper — and
+/// `LayoutSchematicPlacementScanTests` reds on the next file to
+/// carry a second copy of the rule.
+/// `LayoutSchematicTrackEngineTests` pins the one mode with an
+/// engine of its own, `Space.insertIntoTrack`.
 enum SchematicPlacement {
     /// The incoming window's slot among `count` established
     /// windows whose focused one sits at index `focus`, and the
@@ -31,6 +36,20 @@ enum SchematicPlacement {
     /// focus at its pre-splice index is exactly #702. Neither
     /// number is computed here — both are read back off the
     /// space the engine mutated.
+    ///
+    /// The answer is an **index**, not the resulting order, so a
+    /// caller re-performs the insert itself. That is faithful
+    /// while `insert` is a positional splice and would go quietly
+    /// wrong the day it also moves `focused`, refuses, or
+    /// reorders — the id-keyed callers' guards read both ids back
+    /// out of the array they built, which is what would notice.
+    ///
+    /// `focus` must index `count`. Out of range it would fall
+    /// back to the last window and hand back a plausible wrong
+    /// answer, which is #702's own shape one level down; every
+    /// caller's focus reference is pinned present by
+    /// `LayoutSchematicPlacementTests`, and the assertion below
+    /// is the second net.
     static func splice(
         _ placement: SpawnPlacement,
         count: Int,
@@ -39,6 +58,10 @@ enum SchematicPlacement {
         let established = (0..<max(0, count)).map {
             WindowID(UInt32($0))
         }
+        assert(
+            established.indices.contains(focus),
+            "focus \(focus) outside \(count) established windows"
+        )
         let incoming = WindowID(UInt32(max(0, count)))
         var space = Space(
             id: "schematic",

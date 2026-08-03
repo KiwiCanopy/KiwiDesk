@@ -60,7 +60,7 @@ struct LayoutSchematicPlacementTests {
     /// window counts: at `masterCount: 1` the masters clamp is
     /// inert. This is the flat array only — *which* zone each
     /// window is drawn in is `masterWins` / `stackWins`'
-    /// partition of it, and nothing asserts that yet.
+    /// partition of it, which is #707's.
     @Test("Stack opens the window where the engine does")
     func stackPlacement() {
         for placement in placements {
@@ -179,6 +179,24 @@ struct LayoutSchematicPlacementTests {
                 #expect(plain.count == schematic.focusedRun)
                 #expect(plain.incoming < 0)
                 #expect(plain.focus == (plain.count - 1) / 2)
+                // And the tiles the run actually draws. Reading
+                // the tuple alone left the whole #702 symptom
+                // reinstatable by a wrong pick downstream of a
+                // right tuple — proven green, so this reads the
+                // kinds (guard-prover, 2026-08-03).
+                check(
+                    schematic.focusedTrackKinds(nested: true),
+                    placement: placement,
+                    what: "focused track at \(count)"
+                )
+                let plainKinds =
+                    schematic
+                    .focusedTrackKinds(nested: false)
+                #expect(plainKinds.count == schematic.focusedRun)
+                #expect(!plainKinds.contains(.new))
+                #expect(
+                    plainKinds.filter { $0 == .focus }.count == 1
+                )
             }
         }
     }
@@ -258,6 +276,33 @@ struct LayoutSchematicPlacementTests {
         )
         #expect(slots.contains(incoming))
         #expect(slots.contains(focus))
+    }
+
+    /// The tiles a run draws, held to the same promise: exactly
+    /// one `+`, exactly one focus — a collision is #702, where
+    /// `.new` won the pick and the focused tile vanished — and
+    /// the `+` beside the focus or at an end.
+    private func check(
+        _ kinds: [TrackSchematic.TrackWindow],
+        placement: SpawnPlacement,
+        what: String
+    ) {
+        #expect(kinds.filter { $0 == .new }.count == 1)
+        #expect(
+            kinds.filter { $0 == .focus }.count == 1,
+            Comment(rawValue: "\(what): \(kinds) has no focus")
+        )
+        guard
+            let landed = kinds.firstIndex(of: .new),
+            let settled = kinds.firstIndex(of: .focus)
+        else { return }
+        check(
+            incoming: landed,
+            focus: settled,
+            slots: 0...(kinds.count - 1),
+            placement: placement,
+            what: "\(what) tiles"
+        )
     }
 
     /// The id-keyed schematics: find both windows in the array the

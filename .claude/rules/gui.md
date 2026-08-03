@@ -81,6 +81,12 @@ to invert the dim ladder).
   `LayoutSchematicPlacementTests` holds each schematic to what
   its frame promises and
   `LayoutSchematicPlacementScanTests` reds on the next copy.
+  Check *which* engine owns the rule before calling one: track
+  spawn is `Space.insertIntoTrack`'s, not
+  `Space.insert(_:placement:)`'s, and the two agree on position
+  only because `LayoutSchematicTrackEngineTests` now requires it.
+  Where a preview models part of an engine's rule, say which part
+  and file the rest (#708 for the unmodelled spill).
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to
