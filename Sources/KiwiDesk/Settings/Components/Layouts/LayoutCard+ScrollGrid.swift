@@ -167,6 +167,13 @@ extension LayoutCard {
         )
     }
 
+    /// The pair's shared verdict — asked once, so the grey and
+    /// its sentence are one decision. Columns and Rows carry the
+    /// same census gate, so either key answers for both.
+    var gridDimensionsReason: LayoutDefaultsGates.InertReason? {
+        gates.inertReason(for: .layout(.gridColumns))
+    }
+
     /// The Auto-size toggle gating the Columns/Rows steppers, via
     /// the shared `AutoGatedGroup` (#233). A behaviour modifier
     /// like Fill empty space — not a mode switch — so it reads as
@@ -177,13 +184,6 @@ extension LayoutCard {
     /// from `isOn`, so the pair greys on exactly what the census
     /// says gates it — a space that overrides auto-size OFF keeps
     /// the global dimensions live (#520, #527).
-    /// The pair's shared verdict — asked once, so the grey and
-    /// its sentence are one decision. Columns and Rows carry the
-    /// same census gate, so either key answers for both.
-    var gridDimensionsReason: LayoutDefaultsGates.InertReason? {
-        gates.inertReason(for: .layout(.gridColumns))
-    }
-
     var gridDimensionsGroup: some View {
         AutoGatedGroup(
             title: L("scroll_grid.auto_size", "Auto-size grid"),

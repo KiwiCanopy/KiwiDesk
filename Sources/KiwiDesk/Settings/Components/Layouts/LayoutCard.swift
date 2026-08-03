@@ -182,9 +182,17 @@ enum LayoutCardText {
                 state
             )
         case .bsp, .stack, .grid, .track, .floating:
-            // Unreachable: the row is drawn only where
-            // `appBarHost(for:)` returns a host, which is Core's
-            // one copy of who may show a bar.
+            // Unreachable while Core's `appBarHost(for:)` — the
+            // one copy of who may show a bar — grants no host to
+            // these. That is the axis the exhaustive switch does
+            // NOT defend: granting Grid a host compiles, because
+            // Grid is already listed, and would ship an empty
+            // sentence beside a live link in every locale. Loud
+            // in debug, silent in release, like every other
+            // unreachable arm in this area.
+            assertionFailure(
+                "app bar host with no sentence: \(mode)"
+            )
             return ""
         }
     }

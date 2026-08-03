@@ -91,16 +91,19 @@ struct LayoutDefaultsCensusRenderTests {
     /// views to render one with.
     @Test("nothing in this area is behind a disclosure")
     func noRowIsBehindADisclosure() throws {
-        // The two tiers that mean "not at rest, one interaction
-        // away" — NOT every tier past `.atRest`. A `.luaOnly`
-        // parameter has no chrome to hide behind either, and is
-        // exactly what the census records for a layout knob the
-        // GUI deliberately withholds; banning it here would make
-        // a correct placement red a guard about disclosures.
+        // EVERY tier past `.atRest`, and the area filter is
+        // what makes that right: the surfaceless tiers reach
+        // this area only through `.row(.layoutDefaults, …,
+        // .luaOnly)`, which is expressible and is a
+        // self-contradiction — an area and a container carrying
+        // a tier that means "no surface". Narrowing to
+        // `.showMore`/`.immediate` to "allow" a Lua-only layout
+        // knob buys nothing (`SettingPlacement.luaOnly` carries
+        // `area: nil`, so a real one never lands here) and drops
+        // the only reading that catches the contradictory one.
         let deeper = SettingKey.allCases.filter {
             $0.placement.area == .layoutDefaults
-                && [.showMore, .immediate]
-                    .contains($0.placement.tier)
+                && $0.placement.tier != .atRest
         }
         #expect(
             deeper.isEmpty,

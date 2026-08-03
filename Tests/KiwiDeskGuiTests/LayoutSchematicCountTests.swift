@@ -240,11 +240,17 @@ struct LayoutSchematicCountTests {
                 try String(contentsOf: file, encoding: .utf8)
             )
             checked += 1
+            // Either declaration shape: a shared default, or
+            // the un-defaulted `let` that `LayoutSchematicView`
+            // adopted so a caller cannot silently draw a
+            // different count from its sibling. Requiring only
+            // the defaulted form would red a schematic written
+            // the way this lane now recommends.
             #expect(
                 source.contains(
                     "var windows = "
                         + "LayoutSchematic.defaultWindowCount"
-                ),
+                ) || source.contains("let windows: Int"),
                 Comment(
                     rawValue:
                         "\(file.lastPathComponent) declares no "
