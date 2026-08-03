@@ -21,13 +21,17 @@ import Testing
 @MainActor
 @Suite("Windowless-app warmup skip (#662)")
 struct StartupWarmupSkipTests {
-    /// Inert observer: attach installs it, nothing fires.
+    /// Inert healthy observer: attach installs it, nothing
+    /// fires, registration never needs repair (#675 — health is
+    /// stated, never defaulted).
     private final class FakeObserver: AppObserving {
         var onNotification: @MainActor (String, AXUIElement) -> Void = {
             _,
             _ in
         }
+        let needsRegistrationRepair = false
         func observe(window: AXUIElement) {}
+        func repairRegistration() {}
         func invalidate() {}
     }
 

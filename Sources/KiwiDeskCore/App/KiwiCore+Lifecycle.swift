@@ -214,18 +214,16 @@ extension KiwiCore {
     /// registration emits nothing, ever), so this re-arms
     /// itself for the whole session. The work it schedules is
     /// gated — `EventLoop.healSweep` reconciles only where the
-    /// WindowServer census says a window is missing — so a
-    /// healthy tick costs one ~1 ms snapshot. `stop()`'s
+    /// WindowServer census names an untracked window — so a
+    /// healthy tick costs one ~1 ms snapshot; 5 s keeps the
+    /// worst-case adoption latency human-tolerable without the
+    /// census ever mattering in a profile. `stop()`'s
     /// `deferred.cancelAll()` ends the chain; a later `start()`
-    /// re-arms it. Tests override the interval; production
-    /// never does.
-    var adoptionHealInterval: Duration { .seconds(5) }
-
+    /// re-arms it.
     func scheduleAdoptionHeal() {
         deferred.schedule(
             .adoptionHeal,
-            after: adoptionHealIntervalOverride
-                ?? adoptionHealInterval
+            after: adoptionHealInterval
         ) { [weak self] in
             guard let self else { return }
             if self.eventLoop.isRunning {
@@ -236,15 +234,15 @@ extension KiwiCore {
     }
 
     /// One-shot re-track for windows the transient filters
-    /// dropped mid-launch (#675): long enough for a Dock-stack
-    /// zoom or fade-in to finish, short enough to feel
-    /// immediate. Drains every pid queued since the last fire —
-    /// the reschedule-replaces-key semantics coalesce a burst.
+    /// dropped mid-launch (#675): 750 ms is long enough for a
+    /// Dock-stack zoom or fade-in to finish, short enough to
+    /// feel immediate. Drains every pid queued since the fire
+    /// was armed (`markTransientDrop` arms only from idle, so
+    /// a drip of drops cannot push the deadline back).
     func scheduleTransientRetrack() {
         deferred.schedule(
             .transientRetrack,
-            after: transientRetrackDelayOverride
-                ?? .milliseconds(750)
+            after: transientRetrackDelay
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }

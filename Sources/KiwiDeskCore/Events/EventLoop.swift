@@ -102,12 +102,13 @@ public final class EventLoop {
     /// reconcile coalesces tabs. A genuine tab switch within it
     /// falls back to destroy + create (self-healing), which is rare.
     static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
-    /// Census value at the last adoption-heal pass that changed
-    /// nothing, per pid — the sweep stays quiet until the
-    /// WindowServer count moves again, so a window it can never
-    /// adopt (an ignored layer-0 panel) costs one reconcile per
-    /// count change instead of one per tick (#675).
-    var healQuiet: [pid_t: Int] = [:]
+    /// Census window ids a heal pass failed to adopt, per pid —
+    /// the sweep stays quiet for exactly those ids, so a window
+    /// it can never adopt (an ignored layer-0 panel) costs one
+    /// reconcile total instead of one per tick, while any NEW
+    /// census id still opens the gate (#675). Pruned to the
+    /// live census each pass.
+    var healQuiet: [pid_t: Set<WindowID>] = [:]
     /// Windows the transient filters dropped that already spent
     /// their one re-track, per pid (cleared on detach) — bounds
     /// the retry so a permanent invisible helper (#309) cannot
@@ -155,9 +156,9 @@ public final class EventLoop {
         AXHelper.pidsWithNormalWindows
 
     /// The adoption-heal gate's census (#675): on-screen layer-0
-    /// window counts per owning pid, one snapshot per sweep.
-    var onScreenNormalWindowCounts: () -> [pid_t: Int] =
-        AXHelper.onScreenNormalWindowCounts
+    /// window ids per owning pid, one snapshot per sweep.
+    var onScreenNormalWindowIDs: () -> [pid_t: Set<WindowID>] =
+        AXHelper.onScreenNormalWindowIDs
 
     /// AX window list of an app — `attach`'s snapshot and
     /// `reconcile`'s live list.

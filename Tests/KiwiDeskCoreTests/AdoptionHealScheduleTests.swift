@@ -14,8 +14,10 @@ import Testing
 /// accessibility.md, because `start()` is not test-drivable
 /// (the `scheduleStartupSweep` precedent).
 ///
-/// The awaits ride overridden millisecond schedules; production
-/// keeps the shipped cadence (the override seam is nil there).
+/// The awaits ride millisecond timings assigned through the
+/// stored seams (`adoptionHealInterval`,
+/// `transientRetrackDelay`); production keeps the defaults
+/// declared on `KiwiCore`.
 @MainActor
 @Suite("Adoption heal scheduling (#675)")
 struct AdoptionHealScheduleTests {
@@ -25,13 +27,17 @@ struct AdoptionHealScheduleTests {
         var windowQueries = 0
     }
 
-    /// Inert healthy observer: attach installs it, nothing fires.
+    /// Inert healthy observer: attach installs it, nothing
+    /// fires, registration never needs repair (#675 — health is
+    /// stated, never defaulted).
     private final class FakeObserver: AppObserving {
         var onNotification: @MainActor (String, AXUIElement) -> Void = {
             _,
             _ in
         }
+        let needsRegistrationRepair = false
         func observe(window: AXUIElement) {}
+        func repairRegistration() {}
         func invalidate() {}
     }
 
@@ -62,7 +68,7 @@ struct AdoptionHealScheduleTests {
             box.windowQueries += 1
             return []
         }
-        loop.onScreenNormalWindowCounts = {
+        loop.onScreenNormalWindowIDs = {
             box.censusReads += 1
             return [:]
         }
@@ -77,7 +83,7 @@ struct AdoptionHealScheduleTests {
             core.deferred.cancelAll()
             core.eventLoop.stop()
         }
-        core.adoptionHealIntervalOverride = .milliseconds(1)
+        core.adoptionHealInterval = .milliseconds(1)
         core.scheduleAdoptionHeal()
         let armed = core.deferred.task(for: .adoptionHeal)
         await armed?.value
@@ -97,7 +103,7 @@ struct AdoptionHealScheduleTests {
             core.deferred.cancelAll()
             core.eventLoop.stop()
         }
-        core.transientRetrackDelayOverride = .milliseconds(1)
+        core.transientRetrackDelay = .milliseconds(1)
         // The pid needs its observer (a reconcile of an
         // unobserved pid detaches and returns), so attach the
         // fake first — the drop then queues the pid and fires

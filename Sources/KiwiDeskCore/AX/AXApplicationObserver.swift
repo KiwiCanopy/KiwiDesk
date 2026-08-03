@@ -37,18 +37,15 @@ protocol AppObserving: AnyObject {
     /// True while any app-level notification add is still
     /// unregistered (#675) — a fresh-launch app can refuse the
     /// adds, after which the observer sits installed and silent.
+    /// Required, no protocol-extension default: a `false`
+    /// default is the deaf-observer shape this seam exists to
+    /// fix, and a conformer that drifted off the real members
+    /// would inherit it silently. Every fake states its health.
     var needsRegistrationRepair: Bool { get }
     func observe(window: AXUIElement)
     /// Re-attempts the app-level adds that failed (#675).
     func repairRegistration()
     func invalidate()
-}
-
-/// Most fakes model a healthy observer; only the heal suites
-/// override these (#675).
-extension AppObserving {
-    var needsRegistrationRepair: Bool { false }
-    func repairRegistration() {}
 }
 
 extension AXApplicationObserver: AppObserving {}
