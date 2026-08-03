@@ -48,9 +48,27 @@ public enum WindowGather {
     /// its full per-display window list (grid dimension
     /// depends on that total — spaces on one display MUST
     /// merge into one group, never grid separately).
+    ///
+    /// `placingLast` is moved to the end of its display's list,
+    /// and the quit path passes the frontmost app's key window
+    /// (#688). That window ends up in FRONT whatever the circle
+    /// does — no quiet raise can lift anything above it — so
+    /// rather than fight the constraint, the grid gives it the
+    /// slot where being in front is the right answer. Last in
+    /// the list is last in its cell's cascade, which is the slot
+    /// `raiseOrder` raises last and therefore means to be
+    /// frontmost. Placed anywhere else it covers the pile-mates
+    /// the circle wanted above it, which is the one arrangement
+    /// defect a quit could still show (owner device QA,
+    /// 2026-08-03).
+    ///
+    /// It reorders rather than re-slots, so `frames` and
+    /// `raiseOrder` keep seeing one list and cannot partition
+    /// differently.
     public static func collect(
         state: StateCoordinator,
-        primaryHeight: CGFloat
+        primaryHeight: CGFloat,
+        placingLast: WindowID? = nil
     ) -> [Group] {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return [] }
@@ -85,9 +103,15 @@ public enum WindowGather {
         }
         return order.compactMap { id in
             guard
-                let windows = gathered[id],
+                var windows = gathered[id],
                 let axFrame = axFrames[id]
             else { return nil }
+            if let placingLast,
+                let at = windows.firstIndex(of: placingLast)
+            {
+                windows.remove(at: at)
+                windows.append(placingLast)
+            }
             return Group(
                 display: id,
                 axFrame: axFrame,
@@ -101,12 +125,14 @@ public enum WindowGather {
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
         minSize: CGFloat,
-        targetDepth: Int
+        targetDepth: Int,
+        placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for group in collect(
             state: state,
-            primaryHeight: primaryHeight
+            primaryHeight: primaryHeight,
+            placingLast: placingLast
         ) {
             switch style {
             case .grid:
@@ -130,16 +156,18 @@ extension KiwiCore {
     /// area, so windows are not stranded in tiled frames after
     /// KiwiDesk exits.
     ///
-    /// Applies frames synchronously (direct AX IPC) inside a
-    /// SkyLight display-suppression bracket so all moves
-    /// composite as one visual update. A system-wide AX
-    /// messaging timeout (0.25 s) is set once before the loop
-    /// and bounds every AX call in the iteration — EUI reads,
-    /// EUI disable/restore, and setFrame — so Electron/WebKit
-    /// apps (up to ~6 s with the default timeout) cannot stall
-    /// the quit path; wall-clock budgets (~1 s for the moves,
-    /// ~1 s for the raise circle) cap the worst case across
-    /// all windows.
+    /// Two passes. `moveGatheredWindows` applies frames
+    /// synchronously (direct AX IPC) inside a SkyLight
+    /// display-suppression bracket so they composite as one
+    /// visual update; `restackForTeardown` then raises the grid's
+    /// circle, deliberately outside that bracket. A system-wide
+    /// AX messaging timeout (0.25 s) is set here, before either
+    /// pass, and bounds every AX call in both — EUI reads,
+    /// EUI disable/restore, setFrame and the raises — so
+    /// Electron/WebKit apps (up to ~6 s with the default timeout)
+    /// cannot stall the quit path; wall-clock budgets (~1 s for
+    /// the moves, ~1 s for the raise circle) cap the worst case
+    /// across all windows.
     ///
     /// Called on quit and restart, at the top of `stop()` while
     /// the event loop and AX subsystem are still live. When
@@ -158,9 +186,16 @@ extension KiwiCore {
         // Diagnostic trail for the one-shot placement: a
         // wrong grid shape at quit is unreproducible after
         // the fact, so log what was grouped where.
+        // Resolved ONCE and used for both halves: the grid slot
+        // this window is placed in and the circle it is left out
+        // of are two views of the same fact — that nothing can
+        // raise above it — so they must not be able to disagree
+        // about which window it is (#688).
+        let frontmost = trustedFrontmostFocusedWindowID()
         let groups = WindowGather.collect(
             state: state,
-            primaryHeight: primaryH
+            primaryHeight: primaryH,
+            placingLast: frontmost
         )
         onLog(
             "gatherWindows: \(groups.count) display group(s): "
@@ -176,22 +211,65 @@ extension KiwiCore {
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
             minSize: tiler.settings.minWindowSize,
-            targetDepth: targetDepth
+            targetDepth: targetDepth,
+            placingLast: frontmost
         )
         guard !frames.isEmpty else { return }
+        // Bound every AX call in BOTH passes — EUI reads, EUI
+        // disable/restore, setFrame, and the raises — including on
+        // fresh app elements created inside AXHelper. The
+        // system-wide default covers all elements created after
+        // this point.
+        //
+        // Set here rather than inside the move pass, which is
+        // where it used to live: the raise pass depends on it just
+        // as hard — `ZOrderDrain.Policy.teardown`'s ceiling is the
+        // budget plus one blocking raise, and that "one" is only
+        // 0.25 s because of this line — and it must not depend on
+        // the other pass having run first to get it (architect
+        // review, 2026-08-03).
+        AXUIElementSetMessagingTimeout(
+            AXUIElementCreateSystemWide(),
+            0.25
+        )
+        // The bracket covers the MOVES ONLY — `moveGatheredWindows`
+        // is what bounds it, so the raise circle runs after the
+        // resume. It used to run inside, which cost nothing while
+        // it was a bare loop issuing raises in a few ms, but the
+        // drain that replaced it waits for each landing (#688) —
+        // up to its whole 1 s budget. `SLSDisableUpdate` freezes
+        // compositing for the entire desktop, so holding it across
+        // those waits would freeze the screen for the wait rather
+        // than for the moves.
+        //
+        // The restack does not need it: it reads the WindowServer's
+        // ordering, which the bracket never suppressed (probe,
+        // 2026-08-03 — see `restackForTeardown`). The price is not
+        // one extra composite but a visible one: with compositing
+        // live, each landing composites on its own, so the piles
+        // re-shuffle on screen after the grid appears instead of
+        // arriving with it. Still the better half of the trade
+        // against a frozen desktop, and the only half that is
+        // bounded by the budget (code review, 2026-08-03).
+        moveGatheredWindows(frames)
+        restackForTeardown(
+            groups: groups,
+            frames: frames,
+            targetDepth: targetDepth,
+            unbeatable: frontmost
+        )
+    }
+
+    /// Applies the gather frames as one visual update, inside the
+    /// display-suppression bracket.
+    private func moveGatheredWindows(
+        _ frames: [WindowID: CGRect]
+    ) {
         SkyLight.suppressDisplay()
         // defer ensures resumeDisplay() runs even if the
         // budget fires a break below.
         defer { SkyLight.resumeDisplay() }
         let deadline = Date().addingTimeInterval(1.0)
-        // Bound every AX call — EUI reads, EUI disable/
-        // restore, setFrame — including on fresh app elements
-        // created inside AXHelper. The system-wide default
-        // covers all elements created after this point.
-        AXUIElementSetMessagingTimeout(
-            AXUIElementCreateSystemWide(),
-            0.25
-        )
         for (id, frame) in frames {
             // Wall-clock budget: one unresponsive cluster of
             // apps cannot freeze the entire quit path.
@@ -235,38 +313,6 @@ extension KiwiCore {
                     pid: pid,
                     enabled: true
                 )
-            }
-        }
-        // Second pass: raise every window in the grid's
-        // deterministic circle (cell 1 → last, each pile top
-        // slot first, deepest last). The frames alone can't
-        // guarantee readable piles — whatever z-order (and
-        // focus) existed at quit would decide which title
-        // bars survive. Raising defines the stacking instead:
-        // pile order holds within every cell, and later rows
-        // sit above earlier ones. Same wall-clock budget
-        // class as the moves: raiseQuietly is blocking IPC,
-        // but each call is bounded by the 0.25 s messaging
-        // timeout set above.
-        let raiseDeadline = Date().addingTimeInterval(1.0)
-        for group in groups {
-            for id in QuitGridLayout.raiseOrder(
-                for: group.windows,
-                targetDepth: targetDepth
-            ) {
-                if Date() > raiseDeadline {
-                    onLog(
-                        "gatherWindows: raise budget "
-                            + "exceeded — stacking left "
-                            + "partial"
-                    )
-                    return
-                }
-                guard
-                    frames[id] != nil,
-                    let element = eventLoop.element(for: id)
-                else { continue }
-                AXHelper.raiseQuietly(element)
             }
         }
     }

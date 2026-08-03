@@ -100,12 +100,33 @@ editing here:
   order to keep, or a floor the raise must clear; a raise with
   neither needs none of it. Nothing scans for a bare loop, so a
   new ordered raise owes this deliberately. Weigh a teardown
-  raise harder than a live one:
-  [#688](https://github.com/KiwiCanopy/KiwiDesk/issues/688)
-  tracks the quit-grid restack, whose raises run after
-  management stops — so no later restore can correct a miss,
-  which is the one place this rule's usual "the next restore
-  heals it" does not apply.
+  raise harder than a live one, and buy it a bigger budget: the
+  quit-grid restack's raises run after management stops, so no
+  later restore can correct a miss and this rule's usual "the
+  next restore heals it" does not apply there (#688,
+  `KiwiCore+TeardownRaise`). Weigh, for any sequence, what the
+  frontmost app's key window costs inside it: a quiet raise
+  cannot beat that window, so it never costs only its own slot —
+  every window the order puts above it waits out a whole
+  `landingLimit` that can never be satisfied. The two shipped
+  sequences answer that differently *because its role differs*,
+  and a third must say which it is. The teardown restack drops it
+  from its TARGETS, since the circle would otherwise order
+  windows above it. The float raise and the monocle restore keep
+  it out of the FLOOR instead (`raiseFloor`, which owns the
+  measurement) — and knowingly leave it among the targets, the
+  same class of residue `floatLayerTargets` already records for
+  mixed CGWindow layers. Price that residue as **n ×
+  `landingLimit`, not one**: the landing check carries the
+  unbeatable window in every subsequent comparison, so a plan of n
+  raises pays the limit n times and can spend the whole budget
+  with the mouse warp held for all of it (architect review,
+  2026-08-03). The two guards are
+  `ZOrderTeardownDrainTests`
+  (`aPinnedMemberIsDroppedNotAbsorbed`) and `ZOrderRaisePlanTests`
+  (`floatFloorExcludesTheFocusedWindow`), and
+  `ZOrderSequenceWiringTests` pins that the teardown call site
+  still drops it.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

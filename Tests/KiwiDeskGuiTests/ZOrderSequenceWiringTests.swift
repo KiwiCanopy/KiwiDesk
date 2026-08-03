@@ -44,10 +44,12 @@ struct ZOrderSequenceWiringTests {
     private func body(
         of function: String,
         in file: String,
+        under directory: String = "Commands",
         _ path: StaticString = #filePath
     ) throws -> String {
         let url = SourceScan.repoRoot(from: "\(path)")
-            .appendingPathComponent("Sources/KiwiDeskCore/Commands")
+            .appendingPathComponent("Sources/KiwiDeskCore")
+            .appendingPathComponent(directory)
             .appendingPathComponent(file)
         let source = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
@@ -113,6 +115,28 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("keeping: raised"))
     }
 
+    /// The live restore's policy, which nothing else can see.
+    ///
+    /// `zOrderDrain` is a private helper and no unit test reaches
+    /// it, so handing it `.teardown` passed all 2424 tests
+    /// (guard-prover, 2026-08-03) — and that swap is not cosmetic:
+    /// it would hold the mouse warp for 2.5x as long through
+    /// `zOrderRestoresInFlight`, and DROP the tail whose stamps
+    /// nothing would then consume, which is the click-swallowing
+    /// focus bug `releaseZOrderStamps` exists for.
+    ///
+    /// The unit suites pin what each policy MEANS
+    /// (`exhaustedBudgetIssuesTheRemainder` reds if `.restore`
+    /// stops issuing its tail); this pins which one arrives here.
+    @Test("The float raise drains on the restore policy")
+    func floatRaiseUsesTheRestorePolicy() throws {
+        let source = try body(
+            of: "zOrderDrain",
+            in: "KiwiCore+ZOrderFloats.swift"
+        )
+        #expect(source.contains("policy: .restore"))
+    }
+
     @Test("The float raise derives its floor through the rule")
     func floatRaiseUsesTheFloorRule() throws {
         let source = try body(
@@ -139,5 +163,76 @@ struct ZOrderSequenceWiringTests {
             in: "KiwiCore+ZOrder.swift"
         )
         #expect(source.contains("raiseFloor("))
+    }
+
+    /// The teardown restack is the one raise sequence that cannot
+    /// self-heal — nothing runs after it — so it is also the one
+    /// where reverting to a bare `AXHelper.raiseQuietly` loop
+    /// leaves the user looking at the scramble permanently (#688).
+    /// It is unreachable from a unit test for the same reason as
+    /// the three above: `eventLoop.element(for:)` is nil under
+    /// `makeTestCore`, so the function returns before the drain.
+    ///
+    /// The teardown restack's seams, bound to the real machine.
+    ///
+    /// This test used to carry the DECISIONS as well — seven scans
+    /// re-typing `restackForTeardown`'s body, which red on renaming
+    /// a local and pass on `budget * 2` (architect review,
+    /// 2026-08-03). Those decisions moved behind seams into
+    /// `TeardownRestack`, where `TeardownRestackTests` asserts them
+    /// as behavior: the Accessibility gate, the dropped window, the
+    /// per-group narrowing, the stop-dead boundary.
+    ///
+    /// What is left is the half no unit test in either target can
+    /// reach, because `makeTestCore` has neither AX nor a
+    /// WindowServer: that these four seams are bound to the real
+    /// machine rather than to something inert. A `TeardownRestack`
+    /// built with `isTrusted: { true }` and a drain factory
+    /// returning nil satisfies every behavioral test in that suite
+    /// and raises nothing at all on a real quit.
+    @Test("The teardown restack binds the real seams")
+    func teardownRestackUsesTheDrain() throws {
+        let source = try body(
+            of: "restackForTeardown",
+            in: "KiwiCore+TeardownRaise.swift",
+            under: "App"
+        )
+        #expect(source.contains("AXHelper.isTrusted()"))
+        #expect(source.contains("teardownDrain("))
+        #expect(source.contains("policy: .teardown"))
+    }
+
+    /// The frontmost app's key window is resolved ONCE and spent
+    /// twice — the grid places it last (`placingLast`) and the
+    /// circle leaves it out (`unbeatable`). Those are two views of
+    /// one fact: that nothing can raise above it. Resolving it
+    /// twice, or wiring only one of the two, half-fixes the
+    /// arrangement in a way no unit test can see — `collect` is
+    /// pure and testable, the AX read is not, and only this pins
+    /// that the same value reaches both.
+    ///
+    /// Placement alone would put the window in the right slot and
+    /// still burn the budget failing to raise things above it;
+    /// the exemption alone is what shipped before device QA, and
+    /// left the window covering its pile-mates (owner QA,
+    /// 2026-08-03).
+    @Test("One resolved window both places and exempts")
+    func frontmostWindowIsPlacedAndExemptedFromOneRead() throws {
+        let source = try body(
+            of: "gatherWindows",
+            in: "KiwiCore+Teardown.swift",
+            under: "App"
+        )
+        #expect(
+            source.components(
+                separatedBy: "trustedFrontmostFocusedWindowID()"
+            ).count == 2
+        )
+        // Both consumers, and both off that one local.
+        #expect(
+            source.components(separatedBy: "placingLast: frontmost")
+                .count == 3
+        )
+        #expect(source.contains("unbeatable: frontmost"))
     }
 }

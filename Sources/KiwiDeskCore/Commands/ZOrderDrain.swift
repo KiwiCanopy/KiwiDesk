@@ -58,25 +58,27 @@ struct ZOrderDrain: Sendable {
     /// by design. Required at every call site rather than
     /// defaulted, so a new sequence has to decide.
     let floor: [WindowID]
+    /// What this sequence may spend and what it does when that
+    /// is gone. Required, like `floor`: `ZOrderDrain.Policy`
+    /// carries the two shipped answers and why they differ.
+    let policy: Policy
 
     /// How long one raise may be waited on before the drain gives
     /// up on it and moves to the next — 6x the 20 ms worst case
     /// measured. Per-window, so one wedged app cannot stall the
     /// windows behind it in the sequence.
     static let landingLimit: TimeInterval = 0.12
-    /// Whole-sequence ceiling, ~5x the ~55 ms a verified 6-window
-    /// row measured. It has to be a total, not a per-window sum:
-    /// eight windows at the per-window limit would drain 1 s, and
-    /// `zOrderRestoresInFlight` — which holds the mouse warp — is
-    /// raised for exactly this long.
-    static let totalLimit: TimeInterval = 0.4
     /// Poll interval while waiting for a raise to land. The read
     /// costs ~0.4 ms, so this spends under a tenth of a core.
     static let pollInterval: TimeInterval = 0.005
     /// Raises `order` — deepest first, each landing on top of the
     /// last — and returns once every raise has been issued or the
     /// budget is spent. Blocking: call it on `zOrderQueue`, never
-    /// on the main actor.
+    /// on the main actor — with one exception, the teardown
+    /// restack, which runs on the main actor because by then
+    /// there is no live session left to block. The whole quit
+    /// gather is already synchronous AX IPC there, and its budget
+    /// is the thing bounding it (#688).
     ///
     /// **Exactly one pass, and never the same window twice.** A
     /// retry pass for the windows that missed their landing was
@@ -100,7 +102,7 @@ struct ZOrderDrain: Sendable {
     /// (`releaseZOrderStamps`).
     func run(_ rawOrder: [WindowID]) -> [WindowID] {
         guard isCurrent() else { return [] }
-        let deadline = now() + Self.totalLimit
+        let deadline = now() + policy.budget
         // Uniqued, because "never twice" must be a property of
         // this loop rather than a hope about its input: a repeated
         // id makes every tail check fail (a filtered observation
@@ -160,6 +162,9 @@ struct ZOrderDrain: Sendable {
             raise(id)
             raised.append(id)
             guard now() < deadline else {
+                guard policy.spendsBudgetOnUnverifiedTail else {
+                    return raised
+                }
                 // Out of budget. Issue the rest without waiting
                 // rather than dropping them: unverified is the
                 // behavior every pile had before this drain, while
@@ -270,37 +275,5 @@ struct ZOrderDrain: Sendable {
         return Array(
             desired.prefix(desired.count - settled).reversed()
         )
-    }
-}
-
-/// The z-order raise generation (#418/#425), in a lock rather
-/// than on the main actor: the drain reads it between raises from
-/// `zOrderQueue` to abandon a sequence a newer one has superseded
-/// (#684), and every other reader is main-actor code that would
-/// otherwise have to hop threads to answer it. It lives beside
-/// the drain rather than in `App/` with the property that holds
-/// it because the off-actor read is the only reason it is not
-/// still an `Int` — a deliberate placement, not an oversight.
-///
-/// **One minting site: `stampZOrderRaise`, on the main actor.**
-/// The compiler used to enforce that by isolation and no longer
-/// can: `@unchecked Sendable` makes a `bump()` from the raise
-/// queue compile, and it would silently invalidate every
-/// in-flight sequence's identity — the identity #684 spent a
-/// round unifying, since one generation now keys the drain's
-/// staleness check, the stamp release and the focus handoff.
-/// Read it anywhere; mint it in one place.
-final class ZOrderGeneration: @unchecked Sendable {
-    private let lock = NSLock()
-    private var current = 0
-
-    var value: Int { lock.withLock { current } }
-
-    /// Starts a new sequence, returning its generation.
-    func bump() -> Int {
-        lock.withLock {
-            current += 1
-            return current
-        }
     }
 }

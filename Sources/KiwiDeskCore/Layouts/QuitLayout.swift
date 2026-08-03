@@ -142,6 +142,15 @@ public enum QuitGridLayout {
     /// sits above the row before it, so even a degenerate
     /// pile that spills downward cannot bury the next row's
     /// headers.
+    ///
+    /// That is what the ORDER buys, and it is the whole of what
+    /// this function promises — the stacking that actually
+    /// results is the caller's. `restackForTeardown` drops one
+    /// member before raising (the frontmost app's key window,
+    /// which no quiet raise can beat) and is bounded by a wall
+    /// clock, so in that member's pile the two guarantees above
+    /// do not hold. Read them as properties of the circle, not
+    /// of every quit (#688).
     public static func raiseOrder(
         for windows: [WindowID],
         targetDepth: Int

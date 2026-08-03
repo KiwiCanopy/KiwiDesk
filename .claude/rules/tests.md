@@ -29,8 +29,9 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Five ratified exceptions, all *stateless primitives* with no
-  setup/teardown coupling and no assertions of their own:
+  Six ratified exceptions, none with setup/teardown coupling or
+  assertions of their own, and all but the fake WindowServer
+  *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
     divergent copy would silently weaken a guard, the exact
@@ -94,6 +95,24 @@ bite large test PRs:
     the divergence-weakens-a-guard basis the closing paragraph
     below names. The admission gate therefore has two grounds, not
     one — state both when weighing a further one.
+  - *the fake WindowServer* in `ZOrderDrainFake.swift` — the late-
+    landing, fake-clock window server the drain suites run
+    against, shared by `ZOrderDrainTests` (#684) and
+    `ZOrderTeardownDrainTests` (#688). Admitted on the
+    divergence ground, with the harm already on record rather
+    than hypothesized: a fake that models every raise as reaching
+    index 0 makes a landing condition no real raise can satisfy
+    look reachable, and that is what hid an unachievable check
+    under twelve green tests until `pinned` was added. #688's
+    suite is built on that property, so a second copy is a place
+    to lose it again in the suite that needs it most.
+    **It is the one entry here that carries state**, so it is
+    also the case that says what the statelessness bar was
+    protecting: cross-suite coupling. Each test builds its own
+    instance and the state is that instance's clock and window
+    order — nothing is shared or carried between tests, so the
+    isolation the bar stood for holds. Weigh a further stateful
+    helper against that, not against the word.
   (The status-item seam deliberately does NOT add a shared
   factory here: its fake is a per-file `StatusItemHandle`
   stub, because the live wrapper is sealed file-`private` and

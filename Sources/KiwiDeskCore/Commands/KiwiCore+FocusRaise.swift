@@ -206,8 +206,8 @@ extension KiwiCore {
         // zero. The counter would only ever suppress a REAL jump:
         // a pile drain holds it for as long as the sequence takes
         // to verify its landings — bounded since #684 at
-        // `ZOrderDrain.landingLimit` a window and `totalLimit` a
-        // sequence, where it used to be unbounded and set by
+        // `ZOrderDrain.landingLimit` a window and `restoreBudget`
+        // a sequence, where it used to be unbounded and set by
         // whatever an app that answers AX lazily did — so a user
         // stepping back and forth across the row lands inside
         // that window constantly and would see every second jump

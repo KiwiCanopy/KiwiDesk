@@ -4319,10 +4319,40 @@ stacking. Windows sharing a cell cascade vertically like
 `overflow_all`, in **every** cell, so each title bar stays reachable.
 After placing, KiwiDesk raises every window in a fixed circle —
 cell 1 through the last cell, each pile top slot first and deepest
-slot last — so the final stacking is deterministic: within a pile
-every title bar stays visible, later cells sit above earlier ones,
-and whichever window had focus at quit makes no difference. A
-pile's windows also shrink so the cascade ends at its own cell's
+slot last — so within a pile every title bar stays visible and
+later cells sit above earlier ones (one window is exempt; see
+below). It waits for each raise to actually land before issuing
+the next, because macOS reports a raise as accepted well before
+the app performs it, and a circle fired off in one go settles in
+whatever order the apps get to it.
+
+The whole restack is capped at one second across every display, so
+a wedged app cannot delay your quit past that. The cap is a hard
+stop rather than a slow lane: once it is reached, the restack
+stops after at most one more raise — it does not carry on through
+the rest of the display it was on, and it does not start a display
+it had not reached. Those windows keep whatever
+stacking the moves left them in. Quitting promptly is worth more
+here than a perfect arrangement, because nothing runs afterwards
+that could fix either one.
+
+**The window you were last working in gets a slot chosen for it**
+— the last one in its cell, so it sits in front of that cell's
+pile. No quiet raise can lift another window above the frontmost
+app's key window (measured on device, not inferred), so that
+window is going to be in front whatever the circle does. Rather
+than spend the budget failing to move it, KiwiDesk places it where
+being in front is what the arrangement wanted anyway, and leaves
+it out of the raise circle.
+
+So the window you quit from stays visible and on top of its own
+pile, and nothing it covers is a window the grid meant to show
+above it. Every other window lands where the circle puts it
+regardless of the z-order at quit. If KiwiDesk's own window is
+frontmost when it stops, or the frontmost app has no window in
+the grid, none of this applies and the circle is followed exactly.
+
+A pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from
 spilling into the row below.
 Each display sizes its own grid from its window count `N` and the

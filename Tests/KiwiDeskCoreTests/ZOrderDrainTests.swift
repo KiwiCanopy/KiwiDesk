@@ -43,7 +43,7 @@ struct ZOrderDrainTests {
             pinned: WindowID(7)
         )
         server.latency[WindowID(2)] = 0.06
-        let drain = server.drain(above: ids([9]))
+        let drain = server.restoreDrain(above: ids([9]))
         drain.run(ids([2, 1]))
         #expect(server.stacking() == ids([7, 1, 2, 9]))
         #expect(server.raised == ids([2, 1]))
@@ -61,7 +61,7 @@ struct ZOrderDrainTests {
             order: ids([7, 1, 2]),
             pinned: WindowID(7)
         )
-        let drain = server.drain(above: ids([7]))
+        let drain = server.restoreDrain(above: ids([7]))
         let raised = drain.run(ids([2, 1]))
         // Both halves: it really did the work (a drain that ran
         // nothing would satisfy the bound trivially), and it
@@ -70,7 +70,7 @@ struct ZOrderDrainTests {
         #expect(raised == ids([2, 1]))
         #expect(
             server.clock
-                <= ZOrderDrain.totalLimit + ZOrderDrain.pollInterval
+                <= ZOrderDrain.Policy.restore.budget + ZOrderDrain.pollInterval
         )
     }
 
@@ -88,7 +88,7 @@ struct ZOrderDrainTests {
         // Obsidian-shaped: an order of magnitude slower than the
         // rest, and raised first, which is the case that broke.
         server.latency[WindowID(3)] = 0.08
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         drain.run(ids([4, 3, 2, 1]))
         #expect(server.stacking() == ids([1, 2, 3, 4]))
         #expect(server.raised == ids([3, 2, 1]))
@@ -101,7 +101,7 @@ struct ZOrderDrainTests {
     func wedgedWindowIsSkipped() {
         let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
         server.latency[WindowID(3)] = .infinity
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         drain.run(ids([4, 3, 2, 1]))
         #expect(server.raised.contains(WindowID(1)))
         #expect(server.raised.contains(WindowID(2)))
@@ -128,7 +128,7 @@ struct ZOrderDrainTests {
         let order = ids([8, 7, 6, 5, 4, 3, 2, 1])
         let server = FakeWindowServer(order: order)
         for id in order { server.latency[id] = .infinity }
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         let raised = drain.run(order)
         // Window 8 belongs at the back and is already there, so
         // the plan is the other seven — every one of them issued,
@@ -143,7 +143,7 @@ struct ZOrderDrainTests {
         // 5 ms steps, so it lands ON the limit, not before it.
         #expect(
             server.clock
-                <= ZOrderDrain.totalLimit + ZOrderDrain.pollInterval
+                <= ZOrderDrain.Policy.restore.budget + ZOrderDrain.pollInterval
         )
     }
 
@@ -162,7 +162,7 @@ struct ZOrderDrainTests {
         for latency in [0.2, TimeInterval.infinity] {
             let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
             server.latency[WindowID(2)] = latency
-            let drain = server.drain()
+            let drain = server.restoreDrain()
             drain.run(ids([4, 3, 2, 1]))
             // Non-empty first: `Set(raised).count == raised.count`
             // is also true of a drain that raised nothing, so
@@ -185,7 +185,7 @@ struct ZOrderDrainTests {
     @Test("A failed stacking read still issues every raise")
     func emptyReadFallsBackToUnverified() {
         let server = FakeWindowServer(order: [])
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         let order = ids([3, 2, 1])
         #expect(drain.run(order) == order)
         #expect(server.raised == order)
@@ -199,7 +199,7 @@ struct ZOrderDrainTests {
     @Test("A duplicated target is still raised only once")
     func duplicateTargetIsRaisedOnce() {
         let server = FakeWindowServer(order: ids([3, 2, 1]))
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         _ = drain.run(ids([3, 2, 2, 1]))
         #expect(!server.raised.isEmpty)
         #expect(Set(server.raised).count == server.raised.count)
@@ -212,76 +212,8 @@ struct ZOrderDrainTests {
     func supersededDrainStops() {
         let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
         server.currentUntilRaises = 2
-        let drain = server.drain()
+        let drain = server.restoreDrain()
         drain.run(ids([4, 3, 2, 1]))
         #expect(server.raised == ids([3, 2]))
-    }
-}
-
-/// A WindowServer whose apps perform their raises late, on a fake
-/// clock that only advances when the drain sleeps. Deterministic,
-/// and it never touches a real window.
-private final class FakeWindowServer: @unchecked Sendable {
-    /// Front-to-back, the `CGWindowListCopyWindowInfo` order.
-    private var order: [WindowID]
-    /// Raises accepted but not yet performed, with their due time.
-    private var inFlight: [(id: WindowID, due: TimeInterval)] = []
-
-    /// Per-window delay between accepting a raise and performing
-    /// it. `.infinity` is an app that never performs it at all.
-    var latency: [WindowID: TimeInterval] = [:]
-    var defaultLatency: TimeInterval = 0.01
-    /// Every raise issued, in order.
-    private(set) var raised: [WindowID] = []
-    var clock: TimeInterval = 0
-    /// How many raises this sequence stays current for, so a test
-    /// can supersede it mid-drain.
-    var currentUntilRaises = Int.max
-    /// The frontmost app's key window, which a quiet raise cannot
-    /// get above — measured on device, 0 of 7 windows over 600 ms.
-    /// A raise lands directly UNDER it, not at the front. Modelled
-    /// here because the fake's old "every raise reaches index 0"
-    /// is what let a landing condition no real raise can satisfy
-    /// sit under twelve green tests.
-    var pinned: WindowID?
-
-    init(order: [WindowID], pinned: WindowID? = nil) {
-        self.order = order
-        self.pinned = pinned
-    }
-
-    func drain(above floor: [WindowID] = []) -> ZOrderDrain {
-        ZOrderDrain(
-            raise: { [self] id in
-                raised.append(id)
-                let delay = latency[id] ?? defaultLatency
-                guard delay.isFinite else { return }
-                inFlight.append((id, clock + delay))
-            },
-            stacking: { [self] in stacking() },
-            now: { [self] in clock },
-            sleep: { [self] seconds in clock += seconds },
-            isCurrent: { [self] in
-                raised.count < currentUntilRaises
-            },
-            floor: floor
-        )
-    }
-
-    /// Performs everything now due — the newest raise ends up
-    /// front, or directly under `pinned` where one is set — and
-    /// answers the order.
-    func stacking() -> [WindowID] {
-        let due = inFlight.filter { $0.due <= clock }
-            .sorted { $0.due < $1.due }
-        inFlight.removeAll { $0.due <= clock }
-        for entry in due where entry.id != pinned {
-            order.removeAll { $0 == entry.id }
-            let front =
-                pinned.flatMap { order.firstIndex(of: $0) }
-                .map { $0 + 1 } ?? 0
-            order.insert(entry.id, at: front)
-        }
-        return order
     }
 }
