@@ -184,6 +184,107 @@ struct FullscreenCloseFallbackTests {
         state.apply(.windowDestroyed(w1, wasMinimized: false))
         #expect(state.workspaces[space]?.focused == w2)
     }
+
+    @Test("The re-pick steps forward, not to the array head")
+    func rePickPrefersForwardNeighbor() {
+        var state = StateCoordinator()
+        let w4 = WindowID(4)
+        for id in [w1, w2, w3, w4] {
+            state.apply(.windowCreated(makeWindow(id)))
+        }
+        let space = state.workspaces.activeSpace!
+        state.workspaces.focus(w2, in: space)
+        state.apply(
+            .windowFullscreenChanged(w3, isFullscreen: true)
+        )
+        state.apply(.windowDestroyed(w2, wasMinimized: false))
+        // [w1, w3fs, w4] with the removed slot at index 1:
+        // forward past the fullscreen member lands w4 — the
+        // array head (w1) would be the #11 cross-row yank.
+        #expect(state.workspaces[space]?.focused == w4)
+    }
+
+    @Test("The re-pick falls back to the backward neighbor")
+    func rePickFallsBackBackward() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        state.apply(.windowCreated(makeWindow(w3)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.focus(w3, in: space)
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
+        )
+        state.apply(.windowDestroyed(w3, wasMinimized: false))
+        // Nothing forward of the removed last slot: backward
+        // past the fullscreen member lands w1.
+        #expect(state.workspaces[space]?.focused == w1)
+    }
+
+    @Test("A close elsewhere never moves a held fullscreen focus")
+    func unrelatedCloseKeepsFullscreenFocus() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.focus(w2, in: space)
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
+        )
+        // The user is inside w2's fullscreen Space; closing an
+        // unrelated window must not silently reassign the
+        // focused slot behind them.
+        state.apply(.windowDestroyed(w1, wasMinimized: false))
+        #expect(state.workspaces[space]?.focused == w2)
+    }
+}
+
+/// Track occupancy: fill-then-spill counts only members the
+/// layout will actually place — a fullscreen member fills no
+/// slot, so a spawn joins its track instead of spilling (#670
+/// re-review: reachable purely in state, so it owes its red).
+@Suite("Fullscreen track occupancy (#670)")
+struct FullscreenTrackOccupancyTests {
+    @Test("A spawn's occupancy count skips a fullscreen member")
+    func spawnJoinsPastFullscreenMember() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.withSpace(space) { $0.mode = .track }
+        state.trackCapacities[space] = 2
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
+        )
+        state.apply(.windowCreated(makeWindow(w3)))
+        // Occupancy 1 (w2 is exempt) < capacity 2: w3 JOINS the
+        // track at its head (`new_window_position` default
+        // `.first`), landing at index 0. Counting w2 would
+        // spill it into a new track appended after the focused
+        // one instead — the order is the probe; the break
+        // marker is not (a head join transfers it too).
+        #expect(
+            state.workspaces[space]?.windows == [w3, w1, w2]
+        )
+    }
+
+    @Test("A full track still spills (the count stays live)")
+    func fullTrackStillSpills() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(w1)))
+        state.apply(.windowCreated(makeWindow(w2)))
+        let space = state.workspaces.activeSpace!
+        state.workspaces.withSpace(space) { $0.mode = .track }
+        state.trackCapacities[space] = 2
+        state.apply(.windowCreated(makeWindow(w3)))
+        // Control arm: two placeable members meet capacity 2,
+        // so the spill fires and w3 opens a new track after the
+        // focused one (an append) — proving the fixture reaches
+        // the occupancy count at all.
+        #expect(
+            state.workspaces[space]?.windows == [w1, w2, w3]
+        )
+    }
 }
 
 /// The quit grid gathers every tracked tiled window — except a

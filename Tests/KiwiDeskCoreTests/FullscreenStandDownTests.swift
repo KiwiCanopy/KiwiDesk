@@ -7,8 +7,11 @@ import Testing
 
 // #670 stand-down: split from FullscreenExemptionTests.swift for
 // the file-size ceiling. Every test touching the process-global
-// NativeSpaces DEBUG overrides lives in THIS one serialized
+// `isUser` DEBUG overrides (`activeSpaceIsUserOverride`,
+// `currentSpaceIsUserOverride`) lives in THIS one serialized
 // suite -- a second suite would race it under parallel testing.
+// (`activeSpaceNumberOverride` has its own pre-existing users;
+// no stand-down test reads the space number.)
 
 private let w1 = WindowID(1)
 private let w2 = WindowID(2)
