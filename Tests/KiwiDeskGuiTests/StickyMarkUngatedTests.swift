@@ -26,11 +26,22 @@ import Testing
 /// and the write-through that used to keep a forced-ON toggle
 /// honest by storing what it displayed.
 ///
+/// The census has TWO gate axes and a row is greyed by either,
+/// so both are asserted: a container gate on `.stickyWindows`
+/// re-greys this row exactly as a row gate would — it is not
+/// `exemptFromContainerGate` — and generates the same false
+/// caption. Reading one axis and calling the census covered is
+/// how this suite passed its own worst mutation (guard-prover,
+/// first cut).
+///
 /// What it does NOT cover, stated so it is not mistaken for
 /// coverage: a gate re-introduced from OUTSIDE these two files —
 /// a parent view greying the section, a resolver answering for
-/// this row — is invisible here, as is any greying spelled
-/// without the three needles below.
+/// this row — is invisible here, as is greying, or a forced-ON
+/// display value, spelled without one of the needles below.
+/// The needles cover the shape the gate had when it shipped and
+/// the shape the house style would give it today (a resolver
+/// answering `allowsEditing`); a third spelling is not netted.
 @Suite("The sticky mark's toggle is ungated")
 struct StickyMarkUngatedTests {
     private var guiTree: URL {
@@ -49,15 +60,33 @@ struct StickyMarkUngatedTests {
         // deleted one are not the same fix.
         #expect(placement.area == .gapsAndBorders)
         #expect(placement.container == .stickyWindows)
+        // The second axis. The row carries no
+        // `exemptFromContainerGate`, so a gate on its container
+        // greys it just as thoroughly and says the same false
+        // thing.
+        #expect(SettingsContainer.stickyWindows.gate == nil)
     }
 
-    /// The editor greys nothing and reads nothing off the bar.
+    /// The editor greys nothing, reads nothing off the bar, and
+    /// displays no value but the stored one.
+    ///
+    /// `allowsEditing` and `.constant(` are needles because the
+    /// coupling does not have to come back in the spelling it
+    /// left in: a resolver-routed grey is the house style for
+    /// gates here (`BarsGateContext`), and the forced-ON ternary
+    /// is separable from the greying — on its own it is the half
+    /// that made the toggle misreport the stored value, which is
+    /// worse than dimming it.
     @Test("the editor carries no Space Bar gate")
     func editorHasNoGate() throws {
         let source = try strippedSource(
             named: "StickyMarkEditor.swift"
         )
-        for needle in ["spaceBarStyle", "GreyOut", ".disabled("] {
+        let needles = [
+            "spaceBarStyle", "GreyOut", ".disabled(",
+            "allowsEditing", ".constant(",
+        ]
+        for needle in needles {
             #expect(
                 !source.contains(needle),
                 Comment(
