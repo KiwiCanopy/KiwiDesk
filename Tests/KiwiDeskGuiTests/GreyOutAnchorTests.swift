@@ -35,14 +35,18 @@ struct GreyOutAnchorTests {
             "help: blockReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
+        // The header `?` anchors now read the resolver's reason
+        // (2026-08-03 convergence): nil while the bar is shown,
+        // the block sentence while it is off — outside the greyed
+        // block, and worded once in `BarsGateHelp`.
         (
             "SpaceBarCard.swift",
-            "help: allows ? nil : BarsGateHelp.spaceBarOff",
+            "help: reason.map(BarsGateHelp.sentence)",
             1
         ),
         (
             "AppBarCard.swift",
-            "help: allows ? nil : BarsGateHelp.noBarShown",
+            "help: reason.map(BarsGateHelp.sentence)",
             1
         ),
         // Advanced Colours (#678 Phase 3). Every gate on this

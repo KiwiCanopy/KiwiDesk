@@ -54,7 +54,7 @@ struct LayoutDefaultsGateTests {
                 )
                 .isEmpty
         )
-        // The resolver has no `allowsEditing` arm, so a CONTAINER
+        // The resolver has no `containerReason` arm, so a CONTAINER
         // gate on a layout would grey nothing at all — silently,
         // since the guard above walks row gates only. gui.md's
         // obligation is to converge the resolvers rather than

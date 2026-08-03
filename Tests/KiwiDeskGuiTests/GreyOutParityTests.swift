@@ -145,7 +145,7 @@ struct GreyOutParityTests {
         // neither ink is painted.
         (
             "AdvancedColorRow+Bars.swift",
-            "gated(gates.bars.gapOnly, BarsGateHelp.gapOnly)",
+            "gates.bars.gapOnly",
             2
         ),
         // Not a GreyOut site — a plain `.disabled` with its own

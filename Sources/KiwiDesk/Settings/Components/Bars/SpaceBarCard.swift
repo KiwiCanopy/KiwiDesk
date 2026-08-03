@@ -17,13 +17,14 @@ struct SpaceBarCard: View {
     var style: Binding<SpaceBarStyle> {
         $model.config.settings.spaceBarStyle
     }
-    private var gates: BarsGateContext {
-        BarsGateContext(settings: model.config.settings)
+    private var gates: BarsGates {
+        BarsGates(settings: model.config.settings)
     }
-    /// The census container gate, resolved live.
-    private var allows: Bool {
-        gates.allowsEditing(.spaceBar)
+    /// The census container gate, resolved live to a reason.
+    private var reason: BarsGates.InertReason? {
+        gates.containerReason(for: .spaceBar)
     }
+    private var allows: Bool { reason == nil }
 
     var body: some View {
         // The header `?` is the gate's live anchor (#527): every
@@ -32,7 +33,7 @@ struct SpaceBarCard: View {
         SettingsSection(
             SettingsCatalog.bars.spaceBarCard,
             caption: cardCaption,
-            help: allows ? nil : BarsGateHelp.spaceBarOff
+            help: reason.map(BarsGateHelp.sentence)
         ) {
             SpaceBarPreviewStrip(
                 style: style.wrappedValue,
@@ -56,7 +57,7 @@ struct SpaceBarCard: View {
                         active: !allows
                             && !key.placement
                                 .exemptFromContainerGate,
-                        help: BarsGateHelp.spaceBarOff
+                        help: BarsGateHelp.sentence(for: .spaceBarOff)
                     )
                 )
         }

@@ -81,29 +81,31 @@ struct BarsCensusRenderTests {
         #expect(containers == [.spaceBar, .appBar])
     }
 
-    /// The card gates resolve the census containers' own gates
-    /// (`SettingsContainer.gate`) against the live draft — the
-    /// wholesale grey each editor had, now census-driven.
+    /// Each bar container's block gate resolves to a reason
+    /// against the live draft — the wholesale grey each editor
+    /// had, now returned as a `BarsGates.InertReason` rather than
+    /// a Bool. `onlyTwoContainers` pins WHICH containers gate;
+    /// this pins that the resolver answers each correctly.
     @Test("container gates resolve against the draft")
     func containerGatesResolve() {
         var settings = TilingSettings()
         settings.spaceBarStyle.enabled = false
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
-        var gates = BarsGateContext(settings: settings)
-        #expect(!gates.allowsEditing(.spaceBar))
-        #expect(!gates.allowsEditing(.appBar))
+        var gates = BarsGates(settings: settings)
+        #expect(gates.containerReason(for: .spaceBar) == .spaceBarOff)
+        #expect(gates.containerReason(for: .appBar) == .noBarShown)
 
         settings.spaceBarStyle.enabled = true
         settings.scrolling.appBar.enabled = true
-        gates = BarsGateContext(settings: settings)
-        #expect(gates.allowsEditing(.spaceBar))
-        #expect(gates.allowsEditing(.appBar))
+        gates = BarsGates(settings: settings)
+        #expect(gates.containerReason(for: .spaceBar) == nil)
+        #expect(gates.containerReason(for: .appBar) == nil)
 
         settings.scrolling.appBar.enabled = false
         settings.monocle.appBar.enabled = true
-        gates = BarsGateContext(settings: settings)
-        #expect(gates.allowsEditing(.appBar))
+        gates = BarsGates(settings: settings)
+        #expect(gates.containerReason(for: .appBar) == nil)
     }
 
     /// The rows the census exempts from their container's gate
@@ -138,11 +140,12 @@ struct BarsCensusRenderTests {
     /// which layouts host an App Bar"; the census's `.appBar`
     /// container gate re-lists that set as its `anyOf` owners.
     /// Pin the two together, derived from Core: a third hosting
-    /// layout added in Core must red here until the census gate
-    /// (and `BarsGateContext.isOn`, whose debug assertion then
-    /// fires in `containerGatesResolve`) learns it — otherwise
-    /// the App Bar card greys while a bar renders, the #527
-    /// failure.
+    /// layout added in Core must red here until the census
+    /// `.appBar` gate's owners learn it — otherwise that layout's
+    /// own Show-it-in toggle is not exempt from the container
+    /// grey (`exemptSet` derives the exempt owners from these
+    /// same gate settings) and greys along with the card it
+    /// controls, the #527 failure.
     @Test("the App Bar gate's owners are Core's hosting set")
     func appBarGateOwnersMatchCoreHosting() {
         let owners = Set(

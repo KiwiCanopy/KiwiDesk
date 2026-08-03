@@ -49,8 +49,8 @@ struct LayoutDefaultsGates {
 
     /// Why `key`'s row is inert right now, or nil while it is
     /// live. Fail-OPEN on a gate this type does not own — loud in
-    /// debug, live in release — matching `BarsGateContext` and
-    /// `ShortcutsRuntimeGate`, which is the one policy this
+    /// debug, live in release — matching `BarsGates` and
+    /// `ShortcutsGates`, which is the one policy this
     /// codebase has for the class: a missing case must not lock a
     /// shipped Settings row, and of the two silent readings, a
     /// live row the user can ignore beats a dead one they cannot

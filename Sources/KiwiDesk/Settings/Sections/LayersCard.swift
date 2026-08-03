@@ -37,10 +37,8 @@ struct LayersCard: View {
     /// user's configured layers is what disagreement looks like,
     /// and this area shipped it once.
     private var layersExist: Bool {
-        ShortcutsRuntimeGate.isSatisfied(
-            .layersExist,
-            in: model.config
-        )
+        ShortcutsGates(config: model.config)
+            .inertReason(for: .shortcuts(.switchToLayer)) == nil
     }
 
     /// One declaration, two chromes — force-expanded once a

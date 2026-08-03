@@ -180,43 +180,60 @@ surfacing and hiding, so that line would cut the enum in half.
 The rule that needs no guessing:
 
 - a declared gate is answered by the resolver
-  (`BarsGateContext`, `ShortcutsRuntimeGate`), never
+  (`BarsGates`, `ShortcutsGates`), never
   re-implemented inline beside it — a renderer whose predicate
   drifts from the declaration greys the wrong row, or hides one
   entirely, and the tier case is invisible by construction
-  (`ShortcutsRuntimeGateTests`, written after three such
+  (`ShortcutsGateTests`, written after three such
   violations passed the whole suite);
 - a predicate the resolver **cannot** answer from the declared
   owner — resolved shown-bar values, auto sentinels, live editor
   state — is a wiring predicate and was never a census gate;
 - **which declared gates the resolver cannot answer is data**
-  (`ShortcutsRuntimeGate.resolved` / `.resolvedElsewhere`), so
+  (`ShortcutsGates.resolved` / `.resolvedElsewhere`), so
   the gap stays deliberate and a new gate landing in neither
   set reds.
 
-The resolvers still take different shapes — `BarsGateContext`
-keys on `SettingsContainer.gate` over `TilingSettings`,
-`ShortcutsRuntimeGate` on `SettingRuntimeGate` over `GuiConfig`,
-and the reason-case family (`LayoutDefaultsGates`, `GeneralGates`,
-`GapsBordersGates`) on a row's own `SettingKey`. **Converge the
-first two onto that reason-case shape before a fourth shape
-appears.** The "it had nothing to converge with" excuse is now
-spent: `GapsBordersGates` answers a container gate
-(`containerReason(for:)`, held by `GapsAndBordersGateTests`'
-`containerGateIsResolved`) AND a saved-config `.runtime` gate
-(the gap masters) on the SAME `SettingKey`-keyed struct — so the
-shared shape demonstrably carries all three gate flavours. Folding
-`BarsGateContext` and `ShortcutsRuntimeGate` onto it is
-**consciously deferred** (owner ruling 2026-08-03, the Gaps &
-Borders lane kept low-risk) and stays an obligation on the next
-author who touches those two resolvers.
-`ShortcutsRuntimeGate.resolvedElsewhere` sits elsewhere because
-its one gate (`.luaImportAvailable`) is a live-state predicate the
-saved config cannot answer — not because of the shape split.
+The census gate resolvers share ONE shape (convergence
+2026-08-03): a struct keyed on a row's own `SettingKey` — and,
+where the area block-greys, `containerReason(for:
+SettingsContainer)` — returning a REASON case rather than a Bool,
+with a `GateHelp.sentence(for:)` companion where the reason is a
+grey the user reads, and the answered / answered-elsewhere split
+held as `resolved` / `resolvedElsewhere: Set<SettingKey>`. The
+shape carries every flavour a census gate can be: a container
+block gate (`BarsGates`, `GapsBordersGates`), a saved-config
+`.runtime` GREYING gate (`GapsBordersGates`' gap masters), and a
+`.runtime` SURFACING gate (`ShortcutsGates.onlyDefaultLayer`,
+whose non-nil reason WITHHOLDS a row behind its offer rather than
+greying it — so that one resolver carries no `GateHelp`, there
+being no inline sentence to render). **A census-rendered area
+resolves its declared census gates through a resolver of this
+shape; a Bool-returning or otherwise divergent census-gate
+resolver is the regression this convergence removed.** Each
+area's gate-wiring suite pins that its VIEWS consult the resolver
+rather than re-deriving the predicate inline — the dead-resolver
+trap General shipped, where the resolver was built only in tests
+(`BarsGateWiringTests`, `GapsAndBordersGateWiringTests`,
+`ShortcutsGateTests.layersCardConsultsTheResolver`), gate-granular
+so a file resolving two gates reds if EITHER goes hand-rolled.
+`ShortcutsGates.resolvedElsewhere` holds its one gate
+(`.luaImportAvailable`) because that is a live-editor-state
+predicate the saved config cannot answer — not because of any
+shape split, which no longer exists.
+
+`AdvancedColorsGates` is deliberately NOT one of these resolvers
+and is not the regression the rule names: it answers no census
+`gate:` of its own. It DELEGATES the two bar block gates to
+`BarsGates` (`var bars`), and otherwise picks the SENTENCE for
+greys whose owning switch lives on ANOTHER page — a `Bool` +
+`String?`, `@MainActor` wiring-and-copy job, not census-gate
+resolution. The line is whether the thing answers a declared
+census `gate:`; if it does, it takes the shape.
 `LayoutDefaultsGateTests`' `everyGatedRowIsResolved` holds both
 halves: it reds when a ROW gate this resolver does not answer
 appears, and it pins that no container in the area declares a
-gate at all — because the resolver has no `allowsEditing` arm,
+gate at all — because the resolver has no `containerReason` arm,
 so a container gate here would grey nothing, silently, and the
 row-gate net cannot see one. A resolver returns the *reason*
 rather than a Bool where the area greys with an explanation

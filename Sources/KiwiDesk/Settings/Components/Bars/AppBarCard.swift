@@ -23,20 +23,21 @@ struct AppBarCard: View {
     var style: Binding<AppBarStyle> {
         $model.config.settings.appBarStyle
     }
-    var gates: BarsGateContext {
-        BarsGateContext(settings: model.config.settings)
+    var gates: BarsGates {
+        BarsGates(settings: model.config.settings)
     }
-    /// The census container gate, resolved live.
-    private var allows: Bool {
-        gates.allowsEditing(.appBar)
+    /// The census container gate, resolved live to a reason.
+    private var reason: BarsGates.InertReason? {
+        gates.containerReason(for: .appBar)
     }
+    private var allows: Bool { reason == nil }
 
     var body: some View {
         // The header `?` is the gate's live anchor (#527).
         SettingsSection(
             SettingsCatalog.bars.appBarCard,
             caption: cardCaption,
-            help: allows ? nil : BarsGateHelp.noBarShown
+            help: reason.map(BarsGateHelp.sentence)
         ) {
             AppBarPreviewStrip(style: style.wrappedValue)
             rows(BarsRowOrder.appBarAtRest)
@@ -55,7 +56,7 @@ struct AppBarCard: View {
                         active: !allows
                             && !key.placement
                                 .exemptFromContainerGate,
-                        help: BarsGateHelp.noBarShown
+                        help: BarsGateHelp.sentence(for: .noBarShown)
                     )
                 )
         }
@@ -193,7 +194,7 @@ struct AppBarCard: View {
             GreyOut(
                 active: !model.config.settings
                     .spaceBarStyle.enabled,
-                help: BarsGateHelp.spaceBarOff
+                help: BarsGateHelp.sentence(for: .spaceBarOff)
             )
         )
     }
