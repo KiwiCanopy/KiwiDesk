@@ -14,21 +14,21 @@ public protocol HotkeyRegistrar: AnyObject {
 
 extension CarbonHotkeyCenter: HotkeyRegistrar {}
 
-/// Modal keybindings: named modes hold
-/// their own bindings; exactly one mode is active. The default
-/// mode holds `KiwiDesk.bind(...)` registrations.
+/// Modal keybindings: named layers hold
+/// their own bindings; exactly one layer is active. The default
+/// layer holds `KiwiDesk.bind(...)` registrations.
 @MainActor
 public final class KeybindingManager {
-    public static let defaultMode = "default"
+    public static let defaultLayer = "default"
 
     public var lua: LuaInterpreter?
     public var onLog: @MainActor (String) -> Void = CoreLog.write
-    /// GUI indicator hook (mode name).
-    public var onModeChange: @MainActor (String) -> Void = {
+    /// GUI indicator hook (layer name).
+    public var onLayerChange: @MainActor (String) -> Void = {
         _ in
     }
 
-    public private(set) var currentMode = defaultMode
+    public private(set) var currentLayer = defaultLayer
     /// True while a hotkey's Lua callback runs (#184): commands
     /// executing inside a fire are keyboard-interactive, so
     /// failure cues (the unsupported-resize beep) key off this —
@@ -47,14 +47,14 @@ public final class KeybindingManager {
     /// system didn't grant it").
     public private(set) var activationFailures: Set<KeyCombo> =
         []
-    private var modes: [String: [KeyCombo: Int32]] = [:]
-    /// Menu bar indicator per mode (SF Symbol name or emoji),
-    /// set via `define_mode(name, bindings, { icon = ... })`.
-    private var modeIcons: [String: String] = [:]
+    private var layers: [String: [KeyCombo: Int32]] = [:]
+    /// Menu bar indicator per layer (SF Symbol name or emoji),
+    /// set via `define_layer(name, bindings, { icon = ... })`.
+    private var layerIcons: [String: String] = [:]
     private var activeIDs: [UInt32] = []
     /// True while a Settings recorder is armed (#213): all our
     /// hotkeys are unregistered so testing an existing shortcut
-    /// mid-capture can't fire its action. Table/mode edits still
+    /// mid-capture can't fire its action. Table/layer edits still
     /// apply but skip registration until `resume()`.
     private var suspended = false
     private let registrar: HotkeyRegistrar
@@ -65,147 +65,147 @@ public final class KeybindingManager {
         self.registrar = registrar
     }
 
-    /// Bindings of one mode (exposed for the GUI editor).
+    /// Bindings of one layer (exposed for the GUI editor).
     public func bindings(
-        for mode: String
+        for layer: String
     ) -> [KeyCombo: Int32] {
-        modes[mode] ?? [:]
+        layers[layer] ?? [:]
     }
 
-    /// Every defined mode name, the default first and the rest
+    /// Every defined layer name, the default first and the rest
     /// sorted, so the GUI import (#4) can enumerate them in a
     /// stable order. The default is always present even with no
-    /// bindings, matching the always-present GUI default mode.
-    public var definedModes: [String] {
-        let others = modes.keys
-            .filter { $0 != Self.defaultMode }
+    /// bindings, matching the always-present GUI default layer.
+    public var definedLayers: [String] {
+        let others = layers.keys
+            .filter { $0 != Self.defaultLayer }
             .sorted()
-        return [Self.defaultMode] + others
+        return [Self.defaultLayer] + others
     }
 
     // MARK: - Registration (from Lua)
 
-    /// `KiwiDesk.bind(combo, fn)` — default mode. A rebound
+    /// `KiwiDesk.bind(combo, fn)` — default layer. A rebound
     /// combo's displaced ref is released (registry slots must
     /// not leak between resets).
     public func bind(_ combo: KeyCombo, ref: Int32) {
-        let old = modes[Self.defaultMode, default: [:]]
+        let old = layers[Self.defaultLayer, default: [:]]
             .updateValue(ref, forKey: combo)
         if let old, old != ref {
             lua?.release(ref: old)
         }
-        if currentMode == Self.defaultMode {
-            activate(Self.defaultMode)
+        if currentLayer == Self.defaultLayer {
+            activate(Self.defaultLayer)
         }
     }
 
-    /// `KiwiDesk.define_mode(name, { key = fn, ... }, opts)`.
-    /// Redefining an existing mode releases the displaced
-    /// refs — a duplicate mode name in hand-edited config must
+    /// `KiwiDesk.define_layer(name, { key = fn, ... }, opts)`.
+    /// Redefining an existing layer releases the displaced
+    /// refs — a duplicate layer name in hand-edited config must
     /// not leak registry slots until the next reload.
-    public func defineMode(
+    public func defineLayer(
         _ name: String,
         bindings: [KeyCombo: Int32],
         icon: String? = nil
     ) {
-        if let lua, let old = modes[name] {
+        if let lua, let old = layers[name] {
             for ref in old.values
             where bindings.values.contains(ref) == false {
                 lua.release(ref: ref)
             }
         }
-        modes[name] = bindings
+        layers[name] = bindings
         if let icon, !icon.isEmpty {
-            modeIcons[name] = icon
+            layerIcons[name] = icon
         } else {
-            modeIcons[name] = nil
+            layerIcons[name] = nil
         }
-        if currentMode == name {
+        if currentLayer == name {
             activate(name)
         }
     }
 
-    /// The menu bar indicator for a mode, if one was set.
-    public func icon(for mode: String) -> String? {
-        modeIcons[mode]
+    /// The menu bar indicator for a layer, if one was set.
+    public func icon(for layer: String) -> String? {
+        layerIcons[layer]
     }
 
-    /// `KiwiDesk.switch_mode(name)`.
-    public func switchMode(_ name: String) {
-        guard name == Self.defaultMode || modes[name] != nil
+    /// `KiwiDesk.switch_layer(name)`.
+    public func switchLayer(_ name: String) {
+        guard name == Self.defaultLayer || layers[name] != nil
         else {
-            onLog("switch_mode: unknown mode '\(name)'")
+            onLog("switch_layer: unknown layer '\(name)'")
             return
         }
-        currentMode = name
+        currentLayer = name
         activate(name)
-        onModeChange(name)
+        onLayerChange(name)
     }
 
     /// Clears everything (config reload / profile apply).
-    /// Falling back to the default mode notifies
-    /// `onModeChange` — the menu-bar indicator must not keep
-    /// showing a mode whose bindings just went away.
+    /// Falling back to the default layer notifies
+    /// `onLayerChange` — the menu-bar indicator must not keep
+    /// showing a layer whose bindings just went away.
     public func reset() {
         deactivate()
         if let lua {
-            for bindings in modes.values {
+            for bindings in layers.values {
                 for ref in bindings.values {
                     lua.release(ref: ref)
                 }
             }
         }
-        modes = [:]
-        modeIcons = [:]
-        let changed = currentMode != Self.defaultMode
-        currentMode = Self.defaultMode
+        layers = [:]
+        layerIcons = [:]
+        let changed = currentLayer != Self.defaultLayer
+        currentLayer = Self.defaultLayer
         if changed {
-            onModeChange(Self.defaultMode)
+            onLayerChange(Self.defaultLayer)
         }
     }
 
-    /// Atomically replaces every mode prepared by the
+    /// Atomically replaces every layer prepared by the
     /// structured-config bridge. Preparation happens before
     /// this call, so the old table remains callable until one
     /// swap; Carbon registration then runs once for the chosen
-    /// mode instead of once per growing default-mode prefix.
+    /// layer instead of once per growing default-layer prefix.
     ///
-    /// `preferredMode` preserves a recorder session's active
-    /// mode when it still exists. Profile/config applies pass
+    /// `preferredLayer` preserves a recorder session's active
+    /// layer when it still exists. Profile/config applies pass
     /// `default`, retaining their settled reset semantics.
-    func replaceModes(
+    func replaceLayers(
         _ replacements: [String: [KeyCombo: Int32]],
         icons: [String: String],
-        preferredMode: String
+        preferredLayer: String
     ) {
-        let oldModes = modes
-        let oldCurrent = currentMode
+        let oldLayers = layers
+        let oldCurrent = currentLayer
 
         deactivate()
-        modes = replacements
-        if modes[Self.defaultMode] == nil {
-            modes[Self.defaultMode] = [:]
+        layers = replacements
+        if layers[Self.defaultLayer] == nil {
+            layers[Self.defaultLayer] = [:]
         }
-        modeIcons = icons
+        layerIcons = icons
 
-        if preferredMode == Self.defaultMode
-            || modes[preferredMode] != nil
+        if preferredLayer == Self.defaultLayer
+            || layers[preferredLayer] != nil
         {
-            currentMode = preferredMode
+            currentLayer = preferredLayer
         } else {
-            currentMode = Self.defaultMode
+            currentLayer = Self.defaultLayer
         }
 
         if let lua {
-            for bindings in oldModes.values {
+            for bindings in oldLayers.values {
                 for ref in bindings.values {
                     lua.release(ref: ref)
                 }
             }
         }
-        activate(currentMode)
-        if currentMode != oldCurrent {
-            onModeChange(currentMode)
+        activate(currentLayer)
+        if currentLayer != oldCurrent {
+            onLayerChange(currentLayer)
         }
     }
 
@@ -226,12 +226,12 @@ public final class KeybindingManager {
     }
 
     /// Restores the hotkeys suspended by `suspend()`, registering
-    /// whatever mode is current now — a mode/table change made
+    /// whatever layer is current now — a layer/table change made
     /// during suspension is honored. Idempotent.
     public func resume() {
         guard suspended else { return }
         suspended = false
-        activate(currentMode)
+        activate(currentLayer)
     }
 
     // MARK: - Hotkey activation
@@ -243,13 +243,13 @@ public final class KeybindingManager {
         activeIDs = []
     }
 
-    private func activate(_ mode: String) {
+    private func activate(_ layer: String) {
         deactivate()
         activationFailures = []
         // A recorder is armed: keep the table current but
         // register nothing, so testing a shortcut can't fire.
         guard !suspended else { return }
-        for (combo, ref) in modes[mode] ?? [:] {
+        for (combo, ref) in layers[layer] ?? [:] {
             let id = registrar.register(
                 keyCode: combo.keyCode,
                 modifiers: combo.modifiers
@@ -262,8 +262,8 @@ public final class KeybindingManager {
                 activationFailures.insert(combo)
                 onLog(
                     "keybinding conflict: could not "
-                        + "register a shortcut in mode "
-                        + "'\(mode)'"
+                        + "register a shortcut in layer "
+                        + "'\(layer)'"
                 )
             }
         }
@@ -277,14 +277,14 @@ public final class KeybindingManager {
         if case .failure(let error) = lua.call(ref: ref) {
             onLog("keybinding disabled: \(error)")
             // Disable the faulty callback (sandbox rules).
-            for (mode, var bindings) in modes {
+            for (layer, var bindings) in layers {
                 if bindings[combo] == ref {
                     bindings[combo] = nil
-                    modes[mode] = bindings
+                    layers[layer] = bindings
                 }
             }
             lua.release(ref: ref)
-            activate(currentMode)
+            activate(currentLayer)
         }
     }
 }

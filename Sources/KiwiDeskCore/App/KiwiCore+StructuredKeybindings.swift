@@ -3,16 +3,16 @@ import Foundation
 /// Prepared structured keybindings waiting for one atomic
 /// `KeybindingManager` swap. Lua refs are minted before the
 /// running table changes, so a recorder edit never exposes a
-/// half-built mode set (#123 review).
+/// half-built layer set (#123 review).
 struct PreparedKeybindings {
     struct Failure {
-        let mode: String
+        let layer: String
         let binding: KeyBinding
     }
 
     var refs: [String: [KeyCombo: Int32]]
     var icons: [String: String]
-    var registeredModes: [KeyMode]
+    var registeredLayers: [KeyLayer]
     var failures: [Failure]
 
     @MainActor func release(using lua: LuaInterpreter) {
@@ -26,15 +26,15 @@ struct PreparedKeybindings {
 
 extension KiwiCore {
     /// Resolves the base + profile tiers, prepares every Lua
-    /// callback, then replaces all modes in one batch. Regular
+    /// callback, then replaces all layers in one batch. Regular
     /// config/profile applies reset to default; recorder-only
-    /// entry points call the lower seam with their active mode.
+    /// entry points call the lower seam with their active layer.
     func applyStructuredKeybindings(
-        modes base: [KeyMode],
-        profile: KeyModeOverride?,
+        layers base: [KeyLayer],
+        profile: KeyLayerOverride?,
         lua: LuaInterpreter
     ) {
-        let resolved = ConfigResolver.resolvedModes(
+        let resolved = ConfigResolver.resolvedLayers(
             base: base,
             profile: profile
         )
@@ -44,7 +44,7 @@ extension KiwiCore {
         )
         install(
             prepared,
-            preferredMode: KeybindingManager.defaultMode
+            preferredLayer: KeybindingManager.defaultLayer
         )
     }
 
@@ -54,24 +54,24 @@ extension KiwiCore {
     /// failures remain identifiable so live recorder feedback
     /// never claims the target compiled.
     func prepareKeybindings(
-        _ modes: [KeyMode],
+        _ layers: [KeyLayer],
         lua: LuaInterpreter
     ) -> PreparedKeybindings {
         var refs: [String: [KeyCombo: Int32]] = [:]
         var icons: [String: String] = [:]
-        var registeredModes: [KeyMode] = []
+        var registeredLayers: [KeyLayer] = []
         var failures: [PreparedKeybindings.Failure] = []
 
-        for mode in modes {
-            let prepared = prepare(mode: mode, lua: lua)
-            refs[mode.name] = prepared.refs
-            if let icon = mode.icon, !icon.isEmpty {
-                icons[mode.name] = icon
+        for layer in layers {
+            let prepared = prepare(layer: layer, lua: lua)
+            refs[layer.name] = prepared.refs
+            if let icon = layer.icon, !icon.isEmpty {
+                icons[layer.name] = icon
             }
-            registeredModes.append(
-                KeyMode(
-                    name: mode.name,
-                    icon: mode.icon,
+            registeredLayers.append(
+                KeyLayer(
+                    name: layer.name,
+                    icon: layer.icon,
                     bindings: prepared.bindings
                 )
             )
@@ -80,25 +80,25 @@ extension KiwiCore {
         return PreparedKeybindings(
             refs: refs,
             icons: icons,
-            registeredModes: registeredModes,
+            registeredLayers: registeredLayers,
             failures: failures
         )
     }
 
     func install(
         _ prepared: PreparedKeybindings,
-        preferredMode: String
+        preferredLayer: String
     ) {
-        keys.replaceModes(
+        keys.replaceLayers(
             prepared.refs,
             icons: prepared.icons,
-            preferredMode: preferredMode
+            preferredLayer: preferredLayer
         )
-        appliedStructuredModes = prepared.registeredModes
+        appliedStructuredLayers = prepared.registeredLayers
     }
 
     private func prepare(
-        mode: KeyMode,
+        layer: KeyLayer,
         lua: LuaInterpreter
     ) -> (
         refs: [KeyCombo: Int32],
@@ -109,7 +109,7 @@ extension KiwiCore {
             [KeyCombo: (index: Int, binding: KeyBinding, ref: Int32)] = [:]
         var failures: [PreparedKeybindings.Failure] = []
 
-        for (index, binding) in mode.bindings.enumerated()
+        for (index, binding) in layer.bindings.enumerated()
         where !binding.combo.isEmpty {
             guard let combo = KeyCombo.parse(binding.combo)
             else {
@@ -118,7 +118,7 @@ extension KiwiCore {
                         + "'\(binding.combo)'"
                 )
                 failures.append(
-                    .init(mode: mode.name, binding: binding)
+                    .init(layer: layer.name, binding: binding)
                 )
                 continue
             }
@@ -138,7 +138,7 @@ extension KiwiCore {
                         + "[\(binding.combo)]: \(error)"
                 )
                 failures.append(
-                    .init(mode: mode.name, binding: binding)
+                    .init(layer: layer.name, binding: binding)
                 )
             }
         }

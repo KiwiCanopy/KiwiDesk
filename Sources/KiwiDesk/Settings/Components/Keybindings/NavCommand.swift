@@ -4,7 +4,7 @@ import KiwiDeskCore
 /// binds to. `label` is the stable, English canonical text —
 /// it is what the import classifier matches on (keyed off
 /// `lua`, never displayed text) and what persists into
-/// `KeyBinding.label` (`KeyMode.sameAction` already documents
+/// `KeyBinding.label` (`KeyLayer.sameAction` already documents
 /// `label` as display-only metadata for the override cascade).
 /// `displayLabel` is the localized string shown in the GUI —
 /// resolved separately so a language switch never rewrites the

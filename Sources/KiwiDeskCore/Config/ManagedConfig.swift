@@ -50,7 +50,7 @@ public enum ManagedConfig {
         "float_rules",
         "ignore_rules",
         "KiwiDesk.bind(",
-        "KiwiDesk.define_mode(",
+        "KiwiDesk.define_layer(",
         "KiwiDesk.bind_profile_to_native_space(",
     ]
 

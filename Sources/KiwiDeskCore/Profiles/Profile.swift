@@ -106,7 +106,7 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Per-profile sparse keybinding override (#55). nil
     /// inherits the base modes (gui.json) entirely; present,
     /// it shadows by mode name then combo (O4 soft).
-    public var modes: KeyModeOverride?
+    public var layers: KeyLayerOverride?
     /// Per-profile sparse app→space rule override (#109). nil
     /// inherits the global `app_rules` base entirely;
     /// present, it shadows per app — with a null tombstone to
@@ -166,7 +166,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case spaceModes = "space_modes"
         case settings
         case savedAt = "saved_at"
-        case modes
+        case layers
         case appRules = "app_rules"
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
@@ -183,7 +183,7 @@ public struct Profile: Codable, Sendable, Equatable {
         spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
         savedAt: Date = .now,
-        modes: KeyModeOverride? = nil,
+        layers: KeyLayerOverride? = nil,
         appRules: AppRuleOverride? = nil,
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil
@@ -198,7 +198,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.spaceModes = spaceModes
         self.settings = settings
         self.savedAt = savedAt
-        self.modes = modes
+        self.layers = layers
         self.appRules = appRules
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
@@ -269,9 +269,9 @@ public struct Profile: Codable, Sendable, Equatable {
             Date.self,
             forKey: .savedAt
         )
-        modes = try container.decodeIfPresent(
-            KeyModeOverride.self,
-            forKey: .modes
+        layers = try container.decodeIfPresent(
+            KeyLayerOverride.self,
+            forKey: .layers
         )
         appRules = try container.decodeIfPresent(
             AppRuleOverride.self,

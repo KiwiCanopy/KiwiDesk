@@ -272,7 +272,7 @@ public enum APIReference {
     /// (`suggestion`), which must only hint at commands the
     /// caller's channel can invoke (issue #37).
     public static let luaOnly: [String] = [
-        "exec", "bind", "on", "define_mode", "switch_mode",
+        "exec", "bind", "on", "define_layer", "switch_layer",
         "show_shortcuts",
     ]
 

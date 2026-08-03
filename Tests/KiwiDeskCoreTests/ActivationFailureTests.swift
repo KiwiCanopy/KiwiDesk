@@ -63,7 +63,7 @@ struct ActivationFailureTests {
         // The system frees the combo (or the user rebinds);
         // re-activating must not report a stale failure.
         registrar.deniedKeyCodes = []
-        manager.switchMode(KeybindingManager.defaultMode)
+        manager.switchLayer(KeybindingManager.defaultLayer)
         #expect(manager.activationFailures.isEmpty)
     }
 }

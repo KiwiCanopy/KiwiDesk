@@ -1,7 +1,7 @@
 import Foundation
 import KiwiDeskCore
 
-/// Builds a `ShortcutsReference` from a live key mode by filtering
+/// Builds a `ShortcutsReference` from a live key layer by filtering
 /// the `KeybindingCatalog` presets to the bindings that actually
 /// exist — reusing the exact labels, icons, and Lua identity the
 /// editor authors, so the panel can never disagree with the tab.
@@ -19,19 +19,19 @@ import KiwiDeskCore
 @MainActor
 enum ShortcutsReferenceBuilder {
     static func build(
-        mode: KeyMode,
+        layer: KeyLayer,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         resizeStep: Int,
-        modeNames: [String]
+        layerNames: [String]
     ) -> ShortcutsReference {
         // The panel's own opener never renders as a row (see the
         // type docstring): drop every binding of it — whatever its
         // kind or combo — from the working set before any band
         // builds, so the suppression holds across all three bands
         // by construction, not by each band's filter remembering.
-        var mode = mode
-        mode.bindings.removeAll {
+        var layer = layer
+        layer.bindings.removeAll {
             $0.lua == ShortcutsOpenBinding.lua
         }
 
@@ -46,7 +46,7 @@ enum ShortcutsReferenceBuilder {
 
         // A bound binding (non-empty combo) for a preset's Lua.
         func bound(_ lua: String) -> KeyBinding? {
-            mode.bindings.first {
+            layer.bindings.first {
                 $0.lua == lua && !$0.combo.isEmpty
             }
         }
@@ -75,18 +75,18 @@ enum ShortcutsReferenceBuilder {
         }
 
         let controls = buildControls(
-            activeMode: mode.name,
+            activeLayer: layer.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
             resizeStep: resizeStep,
-            modeNames: modeNames,
+            layerNames: layerNames,
             rows: rows
         )
-        let apps = buildApps(mode, consumed: &consumed)
-        let custom = buildCustom(mode, consumed: consumed)
+        let apps = buildApps(layer, consumed: &consumed)
+        let custom = buildCustom(layer, consumed: consumed)
 
         return ShortcutsReference(
-            modeName: mode.name,
+            layerName: layer.name,
             controls: controls,
             apps: apps,
             custom: custom
@@ -95,19 +95,32 @@ enum ShortcutsReferenceBuilder {
 
     // MARK: - Bands
 
-    /// Membership twin of the editor's `FocusGroup` /
-    /// `MoveWindowsGroup` / `SizeFloatGroup` / `ChangeModesGroup`
-    /// (`KeybindingGroups.swift`) and `KeybindingCatalog`'s
-    /// `navigationGroups`. Row identity (label / icon / Lua) is
-    /// single-sourced from the catalog, so only the *grouping* is
-    /// mirrored here — and a forgotten command degrades to Custom via
-    /// the fallthrough, never vanishes. Keep the three in step.
+    /// Membership twin of the editor's grouping. Row identity
+    /// (label / icon / Lua) is single-sourced from
+    /// `KeybindingCatalog`, so only the *grouping* is mirrored
+    /// here — and a forgotten command degrades to Custom via the
+    /// fallthrough, never vanishes.
+    ///
+    /// Since #678 Phase 3 the editor's grouping has an OWNER —
+    /// the settings census, read through `ShortcutsRowOrder` and
+    /// expanded by `ShortcutsFamilyRows` — and this builder is
+    /// now the copy rather than a peer. It still reads the
+    /// catalog directly, which is why the panel and the editor
+    /// can disagree about ORDER (they did, over the per-space
+    /// move pair) even while agreeing about membership.
+    ///
+    /// **A family added to the census owes this builder a band
+    /// too**, until it consumes the expander. Consuming it is the
+    /// real fix and is available — this is `@MainActor` and
+    /// GUI-side — but it is a behavioural change to the panel and
+    /// belongs in its own change, not in the one that created the
+    /// owner.
     private static func buildControls(
-        activeMode: String,
+        activeLayer: String,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         resizeStep: Int,
-        modeNames: [String],
+        layerNames: [String],
         rows: ([NavCommand]) -> [ShortcutRow]
     ) -> [ShortcutSubgroup] {
         let focus =
@@ -121,13 +134,13 @@ enum ShortcutsReferenceBuilder {
                 spaces,
                 icons: spaceIcons
             )
-        // Exclude the active mode: you never switch to the mode
-        // you're already in, and the editor's ChangeModesGroup
+        // Exclude the active layer: you never switch to the layer
+        // you're already in, and the editor's SwitchLayersGroup
         // filters it out the same way — keep the two in parity.
-        let switchModes =
-            modeNames
-            .filter { $0 != activeMode }
-            .map { KeybindingCatalog.switchModeCommand($0) }
+        let switchLayers =
+            layerNames
+            .filter { $0 != activeLayer }
+            .map { KeybindingCatalog.switchLayerCommand($0) }
         return [
             ShortcutSubgroup(
                 title: L("shortcuts.section.focus", "Focus"),
@@ -153,19 +166,19 @@ enum ShortcutsReferenceBuilder {
             ),
             ShortcutSubgroup(
                 title: L(
-                    "shortcuts.section.switch_modes",
-                    "Switch modes"
+                    "shortcuts.section.switch_layers",
+                    "Switch layers"
                 ),
-                rows: rows(switchModes)
+                rows: rows(switchLayers)
             ),
         ].filter { !$0.rows.isEmpty }
     }
 
     private static func buildApps(
-        _ mode: KeyMode,
+        _ layer: KeyLayer,
         consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
-        mode.bindings
+        layer.bindings
             .filter {
                 $0.kind == .application && !$0.combo.isEmpty
             }
@@ -214,10 +227,10 @@ enum ShortcutsReferenceBuilder {
     }
 
     private static func buildCustom(
-        _ mode: KeyMode,
+        _ layer: KeyLayer,
         consumed: Set<UUID>
     ) -> [ShortcutRow] {
-        mode.bindings
+        layer.bindings
             .filter {
                 !$0.combo.isEmpty && !consumed.contains($0.id)
             }
@@ -235,14 +248,14 @@ enum ShortcutsReferenceBuilder {
     /// (`focus`/`swap` left/right/up/down) — the one clearly-spatial
     /// glyph the hybrid symbol scheme adds beyond space/app icons.
     /// Non-spatial commands (prev/next track, resize axes,
-    /// switch-mode, custom Lua) stay label-only by design. Panel-only:
+    /// switch-layer, custom Lua) stay label-only by design. Panel-only:
     /// the shared catalog and the editor rows are untouched.
     private static func directionalIcon(for lua: String) -> String? {
-        // A space or mode literally named a direction word would
+        // A space or layer literally named a direction word would
         // otherwise false-match on the substring — those commands own
         // their own glyphs (space fallback / none), so bail first.
         guard !lua.contains("_space"),
-            !lua.contains("switch_mode")
+            !lua.contains("switch_layer")
         else { return nil }
         if lua.contains("\"left\"") { return "arrow.left" }
         if lua.contains("\"right\"") { return "arrow.right" }

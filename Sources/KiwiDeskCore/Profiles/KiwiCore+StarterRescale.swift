@@ -71,7 +71,7 @@ extension KiwiCore {
     /// safe to call after any GUI-managed apply.
     func topUpDigitShortcuts() {
         guard isGuiManaged, var config = guiConfigStore.load(),
-            let index = config.modes.firstIndex(
+            let index = config.layers.firstIndex(
                 where: { $0.isDefault }
             )
         else { return }
@@ -79,11 +79,11 @@ extension KiwiCore {
             state.workspaces.allSpaces.map(\.id)
         )
         let added = DefaultKeybindings.digitTopUp(
-            existing: config.modes[index].bindings,
+            existing: config.layers[index].bindings,
             spaces: spaces
         )
         guard !added.isEmpty else { return }
-        config.modes[index].bindings.append(
+        config.layers[index].bindings.append(
             contentsOf: added
         )
         try? guiConfigStore.save(config)
@@ -93,8 +93,8 @@ extension KiwiCore {
         // does (a transient Standard baseline has none).
         guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
-            modes: config.modes,
-            profile: activeProfileOverrides()?.modes,
+            layers: config.layers,
+            profile: activeProfileOverrides()?.layers,
             lua: lua
         )
     }

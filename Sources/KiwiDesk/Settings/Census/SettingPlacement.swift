@@ -68,10 +68,16 @@ enum SettingTier: Hashable {
     /// wording would put those three in a drawer.
     case showMore
     /// Surfaces without disclosure the moment its gate allows.
-    /// No census row uses it yet: the placement table encodes
-    /// conditional surfacing as a `.runtime` gate on an
-    /// atRest/showMore row, and this tier waits for the
-    /// mode-mechanics phase, which item 12 names it for.
+    ///
+    /// This is the tier that carries **config presence expands
+    /// the Simple surface**: anything that already EXISTS in the
+    /// user's config — a layer, an imported binding, an override
+    /// — shows in both modes and enhances the simple one. Simple
+    /// withholds only the OFFER to create, never an existing
+    /// thing. So an `.immediate` row is at rest once its gate
+    /// says the thing exists, and behind the offer's disclosure
+    /// before that; it is NOT a `.showMore` row, and reading it
+    /// as one hides a user's own configuration from them.
     case immediate
     /// Reachable only from Lua (`init.lua`), by design.
     case luaOnly
@@ -170,6 +176,11 @@ enum SettingRuntimeGate: Hashable {
     /// being edited (same one-slot conjunction:
     /// `editingStoredProfile` is its other half).
     case luaImportAvailable
+    /// The config defines a layer beyond `default`. Gates the
+    /// Layers card's `.immediate` tier: with layers configured
+    /// the card is a user's own setup and shows at rest; with
+    /// only `default` it is purely the offer to create one.
+    case layersExist
     /// Liquid Glass is offered only where it can render
     /// (macOS 26+) — hidden, never greyed, matching the OS
     /// capability gate (#390); the `#available` check itself

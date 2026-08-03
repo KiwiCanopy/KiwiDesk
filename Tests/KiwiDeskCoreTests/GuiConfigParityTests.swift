@@ -31,7 +31,7 @@ struct GuiConfigParityTests {
                 "settings", "spaces", "spaceModes", "appRules",
                 "spacePins", "mainSpaces", "fallbackSpace",
                 "floatRules", "ignoreRules", "profileBindings",
-                "modes",
+                "layers",
             ]
         )
     }
@@ -44,8 +44,8 @@ struct GuiConfigParityTests {
         config.floatRules = ["Calculator"]
         config.ignoreRules = ["io.tailscale.ipn.macos"]
         config.profileBindings = [2: "Studio"]
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -66,7 +66,7 @@ struct GuiConfigParityTests {
         #expect(back.floatRules == config.floatRules)
         #expect(back.ignoreRules == config.ignoreRules)
         #expect(back.profileBindings == config.profileBindings)
-        #expect(back.modes == config.modes)
+        #expect(back.layers == config.layers)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

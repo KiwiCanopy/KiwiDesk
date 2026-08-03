@@ -134,7 +134,7 @@ struct StarterLadderSeedTests {
             config.spaces.map(\.raw)
                 == (1...10).map { "\($0)" }
         )
-        let base = config.modes.first { $0.isDefault }
+        let base = config.layers.first { $0.isDefault }
         let combos = Set((base?.bindings ?? []).map(\.combo))
         // Tenth space binds ⌃⌥0; there is no ⌃⌥6-as-two-digits.
         #expect(combos.contains("control+option+0"))
@@ -152,7 +152,7 @@ struct StarterLadderSeedTests {
         seedDisplays(core, count: 1)
         let config = core.guiConfigSeed()
         #expect(config.spaces.count == 5)
-        let base = core.guiConfigSeed().modes.first { $0.isDefault }
+        let base = core.guiConfigSeed().layers.first { $0.isDefault }
         let combos = Set((base?.bindings ?? []).map(\.combo))
         #expect(combos.contains("control+option+5"))
         #expect(!combos.contains("control+option+6"))

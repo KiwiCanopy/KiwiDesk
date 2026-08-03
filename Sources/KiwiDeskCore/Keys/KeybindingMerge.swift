@@ -1,47 +1,47 @@
 import Foundation
 
-/// Folds recovered keybinding modes into an edited `GuiConfig`
-/// for the GUI's "Import current shortcuts" (#4): modes are
+/// Folds recovered keybinding layers into an edited `GuiConfig`
+/// for the GUI's "Import current shortcuts" (#4): layers are
 /// matched by name (appended when new) and rows upserted by their
 /// combo, so re-importing refreshes an existing shortcut instead
 /// of duplicating it. Pure and Core-typed, so the dedup logic the
 /// import depends on is unit-tested without the SwiftUI layer.
 ///
-/// Sibling keyed merge: `KeyModeOverride.resolved(onto:)` (#55
+/// Sibling keyed merge: `KeyLayerOverride.resolved(onto:)` (#55
 /// profile override) merges by the same name×combo key but with
 /// the OPPOSITE icon precedence (override-wins). Both are
 /// correct for their direction — do not unify them.
 public enum KeybindingMerge {
-    /// Merges every recovered mode into `config` in place.
+    /// Merges every recovered layer into `config` in place.
     public static func merge(
-        recovered: [KeyMode],
+        recovered: [KeyLayer],
         into config: inout GuiConfig
     ) {
-        for mode in recovered {
-            merge(mode, into: &config)
+        for layer in recovered {
+            merge(layer, into: &config)
         }
     }
 
-    /// Folds one recovered mode into `config` — updating the
-    /// same-named mode's rows, or appending the mode when new. An
-    /// existing mode keeps its icon unless it had none.
+    /// Folds one recovered layer into `config` — updating the
+    /// same-named layer's rows, or appending the layer when new. An
+    /// existing layer keeps its icon unless it had none.
     private static func merge(
-        _ recovered: KeyMode,
+        _ recovered: KeyLayer,
         into config: inout GuiConfig
     ) {
         guard
-            let index = config.modes.firstIndex(
+            let index = config.layers.firstIndex(
                 where: { $0.name == recovered.name }
             )
         else {
-            config.modes.append(recovered)
+            config.layers.append(recovered)
             return
         }
-        if config.modes[index].icon == nil {
-            config.modes[index].icon = recovered.icon
+        if config.layers[index].icon == nil {
+            config.layers[index].icon = recovered.icon
         }
         for row in recovered.bindings {
-            upsert(row, into: &config.modes[index].bindings)
+            upsert(row, into: &config.layers[index].bindings)
         }
     }
 

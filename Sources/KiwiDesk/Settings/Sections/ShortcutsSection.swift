@@ -1,17 +1,29 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Shortcuts (#68 §3.6): a mode strip (chips, "+"
-/// popover), flat intent groups (Focus / Move windows / Size &
-/// Float / Switch modes / Open applications), the raw-Lua rows
-/// demoted to a collapsed Advanced drawer, and Import moved to
-/// the header where a new user can see it. One recorder can be
-/// active at a time (#33), duplicates hard-block with Steal /
-/// Go to (#34), and conflict state derives live from the
-/// bindings on every render (#35).
+/// Whole App ▸ Shortcuts (#68 §3.6), rendered FROM the settings
+/// census (#678 Phase 3): flat intent groups (Focus / Move
+/// windows / Size & float / Open applications), then the
+/// advanced half — the Layers card and the raw-Lua drawer — with
+/// Import in the header where a new user can see it. One
+/// recorder can be active at a
+/// time (#33), duplicates hard-block with Steal / Go to (#34),
+/// and conflict state derives live from the bindings on every
+/// render (#35).
+///
+/// The census owns placement, `ShortcutsRowOrder` owns display
+/// order and `ShortcutsFamilyRows` owns the family→rows
+/// expansion; `ShortcutsCensusRenderTests` pins all three
+/// together. What the census does NOT place is the Inactive
+/// shortcuts card: its rows are instances of the `goToSpace` and
+/// `moveToSpace` families already censused under Focus and Move
+/// windows, surfaced a second time because their space left the
+/// list. A census row for it would be a second placement of a
+/// setting that already has one, so the card is hand-mounted and
+/// the guard states why it holds no census keys.
 struct ShortcutsSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var selected = KeyMode.defaultName
+    @State private var selected = KeyLayer.defaultName
     @State private var advancedExpanded = false
     @StateObject private var coordinator =
         RecorderCoordinator()
@@ -20,66 +32,19 @@ struct ShortcutsSection: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    KeybindingConflictBanner(model: model)
-                    overrideBanner
-                    ShortcutsHeader(
-                        model: model,
-                        selected: $selected
-                    )
-                    // Right under the strip that defines the
-                    // modes — the switch shortcuts belong
-                    // beside their definition, not buried
-                    // below the action groups.
-                    if model.config.modes.count > 1 {
-                        ChangeModesGroup(
-                            model: model,
-                            bindings: bindingsBinding,
-                            modeNames: model.config.modes.map(
-                                \.name
-                            ),
-                            current: selected
-                        )
-                    }
-                    FocusGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    MoveWindowsGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    SizeFloatGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    ApplicationsGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    GeneralShortcutsGroup(
-                        model: model,
-                        bindings: bindingsBinding
-                    )
-                    // Orphaned space-targeting rows (#92):
-                    // rendered so "Go to" from a rejected
-                    // recording can reach the holder — the
-                    // per-space groups above only render
-                    // live spaces.
-                    OrphanedShortcutsGroup(
-                        model: model,
-                        bindings: bindingsBinding,
-                        spaces: model.config.spaces
-                    )
-                    advancedDrawer
+                    header
+                    actionGroups
+                    tail
                 }
-                .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+                .padding(
+                    [.horizontal, .bottom],
+                    SettingsMetrics.paneInset
+                )
                 .environment(
                     \.keybindingOverrideBase,
-                    model.overrideBaseRows(mode: selected)
+                    model.overrideBaseRows(layer: selected)
                 )
-                .environment(\.keybindingModeName, selected)
+                .environment(\.keybindingLayerName, selected)
                 .environmentObject(coordinator)
             }
             .onChange(of: coordinator.scrollTarget) {
@@ -102,10 +67,10 @@ struct ShortcutsSection: View {
             }
         }
         // The section stays mounted across reloads and edit-
-        // target switches; a vanished mode must never leave
-        // `selected` pointing at modes[0] under a phantom
+        // target switches; a vanished layer must never leave
+        // `selected` pointing at layers[0] under a phantom
         // header (#68 review M1).
-        .onChange(of: model.config.modes.map(\.name)) {
+        .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
             ensureSelection()
@@ -119,10 +84,69 @@ struct ShortcutsSection: View {
         }
     }
 
-    // MARK: - Override mode (#55 phase 7)
+    // MARK: - Body pieces
+    //
+    // Split out of `body` rather than nested in it: a single
+    // expression holding every group blew the type-checker's
+    // budget, which fails on the slower CI runner while
+    // compiling fine locally (gui.md's shallow-body rule).
+
+    @ViewBuilder private var header: some View {
+        KeybindingConflictBanner(model: model)
+        overrideBanner
+        ShortcutsHeader(model: model, selected: $selected)
+    }
+
+    @ViewBuilder private var actionGroups: some View {
+        FocusGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        MoveWindowsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        SizeFloatGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+        ApplicationsGroup(model: model, bindings: bindingsBinding)
+        GeneralShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
+    }
+
+    @ViewBuilder private var tail: some View {
+        // Orphaned space-targeting rows (#92): rendered so "Go
+        // to" from a rejected recording can reach the holder —
+        // the per-space groups above only render live spaces.
+        OrphanedShortcutsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            spaces: model.config.spaces
+        )
+        // The layers that define alternate key sets — at rest
+        // once one exists, the offer to create the first behind
+        // its disclosure — then the raw-Lua escape hatch, which
+        // is `.showMore` outright.
+        LayersCard(
+            model: model,
+            bindings: bindingsBinding,
+            selected: $selected,
+            expander: expander
+        )
+        advancedDrawer
+    }
+
+    // MARK: - Override layer (#55 phase 7)
 
     /// Shown while editing a stored profile: the section
-    /// renders the RESOLVED modes; only rows diverging from
+    /// renders the RESOLVED layers; only rows diverging from
     /// the base are saved into the profile's sparse override.
     @ViewBuilder private var overrideBanner: some View {
         if model.editingStoredProfile {
@@ -225,30 +249,44 @@ struct ShortcutsSection: View {
         )
     }
 
-    // MARK: - Bindings into the selected mode
+    /// The family→rows expansion every group reads. Built once
+    /// per render from live state, so the per-space and
+    /// per-layer families expand against what is actually
+    /// configured right now.
+    private var expander: ShortcutsFamilyRows {
+        ShortcutsFamilyRows(
+            spaces: model.config.spaces,
+            icons: model.config.settings.spaceIcons,
+            resizeStep: Int(model.config.settings.resizeStep),
+            layerNames: model.config.layers.map(\.name),
+            currentLayer: selected
+        )
+    }
 
-    private var modeIndex: Int {
-        model.config.modes.firstIndex {
+    // MARK: - Bindings into the selected layer
+
+    private var layerIndex: Int {
+        model.config.layers.firstIndex {
             $0.name == selected
         } ?? 0
     }
 
     private var bindingsBinding: Binding<[KeyBinding]> {
         Binding(
-            get: { model.config.modes[modeIndex].bindings },
+            get: { model.config.layers[layerIndex].bindings },
             set: {
-                model.config.modes[modeIndex].bindings = $0
+                model.config.layers[layerIndex].bindings = $0
             }
         )
     }
 
-    /// Falls back to the default mode if the remembered
+    /// Falls back to the default layer if the remembered
     /// selection no longer exists (e.g. after a reload).
     private func ensureSelection() {
-        if !model.config.modes.contains(
+        if !model.config.layers.contains(
             where: { $0.name == selected }
         ) {
-            selected = KeyMode.defaultName
+            selected = KeyLayer.defaultName
         }
     }
 }

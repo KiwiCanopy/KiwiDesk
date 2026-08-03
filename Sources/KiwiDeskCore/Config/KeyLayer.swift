@@ -1,13 +1,13 @@
 import Foundation
 
-/// One keybinding mode: a named set of shortcut rows plus an
+/// One keybinding layer: a named set of shortcut rows plus an
 /// optional menu bar indicator (SF Symbol name or flat emoji).
-public struct KeyMode: Codable, Equatable, Sendable,
+public struct KeyLayer: Codable, Equatable, Sendable,
     Identifiable
 {
     public var name: String
     /// SF Symbol name (`arrow.left.and.right`) or emoji
-    /// (`📐`). Nil for the default mode's standard icon.
+    /// (`📐`). Nil for the default layer's standard icon.
     public var icon: String?
     public var bindings: [KeyBinding]
 
@@ -23,9 +23,9 @@ public struct KeyMode: Codable, Equatable, Sendable,
         self.bindings = bindings
     }
 
-    /// The always-present default mode (`KiwiDesk.bind`).
-    public static let defaultMode = KeyMode(
-        name: KeyMode.defaultName
+    /// The always-present default layer (`KiwiDesk.bind`).
+    public static let defaultLayer = KeyLayer(
+        name: KeyLayer.defaultName
     )
     public static let defaultName = "default"
 

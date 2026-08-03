@@ -171,14 +171,17 @@ struct KeyRecorderField: View {
     // A meaning change replaced the old `help` key (#212 —
     // the recorder no longer locks on release): per
     // docs/translating.md a changed English text gets a NEW
-    // key, never a rename.
+    // key, never a rename. The closing sentence changed again
+    // with the layers rename — the key is right for the same
+    // spot, so it keeps its name and `scripts/drop-key`
+    // retires the eleven translations of the old wording.
     @MainActor private static let recordHelp = L(
         "key_recorder.help_press",
         "A shortcut is one key plus any of "
             + "⌃ Control, ⌥ Option, ⇧ Shift, "
             + "and ⌘ Command — it locks in the "
-            + "moment you press the key. For more "
-            + "shortcut layers, add Modes."
+            + "moment you press the key. Add a layer "
+            + "to give one key a second meaning."
     )
 
     // MARK: - Rejection UI (#34)

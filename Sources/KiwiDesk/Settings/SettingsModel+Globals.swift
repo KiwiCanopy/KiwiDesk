@@ -17,7 +17,7 @@ extension SettingsModel {
         from source: GuiConfig,
         into target: inout GuiConfig
     ) {
-        target.modes = source.modes
+        target.layers = source.layers
         target.appRules = source.appRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules

@@ -28,8 +28,8 @@ extension KiwiCore {
     /// time-dependent (recovers from the live VM) — callers
     /// should read it once per edit/save cycle, not cache it
     /// across reloads.
-    public func baseKeyModes() -> [KeyMode] {
-        (guiConfigStore.load() ?? guiConfigSeed()).modes
+    public func baseKeyLayers() -> [KeyLayer] {
+        (guiConfigStore.load() ?? guiConfigSeed()).layers
     }
 
     /// The authored gui.json config WITHOUT `loadGuiConfig()`'s
@@ -43,7 +43,7 @@ extension KiwiCore {
     }
 
     /// The base app→space rules every profile override
-    /// resolves onto AND diffs against — `baseKeyModes()`'s
+    /// resolves onto AND diffs against — `baseKeyLayers()`'s
     /// app-rule sibling (#109), with the same one-definition
     /// and read-once-per-cycle caveats.
     public func baseAppRules() -> [String: SpaceID] {
@@ -283,9 +283,9 @@ extension KiwiCore {
     /// GUI classifies known catalog actions afterwards. Returns at
     /// least the default mode (empty when nothing is bound or the
     /// interpreter is unavailable).
-    public func recoverKeybindings() -> [KeyMode] {
-        guard let lua else { return [KeyMode.defaultMode] }
-        return KeybindingImporter.modes(
+    public func recoverKeybindings() -> [KeyLayer] {
+        guard let lua else { return [KeyLayer.defaultLayer] }
+        return KeybindingImporter.layers(
             from: keys,
             interpreter: lua,
             readFile: { path in

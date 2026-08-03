@@ -9,9 +9,9 @@ import KiwiDeskCore
 /// nothing stay `.custom` and show in Custom Bindings.
 enum KeybindingImportClassifier {
     /// Reclassifies every `.custom` row in `config` in place,
-    /// rebuilding the navigation and change-mode commands the
+    /// rebuilding the navigation and change-layer commands the
     /// keybindings tab would generate from the config's own
-    /// spaces and mode names.
+    /// spaces and layer names.
     /// `recoverResizeStep` reads a recovered Grow/Shrink magnitude
     /// back into `resize.step` (#58) — pass it ONLY on an explicit
     /// import, where the pulled-in bindings are the source of
@@ -25,10 +25,10 @@ enum KeybindingImportClassifier {
     ) {
         let navigation = navigationLabels(for: config)
         var recoveredStep: Int?
-        for mode in config.modes.indices {
-            for row in config.modes[mode].bindings.indices {
+        for layer in config.layers.indices {
+            for row in config.layers[layer].bindings.indices {
                 if let step = reclassify(
-                    &config.modes[mode].bindings[row],
+                    &config.layers[layer].bindings[row],
                     navigation: navigation
                 ) {
                     recoveredStep = step
@@ -43,7 +43,7 @@ enum KeybindingImportClassifier {
         }
     }
 
-    /// Lua action → label for every navigation and change-mode
+    /// Lua action → label for every navigation and change-layer
     /// command the keybindings tab can produce for this config.
     private static func navigationLabels(
         for config: GuiConfig
@@ -57,8 +57,8 @@ enum KeybindingImportClassifier {
                 map[command.lua] = command.label
             }
         }
-        for name in config.modes.map(\.name) {
-            let command = KeybindingCatalog.switchModeCommand(name)
+        for name in config.layers.map(\.name) {
+            let command = KeybindingCatalog.switchLayerCommand(name)
             map[command.lua] = command.label
         }
         // Step-independent Size & float rows: not in any

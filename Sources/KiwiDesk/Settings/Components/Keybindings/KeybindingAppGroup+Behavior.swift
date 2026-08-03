@@ -68,6 +68,12 @@ extension ApplicationsGroup {
         }
     }
 
+    /// The minimized sentence (#673) is here rather than on its
+    /// own row because it answers a question about *this
+    /// control's* two choices — what Open or Focus does when
+    /// there is nothing on screen to focus. A separate hint would
+    /// be a second explanation of one decision, and the `?`
+    /// popover is where a concept belongs.
     private var behaviorHelp: String {
         L(
             "shortcuts.app_behavior.help",
@@ -75,7 +81,11 @@ extension ApplicationsGroup {
                 + "the current space, or launches it if the app "
                 + "isn't running. Pressing again while that window "
                 + "is focused cycles through the app's other "
-                + "windows.\n\n**Open New** always launches a "
+                + "windows. If the app has nothing on screen, "
+                + "pressing the shortcut restores its most "
+                + "recently minimized window; otherwise "
+                + "minimized windows stay in the Dock."
+                + "\n\n**Open New** always launches a "
                 + "fresh instance, even when the app is already "
                 + "open."
         )

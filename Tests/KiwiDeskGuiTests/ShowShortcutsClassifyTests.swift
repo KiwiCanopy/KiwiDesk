@@ -13,9 +13,9 @@ struct ShowShortcutsClassifyTests {
     @Test("A show_shortcuts row upgrades out of Custom")
     func classifies() {
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     KeyBinding(
                         combo: "alt+space",
@@ -26,7 +26,7 @@ struct ShowShortcutsClassifyTests {
             )
         ]
         KeybindingImportClassifier.classify(&config)
-        let row = config.modes[0].bindings[0]
+        let row = config.layers[0].bindings[0]
         #expect(row.kind == .navigation)
         #expect(row.label == "Show shortcuts panel")
     }

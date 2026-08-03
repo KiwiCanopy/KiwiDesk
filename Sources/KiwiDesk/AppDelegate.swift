@@ -192,9 +192,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // the shortcuts panel if it's open — its content is a
         // per-open snapshot of one mode, stale after a switch
         // (#603).
-        core.keys.onModeChange = { [weak self] mode in
+        core.keys.onLayerChange = { [weak self] mode in
             let icon =
-                mode == KeybindingManager.defaultMode
+                mode == KeybindingManager.defaultLayer
                 ? nil
                 : self?.core.keys.icon(for: mode)
             self?.statusItem?.setModeIcon(icon)

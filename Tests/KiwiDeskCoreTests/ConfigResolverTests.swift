@@ -15,8 +15,8 @@ private func binding(
 private func mode(
     _ name: String,
     combos: [(String, String)] = []
-) -> KeyMode {
-    KeyMode(
+) -> KeyLayer {
+    KeyLayer(
         name: name,
         bindings: combos.map { binding(combo: $0.0, lua: $0.1) }
     )
@@ -27,13 +27,13 @@ private func mode(
 @Suite("ConfigResolver — thin modes resolver (#55 O1)")
 struct ConfigResolverTests {
 
-    private let base: [KeyMode] = [
+    private let base: [KeyLayer] = [
         mode("default", combos: [("alt+h", "base")])
     ]
 
     @Test("nil profile returns base unchanged")
     func nilProfileReturnsBase() {
-        let result = ConfigResolver.resolvedModes(
+        let result = ConfigResolver.resolvedLayers(
             base: base,
             profile: nil
         )
@@ -42,21 +42,21 @@ struct ConfigResolverTests {
 
     @Test("Empty override returns base unchanged")
     func emptyOverrideReturnsBase() {
-        let result = ConfigResolver.resolvedModes(
+        let result = ConfigResolver.resolvedLayers(
             base: base,
-            profile: KeyModeOverride()
+            profile: KeyLayerOverride()
         )
         #expect(result == base)
     }
 
     @Test("Present override produces merged result")
     func presentOverrideMerges() {
-        let over = KeyModeOverride(
-            modes: [
+        let over = KeyLayerOverride(
+            layers: [
                 mode("default", combos: [("alt+h", "override")])
             ]
         )
-        let result = ConfigResolver.resolvedModes(
+        let result = ConfigResolver.resolvedLayers(
             base: base,
             profile: over
         )
@@ -67,10 +67,10 @@ struct ConfigResolverTests {
 
     @Test("Empty base + profile modes returns profile modes")
     func emptyBasePlusProfile() {
-        let over = KeyModeOverride(
-            modes: [mode("nav", combos: [("alt+x", "noop")])]
+        let over = KeyLayerOverride(
+            layers: [mode("nav", combos: [("alt+x", "noop")])]
         )
-        let result = ConfigResolver.resolvedModes(
+        let result = ConfigResolver.resolvedLayers(
             base: [],
             profile: over
         )

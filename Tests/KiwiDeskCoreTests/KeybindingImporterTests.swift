@@ -110,12 +110,12 @@ struct KeyComboInstanceTests {
 
 @Suite("KeybindingMerge")
 struct KeybindingMergeTests {
-    private func mode(
+    private func layer(
         _ name: String,
         _ rows: [KeyBinding],
         icon: String? = nil
-    ) -> KeyMode {
-        KeyMode(name: name, icon: icon, bindings: rows)
+    ) -> KeyLayer {
+        KeyLayer(name: name, icon: icon, bindings: rows)
     }
 
     private func row(
@@ -126,27 +126,27 @@ struct KeybindingMergeTests {
         KeyBinding(combo: combo, lua: lua, kind: kind)
     }
 
-    @Test("A new mode is appended whole")
+    @Test("A new layer is appended whole")
     func appendsNewMode() {
         var config = GuiConfig()
-        config.modes = [mode("default", [])]
+        config.layers = [layer("default", [])]
         KeybindingMerge.merge(
-            recovered: [mode("resize", [row("h", "x()")])],
+            recovered: [layer("resize", [row("h", "x()")])],
             into: &config
         )
-        #expect(config.modes.map(\.name) == ["default", "resize"])
-        #expect(config.modes[1].bindings.count == 1)
+        #expect(config.layers.map(\.name) == ["default", "resize"])
+        #expect(config.layers[1].bindings.count == 1)
     }
 
     @Test("Same combo is replaced, a free combo appended")
     func upsertByCombo() {
         var config = GuiConfig()
-        config.modes = [
-            mode("default", [row("alt+h", "old()")])
+        config.layers = [
+            layer("default", [row("alt+h", "old()")])
         ]
         KeybindingMerge.merge(
             recovered: [
-                mode(
+                layer(
                     "default",
                     [
                         row("alt+h", "new()", .navigation),
@@ -156,7 +156,7 @@ struct KeybindingMergeTests {
             ],
             into: &config
         )
-        let rows = config.modes[0].bindings
+        let rows = config.layers[0].bindings
         #expect(rows.count == 2)
         let updated = rows.first { $0.combo == "alt+h" }
         #expect(updated?.lua == "new()")
@@ -172,22 +172,22 @@ struct KeybindingMergeTests {
         #expect(bindings[0].lua == "keep()")
     }
 
-    @Test("An existing mode keeps its icon unless it had none")
+    @Test("An existing layer keeps its icon unless it had none")
     func iconFill() {
         var config = GuiConfig()
-        config.modes = [
-            mode("kept", [], icon: "📐"),
-            mode("filled", []),
+        config.layers = [
+            layer("kept", [], icon: "📐"),
+            layer("filled", []),
         ]
         KeybindingMerge.merge(
             recovered: [
-                mode("kept", [], icon: "🆕"),
-                mode("filled", [], icon: "🆕"),
+                layer("kept", [], icon: "🆕"),
+                layer("filled", [], icon: "🆕"),
             ],
             into: &config
         )
-        #expect(config.modes[0].icon == "📐")
-        #expect(config.modes[1].icon == "🆕")
+        #expect(config.layers[0].icon == "📐")
+        #expect(config.layers[1].icon == "🆕")
     }
 }
 
@@ -241,17 +241,17 @@ struct KeybindingImporterIntegrationTests {
         }
         try lua.runFile(file).get()
 
-        let modes = KeybindingImporter.modes(
+        let layers = KeybindingImporter.layers(
             from: manager,
             interpreter: lua,
             readFile: {
                 try? String(contentsOfFile: $0, encoding: .utf8)
             }
         )
-        let defaultMode = try #require(
-            modes.first { $0.name == KeyMode.defaultName }
+        let defaultLayer = try #require(
+            layers.first { $0.name == KeyLayer.defaultName }
         )
-        let row = try #require(defaultMode.bindings.first)
+        let row = try #require(defaultLayer.bindings.first)
         #expect(row.combo == "option+h")
         #expect(row.lua == "KiwiDesk.focus(\"left\")")
         #expect(row.kind == .custom)

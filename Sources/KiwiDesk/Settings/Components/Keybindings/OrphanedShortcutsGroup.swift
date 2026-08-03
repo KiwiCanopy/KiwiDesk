@@ -76,6 +76,7 @@ enum OrphanedShortcuts {
     /// drawer. The command is rebuilt through the catalog for
     /// the orphan's space, so its Lua matches the binding
     /// byte-for-byte and the row behaves like any preset row.
+    @MainActor
     static func commands(
         bindings: [KeyBinding],
         spaces: [SpaceID],
@@ -93,15 +94,10 @@ enum OrphanedShortcuts {
                 !live.contains(space),
                 !seen.contains(binding.lua)
             else { continue }
-            let candidates =
-                KeybindingCatalog.goToSpace(
-                    [space],
-                    icons: icons
-                )
-                + KeybindingCatalog.moveToSpace(
-                    [space],
-                    icons: icons
-                )
+            let candidates = perSpaceCommands(
+                for: space,
+                icons: icons
+            )
             guard
                 let command = candidates.first(where: {
                     $0.lua == binding.lua
@@ -112,4 +108,46 @@ enum OrphanedShortcuts {
         }
         return commands
     }
+
+    /// Every command a per-space FAMILY draws for one space —
+    /// derived from the census families rather than hand-listed.
+    ///
+    /// This card is the safety net for #92: a space-targeting
+    /// binding whose space has left the list is still
+    /// Carbon-registered, still blocks the recorder, and would
+    /// otherwise be invisible. That net is only as wide as the
+    /// set of families it knows about, so hand-listing them here
+    /// meant a fifth per-space family would compile, red the
+    /// render guard, and be silently omitted from the one card
+    /// that exists to catch it. Asking the expander instead makes
+    /// the two grow together; `perSpaceFamilies` is the one place
+    /// that says which families are per-space, and
+    /// `OrphanedShortcutsTests` pins that the net covers all of
+    /// them.
+    @MainActor
+    static func perSpaceCommands(
+        for space: SpaceID,
+        icons: [SpaceID: String]
+    ) -> [NavCommand] {
+        let expander = ShortcutsFamilyRows(
+            spaces: [space],
+            icons: icons,
+            // Neither field reaches a per-space family; both are
+            // required by the type and irrelevant here.
+            resizeStep: 0,
+            layerNames: [],
+            currentLayer: ""
+        )
+        return perSpaceFamilies.flatMap {
+            expander.rows(for: $0) ?? []
+        }
+    }
+
+    /// The census families that expand once per space. Data, so
+    /// the card above and the guard read one list.
+    static let perSpaceFamilies: [SettingKey] = [
+        .shortcuts(.goToSpace),
+        .shortcuts(.moveToSpace),
+        .shortcuts(.moveToSpaceFollow),
+    ]
 }

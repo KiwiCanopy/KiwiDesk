@@ -52,12 +52,12 @@ struct KeybindingLocalizationTests {
         #expect(command.resolvedLabel == "Zu Space Studio wechseln")
     }
 
-    @Test("switchModeCommand keeps the mode name untranslated")
+    @Test("switchLayerCommand keeps the mode name untranslated")
     func switchModeKeepsNameLiteral() {
         reset()
         LocalizationManager.shared.select("de")
         defer { reset() }
-        let command = KeybindingCatalog.switchModeCommand(
+        let command = KeybindingCatalog.switchLayerCommand(
             "Deep Work"
         )
         #expect(command.label == "Switch to Deep Work")

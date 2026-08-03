@@ -1,6 +1,6 @@
 import Foundation
 
-/// Reconstructs the GUI's `[KeyMode]` from the live keybindings
+/// Reconstructs the GUI's `[KeyLayer]` from the live keybindings
 /// (#4). Each bound `(KeyCombo, ref)` becomes a row: the combo is
 /// formatted back to its canonical string, and the action text is
 /// recovered from the source file via `debug.getinfo`'s line
@@ -19,15 +19,15 @@ import Foundation
 /// `KiwiCore.recoverKeybindings`.
 @MainActor
 enum KeybindingImporter {
-    /// Builds modes from `manager`, reading each binding's source
+    /// Builds layers from `manager`, reading each binding's source
     /// through `interpreter` and `readFile` (path → contents).
-    static func modes(
+    static func layers(
         from manager: KeybindingManager,
         interpreter: LuaInterpreter,
         readFile: (String) -> String?
-    ) -> [KeyMode] {
+    ) -> [KeyLayer] {
         var cache: [String: String] = [:]
-        return manager.definedModes.map { name in
+        return manager.definedLayers.map { name in
             var rows: [KeyBinding] = []
             for (combo, ref) in manager.bindings(for: name) {
                 guard let text = combo.comboString(),
@@ -43,7 +43,7 @@ enum KeybindingImporter {
                 )
             }
             rows.sort { $0.combo < $1.combo }
-            return KeyMode(
+            return KeyLayer(
                 name: name,
                 icon: manager.icon(for: name),
                 bindings: rows

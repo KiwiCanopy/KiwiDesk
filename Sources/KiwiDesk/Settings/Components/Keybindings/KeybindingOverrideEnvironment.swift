@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Environment plumbing for the Shortcuts tab's override mode
+/// Environment plumbing for the Shortcuts tab's override layer
 /// (#55 phase 7): while editing a stored profile the tab shows
-/// the RESOLVED modes (base + the profile's sparse override).
+/// the RESOLVED layers (base + the profile's sparse override).
 /// Rows equal to their base gui.json row are inherited and
 /// render dimmed; rows that diverge are this profile's
 /// overrides and render at full strength — the same
@@ -13,24 +13,24 @@ private struct KeybindingOverrideBaseKey: EnvironmentKey {
     static let defaultValue: [KeyBinding]? = nil
 }
 
-private struct KeybindingModeNameKey: EnvironmentKey {
-    static let defaultValue = KeyMode.defaultName
+private struct KeybindingLayerNameKey: EnvironmentKey {
+    static let defaultValue = KeyLayer.defaultName
 }
 
 extension EnvironmentValues {
-    /// The selected mode's base bindings while the Shortcuts
+    /// The selected layer's base bindings while the Shortcuts
     /// tab edits a stored profile; nil during live editing.
     var keybindingOverrideBase: [KeyBinding]? {
         get { self[KeybindingOverrideBaseKey.self] }
         set { self[KeybindingOverrideBaseKey.self] = newValue }
     }
 
-    /// Mode whose recorder rows are currently rendered. The
+    /// Layer whose recorder rows are currently rendered. The
     /// live-apply seam uses it without threading another value
     /// through every intent-section wrapper.
-    var keybindingModeName: String {
-        get { self[KeybindingModeNameKey.self] }
-        set { self[KeybindingModeNameKey.self] = newValue }
+    var keybindingLayerName: String {
+        get { self[KeybindingLayerNameKey.self] }
+        set { self[KeybindingLayerNameKey.self] = newValue }
     }
 }
 
@@ -39,7 +39,7 @@ extension KeyBinding {
     /// SEMANTIC match (`sameAction`: combo + lua), so the GUI
     /// import classifier's display-only kind/label upgrades
     /// never render an untouched row as overridden. Always
-    /// false outside override mode (`base == nil`).
+    /// false outside override layer (`base == nil`).
     func isInherited(from base: [KeyBinding]?) -> Bool {
         base?.contains { $0.sameAction(as: self) } == true
     }

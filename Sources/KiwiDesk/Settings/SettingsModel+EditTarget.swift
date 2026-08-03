@@ -26,7 +26,7 @@ extension SettingsModel {
         var showLuaEditor: Bool
         var placementEditable: Bool
         var savedSidecar: GuiConfig?
-        var profileEditingBaseModes: [KeyMode]?
+        var profileEditingBaseLayers: [KeyLayer]?
         var profileEditingBaseAppRules: [String: SpaceID]?
         var profileEditingBaseFloatRules: [String]?
         var keybindingWarning: String?
@@ -90,7 +90,7 @@ extension SettingsModel {
         showLuaEditor = state.showLuaEditor
         placementEditable = state.placementEditable
         savedSidecar = state.savedSidecar
-        profileEditingBaseModes = state.profileEditingBaseModes
+        profileEditingBaseLayers = state.profileEditingBaseLayers
         profileEditingBaseAppRules =
             state.profileEditingBaseAppRules
         profileEditingBaseFloatRules =
@@ -163,7 +163,7 @@ extension SettingsModel {
             // deleting + re-adding a transient space alone
             // doesn't read as an edit.
             savedSidecar: core.isGuiManaged ? loaded : nil,
-            profileEditingBaseModes: nil,
+            profileEditingBaseLayers: nil,
             profileEditingBaseAppRules: nil,
             profileEditingBaseFloatRules: nil,
             // A reload discards the edits the banner was
@@ -202,9 +202,9 @@ extension SettingsModel {
             // Diff baseline for the override-mode Shortcuts
             // tab (#55 phase 7): the same base the seed
             // resolved onto (ONE definition,
-            // `KiwiCore.baseKeyModes`) — never the resolved
+            // `KiwiCore.baseKeyLayers`) — never the resolved
             // set the tabs edit.
-            profileEditingBaseModes: core.baseKeyModes(),
+            profileEditingBaseLayers: core.baseKeyLayers(),
             // Same baseline role for the App Rules tab's
             // space-facet override (#109).
             profileEditingBaseAppRules: core.baseAppRules(),

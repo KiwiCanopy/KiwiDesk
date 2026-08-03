@@ -4,40 +4,40 @@ import Foundation
 /// on the parsed `KeyCombo` (key code + modifiers), so they are
 /// independent of how a combo was spelled. Lives in Core (not
 /// the GUI target) since it is pure logic over
-/// `KeyBinding`/`KeyMode`, with no GUI dependency.
+/// `KeyBinding`/`KeyLayer`, with no GUI dependency.
 public enum KeybindingConflicts {
     /// Whether any row in the set carries a conflict. This is
-    /// the per-mode primitive `hasAnyAcrossModes` reduces over:
-    /// modes are independent keymaps, so each is checked
-    /// against its own rows only, never across modes.
+    /// the per-layer primitive `hasAnyAcrossLayers` reduces over:
+    /// layers are independent keymaps, so each is checked
+    /// against its own rows only, never across layers.
     public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
         bindings.contains { binding in
             conflict(for: binding, in: bindings) != nil
         }
     }
 
-    /// Whether any mode's bindings carry a conflict — drives
+    /// Whether any layer's bindings carry a conflict — drives
     /// the in-app warning shown after recording a conflicting
     /// shortcut, adopting a config, or saving from the raw Lua
     /// editor (see `SettingsModel`).
-    public static func hasAnyAcrossModes(
-        _ modes: [KeyMode]
+    public static func hasAnyAcrossLayers(
+        _ layers: [KeyLayer]
     ) -> Bool {
-        modes.contains { hasAny($0.bindings) }
+        layers.contains { hasAny($0.bindings) }
     }
 
-    /// Structured conflicts across all modes, for building a
+    /// Structured conflicts across all layers, for building a
     /// named, enumerated summary (see `SettingsModel`'s banner
     /// formatter). One entry per conflicting row; a row that
     /// duplicates another and *also* shadows a system shortcut
     /// only reports the first match, since it reduces over
     /// `conflict(for:in:)` and inherits its branch order.
     public static func conflicts(
-        in modes: [KeyMode]
+        in layers: [KeyLayer]
     ) -> [Conflict] {
-        modes.flatMap { mode in
-            mode.bindings.compactMap { binding in
-                conflict(for: binding, in: mode.bindings)
+        layers.flatMap { layer in
+            layer.bindings.compactMap { binding in
+                conflict(for: binding, in: layer.bindings)
             }
         }
     }
@@ -91,7 +91,7 @@ public struct Conflict: Equatable, Sendable {
         /// localizes (never its English name — see
         /// `SystemShortcut`, #96).
         case systemShortcut(SystemShortcut)
-        /// Another row in the same mode, by its display name.
+        /// Another row in the same layer, by its display name.
         case otherBinding(String)
         /// The combo itself couldn't be parsed — not a "conflicts
         /// with X" case, just an invalid shortcut.

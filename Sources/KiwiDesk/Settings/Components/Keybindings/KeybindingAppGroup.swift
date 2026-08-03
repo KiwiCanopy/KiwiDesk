@@ -12,8 +12,8 @@ struct ApplicationsGroup: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
-    @Environment(\.keybindingModeName)
-    private var modeName
+    @Environment(\.keybindingLayerName)
+    private var layerName
     /// The app chosen in the add-row but not yet committed — the
     /// row only enters the list once an app is picked, so no
     /// app-less placeholder can exist (matches App Rules). Read by
@@ -45,7 +45,7 @@ struct ApplicationsGroup: View {
         // when the mode changes or later modes would render in raw
         // array order. Recording is invalidated on mode switch, so
         // re-sorting here can't yank an in-flight recorder.
-        .onChange(of: modeName) { _, _ in recomputeOrder() }
+        .onChange(of: layerName) { _, _ in recomputeOrder() }
     }
 
     /// Application-binding ids in the snapshot's alpha order, with
@@ -140,7 +140,7 @@ struct ApplicationsGroup: View {
                     binding.wrappedValue.combo = ""
                     // Live target: unregister now (#123).
                     _ = model.liveApplyRecorded(
-                        modeName: modeName,
+                        layerName: layerName,
                         bindingID: id,
                         combo: nil
                     )
@@ -182,7 +182,7 @@ struct ApplicationsGroup: View {
             )
         }
         return model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: combo
         )
@@ -206,7 +206,7 @@ struct ApplicationsGroup: View {
             in: bindings
         )
         return model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: combo
         )
@@ -316,7 +316,7 @@ struct ApplicationsGroup: View {
     private func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
         _ = model.liveApplyRecorded(
-            modeName: modeName,
+            layerName: layerName,
             bindingID: id,
             combo: nil
         )

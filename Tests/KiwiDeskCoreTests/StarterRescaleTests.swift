@@ -202,7 +202,7 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         // The one-display seed bound ⌃⌥1-5 only.
         let seeded = Set(
-            (core.persistedGuiConfig()?.modes
+            (core.persistedGuiConfig()?.layers
                 .first { $0.isDefault }?.bindings ?? [])
                 .map(\.combo)
         )
@@ -214,7 +214,7 @@ struct StarterRescaleTests {
         core.handleMonitorChange()
 
         let grown = Set(
-            (core.persistedGuiConfig()?.modes
+            (core.persistedGuiConfig()?.layers
                 .first { $0.isDefault }?.bindings ?? [])
                 .map(\.combo)
         )
@@ -225,7 +225,7 @@ struct StarterRescaleTests {
         #expect(grown.contains("control+option+command+0"))
         // The original ⌃⌥1-5 are untouched (still present once).
         let goToSix =
-            (core.persistedGuiConfig()?.modes
+            (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
             .filter { $0.combo == "control+option+0" }
         #expect(goToSix.count == 1)
@@ -239,8 +239,8 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         // The user rebinds ⌃⌥6 in the sidecar before the change.
         var config = core.persistedGuiConfig() ?? GuiConfig()
-        let index = config.modes.firstIndex { $0.isDefault }!
-        config.modes[index].bindings.append(
+        let index = config.layers.firstIndex { $0.isDefault }!
+        config.layers[index].bindings.append(
             KeyBinding(
                 combo: "control+option+6",
                 lua: "KiwiDesk.toggle_floating()",
@@ -254,7 +254,7 @@ struct StarterRescaleTests {
         core.handleMonitorChange()
 
         let sixes =
-            (core.persistedGuiConfig()?.modes
+            (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
             .filter { $0.combo == "control+option+6" }
         // Still exactly one ⌃⌥6 — the user's, not overwritten by

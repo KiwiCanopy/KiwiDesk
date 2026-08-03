@@ -62,9 +62,9 @@ struct ManagedConfigTests {
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
-    @Test("define_mode is foreign")
+    @Test("define_layer is foreign")
     func defineModeIsForeign() {
-        let source = #"KiwiDesk.define_mode("resize", {})"#
+        let source = #"KiwiDesk.define_layer("resize", {})"#
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
@@ -116,9 +116,9 @@ struct ManagedConfigTests {
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
-    @Test("KiwiDesk.define_mode with space before ( is foreign")
+    @Test("KiwiDesk.define_layer with space before ( is foreign")
     func defineModeWithSpaceBeforeParenIsForeign() {
-        let source = #"KiwiDesk.define_mode ("resize", {})"#
+        let source = #"KiwiDesk.define_layer ("resize", {})"#
         #expect(ManagedConfig.hasForeignCode(source))
     }
 

@@ -77,7 +77,7 @@ struct DefaultSeedCatalogParityTests {
         var config = GuiConfig()
         config.spaces = spaces
         config.settings.resizeStep = CGFloat(step)
-        var mode = KeyMode.defaultMode
+        var mode = KeyLayer.defaultLayer
         mode.bindings = DefaultKeybindings.bindings(
             spaces: spaces,
             resizeStep: step
@@ -89,9 +89,9 @@ struct DefaultSeedCatalogParityTests {
                 label: ""
             )
         }
-        config.modes = [mode]
+        config.layers = [mode]
         KeybindingImportClassifier.classify(&config)
-        for row in config.modes[0].bindings {
+        for row in config.layers[0].bindings {
             #expect(
                 row.kind == .navigation,
                 "demoted to \(row.kind): \(row.lua)"

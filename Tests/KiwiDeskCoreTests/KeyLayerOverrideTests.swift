@@ -18,39 +18,39 @@ private func binding(
     )
 }
 
-private func mode(
+private func layer(
     _ name: String,
     icon: String? = nil,
     combos: [(String, String)] = []
-) -> KeyMode {
-    KeyMode(
+) -> KeyLayer {
+    KeyLayer(
         name: name,
         icon: icon,
         bindings: combos.map { binding(combo: $0.0, lua: $0.1) }
     )
 }
 
-// MARK: - KeyModeOverride tests
+// MARK: - KeyLayerOverride tests
 
-/// `KeyModeOverride` is a keyed collection merge (mode name ×
+/// `KeyLayerOverride` is a keyed collection merge (layer name ×
 /// combo), NOT a struct field-mirror — so no reflection parity
 /// net applies. Guarded by: round-trip, resolve-every-case, and
-/// default-mode-invariant tests (AGENTS.md §5).
-@Suite("KeyModeOverride — data model and merge (#55)")
-struct KeyModeOverrideTests {
+/// default-layer-invariant tests (AGENTS.md §5).
+@Suite("KeyLayerOverride — data model and merge (#55)")
+struct KeyLayerOverrideTests {
 
     // MARK: - isEmpty / init
 
     @Test("Empty override reports isEmpty")
     func emptyIsEmpty() {
-        #expect(KeyModeOverride().isEmpty)
-        #expect(KeyModeOverride(modes: []).isEmpty)
+        #expect(KeyLayerOverride().isEmpty)
+        #expect(KeyLayerOverride(layers: []).isEmpty)
     }
 
     @Test("Non-empty override is not empty")
     func nonEmpty() {
-        let over = KeyModeOverride(
-            modes: [mode("default", combos: [("alt+h", "")])]
+        let over = KeyLayerOverride(
+            layers: [layer("default", combos: [("alt+h", "")])]
         )
         #expect(!over.isEmpty)
     }
@@ -59,10 +59,10 @@ struct KeyModeOverrideTests {
 
     @Test("Round-trip: encode then decode equals original")
     func roundTrip() throws {
-        let over = KeyModeOverride(
-            modes: [
-                mode("default", combos: [("alt+h", "focus()")]),
-                mode(
+        let over = KeyLayerOverride(
+            layers: [
+                layer("default", combos: [("alt+h", "focus()")]),
+                layer(
                     "resize",
                     icon: "📐",
                     combos: [("alt+l", "resize()")]
@@ -71,7 +71,7 @@ struct KeyModeOverrideTests {
         )
         let data = try JSONEncoder().encode(over)
         let back = try JSONDecoder().decode(
-            KeyModeOverride.self,
+            KeyLayerOverride.self,
             from: data
         )
         #expect(back == over)
@@ -81,23 +81,23 @@ struct KeyModeOverrideTests {
 
     @Test("Empty override encodes as bare empty array, not null")
     func emptyEncodesAsBareArray() throws {
-        let data = try JSONEncoder().encode(KeyModeOverride())
+        let data = try JSONEncoder().encode(KeyLayerOverride())
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
         #expect(json == "[]")
     }
 
-    @Test("Non-empty override encodes as bare array of modes")
+    @Test("Non-empty override encodes as bare array of layers")
     func nonEmptyEncodesAsBareArray() throws {
-        let over = KeyModeOverride(
-            modes: [mode("default", combos: [("alt+h", "")])]
+        let over = KeyLayerOverride(
+            layers: [layer("default", combos: [("alt+h", "")])]
         )
         let data = try JSONEncoder().encode(over)
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
-        // Must be a bare array, not {"modes": [...]}
+        // Must be a bare array, not {"layers": [...]}
         #expect(json.hasPrefix("["))
         #expect(json.contains("\"default\""))
     }
@@ -107,15 +107,15 @@ struct KeyModeOverrideTests {
     @Test("Empty override leaves base unchanged")
     func emptyResolvedLeavesBase() {
         let base = [
-            mode("default", combos: [("alt+h", "focus")])
+            layer("default", combos: [("alt+h", "focus")])
         ]
-        #expect(KeyModeOverride().resolved(onto: base) == base)
+        #expect(KeyLayerOverride().resolved(onto: base) == base)
     }
 
     @Test("Override combo wins; unmentioned base combos survive")
     func overrideComboWins() {
         let base = [
-            mode(
+            layer(
                 "default",
                 combos: [
                     ("alt+h", "focus_left"),
@@ -123,9 +123,9 @@ struct KeyModeOverrideTests {
                 ]
             )
         ]
-        let over = KeyModeOverride(
-            modes: [
-                mode("default", combos: [("alt+h", "CUSTOM")])
+        let over = KeyLayerOverride(
+            layers: [
+                layer("default", combos: [("alt+h", "CUSTOM")])
             ]
         )
         let result = over.resolved(onto: base)
@@ -138,7 +138,7 @@ struct KeyModeOverrideTests {
         let j = bindings.first { $0.combo == "alt+j" }
         #expect(j?.lua == "focus_down")
         // In-place merge: base row order survives (the GUI
-        // renders resolved modes — rows must not jump).
+        // renders resolved layers — rows must not jump).
         #expect(bindings.map(\.combo) == ["alt+h", "alt+j"])
     }
 
@@ -149,7 +149,7 @@ struct KeyModeOverrideTests {
         // override — registration is last-wins, so a stale
         // trailing base row would silently displace it.
         let base = [
-            mode(
+            layer(
                 "default",
                 combos: [
                     ("alt+h", "first"),
@@ -158,8 +158,8 @@ struct KeyModeOverrideTests {
                 ]
             )
         ]
-        let over = KeyModeOverride(
-            modes: [mode("default", combos: [("alt+h", "WIN")])]
+        let over = KeyLayerOverride(
+            layers: [layer("default", combos: [("alt+h", "WIN")])]
         )
         let result = over.resolved(onto: base)
         let hRows = result[0].bindings.filter {
@@ -175,14 +175,14 @@ struct KeyModeOverrideTests {
     @Test("Override icon replaces base icon when non-nil")
     func iconOverride() {
         let base = [
-            mode(
+            layer(
                 "resize",
                 icon: "🔧",
                 combos: [("alt+h", "")]
             )
         ]
-        let over = KeyModeOverride(
-            modes: [mode("resize", icon: "📐")]
+        let over = KeyLayerOverride(
+            layers: [layer("resize", icon: "📐")]
         )
         let result = over.resolved(onto: base)
         #expect(result[0].icon == "📐")
@@ -191,28 +191,28 @@ struct KeyModeOverrideTests {
     @Test("Nil override icon keeps base icon")
     func nilIconKeepsBase() {
         let base = [
-            mode(
+            layer(
                 "resize",
                 icon: "🔧",
                 combos: [("alt+h", "")]
             )
         ]
         // Override has no icon (nil).
-        let over = KeyModeOverride(
-            modes: [mode("resize")]
+        let over = KeyLayerOverride(
+            layers: [layer("resize")]
         )
         let result = over.resolved(onto: base)
         #expect(result[0].icon == "🔧")
     }
 
-    @Test("Override mode absent from base is appended")
+    @Test("Override layer absent from base is appended")
     func newModeAppended() {
         let base = [
-            mode("default", combos: [("alt+h", "focus")])
+            layer("default", combos: [("alt+h", "focus")])
         ]
-        let over = KeyModeOverride(
-            modes: [
-                mode("custom", combos: [("alt+x", "noop")])
+        let over = KeyLayerOverride(
+            layers: [
+                layer("custom", combos: [("alt+x", "noop")])
             ]
         )
         let result = over.resolved(onto: base)
@@ -222,38 +222,38 @@ struct KeyModeOverrideTests {
         #expect(result[1].bindings[0].combo == "alt+x")
     }
 
-    @Test("Base mode absent from override passes through")
+    @Test("Base layer absent from override passes through")
     func baseModeSurvives() {
         let base = [
-            mode("default", combos: [("alt+h", "focus")]),
-            mode("other", combos: [("alt+y", "swap")]),
+            layer("default", combos: [("alt+h", "focus")]),
+            layer("other", combos: [("alt+y", "swap")]),
         ]
         // Override only touches "default".
-        let over = KeyModeOverride(
-            modes: [mode("default", combos: [("alt+h", "X")])]
+        let over = KeyLayerOverride(
+            layers: [layer("default", combos: [("alt+h", "X")])]
         )
         let result = over.resolved(onto: base)
         #expect(result.count == 2)
-        // "other" mode is preserved exactly.
+        // "other" layer is preserved exactly.
         #expect(result[1].name == "other")
         #expect(result[1].bindings[0].combo == "alt+y")
         #expect(result[1].bindings[0].lua == "swap")
     }
 
-    // MARK: - Default-mode invariant (O4 switch-key-trap)
+    // MARK: - Default-layer invariant (O4 switch-key-trap)
 
     /// A profile that rebinds exactly one combo in the default
-    /// mode must still expose every other base binding — the
+    /// layer must still expose every other base binding — the
     /// O4 soft base layer guarantees no switch-key trap.
-    @Test("Default-mode invariant: unbound base combos survive")
-    func defaultModeInvariant() {
+    @Test("Default-layer invariant: unbound base combos survive")
+    func defaultLayerInvariant() {
         let switchKey = binding(
             combo: "alt+p",
             lua: "load_profile(\"Work\")"
         )
         let base = [
-            KeyMode(
-                name: KeyMode.defaultName,
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     switchKey,
                     binding(combo: "alt+h", lua: "focus_left"),
@@ -262,10 +262,10 @@ struct KeyModeOverrideTests {
             )
         ]
         // Profile rebinds only alt+h.
-        let over = KeyModeOverride(
-            modes: [
-                KeyMode(
-                    name: KeyMode.defaultName,
+        let over = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
                     bindings: [
                         binding(combo: "alt+h", lua: "CUSTOM")
                     ]

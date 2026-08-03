@@ -73,7 +73,7 @@ Settings app offers **Adopt into the GUI** instead. Settings are:
   `app_bar.*`, `animations.*`, `mouse.*`, `quit.*` — plus
   `border.fit_gaps`.
 - Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
-- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_mode`,
+- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_native_space`.
 
 ```lua
@@ -3329,17 +3329,18 @@ applications shortcut carries a per-row **Launch behavior** menu —
 **Expects:** nothing.
 
 **Does:** opens the read-only **shortcuts reference** panel — a
-live glance at the active mode's bindings — or closes it if it is
+live glance at the active layer's bindings — or closes it if it is
 already open (the verb toggles). Bind it to a hotkey to summon the
 reference from anywhere. This is the same panel reached from the
 menu bar's *View Shortcuts…* row; the bound combo also shows beside
 the menu row and in the panel's own close hint. It is seeded to
-**⌃⌥K** by default, in the base mode and in every mode you create,
+**⌃⌥K** by default, in the base layer and in every layer you
+create,
 so the reference is reachable from the keyboard out of the box.
 
 It is also offered as a bindable preset in the Settings app under
 **Shortcuts ▸ General** ("Show shortcuts panel"), where you can
-rebind or clear it per mode without hand-writing Lua.
+rebind or clear it per layer without hand-writing Lua.
 
 **Example:**
 
@@ -3396,21 +3397,22 @@ plus a single key code — so a hand-written combo that doesn't parse
 is never registered and the Shortcuts section flags the row with ⚠
 *"isn't a recognized shortcut"*.
 
-### Modal Modes
+### Shortcut Layers
 
-Define vim-style modes; only the active mode's bindings fire:
+Define vim-style layers; only the active layer's bindings
+fire:
 
 ```lua
-KiwiDesk.define_mode("resize", {
+KiwiDesk.define_layer("resize", {
     ["h"]      = function() KiwiDesk.resize("x", -50) end,
     ["l"]      = function() KiwiDesk.resize("x", 50) end,
     ["j"]      = function() KiwiDesk.resize("y", -50) end,
     ["k"]      = function() KiwiDesk.resize("y", 50) end,
-    ["escape"] = function() KiwiDesk.switch_mode("default") end,
+    ["escape"] = function() KiwiDesk.switch_layer("default") end,
 })
 
 KiwiDesk.bind("ctrl+alt+r", function()
-    KiwiDesk.switch_mode("resize")
+    KiwiDesk.switch_layer("resize")
 end)
 ```
 
@@ -3498,41 +3500,41 @@ KiwiDesk.resize("x", -50)
 KiwiDesk.resize("y", 50)
 ```
 
-#### Mode Icons
+#### Layer Icons
 
-An optional third argument to `define_mode` sets a menu bar
-indicator — an SF Symbol name or a flat emoji. While the mode is
-active, the KiwiDesk status item swaps to it. The default mode
-(`KiwiDesk.bind`) never takes an icon — it always shows the
-standard KiwiDesk glyph.
+An optional third argument to `define_layer` sets a menu bar
+indicator — an SF Symbol name or a flat emoji. While the layer
+is active, the KiwiDesk status item swaps to it. The default
+layer (`KiwiDesk.bind`) never takes an icon — it always shows
+the standard KiwiDesk glyph.
 
 **Example:**
 
 ```lua
-KiwiDesk.define_mode("resize", { --[[ bindings ]] },
+KiwiDesk.define_layer("resize", { --[[ bindings ]] },
     { icon = "arrow.left.and.right" })
-KiwiDesk.define_mode("service", { --[[ bindings ]] },
+KiwiDesk.define_layer("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 
 ### Config Cascade (Per-Profile Keybindings)
 
-Keybindings resolve through a two-tier cascade, mirroring how
-tiling layers (global settings ← profile):
+Keybindings resolve through a two-level cascade, mirroring
+how tiling resolves (global settings ← profile):
 
 > **The base config is the seed; the profile wins.** The base
 > shortcuts (the app's `gui.json`, or your Lua-declared binds
 > in a hand-written config) apply first. When the loaded
-> profile carries a `"modes"` override, each of its rows
-> shadows the base row with the same combo in the same mode;
+> profile carries a `"layers"` override, each of its rows
+> shadows the base row with the same combo in the same layer;
 > everything the profile does not mention stays active.
 > Event hooks fire on their event — they are never a cascade
 > layer.
 
 The override is **sparse and soft by design**:
 
-- A profile stores only the modes and rows that diverge; a
-  profile without a `"modes"` key inherits the base shortcuts
+- A profile stores only the layers and rows that diverge; a
+  profile without a `"layers"` key inherits the base shortcuts
   completely.
 - Every base binding the profile doesn't rebind survives — in
   particular your profile-switch shortcut, so a profile can
@@ -3541,7 +3543,7 @@ The override is **sparse and soft by design**:
 - Removing a base binding per profile is not expressible:
   deleting an inherited row in the editor just resets it. To
   disable a combo in one profile, rebind it to a no-op action.
-  The same applies to a base mode's menu bar icon — a profile
+  The same applies to a base layer's menu bar icon — a profile
   can *change* it, but clearing it just reverts to the base
   icon.
 - Keybindings live in ONE home: the structured config (gui.json +
@@ -3552,8 +3554,8 @@ The override is **sparse and soft by design**:
 
 Profiles re-resolve their bindings whenever they apply: on
 `load_profile`, on a monitor change, and on a native-Space binding
-switch. Switching profiles also returns you to the default key
-mode.
+switch. Switching profiles also returns you to the default
+layer.
 
 ## Events
 
@@ -4030,9 +4032,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
   },
   "space_modes": { "1": "stack", "2": "bsp" },
   // Optional sparse keybinding override (see Config
-  // cascade): only the modes/rows this profile changes.
+  // cascade): only the layers/rows this profile changes.
   // Omit the key entirely to inherit the base shortcuts.
-  "modes": [
+  "layers": [
     {
       "name": "default",
       "bindings": [

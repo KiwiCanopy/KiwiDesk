@@ -3,8 +3,8 @@
 /// and the Lua-binding rows.
 
 enum ShortcutsKey: String, CaseIterable, Hashable {
-    case layers = "config.modes"
-    case layersIcon = "config.modes[].icon"
+    case layers = "config.layers"
+    case layersIcon = "config.layers[].icon"
     case focusDir = "keybinding.focus_dir (x4)"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case swapDir = "keybinding.swap_dir (x4)"
@@ -20,7 +20,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleSticky = "keybinding.toggle_sticky"
     case toggleDisplaySticky = "keybinding.toggle_display_sticky"
     case showShortcuts = "keybinding.show_shortcuts"
-    case switchToMode = "keybinding.switch_to_mode (x N-1)"
+    case switchToLayer = "keybinding.switch_to_layer (x N-1)"
     case openApplications = "(rows) shortcuts.open_applications"
     case advanced = "(rows) shortcuts.advanced"
     case `import` = "(action) shortcuts.import"
@@ -29,8 +29,17 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
 extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
-        case .layers, .layersIcon, .switchToMode:
-            return .row(.shortcuts, .layers, .showMore)
+        case .layers, .layersIcon, .switchToLayer:
+            // `.immediate`, not `.showMore`: a configured layer
+            // is the user's own setup, so the card surfaces at
+            // rest the moment one exists. Only the offer to
+            // create the first one is withheld.
+            return .row(
+                .shortcuts,
+                .layers,
+                .immediate,
+                gate: .runtime(.layersExist)
+            )
         case .focusDir, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveWindowToTrack, .swapWithTrack, .moveToSpace,
@@ -46,10 +55,17 @@ extension ShortcutsKey {
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
+            // At rest, in the header, not in the Lua drawer: the
+            // row it belongs to conceptually is the raw-Lua one,
+            // but Import is the affordance a NEW user needs and
+            // the one thing on this page that must not be behind
+            // a disclosure. Its `.runtime` gate already keeps it
+            // absent until `init.lua` holds something to adopt,
+            // which is what makes surfacing it at rest safe.
             return .row(
                 .shortcuts,
                 .luaBindings,
-                .showMore,
+                .atRest,
                 gate: .runtime(.luaImportAvailable)
             )
         }
@@ -66,7 +82,7 @@ extension ShortcutsKey {
         // template key.
         case .layers, .openApplications, .advanced, .focusDir,
             .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
-            .moveToSpace, .moveToSpaceFollow, .switchToMode:
+            .moveToSpace, .moveToSpaceFollow, .switchToLayer:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

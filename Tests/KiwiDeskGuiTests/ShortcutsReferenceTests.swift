@@ -30,17 +30,17 @@ struct ShortcutsReferenceTests {
     private func build(
         _ bindings: [KeyBinding],
         spaces: [SpaceID] = [SpaceID("1")],
-        modeNames: [String] = [KeyMode.defaultName]
+        layerNames: [String] = [KeyLayer.defaultName]
     ) -> ShortcutsReference {
         ShortcutsReferenceBuilder.build(
-            mode: KeyMode(
-                name: KeyMode.defaultName,
+            layer: KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: bindings
             ),
             spaces: spaces,
             spaceIcons: [:],
             resizeStep: 50,
-            modeNames: modeNames
+            layerNames: layerNames
         )
     }
 
@@ -244,23 +244,23 @@ struct ShortcutsReferenceTests {
     func activeModeExcludedFromSwitch() {
         reset()
         // A self-switch row (switch to the mode you're in) must not
-        // render — mirrors the editor's ChangeModesGroup filter.
+        // render — mirrors the editor's SwitchLayersGroup filter.
         let reference = build(
             [
                 binding(
                     "alt+d",
-                    "KiwiDesk.switch_mode(\"default\")",
+                    "KiwiDesk.switch_layer(\"default\")",
                     .navigation
                 )
             ],
-            modeNames: [KeyMode.defaultName, "Coding"]
+            layerNames: [KeyLayer.defaultName, "Coding"]
         )
-        let switchModes = reference.controls.first {
+        let switchLayers = reference.controls.first {
             $0.title == "Switch modes"
         }
         // The only bound switch row targets the active mode, so the
         // subgroup is absent; the row falls through to Custom.
-        #expect(switchModes == nil)
+        #expect(switchLayers == nil)
         #expect(reference.custom.count == 1)
     }
 
@@ -268,7 +268,7 @@ struct ShortcutsReferenceTests {
     func controlsCompleteness() {
         reset()
         let spaces = [SpaceID("1"), SpaceID("2")]
-        let modeNames = [KeyMode.defaultName, "Coding"]
+        let layerNames = [KeyLayer.defaultName, "Coding"]
         // Sourced from the same catalog membership the editor and the
         // import classifier use — so if buildControls ever drifts from
         // it, these commands fall to Custom and this test fails,
@@ -277,7 +277,7 @@ struct ShortcutsReferenceTests {
             KeybindingCatalog.navigationGroups(spaces: spaces)
             .flatMap(\.commands)
             + KeybindingCatalog.resizeAndFloat(step: 50)
-            + [KeybindingCatalog.switchModeCommand("Coding")]
+            + [KeybindingCatalog.switchLayerCommand("Coding")]
         let bindings = commands.map {
             KeyBinding(
                 combo: "alt+z",
@@ -288,7 +288,7 @@ struct ShortcutsReferenceTests {
         let reference = build(
             bindings,
             spaces: spaces,
-            modeNames: modeNames
+            layerNames: layerNames
         )
         #expect(reference.custom.isEmpty)
         let controlRows = reference.controls.reduce(0) {

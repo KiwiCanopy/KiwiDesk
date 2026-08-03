@@ -29,16 +29,16 @@ struct ImportClassifierLanguageTests {
         defer { reset() }
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     customRow("KiwiDesk.focus(\"left\")")
                 ]
             )
         ]
         KeybindingImportClassifier.classify(&config)
-        let row = config.modes[0].bindings[0]
+        let row = config.layers[0].bindings[0]
         #expect(row.kind == .navigation)
         // The persisted label is the stable English canonical
         // text, matching `NavCommand.label` — never the
@@ -51,9 +51,9 @@ struct ImportClassifierLanguageTests {
     func classificationIsLanguageIndependent() {
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: [
                     customRow(
                         "KiwiDesk.focus_space(\"1\")"
@@ -72,14 +72,14 @@ struct ImportClassifierLanguageTests {
         reset()
 
         #expect(
-            english.modes[0].bindings[0].kind
-                == german.modes[0].bindings[0].kind
+            english.layers[0].bindings[0].kind
+                == german.layers[0].bindings[0].kind
         )
         #expect(
-            english.modes[0].bindings[0].label
-                == german.modes[0].bindings[0].label
+            english.layers[0].bindings[0].label
+                == german.layers[0].bindings[0].label
         )
-        #expect(english.modes[0].bindings[0].kind == .navigation)
+        #expect(english.layers[0].bindings[0].kind == .navigation)
     }
 
     @Test("classifies a switch-mode row under German")
@@ -88,19 +88,19 @@ struct ImportClassifierLanguageTests {
         LocalizationManager.shared.select("de")
         defer { reset() }
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(name: KeyMode.defaultName),
-            KeyMode(
+        config.layers = [
+            KeyLayer(name: KeyLayer.defaultName),
+            KeyLayer(
                 name: "Deep Work",
                 bindings: [
                     customRow(
-                        "KiwiDesk.switch_mode(\"default\")"
+                        "KiwiDesk.switch_layer(\"default\")"
                     )
                 ]
             ),
         ]
         KeybindingImportClassifier.classify(&config)
-        let row = config.modes[1].bindings[0]
+        let row = config.layers[1].bindings[0]
         #expect(row.kind == .navigation)
         #expect(row.label == "Switch to default")
     }

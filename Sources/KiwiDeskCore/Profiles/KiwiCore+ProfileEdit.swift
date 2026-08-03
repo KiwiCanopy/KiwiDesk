@@ -102,7 +102,7 @@ extension KiwiCore {
         // edited modes/rules are the
         // RESOLVED sets (seeded by `overlayProfileState`);
         // store only the sparse diffs against the SAME base
-        // the seed resolved onto (`baseKeyModes()` /
+        // the seed resolved onto (`baseKeyLayers()` /
         // `baseAppRules()`). nil when nothing diverges — an
         // empty override is never persisted (O3/o4), and
         // gui.json itself is NOT written here. A sidecar that
@@ -121,9 +121,9 @@ extension KiwiCore {
             )
         } else {
             let base = sidecar ?? guiConfigSeed()
-            profile.modes = KeyModeOverride.diff(
-                base: base.modes,
-                edited: config.modes
+            profile.layers = KeyLayerOverride.diff(
+                base: base.layers,
+                edited: config.layers
             )
             profile.appRules = AppRuleOverride.diff(
                 base: sidecar?.appRules ?? globalAppRuleBase,

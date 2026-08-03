@@ -22,14 +22,14 @@ struct ShortcutsSelfRowTests {
         _ bindings: [KeyBinding]
     ) -> ShortcutsReference {
         ShortcutsReferenceBuilder.build(
-            mode: KeyMode(
-                name: KeyMode.defaultName,
+            layer: KeyLayer(
+                name: KeyLayer.defaultName,
                 bindings: bindings
             ),
             spaces: [SpaceID("1")],
             spaceIcons: [:],
             resizeStep: 50,
-            modeNames: [KeyMode.defaultName]
+            layerNames: [KeyLayer.defaultName]
         )
     }
 

@@ -34,9 +34,9 @@ extension KiwiCore {
         // tabs edit the RESOLVED modes (base + this profile's
         // sparse override); `overwriteProfile` diffs them back
         // against the base on save.
-        config.modes = ConfigResolver.resolvedModes(
-            base: config.modes,
-            profile: profile.modes
+        config.layers = ConfigResolver.resolvedLayers(
+            base: config.layers,
+            profile: profile.layers
         )
         // App Rules tab in override mode (#109): same
         // resolve-edit-diff cycle over the flat rule map.
@@ -155,7 +155,7 @@ extension KiwiCore {
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
-        config.modes = recoverKeybindings()
+        config.layers = recoverKeybindings()
         config.floatRules = globalFloatRuleBase
         config.ignoreRules = globalIgnoreRuleBase
         var modes: [SpaceID: LayoutMode] = [:]
@@ -196,8 +196,8 @@ extension KiwiCore {
         _ config: inout GuiConfig
     ) {
         guard
-            config.modes.allSatisfy({ $0.bindings.isEmpty }),
-            let index = config.modes.firstIndex(
+            config.layers.allSatisfy({ $0.bindings.isEmpty }),
+            let index = config.layers.firstIndex(
                 where: { $0.isDefault }
             )
         else { return }
@@ -217,7 +217,7 @@ extension KiwiCore {
                 config.spaces + starterSpaces()
             )
         }
-        config.modes[index].bindings =
+        config.layers[index].bindings =
             DefaultKeybindings.bindings(
                 spaces: config.spaces,
                 resizeStep: Int(config.settings.resizeStep)

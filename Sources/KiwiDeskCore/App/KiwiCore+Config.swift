@@ -6,7 +6,7 @@ extension KiwiCore {
     public func loadConfig() {
         keybindingRuntimeGeneration &+= 1
         bus.resetLuaCallbacks()
-        appliedStructuredModes = nil
+        appliedStructuredLayers = nil
         keys.reset()
         nativeSpaceBindings = [:]
         resetDeclarativeState()

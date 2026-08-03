@@ -157,7 +157,7 @@ the KiwiDesk icon opens the quick menu where you can:
   another profile to switch to, so it never adds noise when there is
   no choice to make.
 - **View Shortcuts…**: Open a read-only reference of every shortcut
-  bound in the currently active mode — see below.
+  bound in the currently active layer — see below.
 - **Settings…**: Open the full Settings window.
 - **Window Management Paused…** (only when Accessibility permission
   is missing): appears at the top of the menu and reopens the
@@ -166,12 +166,12 @@ the KiwiDesk icon opens the quick menu where you can:
 ### The Shortcuts Reference
 
 **View Shortcuts…** opens a floating, read-only panel that mirrors the
-shortcuts bound in the currently active mode — a fast "what can I press
+shortcuts bound in the currently active layer — a fast "what can I press
 right now" lookup. It is not an editor: it only shows what is already
 bound, grouped into three sections:
 
 - **Controls** — window and focus actions (Focus, Move windows, Size &
-  float, Switch modes), laid out in two columns.
+  float, Switch layers), laid out in two columns.
 - **Apps** — your app-launch shortcuts, each with the app's icon. A
   small window-plus badge marks a shortcut set to *Open New* (always
   a fresh instance).
@@ -179,17 +179,17 @@ bound, grouped into three sections:
 
 The panel has its own **hotkey**: **⌃⌥K** by default (under Settings ▸
 Shortcuts ▸ **General**, "Show shortcuts panel" — rebindable or
-clearable per mode). That key both opens and closes the panel, and it
+clearable per layer). That key both opens and closes the panel, and it
 appears beside the menu bar's **View Shortcuts…** row and in the
-panel's own close hint. Every mode you create gets the same ⌃⌥K row,
+panel's own close hint. Every layer you create gets the same ⌃⌥K row,
 so the cheat-sheet is always reachable from the keyboard.
 
 The panel always appears centered on the screen under your pointer and
 never remembers a position. Press **Esc**, click anywhere outside it, or
 choose **View Shortcuts…** again to close it. Empty sections are hidden;
-a mode with nothing bound shows a short placeholder. The panel never
+a layer with nothing bound shows a short placeholder. The panel never
 lists its own ⌃⌥K shortcut as a row — the close hint in the footer
-already shows it — so a fresh mode, which starts with only that
+already shows it — so a fresh layer, which starts with only that
 binding, shows the placeholder too. To change any
 shortcut, click **Edit in Settings…** at the bottom — it opens Settings
 ▸ Shortcuts, the one place bindings are edited. If your configuration is
@@ -336,7 +336,7 @@ hand, but it is documented here for backup and transparency.
   "float_rules": [ "com.apple.calculator" ],
   "ignore_rules": [ "eu.exelban.Stats" ],
   "profile_bindings": { "1": "Developer" },
-  "modes": [
+  "layers": [
     { "name": "default", "bindings": [...] }
   ]
 }
@@ -362,8 +362,10 @@ Each field:
   (Mission Control desktops) to profile names. When you switch
   desktops, the bound profile loads. Updated in the Profiles
   section.
-- **`modes`**: array of keybinding modes. Each mode is an object with:
-  - **`name`**: the mode name ("default" for the main set).
+- **`layers`**: array of keybinding layers — named alternate
+  shortcut sets, only one of which fires at a time. Each layer is
+  an object with:
+  - **`name`**: the layer name ("default" for the main set).
   - **`icon`**: optional SF Symbol name or emoji for the menu bar.
   - **`bindings`**: array of shortcut rows, each with:
     - **`combo`**: key combo string (e.g., `"cmd+alt+left"`).
@@ -371,12 +373,29 @@ Each field:
     - **`kind`**: classification ("navigation", "application", or "custom").
     - **`label`**: display name for the row.
 
-If you hand-edit the `modes` list, it is normalized on load:
-modes with an empty name are dropped, a duplicated mode name
-keeps only its first entry, the `default` mode always exists and
-sits first, and an `icon` on the default mode is removed (its
+If you hand-edit the `layers` list, it is normalized on load:
+layers with an empty name are dropped, a duplicated layer name
+keeps only its first entry, the `default` layer always exists and
+sits first, and an `icon` on the default layer is removed (its
 menu bar indicator is fixed). The cleanup is silent; the next
 Save persists the normalized list.
+
+> This key was called `"modes"` in earlier pre-release builds.
+> A file still using the old name loads as *no shortcuts at
+> all* — every layer, `default` included — and the next Save
+> writes that emptiness back, so do this **before** opening
+> Settings:
+>
+> ```bash
+> sed -i '' 's/"modes"/"layers"/' ~/.config/KiwiDesk/gui.json
+> ```
+>
+> Repeat it for any file in `~/.config/KiwiDesk/profiles/` that
+> carries a keybinding override. A hand-written `init.lua` needs
+> the verbs renamed too — `KiwiDesk.define_mode` and
+> `switch_mode` no longer exist, so a config still calling them
+> errors on load. If you would rather start clean, **Reset all
+> settings…** trashes `gui.json` and reseeds the defaults.
 
 To reset the app to what your `init.lua` declares, delete `gui.json`.
 Treat it like `init.lua` — do not import it from an untrusted source,
@@ -1664,9 +1683,16 @@ change.
 ## Shortcuts
 
 The **Shortcuts** section (in the **System** group) binds keyboard
-combos to actions. Every shortcut lives in a **mode** — normally the
-**default** mode (active at startup), plus optional modal modes
-(vim-style); only the active mode's bindings fire at a time.
+combos to actions. Every shortcut lives in a **layer** — normally
+the **default** layer (active at startup), plus optional extra
+layers (vim-style); only the active layer's bindings fire at a
+time. ("Layer" and not "mode": *mode* already names a space's
+layout, and one word for two things is one too many.)
+
+> **Upgrading and every shortcut is gone?** The `gui.json` key
+> that stores them was renamed from `"modes"` to `"layers"`.
+> See [The gui.json File](#the-guijson-file) for the
+> one-line fix — do it before opening Settings.
 
 ### Your first run
 
@@ -1695,7 +1721,7 @@ always available as the **Starter** preset if you want it back.)
 
 ### Default Shortcuts
 
-A fresh install starts with a usable set in the default mode, so
+A fresh install starts with a usable set in the default layer, so
 you can drive KiwiDesk before configuring anything:
 
 | Action | Shortcut |
@@ -1762,9 +1788,9 @@ long word forms (`cmd`, `alt`, `semicolon`, …).
 editing the live configuration (the active profile or Standard),
 a committed recording — and a clear, and deleting a whole row —
 takes effect immediately: press a combo recorded in the
-runtime-active mode and it works, no Save needed, and a deleted
+runtime-active layer and it works, no Save needed, and a deleted
 row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
-"Active now", updated for an inactive mode, refused by macOS,
+"Active now", updated for an inactive layer, refused by macOS,
 shadowed by the active profile, or unable to compile/apply. The
 change is still *unsaved*: the footer's Save persists the base
 shortcut configuration globally in `gui.json`; profile-specific
@@ -1778,7 +1804,7 @@ so.
 
 A ⚠️ icon appears next to any row whose combo:
 
-- Duplicates another row in the same mode.
+- Duplicates another row in the same layer.
 - Conflicts with a reserved macOS shortcut.
 
 Hover the icon for a tooltip naming the conflict. This indicator
@@ -1823,7 +1849,7 @@ symbol or a word name:
 - `'` or `quote` / `apostrophe`
 
 A combo is one set of modifiers + exactly one key. Multi-key chords
-like `cmd+j+k` are not supported — use modal modes instead.
+like `cmd+j+k` are not supported — use extra layers instead.
 
 ### Actions
 
@@ -1835,7 +1861,8 @@ Each row has an action. Built-in actions live under headings:
   caption notes they only matter in the track layout).
 - **Size & float** — the per-axis Grow/Shrink rows, Make
   floating, the resize step, and **Alert sound when resize
-  can't apply** (default on): a resize shortcut pressed in a
+  can't apply** (default on, behind the card's **Resize
+  feedback** disclosure): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
   space) plays the system alert instead of failing silently.
 - **Applications** — launch an app. Each row carries a **Launch
@@ -1855,7 +1882,7 @@ Each row has an action. Built-in actions live under headings:
   Named "Advanced Lua bindings" until #406: there is no basic Lua
   binding to contrast it with, so the qualifier only misread.
 
-When you save, every shortcut lives in a mode in `gui.json`. To use
+When you save, every shortcut lives in a layer in `gui.json`. To use
 an action not in the built-in sections, write custom Lua in a row
 under Lua bindings.
 
@@ -1892,13 +1919,14 @@ If your `init.lua` holds custom keybindings:
   helpers) live, so integrations like the sketchybar bridge keep
   firing.
 
-### Modal Modes
+### Shortcut Layers
 
-In the **Shortcuts** header, click **+ Mode** to define a vim-style
-mode — a mode where only its bindings fire. Each mode has a name
+In the **Shortcuts** header, click the **+** beside the layer
+chips to define a vim-style
+layer — a layer where only its bindings fire. Each layer has a name
 (e.g., "resize"), an optional menu bar icon (SF Symbol or emoji), and
-a set of bindings that shadow the base shortcuts when the mode is
-active. Use `KiwiDesk.switch_mode` to switch modes (see
+a set of bindings that shadow the base shortcuts while the layer is
+active. Use `KiwiDesk.switch_layer` to switch layers (see
 [lua-reference.md](lua-reference.md)).
 
 ### Per-Profile Shortcut Overrides

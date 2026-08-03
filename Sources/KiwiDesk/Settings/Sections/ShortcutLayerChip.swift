@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// One persistent Shortcuts mode chip. Selection is its rest
+/// One persistent Shortcuts layer chip. Selection is its rest
 /// affordance; an unselected chip only strengthens its existing
 /// fill on hover, with no geometry or cursor change.
-struct ShortcutModeChip: View {
+struct ShortcutLayerChip: View {
     let name: String
     let selected: Bool
     let action: () -> Void

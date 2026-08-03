@@ -6,11 +6,11 @@ import Foundation
 /// (absent) inherits the global `app_rules` base entirely;
 /// present, it shadows the base per app: an app the override
 /// mentions takes its space, apps it does not mention survive
-/// unchanged. Unlike `KeyModeOverride`, a TOMBSTONE exists — a
+/// unchanged. Unlike `KeyLayerOverride`, a TOMBSTONE exists — a
 /// present-but-null entry un-pins an app the base pins, so a
 /// profile can add, change, or remove a base rule.
 ///
-/// Bespoke, templated on `KeyModeOverride`'s seam — NOT a
+/// Bespoke, templated on `KeyLayerOverride`'s seam — NOT a
 /// generic sparse-override primitive (AGENTS.md §5,
 /// `.claude/rules/parity-tests.md`): keyed flat-map merge, so
 /// no reflection parity net applies; guarded by a round-trip +
@@ -58,7 +58,7 @@ extension AppRuleOverride {
     /// equals its base pin is inherited and omitted; a changed
     /// or added pin is included; a base app absent from
     /// `edited` becomes a tombstone (un-pin — deletions ARE
-    /// expressible here, unlike `KeyModeOverride`). Returns nil
+    /// expressible here, unlike `KeyLayerOverride`). Returns nil
     /// when nothing diverges — a fully-inherited profile stores
     /// no override (an empty override is never persisted).
     public static func diff(
@@ -177,7 +177,7 @@ extension AppRuleOverride: Codable {
 extension ConfigResolver {
     /// Returns the effective app→space rules: `base` (from
     /// gui.json) when `profile` is nil or empty; the per-app
-    /// merge otherwise. Sibling of `resolvedModes` — one
+    /// merge otherwise. Sibling of `resolvedLayers` — one
     /// resolver per behavior-override tier (AGENTS.md §5).
     public static func resolvedAppRules(
         base: [String: SpaceID],

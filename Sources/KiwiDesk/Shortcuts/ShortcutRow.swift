@@ -44,7 +44,7 @@ struct ShortcutsReference {
     // `var`, not `let`: post-processing (the #294 glyph pass)
     // mutates a copy instead of re-initializing memberwise,
     // which would be one more hand-mirrored field list.
-    var modeName: String
+    var layerName: String
     var controls: [ShortcutSubgroup]
     var apps: [ShortcutRow]
     var custom: [ShortcutRow]

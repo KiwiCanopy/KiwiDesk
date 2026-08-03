@@ -14,29 +14,62 @@ extension KeybindingCatalog {
     /// monocle/grid/floating; the section caption states this
     /// and the docs echo it.
     static func resizeAndFloat(step: Int) -> [NavCommand] {
-        [
-            NavCommand(
+        ResizeRow.allCases.map { resizeRow($0, step: step) }
+            + [
+                toggleFloating,
+                toggleSticky,
+                toggleDisplaySticky,
+            ]
+    }
+
+    /// The four resize rows, one census family each (#678
+    /// Phase 3). Named rather than positional: the Shortcuts
+    /// area renders per family, and addressing these by index
+    /// into `resizeAndFloat` would silently re-point a family at
+    /// its neighbour the moment a row was inserted.
+    enum ResizeRow: CaseIterable {
+        case growWidth
+        case shrinkWidth
+        case growHeight
+        case shrinkHeight
+    }
+
+    /// One resize row, step baked into its Lua. The single
+    /// authority for these four commands — `resizeAndFloat`
+    /// composes from it rather than repeating them, so the row
+    /// the GUI writes and the row the import classifier matches
+    /// stay byte-identical (#4).
+    static func resizeRow(
+        _ row: ResizeRow,
+        step: Int
+    ) -> NavCommand {
+        switch row {
+        case .growWidth:
+            return NavCommand(
                 label: "Grow width",
                 lua: "KiwiDesk.resize(\"x\", \(step))",
                 displayLabel: {
                     L("keybinding.grow_width", "Grow width")
                 }
-            ),
-            NavCommand(
+            )
+        case .shrinkWidth:
+            return NavCommand(
                 label: "Shrink width",
                 lua: "KiwiDesk.resize(\"x\", -\(step))",
                 displayLabel: {
                     L("keybinding.shrink_width", "Shrink width")
                 }
-            ),
-            NavCommand(
+            )
+        case .growHeight:
+            return NavCommand(
                 label: "Grow height",
                 lua: "KiwiDesk.resize(\"y\", \(step))",
                 displayLabel: {
                     L("keybinding.grow_height", "Grow height")
                 }
-            ),
-            NavCommand(
+            )
+        case .shrinkHeight:
+            return NavCommand(
                 label: "Shrink height",
                 lua: "KiwiDesk.resize(\"y\", -\(step))",
                 displayLabel: {
@@ -45,11 +78,8 @@ extension KeybindingCatalog {
                         "Shrink height"
                     )
                 }
-            ),
-            toggleFloating,
-            toggleSticky,
-            toggleDisplaySticky,
-        ]
+            )
+        }
     }
 
     /// The Toggle-floating row — the one float verb offered as a

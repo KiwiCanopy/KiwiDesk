@@ -5,7 +5,7 @@ import Testing
 
 @Suite("KeybindingConflicts")
 struct KeybindingConflictsTests {
-    @Test("A duplicate combo within a mode is a conflict")
+    @Test("A duplicate combo within a layer is a conflict")
     func duplicateWithinMode() {
         let bindings = [
             KeyBinding(combo: "cmd+alt+h", lua: "a"),
@@ -20,7 +20,7 @@ struct KeybindingConflictsTests {
         )
     }
 
-    @Test("Unique combos in one mode are not a conflict")
+    @Test("Unique combos in one layer are not a conflict")
     func uniqueWithinMode() {
         let bindings = [
             KeyBinding(combo: "cmd+alt+h", lua: "a"),
@@ -30,32 +30,32 @@ struct KeybindingConflictsTests {
     }
 
     @Test(
-        "The same combo in different modes is not a conflict"
+        "The same combo in different layers is not a conflict"
     )
     func sameComboAcrossModes() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [KeyBinding(combo: "h", lua: "a")]
             ),
-            KeyMode(
+            KeyLayer(
                 name: "resize",
                 bindings: [KeyBinding(combo: "h", lua: "b")]
             ),
         ]
         #expect(
-            !KeybindingConflicts.hasAnyAcrossModes(modes)
+            !KeybindingConflicts.hasAnyAcrossLayers(layers)
         )
     }
 
-    @Test("A conflict inside any single mode is reported")
+    @Test("A conflict inside any single layer is reported")
     func conflictWithinOneOfSeveralModes() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [KeyBinding(combo: "h", lua: "a")]
             ),
-            KeyMode(
+            KeyLayer(
                 name: "resize",
                 bindings: [
                     KeyBinding(combo: "j", lua: "b"),
@@ -63,13 +63,13 @@ struct KeybindingConflictsTests {
                 ]
             ),
         ]
-        #expect(KeybindingConflicts.hasAnyAcrossModes(modes))
+        #expect(KeybindingConflicts.hasAnyAcrossLayers(layers))
     }
 
     @Test("conflicts(in:) names a system-shortcut clash")
     func conflictsReportsSystemShortcut() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -80,7 +80,7 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: modes)
+        let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
         #expect(list[0].name == "Close")
         // The case, never its English name (#96): Core cannot
@@ -88,10 +88,10 @@ struct KeybindingConflictsTests {
         #expect(list[0].target == .systemShortcut(.closeWindow))
     }
 
-    @Test("conflicts(in:) names an intra-mode duplicate")
+    @Test("conflicts(in:) names an intra-layer duplicate")
     func conflictsReportsOtherBinding() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -107,7 +107,7 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: modes)
+        let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 2)
         #expect(list[0].name == "First")
         #expect(list[0].target == .otherBinding("Second"))
@@ -117,23 +117,23 @@ struct KeybindingConflictsTests {
 
     @Test("conflicts(in:) falls back to the combo for an unnamed row")
     func conflictsFallsBackToCombo() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(combo: "cmd+w", lua: "a")
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: modes)
+        let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
         #expect(list[0].name == "cmd+w")
     }
 
     @Test("conflicts(in:) flags an unparseable combo")
     func conflictsReportsUnrecognized() {
-        let modes = [
-            KeyMode(
+        let layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -144,7 +144,7 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: modes)
+        let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
         #expect(list[0].name == "Bad")
         #expect(list[0].target == .unrecognized)

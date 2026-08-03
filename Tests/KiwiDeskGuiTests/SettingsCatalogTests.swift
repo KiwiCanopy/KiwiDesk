@@ -48,13 +48,16 @@ struct SettingsCatalogTests {
     }
 
     /// Pinned totals, so a shrunken enumeration cannot make the
-    /// sweeps above vacuous while still passing. 54 declared
-    /// tuples (incl. the two bar cards and the two colour
-    /// destinations added in #678 Phase 3) + 6 computed mode
-    /// tabs. Update deliberately as the catalog fills.
+    /// sweeps above vacuous while still passing. 55 declared
+    /// tuples (incl. the two bar cards, the two colour
+    /// destinations, and Size & float's disclosure — the one
+    /// declaration #678 Phase 3's Shortcuts area adds, its
+    /// drawer now holding the census's `.showMore` row) + 6
+    /// computed mode tabs. Update deliberately as the catalog
+    /// fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        #expect(allEntries.count == 60)
+        #expect(allEntries.count == 61)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

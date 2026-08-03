@@ -74,9 +74,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // which promotes to regular). KiwiDesk's tiling hotkeys stay
         // global Carbon and keep firing while it's open; the panel is
         // a stateless summon that rebuilds its content on each open.
-        // A mode switch while it's up auto-closes it (#603, see
-        // closeIfOpen) rather than leaving another mode's bindings on
-        // screen — reopen to see the new mode.
+        // A layer switch while it's up auto-closes it (#603, see
+        // closeIfOpen) rather than leaving another layer's bindings on
+        // screen — reopen to see the new layer.
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
@@ -97,10 +97,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     }
 
     /// Close the panel if it is open. Called when the active
-    /// keybinding mode changes (#603): the panel is a per-open
-    /// snapshot of one mode's bindings, so leaving it up after a
+    /// keybinding layer changes (#603): the panel is a per-open
+    /// snapshot of one layer's bindings, so leaving it up after a
     /// switch would advertise shortcuts that are no longer active.
-    /// Reopening (⌃⌥K) rebuilds it for the new mode.
+    /// Reopening (⌃⌥K) rebuilds it for the new layer.
     func closeIfOpen() {
         guard let panel, panel.isVisible else { return }
         close()
@@ -170,25 +170,25 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     // MARK: - Reference data
 
-    /// The shortcuts for the active mode. Nil ONLY when the config
+    /// The shortcuts for the active layer. Nil ONLY when the config
     /// is genuinely owned by `init.lua` (not GUI-managed) — the view
     /// then shows its "managed by init.lua" placeholder.
     ///
     /// Prefers the live, resolved snapshot (what Carbon actually has
     /// installed). When window management is paused — no Accessibility
     /// permission, or bindings not applied yet — there is no snapshot;
-    /// for a GUI-managed config we fall back to the CONFIGURED modes
+    /// for a GUI-managed config we fall back to the CONFIGURED layers
     /// from gui.json so the user still sees their shortcuts (defined,
     /// just not live right now) rather than a misleading placeholder.
     private func buildReference() -> ShortcutsReference? {
-        let modes: [KeyMode]
-        let activeMode: String
+        let layers: [KeyLayer]
+        let activeLayer: String
         let config: GuiConfig
         if let snapshot = core.liveKeybindingSnapshot() {
             // Live: the running engine's spaces match the resolved
             // bindings, so the live-overlaid config is correct.
-            modes = snapshot.keyModes
-            activeMode = snapshot.activeModeName
+            layers = snapshot.keyLayers
+            activeLayer = snapshot.activeLayerName
             config = core.loadGuiConfig()
         } else if core.isGuiManaged,
             let raw = core.persistedGuiConfig()
@@ -197,18 +197,18 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             // any spaces, so loadGuiConfig would overlay an EMPTY live
             // space list and misfile every space shortcut into Custom.
             // Read the persisted gui.json directly — it keeps the
-            // authored spaces and modes.
-            modes = raw.modes
-            activeMode = raw.modes.first?.name ?? KeyMode.defaultName
+            // authored spaces and layers.
+            layers = raw.layers
+            activeLayer = raw.layers.first?.name ?? KeyLayer.defaultName
             config = raw
         } else {
             return nil
         }
-        let mode =
-            modes.first { $0.name == activeMode }
-            ?? modes.first
-            ?? KeyMode.defaultMode
-        // Two-source read: the modes supply the bindings; the config
+        let layer =
+            layers.first { $0.name == activeLayer }
+            ?? layers.first
+            ?? KeyLayer.defaultLayer
+        // Two-source read: the layers supply the bindings; the config
         // supplies only spaces / icons / step, used to *generate
         // candidate preset rows* that are then intersected with the
         // actual bindings. A transient disagreement (space or step
@@ -216,11 +216,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // into Custom, never hide or invent one — safe for a
         // read-only glance panel.
         let reference = ShortcutsReferenceBuilder.build(
-            mode: mode,
+            layer: layer,
             spaces: config.spaces,
             spaceIcons: config.settings.spaceIcons,
             resizeStep: Int(config.settings.resizeStep),
-            modeNames: modes.map(\.name)
+            layerNames: layers.map(\.name)
         )
         return withAppGlyphs(
             reference,

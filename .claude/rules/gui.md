@@ -108,11 +108,93 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion and Advanced Colours render from
-it now** (#678 Phases 2-3): `BarsRowOrder` / `ColorsRowOrder`
+it. **Bars, Colours & Motion, Advanced Colours and Shortcuts
+render from it now** (#678 Phases 2-3): `BarsRowOrder` /
+`ColorsRowOrder` / `ShortcutsRowOrder`
 hold the display order and `BarsCensusRenderTests` /
-`ColorsCensusRenderTests` pin them to the census, so a row in
+`ColorsCensusRenderTests` / `ShortcutsCensusRenderTests` pin
+them to the census, so a row in
 those areas moves by editing the census.
+
+That promise has a stated edge in Shortcuts, and reading it as
+unqualified will waste your afternoon: three containers there
+are BESPOKE views, not `ForEach`es over an order list — the
+layer strip, the app list and the raw-Lua drawer. Their order
+lists exist so the census still records those rows for the
+placement table and for search, and the guard holds their
+MEMBERSHIP, but editing one moves nothing on screen. Which
+three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
+by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
+to edit that set; check it before assuming an edit will show up.
+
+**The census's unit is a SETTING, and one setting may draw many
+rows.** A keybinding family is the worked case: `focusDir` is
+one census case that puts four rows on screen and `goToSpace`
+one that puts a row per live space, so the Shortcuts area needs
+a second seam the other areas do not — an order list saying
+*where a family sits* and `ShortcutsFamilyRows` saying *what it
+draws*. An area whose keys expand this way owes both halves and
+a guard over each; **which keys may legitimately expand to
+nothing is data, never a skipped branch**, because a renderer
+reading `rows(for:) ?? []` cannot tell a hand-drawn container
+from a family that lost its rows, and a guard that skips `nil`
+goes green on exactly the disappearance it exists to catch
+(proven against `ShortcutsCensusRenderTests` before it shipped).
+
+**A census `gate:` is resolved through its area's gate
+resolver — whatever the gate decides.** Not "presence gates are
+census-owned and greying gates are wiring-owned": `BarsGates`
+already resolves census gates and everything it decides is
+greying, and `SettingRuntimeGate`'s cases split across greying,
+surfacing and hiding, so that line would cut the enum in half.
+The rule that needs no guessing:
+
+- a declared gate is answered by the resolver
+  (`BarsGateContext`, `ShortcutsRuntimeGate`), never
+  re-implemented inline beside it — a renderer whose predicate
+  drifts from the declaration greys the wrong row, or hides one
+  entirely, and the tier case is invisible by construction
+  (`ShortcutsRuntimeGateTests`, written after three such
+  violations passed the whole suite);
+- a predicate the resolver **cannot** answer from the declared
+  owner — resolved shown-bar values, auto sentinels, live editor
+  state — is a wiring predicate and was never a census gate;
+- **which declared gates the resolver cannot answer is data**
+  (`ShortcutsRuntimeGate.resolved` / `.resolvedElsewhere`), so
+  the gap stays deliberate and a new gate landing in neither
+  set reds.
+
+The two resolvers still take different shapes — one keys on
+`SettingsContainer.gate` over `TilingSettings`, the other on
+`SettingRuntimeGate` over `GuiConfig`. **Converge them before a
+third area invents a fourth**; the split is why one legitimate
+gate is "resolved elsewhere" today.
+
+**Config presence expands the Simple surface.** Anything that
+already EXISTS in the user's config — a layer, an imported
+binding, an override — is displayed in BOTH Settings modes and
+enhances the simple one; Simple withholds only the OFFER to
+create, and that offer retires itself once the first one exists.
+So a row whose gate says the thing is already there is
+`SettingTier.immediate`, never `.showMore`, and its gate is what
+gives the tier meaning — `immediateRowsAreGated` pins that every
+`.immediate` row carries one. Reading such a row as `.showMore`
+hides a user's own configuration from them, which the Shortcuts
+area shipped once. The argument is in `docs/design-decisions.md`.
+
+**A capability unlocked in one list stays scoped to that list**
+(#678). Once a profile carries a single shortcut override, the
+override affordance is live on every row of that list — never
+re-earned per row — and it turns nothing on elsewhere in the
+app. Do not gate such an affordance on a Settings mode: mode
+depth is per AREA (`SettingsArea.minimumMode`), never per row,
+and nothing is read-only because of the mode.
+`ShortcutsCapabilityUnlockTests` holds those three.
+The fourth clause has no guard because it needs no code —
+**never give an override resolver a mode parameter**;
+`KeyLayerOverride.resolved(onto:)` takes a base list and
+nothing else, and a flag deciding which shortcuts fire is a
+second config the user cannot see.
 Container-level greying is census-driven there (the container
 gate plus `exemptFromContainerGate`), but a ROW's grey
 predicate stays wiring-owned even in a census-rendered area —

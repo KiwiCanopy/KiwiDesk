@@ -1043,7 +1043,7 @@ is inert. (#8)
 ones.** A profile owns tiling, and may also carry a sparse
 override of a global setting that shapes how the workspace
 *behaves while the profile is active* — keybindings
-(`Profile.modes`) and the three window-rule families:
+(`Profile.layers`) and the three window-rule families:
 app→space (`Profile.appRules`), float (`Profile.floatRules`),
 and ignore (`Profile.ignoreRules`). The global base lives in
 the active config owner (`gui.json` or hand-written `init.lua`).
@@ -1391,7 +1391,7 @@ row — no collapse to Live.** (#209.) The top **Live** entry
 edits the running/global config; every saved profile lists
 below, the loaded one included. Picking the loaded profile used
 to silently remap to Live, which made it the one profile whose
-*stored* sparse overrides (key modes #55, app rules #109) could
+*stored* sparse overrides (key layers #55, app rules #109) could
 never be edited — you could only touch the live/global config.
 The considered fix — listing the loaded profile **twice**, top
 meaning global and list meaning overrides — was rejected as a
@@ -1429,7 +1429,7 @@ layers of the sparse-override model, not the same data twice:
   Ignore rules have no GUI control yet, so that hidden diff is
   preserved verbatim rather than reconstructed from resolved state.
 
-So "Live leaves `profile.modes` frozen while the row rewrites
+So "Live leaves `profile.layers` frozen while the row rewrites
 it" is the model working, not divergence: one door edits the
 base, the other edits the per-profile diff over it. The trap to
 avoid is "fixing" `buildProfile`/`persistProfile` to also adopt
@@ -1645,7 +1645,7 @@ its own list. Ours is curated *with search tags* ("mail" finds
 names ever could. The full catalog stays reachable: any valid
 SF Symbol name typed into the search appears as a result, and
 any single character (incl. emoji) works via "Use as text".
-One `IconPicker` serves mode icons and space icons. (#68 §6.4)
+One `IconPicker` serves layer icons and space icons. (#68 §6.4)
 
 **Browsing is tabbed (Emoji first); search is global.** The
 picker's popover splits Emoji and Symbols into segmented
@@ -1670,26 +1670,100 @@ permission. Multi-key chords (⌘J+K) are therefore not
 recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
-**Switch-mode shortcuts sit right under the mode strip.**
-The rows that switch modes render directly beneath the strip
-that defines the modes, ahead of the action groups — the
+
+**Config presence expands the Simple surface.** The simple
+mode is not a smaller product, it is a smaller *offer*. Anything
+already in the user's config — a shortcut layer, an imported Lua
+binding, a per-profile override — shows in both modes and makes
+the simple one richer; what Simple withholds is only the
+invitation to create the first one, and that invitation retires
+itself the moment it is accepted.
+
+The failure this prevents is the one worth naming, because the
+Shortcuts area shipped it: a user who created a layer, then
+found the Layers card gone because they were in the simple mode.
+Hiding a control the user has never used is curation. Hiding
+something they *made* is losing their work as far as they can
+tell, and it teaches them that the mode switch is dangerous —
+which costs the mode its whole purpose. Nothing a user has
+configured is ever hidden by a mode.
+
+It follows that "which mode is this row in" is the wrong
+question for such a row; the right one is "does the thing
+exist yet", which is a runtime gate rather than a depth. That is
+what `SettingTier.immediate` is for, and why an `.immediate` row
+without a gate is meaningless.
+
+**Overrides always resolve; the Simple/Nerd mode never
+changes what runs.** There is no stored flag deciding whether a profile's
+shortcut overrides apply — an early draft of the redesign
+specified one, with a default and an upgrade migration, and it
+was cut before any of it was built. The reason it must stay
+cut: a preference that changes *which shortcuts fire* is not a
+preference, it is a second config the user cannot see, and the
+first time a shortcut goes dead because of a display setting
+the app has lied. So the resolver takes a base list and a
+sparse override and nothing else, and nothing in the Settings
+window is read-only because of the mode a user picked.
+
+What the mode may decide is only whether *creating* an override
+is offered — and that offer retires itself. **A used capability
+unlocks its whole list.** The moment a profile carries one
+shortcut override, the override column is live on every row of
+that list, because a user who has overridden one key is a user
+who overrides keys and making them re-earn the affordance per
+row is busywork dressed as simplicity. **The scope is the list,
+not the app**: overriding a shortcut must not turn a deeper
+surface on in App Rules or anywhere else, or the mode becomes
+something users lose by accident and stop trusting.
+`ShortcutsCapabilityUnlockTests` holds both halves plus the
+mode-independence. All three already hold by construction, and
+the suite exists because the cheapest way to build mode
+mechanics later is to gate the override column on a mode —
+which would break every one of them while breaking no test.
+The resolver clause is guarded by the signature rather than by
+that suite: `KeyLayerOverride.resolved(onto:)` takes a base
+list and nothing else, so the obligation is simply never to
+add a mode parameter to it.
+
+**A named alternate keybinding set is a LAYER, never a
+mode.** "Mode" was already carrying two unrelated meanings —
+a space's layout (monocle, grid, …) and the Settings window's
+Simple/Nerd depth — and a third sense made every sentence
+about any of them ambiguous: "switch mode" could mean three
+things, and "only the active mode's shortcuts fire" had to
+name which kind of mode it meant to be read at all. Layer
+also describes the thing better, since what it does is stack
+a second meaning over the same physical keys. The rename runs
+the whole width of the product — the Lua verbs
+(`define_layer` / `switch_layer`), `KeyLayer` and its sparse
+override in Core, the `"layers"` key in `gui.json` and in a
+profile, the GUI, and the strings — because a vocabulary
+split across two names is the ambiguity it was meant to
+remove. Pre-release, single user: no aliases and no migration,
+so an old `"modes"` key reads as *absent* rather than as
+layers, and re-saving is the migration.
+
+**Switch-layer shortcuts sit right under the layer strip.**
+The rows that switch layers render directly beneath the strip
+that defines the layers, ahead of the action groups — the
 definition and its bindings read as one unit. The strip's
-caption also states that "default" is the standard mode and
-always the active one after an app start. Renaming a mode
-shares Delete's gate (base modes are protected in
-profile-override editing, #55) and rewrites the switch-mode
+caption also states that "default" is the standard layer and
+always the active one after an app start. Renaming a layer
+shares Delete's gate (base layers are protected in
+profile-override editing, #55) and rewrites the switch-layer
 rows of the config being edited through the catalog's
 single authority, so writer and import classifier keep
 matching byte-for-byte (#4). Scope: a stored profile whose
 sparse override targets the old name keeps it and
-resurfaces it as a standalone mode — the same accepted
+resurfaces it as a standalone layer — the same accepted
 pre-release gap Delete has (the edit is a draft until Save,
 so stored files can't be chased at click time). Saved
 profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
 native-Space bindings follow, like Delete and make default.
 
-**Modal modes are the layering mechanism**: a mode switch
+**Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
@@ -1731,8 +1805,8 @@ combo you are about to bind is often already bound to a window
 action, so pressing it to test it would fire that action
 mid-capture. While any recorder is open, the manager
 unregisters every KiwiDesk Carbon hotkey and re-registers the
-current mode when it closes — the suspend/resume round-trip the
-exact table, so a mode change made while armed is honored on
+current layer when it closes — the suspend/resume round-trip the
+exact table, so a layer change made while armed is honored on
 resume. The `RecorderCoordinator` drives this on the idle↔armed
 edge only, so hopping between fields never bounces the
 registration. It never touches macOS/system shortcuts (not ours
@@ -1754,7 +1828,7 @@ successfully committed recording (or clear) on the live edit
 target re-registers the running Carbon hotkeys immediately,
 with no file writes. The runtime source starts from the clean
 Settings baseline and accumulates **recorder combo mutations
-only**: staged Lua bodies, app choices, mode edits, and other
+only**: staged Lua bodies, app choices, layer edits, and other
 shortcut fields never hitchhike on a recording. A new row's
 action is required payload for its first recording; later
 non-recorder edits to it stay staged. The base then resolves
@@ -1765,10 +1839,10 @@ in `gui.json`, while stored-profile editing owns sparse profile
 overrides.
 
 Re-registration prepares every Lua callback before one atomic
-mode-table swap, then activates the preserved runtime mode once
+layer-table swap, then activates the preserved runtime layer once
 (profile/config applies still reset to default). Feedback is
-scoped to the exact row and mode: "Active now" only after that
-combo registered in the active mode; inactive-mode, profile-
+scoped to the exact row and layer: "Active now" only after that
+combo registered in the active layer; inactive-layer, profile-
 shadowed, compile-failed, and Carbon-denied states say so instead.
 Revert first re-applies persisted state; if the sidecar/profile
 became unreadable, an in-memory pre-edit snapshot removes ghost
@@ -1823,14 +1897,14 @@ cannot see needs a test (two cases resolving to the same string,
 
 **First run seeds a starter shortcut set — base tier, only
 into emptiness.** A fresh install used to boot with zero
-shortcuts (the default mode existed but was empty): a GUI-first
+shortcuts (the default layer existed but was empty): a GUI-first
 user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
 **escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
 `⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
 / move-and-follow, `⌃⌥⌘` arrows resize, `⌃⌥F` float, `⌃⌥S` display
 sticky, `⌃⌥⇧S` global sticky — with one guard everywhere: **only
-when no mode carries a single binding** — a user- or Lua-authored
+when no layer carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive.
 
@@ -1846,7 +1920,7 @@ and remappable to Caps Lock; `⌘⌥` was rejected because it collides
 with always-on system shortcuts (Force Quit, Dock, Hide/Minimize).
 Directions bind the arrow keys, which never compose a character on
 any layout. The set lives in the **base `gui.json`
-modes**, never a profile override (profiles stay
+layers**, never a profile override (profiles stay
 tiling-plus-sparse-behavior, #55): on first launch the seeded
 model is persisted so the very first boot is GUI-managed and the
 shortcuts actually fire.
@@ -1968,7 +2042,7 @@ The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
 **The reference panel never lists its own opener.** The
-`show_shortcuts` binding (⌃⌥K, seeded per mode since #602) is
+`show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
 dropped from the panel builder's working set and renders in no
 band — the one deliberate exception to the panel's "no bound
 shortcut is ever invisible" contract. The footer's dismiss hint
@@ -1986,7 +2060,7 @@ read, ahead of the actions the user opened the panel to look
 up. The editor's General section likewise stays low — macOS's
 own Keyboard pane puts "Keyboard Shortcuts…" below the content,
 and the menu bar's "View Shortcuts…" plus the onboarding hint
-already carry discovery. Consequence to keep: a fresh mode
+already carry discovery. Consequence to keep: a fresh layer
 (seeded with only the opener) honestly shows the "nothing
 bound" placeholder while the footer teaches ⌃⌥K.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing

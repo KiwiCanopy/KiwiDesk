@@ -5,10 +5,10 @@ import Testing
 
 /// Integration tests for editing a stored profile's keybinding
 /// override through the GUI path (#55 phase 7):
-/// `loadGuiConfig(editing:)` seeds the RESOLVED modes,
+/// `loadGuiConfig(editing:)` seeds the RESOLVED layers,
 /// `overwriteProfile` stores only the sparse diff against the
-/// base gui.json modes — and never writes gui.json itself.
-@Suite("Profile modes edit round-trip (#55 phase 7)", .serialized)
+/// base gui.json layers — and never writes gui.json itself.
+@Suite("Profile layers edit round-trip (#55 phase 7)", .serialized)
 @MainActor
 struct ProfileModesEditTests {
 
@@ -23,8 +23,8 @@ struct ProfileModesEditTests {
                 )
         )
         var config = GuiConfig()
-        config.modes = [
-            KeyMode(
+        config.layers = [
+            KeyLayer(
                 name: "default",
                 bindings: [
                     KeyBinding(
@@ -48,7 +48,7 @@ struct ProfileModesEditTests {
 
     private func saveWorkProfile(
         _ core: KiwiCore,
-        modes: KeyModeOverride? = nil
+        layers: KeyLayerOverride? = nil
     ) throws {
         try core.profiles.save(
             Profile(
@@ -58,15 +58,15 @@ struct ProfileModesEditTests {
                 ],
                 spaceModes: [:],
                 settings: TilingSettings(),
-                modes: modes
+                layers: layers
             )
         )
     }
 
-    private var override: KeyModeOverride {
-        KeyModeOverride(
-            modes: [
-                KeyMode(
+    private var override: KeyLayerOverride {
+        KeyLayerOverride(
+            layers: [
+                KeyLayer(
                     name: "default",
                     bindings: [
                         KeyBinding(
@@ -83,14 +83,14 @@ struct ProfileModesEditTests {
 
     // MARK: - Seeding
 
-    @Test("loadGuiConfig(editing:) seeds the RESOLVED modes")
+    @Test("loadGuiConfig(editing:) seeds the RESOLVED layers")
     func editingSeedsResolvedModes() throws {
         let core = makeGuiCore()
-        try saveWorkProfile(core, modes: override)
+        try saveWorkProfile(core, layers: override)
 
         let config = try core.loadGuiConfig(editing: "Work")
 
-        let rows = config.modes[0].bindings
+        let rows = config.layers[0].bindings
         // Overridden combo shows the profile's action…
         #expect(
             rows.first { $0.combo == "alt+h" }?.lua
@@ -111,56 +111,56 @@ struct ProfileModesEditTests {
         try saveWorkProfile(core)
 
         var config = try core.loadGuiConfig(editing: "Work")
-        let at = config.modes[0].bindings.firstIndex {
+        let at = config.layers[0].bindings.firstIndex {
             $0.combo == "alt+h"
         }
-        config.modes[0].bindings[try #require(at)].lua =
+        config.layers[0].bindings[try #require(at)].lua =
             "OVERRIDE"
         try core.overwriteProfile(named: "Work", with: config)
 
         let saved = try core.profiles.read(name: "Work")
-        let stored = try #require(saved.modes)
-        #expect(stored.modes.count == 1)
-        #expect(stored.modes[0].bindings.count == 1)
-        #expect(stored.modes[0].bindings[0].combo == "alt+h")
-        #expect(stored.modes[0].bindings[0].lua == "OVERRIDE")
+        let stored = try #require(saved.layers)
+        #expect(stored.layers.count == 1)
+        #expect(stored.layers[0].bindings.count == 1)
+        #expect(stored.layers[0].bindings[0].combo == "alt+h")
+        #expect(stored.layers[0].bindings[0].lua == "OVERRIDE")
     }
 
     @Test("Unchanged edit session preserves the override")
     func unchangedSavePreservesOverride() throws {
         let core = makeGuiCore()
-        try saveWorkProfile(core, modes: override)
+        try saveWorkProfile(core, layers: override)
 
         // Load for edit and save straight back.
         let config = try core.loadGuiConfig(editing: "Work")
         try core.overwriteProfile(named: "Work", with: config)
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.modes == override)
+        #expect(saved.layers == override)
     }
 
     @Test("Reverting to base clears the override (nil, sparse)")
     func revertingClearsOverride() throws {
         let core = makeGuiCore()
-        try saveWorkProfile(core, modes: override)
+        try saveWorkProfile(core, layers: override)
 
         var config = try core.loadGuiConfig(editing: "Work")
         // Put the overridden row back to its base action.
-        let at = config.modes[0].bindings.firstIndex {
+        let at = config.layers[0].bindings.firstIndex {
             $0.combo == "alt+h"
         }
-        config.modes[0].bindings[try #require(at)].lua =
+        config.layers[0].bindings[try #require(at)].lua =
             "focus_left"
         try core.overwriteProfile(named: "Work", with: config)
 
         let saved = try core.profiles.read(name: "Work")
-        #expect(saved.modes == nil)
+        #expect(saved.layers == nil)
         // O3: the cleared override encodes as key ABSENT.
         let data = try JSONEncoder().encode(saved)
         let json = try #require(
             String(data: data, encoding: .utf8)
         )
-        #expect(!json.contains("\"modes\""))
+        #expect(!json.contains("\"layers\""))
     }
 
     @Test("overwriteProfile never writes gui.json")
@@ -172,7 +172,7 @@ struct ProfileModesEditTests {
         let before = try Data(contentsOf: sidecarURL)
 
         var config = try core.loadGuiConfig(editing: "Work")
-        config.modes[0].bindings[0].lua = "CHANGED"
+        config.layers[0].bindings[0].lua = "CHANGED"
         try core.overwriteProfile(named: "Work", with: config)
 
         let after = try Data(contentsOf: sidecarURL)
