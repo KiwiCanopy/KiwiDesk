@@ -44,38 +44,26 @@ enum LayoutSchematic {
     /// telling two stories (#712).
     static let cascadeOffset: CGFloat = 9
 
-    /// The cell ceiling a schematic stands in for when the real
-    /// one is **screen-derived** — `auto_size`, where
-    /// `GridLayout.capDimensions` fits as many minimum-size cells
-    /// as the display allows. The canvas is not a display and has
-    /// no minimum window size, so it cannot compute that; it
-    /// draws a plausible one instead and says so here.
+    /// The Grid preview's stand-in for the one ceiling it cannot
+    /// compute: `auto_size`, where `GridLayout.capDimensions`
+    /// fits as many minimum-size cells as the *display* allows.
+    /// The canvas is not a display and has no minimum window
+    /// size, so it draws a plausible grid and the caption states
+    /// these numbers rather than prose (#712).
     ///
     /// With auto-size **off** no stand-in is needed: the ceiling
-    /// is the user's own typed columns × rows, and the preview
-    /// uses it (#712).
-    static let autoSizeCap = (columns: 3, rows: 3)
+    /// is the user's own typed columns × rows.
+    ///
+    /// **A schematic's ceiling is the engine's rule, never the
+    /// canvas's.** An earlier cut of #712 also clamped the
+    /// ceiling to what the canvas could legibly draw, which made
+    /// the drawn *capacity* scale-dependent: rigid 8 × 1 with
+    /// five windows drew a two-window pile on the strip
+    /// thumbnail and none in the panel, inventing an overflow
+    /// the engine does not have. Clamp the drawing if you must;
+    /// never the rule.
+    static let gridAutoSizeCap = (columns: 3, rows: 3)
 
-    /// The most cells a canvas can draw before a cell stops
-    /// reading as a window.
-    ///
-    /// **This is the picture's limit, not the layout's.** The
-    /// layout's ceiling is `cap` on the schematic — the typed
-    /// columns × rows, which decides where the pile starts. This
-    /// one only decides what fits on screen, and conflating the
-    /// two is what let a 6 × 5 caption sit over a 4 × 4 drawing
-    /// (#712). Where this one wins, the caption says so.
-    ///
-    /// The two values are the two canvas sizes: a `tile` is the
-    /// 132 × 84 thumbnail in the layout strip, where columns and
-    /// rows set to their maximum of 10 would be 13 × 8 pt cells;
-    /// a `panel` is the full-width live preview at 240 tall, with
-    /// room for more.
-    static func drawableCells(
-        for scale: SchematicScale
-    ) -> (columns: Int, rows: Int) {
-        scale == .tile ? (columns: 4, rows: 4) : (columns: 6, rows: 6)
-    }
 }
 
 /// How large a schematic draws — and therefore what it is *for*

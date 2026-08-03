@@ -35,6 +35,15 @@ struct LayoutSchematicCapacityTests {
                 windows: count
             )
             #expect(schematic.cap == (columns: 2, rows: 2))
+            // Scale-invariant: the ceiling is the layout's rule,
+            // so a thumbnail and the panel must agree about it.
+            // An earlier cut clamped the rule to what the canvas
+            // could draw and the two disagreed (#712).
+            var panel = schematic
+            panel.scale = .panel
+            #expect(panel.cap == schematic.cap)
+            #expect(panel.capacity == schematic.capacity)
+            #expect(panel.piledCount == schematic.piledCount)
             #expect(schematic.dims.columns <= 2)
             #expect(schematic.dims.rows <= 2)
         }
@@ -52,6 +61,11 @@ struct LayoutSchematicCapacityTests {
     /// Auto-size is the one arm the canvas cannot compute, since
     /// the real ceiling fits minimum-size cells against a real
     /// display. It stands in, and the stand-in is the ceiling.
+    /// Falsifiable on both sides: the stand-in is used AND the
+    /// typed dimensions are not. An earlier cut asserted
+    /// `!isClamped`, whose first term was `!autoSize` — trivially
+    /// true for this very fixture, so it could not fail whatever
+    /// the cap did (code review, 2026-08-03).
     @Test("auto-size uses the canvas stand-in, not the typed dims")
     func autoSizeUsesTheStandIn() {
         let schematic = grid(
@@ -61,8 +75,17 @@ struct LayoutSchematicCapacityTests {
             windows: 6,
             autoSize: true
         )
-        #expect(schematic.cap == LayoutSchematic.autoSizeCap)
-        #expect(!schematic.isClamped)
+        #expect(schematic.cap == LayoutSchematic.gridAutoSizeCap)
+        #expect(schematic.cap != (columns: 9, rows: 9))
+        // And turning auto-size off follows the typed dims, so
+        // the branch above is a choice and not a constant.
+        let typed = grid(
+            columns: 9,
+            rows: 9,
+            type: .rigid,
+            windows: 6
+        )
+        #expect(typed.cap == (columns: 9, rows: 9))
     }
 
     /// Past capacity the engine tiles `capacity - 1` and piles
@@ -81,7 +104,12 @@ struct LayoutSchematicCapacityTests {
             )
             let piled = schematic.piledCount
             if count <= schematic.capacity {
-                #expect(piled <= 1)
+                // Exactly zero, not "at most one": the engine
+                // takes its overflow branch only PAST capacity,
+                // and a `<= 1` here was written around an
+                // off-by-one in `piledCount` rather than
+                // catching it (code review, 2026-08-03).
+                #expect(piled == 0)
             } else {
                 #expect(piled > 1)
                 #expect(piled > previous)
@@ -101,8 +129,16 @@ struct LayoutSchematicCapacityTests {
             type: .rigid,
             windows: 12
         )
+        // The panel's real drawing area, not an invented size —
+        // a fixture that reasons from geometry pins it
+        // (`.claude/rules/tests.md`). Width is the pane's, so a
+        // representative one; the height is the scale's own, less
+        // the 6 pt padding the body applies.
         let cells = schematic.gridCells(
-            CGSize(width: 200, height: 120),
+            CGSize(
+                width: 600,
+                height: SchematicScale.panel.height - 12
+            ),
             cols: schematic.dims.columns,
             rows: schematic.dims.rows,
             ids: schematic.ids
@@ -123,34 +159,49 @@ struct LayoutSchematicCapacityTests {
         for (a, b) in zip(origins, origins.dropFirst()) {
             #expect(b - a == LayoutSchematic.cascadeOffset)
         }
-        // The cell count is the window count: nothing is dropped
-        // on the way into the pile.
-        #expect(cells.count == schematic.ids.count)
+        // Nothing is dropped on the way into the pile: every
+        // window is either a cell or counted by a `+N` chip.
+        let hidden = cells.reduce(0) { sum, cell in
+            if case .piled(_, let n) = cell.kind { return sum + n }
+            return sum
+        }
+        #expect(cells.count + hidden == schematic.ids.count)
     }
 
-    /// The caption may never state dimensions the picture
-    /// contradicts — a 6 × 5 caption over a 4 × 4 drawing was the
-    /// third arm of #712.
-    @Test("a clamped grid says so instead of overstating itself")
-    func aClampedGridSaysSo() {
-        let clamped = grid(
-            columns: 9,
-            rows: 9,
+    /// The pile stays inside the cell that owns it. Reveals that
+    /// outrun the cell height march the tiles off the canvas,
+    /// where the clip eats them and the picture shows fewer
+    /// windows than the caption claims (code review, 2026-08-03).
+    @Test("the pile never leaves its cell")
+    func thePileStaysInItsCell() {
+        let schematic = grid(
+            columns: 1,
+            rows: 6,
             type: .rigid,
-            windows: 6
+            windows: 12
         )
-        #expect(clamped.isClamped)
-        #expect(
-            clamped.cap
-                == LayoutSchematic.drawableCells(for: .tile)
+        let size = CGSize(
+            width: 600,
+            height: SchematicScale.panel.height - 12
         )
-        let fits = grid(
-            columns: 2,
-            rows: 2,
-            type: .rigid,
-            windows: 6
+        let cells = schematic.gridCells(
+            size,
+            cols: schematic.dims.columns,
+            rows: schematic.dims.rows,
+            ids: schematic.ids
         )
-        #expect(!fits.isClamped)
+        for cell in cells {
+            #expect(cell.rect.maxY <= size.height + 0.5)
+            #expect(cell.rect.maxX <= size.width + 0.5)
+        }
+        // What did not fit is accounted for, not dropped.
+        let piled = cells.compactMap { cell -> Int? in
+            if case .piled(_, let hidden) = cell.kind {
+                return hidden
+            }
+            return nil
+        }
+        #expect(piled.reduce(0, +) + piled.count == schematic.piledCount)
     }
 
     private func grid(

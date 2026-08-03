@@ -34,7 +34,13 @@ extension TrackSchematic {
         let n = overflowWindows
         let w = size.width
         let h = size.height
-        let off = LayoutSchematic.cascadeOffset
+        // Track keeps its own, narrower reveal rather than the
+        // family's: its overflow track is one slice of the strip,
+        // so the wider reveal trips the tile-height floor sooner
+        // and the pile leaves its zone. The shared value is the
+        // Stack/Grid one; this is a deliberate divergence, not a
+        // missed rename.
+        let off: CGFloat = 6
         if overflowStyle == .cascadeAll {
             let tileH = max(6, h - off * CGFloat(n - 1))
             return (0..<n).map {

@@ -47,10 +47,6 @@ struct StackSchematic: View {
     /// the offset below and `stackWins`, for the slot math in
     /// `StackSchematic+Slots.swift`.
     static let overflowTiled = 3
-    /// Scaled-down title-bar reveal — the family's one value.
-    static var cascadeOffset: CGFloat {
-        LayoutSchematic.cascadeOffset
-    }
 
     /// Masters cannot outnumber the established windows: at two
     /// windows a master count of ten still leaves the stack zone

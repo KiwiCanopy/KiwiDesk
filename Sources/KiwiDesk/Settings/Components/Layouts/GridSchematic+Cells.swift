@@ -10,8 +10,9 @@ extension GridSchematic {
     /// mirroring `GridLayout`'s fill: columns-first row-major,
     /// rows-first column-major), plus any trailing empty cell. The
     /// last window spans the leftover when fill-empty-space is on,
-    /// and windows past the grid's capacity — which only a rigid
-    /// grid has — stack in the last cell, later ones on top.
+    /// and windows past the grid's capacity — which BOTH types have,
+    /// since a dynamic grid balances only up to the same ceiling —
+    /// cascade in the last cell.
     func gridCells(
         _ size: CGSize,
         cols: Int,
@@ -37,44 +38,36 @@ extension GridSchematic {
                 ? (slot % cols, slot / cols)
                 : (slot / rows, slot % rows)
         }
+        // The engine's OVERFLOW branch lays its tiled prefix out
+        // row-major unconditionally — it does not consult
+        // `splitDirection` there, unlike its normal fill
+        // (`GridLayout.calculateGeometry`). Mirror that rather
+        // than the fill order, or a rows-first grid past capacity
+        // draws the focus in a cell the engine never puts it in.
+        func overflowAt(_ i: Int) -> (Int, Int) {
+            (i % cols, i / cols)
+        }
         var cells: [(CGRect, CellKind)] = []
+        let overflowing = ids.count > capacity
         // Past capacity the engine tiles `capacity - 1` windows
         // and sends the rest to `OverlapStack` in the last cell.
         // Drawing them at one rect is what made the cell darken
         // instead of pile (#712), so each gets its own offset —
         // and `.piled` so it renders opaque.
-        let tiled = ids.count > capacity ? capacity - 1 : ids.count
+        let tiled = overflowing ? capacity - 1 : ids.count
         for (i, id) in ids.prefix(tiled).enumerated() {
-            let (c, r) = at(i)
+            let (c, r) = overflowing ? overflowAt(i) : at(i)
             if i == ids.count - 1 && spansLeftover {
                 let cs = columnsFirst ? cols - c : 1
                 let rs = columnsFirst ? 1 : rows - r
-                cells.append((rect(c, r, cs, rs), kind(id)))
+                cells.append((rect(c, r, cs, rs), .window(kind(id))))
             } else {
-                cells.append((rect(c, r, 1, 1), kind(id)))
+                cells.append((rect(c, r, 1, 1), .window(kind(id))))
             }
         }
-        if ids.count > capacity {
+        if overflowing {
             let last = rect(cols - 1, rows - 1, 1, 1)
-            let pile = Array(ids.dropFirst(tiled))
-            let off = LayoutSchematic.cascadeOffset
-            let height = max(
-                8,
-                last.height - off * CGFloat(pile.count - 1)
-            )
-            for (k, id) in pile.enumerated() {
-                cells.append(
-                    (
-                        CGRect(
-                            x: last.minX,
-                            y: last.minY + CGFloat(k) * off,
-                            width: last.width,
-                            height: height
-                        ),
-                        .piled(kind(id))
-                    )
-                )
-            }
+            cells.append(contentsOf: pileCells(in: last, ids: ids))
         } else if !spansLeftover, ids.count < capacity {
             for i in ids.count..<capacity {
                 let (c, r) = at(i)
@@ -82,5 +75,49 @@ extension GridSchematic {
             }
         }
         return cells
+    }
+
+    /// The cascade inside the last cell, **bounded by that cell**.
+    ///
+    /// A pile whose reveals outrun the cell height marches out of
+    /// it and is cut by the canvas clip, so the picture shows
+    /// fewer windows than the caption claims — panel scale at
+    /// 1 × 6 with twelve windows drew three of them off-canvas.
+    /// Only as many tiles as fit are drawn; a `+N` chip on the
+    /// front one carries the rest, which is what
+    /// `SchematicMoreChip` is for.
+    func pileCells(
+        in cell: CGRect,
+        ids: [Int]
+    ) -> [(rect: CGRect, kind: CellKind)] {
+        let off = LayoutSchematic.cascadeOffset
+        let minTile: CGFloat = 8
+        let pile = Array(ids.dropFirst(max(0, ids.count - piledCount)))
+        // How many reveals the cell can hold with a legible tile
+        // still under them.
+        let room = max(
+            1,
+            Int(((cell.height - minTile) / off).rounded(.down)) + 1
+        )
+        let drawn = min(pile.count, room)
+        let hidden = pile.count - drawn
+        let height = max(
+            minTile,
+            cell.height - off * CGFloat(drawn - 1)
+        )
+        return pile.suffix(drawn).enumerated().map { k, id in
+            (
+                CGRect(
+                    x: cell.minX,
+                    y: cell.minY + CGFloat(k) * off,
+                    width: cell.width,
+                    height: height
+                ),
+                CellKind.piled(
+                    kind(id),
+                    hidden: k == drawn - 1 ? hidden : 0
+                )
+            )
+        }
     }
 }

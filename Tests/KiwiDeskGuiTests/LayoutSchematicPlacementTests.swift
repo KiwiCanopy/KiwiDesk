@@ -88,7 +88,7 @@ struct LayoutSchematicPlacementTests {
     }
 
     /// Grid fills its cells in array order, so the array *is* the
-    /// picture once `GridLayout.balanced` has chosen the dims.
+    /// picture once `GridLayout.dimensions` has chosen them.
     @Test("Grid opens the window where the engine does")
     func gridPlacement() {
         for placement in placements {
