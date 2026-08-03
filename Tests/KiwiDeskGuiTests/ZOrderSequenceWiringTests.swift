@@ -173,56 +173,35 @@ struct ZOrderSequenceWiringTests {
     /// the three above: `eventLoop.element(for:)` is nil under
     /// `makeTestCore`, so the function returns before the drain.
     ///
-    /// Five expectations, because there are five ways to un-fix it
-    /// and only one of them deletes a call. Each was proved to red
-    /// on its own by mutating THIS function, not the drain
-    /// (guard-prover, 2026-08-03).
+    /// The teardown restack's seams, bound to the real machine.
     ///
-    /// Three of them guard decisions that nothing else in the
-    /// suite can see, each of which was measured green across all
-    /// 2424 tests before its needle existed:
+    /// This test used to carry the DECISIONS as well — seven scans
+    /// re-typing `restackForTeardown`'s body, which red on renaming
+    /// a local and pass on `budget * 2` (architect review,
+    /// 2026-08-03). Those decisions moved behind seams into
+    /// `TeardownRestack`, where `TeardownRestackTests` asserts them
+    /// as behavior: the Accessibility gate, the dropped window, the
+    /// per-group narrowing, the stop-dead boundary.
     ///
-    /// - **The Accessibility gate.** `stop()` also runs on a
-    ///   permission revoke, where no raise can land but the
-    ///   WindowServer read keeps answering — so the drain plans
-    ///   the whole circle and sleeps the entire budget on the main
-    ///   actor. Deleting the gate reinstates that freeze.
-    /// - **The teardown policy.** Naming it is what ties this call
-    ///   site to `ZOrderDrain.Policy.teardown`, which the unit
-    ///   suites do assert on; passing `.restore` instead would cut
-    ///   the circle short and issue an unbounded tail.
-    /// - **Sizing the per-group drain from what is LEFT** of that
-    ///   budget rather than handing each display the whole of it.
-    ///
-    /// The exclusion needles are the remaining two:
-    /// `aPinnedMemberIsDroppedNotAbsorbed` prices what leaving the
-    /// frontmost app's key window in the circle costs, and only
-    /// these pin that the circle still takes it out. Resolving the
-    /// window and never filtering on it is a real shape, so they
-    /// match the edge rather than the two nodes.
-    @Test("The teardown restack drains its raises")
+    /// What is left is the half no unit test in either target can
+    /// reach, because `makeTestCore` has neither AX nor a
+    /// WindowServer: that these four seams are bound to the real
+    /// machine rather than to something inert. A `TeardownRestack`
+    /// built with `isTrusted: { true }` and a drain factory
+    /// returning nil satisfies every behavioral test in that suite
+    /// and raises nothing at all on a real quit.
+    @Test("The teardown restack binds the real seams")
     func teardownRestackUsesTheDrain() throws {
         let source = try body(
             of: "restackForTeardown",
             in: "KiwiCore+TeardownRaise.swift",
             under: "App"
         )
-        #expect(source.contains("drain.run("))
         #expect(source.contains("AXHelper.isTrusted()"))
-        #expect(source.contains("ZOrderDrain.Policy.teardown"))
-        #expect(source.contains("policy.limited(to: remaining)"))
-        // The narrowing needle above pins that each group gets
-        // what is LEFT, never what the whole-quit deadline it is
-        // narrowed against was sized from. Sizing that deadline
-        // from `.restore.budget` satisfies every other needle here
-        // and passes the whole suite (guard-prover, 2026-08-03),
-        // so the deadline expression earns its own.
-        #expect(source.contains("+ policy.budget"))
         #expect(
-            source.contains(
-                "let unbeatable = trustedFrontmostFocusedWindowID()"
-            )
+            source.contains("trustedFrontmostFocusedWindowID()")
         )
-        #expect(source.contains("$0 != unbeatable"))
+        #expect(source.contains("teardownDrain("))
+        #expect(source.contains("policy: .teardown"))
     }
 }

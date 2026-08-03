@@ -112,12 +112,16 @@ editing here:
   sequences answer that differently *because its role differs*,
   and a third must say which it is. The teardown restack drops it
   from its TARGETS, since the circle would otherwise order
-  windows above it. The float raise keeps it out of the FLOOR
-  (`raiseFloor`, which owns the measurement) — and knowingly
-  leaves it among the targets, where a focused float can still
-  buy one unsatisfiable wait, bounded and once per raise, the
+  windows above it. The float raise and the monocle restore keep
+  it out of the FLOOR instead (`raiseFloor`, which owns the
+  measurement) — and knowingly leave it among the targets, the
   same class of residue `floatLayerTargets` already records for
-  mixed CGWindow layers. The two guards are
+  mixed CGWindow layers. Price that residue as **n ×
+  `landingLimit`, not one**: the landing check carries the
+  unbeatable window in every subsequent comparison, so a plan of n
+  raises pays the limit n times and can spend the whole budget
+  with the mouse warp held for all of it (architect review,
+  2026-08-03). The two guards are
   `ZOrderTeardownDrainTests`
   (`aPinnedMemberIsDroppedNotAbsorbed`) and `ZOrderRaisePlanTests`
   (`floatFloorExcludesTheFocusedWindow`), and

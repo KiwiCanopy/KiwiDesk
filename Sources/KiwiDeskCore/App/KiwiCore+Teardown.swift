@@ -135,8 +135,8 @@ extension KiwiCore {
     /// display-suppression bracket so they composite as one
     /// visual update; `restackForTeardown` then raises the grid's
     /// circle, deliberately outside that bracket. A system-wide
-    /// AX messaging timeout (0.25 s) is set once before the move
-    /// loop and bounds every AX call in both passes — EUI reads,
+    /// AX messaging timeout (0.25 s) is set here, before either
+    /// pass, and bounds every AX call in both — EUI reads,
     /// EUI disable/restore, setFrame and the raises — so
     /// Electron/WebKit apps (up to ~6 s with the default timeout)
     /// cannot stall the quit path; wall-clock budgets (~1 s for
@@ -181,6 +181,23 @@ extension KiwiCore {
             targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }
+        // Bound every AX call in BOTH passes — EUI reads, EUI
+        // disable/restore, setFrame, and the raises — including on
+        // fresh app elements created inside AXHelper. The
+        // system-wide default covers all elements created after
+        // this point.
+        //
+        // Set here rather than inside the move pass, which is
+        // where it used to live: the raise pass depends on it just
+        // as hard — `ZOrderDrain.Policy.teardown`'s ceiling is the
+        // budget plus one blocking raise, and that "one" is only
+        // 0.25 s because of this line — and it must not depend on
+        // the other pass having run first to get it (architect
+        // review, 2026-08-03).
+        AXUIElementSetMessagingTimeout(
+            AXUIElementCreateSystemWide(),
+            0.25
+        )
         // The bracket covers the MOVES ONLY — `moveGatheredWindows`
         // is what bounds it, so the raise circle runs after the
         // resume. It used to run inside, which cost nothing while
@@ -218,14 +235,6 @@ extension KiwiCore {
         // budget fires a break below.
         defer { SkyLight.resumeDisplay() }
         let deadline = Date().addingTimeInterval(1.0)
-        // Bound every AX call — EUI reads, EUI disable/
-        // restore, setFrame — including on fresh app elements
-        // created inside AXHelper. The system-wide default
-        // covers all elements created after this point.
-        AXUIElementSetMessagingTimeout(
-            AXUIElementCreateSystemWide(),
-            0.25
-        )
         for (id, frame) in frames {
             // Wall-clock budget: one unresponsive cluster of
             // apps cannot freeze the entire quit path.

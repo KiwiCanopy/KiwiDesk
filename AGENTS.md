@@ -85,7 +85,7 @@ file list; grep within a subsystem for specifics:
 | `State` | Flat `[WindowID]`-per-space window state |
 | `Tiling` | Placing windows from state into layouts |
 | `Layouts` | Pure layout algorithms over the flat array |
-| `Commands` | Command dispatch (the `set_*` verbs) |
+| `Commands` | Command dispatch (the `set_*` verbs), plus the z-order raise machinery every command path shares (`ZOrderDrain` and its policy) |
 | `Config` | Decoding the Lua/profile config into settings |
 | `Profiles` | Profile JSON load/save & defaults |
 | `Appearance` | Color palettes (bundled + user, one-shot apply) |
