@@ -39,6 +39,19 @@ struct ToolTipDelayTests {
         #expect((500...1000).contains(ToolTipDelay.milliseconds))
     }
 
+    /// **`register` writes to `NSRegistrationDomain`, which is
+    /// process-global** — not to the suite it is called on. So a
+    /// freshly-created scratch suite can already read the value
+    /// another test in this file registered, and
+    /// `removePersistentDomain` does not clear it. Asserting the
+    /// key is absent beforehand is therefore unsatisfiable by
+    /// construction; it passed locally on a lucky order and red
+    /// on CI, which parallelises differently.
+    ///
+    /// What is deterministic is *where the value lands*: read the
+    /// registration domain directly, so this asserts `install`
+    /// registered rather than merely that something, somewhere,
+    /// answers for the key.
     @Test("installs the shortened delay")
     func installsDelay() {
         let defaults = scratchDefaults("install")
@@ -47,8 +60,12 @@ struct ToolTipDelayTests {
                 forName: "kiwidesk.tests.tooltip.install"
             )
         }
-        #expect(defaults.object(forKey: ToolTipDelay.key) == nil)
         ToolTipDelay.install(into: defaults)
+        let registered =
+            defaults.volatileDomain(
+                forName: UserDefaults.registrationDomain
+            )[ToolTipDelay.key] as? Int
+        #expect(registered == ToolTipDelay.milliseconds)
         #expect(
             defaults.integer(forKey: ToolTipDelay.key)
                 == ToolTipDelay.milliseconds
