@@ -76,13 +76,12 @@ struct GreyOutParityTests {
             1
         ),
         ("DragVisualsEditor.swift", "active: !visual.enabled", 1),
-        // The mark tints left in #678 Phase 3, and with them the
-        // editor's only `GreyOut`. What remains is the coverage
-        // guard the card exists for: with the Space Bar off this
-        // is the ONLY sticky mark, so the toggle renders forced
-        // ON and disabled rather than editable-and-ignored.
-        // Sticky state must never be invisible from the GUI.
-        ("StickyMarkEditor.swift", ".disabled(!spaceBarOn)", 1),
+        // `StickyMarkEditor` is deliberately absent: its coverage
+        // guard was dropped in #678 Phase 3, the mark being what
+        // survives the Space Bar rather than what depends on it.
+        // The opposite invariant — that no gate returns — is
+        // `StickyMarkUngatedTests`.
+        //
         // The gate is passed INTO the group (#527) so its
         // section header — and the `?` anchor on it — stays
         // live; the wrap-around form would disable both. Two

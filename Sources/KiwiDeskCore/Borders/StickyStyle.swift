@@ -8,10 +8,12 @@ import Foundation
 /// off, so the mark must not ride them.
 ///
 /// The setter applies unconditionally: turning the glyph off
-/// with the Space Bar also off is a valid deliberate
-/// zero-mark state from Lua (the `dim_factor` precedent).
-/// The GUI's forced-ON coverage guard is presentation only,
-/// never a clamp here.
+/// with the Space Bar also off is a valid deliberate zero-mark
+/// state (the `dim_factor` precedent), and no surface may clamp
+/// it back. The GUI's own toggle is held to that by
+/// `StickyMarkUngatedTests` — this module cannot see
+/// `Sources/KiwiDesk` and would not otherwise notice the day a
+/// forced-ON gate came back.
 public struct StickyStyle: Sendable, Equatable {
     /// The sticky mark — ONE glyph everywhere (#414): the
     /// on-window mark and the Space Bar badge both read this,

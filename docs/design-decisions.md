@@ -2283,26 +2283,50 @@ cycle. (#673)
 
 **[Principle]**
 
-**Sticky state must never be invisible from the GUI.** A
-sticky window can look identical to a normal one, so it gets
-two marks: an on-window mark (top-RIGHT corner —
-top-left belongs to the traffic lights) and a Space Bar badge
-(top-LEFT of its glyph — the bar reserves top-right for the
-group count; an intentional cross-surface difference).
-Floating gets a badge only in the bar, where tiled and
-floating are otherwise indistinguishable — on the window
-itself floating is self-evident. Badges are Space-Bar-only
-(the per-layout App Bar shows no state badges), survive
-grouping as an "at least one" aggregate, and have no GUI
-toggle. The coverage guard: the on-window mark's toggle greys
-out and renders forced ON while the Space Bar is off, because
-it is then the only sticky mark there is and — unlike a
-focus border, which duplicates an OS cue — sticky has no
-native fallback. The guard is presentation-only; Lua's
-`sticky.set_mark` and `space_bar.set_sticky_badge` apply
-unclamped, so a deliberate zero-mark setup stays
-reachable from the open layer (`dim_factor` precedent).
-(#414)
+**Sticky has no native cue, so KiwiDesk gives it two marks
+and ships both on.** A sticky window can look identical to a
+normal one, and unlike focus — which duplicates an OS cue —
+there is nothing to fall back to. So it gets an on-window mark
+(top-RIGHT corner — top-left belongs to the traffic lights)
+and a Space Bar badge (top-LEFT of its glyph — the bar
+reserves top-right for the group count; an intentional
+cross-surface difference). Floating gets a badge only in the
+bar, where tiled and floating are otherwise indistinguishable
+— on the window itself floating is self-evident. Badges are
+Space-Bar-only (the per-layout App Bar shows no state badges),
+survive grouping as an "at least one" aggregate, and have no
+GUI toggle.
+
+**The on-window mark's switch is unconditional, because the
+mark does not depend on the Space Bar.** It paints on the
+window, so it is precisely what survives the bar being hidden.
+Greying it says the opposite — dimming means *turn that on and
+I act* — and a census `gate:` records the same dependency as
+data, for every surface that reads the census to decide what
+to grey and what to say about it. A declaration that is
+backwards is wrong wherever it is rendered, which is why the
+row carries none on either axis. What earns a gate is the
+**Floating** tint: it paints only the Space Bar's badge, so
+with the bar off there is genuinely nothing left for it to
+colour. The two rows sit one card apart and their gates
+differ, which is the test working, not an inconsistency.
+
+**A floor guards a trap, not a choice** — so no softer warning
+replaces the greying either. Turning the mark off is a real
+cost and the `?` help is where it is stated: the mark is also
+the carrier for sticky's refusal feedback, so switching it off
+silences the home-space, can't-pile and move-blocked pills
+along with the resting glyph. But it is a cost a user chooses
+deliberately, on a row that says so, and the floor was porous
+by design in any case — `sticky.set_mark` and
+`space_bar.set_sticky_badge` apply unclamped (`dim_factor`
+precedent), so the state was always reachable from the open
+layer. Settings does warn about valid-but-surprising choices
+elsewhere (`native_spaces.separate_warning`,
+`profiles.overlap_warning`); what rules those out here is that
+both of them flag a setup whose consequence is invisible at
+the point of choosing, and this one's consequence is the row's
+own subject. (#414)
 
 **One word for the dot — "mark" — with two deliberate
 carve-outs.** (R6/#406.) Five words named one thing: indicator,

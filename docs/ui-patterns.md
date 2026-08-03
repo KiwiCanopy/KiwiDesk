@@ -56,7 +56,21 @@ scope guards: help is optional reading (a label must stay
 understandable without it — must-know info never lives only
 in the popover), and a field already taught by its live
 preview or schematic (App Bar colors, a layout card's
-geometry) gets no `?` at all. Copy is a normal `L()` string
+geometry) gets no `?` at all.
+
+**A concept goes in the `?`; a live fact goes in the flow.**
+The split is what each surface can promise. A popover's copy
+is fixed for every reader, so it holds what is always true of
+the setting — what the thing *is*, what turning it off costs.
+A statement that turns on the current value of something else
+("the Space Bar is off right now") would be wrong for half
+the readers, so it belongs in a caption or a
+`CrossReferenceRow` that re-renders with the state. The
+corollary is the one that bites: delete a live cue and its
+fact does not fall back into the `?` — check whether the
+timeless half of it was ever written there.
+
+Copy is a normal `L()` string
 under the `<key>.help` suffix convention; when a *label* key
 is shared by fields with divergent semantics (Stack's and
 Track's Overflow both use `layout_params.overflow`), the
@@ -120,9 +134,14 @@ breadcrumb headed by the destination's own title
 ("Bars ▸ App Bar"), not the section name alone: a link
 reading "App Bar" names no row any sidebar shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A
-pointer whose sentence names the **feature itself** ("the
-Space Bar is off") links that mention instead, and stays
-one segment.
+pointer whose sentence names the **feature itself** rather
+than where to find it — a sentence turning on whether the
+Space Bar is on, say — links that mention instead and stays
+one segment. No shipped row takes that form today; all three
+`CrossReferenceRow` call sites name a location. It is kept as
+a convention because the choice is the sentence's to make: a
+pointer forced into a breadcrumb when its prose already names
+the thing reads as a second, redundant mention.
 
 ## Choosing a control
 
@@ -858,6 +877,20 @@ The rules that fall out of applying this across a whole editor
 (#520, #527), each of which was got wrong somewhere before it
 was written down:
 
+- **Read the claim aloud before writing the gate.** Greying
+  row A off setting B says *turn B on and I act*, so before
+  writing one, say that sentence and ask whether A actually
+  stops working without B. Where it does not, the intent was a
+  FLOOR — "don't leave yourself with none of these" — and a
+  greyed control is the wrong vocabulary for a floor: it
+  states a dependency the app will contradict the first time
+  the user turns B off and watches A keep working. Sticky's
+  on-window mark shipped greyed off the Space Bar for that
+  reason and is now ungated
+  (`StickyMarkUngatedTests`; the ruling is in
+  `docs/design-decisions.md` ▸ Overrides & appearance). The
+  same reading applies to a census `gate:`, which records the
+  dependency as data for whatever renders it.
 - **Gate a whole editor off its own switch, not just the odd
   row.** When a switch turns off the thing an entire section
   configures — the Space Bar's own toggle, "no layout shows an
@@ -926,9 +959,11 @@ was written down:
   Borders card and each Drag column carry a header `?` even
   though neither has a block gate at all
   (`AdvancedColorsHelp`). Where a live state-dependent cue
-  exists in the flow, use that too — the sticky editor's
-  conditional `CrossReferenceRow` naming the Space Bar is the
-  model. Per-control `?`s inside a gated block stay
+  exists in the flow, use that too — `LayoutCard`'s app-bar
+  `CrossReferenceRow` is the model, naming the bar's current
+  state in the sentence and linking where to change it
+  ("The monocle App Bar (currently on) is configured in …").
+  Per-control `?`s inside a gated block stay
   visible-but-dimmed like every other row member; their fine
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.

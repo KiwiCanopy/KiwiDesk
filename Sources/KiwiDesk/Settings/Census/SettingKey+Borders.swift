@@ -74,11 +74,14 @@ extension BordersKey {
             )
         case .stickyColor:
             // The table marks this GATED; the Colours phase
-            // ruled it UNGATED and it ships that way. The color
-            // also paints the on-window mark, not only the
-            // Space Bar's sticky badge, so it always tints
-            // something — which is why the .borders container
-            // carries no block gate at all.
+            // ruled it UNGATED and it ships that way. The tint
+            // has a consumer the Space Bar does not own — the
+            // on-window mark — so no state of the BAR can make
+            // it inert, which is why the .borders container
+            // carries no block gate at all. (Not "it always
+            // tints something": the mark's own toggle can be
+            // off, a state the sticky-mark ruling deliberately
+            // leaves reachable.)
             return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
             // Glow on, and not auto-sized (AutoGatedGroup).
@@ -98,13 +101,15 @@ extension BordersKey {
             // the .focusBorder CONTAINER gate.
             return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .stickyMark:
-            // Forced on while the Space Bar is off — the only
-            // sticky mark left (StickyMarkEditor).
+            // Ungated. The mark paints on the window, so it is
+            // what survives the Space Bar going off — a gate
+            // here would record a dependency that runs the
+            // other way, for every reader of the census
+            // (StickyMarkEditor, StickyMarkUngatedTests).
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,
-                .showMore,
-                gate: .setting(.spaceBar(.spaceBarEnabled))
+                .showMore
             )
         case .dragCornerRadius:
             return .row(.gapsAndBorders, .dragAndDrop, .showMore)
