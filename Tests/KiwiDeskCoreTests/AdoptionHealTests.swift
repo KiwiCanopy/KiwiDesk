@@ -194,6 +194,29 @@ struct AdoptionHealTests {
         #expect(box.windowQueries == 0)
     }
 
+    @Test("detach clears the quiet gate for a reused pid")
+    func detachClearsTheQuietGate() {
+        // A quieted census value must die with its app: a
+        // relaunch reusing the pid starts with a fresh gate,
+        // not a hush inherited from the previous process at
+        // the same window count.
+        let (loop, box) = makeLoop()
+        loop.attach(
+            pid: pid,
+            activationPolicy: .regular,
+            ref: ref,
+            scanWindowsAtAttach: false
+        )
+        box.counts = [pid: 1]
+        loop.healSweep()
+        #expect(box.windowQueries == 1)
+        loop.detach(pid: pid, restoreEnhancedUI: false)
+        // Same census value, fresh process: the missed-attach
+        // branch must fire, not inherit the hush.
+        loop.healSweep()
+        #expect(box.windowQueries == 2)
+    }
+
     @Test("a transient drop queues one re-track per window")
     func transientDropQueuesOnce() {
         let (loop, box) = makeLoop()
