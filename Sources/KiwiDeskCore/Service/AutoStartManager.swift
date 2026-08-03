@@ -10,12 +10,23 @@ import Foundation
 /// `SMAppService`), and this facade owns the coupling instead of
 /// the view.
 ///
-/// Why fold, not two toggles: the service is `RunAtLoad` +
-/// `KeepAlive` as one indivisible unit, so "restart on crash" is a
-/// *superset* of "open at login" — a pair of read-through toggles
-/// could render the contradictory *Open at Login: OFF + Restart:
-/// ON*. One control over one merged status makes that
-/// unrepresentable.
+/// Why one merged level and not two independent flags: the
+/// service is `RunAtLoad` + `KeepAlive` as one indivisible unit,
+/// so "restart on crash" is a *superset* of "open at login", and
+/// the pair *Open at Login: OFF + Restart: ON* names no reachable
+/// state. #576 kept that honest by shipping one three-level
+/// picker.
+///
+/// **The GUI now draws two rows again (#678 item 16), and the
+/// constraint did not move with it.** What makes the pair
+/// impossible is no longer the shape of the control — a view can
+/// hold two toggles in any combination — but
+/// `AutoStartLevel.level(openAtLogin:restartOnCrash:)`, which
+/// discards the restart flag when login is off. Read that as the
+/// invariant's home: the Advanced row's greying is a courtesy to
+/// the reader, and this type is what a CLI verb, a restored
+/// preference or a test hits when no view is involved. Do not
+/// re-derive the pair anywhere else.
 ///
 /// **Async discipline (architect-gated).** `ServiceManager`'s
 /// launchctl verbs are blocking `Process` spawns; running them in a
@@ -132,6 +143,44 @@ public enum AutoStartLevel: Equatable, Sendable, CaseIterable {
     /// The `kiwidesk service` LaunchAgent: launches at login and
     /// restarts on crash (`RunAtLoad` + `KeepAlive`).
     case atLoginWithAutoRestart
+
+    // MARK: - The two rows the GUI draws (#678 item 16)
+
+    /// Whether KiwiDesk starts itself at login.
+    public var opensAtLogin: Bool { self != .off }
+
+    /// Whether it is also supervised and relaunched on a crash.
+    public var restartsOnCrash: Bool {
+        self == .atLoginWithAutoRestart
+    }
+
+    /// The level a (login, restart) PAIR means — and the one place
+    /// the impossible pair is refused (#678 item 16).
+    ///
+    /// Turn 14b draws two rows where #576 shipped one three-level
+    /// picker. #576's reason has not gone away: the LaunchAgent
+    /// writes `RunAtLoad` and `KeepAlive` as one indivisible unit,
+    /// so "restart on crash" is a SUPERSET of "open at login" and
+    /// the pair *login OFF + restart ON* names no reachable
+    /// state. What changed is the presentation, not the
+    /// constraint.
+    ///
+    /// So the constraint moves here, where it is total: with
+    /// login off the restart flag is DISCARDED rather than
+    /// honoured, and no caller can express the contradiction
+    /// whatever its two toggles say. The Advanced row also greys
+    /// while login is off, but `gui.md` is explicit that a grey
+    /// is never the sole gate on a side effect — this is the
+    /// other half, and it is the half that holds when a future
+    /// caller (a CLI verb, a restored preference, a test) never
+    /// passes through the view at all.
+    public static func level(
+        openAtLogin: Bool,
+        restartOnCrash: Bool
+    ) -> AutoStartLevel {
+        guard openAtLogin else { return .off }
+        return restartOnCrash ? .atLoginWithAutoRestart : .atLogin
+    }
 }
 
 /// The structure Core hands the GUI for the auto-start control: the

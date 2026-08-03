@@ -118,3 +118,82 @@ struct AutoStartLevelTests {
         )
     }
 }
+
+/// The two rows turn 14b draws over the one folded level
+/// (#678 item 16).
+///
+/// The pair *login OFF + restart ON* names no reachable state —
+/// the LaunchAgent writes `RunAtLoad` and `KeepAlive` together —
+/// so splitting the picker into two toggles moved the constraint
+/// rather than removing it. These hold the half that survives
+/// when no view is involved: greying the Advanced row is what a
+/// reader sees, and this is what a CLI verb, a restored
+/// preference or a future caller hits.
+@Suite("Auto-start row pair (#678 item 16)")
+struct AutoStartRowPairTests {
+    @Test("the impossible pair collapses to off")
+    func impossiblePairIsRefused() {
+        // The whole point: restart ON with login OFF must not
+        // survive as a level. It is discarded, not honoured.
+        #expect(
+            AutoStartLevel.level(
+                openAtLogin: false,
+                restartOnCrash: true
+            ) == .off
+        )
+        #expect(
+            AutoStartLevel.level(
+                openAtLogin: false,
+                restartOnCrash: false
+            ) == .off
+        )
+    }
+
+    @Test("the two reachable pairs map to their levels")
+    func reachablePairsMap() {
+        #expect(
+            AutoStartLevel.level(
+                openAtLogin: true,
+                restartOnCrash: false
+            ) == .atLogin
+        )
+        #expect(
+            AutoStartLevel.level(
+                openAtLogin: true,
+                restartOnCrash: true
+            ) == .atLoginWithAutoRestart
+        )
+    }
+
+    /// Round-trip over every case, derived from `allCases` rather
+    /// than a hand-listed three: a fourth level added later must
+    /// either round-trip or fail here, not be silently omitted
+    /// from the pair vocabulary.
+    @Test("every level round-trips through its own pair")
+    func everyLevelRoundTrips() {
+        for level in AutoStartLevel.allCases {
+            #expect(
+                AutoStartLevel.level(
+                    openAtLogin: level.opensAtLogin,
+                    restartOnCrash: level.restartsOnCrash
+                ) == level,
+                Comment(
+                    rawValue:
+                        "\(level) does not survive being split "
+                        + "into two rows and folded back"
+                )
+            )
+        }
+    }
+
+    /// Restart implies login for every level that offers it —
+    /// stated as the superset relation rather than as a fact
+    /// about the three cases that exist today.
+    @Test("restart is a superset of opening at login")
+    func restartImpliesLogin() {
+        for level in AutoStartLevel.allCases
+        where level.restartsOnCrash {
+            #expect(level.opensAtLogin)
+        }
+    }
+}

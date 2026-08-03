@@ -19,5 +19,6 @@ extension SettingsModel {
     func setAppearance(_ choice: AppearanceChoice) {
         AppearancePreference.write(choice)
         appearance = choice
+        choice.apply()
     }
 }
