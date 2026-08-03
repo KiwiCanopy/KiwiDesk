@@ -35,34 +35,32 @@ struct LoginItemCard: View {
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
-        SettingsSection(SettingsCatalog.general.loginItemCard) {
-            VStack(alignment: .leading, spacing: 6) {
-                DropdownRow(
-                    // Card heading is the noun "Login"; the row
-                    // carries the verb.
-                    label: startLabel,
-                    help: startHelp
-                ) {
-                    // A Toggle, not the #576 Picker: this row now
-                    // asks ONE yes/no question, and the second
-                    // question (restart on crash) is its own row
-                    // among Advanced's five. `gui.md` gives a
-                    // toggle the binary case.
-                    Toggle("", isOn: loginBinding)
-                        .labelsHidden()
-                        // Grey the control only, never the row —
-                        // the label's `?` stays live because that
-                        // help is useful whether or not the
-                        // toggle can be driven right now. An
-                        // unregisterable copy (bare binary,
-                        // translocated download) cannot register
-                        // at all, and the caption below names the
-                        // fix (#342, #171).
-                        .disabled(!model.autoStartEditable)
-                }
-                confirmation
-                caption
+        VStack(alignment: .leading, spacing: 6) {
+            DropdownRow(
+                // Card heading is the noun "Login"; the row
+                // carries the verb.
+                label: startLabel,
+                help: startHelp
+            ) {
+                // A Toggle, not the #576 Picker: this row now
+                // asks ONE yes/no question, and the second
+                // question (restart on crash) is its own row
+                // among Advanced's five. `gui.md` gives a
+                // toggle the binary case.
+                Toggle("", isOn: loginBinding)
+                    .labelsHidden()
+                    // Grey the control only, never the row —
+                    // the label's `?` stays live because that
+                    // help is useful whether or not the
+                    // toggle can be driven right now. An
+                    // unregisterable copy (bare binary,
+                    // translocated download) cannot register
+                    // at all, and the caption below names the
+                    // fix (#342, #171).
+                    .disabled(!model.autoStartEditable)
             }
+            confirmation
+            caption
         }
         .onAppear { model.refreshAutoStart() }
         .onReceive(
@@ -72,36 +70,53 @@ struct LoginItemCard: View {
         ) { _ in model.refreshAutoStart() }
     }
 
+    /// The design's own words. It deliberately does NOT say
+    /// "and keep it running": that becomes false the moment the
+    /// Advanced row is switched off, and item 16 rules that "a
+    /// label that rewrites itself is worse than one that is
+    /// simply always true".
     private var startLabel: String {
-        L("general.login_item.start", "Start KiwiDesk")
-    }
-
-    /// The one field-level `?` (#94): explains all three levels and
-    /// is the only place the crash-restart mechanism is named — the
-    /// row itself stays a plain label.
-    private var startHelp: String {
         L(
-            "general.login_item.start_help",
-            "Choose when KiwiDesk starts on its own. "
-                + "\u{201C}At Login\u{201D} launches it when you sign "
-                + "in, so your windows are arranged from the start. "
-                + "\u{201C}At Login + Restart on Crash\u{201D} also "
-                + "runs a background helper that relaunches KiwiDesk "
-                + "if it ever crashes. \u{201C}Never\u{201D} turns "
-                + "both off."
+            "general.login_item.start",
+            "Start KiwiDesk when I log in"
         )
     }
 
-    /// Writing a level routes through the facade and adopts the
+    /// The one field-level `?` (#94). It names the supervision
+    /// half and points at the Advanced row rather than describing
+    /// three picker levels that no longer exist.
+    private var startHelp: String {
+        L(
+            "general.login_item.start_help",
+            "KiwiDesk opens when you sign in, so your windows are "
+                + "arranged from the start. It also keeps itself "
+                + "running if it ever stops — switch that off "
+                + "under Advanced if you would rather it did not."
+        )
+    }
+
     /// This row's half of the folded level: does KiwiDesk start
     /// itself at all.
     ///
-    /// Writing preserves the OTHER row's answer rather than
-    /// clearing it — turning login off and on again must not
-    /// silently drop crash-restart — and the fold in
-    /// `AutoStartLevel.level(openAtLogin:restartOnCrash:)` is
-    /// what makes "off + restart" collapse instead of persisting
-    /// as a contradiction.
+    /// **Turning it on brings crash-restart with it** (item 16,
+    /// "on by default"). That is the north star's "approachable
+    /// by default, powerful on demand" applied to one row: the
+    /// obvious answer for someone who just wants KiwiDesk running
+    /// is *both*, and the design's own argument is that this
+    /// "reconstructs the third state for anyone who wants
+    /// login-without-restart, without making every user read
+    /// three options to pick the obvious one". The third state is
+    /// reached by switching the Advanced row off afterwards.
+    ///
+    /// **A login-without-restart choice does not survive being
+    /// switched off and on again**, and it cannot: the level is
+    /// read through from the OS with nothing cached, and `.off`
+    /// erases the distinction — a copy that never wanted restart
+    /// and a copy that was simply never started both read as
+    /// `.off`. So turning login back on has no prior answer to
+    /// restore and takes the default. Storing one would mean a
+    /// preference the OS does not have, which is the drift
+    /// read-through exists to prevent.
     ///
     /// The refusal on an unregisterable copy lives in
     /// `SettingsModel.setAutoStart`, not here: the harm is a
@@ -115,8 +130,7 @@ struct LoginItemCard: View {
             set: { on in
                 model.setAutoStart(
                     openAtLogin: on,
-                    restartOnCrash:
-                        model.autoStart.level.restartsOnCrash
+                    restartOnCrash: on
                 )
             }
         )

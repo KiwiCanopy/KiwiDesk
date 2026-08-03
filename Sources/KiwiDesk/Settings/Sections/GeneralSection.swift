@@ -21,8 +21,7 @@ struct GeneralSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                languageSection
-                LoginItemCard(model: model)
+                appliesImmediatelySection
                 aboutSection
                 advancedSection
             }
@@ -34,9 +33,15 @@ struct GeneralSection: View {
     /// shipped locale by its own native name — the picker itself
     /// is the live control, no Save button (`setLanguage`
     /// persists immediately).
-    private var languageSection: some View {
+    /// Turn 14b's first group: ONE card, because these rows are
+    /// grouped by the RULE they share rather than by topic —
+    /// none is part of a profile, none is touched by the
+    /// footer's Save. Splitting them into a Language card and a
+    /// Login card is what let Revert look as though it would
+    /// undo them (the 6b audit's fourth finding).
+    private var appliesImmediatelySection: some View {
         SettingsSection(
-            SettingsCatalog.general.languageCard
+            SettingsCatalog.general.appliesImmediatelyCard
         ) {
             // Uses the house `DropdownRow` (shared label axis,
             // `.menu` style, large control) like every other
@@ -75,7 +80,16 @@ struct GeneralSection: View {
                     }
                 }
             }
+            Text(
+                L(
+                    "general.language.applies",
+                    "Changes the moment you pick one."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             appearanceRow
+            LoginItemCard(model: model)
         }
     }
 
@@ -211,6 +225,8 @@ struct GeneralSection: View {
             isExpanded: $advancedExpanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                restartOnCrashRow
+                Divider()
                 Text(
                     L(
                         "general.advanced.config_file",
