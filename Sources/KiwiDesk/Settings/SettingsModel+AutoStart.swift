@@ -101,13 +101,6 @@ extension SettingsModel {
         }
     }
 
-    /// Whether either row may be driven right now: the first read
-    /// has landed, no write is in flight, and this copy can
-    /// actually register.
-    var autoStartEditable: Bool {
-        autoStartLoaded && !autoStartBusy && autoStart.registerable
-    }
-
     /// A transient block that is NOT a gate reason: the first read
     /// has not landed, or a write is in flight. The rows grey while
     /// it holds, but there is no sentence — nothing is wrong, the
