@@ -118,6 +118,37 @@ struct FullscreenLayoutExemptionTests {
             ).contains(w2)
         )
     }
+
+    @Test("A floating fullscreen sticky never travels either")
+    func floatingFullscreenStickyStaysHome() {
+        var state = makeState()
+        state.workspaces.ensureSpace(SpaceID(2))
+        state.setSticky(w2, .global)
+        state.apply(.windowFloatChanged(w2, isFloating: true))
+        state.apply(
+            .windowFullscreenChanged(w2, isFullscreen: true)
+        )
+        state.workspaces.activate(SpaceID(2))
+        // The floating-traveler append is a separate path from
+        // the tiled injection — without its own fullscreen
+        // exclusion the render space grows a second glyph
+        // (guard-prover found the tiled fixture never reaches
+        // that filter's fullscreen term).
+        let home = state.workspaces[SpaceID(1)]!
+        let away = state.workspaces[SpaceID(2)]!
+        #expect(
+            state.effectiveMembers(
+                of: home,
+                activeSpace: SpaceID(2)
+            ).contains(w2)
+        )
+        #expect(
+            !state.effectiveMembers(
+                of: away,
+                activeSpace: SpaceID(2)
+            ).contains(w2)
+        )
+    }
 }
 
 /// The close fallback: `Space.remove` hands `focused` to the
