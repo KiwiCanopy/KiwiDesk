@@ -3,19 +3,23 @@ import SwiftUI
 
 /// The Grid schematic (#125, recount turn 10):
 ///
+/// Both types share one ceiling and both pile past it, which is
+/// the engine's own shape (`GridLayout`) and the half a preview
+/// most easily omits (#712):
+///
 /// - **Dynamic** balances the window count into a square-ish
-///   grid through the engine's own `GridLayout.balanced`, so the
-///   preview rebalances as the count slider moves — Columns
-///   first grows a column before a row, Rows first mirrors it.
-///   The new window sits where the placement opens it (relative
-///   to the focused tile), and fill-empty-space makes the last
-///   window span the leftover cell.
-/// - **Rigid** is a fixed grid of the configured columns × rows
-///   (or a screen-fit 3×3 when auto-size is on) filled in the
-///   engine's fill order; cells past the window count stay
-///   empty, and a count past the grid's capacity stacks its
-///   surplus in the last cell — the real behaviour, which is
-///   exactly what a count the reader can drive is for.
+///   grid and stops at the ceiling — Columns first grows a
+///   column before a row, Rows first mirrors it. The new window
+///   sits where the placement opens it, and fill-empty-space
+///   makes the last window span the leftover cell.
+/// - **Rigid** fills the ceiling outright, leaving empty cells
+///   until the count catches up.
+///
+/// The ceiling is the configured columns × rows, or
+/// `LayoutSchematic.gridAutoSizeCap` when auto-size hands the
+/// job to a display this canvas does not have. Past it, the
+/// surplus cascades in the last cell — the real behaviour, and
+/// exactly what a count the reader can drive is for.
 ///
 /// The two frames the dynamic arm used to draw ("4 windows" →
 /// "a 5th opens") retired with the slider: a reader who can add
@@ -33,7 +37,7 @@ struct GridSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
-    private var columnsFirst: Bool {
+    var columnsFirst: Bool {
         splitDirection == .horizontal
     }
 
@@ -77,33 +81,84 @@ struct GridSchematic: View {
         }
     }
 
-    @ViewBuilder
     private var frame: some View {
-        if type == .dynamic {
-            gridFrame(
-                cols: dynamicDims.columns,
-                rows: dynamicDims.rows,
-                ids: ids
-            )
-        } else {
-            rigidGrid
-        }
+        gridFrame(
+            cols: dims.columns,
+            rows: dims.rows,
+            ids: ids
+        )
     }
 
-    private enum CellKind { case tile, focus, new, gap }
+    /// A window's role in a cell — the three things a *window*
+    /// can be. Separate from `CellKind` so that a piled cell can
+    /// carry one without `.piled(.gap)` or `.piled(.piled(_))`
+    /// being sayable: a gap is the absence of a window and can
+    /// never be piled.
+    enum TileKind { case tile, focus, new }
 
-    // MARK: - Dynamic (balanced against the count)
+    /// What a cell draws. `piled` carries the window's role
+    /// rather than replacing it, so a piled window keeps its
+    /// identity — the incoming one still shows its `+` when the
+    /// placement rule lands it in the pile — plus how many
+    /// further windows the pile stands for when the cell could
+    /// not hold them all.
+    enum CellKind {
+        case window(TileKind)
+        case gap
+        case piled(TileKind, hidden: Int)
+    }
 
-    /// The engine's own balance for this count — called rather
-    /// than reproduced, so a change to how KiwiDesk balances a
-    /// dynamic grid moves the preview with it. Uncapped on
-    /// purpose: the cap is a function of the real screen and the
-    /// minimum window size, and this canvas is neither.
-    var dynamicDims: (columns: Int, rows: Int) {
-        GridLayout.balanced(
+    // MARK: - Dimensions, capacity and the pile past it
+
+    /// The cell **ceiling** — the engine's own rule, and only
+    /// that. The typed columns × rows, or `gridAutoSizeCap` when
+    /// `auto_size` hands the job to a display the canvas does not
+    /// have (#712).
+    ///
+    /// Deliberately NOT clamped to what the canvas can draw. An
+    /// earlier cut mined it with a legibility ceiling and so made
+    /// the drawn capacity depend on the canvas: rigid 8 × 1 with
+    /// five windows drew a two-window pile on the thumbnail and
+    /// none in the panel — one config, two pictures, and the
+    /// thumbnail's was of an overflow the engine never performs.
+    /// The drawing may be clamped; the rule may not.
+    var cap: (columns: Int, rows: Int) {
+        autoSize
+            ? LayoutSchematic.gridAutoSizeCap
+            : (columns: max(1, columns), rows: max(1, rows))
+    }
+
+    /// The drawn dimensions — the engine's whole rule, not just
+    /// its balance. Rigid takes the ceiling verbatim; dynamic
+    /// balances *up to* it and stops, which is the behaviour the
+    /// preview used to omit: it called `balanced` alone and so
+    /// kept subdividing forever as the count rose (#712).
+    var dims: (columns: Int, rows: Int) {
+        var params = GridParams()
+        params.type = type
+        params.splitDirection = splitDirection
+        return GridLayout.dimensions(
             count: ids.count,
-            splitDirection: splitDirection
+            params: params,
+            cap: cap
         )
+    }
+
+    /// Cells the drawn grid holds. Windows past it pile in the
+    /// last one, exactly as `GridLayout` sends them to
+    /// `OverlapStack`.
+    var capacity: Int { max(1, dims.columns * dims.rows) }
+
+    /// Windows that do not get a cell of their own.
+    ///
+    /// Zero until the count actually exceeds capacity: the engine
+    /// takes its overflow branch only at `count > capacity`, and
+    /// then tiles `capacity - 1` and piles the rest — so the pile
+    /// starts one cell early, but only once it starts at all. An
+    /// earlier cut dropped the guard and reported one pile at
+    /// exactly full, where the drawing correctly piles nothing.
+    var piledCount: Int {
+        ids.count > capacity ? ids.count - (capacity - 1) : 0
     }
 
     /// The window array with the new window spliced in where
@@ -159,74 +214,12 @@ struct GridSchematic: View {
     /// asks the resolved type, since a space may override it) —
     /// so the rigid arm draws its empty cells whatever the toggle
     /// says, which is the behaviour the toggle's grey describes.
-    private var spansLeftover: Bool {
+    var spansLeftover: Bool {
         fillEmptySpace && type == .dynamic
     }
 
-    /// Cell rects for the windows in `ids` (drawn in array order,
-    /// mirroring `GridLayout`'s fill: columns-first row-major,
-    /// rows-first column-major), plus any trailing empty cell. The
-    /// last window spans the leftover when fill-empty-space is on,
-    /// and windows past the grid's capacity — which only a rigid
-    /// grid has — stack in the last cell, later ones on top.
-    private func gridCells(
-        _ size: CGSize,
-        cols: Int,
-        rows: Int,
-        ids: [Int]
-    ) -> [(rect: CGRect, kind: CellKind)] {
-        let gap: CGFloat = 3
-        let cw = (size.width - gap * CGFloat(cols - 1)) / CGFloat(cols)
-        let ch =
-            (size.height - gap * CGFloat(rows - 1)) / CGFloat(rows)
-        func rect(_ c: Int, _ r: Int, _ cs: Int, _ rs: Int) -> CGRect {
-            CGRect(
-                x: CGFloat(c) * (cw + gap),
-                y: CGFloat(r) * (ch + gap),
-                width: cw * CGFloat(cs) + gap * CGFloat(cs - 1),
-                height: ch * CGFloat(rs) + gap * CGFloat(rs - 1)
-            )
-        }
-        let capacity = max(1, cols * rows)
-        func at(_ i: Int) -> (Int, Int) {
-            let slot = min(i, capacity - 1)
-            return columnsFirst
-                ? (slot % cols, slot / cols)
-                : (slot / rows, slot % rows)
-        }
-        var cells: [(CGRect, CellKind)] = []
-        for (i, id) in ids.enumerated() {
-            let (c, r) = at(i)
-            if i == ids.count - 1 && spansLeftover {
-                let cs = columnsFirst ? cols - c : 1
-                let rs = columnsFirst ? 1 : rows - r
-                cells.append((rect(c, r, cs, rs), kind(id)))
-            } else {
-                cells.append((rect(c, r, 1, 1), kind(id)))
-            }
-        }
-        if !spansLeftover, ids.count < capacity {
-            for i in ids.count..<capacity {
-                let (c, r) = at(i)
-                cells.append((rect(c, r, 1, 1), .gap))
-            }
-        }
-        return cells
-    }
-
-    private func kind(_ id: Int) -> CellKind {
+    func kind(_ id: Int) -> TileKind {
         id == newID ? .new : id == focusID ? .focus : .tile
-    }
-
-    // MARK: - Rigid (a fixed grid the count fills)
-
-    /// Auto-size resolves to a screen-fit grid (drawn as 3×3); a
-    /// plain rigid grid uses the typed dims, clamped for legibility.
-    private var rigidCols: Int { autoSize ? 3 : min(max(columns, 1), 4) }
-    private var rigidRows: Int { autoSize ? 3 : min(max(rows, 1), 4) }
-
-    private var rigidGrid: some View {
-        gridFrame(cols: rigidCols, rows: rigidRows, ids: ids)
     }
 
     // MARK: - Cell view + caption / a11y
@@ -234,36 +227,63 @@ struct GridSchematic: View {
     @ViewBuilder
     private func cellView(_ kind: CellKind) -> some View {
         switch kind {
-        case .tile: SchematicTile()
-        case .focus: SchematicTile(active: true)
-        case .new: SchematicNewWindow()
         case .gap: SchematicGap()
+        case .window(let tile): tileView(tile)
+        case .piled(let tile, let hidden):
+            ZStack(alignment: .bottomTrailing) {
+                SchematicPileTile(
+                    active: tile == .focus,
+                    isNew: tile == .new
+                )
+                if hidden > 0 {
+                    SchematicMoreChip(hidden: hidden).padding(2)
+                }
+            }
         }
     }
 
-    private var caption: String {
+    @ViewBuilder
+    private func tileView(_ tile: TileKind) -> some View {
+        switch tile {
+        case .tile: SchematicTile()
+        case .focus: SchematicTile(active: true)
+        case .new: SchematicNewWindow()
+        }
+    }
+
+    /// Internal so the guard can read it: the captions state the
+    /// ceiling in words, and nothing else stops them stating a
+    /// different one from the picture — which was two of #712's
+    /// three arms (guard-prover, 2026-08-03).
+    var caption: String {
         type == .rigid ? rigidCaption : dynamicCaption
     }
 
     private var rigidCaption: String {
         if autoSize {
+            // The numbers come from the stand-in rather than
+            // prose, so moving it cannot leave twelve translated
+            // captions stating the old one (#712).
             return L(
                 "layout.schematic.grid.caption_rigid_auto",
-                "A fixed grid sized to your screen (about 3 × 3); "
-                    + "each window shrinks to a cell."
+                "A fixed grid sized to your screen (about %1$d × "
+                    + "%2$d); each window shrinks to a cell.",
+                LayoutSchematic.gridAutoSizeCap.columns,
+                LayoutSchematic.gridAutoSizeCap.rows
             )
         }
         return L(
             "layout.schematic.grid.caption_rigid",
             "A fixed %1$d × %2$d grid; each window shrinks to a "
                 + "cell, extras stack in the last.",
-            columns,
-            rows
+            cap.columns,
+            cap.rows
         )
     }
 
     private var dynamicCaption: String {
-        columnsFirst
+        let order =
+            columnsFirst
             ? L(
                 "layout.schematic.grid.order_columns",
                 "New windows fill across a row, then wrap down."
@@ -272,6 +292,18 @@ struct GridSchematic: View {
                 "layout.schematic.grid.order_rows",
                 "New windows fill down a column, then wrap across."
             )
+        // A dynamic grid balances only *up to* the same ceiling a
+        // rigid one fills, so the ceiling governs it too — the
+        // half of the rule the preview used to omit (#712). The
+        // numbers are the ceiling itself, never a drawing limit.
+        return L(
+            "layout.schematic.grid.order_capped",
+            "%1$@ It balances up to %2$d × %3$d, then the surplus "
+                + "stacks in the last cell.",
+            order,
+            cap.columns,
+            cap.rows
+        )
     }
 
     private var axLabel: String {

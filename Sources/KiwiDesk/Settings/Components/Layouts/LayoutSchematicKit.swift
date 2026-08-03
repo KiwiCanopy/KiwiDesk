@@ -33,6 +33,37 @@ enum LayoutSchematic {
     /// story and starts drawing slivers.
     static let defaultWindowCount = 5
     static let windowCountRange = 2...12
+
+    /// How far a piled tile reveals the one beneath it. The
+    /// engine's `OverlapStack` uses 40 pt against a real display;
+    /// on a canvas this size that would throw tiles off the frame,
+    /// so the reveal is scaled to the canvas. Shared by every
+    /// schematic that piles — Stack's zone, Track's overflow track
+    /// and Grid's last cell — because a pile that reads as a pile
+    /// in one and as a colour in another is the same picture
+    /// telling two stories (#712).
+    static let cascadeOffset: CGFloat = 9
+
+    /// The Grid preview's stand-in for the one ceiling it cannot
+    /// compute: `auto_size`, where `GridLayout.capDimensions`
+    /// fits as many minimum-size cells as the *display* allows.
+    /// The canvas is not a display and has no minimum window
+    /// size, so it draws a plausible grid and the caption states
+    /// these numbers rather than prose (#712).
+    ///
+    /// With auto-size **off** no stand-in is needed: the ceiling
+    /// is the user's own typed columns × rows.
+    ///
+    /// **A schematic's ceiling is the engine's rule, never the
+    /// canvas's.** An earlier cut of #712 also clamped the
+    /// ceiling to what the canvas could legibly draw, which made
+    /// the drawn *capacity* scale-dependent: rigid 8 × 1 with
+    /// five windows drew a two-window pile on the strip
+    /// thumbnail and none in the panel, inventing an overflow
+    /// the engine does not have. Clamp the drawing if you must;
+    /// never the rule.
+    static let gridAutoSizeCap = (columns: 3, rows: 3)
+
 }
 
 /// How large a schematic draws — and therefore what it is *for*
@@ -176,6 +207,52 @@ struct SchematicNewWindow: View {
                 .font(.system(size: 7, weight: .bold))
                 .foregroundStyle(.white)
                 .padding(2)
+        }
+    }
+}
+
+/// **Piled tile** — one window in an `OverlapStack` cascade, where
+/// only its top edge shows above the next.
+///
+/// Drawn **opaque**: a solid base under the accent fill, so
+/// stacking never sums the accent alpha. That is the whole reason
+/// this is a type rather than a `SchematicTile` drawn twice — the
+/// Grid preview piled translucent tiles at one rect and the last
+/// cell simply *got bluer* with the count instead of showing
+/// windows (#712), the same compounding-opacity trap as #406.
+/// Stack and Track each had a correct private copy; Grid needed a
+/// third, which is one more than a look this load-bearing should
+/// have (§2.4).
+///
+/// The front tile of a pile carries the dominant colour and the
+/// buried ones read as lighter slivers behind it.
+struct SchematicPileTile: View {
+    /// A heavier stroke for the focused window in the pile.
+    var active = false
+    /// The "+" badge, when this piled window is the incoming one.
+    var isNew = false
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .fill(Color(nsColor: .textBackgroundColor))
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .fill(
+                    isNew
+                        ? Color.accentColor.opacity(0.45)
+                        : LayoutSchematic.fill
+                )
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .strokeBorder(
+                    LayoutSchematic.stroke,
+                    lineWidth: active ? 2 : 1
+                )
+            if isNew {
+                Image(systemName: "plus")
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(2)
+            }
         }
     }
 }

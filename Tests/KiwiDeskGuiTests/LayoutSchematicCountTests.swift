@@ -139,6 +139,11 @@ struct LayoutSchematicCountTests {
     /// directly: an earlier cut called the engine here and let the
     /// schematic reproduce the arithmetic inline, which is the one
     /// thing the schematic's docstring promises it does not do.
+    ///
+    /// The fixture types 4 × 4 so the ceiling does not bind at
+    /// these counts — balancing is what this test is about, and
+    /// `LayoutSchematicCapacityTests` owns what happens when the
+    /// ceiling *does* bind (#712).
     @Test("a dynamic grid balances the way the engine does")
     func gridBalance() {
         // Four windows are a 2×2; a fifth adds a column
@@ -146,34 +151,35 @@ struct LayoutSchematicCountTests {
         // incoming tile, so five on screen is `windows: 5`.
         let four = grid(windows: 4, columnsFirst: true)
         #expect(four.ids.count == 4)
-        #expect(
-            four.dynamicDims.columns == 2
-                && four.dynamicDims.rows == 2
-        )
+        #expect(four.dims.columns == 2 && four.dims.rows == 2)
         let five = grid(windows: 5, columnsFirst: true)
-        #expect(
-            five.dynamicDims.columns == 3
-                && five.dynamicDims.rows == 2
-        )
+        #expect(five.dims.columns == 3 && five.dims.rows == 2)
         let rowsFirst = grid(windows: 5, columnsFirst: false)
         #expect(
-            rowsFirst.dynamicDims.columns == 2
-                && rowsFirst.dynamicDims.rows == 3
+            rowsFirst.dims.columns == 2
+                && rowsFirst.dims.rows == 3
         )
         // And the schematic's dims ARE the engine's, at every
         // count in the band — so an inlined copy that happens to
-        // agree at five still reds somewhere.
+        // agree at five still reds somewhere. Compared against
+        // `dimensions`, the whole rule, rather than `balanced`
+        // alone: calling only the latter is what let the preview
+        // subdivide past the point the real grid stops (#712).
         for count in LayoutSchematic.windowCountRange {
             let schematic = grid(
                 windows: count,
                 columnsFirst: true
             )
-            let engine = GridLayout.balanced(
+            var params = GridParams()
+            params.type = .dynamic
+            params.splitDirection = .horizontal
+            let engine = GridLayout.dimensions(
                 count: schematic.ids.count,
-                splitDirection: .horizontal
+                params: params,
+                cap: schematic.cap
             )
-            #expect(schematic.dynamicDims.columns == engine.columns)
-            #expect(schematic.dynamicDims.rows == engine.rows)
+            #expect(schematic.dims.columns == engine.columns)
+            #expect(schematic.dims.rows == engine.rows)
         }
     }
 
@@ -311,8 +317,8 @@ struct LayoutSchematicCountTests {
         columnsFirst: Bool
     ) -> GridSchematic {
         GridSchematic(
-            columns: 2,
-            rows: 2,
+            columns: 4,
+            rows: 4,
             type: .dynamic,
             fillEmptySpace: false,
             autoSize: false,

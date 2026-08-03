@@ -30,7 +30,7 @@ public struct GridLayout: LayoutSystem {
             gapV: gapV,
             minSize: context.minWindowSize
         )
-        let (columns, rows) = dimensions(
+        let (columns, rows) = Self.dimensions(
             count: count,
             params: params,
             cap: cap
@@ -179,7 +179,15 @@ public struct GridLayout: LayoutSystem {
     /// balanced arrangement's orientation fights the cap's (a
     /// wide balance against a tall cap), the unpinned axis grows
     /// to use the cap's full capacity before the count overflows.
-    func dimensions(
+    ///
+    /// Public and `static` for the same reason `balanced` is: the
+    /// Settings preview needs the *whole* rule, not just the
+    /// balance, or it draws a grid that keeps subdividing past
+    /// the point the real one stops (#712). It takes the cap as a
+    /// parameter and touches no screen, so exposing it hands out
+    /// no state — the caller supplies the ceiling, which is the
+    /// one part that IS screen-derived (`capDimensions`).
+    public static func dimensions(
         count: Int,
         params: GridParams,
         cap: (columns: Int, rows: Int)

@@ -24,7 +24,7 @@ extension StackSchematic {
         guard n > 0 else { return [] }
         let w = size.width
         let h = size.height
-        let off = Self.cascadeOffset
+        let off = LayoutSchematic.cascadeOffset
         if overflowStyle == .cascadeAll {
             // The whole zone piles downward regardless of the
             // zone's orientation, exactly like the engine.

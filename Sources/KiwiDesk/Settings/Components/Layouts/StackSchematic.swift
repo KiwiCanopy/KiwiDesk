@@ -47,8 +47,6 @@ struct StackSchematic: View {
     /// the offset below and `stackWins`, for the slot math in
     /// `StackSchematic+Slots.swift`.
     static let overflowTiled = 3
-    /// Scaled-down title-bar reveal (the engine uses 40 pt).
-    static let cascadeOffset: CGFloat = 9
 
     /// Masters cannot outnumber the established windows: at two
     /// windows a master count of ten still leaves the stack zone
@@ -250,34 +248,12 @@ struct StackSchematic: View {
         slot: Slot
     ) -> some View {
         if slot.piled {
-            pileTile(id: id, front: slot.front)
+            SchematicPileTile(
+                active: id == focused,
+                isNew: id == newWindow
+            )
         } else {
             tile(for: id)
-        }
-    }
-
-    /// An opaque cascade tile: a solid base so stacking never sums
-    /// the accent alpha into dark bands, then the *same* accent fill
-    /// every other tile uses. The overlapping borders — not colour —
-    /// separate the piled windows from one another.
-    private func pileTile(id: WindowID, front: Bool) -> some View {
-        let corner = LayoutSchematic.corner
-        return ZStack(alignment: .bottomTrailing) {
-            RoundedRectangle(cornerRadius: corner)
-                .fill(Color(nsColor: .textBackgroundColor))
-            RoundedRectangle(cornerRadius: corner)
-                .fill(LayoutSchematic.fill)
-            RoundedRectangle(cornerRadius: corner)
-                .strokeBorder(
-                    LayoutSchematic.stroke,
-                    lineWidth: id == focused ? 2 : 1
-                )
-            if id == newWindow {
-                Image(systemName: "plus")
-                    .font(.system(size: 7, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(2)
-            }
         }
     }
 

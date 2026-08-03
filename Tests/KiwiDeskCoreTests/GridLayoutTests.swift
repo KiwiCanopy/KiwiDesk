@@ -42,7 +42,7 @@ struct GridDimensionTests {
     func columnFirst(spec: (n: Int, cols: Int, rows: Int)) {
         var params = GridParams()
         params.splitDirection = .horizontal
-        let dims = layout.dimensions(
+        let dims = GridLayout.dimensions(
             count: spec.n,
             params: params,
             cap: looseCap
@@ -61,7 +61,7 @@ struct GridDimensionTests {
     func rowFirst(spec: (n: Int, cols: Int, rows: Int)) {
         var params = GridParams()
         params.splitDirection = .vertical
-        let dims = layout.dimensions(
+        let dims = GridLayout.dimensions(
             count: spec.n,
             params: params,
             cap: looseCap
@@ -78,7 +78,7 @@ struct GridDimensionTests {
         params.columns = 3
         params.rows = 2
         // 9 windows balance to 3x3, but the 3x2 cap holds.
-        let dims = layout.dimensions(
+        let dims = GridLayout.dimensions(
             count: 9,
             params: params,
             cap: (3, 2)
@@ -94,7 +94,7 @@ struct GridDimensionTests {
         params.splitDirection = .horizontal
         // 6 windows balance to 3x2 (wide), but the cap is tall
         // (2x3) — columns pin to 2, rows grow to 3 to hold all 6.
-        let dims = layout.dimensions(
+        let dims = GridLayout.dimensions(
             count: 6,
             params: params,
             cap: (2, 3)
@@ -107,7 +107,7 @@ struct GridDimensionTests {
     func rigidUsesCap() {
         var params = GridParams()
         params.type = .rigid
-        let dims = layout.dimensions(
+        let dims = GridLayout.dimensions(
             count: 1,
             params: params,
             cap: (4, 2)
