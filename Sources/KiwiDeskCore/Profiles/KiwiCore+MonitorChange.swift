@@ -12,15 +12,20 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return }
         // No exit may leave a space orphaned (#676): the state
-        // fold already ran, and a display id that churned (an
-        // AirPlay connect can reassign even the built-in's id)
-        // took every `spaceDisplay` entry on the old id with it.
-        // A branch that skips re-resolving — `.countDefault`
-        // with the profile already current did — leaves both
-        // bars' display keys unresolvable, so the trailing
-        // retile retires them with nothing to heal. Resolve on
-        // every exit; the call is idempotent, so branches that
-        // already resolved pay nothing.
+        // fold already ran, and any display id churn (sleep,
+        // dock/undock — #676's report was an AirPlay connect
+        // re-keying the built-in) wiped every `spaceDisplay`
+        // entry on the old id. A branch that skips re-resolving
+        // — `.countDefault` with the profile already current
+        // did — leaves both bars' display keys unresolvable, so
+        // the trailing retile retires them with nothing to
+        // heal. Resolve on every exit. The obligation this
+        // rests on: a branch finishes mutating every resolve
+        // input (`spacePins`, profile adoption) before its own
+        // resolve/retile, so the deferred pass re-runs on
+        // identical inputs and moves nothing —
+        // `MonitorChangeSpaceResolveTests` pins that a second
+        // immediate resolve is a no-op.
         defer { resolveSpaceDisplays() }
         let fingerprints = displays.map(\.fingerprint)
 
@@ -60,13 +65,13 @@ extension KiwiCore {
             } else {
                 // Same profile back on one of its exact sets
                 // (e.g. re-docked after an interim mismatch):
-                // re-adopt so a lingering dirty flag clears,
-                // and re-resolve with that set's pins.
+                // re-adopt so a lingering dirty flag clears;
+                // the deferred resolve picks up that set's
+                // pins — nothing runs between here and it.
                 profiles.adopt(profile)
                 spacePins =
                     profile.set(matching: fingerprints)?
                     .spaceMonitorMap ?? [:]
-                resolveSpaceDisplays()
             }
         case .countDefault(let profile):
             if profile.name != profiles.currentName {
@@ -101,6 +106,14 @@ extension KiwiCore {
                 if profiles.currentName != nil {
                     profiles.markDirty()
                 }
+                // NOT redundant with the deferred resolve:
+                // this branch retiles and emits below, and two
+                // callers (`delete_profile`, the reload
+                // re-apply's else-arm) run no trailing retile —
+                // only a resolve BEFORE this retile places
+                // windows correctly there. The deferred pass
+                // then re-runs on identical inputs and moves
+                // nothing.
                 resolveSpaceDisplays()
                 retile()
                 emitSpaceChange()
