@@ -4336,17 +4336,21 @@ stacking the moves left them in. Quitting promptly is worth more
 here than a perfect arrangement, because nothing runs afterwards
 that could fix either one.
 
-One window is exempt: **the key window of whichever app is
-frontmost when KiwiDesk stops** — normally the window you were
-last working in. No quiet raise can lift another window above it
-(measured on device, not inferred), so KiwiDesk leaves it out of
-the circle instead of spending the budget failing to move it. It
-keeps the top of its pile, and that is the one place a title bar
-can end up covered: the pile-mates the circle would have stacked
-above it stay behind it instead. Every other window lands where
-the circle puts it regardless of the z-order at quit — and if the
-frontmost window when KiwiDesk stops is one of KiwiDesk's own, no
-grid window is exempt at all.
+**The window you were last working in gets a slot chosen for it**
+— the last one in its cell, so it sits in front of that cell's
+pile. No quiet raise can lift another window above the frontmost
+app's key window (measured on device, not inferred), so that
+window is going to be in front whatever the circle does. Rather
+than spend the budget failing to move it, KiwiDesk places it where
+being in front is what the arrangement wanted anyway, and leaves
+it out of the raise circle.
+
+So the window you quit from stays visible and on top of its own
+pile, and nothing it covers is a window the grid meant to show
+above it. Every other window lands where the circle puts it
+regardless of the z-order at quit. If KiwiDesk's own window is
+frontmost when it stops, or the frontmost app has no window in
+the grid, none of this applies and the circle is followed exactly.
 
 A pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from

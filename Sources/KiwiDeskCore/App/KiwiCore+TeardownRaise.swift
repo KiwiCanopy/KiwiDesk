@@ -53,7 +53,8 @@ extension KiwiCore {
     func restackForTeardown(
         groups: [WindowGather.Group],
         frames: [WindowID: CGRect],
-        targetDepth: Int
+        targetDepth: Int,
+        unbeatable: WindowID?
     ) {
         let circles = groups.map { group in
             (
@@ -67,25 +68,24 @@ extension KiwiCore {
         }
         TeardownRestack(
             isTrusted: { AXHelper.isTrusted() },
-            // The one window the circle cannot place.
+            // The one window the circle cannot place — resolved
+            // by `gatherWindows` and handed in, because the grid
+            // ALSO uses it: it is placed last in its cell so that
+            // being in front is the slot it was given, rather than
+            // a defect (`WindowGather.collect`). Two views of one
+            // fact, so they read one value.
             //
             // A quiet raise cannot get a window above the frontmost
             // app's key window — the measurement, and why the float
             // raise answers the same constraint by keeping that
             // window out of its FLOOR instead, are on `raiseFloor`.
-            // Quitting does not change which app is frontmost, so
-            // here that key window is usually a circle member:
-            // whichever app the user was working in when they quit
-            // KiwiDesk, including the terminal, if that is where
-            // they stopped it from.
+            // Dropping it from the circle costs nothing now: it is
+            // already where the circle would have raised it to.
             //
             // Nil is the ordinary answer, not a failure: no
             // frontmost app, one showing an ignored panel (#21), or
-            // an AX read that did not answer. `TeardownRestack`
-            // carries what dropping it buys.
-            unbeatable: { [weak self] in
-                self?.trustedFrontmostFocusedWindowID()
-            },
+            // an AX read that did not answer.
+            unbeatable: { unbeatable },
             now: { ProcessInfo.processInfo.systemUptime },
             drain: { [weak self] order, policy in
                 self?.teardownDrain(over: order, policy: policy)

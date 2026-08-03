@@ -198,10 +198,41 @@ struct ZOrderSequenceWiringTests {
             under: "App"
         )
         #expect(source.contains("AXHelper.isTrusted()"))
-        #expect(
-            source.contains("trustedFrontmostFocusedWindowID()")
-        )
         #expect(source.contains("teardownDrain("))
         #expect(source.contains("policy: .teardown"))
+    }
+
+    /// The frontmost app's key window is resolved ONCE and spent
+    /// twice — the grid places it last (`placingLast`) and the
+    /// circle leaves it out (`unbeatable`). Those are two views of
+    /// one fact: that nothing can raise above it. Resolving it
+    /// twice, or wiring only one of the two, half-fixes the
+    /// arrangement in a way no unit test can see — `collect` is
+    /// pure and testable, the AX read is not, and only this pins
+    /// that the same value reaches both.
+    ///
+    /// Placement alone would put the window in the right slot and
+    /// still burn the budget failing to raise things above it;
+    /// the exemption alone is what shipped before device QA, and
+    /// left the window covering its pile-mates (owner QA,
+    /// 2026-08-03).
+    @Test("One resolved window both places and exempts")
+    func frontmostWindowIsPlacedAndExemptedFromOneRead() throws {
+        let source = try body(
+            of: "gatherWindows",
+            in: "KiwiCore+Teardown.swift",
+            under: "App"
+        )
+        #expect(
+            source.components(
+                separatedBy: "trustedFrontmostFocusedWindowID()"
+            ).count == 2
+        )
+        // Both consumers, and both off that one local.
+        #expect(
+            source.components(separatedBy: "placingLast: frontmost")
+                .count == 3
+        )
+        #expect(source.contains("unbeatable: frontmost"))
     }
 }

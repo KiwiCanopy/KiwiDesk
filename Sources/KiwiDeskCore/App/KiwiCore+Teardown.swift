@@ -48,9 +48,27 @@ public enum WindowGather {
     /// its full per-display window list (grid dimension
     /// depends on that total — spaces on one display MUST
     /// merge into one group, never grid separately).
+    ///
+    /// `placingLast` is moved to the end of its display's list,
+    /// and the quit path passes the frontmost app's key window
+    /// (#688). That window ends up in FRONT whatever the circle
+    /// does — no quiet raise can lift anything above it — so
+    /// rather than fight the constraint, the grid gives it the
+    /// slot where being in front is the right answer. Last in
+    /// the list is last in its cell's cascade, which is the slot
+    /// `raiseOrder` raises last and therefore means to be
+    /// frontmost. Placed anywhere else it covers the pile-mates
+    /// the circle wanted above it, which is the one arrangement
+    /// defect a quit could still show (owner device QA,
+    /// 2026-08-03).
+    ///
+    /// It reorders rather than re-slots, so `frames` and
+    /// `raiseOrder` keep seeing one list and cannot partition
+    /// differently.
     public static func collect(
         state: StateCoordinator,
-        primaryHeight: CGFloat
+        primaryHeight: CGFloat,
+        placingLast: WindowID? = nil
     ) -> [Group] {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return [] }
@@ -85,9 +103,15 @@ public enum WindowGather {
         }
         return order.compactMap { id in
             guard
-                let windows = gathered[id],
+                var windows = gathered[id],
                 let axFrame = axFrames[id]
             else { return nil }
+            if let placingLast,
+                let at = windows.firstIndex(of: placingLast)
+            {
+                windows.remove(at: at)
+                windows.append(placingLast)
+            }
             return Group(
                 display: id,
                 axFrame: axFrame,
@@ -101,12 +125,14 @@ public enum WindowGather {
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
         minSize: CGFloat,
-        targetDepth: Int
+        targetDepth: Int,
+        placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for group in collect(
             state: state,
-            primaryHeight: primaryHeight
+            primaryHeight: primaryHeight,
+            placingLast: placingLast
         ) {
             switch style {
             case .grid:
@@ -160,9 +186,16 @@ extension KiwiCore {
         // Diagnostic trail for the one-shot placement: a
         // wrong grid shape at quit is unreproducible after
         // the fact, so log what was grouped where.
+        // Resolved ONCE and used for both halves: the grid slot
+        // this window is placed in and the circle it is left out
+        // of are two views of the same fact — that nothing can
+        // raise above it — so they must not be able to disagree
+        // about which window it is (#688).
+        let frontmost = trustedFrontmostFocusedWindowID()
         let groups = WindowGather.collect(
             state: state,
-            primaryHeight: primaryH
+            primaryHeight: primaryH,
+            placingLast: frontmost
         )
         onLog(
             "gatherWindows: \(groups.count) display group(s): "
@@ -178,7 +211,8 @@ extension KiwiCore {
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
             minSize: tiler.settings.minWindowSize,
-            targetDepth: targetDepth
+            targetDepth: targetDepth,
+            placingLast: frontmost
         )
         guard !frames.isEmpty else { return }
         // Bound every AX call in BOTH passes — EUI reads, EUI
@@ -221,7 +255,8 @@ extension KiwiCore {
         restackForTeardown(
             groups: groups,
             frames: frames,
-            targetDepth: targetDepth
+            targetDepth: targetDepth,
+            unbeatable: frontmost
         )
     }
 
