@@ -1304,6 +1304,48 @@ lock.
 
 **[Principle]**
 
+**A layout is chosen by its picture, not by its name.** Layout
+Defaults selects one of seven layouts, and "Track" and
+"Scrolling" and "Monocle" are words only somebody who already
+uses a tiling window manager knows — which makes a strip of
+those words the worst possible label on the one page where a
+beginner is most lost. So the selector draws each layout
+instead, and the tile doubles as the answer to the question the
+reader actually has, which is not "which of these is called
+Track" but "which of these do I want". Each tile also carries
+the count of spaces using it, so a layout nothing runs is
+visibly not worth tuning — the page edits *defaults*, and a
+default with nothing reading it is an hour spent on nothing.
+The obligation this creates: the tiles are the same schematics
+the page's own preview draws, from the same staged settings —
+a strip of stylised mock drawings would be a second, quietly
+disagreeing picture of the same configuration.
+
+**A preview that takes a window count simulates; one that does
+not illustrates.** Several Layout Defaults settings are
+invisible at any fixed number of windows. Cascade overflow and
+Cascade all draw the identical frame until the stack is deep
+enough to overflow; a track limit means nothing until there are
+more windows than tracks; a dynamic grid's balance only shows
+as it rebalances. A still frame at a baked-in count therefore
+cannot teach the setting it is under, and the reader has to
+save, watch real windows, and come back. So the count is an
+input on a slider, and each schematic runs its real fill logic
+against it — calling the engine wherever the engine can answer
+(BSP tiles through `BspLayout`, a dynamic grid balances through
+`GridLayout.balanced`), so the picture cannot drift from what
+KiwiDesk does. Two consequences worth stating, because both
+look like regressions in isolation: the two-frame "4 windows →
+a 5th opens" growth pair retired, since a reader who can add
+the fifth window themselves does not need it staged; and the
+count is view state that resets on leaving, because it is a
+question asked of the preview rather than a setting — writing
+it to the config would be a second, invisible knob. What the
+count does **not** buy is a render of the user's actual
+windows: that needs live window state, which is exactly the
+live-apply coupling #123 rejects (see
+[accepted limitations](accepted-limitations.md)).
+
 **Two-group sidebar, topic-named: "Design" vs "System".**
 Every control either travels with the profile being edited or
 is app-wide, and the old flat tabs hid which was which — the

@@ -108,11 +108,13 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion, Advanced Colours and Shortcuts
-render from it now** (#678 Phases 2-3): `BarsRowOrder` /
-`ColorsRowOrder` / `ShortcutsRowOrder`
+it. **Bars, Colours & Motion, Advanced Colours, Shortcuts and
+Layout Defaults render from it now** (#678 Phases 2-3):
+`BarsRowOrder` / `ColorsRowOrder` / `ShortcutsRowOrder` /
+`LayoutDefaultsRowOrder`
 hold the display order and `BarsCensusRenderTests` /
-`ColorsCensusRenderTests` / `ShortcutsCensusRenderTests` pin
+`ColorsCensusRenderTests` / `ShortcutsCensusRenderTests` /
+`LayoutDefaultsCensusRenderTests` pin
 them to the census, so a row in
 those areas moves by editing the census.
 
@@ -164,11 +166,22 @@ The rule that needs no guessing:
   the gap stays deliberate and a new gate landing in neither
   set reds.
 
-The two resolvers still take different shapes — one keys on
-`SettingsContainer.gate` over `TilingSettings`, the other on
-`SettingRuntimeGate` over `GuiConfig`. **Converge them before a
-third area invents a fourth**; the split is why one legitimate
-gate is "resolved elsewhere" today.
+The resolvers still take different shapes — one keys on
+`SettingsContainer.gate` over `TilingSettings`, another on
+`SettingRuntimeGate` over `GuiConfig`, a third
+(`LayoutDefaultsGates`) on a row's own `SettingKey` over
+`TilingSettings`. **Converge them before a fourth shape
+appears**; the split is why one legitimate gate is "resolved
+elsewhere" today. Layout Defaults did not force the
+convergence and does not discharge it: it declares no container
+gate and no `.runtime` gate, so it answers only ROW gates and
+had nothing to converge *with*. A resolver returns the *reason*
+rather than a Bool where the area greys with an explanation
+(`LayoutDefaultsGates.InertReason`, rendered by
+`LayoutDefaultsGateHelp`) — why-you-cannot is always inline, so
+the grey and its sentence must not be two decisions that can
+disagree, and a reason CASE keeps the whole resolver assertable
+off the main actor.
 
 **Config presence expands the Simple surface.** Anything that
 already EXISTS in the user's config — a layer, an imported
@@ -181,6 +194,20 @@ gives the tier meaning — `immediateRowsAreGated` pins that every
 `.immediate` row carries one. Reading such a row as `.showMore`
 hides a user's own configuration from them, which the Shortcuts
 area shipped once. The argument is in `docs/design-decisions.md`.
+
+**A live preview that takes a window count owes the arithmetic
+a guard, not a source scan.** Layout Defaults' schematics
+simulate the count the preview's slider supplies, and a
+schematic that takes the count and draws a constant satisfies
+every substring a scan can look for while answering nothing —
+guard-prover shipped that mutation past the first cut of
+`LayoutSchematicCountTests`. So each schematic's count-derived
+quantity is internal rather than private and asserted directly,
+and the source scan stays only for what arithmetic over
+existing types cannot see: a NEW schematic that never took the
+count. A suite reading those quantities is `@MainActor`, since
+they are `View` properties and reading one off the main actor
+traps the runner instead of failing an expectation.
 
 **A capability unlocked in one list stays scoped to that list**
 (#678). Once a profile carries a single shortcut override, the

@@ -64,29 +64,41 @@ struct LayoutSchematicCountTests {
     /// leaves a stack zone — the two-zone split is the point.
     @Test("Stack partitions the count into its two zones")
     func stackPartition() {
-        for count in LayoutSchematic.windowCountRange {
-            let schematic = stack(masterCount: 1, windows: count)
-            #expect(
-                schematic.masters + schematic.stackWindows + 1
-                    == count
-            )
-            #expect(schematic.masters >= 1)
+        // Across master counts as well as window counts: at
+        // `masterCount: 1` the clamp is inert, so a loop over the
+        // band alone leaves it watched by nothing.
+        for masterCount in [1, 3, 10] {
+            for count in LayoutSchematic.windowCountRange {
+                let schematic = stack(
+                    masterCount: masterCount,
+                    windows: count
+                )
+                #expect(
+                    schematic.masters + schematic.stackWindows + 1
+                        == count
+                )
+                #expect(schematic.masters >= 1)
+                // The clamp: masters never outrun the
+                // established windows, so the stack zone is on
+                // screen at every count.
+                #expect(schematic.masters <= max(1, count - 1))
+            }
         }
-        // The clamp: ten masters over three windows is two
-        // masters, not ten, so the stack zone survives.
-        let crowded = stack(masterCount: 10, windows: 3)
-        #expect(crowded.masters == 2)
-        #expect(crowded.stackWindows == 0)
     }
 
     /// The stack run is what makes the two overflow styles
-    /// diverge, so it has to actually deepen with the count.
+    /// diverge, so it has to actually deepen with the count —
+    /// at every step, not merely between two samples a plateau
+    /// could sit inside.
     @Test("a bigger count deepens the stack run")
     func stackDeepens() {
-        #expect(
-            stack(masterCount: 1, windows: 8).stackWindows
-                > stack(masterCount: 1, windows: 4).stackWindows
-        )
+        var previous = -1
+        for count in LayoutSchematic.windowCountRange {
+            let run = stack(masterCount: 1, windows: count)
+                .stackWindows
+            #expect(run > previous)
+            previous = run
+        }
     }
 
     /// Track opens tracks up to the limit and spills the rest
@@ -106,6 +118,19 @@ struct LayoutSchematicCountTests {
             track(limit: 9, windows: 12, auto: true).trackCount
                 == 3
         )
+        // The focused track's own run, read DIRECTLY. Reading it
+        // only through `overflowWindows` left it satisfiable by
+        // the constant 4 — a focused track drawing four windows
+        // over one established one, invisible because the
+        // arithmetic happens to land at the sampled shapes
+        // (guard-prover, 2026-08-03).
+        #expect(track(limit: 3, windows: 2).focusedRun == 1)
+        #expect(track(limit: 3, windows: 12).focusedRun == 4)
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = track(limit: 3, windows: count)
+            #expect(schematic.focusedRun >= 1)
+            #expect(schematic.focusedRun <= max(1, count - 1))
+        }
     }
 
     /// A dynamic grid balances through the ENGINE's own rule, so

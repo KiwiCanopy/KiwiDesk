@@ -520,19 +520,38 @@ KiwiDesk draws around a window.
 
 ### Per-Layout Tuning
 
-The pane opens on a **tab strip** — one tab per layout mode (BSP,
-Stack, Scrolling, Grid, Monocle, Track), landing on the mode your
-spaces use most — and shows only the selected mode's settings, so
-you tune one mode without scrolling past the others. The global
-**Minimum window size** sits above the strip (it feeds every
-mode). Floating has no tunables, so it has no tab.
+The pane opens on a **Choose a layout** strip — one tile per
+layout mode (BSP, Stack, Scrolling, Grid, Monocle, Track),
+landing on the mode your spaces use most — and shows only the
+selected mode's settings, so you tune one mode without scrolling
+past the others. Floating has no tunables, so it has no tile.
 
-Each mode's tab leads with a small **schematic** — a static
-mini-diagram that redraws as you change ratios, counts, and
-orientation, so you can judge what a value looks like before you
-save (the same idea as the Gaps diagram in Gaps & Borders). It
-is a preview only; nothing applies to your live windows until
-you Save.
+Each tile **draws its layout** rather than naming it, and says
+how many of your spaces use it, so you can pick by what a layout
+looks like instead of by a word, and see at a glance which ones
+are worth tuning. The global **Minimum window size** sits above
+the strip, because it feeds every layout — it is the floor no
+window tiles below, and it also caps auto-sized grids and track
+limits.
+
+Below the selected layout's settings sits a **Live preview**:
+the same drawing at full width, with a **Windows** slider. Drag
+it and the preview re-runs the layout for that many windows —
+which is where several of these settings first become visible.
+Cascade overflow and Cascade all draw the same picture until the
+stack is deep enough to overflow; a track limit means nothing
+until there are more windows than tracks; a dynamic grid's
+balance only shows as it rebalances. The count is a question you
+ask the preview, not a setting: it is not saved and resets when
+you leave.
+
+A last card lists the **spaces using this layout**, and says how
+many of them override the values above — Layout Defaults sets
+defaults, and this is where the page admits that a given space
+may not be following them.
+
+The preview is a preview only; nothing applies to your live
+windows until you Save.
 
 Adjust each mode's defaults:
 

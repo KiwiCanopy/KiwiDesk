@@ -161,18 +161,24 @@ loud?* — not by which pane it lives in:
 
 Minimum window size migrated slider → `StepperRow` on this
 rule (#204): it is a precise pt threshold, not a feel knob.
-**Layout Defaults is a per-mode tab strip, not a stacked
-scroll (#204).** The layout modes are a fixed, small,
-mutually-exclusive set (`LayoutMode` minus Floating), so they
-get a segmented tab strip — one mode's editor visible at a
-time — instead of every mode stacked in one `ScrollView`. The
-strip lands on the profile's most-used mode. The global
-minimum window size is pinned *above* the strip because it
-feeds every mode (and gates the `OverlapStack` overflow
-cascade), so it belongs to none of them. The formerly bundled
-`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
-(Scrolling+Grid) were split at the mode boundary so each mode
-owns one tab and one schematic.
+**Layout Defaults picks one layout at a time, and picks it by
+its picture (#204, #678 turn 10).** The layout modes are a
+fixed, small, mutually-exclusive set (`LayoutMode` minus
+Floating), so one mode's editor is visible at a time instead of
+every mode stacked in one `ScrollView`. What selects it is a
+strip of **live schematic thumbnails**, not a segmented strip of
+words: the words are ones only a tiler user knows, so on the
+page where a beginner is most lost the drawing is the label —
+each tile also carrying the count of spaces using it, so an
+unused layout is visibly not worth tuning. The strip lands on
+the profile's most-used layout. The global minimum window size
+is pinned *above* the strip because it feeds every layout (and
+gates the `OverlapStack` overflow cascade), so it belongs to
+none of them. The formerly bundled `LayoutParamsEditor`
+(BSP+Stack) and `ScrollGridEditor` (Scrolling+Grid) were split
+at the mode boundary; since turn 10 the rows come from the
+settings census and one `LayoutCard` renders whichever layout
+is selected.
 
 ## Shared visual language
 
