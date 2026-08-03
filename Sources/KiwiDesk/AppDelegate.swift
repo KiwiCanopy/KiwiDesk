@@ -50,6 +50,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private var localeObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Shorten the hover-help delay before any window opens
+        // (`ToolTipDelay` carries why).
+        ToolTipDelay.install()
+
         // Inject the persisted language pick before any view
         // reads `L(_:_:)` (issue #9). Read directly from
         // UserDefaults, NOT via `loadGuiConfig()` — a language
