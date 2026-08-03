@@ -173,9 +173,14 @@ The resolvers still take different shapes — one keys on
 `TilingSettings`. **Converge them before a fourth shape
 appears**; the split is why one legitimate gate is "resolved
 elsewhere" today. Layout Defaults did not force the
-convergence and does not discharge it: it declares no container
-gate and no `.runtime` gate, so it answers only ROW gates and
-had nothing to converge *with*. A resolver returns the *reason*
+convergence and does not discharge it: it answers only ROW
+gates, so it had nothing to converge *with* — **give this area
+a container gate or a `.runtime` one and converge the
+resolvers rather than teaching this one a second shape.**
+`LayoutDefaultsGateTests`' `everyGatedRowIsResolved` reds when
+a ROW gate this resolver does not answer appears; a CONTAINER
+gate here sits under no such net, so that half is a reviewer's
+to catch. A resolver returns the *reason*
 rather than a Bool where the area greys with an explanation
 (`LayoutDefaultsGates.InertReason`, rendered by
 `LayoutDefaultsGateHelp`) — why-you-cannot is always inline, so
@@ -201,13 +206,19 @@ simulate the count the preview's slider supplies, and a
 schematic that takes the count and draws a constant satisfies
 every substring a scan can look for while answering nothing —
 guard-prover shipped that mutation past the first cut of
-`LayoutSchematicCountTests`. So each schematic's count-derived
+`LayoutSchematicCountTests` — the general form of that failure
+is [rule-authoring.md](rule-authoring.md)'s "Prove a new guard
+reds". So each schematic's count-derived
 quantity is internal rather than private and asserted directly,
 and the source scan stays only for what arithmetic over
 existing types cannot see: a NEW schematic that never took the
 count. A suite reading those quantities is `@MainActor`, since
 they are `View` properties and reading one off the main actor
-traps the runner instead of failing an expectation.
+traps the runner instead of failing an expectation. One residue
+is knowingly unguarded and stated so it is not mistaken for
+coverage: nothing pins that a schematic's `body` still *draws*
+the quantity it derives, so a correct derivation feeding a
+constant frame passes.
 
 **A capability unlocked in one list stays scoped to that list**
 (#678). Once a profile carries a single shortcut override, the

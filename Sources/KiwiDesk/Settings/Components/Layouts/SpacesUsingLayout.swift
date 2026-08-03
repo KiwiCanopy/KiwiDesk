@@ -19,16 +19,9 @@ struct SpacesUsingLayout: View {
             SettingsCatalog.layoutDefaults.spacesUsing
         ) {
             if spaces.isEmpty {
-                Text(
-                    L(
-                        "layout_defaults.spaces_using.none",
-                        "No space uses this layout yet — set one "
-                            + "to it in %1$@.",
-                        SettingsDestination.spaces.title
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(emptyProse)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             } else {
                 WrapChips(spaces) { space in
                     SpaceChip(label: space.raw)
@@ -50,13 +43,8 @@ struct SpacesUsingLayout: View {
         }
     }
 
-    /// Spaces on this layout, in the user's own space order — a
-    /// space with no recorded mode runs the default (`?? .bsp`),
-    /// the same reading every other surface uses.
     private var spaces: [SpaceID] {
-        model.config.spaces.filter {
-            (model.config.spaceModes[$0] ?? .bsp) == mode
-        }
+        LayoutUsage.spaces(on: mode, in: model.config)
     }
 
     /// How many of those spaces override at least one of this
@@ -82,6 +70,19 @@ struct SpacesUsingLayout: View {
         case .track: return Set(settings.track.override.keys)
         case .floating: return []
         }
+    }
+
+    /// Hoisted out of `body` for the type-checker: a
+    /// `+`-concatenated literal inside a conditional inside a
+    /// `ViewBuilder` is the shape that compiles here and dies on
+    /// the slower CI runner (gui.md, SwiftUI traps).
+    private var emptyProse: String {
+        L(
+            "layout_defaults.spaces_using.none",
+            "No space uses this layout yet — set one to it in "
+                + "%1$@.",
+            SettingsDestination.spaces.title
+        )
     }
 
     private var overrideProse: String {

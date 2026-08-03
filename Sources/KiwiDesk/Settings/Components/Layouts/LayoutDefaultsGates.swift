@@ -17,12 +17,15 @@ import SwiftUI
 /// split gui.md draws: the census `gate:` names the *setting*
 /// that decides, and the exact question — resolved override
 /// chains, auto sentinels — lives here with the values it reads.
-/// Two of them ask about per-space overrides as well as the
+/// Three of them ask about per-space overrides as well as the
 /// global, and that is not an inconsistency to tidy away: the
-/// census names both owners for exactly those two rows (#406 —
+/// census names both owners for exactly those three rows (#406 —
 /// gate on the RESOLVED value, since a control the global would
 /// silence is still live for a space that overrides it), and
-/// names one owner where the override half is Lua-only.
+/// names one owner only where the override half is **Lua-only**
+/// and so cannot be surfaced (grid auto-size, track
+/// auto-tracks). A row whose override twin IS in the GUI and is
+/// gated on one owner is that bug, not that exception.
 ///
 /// Returning the *reason* rather than a bare Bool is deliberate:
 /// why-you-cannot is always inline (item 19), so a row that
@@ -57,8 +60,7 @@ struct LayoutDefaultsGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .layout(.stackMasterOrientation):
-            return settings.stack.masterCount <= 1
-                ? .oneMaster : nil
+            return masterOrientationIsInert ? .oneMaster : nil
         case .layout(.gridFillEmptySpace):
             return fillEmptyIsInert ? .rigidGrid : nil
         case .layout(.gridColumns), .layout(.gridRows):
@@ -98,7 +100,8 @@ struct LayoutDefaultsGates {
 
     // MARK: - The predicates
 
-    /// Whether any space's grid override satisfies `predicate`.
+    /// Whether any overriding space's RESOLVED grid satisfies
+    /// `predicate`.
     ///
     /// A control on this GLOBAL editor is inert only when nothing
     /// still reads it — and a per-space override can keep it live
@@ -108,14 +111,23 @@ struct LayoutDefaultsGates {
     /// down: ask the value that is actually read, never the
     /// global; #527 found this pair still asking the global).
     ///
+    /// Resolved through Core's own `resolvedGrid(for:)` rather
+    /// than off the raw override fields, because the per-space
+    /// surface that draws the same condition and shows the same
+    /// sentence resolves it that way — two surfaces answering
+    /// "is this space rigid" differently is the drift the
+    /// resolver exists to prevent.
+    ///
     /// Deliberately ignores whether that space also overrides the
     /// gated value itself. If it does, the control is inert for
     /// it and we leave it enabled anyway — erring toward enabled
     /// is the safe direction here.
-    private func anyGridOverride(
-        _ predicate: (GridOverride) -> Bool
+    private func anyOverridingSpace(
+        _ predicate: (GridParams) -> Bool
     ) -> Bool {
-        settings.grid.override.values.contains(where: predicate)
+        settings.grid.override.keys.contains {
+            predicate(settings.resolvedGrid(for: $0))
+        }
     }
 
     /// Fill-empty applies to dynamic grids only, so a rigid
@@ -123,7 +135,7 @@ struct LayoutDefaultsGates {
     /// back to dynamic, which makes the global value live again.
     private var fillEmptyIsInert: Bool {
         settings.grid.type == .rigid
-            && !anyGridOverride { $0.type == .dynamic }
+            && !anyOverridingSpace { $0.type == .dynamic }
     }
 
     /// Auto-size supplies the dimensions, so it silences the
@@ -131,7 +143,19 @@ struct LayoutDefaultsGates {
     /// OFF, which makes the global dimensions live for it.
     private var dimensionsAreInert: Bool {
         settings.grid.autoSize
-            && !anyGridOverride { $0.autoSize == false }
+            && !anyOverridingSpace { !$0.autoSize }
+    }
+
+    /// Orientation only changes anything with more than one
+    /// master — and the count that decides is the RESOLVED one,
+    /// since a space overriding it to several masters reads this
+    /// orientation whatever the global says. The census names
+    /// both owners for this row for that reason.
+    private var masterOrientationIsInert: Bool {
+        settings.stack.masterCount <= 1
+            && !settings.stack.override.keys.contains {
+                settings.resolvedStack(for: $0).masterCount > 1
+            }
     }
 }
 

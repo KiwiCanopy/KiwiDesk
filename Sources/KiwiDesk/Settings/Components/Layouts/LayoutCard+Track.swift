@@ -89,6 +89,10 @@ extension LayoutCard {
     /// The pair used to be a hand-built toggle-plus-caption above
     /// a separately-`disabled` stepper, which is this component's
     /// job spelled a third way (#233's whole argument).
+    var trackLimitReason: LayoutDefaultsGates.InertReason? {
+        gates.inertReason(for: .layout(.trackLimit))
+    }
+
     var trackLimitGroup: some View {
         AutoGatedGroup(
             title: L("track.auto_tracks", "Auto track limit"),
@@ -99,9 +103,10 @@ extension LayoutCard {
                     + "the minimum window size above — opening and "
                     + "collapsing them as windows come and go."
             ),
-            gatedIsInert:
-                gates
-                .inertReason(for: .layout(.trackLimit)) != nil
+            gatedIsInert: trackLimitReason != nil,
+            gatedHelp: trackLimitReason.map(
+                LayoutDefaultsGateHelp.sentence
+            ) ?? ""
         ) {
             StepperRow(
                 label: L("track.limit", "Track limit"),

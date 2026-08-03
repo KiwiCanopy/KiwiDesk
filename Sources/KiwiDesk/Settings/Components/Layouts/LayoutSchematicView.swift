@@ -17,8 +17,12 @@ import SwiftUI
 struct LayoutSchematicView: View {
     let mode: LayoutMode
     let settings: TilingSettings
-    var windows = LayoutSchematic.defaultWindowCount
-    var scale: SchematicScale = .tile
+    /// No default: a caller that could omit the count would draw
+    /// a different number of windows from its sibling and never
+    /// say so — which is the drift this type exists to prevent,
+    /// one parameter down. Every caller states its count.
+    let windows: Int
+    let scale: SchematicScale
 
     var body: some View {
         switch mode {

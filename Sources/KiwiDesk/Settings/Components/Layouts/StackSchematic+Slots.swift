@@ -14,10 +14,13 @@ extension StackSchematic {
     /// their top edge shows above the next.
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
-        // Driven by the preview's window count since turn 10, so
-        // the divisions below are live arithmetic rather than a
-        // formality: an empty stack zone (every window a master)
-        // draws nothing at all.
+        // `order` always carries the incoming window, so the
+        // stack zone is never actually empty and this guard does
+        // not fire today. It stays because the divisions below
+        // are live arithmetic since turn 10 made the count an
+        // input: at n == 0 the overflow branch would build a
+        // reversed `Range` and trap, which is a worse way to
+        // learn that the partition changed.
         guard n > 0 else { return [] }
         let w = size.width
         let h = size.height

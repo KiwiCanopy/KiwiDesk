@@ -535,8 +535,8 @@ window tiles below, and it also caps auto-sized grids and track
 limits.
 
 Below the selected layout's settings sits a **Live preview**:
-the same drawing at full width, with a **Windows** slider. Drag
-it and the preview re-runs the layout for that many windows —
+the same drawing at full width, with a **Window count** slider.
+Drag it and the preview re-runs the layout for that many windows —
 which is where several of these settings first become visible.
 Cascade overflow and Cascade all draw the same picture until the
 stack is deep enough to overflow; a track limit means nothing
@@ -1360,7 +1360,7 @@ mouse interaction and what happens on quit.
   changes, so clicks and scrolls land where the keyboard is working.
 - **Minimum window size**: if a window shrinks below this (pt), it
   cascades instead of further shrinking (default 300 pt). It is a
-  stepper pinned above the layout-mode tab strip in Layout
+  stepper pinned above the **Choose a layout** strip in Layout
   Defaults — type an exact pt value or use the arrows.
 - **New window placement**: where new windows enter the space's window
   order — first, last, before focused, or after focused. Each layout

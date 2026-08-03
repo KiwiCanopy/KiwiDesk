@@ -34,6 +34,13 @@ struct AutoGatedGroup<Gated: View>: View {
     /// overrides auto-size OFF, and greying a control something
     /// still reads is the worse direction (#520, #527).
     var gatedIsInert: Bool? = nil
+    /// The why-you-cannot sentence for the greyed controls. The
+    /// toggle directly above them usually answers it by
+    /// adjacency, which is why this is optional — but a caller
+    /// whose gate is resolved from the census carries a reason
+    /// with it, and without somewhere to put it that reason is
+    /// authored, translated and never shown.
+    var gatedHelp: String = ""
     @ViewBuilder let gated: Gated
 
     var body: some View {
@@ -45,7 +52,12 @@ struct AutoGatedGroup<Gated: View>: View {
                     .foregroundStyle(.secondary)
             }
             gated
-                .modifier(GreyOut(active: gatedIsInert ?? isOn))
+                .modifier(
+                    GreyOut(
+                        active: gatedIsInert ?? isOn,
+                        help: gatedHelp
+                    )
+                )
         }
     }
 }

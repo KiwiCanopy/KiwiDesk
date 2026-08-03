@@ -35,6 +35,14 @@ struct LayoutPreviewPanel: View {
         }
     }
 
+    /// Hoisted out of the `SettingsSlider` call, which already
+    /// carries a closure-pair `Binding`: a range built inline
+    /// beside it is the type-checker-budget shape gui.md names.
+    private var countRange: ClosedRange<Double> {
+        let band = LayoutSchematic.windowCountRange
+        return Double(band.lowerBound)...Double(band.upperBound)
+    }
+
     private var countRow: some View {
         HStack {
             // "Window count", not a bare "Windows": beside a
@@ -57,11 +65,7 @@ struct LayoutPreviewPanel: View {
                     get: { Double(windows) },
                     set: { windows = Int($0.rounded()) }
                 ),
-                range: Double(
-                    LayoutSchematic.windowCountRange.lowerBound
-                )...Double(
-                    LayoutSchematic.windowCountRange.upperBound
-                ),
+                range: countRange,
                 step: 1
             )
             Text("\(windows)")

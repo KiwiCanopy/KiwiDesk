@@ -42,8 +42,11 @@ struct LayoutDefaultsGateTests {
         )
         // Both halves pinned, not just their union: an entry
         // parked in `resolvedElsewhere` that the resolver
-        // actually answers would otherwise pass while claiming
-        // the opposite.
+        // actually answers would claim the opposite of what it
+        // does. Trivially true while `resolvedElsewhere` is
+        // empty — this is a slot armed for its first entry, not
+        // a live net, and reading its green as coverage is the
+        // mistake it invites.
         #expect(
             LayoutDefaultsGates.resolved
                 .intersection(
@@ -51,6 +54,25 @@ struct LayoutDefaultsGateTests {
                 )
                 .isEmpty
         )
+        // The resolver has no `allowsEditing` arm, so a CONTAINER
+        // gate on a layout would grey nothing at all — silently,
+        // since the guard above walks row gates only. gui.md's
+        // obligation is to converge the resolvers rather than
+        // teach this one a second shape; this is what makes that
+        // a red test instead of a reviewer's job.
+        for mode in LayoutMode.placementTabs {
+            #expect(
+                LayoutDefaultsRowOrder.container(for: mode)?.gate
+                    == nil,
+                Comment(
+                    rawValue:
+                        "\(mode)'s container declares a gate no "
+                        + "resolver in this area answers — "
+                        + "converge the resolvers first"
+                )
+            )
+        }
+        #expect(SettingsContainer.general.gate == nil)
     }
 
     /// An ungated row is never inert — the guard above says the
@@ -66,7 +88,12 @@ struct LayoutDefaultsGateTests {
         }
     }
 
-    @Test("master orientation follows the master count")
+    /// Asks the RESOLVED count, not the global (#406): the
+    /// per-space master count is a GUI-surfaced override, so a
+    /// space running three masters is reading this orientation
+    /// whatever the global says — greying it there would lock
+    /// the only editor for a value something is using.
+    @Test("master orientation follows the resolved master count")
     func masterOrientation() {
         let key = SettingKey.layout(.stackMasterOrientation)
         #expect(
@@ -76,6 +103,26 @@ struct LayoutDefaultsGateTests {
         #expect(
             gates { $0.stack.masterCount = 2 }
                 .inertReason(for: key) == nil
+        )
+        #expect(
+            gates {
+                $0.stack.masterCount = 1
+                var override = StackOverride()
+                override.masterCount = 3
+                $0.stack.override[SpaceID("1")] = override
+            }
+            .inertReason(for: key) == nil
+        )
+        // An override that does not raise the count leaves it
+        // inert — the override's presence is not the condition.
+        #expect(
+            gates {
+                $0.stack.masterCount = 1
+                var override = StackOverride()
+                override.masterRatio = 0.7
+                $0.stack.override[SpaceID("1")] = override
+            }
+            .inertReason(for: key) == .oneMaster
         )
     }
 

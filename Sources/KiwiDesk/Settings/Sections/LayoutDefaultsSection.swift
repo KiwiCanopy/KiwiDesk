@@ -7,12 +7,12 @@ import SwiftUI
 ///
 /// Thirty-six rows live here, and nobody ever wants more than
 /// one layout's worth. So the page is a **strip of live layout
-/// thumbnails** — not a tab strip of words — and picking one
+/// thumbnails** — not a strip of words — and picking one
 /// swaps the whole body: only the selected layout's rows are
 /// ever mounted, so the most anyone sees is eight.
 ///
 /// The minimum window size sits ABOVE the strip because it
-/// governs all seven and silently caps auto-sized grids and
+/// governs every layout and silently caps auto-sized grids and
 /// track limits; inside a layout's card it would read as that
 /// layout's setting. Anything shared by every layout belongs
 /// above the selector.
@@ -40,11 +40,19 @@ struct LayoutDefaultsSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
                 LayoutStrip(model: model, selection: selected)
-                LayoutCard(
+                // The live preview LEADS its editor, the way
+                // every schematic led the editor it belonged to
+                // (gui.md; `docs/ui-patterns.md` row-order tier
+                // 1). The strip above does not discharge that:
+                // it is the selector, drawing every layout at
+                // one fixed count, while this panel is the
+                // selected layout's own preview and the only
+                // thing the count slider moves.
+                LayoutPreviewPanel(
                     model: model,
                     mode: selected.wrappedValue
                 )
-                LayoutPreviewPanel(
+                LayoutCard(
                     model: model,
                     mode: selected.wrappedValue
                 )
@@ -75,16 +83,13 @@ struct LayoutDefaultsSection: View {
         }
     }
 
-    /// The most common layout across the profile's spaces,
-    /// falling back to BSP — so a user who lives in one layout
-    /// lands on it. Floating (no tunables) never wins; it has no
-    /// tile.
+    /// The most common layout across the profile's spaces, so a
+    /// user who lives in one layout lands on it — read from the
+    /// same place the strip reads its per-tile counts, or the
+    /// page lands on one layout while the strip beside it
+    /// credits the spaces to another.
     private var initialMode: LayoutMode {
-        let tabs = LayoutMode.placementTabs
-        let counts = model.config.spaceModes.values
-            .filter { tabs.contains($0) }
-            .reduce(into: [LayoutMode: Int]()) { $0[$1, default: 0] += 1 }
-        return counts.max { $0.value < $1.value }?.key ?? .bsp
+        LayoutUsage.mostUsed(in: model.config)
     }
 
     /// The one row above the strip. Rendered through the same

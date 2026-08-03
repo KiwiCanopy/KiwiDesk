@@ -156,6 +156,10 @@ enum LayoutCardText {
     /// state read into the sentence. One key per layout, because
     /// the layout's name is inside it and a language that
     /// inflects around that name cannot be handed a bare noun.
+    /// Exhaustive rather than defaulted, so a third hosting
+    /// layout fails to COMPILE — which is the discipline this
+    /// area states everywhere else, and a `default:` here would
+    /// quietly give that layout Scrolling's sentence.
     static func appBarState(
         _ mode: LayoutMode,
         on: Bool
@@ -170,13 +174,18 @@ enum LayoutCardText {
                     + "configured in",
                 state
             )
-        default:
+        case .scrolling:
             return L(
                 "scroll_grid.app_bar_xref_state",
                 "The scrolling app bar (currently %1$@) is "
                     + "configured in",
                 state
             )
+        case .bsp, .stack, .grid, .track, .floating:
+            // Unreachable: the row is drawn only where
+            // `appBarHost(for:)` returns a host, which is Core's
+            // one copy of who may show a bar.
+            return ""
         }
     }
 }

@@ -91,15 +91,22 @@ struct LayoutDefaultsCensusRenderTests {
     /// views to render one with.
     @Test("nothing in this area is behind a disclosure")
     func noRowIsBehindADisclosure() throws {
+        // The two tiers that mean "not at rest, one interaction
+        // away" — NOT every tier past `.atRest`. A `.luaOnly`
+        // parameter has no chrome to hide behind either, and is
+        // exactly what the census records for a layout knob the
+        // GUI deliberately withholds; banning it here would make
+        // a correct placement red a guard about disclosures.
         let deeper = SettingKey.allCases.filter {
             $0.placement.area == .layoutDefaults
-                && $0.placement.tier != .atRest
+                && [.showMore, .immediate]
+                    .contains($0.placement.tier)
         }
         #expect(
             deeper.isEmpty,
             Comment(
                 rawValue:
-                    "tiered past .atRest with no chrome to draw "
+                    "tiered as hidden with no chrome to draw "
                     + "them: \(deeper.map(\.id))"
             )
         )
@@ -127,7 +134,7 @@ struct LayoutDefaultsCensusRenderTests {
         // schematics plus the row/gate/render files; it only has
         // to be high enough that an empty scan cannot reach it.
         #expect(
-            files.count >= 12,
+            files.count >= 13,
             Comment(
                 rawValue:
                     "scanned \(files.count) files — the area's "
@@ -185,12 +192,23 @@ struct LayoutDefaultsCensusRenderTests {
         )
     }
 
+    /// Every file that could draw this area's chrome — the
+    /// components directory AND the section that composes them.
+    /// The section is the area's own `body` and the likeliest
+    /// place a disclosure would land, so scanning only the
+    /// components directory watched everywhere but the door.
     private func areaSources() throws -> [URL] {
-        try SourceScan.swiftSources(
-            under: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(
-                    "Sources/KiwiDesk/Settings/Components/Layouts"
-                )
+        let root = SourceScan.repoRoot(from: #filePath)
+        return try SourceScan.swiftSources(
+            under: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Layouts"
+            )
         )
+            + [
+                root.appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Sections/"
+                        + "LayoutDefaultsSection.swift"
+                )
+            ]
     }
 }

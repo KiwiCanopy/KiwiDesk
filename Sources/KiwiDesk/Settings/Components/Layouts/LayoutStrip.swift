@@ -55,6 +55,11 @@ struct LayoutStrip: View {
                 LayoutSchematicView(
                     mode: mode,
                     settings: model.config.settings,
+                    // The tiles all draw the same count, so the
+                    // strip compares seven layouts rather than
+                    // seven arbitrary window counts; the panel
+                    // below is where the count is the question.
+                    windows: LayoutSchematic.defaultWindowCount,
                     scale: .tile
                 )
                 Label(mode.displayName, systemImage: mode.glyph)
@@ -101,9 +106,10 @@ struct LayoutStrip: View {
     /// it (`?? .bsp`), so BSP's count includes the untouched
     /// spaces rather than under-reporting them.
     private func usageText(_ mode: LayoutMode) -> String {
-        let count = model.config.spaces.filter {
-            (model.config.spaceModes[$0] ?? .bsp) == mode
-        }.count
+        let count = LayoutUsage.spaces(
+            on: mode,
+            in: model.config
+        ).count
         if count == 0 {
             return L("layout_defaults.uses.none", "No spaces")
         }
