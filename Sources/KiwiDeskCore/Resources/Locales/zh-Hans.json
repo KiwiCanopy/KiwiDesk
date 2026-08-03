@@ -858,7 +858,7 @@
   "sticky.home.pill": "仅可在其主空间 %1$@ 内移动",
   "sticky.mark": "在 Sticky 窗口上显示标记",
   "sticky.mark.ax": "Sticky 窗口",
-  "sticky.mark.help": "Sticky 窗口可能与普通窗口看起来完全一样，因此 KiwiDesk 会在窗口右上角绘制一个小标记。Space Bar 也会显示自己的 Sticky 徽标，但隐藏 Space Bar 之后，这个标记就是唯一能看出窗口是 Sticky 的提示。",
+  "sticky.mark.help": "Sticky 窗口可能与普通窗口看起来完全一样，因此 KiwiDesk 会在窗口右上角绘制一个小标记。移动被拒绝时，说明原因的也是这个标记，无论你是拖动窗口还是使用了快捷键；关闭标记后，这些说明也不再出现。无论如何，Space Bar 都会显示自己的 Sticky 徽标；如果连 Space Bar 也隐藏，就再也没有任何能看出窗口是 Sticky 的迹象。",
   "sticky.pile.pill": "Sticky 窗口无法移动至堆栈",
   "sticky.title": "Sticky 窗口",
   "system_shortcut.app_switcher": "应用切换器",

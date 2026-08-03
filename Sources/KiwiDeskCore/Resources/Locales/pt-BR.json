@@ -858,7 +858,7 @@
   "sticky.home.pill": "Movível apenas para seu espaço de origem %1$@",
   "sticky.mark": "Mostrar marca em janelas sticky",
   "sticky.mark.ax": "Janela Sticky",
-  "sticky.mark.help": "Uma janela Sticky pode parecer idêntica a uma normal, então o KiwiDesk desenha uma pequena marca no canto superior direito dela. A Space Bar também mostra o próprio selo de Sticky; se você a ocultar, esta marca continua sendo o único sinal de Sticky.",
+  "sticky.mark.help": "Uma janela Sticky pode parecer idêntica a uma normal, então o KiwiDesk desenha uma pequena marca no canto superior direito dela. A marca também é o que explica um movimento recusado, tenha você arrastado a janela ou usado um atalho; ao desativar a marca, você também silencia essas mensagens. A Space Bar mostra o próprio selo de Sticky de qualquer forma; se você também ocultar a barra, não resta nenhum sinal de Sticky.",
   "sticky.pile.pill": "Janelas Sticky não podem ser movidas para a pilha",
   "sticky.title": "Janelas Sticky",
   "system_shortcut.app_switcher": "Seletor de Aplicativos",

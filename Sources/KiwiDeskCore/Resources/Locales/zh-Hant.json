@@ -858,7 +858,7 @@
   "sticky.home.pill": "只能在它的歸屬空間 %1$@ 中移動",
   "sticky.mark": "在 Sticky 視窗上顯示標記",
   "sticky.mark.ax": "Sticky 視窗",
-  "sticky.mark.help": "Sticky 視窗可能和一般視窗看起來一模一樣，因此 KiwiDesk 會在視窗右上角繪製一個小標記。Space Bar 也會顯示它自己的 Sticky 徽章，但隱藏 Space Bar 之後，這個標記就是唯一能看出視窗是 Sticky 的提示。",
+  "sticky.mark.help": "Sticky 視窗可能和一般視窗看起來一模一樣，因此 KiwiDesk 會在視窗右上角繪製一個小標記。移動被拒絕時，說明原因的也是這個標記，無論你是拖移視窗還是使用了快速鍵；關閉標記後，這些說明也不會再出現。無論如何，Space Bar 都會顯示它自己的 Sticky 徽章；若連 Space Bar 也隱藏，就再也沒有任何能看出視窗是 Sticky 的跡象。",
   "sticky.pile.pill": "Sticky 視窗無法移到層疊堆中",
   "sticky.title": "Sticky 視窗",
   "system_shortcut.app_switcher": "App 切換器",

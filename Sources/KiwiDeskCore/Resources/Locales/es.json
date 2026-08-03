@@ -858,7 +858,7 @@
   "sticky.home.pill": "Solo se puede mover en su espacio de origen %1$@",
   "sticky.mark": "Mostrar marca en ventanas sticky",
   "sticky.mark.ax": "Ventana sticky",
-  "sticky.mark.help": "Una ventana sticky puede verse igual que una normal, así que KiwiDesk dibuja una pequeña marca en su esquina superior derecha. La Space Bar también muestra su propia insignia de sticky; si ocultas la barra, esta marca es la única señal de sticky que queda.",
+  "sticky.mark.help": "Una ventana sticky puede verse igual que una normal, así que KiwiDesk dibuja una pequeña marca en la esquina superior derecha de la ventana. La marca es también lo que explica un movimiento rechazado, tanto si arrastraste la ventana como si usaste un atajo; al desactivar la marca también silencias esos mensajes. La Space Bar muestra su propia insignia de sticky de todos modos; si además ocultas la barra, no queda ninguna señal de sticky.",
   "sticky.pile.pill": "Las ventanas sticky no se pueden mover a la pila",
   "sticky.title": "Ventanas sticky",
   "system_shortcut.app_switcher": "Selector de aplicaciones",

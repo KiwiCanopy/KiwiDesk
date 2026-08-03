@@ -966,14 +966,16 @@ is the sticky signal that survives hiding the Space Bar.
 
 Switching the mark off costs more than the resting glyph: the
 pills described above ride the same mark, so with it off a
-snapped-back drag simply snaps back and explains nothing. The
+refused move simply fails and explains nothing — a snapped-back
+drag, and equally a swap or **Move to space** refused from the
+keyboard. The
 Space Bar's badge keeps showing *which* windows are sticky
 either way, but only the mark answers *why that gesture just
-failed*. Turn the mark off and hide the bar and a sticky
-window is indistinguishable from any other — KiwiDesk lets you
-do that rather than talking you out of it, and this paragraph
-is what it says instead. (From Lua the two switches are
-`sticky.set_mark` and `space_bar.set_sticky_badge`.)
+failed* — which is why the toggle's own `?` says so before you
+use it. Turn the mark off and hide the bar and a sticky window
+is indistinguishable from any other; KiwiDesk lets you do that
+rather than talking you out of it. (From Lua the two switches
+are `sticky.set_mark` and `space_bar.set_sticky_badge`.)
 
 The marks' colours are in **Advanced Colors** — **Sticky** in
 Border colors (it paints both the on-window mark and the Space

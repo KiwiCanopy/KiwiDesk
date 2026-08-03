@@ -858,7 +858,7 @@
   "sticky.home.pill": "Kann nur auf seinem Heimat-Space %1$@ verschoben werden",
   "sticky.mark": "Markierung auf Sticky-Fenstern anzeigen",
   "sticky.mark.ax": "Sticky-Fenster",
-  "sticky.mark.help": "Ein Sticky-Fenster kann genauso aussehen wie ein normales, deshalb zeichnet KiwiDesk eine kleine Markierung in seiner oberen rechten Ecke. Die Space Bar zeigt zusätzlich ihr eigenes Sticky-Badge; blendest du sie aus, bleibt diese Markierung der einzige Sticky-Hinweis.",
+  "sticky.mark.help": "Ein Sticky-Fenster kann genauso aussehen wie ein normales, deshalb zeichnet KiwiDesk eine kleine Markierung in der oberen rechten Ecke des Fensters. Über die Markierung erklärt sich auch ein abgelehntes Verschieben — ob du das Fenster gezogen oder ein Tastenkürzel benutzt hast; schaltest du die Markierung aus, entfallen diese Meldungen ebenfalls. Die Space Bar zeigt ihr eigenes Sticky-Badge unabhängig davon; blendest du sie zusätzlich aus, bleibt kein Sticky-Hinweis mehr übrig.",
   "sticky.pile.pill": "Sticky-Fenster können nicht in den Stapel verschoben werden",
   "sticky.title": "Sticky-Fenster",
   "system_shortcut.app_switcher": "App-Umschalter",
