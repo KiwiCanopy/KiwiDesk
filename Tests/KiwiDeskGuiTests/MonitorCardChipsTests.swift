@@ -40,6 +40,11 @@ struct MonitorCardChipsTests {
                 "Sources/KiwiDesk/Settings/Components/Monitors"
             )
         for name in ["DisplayCard.swift", "FollowsMainTray.swift"] {
+            // The tray's header is the one whose height the
+            // arithmetic cannot infer — the card frames its own,
+            // the tray's is an unsized `.caption2`. Deleting that
+            // frame left the suite green while the constant went
+            // back to being an estimate (guard-prover round 3).
             let source = SourceScan.stripComments(
                 try String(
                     contentsOf: dir.appendingPathComponent(name),
@@ -49,6 +54,20 @@ struct MonitorCardChipsTests {
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
+            if name == "FollowsMainTray.swift" {
+                #expect(
+                    squashed.contains(
+                        ".frame(height:MonitorCardChips"
+                            + ".trayHeaderHeight)"
+                    ),
+                    Comment(
+                        rawValue:
+                            "the tray's header no longer frames "
+                            + "to the height its chip arithmetic "
+                            + "subtracts"
+                    )
+                )
+            }
             // The stack is laid out with the very constant the
             // capacity subtracts, never a literal beside it.
             #expect(
@@ -60,6 +79,23 @@ struct MonitorCardChipsTests {
                         "\(name)'s chip stack no longer uses the "
                         + "spacing the capacity arithmetic "
                         + "subtracts"
+                )
+            )
+            // The `+n` marker is drawn at the width the
+            // reservation subtracts. Without this the constant is
+            // a claim about a view that never reads it — both
+            // markers could be framed at 120 with the whole suite
+            // green, and a marker wider than its reserved column
+            // re-opens the clip the mechanism exists to prevent
+            // (guard-prover round 3, 2026-08-04).
+            #expect(
+                squashed.contains(
+                    ".frame(width:MonitorCardChips.markerWidth)"
+                ),
+                Comment(
+                    rawValue:
+                        "\(name)'s `+n` no longer draws at the "
+                        + "width the reservation subtracts"
                 )
             )
             // …and it holds `header` then `chips` and nothing
