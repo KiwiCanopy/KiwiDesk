@@ -149,8 +149,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             contentRect: NSRect(
                 x: 0,
                 y: 0,
-                // Tracks the shell's 840pt minimum (#297) with
-                // a little slack on first launch.
+                // Comfortably above the shell's 720pt hard
+                // minimum (#678 turn 9) on first launch.
                 width: 860,
                 height: 620
             ),
@@ -161,17 +161,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = L("sidebar.app_name", "KiwiDesk")
-        // Titlebar text hidden: the sidebar header carries the
-        // app identity and the detail's own header bar shows the
-        // section name. `title` still names the Window menu.
+        window.title = L("app.name", "KiwiDesk")
+        // Titlebar text hidden: the header bar carries the app
+        // identity on Home and the area title when pushed.
+        // `title` still names the Window menu.
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        // An empty unified toolbar makes the sidebar run
-        // full-height with the traffic lights over it (the
-        // System Settings look). The detail's header bar pulls
-        // up under it (`ignoresSafeArea` in `SettingsView`), so
-        // no empty toolbar strip shows above the header.
+        // An empty unified toolbar keeps the traffic lights
+        // over the header bar, which pulls up under it
+        // (`ignoresSafeArea` in `SettingsView`), so no empty
+        // toolbar strip shows above the header.
         let toolbar = NSToolbar()
         toolbar.showsBaselineSeparator = false
         window.toolbar = toolbar

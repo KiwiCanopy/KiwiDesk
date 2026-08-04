@@ -8,9 +8,9 @@ import SwiftUI
 ///
 /// It also holds the surface-scoped columns that ride those
 /// axes or stand beside them — the override chrome's, the
-/// facet control's, the sidebar's. They live here rather than
-/// on their views for discoverability and because each is a
-/// *budget* something else must fit: a constant on a view is
+/// facet control's, the icon tile's. They live here rather
+/// than on their views for discoverability and because each is
+/// a *budget* something else must fit: a constant on a view is
 /// one nobody measures against.
 enum SettingsMetrics {
     /// The label column in front of sliders, segmented pickers

@@ -35,7 +35,7 @@ struct HeaderSearch: View {
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 12, weight: .medium))
-                Text(L("sidebar.search.placeholder", "Search"))
+                Text(L("search.placeholder", "Search"))
                 Text("⌘K")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
@@ -51,7 +51,7 @@ struct HeaderSearch: View {
         .buttonStyle(.plain)
         .keyboardShortcut("k", modifiers: .command)
         .accessibilityLabel(
-            L("sidebar.search.placeholder", "Search")
+            L("search.placeholder", "Search")
         )
         .popover(isPresented: $open, arrowEdge: .bottom) {
             popoverContent
@@ -90,7 +90,7 @@ struct HeaderSearch: View {
     @ViewBuilder private var resultList: some View {
         let results = results
         if results.isEmpty {
-            Text(L("sidebar.search.no_results", "No results"))
+            Text(L("search.no_results", "No results"))
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -136,7 +136,7 @@ struct HeaderSearch: View {
     ) -> String {
         guard spotlightProfiles, destination == .profiles
         else { return "" }
-        return L("sidebar.profiles.badge_ax", "start here")
+        return L("home.profiles.badge_ax", "start here")
     }
 
     private func pick(_ anchor: SettingsAnchor) {

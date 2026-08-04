@@ -14,10 +14,10 @@ struct HomeScreen: View {
     /// (turn 20: leaving a sub-view returns to the originating
     /// row).
     @FocusState private var focusedCard: SettingsDestination?
-    /// The 14c banner's visibility, read once per mount so the
-    /// dismiss can animate the card away.
-    @State private var firstRunVisible =
-        HomeFirstRunState.shouldShow()
+    /// The 14c banner's visibility, read per mount through the
+    /// model's defaults seam so a test-constructed Home never
+    /// consults the runner's real domain.
+    @State private var firstRunVisible = false
 
     private var columns: [GridItem] {
         [
@@ -55,6 +55,9 @@ struct HomeScreen: View {
             )
         }
         .onAppear {
+            firstRunVisible = HomeFirstRunState.shouldShow(
+                model.firstRunDefaults
+            )
             if let last = model.nav.homeReturnFocus {
                 focusedCard = last
                 model.nav.homeReturnFocus = nil

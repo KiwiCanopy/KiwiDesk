@@ -417,18 +417,23 @@ navigator — there is no sidebar. The conventions a shell change
 must keep:
 
 - **One offer predicate.** Whether a destination is reachable —
-  the Simple/Nerd gate, the computed Monitors promotion, the
+  the Simple/Power-User gate, the computed Monitors promotion, the
   #18 stored-profile axis — is answered by
   `HomeCardOrder.isOffered`, consulted by the grid, the
   selection repairs and the `settingsNavigate` guard alike;
   a hand-negated copy at any of those sites is the drift #18's
   one-predicate rule exists to prevent
-  (`HomeCardOrderTests`).
+  (`HomeCardOrderTests`). The `displayCount` axis has NO
+  selection repair, deliberately — a display disconnect never
+  pops an open area; `HomeCardOrder.isOffered`'s docstring
+  carries the argument.
 - **Navigation into a mode-withheld area switches the mode,
   never refuses** (`ensureModeAdmits` — search and
-  cross-references index both modes), and a Nerd → Simple flip
-  pops a Nerd-only area to Home
-  (`SettingsModeNavigationTests`).
+  cross-references index both modes), and a flip back to
+  Simple pops a `.nerd`-gated area to Home
+  (`SettingsModeNavigationTests`). User-facing labels are
+  "Simple" / "Power User"; `.nerd` is wire-only
+  (`docs/localization-naming.md` owns the pair's policy).
 - **A card is an answer**: subtitles derive from the draft
   (`HomeCardContentTests` holds the derivations), previews
   come only from renderers that already ask the real data, and

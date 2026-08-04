@@ -130,22 +130,27 @@ struct SettingsDraftDiffTests {
     /// silently exclude a settable field. (The walk refusing to
     /// descend an EMPTY dictionary is the parity suite's
     /// concern; the seeding above keeps this one total.)
+    /// TOTAL, not diff-driven: every leaf the walk reaches in a
+    /// seeded config must resolve — a diff against a default
+    /// config only exercises leaves whose values differ, so a
+    /// new SCALAR field equal in both would slip past it
+    /// (architect review 2026-08-04). This is the net gui.md
+    /// names: a new `GuiConfig`/`TilingSettings` field reds
+    /// here until its census row exists.
     @Test("every reachable leaf resolves to a census key")
     func everyLeafIsAttributed() {
-        // Diffing the fully seeded config against a DEFAULT one
-        // flips every seeded leaf, driving each through
-        // attribution.
-        let diff = SettingsDraftDiff.between(
-            config: GuiConfig(),
-            cleanConfig: seeded()
-        )
-        #expect(!diff.changedSettings.isEmpty)
+        let leaves = SettingsDraftDiff.leaves(of: seeded())
+        #expect(leaves.count > 100)
+        let bases = SettingsDraftDiff.censusBases()
+        let orphans = leaves.keys.filter {
+            SettingsDraftDiff.resolve($0, in: bases) == nil
+        }
         #expect(
-            diff.unattributed.isEmpty,
+            orphans.isEmpty,
             Comment(
                 rawValue:
                     "unattributed paths: "
-                    + diff.unattributed.joined(separator: ", ")
+                    + orphans.sorted().joined(separator: ", ")
             )
         )
     }

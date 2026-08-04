@@ -23,7 +23,7 @@ struct LayoutQuickMenuTests {
         // (#565) — this suite asserts nothing about registration.
         let core = makeTestCore()
         try? core.guiConfigStore.save(GuiConfig())
-        return (SettingsModel(core: core), core)
+        return (makeTestModel(core: core), core)
     }
 
     private func makeController(

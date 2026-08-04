@@ -93,11 +93,11 @@ final class SettingsModel: ObservableObject {
     /// `SettingsWindowController.show()` resets this each time
     /// the window is opened.
     @Published var destination: SettingsDestination?
-    /// The Simple/Nerd pick (#678 turn 9). Read from
-    /// `UserDefaults` at init and written back through
+    /// The Simple/Nerd pick (#678 turn 9). Read at init through
+    /// `settingsModeDefaults` and written back through
     /// `setSettingsMode`, so it never enters the dirty-tracked
     /// config — same shape and reasoning as `appearance`.
-    @Published var settingsMode = SettingsModePreference.read()
+    @Published var settingsMode: SettingsMode = .simple
     /// Distinct settings the draft changes — the header's
     /// "N unsaved changes" count, recomputed beside `isDirty`
     /// from the same baselines so the two cannot disagree.
@@ -136,8 +136,14 @@ final class SettingsModel: ObservableObject {
     /// Where the mode pick persists — a seam so tests write a
     /// scratch domain instead of the developer's real defaults
     /// (tests.md: process-global state). The setter lives in
-    /// `SettingsModel+Mode.swift` (§2.1 headroom).
-    var settingsModeDefaults: UserDefaults = .standard
+    /// `SettingsModel+Mode.swift` (§2.1 headroom); the init
+    /// read comes through the same seam, so a test-constructed
+    /// model never inherits the runner's real domain.
+    let settingsModeDefaults: UserDefaults
+    /// The first-run banner's domain, same seam and reason:
+    /// `apply(_:)` retires the banner on a dirty→clean
+    /// transition, a path ordinary model tests drive every run.
+    let firstRunDefaults: UserDefaults
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
@@ -289,9 +295,22 @@ final class SettingsModel: ObservableObject {
     /// Global float rules used to resolve and diff a stored profile.
     var profileEditingBaseFloatRules: [String]?
 
-    init(core: KiwiCore) {
+    /// The two `UserDefaults` seams default live and are
+    /// injected by tests — a bare default read inside the class
+    /// would hand a test-constructed model the runner's real
+    /// domain (tests.md: process-global state).
+    init(
+        core: KiwiCore,
+        modeDefaults: UserDefaults = .standard,
+        firstRunDefaults: UserDefaults = .standard
+    ) {
         self.core = core
         self.config = GuiConfig()
+        self.settingsModeDefaults = modeDefaults
+        self.firstRunDefaults = firstRunDefaults
+        self.settingsMode = SettingsModePreference.read(
+            from: modeDefaults
+        )
         reload()
     }
 

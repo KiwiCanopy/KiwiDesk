@@ -80,7 +80,7 @@ struct SettingsDraftDiff {
     /// (synthetic row suffixes stripped, instance brackets
     /// `[space]`/`[app]`/`[n]` → `[]`). Action/readonly/state
     /// ids name no model path and stay out.
-    private static func censusBases() -> [String: SettingKey] {
+    static func censusBases() -> [String: SettingKey] {
         var bases: [String: SettingKey] = [:]
         for key in SettingKey.allCases {
             var id = key.id
@@ -125,7 +125,7 @@ struct SettingsDraftDiff {
     /// The walk keys dictionary entries as `[]<key>`; the
     /// census declares the instance slot bare, so the entry
     /// text is dropped before matching.
-    private static func resolve(
+    static func resolve(
         _ path: String,
         in bases: [String: SettingKey]
     ) -> SettingKey? {

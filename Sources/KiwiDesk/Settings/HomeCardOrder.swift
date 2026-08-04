@@ -23,6 +23,15 @@ enum HomeCardOrder {
     /// lands on a card (the grid, the selection repair, the
     /// `settingsNavigate` guard, search) — the #18 rule with
     /// the mode as its second axis. No hand-negated copies.
+    ///
+    /// The `displayCount` axis deliberately has NO selection
+    /// repair: unplugging the second display while standing in
+    /// an auto-promoted Monitors area leaves the user there —
+    /// the area still exists and still edits (its own gates
+    /// handle the missing geometry); only the next Home visit
+    /// re-derives the card offer. Repairing here would yank the
+    /// screen out from under a user mid-edit for a change they
+    /// did not make in Settings.
     static func isOffered(
         _ destination: SettingsDestination,
         mode: SettingsMode,

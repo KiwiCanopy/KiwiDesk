@@ -71,7 +71,12 @@ extension SettingsModel {
         }
         apply(state)
         refreshProfiles()
-        isDirty = false
+        // Recompute, never hand-set: `apply` assigns under
+        // `suppressDirty`, so this is the reload path's one
+        // recompute — a bare `isDirty = false` left the
+        // header's `draftChangeCount` stale on every
+        // save/revert until the next edit (review 2026-08-04).
+        recomputeDirty()
     }
 
     private func apply(_ state: TargetState) {
@@ -80,7 +85,9 @@ extension SettingsModel {
         // needing Home's first-run orientation either way.
         // (Window open never lands here dirty: `show()` guards
         // its reload on `!isDirty`.)
-        if isDirty { HomeFirstRunState.retire() }
+        if isDirty {
+            HomeFirstRunState.retire(firstRunDefaults)
+        }
         suppressDirty = true
         config = state.config
         luaSource = state.luaSource

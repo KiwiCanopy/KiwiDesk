@@ -157,7 +157,11 @@ struct SettingsHeaderBar: View {
         ) {
             Text(L("mode.simple", "Simple"))
                 .tag(SettingsMode.simple)
-            Text(L("mode.nerd", "Nerd"))
+            // "Power User" user-facing (owner 2026-08-04);
+            // `.nerd` stays the wire name, and the site's
+            // slider keeps its own "Nerd" flair — different
+            // surface, different register.
+            Text(L("mode.power_user", "Power User"))
                 .tag(SettingsMode.nerd)
         }
         .pickerStyle(.segmented)
@@ -173,11 +177,7 @@ struct SettingsHeaderBar: View {
     /// stay in the footer.
     private var unsavedChip: some View {
         Label(
-            L(
-                "home.unsaved.count",
-                "%1$d unsaved changes",
-                model.draftChangeCount
-            ),
+            unsavedText,
             systemImage: "pencil.circle"
         )
         .font(.caption)
@@ -194,6 +194,22 @@ struct SettingsHeaderBar: View {
                 "Changes not saved yet — Save and Revert "
                     + "are in the footer."
             )
+        )
+    }
+
+    /// Singular has its own frame — "1 unsaved changes" is not
+    /// a plural rule any locale can fix from one key.
+    private var unsavedText: String {
+        guard model.draftChangeCount > 1 else {
+            return L(
+                "home.unsaved.count_one",
+                "1 unsaved change"
+            )
+        }
+        return L(
+            "home.unsaved.count",
+            "%1$d unsaved changes",
+            model.draftChangeCount
         )
     }
 

@@ -32,8 +32,8 @@ Open Settings from the KiwiDesk menu in the menu bar, or press
 groups:
 
 - **This Profile** — areas scoped to the profile being edited
-  (Spaces & Layouts, Gaps & Borders, Bars, Colors & Motion,
-  and in Nerd mode Layout Defaults, Monitors, Behavior,
+  (Spaces, Gaps & Borders, Bars, Colors & Motion,
+  and in Power User mode Layout Defaults, Monitors, Behavior,
   Advanced Colors).
 - **Whole App** — settings that apply everywhere (Shortcuts,
   Profiles, App Rules, General).
@@ -44,8 +44,8 @@ bound — so most questions are answered without opening
 anything. Click a card to open its area; the **← Home** chip
 (or **⌘[** / Escape) brings you back.
 
-The header carries a **Simple | Nerd** switch. Simple shows
-the eight everyday cards; Nerd adds the deeper four (Layout
+The header carries a **Simple | Power User** switch. Simple shows
+the eight everyday cards; Power User adds the deeper four (Layout
 Defaults, Monitors, Behavior, Advanced Colors). The switch
 only changes which cards exist — nothing behind it stops
 working, and the Monitors card joins Simple by itself while
@@ -503,7 +503,7 @@ override for the app instead.
 
 ## Spaces
 
-The **Spaces** section (in the **Design** group) lists every virtual
+The **Spaces** section (in the **This Profile** group) lists every virtual
 workspace you manage. Each space is independent of monitors and can
 span multiple displays or run on just one.
 
@@ -546,7 +546,8 @@ windows land in the first space of the profile's list.
 
 ## Layout Defaults
 
-The **Layout Defaults** section (in the **Design** group) controls
+The **Layout Defaults** section (in the **This Profile** group;
+its card appears in **Power User** mode) controls
 tiling for every space in this profile.
 
 ### Modes
@@ -848,7 +849,7 @@ space. Clicking the menu bar or the Dock does not move focus.
 
 ## Gaps & Borders
 
-The **Gaps & Borders** section (in the **Design** group) sets the
+The **Gaps & Borders** section (in the **This Profile** group) sets the
 STRUCTURE of everything KiwiDesk draws around your windows: the
 spacing, the drag overlays' shape, the focus ring's width and
 glow, and whether a sticky window carries a mark. What any of it
@@ -1334,7 +1335,7 @@ dragged window must hover a Space before the view springs to it
 
 ## Colors & Motion
 
-The **Colors & Motion** section (in the **Design** group) is the
+The **Colors & Motion** section (in the **This Profile** group) is the
 whole colour story for most people: pick a palette, see what you
 are running, and set how windows move. Nothing here asks you to
 choose an individual colour — that is the next section, and you
@@ -1467,7 +1468,8 @@ you can re-apply anywhere.
 
 ## Behavior
 
-The **Behavior** section (in the **Design** group) adjusts
+The **Behavior** section (in the **This Profile** group; its
+card appears in **Power User** mode) adjusts
 mouse interaction and what happens on quit.
 
 ### Mouse & Window Behavior
@@ -1531,7 +1533,7 @@ only strategy today.)
 
 ## Profiles
 
-The **Profiles** section (in the **System** group) manages saved
+The **Profiles** section (in the **Whole App** group) manages saved
 layouts. A profile is your whole setup, remembered per display
 arrangement: it captures tiling (modes, gaps, parameters),
 space-to-monitor pins, and optionally a sparse keybinding override
@@ -1603,8 +1605,8 @@ global config; every saved profile is listed below, one row each
 - **Edit Live** (top entry): the running config. Saving here
   adopts your changes into the loaded profile as usual.
 - **Edit** a saved profile **without switching** — Home
-  becomes profile-scoped: the This Profile cards (Spaces &
-  Layouts, Layout Defaults, Monitors, Gaps & Borders, Bars,
+  becomes profile-scoped: the This Profile cards (Spaces,
+  Layout Defaults, Monitors, Gaps & Borders, Bars,
   Colors & Motion, Advanced Colors, Behavior) edit this
   profile, and **the General card leaves the grid** — it holds
   global state a profile edit never writes. Save writes to this profile's JSON instead of
@@ -1775,7 +1777,7 @@ reverts to its Standard on the next monitor change.
 
 ## App Rules
 
-The **App Rules** section (in the **System** group) controls where
+The **App Rules** section (in the **Whole App** group) controls where
 windows of specific apps land and whether they tile.
 
 ### One rule, one sentence
@@ -1906,7 +1908,7 @@ change.
 
 ## Shortcuts
 
-The **Shortcuts** section (in the **System** group) binds keyboard
+The **Shortcuts** section (in the **Whole App** group) binds keyboard
 combos to actions. Every shortcut lives in a **layer** — normally
 the **default** layer (active at startup), plus optional extra
 layers (vim-style); only the active layer's bindings fire at a

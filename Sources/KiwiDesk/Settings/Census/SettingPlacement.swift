@@ -7,11 +7,14 @@
 /// guards hold against the model and the locale catalogs;
 /// rendering from it starts with the Bars area (Phase 2).
 
-/// The two Settings modes, in the shipped (site-slider)
-/// vocabulary: user-facing "Simple" / "Nerd". The design doc's
-/// "Easy/Advanced" is spec-internal shorthand and never appears
-/// in code or copy; the word "mode" itself stays reserved for
-/// this pair and for layout modes.
+/// The two Settings modes. User-facing labels are "Simple" /
+/// "Power User" (owner 2026-08-04); `.nerd` is the WIRE name
+/// only — kept for the preference's stored raw value and its
+/// kinship with the site slider, whose "Nerd" flair belongs to
+/// that surface alone. The design doc's "Easy/Advanced" is
+/// spec-internal shorthand and never appears in code or copy;
+/// the word "mode" itself stays reserved for this pair and for
+/// layout modes.
 enum SettingsMode: String, CaseIterable, Hashable {
     case simple
     case nerd

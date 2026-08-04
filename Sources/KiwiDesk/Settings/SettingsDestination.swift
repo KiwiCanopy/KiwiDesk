@@ -1,10 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The sidebar's destinations (#68 §3.1): a two-group source
-/// list that makes the profile/global scope split part of the
-/// navigation itself — "This Profile" sections follow the
-/// banner's edit target, "Whole App" sections are always live.
+/// The navigation identities (#68 §3.1 → #678 turn 9): one case
+/// per area screen, fronted by a Home card. The two groups make
+/// the profile/global scope split part of the navigation itself
+/// — "This Profile" areas follow the header's edit target,
+/// "Whole App" areas are always live.
 enum SettingsDestination: String, CaseIterable, Identifiable {
     // This Profile
     case spaces
@@ -23,19 +24,20 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// Advanced Colors sits DIRECTLY under its Simple twin: with
-    /// no mode toggle until Phase 4, that adjacency is the only
-    /// cue saying "this is the deep version of the page above",
-    /// and when the toggle lands the row leaves the end of a pair
-    /// rather than a gap in the middle of the list.
+    /// Advanced Colors sits DIRECTLY after its Simple twin, so
+    /// the pair reads as a family wherever this order surfaces
+    /// (the Power-User grid keeps both; search lists them
+    /// adjacent).
     ///
-    /// The pair sits AFTER the things it paints, and the order is
-    /// load-bearing beyond taste: sidebar search returns one hit
-    /// per destination in this order, so a colour page listed
-    /// above Bars would answer "App Bar" with a grid of swatches
+    /// The pair sits AFTER the things it paints, and the order
+    /// is load-bearing beyond taste: search returns one hit per
+    /// destination in this order, so a colour page listed above
+    /// Bars would answer "App Bar" with a grid of swatches
     /// instead of with the App Bar's own card
     /// (`SidebarSearchAnchorTests`). You arrive at colour having
     /// noticed something on a surface you already know.
+    /// (The GRID's own order is `HomeCardOrder`'s; only set
+    /// membership is shared — `HomeCardOrderTests` pins it.)
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
         .bars, .colors, .advancedColors, .behavior,
@@ -46,26 +48,26 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     @MainActor var title: String {
         switch self {
-        case .spaces: return L("sidebar.spaces", "Spaces")
-        case .layoutDefaults: return L("sidebar.layout", "Layout Defaults")
-        case .monitors: return L("sidebar.monitors", "Monitors")
+        case .spaces: return L("destination.spaces", "Spaces")
+        case .layoutDefaults: return L("destination.layout", "Layout Defaults")
+        case .monitors: return L("destination.monitors", "Monitors")
         case .colors:
-            return L("sidebar.colors", "Colors & Motion")
+            return L("destination.colors", "Colors & Motion")
         case .advancedColors:
             return L(
-                "sidebar.advanced_colors",
+                "destination.advanced_colors",
                 "Advanced Colors"
             )
         case .gapsAndBorders:
-            return L("sidebar.gaps_borders", "Gaps & Borders")
-        case .bars: return L("sidebar.bars", "Bars")
-        case .behavior: return L("sidebar.behavior", "Behavior")
-        case .profiles: return L("sidebar.profiles", "Profiles")
+            return L("destination.gaps_borders", "Gaps & Borders")
+        case .bars: return L("destination.bars", "Bars")
+        case .behavior: return L("destination.behavior", "Behavior")
+        case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
-            return L("sidebar.shortcuts", "Shortcuts")
+            return L("destination.shortcuts", "Shortcuts")
         case .appRules:
-            return L("sidebar.app_rules", "App Rules")
-        case .general: return L("sidebar.general", "General")
+            return L("destination.app_rules", "App Rules")
+        case .general: return L("destination.general", "General")
         }
     }
 

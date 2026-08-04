@@ -12,53 +12,49 @@ enum HomeCardPreview {
     /// The preview region's fixed height, so grid rows align.
     static let height: CGFloat = 56
 
-    @ViewBuilder
+    /// The card's picture, or nil for the text-only cards —
+    /// ONE switch, so "has a preview" and "which preview"
+    /// cannot drift apart (review 2026-08-04: the earlier
+    /// `hasPreview` twin was a second hand-kept copy of this
+    /// partition). `AnyView` is the price of the optional; a
+    /// card body mounts it at most once.
     static func preview(
         for destination: SettingsDestination,
         model: SettingsModel
-    ) -> some View {
+    ) -> AnyView? {
         switch destination {
         case .spaces:
-            nameChips(
-                model.config.spaces.map { "\($0)" },
-                cap: 6
+            return AnyView(
+                nameChips(
+                    model.config.spaces.map { "\($0)" },
+                    cap: 6
+                )
             )
         case .bars:
-            barsStrip(model)
+            return AnyView(barsStrip(model))
         case .layoutDefaults:
-            schematics(model)
+            return AnyView(schematics(model))
         case .monitors:
-            miniArrangement(model)
+            return AnyView(miniArrangement(model))
         case .shortcuts:
-            keyCaps(model)
+            return AnyView(keyCaps(model))
         case .profiles:
-            nameChips(
-                model.profileSummaries.map(\.name),
-                cap: 4
+            return AnyView(
+                nameChips(
+                    model.profileSummaries.map(\.name),
+                    cap: 4
+                )
             )
         case .appRules:
-            nameChips(
-                model.config.appRules.keys.sorted(),
-                cap: 4
+            return AnyView(
+                nameChips(
+                    model.config.appRules.keys.sorted(),
+                    cap: 4
+                )
             )
         case .gapsAndBorders, .colors, .advancedColors,
             .behavior, .general:
-            EmptyView()
-        }
-    }
-
-    /// Whether the card draws a picture at all — nil-preview
-    /// cards give the row to the subtitle.
-    static func hasPreview(
-        _ destination: SettingsDestination
-    ) -> Bool {
-        switch destination {
-        case .spaces, .bars, .layoutDefaults, .monitors,
-            .shortcuts, .profiles, .appRules:
-            return true
-        case .gapsAndBorders, .colors, .advancedColors,
-            .behavior, .general:
-            return false
+            return nil
         }
     }
 
@@ -112,6 +108,15 @@ enum HomeCardPreview {
         _ model: SettingsModel
     ) -> some View {
         let settings = model.config.settings
+        // SCALED, never cropped: the strip's canvas is a fixed
+        // 96 pt, and a `maxHeight` + `clipped()` cut would keep
+        // its middle band — with the default top-edge bar
+        // cropped away, the card showed an empty plate (the
+        // 13b "picture drawn invisible" class, review
+        // 2026-08-04). ~0.55 lands the whole canvas inside the
+        // 56 pt region; the empty caption override suppresses
+        // the position caption, which the subtitle already
+        // carries.
         return SpaceBarPreviewStrip(
             style: settings.spaceBarStyle,
             appBar: settings.appBarStyle,
@@ -119,26 +124,22 @@ enum HomeCardPreview {
                 == settings.appBarStyle.edge,
             captionOverride: ""
         )
-        .frame(maxHeight: height)
+        .scaleEffect(0.55, anchor: .topLeading)
+        .frame(height: height, alignment: .topLeading)
         .clipped()
         .allowsHitTesting(false)
     }
 
     /// One schematic tile of the most-used layout mode — the
-    /// engine-backed thumbnail family, never a sketch.
+    /// engine-backed thumbnail family, never a sketch, and the
+    /// mode from `LayoutUsage.mostUsed`, the one owner of that
+    /// derivation (review 2026-08-04: a fourth inline copy had
+    /// already diverged from it).
     private static func schematics(
         _ model: SettingsModel
     ) -> some View {
-        let modes = model.config.spaces.map {
-            model.config.spaceModes[$0] ?? .bsp
-        }
-        let counts = Dictionary(grouping: modes) { $0 }
-        let lead =
-            counts.max {
-                $0.value.count < $1.value.count
-            }?.key ?? .bsp
-        return LayoutSchematicView(
-            mode: lead,
+        LayoutSchematicView(
+            mode: LayoutUsage.mostUsed(in: model.config),
             settings: model.config.settings,
             windows: 4,
             scale: .tile

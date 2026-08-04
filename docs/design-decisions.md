@@ -1399,7 +1399,8 @@ Light / Dark*; System is the default and stores nothing.
   a dark counterpart, and the bars and border overlays are their
   own windows a Settings-view modifier never reaches. And it does
   not cleanly revert: AppKit-backed subviews (`NSViewRepresentable`
-  captions, the visual-effect sidebar) resolve their appearance
+  captions, and at the time the sidebar's visual-effect
+  backing) resolve their appearance
   when made and do not re-read it when the modifier returns to
   `nil`, so *Dark → System* stranded them dark while *Dark → Light*
   — a new concrete value — looked fine (found on device before it
@@ -1519,7 +1520,7 @@ Colours, Behaviour and General carry no picture at all rather
 than a sketch. A card that gains a picture gains it by
 reusing a renderer, never by drawing beside one.
 
-**The Simple/Nerd segment gates whole cards, and navigation
+**The Simple/Power User segment gates whole cards, and navigation
 into a withheld card switches the mode rather than refusing.**
 (#678 turns 4/9.) Mode depth is per area
 (`SettingsArea.minimumMode`) — never per row, and never an
@@ -1527,9 +1528,9 @@ input to anything that resolves behavior. Monitors is the one
 COMPUTED promotion: it joins Simple while 2+ displays are
 connected, decided at read so a disconnect cannot strand a
 stored flag. Search and cross-references index both modes, so
-a landing in a Nerd-only area flips the segment (visible in
-the header) instead of dead-ending; flipping Nerd → Simple
-while standing in a Nerd-only area pops to Home, because the
+a landing in a Power-User-only area flips the segment (visible in
+the header) instead of dead-ending; flipping Power User → Simple
+while standing in a Power-User-only area pops to Home, because the
 area ceased to exist — mode gates cards, so this is the
 "which cards exist" rule, not a grey-don't-hide violation.
 The pick persists like the appearance choice (`UserDefaults`,
@@ -1913,7 +1914,7 @@ exist yet", which is a runtime gate rather than a depth. That is
 what `SettingTier.immediate` is for, and why an `.immediate` row
 without a gate is meaningless.
 
-**Overrides always resolve; the Simple/Nerd mode never
+**Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's
 shortcut overrides apply — an early draft of the redesign
 specified one, with a default and an upgrade migration, and it
@@ -1948,7 +1949,7 @@ add a mode parameter to it.
 **A named alternate keybinding set is a LAYER, never a
 mode.** "Mode" was already carrying two unrelated meanings —
 a space's layout (monocle, grid, …) and the Settings window's
-Simple/Nerd depth — and a third sense made every sentence
+Simple/Power-User depth — and a third sense made every sentence
 about any of them ambiguous: "switch mode" could mean three
 things, and "only the active mode's shortcuts fire" had to
 name which kind of mode it meant to be read at all. Layer
@@ -2800,7 +2801,7 @@ way before the rule was written down — `site/src/styles/theme.css`
 themes the Starlight title ink while its header mark stays fixed
 — so this generalizes a precedent rather than importing one. So the kiwi symbol is byte-identical in both
 appearances — there is deliberately **no dark symbol master**,
-and `logo.svg` serves the app sidebar, the bundle's `AppIcon`,
+and `logo.svg` serves the Settings header, the bundle's `AppIcon`,
 the site nav and the Starlight header in either theme. (The
 *runtime* Dock icon it once also served is gone with the
 activation-policy promotion — an `.accessory` app has no tile.) (The retired
@@ -3002,8 +3003,10 @@ colour" after the split left it owning no colour. It is **Gaps
 & Borders**, the name the census already gives that area — the
 name the Home card teaches. **And the colour pages
 sit after the things they paint**: search returns one hit per
-destination in the grid's own order
-(`SettingsDestination.thisProfile` + `.wholeApp`), so a colour
+destination in the search catalog's own order
+(`SettingsDestination.thisProfile` + `.wholeApp` — a separate
+list from the Home grid's card order, pinned set-equal to it by
+`HomeCardOrderTests`), so a colour
 page above Bars would answer "App Bar" with a grid of swatches
 instead of with the App Bar's own card.
 

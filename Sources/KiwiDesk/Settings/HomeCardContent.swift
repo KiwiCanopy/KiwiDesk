@@ -87,15 +87,28 @@ enum HomeCardContent {
                 model.config.spacePins.count
             )
         case .behavior:
+            // Answers the mouse-resize choice rather than
+            // naming it — a card is an answer — and spells out
+            // what the quit count counts, so the frame is
+            // translatable without guessing.
+            if settings.mouseResize == .layout {
+                return L(
+                    "home.card.behavior.subtitle_layout",
+                    "Drag resizes neighbours · quit leaves "
+                        + "%1$d windows per grid cell",
+                    settings.quitGridTargetDepth
+                )
+            }
             return L(
-                "home.card.behavior.subtitle",
-                "Mouse resize · %1$d per cell on quit",
+                "home.card.behavior.subtitle_snap_back",
+                "Drag snaps back · quit leaves %1$d windows "
+                    + "per grid cell",
                 settings.quitGridTargetDepth
             )
         case .advancedColors:
             return L(
                 "home.card.advanced_colors.subtitle",
-                "%1$d individual colours",
+                "%1$d individual colors",
                 advancedColourCount
             )
         case .shortcuts:
@@ -223,17 +236,13 @@ enum HomeCardContent {
             .first { $0.0 == edge }?.1 ?? ""
     }
 
-    /// The current GUI language's endonym, capitalized for a
-    /// list, matching the General page's picker entries.
+    /// The current GUI language's endonym, through the one
+    /// shared derivation the General picker also renders with.
     private static var languageName: String {
-        let code =
-            LocalizationManager.shared.effectiveLocale ?? "en"
-        let locale = Locale(identifier: code)
-        let raw =
-            locale.localizedString(forIdentifier: code) ?? code
-        guard let first = raw.first else { return raw }
-        return String(first).uppercased(with: locale)
-            + raw.dropFirst()
+        LocaleNativeName.name(
+            for: LocalizationManager.shared.effectiveLocale
+                ?? "en"
+        )
     }
 }
 

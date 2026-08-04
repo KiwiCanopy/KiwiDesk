@@ -22,7 +22,7 @@ import Testing
 @MainActor
 struct ProfileBindingEscapeTests {
     private func model() -> SettingsModel {
-        SettingsModel(core: makeTestCore())
+        makeTestModel()
     }
 
     @Test("clearing removes every binding")

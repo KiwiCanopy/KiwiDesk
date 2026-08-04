@@ -59,13 +59,14 @@ struct HomeSurfacingTests {
             // The conflict shout is drawn on the card.
             "ifletshout{shoutBadge(shout)}",
             // A preview card draws its preview.
-            "ifHomeCardPreview.hasPreview(destination)"
-                + "{HomeCardPreview.preview(",
+            "ifletpreview=HomeCardPreview.preview(",
         ],
         "Settings/SettingsModel+EditTarget.swift": [
             // A dirty draft reaching a clean transition
-            // retires the first-run banner.
-            "ifisDirty{HomeFirstRunState.retire()}"
+            // retires the first-run banner (through the
+            // injected-domain seam).
+            "ifisDirty{"
+                + "HomeFirstRunState.retire(firstRunDefaults)}"
         ],
         "Settings/SettingsWindowController.swift": [
             // Home is the entry point on every open.
@@ -73,7 +74,8 @@ struct HomeSurfacingTests {
         ],
         "Settings/HomeFirstRunBanner.swift": [
             // Dismiss retires permanently and unmounts.
-            "HomeFirstRunState.retire()visible=false"
+            "HomeFirstRunState.retire(model.firstRunDefaults)"
+                + "visible=false"
         ],
         "AppDelegate+Onboarding.swift": [
             // The tour's close seeds the banner beside the

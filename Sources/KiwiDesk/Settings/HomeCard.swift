@@ -18,11 +18,11 @@ struct HomeCard: View {
         Button(action: open) {
             VStack(alignment: .leading, spacing: 8) {
                 titleRow
-                if HomeCardPreview.hasPreview(destination) {
-                    HomeCardPreview.preview(
-                        for: destination,
-                        model: model
-                    )
+                if let preview = HomeCardPreview.preview(
+                    for: destination,
+                    model: model
+                ) {
+                    preview
                 } else {
                     Spacer(minLength: 0)
                 }
@@ -99,6 +99,14 @@ struct HomeCard: View {
 
     private var axValue: String {
         guard let shout else { return subtitle }
-        return "\(subtitle), \(shout)"
+        // One positional frame, not a hard-coded ", " — the
+        // joiner between two localized statements is the
+        // translator's (CJK wants 、/，).
+        return L(
+            "home.card.ax_value",
+            "%1$@, %2$@",
+            subtitle,
+            shout
+        )
     }
 }

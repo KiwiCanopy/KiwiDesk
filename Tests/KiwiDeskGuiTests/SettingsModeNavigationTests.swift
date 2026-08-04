@@ -13,12 +13,10 @@ import Testing
 @Suite("Settings mode navigation")
 struct SettingsModeNavigationTests {
     private func model() -> (SettingsModel, UserDefaults) {
-        let model = SettingsModel(core: makeTestCore())
         let name = "settings-mode-nav-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: name)!
         defaults.removePersistentDomain(forName: name)
-        model.settingsModeDefaults = defaults
-        return (model, defaults)
+        return (makeTestModel(defaults: defaults), defaults)
     }
 
     @Test("Nerd → Simple pops a Nerd-only area to Home")
@@ -77,6 +75,20 @@ struct SettingsModeNavigationTests {
         // Hand-undoing the edits clears the count with the
         // flag — a live comparison, never a latch.
         model.config = model.cleanConfig
+        #expect(!model.isDirty)
+        #expect(model.draftChangeCount == 0)
+    }
+
+    /// The reload path (revert, every save) must recompute the
+    /// count, not just hand-set the flag — a bare
+    /// `isDirty = false` left the chip showing a stale count on
+    /// a clean draft (review 2026-08-04).
+    @Test("revert clears the count through the reload path")
+    func revertClearsTheCount() {
+        let (model, _) = model()
+        model.config.settings.gapsGlobal.outer.top += 4
+        #expect(model.draftChangeCount == 1)
+        model.revert()
         #expect(!model.isDirty)
         #expect(model.draftChangeCount == 0)
     }

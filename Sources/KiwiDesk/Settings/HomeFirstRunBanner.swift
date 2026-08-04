@@ -67,7 +67,9 @@ struct HomeFirstRunBanner: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
             Button {
-                HomeFirstRunState.retire()
+                HomeFirstRunState.retire(
+                    model.firstRunDefaults
+                )
                 visible = false
             } label: {
                 Image(systemName: "xmark.circle")
@@ -104,9 +106,10 @@ struct HomeFirstRunBanner: View {
         }
         return L(
             "home.firstrun.lede",
-            "%1$d spaces and your keys are bound. Nothing "
-                + "below needs your attention — this is where "
-                + "you come when you want something different.",
+            "%1$d spaces are set up and your keys are "
+                + "bound. Nothing below needs your attention "
+                + "— this is where you come when you want "
+                + "something different.",
             model.config.spaces.count
         )
     }

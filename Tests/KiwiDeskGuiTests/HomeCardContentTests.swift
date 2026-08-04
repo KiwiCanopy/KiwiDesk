@@ -12,7 +12,7 @@ import Testing
 @Suite("Home card content")
 struct HomeCardContentTests {
     private func model() -> SettingsModel {
-        SettingsModel(core: makeTestCore())
+        makeTestModel()
     }
 
     @Test("the spaces answer counts spaces and distinct modes")

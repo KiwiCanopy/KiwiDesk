@@ -174,7 +174,9 @@ is why they are here rather than beside the views:
 
 - **A destination label wants to be a short noun in every
   language** — it is a card title, a back-chip heading and a
-  search row all at once, drawn with `lineLimit(1)`. Since #678
+  search row all at once, drawn single-line (`HomeCard`'s
+  title row owns the `lineLimit`; the metrics file keeps only
+  the icon tile). Since #678
   turn 9 dropped the sidebar there is no fixed column to
   measure against (the label-width suite retired with it, as
   this bullet promised): a card flexes, so an over-long label

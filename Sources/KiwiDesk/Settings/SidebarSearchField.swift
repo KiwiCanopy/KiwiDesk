@@ -53,7 +53,7 @@ struct SidebarSearchField: View {
             "",
             text: $text,
             prompt: Text(
-                L("sidebar.search.placeholder", "Search")
+                L("search.placeholder", "Search")
             )
             .foregroundStyle(Color.secondary.opacity(0.42))
         )
@@ -98,7 +98,7 @@ struct SidebarSearchField: View {
         // Explicit name, so accessibility does not depend on
         // the placeholder staying non-decorative.
         .accessibilityLabel(
-            L("sidebar.search.placeholder", "Search")
+            L("search.placeholder", "Search")
         )
     }
 
@@ -116,7 +116,7 @@ struct SidebarSearchField: View {
         }
         .buttonStyle(.plain)
         .iconButtonAffordance(
-            L("sidebar.search.clear", "Clear search")
+            L("search.clear", "Clear search")
         )
     }
 
