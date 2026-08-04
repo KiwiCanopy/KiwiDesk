@@ -100,6 +100,22 @@ struct ZOrderCloseReturnArmTests {
         #expect(!core.pendingZOrderRestore)
     }
 
+    @Test("A distance-2 pick — the minimal jump — arms")
+    func minimalJumpArms() {
+        let core = makeCore()
+        // The boundary pin for the `> 1` threshold: distance 2
+        // is the smallest jump that must arm, so a widened
+        // trigger (`> 2`) reds here and nowhere else.
+        _ = makeSpace(core, windows: 6, focused: 4)
+        guard startDummyPan(core) else { return }
+        core.armCloseReturnRestack(
+            to: WindowID(4),
+            fromRemovedSlot: 1
+        )
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     @Test("An adjacent pick arms nothing")
     func adjacentPickArmsNothing() {
         let core = makeCore()
