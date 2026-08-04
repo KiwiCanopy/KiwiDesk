@@ -53,6 +53,21 @@ struct HomeCardContentTests {
         #expect(line.contains("14"))
         #expect(line.contains("7"))
         #expect(line.contains("3"))
+        // Order, not just presence: with distinct values in
+        // every slot, `contains` alone passes with the outer
+        // and inner arguments swapped (guard-prover proved the
+        // swap green, 2026-08-04). The English frame is
+        // "Outer … · inner …", so outer's value must render
+        // first.
+        let outerAt = line.range(of: "14")
+        let innerAt = line.range(of: "7")
+        #expect(outerAt != nil && innerAt != nil)
+        if let outerAt, let innerAt {
+            #expect(
+                outerAt.lowerBound < innerAt.lowerBound,
+                "outer and inner render swapped"
+            )
+        }
         // Border off swaps the frame, not just a number.
         model.config.settings.borderStyle.enabled = false
         let off = HomeCardContent.subtitle(
@@ -80,12 +95,27 @@ struct HomeCardContentTests {
                 label: "Focus right"
             ),
         ]
-        model.config.layers = [layer]
+        // A second, non-default layer with its own binding: the
+        // count is the DEFAULT layer's, so an all-layers sum
+        // would read 3 here (guard-prover found the one-layer
+        // fixture blind to exactly that).
+        var resize = KeyLayer.defaultLayer
+        resize.name = "resize"
+        resize.bindings = [
+            KeyBinding(
+                combo: "alt+r",
+                lua: "kiwi.grow('width')",
+                kind: .navigation,
+                label: "Grow"
+            )
+        ]
+        model.config.layers = [layer, resize]
         let line = HomeCardContent.subtitle(
             for: .shortcuts,
             model: model
         )
         #expect(line.contains("2"))
+        #expect(!line.contains("3"))
     }
 
     @Test("the conflict shout appears only with conflicts")

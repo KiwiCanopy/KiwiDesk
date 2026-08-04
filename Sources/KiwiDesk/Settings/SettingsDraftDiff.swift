@@ -143,6 +143,12 @@ struct SettingsDraftDiff {
 
     /// `settings.gapsOverride[]1.outer.top` →
     /// `settings.gapsOverride[].outer.top`.
+    ///
+    /// Redundant with `censusBases()`' container-prefix
+    /// registration by design, and each is the other's ONLY
+    /// backup (guard-prover 2026-08-04: deleting either alone
+    /// leaves the suite green through the other) — do not
+    /// "simplify" one away on the strength of a green run.
     private static func normalized(_ path: String) -> String {
         var result = ""
         var rest = Substring(path)
