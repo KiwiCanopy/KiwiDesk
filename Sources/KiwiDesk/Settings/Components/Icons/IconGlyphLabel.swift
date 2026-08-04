@@ -17,8 +17,19 @@ struct IconGlyphLabel: View {
                 // glyph-sized so pickers line up uniformly
                 // whether or not an icon is set (the button's
                 // tooltip carries the hint).
+                //
+                // A CONCRETE ink, not `.secondary`: hierarchical
+                // styles derive from the enclosing foreground, and
+                // a space row draws its glyphs in the accent — so
+                // `.secondary` here rendered the "no icon yet"
+                // placeholder as translucent green ON green, which
+                // reads as a grey film over the row rather than as
+                // an empty slot (owner, 2026-08-04). The set-icon
+                // branches below inherit the row's colour on
+                // purpose; only the placeholder needs to stand
+                // apart from it.
                 Image(systemName: "face.smiling")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink3)
             }
         } else if isSymbol {
             Image(systemName: icon)
