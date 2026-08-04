@@ -272,6 +272,10 @@ final class SettingsModel: ObservableObject {
     /// Routes the paused banner's "Enable Accessibility…" button
     /// to the shared onboarding grant flow (wired by the app).
     var onResolvePermission: () -> Void = {}
+    /// Routes the 14c banner's "Show me around" to the welcome
+    /// tour's voluntary replay (wired by the app) — the tour's
+    /// first willing caller; the other three are involuntary.
+    var onShowTour: () -> Void = {}
 
     let core: KiwiCore
     /// Recorder-only runtime delta + disk-independent rollback

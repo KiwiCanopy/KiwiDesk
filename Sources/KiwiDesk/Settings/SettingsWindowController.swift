@@ -81,6 +81,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.permissionPaused = paused
     }
 
+    /// Routes Home's "Show me around" to the welcome tour's
+    /// voluntary replay (#678 turn 14c).
+    func setShowTour(_ handler: @escaping () -> Void) {
+        model.onShowTour = handler
+    }
+
     /// Non-destructive refresh for the quick menu's layout
     /// actions: recomputes only the live-vs-saved drift
     /// captions, never reseeding `config` — staged edits

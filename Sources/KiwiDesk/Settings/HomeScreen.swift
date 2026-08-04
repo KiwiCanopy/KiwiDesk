@@ -14,6 +14,10 @@ struct HomeScreen: View {
     /// (turn 20: leaving a sub-view returns to the originating
     /// row).
     @FocusState private var focusedCard: SettingsDestination?
+    /// The 14c banner's visibility, read once per mount so the
+    /// dismiss can animate the card away.
+    @State private var firstRunVisible =
+        HomeFirstRunState.shouldShow()
 
     private var columns: [GridItem] {
         [
@@ -27,6 +31,12 @@ struct HomeScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                if firstRunVisible {
+                    HomeFirstRunBanner(
+                        model: model,
+                        visible: $firstRunVisible
+                    )
+                }
                 group(
                     L(
                         "home.group.this_profile",

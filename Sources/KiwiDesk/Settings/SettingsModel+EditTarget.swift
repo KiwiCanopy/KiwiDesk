@@ -75,6 +75,12 @@ extension SettingsModel {
     }
 
     private func apply(_ state: TargetState) {
+        // A dirty draft reaching a clean transition means the
+        // user saved, reverted or knowingly discarded — past
+        // needing Home's first-run orientation either way.
+        // (Window open never lands here dirty: `show()` guards
+        // its reload on `!isDirty`.)
+        if isDirty { HomeFirstRunState.retire() }
         suppressDirty = true
         config = state.config
         luaSource = state.luaSource

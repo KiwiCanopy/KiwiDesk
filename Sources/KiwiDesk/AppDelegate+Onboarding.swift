@@ -16,6 +16,15 @@ extension AppDelegate {
         showOnboarding()
     }
 
+    /// The tour's one VOLUNTARY entry point — Home's "Show me
+    /// around" (turn 14c). Resets to the welcome step so a
+    /// replay starts at the top, where the involuntary callers
+    /// land on the step their trigger needs.
+    func replayOnboardingTour() {
+        onboardingModel.step = .welcome
+        showOnboarding()
+    }
+
     func showOnboarding() {
         if let window = onboardingWindow {
             NSApp.forceFront(window)
@@ -154,6 +163,10 @@ extension AppDelegate {
             || onboardingModel.step == .readyToExplore
         {
             OnboardingDiscovery.markShown()
+            // The tour reached its closing beats, so Home's
+            // 14c banner goes pending — the next Settings
+            // visit opens oriented, not empty (turn 14c).
+            HomeFirstRunState.seed()
         }
     }
 }
