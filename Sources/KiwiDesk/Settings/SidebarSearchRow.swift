@@ -82,7 +82,7 @@ struct SidebarSearchRow: View {
     private var axLabel: String {
         guard !result.path.isEmpty else { return result.primary }
         return L(
-            "sidebar.search.result_ax",
+            "search.result_ax",
             "%1$@, in %2$@",
             result.primary,
             result.path.joined(separator: ", ")

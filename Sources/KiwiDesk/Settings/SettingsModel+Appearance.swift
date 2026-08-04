@@ -17,7 +17,7 @@ extension SettingsModel {
     /// Persists the pick and repaints the window. `.system` hands
     /// the decision back to macOS and leaves no key behind.
     func setAppearance(_ choice: AppearanceChoice) {
-        AppearancePreference.write(choice)
+        AppearancePreference.write(choice, to: preferences)
         appearance = choice
         choice.apply()
     }

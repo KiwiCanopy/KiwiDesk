@@ -45,13 +45,13 @@ final class SettingsModel: ObservableObject {
     @Published var nav = SettingsNavigation()
     /// Which appearance the window follows (#678 item 8).
     ///
-    /// Read from `UserDefaults` at init and written back through
-    /// `setAppearance`, so it never enters the dirty-tracked
-    /// config — it is app-wide, not part of a profile, and the
-    /// footer's Save has nothing to do with it. Storage lives in
-    /// `AppearancePreference`, which argues why it is not
-    /// `gui.json`.
-    @Published var appearance = AppearancePreference.read()
+    /// Read at init through the `preferences` seam and written
+    /// back through `setAppearance`, so it never enters the
+    /// dirty-tracked config — it is app-wide, not part of a
+    /// profile, and the footer's Save has nothing to do with
+    /// it. Storage lives in `AppearancePreference`, which
+    /// argues why it is not `gui.json`.
+    @Published var appearance: AppearanceChoice = .system
     /// The live auto-start status (#678 item 16).
     ///
     /// Held here, not in `LoginItemCard`, because turn 14b draws
@@ -77,21 +77,31 @@ final class SettingsModel: ObservableObject {
     /// cancels an older timer instead of clearing the latest
     /// confirmation early.
     var autoStartFlashToken = 0
-    /// Which sidebar row is selected.
+    /// Which area screen is pushed — nil is Home, the card grid
+    /// that replaced the sidebar (#678 turn 9).
     ///
     /// Held here rather than as `@State` in `SettingsView`
     /// because the view is re-keyed on a GUI language change
     /// (`LocaleScopedRoot`), and `@State` does not survive that —
-    /// switching language silently threw the user back to
-    /// Profiles mid-task. The model outlives the rebuild, so the
-    /// selection does too.
+    /// switching language silently threw the user back to the
+    /// entry screen mid-task. The model outlives the rebuild, so
+    /// the selection does too.
     ///
-    /// Profiles stays the *entry* point for a first-run and a
-    /// returning user (§5.8): `SettingsWindowController.show()`
-    /// resets this each time the window is opened, so persisting
-    /// it here changes nothing a user sees except that a language
-    /// switch no longer moves them.
-    @Published var destination: SettingsDestination = .profiles
+    /// Home is the *entry* point for a first-run and a returning
+    /// user alike (turn 9 supersedes §5.8's Profiles ruling —
+    /// the grid IS the overview that made Profiles the landing):
+    /// `SettingsWindowController.show()` resets this each time
+    /// the window is opened.
+    @Published var destination: SettingsDestination?
+    /// The Simple/Power User pick (#678 turn 9). Read at init
+    /// through the `preferences` seam and written back through
+    /// `setSettingsMode`, so it never enters the dirty-tracked
+    /// config — same shape and reasoning as `appearance`.
+    @Published var settingsMode: SettingsMode = .simple
+    /// Distinct settings the draft changes — the header's
+    /// "N unsaved changes" count, recomputed beside `isDirty`
+    /// from the same baselines so the two cannot disagree.
+    @Published var draftChangeCount = 0
     /// A destructive action parked behind the unsaved-changes
     /// dialog (#515). Written only by `discardingEdits` and the
     /// two `*PendingDiscard` verbs in `SettingsModel+Discard`.
@@ -108,11 +118,20 @@ final class SettingsModel: ObservableObject {
     /// the dashboard sat open) — see `KiwiCore.mergeLiveSpaces`.
     var seedSpaces: [SpaceID] = []
 
-    func recomputeDirty() {
-        isDirty =
-            config != cleanConfig
-            || luaSource != cleanLuaSource
-    }
+    // `recomputeDirty()` lives in `SettingsModel+Mode.swift`
+    // with the rest of the draft-state derivations (§2.1
+    // headroom — this file sits near the ceiling).
+
+    /// The ONE `UserDefaults` seam for everything this model
+    /// persists outside the config — the mode pick, the
+    /// first-run banner's flags, the appearance choice — so
+    /// tests write a scratch domain instead of the developer's
+    /// real defaults (tests.md: process-global state). One
+    /// domain, not one per consumer: the split carried no
+    /// information and grew the init a parameter per consumer
+    /// (architect re-review 2026-08-04, which also caught the
+    /// appearance read bypassing the split seams entirely).
+    let preferences: UserDefaults
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
@@ -233,6 +252,10 @@ final class SettingsModel: ObservableObject {
     /// Routes the paused banner's "Enable Accessibility…" button
     /// to the shared onboarding grant flow (wired by the app).
     var onResolvePermission: () -> Void = {}
+    /// Routes the 14c banner's "Show me around" to the welcome
+    /// tour's voluntary replay (wired by the app) — the tour's
+    /// first willing caller; the other three are involuntary.
+    var onShowTour: () -> Void = {}
 
     let core: KiwiCore
     /// Recorder-only runtime delta + disk-independent rollback
@@ -260,9 +283,23 @@ final class SettingsModel: ObservableObject {
     /// Global float rules used to resolve and diff a stored profile.
     var profileEditingBaseFloatRules: [String]?
 
-    init(core: KiwiCore) {
+    /// The preferences seam defaults live and is injected by
+    /// tests — a bare default read inside the class would hand
+    /// a test-constructed model the runner's real domain
+    /// (tests.md: process-global state).
+    init(
+        core: KiwiCore,
+        preferences: UserDefaults = .standard
+    ) {
         self.core = core
         self.config = GuiConfig()
+        self.preferences = preferences
+        self.settingsMode = SettingsModePreference.read(
+            from: preferences
+        )
+        self.appearance = AppearancePreference.read(
+            from: preferences
+        )
         reload()
     }
 

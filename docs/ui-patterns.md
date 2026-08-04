@@ -99,7 +99,7 @@ back inside the row: that re-enters the disabled scope.
 **"Lives elsewhere" pointers are links, and the link sits
 where the sentence puts it.** Prose that names another tab
 ("configured in the App Bar tab") is a dead end; those
-pointers are `CrossReferenceRow`s, jumping the sidebar
+pointers are `CrossReferenceRow`s, jumping the pushed-area
 selection through an injected `settingsNavigate` environment
 action.
 
@@ -132,7 +132,7 @@ gives none of them.
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
 ("Bars ▸ App Bar"), not the section name alone: a link
-reading "App Bar" names no row any sidebar shows, and only a
+reading "App Bar" names no row Home or search shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A
 pointer whose sentence names the **feature itself** rather
 than where to find it — a sentence turning on whether the
@@ -263,9 +263,10 @@ Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
   and the `.headline` labels of an "Advanced" disclosure. The
-  **sidebar's `SettingsDestination` titles stay Title Case**
+  **`SettingsDestination` titles (Home cards, back-chip
+  headings) stay Title Case**
   ("Layout Defaults", "App Rules"): they name a destination, as
-  System Settings' own sidebar does. So do **action labels**
+  System Settings names its panes. So do **action labels**
   ("Open New", "Set Gap Values") — a verb-phrase command follows
   the menu-item convention, not this one.
 - **`&` does not start a new sentence**: "Size & float", "Drag &
@@ -294,7 +295,7 @@ what it meant — and the same drawers on the new page do not,
 because the adjective now reads as the page's own name rather
 than as a tier inside it. And a row tier and a mode depth must never
 be spelled with one word: Advanced Colors is the deep-mode twin
-of Colours & Motion (`SettingsArea.minimumMode` is `.nerd`
+of Colours & Motion (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. They are **"More

@@ -46,7 +46,7 @@ enum MainMenu {
         target: AnyObject,
         action: Selector
     ) -> NSMenuItem {
-        let name = L("sidebar.app_name", "KiwiDesk")
+        let name = L("app.name", "KiwiDesk")
         let item = submenu(name)
         let menu = item.submenu!
         menu.addItem(

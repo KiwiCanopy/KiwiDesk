@@ -15,7 +15,7 @@ import SwiftUI
 /// `SettingsContainer.gate` — and it takes no `SettingsMode`
 /// input: the mode never changes what runs (8c), it only decides
 /// what is offered, so an override that exists greys the same way
-/// in Simple and Nerd.
+/// in Simple and Power User.
 ///
 /// The five override-row predicates ask the RESOLVED value for the
 /// space (#406/#520): a control the global would silence is still

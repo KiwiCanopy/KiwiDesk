@@ -28,7 +28,7 @@ struct DiscardGateTests {
             hotkeyRegistrar: DiscardRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())
-        return SettingsModel(core: core)
+        return makeTestModel(core: core)
     }
 
     /// Dirties the model the way a real edit does — through

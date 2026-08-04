@@ -172,7 +172,7 @@ struct SidebarCrossReferenceTests {
         )
         #expect(
             link.segmentKeys == [
-                "sidebar.layout", "layout.scrolling.name",
+                "destination.layout", "layout.scrolling.name",
             ]
         )
         // The tail lookup is keyed by English mode name and is

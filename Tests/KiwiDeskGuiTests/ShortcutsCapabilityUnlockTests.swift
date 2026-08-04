@@ -88,7 +88,7 @@ struct ShortcutsCapabilityUnlockTests {
             )
         ]
         try core.saveGuiConfig(config)
-        return (SettingsModel(core: core), core)
+        return (makeTestModel(core: core), core)
     }
 
     /// A profile overriding ONE row still resolves a base for

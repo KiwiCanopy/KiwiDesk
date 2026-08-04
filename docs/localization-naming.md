@@ -277,6 +277,27 @@ failing on correct copy is the one failure that makes an exemption
 file look necessary, so the rule holds: argue a name in, never add
 one to silence a hit.
 
+## The Settings-mode pair: Simple / Power User
+
+Neither family covers the Settings window's depth switch
+(#678 turn 9), so its policy is stated here directly (owner
+ruling 2026-08-04): the English pair is **"Simple" / "Power
+User"**, and **both names translate by meaning** — each locale
+picks natural words for an "easy" versus "power-user"
+register; neither is a verbatim coinage. No content guard
+enforces this pair (nothing to hold verbatim, nothing to hold
+absent); this ruling is what keeps ten translators from
+diverging.
+
+The marketing site's slider is a **different surface with its
+own flair** — it says "Nerd" (`site/src/i18n/<locale>.json`,
+keys `mode_simple` / `mode_dev`) and keeps it; do not
+"harmonize" the app onto the site's register or vice versa.
+The app's case name is `.powerUser`, matching the label; it is
+never the site's word. A translator drafting `mode.simple` /
+`mode.power_user` may still read the site's pair for their
+locale as context, but translates the app's own English.
+
 ## See also
 
 - [Translating](translating.md) — the full translator guide,

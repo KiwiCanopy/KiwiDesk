@@ -43,7 +43,7 @@ enum ColorsRowOrder {
         .colours(.animationsDurationMS),
     ]
 
-    // MARK: - Advanced Colours (the Nerd area)
+    // MARK: - Advanced Colours (the Power-User area)
 
     /// Borders: the two ring tints, then the sticky mark's.
     /// Three rows, so the group has no drawer — see

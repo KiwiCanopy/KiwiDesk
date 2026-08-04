@@ -40,7 +40,7 @@ struct LayoutCard: View {
     /// On/Off state so it isn't a dead pointer, which is the
     /// design consult's ruling from when this row was born.
     ///
-    /// Layout Defaults is a Nerd-mode area and Bars is a Simple
+    /// Layout Defaults is a Power-User-mode area and Bars is a Simple
     /// one, so the destination always exists in the mode the
     /// reader is already in (item 14).
     @ViewBuilder private var appBarCrossReference: some View {

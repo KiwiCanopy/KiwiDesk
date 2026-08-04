@@ -77,7 +77,7 @@ synonym:
   one fires (`KeyLayer`, `config.layers`, `define_layer` /
   `switch_layer`). Retired as a name for it: *mode*. That word
   is spoken for twice over — a space's layout (`LayoutMode`,
-  `space_modes`) and the Settings window's Simple/Nerd depth —
+  `space_modes`) and the Settings window's Simple/Power-User depth —
   so a third sense made "switch mode" ambiguous three ways.
   Reserve *mode* for those two; the ruling is
   `docs/design-decisions.md` ▸ Shortcuts.
