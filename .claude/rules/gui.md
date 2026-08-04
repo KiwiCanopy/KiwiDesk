@@ -410,6 +410,41 @@ views' `L(key, english)` call sites, so a change that deletes a
 view must re-author its keys through a scanner-visible shape in
 the same change or the keys are pruned from every locale.
 
+## Home, the shell (#678 turn 9)
+
+Home (a card grid; `model.destination == nil`) is the only
+navigator — there is no sidebar. The conventions a shell change
+must keep:
+
+- **One offer predicate.** Whether a destination is reachable —
+  the Simple/Nerd gate, the computed Monitors promotion, the
+  #18 stored-profile axis — is answered by
+  `HomeCardOrder.isOffered`, consulted by the grid, the
+  selection repairs and the `settingsNavigate` guard alike;
+  a hand-negated copy at any of those sites is the drift #18's
+  one-predicate rule exists to prevent
+  (`HomeCardOrderTests`).
+- **Navigation into a mode-withheld area switches the mode,
+  never refuses** (`ensureModeAdmits` — search and
+  cross-references index both modes), and a Nerd → Simple flip
+  pops a Nerd-only area to Home
+  (`SettingsModeNavigationTests`).
+- **A card is an answer**: subtitles derive from the draft
+  (`HomeCardContentTests` holds the derivations), previews
+  come only from renderers that already ask the real data, and
+  only the Shortcuts conflict may shout — glyph + text, never
+  hue alone.
+- **A new surfacing branch or one-line wiring decision in the
+  shell joins `HomeSurfacingTests` in the same change**, keyed
+  on its use site — the Monitors lesson, which this shell
+  inherits whole.
+- The mode pick persists via `SettingsModePreference`
+  (`UserDefaults`, absent = Simple, never `gui.json`); the
+  header's unsaved count comes from `SettingsDraftDiff`, whose
+  every-leaf attribution net (`SettingsDraftDiffTests`) is
+  what a new `GuiConfig` or `TilingSettings` field reds until
+  its census row exists.
+
 ## SwiftUI traps
 
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

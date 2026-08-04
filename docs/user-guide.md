@@ -27,32 +27,44 @@ space uses, the gaps, the bars, and the shortcuts.
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while KiwiDesk is the active app. The window shows a
-two-group sidebar on the left:
+**⌘,** while KiwiDesk is the active app. The window opens on
+**Home** — a grid of cards, one per settings area, in two
+groups:
 
-- **Design** — sections scoped to the active profile (Spaces,
-  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
-  Advanced Colors, Behavior).
-- **System** — global settings that apply everywhere (Profiles,
-  Shortcuts, App Rules, General).
+- **This Profile** — areas scoped to the profile being edited
+  (Spaces & Layouts, Gaps & Borders, Bars, Colors & Motion,
+  and in Nerd mode Layout Defaults, Monitors, Behavior,
+  Advanced Colors).
+- **Whole App** — settings that apply everywhere (Shortcuts,
+  Profiles, App Rules, General).
 
-The sidebar is a fixed-width column, like System Settings — it
-cannot be resized or collapsed.
+Every card shows its area's current values — spaces and
+layouts in use, gap and border sizes, how many shortcuts are
+bound — so most questions are answered without opening
+anything. Click a card to open its area; the **← Home** chip
+(or **⌘[** / Escape) brings you back.
 
-At the top you'll see the app name and a banner showing which
-profile is loaded and letting you edit a saved profile without
-switching to it. At the bottom, a stable three-slot footer holds
-Revert, Save a Copy As…, and Save.
+The header carries a **Simple | Nerd** switch. Simple shows
+the eight everyday cards; Nerd adds the deeper four (Layout
+Defaults, Monitors, Behavior, Advanced Colors). The switch
+only changes which cards exist — nothing behind it stops
+working, and the Monitors card joins Simple by itself while
+two or more displays are connected. While you have unsaved
+edits, the header counts them ("3 unsaved changes"); Save and
+Revert live in the footer.
 
-### Sidebar Search
+The header also shows which profile is loaded and lets you
+edit a saved profile without switching to it. At the bottom, a
+stable three-slot footer holds Revert, Save a Copy As…, and
+Save.
 
-A search field sits at the top of the sidebar, under the app
-name. Typing filters the sidebar to the sections that match —
-by section name or by any of the titled groups inside a section
+### Search
+
+Press **⌘K** (or click the search field in the header) to
+search every area. Typing lists the areas that match — by
+area name or by any of the titled groups inside one
 (searching "sticky" finds Gaps & Borders, "focus" finds
 Shortcuts).
-While active, a subtle blue outline marks keyboard focus; the
-lighter placeholder gives way to normal text as soon as you type.
 
 Each result leads with the words that actually matched, and puts
 the trail to them in a smaller line underneath — so a hit on the
@@ -72,9 +84,9 @@ lands on that row, highlighted, ready to open.
 
 Only the first match per section is listed, so a broad word like
 "color" gives you one row per section instead of a wall of them;
-type a little more to reach a different one. The query stays put
-while you navigate — press Escape or the clear button to get the
-full sidebar back.
+type a little more to reach a different one. Press Escape or the
+clear button to empty the query; closing the search popover
+clears it too.
 
 Matching ignores case, accents, and hyphens-versus-spaces, so
 "grosse" finds "Größe" and "space bar farben" finds
@@ -1590,12 +1602,12 @@ global config; every saved profile is listed below, one row each
 
 - **Edit Live** (top entry): the running config. Saving here
   adopts your changes into the loaded profile as usual.
-- **Edit** a saved profile **without switching** — the Settings
-  sidebar becomes profile-scoped: the Design sections (Spaces,
-  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
-  Advanced Colors, Behavior) edit this profile, and
-  **General is hidden** — it holds global state a profile edit
-  never writes. Save writes to this profile's JSON instead of
+- **Edit** a saved profile **without switching** — Home
+  becomes profile-scoped: the This Profile cards (Spaces &
+  Layouts, Layout Defaults, Monitors, Gaps & Borders, Bars,
+  Colors & Motion, Advanced Colors, Behavior) edit this
+  profile, and **the General card leaves the grid** — it holds
+  global state a profile edit never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the
   target, and the menu title shows "*Name* — overrides").
   Shortcuts and App Rules enter override mode and edit only what
@@ -1655,7 +1667,7 @@ choice. With nothing staged the action runs immediately — the
 prompt only appears when there is something to lose.
 
 Until your first profile exists, Settings points the way
-without gating anything: the Profiles sidebar tile carries a
+without gating anything: the Profiles Home card carries a
 small accent dot, and **Start from a preset** leads the page
 with a "Start here" line plus one accent-colored **Apply** —
 on the Standard preset for your connected screen count, so the

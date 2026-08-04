@@ -1468,52 +1468,103 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
-**Two-group sidebar, topic-named: "Design" vs "System".**
-Every control either travels with the profile being edited or
-is app-wide, and the old flat tabs hid which was which — the
-single biggest source of confusion. The sidebar makes the
-split part of the navigation, but names the groups by *topic*,
-not scope (System Settings groups by subject, never by
-per-machine/per-user scope): **Design** holds the
-profile-scoped content, **System** the app-level surfaces
-(`SettingsDestination.thisProfile` / `.wholeApp` are the
-membership, and the only copy of it). Scope stays the underlying
-model — the header's profile picker shows which profile
-"Design" edits — it's just no longer the group label, since a
-new user can't predict placement from "is this a Profile
-thing?". The membership is unchanged from the earlier "This
-Profile" / "Whole App" split; only the labels are topical.
-(#68 §3.1)
+**Home is the only navigator: a card grid, not a sidebar.**
+(#678 turn 9, superseding the #68/#297 fixed source list.) A
+sidebar is a menu the user pays for on every visit — a column
+of names that answers nothing until clicked. Home inverts
+that: each destination is a card carrying its **current
+values** (and, where a real renderer exists, a small live
+picture), so "is my gap 8 or 10?" is answered without opening
+anything, and the window opens as a status board rather than a
+launcher. An area screen is a pushed view behind a "← Home"
+back chip (⌘[ and Escape pop it; Escape only when no inner
+view claimed the key). What this buys over the sidebar it
+replaced: the full window width for content, an entry screen
+that scales to the mode's card count instead of a fixed
+taxonomy column, and per-language label budgets that die with
+the fixed column (a card flexes; an over-long label truncates
+visibly). What it costs, accepted: a second click to move
+between sibling areas until the pill row lands (Phase 4). The
+old `HStack`-not-`NavigationSplitView` finding stands as
+history — macOS 26 cannot lock a split-view divider — but
+nothing composes columns any more, so nothing rests on it.
 
-**The sidebar is a fixed-width, floating, non-resizable
-column.** (#297) The taxonomy is **closed** — the sidebar shows
-exactly the `SettingsDestination` cases, never a user-grown list
-— so whatever its length it never needs more or less room than
-its longest label, and a draggable divider is the same
-"bespoke panel" tell that got the collapse toggle removed
-(#68) — and a collapsed sidebar had no affordance to reopen
-it. System Settings, the GUI north star, fixes its sidebar
-too. Mechanically the shell composes the two columns with a
-plain `HStack`, not `NavigationSplitView`: on macOS 26 the
-split view's divider cannot be locked by any supported means
-(the column-width modifier is ignored, `NSSplitViewItem`
-thickness writes are reverted by the private controller,
-delegate interception crashes), so the static column is fixed
-by construction rather than by fighting the framework —
-revisit if a later macOS/SwiftUI exposes a supported
-fixed-width sidebar. The
-column renders as the macOS 26 floating pane: a rounded,
-shadowed card inset from the window edges with the traffic
-lights inside its top-left, in near-window-background gray
-(settled by eye against System Settings), with no divider
-line, and softly-shadowed icon tiles. When the window resigns
-key the card goes flat #F7F7F7 (sampled from System Settings'
-inactive sidebar; dark mode falls back to the flat window
-background) and the hand-built chrome above the list
-(identity, search, icon tiles) fades uniformly — hue kept,
-never desaturated (`InactiveDimmed`), keyed to fully-inactive
-only so the shared color panel taking key does not dim the
-sidebar.
+**Home's two groups are scope-named: "This Profile" / "Whole
+App".** (#678 turn 9, reversing the #68 "Design"/"System"
+topical naming — deliberately, not by drift.) The topical
+names existed because a *sidebar* label had to predict
+placement for a user who couldn't see the contents. A card
+grid shows the contents: every This Profile card renders
+values from the draft the header's profile chip names, so the
+scope label is no longer a prediction the user must make — it
+is a caption over evidence. Scope was always the primary
+navigation axis (turn 2 kept it through every concept);
+naming it honestly beats a topical alias once the cards carry
+the proof. `SettingsDestination.thisProfile` / `.wholeApp`
+remain the membership's one copy, and `HomeCardOrderTests`
+pins the grid's groups to them.
+
+**A card's picture comes from a renderer that already asks the
+real data, or the card stays text-only.** (#678 turn 9.) The
+turn-9 frames draw every profile card with a dark preview tile
+from a unified draft renderer that does not exist until Phase
+4, and hand-drawing stand-ins would ship previews that teach
+what the app does not do — the #702 class of defect, at grid
+scale. So the Bars card mounts the real `SpaceBarPreviewStrip`
+(Plain really drops the plate, thickness really moves the
+strip), Layout Defaults a real `LayoutSchematicView`, Monitors
+the real `MonitorArrangement` maths, Shortcuts the recorder's
+own combo glyphs — and Gaps & Borders, Colours, Advanced
+Colours, Behaviour and General carry no picture at all rather
+than a sketch. A card that gains a picture gains it by
+reusing a renderer, never by drawing beside one.
+
+**The Simple/Nerd segment gates whole cards, and navigation
+into a withheld card switches the mode rather than refusing.**
+(#678 turns 4/9.) Mode depth is per area
+(`SettingsArea.minimumMode`) — never per row, and never an
+input to anything that resolves behavior. Monitors is the one
+COMPUTED promotion: it joins Simple while 2+ displays are
+connected, decided at read so a disconnect cannot strand a
+stored flag. Search and cross-references index both modes, so
+a landing in a Nerd-only area flips the segment (visible in
+the header) instead of dead-ending; flipping Nerd → Simple
+while standing in a Nerd-only area pops to Home, because the
+area ceased to exist — mode gates cards, so this is the
+"which cards exist" rule, not a grey-don't-hide violation.
+The pick persists like the appearance choice (`UserDefaults`,
+absent = Simple, never `gui.json` — a sidecar write would
+flip config ownership).
+
+**The header shows a count of the draft, not a second save
+surface.** (#678 turn 9.) The turn-9 frame draws three views
+of one draft on one screen — the floating save pill, the
+top-right unsaved button's popover, and (in this codebase) the
+docked three-verb footer. The footer already is the pill's
+final form (turn 17: below 900 pt "the pill docks as a real
+footer"), so the pill is not built, and the popover waits for
+the Phase 4 renderer work that gives diff rows their label
+authority — a popover listing a partial diff would claim the
+list is the whole draft. What ships is the honest subset: a
+count-only chip fed by `SettingsDraftDiff`, which resolves
+changed model leaves to census settings (many leaves under one
+setting count once), so the number is the number of settings
+the user changed, not an implementation detail. Save and
+Revert stay in the footer alone.
+
+**The first-run banner orients once, then gets out of the
+way.** (#678 turn 14c.) Home opens already full — the tour
+seeded a real setup — so the first visit gets a banner saying
+so ("You are already set up"), never a wizard or an outlined
+empty state. It seeds when the tour reaches its closing beats,
+and retires permanently on dismiss or on the first clean
+transition of a dirty draft (save, revert, or a confirmed
+discard): a user who just acted on their settings is past
+needing orientation, and a welcome that lingers becomes
+chrome. "Show me around" is the welcome tour's first
+*voluntary* entry point — the other callers are all
+involuntary (permission loss, discovery resume) — so replay
+starts at the top rather than at the step a trigger needed.
 
 **Live-apply is the rare exception, earned per control — not
 per tab.** (Settled 2026-07-10, full-Settings audit; #123.) A
@@ -1783,7 +1834,7 @@ spotlight, never a gate** (QA 2026-07-19): a "Start here"
 lead-in, ONE accent-prominent Apply — the appliable count's
 Standard preset, since prominence on every appliable preset
 put three accent buttons in one field — an accent dot on
-the Profiles sidebar tile, and a pre-filled first-save
+the Profiles Home card's tile, and a pre-filled first-save
 name. A hard first-run gate was
 considered and rejected — System Settings never gates a
 pane, the zero-profile state recurs whenever the last
@@ -2943,17 +2994,18 @@ oversight in it.
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
-Sidebar search indexes destination titles, so a page keeping a
+Settings search indexes destination titles, so a page keeping a
 name for content it no longer holds keeps winning the query for
 that content — Appearance, the most colour-sounding word in the
 app, would have gone on answering "where do I change the ring
 colour" after the split left it owning no colour. It is **Gaps
-& Borders**, the name the census already gives that area, so
-the interim sidebar teaches the name that survives. **And the colour pages
-sit after the things they paint** in the sidebar: search returns
-one hit per destination in sidebar order, so a colour page above
-Bars would answer "App Bar" with a grid of swatches instead of
-with the App Bar's own card.
+& Borders**, the name the census already gives that area — the
+name the Home card teaches. **And the colour pages
+sit after the things they paint**: search returns one hit per
+destination in the grid's own order
+(`SettingsDestination.thisProfile` + `.wholeApp`), so a colour
+page above Bars would answer "App Bar" with a grid of swatches
+instead of with the App Bar's own card.
 
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
