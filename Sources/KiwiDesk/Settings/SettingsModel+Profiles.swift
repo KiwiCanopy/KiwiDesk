@@ -162,6 +162,22 @@ extension SettingsModel {
         reload()
     }
 
+    /// Removes every Desktop → profile binding (#678 turn 13a).
+    ///
+    /// On the model, not inline in the button, because it is the
+    /// escape hatch from a state the GUI otherwise cannot leave:
+    /// while displays have separate Spaces the binding rows are
+    /// greyed, yet the runtime keeps firing a binding made
+    /// before that setting changed. A view-local
+    /// `config.profileBindings = [:]` is unreachable from a
+    /// test, and this one is worth reaching.
+    ///
+    /// Staged like every other binding edit — the footer's Save
+    /// writes it — so a mis-click is revertible.
+    func clearProfileBindings() {
+        config.profileBindings = [:]
+    }
+
     func makeDefault(named name: String) {
         _ = core.execute(
             "set_default_profile",

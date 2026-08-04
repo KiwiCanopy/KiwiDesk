@@ -137,7 +137,7 @@ struct NativeSpacesGroup: View {
                     ),
                     role: .destructive
                 ) {
-                    model.config.profileBindings = [:]
+                    model.clearProfileBindings()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)

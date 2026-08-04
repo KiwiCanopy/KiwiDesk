@@ -133,6 +133,53 @@ struct ProfilesGateWiringTests {
         }
     }
 
+    /// The "Which profile loads" card reads the whole-rule
+    /// verdict, and asks the profile matcher nothing.
+    ///
+    /// This is the seam the card's first cut got wrong: it
+    /// called `ProfileManager.match`, which answers the DISPLAY
+    /// half only — a native-Space binding outranks matching —
+    /// so with a Desktop bound the card named one profile while
+    /// another was on screen. `KiwiCore.profileVerdict` carries
+    /// the whole precedence; a call site that reaches past it to
+    /// `match` is that defect returning, and no behavioural test
+    /// over the verdict can see it.
+    @Test("the which-loads card reads the whole-rule verdict")
+    func whichLoadsReadsTheVerdict() throws {
+        let name = "Sections/ProfilesSection+WhichLoads.swift"
+        let squashed = SourceScan.stripComments(try read(name))
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(
+            squashed.contains("model.profileVerdict"),
+            Comment(
+                rawValue:
+                    "\(name) no longer reads the model's verdict "
+                    + "snapshot"
+            )
+        )
+        #expect(
+            !squashed.contains(".match("),
+            Comment(
+                rawValue:
+                    "\(name) asks the profile matcher directly — "
+                    + "that answers the display half of the rule "
+                    + "only, and a bound Desktop outranks it"
+            )
+        )
+        // Nor may it scan the profile directory itself: the
+        // verdict costs a decode per profile and belongs to the
+        // refresh, never to a body pass.
+        #expect(
+            !squashed.contains("core.profiles"),
+            Comment(
+                rawValue:
+                    "\(name) queries Core per render — the "
+                    + "verdict is snapshotted by refreshProfiles"
+            )
+        )
+    }
+
     /// Every gate sentence is authored ONCE, in the help enum; a
     /// row that re-authors one is the duplication that let
     /// General describe one status two ways.
