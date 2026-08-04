@@ -1,0 +1,81 @@
+import Foundation
+import KiwiDeskCore
+
+/// The dashboard model's backend sync (#678 turn 13a split): the
+/// snapshots `refreshProfiles` takes of live state, and the
+/// keybinding import that seeds the edited config from
+/// `init.lua`.
+///
+/// Split from `SettingsModel.swift` on the file ceiling. The
+/// stored `@Published` properties these write must stay on the
+/// class (an extension cannot hold them), so the seam here is
+/// state vs. the refresh that fills it.
+extension SettingsModel {
+    // MARK: - Sync with the backend
+
+    // `reload()` and `selectEditTarget` — the single edit-mode
+    // state machine — live in `SettingsModel+EditTarget.swift`
+    // (#64).
+
+    func refreshProfiles() {
+        profiles = core.profiles.list()
+        activeProfile = core.profiles.currentName
+        activeStandard = core.profiles.currentStandard
+        profileDirty = core.profiles.isDirty
+        duplicateDefaultCounts =
+            core.profiles.duplicateDefaultCounts()
+        let live = displays.map(\.fingerprint)
+        profileSummaries = core.profiles.allProfiles().map {
+            profile in
+            ProfileSummary(
+                name: profile.name,
+                count: profile.monitorCount,
+                sets: profile.monitorSets.map(\.monitors),
+                isDefault: profile.isDefault,
+                matchesLive: profile.set(matching: live) != nil,
+                spaceCount: profile.declaredSpaces.count,
+                shortcutOverrideCount:
+                    profile.layers?.overrideCount ?? 0
+            )
+        }
+        brokenProfiles = core.profiles.brokenNames()
+        nativeSpaceCount =
+            NativeSpaces.allSpaces().filter(\.isUser).count
+        currentNativeSpace = NativeSpaces.activeSpaceNumber()
+        // After `currentNativeSpace`: a Desktop binding outranks
+        // monitor matching, so the verdict needs the desktop this
+        // pass just read. The count is captured in the same
+        // breath, so the card's sentence has one moment behind
+        // it.
+        profileResolution = ProfileResolution(
+            verdict: core.profileVerdict(
+                activeDesktop: currentNativeSpace
+            ),
+            screens: displays.count
+        )
+        separateDisplaySpacesPreference =
+            DisplaySpacesSetting.hasSeparateSpaces()
+        refreshLayoutDrift()
+    }
+
+    // MARK: - Import live keybindings (#4)
+
+    /// Merges the shortcuts currently active in `init.lua` into
+    /// the edited config: each recovered mode is matched by name
+    /// (created if new), every recovered row upserted by combo,
+    /// and the result reclassified so known actions land in their
+    /// sections. Marks the config dirty so the user reviews the
+    /// import before Save writes it.
+    func importCurrentShortcuts() {
+        var updated = config
+        KeybindingMerge.merge(
+            recovered: core.recoverKeybindings(),
+            into: &updated
+        )
+        KeybindingImportClassifier.classify(
+            &updated,
+            recoverResizeStep: true
+        )
+        config = updated
+    }
+}

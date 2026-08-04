@@ -315,6 +315,17 @@ struct ProfileSummary: Identifiable {
     var id: String { name }
 }
 
+/// The "Which profile loads" answer as one value (#678 turn
+/// 13a): what resolves, and the screen count it resolved over.
+///
+/// One value, not two published fields, because the card renders
+/// them in a single sentence — and two fields refreshed together
+/// today are two fields somebody refreshes apart tomorrow.
+struct ProfileResolution: Equatable {
+    let verdict: ProfileVerdict
+    let screens: Int
+}
+
 /// How a space's screen resolves in the Canvas (#36).
 enum SpaceResolution: Equatable {
     case pinned(String)

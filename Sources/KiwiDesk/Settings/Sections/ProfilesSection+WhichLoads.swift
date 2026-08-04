@@ -57,11 +57,18 @@ extension ProfilesSection {
     /// it, while a count default only asks how many screens
     /// there are.
     private var verdictSentence: String {
+        // Count and verdict from ONE snapshot. Reading the count
+        // live beside a snapshotted verdict lets the sentence
+        // name a profile that matched a different display set —
+        // "2 screens → Desk (these exact monitors)" about a
+        // one-screen match.
+        //
         // The count phrase, never a bare `%1$d screens` — that
         // frame renders "1 screens" on a one-display Mac, and no
         // catalog can repair a frame.
-        let screens = screensPhrase(model.displays.count)
-        switch model.profileVerdict {
+        let resolution = model.profileResolution
+        let screens = screensPhrase(resolution.screens)
+        switch resolution.verdict {
         case .boundToDesktop(let name, let desktop):
             return L(
                 "profiles.which_loads.bound",

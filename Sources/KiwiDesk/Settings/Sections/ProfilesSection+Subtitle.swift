@@ -66,10 +66,13 @@ extension ProfilesSection {
             : L("profiles.screens.many", "%1$d screens", count)
     }
 
-    /// Shared with the preset cards' own space count — one pair
-    /// of keys for one noun, so the two surfaces cannot drift
-    /// per locale.
-    func spacesPhrase(_ count: Int) -> String {
+    /// The preset card counts spaces with the SAME two keys
+    /// (`PresetScreenCard.spaceCountPhrase`) — one noun, one
+    /// pair of keys, so the two surfaces cannot drift per
+    /// locale. The keys are what is shared, not this method: an
+    /// extension member of `ProfilesSection` is not something a
+    /// sibling view could call.
+    private func spacesPhrase(_ count: Int) -> String {
         count == 1
             ? L("profiles.spaces.one", "1 space")
             : L("profiles.spaces.many", "%1$d spaces", count)

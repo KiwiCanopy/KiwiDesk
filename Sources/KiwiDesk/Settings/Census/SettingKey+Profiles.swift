@@ -53,7 +53,7 @@ extension ProfilesKey {
                 .profiles,
                 .presets,
                 .atRest,
-                gate: .runtime(.screenCountMismatch)
+                gate: .runtime(.presetApplyUnavailable)
             )
         }
     }

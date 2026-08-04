@@ -150,12 +150,25 @@ struct ProfilesGateWiringTests {
         let squashed = SourceScan.stripComments(try read(name))
             .split(whereSeparator: \.isWhitespace)
             .joined()
+        // The snapshot carries the screen count WITH the verdict,
+        // so the needle is the whole value: reading a live count
+        // beside a snapshotted verdict is what let the sentence
+        // be assembled from two moments.
         #expect(
-            squashed.contains("model.profileVerdict"),
+            squashed.contains("model.profileResolution"),
             Comment(
                 rawValue:
-                    "\(name) no longer reads the model's verdict "
-                    + "snapshot"
+                    "\(name) no longer reads the model's "
+                    + "resolution snapshot"
+            )
+        )
+        #expect(
+            !squashed.contains("model.displays.count"),
+            Comment(
+                rawValue:
+                    "\(name) reads the display count live beside "
+                    + "a snapshotted verdict — one sentence, two "
+                    + "moments"
             )
         )
         #expect(

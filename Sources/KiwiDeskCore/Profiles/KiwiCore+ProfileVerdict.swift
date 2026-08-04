@@ -70,12 +70,21 @@ extension KiwiCore {
         case .countDefault(let profile):
             return .countDefault(name: profile.name)
         case .none:
+            // The SAME baseline-aware fallback the live path
+            // composes with, not `StandardProfiles.standard(for:)`
+            // — on the beginner ladder baseline a monitor change
+            // recomposes the LADDER (#485), which is
+            // `isStandard: false` and so can never be what
+            // `standard(for:)` returns. Asking the simpler query
+            // would name a workflow Standard while Starter is
+            // what actually composes, with the profile header
+            // two cards up already saying "Starter".
             guard
-                let standard = StandardProfiles.standard(
-                    for: displays.count
+                let composed = composeMonitorChangeFallback(
+                    displays: displays
                 )
             else { return .none }
-            return .builtInStandard(name: standard.name)
+            return .builtInStandard(name: composed.sourceName)
         }
     }
 }

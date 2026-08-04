@@ -60,9 +60,13 @@ struct ProfilesFamilyRows {
     /// nothing is plugged or unplugged.
     ///
     /// The ORDER lives here, with the expansion, rather than in
-    /// the view: `instanceCounts` can then hold what the screen
-    /// actually shows. A seam the views do not consult is a
-    /// seam whose guards test their own fixture.
+    /// the view, so the rule is stated once and is reachable
+    /// from a test (`ProfilesFamilyRowsTests`); that the views
+    /// actually call it is
+    /// `ProfilesGateWiringTests.viewsConsultTheFamilySeam`.
+    /// Note which guard holds which: `rows(for:)` and its census
+    /// parity are held over fixtures, and it is this static half
+    /// the screen consumes.
     static func orderedProfiles(
         _ summaries: [ProfileSummary]
     ) -> [ProfileSummary] {

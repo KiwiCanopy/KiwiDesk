@@ -145,9 +145,6 @@ enum SettingRuntimeGate: Hashable {
     /// The gaps master slider reads "mixed" while the per-edge
     /// values differ.
     case perEdgeValuesDiffer
-    /// Desktop bindings are global — dead while a stored
-    /// profile is being edited (switch to Live).
-    case editingStoredProfile
     /// The Desktop bindings are dead for EITHER of two
     /// independent reasons — a stored profile is being edited,
     /// or macOS's "Displays have separate Spaces" is on with
@@ -157,16 +154,25 @@ enum SettingRuntimeGate: Hashable {
     /// A DISJUNCTION, unlike the two conjunctions below, and the
     /// third entry in the register `SettingGate` keeps: one gate
     /// slot, a predicate with more than one arm. It is a case of
-    /// its own rather than `editingStoredProfile` because that
-    /// tag names one arm, and a row declaring it while greying
-    /// on two says something false about its own owner.
+    /// its own rather than a tag naming the stored-profile arm
+    /// alone, because a row declaring one arm while greying on
+    /// two says something false about its own owner.
     /// `ProfilesGates` resolves both arms and names them apart
     /// in its reason cases, since the sentences differ and only
     /// one of them has a fix the user can act on.
     case desktopBindingsUnavailable
-    /// Presets apply only when the connected screen count
-    /// matches the preset's.
-    case screenCountMismatch
+    /// A preset's Apply is dead for EITHER of two independent
+    /// reasons — the connected screen count does not match the
+    /// preset's, or a stored profile is being edited (applying
+    /// switches the LIVE layout, which editing a stored profile
+    /// never does).
+    ///
+    /// A disjunction, like `desktopBindingsUnavailable`, and in
+    /// the same register below. It replaced a
+    /// `screenCountMismatch` tag that named the count arm only
+    /// — which made the census claim an owner that was not the
+    /// whole owner while `ProfilesGates` greyed on both.
+    case presetApplyUnavailable
     /// The login item follows `SMAppService` status — the
     /// setter is guarded, the control greys (#342).
     case loginItemServiceStatus
@@ -194,9 +200,9 @@ enum SettingRuntimeGate: Hashable {
     /// tag carries the whole conjunction).
     case paletteGlowPairing
     /// The import row shows only while `init.lua` holds
-    /// bindings the GUI can adopt AND the live profile is
-    /// being edited (same one-slot conjunction:
-    /// `editingStoredProfile` is its other half).
+    /// bindings the GUI can adopt AND the LIVE config is the
+    /// edit target — one slot, so this tag carries both arms,
+    /// the not-editing-a-stored-profile half included.
     case luaImportAvailable
     /// The config defines a layer beyond `default`. Gates the
     /// Layers card's `.immediate` tier: with layers configured
@@ -215,11 +221,12 @@ enum SettingRuntimeGate: Hashable {
 /// values decide the grey — the exact predicate (resolved
 /// override chains, value comparisons) lives with the wiring,
 /// and gates on resolved values name every surfaced owner
-/// (#406: gate on RESOLVED, not global) — EXCEPT the three
+/// (#406: gate on RESOLVED, not global) — EXCEPT the four
 /// documented multi-arm slots, whose runtime tag carries the
 /// arms a single gate slot cannot: the two conjunctions
-/// (`paletteGlowPairing`, `luaImportAvailable`) and the one
-/// disjunction (`desktopBindingsUnavailable`). Each tag's own
+/// (`paletteGlowPairing`, `luaImportAvailable`) and the two
+/// disjunctions (`desktopBindingsUnavailable`,
+/// `presetApplyUnavailable`). Each tag's own
 /// docstring states its arms; a fourth joins this register in
 /// the same change that declares it, because a tag naming one
 /// arm of a two-arm predicate makes the census claim an owner
