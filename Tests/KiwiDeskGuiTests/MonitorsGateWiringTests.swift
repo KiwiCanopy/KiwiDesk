@@ -78,7 +78,13 @@ struct MonitorsGateWiringTests {
     func viewsConsultTheFamilySeam() throws {
         let consults: [String: [String]] = [
             "Components/Monitors/DisplayCard.swift": [
-                "rows.chips(on:display.fingerprint)"
+                // The ASSIGNMENT site, not the call: the bare
+                // call appears twice in this file, and the
+                // tooltip's copy satisfied this needle while the
+                // chips themselves were hand-rolled from
+                // `model.config.spacePins` — green on the whole
+                // suite (guard-prover, 2026-08-04).
+                "letassignments=rows.chips(on:display.fingerprint)"
             ],
             "Components/Monitors/FollowsMainTray.swift": [
                 "rows.trayChips"
@@ -103,6 +109,65 @@ struct MonitorsGateWiringTests {
                             + "re-derives its instances inline, "
                             + "and the census guards over the "
                             + "seam stop watching the screen"
+                    )
+                )
+            }
+        }
+    }
+
+    /// Every conditional BRANCH this area draws is named here,
+    /// not just every gate.
+    ///
+    /// This is the hole guard-prover opened on the first cut: the
+    /// resolver was consulted, the seam was called and the census
+    /// agreed — all of which the suites above check — while five
+    /// separate `if`s inside `body` could each be deleted with
+    /// the whole 2813-test suite green. A surfacing gate leaves
+    /// no greyed control to assert on, so nothing observed
+    /// whether the view acted on the answer it was given: the
+    /// orphan card's condition, the two notes, the `+n` and the
+    /// tray's own gate all rendered by nothing but hope.
+    ///
+    /// Stated limit: a needle proves the branch is WRITTEN, not
+    /// that it draws what it should — that half needs the eye.
+    @Test("every surfacing branch is drawn, not just resolved")
+    func surfacingBranchesAreDrawn() throws {
+        let draws: [String: [String]] = [
+            "Sections/MonitorsSection.swift": [
+                // The orphan card's own surfacing condition, fed
+                // from the live orphans rather than a constant.
+                "hasOrphanedPins:!rows.orphans.isEmpty",
+                // The two notes that say what the picture cannot
+                // draw. Each is the ONLY consumer of its
+                // derivation, so deleting the `if` retires the
+                // whole promise silently.
+                "MonitorArrangement.isApproximate(rows.displays)",
+                "rows.hasAmbiguousDisplays",
+            ],
+            "Components/Monitors/DisplayCard.swift": [
+                // The `+n` itself, not merely the arithmetic
+                // behind it: `cardCountsOverflow` stayed green
+                // with the marker deleted and the chips clipped
+                // again.
+                "split.overflow>0",
+                "overflowChip(",
+            ],
+            "Components/Monitors/MonitorsPicture.swift": [
+                // `.mainSpaces`' census gate reaching the tray.
+                "ifshowsTray,"
+            ],
+        ]
+        for (name, needles) in draws {
+            let source = try squashed(name)
+            for needle in needles {
+                #expect(
+                    source.contains(needle),
+                    Comment(
+                        rawValue:
+                            "\(name) no longer draws `\(needle)` "
+                            + "— the branch is gone and every "
+                            + "resolver and seam guard stays "
+                            + "green without it"
                     )
                 )
             }
@@ -152,11 +217,19 @@ struct MonitorsGateWiringTests {
     /// under the picture are the same claim about the same
     /// display, and two copies is how a tooltip comes to disagree
     /// with the caption beside it.
+    ///
+    /// The author's half reads STRIPPED source. Reading it raw
+    /// let a deleted branch pass on the comment left behind
+    /// (`// was: monitors.selection.showing`), so the guard could
+    /// not tell a call site from a mention of one (guard-prover,
+    /// 2026-08-04). The non-author halves stay raw on purpose:
+    /// there a comment quoting the key reds, which is fail-closed
+    /// and cheap to fix.
     @Test("the readout sentence is authored once")
     func readoutIsAuthoredOnce() throws {
         let author =
             "Components/Monitors/MonitorReadout.swift"
-        let help = try read(author)
+        let help = SourceScan.stripComments(try read(author))
         for key in [
             "monitors.selection.one",
             "monitors.selection.many",

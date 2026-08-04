@@ -132,7 +132,12 @@ struct MonitorsCensusRenderTests {
         // it: an enumerator over a renamed directory yields [] and
         // every check below would pass for having looked at
         // nothing.
-        #expect(files.count >= 10)
+        //
+        // Tight, not merely non-zero: at a floor of 10 the whole
+        // `Sections/` half could stop being scanned and the
+        // Components half alone would still clear it
+        // (guard-prover, 2026-08-04).
+        #expect(files.count >= 13)
         for file in files {
             let source = SourceScan.blankingCommentsAndLiterals(
                 try String(contentsOf: file, encoding: .utf8)

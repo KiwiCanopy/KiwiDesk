@@ -50,12 +50,15 @@ enum MonitorArrangement {
         var tray: CGRect?
         var trayIsAbove = true
         var contentSize: CGSize = .zero
-        /// True when the ratio cap pushed some display FAR
-        /// enough below true scale for the page to say so — see
-        /// `perceptibleClamp`. Not the same question as a
-        /// `Drawn.isClamped`, which is true of any shrink at all.
-        var isApproximate = false
     }
+
+    // Deliberately NOT a `Layout` field: whether the picture is
+    // approximate is asked by the PAGE, which has the displays
+    // but not the laid-out picture, and a field beside the static
+    // would be a second answer that agrees only by construction —
+    // with the guards asserting the field while the screen read
+    // the static (guard-prover, 2026-08-04). One answer:
+    // `isApproximate(_:)` below.
 
     /// The largest ratio between the longest sides of any two
     /// drawn displays.
@@ -143,13 +146,7 @@ enum MonitorArrangement {
                 isClamped: entry.factor < 1
             )
         }
-        return MonitorTray.fold(
-            cards: cards,
-            main: mainID,
-            isApproximate: capped.contains {
-                $0.factor < perceptibleClamp
-            }
-        )
+        return MonitorTray.fold(cards: cards, main: mainID)
     }
 
     /// Whether the picture is far enough from true scale for the

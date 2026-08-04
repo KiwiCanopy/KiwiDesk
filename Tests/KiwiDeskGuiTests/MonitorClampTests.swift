@@ -75,7 +75,6 @@ struct MonitorClampTests {
             ),
         ]
         let result = layout(displays)
-        #expect(!result.isApproximate)
         #expect(!MonitorArrangement.isApproximate(displays))
         #expect(result.displays.allSatisfy { !$0.isClamped })
         let small = try rect(result, 1)
@@ -113,7 +112,6 @@ struct MonitorClampTests {
         // Capped — the geometry does not lie about that…
         #expect(result.displays.contains { $0.isClamped })
         // …and silent, because 1.6% is not something to caption.
-        #expect(!result.isApproximate)
         #expect(!MonitorArrangement.isApproximate(displays))
     }
 
@@ -136,7 +134,6 @@ struct MonitorClampTests {
             ),
         ]
         let result = layout(displays)
-        #expect(result.isApproximate)
         #expect(MonitorArrangement.isApproximate(displays))
         let small = try rect(result, 1)
         let wide = try rect(result, 2)
@@ -217,40 +214,66 @@ struct MonitorClampTests {
     /// exists to fit rather than chosen — so a card at the floor
     /// can always show a chip, and a five-display desk is not
     /// forced into a scrolling picture by a comfort margin.
+    /// Bounded from BOTH sides. The first cut asserted only
+    /// `capacity == 1`, which caps the floor from above and
+    /// leaves it free to fall to the padding — a card one point
+    /// too narrow for the chip it exists to fit passed
+    /// (guard-prover, 2026-08-04). The lower bound is the claim
+    /// that matters: at the floor, a chip actually fits.
     @Test("the floor is exactly one chip's worth")
     func floorFitsOneChip() {
         let minimum = MonitorArrangement.minimumCard
+        let area = MonitorCardChips.chipArea(in: minimum)
+        // Lower bound: one chip fits, in both axes.
+        #expect(area.width >= MonitorCardChips.minChipWidth)
+        #expect(area.height >= MonitorCardChips.chipHeight)
+        // Upper bound: exactly one — the floor is the boundary,
+        // not a comfortable margin past it.
         #expect(MonitorCardChips.capacity(in: minimum) == 1)
-        // One point short in either axis and it would not — the
-        // floor is at the boundary, not comfortably past it.
-        let narrower = CGSize(
-            width: minimum.width - MonitorCardChips.minChipWidth,
-            height: minimum.height
-        )
         #expect(
-            MonitorCardChips.chipArea(in: narrower).width
-                < MonitorCardChips.minChipWidth
+            area.width
+                < MonitorCardChips.minChipWidth * 2
+                + MonitorCardChips.spacing
         )
     }
 
-    /// A canvas roomy enough for the floor leaves the fit scale
+    /// A canvas roomy enough for the floor leaves the FIT scale
     /// in charge — the floor raises the scale, it does not pin
     /// it.
+    ///
+    /// Asserted as the fit itself, not as "big enough": a picture
+    /// that always floored satisfied both of the first cut's
+    /// bounds, since a floored 2560×1440 is still wider than the
+    /// minimum card and still inside the canvas (guard-prover,
+    /// 2026-08-04). One display fills its canvas in the bound
+    /// axis — here the height — and nothing but that equality
+    /// distinguishes the two scales.
     @Test("a roomy canvas is fitted, not floored")
     func fitWinsWhenThereIsRoom() throws {
         let displays = [
             display(1, "Desk", x: 0, y: 0, width: 2560, height: 1440)
         ]
         let result = layout(displays)
+        let card = try rect(result, 1)
+        // 2560×1440 into 700×240 is height-bound, so a fitted
+        // picture is exactly the canvas tall.
+        #expect(abs(card.height - canvas.height) < 0.001)
         #expect(result.contentSize.width <= canvas.width + 0.001)
         #expect(
-            try rect(result, 1).width
-                > MonitorArrangement.minimumCard.width
+            card.width > MonitorArrangement.minimumCard.width
         )
     }
 
     // MARK: - Degenerate input
 
+    /// A smoke test, and stated as one rather than mistaken for
+    /// coverage: the empty picture is defended twice — the
+    /// `drawable.isEmpty` guard in `layout` and `fold`'s own
+    /// `cards.isEmpty` — and with either removed `union([])` is
+    /// `.zero` and no anchor is found, so the empty `Layout`
+    /// comes back anyway. No single mutation reds it
+    /// (guard-prover, 2026-08-04). It is here to catch a crash or
+    /// a NaN, not to hold an invariant.
     @Test("no displays draws nothing")
     func emptyDrawsNothing() {
         let result = layout([])

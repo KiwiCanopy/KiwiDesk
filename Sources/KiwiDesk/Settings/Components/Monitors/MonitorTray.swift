@@ -35,8 +35,7 @@ enum MonitorTray {
     /// passes a live id, and the nil case is the empty picture.
     static func fold(
         cards: [MonitorArrangement.Drawn],
-        main: DisplayID?,
-        isApproximate: Bool
+        main: DisplayID?
     ) -> MonitorArrangement.Layout {
         guard !cards.isEmpty else {
             return MonitorArrangement.Layout()
@@ -71,8 +70,7 @@ enum MonitorTray {
             },
             tray: tray?.rect.offsetBy(dx: shift.x, dy: shift.y),
             trayIsAbove: tray?.isAbove ?? true,
-            contentSize: bounds.size,
-            isApproximate: isApproximate
+            contentSize: bounds.size
         )
     }
 
