@@ -80,11 +80,17 @@ struct SettingsHeaderBar: View {
         HStack(spacing: 12) {
             if let destination {
                 backChip
+                // NO `layoutPriority` on the title: at the 720 pt
+                // hard minimum something in this row has to give,
+                // and the order must be search field down to its
+                // floor, then the TITLE truncates — never a chip
+                // or the segment clipped. A priority here inverts
+                // that and drops a control, which the responsive
+                // rule forbids ("controls never", 17a).
                 Text(destination.title)
                     .font(.title2.weight(.bold))
                     .foregroundStyle(SettingsTheme.ink)
                     .lineLimit(1)
-                    .layoutPriority(1)
             } else {
                 identity
             }

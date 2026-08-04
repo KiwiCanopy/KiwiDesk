@@ -110,16 +110,21 @@ struct SettingsSlider: View {
         )
     }
 
-    /// The thumb riding the accent-filled track — so it is
-    /// `onAccentKnob`, the one token in the 16b table that flips
-    /// between appearances: white on light, and dark on the dark
-    /// appearance, where a white knob glares against the chrome
-    /// around it. A clear Liquid Glass knob was tried and
+    /// The native white thumb, on every macOS and in BOTH
+    /// appearances. A clear Liquid Glass knob was tried and
     /// dropped: it refracted the accent fill sliding beneath it,
     /// tinting the knob blue.
+    ///
+    /// Deliberately NOT `SettingsTheme.onAccentKnob`, which was
+    /// tried in the turn-16b skin and reverted: that token flips
+    /// to near-black on the dark appearance, and on this control
+    /// it rendered as a dark green thumb (owner, 2026-08-04). The
+    /// table's note about a white knob glaring is about a knob on
+    /// a LARGE accent field, not a 20 pt thumb whose whole job is
+    /// to be the brightest thing on the track.
     private var knob: some View {
         Capsule()
-            .fill(SettingsTheme.onAccentKnob)
+            .fill(.white)
             .overlay(
                 Capsule().strokeBorder(
                     Color.black.opacity(0.1),

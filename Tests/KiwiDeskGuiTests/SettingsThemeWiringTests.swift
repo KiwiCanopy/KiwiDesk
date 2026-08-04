@@ -39,7 +39,6 @@ struct SettingsThemeWiringTests {
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar.swift",
         "danger": "KeyRecorderRejectionRow.swift",
-        "onAccentKnob": "SettingsSlider.swift",
     ]
 
     /// Token → why nothing draws it yet. Each ships with the
@@ -53,6 +52,11 @@ struct SettingsThemeWiringTests {
             "AppKit picks the label ink on a tinted prominent "
             + "button; the first site that draws it explicitly "
             + "is Phase 4's save pill",
+        "onAccentKnob":
+            "tried on the slider thumb in this lane and reverted "
+            + "— it flips near-black on dark and rendered a dark "
+            + "green thumb; the table means a knob on a LARGE "
+            + "accent field, which nothing draws until Phase 4",
     ]
 
     private var settingsDir: URL {
