@@ -1,45 +1,77 @@
 import KiwiDeskCore
 
 /// What one display currently holds, in a sentence (#678 Phase 3,
-/// turn 13b): "2 spaces here · code is showing".
+/// turn 13b): "2 spaces here · space code is showing".
 ///
-/// Authored once and read twice — the line under the picture
-/// says it, and the selected card speaks it to VoiceOver and
-/// shows it on hover. Two copies of one sentence is how a
-/// tooltip and a caption come to describe the same display
-/// differently.
+/// Authored once and read twice — the line under the picture says
+/// it, and the card speaks it to VoiceOver and shows it on hover.
+/// Two copies of one sentence is how a tooltip and a caption come
+/// to describe the same display differently.
+///
+/// **Whole sentences, never a composed one.** The first cut built
+/// this by interpolating the count PHRASE into a second frame
+/// ("%1$@ · %2$@ is showing"), which asks the translator of the
+/// frame to write around a blob they cannot see and the
+/// translator of the phrase not to know they are inside one. Each
+/// case below is a complete sentence a translator can read
+/// (localization audit, 2026-08-04).
+///
+/// The space id is named — "space %1$@" — rather than dropped in
+/// bare: ids are commonly numeric, and "3 spaces here · 2 is
+/// showing" is two numerals with no noun on either.
 ///
 /// **"is showing" is per display and stays that way.** It comes
-/// from `WorkspaceManager.activeSpace(on:)`, which is the single
-/// truth the tiler lays out per display and the bars read — a
-/// KiwiDesk space, not a macOS Desktop. It is therefore
-/// independent of macOS's "Displays have separate Spaces", which
-/// gates the Desktop→profile bindings in Profiles and nothing
-/// here.
+/// from `WorkspaceManager.activeSpace(on:)`, the single truth the
+/// tiler lays out per display and the bars read — a KiwiDesk
+/// space, not a macOS Desktop. It is therefore independent of
+/// macOS's "Displays have separate Spaces", which gates the
+/// Desktop→profile bindings in Profiles and nothing here.
 @MainActor
 enum MonitorReadout {
+    /// `held` counts what the display HOLDS, which on the main
+    /// display includes the spaces that follow main — they are on
+    /// that screen right now, and counting only the pinned and
+    /// auto-placed chips made a desk where everything follows
+    /// main read "0 spaces here · space code is showing" on every
+    /// card (localization audit, 2026-08-04).
     static func sentence(
         held: Int,
         showing: SpaceID?
     ) -> String {
-        // A localized PHRASE per count, never "%1$d space(s)":
-        // an English plural glued to a number reads "1 spaces" in
-        // the language it was written for and cannot be declined
-        // in the ten it was not.
-        let phrase =
-            held == 1
-            ? L("monitors.selection.one", "1 space here")
-            : L(
+        guard let showing else { return silent(held) }
+        switch held {
+        case 1:
+            return L(
+                "monitors.selection.showing.one",
+                "1 space here · space %1$@ is showing",
+                showing.raw
+            )
+        default:
+            return L(
+                "monitors.selection.showing.many",
+                "%1$d spaces here · space %2$@ is showing",
+                held,
+                showing.raw
+            )
+        }
+    }
+
+    /// A localized PHRASE per count, never "%1$d space(s)": an
+    /// English plural glued to a number reads "1 spaces" in the
+    /// language it was written for and cannot be declined in the
+    /// ten it was not.
+    private static func silent(_ held: Int) -> String {
+        switch held {
+        case 0:
+            return L("monitors.selection.none", "No spaces here")
+        case 1:
+            return L("monitors.selection.one", "1 space here")
+        default:
+            return L(
                 "monitors.selection.many",
                 "%1$d spaces here",
                 held
             )
-        guard let showing else { return phrase }
-        return L(
-            "monitors.selection.showing",
-            "%1$@ · %2$@ is showing",
-            phrase,
-            showing.raw
-        )
+        }
     }
 }

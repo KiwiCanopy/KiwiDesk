@@ -42,10 +42,12 @@ struct MonitorsGateWiringTests {
     @Test("each gate is wired to the resolver, not a copy")
     func rowsConsultTheResolver() throws {
         let consults: [String: [String]] = [
+            // One consult, not three: the picture's rows carry no
+            // gate of their own, because a second inverted copy
+            // of the banner's condition is a thing that can drift
+            // from it (architect review, 2026-08-04).
             "Sections/MonitorsSection.swift": [
-                "inertReason(for:.monitors(.placementUnavailable))",
-                "inertReason(for:.monitors(.spacePins))",
-                "inertReason(for:.monitors(.mainSpaces))",
+                "inertReason(for:.monitors(.placementUnavailable))"
             ],
             "Sections/MonitorsSection+Details.swift": [
                 "inertReason(for:.monitors(.orphanPinClear))"
@@ -87,7 +89,15 @@ struct MonitorsGateWiringTests {
                 "letassignments=rows.chips(on:display.fingerprint)"
             ],
             "Components/Monitors/FollowsMainTray.swift": [
-                "rows.trayChips"
+                "rows.trayChips",
+                // The tray holds chips in a fixed band exactly as
+                // a card does, so it takes the same overflow
+                // arithmetic. It was the one unbounded chip
+                // container left, clipping every space past its
+                // first row along with that space's clear button
+                // and menu (architect review, 2026-08-04).
+                "MonitorCardChips.split(spaces,in:size)",
+                "overflowChip(spaces,split.overflow)",
             ],
             "Sections/MonitorsSection+Details.swift": [
                 "rows.orphans",
@@ -161,9 +171,12 @@ struct MonitorsGateWiringTests {
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
             ],
-            "Components/Monitors/MonitorsPicture.swift": [
-                // `.mainSpaces`' census gate reaching the tray.
-                "ifshowsTray,"
+            "Sections/MonitorsSection+Details.swift": [
+                // The orphan row's spoken label: its value is a
+                // bare fingerprint hash, which VoiceOver steps
+                // through with no context unless the row says
+                // what it is (docs review, 2026-08-04).
+                "accessibilityLabel("
             ],
         ]
         for (name, needles) in draws {

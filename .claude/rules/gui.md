@@ -131,8 +131,8 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles and Monitors render from it now** (#678 Phases
-2-3): each
+Layouts, Profiles and Monitors render from it now** (#678
+Phases 2-3): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MonitorsRowOrder` /
 `MonitorsCensusRenderTests` is the newest pair), so a row in a
@@ -153,9 +153,8 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders, Spaces & Layouts, Profiles and Monitors
-push that
-edge wider: EVERY container in them is bespoke
+General, Gaps & Borders, Spaces & Layouts, Profiles and
+Monitors push that edge wider: EVERY container in them is bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
 `SpacesRowOrder.bespokeContainers` /
@@ -186,11 +185,14 @@ draws — a row per saved profile, per Desktop, per preset, held by
 `instanceCounts` in `ProfilesCensusRenderTests` because set
 equality over `SettingKey` cannot see a collapse to one row.
 Monitors has the pair too (`MonitorsFamilyRows`), and adds the
-case where several families must be read TOGETHER: its three chip
-families partition the declared spaces — carded, following main,
-or waiting on an absent monitor — so each one's own count can be
-right while a space falls through all three, and
-`everySpaceLandsExactlyOnce` is the only thing that sees it. An
+case where several families must be read TOGETHER: its three
+placement families partition the declared spaces — carded (a
+chip), following main (a chip in the tray), or waiting on an
+absent monitor (a row of its own) — so each one's own count can
+be right while a space falls through all three. Only a guard
+over the UNION sees that, so a family joining or leaving that
+partition joins `MonitorsCensusRenderTests`'
+`everySpaceLandsExactlyOnce` in the same change. An
 area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer

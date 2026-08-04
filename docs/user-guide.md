@@ -783,8 +783,8 @@ non-Retina one.
 
 **Drag space chips** between displays to pin a space to one. A
 pinned space always appears on that monitor when the profile loads.
-Every chip also has a menu — click it, or right-click it — with the
-same moves, which is the route to use from the keyboard.
+Every chip is also a menu — click it for the same moves, which is
+the route to use from the keyboard.
 
 **Drag onto the dashed "Follows main display" tray** (it hangs off
 whichever display is currently main) to give a space the **Main
@@ -797,8 +797,9 @@ monitors. A filled chip is one you placed; its clear button puts it
 back to automatic.
 
 **Click a display** to see what it holds — how many spaces live
-there, and which one is showing right now. A display with more
-chips than fit shows a **+n** you can click for the rest.
+there, and which one is showing right now. A display too small to
+draw all its chips shows a **+n**; click it for every space on
+that display, each chip working exactly as it does on the card.
 
 Two notes appear only when they apply:
 
@@ -822,9 +823,9 @@ replaced by a note saying so — the profile's other sections still
 edit normally.
 
 A space pinned to a monitor that is not attached gets its own card
-below the picture, with a **Back to automatic** button; there is no
-rectangle for absent hardware, so this is the only place that pin
-can be seen or cleared.
+below the picture, with a **Back to automatic placement** button;
+there is no rectangle for absent hardware, so this is the only
+place that pin can be seen or cleared.
 
 Each monitor shows its own space at once, and the **focused
 monitor** is simply the one you last clicked — clicking a window

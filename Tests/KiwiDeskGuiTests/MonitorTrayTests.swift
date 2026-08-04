@@ -56,7 +56,8 @@ struct MonitorTrayTests {
         )
         let tray = try #require(result.tray)
         let main = try card(result, 1)
-        #expect(result.trayIsAbove)
+        // Above is readable from the rects themselves — which
+        // is why the layout carries no separate flag saying so.
         #expect(tray.maxY <= main.minY)
         // Hung off that display, not floated over the picture:
         // the two share a centre line.
@@ -89,7 +90,6 @@ struct MonitorTrayTests {
         )
         let tray = try #require(result.tray)
         let main = try card(result, 2)
-        #expect(!result.trayIsAbove)
         #expect(tray.minY >= main.maxY)
         for drawn in result.displays {
             #expect(!drawn.rect.intersects(tray))
@@ -116,6 +116,58 @@ struct MonitorTrayTests {
                         + MonitorArrangement.trayGap)
             ) < 0.001
         )
+    }
+
+    /// The whole picture — the tray band included — fits the
+    /// canvas it was given.
+    ///
+    /// The tray is added AFTER the displays are scaled, so
+    /// fitting the displays alone overflowed by exactly the band
+    /// on every height-bound desk, which is nearly all of them:
+    /// one display, two side by side, a laptop under a desk
+    /// display. Both of this file's other assertions held while
+    /// that shipped (code review, 2026-08-04).
+    @Test("the picture fits its canvas, tray and all")
+    func contentFitsTheCanvas() throws {
+        let canvas = CGSize(width: 700, height: 240)
+        for displays in [
+            [display(1, x: 0, y: 0, width: 2560, height: 1440)],
+            [
+                display(1, x: 0, y: 0, width: 2560, height: 1440),
+                display(
+                    2,
+                    x: 2560,
+                    y: 0,
+                    width: 1512,
+                    height: 982
+                ),
+            ],
+            [
+                display(1, x: 0, y: 0, width: 2560, height: 1440),
+                display(
+                    2,
+                    x: 500,
+                    y: -982,
+                    width: 1512,
+                    height: 982
+                ),
+            ],
+        ] {
+            let result = MonitorArrangement.layout(
+                displays: displays,
+                mainID: displays[0].id,
+                canvas: canvas
+            )
+            #expect(
+                result.contentSize.height <= canvas.height + 0.001,
+                Comment(
+                    rawValue:
+                        "\(displays.count) display(s) overflow "
+                        + "the canvas by "
+                        + "\(result.contentSize.height - canvas.height)"
+                )
+            )
+        }
     }
 
     /// A tray narrower than one chip is a drop target nothing

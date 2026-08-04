@@ -55,11 +55,14 @@ struct MonitorsSection: View {
 
     // MARK: - The picture
 
-    /// The picture and the banner that stands in for it are two
-    /// rows of one container, each asking its OWN census gate —
-    /// `MonitorsGates` is what keeps them from both appearing or
-    /// both vanishing, rather than an `if/else` here that would
-    /// be a second copy of the condition.
+    /// The banner asks its census gate; the picture is its
+    /// complement.
+    ///
+    /// ONE consult, not two: the cards carry no gate of their own
+    /// (see `SettingKey+Monitors`), because a second, inverted
+    /// copy of the banner's condition is a thing that can drift
+    /// from it. So the `else` here is the complement by
+    /// construction rather than a re-derivation.
     @ViewBuilder private func placementCard(
         rows: MonitorsFamilyRows,
         gates: MonitorsGates
@@ -71,18 +74,14 @@ struct MonitorsSection: View {
                 for: .monitors(.placementUnavailable)
             ) == nil {
                 placementUnavailable
-            }
-            if gates.inertReason(for: .monitors(.spacePins))
-                == nil
-            {
-                picture(rows: rows, gates: gates)
+            } else {
+                picture(rows: rows)
             }
         }
     }
 
     @ViewBuilder private func picture(
-        rows: MonitorsFamilyRows,
-        gates: MonitorsGates
+        rows: MonitorsFamilyRows
     ) -> some View {
         if rows.displays.isEmpty {
             Text(
@@ -96,10 +95,7 @@ struct MonitorsSection: View {
             MonitorsPicture(
                 model: model,
                 rows: rows,
-                selection: $selection,
-                showsTray: gates.inertReason(
-                    for: .monitors(.mainSpaces)
-                ) == nil
+                selection: $selection
             )
             if MonitorArrangement.isApproximate(rows.displays) {
                 note(clampedNote)
@@ -145,10 +141,12 @@ struct MonitorsSection: View {
     /// with no explanation. The list this page replaced hid the
     /// symptom; a picture cannot.
     private var ambiguousNote: String {
+        // "Some", not "two": the predicate is true of any
+        // duplicate count, three included.
         L(
             "monitors.picture.ambiguous",
-            "Two of these displays look identical to KiwiDesk, "
-                + "so a space pinned to one may open on either."
+            "Some of these displays look identical to KiwiDesk, "
+                + "so a space pinned to one may open on another."
         )
     }
 
@@ -174,7 +172,10 @@ struct MonitorsSection: View {
         rows: MonitorsFamilyRows
     ) -> String {
         MonitorReadout.sentence(
-            held: rows.chips(on: display.fingerprint).count,
+            held: rows.held(
+                on: display,
+                isMain: model.mainDisplay?.id == display.id
+            ),
             showing: model.showingSpace(on: display.id)
         )
     }

@@ -12,19 +12,19 @@ extension MonitorsKey {
     var placement: SettingPlacement {
         switch self {
         case .spacePins, .mainSpaces:
-            // The picture's two row families are WITHHELD by the
-            // same condition that surfaces the banner below: with
-            // the profile's monitors away there are no frames to
-            // draw cards from, and the banner stands in for them.
-            // Recording the gate here is what keeps that pairing
-            // knowable from the census rather than only from the
-            // view's if/else (#678 turn 13b).
-            return .row(
-                .monitors,
-                .spacePlacement,
-                .atRest,
-                gate: .runtime(.monitorsDisconnected)
-            )
+            // Ungated on purpose. These were briefly given
+            // `.runtime(.monitorsDisconnected)` — the condition
+            // that surfaces the banner below — to record why the
+            // picture disappears. It records the wrong thing: a
+            // census gate reads "shows while true" everywhere
+            // else in the enum, so the same tag on the banner and
+            // on the rows it REPLACES declares one condition with
+            // two opposite meanings, knowable only inside the
+            // resolver. The banner's own gate already says the
+            // picture is unavailable; these rows need no second,
+            // inverted copy of it (#678 turn 13b, architect
+            // review).
+            return .row(.monitors, .spacePlacement, .atRest)
         case .orphanPinClear:
             return .row(
                 .monitors,

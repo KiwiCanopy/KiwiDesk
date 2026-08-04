@@ -15,7 +15,15 @@ import SwiftUI
 struct FollowsMainTray: View {
     @ObservedObject var model: SettingsModel
     let rows: MonitorsFamilyRows
+    /// The tray's drawn size, from the arrangement — it holds
+    /// chips in a fixed band exactly as a card does, so it takes
+    /// the same overflow arithmetic. Without it the tray was the
+    /// one unbounded chip container left, clipping every space
+    /// past its first row along with that space's clear button
+    /// and menu (architect review, 2026-08-04).
+    let size: CGSize
     @State private var targeted = false
+    @State private var showingOverflow = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -83,14 +91,60 @@ struct FollowsMainTray: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            WrapChips(spaces) { space in
-                SpaceAssignmentChip(
-                    model: model,
-                    space: space,
-                    kind: .main,
-                    displays: rows.orderedDisplays
-                )
+            let split = MonitorCardChips.split(spaces, in: size)
+            HStack(
+                alignment: .top,
+                spacing: MonitorCardChips.spacing
+            ) {
+                WrapChips(split.shown) { space in
+                    chip(space)
+                }
+                if split.overflow > 0 {
+                    overflowChip(spaces, split.overflow)
+                }
             }
+        }
+    }
+
+    private func chip(_ space: SpaceID) -> some View {
+        SpaceAssignmentChip(
+            model: model,
+            space: space,
+            kind: .main,
+            displays: rows.orderedDisplays
+        )
+    }
+
+    /// The chips the tray has no room for, reachable rather than
+    /// clipped away — the same offer the display cards make.
+    private func overflowChip(
+        _ all: [SpaceID],
+        _ count: Int
+    ) -> some View {
+        Button {
+            showingOverflow = true
+        } label: {
+            Text(L("monitor_card.more_spaces", "+%1$d", count))
+                .font(.caption)
+                .fontWeight(.medium)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Capsule().fill(.tint.opacity(0.15)))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            L(
+                "monitor_card.more_spaces.axlabel",
+                "%1$d more spaces on this display",
+                count
+            )
+        )
+        .popover(isPresented: $showingOverflow) {
+            WrapChips(all) { space in
+                chip(space)
+            }
+            .frame(width: 240)
+            .padding(12)
         }
     }
 

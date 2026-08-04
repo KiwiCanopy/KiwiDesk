@@ -64,12 +64,10 @@ enum MonitorTray {
                     rect: $0.rect.offsetBy(
                         dx: shift.x,
                         dy: shift.y
-                    ),
-                    isClamped: $0.isClamped
+                    )
                 )
             },
             tray: tray?.rect.offsetBy(dx: shift.x, dy: shift.y),
-            trayIsAbove: tray?.isAbove ?? true,
             contentSize: bounds.size
         )
     }

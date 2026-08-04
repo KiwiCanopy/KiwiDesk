@@ -48,6 +48,18 @@ struct BadgeChip: View {
 
 /// A simple left-to-right flowing row of chips that wraps to the
 /// next line when it runs out of width.
+/// Geometry every chip list shares.
+///
+/// Owned HERE, at the shared widget, not in one area's component:
+/// `WrapChips` is used by Monitors, App Rules and Layout
+/// Defaults, so taking its gap from `MonitorCardChips` let a
+/// Monitors retune silently move the other two. The card-capacity
+/// arithmetic is this constant's consumer, not its owner
+/// (architect review, 2026-08-04).
+enum ChipMetrics {
+    static let spacing: CGFloat = 6
+}
+
 /// `Item: Hashable` and identity by VALUE, not by index: a chip
 /// list that re-identified its children by position handed the
 /// wrong view state to the wrong chip whenever membership changed
@@ -65,7 +77,7 @@ struct WrapChips<Item: Hashable, Chip: View>: View {
     }
 
     var body: some View {
-        FlowLayout(spacing: MonitorCardChips.spacing) {
+        FlowLayout(spacing: ChipMetrics.spacing) {
             ForEach(items, id: \.self) { item in
                 chip(item)
             }

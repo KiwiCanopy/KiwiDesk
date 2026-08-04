@@ -30,12 +30,14 @@ import KiwiDeskCore
 /// can look for).
 enum MonitorArrangement {
     /// One display's drawn rectangle, in canvas coordinates.
+    ///
+    /// Carries no per-display "was I clamped" flag: nothing draws
+    /// one, and a field only the tests read is the second answer
+    /// this file argues against below — the page asks
+    /// `isApproximate(_:)`.
     struct Drawn: Equatable, Identifiable {
         let display: Display
         let rect: CGRect
-        /// True when the ratio cap shrank this one below true
-        /// scale.
-        let isClamped: Bool
 
         var id: DisplayID { display.id }
     }
@@ -46,9 +48,11 @@ enum MonitorArrangement {
     struct Layout: Equatable {
         var displays: [Drawn] = []
         /// The dashed tray's rectangle, or nil when no display is
-        /// main (an empty arrangement).
+        /// main (an empty arrangement). The rect is the whole
+        /// answer — which SIDE of its display the tray landed on
+        /// is readable from it, and a stored flag beside it would
+        /// be a second answer nothing draws.
         var tray: CGRect?
-        var trayIsAbove = true
         var contentSize: CGSize = .zero
     }
 
@@ -101,6 +105,7 @@ enum MonitorArrangement {
             + MonitorCardChips.minChipWidth,
         height: MonitorCardChips.cardPadding * 2
             + MonitorCardChips.headerHeight
+            + MonitorCardChips.stackSpacing
             + MonitorCardChips.chipHeight
     )
 
@@ -133,7 +138,21 @@ enum MonitorArrangement {
         let scale = self.scale(
             for: capped.map(\.rect.size),
             bounds: bounds.size,
-            canvas: canvas
+            // The tray is added AFTER scaling, so the canvas the
+            // displays are fitted into is the canvas minus the
+            // band it will occupy. Fitting the displays alone
+            // overflowed by exactly that band on every
+            // height-bound desk — which is one display, two side
+            // by side, or a laptop under a desk display, i.e.
+            // nearly all of them. One band whichever side the
+            // tray lands on, since it never takes both.
+            canvas: CGSize(
+                width: canvas.width,
+                height: max(
+                    1,
+                    canvas.height - trayHeight - trayGap
+                )
+            )
         )
         let cards = capped.map { entry in
             Drawn(
@@ -142,8 +161,7 @@ enum MonitorArrangement {
                     entry.rect,
                     in: bounds,
                     scale: scale
-                ),
-                isClamped: entry.factor < 1
+                )
             )
         }
         return MonitorTray.fold(cards: cards, main: mainID)

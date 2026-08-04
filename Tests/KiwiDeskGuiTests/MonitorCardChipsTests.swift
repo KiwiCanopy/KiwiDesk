@@ -21,6 +21,57 @@ struct MonitorCardChipsTests {
         #expect(MonitorCardChips.capacity(in: floor) == 1)
     }
 
+    /// The chip area accounts for the card's stack spacing, not
+    /// just its padding and header.
+    ///
+    /// Omitting it overstated the area at every card size, so
+    /// `capacity` could claim a row that then clipped — the clip
+    /// the `+n` exists to prevent, reintroduced invisibly because
+    /// the floor's own guard asserts against this same formula
+    /// (code review, 2026-08-04). Asserted against the card's
+    /// real chrome rather than against the formula.
+    @Test("the chip area counts the card's stack spacing")
+    func chipAreaCountsEveryGap() {
+        let card = CGSize(width: 200, height: 200)
+        let chrome =
+            MonitorCardChips.cardPadding * 2
+            + MonitorCardChips.headerHeight
+            + MonitorCardChips.stackSpacing
+        #expect(
+            MonitorCardChips.chipArea(in: card).height
+                == card.height - chrome
+        )
+        #expect(MonitorCardChips.stackSpacing > 0)
+    }
+
+    /// The overflow marker never names ONE hidden chip, because
+    /// it takes a slot of its own — which is why
+    /// `monitor_card.more_spaces.axlabel` has no singular. Pinned
+    /// as the general property rather than at the two counts the
+    /// other tests happen to use (localization audit,
+    /// 2026-08-04).
+    @Test("an overflow is never exactly one")
+    func overflowIsNeverOne() {
+        for count in 0..<12 {
+            for side in [floor.width, 120.0, 260.0] {
+                let card = CGSize(width: side, height: floor.height)
+                let split = MonitorCardChips.split(
+                    Array(0..<count),
+                    in: card
+                )
+                #expect(
+                    split.overflow == 0 || split.overflow >= 2,
+                    Comment(
+                        rawValue:
+                            "\(count) chips in \(card) hid "
+                            + "exactly one — the label has no "
+                            + "singular"
+                    )
+                )
+            }
+        }
+    }
+
     /// Capacity is derived, not constant: a card twice as tall
     /// holds more rows, and one twice as wide holds more per row.
     @Test("capacity grows with the card")

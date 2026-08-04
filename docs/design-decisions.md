@@ -3766,19 +3766,21 @@ safeguard.
 
 **[Rationale]**
 
-**One representation, and it is the arrangement itself.** The old
-tab rendered the same space→monitor mapping three ways
-(proportional canvas, drag palette, resolution list); the first
-consolidation drew one row of equal-sized cards in physical
-x-order and ruled that "macOS's Displays pane owns true spatial
-layout — identity + order is enough here". That ruling is
-retired, by its own logic: those cards are **drop targets**. Once
-the user has to aim at a rectangle, they must map it to a monitor
-on their desk by eye, and identity-plus-order cannot do that —
-three same-named cards in a row say nothing about which one is
-the portrait panel on the left. So the cards are the real
-arrangement, drawn from the live frames. (#68 §3.13, #678 turn
-13b)
+**One representation, and it is the arrangement itself.** A card
+on this page is a **drop target**, and a drop target must be
+identifiable by eye: the user aims at a rectangle, so they have
+to know which monitor on their desk it stands for before they
+release. Identity and order cannot tell them — three same-named
+cards in a row say nothing about which one is the portrait panel
+on the left. So the cards are the real arrangement, at their own
+sizes and positions, drawn from the live frames. This retires
+"macOS's Displays pane owns true spatial layout — identity +
+order is enough here", the earlier ruling that folded the old
+tab's three representations (proportional canvas, drag palette,
+resolution list) into one row of equal-sized cards in physical
+x-order: enough for a *list* of displays, and that consolidation
+kept the drag. Equal-sized cards can only come back together
+with the drop. (#68 §3.13, #678 turn 13b)
 
 **Drawn from POINTS — not pixels, and not physical millimetres.**
 Position is the reason, not fidelity: a display's global position
@@ -3826,10 +3828,11 @@ than a limit of the identity.
 automatic is drawn as an outline rather than a dimmed capsule —
 dimming is this app's inert vocabulary, and an automatic chip is
 the one most worth dragging. The chip is a menu control, not a
-decorated label: the context menu is the keyboard and VoiceOver
-route for every move, and a plain stack with a drag gesture on it
-cannot be focused, so the fallback existed only for people using
-a mouse.
+decorated label wearing a context menu: the menu is the keyboard
+and VoiceOver route for every move a drag can make, and a plain
+stack with a drag gesture on it cannot be focused — so as a
+context menu that route existed only for people using a mouse,
+which is the one group it was not for.
 
 ### App rules
 

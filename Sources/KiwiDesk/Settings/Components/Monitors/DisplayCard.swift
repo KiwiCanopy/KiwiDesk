@@ -68,8 +68,14 @@ struct DisplayCard: View {
         .help(readout)
     }
 
+    /// By display ID, not by fingerprint: two identical monitors
+    /// share a fingerprint, so a fingerprint comparison drew the
+    /// "main" badge on BOTH cards while the tray hung off one —
+    /// the two answers to one question that
+    /// `SettingsModel.mainDisplay` exists to prevent (code
+    /// review, 2026-08-04).
     private var isMain: Bool {
-        model.mainFingerprint == display.fingerprint
+        model.mainDisplay?.id == display.id
     }
 
     private var isSelected: Bool { selection == display.id }
@@ -193,15 +199,26 @@ struct DisplayCard: View {
     /// spaces live here, and which of them is up.
     private var readout: String {
         MonitorReadout.sentence(
-            held: rows.chips(on: display.fingerprint).count,
+            held: rows.held(on: display, isMain: isMain),
             showing: model.showingSpace(on: display.id)
         )
     }
 
+    /// Named with its object, not deictically: these reach a
+    /// translator as bare worksheet lines with no element label
+    /// and no screen, and "what this holds" needs an explicit
+    /// noun in most target languages (localization audit,
+    /// 2026-08-04).
     private var selectActionName: String {
         isSelected
-            ? L("monitors.deselect", "Hide what this holds")
-            : L("monitors.select", "Show what this holds")
+            ? L(
+                "monitors.deselect",
+                "Hide the spaces on this display"
+            )
+            : L(
+                "monitors.select",
+                "Show the spaces on this display"
+            )
     }
 
     /// Selecting is a toggle: the readout under the picture is

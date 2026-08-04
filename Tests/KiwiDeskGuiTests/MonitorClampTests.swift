@@ -76,7 +76,6 @@ struct MonitorClampTests {
         ]
         let result = layout(displays)
         #expect(!MonitorArrangement.isApproximate(displays))
-        #expect(result.displays.allSatisfy { !$0.isClamped })
         let small = try rect(result, 1)
         let wide = try rect(result, 2)
         #expect(abs(wide.width / small.width - ratio) < 0.001)
@@ -89,7 +88,7 @@ struct MonitorClampTests {
     /// two-display desk in the world teaches people to ignore
     /// captions.
     @Test("a barely-capped pair says nothing")
-    func imperceptibleClampIsSilent() {
+    func imperceptibleClampIsSilent() throws {
         let displays = [
             display(
                 1,
@@ -108,9 +107,22 @@ struct MonitorClampTests {
                 height: 2160
             ),
         ]
+        // Capped: the 4K really is drawn under true scale —
+        // 2.5 x 1512 / 3840, i.e. 1.6% short — which the drawn
+        // ratio shows directly.
         let result = layout(displays)
-        // Capped — the geometry does not lie about that…
-        #expect(result.displays.contains { $0.isClamped })
+        let laptop = try #require(
+            result.displays.first { $0.id == DisplayID(1) }?.rect
+        )
+        let big = try #require(
+            result.displays.first { $0.id == DisplayID(2) }?.rect
+        )
+        #expect(
+            abs(
+                big.width / laptop.width
+                    - MonitorArrangement.maxDrawnRatio
+            ) < 0.001
+        )
         // …and silent, because 1.6% is not something to caption.
         #expect(!MonitorArrangement.isApproximate(displays))
     }
@@ -148,11 +160,10 @@ struct MonitorClampTests {
         #expect(
             abs(wide.width / wide.height - 5000.0 / 1400.0) < 0.001
         )
-        // The small display is untouched — only the outlier is.
-        #expect(
-            result.displays.first { $0.id == DisplayID(1) }?
-                .isClamped == false
-        )
+        // The small display is untouched — only the outlier is:
+        // its drawn size is the plain uniform scale of its own
+        // frame, which the gap arithmetic below would not see.
+        #expect(abs(small.width / small.height - 1000.0 / 800.0) < 0.001)
     }
 
     /// The cap shrinks around each display's CENTRE, so a capped
@@ -256,8 +267,18 @@ struct MonitorClampTests {
         let result = layout(displays)
         let card = try rect(result, 1)
         // 2560×1440 into 700×240 is height-bound, so a fitted
-        // picture is exactly the canvas tall.
-        #expect(abs(card.height - canvas.height) < 0.001)
+        // picture fills the canvas — MINUS the band reserved for
+        // the tray, which is part of the content and so part of
+        // what has to fit.
+        let band =
+            MonitorArrangement.trayHeight
+            + MonitorArrangement.trayGap
+        #expect(
+            abs(card.height - (canvas.height - band)) < 0.001
+        )
+        #expect(
+            abs(result.contentSize.height - canvas.height) < 0.001
+        )
         #expect(result.contentSize.width <= canvas.width + 0.001)
         #expect(
             card.width > MonitorArrangement.minimumCard.width

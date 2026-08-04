@@ -22,12 +22,16 @@ import KiwiDeskCore
 /// the picture's place and says so in a sentence, which is the
 /// stronger form of the same promise.
 ///
-/// One runtime condition drives two opposite outcomes, and the
-/// census records both: `.monitorsDisconnected` surfaces the
-/// banner and withholds the cards. A resolver returning a reason
-/// per ROW rather than a Bool per condition is what lets one
-/// condition do that without a second tag standing for its
-/// negation.
+/// The picture's own rows carry NO gate, and that is deliberate.
+/// They were briefly given `.monitorsDisconnected` — the banner's
+/// condition — so the census would record why the cards vanish.
+/// It records the wrong thing: every census gate reads "shows
+/// while true", so one tag on both the banner and the rows it
+/// replaces declares a single condition with two opposite
+/// meanings, legible only inside this file. The banner's gate
+/// already carries the fact; the cards are its complement by
+/// construction, and one answer beats two that agree only while
+/// somebody remembers to keep them agreeing.
 ///
 /// Pure over the live-state answers it is given, so
 /// `MonitorsGateTests` asserts it without a view.
@@ -50,10 +54,6 @@ struct MonitorsGates {
     /// condition, so collapsing them would leave a renderer
     /// unable to tell which side of it it is on.
     enum InertReason: Hashable {
-        /// There is no live display geometry to draw a picture
-        /// from — a stored profile is being edited and its
-        /// monitors are not attached.
-        case noLiveGeometry
         /// The picture IS drawable, so the banner standing in for
         /// it stays away.
         case pictureIsDrawable
@@ -78,8 +78,6 @@ struct MonitorsGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
-        case .monitors(.spacePins), .monitors(.mainSpaces):
-            return monitorsDisconnected ? .noLiveGeometry : nil
         case .monitors(.placementUnavailable):
             return monitorsDisconnected ? nil : .pictureIsDrawable
         case .monitors(.orphanPinClear):
@@ -97,8 +95,6 @@ struct MonitorsGates {
     /// this area lands in neither set instead of hitting the
     /// fail-open default at run time.
     static let resolved: Set<SettingKey> = [
-        .monitors(.spacePins),
-        .monitors(.mainSpaces),
         .monitors(.placementUnavailable),
         .monitors(.orphanPinClear),
     ]

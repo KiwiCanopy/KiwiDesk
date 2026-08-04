@@ -124,16 +124,34 @@ struct MonitorsFamilyRows {
         spaces.filter { mainSpaces.contains($0) }
     }
 
+    /// How many spaces a display HOLDS right now — its own chips
+    /// plus, on the main display, the ones that follow main. They
+    /// are on that screen at this moment, which is what the
+    /// readout claims to answer; counting only the carded chips
+    /// made a desk where every space follows main read "0 spaces
+    /// here" on every card.
+    func held(on display: Display, isMain: Bool) -> Int {
+        chips(on: display.fingerprint).count
+            + (isMain ? trayChips.count : 0)
+    }
+
     /// Pins waiting on hardware that is not attached. Read from
     /// the SAVED pins rather than from a resolution, which can
     /// only ever name a display that exists — the user's intent
     /// has to stay visible and clearable while its monitor is
     /// away.
+    /// A space that follows main is excluded even when a stale
+    /// pin is still stored against it: the tray already draws it,
+    /// and the runtime resolves main first, so listing it here
+    /// too would put one space in two places and claim it opens
+    /// somewhere it does not. The GUI writers keep the two
+    /// exclusive; Lua can set both (code review, 2026-08-04).
     var orphans: [OrphanPin] {
         let connected = Set(displays.map(\.fingerprint))
         return
             pins
             .filter { !connected.contains($0.value) }
+            .filter { !mainSpaces.contains($0.key) }
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
             .sorted { $0.space.raw < $1.space.raw }
     }
@@ -142,8 +160,21 @@ struct MonitorsFamilyRows {
     /// what the cards hold, derived from `chips(on:)` rather than
     /// beside it, so the census expansion and the screen cannot
     /// disagree about which spaces are carded.
+    ///
+    /// Deduplicated by space, because two displays can share a
+    /// fingerprint (`hasAmbiguousDisplays`) and would then each
+    /// claim the same chips — double-counting the census
+    /// expansion and falsifying the partition in exactly the case
+    /// this type dedicates a property to warning about (code
+    /// review, 2026-08-04). The picture still draws the chip on
+    /// both cards, which is the honest rendering of one identity
+    /// the app cannot split; the COUNT is what must not double.
     var cardedSpaces: [SpaceAssignment] {
-        orderedDisplays.flatMap { chips(on: $0.fingerprint) }
+        var seen: Set<SpaceID> = []
+        return
+            orderedDisplays
+            .flatMap { chips(on: $0.fingerprint) }
+            .filter { seen.insert($0.space).inserted }
     }
 
     func rows(for key: SettingKey) -> [MonitorsRowInstance]? {

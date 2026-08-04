@@ -63,6 +63,13 @@ struct SpaceAssignmentChip: View {
         )
         .accessibilityLabel(space.raw)
         .accessibilityValue(hint)
+        // Right-click keeps working. Making the chip a `Menu`
+        // dropped the `.contextMenu` it used to carry, which
+        // silently retired the gesture people already had — a
+        // side effect of fixing the keyboard route, never a
+        // decision (docs review, 2026-08-04). Both open the same
+        // menu.
+        .contextMenu { menu }
     }
 
     private var capsule: some View {

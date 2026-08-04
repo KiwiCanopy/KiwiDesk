@@ -28,12 +28,6 @@ struct MonitorsGateTests {
     func liveShowsThePicture() {
         let live = gates()
         #expect(
-            live.inertReason(for: .monitors(.spacePins)) == nil
-        )
-        #expect(
-            live.inertReason(for: .monitors(.mainSpaces)) == nil
-        )
-        #expect(
             live.inertReason(
                 for: .monitors(.placementUnavailable)
             ) == .pictureIsDrawable
@@ -46,14 +40,6 @@ struct MonitorsGateTests {
     @Test("an away profile swaps the picture for the banner")
     func awayShowsTheBanner() {
         let away = gates(editing: true, editable: false)
-        #expect(
-            away.inertReason(for: .monitors(.spacePins))
-                == .noLiveGeometry
-        )
-        #expect(
-            away.inertReason(for: .monitors(.mainSpaces))
-                == .noLiveGeometry
-        )
         #expect(
             away.inertReason(
                 for: .monitors(.placementUnavailable)

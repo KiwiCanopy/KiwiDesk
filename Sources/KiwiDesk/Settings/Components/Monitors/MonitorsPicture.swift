@@ -16,10 +16,6 @@ struct MonitorsPicture: View {
     @ObservedObject var model: SettingsModel
     let rows: MonitorsFamilyRows
     @Binding var selection: DisplayID?
-    /// Whether the follows-main tray is drawn — the answer to
-    /// `.mainSpaces`' own census gate, resolved by the page and
-    /// passed in rather than re-derived beside the drawing.
-    let showsTray: Bool
 
     /// The canvas the arrangement is fitted into. A fixed height
     /// rather than one derived from the arrangement: the pane's
@@ -99,13 +95,20 @@ struct MonitorsPicture: View {
                 )
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
             }
-            if showsTray, let tray = layout.tray {
-                FollowsMainTray(model: model, rows: rows)
-                    .frame(
-                        width: tray.width,
-                        height: tray.height
-                    )
-                    .offset(x: tray.minX, y: tray.minY)
+            // No gate on the tray: `.mainSpaces` and `.spacePins`
+            // are one row family drawn by one picture, and a
+            // `showsTray` flag derived from the same resolver arm
+            // as the picture itself could never be false — an
+            // inert branch, with a wiring needle pinning it
+            // (code review, 2026-08-04).
+            if let tray = layout.tray {
+                FollowsMainTray(
+                    model: model,
+                    rows: rows,
+                    size: tray.size
+                )
+                .frame(width: tray.width, height: tray.height)
+                .offset(x: tray.minX, y: tray.minY)
             }
         }
         .frame(

@@ -36,6 +36,14 @@ extension MonitorsSection {
 
     private func orphanRow(_ orphan: OrphanPin) -> some View {
         HStack(alignment: .firstTextBaseline) {
+            // The readout is ONE spoken element, and the button
+            // stays a sibling: combining an interactive child
+            // would fold the clear action into the label and cost
+            // it. The row lost this when its old label key was
+            // retired with the view that carried it, leaving the
+            // monospaced fingerprint to be spoken as a raw hash
+            // with no context — the exact case `docs/ui-patterns`
+            // cites this row for (docs review, 2026-08-04).
             VStack(alignment: .leading, spacing: 2) {
                 // One sentence with the space name INSIDE it: a
                 // chip beside a prose fragment would be a value
@@ -51,6 +59,15 @@ extension MonitorsSection {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(
+                L(
+                    "monitors.orphan_pin.row_axlabel",
+                    "%1$@, waiting for monitor %2$@",
+                    orphanSentence(orphan.space),
+                    orphan.fingerprint
+                )
+            )
             Spacer()
             Button(backToAutomatic) {
                 model.config.spacePins[orphan.space] = nil
@@ -59,11 +76,23 @@ extension MonitorsSection {
         }
     }
 
+    /// Names no display, because the runtime does not promise
+    /// one: `SpacePlacement.resolve` answers `.pinnedAbsent` with
+    /// the POSITIONAL default's assignment, falling back to main
+    /// only where the composition covers that space with nothing.
+    /// The first cut said "opens on the main display for now",
+    /// which is wrong on any multi-display profile — a sentence
+    /// the docs would then have had to repeat (docs review,
+    /// 2026-08-04).
+    ///
+    /// "Space %1$@" keeps the noun the retired label had: a space
+    /// id is commonly numeric, and a bare numeral opening a
+    /// sentence as its subject is not writable in `ja` or `ko`.
     private func orphanSentence(_ space: SpaceID) -> String {
         L(
             "monitors.orphan_pin.sentence",
-            "%1$@ is pinned to a monitor that isn't attached, "
-                + "so it opens on the main display for now.",
+            "Space %1$@ is pinned to a monitor that isn't "
+                + "attached, so it opens elsewhere for now.",
             space.raw
         )
     }

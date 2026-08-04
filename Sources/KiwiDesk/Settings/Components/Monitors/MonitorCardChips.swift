@@ -33,12 +33,25 @@ enum MonitorCardChips {
     /// appears one chip early costs nothing and a chip that
     /// silently does not fit costs the affordance.
     static let minChipWidth: CGFloat = 52
-    /// The gap `WrapChips` lays chips out with.
-    static let spacing: CGFloat = 6
+    /// The gap `WrapChips` lays chips out with — read from
+    /// `ChipMetrics`, which owns it, since this arithmetic is its
+    /// consumer rather than its source.
+    static var spacing: CGFloat { ChipMetrics.spacing }
     /// The card's own padding, and the header line above the
     /// chips.
     static let cardPadding: CGFloat = 6
     static let headerHeight: CGFloat = 16
+    /// The gap the card's `VStack` puts between the header and
+    /// the chips.
+    ///
+    /// Counted, not ignored: leaving it out overstated the chip
+    /// area by exactly this much at EVERY card size, so
+    /// `capacity` could return one row too many and that row
+    /// clipped — reintroducing the clip the `+n` exists to
+    /// prevent, and invisibly, because the floor's own guard
+    /// asserts against this same formula (code review,
+    /// 2026-08-04).
+    static let stackSpacing: CGFloat = 2
 
     /// The chip area inside a card of `size`.
     static func chipArea(in size: CGSize) -> CGSize {
@@ -47,6 +60,7 @@ enum MonitorCardChips {
             height: max(
                 0,
                 size.height - cardPadding * 2 - headerHeight
+                    - stackSpacing
             )
         )
     }
