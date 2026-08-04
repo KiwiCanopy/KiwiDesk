@@ -1,182 +1,199 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Monitors (#68 §3.13): one row of equal-sized
-/// monitor cards (physical x-order) plus the dashed
-/// "Follows main display" card — the space chips live inside
-/// the cards. Monitor fingerprints are a diagnostic and sit in
-/// an Advanced disclosure.
+/// Monitors (#68 §3.13, rebuilt in #678 Phase 3 turn 13b): the
+/// one page that is a picture rather than a form.
+///
+/// The cards used to be an equal-sized row in physical x-order —
+/// identity and order, with the geometry thrown away. They are
+/// now the real arrangement: each display drawn at its own size
+/// and position (`MonitorArrangement`), so the answer to "which
+/// monitor is that?" is where the card is, not what it says.
+///
+/// Everything else on the page hangs off that picture: the
+/// follows-main tray on the main display, a warning card for pins
+/// waiting on absent hardware, and the read-only fingerprints
+/// drawer (both in `MonitorsSection+Details`).
 struct MonitorsSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var advancedExpanded = false
+    /// `internal`, not `private`: the drawer that owns this
+    /// state is drawn in `MonitorsSection+Details.swift` (file
+    /// ceiling), and `@State` cannot move to an extension.
+    @State var advancedExpanded = false
+    /// Which display's contents the readout under the picture
+    /// describes. View state, never config — selecting a display
+    /// changes nothing about the setup.
+    @State var selection: DisplayID?
 
     var body: some View {
+        let rows = model.monitorRows
+        let gates = MonitorsGates(
+            editingStoredProfile: model.editingStoredProfile,
+            placementEditable: model.placementEditable,
+            hasOrphanedPins: !rows.orphans.isEmpty
+        )
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if model.editingStoredProfile
-                    && !model.placementEditable
-                {
-                    // Editing a stored profile whose monitors
-                    // aren't attached: no live geometry to
-                    // render, so placement is read-only here
-                    // (#18). The other sections still edit
-                    // the profile.
-                    placementUnavailable
-                } else {
-                    cardsSection
-                    orphanPins
-                    advancedSection
-                }
+                Text(areaCaption)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                placementCard(rows: rows, gates: gates)
+                orphanCard(rows: rows, gates: gates)
+                fingerprintsDrawer(rows: rows)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
     }
 
-    private var cardsSection: some View {
-        SettingsSection(
-            SettingsCatalog.monitors.spacePlacement
-        ) {
-            if model.displays.isEmpty {
-                Text(
-                    L(
-                        "monitors.none_detected",
-                        "No monitors detected."
-                    )
-                )
-                .foregroundStyle(.secondary)
-            } else {
-                Text(cardsCaption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(orderedDisplays, id: \.id) {
-                        display in
-                        MonitorCard(
-                            model: model,
-                            display: display
-                        )
-                    }
-                    MainRoleCard(model: model)
-                }
-            }
-        }
-    }
-
-    private var cardsCaption: String {
+    private var areaCaption: String {
         L(
-            "monitors.cards.caption",
-            "Drag a space between cards to pin it to "
-                + "a monitor or have it follow the "
-                + "main display. Dimmed spaces are "
-                + "placed automatically. Right-click "
-                + "a space for the same moves."
+            "monitors.area.caption",
+            "Drag a space onto the display it belongs to."
         )
     }
 
-    /// Cards render connected displays; macOS's Displays pane
-    /// owns true spatial arrangement — identity + order is
-    /// enough here.
-    private var orderedDisplays: [Display] {
-        model.displays.sorted {
-            $0.frame.minX < $1.frame.minX
-        }
-    }
+    // MARK: - The picture
 
-    /// Pins to monitors that aren't attached right now — the
-    /// user's intent must stay visible and clearable even
-    /// though no card exists for the hardware.
-    @ViewBuilder private var orphanPins: some View {
-        let orphans = model.config.spacePins.filter {
-            pin in
-            !model.displays.contains {
-                $0.fingerprint == pin.value
-            }
-        }
-        .sorted { $0.key.raw < $1.key.raw }
-        if !orphans.isEmpty {
-            SettingsSection(
-                SettingsCatalog.monitors.orphanPins
-            ) {
-                ForEach(orphans, id: \.key.raw) { pin in
-                    orphanPinRow(
-                        space: pin.key,
-                        fingerprint: pin.value
-                    )
-                }
-            }
-        }
-    }
-
-    /// One orphaned pin: which space, and the fingerprint of the
-    /// monitor it is waiting for.
-    ///
-    /// Same rule as `fingerprintRow` — a bare hash arrives at
-    /// VoiceOver with no context — but here the section title
-    /// does not even name the value, so the spoken label carries
-    /// both halves. It is scoped to the **readout**, not the
-    /// whole row: combining an interactive child would fold the
-    /// clear button into one element and cost the action.
-    private func orphanPinRow(
-        space: SpaceID,
-        fingerprint: String
+    /// The picture and the banner that stands in for it are two
+    /// rows of one container, each asking its OWN census gate —
+    /// `MonitorsGates` is what keeps them from both appearing or
+    /// both vanishing, rather than an `if/else` here that would
+    /// be a second copy of the condition.
+    @ViewBuilder private func placementCard(
+        rows: MonitorsFamilyRows,
+        gates: MonitorsGates
     ) -> some View {
-        HStack {
-            HStack {
-                SpaceChip(label: space.raw)
-                Image(systemName: "arrow.right")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(fingerprint)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(
-                L(
-                    "monitors.orphan_pin.row_axlabel",
-                    "Space %1$@, pinned to fingerprint %2$@",
-                    space.raw,
-                    fingerprint
-                )
-            )
-            Spacer()
-            Button {
-                model.config.spacePins[space] = nil
-            } label: {
-                Image(systemName: "xmark.circle")
-            }
-            .buttonStyle(.borderless)
-            .iconButtonAffordance(
-                L(
-                    "monitors.orphan_pin.help",
-                    "Back to automatic placement"
-                )
-            )
-        }
-    }
-
-    private var placementUnavailable: some View {
-        // The if/else twin of the editable card above — never
-        // co-mounted, so sharing its anchor id is safe and
-        // allow-listed in `SettingsCatalogArgumentTests`.
         SettingsSection(
             SettingsCatalog.monitors.spacePlacement
         ) {
-            VStack(alignment: .leading, spacing: 8) {
-                Label(
-                    L(
-                        "monitors.not_connected",
-                        "Monitors not connected"
-                    ),
-                    systemImage:
-                        "display.trianglebadge.exclamationmark"
-                )
-                .font(.headline)
-                Text(placementUnavailableCaption)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            if gates.inertReason(
+                for: .monitors(.placementUnavailable)
+            ) == nil {
+                placementUnavailable
             }
+            if gates.inertReason(for: .monitors(.spacePins))
+                == nil
+            {
+                picture(rows: rows, gates: gates)
+            }
+        }
+    }
+
+    @ViewBuilder private func picture(
+        rows: MonitorsFamilyRows,
+        gates: MonitorsGates
+    ) -> some View {
+        if rows.displays.isEmpty {
+            Text(
+                L(
+                    "monitors.none_detected",
+                    "No monitors detected."
+                )
+            )
+            .foregroundStyle(.secondary)
+        } else {
+            MonitorsPicture(
+                model: model,
+                rows: rows,
+                selection: $selection,
+                showsTray: gates.inertReason(
+                    for: .monitors(.mainSpaces)
+                ) == nil
+            )
+            if MonitorArrangement.isApproximate(rows.displays) {
+                note(clampedNote)
+            }
+            if rows.hasAmbiguousDisplays {
+                note(ambiguousNote)
+            }
+            selectionReadout(rows: rows)
+        }
+    }
+
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// Said rather than left to be noticed: past the ratio cap
+    /// the biggest display is drawn smaller than true scale, so
+    /// the smallest stays big enough to drop a space onto. A
+    /// picture that quietly lies about proportion reads as a
+    /// wrong arrangement.
+    ///
+    /// Below the picture, not above it — the caption that opens
+    /// the page is what to DO here, and a caveat about drawing
+    /// cannot outrank it. And only while the difference is
+    /// visible: `MonitorArrangement.perceptibleClamp` is what
+    /// keeps this off the commonest two-display desk, whose 2.54
+    /// ratio trips the cap by 1.6%.
+    private var clampedNote: String {
+        L(
+            "monitors.picture.clamped",
+            "Sizes are approximate — these displays are too "
+                + "different to draw to scale."
+        )
+    }
+
+    /// Two monitors of the same model and resolution have the
+    /// same fingerprint, which is what a pin is stored against —
+    /// so KiwiDesk genuinely cannot tell them apart, and the
+    /// picture would otherwise show the same spaces on both cards
+    /// with no explanation. The list this page replaced hid the
+    /// symptom; a picture cannot.
+    private var ambiguousNote: String {
+        L(
+            "monitors.picture.ambiguous",
+            "Two of these displays look identical to KiwiDesk, "
+                + "so a space pinned to one may open on either."
+        )
+    }
+
+    /// What the selected display currently holds. Nothing is
+    /// selected at rest — the picture already says where every
+    /// space sits, and this answers the one thing it cannot: what
+    /// is on that screen right now.
+    @ViewBuilder private func selectionReadout(
+        rows: MonitorsFamilyRows
+    ) -> some View {
+        if let display = rows.displays.first(where: {
+            $0.id == selection
+        }) {
+            Text(readout(for: display, rows: rows))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func readout(
+        for display: Display,
+        rows: MonitorsFamilyRows
+    ) -> String {
+        MonitorReadout.sentence(
+            held: rows.chips(on: display.fingerprint).count,
+            showing: model.showingSpace(on: display.id)
+        )
+    }
+
+    private var placementUnavailable: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(
+                L(
+                    "monitors.not_connected",
+                    "Monitors not connected"
+                ),
+                systemImage:
+                    "display.trianglebadge.exclamationmark"
+            )
+            .font(.headline)
+            Text(placementUnavailableCaption)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -189,72 +206,6 @@ struct MonitorsSection: View {
                 + "monitor setup to arrange spaces — "
                 + "the other sections still edit this "
                 + "profile."
-        )
-    }
-
-    /// Diagnostic, read-only, never touched day to day.
-    private var advancedSection: some View {
-        SettingsDisclosure(
-            SettingsCatalog.monitors.monitorFingerprints,
-            chrome: .card,
-            isExpanded: $advancedExpanded
-        ) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(
-                    L(
-                        "monitors.advanced.caption",
-                        "Profiles reattach automatically when "
-                            + "a known monitor setup is "
-                            + "reconnected."
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                ForEach(model.displays, id: \.id) { display in
-                    fingerprintRow(display)
-                }
-            }
-            .padding(.top, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    /// One display's name and fingerprint. Visually the drawer's
-    /// own title does the labelling — a visible per-row
-    /// "Fingerprint" was tried and rejected as noise (#540), since
-    /// by the time the eye reaches a row inside a drawer titled
-    /// "Monitor fingerprints" nothing is ambiguous.
-    ///
-    /// **VoiceOver is the case that title does not cover:** it is
-    /// read once, while rows are stepped one at a time, so the
-    /// row used to speak a bare hex string with no context. Hence
-    /// one combined element with an explicit spoken label, and no
-    /// visible change.
-    ///
-    /// Selection stays scoped to the hash, so copying for a
-    /// support ticket yields just the value.
-    private func fingerprintRow(_ display: Display) -> some View {
-        HStack {
-            Image(systemName: "display")
-                .foregroundStyle(.secondary)
-            Text(display.name)
-            Spacer()
-            Text(display.fingerprint)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-        }
-        // One combined element with an explicit label: it also
-        // overrides whatever spoken name the SF Symbol would
-        // otherwise contribute.
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(
-            L(
-                "monitors.advanced.row_axlabel",
-                "%1$@, fingerprint %2$@",
-                display.name,
-                display.fingerprint
-            )
         )
     }
 }

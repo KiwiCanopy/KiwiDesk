@@ -234,7 +234,7 @@ extension SettingsModel {
 
     // MARK: - Space placement (Canvas)
 
-    /// Where a space renders in the Canvas, via the same
+    /// Where each space renders in the picture, via the same
     /// `SpacePlacement` precedence the runtime resolves with
     /// (pin → Main → positional default). There is no
     /// "unassigned" state — defaults compose a concrete
@@ -242,21 +242,60 @@ extension SettingsModel {
     /// disconnected monitor renders as pinned (the user's
     /// intent), while the runtime places the space on the
     /// fallback display until that monitor returns.
-    func resolution(for space: SpaceID) -> SpaceResolution {
+    ///
+    /// Every declared space in ONE composition pass (#678 turn
+    /// 13b). It used to be a per-space call, and the picture asks
+    /// about every space once per card, so each card re-composed
+    /// the whole profile — quadratic in exactly the displays ×
+    /// spaces this surface is most alive at.
+    func resolutions() -> [SpaceID: SpaceResolution] {
         let mainID = PositionalDisplays.liveMainID
         let assignment =
             ProfileComposition.compose(
                 displays: displays,
                 mainID: mainID
             )?.assignment ?? [:]
-        let resolved = SpacePlacement.resolve(
-            space: space,
-            pins: config.spacePins,
+        var resolved: [SpaceID: SpaceResolution] = [:]
+        for space in config.spaces {
+            resolved[space] = Self.reading(
+                SpacePlacement.resolve(
+                    space: space,
+                    pins: config.spacePins,
+                    mainSpaces: config.mainSpaces,
+                    displays: displays,
+                    mainID: mainID,
+                    assignment: assignment
+                )
+            )
+        }
+        return resolved
+    }
+
+    /// The Monitors area's row expansion, built from live state —
+    /// what the cards, the tray, the orphan card and the
+    /// fingerprint drawer all draw from, and what the census
+    /// guards read (#678 turn 13b).
+    ///
+    /// Built here rather than in each view so both halves of the
+    /// seam answer from one construction; the frames themselves
+    /// are read LIVE off Core, never snapshotted onto the model,
+    /// because `SettingsWindowController` republishes on a
+    /// display change and a cached arrangement is the thing that
+    /// would go stale behind it.
+    var monitorRows: MonitorsFamilyRows {
+        MonitorsFamilyRows(
+            spaces: config.spaces,
             mainSpaces: config.mainSpaces,
-            displays: displays,
-            mainID: mainID,
-            assignment: assignment
+            resolutions: resolutions(),
+            pins: config.spacePins,
+            displays: displays
         )
+    }
+
+    /// The picture's reading of one `SpacePlacement` verdict.
+    private static func reading(
+        _ resolved: SpacePlacement.Resolution?
+    ) -> SpaceResolution {
         switch resolved {
         case .pinned(let display):
             return .pinned(display.fingerprint)
@@ -271,6 +310,14 @@ extension SettingsModel {
         }
     }
 
+    /// The space currently on a display, for the picture's
+    /// selection readout — the one thing the arrangement cannot
+    /// show, since a card draws where spaces LIVE rather than
+    /// which of them is up.
+    func showingSpace(on display: DisplayID) -> SpaceID? {
+        core.state.workspaces.activeSpace(on: display)
+    }
+
     /// Human-readable monitor name, falling back to the raw
     /// fingerprint when that display isn't connected — used by
     /// the Monitors cards and the profile rows (§3.15).
@@ -280,17 +327,25 @@ extension SettingsModel {
         }?.name ?? fingerprint
     }
 
-    /// The current main display's fingerprint, for the Main
-    /// drop target's live annotation. Falls back positionally
-    /// (leftmost), matching the runtime.
-    var mainFingerprint: String? {
+    /// The current main display, falling back positionally
+    /// (leftmost) exactly as the runtime does. One derivation:
+    /// the picture hangs the follows-main tray off this display
+    /// and the tray annotates itself with its name, and a badge
+    /// on one display beside a tray under another would be two
+    /// answers to one question.
+    var mainDisplay: Display? {
         let mainID = PositionalDisplays.liveMainID
-        return
-            (displays.first { $0.id == mainID }
+        return displays.first { $0.id == mainID }
             ?? PositionalDisplays.ordered(
                 displays,
                 mainID: mainID
-            ).first)?.fingerprint
+            ).first
+    }
+
+    /// The current main display's fingerprint, for the tray's
+    /// live annotation and the "main" badge.
+    var mainFingerprint: String? {
+        mainDisplay?.fingerprint
     }
 }
 

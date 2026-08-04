@@ -12,7 +12,19 @@ extension MonitorsKey {
     var placement: SettingPlacement {
         switch self {
         case .spacePins, .mainSpaces:
-            return .row(.monitors, .spacePlacement, .atRest)
+            // The picture's two row families are WITHHELD by the
+            // same condition that surfaces the banner below: with
+            // the profile's monitors away there are no frames to
+            // draw cards from, and the banner stands in for them.
+            // Recording the gate here is what keeps that pairing
+            // knowable from the census rather than only from the
+            // view's if/else (#678 turn 13b).
+            return .row(
+                .monitors,
+                .spacePlacement,
+                .atRest,
+                gate: .runtime(.monitorsDisconnected)
+            )
         case .orphanPinClear:
             return .row(
                 .monitors,

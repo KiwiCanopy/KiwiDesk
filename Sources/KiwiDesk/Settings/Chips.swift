@@ -48,7 +48,11 @@ struct BadgeChip: View {
 
 /// A simple left-to-right flowing row of chips that wraps to the
 /// next line when it runs out of width.
-struct WrapChips<Item, Chip: View>: View {
+/// `Item: Hashable` and identity by VALUE, not by index: a chip
+/// list that re-identified its children by position handed the
+/// wrong view state to the wrong chip whenever membership changed
+/// mid-drag, which is exactly what these lists do.
+struct WrapChips<Item: Hashable, Chip: View>: View {
     private let items: [Item]
     private let chip: (Item) -> Chip
 
@@ -61,10 +65,8 @@ struct WrapChips<Item, Chip: View>: View {
     }
 
     var body: some View {
-        FlowLayout(spacing: 6) {
-            ForEach(Array(items.enumerated()), id: \.offset) {
-                _,
-                item in
+        FlowLayout(spacing: MonitorCardChips.spacing) {
+            ForEach(items, id: \.self) { item in
                 chip(item)
             }
         }
