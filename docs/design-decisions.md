@@ -2285,6 +2285,38 @@ into the layout. If demand for reaching minimized windows ever
 materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
 
+**Close-return focus: closing the focused window returns focus
+to the previously focused window, same space only — and this is
+not the MRU the cycling ruling rejected.** [Rationale] The
+#637 argument against MRU is about a *repeating* gesture: a
+self-reordering ring makes the third press unpredictable. A
+close-return is a single step back to the window the user just
+left — one-deep, and the history it reads is the user's own
+last action, so the target is exactly as visible as ⌘W's
+native behavior (macOS itself hands focus down the z-order,
+which is the most recent survivor). Reading #637 as banning
+this trades the predictable outcome for a spatial successor
+the user may never have visited. The candidate is one
+`WindowID?`, never a stack: a deeper walk-back only fires when
+the one candidate is already dead — where the successor-slot
+pick is already good — and each step further back is more of
+the invisible history #637 rejected. Validation happens at
+close time against current state, and the candidate must be
+alive (a minimized one left state, so #673's never-un-park
+holds by construction), in the *same space* (never a
+cross-space yank; a sticky focused from a foreign space, #414,
+is how a foreign member enters the history), not
+native-fullscreen (#670), and not a transient
+overlay (#671). A candidate failing any of these falls through
+to the successor-slot pick `Space.remove` already makes —
+spatial stability is the right tiebreak once recency has run
+out, because the forward neighbor inherits the closed slot and
+focus lands where the user's eyes already are; an
+index-minus-one pick would move focus against the direction
+everything just slid. Fixed behavior, no setting: no peer WM
+ships a knob here, and if demand materializes it becomes a
+Lua-only setting later. `CloseFocusReturnTests` pins all of it.
+
 ### Overrides & appearance
 
 **[Principle]**

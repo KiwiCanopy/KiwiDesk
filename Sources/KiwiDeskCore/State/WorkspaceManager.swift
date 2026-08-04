@@ -8,9 +8,14 @@ import Foundation
 public struct WorkspaceManager: Sendable {
     private var spaces: [SpaceID: Space] = [:]
     /// Creation order, used for deterministic iteration.
-    private var order: [SpaceID] = []
-    private var displays: [DisplayID: Display] = [:]
-    private var spaceDisplay: [SpaceID: DisplayID] = [:]
+    /// Internal (not private) with the three display maps
+    /// below: the `+Displays` split reads them cross-file.
+    /// Writes stay inside the two `WorkspaceManager*` files —
+    /// `WorkspaceMapSealTests` pins the two scannable names
+    /// and states why these two are not.
+    var order: [SpaceID] = []
+    var displays: [DisplayID: Display] = [:]
+    var spaceDisplay: [SpaceID: DisplayID] = [:]
     /// The space shown on the FOCUSED display — the one the user
     /// is currently acting on. Every command that means "the
     /// current space" reads this. On a single monitor it is the
@@ -28,7 +33,8 @@ public struct WorkspaceManager: Sendable {
     /// needs no explicit seeding — only an explicit switch away
     /// from that default records an entry. Every non-focused
     /// display's shown space is thus `activeSpace(on:)`.
-    private var secondaryShown: [DisplayID: SpaceID] = [:]
+    /// Internal like `order`: the `+Displays` split writes it.
+    var secondaryShown: [DisplayID: SpaceID] = [:]
 
     /// The window holding the SYSTEM focus, across spaces —
     /// every focus write lands here (`focus(_:in:)` is the one
@@ -38,6 +44,16 @@ public struct WorkspaceManager: Sendable {
     /// the two disagree, and surfaces that accent "the focused
     /// window" (the Space Bar) must follow this one.
     public private(set) var lastFocused: WindowID?
+
+    /// The window focused immediately BEFORE `lastFocused` — a
+    /// one-deep history, not a stack. Read by the destroy fold's
+    /// close-return pick (validated there against current state:
+    /// alive, same space, surfaceable); deliberately never a
+    /// deeper walk-back — invisible, self-reordering history is
+    /// what the repeat-press-cycling ruling rejected, and one
+    /// visible step back is the whole close-return promise
+    /// (`docs/design-decisions.md` ▸ Close-return focus).
+    public private(set) var focusReturnCandidate: WindowID?
 
     public init() {}
 
@@ -262,6 +278,7 @@ public struct WorkspaceManager: Sendable {
     /// Removes a window from whatever space contains it.
     public mutating func remove(_ window: WindowID) {
         if lastFocused == window { lastFocused = nil }
+        if focusReturnCandidate == window { focusReturnCandidate = nil }
         guard let id = space(of: window) else { return }
         spaces[id]?.remove(window)
     }
@@ -270,6 +287,10 @@ public struct WorkspaceManager: Sendable {
     /// (#308). No-op if `old` is in no space.
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
         if lastFocused == old { lastFocused = new }
+        // The close-return candidate must follow a native-tab
+        // rekey like `lastFocused` does, or every tab switch
+        // silently kills it.
+        if focusReturnCandidate == old { focusReturnCandidate = new }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
     }
@@ -280,6 +301,11 @@ public struct WorkspaceManager: Sendable {
     ) {
         guard spaces[id]?.windows.contains(window) == true else {
             return
+        }
+        // A re-focus of the already-focused window must not
+        // collapse the history to itself.
+        if lastFocused != window {
+            focusReturnCandidate = lastFocused
         }
         spaces[id]?.focused = window
         lastFocused = window
@@ -295,55 +321,4 @@ public struct WorkspaceManager: Sendable {
         spaces[id] = space
     }
 
-    // MARK: - Displays
-
-    public var allDisplays: [Display] {
-        Array(displays.values)
-    }
-
-    public mutating func upsertDisplay(_ display: Display) {
-        displays[display.id] = display
-    }
-
-    @discardableResult
-    public mutating func removeDisplay(
-        _ id: DisplayID
-    ) -> Display? {
-        for (space, display) in spaceDisplay where display == id {
-            spaceDisplay[space] = nil
-        }
-        secondaryShown[id] = nil
-        return displays.removeValue(forKey: id)
-    }
-
-    public mutating func assign(
-        _ space: SpaceID,
-        to display: DisplayID
-    ) {
-        ensureSpace(space)
-        spaceDisplay[space] = display
-        // Reassigning a space can strand a `secondaryShown` entry
-        // that still points at it on its OLD display; drop any
-        // entry no longer matching its display so stale picks
-        // never accumulate (the read path also ignores them).
-        secondaryShown = secondaryShown.filter { display, space in
-            spaceDisplay[space] == display
-        }
-    }
-
-    public func display(of space: SpaceID) -> DisplayID? {
-        spaceDisplay[space]
-    }
-
-    /// Spaces assigned to one display, in creation order.
-    public func spaces(on display: DisplayID) -> [SpaceID] {
-        order.filter { spaceDisplay[$0] == display }
-    }
-
-    /// The space a display currently shows. Alias of
-    /// `activeSpace(on:)`; kept for the bar/overlay call sites
-    /// that predate the per-display active model.
-    public func currentSpace(on display: DisplayID) -> SpaceID? {
-        activeSpace(on: display)
-    }
 }
