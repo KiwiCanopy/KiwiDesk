@@ -131,10 +131,11 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts and Profiles render from it now** (#678 Phases 2-3): each
+Layouts, Profiles and Monitors render from it now** (#678
+Phases 2-3): each
 carries its own order list and a census-render suite pinning that
-order to the census (`ProfilesRowOrder` /
-`ProfilesCensusRenderTests` is the newest pair), so a row in a
+order to the census (`MonitorsRowOrder` /
+`MonitorsCensusRenderTests` is the newest pair), so a row in a
 `ForEach`-rendered container moves by editing the census — with
 the bespoke edge below. This bold list is itself a hand-kept
 claim with no guard,
@@ -152,19 +153,25 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders, Spaces & Layouts and Profiles push that
-edge wider: EVERY container in them is bespoke
+General, Gaps & Borders, Spaces & Layouts, Profiles and
+Monitors push that edge wider: EVERY container in them is bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
 `SpacesRowOrder.bespokeContainers` /
-`ProfilesRowOrder.bespokeContainers`, each the whole set,
+`ProfilesRowOrder.bespokeContainers` /
+`MonitorsRowOrder.bespokeContainers`, each the whole set,
 asserted by `bespokeMeansNoForEach` in each area's render suite),
 so their order lists are membership-and-search only and editing
 one moves nothing on screen. In Profiles the reason is
 structural rather than incidental: every container there expands
 one key into a row per live instance, which is what an order-list
 `ForEach` cannot express at all — the paragraph below owns that
-seam.
+seam. Monitors is the far end of the same argument and worth
+knowing before you look for a list to reorder: its placement
+container is a PICTURE, positioned by the real display
+arrangement (`MonitorArrangement`), so its rows have no reading
+order to state — a card's place on screen is where that monitor
+is on the desk.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -176,7 +183,16 @@ draws*. Profiles has the same pair (`ProfilesFamilyRows`), and
 there the expansion is per live INSTANCE in every container it
 draws — a row per saved profile, per Desktop, per preset, held by
 `instanceCounts` in `ProfilesCensusRenderTests` because set
-equality over `SettingKey` cannot see a collapse to one row. An
+equality over `SettingKey` cannot see a collapse to one row.
+Monitors has the pair too (`MonitorsFamilyRows`), and adds the
+case where several families must be read TOGETHER: its three
+placement families partition the declared spaces — carded (a
+chip), following main (a chip in the tray), or waiting on an
+absent monitor (a row of its own) — so each one's own count can
+be right while a space falls through all three. Only a guard
+over the UNION sees that, so a family joining or leaving that
+partition joins `MonitorsCensusRenderTests`'
+`everySpaceLandsExactlyOnce` in the same change. An
 area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer
@@ -235,6 +251,30 @@ so a file resolving two gates reds if EITHER goes hand-rolled.
 (`.luaImportAvailable`) because that is a live-editor-state
 predicate the saved config cannot answer — not because of any
 shape split, which no longer exists.
+
+**Consulting a resolver is not drawing what it answered, and a
+SURFACING gate leaves nothing behind to prove the difference.**
+A greying gate ends in a dimmed control a test can find; a
+surfacing one ends in an `if` inside a `body`, and every guard
+above it — the resolver's own suite, the census parity, the
+family expansion — passes whether or not that `if` was ever
+written. Monitors shipped a cut where five such branches could
+each be deleted with the whole suite green (guard-prover,
+2026-08-04): the orphaned-pins card, both of the picture's
+notes, the chip overflow and the tray. So a view drawing off a
+resolved answer owes a needle naming the BRANCH, not only the
+consult — `MonitorsGateWiringTests`' `surfacingBranchesAreDrawn`
+is the worked example, and a new surfacing branch joins it in
+the same change. Two authoring rules the same run paid for:
+key a needle on the site that USES the value (a bare
+`overflowChip(` matched the helper's own declaration; a bare
+`rows.chips(on:)` matched a tooltip while the chips went
+hand-rolled), and strip comments before matching, or a comment
+quoting a deleted key stands in for the call site.
+
+Where the value is already arithmetic, the paragraph below on
+live previews owns which half a scan is for; a branch that was
+never written at all is what it cannot see.
 
 `AdvancedColorsGates` is deliberately NOT one of these resolvers
 and is not the regression the rule names: it answers no census

@@ -769,25 +769,64 @@ since it also discards the dormant values not otherwise shown.
 
 ## Monitors
 
-The **Monitors** section (in the **Design** group) pins spaces to
-specific displays for this profile. It appears only when the profile's
-monitor setup is connected; when editing a profile whose monitors
-aren't connected, a read-only note appears instead.
+The **Monitors** section pins spaces to specific displays for this
+profile. It is a **picture of your desk**: each display is drawn at
+its own size and in its own place, so the portrait panel on your
+left is the tall rectangle on the left, and a laptop below a desk
+display is the small rectangle below it. Drag a space onto the
+display it belongs to.
 
-**Drag space chips** onto monitor cards to pin a space to a display.
-A pinned space always appears on that monitor when the profile loads.
+The rectangles are drawn from each display's size **in points** —
+the same measure System Settings ▸ Displays ▸ Arrangement uses — so
+a Retina display does not draw twice the size of an identical
+non-Retina one.
 
-**Drag onto the "Follows main display" card** to give a space the
-**Main role**. That space moves with whatever display is currently
-the Mac's main display (useful for your primary work space when you
-dock/undock).
+**Drag space chips** between displays to pin a space to one. A
+pinned space always appears on that monitor when the profile loads.
+Every chip is also a menu — click it, or right-click it, for the
+same moves. The menu is the route to use from the keyboard: the
+chip takes focus with Tab and opens with Return.
 
-**Dimmed chips** are placed automatically by KiwiDesk — they are not
-manually pinned but still show which spaces run on which monitors.
+**Drag onto the dashed "Follows main display" tray** (it hangs off
+whichever display is currently main) to give a space the **Main
+role**. That space moves with whatever display is main, which is
+what you want for your primary work space when you dock and undock.
 
-When you add a new monitor and save the profile, the new arrangement
-is recorded so the profile becomes available for future loads with
+**Outlined chips** are placed automatically by KiwiDesk — they are
+not manually pinned, but they still show which spaces run on which
+monitors. A filled chip is one you placed; its clear button puts it
+back to automatic.
+
+**Click a display** to see what it holds — how many spaces live
+there, and which one is showing right now. A display too small to
+draw all its chips shows a **+n**; click it for every space on
+that display, each chip working exactly as it does on the card.
+
+Two notes appear only when they apply:
+
+- *"Sizes are approximate"* — your displays are too different in
+  size to draw to scale and still leave the smallest one big enough
+  to drop a space onto, so the largest is drawn smaller than life.
+- *"Some of these displays look identical to KiwiDesk"* — KiwiDesk
+  recognises a display by its name and resolution, so two of the
+  same model at the same resolution are one identity to it, and a
+  space pinned to one may open on either.
+
+**Monitor fingerprints** at the bottom is a read-only drawer: it
+shows how KiwiDesk recognises each display when it reconnects. When
+you add a new monitor and save the profile, the new arrangement is
+recorded so the profile becomes available for future loads with
 this hardware.
+
+When you are editing a profile whose monitors are not attached
+right now, there are no real frames to draw, so the picture is
+replaced by a note saying so — the profile's other sections still
+edit normally.
+
+A space pinned to a monitor that is not attached gets its own card
+below the picture, with a **Back to automatic placement** button;
+there is no rectangle for absent hardware, so this is the only
+place that pin can be seen or cleared.
 
 Each monitor shows its own space at once, and the **focused
 monitor** is simply the one you last clicked — clicking a window

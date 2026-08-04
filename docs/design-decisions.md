@@ -3766,16 +3766,76 @@ safeguard.
 
 **[Rationale]**
 
-**One representation: monitor cards.** The old tab rendered
-the same space→monitor mapping three ways (proportional
-canvas, drag palette, resolution list). Equal-sized cards in
-physical x-order hold the space chips that resolve to them;
-a dashed "Follows main display" card holds the Main-role
-spaces. Chips carry semantic micro-icons (pin/link) rather
-than border styles alone (accessibility), ⓧ clears to
-automatic, and the context menu is the keyboard/VoiceOver
-fallback. macOS's Displays pane owns true spatial layout —
-identity + order is enough here. (#68 §3.13)
+**One representation, and it is the arrangement itself.** A card
+on this page is a **drop target**, and a drop target must be
+identifiable by eye: the user aims at a rectangle, so they have
+to know which monitor on their desk it stands for before they
+release. Identity and order cannot tell them — three same-named
+cards in a row say nothing about which one is the portrait panel
+on the left. So the cards are the real arrangement, at their own
+sizes and positions, drawn from the live frames. This retires
+"macOS's Displays pane owns true spatial layout — identity +
+order is enough here", the earlier ruling that folded the old
+tab's three representations (proportional canvas, drag palette,
+resolution list) into one row of equal-sized cards in physical
+x-order: enough for a *list* of displays, and that consolidation
+kept the drag. Equal-sized cards can only come back together
+with the drop. (#68 §3.13, #678 turn 13b)
+
+**Drawn from POINTS — not pixels, and not physical millimetres.**
+Position is the reason, not fidelity: a display's global position
+only exists in point space, so sizing from EDID millimetres while
+positioning from points would tear the picture into gaps and
+overlaps that exist in neither space, and macOS publishes no
+physical arrangement to re-derive it from. `CGDisplayScreenSize`
+is EDID and unreliable besides — zeros for virtual, AirPlay and
+projector displays, wrong values on real panels — and a 0×0
+monitor drawn silently is worse than a slightly wrong proportion.
+Points already track physical size in practice, because people
+scale a display to a comfortable UI size at their viewing
+distance, and System Settings ▸ Displays ▸ Arrangement draws in
+points too, which is the surface users compare this one against.
+Pixels are the one option ruled out outright: a Retina display
+drawn twice the size of an identical non-Retina one is a picture
+of the framebuffer, not of the desk.
+
+**A drop target has a minimum size that a truthful picture does
+not — so the scale is clamped, and the clamp is stated.** Two
+clamps: the scale has a floor, so the smallest display is never
+drawn too small to hold one space chip (past that the picture
+scrolls rather than shrinking further), and the largest:smallest
+drawn ratio is capped, so one ultrawide cannot reduce everything
+beside it to slivers. The cap shrinks the outlier around its own
+centre, which can only open a gap and never move a rectangle onto
+its neighbour. A clamp that engages silently reads as a wrong
+arrangement rather than an approximate one, so the page says so —
+but only once the difference is visible. A caption pinned to an
+everyday desk teaches people to ignore captions, and the cap is
+easy to trip imperceptibly: a laptop beside a 4K reporting its
+full 3840 points is over the ratio by under two percent (measured
+at 1:1 scaling — at macOS's default HiDPI scaling that display
+reports far fewer points and does not approach the cap at all).
+
+**What the picture cannot say, it says in words.** Two facts have
+no rectangle: which space is *up* on a display right now
+(selecting one answers it), and the fact that two identical
+monitors are a single identity to KiwiDesk — `name:WxH` is what a
+pin is stored against, so a pinned space may open on either. The
+list this page replaced hid that second one; a picture cannot,
+and an unexplained duplicate reads as a bug in the drawing rather
+than a limit of the identity.
+
+**Chips: pinned, follows-main, automatic.** Semantic micro-icons
+(pin, arrow) rather than border styles alone (accessibility), and
+automatic is drawn as an outline rather than a dimmed capsule —
+dimming is this app's inert vocabulary, and an automatic chip is
+the one most worth dragging. The chip is a menu CONTROL, and
+that is what makes its menu reachable: the same items were
+available as a context menu for a year, on a plain stack with a
+drag gesture, which cannot take focus — so the route billed as
+the keyboard and VoiceOver fallback existed only for people using
+a mouse, the one group it was not for. Right-click still opens
+it; the control is what added the other two.
 
 ### App rules
 

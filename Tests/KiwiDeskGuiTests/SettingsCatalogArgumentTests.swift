@@ -53,14 +53,18 @@ struct SettingsCatalogArgumentTests {
     /// sites. **Mutual exclusion is the only admissible
     /// reason** — the sites must never co-render, or the shared
     /// id is ambiguous.
-    private let alternatelyMounted: [String: Int] = [
-        // `MonitorsSection`'s cards section and its
-        // "not connected" read-only twin are if/else branches.
-        // (The bar colour drawers left this list when the Bars
-        // switch died: they co-render now, so each mounts its
-        // own instance declaration instead.)
-        "monitors.spacePlacement": 2
-    ]
+    /// Empty since #678 turn 13b, and kept so the next mutually
+    /// exclusive pair has to be recorded on purpose rather than
+    /// pass as an ordinary double mount.
+    ///
+    /// Monitors' entry left it: the picture and the
+    /// "not connected" banner used to be if/else TWINS each
+    /// mounting `monitors.spacePlacement`, and they are now two
+    /// gated ROWS inside one mount of it — which is what the
+    /// census says they are. (The bar colour drawers left this
+    /// list earlier, when the Bars switch died: they co-render
+    /// now, so each mounts its own instance declaration.)
+    private let alternatelyMounted: [String: Int] = [:]
 
     /// Every `SettingsSection(` / `SettingsDisclosure(` first
     /// argument is a catalog declaration (counted, so a
@@ -130,7 +134,11 @@ struct SettingsCatalogArgumentTests {
         // 49 since turn 13a: Profiles' "Which profile loads"
         // card and its "For other setups" preset drawer, each
         // mounted once.
-        #expect(direct.values.reduce(0, +) == 49)
+        // 48 since turn 13b: Monitors' second mount of
+        // `spacePlacement` is gone — the picture and the
+        // not-connected banner are gated rows inside one card
+        // rather than two cards sharing an anchor id.
+        #expect(direct.values.reduce(0, +) == 48)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

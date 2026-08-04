@@ -172,8 +172,13 @@ enum SettingRuntimeGate: Hashable {
     /// The orphaned-pins card exists only while a space is
     /// pinned to a disconnected monitor.
     case orphanPinsExist
-    /// The not-connected banner shows only while a pinned
-    /// monitor is absent.
+    /// A stored profile is being edited AND its monitors are not
+    /// attached — one slot, so this tag carries both arms, like
+    /// `paletteGlowPairing` and `luaImportAvailable` below. There
+    /// are then no display frames to draw the Monitors picture
+    /// from, so the condition surfaces the not-connected banner
+    /// and withholds the cards it stands in for
+    /// (`MonitorsGates` resolves both sides).
     case monitorsDisconnected
     /// The neon "Pair with Glow" link shows only for palettes
     /// that carry the glow pairing (#578) — and only while
@@ -216,10 +221,13 @@ enum SettingRuntimeGate: Hashable {
 /// the predicate knowable only inside the area's resolver. Two
 /// such tags existed for one commit; `.runtimeAnyOf` replaced
 /// them, and with them a hand-kept register of which tags were
-/// secretly compound. The two remaining CONJUNCTIONS
-/// (`paletteGlowPairing`, `luaImportAvailable`) each state both
-/// arms in their own docstring — an `allOf` has no second
-/// client yet, and one client is not a shape.
+/// secretly compound. The remaining CONJUNCTIONS
+/// (`paletteGlowPairing`, `luaImportAvailable`,
+/// `monitorsDisconnected`) each state both arms in their own
+/// docstring — `allOf` stays unbuilt because a conjunction has
+/// no per-arm sentence to render: a row dead for both reasons
+/// says one thing, while a disjunction has to name the arm that
+/// killed it.
 enum SettingGate: Hashable {
     case setting(SettingKey)
     case anyOf([SettingKey])
