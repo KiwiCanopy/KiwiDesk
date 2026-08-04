@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "Restablecer todo",
   "space_override.reset_all_confirm.message": "Esto borra las anulaciones guardadas de cada diseño para este espacio, no solo el actual. Esta acción no se puede deshacer.",
   "space_override.reset_all_confirm.title": "¿Restablecer todas las anulaciones de diseño?",
-  "space_override.slot_size.help": "Establece el tamaño de cada ventana desplazable según el sentido de desplazamiento. Horizontal usa el ancho de columna; vertical usa la altura de fila. Porcentaje escala con el espacio disponible (80 % de fábrica); Puntos fija un tamaño exacto.",
   "space_override.title": "%1$@ — anulaciones de %2$@",
   "spaces.add.help": "Añadir espacio",
   "spaces.add.placeholder": "Nombre del nuevo espacio",

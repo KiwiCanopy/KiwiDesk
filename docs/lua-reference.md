@@ -880,7 +880,7 @@ stack.set_master_orientation_override("3", "vertical")
 available axis), or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
-in scrolling layouts. Auto is 80% of the available width
+in scrolling layouts. Auto is 95% of the available width
 (horizontal) or height (vertical). Any resolved size is floored
 at the global
 minimum window size (`set_min_window_size`) and capped at the

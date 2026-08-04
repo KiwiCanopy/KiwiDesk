@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "모두 리셋",
   "space_override.reset_all_confirm.message": "이 공간에 대한 모든 레이아웃의 저장된 오버라이드가 삭제됩니다. 복구할 수 없습니다.",
   "space_override.reset_all_confirm.title": "모든 레이아웃 오버라이드를 리셋하시겠습니까?",
-  "space_override.slot_size.help": "스크롤 방향에 따른 각 스크롤 윈도우의 크기를 설정합니다. 가로는 열 너비, 세로는 행 높이를 사용합니다. 퍼센트는 사용 가능한 공간에 맞춰 조정되며(기본 80%), 포인트는 정확한 크기로 고정합니다.",
   "space_override.title": "%1$@ — %2$@ 오버라이드",
   "spaces.add.help": "공간 추가",
   "spaces.add.placeholder": "새 공간 이름",

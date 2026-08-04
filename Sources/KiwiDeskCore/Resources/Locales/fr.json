@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "Tout réinitialiser",
   "space_override.reset_all_confirm.message": "Ceci efface les surcharges enregistrées de chaque disposition pour cet espace, pas seulement la disposition actuelle. Cette action est irréversible.",
   "space_override.reset_all_confirm.title": "Réinitialiser toutes les surcharges de disposition ?",
-  "space_override.slot_size.help": "Définit la taille de chaque fenêtre défilante selon le sens de défilement. Horizontal utilise la largeur de colonne ; vertical utilise la hauteur de ligne. Pourcentage s'adapte à l'espace disponible (80 % par défaut) ; Points fixe une taille exacte.",
   "space_override.title": "%1$@ — surcharges de %2$@",
   "spaces.add.help": "Ajouter un espace",
   "spaces.add.placeholder": "Nom du nouvel espace",

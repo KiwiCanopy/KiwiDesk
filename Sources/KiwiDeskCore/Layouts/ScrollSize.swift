@@ -58,11 +58,20 @@ public enum ScrollSize: Sendable, Equatable {
     /// ~73% of a 14" MBP but ~64% of a 16"). On an ultrawide the
     /// resolved column is huge — an accepted trade; set an
     /// explicit pt/% slot size there.
-    public static let autoHorizontalFraction: Double = 0.8
-    /// `auto` + vertical → this fraction of the *available* height.
-    /// Height is bounded, so a fraction adapts across laptop and
-    /// desktop without producing near-full-height rows.
-    public static let autoVerticalFraction: Double = 0.8
+    ///
+    /// The shipped standard is a *near*-full slot: the sliver the
+    /// remaining 5% leaves is what tells the user the space
+    /// scrolls at all, so it is the neighbour peeking in — not
+    /// spare room — that earns the fraction. A full-axis slot is
+    /// still settable (`maxFraction`) and still renders; it just
+    /// looks like a monocle until the focus moves.
+    public static let autoHorizontalFraction: Double = 0.95
+    /// `auto` + vertical → this fraction of the *available*
+    /// height, the same standard as horizontal so neither axis
+    /// surprises after an orientation flip. Height is bounded, so
+    /// a fraction adapts across laptop and desktop where a pt
+    /// count would not.
+    public static let autoVerticalFraction: Double = 0.95
 
     // MARK: - Resolution
 

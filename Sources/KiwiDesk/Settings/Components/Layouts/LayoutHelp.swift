@@ -128,7 +128,7 @@ enum LayoutHelp {
             "Sets each scrolling window's size along the scroll "
                 + "direction. Horizontal uses column width; "
                 + "vertical uses row height. Percent scales with "
-                + "the available space (80% out of the box); "
+                + "the available space (95% out of the box); "
                 + "Points fixes an exact size."
         )
     }

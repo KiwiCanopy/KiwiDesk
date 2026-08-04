@@ -3074,9 +3074,9 @@ of hard-capping halfway (the `AppBarPreviewStrip` fix).
 The three-way picker's founding reason was that the shipped
 default could not be expressed as one number (a fixed pt
 horizontally, a fraction vertically). Once both axes' standards
-became the same 80% fraction, a "Default" segment was
-indistinguishable from Percent-at-80 by anything the user could
-do in Settings — and a picker option that no in-app action can
+became the same fraction, a "Default" segment was
+indistinguishable from Percent at that number by anything the
+user could do in Settings — and a picker option that no in-app action can
 ever tell apart from its sibling is removed outright, not
 greyed ("grey, don't hide" covers controls another mode
 reactivates, which this was not). A stored `.auto` renders as
@@ -3087,6 +3087,30 @@ reachable from the open layer (GUI curates, Lua stays open —
 the `dim_factor` precedent). Removing `.auto` from the model
 instead would have spent Lua surface to solve a GUI problem the
 two-way picker already solves. (ui-designer, 2026-07-29.)
+
+**[Trade-off]**
+
+**A scrolling slot ships at 95% of its axis — near-full, not
+full.** The sliver the last 5% leaves is not spare room: it is
+the neighbouring window peeking in, and it is the only thing on
+screen that says the space scrolls at all. A full-axis slot
+looks exactly like a monocle layout until the user happens to
+change focus, so the *default* leaves the hint showing — while
+the slider still runs to 100%, because a full-axis slot is a
+legitimate thing to want and hiding a hint is not a broken
+value (GUI curates, Lua stays open — and here they agree, so
+neither withholds it). The standard is deliberately not a
+comfortable-looking 80%: a scrolling space is a stack of
+near-full windows the user pans between, and every point the
+default gives back is a point of the window they are actually
+working in. The cost is the counterpart of the ultrawide trade
+above — on a very wide display 95% is a very wide column, and
+the answer there is still an explicit pt or % slot size. The
+percent slider steps by 1% rather than the coarser step its pt
+sibling takes, since a percent of a scroll axis is tens of
+points on any display this app targets;
+`SlotSizePercentRangeTests` holds the slider to the model's own
+bounds and to a step the standard lands on.
 
 ### App Bar
 

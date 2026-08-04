@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "Redefinir tudo",
   "space_override.reset_all_confirm.message": "Isso apagará substituições salvas para cada layout neste espaço. Não é possível desfazer.",
   "space_override.reset_all_confirm.title": "Redefinir todas as substituições de layout?",
-  "space_override.slot_size.help": "Define as dimensões de cada janela com rolagem ao longo do eixo de rolagem. Horizontal usa a largura da coluna; vertical usa a altura da linha. Porcentagem escala com o espaço disponível (80% de fábrica); Pontos fixam um tamanho exato.",
   "space_override.title": "%1$@ — Substituições de %2$@",
   "spaces.add.help": "Adicionar espaço",
   "spaces.add.placeholder": "Nome do novo espaço",
