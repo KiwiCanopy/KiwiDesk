@@ -68,19 +68,19 @@ struct ScrollSizeTests {
 
     @Test("resolved clamps to the along-axis")
     func resolvedClamps() {
-        // Auto is 80% of the available along-axis on both
+        // Auto is 95% of the available along-axis on both
         // orientations.
         #expect(
             ScrollSize.auto.resolved(along: 2000, horizontal: true)
-                == 1600
+                == 1900
         )
         #expect(
             ScrollSize.auto.resolved(along: 1000, horizontal: true)
-                == 800
+                == 950
         )
         #expect(
             ScrollSize.auto.resolved(along: 1000, horizontal: false)
-                == 800
+                == 950
         )
         #expect(
             ScrollSize.fraction(0.5)
@@ -105,7 +105,7 @@ struct ScrollSizeTests {
         #expect(
             ScrollSize.auto
                 .editablePoints(along: 2000, horizontal: true)
-                == 1600
+                == 1900
         )
         #expect(
             ScrollSize.fraction(0.5)

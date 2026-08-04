@@ -5,7 +5,7 @@ import SwiftUI
 /// Points) and the slider row it drives. A stored `.auto`
 /// renders as Percent at the orientation standard — the GUI
 /// stopped offering "Default" as a third unit once both axes'
-/// standards became the same 80% fraction (ui-designer,
+/// standards became the same fraction (ui-designer,
 /// 2026-07-29; see `docs/design-decisions.md`), while `.auto`
 /// itself stays in the model and Lua (`scroll.set_slot_size(0)`).
 /// Split out of `ScrollGridEditor` so the unit seeds and
@@ -59,13 +59,29 @@ struct SlotSizeRows: View {
         Double(min(model.config.settings.minWindowSize, 1990))
     }
 
+    /// The Percent slider's range, spanning what the model
+    /// stores: the floor is `ScrollSize.minFraction` — below it
+    /// the setter clamps, so a lower stop would report a slot
+    /// the config never holds — and the ceiling is the whole
+    /// axis, which is a slot KiwiDesk renders rather than a
+    /// broken value. Internal so `SlotSizePercentRangeTests` can
+    /// hold it against the model's own bounds.
+    static let percentRange: ClosedRange<Double> = 5...100
+    /// The Percent slider's granularity. 1%, because a percent
+    /// of a scroll axis is a visible amount of window — ~19 pt
+    /// of column on a 1920 display — so every stop moves
+    /// something the user can see, and the shipped standard
+    /// stays a stop whatever it is: a default the slider cannot
+    /// return to reads as a bug.
+    static let percentStep: Double = 1
+
     private enum SizeUnit: Hashable {
         case points, percent
     }
 
     /// `.auto` presents as Percent: it resolves to the standard
-    /// fraction on either axis, so Percent-at-80 is its truthful
-    /// rendering. The stored value stays `.auto` until the user
+    /// fraction on either axis, so Percent at that fraction is its
+    /// truthful rendering. The stored value stays `.auto` until the user
     /// moves the slider (the binding then writes an explicit
     /// `.fraction`) — an untouched config keeps tracking the
     /// shipped standard.
@@ -225,8 +241,8 @@ struct SlotSizeRows: View {
                     )
                 SettingsSlider(
                     value: percentBinding,
-                    range: 5...100,
-                    step: 5
+                    range: Self.percentRange,
+                    step: Self.percentStep
                 )
                 Text("\(Int(currentFraction * 100)) %")
                     .frame(

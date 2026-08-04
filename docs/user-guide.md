@@ -626,7 +626,9 @@ Adjust each mode's defaults:
   **Right** when horizontal and **Top**/**Bottom** when vertical;
   or **Follow**, the default, which holds the viewport and pans
   the minimum to keep the focus visible), slot size (a
-  percentage of the available space — 80% out of the box — or
+  percentage of the available space — 95% out of the box, so a
+  sliver of the next window stays visible to show the space
+  scrolls; the slider runs 5–100% in 1% steps — or
   an exact point count), and **Wrap focus** —
   off by default, so
   stepping focus past a row end stops there; turn it on to wrap
@@ -743,7 +745,7 @@ persists.
 (**Percent**, **Points**) and a value. It sets each window's
 size along the scroll direction — **Column width** when the
 space scrolls horizontally, **Row height** when vertical.
-Percent scales with the available space (80% out of the box);
+Percent scales with the available space (95% out of the box);
 Points fixes an exact size. The single checkbox owns the whole
 setting.
 

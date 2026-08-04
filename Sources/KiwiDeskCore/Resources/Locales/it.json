@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "Ripristina tutto",
   "space_override.reset_all_confirm.message": "Questo cancellerà le personalizzazioni salvate per ogni disposizione in questo spazio. Impossibile annullare.",
   "space_override.reset_all_confirm.title": "Ripristinare tutte le personalizzazioni della disposizione?",
-  "space_override.slot_size.help": "Imposta le dimensioni di ciascuna finestra a scorrimento lungo l'asse di scorrimento. In orizzontale usa la larghezza della colonna; in verticale l'altezza della riga. Percentuale scala con lo spazio disponibile (80 % predefinito); Punti fissa una dimensione esatta.",
   "space_override.title": "%1$@ — Personalizzazioni di %2$@",
   "spaces.add.help": "Aggiungi spazio",
   "spaces.add.placeholder": "Nome nuovo spazio",

@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "全部重設",
   "space_override.reset_all_confirm.message": "這會清除這個空間中每個佈局已儲存的覆寫項目，而不只是目前這一個。此動作無法還原。",
   "space_override.reset_all_confirm.title": "要重設所有佈局覆寫項目嗎？",
-  "space_override.slot_size.help": "設定每個捲動視窗沿捲動方向的尺寸。水平時採用欄寬；垂直時採用列高。百分比隨可用空間縮放（預設 80%）；點數固定精確尺寸。",
   "space_override.title": "%1$@ — %2$@ 覆寫項目",
   "spaces.add.help": "加入空間",
   "spaces.add.placeholder": "新空間名稱",

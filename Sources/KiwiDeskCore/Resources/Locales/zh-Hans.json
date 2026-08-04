@@ -822,7 +822,6 @@
   "space_override.reset_all_confirm.action": "全部重置",
   "space_override.reset_all_confirm.message": "这将清除该空间针对每个布局保存的覆盖。此操作无法撤销。",
   "space_override.reset_all_confirm.title": "重置所有布局覆盖？",
-  "space_override.slot_size.help": "设置每个滚动窗口沿滚动方向的尺寸。水平时采用列宽；垂直时采用行高。百分比随可用空间缩放（出厂为80%）；点数固定精确尺寸。",
   "space_override.title": "%1$@ — %2$@ 覆盖",
   "spaces.add.help": "添加空间",
   "spaces.add.placeholder": "新空间名称",
