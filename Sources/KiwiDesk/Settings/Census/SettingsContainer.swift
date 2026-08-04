@@ -31,6 +31,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case palettes
     case perSpaceOverrides
     case pinnedToDisconnectedMonitors
+    case presets
     case profilesPerMacOSSpace
     case rulesPerApp
     case savedProfiles
@@ -76,7 +77,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .monitorFingerprints, .monocle, .mouse,
             .moveWindows, .onQuit, .openApplications,
             .palettes, .perSpaceOverrides,
-            .pinnedToDisconnectedMonitors,
+            .pinnedToDisconnectedMonitors, .presets,
             .profilesPerMacOSSpace, .rulesPerApp,
             .savedProfiles, .scrolling, .sizeAndFloat,
             .spaceList, .spacePlacement, .stack,

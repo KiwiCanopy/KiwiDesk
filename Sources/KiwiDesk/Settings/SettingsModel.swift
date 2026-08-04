@@ -145,6 +145,55 @@ final class SettingsModel: ObservableObject {
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
+    /// macOS's "Displays have separate Spaces" preference, on its
+    /// own (#678 turn 13a).
+    ///
+    /// Snapshotted because it is a `CFPreferences` lookup and two
+    /// surfaces ask for it; the DISPLAY COUNT half of the
+    /// ambiguity condition is deliberately NOT baked in here.
+    /// Folding `recommendsSharedSpaces(displayCount:)` whole into
+    /// a snapshot re-created the fail-open it was meant to close:
+    /// nothing refreshes the dashboard on a display change, so
+    /// plugging in a second monitor left the binding rows live
+    /// with the stale one-display answer. The count is read live
+    /// at each use (`displaysHaveSeparateSpaces`), which cannot
+    /// go stale; only the preference — which a user changes in
+    /// System Settings and which needs a log out to take effect
+    /// anyway — is cached.
+    @Published var separateDisplaySpacesPreference = false
+
+    /// The condition that makes a Desktop binding ambiguous:
+    /// separate Spaces on AND more than one display. The
+    /// preference is the snapshot, the count is live — and the
+    /// predicate itself stays Core's, which is the whole point
+    /// of `recommendsSharedSpaces` existing (#8: one predicate,
+    /// so onboarding and this page cannot drift).
+    var displaysHaveSeparateSpaces: Bool {
+        DisplaySpacesSetting.recommendsSharedSpaces(
+            separateSpaces: separateDisplaySpacesPreference,
+            displayCount: displays.count
+        )
+    }
+    /// What loads right now, by which rule, and over how many
+    /// screens (#678 turn 13a) — for the "Which profile loads"
+    /// card.
+    ///
+    /// Snapshotted rather than asked per render: the query scans
+    /// the profile directory and decodes every profile, so a
+    /// computed property read from `body` would do that on every
+    /// SwiftUI pass — and log a line per broken profile each
+    /// time. Refreshed by `refreshProfiles`, which already pays
+    /// for that scan once.
+    ///
+    /// The COUNT rides with the verdict rather than being read
+    /// live beside it. The card renders both in one sentence, so
+    /// two sources would let it say "2 screens → Desk (these
+    /// exact monitors)" about a profile that matched the
+    /// one-screen set — a sentence assembled from two moments.
+    @Published var profileResolution = ProfileResolution(
+        verdict: .none,
+        screens: 0
+    )
     /// A dismissible warning from the last profile action
     /// (overlapping monitor sets, save failures).
     @Published var profileWarning: String?
@@ -246,56 +295,4 @@ final class SettingsModel: ObservableObject {
     /// swaps the footer's save action. The editing surface
     /// lives in `SettingsModel+ProfileOverrides.swift`.
     var editingStoredProfile: Bool { target != .live }
-
-    // MARK: - Sync with the backend
-
-    // `reload()` and `selectEditTarget` — the single edit-mode
-    // state machine — live in `SettingsModel+EditTarget.swift`
-    // (#64).
-
-    func refreshProfiles() {
-        profiles = core.profiles.list()
-        activeProfile = core.profiles.currentName
-        activeStandard = core.profiles.currentStandard
-        profileDirty = core.profiles.isDirty
-        duplicateDefaultCounts =
-            core.profiles.duplicateDefaultCounts()
-        let live = displays.map(\.fingerprint)
-        profileSummaries = core.profiles.allProfiles().map {
-            profile in
-            ProfileSummary(
-                name: profile.name,
-                count: profile.monitorCount,
-                sets: profile.monitorSets.map(\.monitors),
-                isDefault: profile.isDefault,
-                matchesLive: profile.set(matching: live) != nil
-            )
-        }
-        brokenProfiles = core.profiles.brokenNames()
-        nativeSpaceCount =
-            NativeSpaces.allSpaces().filter(\.isUser).count
-        currentNativeSpace = NativeSpaces.activeSpaceNumber()
-        refreshLayoutDrift()
-    }
-
-    // MARK: - Import live keybindings (#4)
-
-    /// Merges the shortcuts currently active in `init.lua` into
-    /// the edited config: each recovered mode is matched by name
-    /// (created if new), every recovered row upserted by combo,
-    /// and the result reclassified so known actions land in their
-    /// sections. Marks the config dirty so the user reviews the
-    /// import before Save writes it.
-    func importCurrentShortcuts() {
-        var updated = config
-        KeybindingMerge.merge(
-            recovered: core.recoverKeybindings(),
-            into: &updated
-        )
-        KeybindingImportClassifier.classify(
-            &updated,
-            recoverResizeStep: true
-        )
-        config = updated
-    }
 }

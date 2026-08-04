@@ -9,10 +9,63 @@ import SwiftUI
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let model: SettingsModel
     private var window: NSWindow?
-
     init(core: KiwiCore) {
         self.model = SettingsModel(core: core)
         super.init()
+        observeWorkspaceTopology()
+    }
+
+    /// Re-snapshots what the dashboard says about the MACHINE
+    /// when the machine changes under it (#678 turn 13a).
+    ///
+    /// Several answers on the Profiles page are snapshots taken
+    /// at refresh time: which profile resolves (a Desktop
+    /// binding outranks monitor matching), whether a Desktop
+    /// binding is ambiguous (separate Spaces AND more than one
+    /// display), and which Desktop wears the "current" badge.
+    /// Nothing refreshed them once the window was open, so
+    /// plugging in a monitor or switching Desktop left a card
+    /// saying "Right now:" about a moment that had passed — and
+    /// the ambiguity gate answering for a display count that no
+    /// longer held.
+    ///
+    /// Observed HERE rather than pushed from Core: the staleness
+    /// belongs to this window, these are the standard AppKit
+    /// notifications for exactly these two facts, and Core's own
+    /// `.monitorChange` bus event is the Lua/CLI contract rather
+    /// than a GUI refresh channel. `refreshProfiles` re-reads
+    /// live state and touches no staged config, so this is safe
+    /// mid-edit in a way `reload()` would not be.
+    ///
+    /// The observers are never removed, and that is deliberate
+    /// rather than overlooked: `AppDelegate` builds exactly one
+    /// of these and holds it for the process lifetime, precisely
+    /// so the window survives close-and-reopen. A `deinit` that
+    /// unregistered them would be unreachable code with an
+    /// actor-isolation problem of its own. A second construction
+    /// site would change that — and would want the tokens kept.
+    private func observeWorkspaceTopology() {
+        let refresh: @Sendable (Notification) -> Void = {
+            [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshProfiles() }
+        }
+        _ = NotificationCenter.default.addObserver(
+            forName: NSApplication
+                .didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main,
+            using: refresh
+        )
+        // `NSWorkspace` posts to its OWN centre, not the default
+        // one — a Space switch observed on `NotificationCenter`
+        // .default never fires.
+        _ = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace
+                .activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main,
+            using: refresh
+        )
     }
 
     /// Routes the paused-permission banner's "Enable

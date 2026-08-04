@@ -127,7 +127,10 @@ struct SettingsCatalogArgumentTests {
         // Turn 10 adds Layout Defaults' live-preview and
         // spaces-using cards: 48.
         // 47 since turn 14b merged General's two cards.
-        #expect(direct.values.reduce(0, +) == 47)
+        // 49 since turn 13a: Profiles' "Which profile loads"
+        // card and its "For other setups" preset drawer, each
+        // mounted once.
+        #expect(direct.values.reduce(0, +) == 49)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

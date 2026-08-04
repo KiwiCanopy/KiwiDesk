@@ -162,6 +162,22 @@ extension SettingsModel {
         reload()
     }
 
+    /// Removes every Desktop → profile binding (#678 turn 13a).
+    ///
+    /// On the model, not inline in the button, because it is the
+    /// escape hatch from a state the GUI otherwise cannot leave:
+    /// while displays have separate Spaces the binding rows are
+    /// greyed, yet the runtime keeps firing a binding made
+    /// before that setting changed. A view-local
+    /// `config.profileBindings = [:]` is unreachable from a
+    /// test, and this one is worth reaching.
+    ///
+    /// Staged like every other binding edit — the footer's Save
+    /// writes it — so a mis-click is revertible.
+    func clearProfileBindings() {
+        config.profileBindings = [:]
+    }
+
     func makeDefault(named name: String) {
         _ = core.execute(
             "set_default_profile",
@@ -287,7 +303,27 @@ struct ProfileSummary: Identifiable {
     let isDefault: Bool
     /// One of the sets equals the live monitors.
     let matchesLive: Bool
+    /// Spaces the profile declares (#678 turn 13a). Part of the
+    /// row's subtitle, which counts only what the profile OWNS.
+    let spaceCount: Int
+    /// Keybindings the profile overrides — the count of rows in
+    /// its sparse `layers` override, never the size of the
+    /// resolved set. "18 shortcuts" on a profile row would claim
+    /// the profile carries a keybinding set of its own; it
+    /// carries a diff over the global one (#678 turn 13a).
+    let shortcutOverrideCount: Int
     var id: String { name }
+}
+
+/// The "Which profile loads" answer as one value (#678 turn
+/// 13a): what resolves, and the screen count it resolved over.
+///
+/// One value, not two published fields, because the card renders
+/// them in a single sentence — and two fields refreshed together
+/// today are two fields somebody refreshes apart tomorrow.
+struct ProfileResolution: Equatable {
+    let verdict: ProfileVerdict
+    let screens: Int
 }
 
 /// How a space's screen resolves in the Canvas (#36).

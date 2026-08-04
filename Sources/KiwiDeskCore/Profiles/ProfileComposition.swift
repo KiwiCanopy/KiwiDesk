@@ -63,15 +63,18 @@ public enum ProfileComposition {
         var spaces: [SpaceID] = []
         var modes: [SpaceID: LayoutMode] = [:]
         var assignment: [SpaceID: DisplayID] = [:]
-        for number in 1...layout.spaceCount {
-            let space = SpaceID(number)
+        for space in layout.plannedSpaces {
             spaces.append(space)
-            modes[space] = layout.spaceModes[space] ?? .bsp
-            // Positions are clamped defensively; a Standard
-            // never plans beyond its own screen count.
-            let position = min(
-                max(layout.spaceScreens[space] ?? 0, 0),
-                ordered.count - 1
+            // Both sparse fallbacks — unlisted mode is bsp,
+            // unlisted screen is main, clamped into the live
+            // display count — belong to the layout and are read
+            // through its accessors, so the Settings preset card
+            // cannot answer them differently
+            // (`StandardLayout+Screens`).
+            modes[space] = layout.mode(of: space)
+            let position = layout.screen(
+                of: space,
+                screens: ordered.count
             )
             assignment[space] = ordered[position].id
         }

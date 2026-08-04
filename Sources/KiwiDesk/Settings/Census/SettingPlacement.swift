@@ -145,9 +145,13 @@ enum SettingRuntimeGate: Hashable {
     /// The gaps master slider reads "mixed" while the per-edge
     /// values differ.
     case perEdgeValuesDiffer
-    /// Desktop bindings are global — dead while a stored
-    /// profile is being edited (switch to Live).
+    /// A stored profile is being edited, so a global setting
+    /// this profile may never override is dead (switch to Live).
     case editingStoredProfile
+    /// macOS's "Displays have separate Spaces" is on with more
+    /// than one display attached, so every display has its own
+    /// Desktop 1 and a Desktop binding names no single event.
+    case displaysHaveSeparateSpaces
     /// Presets apply only when the connected screen count
     /// matches the preset's.
     case screenCountMismatch
@@ -178,9 +182,9 @@ enum SettingRuntimeGate: Hashable {
     /// tag carries the whole conjunction).
     case paletteGlowPairing
     /// The import row shows only while `init.lua` holds
-    /// bindings the GUI can adopt AND the live profile is
-    /// being edited (same one-slot conjunction:
-    /// `editingStoredProfile` is its other half).
+    /// bindings the GUI can adopt AND the LIVE config is the
+    /// edit target — one slot, so this tag carries both arms,
+    /// the not-editing-a-stored-profile half included.
     case luaImportAvailable
     /// The config defines a layer beyond `default`. Gates the
     /// Layers card's `.immediate` tier: with layers configured
@@ -199,22 +203,48 @@ enum SettingRuntimeGate: Hashable {
 /// values decide the grey — the exact predicate (resolved
 /// override chains, value comparisons) lives with the wiring,
 /// and gates on resolved values name every surfaced owner
-/// (#406: gate on RESOLVED, not global) — EXCEPT the two
-/// documented one-slot conjunctions (`paletteGlowPairing`,
-/// `luaImportAvailable`), whose runtime tag carries the owner
-/// half that a single gate slot cannot. `.runtime` names a
-/// condition that is not itself a setting.
+/// (#406: gate on RESOLVED, not global). `.runtime` names a
+/// condition that is not itself a setting, and `.runtimeAnyOf`
+/// names SEVERAL such conditions where a row dies for any of
+/// them — so a multi-arm predicate is spelled out in the census
+/// rather than hidden behind one tag standing for the whole
+/// disjunction.
+///
+/// That distinction is load-bearing: a tag named for the row's
+/// own OUTCOME ("this control is unavailable") records nothing a
+/// reader could not see from the greyed row itself, and leaves
+/// the predicate knowable only inside the area's resolver. Two
+/// such tags existed for one commit; `.runtimeAnyOf` replaced
+/// them, and with them a hand-kept register of which tags were
+/// secretly compound. The two remaining CONJUNCTIONS
+/// (`paletteGlowPairing`, `luaImportAvailable`) each state both
+/// arms in their own docstring — an `allOf` has no second
+/// client yet, and one client is not a shape.
 enum SettingGate: Hashable {
     case setting(SettingKey)
     case anyOf([SettingKey])
     case runtime(SettingRuntimeGate)
+    /// The row is inert while ANY of these conditions holds —
+    /// the runtime peer of `.anyOf`, so a row with a two-arm
+    /// predicate names both arms instead of one tag standing for
+    /// the pair.
+    case runtimeAnyOf([SettingRuntimeGate])
 
     /// The setting rows this gate reads, for the guards.
     var settings: [SettingKey] {
         switch self {
         case .setting(let key): return [key]
         case .anyOf(let keys): return keys
-        case .runtime: return []
+        case .runtime, .runtimeAnyOf: return []
+        }
+    }
+
+    /// The runtime conditions this gate names, for the guards.
+    var runtimeConditions: [SettingRuntimeGate] {
+        switch self {
+        case .setting, .anyOf: return []
+        case .runtime(let condition): return [condition]
+        case .runtimeAnyOf(let conditions): return conditions
         }
     }
 }

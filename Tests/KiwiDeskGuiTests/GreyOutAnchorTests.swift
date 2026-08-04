@@ -80,9 +80,17 @@ struct GreyOutAnchorTests {
             "help: enabledReason.map(GapsBordersGateHelp.sentence)",
             1
         ),
+        // The bindings card's explanation is INLINE since #678
+        // turn 13a, not behind a `?`: it is drawn from the
+        // resolver's reason above the rows and outside their
+        // `GreyOut`, so it survives the dim by not being in the
+        // dimmed subtree at all — the stronger form of the same
+        // rule (why-you-cannot is always inline, and VoiceOver
+        // reads it without a click). The needle is the render of
+        // the reason, so deleting the note reds here.
         (
             "NativeSpacesGroup.swift",
-            "help: gatedOff && !gateHelp.isEmpty",
+            "ProfilesGateHelp.sentence(for: reason)",
             1
         ),
         // Reduce Motion greys the whole Animations card; the

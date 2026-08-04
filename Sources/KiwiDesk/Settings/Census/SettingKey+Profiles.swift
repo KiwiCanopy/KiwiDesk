@@ -14,24 +14,52 @@ extension ProfilesKey {
     var placement: SettingPlacement {
         switch self {
         case .profileBindings:
-            // Desktop bindings are global — dead while a
-            // stored profile is being edited.
+            // Dead while a stored profile is being edited
+            // (bindings are global), AND dead while displays
+            // have separate Spaces (every display has its own
+            // Desktop 1). One slot, two arms — the tag names
+            // the disjunction rather than half of it, and
+            // `ProfilesGates` tells the two apart.
             return .row(
                 .profiles,
                 .profilesPerMacOSSpace,
                 .showMore,
-                gate: .runtime(.editingStoredProfile)
+                gate: .runtimeAnyOf([
+                    .editingStoredProfile,
+                    .displaysHaveSeparateSpaces,
+                ])
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)
         case .isStarterLadder:
             return .luaOnly
         case .presetsApply:
+            // Its own card since #678 turn 13a — "Start from a
+            // preset" is a distinct offer from the saved list it
+            // used to sit inside, and the redesign draws it as
+            // one. Apply is greyed by the screen-count match;
+            // `ProfilesGates` also answers the stored-profile
+            // reason for the same row (one gate slot, two
+            // reasons).
+            //
+            // `.atRest` describes the instances that MATTER: the
+            // presets for the connected screen count, which is
+            // the only group whose Apply can fire. The rest
+            // render inside the "For other setups" drawer, so
+            // this one key's instances straddle two tiers — the
+            // first such key in the census. The tier follows the
+            // appliable group deliberately: a search hit on a
+            // preset should offer to apply it, and tiering the
+            // key `.showMore` would describe the group nobody
+            // can act on.
             return .row(
                 .profiles,
-                .savedProfiles,
+                .presets,
                 .atRest,
-                gate: .runtime(.screenCountMismatch)
+                gate: .runtimeAnyOf([
+                    .screenCountMismatch,
+                    .editingStoredProfile,
+                ])
             )
         }
     }
