@@ -501,13 +501,13 @@ To **add a space**, click the **+** button and enter a name
 To **rename**, click the space name in the list.
 
 To **customize a space** (per-space layout overrides), click the
-**Overrides…** button on its row. When the space already has saved
-overrides the button shows the count (e.g. **Overrides (3)**),
-including any saved for layouts other than the one it currently
-uses. The editor opens in a popover floating over the list, so it
-never pushes the other rows down, and opening one space's editor
-closes any other that was open. A space set to **Floating** has no
-layout overrides, so its button is visible but disabled. See
+override cell on its row. On a tiling space it reads **Customize…**
+when the space has no overrides, or **N custom** (e.g. **3 custom**)
+when it has some — the total across every layout. A space set to
+**Floating** has no *active* overrides, so its cell instead reads a
+muted **N saved** (a count of overrides parked for other layouts,
+kept reachable) or **—** when it holds none. Clicking opens the
+full-pane override editor. See
 [Per-Space Overrides](#per-space-overrides) for what it contains.
 
 To **delete**, right-click and pick Delete (or click the trash
@@ -715,16 +715,29 @@ Adjust each mode's defaults:
 To tune the *same layout type differently in different spaces*, use
 the per-space override editor. For example, make space "3" scroll
 vertically while every other scrolling space goes horizontal. Open
-the space's **Overrides…** popover from its row in the **Spaces**
-section, tick the box beside a field, and adjust just that field —
-unticked fields inherit the Layout Defaults value.
+it from a space's override cell in the **Spaces** section; the
+editor takes over the pane, with a breadcrumb —
+**‹ Spaces › `<space>` › Overrides** — back to the list.
 
-The popover is titled `<Space> — <Layout> overrides` and edits the
-layout the space currently uses; the caption reminds you that
-unchecked settings inherit that layout's defaults. Each field has a
-checkbox: unchecked inherits (the control is dimmed and shows the
-inherited value), checked overrides just that field for this space
-and seeds the current value so nothing jumps.
+The header names the space and the layout it edits —
+`<Space> — <Layout> overrides` — with an **N of M set** count of how
+many of that layout's fields the space overrides, and a
+**Reset `<Layout>` Overrides** button (greyed when the space has
+none). The editor edits the layout the space currently uses; to
+tune a different layout, switch the space to it in the list first.
+
+Each field row carries an **Inherit** checkbox in the trailing
+column. Checked (the default) inherits the Layout Defaults value,
+and the row collapses to a quiet **follows `<Layout>` defaults ·
+`<value>`** readout. Uncheck it to override just that field for this
+space — the control appears, seeded with the current value so
+nothing jumps.
+
+A **live preview** beside the rows draws the space's layout with its
+overrides applied, so a ratio or count you change shows at once. A
+**Window count** slider drives how many windows it simulates — a
+question you ask of the preview, not a setting, so it never
+persists.
 
 **Scrolling slot size** is one override with a size unit
 (**Percent**, **Points**) and a value. It sets each window's
@@ -739,16 +752,16 @@ deletes overrides — each layout keeps its own. Switch from
 Scrolling to BSP and you see only BSP's fields; switch back and the
 Scrolling values return unchanged. When a space carries values for
 layouts other than its current one, a **Saved for other layouts
-(N)** disclosure lists each layout and how many fields it holds, so
-the retained data stays discoverable without turning the popover
-into an all-layout editor.
+(N)** card summarises them, and its **Show** disclosure lists each
+layout and how many fields it holds — so the retained data stays
+discoverable without turning the editor into an all-layout editor.
 
-**Resetting.** **Reset `<Layout>` Overrides** clears the current
-layout's overrides for this space (greyed when it has none). When
-other layouts hold saved values, **Reset All Layout Overrides**
-clears every layout's overrides for the space and asks for
-confirmation first, since it also discards the dormant values the
-popover doesn't show.
+**Resetting.** **Reset `<Layout>` Overrides** (in the header) clears
+the current layout's overrides for this space (greyed when it has
+none). When other layouts hold saved values, **Reset All Layout
+Overrides** in the Saved-for-other-layouts card clears every
+layout's overrides for the space and asks for confirmation first,
+since it also discards the dormant values not otherwise shown.
 
 ## Monitors
 
