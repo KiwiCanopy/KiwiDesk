@@ -31,19 +31,31 @@ extension SpacesSection {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     overridesHeader(space, mode: mode, gates: gates)
-                    SpaceOverrideRows(
-                        model: model,
-                        space: space,
-                        pendingResetAll: $pendingResetAll
-                    )
+                    HStack(alignment: .top, spacing: 16) {
+                        // Bounded, not full-bleed: the override rows
+                        // carry their own label/control columns, so
+                        // stretching them only lengthens slider
+                        // travel past what the value needs.
+                        SpaceOverrideRows(
+                            model: model,
+                            space: space,
+                            pendingResetAll: $pendingResetAll
+                        )
+                        .frame(maxWidth: 520, alignment: .leading)
+                        // The live preview leads its editor (gui.md):
+                        // the space's active layout with ITS overrides
+                        // applied, updating as the user edits.
+                        // Floating has no schematic, so it draws none.
+                        if LayoutMode.placementTabs.contains(mode) {
+                            SpaceOverridePreview(
+                                model: model,
+                                space: space,
+                                mode: mode
+                            )
+                            .frame(maxWidth: 300, alignment: .leading)
+                        }
+                    }
                 }
-                // Bounded, not full-bleed: the override rows carry
-                // their own label/control columns, so stretching
-                // them to a wide pane only lengthens slider travel
-                // past what the value needs. The side-by-side
-                // preview (a later 8b turn) claims the space to the
-                // right of this column.
-                .frame(maxWidth: 560, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(
                     [.horizontal, .bottom],

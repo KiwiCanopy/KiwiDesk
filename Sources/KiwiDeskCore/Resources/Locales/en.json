@@ -823,6 +823,7 @@
   "space_override.fraction": "%1$d of %2$d set",
   "space_override.inherit_column": "Inherit",
   "space_override.inherits": "follows %1$@ defaults · %2$@",
+  "space_override.preview": "Preview",
   "space_override.reset_active": "Reset %1$@ Overrides",
   "space_override.reset_active.none": "There are no overrides to reset.",
   "space_override.reset_all": "Reset All Layout Overrides",
