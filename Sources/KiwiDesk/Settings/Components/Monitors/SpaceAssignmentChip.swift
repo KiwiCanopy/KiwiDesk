@@ -23,20 +23,24 @@ struct SpaceAssignment: Identifiable, Hashable {
 /// chip after the flow layout had sized it, so its ⓧ overflowed a
 /// narrow card).
 ///
-/// **The chip is a `Menu`, which is what makes the keyboard route
-/// real** (#678 turn 13b). This docstring used to call the
-/// context menu "the keyboard-navigable fallback for every move"
-/// while the chip was an `HStack` with a `.draggable` on it: not
-/// focusable, no Tab stop, no Return, and nothing for VoiceOver
-/// to activate — so the promise was false for exactly the users
-/// it was written for. A `Menu` earns focus, keyboard activation
-/// and the VoiceOver trait from AppKit.
+/// **A `Menu` inside the chip is what makes the keyboard route
+/// real** (#678 turn 13b). Before it, the chip was an `HStack`
+/// with a `.draggable`: not focusable, no Tab stop, no Return,
+/// nothing for VoiceOver to activate — so the docstring's promise
+/// of a "keyboard-navigable fallback" was false for exactly the
+/// users it was written for. A `Menu` earns focus, keyboard
+/// activation and the VoiceOver trait from AppKit.
 ///
-/// All three routes stay live: click or Return opens the menu,
-/// right-click opens the same one, and drag remains the pointing
-/// route. The `.contextMenu` is kept deliberately — dropping it
-/// with the rewrite would have retired a gesture people already
-/// had, as a side effect rather than a decision.
+/// 13b gave the menu the WHOLE chip, which cost the drag: a
+/// borderless menu consumes the mouse-down to open itself, so
+/// `.draggable` never saw a press to begin from. The menu now
+/// owns the chevron alone and the chip body is draggable again.
+///
+/// All three routes stay live, none a fallback for another: drag
+/// the chip, click the chevron (or focus it and press Return),
+/// right-click anywhere. The `.contextMenu` is kept deliberately
+/// — dropping it with 13b's rewrite retired a gesture people
+/// already had, as a side effect rather than a decision.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -65,29 +69,26 @@ struct SpaceAssignmentChip: View {
     /// those from AppKit, it just no longer owns the whole chip),
     /// or **right-click anywhere** on the chip.
     var body: some View {
-        HStack(spacing: 2) {
-            capsule
-            chevronMenu
-        }
-        .fixedSize()
-        .draggable(DraggableSpace(raw: space.raw))
-        .help(
-            L(
-                "monitor_chip.help_full",
-                "%1$@\n%2$@",
-                space.raw,
-                hint
+        capsule
+            .fixedSize()
+            .draggable(DraggableSpace(raw: space.raw))
+            .help(
+                L(
+                    "monitor_chip.help_full",
+                    "%1$@\n%2$@",
+                    space.raw,
+                    hint
+                )
             )
-        )
-        .accessibilityLabel(space.raw)
-        .accessibilityValue(hint)
-        // Right-click keeps working. Making the chip a `Menu`
-        // dropped the `.contextMenu` it used to carry, which
-        // silently retired the gesture people already had — a
-        // side effect of fixing the keyboard route, never a
-        // decision (docs review, 2026-08-04). Both open the same
-        // menu.
-        .contextMenu { menu }
+            .accessibilityLabel(space.raw)
+            .accessibilityValue(hint)
+            // Right-click keeps working. Making the chip a `Menu`
+            // dropped the `.contextMenu` it used to carry, which
+            // silently retired the gesture people already had — a
+            // side effect of fixing the keyboard route, never a
+            // decision (docs review, 2026-08-04). Both open the same
+            // menu.
+            .contextMenu { menu }
     }
 
     /// The menu's own affordance, sized as a hit target rather
@@ -150,6 +151,14 @@ struct SpaceAssignmentChip: View {
                 // 8-language add (#95) — localized names run
                 // longer.
                 .frame(maxWidth: 120, alignment: .leading)
+            // Inside the pill, beside the ⓧ (owner, 2026-08-04):
+            // as a sibling of the pill it read as a loose arrow
+            // floating next to a token. Press-and-release opening
+            // the menu while press-and-drag drags would be
+            // better still, and is not reachable — SwiftUI has no
+            // way to present a `Menu` imperatively, so the menu
+            // must own a hit area of its own somewhere.
+            chevronMenu
             if kind != .auto {
                 Button {
                     clear()

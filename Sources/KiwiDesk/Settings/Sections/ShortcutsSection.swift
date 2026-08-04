@@ -229,7 +229,27 @@ struct ShortcutsSection: View {
 
     // MARK: - Advanced drawer (§3.6.1)
 
-    private var advancedDrawer: some View {
+    /// Withheld in Simple (owner ruling 2026-08-04): importing
+    /// bindings out of `init.lua` is not a first-week concept,
+    /// and a collapsed drawer for it still costs a Simple user a
+    /// row of chrome to read past.
+    ///
+    /// `hasCustomLua` is the FIRST term for the same reason
+    /// `layersExist` is on the Layers card: someone whose
+    /// `init.lua` already carries bindings must not have the one
+    /// surface that explains them hidden by a mode they did not
+    /// know they were in.
+    private var offersAdvancedDrawer: Bool {
+        model.hasCustomLua || model.settingsMode == .powerUser
+    }
+
+    @ViewBuilder private var advancedDrawer: some View {
+        if offersAdvancedDrawer {
+            luaDrawer
+        }
+    }
+
+    private var luaDrawer: some View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,

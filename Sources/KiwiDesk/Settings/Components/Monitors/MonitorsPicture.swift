@@ -37,12 +37,25 @@ struct MonitorsPicture: View {
     /// the minimum-card floor doing its job.
     private static let inset: CGFloat = 4
 
+    /// The band under the picture that the stands hang into.
+    ///
+    /// RESERVED, not merely drawn into: a stand hangs past its
+    /// card's frame, and the scroll content is sized to the
+    /// layout's `contentSize` — so without a band the feet were
+    /// clipped off at the content's edge, and the topmost card's
+    /// stand was cut where it met the card above it (owner,
+    /// 2026-08-04). Subtracted from the canvas that is fitted and
+    /// added back to the content frame, so the arrangement keeps
+    /// the same room it had and the stands get their own.
+    private static let standBand: CGFloat = 16
+
     var body: some View {
         GeometryReader { proxy in
             let layout = arrangement(
                 for: CGSize(
                     width: proxy.size.width - Self.inset * 2,
                     height: Self.canvasHeight - Self.inset * 2
+                        - Self.standBand
                 )
             )
             ScrollView([.horizontal, .vertical]) {
@@ -50,6 +63,7 @@ struct MonitorsPicture: View {
                     .frame(
                         width: layout.contentSize.width,
                         height: layout.contentSize.height
+                            + Self.standBand
                     )
                     .padding(Self.inset)
             }
@@ -93,15 +107,15 @@ struct MonitorsPicture: View {
     /// 2026-08-04). The clamp is what stops the same proportion
     /// giving a laptop thumbnail a plinth.
     private func stand(cardWidth: CGFloat) -> some View {
-        let base = min(max(cardWidth * 0.28, 26), 140)
-        let neck = min(max(base * 0.22, 8), 30)
+        let base = min(max(cardWidth * 0.38, 44), 190)
+        let neck = min(max(base * 0.26, 14), 44)
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(SettingsTheme.hairline)
-                .frame(width: neck, height: neck * 0.55)
-            RoundedRectangle(cornerRadius: 2)
+                .frame(width: neck, height: 7)
+            RoundedRectangle(cornerRadius: 2.5)
                 .fill(SettingsTheme.hairline)
-                .frame(width: base, height: 4)
+                .frame(width: base, height: 5)
         }
         .allowsHitTesting(false)
     }
