@@ -52,7 +52,28 @@ extension SpacesSection {
     ///   OTHER layouts, not this one) that still opens the editor
     ///   so they stay reachable — "grey, don't hide", §2.7;
     /// - Floating, N==0 → "—", disabled: genuinely no destination.
-    func customizeButton(_ space: SpaceID) -> some View {
+    /// Withheld entirely while the offer is locked (#678 8c) —
+    /// see `SpaceOverrideOffer`, which owns that predicate and
+    /// the argument for hiding rather than dimming. Gated HERE,
+    /// at the one render site, rather than at the row: the row
+    /// would then hold a second copy of the rule, which is the
+    /// hand-negated-copy drift `HomeCardOrder.isOffered` exists
+    /// to prevent one level up.
+    @ViewBuilder func customizeButton(
+        _ space: SpaceID
+    ) -> some View {
+        if SpaceOverrideOffer.isOffered(
+            mode: model.settingsMode,
+            settings: model.config.settings,
+            spaces: model.config.spaces
+        ) {
+            offeredCustomizeButton(space)
+        }
+    }
+
+    private func offeredCustomizeButton(
+        _ space: SpaceID
+    ) -> some View {
         let count = model.config.settings.overrideFieldCount(
             for: space
         )
