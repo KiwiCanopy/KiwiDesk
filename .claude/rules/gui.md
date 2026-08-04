@@ -131,8 +131,8 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles and Monitors render from it now** (#678
-Phases 2-3): each
+Layouts, Profiles, Monitors and Behaviour render from it now**
+(#678 Phases 2-3): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MonitorsRowOrder` /
 `MonitorsCensusRenderTests` is the newest pair), so a row in a
@@ -153,13 +153,15 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders, Spaces & Layouts, Profiles and
-Monitors push that edge wider: EVERY container in them is bespoke
+General, Gaps & Borders, Spaces & Layouts, Profiles, Monitors
+and Behaviour push that edge wider: EVERY container in them is
+bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
 `SpacesRowOrder.bespokeContainers` /
 `ProfilesRowOrder.bespokeContainers` /
-`MonitorsRowOrder.bespokeContainers`, each the whole set,
+`MonitorsRowOrder.bespokeContainers` /
+`BehaviorRowOrder.bespokeContainers`, each the whole set,
 asserted by `bespokeMeansNoForEach` in each area's render suite),
 so their order lists are membership-and-search only and editing
 one moves nothing on screen. In Profiles the reason is
