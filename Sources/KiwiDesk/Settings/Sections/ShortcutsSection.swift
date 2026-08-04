@@ -95,6 +95,22 @@ struct ShortcutsSection: View {
         KeybindingConflictBanner(model: model)
         overrideBanner
         ShortcutsHeader(model: model, selected: $selected)
+        // The layers that define alternate key sets. It LEADS the
+        // area rather than tailing it (owner ruling 2026-08-04):
+        // the layer selected here decides what every card below
+        // is showing, and a control that reframes the whole page
+        // cannot sit under the page it reframes. It withholds
+        // itself entirely until earned — see `LayersCard`.
+        layersCard
+    }
+
+    private var layersCard: some View {
+        LayersCard(
+            model: model,
+            bindings: bindingsBinding,
+            selected: $selected,
+            expander: expander
+        )
     }
 
     @ViewBuilder private var actionGroups: some View {
@@ -130,16 +146,9 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             spaces: model.config.spaces
         )
-        // The layers that define alternate key sets — at rest
-        // once one exists, the offer to create the first behind
-        // its disclosure — then the raw-Lua escape hatch, which
-        // is `.showMore` outright.
-        LayersCard(
-            model: model,
-            bindings: bindingsBinding,
-            selected: $selected,
-            expander: expander
-        )
+        // Then the raw-Lua escape hatch, which is `.showMore`
+        // outright. `LayersCard` used to sit here and now LEADS
+        // the area — see `layersCard` above.
         advancedDrawer
     }
 
@@ -220,7 +229,27 @@ struct ShortcutsSection: View {
 
     // MARK: - Advanced drawer (§3.6.1)
 
-    private var advancedDrawer: some View {
+    /// Withheld in Simple (owner ruling 2026-08-04): importing
+    /// bindings out of `init.lua` is not a first-week concept,
+    /// and a collapsed drawer for it still costs a Simple user a
+    /// row of chrome to read past.
+    ///
+    /// `hasCustomLua` is the FIRST term for the same reason
+    /// `layersExist` is on the Layers card: someone whose
+    /// `init.lua` already carries bindings must not have the one
+    /// surface that explains them hidden by a mode they did not
+    /// know they were in.
+    private var offersAdvancedDrawer: Bool {
+        model.hasCustomLua || model.settingsMode == .powerUser
+    }
+
+    @ViewBuilder private var advancedDrawer: some View {
+        if offersAdvancedDrawer {
+            luaDrawer
+        }
+    }
+
+    private var luaDrawer: some View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,

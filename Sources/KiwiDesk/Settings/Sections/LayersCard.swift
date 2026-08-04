@@ -41,31 +41,53 @@ struct LayersCard: View {
             .inertReason(for: .shortcuts(.switchToLayer)) == nil
     }
 
-    /// One declaration, two chromes — force-expanded once a
-    /// layer exists, collapsible before that. The
-    /// force-expansion binding is the drawer-with-its-own-rules
-    /// seam `SettingsDisclosure` already carries for Gaps, which
-    /// is also why this stays a single catalog declaration: a
-    /// card that is sometimes at rest must not become two search
-    /// anchors for one thing.
-    var body: some View {
-        SettingsDisclosure(
-            SettingsCatalog.shortcuts.layersCard,
-            chrome: .card,
-            isExpanded: layersExist ? .constant(true) : $expanded
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                LayerStripEditor(model: model, selected: $selected)
-                if layersExist {
-                    KeybindingFamilyRows(
+    /// **An always-open card, or no card at all** (owner ruling
+    /// 2026-08-04). It shipped as a disclosure that force-expanded
+    /// once a layer existed and offered itself collapsed before
+    /// that — so in Simple, a user with no layers met a closed
+    /// drawer for a concept they had no use for, on the one screen
+    /// where every other card is at rest.
+    ///
+    /// The offer is now withheld the way every other advanced
+    /// surface in this window is: absent until earned, and earned
+    /// by *having a layer* or by turning Power User on — the same
+    /// capability unlock as `SpaceOverrideOffer` (#678 8c), over
+    /// its own data.
+    ///
+    /// **Nothing a user configured is ever hidden**: `layersExist`
+    /// is the first term of the offer, so a Simple user with two
+    /// layers keeps the card. Getting that backwards hides
+    /// someone's own setup from them, which is the failure this
+    /// card's earlier draft actually shipped by reading the tier
+    /// as `.showMore`.
+    private var offered: Bool {
+        layersExist || model.settingsMode == .powerUser
+    }
+
+    /// The selected layer decides what every card BELOW this one
+    /// is showing, which is why it leads the area rather than
+    /// tailing it — a control that reframes the whole page cannot
+    /// sit under the page it reframes.
+    @ViewBuilder var body: some View {
+        if offered {
+            SettingsSection(
+                SettingsCatalog.shortcuts.layersCard
+            ) {
+                VStack(alignment: .leading, spacing: 12) {
+                    LayerStripEditor(
                         model: model,
-                        bindings: $bindings,
-                        key: .shortcuts(.switchToLayer),
-                        expander: expander
+                        selected: $selected
                     )
+                    if layersExist {
+                        KeybindingFamilyRows(
+                            model: model,
+                            bindings: $bindings,
+                            key: .shortcuts(.switchToLayer),
+                            expander: expander
+                        )
+                    }
                 }
             }
-            .padding(.top, 8)
         }
     }
 }

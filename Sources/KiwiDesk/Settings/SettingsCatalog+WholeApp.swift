@@ -53,7 +53,13 @@ struct ShortcutsControls: Sendable {
     /// rows that switch between them. The ⌃⌥K panel keeps
     /// `shortcuts.section.switch_layers` for its band, which
     /// really is only the switch rows.
-    let layersCard = SettingsDrawer(
+    /// A `SettingsControl`, not a `SettingsDrawer`: since the
+    /// owner ruling of 2026-08-04 the card is always open when it
+    /// is shown at all, and withholds itself entirely when it is
+    /// not (`LayersCard`). A drawer declaration would promise a
+    /// disclosure that no longer exists, and its `childIDs` exist
+    /// to auto-expand one.
+    let layersCard = SettingsControl(
         "shortcuts.section.layers",
         "Layers"
     )

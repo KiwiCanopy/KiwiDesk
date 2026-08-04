@@ -19,11 +19,22 @@ struct SettingsModeNavigationTests {
         return (makeTestModel(defaults: defaults), defaults)
     }
 
+    /// `.behavior`, not `.layoutDefaults`: Layout Defaults moved
+    /// to `.simple` (owner ruling 2026-08-04), and a fixture
+    /// naming an area that is no longer withheld would assert the
+    /// pop against a destination Simple is happy to keep — the
+    /// test would be green for the wrong reason the day someone
+    /// broke the pop. The precondition below is what says the
+    /// fixture still is what this test needs it to be.
     @Test("a flip to Simple pops a Power-User-only area")
     func flipPopsPowerUserArea() {
+        #expect(
+            SettingsArea.behaviour.minimumMode == .powerUser,
+            "fixture must name an area Simple withholds"
+        )
         let (model, _) = model()
         model.setSettingsMode(.powerUser)
-        model.destination = .layoutDefaults
+        model.destination = .behavior
         model.setSettingsMode(.simple)
         #expect(model.destination == nil)
     }

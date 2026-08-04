@@ -962,7 +962,7 @@
   "track.auto_tracks": "Automatische Track-Begrenzung",
   "track.auto_tracks.gates": "Automatische Track-Begrenzung ist für diesen Space aktiv, daher bestimmt der Bildschirm, wie viele öffnen.",
   "track.auto_tracks.limit_inert": "Das Track-Limit richtet sich nach dem Bildschirm, solange die Automatische Track-Begrenzung aktiv ist.",
-  "track.auto_tracks_caption": "Passt so viele Tracks an, wie der Bildschirm erlaubt, unter Nutzung der minimalen Fenstergröße oben — öffnet und schließt sie, wenn Fenster kommen und gehen.",
+  "track.auto_tracks_caption": "Lässt viele Tracks zu, wie der Bildschirm, unter Beachtung der minimalen Fenstergröße oben, zulässt — öffnet und schließt sie, wenn Fenster kommen und gehen.",
   "track.limit": "Track-Limit",
   "track.new_window": "Neues Fenster",
   "track.new_window.focused": "Füllt den fokussierten Track",

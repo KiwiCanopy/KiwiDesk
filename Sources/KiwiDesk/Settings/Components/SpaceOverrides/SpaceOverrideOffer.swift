@@ -7,14 +7,16 @@ import KiwiDeskCore
 /// > the offer unlocks itself per list the moment the profile has
 /// > one … collapsing away when the last override is cleared.
 ///
-/// The Spaces list was reaching past its own mode boundary
-/// without this: `Customize…` rendered on every row in both
-/// modes, and the editor behind it exposes exactly the per-layout
-/// parameters (master count/ratio/orientation, split strategy,
-/// stack position, overflow, grid rows × columns) that the
-/// `.powerUser`-only Layout Defaults area withholds from Simple.
-/// So the mode boundary was stated in `SettingPlacement` and
-/// contradicted one screen over.
+/// `Customize…` rendered on every space row in both modes, so
+/// every user met per-space exception bookkeeping whether or not
+/// they had any exceptions.
+///
+/// Note what this is NOT gating on any more: Layout Defaults
+/// itself became `.simple` (owner ruling 2026-08-04), because
+/// those parameters are how people learn what a tiling manager
+/// does. Editing one layout's defaults is the feature; editing
+/// them per space is bookkeeping about exceptions, and that is
+/// what stays behind the offer.
 ///
 /// **Three properties, and the cheap implementation breaks two of
 /// them** (`ShortcutsCapabilityUnlockTests` names the same trap

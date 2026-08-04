@@ -41,12 +41,24 @@ enum SettingsArea: CaseIterable, Hashable {
     /// mode is on (it adds surface, never expands it).
     var minimumMode: SettingsMode {
         switch self {
-        case .layoutDefaults, .advancedColours, .behaviour,
-            .monitors:
+        case .advancedColours, .behaviour, .monitors:
             return .powerUser
-        case .gapsAndBorders, .shortcuts, .coloursAndMotion,
-            .bars, .spacesAndLayouts, .profiles, .appRules,
-            .general:
+        // Layout Defaults is `.simple` (owner ruling
+        // 2026-08-04), against the digest's own Advanced
+        // placement. The argument that moved it: these are
+        // parameters people LEARN the app by playing with —
+        // change a split ratio, watch the windows move — so
+        // withholding them teaches nothing and hides the thing
+        // a tiling window manager is for. Its size (the largest
+        // card in the app) was the case for Advanced, and size
+        // is a reason to organise a card well, not to hide it.
+        //
+        // The per-space OVERRIDE stays gated (`SpaceOverrideOffer`)
+        // — editing one layout's defaults is the feature; editing
+        // them per space is bookkeeping about exceptions.
+        case .layoutDefaults, .gapsAndBorders, .shortcuts,
+            .coloursAndMotion, .bars, .spacesAndLayouts,
+            .profiles, .appRules, .general:
             return .simple
         }
     }
