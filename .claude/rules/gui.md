@@ -272,9 +272,9 @@ key a needle on the site that USES the value (a bare
 hand-rolled), and strip comments before matching, or a comment
 quoting a deleted key stands in for the call site.
 
-Where the value is already arithmetic, prefer asserting it —
-a scan is the net for what arithmetic cannot see, which is a
-branch that was never written at all.
+Where the value is already arithmetic, the paragraph below on
+live previews owns which half a scan is for; a branch that was
+never written at all is what it cannot see.
 
 `AdvancedColorsGates` is deliberately NOT one of these resolvers
 and is not the regression the rule names: it answers no census

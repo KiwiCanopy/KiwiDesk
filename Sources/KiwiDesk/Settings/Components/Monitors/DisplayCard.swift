@@ -154,7 +154,8 @@ struct DisplayCard: View {
             )
             .font(.caption)
             .fontWeight(.medium)
-            .padding(.horizontal, 8)
+            .lineLimit(1)
+            .frame(width: MonitorCardChips.markerWidth)
             .padding(.vertical, 3)
             .background(Capsule().fill(.tint.opacity(0.15)))
         }

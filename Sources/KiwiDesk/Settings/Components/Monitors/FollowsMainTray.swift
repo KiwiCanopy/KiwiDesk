@@ -36,7 +36,7 @@ struct FollowsMainTray: View {
             header
             chips
         }
-        .padding(6)
+        .padding(MonitorCardChips.cardPadding)
         .frame(
             maxWidth: .infinity,
             maxHeight: .infinity,
@@ -87,6 +87,10 @@ struct FollowsMainTray: View {
             .truncationMode(.tail)
             Spacer(minLength: 0)
         }
+        // Framed, so the height the chip arithmetic subtracts is
+        // TRUE of this header rather than an estimate of an
+        // unsized `.caption2` (code review, 2026-08-04).
+        .frame(height: MonitorCardChips.trayHeaderHeight)
     }
 
     @ViewBuilder private var chips: some View {
@@ -139,7 +143,8 @@ struct FollowsMainTray: View {
             Text(L("monitor_card.more_spaces", "+%1$d", count))
                 .font(.caption)
                 .fontWeight(.medium)
-                .padding(.horizontal, 8)
+                .lineLimit(1)
+                .frame(width: MonitorCardChips.markerWidth)
                 .padding(.vertical, 3)
                 .background(Capsule().fill(.tint.opacity(0.15)))
         }

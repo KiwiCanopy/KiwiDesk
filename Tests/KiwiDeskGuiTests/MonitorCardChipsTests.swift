@@ -105,12 +105,15 @@ struct MonitorCardChipsTests {
             in: card
         )
         let area = MonitorCardChips.chipArea(in: card)
-        let rows = Int(
-            (area.height + MonitorCardChips.spacing)
-                / (MonitorCardChips.chipHeight
-                    + MonitorCardChips.spacing)
-        )
-        let perRow = Double(split.shown.count) / Double(rows)
+        // The row count comes from the production helper, not a
+        // second copy of its formula — the first cut's copy had
+        // already dropped the clamp (code review, 2026-08-04).
+        let rows = MonitorCardChips.rows(in: card)
+        // The WORST row, not the average: an uneven fill puts
+        // more chips in the first row than the mean, and the mean
+        // would let the guard weaken silently instead of failing.
+        let perRow = (Double(split.shown.count) / Double(rows))
+            .rounded(.up)
         let needed =
             perRow
             * Double(

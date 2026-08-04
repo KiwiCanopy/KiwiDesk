@@ -57,7 +57,11 @@ enum MonitorCardChips {
     /// `MonitorsGateWiringTests` pins the stacks to it.
     static let stackSpacing: CGFloat = 2
     /// The `+n` marker's own width — a capsule around a two- or
-    /// three-character label.
+    /// three-character label, and BOUND: both markers frame
+    /// themselves to it. A constant this arithmetic asserts about
+    /// a view that never reads it is the shape this turn removed
+    /// three times; a `+123` would otherwise run wider and
+    /// squeeze the very rows the reservation protects.
     ///
     /// It is a COLUMN, not a slot: the marker sits beside the
     /// wrapped chips, so it narrows every row rather than
@@ -89,16 +93,27 @@ enum MonitorCardChips {
     ///
     /// `reservingMarker` narrows the row by the `+n` column, for
     /// the case where there is going to be one.
+    /// How many chip ROWS fit — `internal` so a guard reads it
+    /// rather than keeping a second copy of the formula, which is
+    /// how the first cut came to drop the clamp below.
+    static func rows(
+        in size: CGSize,
+        header: CGFloat = headerHeight
+    ) -> Int {
+        let area = chipArea(in: size, header: header)
+        return max(
+            1,
+            Int((area.height + spacing) / (chipHeight + spacing))
+        )
+    }
+
     static func capacity(
         in size: CGSize,
         header: CGFloat = headerHeight,
         reservingMarker: Bool = false
     ) -> Int {
         let area = chipArea(in: size, header: header)
-        let rows = max(
-            1,
-            Int((area.height + spacing) / (chipHeight + spacing))
-        )
+        let rows = rows(in: size, header: header)
         let usable =
             reservingMarker
             ? area.width - markerWidth - spacing : area.width

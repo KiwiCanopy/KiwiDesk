@@ -144,6 +144,16 @@ struct MonitorsGateWiringTests {
     func surfacingBranchesAreDrawn() throws {
         let draws: [String: [String]] = [
             "Sections/MonitorsSection.swift": [
+                // The PICTURE, which is the branch the census no
+                // longer names: dropping the gate from
+                // `.spacePins` retired its needle too, and
+                // deleting this `else` draws nothing whenever
+                // monitors are attached — with every needle
+                // inside `picture(rows:)` still matching, because
+                // they are still in the file, and no compiler
+                // warning, because it is a private func
+                // (architect review round 2, 2026-08-04).
+                "}else{picture(rows:rows)}",
                 // The orphan card's own surfacing condition, fed
                 // from the live orphans rather than a constant.
                 "hasOrphanedPins:!rows.orphans.isEmpty",
