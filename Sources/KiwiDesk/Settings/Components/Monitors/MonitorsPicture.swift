@@ -126,7 +126,11 @@ struct MonitorsPicture: View {
         MonitorArrangement.layout(
             displays: rows.displays,
             mainID: model.mainDisplay?.id,
-            canvas: canvas
+            canvas: canvas,
+            // The tray box grows with what it holds: its chips
+            // wrap, and a fixed box pushed its own heading out of
+            // the top at four spaces (owner, 2026-08-04).
+            trayChips: rows.mainSpaces.count
         )
     }
 

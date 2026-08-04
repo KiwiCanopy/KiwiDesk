@@ -34,11 +34,18 @@ struct HomeCardOrderTests {
         )
     }
 
-    @Test("Simple offers eight cards, Power User twelve")
+    /// NINE since Layout Defaults moved to `.simple` (owner
+    /// ruling 2026-08-04) — those parameters are how people learn
+    /// what a tiling manager does, so withholding them teaches
+    /// nothing. A literal over a derived value on purpose: this
+    /// is the conscious-edit tripwire on the size of the
+    /// first-week surface, and growing it should cost a
+    /// deliberate edit here.
+    @Test("Simple offers nine cards, Power User twelve")
     func modeCounts() {
         let simple = offered(mode: .simple, displays: 1)
         let powerUser = offered(mode: .powerUser, displays: 1)
-        #expect(simple.count == 8)
+        #expect(simple.count == 9)
         #expect(powerUser.count == 12)
     }
 
@@ -62,7 +69,7 @@ struct HomeCardOrderTests {
         )
         let promoted = offered(mode: .simple, displays: 2)
         #expect(promoted.contains(.monitors))
-        #expect(promoted.count == 9)
+        #expect(promoted.count == 10)
         // Computed at read: one display again and the card is
         // gone — nothing stored the promotion.
         #expect(

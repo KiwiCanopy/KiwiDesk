@@ -35,7 +35,8 @@ enum MonitorTray {
     /// passes a live id, and the nil case is the empty picture.
     static func fold(
         cards: [MonitorArrangement.Drawn],
-        main: DisplayID?
+        main: DisplayID?,
+        trayHeight: CGFloat = MonitorArrangement.trayHeight
     ) -> MonitorArrangement.Layout {
         guard !cards.isEmpty else {
             return MonitorArrangement.Layout()
@@ -47,7 +48,8 @@ enum MonitorTray {
                 avoiding: cards.filter { card in
                     card.id != anchored.id
                 }
-                .map(\.rect)
+                .map(\.rect),
+                height: trayHeight
             )
         }
         let bounds = MonitorArrangement.union(
@@ -83,14 +85,14 @@ enum MonitorTray {
     /// narrower than one chip is a drop target nothing fits in.
     static func rect(
         anchoredTo anchor: CGRect,
-        avoiding others: [CGRect]
+        avoiding others: [CGRect],
+        height: CGFloat = MonitorArrangement.trayHeight
     ) -> (rect: CGRect, isAbove: Bool) {
         let width = max(
             anchor.width - inset * 2,
             MonitorArrangement.minimumCard.width
         )
         let x = anchor.midX - width / 2
-        let height = MonitorArrangement.trayHeight
         let gap = MonitorArrangement.trayGap
         func band(_ y: CGFloat) -> CGRect {
             CGRect(x: x, y: y, width: width, height: height)

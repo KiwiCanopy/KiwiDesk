@@ -33,14 +33,17 @@ struct SpaceAssignment: Identifiable, Hashable {
 ///
 /// 13b gave the menu the WHOLE chip, which cost the drag: a
 /// borderless menu consumes the mouse-down to open itself, so
-/// `.draggable` never saw a press to begin from. The menu now
-/// owns the chevron alone and the chip body is draggable again.
+/// `.draggable` never saw a press to begin from.
 ///
-/// All three routes stay live, none a fallback for another: drag
-/// the chip, click the chevron (or focus it and press Return),
-/// right-click anywhere. The `.contextMenu` is kept deliberately
-/// — dropping it with 13b's rewrite retired a gesture people
-/// already had, as a side effect rather than a decision.
+/// **Two routes now, and the keyboard one is knowingly gone**
+/// (owner ruling 2026-08-04): drag the chip, or right-click it.
+/// A visible chevron carrying the `Menu` was tried in between and
+/// rejected as clutter — first beside the pill, then inside it.
+/// The cost is the one 13b was written to fix: `.contextMenu` has
+/// no keyboard or VoiceOver equivalent, so "move this space to
+/// another display" is once again pointer-only. Anyone restoring
+/// a keyboard route should read 13b's argument before reaching
+/// for a whole-chip `Menu` again — that is what took the drag.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -51,23 +54,9 @@ struct SpaceAssignmentChip: View {
     /// cards can never list different monitors.
     let displays: [Display]
 
-    /// **The chip body drags; a trailing chevron opens the menu.**
-    ///
-    /// A `Menu` wrapping the whole chip cannot also be dragged: it
-    /// is AppKit-backed and consumes the mouse-down to open
-    /// itself, so `.draggable` never sees a press to begin from —
-    /// proven twice, on the menu and then on its label, with both
-    /// drop targets live the whole time. Dragging predates 13b
-    /// making this a menu, so losing it was a regression rather
-    /// than a gap (owner, 2026-08-04).
-    ///
-    /// Splitting the surface is what lets all three routes be
-    /// real at once, and none of them is a fallback for another:
-    /// **drag** the chip (the pointing route), **click the
-    /// chevron** or focus it and press Return (the keyboard and
-    /// VoiceOver route 13b was written for — a `Menu` still earns
-    /// those from AppKit, it just no longer owns the whole chip),
-    /// or **right-click anywhere** on the chip.
+    /// A plain draggable chip with a context menu — no `Menu`
+    /// anywhere in it, which is the only way the drag works at
+    /// all (see the type's docstring).
     var body: some View {
         capsule
             .fixedSize()
@@ -89,27 +78,6 @@ struct SpaceAssignmentChip: View {
             // decision (docs review, 2026-08-04). Both open the same
             // menu.
             .contextMenu { menu }
-    }
-
-    /// The menu's own affordance, sized as a hit target rather
-    /// than as its 9 pt glyph — the rule the ⓧ beside it already
-    /// follows.
-    private var chevronMenu: some View {
-        Menu {
-            menu
-        } label: {
-            Image(systemName: "chevron.down")
-                .font(.system(size: 8, weight: .semibold))
-                .frame(width: 16, height: 16)
-                .contentShape(Rectangle())
-        }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .accessibilityLabel(
-            L("monitor_chip.move_menu", "Move space")
-        )
     }
 
     private var capsule: some View {
@@ -151,14 +119,6 @@ struct SpaceAssignmentChip: View {
                 // 8-language add (#95) — localized names run
                 // longer.
                 .frame(maxWidth: 120, alignment: .leading)
-            // Inside the pill, beside the ⓧ (owner, 2026-08-04):
-            // as a sibling of the pill it read as a loose arrow
-            // floating next to a token. Press-and-release opening
-            // the menu while press-and-drag drags would be
-            // better still, and is not reachable — SwiftUI has no
-            // way to present a `Menu` imperatively, so the menu
-            // must own a hit area of its own somewhere.
-            chevronMenu
             if kind != .auto {
                 Button {
                     clear()

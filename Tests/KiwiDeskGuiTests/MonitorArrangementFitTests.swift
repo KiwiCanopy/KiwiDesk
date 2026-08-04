@@ -171,4 +171,38 @@ struct MonitorArrangementFitTests {
         }
         #expect(bare.tray == nil)
     }
+
+    /// The tray grows with what it holds.
+    ///
+    /// It was a constant 52 pt — one chip row — so a fourth space
+    /// following main wrapped onto a second row that the box did
+    /// not have, and the tray's own heading was pushed out of the
+    /// top of it. Asserted as a STRICT increase against the
+    /// one-row height rather than against a copied number, so the
+    /// row arithmetic can be retuned without editing this.
+    @Test("the tray box grows with a second row of chips")
+    func trayGrowsWithItsChips() {
+        // Narrow enough that three chips cannot share a row.
+        let width: CGFloat = 120
+        let one = MonitorArrangement.trayHeight(
+            chips: 1,
+            width: width
+        )
+        #expect(one == MonitorArrangement.trayHeight)
+        let many = MonitorArrangement.trayHeight(
+            chips: 6,
+            width: width
+        )
+        #expect(
+            many > one,
+            "six chips at 120 pt need more than one row"
+        )
+        // And a wide tray does NOT grow for the same count —
+        // otherwise the derivation is counting chips and
+        // ignoring the width it has to fit them in.
+        #expect(
+            MonitorArrangement.trayHeight(chips: 6, width: 1200)
+                < many
+        )
+    }
 }

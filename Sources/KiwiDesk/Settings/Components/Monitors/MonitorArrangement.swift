@@ -146,8 +146,13 @@ enum MonitorArrangement {
         displays: [Display],
         mainID: DisplayID?,
         canvas: CGSize,
-        hostsChips: Bool = true
+        hostsChips: Bool = true,
+        trayChips: Int = 0
     ) -> Layout {
+        // The band is reserved from the CANVAS width, before any
+        // scale is known — an upper bound on the tray's own
+        // width, so it can only ever over-reserve.
+        let band = trayHeight(chips: trayChips, width: canvas.width)
         let drawable = displays.filter {
             $0.frame.width > 0 && $0.frame.height > 0
         }
@@ -170,10 +175,7 @@ enum MonitorArrangement {
             canvas: CGSize(
                 width: canvas.width,
                 height: hostsChips
-                    ? max(
-                        1,
-                        canvas.height - trayHeight - trayGap
-                    )
+                    ? max(1, canvas.height - band - trayGap)
                     : canvas.height
             )
         )
@@ -195,7 +197,11 @@ enum MonitorArrangement {
             bare.displays = cards
             return bare
         }
-        return MonitorTray.fold(cards: cards, main: mainID)
+        return MonitorTray.fold(
+            cards: cards,
+            main: mainID,
+            trayHeight: band
+        )
     }
 
     /// Whether the picture is far enough from true scale for the
