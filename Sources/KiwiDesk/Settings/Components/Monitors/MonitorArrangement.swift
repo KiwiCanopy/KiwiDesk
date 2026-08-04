@@ -5,17 +5,13 @@ import KiwiDeskCore
 /// 13b): real display frames in, drawn rectangles out.
 ///
 /// **Displays are drawn from POINTS** — never pixels, never EDID
-/// millimetres (owner ruling 2026-08-04, argued in
-/// `docs/design-decisions.md`). Three reasons, and the first is
-/// the one that decides it: a display's global POSITION only
-/// exists in point space, so sizing from millimetres while
-/// positioning from points would tear the picture into gaps and
-/// overlaps that exist in neither space, and macOS publishes no
-/// physical arrangement to re-derive it from. `Display.frame`
-/// comes from `NSScreen.frame`, which is already points, so a
-/// Retina display cannot draw 2× an identical non-Retina one:
-/// there is no backing-scale term in this file at all, which is
-/// the whole of that fix.
+/// millimetres. The ruling and its argument live in
+/// `docs/design-decisions.md` ▸ Monitors; what belongs here is
+/// what the code must keep true: `Display.frame` is
+/// `NSScreen.frame`, already points, and there is no
+/// backing-scale term in this file at all. Adding one is how a
+/// Retina display would come to draw 2× an identical non-Retina
+/// one.
 ///
 /// The output is SwiftUI space — y grows DOWN — while the input
 /// is AppKit's global space, where y grows UP. The flip is what
@@ -81,12 +77,16 @@ enum MonitorArrangement {
     /// before the page SAYS the picture is approximate.
     ///
     /// The cap itself has no deadband — it engages at the ratio,
-    /// full stop. This is about the sentence: a MacBook beside a
-    /// 4K is 3840/1512 ≈ 2.54, a hair over the cap, and drawing
-    /// that display 1.6% small is not something a user could see
-    /// or would want a permanent caption about. A note that
-    /// appears on the commonest two-display desk in the world
-    /// teaches people to ignore notes.
+    /// full stop. This is about the SENTENCE the page shows. The
+    /// cap is easy to trip imperceptibly: a laptop beside a 4K
+    /// reporting its full 3840 points is 3840/1512 ≈ 2.54, a hair
+    /// over, and drawing that display 1.6% small is not something
+    /// a user could see or would want a permanent caption about.
+    /// (Measured at 1:1 scaling — at macOS's default HiDPI
+    /// scaling that display reports far fewer points and does not
+    /// approach the cap at all. Either way the argument is the
+    /// same: a note on an everyday desk teaches people to ignore
+    /// notes.)
     static let perceptibleClamp: CGFloat = 0.9
 
     /// The smallest a card may be drawn. Derived from the chip
@@ -121,8 +121,10 @@ enum MonitorArrangement {
     /// rather than drawn: it can be neither seen nor dropped onto,
     /// and a zero-sized rectangle would take the ratio cap's
     /// divisor to zero. `mainID` names which display the tray
-    /// hangs off; a nil or unknown one puts the tray on the first
-    /// drawn display, so the tray never silently disappears.
+    /// hangs off; an id matching no drawn display yields NO tray
+    /// rather than one on some other display, because a fallback
+    /// here would be a second derivation of which display is main
+    /// (`MonitorTray.fold` argues it).
     static func layout(
         displays: [Display],
         mainID: DisplayID?,

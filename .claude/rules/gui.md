@@ -252,6 +252,30 @@ so a file resolving two gates reds if EITHER goes hand-rolled.
 predicate the saved config cannot answer — not because of any
 shape split, which no longer exists.
 
+**Consulting a resolver is not drawing what it answered, and a
+SURFACING gate leaves nothing behind to prove the difference.**
+A greying gate ends in a dimmed control a test can find; a
+surfacing one ends in an `if` inside a `body`, and every guard
+above it — the resolver's own suite, the census parity, the
+family expansion — passes whether or not that `if` was ever
+written. Monitors shipped a cut where five such branches could
+each be deleted with the whole suite green (guard-prover,
+2026-08-04): the orphaned-pins card, both of the picture's
+notes, the chip overflow and the tray. So a view drawing off a
+resolved answer owes a needle naming the BRANCH, not only the
+consult — `MonitorsGateWiringTests`' `surfacingBranchesAreDrawn`
+is the worked example, and a new surfacing branch joins it in
+the same change. Two authoring rules the same run paid for:
+key a needle on the site that USES the value (a bare
+`overflowChip(` matched the helper's own declaration; a bare
+`rows.chips(on:)` matched a tooltip while the chips went
+hand-rolled), and strip comments before matching, or a comment
+quoting a deleted key stands in for the call site.
+
+Where the value is already arithmetic, prefer asserting it —
+a scan is the net for what arithmetic cannot see, which is a
+branch that was never written at all.
+
 `AdvancedColorsGates` is deliberately NOT one of these resolvers
 and is not the regression the rule names: it answers no census
 `gate:` of its own. It DELEGATES the two bar block gates to

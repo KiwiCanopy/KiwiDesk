@@ -104,7 +104,7 @@ extension MonitorsSection {
     /// key the census names for this row.
     private var backToAutomatic: String {
         L(
-            "monitors.orphan_pin.help",
+            "monitors.clear_pin.label",
             "Back to automatic placement"
         )
     }

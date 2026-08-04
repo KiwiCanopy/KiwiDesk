@@ -5,9 +5,11 @@ import KiwiDeskCore
 /// each space resolves, which display is main, and what the
 /// picture's row expansion is built from.
 ///
-/// The seam is the SURFACE, not the subject: profiles own saving
-/// and loading, this owns the space→display picture. Both are
-/// extensions on the one model, whose stored `@Published`
+/// The seam is the SUBJECT, not the surface: this owns display
+/// identity and space→display placement, which several pages ask
+/// about — the Spaces pin badge and a profile row's subtitle both
+/// read `monitorName(_:)`. Profiles owns saving and loading. Both
+/// are extensions on the one model, whose stored `@Published`
 /// properties stay on the class.
 extension SettingsModel {
     // MARK: - Space placement (Canvas)
@@ -97,8 +99,10 @@ extension SettingsModel {
     }
 
     /// Human-readable monitor name, falling back to the raw
-    /// fingerprint when that display isn't connected — used by
-    /// the Monitors cards and the profile rows (§3.15).
+    /// fingerprint when that display isn't connected — read by
+    /// the Spaces pin badge and a profile row's subtitle. The
+    /// Monitors picture names displays from the `Display` values
+    /// it already holds.
     func monitorName(_ fingerprint: String) -> String {
         displays.first {
             $0.fingerprint == fingerprint
@@ -106,11 +110,13 @@ extension SettingsModel {
     }
 
     /// The current main display, falling back positionally
-    /// (leftmost) exactly as the runtime does. One derivation:
-    /// the picture hangs the follows-main tray off this display
-    /// and the tray annotates itself with its name, and a badge
-    /// on one display beside a tray under another would be two
-    /// answers to one question.
+    /// (leftmost) exactly as the runtime does. ONE derivation,
+    /// because the picture reads it twice: the follows-main tray
+    /// hangs off this display and the "main" badge marks it, and
+    /// a badge on one card beside a tray under another would be
+    /// two answers to one question — which is exactly what a
+    /// second derivation by fingerprint produced on a twin-monitor
+    /// desk.
     var mainDisplay: Display? {
         let mainID = PositionalDisplays.liveMainID
         return displays.first { $0.id == mainID }
@@ -120,8 +126,8 @@ extension SettingsModel {
             ).first
     }
 
-    /// The current main display's fingerprint, for the tray's
-    /// live annotation and the "main" badge.
+    /// The current main display's fingerprint, for the callers
+    /// that key off identity strings rather than ids.
     var mainFingerprint: String? {
         mainDisplay?.fingerprint
     }

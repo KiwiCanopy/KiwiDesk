@@ -99,3 +99,12 @@ Hand it back — do not run any script yourself. The merge step is
 into `<locale>.json` without touching entries that already exist.
 Partial files are fine: any key a locale omits falls back to
 English per key, so a half-finished locale ships safely.
+
+**A key carrying `%1$d` must read correctly for EVERY count in
+your language.** The app picks between at most two forms — a
+`.one` key and a `.many` key — which fits English and fits few
+other languages: Russian alone needs three. Where your language
+cannot be served by two forms, write the `.many` key in a
+count-neutral construction that holds for all of them (for
+example "Пространств здесь: %1$d") rather than choosing the form
+that is right most often.

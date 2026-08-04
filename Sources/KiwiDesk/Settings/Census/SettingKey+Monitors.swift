@@ -53,7 +53,7 @@ extension MonitorsKey {
         case .mainSpaces:
             return .text("monitor_card.follows_main")
         case .orphanPinClear:
-            return .text("monitors.orphan_pin.help")
+            return .text("monitors.clear_pin.label")
         case .fingerprints:
             return .text(
                 "monitors.advanced.title",

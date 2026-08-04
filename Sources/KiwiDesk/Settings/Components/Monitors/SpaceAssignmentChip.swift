@@ -24,15 +24,19 @@ struct SpaceAssignment: Identifiable, Hashable {
 /// narrow card).
 ///
 /// **The chip is a `Menu`, which is what makes the keyboard route
-/// real** (#678 turn 13b). Its docstring claimed the context menu
-/// was "the keyboard-navigable fallback for every move" while the
-/// chip was an `HStack` with a `.draggable` on it: not focusable,
-/// no Tab stop, no Return, and nothing for VoiceOver to activate,
-/// so the promise was false for exactly the users it was written
-/// for. A `Menu` earns focus, keyboard activation and the
-/// VoiceOver trait from AppKit, and opens the same menu the
-/// right-click does — drag stays the pointing route, not the only
-/// one.
+/// real** (#678 turn 13b). This docstring used to call the
+/// context menu "the keyboard-navigable fallback for every move"
+/// while the chip was an `HStack` with a `.draggable` on it: not
+/// focusable, no Tab stop, no Return, and nothing for VoiceOver
+/// to activate — so the promise was false for exactly the users
+/// it was written for. A `Menu` earns focus, keyboard activation
+/// and the VoiceOver trait from AppKit.
+///
+/// All three routes stay live: click or Return opens the menu,
+/// right-click opens the same one, and drag remains the pointing
+/// route. The `.contextMenu` is kept deliberately — dropping it
+/// with the rewrite would have retired a gesture people already
+/// had, as a side effect rather than a decision.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -127,7 +131,7 @@ struct SpaceAssignmentChip: View {
                 .buttonStyle(.borderless)
                 .iconButtonAffordance(
                     L(
-                        "monitors.orphan_pin.help",
+                        "monitors.clear_pin.label",
                         "Back to automatic placement"
                     )
                 )

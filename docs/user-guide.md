@@ -783,8 +783,9 @@ non-Retina one.
 
 **Drag space chips** between displays to pin a space to one. A
 pinned space always appears on that monitor when the profile loads.
-Every chip is also a menu — click it for the same moves, which is
-the route to use from the keyboard.
+Every chip is also a menu — click it, or right-click it, for the
+same moves. The menu is the route to use from the keyboard: the
+chip takes focus with Tab and opens with Return.
 
 **Drag onto the dashed "Follows main display" tray** (it hangs off
 whichever display is currently main) to give a space the **Main
@@ -806,7 +807,7 @@ Two notes appear only when they apply:
 - *"Sizes are approximate"* — your displays are too different in
   size to draw to scale and still leave the smallest one big enough
   to drop a space onto, so the largest is drawn smaller than life.
-- *"Two of these displays look identical to KiwiDesk"* — KiwiDesk
+- *"Some of these displays look identical to KiwiDesk"* — KiwiDesk
   recognises a display by its name and resolution, so two of the
   same model at the same resolution are one identity to it, and a
   space pinned to one may open on either.

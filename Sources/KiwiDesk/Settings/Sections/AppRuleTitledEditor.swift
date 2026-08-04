@@ -51,11 +51,19 @@ struct AppRuleTitledEditor: View {
         }
     }
 
+    /// Deduplicated, because the chips are identified by VALUE.
+    /// `addPattern` refuses a duplicate, but `floatRules` decodes
+    /// straight from JSON and a hand-written config can repeat
+    /// one — which under value identity is two `ForEach` children
+    /// claiming one id (code review, 2026-08-04). Order is the
+    /// config's; only the repeat is dropped.
     private var patterns: [String] {
-        FloatFacet.patterns(
+        var seen: Set<String> = []
+        return FloatFacet.patterns(
             model.config.floatRules,
             app: app
         )
+        .filter { seen.insert($0).inserted }
     }
 
     private var titledPatternCaption: String {

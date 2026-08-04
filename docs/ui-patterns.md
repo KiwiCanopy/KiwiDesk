@@ -361,8 +361,8 @@ Two things decide how far the combined element reaches:
   titled "Monitor fingerprints", so its rows speak the display
   and the hash. The orphan-pin rows sit under "Pinned to
   disconnected monitors", which never says *fingerprint*, so
-  their label carries both halves ("Space 3, pinned to
-  fingerprint …").
+  their label carries both halves — the row's own sentence plus
+  the monitor it is waiting for.
 - **Does the row hold a control?** Combine the **readout only**,
   never the whole row. `children: .combine` folds interactive
   children in too, so wrapping a row that ends in a clear or
@@ -623,6 +623,18 @@ state rather than a setting, is ruled in
 render of the reader's real windows — is in
 [accepted limitations](accepted-limitations.md). Tile counts
 are still capped for legibility with a "+N" chip.
+
+**"+N" means the same thing wherever it appears: there are N
+more, and here is how to see them.** Two surfaces use it — the
+schematics' legibility cap above, and a Monitors card too small
+to draw all its chips — and a third must not invent a
+different grammar. It counts the items NOT shown (never the
+total), it takes a slot of its own so it never claims to hide
+exactly one, and it is an affordance rather than a label
+wherever the hidden items have their own controls: on the
+Monitors card it opens a popover holding every chip, each
+working as it does on the card, because a chip that is merely
+counted has lost its clear button and its menu.
 
 **Intuitiveness over strict Apple-native, where they conflict
 (#125, owner call).** The first cut held to Apple's "one static

@@ -3809,10 +3809,12 @@ beside it to slivers. The cap shrinks the outlier around its own
 centre, which can only open a gap and never move a rectangle onto
 its neighbour. A clamp that engages silently reads as a wrong
 arrangement rather than an approximate one, so the page says so —
-but only once the difference is visible, since a MacBook beside a
-4K trips the cap by under two percent and a caption pinned to the
-commonest two-display desk in the world teaches people to ignore
-captions.
+but only once the difference is visible. A caption pinned to an
+everyday desk teaches people to ignore captions, and the cap is
+easy to trip imperceptibly: a laptop beside a 4K reporting its
+full 3840 points is over the ratio by under two percent (measured
+at 1:1 scaling — at macOS's default HiDPI scaling that display
+reports far fewer points and does not approach the cap at all).
 
 **What the picture cannot say, it says in words.** Two facts have
 no rectangle: which space is *up* on a display right now
@@ -3827,12 +3829,13 @@ than a limit of the identity.
 (pin, arrow) rather than border styles alone (accessibility), and
 automatic is drawn as an outline rather than a dimmed capsule —
 dimming is this app's inert vocabulary, and an automatic chip is
-the one most worth dragging. The chip is a menu control, not a
-decorated label wearing a context menu: the menu is the keyboard
-and VoiceOver route for every move a drag can make, and a plain
-stack with a drag gesture on it cannot be focused — so as a
-context menu that route existed only for people using a mouse,
-which is the one group it was not for.
+the one most worth dragging. The chip is a menu CONTROL, and
+that is what makes its menu reachable: the same items were
+available as a context menu for a year, on a plain stack with a
+drag gesture, which cannot take focus — so the route billed as
+the keyboard and VoiceOver fallback existed only for people using
+a mouse, the one group it was not for. Right-click still opens
+it; the control is what added the other two.
 
 ### App rules
 
