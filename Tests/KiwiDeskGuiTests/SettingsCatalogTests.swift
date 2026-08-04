@@ -58,11 +58,12 @@ struct SettingsCatalogTests {
     /// fills.
     @Test("the enumeration count is pinned")
     func entryCountIsPinned() {
-        // 62 since turn 14b: General's Language and Login
-        // cards merge into one "Applies immediately" card,
-        // because those rows group by the RULE they share —
-        // not part of a profile, untouched by Save.
-        #expect(allEntries.count == 62)
+        // 64 since turn 13a: Profiles adds the "Which profile
+        // loads" card — the resolution sentence the old GUI
+        // never wrote down — and the "For other setups" drawer
+        // that folds away the presets the live hardware cannot
+        // apply.
+        #expect(allEntries.count == 64)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

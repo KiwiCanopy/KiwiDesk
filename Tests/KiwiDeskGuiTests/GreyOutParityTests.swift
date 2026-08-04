@@ -92,20 +92,19 @@ struct GreyOutParityTests {
         // The opposite invariant — that no gate returns — is
         // `StickyMarkUngatedTests`.
         //
-        // The gate is passed INTO the group (#527) so its
-        // section header — and the `?` anchor on it — stays
-        // live; the wrap-around form would disable both. Two
-        // needles: the caller's predicate plumbing, and the
-        // child's actual disable — deleting either one strands
-        // the invariant, so both must pin.
-        (
-            "ProfilesSection.swift",
-            "gatedOff: model.editingStoredProfile",
-            1
-        ),
+        // The Desktop bindings grey is the card's OWN since #678
+        // turn 13a — the predicate came from the caller before,
+        // and a resolver the caller feeds is a resolver two
+        // files can disagree about. One needle now, on the
+        // dimmed subtree: the reason is the resolver's (pinned
+        // by `ProfilesGateWiringTests`) and this pins that the
+        // reason actually dims the rows. The gate still stops
+        // short of the card header and the inline note, so both
+        // the disclosure label and the "Open Desktop & Dock"
+        // button stay live under it (#527).
         (
             "NativeSpacesGroup.swift",
-            "GreyOut(active: gatedOff",
+            "GreyOut(active: reason != nil",
             1
         ),
         // The per-space grid and track override greys now resolve
@@ -160,8 +159,10 @@ struct GreyOutParityTests {
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch
         // the live layout while the header promises it won't
-        // (#518).
-        ("PresetsSection.swift", "model.editingStoredProfile", 1),
+        // (#518). The predicate is the resolver's since #678
+        // turn 13a, so the needle is the `.disabled` reading
+        // ITS reason rather than a hand-rolled comparison.
+        ("PresetsSection.swift", ".disabled(reason != nil)", 1),
     ]
 
     @Test("every gated editor still greys off its own switch")

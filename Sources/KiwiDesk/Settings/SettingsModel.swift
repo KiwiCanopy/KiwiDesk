@@ -268,7 +268,11 @@ final class SettingsModel: ObservableObject {
                 count: profile.monitorCount,
                 sets: profile.monitorSets.map(\.monitors),
                 isDefault: profile.isDefault,
-                matchesLive: profile.set(matching: live) != nil
+                matchesLive: profile.set(matching: live) != nil,
+                spaceCount: profile.declaredSpaces.count,
+                shortcutOverrideCount:
+                    profile.layers?.layers
+                    .reduce(0) { $0 + $1.bindings.count } ?? 0
             )
         }
         brokenProfiles = core.profiles.brokenNames()

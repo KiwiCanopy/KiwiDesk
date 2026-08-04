@@ -3637,6 +3637,68 @@ direction in chat):
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
 
+### Profiles
+
+**[Principle]**
+
+**A profile row counts what the profile OWNS, never what it
+resolves to.** A profile carries a *sparse diff* over the global
+config — its own keybindings are the rows it overrides, not the
+rows that fire while it is loaded. So the row's subtitle counts
+screens, spaces and shortcut *overrides*, and a profile that
+overrides nothing shows no such segment at all. The alternative
+reads "18 shortcuts" on every profile, which states the opposite
+of how overriding works: a user who believes each profile owns a
+keybinding set will go looking for the other seventeen when they
+edit one, and will read an inherited binding's disappearance as
+data loss. The rule generalises past shortcuts — any count on a
+row that represents a diff is a count of the diff.
+
+**[Rationale]**
+
+**A preset card draws screens, not spaces.** One tile per space
+reads at four and becomes a row of identical stamps at ten, and
+at no count does it answer the question a multi-screen preset
+exists to answer: *which screen gets what*. Screens are the one
+thing that stays legible from one display to three, so the card
+draws an outline per display carrying the layout that display's
+first space opens in, and the space total goes underneath as
+text. What is given up is per-space detail in the thumbnail,
+which the Spaces page owns properly once the preset is applied.
+
+**[Principle]**
+
+**The rule that picks a profile is written down, not inferred
+from the badges.** Screen-count matching with a default
+preference is the single most consequential behavior on the page,
+and it was previously discoverable only by watching profiles load
+and guessing. The card states the rule and then answers it for
+the live machine, naming which of the three ways the match fired
+— exact monitor set, count default, or built-in Standard —
+because those are different promises: only the first survives
+swapping monitors of the same count. The verdict asks
+`ProfileManager.match`, the same query the monitor-change path
+resolves with, so a card that claims to explain the engine cannot
+drift from it.
+
+**[Trade-off]**
+
+**A control the OS has made meaningless is greyed, not left live
+under a warning.** With "Displays have separate Spaces" on and
+more than one display, every display has its own Desktop 1, so
+"load this profile when Desktop 2 activates" names no single
+event. Leaving the menus live under a warning — the earlier
+behavior — let a user configure bindings that could not do what
+the row says. Greying costs the user who is mid-migration to a
+shared-Spaces setup: they must flip the OS setting and log out
+before they can prepare their bindings. That is the smaller harm,
+and the inline reason carries the button that starts it. The gate
+requires BOTH conditions: one display never greys, because
+"Desktop 2" is unambiguous there. Existing bindings stay visible
+while greyed — config presence expands the surface, and hiding a
+user's own configuration to protect them from it is the worse
+failure.
+
 ### Monitors
 
 **[Rationale]**

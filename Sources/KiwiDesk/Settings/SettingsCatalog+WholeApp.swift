@@ -9,12 +9,36 @@ import KiwiDeskCore
 struct ProfilesControls: Sendable {
     let savedProfiles = SettingsControl(
         "profiles.saved.title",
-        "Saved profiles"
+        "Your profiles"
     )
-    let presetsCard = SettingsControl("presets.title", "Presets")
-    let nativeSpaces = SettingsControl(
+    /// The resolution sentence (#678 turn 13a) — "the sentence
+    /// most people never find in the current UI". A card of its
+    /// own so search can land it: "which profile loads" is the
+    /// question the area exists to answer, and until turn 13a it
+    /// was answerable only by reading the list and inferring the
+    /// rule.
+    let whichProfileLoads = SettingsControl(
+        "profiles.which_loads.title",
+        "Which profile loads"
+    )
+    /// A drawer since #678 turn 13a: the census tiers
+    /// `profileBindings` `.showMore`, and a Show-more row lives
+    /// behind its container's disclosure.
+    let nativeSpaces = SettingsDrawer(
         "native_spaces.title",
         "Profiles per macOS Space"
+    )
+    let presetsCard = SettingsControl(
+        "presets.title",
+        "Start from a preset"
+    )
+    /// Presets for screen counts that are NOT connected. A
+    /// disclosure named for what it holds, never a bare "Show
+    /// more" — and its own declaration, so search can land a
+    /// preset the live hardware cannot apply.
+    let presetsOther = SettingsDrawer(
+        "presets.other_setups",
+        "For other setups"
     )
 }
 

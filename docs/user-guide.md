@@ -1481,9 +1481,53 @@ only strategy today.)
 ## Profiles
 
 The **Profiles** section (in the **System** group) manages saved
-layouts. Each profile captures tiling (modes, gaps, parameters),
+layouts. A profile is your whole setup, remembered per display
+arrangement: it captures tiling (modes, gaps, parameters),
 space-to-monitor pins, and optionally a sparse keybinding override
 layer plus sparse app, float, and ignore rule overrides.
+
+The page answers four questions in order — what a profile is, which
+ones you have, which one loads, and where to start from nothing.
+
+### Your Profiles
+
+One row per saved profile, newest hardware first: the profiles
+matching your connected displays lead, since one of them is what
+loads. Each row carries the name (double-click or use the pencil to
+rename), an **active** badge on the loaded one, a **default** badge,
+**make default**, **Load**, and a delete button.
+
+The subtitle counts only what that profile **owns** — for example
+"3 screens · 6 spaces · 1 shortcut override". Shortcut overrides are
+counted, not shortcuts: a profile carries a sparse *diff* over your
+global shortcuts, so a count of the whole resolved set would suggest
+each profile has a keybinding set of its own. Profiles that override
+nothing show no third segment. Hover the subtitle to see which
+monitors each covered arrangement holds.
+
+A note under the list names where your live edits are landing, and
+points at **Save a Copy As…** in the footer if you want to keep them
+separately instead.
+
+Profiles whose JSON will not decode appear under **Couldn't load**,
+dimmed, with a Delete — never hidden, so a broken file can always be
+cleared.
+
+### Which Profile Loads
+
+The card states the rule — *KiwiDesk picks the profile whose screen
+count matches, preferring the one marked default* — and then answers
+it for your machine right now, naming which of the three ways the
+match fired:
+
+- an **exact monitor match** (these exact displays), which survives
+  swapping to different monitors of the same count only if you save
+  a set for them;
+- the **default for this screen count**, when no exact set matches;
+- a **built-in Standard**, when no saved profile matches at all.
+
+The verdict is computed with the same query the monitor-change path
+uses, so it cannot disagree with what actually loads.
 
 ### The Profile Banner
 
@@ -1638,17 +1682,27 @@ or stack.)
   frontend IDE. Right: inspectors. Mixed layouts for creative
   workflows.
 
-To apply a preset, go to the **Presets** section (in the **System**
-group). Click **Apply** next to the preset whose screen count matches
-your connected displays. The layout loads and is saved as an editable
-profile under the preset's name. The first profile saved for a screen
-count becomes that count's default.
+To apply a preset, use the **Start from a preset** card at the bottom
+of Profiles. Presets for your connected screen count come first under
+a heading that names it ("For your 3 screens"); every other count
+folds into **For other setups**, since a preset for hardware you have
+not plugged in is a reference rather than an offer. Click **Apply**
+next to one. The layout loads and is saved as an editable profile
+under the preset's name — applying one saves it as a real profile you
+can then edit. The first profile saved for a screen count becomes
+that count's default.
+
+Each card draws **screens, not spaces**: one outline per display, each
+showing the layout its first space opens in, with the total space
+count underneath. A row of identical tiles cannot say *which screen
+gets what*, which is the whole point of a two- or three-screen preset.
 
 Apply switches your **live** layout, so it is greyed while you are
 editing a saved profile from the banner picker — that mode never
 touches what is on screen. Switch back to Live to apply one. It is
 also greyed when the preset's screen count doesn't match your
-connected displays; the tooltip says which of the two it is.
+connected displays; the tooltip says which of the two it is, and the
+count one names how many screens that preset needs.
 
 Presets themselves cannot be deleted; they always stay available. If
 you delete all saved profiles for a screen count, that count silently
@@ -2049,18 +2103,25 @@ shortcut can never be lost by omission.
 
 ## Native Spaces (Mission Control)
 
-The **Profiles** section in the **System** group has a **Native Spaces**
-subsection listing each macOS desktop (Mission Control number). Assign
-a profile to each desktop using the dropdown.
+The **Profiles** section has a **Profiles per macOS Space** card
+listing each macOS desktop (Mission Control number). Assign a profile
+to each desktop using the dropdown. The card is a disclosure — open by
+default, and one click from out of the way if you never bind a
+desktop.
 
 KiwiDesk has one active profile across the whole display setup. When
 multiple displays are connected while "Displays have separate Spaces"
-is on, this subsection shows a warning: independent Desktop choices on
-each display cannot be represented unambiguously by one active profile.
-The bindings remain visible and editable because basic tiling still
-works and a user may be preparing a shared-Spaces setup. For predictable
-bindings, open Desktop & Dock Settings from the warning, turn the option
-off, then log out and back in.
+is on, every display has its own "Desktop 1", so a binding names no
+single event — the rows are **greyed with the reason inline**, and the
+warning carries an **Open Desktop & Dock** button. Turn the option off
+there, then log out and back in; the rows come back live. A single
+display never greys them: "Desktop 2" is unambiguous with one screen.
+Existing bindings stay visible while greyed, so you can still read what
+you configured.
+
+The rows are also greyed while you edit a *stored* profile from the
+banner picker: bindings are global, and a profile may never override
+what selects it. Switch back to Live to change them.
 
 When you switch desktops (Ctrl+arrow, Mission Control, …), the bound
 profile loads with its spaces, layouts, and settings. Desktops without

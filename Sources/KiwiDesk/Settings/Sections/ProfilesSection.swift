@@ -1,15 +1,23 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Profiles (#36/#53/#68 §3.2): the saved-profiles
-/// list grouped by screen count, the native-Space bindings,
-/// and the built-in Presets — "which profile applies
-/// where/when" in one place. The Desktop bindings always ride
-/// directly beneath the saved profiles they reference. Presets
-/// lead only while no profile is saved yet (bootstrap, so
-/// first launch is never barren); once one exists, the user's
-/// own content takes the top and the full preset list closes
-/// the tab.
+/// Whole App ▸ Profiles (#36/#53/#68 §3.2, rebuilt in #678
+/// Phase 3 turn 13a): what a profile IS, which ones exist, which
+/// one loads, and where to start from nothing — in that order.
+///
+/// The list is flat now. It used to group by screen count with a
+/// header per count and a chip row of raw monitor names per row,
+/// which spent the whole row on the machine and left the user to
+/// infer what the profile contained. The subtitle counts what the
+/// profile OWNS instead — screens, spaces, shortcut overrides —
+/// and the screen count keeps the monitor names as its tooltip.
+///
+/// The lead-in text is the AREA's caption. The interim sidebar
+/// shell has no area header to hang it on (Home, the last Phase 3
+/// lane, is what grows one), so it renders as the pane's first
+/// line rather than being dropped until then — the sentence is
+/// the answer to "what is a profile", which is the question this
+/// page opens with.
 struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
     /// The profile whose rename popover is open, if any.
@@ -22,13 +30,22 @@ struct ProfilesSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                Text(areaCaption)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if model.profileSummaries.isEmpty {
+                    // Bootstrap: with nothing saved, the presets
+                    // are the only thing on this page that can be
+                    // acted on, so they lead (#53).
                     PresetsSection(model: model)
                     profileSection
-                    nativeSpaces
+                    whichProfileLoads
+                    NativeSpacesGroup(model: model)
                 } else {
                     profileSection
-                    nativeSpaces
+                    whichProfileLoads
+                    NativeSpacesGroup(model: model)
                     PresetsSection(model: model)
                 }
             }
@@ -40,34 +57,24 @@ struct ProfilesSection: View {
         }
     }
 
-    /// "Which profile applies where/when" lives together
-    /// (#68 §3.2): native-Space bindings are global — only
-    /// offered in live editing.
-    @ViewBuilder private var nativeSpaces: some View {
-        // Greyed, not hidden (#171/#520). The bindings are
-        // global and a stored profile may never override what
-        // SELECTS it (AGENTS §5), so they are correctly not
-        // editable here — but hiding them meant a user editing a
-        // profile could not even READ which Desktop maps to
-        // what, which is exactly the context that decision needs.
-        // Gate passed IN, not wrapped around (#527): the group
-        // keeps its section header — and its `?` anchor — live.
-        NativeSpacesGroup(
-            model: model,
-            gatedOff: model.editingStoredProfile,
-            gateHelp: L(
-                "profiles.native_spaces.live_only",
-                "Desktop bindings are global — switch to "
-                    + "Live to change them."
-            )
+    private var areaCaption: String {
+        L(
+            "profiles.area.caption",
+            "A profile is your whole setup, remembered per "
+                + "display arrangement."
         )
     }
 
-    // MARK: - Saved profiles (#36)
+    // MARK: - Your profiles (#36)
 
     private var profileSection: some View {
         SettingsSection(
-            SettingsCatalog.profiles.savedProfiles
+            SettingsCatalog.profiles.savedProfiles,
+            caption: L(
+                "profiles.saved.caption",
+                "The one matching your displays loads "
+                    + "automatically."
+            )
         ) {
             if model.profileSummaries.isEmpty
                 && model.brokenProfiles.isEmpty
@@ -76,11 +83,15 @@ struct ProfilesSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            ForEach(profileCounts, id: \.self) { count in
-                countGroupHeader(count)
-                ForEach(summaries(for: count)) { summary in
-                    profileRow(summary)
-                }
+            ForEach(orderedSummaries) { summary in
+                profileRow(summary)
+            }
+            if let note = currentSetupNote {
+                Text(note)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 2)
             }
             if !model.brokenProfiles.isEmpty {
                 brokenGroup
@@ -97,60 +108,34 @@ struct ProfilesSection: View {
         )
     }
 
-    /// The live count's group sorts on top; the rest ascend.
-    private var profileCounts: [Int] {
-        let counts = Set(model.profileSummaries.map(\.count))
-        let live = model.displays.count
-        return counts.sorted {
-            ($0 == live ? 0 : 1, $0) < ($1 == live ? 0 : 1, $1)
-        }
+    /// Where the live edits land, and how to keep them apart —
+    /// the question a user asks the moment they realise editing
+    /// anything writes into the profile that is loaded.
+    private var currentSetupNote: String? {
+        guard !model.editingStoredProfile,
+            let active = model.activeProfile
+        else { return nil }
+        return L(
+            "profiles.current_setup_note",
+            "Your current setup is saved into %1$@. To keep it "
+                + "separately, use \"Save a copy…\" in the bar "
+                + "below.",
+            active
+        )
     }
 
-    private func summaries(
-        for count: Int
-    ) -> [ProfileSummary] {
-        model.profileSummaries.filter { $0.count == count }
-    }
-
-    private func countGroupHeader(
-        _ count: Int
-    ) -> some View {
-        HStack(spacing: 6) {
-            // A navigational grouping header, not a hint —
-            // uses the shared group-header style, one step above
-            // a section's headline, instead of caption text.
-            SettingsGroupHeader(
-                count == 1
-                    ? L("profiles.screens.one", "1 screen")
-                    : L(
-                        "profiles.screens.many",
-                        "%1$d screens",
-                        count
-                    )
+    /// The profiles that match the connected displays first —
+    /// the list's caption promises one of them loads — then by
+    /// screen count, then by name, so the order is stable while
+    /// nothing is plugged or unplugged.
+    private var orderedSummaries: [ProfileSummary] {
+        model.profileSummaries.sorted {
+            (
+                $0.matchesLive ? 0 : 1, $0.count, $0.name
+            ) < (
+                $1.matchesLive ? 0 : 1, $1.count, $1.name
             )
-            if count == model.displays.count {
-                BadgeChip(
-                    label: L(
-                        "profiles.badge.connected",
-                        "connected"
-                    )
-                )
-            }
-            if model.duplicateDefaultCounts.contains(count) {
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundStyle(.orange)
-                    .font(.caption)
-                    .help(
-                        L(
-                            "profiles.duplicate_default.help",
-                            "Several profiles of this count "
-                                + "are marked default; the "
-                                + "alphabetically first wins."
-                        )
-                    )
-            }
         }
-        .padding(.top, 4)
     }
 
     private func profileRow(
@@ -160,88 +145,122 @@ struct ProfilesSection: View {
             Image(systemName: "square.stack.3d.up")
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
-                    Text(summary.name)
-                        // Bonus discovery path (low-risk): a
-                        // double-click on the name opens the
-                        // same rename popover as the pencil,
-                        // which stays the primary visible cue.
-                        .onTapGesture(count: 2) {
-                            beginRename(summary.name)
-                        }
-                    renameButton(summary.name)
-                    if summary.name == model.activeProfile {
-                        BadgeChip(
-                            label: L(
-                                "profiles.badge.active",
-                                "active"
-                            )
-                        )
-                    }
-                    if summary.isDefault {
-                        BadgeChip(
-                            label: L(
-                                "profiles.badge.default",
-                                "default"
-                            )
-                        )
-                    }
-                }
-                monitorChips(summary)
+                rowTitle(summary)
+                Text(subtitle(summary))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .help(monitorTooltip(summary))
             }
             Spacer()
             if !summary.isDefault {
                 makeDefaultLink(summary.name)
             }
-            // Load / Delete both end in `reload()`, which
-            // re-seeds from disk and clears the dirty flag, so
-            // both drop staged edits — gated like the edit-
-            // target menu (#515).
-            Button(L("profiles.load", "Load")) {
-                model.discardingEdits(
-                    message: L(
-                        "discard.load_profile.message",
-                        "Loading a profile replaces the edits "
-                            + "you haven't saved."
-                    ),
-                    confirmLabel: L(
-                        "discard.load_profile.confirm",
-                        "Discard & load"
-                    )
-                ) { model.loadProfile(named: summary.name) }
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-            .help(
-                summary.matchesLive
-                    ? ""
-                    : L(
-                        "profiles.other_monitors.help",
-                        "Saved for other monitors — loads "
-                            + "with unsaved-changes state."
-                    )
-            )
-            Button {
-                model.discardingEdits(
-                    message: L(
-                        "discard.delete_profile.message",
-                        "Deleting reloads the dashboard, "
-                            + "dropping the edits you haven't "
-                            + "saved."
-                    ),
-                    confirmLabel: L(
-                        "discard.delete_profile.confirm",
-                        "Discard & delete"
-                    )
-                ) { model.deleteProfile(named: summary.name) }
-            } label: {
-                Image(systemName: "trash")
-            }
-            .buttonStyle(.borderless)
-            .iconButtonAffordance(
-                L("profiles.delete.help", "Delete profile")
-            )
+            loadButton(summary)
+            deleteButton(summary.name)
         }
+    }
+
+    private func rowTitle(
+        _ summary: ProfileSummary
+    ) -> some View {
+        HStack(spacing: 6) {
+            Text(summary.name)
+                // Bonus discovery path (low-risk): a double-click
+                // on the name opens the same rename popover as
+                // the pencil, which stays the primary visible cue.
+                .onTapGesture(count: 2) {
+                    beginRename(summary.name)
+                }
+            renameButton(summary.name)
+            if summary.name == model.activeProfile {
+                BadgeChip(
+                    label: L("profiles.badge.active", "active")
+                )
+            }
+            if summary.isDefault {
+                BadgeChip(
+                    label: L("profiles.badge.default", "default")
+                )
+                duplicateDefaultWarning(summary)
+            }
+        }
+    }
+
+    /// Several profiles of one screen count marked default is a
+    /// hand-edited-file state, so the warning rides the rows it
+    /// is about rather than a count header the flat list no
+    /// longer has.
+    @ViewBuilder private func duplicateDefaultWarning(
+        _ summary: ProfileSummary
+    ) -> some View {
+        if model.duplicateDefaultCounts.contains(summary.count) {
+            Image(systemName: "exclamationmark.triangle")
+                .foregroundStyle(.orange)
+                .font(.caption)
+                .help(
+                    L(
+                        "profiles.duplicate_default.help",
+                        "Several profiles of this count "
+                            + "are marked default; the "
+                            + "alphabetically first wins."
+                    )
+                )
+        }
+    }
+
+    // Load / Delete both end in `reload()`, which re-seeds from
+    // disk and clears the dirty flag, so both drop staged edits —
+    // gated like the edit-target menu (#515).
+    private func loadButton(
+        _ summary: ProfileSummary
+    ) -> some View {
+        Button(L("profiles.load", "Load")) {
+            model.discardingEdits(
+                message: L(
+                    "discard.load_profile.message",
+                    "Loading a profile replaces the edits "
+                        + "you haven't saved."
+                ),
+                confirmLabel: L(
+                    "discard.load_profile.confirm",
+                    "Discard & load"
+                )
+            ) { model.loadProfile(named: summary.name) }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .help(
+            summary.matchesLive
+                ? ""
+                : L(
+                    "profiles.other_monitors.help",
+                    "Saved for other monitors — loads "
+                        + "with unsaved-changes state."
+                )
+        )
+    }
+
+    private func deleteButton(_ name: String) -> some View {
+        Button {
+            model.discardingEdits(
+                message: L(
+                    "discard.delete_profile.message",
+                    "Deleting reloads the dashboard, "
+                        + "dropping the edits you haven't "
+                        + "saved."
+                ),
+                confirmLabel: L(
+                    "discard.delete_profile.confirm",
+                    "Discard & delete"
+                )
+            ) { model.deleteProfile(named: name) }
+        } label: {
+            Image(systemName: "trash")
+        }
+        .buttonStyle(.borderless)
+        .iconButtonAffordance(
+            L("profiles.delete.help", "Delete profile")
+        )
     }
 
     /// "make default" is a quiet inline link — underlined
@@ -259,35 +278,5 @@ struct ProfilesSection: View {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
-    }
-
-    /// Each covered monitor combination as one chip row, so
-    /// screen→profile membership is visible at a glance.
-    private func monitorChips(
-        _ summary: ProfileSummary
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            ForEach(
-                Array(summary.sets.enumerated()),
-                id: \.offset
-            ) { _, set in
-                WrapChips(set) { monitor in
-                    // Display names, not raw fingerprints
-                    // (#68 §3.15) — the diagnostic ID demotes
-                    // to a tooltip and stays copyable under
-                    // Monitors ▸ Advanced. Unknown hardware
-                    // falls back to the raw string.
-                    Text(model.monitorName(monitor))
-                        .font(.system(size: 10))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 1)
-                        .background(
-                            Capsule()
-                                .fill(.quaternary.opacity(0.4))
-                        )
-                        .help(monitor)
-                }
-            }
-        }
     }
 }

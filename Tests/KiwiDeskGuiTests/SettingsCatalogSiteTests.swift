@@ -35,8 +35,9 @@ struct SettingsCatalogSiteTests {
         let names = SettingsDestination.allCases
             .flatMap { SettingsCatalog.entries(of: $0) }
             .compactMap { $0.propertyPath.last }
-        // 56 since turn 14b merged General's two cards.
-        #expect(names.count == 56)
+        // 58 since turn 13a: Profiles adds the "Which profile
+        // loads" card and the "For other setups" preset drawer.
+        #expect(names.count == 58)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

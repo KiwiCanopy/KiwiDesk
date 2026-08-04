@@ -130,12 +130,13 @@ never views.
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
-Layout Defaults, App Rules, General, Gaps & Borders and Spaces &
-Layouts render from it now** (#678 Phases 2-3): each carries its
-own order list and a census-render suite pinning that order to the
-census (`SpacesRowOrder` / `SpacesCensusRenderTests` is the newest
-pair), so a row in a `ForEach`-rendered container moves by
-editing the census — with the bespoke edge below. This bold list is itself a hand-kept claim with no guard,
+Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
+Layouts and Profiles render from it now** (#678 Phases 2-3): each
+carries its own order list and a census-render suite pinning that
+order to the census (`ProfilesRowOrder` /
+`ProfilesCensusRenderTests` is the newest pair), so a row in a
+`ForEach`-rendered container moves by editing the census — with
+the bespoke edge below. This bold list is itself a hand-kept claim with no guard,
 so an added area joins it here in the same change that ships its
 `*RowOrder` (General was silently dropped from it once).
 
@@ -150,22 +151,29 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders and Spaces & Layouts push that edge
-wider: EVERY container in them is bespoke
+General, Gaps & Borders, Spaces & Layouts and Profiles push that
+edge wider: EVERY container in them is bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
-`SpacesRowOrder.bespokeContainers`, each the whole set, asserted
-by `bespokeMeansNoForEach` in each area's render suite), so their
-order lists are membership-and-search only and editing one moves
-nothing on screen.
+`SpacesRowOrder.bespokeContainers` /
+`ProfilesRowOrder.bespokeContainers`, each the whole set,
+asserted by `bespokeMeansNoForEach` in each area's render suite),
+so their order lists are membership-and-search only and editing
+one moves nothing on screen. Profiles is the case where the
+reason is structural rather than incidental: every container
+there expands one key into a row per live INSTANCE — a saved
+profile, a Desktop, a preset — which is what an order-list
+`ForEach` cannot express at all.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
 one census case that puts four rows on screen and `goToSpace`
 one that puts a row per live space, so the Shortcuts area needs
-a second seam the other areas do not — an order list saying
+a second seam the plain areas do not — an order list saying
 *where a family sits* and `ShortcutsFamilyRows` saying *what it
-draws*. An area whose keys expand this way owes both halves and
+draws*. Profiles is the second (`ProfilesFamilyRows`), and there
+EVERY key expands: a row per saved profile, per Desktop, per
+preset. An area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer
 reading `rows(for:) ?? []` cannot tell a hand-drawn container

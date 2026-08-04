@@ -1,41 +1,38 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Profiles ▸ Presets (#53): the built-in
-/// per-screen-count layouts. Presets are a bootstrap tool, so
-/// once the user has saved profiles of their own, this section
-/// lists below them instead of on top (the full list either
-/// way — no disclosure folding).
+/// Whole App ▸ Profiles ▸ **Start from a preset** (#53, rebuilt
+/// in #678 turn 13a): the built-in per-screen-count layouts.
+///
+/// Grouped by screen count, and the live count leads under a
+/// heading that names it ("For your 3 screens"). Every other
+/// count folds into one disclosure: a preset for hardware that is
+/// not plugged in cannot be applied, so it is a reference, not an
+/// offer — and eight cards of reference above the user's own
+/// three is what the flat list used to put on screen.
+///
+/// The group heading carries the screen number, so the cards do
+/// not repeat it.
 struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
+    @State private var otherSetupsExpanded = false
 
     var body: some View {
-        SettingsSection(SettingsCatalog.profiles.presetsCard) {
-            rows
-        }
-    }
-
-    @ViewBuilder private var rows: some View {
-        if model.profileSummaries.isEmpty {
-            // Zero-profile spotlight (ui-designer 2026-07-19):
-            // the lead-in labels the bootstrap the section
-            // already is; state-driven, gone once any profile
-            // exists.
-            Text(startHereText)
-                .font(.callout)
-                .fontWeight(.medium)
-        }
-        Text(rowsCaption)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        ForEach(presetCounts, id: \.self) { count in
-            countHeader(count)
-            ForEach(
-                StandardProfiles.layouts(for: count),
-                id: \.name
-            ) { layout in
-                presetRow(layout)
+        SettingsSection(
+            SettingsCatalog.profiles.presetsCard,
+            caption: rowsCaption
+        ) {
+            if model.profileSummaries.isEmpty {
+                // Zero-profile spotlight (ui-designer
+                // 2026-07-19): the lead-in labels the bootstrap
+                // the section already is; state-driven, gone once
+                // any profile exists.
+                Text(startHereText)
+                    .font(.callout)
+                    .fontWeight(.medium)
             }
+            liveGroup
+            otherSetups
         }
     }
 
@@ -53,20 +50,85 @@ struct PresetsSection: View {
     private var rowsCaption: String {
         L(
             "presets.caption",
-            "Built-in layouts per screen count. Apply "
-                + "loads one and saves it as a real, "
-                + "editable profile — only available when "
-                + "the connected screen count matches."
+            "Applying one saves it as a real profile you can "
+                + "then edit."
         )
     }
 
-    private var presetCounts: [Int] {
-        Array(
-            Set(StandardProfiles.all.map(\.screenCount))
-        ).sorted()
+    // MARK: - Groups
+
+    private var liveCount: Int { model.displays.count }
+
+    @ViewBuilder private var liveGroup: some View {
+        let presets = StandardProfiles.layouts(for: liveCount)
+        if presets.isEmpty {
+            Text(noPresetsForCount)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else {
+            SettingsGroupHeader(liveHeading)
+                .padding(.top, 4)
+            ForEach(presets, id: \.name) { presetRow($0) }
+        }
     }
 
-    private func countHeader(_ count: Int) -> some View {
+    private var liveHeading: String {
+        liveCount == 1
+            ? L("presets.for_your.one", "For your 1 screen")
+            : L(
+                "presets.for_your.many",
+                "For your %1$d screens",
+                liveCount
+            )
+    }
+
+    private var noPresetsForCount: String {
+        L(
+            "presets.none_for_count",
+            "No built-in layout plans for this many screens — "
+                + "the ones below still apply once you connect "
+                + "the screens they are for."
+        )
+    }
+
+    /// Every preset for a count that is NOT connected, behind one
+    /// disclosure that says how many are in there.
+    @ViewBuilder private var otherSetups: some View {
+        let others = StandardProfiles.all.filter {
+            $0.screenCount != liveCount
+        }
+        if !others.isEmpty {
+            SettingsDisclosure(
+                SettingsCatalog.profiles.presetsOther,
+                chrome: .inline(font: .subheadline),
+                isExpanded: $otherSetupsExpanded,
+                scrollHoisted: true
+            ) {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(otherCounts(others), id: \.self) {
+                        count in
+                        otherCountGroup(count, in: others)
+                    }
+                }
+                .padding(.top, 6)
+            } accessory: {
+                Text("\(others.count)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func otherCounts(
+        _ others: [StandardLayout]
+    ) -> [Int] {
+        Array(Set(others.map(\.screenCount))).sorted()
+    }
+
+    @ViewBuilder private func otherCountGroup(
+        _ count: Int,
+        in others: [StandardLayout]
+    ) -> some View {
         Text(
             count == 1
                 ? L("profiles.screens.one", "1 screen")
@@ -80,13 +142,19 @@ struct PresetsSection: View {
         .fontWeight(.semibold)
         .foregroundStyle(.secondary)
         .padding(.top, 4)
+        ForEach(
+            others.filter { $0.screenCount == count },
+            id: \.name
+        ) { presetRow($0) }
     }
+
+    // MARK: - Rows
 
     private func presetRow(
         _ layout: StandardLayout
     ) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     Text(layout.displayName).font(.headline)
                     if layout.isStandard {
@@ -101,7 +169,8 @@ struct PresetsSection: View {
                 Text(layout.displaySummary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                PresetThumbnail(layout: layout)
+                    .fixedSize(horizontal: false, vertical: true)
+                PresetScreenCard(layout: layout)
             }
             Spacer()
             applyButton(layout)
@@ -118,12 +187,15 @@ struct PresetsSection: View {
     @ViewBuilder private func applyButton(
         _ layout: StandardLayout
     ) -> some View {
-        // Two independent reasons Apply can be unavailable, so
-        // the help has to say WHICH one (#518).
-        let editing = model.editingStoredProfile
-        let appliable =
-            model.displays.count == layout.screenCount
-            && !editing
+        // Greyed, never hidden (#171) — with the reason, because
+        // "why is Apply dead" has two different answers and the
+        // stored-profile one contradicts what the user just read
+        // in the header (#518). Both answers are the resolver's:
+        // a predicate re-derived here could grey a row the census
+        // says is live.
+        let reason = gates(layout).inertReason(
+            for: .profiles(.presetsApply)
+        )
         // Apply materializes a profile and reloads, so it
         // drops staged edits like the profile actions (#515).
         let button = Button(L("presets.apply", "Apply")) {
@@ -140,9 +212,9 @@ struct PresetsSection: View {
             ) { model.applyStandardPreset(layout) }
         }
         .controlSize(.large)
-        .disabled(!appliable)
-        .help(applyHelp(layout, editing: editing))
-        if appliable, layout.isStandard,
+        .disabled(reason != nil)
+        .help(reason.map(ProfilesGateHelp.sentence) ?? "")
+        if reason == nil, layout.isStandard,
             model.profileSummaries.isEmpty
         {
             button.buttonStyle(.borderedProminent)
@@ -151,62 +223,13 @@ struct PresetsSection: View {
         }
     }
 
-    /// Greyed, never hidden (#171) — with the reason, because
-    /// "why is Apply dead" has two different answers and the
-    /// stored-profile one contradicts what the user just read
-    /// in the header.
-    private func applyHelp(
-        _ layout: StandardLayout,
-        editing: Bool
-    ) -> String {
-        if editing {
-            return L(
-                "presets.editing_stored",
-                "Applying a preset switches your live layout, "
-                    + "which editing a saved profile never does. "
-                    + "Switch to Live to apply one."
-            )
-        }
-        if model.displays.count != layout.screenCount {
-            return L(
-                "presets.needs_screens",
-                "Needs %1$d connected screen(s).",
-                layout.screenCount
-            )
-        }
-        return ""
-    }
-}
-
-/// A mini layout diagram (#68 §3.15): one tile per space, each
-/// carrying its mode's glyph (§6.3), so choosing a preset stops
-/// requiring prose alone.
-struct PresetThumbnail: View {
-    let layout: StandardLayout
-
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(1...layout.spaceCount, id: \.self) { n in
-                let mode =
-                    layout.spaceModes[SpaceID(n)] ?? .bsp
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.accentColor.opacity(0.12))
-                    .frame(width: 24, height: 18)
-                    .overlay {
-                        Image(systemName: mode.glyph)
-                            .font(.system(size: 9))
-                            .foregroundStyle(.secondary)
-                    }
-                    .help(
-                        L(
-                            "presets.space_label",
-                            "Space %1$d: %2$@",
-                            n,
-                            mode.displayName
-                        )
-                    )
-            }
-        }
-        .padding(.top, 1)
+    private func gates(
+        _ layout: StandardLayout
+    ) -> ProfilesGates {
+        ProfilesGates(
+            editingStoredProfile: model.editingStoredProfile,
+            connectedScreens: liveCount,
+            presetScreens: layout.screenCount
+        )
     }
 }

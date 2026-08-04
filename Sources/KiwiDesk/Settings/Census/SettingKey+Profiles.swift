@@ -27,9 +27,16 @@ extension ProfilesKey {
         case .isStarterLadder:
             return .luaOnly
         case .presetsApply:
+            // Its own card since #678 turn 13a — "Start from a
+            // preset" is a distinct offer from the saved list it
+            // used to sit inside, and the redesign draws it as
+            // one. Apply is greyed by the screen-count match;
+            // `ProfilesGates` also answers the stored-profile
+            // reason for the same row (one gate slot, two
+            // reasons).
             return .row(
                 .profiles,
-                .savedProfiles,
+                .presets,
                 .atRest,
                 gate: .runtime(.screenCountMismatch)
             )

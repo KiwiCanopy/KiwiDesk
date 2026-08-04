@@ -287,6 +287,15 @@ struct ProfileSummary: Identifiable {
     let isDefault: Bool
     /// One of the sets equals the live monitors.
     let matchesLive: Bool
+    /// Spaces the profile declares (#678 turn 13a). Part of the
+    /// row's subtitle, which counts only what the profile OWNS.
+    let spaceCount: Int
+    /// Keybindings the profile overrides — the count of rows in
+    /// its sparse `layers` override, never the size of the
+    /// resolved set. "18 shortcuts" on a profile row would claim
+    /// the profile carries a keybinding set of its own; it
+    /// carries a diff over the global one (#678 turn 13a).
+    let shortcutOverrideCount: Int
     var id: String { name }
 }
 
