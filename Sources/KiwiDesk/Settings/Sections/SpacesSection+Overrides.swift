@@ -9,31 +9,42 @@ import SwiftUI
 /// driven by `model.nav.spaceOverridesFocus`, not a
 /// `SettingsSurface`: the override controls are per-space and
 /// uncataloged, so there is nothing for search or the #326 bridge
-/// to reveal — the back affordance below is the whole navigation.
+/// to reveal — the breadcrumb's back segment is the whole
+/// navigation.
+///
+/// This chrome owns the header — the breadcrumb, the title, and
+/// the active-layout reset (top-right, the destructive action that
+/// concerns the rows below it) — while `SpaceOverrideRows` draws
+/// the rows card and the dormant "saved for other layouts" card.
 extension SpacesSection {
     @ViewBuilder
     func overridesEditor(_ space: SpaceID) -> some View {
+        let mode = model.config.spaceModes[space] ?? .bsp
+        let gates = SpacesGates(
+            settings: model.config.settings,
+            space: space,
+            mode: mode
+        )
         VStack(alignment: .leading, spacing: 0) {
-            overridesBackBar
+            overridesBreadcrumb(space)
             Divider()
             ScrollView {
-                SpaceOverrideRows(
-                    model: model,
-                    space: space,
-                    pendingResetAll: $pendingResetAll
-                )
+                VStack(alignment: .leading, spacing: 16) {
+                    overridesHeader(space, mode: mode, gates: gates)
+                    SpaceOverrideRows(
+                        model: model,
+                        space: space,
+                        pendingResetAll: $pendingResetAll
+                    )
+                }
                 // Bounded, not full-bleed: the override rows carry
                 // their own label/control columns, so stretching
                 // them to a wide pane only lengthens slider travel
-                // past what the value needs. Cap the column, then
-                // left-align it in the full pane — the side-by-side
+                // past what the value needs. The side-by-side
                 // preview (a later 8b turn) claims the space to the
                 // right of this column.
-                .frame(maxWidth: 520, alignment: .leading)
-                .frame(
-                    maxWidth: .infinity,
-                    alignment: .leading
-                )
+                .frame(maxWidth: 560, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(
                     [.horizontal, .bottom],
                     SettingsMetrics.paneInset
@@ -43,25 +54,89 @@ extension SpacesSection {
         }
     }
 
-    /// A single back affordance to the space list. A standard
-    /// `Button`, so it keeps focus, keyboard activation and
-    /// VoiceOver for free; the pane's own header bar already names
-    /// the destination, so this names the parent surface it
-    /// returns to rather than repeating it.
-    private var overridesBackBar: some View {
-        HStack {
+    /// `‹ Spaces › <space> › Overrides` — the first crumb is a
+    /// standard `Button` back to the list, so it keeps focus,
+    /// keyboard activation and VoiceOver for free; there is only
+    /// one back target, since the per-space editor has no
+    /// intermediate space page.
+    private func overridesBreadcrumb(_ space: SpaceID) -> some View {
+        HStack(spacing: 6) {
             Button {
                 model.nav.spaceOverridesFocus = nil
             } label: {
                 Label(
-                    L("spaces.overrides.back", "All spaces"),
+                    SettingsDestination.spaces.title,
                     systemImage: "chevron.backward"
                 )
             }
             .buttonStyle(.borderless)
+            crumbSeparator
+            Text(space.raw)
+                .foregroundStyle(.secondary)
+            crumbSeparator
+            Text(L("spaces.overrides.crumb", "Overrides"))
+                .foregroundStyle(.secondary)
             Spacer()
         }
+        .font(.callout)
+        .lineLimit(1)
         .padding(.horizontal, SettingsMetrics.paneInset)
         .padding(.vertical, 10)
+    }
+
+    private var crumbSeparator: some View {
+        Text(verbatim: "›").foregroundStyle(.tertiary)
+    }
+
+    /// The title and the active-layout reset. The reset lives here
+    /// rather than in the footer (#678 8b): it acts on the rows
+    /// directly below it, so it reads as their action; the dormant
+    /// card's `Reset all…` stays with the *other* layouts it
+    /// concerns.
+    private func overridesHeader(
+        _ space: SpaceID,
+        mode: LayoutMode,
+        gates: SpacesGates
+    ) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(
+                L(
+                    "space_override.title",
+                    "%1$@ — %2$@ overrides",
+                    space.raw,
+                    mode.displayName
+                )
+            )
+            .font(.title2)
+            .fontWeight(.semibold)
+            Spacer()
+            resetActiveButton(space, mode: mode, gates: gates)
+        }
+    }
+
+    private func resetActiveButton(
+        _ space: SpaceID,
+        mode: LayoutMode,
+        gates: SpacesGates
+    ) -> some View {
+        let reason = gates.inertReason(
+            for: .spaces(.spaceOverrideResetActive)
+        )
+        return Button(
+            L(
+                "space_override.reset_active",
+                "Reset %1$@ Overrides",
+                mode.displayName
+            ),
+            role: .destructive
+        ) {
+            model.config.settings.resetOverride(mode, for: space)
+        }
+        .buttonStyle(.bordered)
+        // "Grey, don't hide" (§2.7): the reset is furniture of the
+        // active section, greyed when the layout has nothing to
+        // reset, with the reason on hover.
+        .disabled(reason != nil)
+        .help(reason.map(SpacesGateHelp.sentence) ?? "")
     }
 }

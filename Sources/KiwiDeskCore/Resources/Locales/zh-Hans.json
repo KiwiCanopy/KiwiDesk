@@ -816,7 +816,6 @@
   "space_override.caption": "未勾选的设置继承 %1$@ 的默认值。",
   "space_override.dormant.entry_many": "%1$@ — %2$d 个字段",
   "space_override.dormant.entry_one": "%1$@ — 1 个字段",
-  "space_override.dormant.label": "已为其他布局保存 (%1$d)",
   "space_override.floating.none": "浮动没有按空间划分的覆盖。",
   "space_override.reset_active": "重置 %1$@ 覆盖",
   "space_override.reset_all": "重置所有布局覆盖",

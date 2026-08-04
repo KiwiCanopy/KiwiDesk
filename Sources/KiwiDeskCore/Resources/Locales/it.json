@@ -816,7 +816,6 @@
   "space_override.caption": "Le impostazioni non selezionate ereditano i valori predefiniti da %1$@.",
   "space_override.dormant.entry_many": "%1$@ — %2$d campi",
   "space_override.dormant.entry_one": "%1$@ — 1 campo",
-  "space_override.dormant.label": "Salvato per altre disposizioni (%1$d)",
   "space_override.floating.none": "Floating non ha personalizzazioni per spazio.",
   "space_override.reset_active": "Ripristina personalizzazioni di %1$@",
   "space_override.reset_all": "Ripristina tutte le personalizzazioni della disposizione",

@@ -816,7 +816,6 @@
   "space_override.caption": "Configurações não selecionadas herdam padrões de %1$@.",
   "space_override.dormant.entry_many": "%1$@ — %2$d campos",
   "space_override.dormant.entry_one": "%1$@ — 1 campo",
-  "space_override.dormant.label": "Salvo para outros layouts (%1$d)",
   "space_override.floating.none": "Floating não possui substituições por espaço.",
   "space_override.reset_active": "Redefinir substituições de %1$@",
   "space_override.reset_all": "Redefinir todas as substituições de layout",

@@ -816,7 +816,6 @@
   "space_override.caption": "未勾選的設定會沿用 %1$@ 的預設值。",
   "space_override.dormant.entry_many": "%1$@ — %2$d 個欄位",
   "space_override.dormant.entry_one": "%1$@ — 1 個欄位",
-  "space_override.dormant.label": "為其他佈局儲存（%1$d）",
   "space_override.floating.none": "Floating 沒有各空間的覆寫項目。",
   "space_override.reset_active": "重設 %1$@ 覆寫項目",
   "space_override.reset_all": "重設所有佈局覆寫項目",

@@ -19,27 +19,21 @@ struct SpaceOverrideRows: View {
     @Binding var pendingResetAll: SpaceID?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            modeRows
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                modeRows
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.quaternary.opacity(0.35))
+            )
             footer
         }
-    }
-
-    /// `<Space> — <Layout> overrides` (#290): names the space and
-    /// the layout being edited so the popover isn't a context-free
-    /// row set.
-    private var title: String {
-        L(
-            "space_override.title",
-            "%1$@ — %2$@ overrides",
-            space.raw,
-            mode.displayName
-        )
     }
 
     /// Dynamic caption naming the active layout whose defaults an

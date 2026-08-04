@@ -816,7 +816,6 @@
   "space_override.caption": "체크되지 않은 항목은 %1$@ 의 기본값을 상속받습니다.",
   "space_override.dormant.entry_many": "%1$@ — %2$d 필드",
   "space_override.dormant.entry_one": "%1$@ — 1 필드",
-  "space_override.dormant.label": "다른 레이아웃용으로 저장됨 (%1$d)",
   "space_override.floating.none": "플로팅에는 공간별 오버라이드가 없습니다.",
   "space_override.reset_active": "%1$@ 의 오버라이드 리셋",
   "space_override.reset_all": "모든 레이아웃 오버라이드 리셋",

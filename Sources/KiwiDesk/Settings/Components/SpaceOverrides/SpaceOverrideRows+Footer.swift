@@ -1,61 +1,115 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-space override popover's footer (#290): a quiet
-/// disclosure of overrides saved for *other* layouts, then the
-/// reset buttons. Split from `SpaceOverrideRows` to keep the base
-/// file under the line ceiling. Read order is edit-the-active-
-/// layout → see-what-else-exists → reset, so the dormant
-/// disclosure sits above the resets and motivates `Reset All`.
+/// The per-space override editor's dormant footer (#290, restyled
+/// for the #678 8b pane): the "Saved for other layouts" card — a
+/// summary of overrides saved for layouts OTHER than the active
+/// one, expandable to the per-layout breakdown, with `Reset All`
+/// beside it. Split from `SpaceOverrideRows` to keep the base file
+/// under the line ceiling. The active layout's own reset moved to
+/// the editor header (`SpacesSection+Overrides.swift`); this footer
+/// carries only what concerns the *other* layouts, so the card
+/// reads as one idea.
 extension SpaceOverrideRows {
-    @ViewBuilder
-    var footer: some View {
-        dormantDisclosure
-        resetButtons
-    }
-
     /// Layouts other than the active one that carry saved
     /// overrides for this space, each with its set-field count.
     /// Single-sourced from Core (`dormantOverrides`) over the same
-    /// layout list the `Overrides (N)` count sums, so a counted
-    /// layout can never be missing here.
-    private var dormantLayouts: [(mode: LayoutMode, count: Int)] {
+    /// layout list the cell's count sums, so a counted layout can
+    /// never be missing here. Internal so the editor chrome can
+    /// gate the card on it.
+    var dormantLayouts: [(mode: LayoutMode, count: Int)] {
         g.dormantOverrides(for: space, active: mode)
     }
 
-    /// A `DisclosureGroup`, collapsed by default: dormant values
-    /// are inspection-only trivia, so they don't spend the capped
-    /// popover's vertical budget unless asked. Each line is a
-    /// glyph + "<Layout> — N fields" with no checkbox, accent, or
-    /// chevron — that absence of interactive chrome is what reads
-    /// "not editable here" without a caption saying so.
+    /// The bottom card, present only when dormant values exist. A
+    /// clock glyph + "Saved for other layouts (N)" summary that
+    /// says the values reactivate on a layout switch, a `Show`
+    /// disclosure of the per-layout breakdown (inspection-only —
+    /// no checkbox, accent or edit affordance, which is what reads
+    /// "not editable here"), and the destructive `Reset All`
+    /// (confirmed) that only this card can reach.
     @ViewBuilder
-    private var dormantDisclosure: some View {
+    var footer: some View {
         let dormant = dormantLayouts
         if !dormant.isEmpty {
-            DisclosureGroup(
-                L(
-                    "space_override.dormant.label",
-                    "Saved for other layouts (%1$d)",
-                    dormant.count
-                )
-            ) {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(dormant, id: \.mode) { entry in
-                        Label(
-                            dormantLine(entry.mode, entry.count),
-                            systemImage: entry.mode.glyph
-                        )
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .foregroundStyle(.secondary)
+                    Text(dormantSummary(dormant.count))
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    }
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+                    Spacer(minLength: 8)
+                    resetAllButton
                 }
-                .padding(.top, 2)
+                dormantDisclosure(dormant)
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.quaternary.opacity(0.35))
+            )
         }
+    }
+
+    private func dormantSummary(_ count: Int) -> String {
+        count == 1
+            ? L(
+                "space_override.dormant.summary_one",
+                "Saved for 1 other layout — it applies if you "
+                    + "switch this space back."
+            )
+            : L(
+                "space_override.dormant.summary_many",
+                "Saved for %1$d other layouts — they apply if "
+                    + "you switch this space back.",
+                count
+            )
+    }
+
+    /// A `DisclosureGroup` labelled `Show`, collapsed by default:
+    /// the per-layout breakdown is inspection-only trivia. Each
+    /// line is a glyph + "<Layout> — N fields", no interactive
+    /// chrome.
+    @ViewBuilder
+    private func dormantDisclosure(
+        _ dormant: [(mode: LayoutMode, count: Int)]
+    ) -> some View {
+        DisclosureGroup(L("space_override.dormant.show", "Show")) {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(dormant, id: \.mode) { entry in
+                    Label(
+                        dormantLine(entry.mode, entry.count),
+                        systemImage: entry.mode.glyph
+                    )
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                }
+            }
+            .padding(.top, 4)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+
+    private var resetAllButton: some View {
+        Button(
+            L(
+                "space_override.reset_all",
+                "Reset All Layout Overrides"
+            ),
+            role: .destructive
+        ) {
+            pendingResetAll = space
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .fixedSize()
     }
 
     private func dormantLine(
@@ -74,49 +128,5 @@ extension SpaceOverrideRows {
                 layout.displayName,
                 count
             )
-    }
-
-    /// `Reset <Layout> Overrides` (always present, greyed when the
-    /// active layout has none — furniture of the active section,
-    /// so "grey, don't hide") and, only when dormant values exist,
-    /// the destructive `Reset All Layout Overrides` (confirmed).
-    @ViewBuilder
-    private var resetButtons: some View {
-        Divider()
-            .padding(.top, 4)
-        Button(
-            L(
-                "space_override.reset_active",
-                "Reset %1$@ Overrides",
-                mode.displayName
-            ),
-            role: .destructive
-        ) {
-            model.config.settings.resetOverride(mode, for: space)
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
-        .disabled(
-            gates.inertReason(for: .spaces(.spaceOverrideResetActive))
-                != nil
-        )
-        .help(
-            gates.inertReason(for: .spaces(.spaceOverrideResetActive))
-                .map(SpacesGateHelp.sentence) ?? ""
-        )
-
-        if !dormantLayouts.isEmpty {
-            Button(
-                L(
-                    "space_override.reset_all",
-                    "Reset All Layout Overrides"
-                ),
-                role: .destructive
-            ) {
-                pendingResetAll = space
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-        }
     }
 }

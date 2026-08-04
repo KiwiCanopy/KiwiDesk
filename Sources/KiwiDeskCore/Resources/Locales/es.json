@@ -816,7 +816,6 @@
   "space_override.caption": "Los ajustes desmarcados heredan los valores por defecto de %1$@.",
   "space_override.dormant.entry_many": "%1$@ — %2$d campos",
   "space_override.dormant.entry_one": "%1$@ — 1 campo",
-  "space_override.dormant.label": "Guardado para otros diseños (%1$d)",
   "space_override.floating.none": "Floating no tiene anulaciones por espacio.",
   "space_override.reset_active": "Restablecer anulaciones de %1$@",
   "space_override.reset_all": "Restablecer todas las anulaciones de diseño",

@@ -816,7 +816,6 @@
   "space_override.caption": "未チェックの項目は %1$@ のデフォルト値を継承します。",
   "space_override.dormant.entry_many": "%1$@ — %2$d フィールド",
   "space_override.dormant.entry_one": "%1$@ — 1 フィールド",
-  "space_override.dormant.label": "他のレイアウト用に保存済み (%1$d)",
   "space_override.floating.none": "フローティングには操作スペースごとのオーバーライドはありません。",
   "space_override.reset_active": "%1$@ のオーバーライドをリセット",
   "space_override.reset_all": "すべてのレイアウトオーバーライドをリセット",

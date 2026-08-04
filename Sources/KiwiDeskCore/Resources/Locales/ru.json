@@ -816,7 +816,6 @@
   "space_override.caption": "Настройки без флажка наследуют значения по умолчанию из %1$@.",
   "space_override.dormant.entry_many": "%1$@ — полей: %2$d",
   "space_override.dormant.entry_one": "%1$@ — 1 поле",
-  "space_override.dormant.label": "Сохранено для других раскладок (%1$d)",
   "space_override.floating.none": "У Floating нет переопределений по пространствам.",
   "space_override.reset_active": "Сбросить переопределения %1$@",
   "space_override.reset_all": "Сбросить все переопределения раскладок",
