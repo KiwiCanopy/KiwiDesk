@@ -161,6 +161,27 @@ struct HomeCardContentTests {
         )
     }
 
+    /// The behaviour answer follows the mouse-resize mode: the
+    /// two frames must differ, or the card gives the same
+    /// answer whichever drag behaviour the draft holds — the
+    /// branch shipped untested (guard-prover 2026-08-04:
+    /// forcing the layout frame left the full suite green).
+    @Test("the behaviour answer follows the mouse-resize mode")
+    func behaviorAnswer() {
+        let model = model()
+        model.config.settings.mouseResize = .layout
+        let layout = HomeCardContent.subtitle(
+            for: .behavior,
+            model: model
+        )
+        model.config.settings.mouseResize = .snapBack
+        let snap = HomeCardContent.subtitle(
+            for: .behavior,
+            model: model
+        )
+        #expect(layout != snap, "mouse-resize mode ignored")
+    }
+
     @Test("the app-rules answer covers pins and floats")
     func appRulesAnswer() {
         let model = model()

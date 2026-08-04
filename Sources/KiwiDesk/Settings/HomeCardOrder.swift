@@ -1,20 +1,20 @@
 /// Which cards Home offers, in which order (#678 turn 9).
 ///
 /// The order is the turn-9 frame's and is STABLE across mode
-/// flips: Nerd inserts its cards at their slots rather than
+/// flips: Power User inserts its cards at their slots rather than
 /// appending, so a card never moves when the segment is toggled
-/// — Monitors auto-promoted into Simple sits exactly where Nerd
+/// — Monitors auto-promoted into Simple sits exactly where Power User
 /// shows it. `HomeCardOrderTests` pins both lists to the
 /// destination groups so a thirteenth destination cannot miss
 /// the grid.
 enum HomeCardOrder {
-    /// THIS PROFILE, full (Nerd) order.
+    /// THIS PROFILE, full (Power User) order.
     static let thisProfile: [SettingsDestination] = [
         .spaces, .gapsAndBorders, .bars, .colors,
         .layoutDefaults, .monitors, .behavior, .advancedColors,
     ]
 
-    /// WHOLE APP, full (Nerd) order.
+    /// WHOLE APP, full (Power User) order.
     static let wholeApp: [SettingsDestination] = [
         .shortcuts, .profiles, .appRules, .general,
     ]
@@ -41,7 +41,7 @@ enum HomeCardOrder {
         destination.isReachable(
             editingStoredProfile: editingStoredProfile
         )
-            && (mode == .nerd
+            && (mode == .powerUser
                 || destination.area.effectiveMinimumMode(
                     displayCount: displayCount
                 ) == .simple)

@@ -93,7 +93,7 @@ final class SettingsModel: ObservableObject {
     /// `SettingsWindowController.show()` resets this each time
     /// the window is opened.
     @Published var destination: SettingsDestination?
-    /// The Simple/Nerd pick (#678 turn 9). Read at init through
+    /// The Simple/Power User pick (#678 turn 9). Read at init through
     /// `settingsModeDefaults` and written back through
     /// `setSettingsMode`, so it never enters the dirty-tracked
     /// config — same shape and reasoning as `appearance`.

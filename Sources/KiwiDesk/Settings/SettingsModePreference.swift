@@ -1,6 +1,6 @@
 import Foundation
 
-/// Where the Simple/Nerd pick lives (#678 turn 9).
+/// Where the Simple/Power User pick lives (#678 turn 9).
 ///
 /// Storage is app preferences (`UserDefaults`), NOT `gui.json`,
 /// on exactly `AppearancePreference`'s reasoning: the mode is an

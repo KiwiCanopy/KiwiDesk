@@ -19,10 +19,10 @@ struct SettingsModeNavigationTests {
         return (makeTestModel(defaults: defaults), defaults)
     }
 
-    @Test("Nerd → Simple pops a Nerd-only area to Home")
+    @Test("Nerd → Simple pops a Power-User-only area to Home")
     func flipPopsNerdArea() {
         let (model, _) = model()
-        model.setSettingsMode(.nerd)
+        model.setSettingsMode(.powerUser)
         model.destination = .layoutDefaults
         model.setSettingsMode(.simple)
         #expect(model.destination == nil)
@@ -31,7 +31,7 @@ struct SettingsModeNavigationTests {
     @Test("Nerd → Simple leaves a Simple area alone")
     func flipKeepsSimpleArea() {
         let (model, _) = model()
-        model.setSettingsMode(.nerd)
+        model.setSettingsMode(.powerUser)
         model.destination = .gapsAndBorders
         model.setSettingsMode(.simple)
         #expect(model.destination == .gapsAndBorders)
@@ -40,7 +40,7 @@ struct SettingsModeNavigationTests {
     @Test("Home survives the flip")
     func flipOnHome() {
         let (model, _) = model()
-        model.setSettingsMode(.nerd)
+        model.setSettingsMode(.powerUser)
         model.setSettingsMode(.simple)
         #expect(model.destination == nil)
     }
@@ -48,10 +48,10 @@ struct SettingsModeNavigationTests {
     @Test("the pick persists through the injected domain")
     func flipPersists() {
         let (model, defaults) = model()
-        model.setSettingsMode(.nerd)
+        model.setSettingsMode(.powerUser)
         #expect(
             SettingsModePreference.read(from: defaults)
-                == .nerd
+                == .powerUser
         )
         model.setSettingsMode(.simple)
         #expect(

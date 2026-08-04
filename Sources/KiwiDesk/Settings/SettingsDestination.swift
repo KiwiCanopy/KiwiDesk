@@ -106,7 +106,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
         // Colours & Motion inherits Appearance's purple with its
-        // meaning; its Nerd twin takes a deeper violet, so the
+        // meaning; its Power-User twin takes a deeper violet, so the
         // pairing is legible by hue before either label is read.
         case .colors: return .purple
         case .advancedColors:

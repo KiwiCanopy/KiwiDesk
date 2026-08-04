@@ -4,7 +4,7 @@ import SwiftUI
 /// The one header bar (#678 turn 9): on Home the app identity,
 /// on an area screen the "← Home" back chip and the area title —
 /// followed either way by the same search entry, profile chip,
-/// Simple|Nerd segment and, while the draft has changes, the
+/// Simple|Power User segment and, while the draft has changes, the
 /// unsaved-changes count. The status sentence and profile
 /// warning ride a second row exactly as the old header drew
 /// them. One bar for both screens so the chrome reads as
@@ -157,12 +157,11 @@ struct SettingsHeaderBar: View {
         ) {
             Text(L("mode.simple", "Simple"))
                 .tag(SettingsMode.simple)
-            // "Power User" user-facing (owner 2026-08-04);
-            // `.nerd` stays the wire name, and the site's
-            // slider keeps its own "Nerd" flair — different
-            // surface, different register.
+            // The site's slider keeps its own "Nerd" flair —
+            // different surface, different register (owner
+            // 2026-08-04; docs/localization-naming.md).
             Text(L("mode.power_user", "Power User"))
-                .tag(SettingsMode.nerd)
+                .tag(SettingsMode.powerUser)
         }
         .pickerStyle(.segmented)
         .labelsHidden()

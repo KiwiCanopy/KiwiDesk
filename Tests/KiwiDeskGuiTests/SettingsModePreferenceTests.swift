@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Simple/Nerd pick's storage (#678 turn 9) — the
+/// The Simple/Power User pick's storage (#678 turn 9) — the
 /// `AppearancePreference` contract: absent and unrecognised
 /// read as the approachable default, and the default leaves no
 /// key behind. Scratch domains on both sides (tests.md:
@@ -41,17 +41,17 @@ struct SettingsModePreferenceTests {
     @Test("Nerd round-trips")
     func nerdRoundTrips() {
         let defaults = scratch()
-        SettingsModePreference.write(.nerd, to: defaults)
+        SettingsModePreference.write(.powerUser, to: defaults)
         #expect(
             SettingsModePreference.read(from: defaults)
-                == .nerd
+                == .powerUser
         )
     }
 
     @Test("Simple removes the key entirely")
     func simpleLeavesNoTrace() {
         let defaults = scratch()
-        SettingsModePreference.write(.nerd, to: defaults)
+        SettingsModePreference.write(.powerUser, to: defaults)
         SettingsModePreference.write(.simple, to: defaults)
         #expect(
             defaults.string(

@@ -7,17 +7,17 @@
 /// guards hold against the model and the locale catalogs;
 /// rendering from it starts with the Bars area (Phase 2).
 
-/// The two Settings modes. User-facing labels are "Simple" /
-/// "Power User" (owner 2026-08-04); `.nerd` is the WIRE name
-/// only — kept for the preference's stored raw value and its
-/// kinship with the site slider, whose "Nerd" flair belongs to
-/// that surface alone. The design doc's "Easy/Advanced" is
-/// spec-internal shorthand and never appears in code or copy;
-/// the word "mode" itself stays reserved for this pair and for
-/// layout modes.
+/// The two Settings modes: "Simple" / "Power User" (owner
+/// 2026-08-04), user-facing and wire alike. The marketing
+/// site's slider keeps its own "Nerd" flair — a different
+/// surface, never harmonized either way
+/// (`docs/localization-naming.md` owns the pair's policy). The
+/// design doc's "Easy/Advanced" is spec-internal shorthand and
+/// never appears in code or copy; the word "mode" itself stays
+/// reserved for this pair and for layout modes.
 enum SettingsMode: String, CaseIterable, Hashable {
     case simple
-    case nerd
+    case powerUser
 }
 
 /// A Home-level area card in the redesigned Settings window.
@@ -37,13 +37,13 @@ enum SettingsArea: CaseIterable, Hashable {
 
     /// The mode an area first appears in — mode depth is per
     /// area, never per row. `.simple` areas render in both
-    /// modes; `.nerd` areas exist only while Nerd mode is on
-    /// (Nerd adds surface, never expands it).
+    /// modes; `.powerUser` areas exist only while Power User
+    /// mode is on (it adds surface, never expands it).
     var minimumMode: SettingsMode {
         switch self {
         case .layoutDefaults, .advancedColours, .behaviour,
             .monitors:
-            return .nerd
+            return .powerUser
         case .gapsAndBorders, .shortcuts, .coloursAndMotion,
             .bars, .spacesAndLayouts, .profiles, .appRules,
             .general:
@@ -66,7 +66,7 @@ enum SettingsArea: CaseIterable, Hashable {
     }
 }
 
-/// How deep a setting sits. "Show more" rows and nerd-only cards
+/// How deep a setting sits. "Show more" rows and Power-User-only cards
 /// are different things — never conflate them in copy or code:
 /// `.showMore` is a
 /// row-level disclosure; mode depth is

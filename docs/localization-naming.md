@@ -293,8 +293,8 @@ The marketing site's slider is a **different surface with its
 own flair** — it says "Nerd" (`site/src/i18n/<locale>.json`,
 keys `mode_simple` / `mode_dev`) and keeps it; do not
 "harmonize" the app onto the site's register or vice versa.
-The app's internal case name `.nerd` is a wire name only and
-never user-facing. A translator drafting `mode.simple` /
+The app's case name is `.powerUser`, matching the label; it is
+never the site's word. A translator drafting `mode.simple` /
 `mode.power_user` may still read the site's pair for their
 locale as context, but translates the app's own English.
 

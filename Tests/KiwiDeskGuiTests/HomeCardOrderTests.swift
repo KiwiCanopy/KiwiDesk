@@ -5,7 +5,7 @@ import Testing
 /// Home's card offer (#678 turn 9): every destination has a
 /// card, the order is the frame's and stays stable across mode
 /// flips, and one predicate decides who is offered — Simple's
-/// eight, Nerd's twelve, the Monitors auto-promotion, and the
+/// eight, Power User's twelve, the Monitors auto-promotion, and the
 /// #18 stored-profile rule, never a hand-negated copy.
 @Suite("Home card order and offer")
 struct HomeCardOrderTests {
@@ -34,23 +34,23 @@ struct HomeCardOrderTests {
         )
     }
 
-    @Test("Simple offers eight cards, Nerd twelve")
+    @Test("Simple offers eight cards, Power User twelve")
     func modeCounts() {
         let simple = offered(mode: .simple, displays: 1)
-        let nerd = offered(mode: .nerd, displays: 1)
+        let powerUser = offered(mode: .powerUser, displays: 1)
         #expect(simple.count == 8)
-        #expect(nerd.count == 12)
+        #expect(powerUser.count == 12)
     }
 
-    /// Nerd INSERTS, never reorders: Simple's sequence is
-    /// Nerd's with the Nerd-only cards removed, so no card
+    /// Power User INSERTS, never reorders: Simple's sequence is
+    /// Nerd's with the Power-User-only cards removed, so no card
     /// moves when the segment flips.
-    @Test("Simple is a subsequence of Nerd")
+    @Test("Simple is a subsequence of Power User")
     func stablePositions() {
         let simple = offered(mode: .simple, displays: 1)
-        let nerd = offered(mode: .nerd, displays: 1)
+        let powerUser = offered(mode: .powerUser, displays: 1)
         #expect(
-            nerd.filter { simple.contains($0) } == simple
+            powerUser.filter { simple.contains($0) } == simple
         )
     }
 
@@ -77,7 +77,7 @@ struct HomeCardOrderTests {
     func storedProfileHidesGeneral() {
         let cards = HomeCardOrder.offered(
             HomeCardOrder.wholeApp,
-            mode: .nerd,
+            mode: .powerUser,
             displayCount: 1,
             editingStoredProfile: true
         )

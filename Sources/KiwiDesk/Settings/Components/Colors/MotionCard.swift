@@ -11,7 +11,7 @@ import SwiftUI
 /// the tiers decide what the disclosure hides — the master switch
 /// at rest, the four per-event toggles and the duration behind it.
 /// The drawer is named for what it holds rather than "more" or
-/// "advanced": this area's Nerd twin is a whole separate card,
+/// "advanced": this area's Power-User twin is a whole separate card,
 /// and one word must never mean both a row tier and mode depth.
 struct MotionCard: View {
     @ObservedObject var model: SettingsModel

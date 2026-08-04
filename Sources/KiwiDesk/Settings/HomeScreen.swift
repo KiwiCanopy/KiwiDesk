@@ -4,7 +4,7 @@ import SwiftUI
 /// Home (#678 turn 9): the card grid that replaced the sidebar
 /// as the only navigator. Two scope groups — This Profile /
 /// Whole App — of answer-carrying cards; Simple shows the eight
-/// first-week cards and Nerd inserts the other four at stable
+/// first-week cards and Power User inserts the other four at stable
 /// positions. The adaptive grid gives the digest's 4→3→2 column
 /// steps from the card's own min/max width, so the window
 /// survives whatever slot the tiler gives it.

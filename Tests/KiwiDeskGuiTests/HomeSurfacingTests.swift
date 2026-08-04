@@ -33,12 +33,12 @@ struct HomeSurfacingTests {
             "ifselection==nil{HomeScreen(model:model)",
             // Escape pops an area back to Home.
             ".onExitCommand{ifselection!=nil{selection=nil}}",
-            // A link into a Nerd-only area switches the mode
+            // A link into a Power-User-only area switches the mode
             // before landing.
             "ensureModeAdmits(destination)selection=destination",
         ],
         "Settings/SettingsView+Reveal.swift": [
-            // A search hit into a Nerd-only area switches the
+            // A search hit into a Power-User-only area switches the
             // mode before landing.
             "ensureModeAdmits(resolved.destination)"
                 + "model.destination=resolved.destination"

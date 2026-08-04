@@ -295,7 +295,7 @@ what it meant — and the same drawers on the new page do not,
 because the adjective now reads as the page's own name rather
 than as a tier inside it. And a row tier and a mode depth must never
 be spelled with one word: Advanced Colors is the deep-mode twin
-of Colours & Motion (`SettingsArea.minimumMode` is `.nerd`
+of Colours & Motion (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. They are **"More

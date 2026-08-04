@@ -43,7 +43,7 @@ extension SettingsView {
                 editingStoredProfile: model.editingStoredProfile
             )
         else { return }
-        // A hit inside a Nerd-only area switches the mode —
+        // A hit inside a Power-User-only area switches the mode —
         // search indexes both modes (4c), so landing must
         // switch rather than refuse.
         ensureModeAdmits(resolved.destination)

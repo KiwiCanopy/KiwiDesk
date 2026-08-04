@@ -430,9 +430,9 @@ must keep:
 - **Navigation into a mode-withheld area switches the mode,
   never refuses** (`ensureModeAdmits` — search and
   cross-references index both modes), and a flip back to
-  Simple pops a `.nerd`-gated area to Home
+  Simple pops a `.powerUser`-gated area to Home
   (`SettingsModeNavigationTests`). User-facing labels are
-  "Simple" / "Power User"; `.nerd` is wire-only
+  "Simple" / "Power User", wire and label alike
   (`docs/localization-naming.md` owns the pair's policy).
 - **A card is an answer**: subtitles derive from the draft
   (`HomeCardContentTests` holds the derivations), previews

@@ -120,7 +120,7 @@ struct SettingsView: View {
                         model.editingStoredProfile
                 )
             else { return }
-            // A link into a Nerd-only area switches the mode
+            // A link into a Power-User-only area switches the mode
             // (4c/4e: a cross-reference must exist in the
             // current mode or offer the switch) — the segment
             // in the header shows the flip.
@@ -129,7 +129,7 @@ struct SettingsView: View {
         }
     }
 
-    /// Flips Simple → Nerd when navigation targets an area the
+    /// Flips Simple → Power User when navigation targets an area the
     /// current mode withholds — search and cross-references
     /// index both modes, so landing must switch rather than
     /// refuse (#678 4c). Internal, not private: the reveal
@@ -149,7 +149,7 @@ struct SettingsView: View {
                     model.editingStoredProfile
             )
         {
-            model.setSettingsMode(.nerd)
+            model.setSettingsMode(.powerUser)
         }
     }
 
