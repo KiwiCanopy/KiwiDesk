@@ -10,12 +10,13 @@ import SwiftUI
 
 /// An override row, "visible but inherited" (#68 §3.4, #678 8b
 /// layout): a row overrides its field or inherits the layout's
-/// default, chosen by the **INHERIT** checkbox in the trailing
-/// column (checked = inheriting). An overriding row shows its live
+/// default, chosen by the **OVERRIDE** checkbox in the trailing
+/// column (checked = overriding). An overriding row shows its live
 /// control, a left accent bar and a subtle tint, so active
-/// overrides form a scannable boundary. An inheriting row collapses
-/// its control to a quiet "follows <Layout> defaults · <value>"
-/// readout — the value stays visible without the control's weight.
+/// overrides form a scannable boundary — and its checkbox is ticked,
+/// agreeing with that emphasis. An inheriting row collapses its
+/// control to a quiet "follows <Layout> defaults · <value>" readout
+/// — the value stays visible without the control's weight.
 /// The one exception is a row whose value has no one-line form (the
 /// slot-size pair): it passes `inherited: nil` and keeps the live
 /// control, disabled and dimmed, as before.
@@ -49,9 +50,16 @@ struct OverrideChrome<Content: View>: View {
             alignment: alignment,
             spacing: SettingsMetrics.overrideRowInset
         ) {
+            // Fill a bounded width rather than let the content take
+            // its ideal: a long inheriting readout ("follows
+            // <Layout> defaults · <value>") would otherwise overflow
+            // the row on the FIRST layout pass and shove the trailing
+            // checkbox off the hittable edge until a re-render — the
+            // checkbox then silently ignored the first click (worst
+            // on Scrolling, whose readout is longest).
             leadingContent
-            Spacer(minLength: SettingsMetrics.overrideRowInset)
-            inheritToggle
+                .frame(maxWidth: .infinity, alignment: .leading)
+            overrideCheckbox
         }
         // The inset keeps daylight between the 2 pt accent
         // bar and the content, so the bar reads as a boundary
@@ -104,7 +112,7 @@ struct OverrideChrome<Content: View>: View {
 
     private var liveControl: some View {
         content
-            // The narrowed column pays for the trailing INHERIT
+            // The narrowed column pays for the trailing OVERRIDE
             // column, so the shared rows inside land on the same
             // control axis as plain rows.
             .environment(
@@ -149,31 +157,31 @@ struct OverrideChrome<Content: View>: View {
         .foregroundStyle(.secondary)
     }
 
-    private var inheritToggle: some View {
-        Toggle(
-            "",
-            isOn: Binding(
-                get: { !isOn.wrappedValue },
-                set: { isOn.wrappedValue = !$0 }
+    /// The trailing OVERRIDE checkbox: checked means this row
+    /// overrides the layout default (owner call 2026-08-04). Bound
+    /// straight to `isOn`, so the tick agrees with the row's other
+    /// "engaged" signals — the left accent bar, the tint, and the
+    /// live control all appear together on a checked (overriding)
+    /// row, and ticking-to-customize is the native inspector idiom.
+    private var overrideCheckbox: some View {
+        Toggle("", isOn: isOn)
+            .labelsHidden()
+            .toggleStyle(.checkbox)
+            .help(
+                isOn.wrappedValue
+                    ? L(
+                        "app_bar.override.on.help",
+                        "Overriding the global value"
+                    )
+                    : L(
+                        "app_bar.override.off.help",
+                        "Inheriting the global value"
+                    )
             )
-        )
-        .labelsHidden()
-        .toggleStyle(.checkbox)
-        .help(
-            isOn.wrappedValue
-                ? L(
-                    "app_bar.override.on.help",
-                    "Overriding the global value"
-                )
-                : L(
-                    "app_bar.override.off.help",
-                    "Inheriting the global value"
-                )
-        )
-        .frame(
-            width: SettingsMetrics.overrideInheritColumn,
-            alignment: .center
-        )
+            .frame(
+                width: SettingsMetrics.overrideStateColumn,
+                alignment: .center
+            )
     }
 }
 
@@ -278,13 +286,13 @@ struct OverrideFractionRow: View {
 }
 
 /// An override picker over any labeled, hashable option set.
-/// Renders a `.menu` dropdown: the per-Space popover — the one
-/// override surface left since the per-layout bar overrides
+/// Renders a `.menu` dropdown: the per-space override editor — the
+/// one override surface left since the per-layout bar overrides
 /// went Lua-only (GUI_REMOVED_2026-08) — is the documented
-/// compact-surface exception to the #291 segmented norm, its
-/// inherit chrome already eating the width a segment row needs.
-/// A future full-width override surface should restore the
-/// segmented branch this had before the bars deletion.
+/// compact-surface exception to the #291 segmented norm. Its rows
+/// sit in a bounded ~520 pt column with a trailing OVERRIDE
+/// checkbox column, so a segmented row would be cramped and the
+/// `.menu` holds (see `docs/ui-patterns.md`).
 struct OverridePickerRow<Value: Hashable & Sendable>: View {
     let label: String
     @Binding var value: Value?

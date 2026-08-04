@@ -208,10 +208,10 @@ enum SettingsMetrics {
     /// change; sized for the widest stored form, "#RRGGBBAA".
     static let colorHexColumn: CGFloat = 84
 
-    /// The trailing "INHERIT" column in the per-space override
+    /// The trailing "OVERRIDE" column in the per-space override
     /// editor (#678 8b): wide enough to seat the small-caps header
     /// over the checkbox below it, so the two align down the card.
-    static let overrideInheritColumn: CGFloat = 64
+    static let overrideStateColumn: CGFloat = 64
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {
@@ -236,7 +236,11 @@ extension EnvironmentValues {
     /// The active layout's display name, set once by
     /// `SpaceOverrideRows` so each `OverrideChrome` can render
     /// "follows <Layout> defaults · <value>" without every row
-    /// threading the mode through (#678 8b).
+    /// threading the mode through (#678 8b). The default is empty:
+    /// an inheriting row is unusable without the wire (it would read
+    /// "follows  defaults · …"), so the one injector is load-bearing
+    /// — `SpaceOverrideRows` sets it on the card, and no other view
+    /// mounts these rows.
     var overrideLayoutName: String {
         get { self[OverrideLayoutNameKey.self] }
         set { self[OverrideLayoutNameKey.self] = newValue }

@@ -8,8 +8,9 @@ import SwiftUI
 /// Defaults preview uses — via `TilingSettings.resolved(for:
 /// activeMode:)`, the engine's own resolver — so the preview asks
 /// the engine rather than re-deriving placement beside the drawing
-/// (gui.md). Floating has no schematic, so the editor draws no
-/// preview for it.
+/// (gui.md). It sits in the editor's trailing column for now (owner
+/// call 2026-08-04; this panel is being reworked in a later step).
+/// Floating has no schematic, so the editor draws no preview for it.
 ///
 /// The window count is view state, the same question the Layout
 /// Defaults preview poses: overflow, track limits and dynamic-grid

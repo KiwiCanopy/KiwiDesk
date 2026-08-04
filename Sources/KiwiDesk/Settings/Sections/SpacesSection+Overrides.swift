@@ -42,20 +42,45 @@ extension SpacesSection {
                             pendingResetAll: $pendingResetAll
                         )
                         .frame(maxWidth: 520, alignment: .leading)
-                        // The live preview leads its editor (gui.md):
-                        // the space's active layout with ITS overrides
-                        // applied, updating as the user edits.
-                        // Floating has no schematic, so it draws none.
+                        // Win the width negotiation, so a wide preview
+                        // (the scrolling two-panel schematic) can never
+                        // overconstrain the HStack and spill its frame
+                        // over these rows' trailing checkboxes — which
+                        // silently swallowed clicks on a scrolling
+                        // space until any re-render settled the layout.
+                        .layoutPriority(1)
+                        // A live preview beside the rows: the space's
+                        // active layout with ITS overrides applied,
+                        // updating as the user edits. Deliberately
+                        // trailing rather than leading for this wide
+                        // side-by-side editor (owner call 2026-08-04,
+                        // this panel being reworked in a later step).
+                        // It fills the rest of the capped column so it
+                        // shares the header's right edge; Floating has
+                        // no schematic, so it draws none.
                         if LayoutMode.placementTabs.contains(mode) {
                             SpaceOverridePreview(
                                 model: model,
                                 space: space,
                                 mode: mode
                             )
-                            .frame(maxWidth: 300, alignment: .leading)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading
+                            )
+                            // Clip so the schematic can neither draw
+                            // nor hit-test past the preview's own
+                            // frame onto the rows column beside it.
+                            .clipped()
                         }
                     }
                 }
+                // Cap the editing column and left-align it: on a wide
+                // pane the header (with its trailing Reset) and the
+                // cards then share ONE right edge, instead of the
+                // reset floating to the far edge while the cards sit
+                // left of a large void.
+                .frame(maxWidth: 900, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(
                     [.horizontal, .bottom],

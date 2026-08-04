@@ -21,7 +21,13 @@ struct SpaceOverrideRows: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                captionRow
+                // Floating has no override rows, only the placeholder
+                // below, so it carries no caption or column header —
+                // an "inherit Floating defaults" caption over "has no
+                // overrides" contradicts itself.
+                if mode != .floating {
+                    captionRow
+                }
                 modeRows
             }
             // The active layout's name, read by every `OverrideChrome`
@@ -38,9 +44,9 @@ struct SpaceOverrideRows: View {
         }
     }
 
-    /// The caption, and — for a tiling layout — the "INHERIT"
-    /// column header aligned over the rows' trailing checkboxes.
-    /// Floating has no override rows, so it gets no column header.
+    /// The caption and the "OVERRIDE" column header aligned over
+    /// the rows' trailing checkboxes. Only drawn for a tiling
+    /// layout (the caller gates Floating out).
     private var captionRow: some View {
         HStack(
             alignment: .firstTextBaseline,
@@ -50,17 +56,15 @@ struct SpaceOverrideRows: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: SettingsMetrics.overrideRowInset)
-            if mode != .floating {
-                Text(L("space_override.inherit_column", "Inherit"))
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.tertiary)
-                    .frame(
-                        width: SettingsMetrics.overrideInheritColumn,
-                        alignment: .center
-                    )
-            }
+            Text(L("space_override.override_column", "Override"))
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .textCase(.uppercase)
+                .foregroundStyle(.tertiary)
+                .frame(
+                    width: SettingsMetrics.overrideStateColumn,
+                    alignment: .center
+                )
         }
         .padding(.horizontal, SettingsMetrics.overrideRowInset)
     }

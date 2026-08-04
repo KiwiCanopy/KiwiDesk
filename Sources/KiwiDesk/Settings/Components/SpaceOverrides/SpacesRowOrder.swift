@@ -7,7 +7,9 @@
 ///   walked from this list.
 /// - `.perSpaceOverrides` — the per-space layout override rows
 ///   (the fields a space's active layout can override) and the two
-///   reset actions. Drawn by `SpaceOverrideRows`.
+///   reset actions. The rows and Reset-All are drawn by
+///   `SpaceOverrideRows`; the active-layout reset by the editor
+///   header (`SpacesSection+Overrides`, #678 8b).
 ///
 /// Both are bespoke: neither container `ForEach`es its order list,
 /// so the lists record membership for the placement table and

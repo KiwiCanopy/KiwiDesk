@@ -726,10 +726,10 @@ many of that layout's fields the space overrides, and a
 none). The editor edits the layout the space currently uses; to
 tune a different layout, switch the space to it in the list first.
 
-Each field row carries an **Inherit** checkbox in the trailing
-column. Checked (the default) inherits the Layout Defaults value,
+Each field row carries an **Override** checkbox in the trailing
+column. Unchecked (the default) inherits the Layout Defaults value,
 and the row collapses to a quiet **follows `<Layout>` defaults ·
-`<value>`** readout. Uncheck it to override just that field for this
+`<value>`** readout. Check it to override just that field for this
 space — the control appears, seeded with the current value so
 nothing jumps.
 
@@ -751,10 +751,12 @@ setting.
 deletes overrides — each layout keeps its own. Switch from
 Scrolling to BSP and you see only BSP's fields; switch back and the
 Scrolling values return unchanged. When a space carries values for
-layouts other than its current one, a **Saved for other layouts
-(N)** card summarises them, and its **Show** disclosure lists each
-layout and how many fields it holds — so the retained data stays
-discoverable without turning the editor into an all-layout editor.
+layouts other than its current one, a card at the foot of the
+editor summarises them — **Saved for _N_ other layouts** — noting
+they reactivate if you switch the space back, and its **Show**
+disclosure lists each layout and how many fields it holds — so the
+retained data stays discoverable without turning the editor into an
+all-layout editor.
 
 **Resetting.** **Reset `<Layout>` Overrides** (in the header) clears
 the current layout's overrides for this space (greyed when it has

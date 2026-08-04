@@ -77,18 +77,18 @@ Track's Overflow both use `layout_params.overflow`), the
 help key scopes itself (`layout_params.overflow.stack.help`)
 so each field can carry its own text. Shared help copy —
 one string rendered on two surfaces, like a Layout Defaults
-layout card and the per-space Customize popover — is authored
+layout card and the per-space override editor — is authored
 once in a per-domain namespace (`LayoutHelp`); single-call-site
 copy stays inline at its call site (namespace membership =
 2+ call sites, or an override pair like
 `newWindowPlacement`/`trackPosition` — not "it felt
-shared"). In the Customize popover the `?` is rendered by
-`OverrideChrome` itself, not the wrapped row, so it stays
+shared"). In the per-space override editor the `?` is rendered
+by `OverrideChrome` itself, not the wrapped row, so it stays
 clickable while the row inherits — help must work exactly
 while the user decides whether to override. Accepted
 consequence: there the `?` sits at the chrome row's
 trailing edge (past the inner row's spacer, a small
-distance in the narrow popover), consistently for every
+distance in the bounded rows column), consistently for every
 override row — the deliberate exception to label-adjacent
 placement, since the label lives inside the disable-able
 content, the checkbox-narrowed column has no width to
@@ -189,18 +189,24 @@ with real headroom. Re-measure a strip before adding a fourth
 segment to one of those two — they are the ones with the least
 room left.
 
-**The 384 pt per-Space popover is the documented
-compact-surface exception (#291).** There the inherit
-chrome (a checkbox plus accent bar, `OverrideChrome`) eats
-horizontal width, so its override rows stay menus even for
-2–4-peer fields. `OverridePickerRow` renders `.menu` for that
-reason — since the per-layout bar overrides left the GUI
-(GUI_REMOVED_2026-08) the popover is the only override
-surface, so the row's old `.segmented` branch went with them;
-a future *full-width* override surface should restore the
-required-style parameter rather than inherit the menu. The
-inherited (unchecked) state comes free from the chrome's
-existing `.disabled` + `.opacity(0.5)`. App Bar Content
+**The per-Space override rows keep menus, not segmented
+controls (#291).** The override editor is now a full pushed
+pane (#678 8b, no longer the #205 popover), but its rows still
+sit in a **bounded ~520 pt column** with a trailing OVERRIDE
+checkbox column (`overrideStateColumn`, 64 pt) and the
+`OverrideChrome` accent bar eating horizontal width, so a
+2–4-peer field has no room for a segmented render.
+`OverridePickerRow` renders `.menu` for that reason — since the
+per-layout bar overrides left the GUI (GUI_REMOVED_2026-08) the
+per-space editor is the only override surface, so the row's old
+`.segmented` branch went with them. The bounded column, not the
+old popover width, is now the constraint; restore the
+required-style parameter only if a genuinely *full-width*
+override surface later arrives. The inherited (unchecked) state
+collapses to a quiet "follows `<Layout>` defaults · `<value>`"
+readout (the slot-size pair keeps its live control instead,
+dimmed via the chrome's `.disabled` + `.opacity(0.5)`). App Bar
+Content
 ("Icon &amp; name" → German "Symbol &amp; Name") is the one
 segmented label tight enough to warrant a real render at
 minimum width; kept segmented by width headroom, it is a
@@ -405,7 +411,7 @@ is reserved for controls that slide (pill, slider thumb).
 Class is expressed through native style + control size:
 `.borderedProminent` regular for the one surface commit
 (footer Save, popover confirms); `.bordered` large for row
-actions (Load, Apply, Overrides, Set Gap Values), level with
+actions (Load, Apply, Customize, Set Gap Values), level with
 large dropdowns; `.bordered` regular for stateful input
 triggers (the shortcut recorder); and `.borderless` regular
 for icon-only row actions (trash, ×-clear, rename). List-add
@@ -546,8 +552,10 @@ render in the **proportional** system font with
 stay tabular while letters take their natural width; that is
 what keeps the column at 72 pt rather than the 84 a monospaced
 face would need. It is still 8 pt wider than before the word
-arrived, and the per-Space popover widened 384 → 392 pt to pay
-that back on the app's narrowest editing surface. Alignment
+arrived — a cost the per-space override rows, the app's
+narrowest editing surface, absorb in their own bounded column,
+whose label column (`overrideLabelColumn`) is already narrowed
+to pay for the trailing OVERRIDE checkbox. Alignment
 stays **trailing**: the readout's outer edge is also the pane's
 right margin, so trailing is the only choice that pins it to
 one line down the whole pane (ui-designer, 2026-07-26) —
