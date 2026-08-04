@@ -38,7 +38,12 @@ enum MonitorReadout {
         held: Int,
         showing: SpaceID?
     ) -> String {
-        guard let showing else { return silent(held) }
+        // Zero takes its own sentence whatever is showing: a
+        // display our own accounting says holds nothing cannot
+        // also report "0 spaces here · space X is showing", and
+        // that pairing is reachable — a space can be up on a
+        // display while no configured space resolves to it.
+        guard let showing, held > 0 else { return silent(held) }
         switch held {
         case 1:
             return L(

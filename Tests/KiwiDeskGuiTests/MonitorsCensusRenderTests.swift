@@ -243,6 +243,60 @@ struct MonitorsCensusRenderTests {
         )
     }
 
+    /// The partition holds in the two cases that break it, and
+    /// the plain fixture above cannot see either.
+    ///
+    /// Its two displays have distinct names, so dropping
+    /// `cardedSpaces`' dedupe changes nothing there; and its
+    /// orphaned pin is not a follows-main space, so dropping
+    /// `orphans`' exclusion changes nothing either. Both fixes
+    /// were invisible to the whole suite until this fixture
+    /// (code review round 2, 2026-08-04).
+    @Test("twins and double-assignment keep the partition")
+    func partitionSurvivesAmbiguityAndOverlap() {
+        // Two displays that are ONE identity to KiwiDesk, and a
+        // space carrying both a stale pin and follows-main —
+        // reachable from Lua, which does not keep them exclusive.
+        let left = display(1, "Twin")
+        let right = display(2, "Twin", x: 1500)
+        let expander = MonitorsFamilyRows(
+            spaces: [
+                SpaceID("code"), SpaceID("web"), SpaceID("both"),
+            ],
+            mainSpaces: [SpaceID("both")],
+            resolutions: [
+                SpaceID("code"): .pinned(left.fingerprint),
+                SpaceID("web"): .auto(right.fingerprint),
+                SpaceID("both"): .main,
+            ],
+            pins: [
+                SpaceID("code"): left.fingerprint,
+                SpaceID("both"): "Away:1000x1000",
+            ],
+            displays: [left, right]
+        )
+        #expect(expander.hasAmbiguousDisplays)
+        let places =
+            (expander.rows(for: .monitors(.spacePins)) ?? [])
+            + (expander.rows(for: .monitors(.mainSpaces)) ?? [])
+            + (expander.rows(for: .monitors(.orphanPinClear))
+                ?? [])
+        let named = places.compactMap(\.spaceName)
+        #expect(named.count == places.count)
+        // Twins would otherwise claim `code` and `web` twice…
+        #expect(Set(named).count == named.count, "a space twice")
+        // …and the double-assigned space belongs to the tray, not
+        // to the tray AND the orphan card.
+        #expect(
+            Set(named) == Set(expander.spaces.map(\.raw)),
+            "a space is drawn nowhere"
+        )
+        #expect(
+            expander.rows(for: .monitors(.orphanPinClear))?
+                .isEmpty == true
+        )
+    }
+
     /// A key outside `MonitorsKey` expands to nil rather than to
     /// an empty list, so a renderer cannot mistake a foreign key
     /// for a family that lost its rows.

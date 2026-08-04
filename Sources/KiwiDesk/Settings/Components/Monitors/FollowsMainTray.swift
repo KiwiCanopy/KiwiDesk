@@ -26,10 +26,15 @@ struct FollowsMainTray: View {
     @State private var showingOverflow = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        // Two children, one gap, the shared constant — the same
+        // shape the card holds, since the tray runs the card's
+        // capacity arithmetic.
+        VStack(
+            alignment: .leading,
+            spacing: MonitorCardChips.stackSpacing
+        ) {
             header
             chips
-            Spacer(minLength: 0)
         }
         .padding(6)
         .frame(
@@ -91,7 +96,14 @@ struct FollowsMainTray: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            let split = MonitorCardChips.split(spaces, in: size)
+            // The tray's header is unsized `.caption2`, shorter
+            // than the card's, so it passes its own rather than
+            // inheriting a number that only happens to be close.
+            let split = MonitorCardChips.split(
+                spaces,
+                in: size,
+                header: MonitorCardChips.trayHeaderHeight
+            )
             HStack(
                 alignment: .top,
                 spacing: MonitorCardChips.spacing

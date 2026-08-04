@@ -125,12 +125,6 @@ extension SettingsModel {
                 mainID: mainID
             ).first
     }
-
-    /// The current main display's fingerprint, for the callers
-    /// that key off identity strings rather than ids.
-    var mainFingerprint: String? {
-        mainDisplay?.fingerprint
-    }
 }
 
 /// How a space's screen resolves in the picture (#36).

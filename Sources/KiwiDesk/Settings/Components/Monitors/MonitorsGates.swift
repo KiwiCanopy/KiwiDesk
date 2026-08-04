@@ -49,10 +49,8 @@ struct MonitorsGates {
     let hasOrphanedPins: Bool
 
     /// Why a row is not on screen right now. One case per
-    /// predicate AND per outcome: the two arms of
-    /// `.monitorsDisconnected` are different rows' answers to one
-    /// condition, so collapsing them would leave a renderer
-    /// unable to tell which side of it it is on.
+    /// predicate AND per sentence — a reason a renderer can
+    /// switch on, rather than a Bool it would have to interpret.
     enum InertReason: Hashable {
         /// The picture IS drawable, so the banner standing in for
         /// it stays away.

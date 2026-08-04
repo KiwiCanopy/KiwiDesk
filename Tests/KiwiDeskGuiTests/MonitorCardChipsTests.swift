@@ -21,27 +21,107 @@ struct MonitorCardChipsTests {
         #expect(MonitorCardChips.capacity(in: floor) == 1)
     }
 
-    /// The chip area accounts for the card's stack spacing, not
-    /// just its padding and header.
+    /// The chip stacks hold exactly TWO children, so the one gap
+    /// the arithmetic subtracts is the whole of it.
     ///
-    /// Omitting it overstated the area at every card size, so
-    /// `capacity` could claim a row that then clipped — the clip
-    /// the `+n` exists to prevent, reintroduced invisibly because
-    /// the floor's own guard asserts against this same formula
-    /// (code review, 2026-08-04). Asserted against the card's
-    /// real chrome rather than against the formula.
-    @Test("the chip area counts the card's stack spacing")
-    func chipAreaCountsEveryGap() {
-        let card = CGSize(width: 200, height: 200)
-        let chrome =
-            MonitorCardChips.cardPadding * 2
-            + MonitorCardChips.headerHeight
-            + MonitorCardChips.stackSpacing
-        #expect(
-            MonitorCardChips.chipArea(in: card).height
-                == card.height - chrome
+    /// Read off the SOURCE, because that is the half the
+    /// arithmetic cannot see. A first cut asserted
+    /// `chipArea(in:).height == size - (padding*2 + header +
+    /// stackSpacing)` — the same three terms `chipArea` itself
+    /// subtracts, in the same order — so both sides came out of
+    /// one expression and the test could not see that
+    /// `DisplayCard`'s stack had a third child and therefore a
+    /// second gap (code review, 2026-08-04). What matters is not
+    /// the formula but the layout it claims to model.
+    @Test("the chip stacks hold two children and one gap")
+    func stacksMatchTheArithmetic() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Monitors"
+            )
+        for name in ["DisplayCard.swift", "FollowsMainTray.swift"] {
+            let source = SourceScan.stripComments(
+                try String(
+                    contentsOf: dir.appendingPathComponent(name),
+                    encoding: .utf8
+                )
+            )
+            let squashed = source.split(
+                whereSeparator: \.isWhitespace
+            ).joined()
+            // The stack is laid out with the very constant the
+            // capacity subtracts, never a literal beside it.
+            #expect(
+                squashed.contains(
+                    "spacing:MonitorCardChips.stackSpacing"
+                ),
+                Comment(
+                    rawValue:
+                        "\(name)'s chip stack no longer uses the "
+                        + "spacing the capacity arithmetic "
+                        + "subtracts"
+                )
+            )
+            // …and it holds `header` then `chips` and nothing
+            // else: a third child is a second gap the arithmetic
+            // does not know about.
+            #expect(
+                squashed.contains(
+                    "MonitorCardChips.stackSpacing){headerchips}"
+                ),
+                Comment(
+                    rawValue:
+                        "\(name)'s chip stack grew a third child "
+                        + "— that is a second gap, and the chip "
+                        + "area still subtracts one"
+                )
+            )
+        }
+    }
+
+    /// The `+n` is a COLUMN beside the wrapped chips, so it
+    /// narrows every row — reserving it once per card let three
+    /// chips flow into three rows inside a band sized for two,
+    /// and the last row clipped (code review, 2026-08-04).
+    @Test("the marker's column is reserved, not its slot")
+    func markerReservesItsColumn() {
+        let card = CGSize(
+            width: floor.width + MonitorCardChips.minChipWidth
+                + MonitorCardChips.spacing,
+            height: floor.height + MonitorCardChips.chipHeight
+                + MonitorCardChips.spacing
         )
-        #expect(MonitorCardChips.stackSpacing > 0)
+        let plain = MonitorCardChips.capacity(in: card)
+        let reserved = MonitorCardChips.capacity(
+            in: card,
+            reservingMarker: true
+        )
+        #expect(reserved < plain)
+        // Everything shown fits BESIDE the marker: the shown
+        // chips need no more width than the row has left once the
+        // `+n` column is taken.
+        let split = MonitorCardChips.split(
+            Array(0..<12),
+            in: card
+        )
+        let area = MonitorCardChips.chipArea(in: card)
+        let rows = Int(
+            (area.height + MonitorCardChips.spacing)
+                / (MonitorCardChips.chipHeight
+                    + MonitorCardChips.spacing)
+        )
+        let perRow = Double(split.shown.count) / Double(rows)
+        let needed =
+            perRow
+            * Double(
+                MonitorCardChips.minChipWidth
+                    + MonitorCardChips.spacing
+            )
+        #expect(
+            needed
+                <= area.width - MonitorCardChips.markerWidth
+                + 0.001
+        )
     }
 
     /// The overflow marker never names ONE hidden chip, because
@@ -118,9 +198,11 @@ struct MonitorCardChipsTests {
         #expect(split.shown.count + split.overflow == chips.count)
     }
 
-    /// Two rows' worth, one chip over: four shown, two behind the
-    /// marker — the general case of the same arithmetic.
-    @Test("one chip over capacity hides two")
+    /// A card two chips wide and two rows tall holds four — but
+    /// once the `+n` claims a column, each row has room for one,
+    /// so five chips show two and hide three. The marker costs a
+    /// COLUMN, not a chip.
+    @Test("the marker's column costs a chip in every row")
     func oneOverHidesTwo() {
         let card = CGSize(
             width: floor.width + MonitorCardChips.minChipWidth
@@ -129,9 +211,15 @@ struct MonitorCardChipsTests {
                 + MonitorCardChips.spacing
         )
         #expect(MonitorCardChips.capacity(in: card) == 4)
+        #expect(
+            MonitorCardChips.capacity(
+                in: card,
+                reservingMarker: true
+            ) == 2
+        )
         let split = MonitorCardChips.split(Array(0..<5), in: card)
-        #expect(split.shown.count == 3)
-        #expect(split.overflow == 2)
+        #expect(split.shown.count == 2)
+        #expect(split.overflow == 3)
         #expect(split.shown.count + split.overflow == 5)
     }
 }

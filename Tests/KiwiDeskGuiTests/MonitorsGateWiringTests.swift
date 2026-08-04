@@ -96,7 +96,7 @@ struct MonitorsGateWiringTests {
                 // container left, clipping every space past its
                 // first row along with that space's clear button
                 // and menu (architect review, 2026-08-04).
-                "MonitorCardChips.split(spaces,in:size)",
+                "MonitorCardChips.split(spaces,in:size,header:",
                 "overflowChip(spaces,split.overflow)",
             ],
             "Sections/MonitorsSection+Details.swift": [
@@ -176,7 +176,13 @@ struct MonitorsGateWiringTests {
                 // bare fingerprint hash, which VoiceOver steps
                 // through with no context unless the row says
                 // what it is (docs review, 2026-08-04).
-                "accessibilityLabel("
+                //
+                // Keyed on the KEY, not on `accessibilityLabel(`
+                // — the fingerprint drawer two functions below
+                // carries one of those already, so the bare
+                // modifier name could never fail (code review
+                // round 2, 2026-08-04).
+                "\"monitors.orphan_pin.row_axlabel\""
             ],
         ]
         for (name, needles) in draws {

@@ -36,10 +36,18 @@ struct DisplayCard: View {
     @State private var showingOverflow = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        // TWO children and one gap, laid out with the constant
+        // the capacity arithmetic subtracts. The trailing
+        // `Spacer` this used to carry was a third child — so a
+        // second gap the arithmetic did not know about — and the
+        // frame below already pins the content to the top
+        // (code review, 2026-08-04).
+        VStack(
+            alignment: .leading,
+            spacing: MonitorCardChips.stackSpacing
+        ) {
             header
             chips
-            Spacer(minLength: 0)
         }
         .padding(MonitorCardChips.cardPadding)
         .frame(

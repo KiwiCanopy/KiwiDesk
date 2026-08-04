@@ -46,8 +46,6 @@ struct BadgeChip: View {
     }
 }
 
-/// A simple left-to-right flowing row of chips that wraps to the
-/// next line when it runs out of width.
 /// Geometry every chip list shares.
 ///
 /// Owned HERE, at the shared widget, not in one area's component:
@@ -60,6 +58,9 @@ enum ChipMetrics {
     static let spacing: CGFloat = 6
 }
 
+/// A simple left-to-right flowing row of chips that wraps to the
+/// next line when it runs out of width.
+///
 /// `Item: Hashable` and identity by VALUE, not by index: a chip
 /// list that re-identified its children by position handed the
 /// wrong view state to the wrong chip whenever membership changed
