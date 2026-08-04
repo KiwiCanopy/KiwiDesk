@@ -207,11 +207,20 @@ enum SettingsMetrics {
     /// `AppBarGroups` keeps stable cell widths as values
     /// change; sized for the widest stored form, "#RRGGBBAA".
     static let colorHexColumn: CGFloat = 84
+
+    /// The trailing "INHERIT" column in the per-space override
+    /// editor (#678 8b): wide enough to seat the small-caps header
+    /// over the checkbox below it, so the two align down the card.
+    static let overrideInheritColumn: CGFloat = 64
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {
     static let defaultValue: CGFloat =
         SettingsMetrics.labelColumn
+}
+
+private struct OverrideLayoutNameKey: EnvironmentKey {
+    static let defaultValue = ""
 }
 
 extension EnvironmentValues {
@@ -222,5 +231,14 @@ extension EnvironmentValues {
     var settingsLabelColumn: CGFloat {
         get { self[SettingsLabelColumnKey.self] }
         set { self[SettingsLabelColumnKey.self] = newValue }
+    }
+
+    /// The active layout's display name, set once by
+    /// `SpaceOverrideRows` so each `OverrideChrome` can render
+    /// "follows <Layout> defaults · <value>" without every row
+    /// threading the mode through (#678 8b).
+    var overrideLayoutName: String {
+        get { self[OverrideLayoutNameKey.self] }
+        set { self[OverrideLayoutNameKey.self] = newValue }
     }
 }

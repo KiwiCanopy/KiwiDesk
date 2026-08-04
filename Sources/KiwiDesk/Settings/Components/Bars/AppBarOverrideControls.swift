@@ -8,16 +8,24 @@ import SwiftUI
 /// the point of construction (`@MainActor`, matching every
 /// other GUI-only lookup) rather than as call-site literals.
 
-/// An override row, "visible but inherited" (#68 §3.4): the
-/// leading checkbox is on when this scope overrides the field;
-/// off inherits the global value, with the control disabled
-/// and dimmed but still readable. Checking the box seeds the
-/// override with the current global value. Explicitly
-/// overridden rows carry a left accent bar and a subtle tint
-/// so active overrides form a scannable boundary instead of a
-/// checkerboard of enabled inputs.
+/// An override row, "visible but inherited" (#68 §3.4, #678 8b
+/// layout): a row overrides its field or inherits the layout's
+/// default, chosen by the **INHERIT** checkbox in the trailing
+/// column (checked = inheriting). An overriding row shows its live
+/// control, a left accent bar and a subtle tint, so active
+/// overrides form a scannable boundary. An inheriting row collapses
+/// its control to a quiet "follows <Layout> defaults · <value>"
+/// readout — the value stays visible without the control's weight.
+/// The one exception is a row whose value has no one-line form (the
+/// slot-size pair): it passes `inherited: nil` and keeps the live
+/// control, disabled and dimmed, as before.
 struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
+    /// The collapse target when this row inherits: its label and
+    /// the inherited value's one-line form ("50%", "Horizontal").
+    /// `nil` keeps the live control visible-but-disabled instead —
+    /// the slot-size pair, whose value spans two controls (#290).
+    var inherited: (label: String, value: String)? = nil
     /// Vertical alignment of the checkbox against its wrapped
     /// content. `.center` for a single-row override (the norm);
     /// `.top` when the content is a multi-row group (the slot-size
@@ -34,56 +42,24 @@ struct OverrideChrome<Content: View>: View {
     var subject: String? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed
+    @Environment(\.overrideLayoutName) private var layoutName
 
     var body: some View {
         HStack(
             alignment: alignment,
             spacing: SettingsMetrics.overrideRowInset
         ) {
-            Toggle("", isOn: isOn)
-                .labelsHidden()
-                .toggleStyle(.checkbox)
-                .help(
-                    isOn.wrappedValue
-                        ? L(
-                            "app_bar.override.on.help",
-                            "Overriding the global value"
-                        )
-                        : L(
-                            "app_bar.override.off.help",
-                            "Inheriting the global value"
-                        )
-                )
-            content
-                .disabled(!isOn.wrappedValue)
-                // Same single-dim rule as `GreyOut` (#520): an
-                // inheriting row inside a gated block would
-                // otherwise compound to 0.25.
-                .opacity(
-                    !isOn.wrappedValue && !alreadyDimmed
-                        ? 0.5 : 1
-                )
-                .environment(
-                    \.isInsideGreyOut,
-                    alreadyDimmed || !isOn.wrappedValue
-                )
-                // The narrowed column pays for the checkbox
-                // prefix, so the shared rows inside land on
-                // the same control axis as plain rows.
-                .environment(
-                    \.settingsLabelColumn,
-                    SettingsMetrics.overrideLabelColumn
-                )
-            if let help {
-                HelpButton(explanation: help, subject: subject)
-            }
+            leadingContent
+            Spacer(minLength: SettingsMetrics.overrideRowInset)
+            inheritToggle
         }
         // The inset keeps daylight between the 2 pt accent
-        // bar and the checkbox, so the bar reads as a boundary
+        // bar and the content, so the bar reads as a boundary
         // rather than part of the control. It is a shared
         // token: `overrideLabelColumn` derives from it.
         .padding(.leading, SettingsMetrics.overrideRowInset)
-        .padding(.vertical, 2)
+        .padding(.trailing, SettingsMetrics.overrideRowInset)
+        .padding(.vertical, 4)
         .background {
             if isOn.wrappedValue {
                 RoundedRectangle(cornerRadius: 4)
@@ -97,6 +73,107 @@ struct OverrideChrome<Content: View>: View {
                     .frame(width: 2)
             }
         }
+    }
+
+    /// The live control when overriding; when inheriting, either
+    /// the collapsed readout (the norm) or the dimmed control (the
+    /// slot-size pair, `inherited == nil`). The `?` rides alongside
+    /// in every branch, so it stays clickable and label-adjacent
+    /// while the user decides whether to override (#94).
+    @ViewBuilder private var leadingContent: some View {
+        if isOn.wrappedValue {
+            HStack(spacing: SettingsMetrics.overrideRowInset) {
+                liveControl
+                helpButton
+            }
+        } else if let inherited {
+            inheritedReadout(inherited)
+        } else {
+            HStack(spacing: SettingsMetrics.overrideRowInset) {
+                liveControl
+                    .disabled(true)
+                    // Same single-dim rule as `GreyOut` (#520): an
+                    // inheriting row inside a gated block would
+                    // otherwise compound to 0.25.
+                    .opacity(!alreadyDimmed ? 0.5 : 1)
+                    .environment(\.isInsideGreyOut, true)
+                helpButton
+            }
+        }
+    }
+
+    private var liveControl: some View {
+        content
+            // The narrowed column pays for the trailing INHERIT
+            // column, so the shared rows inside land on the same
+            // control axis as plain rows.
+            .environment(
+                \.settingsLabelColumn,
+                SettingsMetrics.overrideLabelColumn
+            )
+    }
+
+    @ViewBuilder private var helpButton: some View {
+        if let help {
+            HelpButton(explanation: help, subject: subject)
+        }
+    }
+
+    /// `<label>    follows <Layout> defaults · <value>` — the label
+    /// on the same axis a live control would use, then the `?` and
+    /// the quiet readout. Secondary throughout, so an inheriting
+    /// row reads as "not overriding" without an opacity that could
+    /// compound.
+    private func inheritedReadout(
+        _ inherited: (label: String, value: String)
+    ) -> some View {
+        HStack(spacing: SettingsMetrics.overrideRowInset) {
+            Text(inherited.label)
+                .lineLimit(1)
+                .frame(
+                    width: SettingsMetrics.overrideLabelColumn,
+                    alignment: .leading
+                )
+            helpButton
+            Text(
+                L(
+                    "space_override.inherits",
+                    "follows %1$@ defaults · %2$@",
+                    layoutName,
+                    inherited.value
+                )
+            )
+            .lineLimit(1)
+            .truncationMode(.tail)
+        }
+        .foregroundStyle(.secondary)
+    }
+
+    private var inheritToggle: some View {
+        Toggle(
+            "",
+            isOn: Binding(
+                get: { !isOn.wrappedValue },
+                set: { isOn.wrappedValue = !$0 }
+            )
+        )
+        .labelsHidden()
+        .toggleStyle(.checkbox)
+        .help(
+            isOn.wrappedValue
+                ? L(
+                    "app_bar.override.on.help",
+                    "Overriding the global value"
+                )
+                : L(
+                    "app_bar.override.off.help",
+                    "Inheriting the global value"
+                )
+        )
+        .frame(
+            width: SettingsMetrics.overrideInheritColumn,
+            alignment: .center
+        )
     }
 }
 
@@ -131,7 +208,15 @@ struct OverrideToggleRow: View {
     let global: Bool
 
     var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+        OverrideChrome(
+            isOn: overrideToggle($value, global: global),
+            inherited: (
+                label,
+                global
+                    ? L("common.on", "on")
+                    : L("common.off", "off")
+            )
+        ) {
             Toggle(
                 label,
                 isOn: overrideValue($value, global: global)
@@ -149,7 +234,10 @@ struct OverrideStepperRow: View {
     let range: ClosedRange<Int>
 
     var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+        OverrideChrome(
+            isOn: overrideToggle($value, global: global),
+            inherited: (label, "\(global)")
+        ) {
             StepperRow(
                 label: label,
                 value: overrideValue($value, global: global),
@@ -174,6 +262,10 @@ struct OverrideFractionRow: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
+            inherited: (
+                label,
+                "\(Int((global * 100).rounded()))%"
+            ),
             help: help,
             subject: label
         ) {
@@ -205,6 +297,10 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
+            inherited: (
+                label,
+                options.first { $0.0 == global }?.1 ?? ""
+            ),
             help: help,
             subject: label
         ) {

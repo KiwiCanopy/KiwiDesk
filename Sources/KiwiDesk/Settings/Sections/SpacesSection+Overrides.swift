@@ -98,7 +98,12 @@ extension SpacesSection {
         mode: LayoutMode,
         gates: SpacesGates
     ) -> some View {
-        HStack(alignment: .firstTextBaseline) {
+        let capacity = mode.overrideFieldCapacity
+        let set = model.config.settings.overrideFieldCount(
+            mode,
+            for: space
+        )
+        return HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text(
                 L(
                     "space_override.title",
@@ -109,6 +114,20 @@ extension SpacesSection {
             )
             .font(.title2)
             .fontWeight(.semibold)
+            // The active layout's set-vs-total fraction; Floating
+            // has no override fields (capacity 0) so it shows none.
+            if capacity > 0 {
+                Text(
+                    L(
+                        "space_override.fraction",
+                        "%1$d of %2$d set",
+                        set,
+                        capacity
+                    )
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
+            }
             Spacer()
             resetActiveButton(space, mode: mode, gates: gates)
         }

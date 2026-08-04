@@ -21,11 +21,13 @@ struct SpaceOverrideRows: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(caption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                captionRow
                 modeRows
             }
+            // The active layout's name, read by every `OverrideChrome`
+            // below to render "follows <Layout> defaults · <value>"
+            // on an inheriting row (#678 8b).
+            .environment(\.overrideLayoutName, mode.displayName)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .background(
@@ -34,6 +36,33 @@ struct SpaceOverrideRows: View {
             )
             footer
         }
+    }
+
+    /// The caption, and — for a tiling layout — the "INHERIT"
+    /// column header aligned over the rows' trailing checkboxes.
+    /// Floating has no override rows, so it gets no column header.
+    private var captionRow: some View {
+        HStack(
+            alignment: .firstTextBaseline,
+            spacing: SettingsMetrics.overrideRowInset
+        ) {
+            Text(caption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: SettingsMetrics.overrideRowInset)
+            if mode != .floating {
+                Text(L("space_override.inherit_column", "Inherit"))
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.tertiary)
+                    .frame(
+                        width: SettingsMetrics.overrideInheritColumn,
+                        alignment: .center
+                    )
+            }
+        }
+        .padding(.horizontal, SettingsMetrics.overrideRowInset)
     }
 
     /// Dynamic caption naming the active layout whose defaults an
