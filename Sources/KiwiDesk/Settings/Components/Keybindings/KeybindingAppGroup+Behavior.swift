@@ -43,6 +43,7 @@ extension ApplicationsGroup {
                 behaviorLabelView(behaviorLabel(current))
             }
             .menuStyle(.borderlessButton)
+            .neutralMenuLabel()
             .fixedSize()
             HelpButton(
                 explanation: behaviorHelp,

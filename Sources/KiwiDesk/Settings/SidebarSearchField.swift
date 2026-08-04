@@ -11,10 +11,12 @@ import SwiftUI
 /// precedent instead.
 struct SidebarSearchField: View {
     @Binding var text: String
-    /// Takes keyboard focus the moment it appears — the field
-    /// only ever mounts inside the just-opened search popover,
-    /// where an unfocused field would cost the ⌘K user a click.
-    let focusOnAppear: Bool
+    /// Focus, owned by the caller. The field mounts in the header
+    /// and lives as long as the window does, so it must NOT grab
+    /// focus on appear — but ⌘K has to be able to put focus here
+    /// from anywhere, and that shortcut belongs to the header. A
+    /// `FocusState` binding is how the two share one focus.
+    let focus: FocusState<Bool>.Binding
     /// Moves the highlighted result while focus stays in the
     /// field, System Settings-style. Without this the results
     /// were mouse-only: the `List` never takes focus while the
@@ -29,23 +31,29 @@ struct SidebarSearchField: View {
     /// `onMove` on purpose — arrowing navigates (cheap), Return
     /// commits to the scroll and flash.
     let onCommit: () -> Void
-    @FocusState private var focused: Bool
+    /// The ⌘K hint, shown only while the field is empty and
+    /// unfocused — once someone is typing it is noise, and it
+    /// would sit where the clear button belongs.
+    let shortcutHint: Bool
 
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink3)
             field
-            if !text.isEmpty { clearButton }
+            if !text.isEmpty {
+                clearButton
+            } else if shortcutHint, !focus.wrappedValue {
+                Text("⌘K")
+                    .font(.caption2)
+                    .foregroundStyle(SettingsTheme.ink3)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
+        .padding(.horizontal, ChipMetrics.padH)
+        .padding(.vertical, ChipMetrics.padV)
         .background(fieldShape)
         .inactiveDimmed()
-        .onAppear {
-            if focusOnAppear { focused = true }
-        }
     }
 
     private var field: some View {
@@ -59,7 +67,7 @@ struct SidebarSearchField: View {
         )
         .textFieldStyle(.plain)
         .font(.body)
-        .focused($focused)
+        .focused(focus)
         // Escape clears, matching `NSSearchField`.
         .onExitCommand { text = "" }
         // `onKeyPress`, not `onMoveCommand`: the latter has no
@@ -120,30 +128,33 @@ struct SidebarSearchField: View {
         )
     }
 
-    /// A full pill: `Capsule` derives its radius from the field's
-    /// height. Keyboard focus gets the restrained accent outline
-    /// of System Settings, not SwiftUI's oversized default halo.
+    /// The chip shape the header row's other tokens use, not the
+    /// `Capsule` this shipped as: the field sits between the back
+    /// chip and the profile chip, and a pill among rounded rects
+    /// reads as a different KIND of thing. Keyboard focus gets the
+    /// restrained accent outline of System Settings, not SwiftUI's
+    /// oversized default halo.
     private var fieldShape: some View {
-        Capsule()
-            .fill(Color.primary.opacity(0.06))
+        ChipMetrics.shape
+            .fill(SettingsTheme.sunken)
             .overlay {
-                Capsule()
+                ChipMetrics.shape
                     .strokeBorder(
-                        Color.accentColor.opacity(
-                            focused ? 0.38 : 0
+                        SettingsTheme.accent.opacity(
+                            focus.wrappedValue ? 0.55 : 0
                         ),
                         lineWidth: 3
                     )
             }
             .shadow(
-                color: Color.accentColor.opacity(
-                    focused ? 0.12 : 0
+                color: SettingsTheme.accent.opacity(
+                    focus.wrappedValue ? 0.12 : 0
                 ),
                 radius: 2
             )
             .animation(
                 .easeOut(duration: 0.12),
-                value: focused
+                value: focus.wrappedValue
             )
     }
 }

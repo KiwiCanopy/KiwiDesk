@@ -13,6 +13,7 @@ struct HomeCard: View {
     /// the old sidebar tile.
     let spotlighted: Bool
     let open: () -> Void
+    @State private var hovering = false
 
     var body: some View {
         Button(action: open) {
@@ -28,7 +29,7 @@ struct HomeCard: View {
                 }
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .frame(
@@ -40,9 +41,14 @@ struct HomeCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 148)
             .background(cardShape)
-            .contentShape(RoundedRectangle(cornerRadius: 10))
+            .contentShape(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+            )
         }
         .buttonStyle(.plain)
+        .onHover { hovering = $0 }
         .accessibilityLabel(destination.title)
         .accessibilityValue(axValue)
     }
@@ -69,6 +75,7 @@ struct HomeCard: View {
             )
             Text(destination.title)
                 .font(.headline)
+                .foregroundStyle(SettingsTheme.ink)
                 .lineLimit(1)
             Spacer(minLength: 4)
             if let shout {
@@ -82,18 +89,31 @@ struct HomeCard: View {
     private func shoutBadge(_ text: String) -> some View {
         Label(text, systemImage: "exclamationmark.triangle.fill")
             .font(.caption.weight(.semibold))
-            .foregroundStyle(.orange)
+            .foregroundStyle(SettingsTheme.warningInk)
             .lineLimit(1)
     }
 
+    /// Flat: fill plus a hairline, no shadow — the prototype's
+    /// cards separate by border, which is also what makes them
+    /// survive the dark appearance, where surfaces sit within ten
+    /// points of each other and a shadow reads as dirt.
+    ///
+    /// Hover swaps the hairline for the accent (owner ruled,
+    /// 2026-08-04). It is the border and only the border, so it
+    /// composes with — rather than competes against — the native
+    /// focus ring a keyboard user gets from the plain `Button`.
     private var cardShape: some View {
-        RoundedRectangle(cornerRadius: 10)
-            .fill(Color(nsColor: .controlBackgroundColor))
+        RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
+            .fill(SettingsTheme.card)
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(
-                        Color.primary.opacity(0.12)
-                    )
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+                .strokeBorder(
+                    hovering
+                        ? SettingsTheme.accent
+                        : SettingsTheme.hairline
+                )
             )
     }
 

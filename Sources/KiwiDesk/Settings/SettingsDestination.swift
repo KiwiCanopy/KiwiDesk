@@ -115,10 +115,14 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
-            // KiwiCanopy kiwi green #8DB354 as RGB floats (was
-            // forest #298747) — keep in sync with the brand green
-            // if it shifts; this literal isn't derived from it.
-            return Color(red: 0.553, green: 0.702, blue: 0.329)
+            // The brand green ITSELF, read from the theme — not a
+            // second copy of it. This shipped as RGB floats with
+            // a "keep in sync" comment, which is the shape that
+            // never gets kept in sync: the two would disagree the
+            // first time the accent moved, and nothing would say
+            // so. `SettingsTheme.accent` is pinned by
+            // `SettingsThemeTokenTests`.
+            return SettingsTheme.accent
         case .shortcuts:
             return Color(
                 red: 0.35,

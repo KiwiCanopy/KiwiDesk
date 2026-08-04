@@ -63,16 +63,6 @@ enum SettingsTheme {
         dark: 0x2C_33_2D
     )
 
-    /// The weaker rule *between rows inside* a container, where
-    /// `hairline` would cut the card into slabs. It is the
-    /// prototype's `rgba(18,37,26,.07)` row separator flattened
-    /// over `card`, which is what the 16b table did for the .12
-    /// border it does list.
-    static let hairlineSoft = token(
-        light: 0xEE_F0_EF,
-        dark: 0x26_2D_28
-    )
-
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.

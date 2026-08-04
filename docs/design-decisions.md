@@ -1169,6 +1169,74 @@ non-standard *controls*, which is the half that stays bound.
 (Owner ruling 2026-08-02, in chat; first applied in the Phase 2
 Bars area.)
 
+### The Settings window paints its own colours, and its accent is kiwi
+
+**[Principle]**
+
+**Every surface, border and ink in the Settings window comes from
+one token table (`SettingsTheme`), and the window tints its
+controls with KiwiDesk green rather than the user's system
+accent.** Two halves, one argument.
+
+*One table.* Before it, the header was a `.bar` vibrancy
+material, the cards `controlBackgroundColor`, the hairlines
+`Color.primary.opacity(0.12)` — three neighbouring greys from
+three unrelated systems, none of which moved when another did,
+and one of which (the vibrancy) took its colour from whatever
+window happened to sit behind KiwiDesk. That last is why the
+shipped shell read as the wrong colour: the app had not chosen
+it. A token also has a dark counterpart by construction, which an
+opacity wash over an unknown backdrop can never have — the paused
+banner's amber could not be given one at all while it was
+`.orange.opacity(0.12)`.
+
+*Kiwi accent.* A user who sets a pink system accent loses it
+inside this one window, and that is the price. What it buys is
+that the window looks like KiwiDesk rather than like a generic
+form, which is the same argument as the entry above: the IA and
+the look are ours. The accent is also the one token that does not
+change between light and dark, because brand recognisability is
+the thing it carries.
+
+What breaks if this is ignored: a second hex literal beside a
+view, which is invisible until the day the palette moves and one
+surface stays behind — and, for the accent, a window that is half
+kiwi (the chrome KiwiDesk draws) and half whatever the user set
+(the native controls), which reads as unfinished rather than as
+respectful. (Owner rulings 2026-08-04, in chat.)
+
+### The header search is a field, not a button that opens one
+
+**[Trade-off]**
+
+**The search entry in the header is the real text field, and its
+results hang below it as an overlay rather than in a popover.**
+
+It shipped the other way round: a field-shaped button that opened
+a popover containing the actual field and the results. That was
+defensible while the button was a small pill — a popover takes
+the key window for free, so focus and dismissal come from AppKit
+— and it became indefensible the moment the field grew to the
+full width the design calls for. A search field you click and
+cannot type into is a lie about what the control is, and the
+second field appearing on top of the first is the user's evidence
+for it.
+
+The trade-off is that a popover cannot be used for the results
+either: it would take the key window away from the header field
+on the first keystroke that produced a result, which is precisely
+why the field lived inside the popover before. So the results are
+a plain overlay, and the shell must lift the header's `zIndex`
+above the content below it or the list is drawn over. That lift
+looks like a cosmetic line and is load-bearing.
+
+What breaks if this is ignored: someone "simplifies" the overlay
+back into a popover and the field stops accepting the second
+keystroke — or removes the `zIndex` and the results become
+invisible while every test still passes, since nothing about
+paint order is observable from the view tree. (Owner report
+2026-08-04, in chat.)
+
 ### Hover help appears sooner than AppKit's default
 
 **[Trade-off]**

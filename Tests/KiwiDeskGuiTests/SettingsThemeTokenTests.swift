@@ -60,12 +60,6 @@ struct SettingsThemeTokenTests {
             0x2C_33_2D,
             SettingsTheme.hairline
         ),
-        Pin(
-            "hairlineSoft",
-            0xEE_F0_EF,
-            0x26_2D_28,
-            SettingsTheme.hairlineSoft
-        ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),
         Pin("ink2", 0x55_63_5C, 0xA8_B3_A9, SettingsTheme.ink2),
         Pin("ink3", 0x7C_8A_82, 0x86_91_84, SettingsTheme.ink3),

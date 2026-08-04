@@ -119,12 +119,17 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             group
                 .padding(12)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(
-                            Color(
-                                nsColor: .controlBackgroundColor
-                            )
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.sectionRadius
+                    )
+                    .fill(SettingsTheme.card)
+                    .overlay(
+                        RoundedRectangle(
+                            cornerRadius:
+                                SettingsTheme.sectionRadius
                         )
+                        .strokeBorder(SettingsTheme.hairline)
+                    )
                 )
                 .searchAnchorCard(control)
         }
@@ -132,7 +137,23 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
 
     private var group: some View {
         DisclosureGroup(isExpanded: expansion) {
+            // The Sunken interior: an expanded drawer's contents
+            // sit in a well one step inside the card, so what the
+            // disclosure REVEALS is legible as a nested thing
+            // rather than as more of the card it opened from.
             content()
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
+                .padding(10)
+                .background(
+                    RoundedRectangle(
+                        cornerRadius:
+                            SettingsTheme.disclosureRadius
+                    )
+                    .fill(SettingsTheme.sunken)
+                )
         } label: {
             // The wash goes on the label alone; flashing the
             // group would tint the expanded contents too — the

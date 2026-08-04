@@ -178,7 +178,7 @@ struct DisplayCard: View {
 
     private var plate: some View {
         RoundedRectangle(cornerRadius: 6)
-            .fill(Color(nsColor: .controlBackgroundColor))
+            .fill(SettingsTheme.card)
             .shadow(radius: 0.5, y: 0.5)
     }
 
@@ -198,7 +198,7 @@ struct DisplayCard: View {
                 isSelected || targeted
                     ? AnyShapeStyle(.tint)
                     : AnyShapeStyle(
-                        Color(nsColor: .separatorColor)
+                        SettingsTheme.hairline
                     ),
                 lineWidth: isSelected ? 2 : 1
             )

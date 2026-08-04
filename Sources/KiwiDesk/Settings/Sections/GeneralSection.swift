@@ -16,7 +16,11 @@ struct GeneralSection: View {
     /// an extension in another file cannot reach `private`.
     @State var confirmingReset = false
     /// Drives the light/dark wordmark swap (see `aboutBrand`).
-    @Environment(\.colorScheme) private var colorScheme
+    /// Internal, not private: the About block lives in
+    /// `GeneralSection+About`, and an extension in another file
+    /// cannot reach `private` — the same reason
+    /// `confirmingReset` above is internal.
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ScrollView {
@@ -150,72 +154,6 @@ struct GeneralSection: View {
         (localization.available + ["en"])
             .map { LocaleOption(code: $0) }
             .sorted { $0.nativeName < $1.nativeName }
-    }
-
-    /// About (#68 §3.9): the wordmark as the canonical logo +
-    /// name placement, version and the discreet support link
-    /// beneath. Falls back to the pre-logo glyph row when the
-    /// bundled resource is missing.
-    private var aboutSection: some View {
-        SettingsSection(SettingsCatalog.general.aboutCard) {
-            VStack(spacing: 10) {
-                aboutBrand
-                Text(KiwiDeskVersion.displayString)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-                Link(destination: SupportLinks.koFi) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart")
-                        Text(
-                            L(
-                                "general.about.support",
-                                "Support KiwiDesk"
-                            )
-                        )
-                        .underline()
-                    }
-                }
-                .buttonStyle(.plain)
-                .font(.callout)
-                .linkHover()
-            }
-            .frame(maxWidth: .infinity)
-        }
-    }
-
-    /// The wordmark is artwork, not text, so its ink is baked at
-    /// rasterization time rather than tinted at runtime: we ship
-    /// two masters — forest lettering for light, mist-green for
-    /// dark — and swap by `colorScheme`, so no backing card is
-    /// needed and the mark melts into the pane in both. The
-    /// **symbol** is identical in the two (#479); only the
-    /// lettering is themed, and `BrandMasterParityTests` pins
-    /// that.
-    @ViewBuilder private var aboutBrand: some View {
-        if let wordmark {
-            Image(nsImage: wordmark)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 130)
-        } else {
-            HStack(spacing: 12) {
-                Image(systemName: "rectangle.3.group")
-                    .font(.system(size: 30))
-                    .foregroundStyle(.secondary)
-                Text(L("general.about.app_name", "KiwiDesk"))
-                    .font(.headline)
-            }
-        }
-    }
-
-    /// The dark master falls back to the light one if it is
-    /// ever missing — a readable-but-imperfect degrade beats
-    /// showing nothing.
-    private var wordmark: NSImage? {
-        colorScheme == .dark
-            ? BrandAssets.wordmarkDark ?? BrandAssets.wordmark
-            : BrandAssets.wordmark
     }
 
     private var advancedSection: some View {

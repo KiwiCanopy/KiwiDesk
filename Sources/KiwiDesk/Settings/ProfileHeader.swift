@@ -54,6 +54,7 @@ struct ProfileEditTargetMenu: View {
             }
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .fixedSize()
     }
 

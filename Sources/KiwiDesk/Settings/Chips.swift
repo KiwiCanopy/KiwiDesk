@@ -46,6 +46,22 @@ struct BadgeChip: View {
     }
 }
 
+extension View {
+    /// The filled chip surface (#678 turn 16b): `sunken` fill on
+    /// `ChipMetrics.shape`, no border.
+    ///
+    /// Owned here beside the other chip primitives rather than in
+    /// the header, because it is what a chip IS — the header is
+    /// one consumer. Filled rather than stroked so it reads as a
+    /// token: the unsaved chip is the stroked shape, and a reader
+    /// must be able to tell the two apart at a glance.
+    func chipSurface() -> some View {
+        padding(.horizontal, ChipMetrics.padH)
+            .padding(.vertical, ChipMetrics.padV)
+            .background(ChipMetrics.shape.fill(SettingsTheme.sunken))
+    }
+}
+
 /// Geometry every chip list shares.
 ///
 /// Owned HERE, at the shared widget, not in one area's component:
@@ -56,6 +72,24 @@ struct BadgeChip: View {
 /// (architect review, 2026-08-04).
 enum ChipMetrics {
     static let spacing: CGFloat = 6
+
+    /// A rounded rect, never a `Capsule` like the two chips
+    /// above. The prototype draws these as square-ish tokens, and
+    /// a capsule beside the Simple|Power User segmented control
+    /// reads as a second control rather than as a label.
+    static var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: SettingsTheme.chipRadius)
+    }
+
+    /// The padding inside a header chip — and inside the search
+    /// field, which is a chip that happens to take text. ONE pair
+    /// for both, because they sit in the same row and a chip a few
+    /// points shorter than the field beside it reads as
+    /// misaligned rather than as smaller. Sized up from 10/4 when
+    /// the chips read as cramped against the taller bar (owner,
+    /// 2026-08-04).
+    static let padH: CGFloat = 12
+    static let padV: CGFloat = 7
 }
 
 /// A simple left-to-right flowing row of chips that wraps to the

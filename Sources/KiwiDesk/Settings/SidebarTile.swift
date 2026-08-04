@@ -23,7 +23,7 @@ struct SidebarTile: View {
             .overlay(alignment: .topTrailing) {
                 if badged {
                     Circle()
-                        .fill(Color.accentColor)
+                        .fill(SettingsTheme.accent)
                         .frame(width: 7, height: 7)
                         .offset(x: 2, y: -2)
                 }

@@ -35,6 +35,13 @@ struct SettingsView: View {
         // survive whatever slot the layout gives it. The old
         // 840 paid for the floating sidebar card, which is gone.
         .frame(minWidth: 720, minHeight: 540)
+        // The window's accent, set ONCE at the root (owner ruled
+        // full kiwi over the system accent, 2026-08-04): every
+        // toggle, segment and prominent Save below inherits it,
+        // so a control cannot opt out by forgetting to. Above the
+        // `editingLua` branch for the same reason the discard
+        // dialog is — both arms must carry it.
+        .tint(SettingsTheme.accent)
         // The one discard dialog (#515). Hosted HERE, above the
         // `editingLua` branch, not inside `chrome` — `chrome` is
         // instantiated in both arms, and two of the gated actions
@@ -161,6 +168,13 @@ struct SettingsView: View {
     ) -> some View {
         VStack(spacing: 0) {
             SettingsHeaderBar(model: model)
+                // The header's search results hang BELOW the bar
+                // as an overlay (see `HeaderSearch`), and a
+                // `VStack` paints its children in order, so
+                // without this lift the content below draws over
+                // the list. Not cosmetic — it is what makes the
+                // results visible at all.
+                .zIndex(1)
             // Paused-permission banner outranks the per-section
             // Lua banner: it renders in the shared chrome (every
             // section *and* the raw Lua editor), because missing
@@ -183,9 +197,18 @@ struct SettingsView: View {
                 ClickAwayResignsFocus()
                 content()
             }
-            Divider()
+            // The footer's overline. A token rule rather than a
+            // `Divider()`: the shell's three horizontal rules
+            // (header underline, this, the card borders) are one
+            // colour in the prototype, and `Divider` renders a
+            // system separator that tracks neither.
+            SettingsTheme.hairline.frame(height: 1)
             SettingsFooter(model: model)
         }
+        // The page, behind everything. Opaque and flat — the
+        // prototype carries no vibrancy, and the header's `.bar`
+        // material was what read as a third grey.
+        .background(SettingsTheme.page)
         // Pull the detail up under the (empty) unified toolbar
         // so the header bar sits flush at the top — no empty
         // toolbar strip above it — while the sidebar keeps the
@@ -208,7 +231,7 @@ struct SettingsView: View {
             // in its subtree that holds the id, so ten per-section
             // wrappers would buy nothing and drift.
             ScrollViewReader { proxy in
-                detail
+                detail(selection)
                     // The panes' top gutter, spent here rather
                     // than as padding inside each one: a content
                     // margin moves what "top of the viewport"
@@ -313,36 +336,4 @@ struct SettingsView: View {
         }
     }
 
-    @ViewBuilder private var detail: some View {
-        switch selection {
-        // nil is Home, which mounts instead of this pane —
-        // unreachable here, but the switch must be total.
-        case nil:
-            EmptyView()
-        case .spaces:
-            SpacesSection(model: model)
-        case .layoutDefaults:
-            LayoutDefaultsSection(model: model)
-        case .monitors:
-            MonitorsSection(model: model)
-        case .colors:
-            ColorsMotionSection(model: model)
-        case .advancedColors:
-            AdvancedColorsSection(model: model)
-        case .gapsAndBorders:
-            GapsAndBordersSection(model: model)
-        case .bars:
-            BarsSection(model: model)
-        case .behavior:
-            BehaviorSection(model: model)
-        case .profiles:
-            ProfilesSection(model: model)
-        case .shortcuts:
-            ShortcutsSection(model: model)
-        case .appRules:
-            AppRulesSection(model: model)
-        case .general:
-            GeneralSection(model: model)
-        }
-    }
 }

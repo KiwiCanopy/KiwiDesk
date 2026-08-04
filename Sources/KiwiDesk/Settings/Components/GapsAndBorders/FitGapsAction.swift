@@ -91,7 +91,7 @@ struct FitGapsAction: View {
                     ),
                     systemImage: "exclamationmark.triangle.fill"
                 )
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
             }
         }
     }

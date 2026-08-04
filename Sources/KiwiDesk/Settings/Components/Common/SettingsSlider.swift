@@ -33,7 +33,7 @@ struct SettingsSlider: View {
     /// translucent white knob, which read as a blue knob.
     private var fill: AnyShapeStyle {
         isEnabled
-            ? AnyShapeStyle(Color.accentColor.gradient)
+            ? AnyShapeStyle(SettingsTheme.accent.gradient)
             : AnyShapeStyle(Color.primary.opacity(0.18))
     }
 
@@ -110,12 +110,16 @@ struct SettingsSlider: View {
         )
     }
 
-    /// The native white thumb, on every macOS. A clear Liquid
-    /// Glass knob was tried and dropped: it refracted the
-    /// accent fill sliding beneath it, tinting the knob blue.
+    /// The thumb riding the accent-filled track — so it is
+    /// `onAccentKnob`, the one token in the 16b table that flips
+    /// between appearances: white on light, and dark on the dark
+    /// appearance, where a white knob glares against the chrome
+    /// around it. A clear Liquid Glass knob was tried and
+    /// dropped: it refracted the accent fill sliding beneath it,
+    /// tinting the knob blue.
     private var knob: some View {
         Capsule()
-            .fill(.white)
+            .fill(SettingsTheme.onAccentKnob)
             .overlay(
                 Capsule().strokeBorder(
                     Color.black.opacity(0.1),

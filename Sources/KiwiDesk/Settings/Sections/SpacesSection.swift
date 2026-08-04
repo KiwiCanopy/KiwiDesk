@@ -204,12 +204,12 @@ struct SpacesSection: View {
         // grabbable tiles, not table lines.
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(.quaternary.opacity(0.35))
+                .fill(SettingsTheme.sunken)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(
-                    Color(nsColor: .separatorColor)
+                    SettingsTheme.hairline
                 )
         )
         .contextMenu { contextActions(space) }

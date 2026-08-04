@@ -169,7 +169,7 @@ enum HomeCardPreview {
                     RoundedRectangle(cornerRadius: 3)
                         .strokeBorder(
                             drawn.display.id == mainID
-                                ? Color.accentColor
+                                ? SettingsTheme.accent
                                 : Color.secondary.opacity(0.6),
                             lineWidth: 1.5
                         )

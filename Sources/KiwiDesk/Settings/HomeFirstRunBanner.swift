@@ -44,7 +44,7 @@ struct HomeFirstRunBanner: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Image(systemName: "checkmark.seal")
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(SettingsTheme.accent)
                 .font(.title3)
             VStack(alignment: .leading, spacing: 2) {
                 Text(
@@ -54,9 +54,10 @@ struct HomeFirstRunBanner: View {
                     )
                 )
                 .font(.headline)
+                .foregroundStyle(SettingsTheme.ink)
                 Text(lede)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             Spacer()
             Button(
@@ -80,15 +81,23 @@ struct HomeFirstRunBanner: View {
             )
         }
         .padding(12)
+        // Card chrome on the card radius — the same box a Home
+        // card is, so the banner reads as belonging to the grid
+        // it sits above rather than as a fourth surface. The
+        // accent border is what marks it as the welcome beat;
+        // it deliberately never takes the paused bar's amber
+        // (failure outranks welcome).
         .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(nsColor: .controlBackgroundColor))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(
-                            Color.accentColor.opacity(0.4)
-                        )
+            RoundedRectangle(
+                cornerRadius: SettingsTheme.cardRadius
+            )
+            .fill(SettingsTheme.card)
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
                 )
+                .strokeBorder(SettingsTheme.accent)
+            )
         )
     }
 

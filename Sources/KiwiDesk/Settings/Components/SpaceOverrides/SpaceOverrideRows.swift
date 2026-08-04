@@ -38,7 +38,7 @@ struct SpaceOverrideRows: View {
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(.quaternary.opacity(0.35))
+                    .fill(SettingsTheme.sunken)
             )
             footer
         }

@@ -96,11 +96,11 @@ struct GapsDiagram: View {
 
     private var windowRect: some View {
         RoundedRectangle(cornerRadius: 3)
-            .fill(Color.accentColor.opacity(0.25))
+            .fill(SettingsTheme.accent.opacity(0.25))
             .overlay(
                 RoundedRectangle(cornerRadius: 3)
                     .strokeBorder(
-                        Color.accentColor.opacity(0.6)
+                        SettingsTheme.accent.opacity(0.6)
                     )
             )
     }
