@@ -4,15 +4,12 @@ import SwiftUI
 
 /// This Profile ▸ Spaces (#68 §3.2/§3.3): the profile's space
 /// list — rename, reorder (drag or context menu), pick a layout
-/// mode (with its glyph), designate the fallback space, and
-/// tune per-space overrides in a Customize popover (#205).
+/// mode (with its glyph), designate the fallback space, and open
+/// a space's per-space overrides in the pushed editor (#678 8b,
+/// `SpacesSection+Overrides.swift`).
 struct SpacesSection: View {
     @ObservedObject var model: SettingsModel
     @State private var newSpace = ""
-    /// The one row whose "Customize" popover is open, if any.
-    /// A single slot (not a set) makes the popover its own
-    /// accordion — opening one row closes any other (#205).
-    @State var customizing: SpaceID?
     /// A space awaiting delete confirmation — set only for a
     /// space that `carriesOverrides`, so a plain empty space
     /// still deletes in one click (#205).
@@ -55,6 +52,53 @@ struct SpacesSection: View {
     @Environment(\.controlActiveState) var activeState
 
     var body: some View {
+        Group {
+            if let space = editingSpace {
+                overridesEditor(space)
+            } else {
+                spaceList
+            }
+        }
+        // The reset-all dialog is armed from inside the pushed
+        // editor's footer, so it lives on the container present in
+        // both branches — the same reason it sat above the popover
+        // before (#290): the dialog must outlive the surface that
+        // requested it.
+        .confirmationDialog(
+            deleteConfirmTitle,
+            isPresented: deleteConfirmPresented,
+            presenting: pendingDelete
+        ) { space in
+            deleteConfirmActions(space)
+        } message: { _ in
+            Text(deleteConfirmMessage)
+        }
+        .confirmationDialog(
+            resetAllConfirmTitle,
+            isPresented: resetAllConfirmPresented,
+            presenting: pendingResetAll
+        ) { space in
+            resetAllConfirmActions(space)
+        } message: { _ in
+            Text(resetAllConfirmMessage)
+        }
+    }
+
+    /// The pushed per-space override editor when a row's cell has
+    /// focused a still-present space, else the list. A deleted
+    /// space (focus left dangling) falls back to the list rather
+    /// than an empty editor — the architect's stale-surface
+    /// downgrade, done at the render read since the nav field is a
+    /// plain `SpaceID?`.
+    private var editingSpace: SpaceID? {
+        guard
+            let space = model.nav.spaceOverridesFocus,
+            model.config.spaces.contains(space)
+        else { return nil }
+        return space
+    }
+
+    private var spaceList: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 spacesSection
@@ -76,24 +120,6 @@ struct SpacesSection: View {
                 commitDragOrder()
                 dragged = nil
             }
-        }
-        .confirmationDialog(
-            deleteConfirmTitle,
-            isPresented: deleteConfirmPresented,
-            presenting: pendingDelete
-        ) { space in
-            deleteConfirmActions(space)
-        } message: { _ in
-            Text(deleteConfirmMessage)
-        }
-        .confirmationDialog(
-            resetAllConfirmTitle,
-            isPresented: resetAllConfirmPresented,
-            presenting: pendingResetAll
-        ) { space in
-            resetAllConfirmActions(space)
-        } message: { _ in
-            Text(resetAllConfirmMessage)
         }
     }
 
@@ -217,47 +243,10 @@ struct SpacesSection: View {
     // `modePicker` and its binding live in
     // `SpacesSection+ModePicker.swift` (#123 file-size split).
 
-    // `customizeButton` (the popover anchor), the delete
-    // confirmation, and the empty-state live in
-    // `SpacesSection+Customize.swift` (#205 file-size split).
-
-    /// Keyboard-reachable equivalents of the drag/badge
-    /// affordances (the §3.13 accessibility pattern).
-    @ViewBuilder
-    private func contextActions(_ space: SpaceID) -> some View {
-        if model.config.fallbackSpace == space {
-            Button(
-                L("spaces.context.clear_fallback", "Clear Fallback")
-            ) {
-                model.config.fallbackSpace = nil
-            }
-        } else {
-            Button(
-                L("spaces.context.make_fallback", "Make Fallback")
-            ) {
-                model.config.fallbackSpace = space
-            }
-        }
-        Divider()
-        Button(L("spaces.context.move_up", "Move Up")) {
-            nudge(space, by: -1)
-        }
-        .disabled(index(of: space) == 0)
-        Button(L("spaces.context.move_down", "Move Down")) {
-            nudge(space, by: 1)
-        }
-        .disabled(
-            index(of: space)
-                == model.config.spaces.count - 1
-        )
-        Divider()
-        Button(
-            L("spaces.context.delete", "Delete"),
-            role: .destructive
-        ) {
-            requestRemove(space)
-        }
-    }
+    // `customizeButton` (the override cell that pushes the
+    // editor), the delete confirmation, and the empty-state live
+    // in `SpacesSection+Customize.swift` (#205 file-size split);
+    // the pushed editor itself in `SpacesSection+Overrides.swift`.
 
     private var addRow: some View {
         HStack {
@@ -299,20 +288,9 @@ struct SpacesSection: View {
     /// the next profile load (#68 review).
     func removeSpace(_ space: SpaceID) {
         model.config.removeSpace(space)
-        if customizing == space { customizing = nil }
-    }
-
-    private func index(of space: SpaceID) -> Int {
-        model.config.spaces.firstIndex(of: space) ?? 0
-    }
-
-    private func nudge(_ space: SpaceID, by delta: Int) {
-        let from = index(of: space)
-        let to = from + delta
-        guard model.config.spaces.indices.contains(to) else {
-            return
+        if model.nav.spaceOverridesFocus == space {
+            model.nav.spaceOverridesFocus = nil
         }
-        model.config.spaces.swapAt(from, to)
     }
 
     /// The space's optional recognition icon (#68 §6.5):

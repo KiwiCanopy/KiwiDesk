@@ -73,14 +73,31 @@ struct SettingsNavigation {
     /// user's later pick, and a reveal, both write it.
     var layoutModeTab: LayoutMode?
 
+    /// The space whose per-space override editor is pushed over
+    /// the Spaces list, or nil for the list itself (#678 8b). On
+    /// the model, not the section's `@State`, for the same #277
+    /// reason `layoutModeTab` is: a selection that outside code
+    /// (a reset, an edit-target switch) must be able to clear.
+    /// The editor is a view-state branch, not a `SettingsSurface`
+    /// — the override controls are per-space and uncataloged, so
+    /// there is nothing for search or the #326 bridge to reveal;
+    /// add a `.spaceOverrides(SpaceID)` surface only if a
+    /// deep-link INTO a specific space's editor is later wanted.
+    var spaceOverridesFocus: SpaceID?
+
     /// Forgets the surface selection, so it re-derives its
     /// default. For window open, which re-asserts `destination`
     /// for the same reason, and for an **edit-target switch**,
     /// where a different profile means a different most-used
     /// mode. Moving this off view-local `@State` (#277) silently
     /// promoted a per-visit landing to a process-lifetime one.
+    ///
+    /// Also drops the pushed override editor back to the list, so
+    /// opening the window (or switching edit target) never lands
+    /// on a stale per-space editor.
     mutating func resetSurfaces() {
         layoutModeTab = nil
+        spaceOverridesFocus = nil
     }
 
     /// Starts a flash on `anchor`, bumping the token so that
