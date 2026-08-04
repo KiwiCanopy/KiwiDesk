@@ -1,9 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One space's resolved placement, split out of
-/// `MonitorCards.swift` (which keeps the two drop-target cards)
-/// to stay under the file-size ceiling.
+/// One space's resolved placement: which display it lands on and
+/// whether a person or a default put it there.
 struct SpaceAssignment: Identifiable, Hashable {
     enum Kind: Hashable {
         case pinned
@@ -146,7 +145,8 @@ struct SpaceAssignmentChip: View {
             )
         )
         .foregroundStyle(
-            kind == .auto ? AnyShapeStyle(.secondary)
+            kind == .auto
+                ? AnyShapeStyle(.secondary)
                 : AnyShapeStyle(.primary)
         )
     }

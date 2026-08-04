@@ -3766,16 +3766,70 @@ safeguard.
 
 **[Rationale]**
 
-**One representation: monitor cards.** The old tab rendered
-the same space→monitor mapping three ways (proportional
-canvas, drag palette, resolution list). Equal-sized cards in
-physical x-order hold the space chips that resolve to them;
-a dashed "Follows main display" card holds the Main-role
-spaces. Chips carry semantic micro-icons (pin/link) rather
-than border styles alone (accessibility), ⓧ clears to
-automatic, and the context menu is the keyboard/VoiceOver
-fallback. macOS's Displays pane owns true spatial layout —
-identity + order is enough here. (#68 §3.13)
+**One representation, and it is the arrangement itself.** The old
+tab rendered the same space→monitor mapping three ways
+(proportional canvas, drag palette, resolution list); the first
+consolidation drew one row of equal-sized cards in physical
+x-order and ruled that "macOS's Displays pane owns true spatial
+layout — identity + order is enough here". That ruling is
+retired, by its own logic: those cards are **drop targets**. Once
+the user has to aim at a rectangle, they must map it to a monitor
+on their desk by eye, and identity-plus-order cannot do that —
+three same-named cards in a row say nothing about which one is
+the portrait panel on the left. So the cards are the real
+arrangement, drawn from the live frames. (#68 §3.13, #678 turn
+13b)
+
+**Drawn from POINTS — not pixels, and not physical millimetres.**
+Position is the reason, not fidelity: a display's global position
+only exists in point space, so sizing from EDID millimetres while
+positioning from points would tear the picture into gaps and
+overlaps that exist in neither space, and macOS publishes no
+physical arrangement to re-derive it from. `CGDisplayScreenSize`
+is EDID and unreliable besides — zeros for virtual, AirPlay and
+projector displays, wrong values on real panels — and a 0×0
+monitor drawn silently is worse than a slightly wrong proportion.
+Points already track physical size in practice, because people
+scale a display to a comfortable UI size at their viewing
+distance, and System Settings ▸ Displays ▸ Arrangement draws in
+points too, which is the surface users compare this one against.
+Pixels are the one option ruled out outright: a Retina display
+drawn twice the size of an identical non-Retina one is a picture
+of the framebuffer, not of the desk.
+
+**A drop target has a minimum size that a truthful picture does
+not — so the scale is clamped, and the clamp is stated.** Two
+clamps: the scale has a floor, so the smallest display is never
+drawn too small to hold one space chip (past that the picture
+scrolls rather than shrinking further), and the largest:smallest
+drawn ratio is capped, so one ultrawide cannot reduce everything
+beside it to slivers. The cap shrinks the outlier around its own
+centre, which can only open a gap and never move a rectangle onto
+its neighbour. A clamp that engages silently reads as a wrong
+arrangement rather than an approximate one, so the page says so —
+but only once the difference is visible, since a MacBook beside a
+4K trips the cap by under two percent and a caption pinned to the
+commonest two-display desk in the world teaches people to ignore
+captions.
+
+**What the picture cannot say, it says in words.** Two facts have
+no rectangle: which space is *up* on a display right now
+(selecting one answers it), and the fact that two identical
+monitors are a single identity to KiwiDesk — `name:WxH` is what a
+pin is stored against, so a pinned space may open on either. The
+list this page replaced hid that second one; a picture cannot,
+and an unexplained duplicate reads as a bug in the drawing rather
+than a limit of the identity.
+
+**Chips: pinned, follows-main, automatic.** Semantic micro-icons
+(pin, arrow) rather than border styles alone (accessibility), and
+automatic is drawn as an outline rather than a dimmed capsule —
+dimming is this app's inert vocabulary, and an automatic chip is
+the one most worth dragging. The chip is a menu control, not a
+decorated label: the context menu is the keyboard and VoiceOver
+route for every move, and a plain stack with a drag gesture on it
+cannot be focused, so the fallback existed only for people using
+a mouse.
 
 ### App rules
 

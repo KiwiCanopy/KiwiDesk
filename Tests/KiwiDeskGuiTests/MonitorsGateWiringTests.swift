@@ -1,0 +1,181 @@
+import Foundation
+import Testing
+
+@testable import KiwiDesk
+
+/// The Monitors views are wired to their seams (#678 Phase 3,
+/// turn 13b).
+///
+/// General shipped a round-1 cut whose resolver was built only in
+/// tests while the views re-derived each predicate inline; the
+/// census gate and the screen could then drift with every gate
+/// test still green. Profiles then shipped the same shape one
+/// level over — a family seam with no call sites, so its guards
+/// asserted over a structure the screen never touched.
+///
+/// SCOPE: by explicit path, one entry per GATE and per SEAM
+/// rather than per file, because a file-level "touches the
+/// resolver somewhere" check passes while one of several gates
+/// goes hand-rolled.
+@Suite("Monitors gate and seam wiring")
+struct MonitorsGateWiringTests {
+    private var settingsDir: URL {
+        SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+    }
+
+    private func read(_ path: String) throws -> String {
+        try String(
+            contentsOf: settingsDir.appendingPathComponent(path),
+            encoding: .utf8
+        )
+    }
+
+    /// Whitespace-free source, so a needle survives the formatter
+    /// wrapping a call across lines.
+    private func squashed(_ path: String) throws -> String {
+        SourceScan.stripComments(try read(path))
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+    }
+
+    @Test("each gate is wired to the resolver, not a copy")
+    func rowsConsultTheResolver() throws {
+        let consults: [String: [String]] = [
+            "Sections/MonitorsSection.swift": [
+                "inertReason(for:.monitors(.placementUnavailable))",
+                "inertReason(for:.monitors(.spacePins))",
+                "inertReason(for:.monitors(.mainSpaces))",
+            ],
+            "Sections/MonitorsSection+Details.swift": [
+                "inertReason(for:.monitors(.orphanPinClear))"
+            ],
+        ]
+        for (name, needles) in consults {
+            let source = try squashed(name)
+            for needle in needles {
+                #expect(
+                    source.contains(needle),
+                    Comment(
+                        rawValue:
+                            "\(name) no longer wires `\(needle)` "
+                            + "to the gate resolver — that gate "
+                            + "went hand-rolled"
+                    )
+                )
+            }
+        }
+    }
+
+    /// The bespoke containers derive their instances from
+    /// `MonitorsFamilyRows`, not from re-derivations of their
+    /// own — otherwise the census guards assert over lists the
+    /// screen never sees.
+    ///
+    /// Stated limit: this pins that each view CALLS the seam, not
+    /// that it renders what it gets back.
+    @Test("the views consult the family seam")
+    func viewsConsultTheFamilySeam() throws {
+        let consults: [String: [String]] = [
+            "Components/Monitors/DisplayCard.swift": [
+                "rows.chips(on:display.fingerprint)"
+            ],
+            "Components/Monitors/FollowsMainTray.swift": [
+                "rows.trayChips"
+            ],
+            "Sections/MonitorsSection+Details.swift": [
+                "rows.orphans",
+                "rows.orderedDisplays",
+            ],
+            "Sections/MonitorsSection.swift": [
+                "model.monitorRows"
+            ],
+        ]
+        for (name, needles) in consults {
+            let source = try squashed(name)
+            for needle in needles {
+                #expect(
+                    source.contains(needle),
+                    Comment(
+                        rawValue:
+                            "\(name) no longer derives its rows "
+                            + "from `\(needle)` — that container "
+                            + "re-derives its instances inline, "
+                            + "and the census guards over the "
+                            + "seam stop watching the screen"
+                    )
+                )
+            }
+        }
+    }
+
+    /// The picture asks `MonitorArrangement` for its geometry and
+    /// computes none of its own.
+    ///
+    /// This is the #702 rule one surface over: a drawing that
+    /// re-derives what a shared function owns is right the day it
+    /// is written and drifts the day the rule moves. Here the
+    /// shared function is also the only thing the geometry guards
+    /// can see — a card positioned by arithmetic inline in the
+    /// view would pass every assertion in
+    /// `MonitorArrangementTests` while drawing something else.
+    @Test("the picture asks the arrangement for its geometry")
+    func pictureAsksTheArrangement() throws {
+        let name = "Components/Monitors/MonitorsPicture.swift"
+        let source = try squashed(name)
+        #expect(source.contains("MonitorArrangement.layout("))
+        for forbidden in ["frame.minX", "frame.width", "NSScreen"] {
+            #expect(
+                !source.contains(forbidden),
+                Comment(
+                    rawValue:
+                        "\(name) reads display geometry itself "
+                        + "(`\(forbidden)`) instead of drawing "
+                        + "the arrangement it was given"
+                )
+            )
+        }
+    }
+
+    /// The card's chip capacity comes from the shared arithmetic,
+    /// so a card can never resolve "more chips than fit" by
+    /// clipping them — which would take the clear button and the
+    /// drag handle with them.
+    @Test("the card counts its overflow rather than clipping")
+    func cardCountsOverflow() throws {
+        let name = "Components/Monitors/DisplayCard.swift"
+        let source = try squashed(name)
+        #expect(source.contains("MonitorCardChips.split("))
+    }
+
+    /// One sentence, one author: the card's tooltip and the line
+    /// under the picture are the same claim about the same
+    /// display, and two copies is how a tooltip comes to disagree
+    /// with the caption beside it.
+    @Test("the readout sentence is authored once")
+    func readoutIsAuthoredOnce() throws {
+        let author =
+            "Components/Monitors/MonitorReadout.swift"
+        let help = try read(author)
+        for key in [
+            "monitors.selection.one",
+            "monitors.selection.many",
+            "monitors.selection.showing",
+        ] {
+            #expect(help.contains(key))
+            for name in [
+                "Sections/MonitorsSection.swift",
+                "Components/Monitors/DisplayCard.swift",
+            ] {
+                #expect(
+                    !(try read(name)).contains(key),
+                    Comment(
+                        rawValue:
+                            "\(name) re-authors \(key) — it must "
+                            + "come from MonitorReadout"
+                    )
+                )
+            }
+        }
+    }
+}

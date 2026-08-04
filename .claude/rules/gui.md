@@ -131,10 +131,11 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts and Profiles render from it now** (#678 Phases 2-3): each
+Layouts, Profiles and Monitors render from it now** (#678 Phases
+2-3): each
 carries its own order list and a census-render suite pinning that
-order to the census (`ProfilesRowOrder` /
-`ProfilesCensusRenderTests` is the newest pair), so a row in a
+order to the census (`MonitorsRowOrder` /
+`MonitorsCensusRenderTests` is the newest pair), so a row in a
 `ForEach`-rendered container moves by editing the census — with
 the bespoke edge below. This bold list is itself a hand-kept
 claim with no guard,
@@ -152,19 +153,26 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders, Spaces & Layouts and Profiles push that
+General, Gaps & Borders, Spaces & Layouts, Profiles and Monitors
+push that
 edge wider: EVERY container in them is bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
 `SpacesRowOrder.bespokeContainers` /
-`ProfilesRowOrder.bespokeContainers`, each the whole set,
+`ProfilesRowOrder.bespokeContainers` /
+`MonitorsRowOrder.bespokeContainers`, each the whole set,
 asserted by `bespokeMeansNoForEach` in each area's render suite),
 so their order lists are membership-and-search only and editing
 one moves nothing on screen. In Profiles the reason is
 structural rather than incidental: every container there expands
 one key into a row per live instance, which is what an order-list
 `ForEach` cannot express at all — the paragraph below owns that
-seam.
+seam. Monitors is the far end of the same argument and worth
+knowing before you look for a list to reorder: its placement
+container is a PICTURE, positioned by the real display
+arrangement (`MonitorArrangement`), so its rows have no reading
+order to state — a card's place on screen is where that monitor
+is on the desk.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -176,7 +184,13 @@ draws*. Profiles has the same pair (`ProfilesFamilyRows`), and
 there the expansion is per live INSTANCE in every container it
 draws — a row per saved profile, per Desktop, per preset, held by
 `instanceCounts` in `ProfilesCensusRenderTests` because set
-equality over `SettingKey` cannot see a collapse to one row. An
+equality over `SettingKey` cannot see a collapse to one row.
+Monitors has the pair too (`MonitorsFamilyRows`), and adds the
+case where several families must be read TOGETHER: its three chip
+families partition the declared spaces — carded, following main,
+or waiting on an absent monitor — so each one's own count can be
+right while a space falls through all three, and
+`everySpaceLandsExactlyOnce` is the only thing that sees it. An
 area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer
