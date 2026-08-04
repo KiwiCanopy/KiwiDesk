@@ -104,18 +104,32 @@ struct SettingsDraftDiff {
             // (auto/value pairs) share a base and must resolve
             // to ONE key, or the count double-books a change.
             if bases[base] == nil { bases[base] = key }
+            // A dictionary setting also owns its container's
+            // own leaves — the walk's `.count` sentinel and any
+            // sibling the bracket form cannot prefix-match.
+            if let bracket = base.range(of: "[]") {
+                let container = String(
+                    base[..<bracket.lowerBound]
+                )
+                if bases[container] == nil {
+                    bases[container] = key
+                }
+            }
         }
         return bases
     }
 
     /// Longest-prefix match: a leaf inside a struct-valued
-    /// setting (`settings.gap.override[].top`) belongs to the
-    /// setting whose base owns the longest prefix of it.
+    /// setting (`settings.gapsOverride[].outer.top`) belongs to
+    /// the setting whose base owns the longest prefix of it.
+    /// The walk keys dictionary entries as `[]<key>`; the
+    /// census declares the instance slot bare, so the entry
+    /// text is dropped before matching.
     private static func resolve(
         _ path: String,
         in bases: [String: SettingKey]
     ) -> SettingKey? {
-        var probe = path
+        var probe = normalized(path)
         while true {
             if let key = bases[probe] { return key }
             guard
@@ -125,6 +139,27 @@ struct SettingsDraftDiff {
             else { return nil }
             probe = String(probe[..<cut])
         }
+    }
+
+    /// `settings.gapsOverride[]1.outer.top` →
+    /// `settings.gapsOverride[].outer.top`.
+    private static func normalized(_ path: String) -> String {
+        var result = ""
+        var rest = Substring(path)
+        while let open = rest.range(of: "[]") {
+            result += rest[..<open.upperBound]
+            rest = rest[open.upperBound...]
+            // Drop the entry key: everything up to the next
+            // path separator.
+            if let next = rest.firstIndex(where: {
+                $0 == "." || $0 == "["
+            }) {
+                rest = rest[next...]
+            } else {
+                rest = ""
+            }
+        }
+        return result + rest
     }
 
     // MARK: - The walk

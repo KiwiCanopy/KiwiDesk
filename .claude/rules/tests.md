@@ -318,13 +318,10 @@ pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.start()` with faked
 seams (`publishDisplays`; the suites set
 `registersWorkspaceObservers = false`, so no live workspace
-observer outlives the test), and the host's own text metric —
-`NSFont.systemFont` measured through `NSString.size`, by
-`SidebarLabelWidthTests`. That last one is the only host read
-that can red the suite by itself, which is why its calibration
-sits in `measurementIsLive` on a band narrower than the labels'
-own margin: a metric that moves must red as a metric, not as a
-label that needs shortening. The service tests only parse
+observer outlives the test). (The host text-metric read —
+`NSFont.systemFont` via `NSString.size` in the retired sidebar
+label-width suite — went away with the sidebar's fixed label
+column, #678 turn 9.) The service tests only parse
 `launchctl` strings; nothing spawns it. **Unit tests never need
 the running app**; its run state is irrelevant to them.
 

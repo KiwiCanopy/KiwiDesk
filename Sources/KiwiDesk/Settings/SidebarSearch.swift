@@ -46,7 +46,7 @@ enum SidebarSearch {
     /// One row per destination is the settled cap (ui-designer
     /// 2026-07-27): a query like "color" hits many controls, and
     /// enumerating each would build a forty-row wall in the
-    /// sidebar's narrow fixed column (`sidebarColumn`) for
+    /// narrow result list for
     /// information the click cannot act on anyway. The
     /// honest trade-off is that a destination with several
     /// matches surfaces only its first, and a user who wanted

@@ -99,57 +99,13 @@ enum SettingsMetrics {
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 
-    /// The Settings sidebar's fixed, non-resizable column
-    /// (#297) — `SettingsSidebar` frames itself to it, and
-    /// `sidebarLabelColumn` rides it, so narrowing the column
-    /// tightens the label budget in the same move. The card's
-    /// own `.padding(8)` sits OUTSIDE this frame, so it costs
-    /// the window width, never the column's text room.
-    static let sidebarColumn: CGFloat = 190
-
-    /// `SidebarTile`, the icon square in front of every sidebar
-    /// row. Consumed by the row, so widening the tile shrinks
-    /// `sidebarLabelColumn` rather than silently eating into a
-    /// budget that stayed put.
+    /// `SidebarTile`, the destination icon square — since #678
+    /// turn 9 it fronts the search result rows and the Home
+    /// cards rather than a sidebar list (the fixed column and
+    /// its label budget retired with the sidebar; card titles
+    /// flex and wrap instead, the redesign's own rule for row
+    /// labels).
     static let sidebarTile: CGFloat = 22
-
-    /// The RESIDUAL, stated as one because that is what it is.
-    /// The load-bearing quantity is `sidebarLabelColumn` — the
-    /// empirical truncation threshold #95/#297 arrived at by
-    /// measuring the shipped corpus against the rendered
-    /// column, not a figure derived from parts. This is what is
-    /// left of `sidebarColumn` once that threshold and the tile
-    /// are accounted for, and it stands in for the `.sidebar`
-    /// list style's row insets and the `Label` icon/title gap,
-    /// which AppKit owns and no constant can pin.
-    ///
-    /// **Never re-tuned to hold a total.** Narrowing
-    /// `sidebarColumn` must be allowed to carry
-    /// `sidebarLabelColumn` down with it — restoring the old
-    /// budget by shrinking this number is the repair
-    /// `SidebarLabelWidthTests` exists to prevent, dressed as
-    /// arithmetic.
-    ///
-    /// Deliberately NOT decomposed further. An earlier version
-    /// summed a card padding into it, which is wrong twice over
-    /// — `.padding(8)` is applied outside the frame, so it never
-    /// costs the column any text room — and the correction would
-    /// have had to invent a second figure for the insets to keep
-    /// the total. One residual with an honest provenance beats
-    /// two components where one is fabricated.
-    static let sidebarRowChrome: CGFloat = 48
-
-    /// The text room a sidebar destination label actually gets.
-    /// A label measuring past it truncates — `lineLimit(1)`
-    /// makes that visible rather than a quiet wrap — and the
-    /// fix is a SHORTER LABEL, never a wider column, because
-    /// the column is a fixed app-wide axis and System Settings'
-    /// own does not grow per language.
-    ///
-    /// `SidebarLabelWidthTests` enforces that against every
-    /// shipped locale, deriving its budget from here.
-    static let sidebarLabelColumn: CGFloat =
-        sidebarColumn - (sidebarTile + sidebarRowChrome)
 
     /// The label column for the Drag & drop editor's two
     /// half-width columns (#231). Narrower than the shared 150,

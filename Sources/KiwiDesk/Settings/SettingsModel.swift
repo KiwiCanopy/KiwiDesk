@@ -133,25 +133,11 @@ final class SettingsModel: ObservableObject {
             : 0
     }
 
-    /// Persists the Simple/Nerd pick and repairs the selection:
-    /// a Nerd-only area the flip just removed pops to Home (the
-    /// area ceased to exist — mode gates whole cards, so this is
-    /// the settled "which cards exist" rule, not a grey-don't-
-    /// hide case).
-    func setSettingsMode(_ mode: SettingsMode) {
-        SettingsModePreference.write(mode)
-        settingsMode = mode
-        if let current = destination,
-            !HomeCardOrder.isOffered(
-                current,
-                mode: mode,
-                displayCount: displays.count,
-                editingStoredProfile: editingStoredProfile
-            )
-        {
-            destination = nil
-        }
-    }
+    /// Where the mode pick persists — a seam so tests write a
+    /// scratch domain instead of the developer's real defaults
+    /// (tests.md: process-global state). The setter lives in
+    /// `SettingsModel+Mode.swift` (§2.1 headroom).
+    var settingsModeDefaults: UserDefaults = .standard
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
