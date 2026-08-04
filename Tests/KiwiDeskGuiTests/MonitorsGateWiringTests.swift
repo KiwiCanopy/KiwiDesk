@@ -149,8 +149,17 @@ struct MonitorsGateWiringTests {
                 // behind it: `cardCountsOverflow` stayed green
                 // with the marker deleted and the chips clipped
                 // again.
+                //
+                // Keyed on the CALL with its arguments. A bare
+                // `overflowChip(` is a substring of the helper's
+                // own `private func overflowChip(` declaration,
+                // so it watched "the function still exists" while
+                // the call site was replaced by an `EmptyView()`
+                // — green on the whole suite (guard-prover round
+                // 2, 2026-08-04). Same defect as the family-seam
+                // needle two entries down, and the same fix.
                 "split.overflow>0",
-                "overflowChip(",
+                "overflowChip(assignments,split.overflow)",
             ],
             "Components/Monitors/MonitorsPicture.swift": [
                 // `.mainSpaces`' census gate reaching the tray.
