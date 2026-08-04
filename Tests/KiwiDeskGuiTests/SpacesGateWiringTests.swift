@@ -13,32 +13,31 @@ import Testing
 /// could then drift with every gate test still green. This is the
 /// wiring half — the behaviour half is `SpacesGateTests`.
 ///
-/// SCOPE: this scans `Settings/Components/SpaceOverrides/` because
-/// every gated row `SpacesGates` answers renders there today — all
-/// six sit in the `.perSpaceOverrides` container. The area's other
-/// container, `.spaceList` (drawn by `Settings/Sections/
-/// SpacesSection*`), carries NO gated row, so it has nothing to
-/// consult and is deliberately unscanned. A future gated
-/// `.spaceList` row would be forced into `SpacesGates.resolved` by
-/// `everyGatedRowIsResolved`, yet nothing here would force
-/// `SpacesSection` to consult the resolver — the dead-resolver
-/// trap, reopened in the uncovered container. Such a row owes both
-/// its resolver consult AND a `consults` entry naming the
-/// `SpacesSection*` file that draws it (widen `dir`/`read` to reach
-/// it), in the same change.
+/// SCOPE: this scans by explicit path under `Settings/`, since the
+/// gated rows `SpacesGates` answers now render in TWO places — five
+/// in the `.perSpaceOverrides` rows (`Components/SpaceOverrides/`)
+/// and the active-layout reset in the pushed editor's header
+/// (`Sections/SpacesSection+Overrides.swift`, #678 8b, which moved
+/// the reset out of the footer). The `.spaceList` container drawn
+/// by the other `SpacesSection*` files carries NO gated row, so it
+/// stays unscanned. A future gated `.spaceList` row would be forced
+/// into `SpacesGates.resolved` by `everyGatedRowIsResolved`, yet
+/// nothing here would force its view to consult the resolver — the
+/// dead-resolver trap. Such a row owes both its resolver consult
+/// AND a `consults` entry naming the file that draws it (add its
+/// path below), in the same change.
 @Suite("Spaces & Layouts gate wiring")
 struct SpacesGateWiringTests {
-    private var dir: URL {
+    private var settingsDir: URL {
         SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/"
-                    + "SpaceOverrides"
-            )
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    private func read(_ name: String) throws -> String {
+    /// `path` is relative to `Settings/`, so the map below can name
+    /// files in either `Components/SpaceOverrides/` or `Sections/`.
+    private func read(_ path: String) throws -> String {
         try String(
-            contentsOf: dir.appendingPathComponent(name),
+            contentsOf: settingsDir.appendingPathComponent(path),
             encoding: .utf8
         )
     }
@@ -58,16 +57,19 @@ struct SpacesGateWiringTests {
                 .split(whereSeparator: \.isWhitespace)
                 .joined()
         }
+        let overrides = "Components/SpaceOverrides/"
         let consults: [String: [String]] = [
-            "SpaceOverrideRows+Footer.swift": [
+            // The active-layout reset now lives in the pushed
+            // editor's header (#678 8b), not the footer.
+            "Sections/SpacesSection+Overrides.swift": [
                 "gates.inertReason("
                     + "for:.spaces(.spaceOverrideResetActive))"
             ],
-            "SpaceOverrideRows+StackRows.swift": [
+            overrides + "SpaceOverrideRows+StackRows.swift": [
                 "gates.inertReason("
                     + "for:.layout(.stackOverrideMasterOrientation))"
             ],
-            "SpaceOverrideRows+ModeRows.swift": [
+            overrides + "SpaceOverrideRows+ModeRows.swift": [
                 "gates.inertReason("
                     + "for:.layout(.gridOverrideFillEmptySpace))",
                 "gates.inertReason("
@@ -103,11 +105,11 @@ struct SpacesGateWiringTests {
         // Every gate sentence is authored ONCE, in the help enum; a
         // row that re-authors one is the duplication that let
         // General describe one status two ways.
-        let help = try read("SpacesGates.swift")
+        let help = try read(overrides + "SpacesGates.swift")
         let nonAuthors =
             Array(consults.keys) + [
-                "SpaceOverrideRows.swift",
-                "OverrideSlotSizeRow.swift",
+                overrides + "SpaceOverrideRows.swift",
+                overrides + "OverrideSlotSizeRow.swift",
             ]
         for key in [
             "space_override.reset_active.none",

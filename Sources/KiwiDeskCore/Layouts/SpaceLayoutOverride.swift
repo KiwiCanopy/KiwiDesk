@@ -39,6 +39,15 @@ extension SpaceLayoutOverride {
         }
         return count
     }
+
+    /// How many fields this override COULD set — every optional
+    /// mirror of a global param, set or not. The `N of M set`
+    /// denominator the per-space editor's header shows (#678 8b),
+    /// discovered by the same reflection net as `fieldCount` so a
+    /// new field lifts both together and neither drifts.
+    public var fieldCapacity: Int {
+        Mirror(reflecting: self).children.count
+    }
 }
 
 extension ScrollingOverride: SpaceLayoutOverride {}
@@ -47,3 +56,22 @@ extension StackOverride: SpaceLayoutOverride {}
 extension GridOverride: SpaceLayoutOverride {}
 extension MonocleOverride: SpaceLayoutOverride {}
 extension TrackOverride: SpaceLayoutOverride {}
+
+extension LayoutMode {
+    /// How many per-space override fields this layout exposes — the
+    /// `M` in the editor's `N of M set` (#678 8b). Reads the empty
+    /// override's `fieldCapacity`, so it tracks the struct by
+    /// reflection; Floating has no override, hence none. The switch
+    /// is exhaustive, so a new layout must name its override here.
+    public var overrideFieldCapacity: Int {
+        switch self {
+        case .scrolling: return ScrollingOverride().fieldCapacity
+        case .bsp: return BspOverride().fieldCapacity
+        case .stack: return StackOverride().fieldCapacity
+        case .grid: return GridOverride().fieldCapacity
+        case .monocle: return MonocleOverride().fieldCapacity
+        case .track: return TrackOverride().fieldCapacity
+        case .floating: return 0
+        }
+    }
+}

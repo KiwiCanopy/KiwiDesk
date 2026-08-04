@@ -273,4 +273,30 @@ extension TilingSettings {
             appBarStyle: appBarStyle
         )
     }
+
+    /// The whole settings as `space` sees them under `mode`: the
+    /// active layout's params overlaid with that space's overrides,
+    /// every other layout left global (they are not drawn). The
+    /// per-space override editor's live preview feeds this to the
+    /// SAME schematic the Layout Defaults preview draws, so the
+    /// preview asks the engine rather than re-deriving a resolution
+    /// rule beside the drawing (gui.md). Floating has no schematic,
+    /// so it is returned untouched.
+    public func resolved(
+        for space: SpaceID,
+        activeMode mode: LayoutMode
+    ) -> TilingSettings {
+        var resolved = self
+        switch mode {
+        case .bsp: resolved.bsp = resolvedBsp(for: space)
+        case .stack: resolved.stack = resolvedStack(for: space)
+        case .scrolling:
+            resolved.scrolling = resolvedScrolling(for: space)
+        case .grid: resolved.grid = resolvedGrid(for: space)
+        case .monocle: resolved.monocle = resolvedMonocle(for: space)
+        case .track: resolved.track = resolvedTrack(for: space)
+        case .floating: break
+        }
+        return resolved
+    }
 }

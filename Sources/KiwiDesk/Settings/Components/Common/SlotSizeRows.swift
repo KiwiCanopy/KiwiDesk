@@ -29,10 +29,11 @@ struct SlotSizeRows: View {
 
     /// How the unit picker renders. `.segmented` on the full-width
     /// Layout Defaults surface, where it lines up with the
-    /// orientation/anchor segmented pickers; `.menu` in the narrow
-    /// per-Space override popover, matching that surface's other
+    /// orientation/anchor segmented pickers; `.menu` in the
+    /// per-space override editor, matching that surface's other
     /// (dropdown) override rows — the #291 compact-surface
-    /// exception, where segments would be cramped.
+    /// exception, where its bounded rows column would cramp
+    /// segments.
     var unitStyle: UnitStyle = .segmented
 
     enum UnitStyle { case segmented, menu }

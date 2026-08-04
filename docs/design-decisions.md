@@ -2494,8 +2494,8 @@ the App Bar editor's grey. (#678 Phase 2, supersedes the
 GUI half of #68 §3.4's scope; owner sign-off 2026-08-02)
 
 **A per-space override is eligible only when it is
-layout-local.** A field belongs in the Spaces → `Overrides…`
-tier when three things hold: it belongs to the space's
+layout-local.** A field belongs in the Spaces → `Customize…`
+override tier when three things hold: it belongs to the space's
 **active layout**, it **resolves before** the pure layout
 calculation (so the resolved value can feed layout math over
 the flat array), and it has an **unambiguous layout default
@@ -2513,10 +2513,32 @@ for exactly that reason. Two boundary notes: **Monocle** has a
 single eligible override, focus **orientation** (which
 directional keys cycle the window order and which axis the App
 Bar follows); **Wrap focus** is a layout-wide Monocle/Scrolling
-behavior, deliberately *not* per-space. The `Overrides…`
-button's count and the *Saved for other layouts (N)* disclosure
-read one reflective `fieldCount` over these six models, so a
-new override field is counted without a hand-kept tally. (#290)
+behavior, deliberately *not* per-space. The override cell's
+count and the *saved for other layouts* breakdown read one
+reflective `fieldCount` over these six models, so a new override
+field is counted without a hand-kept tally. (#290)
+
+**A Floating space still shows its parked overrides as a muted
+"N saved", never hidden.** A space's override cell reports the
+total overrides it carries across every layout. A Floating space
+has none for its *active* mode, but it may still hold overrides
+saved for OTHER layouts — parked, and live again the instant the
+space switches to a tiling mode. Hiding that count (or disabling
+the cell to a dead "—") on a Floating space recreates the
+**haunted tiler** (#458): a space silently carrying tiling
+configuration the user cannot see, which reactivates on
+switch-back so the layout appears to "change by itself". So a
+Floating space with parked values shows a muted **N saved** cell
+that still opens the editor, keeping them reachable; only a
+Floating space with nothing parked is genuinely inert and
+disables. This extends *Overrides are visible-but-inherited* and
+*grey, don't hide* (AGENTS.md §2.7) from the override rows to the
+space-list cell that summarises them — the count is the scannable
+signal, and dropping it is the one way the data goes invisible.
+What breaks without it: a user floats a tuned space, sees the
+cell blank, assumes the overrides are gone, and is ambushed when
+they return on the next tiling switch. (`OverrideCellState`,
+owner ruling 2026-08-04; #678 8a)
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge

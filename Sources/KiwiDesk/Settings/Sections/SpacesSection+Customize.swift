@@ -1,14 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-row Customize popover, the destructive-delete
-/// confirmation, and their mutations — split from
-/// `SpacesSection.swift` to stay under the line ceiling (#205).
-/// Moving the override editor into a popover decouples its
-/// height from the pane scroll: the space list stays short and
-/// scannable, and the floating surface is its own card, instead
-/// of an inline block pushing every row below it down.
-/// The widest Overrides-button label currently on screen, so every
+/// The per-row override cell, the row context menu, the
+/// destructive-delete confirmation, and their mutations — split
+/// from `SpacesSection.swift` to stay under the line ceiling
+/// (#205). The cell summarises the space's saved overrides and
+/// pushes the full-pane editor (`SpacesSection+Overrides.swift`);
+/// its four-state wording is resolved purely by
+/// `OverrideCellState`.
+/// The widest override-cell label currently on screen, so every
 /// row's button locks to one shared column width instead of each
 /// hugging its own (variable-count / variable-locale) label —
 /// mirrors `SpaceRowFrames` in `SpacesSection+Drag.swift`.
@@ -38,38 +38,34 @@ extension SpacesSection {
         )
     }
 
-    /// The Customize button anchors a bounded popover holding
-    /// the space's override rows. `customizing` is a single slot,
-    /// so only one popover is ever open (the accordion the issue
-    /// asked for falls out for free).
+    /// The per-row override cell: a bordered button whose label
+    /// summarises the space's saved overrides and whose tap pushes
+    /// the full-pane editor (#678 8b, replacing the #205 popover).
+    ///
+    /// The label is the SUM across every layout
+    /// (`overrideFieldCount(for:)`), the scannable "how much custom
+    /// config does this space carry" signal; the editor breaks it
+    /// into active-layout rows and a dormant drawer. Wording turns
+    /// on the space's mode (owner ruling 2026-08-04):
+    /// - tiled, N>0 → "N custom"; N==0 → "Customize…";
+    /// - Floating, N>0 → a muted "N saved" (the values apply to
+    ///   OTHER layouts, not this one) that still opens the editor
+    ///   so they stay reachable — "grey, don't hide", §2.7;
+    /// - Floating, N==0 → "—", disabled: genuinely no destination.
     func customizeButton(_ space: SpaceID) -> some View {
         let count = model.config.settings.overrideFieldCount(
             for: space
         )
-        // Floating carries no active-layout overrides (#290): the
-        // button stays visible but disabled, its count still
-        // reporting any dormant values so they aren't hidden — the
-        // user reaches them by switching the space to a real
-        // layout ("grey, don't hide", §2.7).
         let isFloating =
             (model.config.spaceModes[space] ?? .bsp) == .floating
+        let state = OverrideCellState.resolve(
+            count: count,
+            isFloating: isFloating
+        )
         return Button {
-            customizing = (customizing == space) ? nil : space
+            model.nav.spaceOverridesFocus = space
         } label: {
-            // Count in the label, not a colored badge: a
-            // parenthetical numeral is the native descriptive
-            // form and is perceivable without color (#290). The
-            // ellipsis and the count are mutually exclusive — the
-            // numeral already signals there is something to open.
-            Text(
-                count > 0
-                    ? L(
-                        "spaces.overrides.count",
-                        "Overrides (%1$d)",
-                        count
-                    )
-                    : L("spaces.overrides.none", "Overrides…")
-            )
+            overrideCellLabel(state)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
@@ -95,18 +91,8 @@ extension SpacesSection {
                 ? overridesButtonWidth : nil,
             alignment: .center
         )
-        .disabled(isFloating)
-        .help(
-            isFloating
-                ? L(
-                    "spaces.overrides.floating.help",
-                    "Floating has no layout overrides."
-                )
-                : L(
-                    "spaces.customize.help",
-                    "Layout overrides for this space"
-                )
-        )
+        .disabled(state.isInert)
+        .help(overrideCellHelp(state))
         .accessibilityLabel(
             L(
                 "spaces.overrides.a11y",
@@ -115,41 +101,46 @@ extension SpacesSection {
                 count
             )
         )
-        .popover(
-            isPresented: Binding(
-                get: { customizing == space },
-                set: { if !$0 { customizing = nil } }
-            ),
-            arrowEdge: .bottom
-        ) {
-            overridePopover(space)
+    }
+
+    /// The cell's text, muted on the Floating-dormant case so it
+    /// reads as "saved, not live" rather than an active count.
+    @ViewBuilder
+    private func overrideCellLabel(
+        _ state: OverrideCellState
+    ) -> some View {
+        switch state {
+        case .inert:
+            Text(verbatim: "—")
+        case .saved(let count):
+            Text(L("spaces.overrides.saved", "%1$d saved", count))
+                .foregroundStyle(.secondary)
+        case .customize:
+            Text(L("spaces.overrides.customize", "Customize…"))
+        case .custom(let count):
+            Text(L("spaces.overrides.custom", "%1$d custom", count))
         }
     }
 
-    /// The override editor floats at a fixed width with its own
-    /// scroll, so even the tallest mode's field set can't grow
-    /// the pane — it scrolls inside the popover instead.
-    private func overridePopover(_ space: SpaceID) -> some View {
-        ScrollView {
-            SpaceOverrideRows(
-                model: model,
-                space: space,
-                pendingResetAll: $pendingResetAll
+    private func overrideCellHelp(_ state: OverrideCellState) -> String {
+        switch state {
+        case .inert:
+            return L(
+                "spaces.overrides.floating.help",
+                "Floating has no layout overrides."
             )
-            .padding(14)
+        case .saved:
+            return L(
+                "spaces.overrides.saved.help",
+                "Saved for other layouts — switch this space "
+                    + "to a tiling layout to use them."
+            )
+        case .customize, .custom:
+            return L(
+                "spaces.customize.help",
+                "Layout overrides for this space"
+            )
         }
-        // 392, not 360: pays back the 22 pt the label column
-        // grew (#94 label-adjacent help) PLUS the 8 pt
-        // `readoutColumn` grew to hold "Automatic" (R6/#406),
-        // so the sliders inside keep their drag travel instead
-        // of absorbing the loss on the app's narrowest editing
-        // surface. The second debt is owed in full and then
-        // some: this popover's only readout consumer
-        // (`OverrideSlotSizeRow`) renders its auto state as a
-        // capsule chip on a separate branch, so it can never
-        // print the word it just paid for.
-        .frame(width: 392)
-        .frame(maxHeight: 380)
     }
 
     // MARK: - Destructive delete
@@ -250,5 +241,61 @@ extension SpacesSection {
             L("spaces.delete_confirm.cancel", "Cancel"),
             role: .cancel
         ) {}
+    }
+
+    // MARK: - Row context menu
+
+    /// Keyboard-reachable equivalents of the drag/badge
+    /// affordances (the §3.13 accessibility pattern). Here beside
+    /// the delete confirmation it invokes, and the reorder helpers
+    /// it is the only caller of, to keep `SpacesSection.swift`
+    /// under the line ceiling.
+    @ViewBuilder
+    func contextActions(_ space: SpaceID) -> some View {
+        if model.config.fallbackSpace == space {
+            Button(
+                L("spaces.context.clear_fallback", "Clear Fallback")
+            ) {
+                model.config.fallbackSpace = nil
+            }
+        } else {
+            Button(
+                L("spaces.context.make_fallback", "Make Fallback")
+            ) {
+                model.config.fallbackSpace = space
+            }
+        }
+        Divider()
+        Button(L("spaces.context.move_up", "Move Up")) {
+            nudge(space, by: -1)
+        }
+        .disabled(index(of: space) == 0)
+        Button(L("spaces.context.move_down", "Move Down")) {
+            nudge(space, by: 1)
+        }
+        .disabled(
+            index(of: space)
+                == model.config.spaces.count - 1
+        )
+        Divider()
+        Button(
+            L("spaces.context.delete", "Delete"),
+            role: .destructive
+        ) {
+            requestRemove(space)
+        }
+    }
+
+    private func index(of space: SpaceID) -> Int {
+        model.config.spaces.firstIndex(of: space) ?? 0
+    }
+
+    private func nudge(_ space: SpaceID, by delta: Int) {
+        let from = index(of: space)
+        let to = from + delta
+        guard model.config.spaces.indices.contains(to) else {
+            return
+        }
+        model.config.spaces.swapAt(from, to)
     }
 }

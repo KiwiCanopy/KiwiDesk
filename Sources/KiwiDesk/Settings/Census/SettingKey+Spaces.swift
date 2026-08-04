@@ -20,8 +20,8 @@ extension SpacesKey {
         case .fallbackSpace:
             return .row(.spacesAndLayouts, .spaceList, .showMore)
         case .spaceOverrideResetActive:
-            // Dead while the space has nothing to reset
-            // (SpaceOverrideRows+Footer).
+            // Dead while the space has nothing to reset. Drawn in
+            // the editor header (SpacesSection+Overrides), #678 8b.
             return .row(
                 .spacesAndLayouts,
                 .perSpaceOverrides,

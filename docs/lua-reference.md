@@ -992,9 +992,9 @@ scroll.set_wrap_focus(true)
   `scroll.set_slot_size`).
 
 **Does:** overrides the global slot size for one space. Editable
-in the GUI from the space's **Overrides…** popover (check the
-slot-size box to override; leave it unchecked to inherit the
-Layout Defaults value).
+in the GUI from the space's **Customize…** override editor (check
+the slot-size **Override** box to customize it; leave it unchecked
+to inherit the Layout Defaults value).
 
 **Example:**
 

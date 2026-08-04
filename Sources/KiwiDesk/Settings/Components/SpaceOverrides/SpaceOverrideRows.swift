@@ -3,10 +3,12 @@ import SwiftUI
 
 /// The per-space layout override rows (issue #17): the fields
 /// the space's current mode can override, each inheriting the
-/// global value (gray) until its checkbox is ticked. Rendered
-/// in a space row's "Customize" popover (#68 §3.2, moved out of
-/// the inline expander in #205) — the row set mirrors the
-/// app-bar override controls, keyed by space instead of layout.
+/// global value (gray) until its checkbox is ticked. Rendered in
+/// the pushed per-space override editor (#678 8b,
+/// `SpacesSection+Overrides.swift`; an inline expander in #68
+/// §3.2, then a Customize popover in #205 before the pane) — the
+/// row set mirrors the app-bar override controls, keyed by space
+/// instead of layout.
 struct SpaceOverrideRows: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -17,27 +19,54 @@ struct SpaceOverrideRows: View {
     @Binding var pendingResetAll: SpaceID?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-            Text(caption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            modeRows
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Floating has no override rows, only the placeholder
+                // below, so it carries no caption or column header —
+                // an "inherit Floating defaults" caption over "has no
+                // overrides" contradicts itself.
+                if mode != .floating {
+                    captionRow
+                }
+                modeRows
+            }
+            // The active layout's name, read by every `OverrideChrome`
+            // below to render "follows <Layout> defaults · <value>"
+            // on an inheriting row (#678 8b).
+            .environment(\.overrideLayoutName, mode.displayName)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.quaternary.opacity(0.35))
+            )
             footer
         }
     }
 
-    /// `<Space> — <Layout> overrides` (#290): names the space and
-    /// the layout being edited so the popover isn't a context-free
-    /// row set.
-    private var title: String {
-        L(
-            "space_override.title",
-            "%1$@ — %2$@ overrides",
-            space.raw,
-            mode.displayName
-        )
+    /// The caption and the "OVERRIDE" column header aligned over
+    /// the rows' trailing checkboxes. Only drawn for a tiling
+    /// layout (the caller gates Floating out).
+    private var captionRow: some View {
+        HStack(
+            alignment: .firstTextBaseline,
+            spacing: SettingsMetrics.overrideRowInset
+        ) {
+            Text(caption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: SettingsMetrics.overrideRowInset)
+            Text(L("space_override.override_column", "Override"))
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .textCase(.uppercase)
+                .foregroundStyle(.tertiary)
+                .frame(
+                    width: SettingsMetrics.overrideStateColumn,
+                    alignment: .center
+                )
+        }
+        .padding(.horizontal, SettingsMetrics.overrideRowInset)
     }
 
     /// Dynamic caption naming the active layout whose defaults an

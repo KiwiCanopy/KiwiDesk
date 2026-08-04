@@ -98,4 +98,66 @@ struct SpaceOverrideFieldCountTests {
         grid.autoSize = true
         #expect(grid.fieldCount == 3)
     }
+
+    /// `fieldCapacity` (#678 8b, the `N of M set` denominator) is
+    /// set-independent: a full override's capacity equals its field
+    /// count, and an empty override's capacity equals the full
+    /// one's — so `M` never moves as the user sets fields.
+    @Test("fieldCapacity is the total field count, set or not")
+    func capacityIsTotalFields() {
+        for (name, full) in Self.fullFixtures() {
+            let declared = fieldNames(full).count
+            #expect(
+                full.fieldCapacity == declared,
+                Comment(
+                    rawValue:
+                        "\(name): capacity \(full.fieldCapacity), "
+                        + "declared \(declared)"
+                )
+            )
+            // A full override sets every field, so capacity ==
+            // count there; the empty twin must report the SAME
+            // capacity though its count is zero.
+            let empty = type(of: full).init()
+            #expect(
+                empty.fieldCapacity == full.fieldCapacity,
+                Comment(
+                    rawValue:
+                        "\(name): empty capacity drifted from full"
+                )
+            )
+        }
+    }
+
+    /// `LayoutMode.overrideFieldCapacity` reads the layout's own
+    /// override struct, and Floating — which has no override —
+    /// reports zero, which is what suppresses the header fraction.
+    @Test("LayoutMode capacity matches its override struct")
+    func modeCapacityMatchesStruct() {
+        #expect(
+            LayoutMode.bsp.overrideFieldCapacity
+                == BspOverride().fieldCapacity
+        )
+        #expect(
+            LayoutMode.stack.overrideFieldCapacity
+                == StackOverride().fieldCapacity
+        )
+        #expect(
+            LayoutMode.scrolling.overrideFieldCapacity
+                == ScrollingOverride().fieldCapacity
+        )
+        #expect(
+            LayoutMode.grid.overrideFieldCapacity
+                == GridOverride().fieldCapacity
+        )
+        #expect(
+            LayoutMode.monocle.overrideFieldCapacity
+                == MonocleOverride().fieldCapacity
+        )
+        #expect(
+            LayoutMode.track.overrideFieldCapacity
+                == TrackOverride().fieldCapacity
+        )
+        #expect(LayoutMode.floating.overrideFieldCapacity == 0)
+    }
 }
