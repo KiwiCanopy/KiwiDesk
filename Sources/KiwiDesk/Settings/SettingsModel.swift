@@ -145,6 +145,26 @@ final class SettingsModel: ObservableObject {
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
+    /// macOS's "Displays have separate Spaces" is on with more
+    /// than one display attached (#678 turn 13a) — the condition
+    /// that makes a Desktop binding ambiguous.
+    ///
+    /// Snapshotted, not read per render: it is a
+    /// `CFPreferences` lookup, and two surfaces ask for it (the
+    /// bindings card's gate and the preset gate's context). One
+    /// read per refresh also means the two cannot answer
+    /// differently within a pass.
+    @Published var displaysHaveSeparateSpaces = false
+    /// What loads right now and by which rule (#678 turn 13a),
+    /// for the "Which profile loads" card.
+    ///
+    /// Snapshotted here rather than asked per render: the query
+    /// scans the profile directory and decodes every profile, so
+    /// a computed property read from `body` would do that on
+    /// every SwiftUI pass — and log a line per broken profile
+    /// each time. Refreshed by `refreshProfiles`, which already
+    /// pays for that scan once.
+    @Published var profileVerdict: ProfileVerdict = .none
     /// A dismissible warning from the last profile action
     /// (overlapping monitor sets, save failures).
     @Published var profileWarning: String?
@@ -271,14 +291,23 @@ final class SettingsModel: ObservableObject {
                 matchesLive: profile.set(matching: live) != nil,
                 spaceCount: profile.declaredSpaces.count,
                 shortcutOverrideCount:
-                    profile.layers?.layers
-                    .reduce(0) { $0 + $1.bindings.count } ?? 0
+                    profile.layers?.overrideCount ?? 0
             )
         }
         brokenProfiles = core.profiles.brokenNames()
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()
+        // After `currentNativeSpace`: a Desktop binding outranks
+        // monitor matching, so the verdict needs the desktop this
+        // pass just read.
+        profileVerdict = core.profileVerdict(
+            activeDesktop: currentNativeSpace
+        )
+        displaysHaveSeparateSpaces =
+            DisplaySpacesSetting.recommendsSharedSpaces(
+                displayCount: displays.count
+            )
         refreshLayoutDrift()
     }
 

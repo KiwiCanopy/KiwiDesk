@@ -52,13 +52,24 @@ extension ProfilesSection {
             .joined(separator: "\n")
     }
 
-    private func screensPhrase(_ count: Int) -> String {
+    /// The screen-count phrase, as a complete localized unit.
+    ///
+    /// `internal`, not `private`: the "Which profile loads" card
+    /// interpolates the SAME phrase into its verdicts. Authoring
+    /// `"%1$d screens"` into those frames instead reads "1
+    /// screens" on a one-display Mac — the modal setup — in a
+    /// sentence no catalog can repair, because the defect is in
+    /// the frame rather than the translation.
+    func screensPhrase(_ count: Int) -> String {
         count == 1
             ? L("profiles.screens.one", "1 screen")
             : L("profiles.screens.many", "%1$d screens", count)
     }
 
-    private func spacesPhrase(_ count: Int) -> String {
+    /// Shared with the preset cards' own space count — one pair
+    /// of keys for one noun, so the two surfaces cannot drift
+    /// per locale.
+    func spacesPhrase(_ count: Int) -> String {
         count == 1
             ? L("profiles.spaces.one", "1 space")
             : L("profiles.spaces.many", "%1$d spaces", count)

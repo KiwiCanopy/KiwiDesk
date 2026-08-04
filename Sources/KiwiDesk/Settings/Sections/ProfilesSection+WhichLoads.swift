@@ -9,13 +9,18 @@ import SwiftUI
 /// *this* profile is the one that came up. So the card states it,
 /// and then answers it for the live machine.
 ///
-/// The verdict ASKS THE ENGINE (gui.md): `ProfileManager.match`
-/// is the same query the monitor-change path resolves with, so
-/// this card cannot drift from what actually loads. Nothing here
-/// re-implements exact-set-then-count-default beside the drawing
-/// of it — the one thing it adds is the `.none` arm's name for
-/// the built-in Standard, which the engine composes rather than
-/// matches.
+/// The verdict ASKS THE ENGINE (gui.md) — `KiwiCore.profileVerdict`
+/// carries the SAME precedence the live paths use, bindings
+/// included. An earlier cut asked `ProfileManager.match` alone and
+/// so answered only the display half of the rule: with a Desktop
+/// bound it named the profile that would load on a *monitor*
+/// change while a different one was actually on screen, and the
+/// card that configures those bindings sits directly below this
+/// one. A preview that models part of an engine's rule must say
+/// which part; this one models all of it.
+///
+/// The verdict is read from the model's snapshot, never queried
+/// here: it costs a directory scan plus a decode per profile.
 extension ProfilesSection {
     @ViewBuilder var whichProfileLoads: some View {
         SettingsSection(
@@ -31,67 +36,74 @@ extension ProfilesSection {
         }
     }
 
+    /// Both halves of the precedence, in the order it applies —
+    /// a rule sentence that mentioned only screen counts would be
+    /// wrong for anyone who has bound a Desktop, and the card
+    /// below this one is where they bound it.
     private var rulesSentence: String {
         L(
             "profiles.which_loads.rule",
-            "KiwiDesk picks the profile whose screen count "
-                + "matches, preferring the one marked default."
+            "A profile bound to the active Desktop loads first. "
+                + "Otherwise KiwiDesk picks the profile whose "
+                + "screen count matches, preferring the one "
+                + "marked default."
         )
     }
 
-    /// "Right now: 3 screens → Desk", with the reason the match
-    /// fired — an exact monitor match and a count default are
-    /// different promises, and only the first survives plugging a
-    /// different monitor of the same count in.
+    /// "Right now: 3 screens → Desk", with the rule that fired —
+    /// they are different promises. The DEFAULT is the durable
+    /// one: an exact match compares the fingerprint set, so
+    /// swapping in a different monitor of the same count drops
+    /// it, while a count default only asks how many screens
+    /// there are.
     private var verdictSentence: String {
-        let screens = model.displays.count
-        switch model.core.profiles.match(
-            fingerprints: model.displays.map(\.fingerprint)
-        ) {
-        case .exact(let profile):
+        // The count phrase, never a bare `%1$d screens` — that
+        // frame renders "1 screens" on a one-display Mac, and no
+        // catalog can repair a frame.
+        let screens = screensPhrase(model.displays.count)
+        switch model.profileVerdict {
+        case .boundToDesktop(let name, let desktop):
+            return L(
+                "profiles.which_loads.bound",
+                "Right now: Desktop %1$d → %2$@ (bound below, "
+                    + "which outranks the screen count).",
+                desktop,
+                name
+            )
+        case .exactMonitors(let name):
             return L(
                 "profiles.which_loads.exact",
-                "Right now: %1$d screens → %2$@ (these exact "
-                    + "monitors).",
+                "Right now: %1$@ → %2$@ (these exact monitors).",
                 screens,
-                profile.name
+                name
             )
-        case .countDefault(let profile):
+        case .countDefault(let name):
             return L(
                 "profiles.which_loads.count_default",
-                "Right now: %1$d screens → %2$@ (the default "
-                    + "for this screen count).",
+                "Right now: %1$@ → %2$@ (the default for this "
+                    + "screen count).",
                 screens,
-                profile.name
+                name
+            )
+        case .builtInStandard(let name):
+            // Named, not "a built-in layout": the name is what
+            // the Presets card offers, so the two surfaces say
+            // the same word. Core carries the stable English
+            // name; the GUI localizes it (#96).
+            return L(
+                "profiles.which_loads.standard",
+                "Right now: %1$@ → the built-in %2$@ (no saved "
+                    + "profile matches).",
+                screens,
+                standardDisplayName(name)
             )
         case .none:
-            return standardVerdict(screens: screens)
-        }
-    }
-
-    /// No saved profile covers the live screens, so a built-in
-    /// Standard composes. Named, not called "a built-in layout":
-    /// the name is what the Presets card offers, so the two
-    /// surfaces say the same word.
-    private func standardVerdict(screens: Int) -> String {
-        guard
-            let standard = StandardProfiles.standard(
-                for: screens
-            )
-        else {
             return L(
                 "profiles.which_loads.none",
-                "Right now: %1$d screens → no profile and no "
-                    + "built-in layout match.",
+                "Right now: %1$@ → no profile and no built-in "
+                    + "layout match.",
                 screens
             )
         }
-        return L(
-            "profiles.which_loads.standard",
-            "Right now: %1$d screens → the built-in %2$@ "
-                + "(no saved profile matches).",
-            screens,
-            standard.displayName
-        )
     }
 }

@@ -53,6 +53,57 @@ struct ProfilesFamilyRows {
         return rows(for: family)
     }
 
+    /// The saved profiles the list draws, in display order:
+    /// the ones matching the connected displays first — the
+    /// card's caption promises one of them loads — then by
+    /// screen count, then by name, so the order is stable while
+    /// nothing is plugged or unplugged.
+    ///
+    /// The ORDER lives here, with the expansion, rather than in
+    /// the view: `instanceCounts` can then hold what the screen
+    /// actually shows. A seam the views do not consult is a
+    /// seam whose guards test their own fixture.
+    static func orderedProfiles(
+        _ summaries: [ProfileSummary]
+    ) -> [ProfileSummary] {
+        summaries.sorted {
+            (
+                $0.matchesLive ? 0 : 1, $0.count, $0.name
+            ) < (
+                $1.matchesLive ? 0 : 1, $1.count, $1.name
+            )
+        }
+    }
+
+    /// The Desktops the bindings card lists: every present
+    /// desktop plus any number already bound, so a binding to a
+    /// now-absent Space stays visible and clearable rather than
+    /// silently lost.
+    static func desktops(
+        present: Int,
+        bound: some Collection<Int>
+    ) -> [Int] {
+        let live = present > 0 ? Array(1...present) : []
+        return Array(Set(live).union(bound)).sorted()
+    }
+
+    /// The presets a screen count offers, in catalog order.
+    static func presets(
+        forScreens screens: Int
+    ) -> [StandardLayout] {
+        StandardProfiles.layouts(for: screens)
+    }
+
+    /// Every preset for a count that is NOT connected — the
+    /// "For other setups" drawer's contents.
+    static func presets(
+        excludingScreens screens: Int
+    ) -> [StandardLayout] {
+        StandardProfiles.all.filter {
+            $0.screenCount != screens
+        }
+    }
+
     private func rows(
         for family: ProfilesKey
     ) -> [ProfilesRowInstance]? {

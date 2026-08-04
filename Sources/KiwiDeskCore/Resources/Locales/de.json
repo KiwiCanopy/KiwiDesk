@@ -633,7 +633,6 @@
   "profiles.rename_failed": "Umbenennen fehlgeschlagen: %1$@",
   "profiles.save_blocked_paused": "Fensterverwaltung ist pausiert, da Bedienungshilfen deaktiviert sind und keine Displays erkannt wurden. Gewähre zuerst Zugriff — ein jetzt gespeichertes Profil würde keine Monitore erfassen.",
   "profiles.save_failed": "Speichern fehlgeschlagen: %1$@",
-  "profiles.saved.empty": "Noch keine Profile gespeichert — das Standard-Profil wird verwendet, bis du ein eigenes erstellst.",
   "profiles.saved.title": "Gespeicherte Profile",
   "profiles.screens.many": "%1$d Bildschirme",
   "profiles.screens.one": "1 Bildschirm",

@@ -1487,15 +1487,20 @@ space-to-monitor pins, and optionally a sparse keybinding override
 layer plus sparse app, float, and ignore rule overrides.
 
 The page answers four questions in order — what a profile is, which
-ones you have, which one loads, and where to start from nothing.
+ones you have, which one loads, and where to start from nothing. Until
+you have saved your first profile the last of those moves to the top:
+with an empty list, the presets are the only thing on the page you can
+act on.
 
 ### Your Profiles
 
-One row per saved profile, newest hardware first: the profiles
-matching your connected displays lead, since one of them is what
-loads. Each row carries the name (double-click or use the pencil to
-rename), an **active** badge on the loaded one, a **default** badge,
-**make default**, **Load**, and a delete button.
+One row per saved profile, the ones matching your connected
+displays first — one of them is what loads — then by screen count,
+then by name. Each row carries the name (double-click or use the
+pencil to rename), an **active** badge on the loaded one, a
+**default** badge, a **make default** link on every profile that
+isn't already its screen count's default, **Load**, and a delete
+button.
 
 The subtitle counts only what that profile **owns** — for example
 "3 screens · 6 spaces · 1 shortcut override". Shortcut overrides are
@@ -1515,19 +1520,27 @@ cleared.
 
 ### Which Profile Loads
 
-The card states the rule — *KiwiDesk picks the profile whose screen
-count matches, preferring the one marked default* — and then answers
-it for your machine right now, naming which of the three ways the
-match fired:
+The card states the rule — *a profile bound to the active Desktop
+loads first; otherwise KiwiDesk picks the profile whose screen count
+matches, preferring the one marked default* — and then answers it for
+your machine right now, naming which of the four ways it resolved:
 
-- an **exact monitor match** (these exact displays), which survives
-  swapping to different monitors of the same count only if you save
-  a set for them;
-- the **default for this screen count**, when no exact set matches;
-- a **built-in Standard**, when no saved profile matches at all.
+- a **Desktop binding**, which outranks everything below it. If you
+  bound a profile to the Desktop you are on, that is what loads,
+  whatever your displays are — see
+  [Native Spaces](#native-spaces-mission-control);
+- an **exact monitor match** — these exact displays. It stops
+  matching the moment you swap one of them out, unless you have
+  saved a set for the new hardware too;
+- the **default for this screen count**, when no exact set matches.
+  This one keeps matching whatever monitors are plugged in, as long
+  as the count is right;
+- a **built-in layout**, when no saved profile matches at all — or,
+  for a screen count with no built-in either, a line saying nothing
+  matches.
 
-The verdict is computed with the same query the monitor-change path
-uses, so it cannot disagree with what actually loads.
+The verdict carries the same precedence the live paths use, bindings
+included, so it cannot disagree with what actually loads.
 
 ### The Profile Banner
 
@@ -1604,9 +1617,10 @@ prompt only appears when there is something to lose.
 
 Until your first profile exists, Settings points the way
 without gating anything: the Profiles sidebar tile carries a
-small accent dot, and the Presets list leads with a "Start
-here" line plus an accent-colored **Apply** on the presets
-matching your connected screen count. Applying one (or saving
+small accent dot, and **Start from a preset** leads the page
+with a "Start here" line plus one accent-colored **Apply** —
+on the Standard preset for your connected screen count, so the
+page has a single primary. Applying one (or saving
 from any tab) creates the first profile and the emphasis
 disappears — it returns only if you ever delete your last
 profile.
@@ -1682,15 +1696,15 @@ or stack.)
   frontend IDE. Right: inspectors. Mixed layouts for creative
   workflows.
 
-To apply a preset, use the **Start from a preset** card at the bottom
-of Profiles. Presets for your connected screen count come first under
-a heading that names it ("For your 3 screens"); every other count
-folds into **For other setups**, since a preset for hardware you have
-not plugged in is a reference rather than an offer. Click **Apply**
-next to one. The layout loads and is saved as an editable profile
-under the preset's name — applying one saves it as a real profile you
-can then edit. The first profile saved for a screen count becomes
-that count's default.
+To apply a preset, use the **Start from a preset** card in Profiles —
+it closes the page once you have saved a profile, and leads it while
+you have none. Presets for your connected screen count come first
+under a heading that names it ("For your 3 screens"); every other
+count folds into **For other setups**, since a preset for hardware you
+have not plugged in is a reference rather than an offer. Click
+**Apply** next to one: the layout loads and is saved as a real,
+editable profile under the preset's name. The first profile saved for
+a screen count becomes that count's default.
 
 Each card draws **screens, not spaces**: one outline per display, each
 showing the layout its first space opens in, with the total space
@@ -2116,8 +2130,14 @@ single event — the rows are **greyed with the reason inline**, and the
 warning carries an **Open Desktop & Dock** button. Turn the option off
 there, then log out and back in; the rows come back live. A single
 display never greys them: "Desktop 2" is unambiguous with one screen.
+
 Existing bindings stay visible while greyed, so you can still read what
-you configured.
+you configured — and they stay **clearable**: while any binding exists,
+the warning carries a **Clear all bindings** button beside the pane
+link. That matters because a binding made *before* you turned separate
+Spaces on keeps loading its profile when that Desktop activates;
+without the button, greying the rows would leave you with a binding
+that fires and no way to remove it.
 
 The rows are also greyed while you edit a *stored* profile from the
 banner picker: bindings are global, and a profile may never override

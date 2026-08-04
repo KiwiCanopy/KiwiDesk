@@ -99,12 +99,17 @@ struct ProfilesSection: View {
         }
     }
 
+    /// "a built-in layout", not "the built-in Standard": no
+    /// layout is NAMED Standard — the ones that resolve silently
+    /// are Developer, Dual Developer and Command Center, and the
+    /// card below this one names whichever is live. Two
+    /// paragraphs of one page calling the same thing by two
+    /// nouns is what sends a translator two ways.
     private var noProfilesCaption: String {
         L(
             "profiles.saved.empty",
-            "No profiles saved yet — the built-in "
-                + "Standard resolves until you save "
-                + "one."
+            "No profiles saved yet — a built-in layout "
+                + "resolves until you save one."
         )
     }
 
@@ -115,27 +120,27 @@ struct ProfilesSection: View {
         guard !model.editingStoredProfile,
             let active = model.activeProfile
         else { return nil }
+        // The button's own label, verbatim (`footer.save_a_copy_as`)
+        // — a note that names a control by an approximation sends
+        // the reader looking for something that is not there.
         return L(
             "profiles.current_setup_note",
             "Your current setup is saved into %1$@. To keep it "
-                + "separately, use \"Save a copy…\" in the bar "
+                + "separately, use \"Save a Copy As…\" in the bar "
                 + "below.",
             active
         )
     }
 
-    /// The profiles that match the connected displays first —
-    /// the list's caption promises one of them loads — then by
-    /// screen count, then by name, so the order is stable while
-    /// nothing is plugged or unplugged.
+    /// The rows this container draws, from the family seam that
+    /// records what a Profiles census key expands to — the same
+    /// list `ProfilesCensusRenderTests` holds against the
+    /// census, so the guard watches what the screen shows rather
+    /// than a fixture of its own.
     private var orderedSummaries: [ProfileSummary] {
-        model.profileSummaries.sorted {
-            (
-                $0.matchesLive ? 0 : 1, $0.count, $0.name
-            ) < (
-                $1.matchesLive ? 0 : 1, $1.count, $1.name
-            )
-        }
+        ProfilesFamilyRows.orderedProfiles(
+            model.profileSummaries
+        )
     }
 
     private func profileRow(

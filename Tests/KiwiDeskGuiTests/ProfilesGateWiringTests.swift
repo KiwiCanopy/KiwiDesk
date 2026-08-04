@@ -82,6 +82,57 @@ struct ProfilesGateWiringTests {
         try sentencesAreAuthoredOnce(Array(consults.keys))
     }
 
+    /// The three bespoke containers derive their instances from
+    /// `ProfilesFamilyRows`, not from re-derivations of their
+    /// own.
+    ///
+    /// Without this the family seam is a data structure that
+    /// exists only for its own guard — the dead-resolver trap
+    /// General shipped, one level over: `familiesExpand` and
+    /// `instanceCounts` would assert over lists the screen never
+    /// sees, and the real derivations would sit inline in the
+    /// views where nothing holds them to the census. Both
+    /// reviewers found that shape in this area's first cut.
+    ///
+    /// Stated limit: this pins that each view CALLS the seam, not
+    /// that it renders what it gets back.
+    @Test("the bespoke containers consult the family seam")
+    func viewsConsultTheFamilySeam() throws {
+        func squashed(_ name: String) throws -> String {
+            SourceScan.stripComments(try read(name))
+                .split(whereSeparator: \.isWhitespace)
+                .joined()
+        }
+        let consults: [String: [String]] = [
+            "Sections/ProfilesSection.swift": [
+                "ProfilesFamilyRows.orderedProfiles("
+            ],
+            "Components/Profiles/NativeSpacesGroup.swift": [
+                "ProfilesFamilyRows.desktops("
+            ],
+            "Sections/PresetsSection.swift": [
+                "ProfilesFamilyRows.presets(forScreens:",
+                "ProfilesFamilyRows.presets(excludingScreens:",
+            ],
+        ]
+        for (name, needles) in consults {
+            let source = try squashed(name)
+            for needle in needles {
+                #expect(
+                    source.contains(needle),
+                    Comment(
+                        rawValue:
+                            "\(name) no longer derives its rows "
+                            + "from `\(needle)` — that container "
+                            + "re-derives its instances inline, "
+                            + "and the census guards over the "
+                            + "seam stop watching the screen"
+                    )
+                )
+            }
+        }
+    }
+
     /// Every gate sentence is authored ONCE, in the help enum; a
     /// row that re-authors one is the duplication that let
     /// General describe one status two ways.

@@ -136,7 +136,8 @@ carries its own order list and a census-render suite pinning that
 order to the census (`ProfilesRowOrder` /
 `ProfilesCensusRenderTests` is the newest pair), so a row in a
 `ForEach`-rendered container moves by editing the census — with
-the bespoke edge below. This bold list is itself a hand-kept claim with no guard,
+the bespoke edge below. This bold list is itself a hand-kept
+claim with no guard,
 so an added area joins it here in the same change that ships its
 `*RowOrder` (General was silently dropped from it once).
 
@@ -159,11 +160,11 @@ edge wider: EVERY container in them is bespoke
 `ProfilesRowOrder.bespokeContainers`, each the whole set,
 asserted by `bespokeMeansNoForEach` in each area's render suite),
 so their order lists are membership-and-search only and editing
-one moves nothing on screen. Profiles is the case where the
-reason is structural rather than incidental: every container
-there expands one key into a row per live INSTANCE — a saved
-profile, a Desktop, a preset — which is what an order-list
-`ForEach` cannot express at all.
+one moves nothing on screen. In Profiles the reason is
+structural rather than incidental: every container there expands
+one key into a row per live instance, which is what an order-list
+`ForEach` cannot express at all — the paragraph below owns that
+seam.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -171,9 +172,12 @@ one census case that puts four rows on screen and `goToSpace`
 one that puts a row per live space, so the Shortcuts area needs
 a second seam the plain areas do not — an order list saying
 *where a family sits* and `ShortcutsFamilyRows` saying *what it
-draws*. Profiles is the second (`ProfilesFamilyRows`), and there
-EVERY key expands: a row per saved profile, per Desktop, per
-preset. An area whose keys expand this way owes both halves and
+draws*. Profiles has the same pair (`ProfilesFamilyRows`), and
+there the expansion is per live INSTANCE in every container it
+draws — a row per saved profile, per Desktop, per preset, held by
+`instanceCounts` in `ProfilesCensusRenderTests` because set
+equality over `SettingKey` cannot see a collapse to one row. An
+area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer
 reading `rows(for:) ?? []` cannot tell a hand-drawn container

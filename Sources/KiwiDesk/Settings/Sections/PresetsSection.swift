@@ -59,8 +59,13 @@ struct PresetsSection: View {
 
     private var liveCount: Int { model.displays.count }
 
+    // Both preset lists come from the family seam that records
+    // what `presetsApply` expands to, so the guard over that
+    // expansion watches the cards this section actually draws.
     @ViewBuilder private var liveGroup: some View {
-        let presets = StandardProfiles.layouts(for: liveCount)
+        let presets = ProfilesFamilyRows.presets(
+            forScreens: liveCount
+        )
         if presets.isEmpty {
             Text(noPresetsForCount)
                 .font(.caption)
@@ -94,9 +99,9 @@ struct PresetsSection: View {
     /// Every preset for a count that is NOT connected, behind one
     /// disclosure that says how many are in there.
     @ViewBuilder private var otherSetups: some View {
-        let others = StandardProfiles.all.filter {
-            $0.screenCount != liveCount
-        }
+        let others = ProfilesFamilyRows.presets(
+            excludingScreens: liveCount
+        )
         if !others.isEmpty {
             SettingsDisclosure(
                 SettingsCatalog.profiles.presetsOther,
@@ -226,8 +231,16 @@ struct PresetsSection: View {
     private func gates(
         _ layout: StandardLayout
     ) -> ProfilesGates {
+        // `separateDisplaySpaces` reaches no arm this row can
+        // hit, and it is passed anyway: the resolver takes no
+        // default for it, so a call site that would rather not
+        // think about it is made to. One snapshot on the model
+        // means this costs nothing and cannot disagree with
+        // what the bindings card resolves from.
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
+            separateDisplaySpaces:
+                model.displaysHaveSeparateSpaces,
             connectedScreens: liveCount,
             presetScreens: layout.screenCount
         )

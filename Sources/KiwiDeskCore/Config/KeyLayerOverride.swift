@@ -27,6 +27,23 @@ public struct KeyLayerOverride: Sendable, Equatable {
     /// needs no stored override (drives sparse encoding).
     public var isEmpty: Bool { layers.isEmpty }
 
+    /// How many things this override actually overrides, for the
+    /// GUI's per-profile count (#678 turn 13a).
+    ///
+    /// Not `layers.flatMap(\.bindings).count`: `diff` emits a
+    /// layer with NO bindings when only its icon diverges, so
+    /// summing bindings returns 0 for an override that
+    /// `isEmpty` calls non-empty — and a profile row that then
+    /// drops its "N shortcut overrides" segment tells the user
+    /// the profile owns nothing here, which is the one reading
+    /// that count exists to prevent. So a diverging layer
+    /// contributes at least itself. The invariant to keep is
+    /// `isEmpty == (overrideCount == 0)`; anything that can
+    /// diverge without a binding must keep counting.
+    public var overrideCount: Int {
+        layers.reduce(0) { $0 + max($1.bindings.count, 1) }
+    }
+
     /// Resolves this override onto `base`, producing the merged
     /// layer list. Returns `base` unchanged when empty.
     ///

@@ -633,7 +633,6 @@
   "profiles.rename_failed": "重新命名失敗：%1$@",
   "profiles.save_blocked_paused": "由於「輔助使用」存取權已關閉，視窗管理已暫停，因此偵測不到任何顯示器。請先授予存取權 — 現在儲存的描述檔不會擷取到任何顯示器，也永遠無法解析。",
   "profiles.save_failed": "儲存失敗：%1$@",
-  "profiles.saved.empty": "尚未儲存任何描述檔 — 在你儲存之前，都由內建的「標準」解析。",
   "profiles.saved.title": "已儲存的描述檔",
   "profiles.screens.many": "%1$d 部螢幕",
   "profiles.screens.one": "1 部螢幕",

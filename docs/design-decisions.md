@@ -1035,13 +1035,15 @@ Both surfaces share one gate — separate Spaces on *and* two or more
 displays connected — so a single-display setup, which has no binding
 ambiguity, is never prompted. Onboarding recommends turning the option
 off only in that state and lets the user continue without changing it.
-The Profiles tab keeps the specific Desktop-binding controls visible
-and editable; in the same multi-display state an inline warning
-explains the limitation and opens Desktop & Dock Settings. The saved
-profile list and its Load actions are unrelated and never warned or
-disabled. Hiding the binding section would erase context and existing
-configuration; disabling it would incorrectly claim that every binding
-is inert. (#8)
+The Profiles page keeps the Desktop-binding rows and their stored
+values **visible** in that state — hiding the section would erase both
+the context and a user's own configuration — with an inline warning
+that explains the limitation and opens Desktop & Dock Settings. The
+saved profile list and its Load actions are unrelated and never warned
+or disabled. Whether those rows also stay *live* under that warning is
+a separate ruling, and #678 settled it the other way: see
+[A control the OS has made meaningless is greyed, not left live under a
+warning](#profiles). (#8)
 
 **Profiles may override *behavior* settings, never *routing*
 ones.** A profile owns tiling, and may also carry a sparse
@@ -1764,21 +1766,25 @@ per-space shortcut labels — never as the only signifier.
 (#68 §6.5)
 
 **Saved profiles lead; Presets demote once one exists.** On
-the Profiles tab, the built-in Presets top the list only
+the Profiles page, the built-in presets top the page only
 while no profile is saved yet — they're a bootstrap tool,
 and leading with an empty saved-profiles list would leave
 first launch barren. From the first saved profile on, the
-order flips: the user's own content takes the top — saved
-profiles with the Desktop bindings that reference them
-directly beneath — and the full preset list closes the tab.
-No disclosure folding on any section — collapsed content
-was tried and rejected as visual clutter; a plain order
-swap carries the same priority signal.
+order flips: the user's own content takes the top, and the
+presets close the page. The priority signal is the order
+swap itself, so neither state hides a card from the other.
+What may fold is content the live machine cannot act on — a
+preset for screens that are not plugged in is a reference,
+not an offer — or a card most users never open, and a fold
+of either kind still draws open by default when its
+contents are the answer to the question its title asks.
 The zero-profile state additionally gets a **soft
 spotlight, never a gate** (QA 2026-07-19): a "Start here"
-lead-in with accent-prominent Apply on the appliable
-presets, an accent dot on the Profiles sidebar tile, and a
-pre-filled first-save name. A hard first-run gate was
+lead-in, ONE accent-prominent Apply — the appliable count's
+Standard preset, since prominence on every appliable preset
+put three accent buttons in one field — an accent dot on
+the Profiles sidebar tile, and a pre-filled first-save
+name. A hard first-run gate was
 considered and rejected — System Settings never gates a
 pane, the zero-profile state recurs whenever the last
 profile is deleted, and KiwiDesk tiles fine with no
@@ -3673,13 +3679,25 @@ from the badges.** Screen-count matching with a default
 preference is the single most consequential behavior on the page,
 and it was previously discoverable only by watching profiles load
 and guessing. The card states the rule and then answers it for
-the live machine, naming which of the three ways the match fired
-— exact monitor set, count default, or built-in Standard —
-because those are different promises: only the first survives
-swapping monitors of the same count. The verdict asks
-`ProfileManager.match`, the same query the monitor-change path
-resolves with, so a card that claims to explain the engine cannot
-drift from it.
+the live machine, naming *why* this profile answered — a Desktop
+binding, an exact monitor set, the count's default, or a built-in
+layout when nothing saved matches — because those are different
+promises. An exact set stops matching the moment the hardware
+changes, and a count default keeps matching whatever monitors are
+plugged in, so a user who reads only the profile's name cannot
+tell which of the two they are relying on.
+
+**A card that explains a rule states the WHOLE rule.** The first
+cut asked `ProfileManager.match` and stopped there — which is
+only the display half, because a native-Space binding outranks
+matching — so on any machine with a bound Desktop the card named
+one profile while another was on screen, with the card that
+creates those bindings sitting directly below it. Half a rule
+stated confidently is worse than no card: it teaches a model the
+app does not follow, and the reader has no way to notice. Hence
+`KiwiCore.profileVerdict`, one query carrying the same precedence
+the live paths use, rather than a GUI-side composition of two
+answers that could be ordered wrongly a second time.
 
 **[Trade-off]**
 
@@ -3698,6 +3716,19 @@ requires BOTH conditions: one display never greys, because
 while greyed — config presence expands the surface, and hiding a
 user's own configuration to protect them from it is the worse
 failure.
+
+**And greying a control never removes the only way out of the
+state it describes.** Bindings are cleared from these rows and
+nowhere else, while the runtime keeps firing a bound profile
+regardless of the OS setting — so dimming the rows alone would
+strand a binding made *before* the setting changed: still
+loading, no longer removable, and undoable only by logging out.
+The inline warning therefore carries **Clear all bindings**
+alongside the pane link, present exactly while there is
+something to clear. Generalise it: when a grey covers the last
+affordance that can undo the thing being greyed, the grey owes
+an escape hatch, or it is a trap wearing the costume of a
+safeguard.
 
 ### Monitors
 

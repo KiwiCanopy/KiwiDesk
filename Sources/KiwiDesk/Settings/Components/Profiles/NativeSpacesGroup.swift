@@ -36,9 +36,7 @@ struct NativeSpacesGroup: View {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
             separateDisplaySpaces:
-                DisplaySpacesSetting.recommendsSharedSpaces(
-                    displayCount: model.displays.count
-                ),
+                model.displaysHaveSeparateSpaces,
             connectedScreens: model.displays.count
         )
     }
@@ -78,8 +76,20 @@ struct NativeSpacesGroup: View {
     }
 
     /// Why the rows are dead, inline — why-you-cannot is never a
-    /// tooltip alone (VoiceOver reads it), and the one reason
-    /// that has a fix carries the button that starts it.
+    /// tooltip alone (VoiceOver reads it) — and, for the reason
+    /// that has one, the fix.
+    ///
+    /// **The escape hatch is load-bearing, not a convenience.**
+    /// Greying every row takes away the only control that can
+    /// CLEAR a binding, while Core keeps firing bound profiles
+    /// regardless of the OS setting (`applyNativeSpaceBinding`
+    /// consults no display-Spaces state). Without this button a
+    /// user who bound a Desktop *before* turning separate Spaces
+    /// on is stuck with a binding that fires and cannot be
+    /// removed short of a log out — the grey would have created
+    /// the trap it exists to prevent. So the note stays outside
+    /// the `GreyOut` and carries both the way out of the OS
+    /// setting and the way out of the bindings.
     private func inertNote(
         _ reason: ProfilesGates.InertReason
     ) -> some View {
@@ -91,16 +101,7 @@ struct NativeSpacesGroup: View {
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
                 if reason == .desktopsAreAmbiguous {
-                    Button(
-                        L(
-                            "native_spaces.open_settings",
-                            "Open Desktop & Dock"
-                        )
-                    ) {
-                        DisplaySpacesSetting.openSystemSettings()
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                    ambiguityActions
                 }
             }
         }
@@ -109,6 +110,47 @@ struct NativeSpacesGroup: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color.orange.opacity(0.12))
         )
+    }
+
+    private var ambiguityActions: some View {
+        HStack(spacing: 8) {
+            Button(
+                L(
+                    "native_spaces.open_settings",
+                    "Open Desktop & Dock"
+                )
+            ) {
+                DisplaySpacesSetting.openSystemSettings()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.large)
+            // Absent, not greyed, with nothing to clear: an
+            // affordance for a channel that does not exist reads
+            // as broken rather than as forthcoming (gui.md), and
+            // here "no bindings" is the state the grey is
+            // harmless in.
+            if !model.config.profileBindings.isEmpty {
+                Button(
+                    L(
+                        "native_spaces.clear_all",
+                        "Clear all bindings"
+                    ),
+                    role: .destructive
+                ) {
+                    model.config.profileBindings = [:]
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .help(
+                    L(
+                        "native_spaces.clear_all.help",
+                        "Removes every Desktop → profile "
+                            + "binding. The footer's Save writes "
+                            + "it."
+                    )
+                )
+            }
+        }
     }
 
     @ViewBuilder private func rows(
@@ -182,16 +224,14 @@ struct NativeSpacesGroup: View {
 
     // MARK: - Data
 
-    /// Native Spaces to list: every present desktop plus any
-    /// number already bound (so a binding to a now-absent Space
-    /// stays visible and editable rather than silently lost).
+    /// Native Spaces to list — from the family seam that records
+    /// what this census key expands to, so the guard over that
+    /// expansion watches the rows the card actually draws.
     private var spaceNumbers: [Int] {
-        let present =
-            model.nativeSpaceCount > 0
-            ? Array(1...model.nativeSpaceCount) : []
-        return Array(
-            Set(present).union(model.config.profileBindings.keys)
-        ).sorted()
+        ProfilesFamilyRows.desktops(
+            present: model.nativeSpaceCount,
+            bound: model.config.profileBindings.keys
+        )
     }
 
     /// Available profiles for the dropdown, always including the
