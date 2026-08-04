@@ -121,11 +121,13 @@ struct ZOrderCloseReturnArmTests {
         // A closed float or fullscreen member has no tiled slot:
         // no evidence of a jump, same asymmetry as
         // `scrollFocusJumpsSlots` — a spurious restack costs N
-        // blocking raises and buries the float layer.
-        _ = makeSpace(core, windows: 6, focused: 1)
+        // blocking raises and buries the float layer. The target
+        // sits at the far end (slot 5), so a mutation that
+        // defaults a nil slot to 0 would read a jump here.
+        _ = makeSpace(core, windows: 6, focused: 6)
         guard startDummyPan(core) else { return }
         core.armCloseReturnRestack(
-            to: WindowID(1),
+            to: WindowID(6),
             fromRemovedSlot: nil
         )
         #expect(!core.pendingZOrderRestore)
