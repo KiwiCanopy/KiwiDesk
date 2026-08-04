@@ -95,6 +95,22 @@ struct ShortcutsSection: View {
         KeybindingConflictBanner(model: model)
         overrideBanner
         ShortcutsHeader(model: model, selected: $selected)
+        // The layers that define alternate key sets. It LEADS the
+        // area rather than tailing it (owner ruling 2026-08-04):
+        // the layer selected here decides what every card below
+        // is showing, and a control that reframes the whole page
+        // cannot sit under the page it reframes. It withholds
+        // itself entirely until earned — see `LayersCard`.
+        layersCard
+    }
+
+    private var layersCard: some View {
+        LayersCard(
+            model: model,
+            bindings: bindingsBinding,
+            selected: $selected,
+            expander: expander
+        )
     }
 
     @ViewBuilder private var actionGroups: some View {
@@ -130,16 +146,9 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             spaces: model.config.spaces
         )
-        // The layers that define alternate key sets — at rest
-        // once one exists, the offer to create the first behind
-        // its disclosure — then the raw-Lua escape hatch, which
-        // is `.showMore` outright.
-        LayersCard(
-            model: model,
-            bindings: bindingsBinding,
-            selected: $selected,
-            expander: expander
-        )
+        // Then the raw-Lua escape hatch, which is `.showMore`
+        // outright. `LayersCard` used to sit here and now LEADS
+        // the area — see `layersCard` above.
         advancedDrawer
     }
 

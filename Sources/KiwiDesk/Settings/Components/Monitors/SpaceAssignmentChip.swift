@@ -51,13 +51,22 @@ struct SpaceAssignmentChip: View {
         Menu {
             menu
         } label: {
+            // The draggable is on the LABEL, not on the `Menu`.
+            // A borderless menu is AppKit-backed and takes the
+            // mouse-down to open itself, so a `.draggable` on the
+            // menu never sees a press to begin a drag from —
+            // which is why the drag read as retired even though
+            // the modifier was there and both drop targets were
+            // live (owner, 2026-08-04). Dragging is a gesture
+            // this area had before 13b made the chip a menu, so
+            // losing it is a regression rather than a gap.
             capsule
+                .draggable(DraggableSpace(raw: space.raw))
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .menuIndicator(.hidden)
         .fixedSize()
-        .draggable(DraggableSpace(raw: space.raw))
         .help(
             L(
                 "monitor_chip.help_full",

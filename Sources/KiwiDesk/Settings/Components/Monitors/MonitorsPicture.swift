@@ -80,6 +80,26 @@ struct MonitorsPicture: View {
             )
     }
 
+    /// A neck and a foot under each display, in the hairline the
+    /// cards are bordered with — quiet enough that the picture
+    /// still reads as an arrangement rather than as furniture.
+    ///
+    /// Deliberately a fixed size rather than one scaled from the
+    /// card: a stand is a real object of roughly one size whatever
+    /// the panel above it, and scaling it gave a laptop a toy
+    /// stand and an ultrawide a plinth.
+    private var stand: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(SettingsTheme.hairline)
+                .frame(width: 10, height: 5)
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(SettingsTheme.hairline)
+                .frame(width: 34, height: 3)
+        }
+        .allowsHitTesting(false)
+    }
+
     private func arrangement(
         for canvas: CGSize
     ) -> MonitorArrangement.Layout {
@@ -106,6 +126,16 @@ struct MonitorsPicture: View {
                     width: drawn.rect.width,
                     height: drawn.rect.height
                 )
+                // Drawn BELOW the card and outside its frame, so
+                // it costs the card no drop area: the layout
+                // floors a card at the size that holds one space
+                // chip, and a stand carved out of that would eat
+                // into the floor it guarantees. Decoration only —
+                // it is what makes a rectangle read as a monitor
+                // rather than as a box.
+                .overlay(alignment: .bottom) {
+                    stand.alignmentGuide(.bottom) { $0[.top] }
+                }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
             }
             // No gate on the tray: `.mainSpaces` and `.spacePins`
