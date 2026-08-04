@@ -565,6 +565,7 @@
   "monitor_chip.hint.auto": "Placed automatically — drag to pin",
   "monitor_chip.hint.main": "Follows the main display — drag to pin, or clear it for automatic",
   "monitor_chip.hint.pinned": "Pinned to this monitor — drag to move, or clear it for automatic",
+  "monitor_chip.move_menu": "Move space",
   "monitor_chip.move_to": "Move to %1$@",
   "monitors.advanced.caption": "Profiles reattach automatically when a known monitor setup is reconnected.",
   "monitors.advanced.row_axlabel": "%1$@, fingerprint %2$@",

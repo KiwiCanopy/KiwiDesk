@@ -84,18 +84,24 @@ struct MonitorsPicture: View {
     /// cards are bordered with — quiet enough that the picture
     /// still reads as an arrangement rather than as furniture.
     ///
-    /// Deliberately a fixed size rather than one scaled from the
-    /// card: a stand is a real object of roughly one size whatever
-    /// the panel above it, and scaling it gave a laptop a toy
-    /// stand and an ultrawide a plinth.
-    private var stand: some View {
-        VStack(spacing: 0) {
+    /// SCALED from the card, within bounds. A fixed size was
+    /// tried first, on the reasoning that a stand is a real
+    /// object of roughly one size whatever the panel above it —
+    /// which is true of desks and false of this picture, where a
+    /// single display fills the whole canvas and a 34 pt foot
+    /// under a 520 pt screen reads as a speck of dirt (owner,
+    /// 2026-08-04). The clamp is what stops the same proportion
+    /// giving a laptop thumbnail a plinth.
+    private func stand(cardWidth: CGFloat) -> some View {
+        let base = min(max(cardWidth * 0.28, 26), 140)
+        let neck = min(max(base * 0.22, 8), 30)
+        return VStack(spacing: 0) {
             Rectangle()
                 .fill(SettingsTheme.hairline)
-                .frame(width: 10, height: 5)
-            RoundedRectangle(cornerRadius: 1.5)
+                .frame(width: neck, height: neck * 0.55)
+            RoundedRectangle(cornerRadius: 2)
                 .fill(SettingsTheme.hairline)
-                .frame(width: 34, height: 3)
+                .frame(width: base, height: 4)
         }
         .allowsHitTesting(false)
     }
@@ -134,7 +140,8 @@ struct MonitorsPicture: View {
                 // it is what makes a rectangle read as a monitor
                 // rather than as a box.
                 .overlay(alignment: .bottom) {
-                    stand.alignmentGuide(.bottom) { $0[.top] }
+                    stand(cardWidth: drawn.rect.width)
+                        .alignmentGuide(.bottom) { $0[.top] }
                 }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
             }

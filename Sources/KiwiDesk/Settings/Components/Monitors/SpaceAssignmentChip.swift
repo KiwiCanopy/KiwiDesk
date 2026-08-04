@@ -47,26 +47,30 @@ struct SpaceAssignmentChip: View {
     /// cards can never list different monitors.
     let displays: [Display]
 
+    /// **The chip body drags; a trailing chevron opens the menu.**
+    ///
+    /// A `Menu` wrapping the whole chip cannot also be dragged: it
+    /// is AppKit-backed and consumes the mouse-down to open
+    /// itself, so `.draggable` never sees a press to begin from —
+    /// proven twice, on the menu and then on its label, with both
+    /// drop targets live the whole time. Dragging predates 13b
+    /// making this a menu, so losing it was a regression rather
+    /// than a gap (owner, 2026-08-04).
+    ///
+    /// Splitting the surface is what lets all three routes be
+    /// real at once, and none of them is a fallback for another:
+    /// **drag** the chip (the pointing route), **click the
+    /// chevron** or focus it and press Return (the keyboard and
+    /// VoiceOver route 13b was written for — a `Menu` still earns
+    /// those from AppKit, it just no longer owns the whole chip),
+    /// or **right-click anywhere** on the chip.
     var body: some View {
-        Menu {
-            menu
-        } label: {
-            // The draggable is on the LABEL, not on the `Menu`.
-            // A borderless menu is AppKit-backed and takes the
-            // mouse-down to open itself, so a `.draggable` on the
-            // menu never sees a press to begin a drag from —
-            // which is why the drag read as retired even though
-            // the modifier was there and both drop targets were
-            // live (owner, 2026-08-04). Dragging is a gesture
-            // this area had before 13b made the chip a menu, so
-            // losing it is a regression rather than a gap.
+        HStack(spacing: 2) {
             capsule
-                .draggable(DraggableSpace(raw: space.raw))
+            chevronMenu
         }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .menuIndicator(.hidden)
         .fixedSize()
+        .draggable(DraggableSpace(raw: space.raw))
         .help(
             L(
                 "monitor_chip.help_full",
@@ -84,6 +88,27 @@ struct SpaceAssignmentChip: View {
         // decision (docs review, 2026-08-04). Both open the same
         // menu.
         .contextMenu { menu }
+    }
+
+    /// The menu's own affordance, sized as a hit target rather
+    /// than as its 9 pt glyph — the rule the ⓧ beside it already
+    /// follows.
+    private var chevronMenu: some View {
+        Menu {
+            menu
+        } label: {
+            Image(systemName: "chevron.down")
+                .font(.system(size: 8, weight: .semibold))
+                .frame(width: 16, height: 16)
+                .contentShape(Rectangle())
+        }
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .accessibilityLabel(
+            L("monitor_chip.move_menu", "Move space")
+        )
     }
 
     private var capsule: some View {
