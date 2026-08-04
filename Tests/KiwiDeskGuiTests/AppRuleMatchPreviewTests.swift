@@ -96,7 +96,7 @@ struct AppRuleMatchPreviewTests {
     @MainActor
     @Test("the preview's verdict is the engine's")
     func previewVerdictMatchesEngine() {
-        let model = SettingsModel(core: makeTestCore())
+        let model = makeTestModel()
         model.config.floatRules = ["\(app):Info"]
         let preview = AppRuleMatchPreview(model: model, app: app)
         for title in [

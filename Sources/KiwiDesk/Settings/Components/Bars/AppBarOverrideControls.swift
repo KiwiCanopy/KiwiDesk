@@ -71,13 +71,13 @@ struct OverrideChrome<Content: View>: View {
         .background {
             if isOn.wrappedValue {
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.accentColor.opacity(0.07))
+                    .fill(SettingsTheme.accent.opacity(0.07))
             }
         }
         .overlay(alignment: .leading) {
             if isOn.wrappedValue {
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(Color.accentColor.opacity(0.7))
+                    .fill(SettingsTheme.accent.opacity(0.7))
                     .frame(width: 2)
             }
         }

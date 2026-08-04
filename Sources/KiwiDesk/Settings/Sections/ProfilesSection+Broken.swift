@@ -23,7 +23,7 @@ extension ProfilesSection {
     private func brokenRow(_ name: String) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Image(systemName: "exclamationmark.triangle")
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .foregroundStyle(.secondary)

@@ -40,7 +40,7 @@ struct LiveApplySettingsModelTests {
             )
         ]
         try core.saveGuiConfig(config)
-        return (SettingsModel(core: core), core)
+        return (makeTestModel(core: core), core)
     }
 
     private func defaultBinding(

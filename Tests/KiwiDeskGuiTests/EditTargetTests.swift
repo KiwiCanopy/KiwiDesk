@@ -17,7 +17,7 @@ private func makeModel() -> SettingsModel {
     // GUI-managed config: the sidecar exists and init.lua
     // holds no foreign code (it doesn't exist at all).
     try? core.guiConfigStore.save(GuiConfig())
-    return SettingsModel(core: core)
+    return makeTestModel(core: core)
 }
 
 /// A stored (non-adopted) profile covering one 100×100 display

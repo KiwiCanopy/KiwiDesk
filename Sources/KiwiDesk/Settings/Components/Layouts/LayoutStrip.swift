@@ -87,14 +87,14 @@ struct LayoutStrip: View {
         RoundedRectangle(cornerRadius: 8)
             .fill(
                 selected
-                    ? Color.accentColor.opacity(0.12)
-                    : Color(nsColor: .controlBackgroundColor)
+                    ? SettingsTheme.accent.opacity(0.12)
+                    : SettingsTheme.card
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(
                         selected
-                            ? Color.accentColor
+                            ? SettingsTheme.accent
                             : Color.secondary.opacity(0.25),
                         lineWidth: selected ? 2 : 1
                     )

@@ -11,11 +11,19 @@ extension StateCoordinator {
         let focused =
             workspaces.activeSpace
             .flatMap { workspaces[$0]?.focused }
+        let home = workspaces.space(of: id)
+        let tiledSlot = home.flatMap { space in
+            workspaces[space].flatMap {
+                effectiveTiledMembers(of: $0, activeSpace: space)
+                    .firstIndex(of: id)
+            }
+        }
         return AppliedEffects.RemovedWindow(
             app: windows[id]?.appName,
             bundleID: windows[id]?.appBundleID,
-            space: workspaces.space(of: id),
-            focusLost: focused == id
+            space: home,
+            focusLost: focused == id,
+            tiledSlot: tiledSlot
         )
     }
 

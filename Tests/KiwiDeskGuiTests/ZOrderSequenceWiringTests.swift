@@ -194,6 +194,24 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("raiseFloor("))
     }
 
+    /// The close path's #674 arm is the same unreachable-wiring
+    /// class: the destroy-raise block gates on
+    /// `eventLoop.isListed`, unconditionally false under
+    /// `makeTestCore`, so the full suite stayed green with the
+    /// call deleted (guard-prover, 2026-08-04). The arm's
+    /// arithmetic is pinned by `ZOrderCloseReturnArmTests`; this
+    /// pins that the destroy handler still calls it — the one
+    /// line free to regress.
+    @Test("The destroy handler arms the close-return restack")
+    func destroyHandlerArmsCloseReturnRestack() throws {
+        let source = try body(
+            of: "handle",
+            in: "KiwiCore+Events.swift",
+            under: "App"
+        )
+        #expect(source.contains("armCloseReturnRestack("))
+    }
+
     /// The teardown restack is the one raise sequence that cannot
     /// self-heal — nothing runs after it — so it is also the one
     /// where reverting to a bare `AXHelper.raiseQuietly` loop

@@ -7,14 +7,17 @@
 /// guards hold against the model and the locale catalogs;
 /// rendering from it starts with the Bars area (Phase 2).
 
-/// The two Settings modes, in the shipped (site-slider)
-/// vocabulary: user-facing "Simple" / "Nerd". The design doc's
-/// "Easy/Advanced" is spec-internal shorthand and never appears
-/// in code or copy; the word "mode" itself stays reserved for
-/// this pair and for layout modes.
-enum SettingsMode: CaseIterable, Hashable {
+/// The two Settings modes: "Simple" / "Power User" (owner
+/// 2026-08-04), user-facing and wire alike. The marketing
+/// site's slider keeps its own "Nerd" flair — a different
+/// surface, never harmonized either way
+/// (`docs/localization-naming.md` owns the pair's policy). The
+/// design doc's "Easy/Advanced" is spec-internal shorthand and
+/// never appears in code or copy; the word "mode" itself stays
+/// reserved for this pair and for layout modes.
+enum SettingsMode: String, CaseIterable, Hashable {
     case simple
-    case nerd
+    case powerUser
 }
 
 /// A Home-level area card in the redesigned Settings window.
@@ -34,22 +37,48 @@ enum SettingsArea: CaseIterable, Hashable {
 
     /// The mode an area first appears in — mode depth is per
     /// area, never per row. `.simple` areas render in both
-    /// modes; `.nerd` areas exist only while Nerd mode is on
-    /// (Nerd adds surface, never expands it).
+    /// modes; `.powerUser` areas exist only while Power User
+    /// mode is on (it adds surface, never expands it).
     var minimumMode: SettingsMode {
         switch self {
-        case .layoutDefaults, .advancedColours, .behaviour,
-            .monitors:
-            return .nerd
-        case .gapsAndBorders, .shortcuts, .coloursAndMotion,
-            .bars, .spacesAndLayouts, .profiles, .appRules,
-            .general:
+        case .advancedColours, .behaviour, .monitors:
+            return .powerUser
+        // Layout Defaults is `.simple` (owner ruling
+        // 2026-08-04), against the digest's own Advanced
+        // placement. The argument that moved it: these are
+        // parameters people LEARN the app by playing with —
+        // change a split ratio, watch the windows move — so
+        // withholding them teaches nothing and hides the thing
+        // a tiling window manager is for. Its size (the largest
+        // card in the app) was the case for Advanced, and size
+        // is a reason to organise a card well, not to hide it.
+        //
+        // The per-space OVERRIDE stays gated (`SpaceOverrideOffer`)
+        // — editing one layout's defaults is the feature; editing
+        // them per space is bookkeeping about exceptions.
+        case .layoutDefaults, .gapsAndBorders, .shortcuts,
+            .coloursAndMotion, .bars, .spacesAndLayouts,
+            .profiles, .appRules, .general:
             return .simple
         }
     }
+
+    /// `minimumMode` with the one COMPUTED promotion (turn 9):
+    /// Monitors joins Simple whenever two or more displays are
+    /// connected — a multi-monitor desk needs space placement in
+    /// its first week. Computed at read, never stored: writing
+    /// the promotion back would strand it after a disconnect.
+    func effectiveMinimumMode(
+        displayCount: Int
+    ) -> SettingsMode {
+        if self == .monitors, displayCount >= 2 {
+            return .simple
+        }
+        return minimumMode
+    }
 }
 
-/// How deep a setting sits. "Show more" rows and nerd-only cards
+/// How deep a setting sits. "Show more" rows and Power-User-only cards
 /// are different things — never conflate them in copy or code:
 /// `.showMore` is a
 /// row-level disclosure; mode depth is
@@ -172,8 +201,13 @@ enum SettingRuntimeGate: Hashable {
     /// The orphaned-pins card exists only while a space is
     /// pinned to a disconnected monitor.
     case orphanPinsExist
-    /// The not-connected banner shows only while a pinned
-    /// monitor is absent.
+    /// A stored profile is being edited AND its monitors are not
+    /// attached — one slot, so this tag carries both arms, like
+    /// `paletteGlowPairing` and `luaImportAvailable` below. There
+    /// are then no display frames to draw the Monitors picture
+    /// from, so the condition surfaces the not-connected banner
+    /// and withholds the cards it stands in for
+    /// (`MonitorsGates` resolves both sides).
     case monitorsDisconnected
     /// The neon "Pair with Glow" link shows only for palettes
     /// that carry the glow pairing (#578) — and only while
@@ -216,10 +250,13 @@ enum SettingRuntimeGate: Hashable {
 /// the predicate knowable only inside the area's resolver. Two
 /// such tags existed for one commit; `.runtimeAnyOf` replaced
 /// them, and with them a hand-kept register of which tags were
-/// secretly compound. The two remaining CONJUNCTIONS
-/// (`paletteGlowPairing`, `luaImportAvailable`) each state both
-/// arms in their own docstring — an `allOf` has no second
-/// client yet, and one client is not a shape.
+/// secretly compound. The remaining CONJUNCTIONS
+/// (`paletteGlowPairing`, `luaImportAvailable`,
+/// `monitorsDisconnected`) each state both arms in their own
+/// docstring — `allOf` stays unbuilt because a conjunction has
+/// no per-arm sentence to render: a row dead for both reasons
+/// says one thing, while a disjunction has to name the arm that
+/// killed it.
 enum SettingGate: Hashable {
     case setting(SettingKey)
     case anyOf([SettingKey])

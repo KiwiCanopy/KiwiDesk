@@ -232,66 +232,6 @@ extension SettingsModel {
         reload()
     }
 
-    // MARK: - Space placement (Canvas)
-
-    /// Where a space renders in the Canvas, via the same
-    /// `SpacePlacement` precedence the runtime resolves with
-    /// (pin → Main → positional default). There is no
-    /// "unassigned" state — defaults compose a concrete
-    /// layout (#53). One conscious divergence: a pin to a
-    /// disconnected monitor renders as pinned (the user's
-    /// intent), while the runtime places the space on the
-    /// fallback display until that monitor returns.
-    func resolution(for space: SpaceID) -> SpaceResolution {
-        let mainID = PositionalDisplays.liveMainID
-        let assignment =
-            ProfileComposition.compose(
-                displays: displays,
-                mainID: mainID
-            )?.assignment ?? [:]
-        let resolved = SpacePlacement.resolve(
-            space: space,
-            pins: config.spacePins,
-            mainSpaces: config.mainSpaces,
-            displays: displays,
-            mainID: mainID,
-            assignment: assignment
-        )
-        switch resolved {
-        case .pinned(let display):
-            return .pinned(display.fingerprint)
-        case .pinnedAbsent(intent: let pin, fallback: _):
-            return .pinned(pin)
-        case .main:
-            return .main
-        case .auto(let display):
-            return .auto(display.fingerprint)
-        case nil:
-            return .auto(nil)
-        }
-    }
-
-    /// Human-readable monitor name, falling back to the raw
-    /// fingerprint when that display isn't connected — used by
-    /// the Monitors cards and the profile rows (§3.15).
-    func monitorName(_ fingerprint: String) -> String {
-        displays.first {
-            $0.fingerprint == fingerprint
-        }?.name ?? fingerprint
-    }
-
-    /// The current main display's fingerprint, for the Main
-    /// drop target's live annotation. Falls back positionally
-    /// (leftmost), matching the runtime.
-    var mainFingerprint: String? {
-        let mainID = PositionalDisplays.liveMainID
-        return
-            (displays.first { $0.id == mainID }
-            ?? PositionalDisplays.ordered(
-                displays,
-                mainID: mainID
-            ).first)?.fingerprint
-    }
 }
 
 /// One saved profile as the load list shows it (#36).
@@ -324,12 +264,4 @@ struct ProfileSummary: Identifiable {
 struct ProfileResolution: Equatable {
     let verdict: ProfileVerdict
     let screens: Int
-}
-
-/// How a space's screen resolves in the Canvas (#36).
-enum SpaceResolution: Equatable {
-    case pinned(String)
-    case main
-    /// Auto-assigned by the positional default (#53).
-    case auto(String?)
 }

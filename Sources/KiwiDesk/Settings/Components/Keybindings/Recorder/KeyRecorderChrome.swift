@@ -24,12 +24,12 @@ struct RecorderButtonChrome: ViewModifier {
             .background {
                 if !recording {
                     RoundedRectangle(cornerRadius: 5)
-                        .fill(.quaternary.opacity(0.5))
+                        .fill(SettingsTheme.sunken)
                         .allowsHitTesting(false)
                 } else {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(
-                            Color.accentColor.opacity(0.08)
+                            SettingsTheme.accent.opacity(0.08)
                         )
                         .padding(-4)
                         .allowsHitTesting(false)
@@ -39,7 +39,7 @@ struct RecorderButtonChrome: ViewModifier {
                 if recording {
                     RoundedRectangle(cornerRadius: 6)
                         .strokeBorder(
-                            Color.accentColor.opacity(0.4),
+                            SettingsTheme.accent.opacity(0.4),
                             lineWidth: 1.5
                         )
                         .padding(-4)

@@ -33,7 +33,7 @@ struct PausedGlobalsSaveTests {
             hotkeyRegistrar: PausedRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())
-        return (SettingsModel(core: core), core)
+        return (makeTestModel(core: core), core)
     }
 
     /// A global edit: an app rule, which has no monitor
@@ -163,7 +163,7 @@ struct PausedGlobalsSaveTests {
         // `setPermissionPaused`, so the first seed must already
         // be correct — an earlier cut of this fix gated on that
         // flag and the test hid the gap by re-seeding.
-        let model = SettingsModel(core: core)
+        let model = makeTestModel(core: core)
 
         #expect(
             model.config.spaces == [
@@ -217,7 +217,7 @@ struct PausedGlobalsSaveTests {
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )
-        let model = SettingsModel(core: core)
+        let model = makeTestModel(core: core)
         model.permissionPaused = true
         #expect(core.lua == nil, "fixture is not a cold core")
 
@@ -259,7 +259,7 @@ struct PausedGlobalsSaveTests {
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )
-        let model = SettingsModel(core: core)
+        let model = makeTestModel(core: core)
         model.permissionPaused = true
         model.reload()
 

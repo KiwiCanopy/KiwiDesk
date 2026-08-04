@@ -172,18 +172,18 @@ lands.
 Two obligations a translator meets while editing a catalog, which
 is why they are here rather than beside the views:
 
-- **A sidebar destination label past `sidebarLabelColumn` gets a
-  SHORTER LABEL, never a wider column.** The column is a fixed
-  app-wide axis and System Settings' own does not grow per
-  language. Shorten with the whole meaning intact: the pane's
-  heading is that same `destination.title`, so a trimmed label is
-  the only name the user ever reads. `SidebarLabelWidthTests`
-  measures every shipped label — and retires with the sidebar
-  when #678's Home grid replaces it, so this bullet goes in the
-  same change set. Note the redesign takes the OPPOSITE line for
-  ordinary *row* labels: there the control is fixed and the label
-  flexes and wraps. Single-line and truncating is a property of a
-  source-list row, not a house rule to carry forward.
+- **A destination label wants to be a short noun in every
+  language** — it is a card title, a back-chip heading and a
+  search row all at once, drawn single-line (`HomeCard`'s
+  title row owns the `lineLimit`; the metrics file keeps only
+  the icon tile). Since #678
+  turn 9 dropped the sidebar there is no fixed column to
+  measure against (the label-width suite retired with it, as
+  this bullet promised): a card flexes, so an over-long label
+  truncates visibly rather than breaking a budget. Shorten with
+  the whole meaning intact — the trimmed label is the only name
+  the user ever reads. Ordinary *row* labels take the OPPOSITE
+  line: the control is fixed and the label flexes and wraps.
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own

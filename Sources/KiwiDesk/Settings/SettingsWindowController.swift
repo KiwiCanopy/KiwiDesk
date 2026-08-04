@@ -81,6 +81,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.permissionPaused = paused
     }
 
+    /// Routes Home's "Show me around" to the welcome tour's
+    /// voluntary replay (#678 turn 14c).
+    func setShowTour(_ handler: @escaping () -> Void) {
+        model.onShowTour = handler
+    }
+
     /// Non-destructive refresh for the quick menu's layout
     /// actions: recomputes only the live-vs-saved drift
     /// captions, never reseeding `config` — staged edits
@@ -122,14 +128,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         if !model.isDirty {
             model.reload()
         }
-        // Profiles is the entry point for a first-run and a
-        // returning user alike (§5.8). The selection now lives on
-        // the model so it survives the locale re-key, so "default
-        // selection" has to be re-asserted on open rather than
-        // falling out of `@State` being fresh. A deep link set
-        // `pendingReveal` just above and still wins — the view
-        // consumes it after this.
-        model.destination = .profiles
+        // Home is the entry point for a first-run and a
+        // returning user alike (turn 9 — the grid is the
+        // overview §5.8 once sent to Profiles). The selection
+        // lives on the model so it survives the locale re-key,
+        // so the default has to be re-asserted on open rather
+        // than falling out of `@State` being fresh. A deep link
+        // set `pendingReveal` just above and still wins — the
+        // view consumes it after this.
+        model.destination = nil
         // The two surface selections live on the model too now
         // (#277), so they need the same re-assertion — otherwise
         // reopening Settings can land in the App Bar editor.
@@ -142,8 +149,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             contentRect: NSRect(
                 x: 0,
                 y: 0,
-                // Tracks the shell's 840pt minimum (#297) with
-                // a little slack on first launch.
+                // Comfortably above the shell's 720pt hard
+                // minimum (#678 turn 9) on first launch.
                 width: 860,
                 height: 620
             ),
@@ -154,17 +161,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = L("sidebar.app_name", "KiwiDesk")
-        // Titlebar text hidden: the sidebar header carries the
-        // app identity and the detail's own header bar shows the
-        // section name. `title` still names the Window menu.
+        window.title = L("app.name", "KiwiDesk")
+        // Titlebar text hidden: the header bar carries the app
+        // identity on Home and the area title when pushed.
+        // `title` still names the Window menu.
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        // An empty unified toolbar makes the sidebar run
-        // full-height with the traffic lights over it (the
-        // System Settings look). The detail's header bar pulls
-        // up under it (`ignoresSafeArea` in `SettingsView`), so
-        // no empty toolbar strip shows above the header.
+        // An empty unified toolbar keeps the traffic lights
+        // over the header bar, which pulls up under it
+        // (`ignoresSafeArea` in `SettingsView`), so no empty
+        // toolbar strip shows above the header.
         let toolbar = NSToolbar()
         toolbar.showsBaselineSeparator = false
         window.toolbar = toolbar
@@ -179,10 +185,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.delegate = self
         window.center()
         window.setFrameAutosaveName("KiwiDeskSettings")
-        // A frame saved by a pre-#297 build can be narrower
-        // than the shell's new 840pt minimum; min-size only
-        // gates user resizing, not the restore, so clamp once.
-        if window.frame.width < 840 {
+        // A frame saved by an older build can be narrower than
+        // the shell's minimum; min-size only gates user
+        // resizing, not the restore, so clamp once.
+        if window.frame.width < 720 {
             let content = window.contentRect(
                 forFrameRect: window.frame
             )

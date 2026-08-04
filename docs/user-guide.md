@@ -27,32 +27,46 @@ space uses, the gaps, the bars, and the shortcuts.
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while KiwiDesk is the active app. The window shows a
-two-group sidebar on the left:
+**⌘,** while KiwiDesk is the active app. The window opens on
+**Home** — a grid of cards, one per settings area, in two
+groups:
 
-- **Design** — sections scoped to the active profile (Spaces,
-  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
-  Advanced Colors, Behavior).
-- **System** — global settings that apply everywhere (Profiles,
-  Shortcuts, App Rules, General).
+- **This Profile** — areas scoped to the profile being edited
+  (Spaces, Gaps & Borders, Bars, Colors & Motion,
+  and in Power User mode Layout Defaults, Monitors, Behavior,
+  Advanced Colors).
+- **Whole App** — settings that apply everywhere (Shortcuts,
+  Profiles, App Rules, General).
 
-The sidebar is a fixed-width column, like System Settings — it
-cannot be resized or collapsed.
+Every card shows its area's current values — spaces and
+layouts in use, gap and border sizes, how many shortcuts are
+bound — so most questions are answered without opening
+anything. Click a card to open its area; the **← Home** chip
+(or **⌘[** / Escape) brings you back.
 
-At the top you'll see the app name and a banner showing which
-profile is loaded and letting you edit a saved profile without
-switching to it. At the bottom, a stable three-slot footer holds
-Revert, Save a Copy As…, and Save.
+The header carries a **Simple | Power User** switch. Simple shows
+the eight everyday cards; Power User adds the deeper four (Layout
+Defaults, Monitors, Behavior, Advanced Colors). The switch
+only changes which cards exist — nothing behind it stops
+working, and the Monitors card joins Simple by itself while
+two or more displays are connected. While you have unsaved
+edits, the header counts them ("3 unsaved changes"); Save and
+Revert live in the footer.
 
-### Sidebar Search
+The header also shows which profile is loaded and lets you
+edit a saved profile without switching to it. At the bottom, a
+stable three-slot footer holds Revert, Save a Copy As…, and
+Save.
 
-A search field sits at the top of the sidebar, under the app
-name. Typing filters the sidebar to the sections that match —
-by section name or by any of the titled groups inside a section
+### Search
+
+The search field sits in the middle of the header and is a real
+field: click it and type, or press **⌘K** from anywhere in the
+window to put the cursor in it. Matches appear in a list under
+the field while you keep typing. Typing lists the areas that match — by
+area name or by any of the titled groups inside one
 (searching "sticky" finds Gaps & Borders, "focus" finds
 Shortcuts).
-While active, a subtle blue outline marks keyboard focus; the
-lighter placeholder gives way to normal text as soon as you type.
 
 Each result leads with the words that actually matched, and puts
 the trail to them in a smaller line underneath — so a hit on the
@@ -72,9 +86,9 @@ lands on that row, highlighted, ready to open.
 
 Only the first match per section is listed, so a broad word like
 "color" gives you one row per section instead of a wall of them;
-type a little more to reach a different one. The query stays put
-while you navigate — press Escape or the clear button to get the
-full sidebar back.
+type a little more to reach a different one. Press Escape or the
+clear button to empty the query — an empty query is what closes
+the result list, and picking a result empties it for you.
 
 Matching ignores case, accents, and hyphens-versus-spaces, so
 "grosse" finds "Größe" and "space bar farben" finds
@@ -491,7 +505,7 @@ override for the app instead.
 
 ## Spaces
 
-The **Spaces** section (in the **Design** group) lists every virtual
+The **Spaces** section (in the **This Profile** group) lists every virtual
 workspace you manage. Each space is independent of monitors and can
 span multiple displays or run on just one.
 
@@ -534,7 +548,8 @@ windows land in the first space of the profile's list.
 
 ## Layout Defaults
 
-The **Layout Defaults** section (in the **Design** group) controls
+The **Layout Defaults** section (in the **This Profile** group;
+its card appears in **Power User** mode) controls
 tiling for every space in this profile.
 
 ### Modes
@@ -769,25 +784,64 @@ since it also discards the dormant values not otherwise shown.
 
 ## Monitors
 
-The **Monitors** section (in the **Design** group) pins spaces to
-specific displays for this profile. It appears only when the profile's
-monitor setup is connected; when editing a profile whose monitors
-aren't connected, a read-only note appears instead.
+The **Monitors** section pins spaces to specific displays for this
+profile. It is a **picture of your desk**: each display is drawn at
+its own size and in its own place, so the portrait panel on your
+left is the tall rectangle on the left, and a laptop below a desk
+display is the small rectangle below it. Drag a space onto the
+display it belongs to.
 
-**Drag space chips** onto monitor cards to pin a space to a display.
-A pinned space always appears on that monitor when the profile loads.
+The rectangles are drawn from each display's size **in points** —
+the same measure System Settings ▸ Displays ▸ Arrangement uses — so
+a Retina display does not draw twice the size of an identical
+non-Retina one.
 
-**Drag onto the "Follows main display" card** to give a space the
-**Main role**. That space moves with whatever display is currently
-the Mac's main display (useful for your primary work space when you
-dock/undock).
+**Drag space chips** between displays to pin a space to one. A
+pinned space always appears on that monitor when the profile loads.
+Every chip is also a menu — click it, or right-click it, for the
+same moves. The menu is the route to use from the keyboard: the
+chip takes focus with Tab and opens with Return.
 
-**Dimmed chips** are placed automatically by KiwiDesk — they are not
-manually pinned but still show which spaces run on which monitors.
+**Drag onto the dashed "Follows main display" tray** (it hangs off
+whichever display is currently main) to give a space the **Main
+role**. That space moves with whatever display is main, which is
+what you want for your primary work space when you dock and undock.
 
-When you add a new monitor and save the profile, the new arrangement
-is recorded so the profile becomes available for future loads with
+**Outlined chips** are placed automatically by KiwiDesk — they are
+not manually pinned, but they still show which spaces run on which
+monitors. A filled chip is one you placed; its clear button puts it
+back to automatic.
+
+**Click a display** to see what it holds — how many spaces live
+there, and which one is showing right now. A display too small to
+draw all its chips shows a **+n**; click it for every space on
+that display, each chip working exactly as it does on the card.
+
+Two notes appear only when they apply:
+
+- *"Sizes are approximate"* — your displays are too different in
+  size to draw to scale and still leave the smallest one big enough
+  to drop a space onto, so the largest is drawn smaller than life.
+- *"Some of these displays look identical to KiwiDesk"* — KiwiDesk
+  recognises a display by its name and resolution, so two of the
+  same model at the same resolution are one identity to it, and a
+  space pinned to one may open on either.
+
+**Monitor fingerprints** at the bottom is a read-only drawer: it
+shows how KiwiDesk recognises each display when it reconnects. When
+you add a new monitor and save the profile, the new arrangement is
+recorded so the profile becomes available for future loads with
 this hardware.
+
+When you are editing a profile whose monitors are not attached
+right now, there are no real frames to draw, so the picture is
+replaced by a note saying so — the profile's other sections still
+edit normally.
+
+A space pinned to a monitor that is not attached gets its own card
+below the picture, with a **Back to automatic placement** button;
+there is no rectangle for absent hardware, so this is the only
+place that pin can be seen or cleared.
 
 Each monitor shows its own space at once, and the **focused
 monitor** is simply the one you last clicked — clicking a window
@@ -797,7 +851,7 @@ space. Clicking the menu bar or the Dock does not move focus.
 
 ## Gaps & Borders
 
-The **Gaps & Borders** section (in the **Design** group) sets the
+The **Gaps & Borders** section (in the **This Profile** group) sets the
 STRUCTURE of everything KiwiDesk draws around your windows: the
 spacing, the drag overlays' shape, the focus ring's width and
 glow, and whether a sticky window carries a mark. What any of it
@@ -1283,7 +1337,7 @@ dragged window must hover a Space before the view springs to it
 
 ## Colors & Motion
 
-The **Colors & Motion** section (in the **Design** group) is the
+The **Colors & Motion** section (in the **This Profile** group) is the
 whole colour story for most people: pick a palette, see what you
 are running, and set how windows move. Nothing here asks you to
 choose an individual colour — that is the next section, and you
@@ -1416,7 +1470,8 @@ you can re-apply anywhere.
 
 ## Behavior
 
-The **Behavior** section (in the **Design** group) adjusts
+The **Behavior** section (in the **This Profile** group; its
+card appears in **Power User** mode) adjusts
 mouse interaction and what happens on quit.
 
 ### Mouse & Window Behavior
@@ -1480,7 +1535,7 @@ only strategy today.)
 
 ## Profiles
 
-The **Profiles** section (in the **System** group) manages saved
+The **Profiles** section (in the **Whole App** group) manages saved
 layouts. A profile is your whole setup, remembered per display
 arrangement: it captures tiling (modes, gaps, parameters),
 space-to-monitor pins, and optionally a sparse keybinding override
@@ -1551,12 +1606,12 @@ global config; every saved profile is listed below, one row each
 
 - **Edit Live** (top entry): the running config. Saving here
   adopts your changes into the loaded profile as usual.
-- **Edit** a saved profile **without switching** — the Settings
-  sidebar becomes profile-scoped: the Design sections (Spaces,
-  Layout, Monitors, Gaps & Borders, Bars, Colors & Motion,
-  Advanced Colors, Behavior) edit this profile, and
-  **General is hidden** — it holds global state a profile edit
-  never writes. Save writes to this profile's JSON instead of
+- **Edit** a saved profile **without switching** — Home
+  becomes profile-scoped: the This Profile cards (Spaces,
+  Layout Defaults, Monitors, Gaps & Borders, Bars,
+  Colors & Motion, Advanced Colors, Behavior) edit this
+  profile, and **the General card leaves the grid** — it holds
+  global state a profile edit never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the
   target, and the menu title shows "*Name* — overrides").
   Shortcuts and App Rules enter override mode and edit only what
@@ -1616,7 +1671,7 @@ choice. With nothing staged the action runs immediately — the
 prompt only appears when there is something to lose.
 
 Until your first profile exists, Settings points the way
-without gating anything: the Profiles sidebar tile carries a
+without gating anything: the Profiles Home card carries a
 small accent dot, and **Start from a preset** leads the page
 with a "Start here" line plus one accent-colored **Apply** —
 on the Standard preset for your connected screen count, so the
@@ -1724,7 +1779,7 @@ reverts to its Standard on the next monitor change.
 
 ## App Rules
 
-The **App Rules** section (in the **System** group) controls where
+The **App Rules** section (in the **Whole App** group) controls where
 windows of specific apps land and whether they tile.
 
 ### One rule, one sentence
@@ -1855,7 +1910,7 @@ change.
 
 ## Shortcuts
 
-The **Shortcuts** section (in the **System** group) binds keyboard
+The **Shortcuts** section (in the **Whole App** group) binds keyboard
 combos to actions. Every shortcut lives in a **layer** — normally
 the **default** layer (active at startup), plus optional extra
 layers (vim-style); only the active layer's bindings fire at a

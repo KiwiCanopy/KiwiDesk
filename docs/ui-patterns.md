@@ -99,7 +99,7 @@ back inside the row: that re-enters the disabled scope.
 **"Lives elsewhere" pointers are links, and the link sits
 where the sentence puts it.** Prose that names another tab
 ("configured in the App Bar tab") is a dead end; those
-pointers are `CrossReferenceRow`s, jumping the sidebar
+pointers are `CrossReferenceRow`s, jumping the pushed-area
 selection through an injected `settingsNavigate` environment
 action.
 
@@ -132,7 +132,7 @@ gives none of them.
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
 ("Bars ▸ App Bar"), not the section name alone: a link
-reading "App Bar" names no row any sidebar shows, and only a
+reading "App Bar" names no row Home or search shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A
 pointer whose sentence names the **feature itself** rather
 than where to find it — a sentence turning on whether the
@@ -263,9 +263,10 @@ Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
   and the `.headline` labels of an "Advanced" disclosure. The
-  **sidebar's `SettingsDestination` titles stay Title Case**
+  **`SettingsDestination` titles (Home cards, back-chip
+  headings) stay Title Case**
   ("Layout Defaults", "App Rules"): they name a destination, as
-  System Settings' own sidebar does. So do **action labels**
+  System Settings names its panes. So do **action labels**
   ("Open New", "Set Gap Values") — a verb-phrase command follows
   the menu-item convention, not this one.
 - **`&` does not start a new sentence**: "Size & float", "Drag &
@@ -294,7 +295,7 @@ what it meant — and the same drawers on the new page do not,
 because the adjective now reads as the page's own name rather
 than as a tier inside it. And a row tier and a mode depth must never
 be spelled with one word: Advanced Colors is the deep-mode twin
-of Colours & Motion (`SettingsArea.minimumMode` is `.nerd`
+of Colours & Motion (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. They are **"More
@@ -361,8 +362,8 @@ Two things decide how far the combined element reaches:
   titled "Monitor fingerprints", so its rows speak the display
   and the hash. The orphan-pin rows sit under "Pinned to
   disconnected monitors", which never says *fingerprint*, so
-  their label carries both halves ("Space 3, pinned to
-  fingerprint …").
+  their label carries both halves — the row's own sentence plus
+  the monitor it is waiting for.
 - **Does the row hold a control?** Combine the **readout only**,
   never the whole row. `children: .combine` folds interactive
   children in too, so wrapping a row that ends in a clear or
@@ -623,6 +624,18 @@ state rather than a setting, is ruled in
 render of the reader's real windows — is in
 [accepted limitations](accepted-limitations.md). Tile counts
 are still capped for legibility with a "+N" chip.
+
+**"+N" means the same thing wherever it appears: there are N
+more, and here is how to see them.** Two surfaces use it — the
+schematics' legibility cap above, and a Monitors card too small
+to draw all its chips — and a third must not invent a
+different grammar. It counts the items NOT shown (never the
+total), it takes a slot of its own so it never claims to hide
+exactly one, and it is an affordance rather than a label
+wherever the hidden items have their own controls: on the
+Monitors card it opens a popover holding every chip, each
+working as it does on the card, because a chip that is merely
+counted has lost its clear button and its menu.
 
 **Intuitiveness over strict Apple-native, where they conflict
 (#125, owner call).** The first cut held to Apple's "one static

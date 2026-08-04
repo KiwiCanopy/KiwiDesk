@@ -275,12 +275,22 @@ struct ScrollingDeferredRaiseTests {
     @Test("Closing the focused window focuses the neighbor")
     func closeFocusedFocusesNeighbor() {
         let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(3))
+        let space = makeScrollingSpace(
+            core,
+            windows: 5,
+            focus: WindowID(3)
+        )
+        // Pin the close-return history at the neighbor: which
+        // window the close picks is `CloseFocusReturnTests`'
+        // subject; this suite pins the raise mechanics of the
+        // handoff.
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.state.workspaces.focus(WindowID(3), in: space)
         guard startDummyPan(core) else { return }
         // Close the focused middle window: focus lands on the
-        // window that slid into its slot (#158), not `windows.last`
-        // — no yank to the far end of the row — and the handoff
-        // raises immediately (previous == target), nothing pends.
+        // close-return pick — never `windows.last` (no yank to
+        // the far end of the row) — and the handoff raises
+        // immediately (previous == target), nothing pends.
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(3), wasMinimized: false)
         )

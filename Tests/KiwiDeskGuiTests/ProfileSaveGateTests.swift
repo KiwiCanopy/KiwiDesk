@@ -27,7 +27,7 @@ struct ProfileSaveGateTests {
             hotkeyRegistrar: GateRegistrar()
         )
         try core.saveGuiConfig(GuiConfig())
-        return SettingsModel(core: core)
+        return makeTestModel(core: core)
     }
 
     @Test("no reason when Accessibility is granted")

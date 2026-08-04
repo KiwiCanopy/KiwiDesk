@@ -44,5 +44,18 @@ public struct AppliedEffects: Sendable {
         let bundleID: String?
         let space: SpaceID?
         let focusLost: Bool
+        /// The gone window's index among its space's effective
+        /// tiled members, pre-removal; nil for a float or
+        /// fullscreen member. The close handler re-derives the
+        /// close-return jump distance from it, because after
+        /// the fold the anchor `focusWindow` classifies from
+        /// IS the pick (#674's arm sees distance zero).
+        /// Scoped to the `focusLost` path: the index is framed
+        /// with the home space as active (sticky-traveler
+        /// injection follows focus), which matches reality
+        /// only there — `focusLost` implies home == active. A
+        /// consumer on a background-space removal inherits a
+        /// counterfactual frame; re-derive instead.
+        let tiledSlot: Int?
     }
 }

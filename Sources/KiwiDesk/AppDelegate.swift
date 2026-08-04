@@ -32,6 +32,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         created.setResolvePermission { [weak self] in
             self?.showAccessibilityHelp()
         }
+        created.setShowTour { [weak self] in
+            self?.replayOnboardingTour()
+        }
         created.setPermissionPaused(!permissions.isTrusted)
         dashboardIfCreated = created
         return created

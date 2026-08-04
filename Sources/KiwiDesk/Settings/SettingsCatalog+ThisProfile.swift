@@ -87,7 +87,7 @@ struct ColorsControls: Sendable {
         "Animations"
     )
     /// Named for what it holds, not "more" or "advanced": this
-    /// area's Nerd twin is a whole separate card, and one word
+    /// area's Power-User twin is a whole separate card, and one word
     /// must never mean both a row tier and mode depth.
     let motionMore = SettingsDrawer(
         "motion.more",

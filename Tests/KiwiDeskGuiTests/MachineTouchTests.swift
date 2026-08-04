@@ -118,6 +118,48 @@ struct MachineTouchTests {
         )
     }
 
+    /// `SettingsModel`'s `preferences` seam defaults to
+    /// `.standard`, and a model driven dirty→clean retires the
+    /// first-run banner — a persistent real-domain write from
+    /// any suite that constructs one bare (#678 turn 9). Same
+    /// omission class as `makeTestCore`; `TestModel.swift`'s
+    /// factory mints scratch domains. GUI tree only — the Core
+    /// target cannot see `SettingsModel`.
+    ///
+    /// Stated residue (this family's usual cut): the needle is
+    /// the literal type name, so a construction spelled through
+    /// `SettingsModel.init(` or a local typealias slips past
+    /// the stray scan — only the factory-alive canary would
+    /// notice the factory itself going dark. No test spells it
+    /// either way today; widen the matcher before excusing one
+    /// that does.
+    @Test("tests build SettingsModel via makeTestModel")
+    func settingsModelConstruction() throws {
+        let guiTree = Self.testTrees.first {
+            $0.lastPathComponent == "KiwiDeskGuiTests"
+        }
+        let sites = try Self.sites(
+            of: "SettingsModel" + "(",
+            under: [try #require(guiTree)]
+        )
+        // The factory must be alive and constructing.
+        #expect(
+            sites.contains {
+                $0.file.lastPathComponent == "TestModel.swift"
+            },
+            "no TestModel.swift build in KiwiDeskGuiTests"
+        )
+        let strays = sites.filter {
+            $0.file.lastPathComponent != "TestModel.swift"
+        }
+        let listed = strays.map(\.site)
+            .joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "bare SettingsModel (real UserDefaults): \(listed)"
+        )
+    }
+
     /// Swift-side drives of the production spawner. Lua-driven
     /// spawns (`KiwiDesk.exec` inside an *executed* fixture) are
     /// out of a text scan's reach — the same string is pure data

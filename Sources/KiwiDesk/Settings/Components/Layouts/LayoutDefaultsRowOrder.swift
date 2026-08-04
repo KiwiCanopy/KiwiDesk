@@ -12,7 +12,7 @@ import KiwiDeskCore
 /// silently missing control.
 ///
 /// **Every list here is at rest.** The area declares no
-/// `.showMore` row at all: it is a Nerd-mode area whose whole
+/// `.showMore` row at all: it is a Power-User-mode area whose whole
 /// job is the tuned layouts' parameters, and a disclosure inside
 /// a card the reader already opened by choosing its layout would
 /// hide a setting behind two doors. That is an obligation, not an

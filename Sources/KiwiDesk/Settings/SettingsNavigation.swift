@@ -85,6 +85,12 @@ struct SettingsNavigation {
     /// deep-link INTO a specific space's editor is later wanted.
     var spaceOverridesFocus: SpaceID?
 
+    /// The card whose area is currently pushed, so popping back
+    /// to Home can return keyboard focus to it (turn 20: leaving
+    /// a sub-view returns to the originating row). Written when
+    /// a card pushes; consumed by `HomeScreen.onAppear`.
+    var homeReturnFocus: SettingsDestination?
+
     /// Forgets the surface selection, so it re-derives its
     /// default. For window open, which re-asserts `destination`
     /// for the same reason, and for an **edit-target switch**,

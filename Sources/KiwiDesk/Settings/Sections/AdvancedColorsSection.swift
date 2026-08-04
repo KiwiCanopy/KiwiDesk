@@ -16,7 +16,7 @@ import SwiftUI
 /// `SettingsContainer.gate` — the same containers the Bars page
 /// gates from, which is what "a container spans two areas" buys.
 ///
-/// The area's census `minimumMode` is `.nerd`, but no mode toggle
+/// The area's census `minimumMode` is `.powerUser`, but no mode toggle
 /// ships until Phase 4, so during coexistence it renders
 /// unconditionally and sits in the sidebar directly under its
 /// Simple twin. That adjacency is the only thing currently saying

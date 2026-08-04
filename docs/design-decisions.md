@@ -1169,6 +1169,74 @@ non-standard *controls*, which is the half that stays bound.
 (Owner ruling 2026-08-02, in chat; first applied in the Phase 2
 Bars area.)
 
+### The Settings window paints its own colours, and its accent is kiwi
+
+**[Principle]**
+
+**Every surface, border and ink in the Settings window comes from
+one token table (`SettingsTheme`), and the window tints its
+controls with KiwiDesk green rather than the user's system
+accent.** Two halves, one argument.
+
+*One table.* Before it, the header was a `.bar` vibrancy
+material, the cards `controlBackgroundColor`, the hairlines
+`Color.primary.opacity(0.12)` — three neighbouring greys from
+three unrelated systems, none of which moved when another did,
+and one of which (the vibrancy) took its colour from whatever
+window happened to sit behind KiwiDesk. That last is why the
+shipped shell read as the wrong colour: the app had not chosen
+it. A token also has a dark counterpart by construction, which an
+opacity wash over an unknown backdrop can never have — the paused
+banner's amber could not be given one at all while it was
+`.orange.opacity(0.12)`.
+
+*Kiwi accent.* A user who sets a pink system accent loses it
+inside this one window, and that is the price. What it buys is
+that the window looks like KiwiDesk rather than like a generic
+form, which is the same argument as the entry above: the IA and
+the look are ours. The accent is also the one token that does not
+change between light and dark, because brand recognisability is
+the thing it carries.
+
+What breaks if this is ignored: a second hex literal beside a
+view, which is invisible until the day the palette moves and one
+surface stays behind — and, for the accent, a window that is half
+kiwi (the chrome KiwiDesk draws) and half whatever the user set
+(the native controls), which reads as unfinished rather than as
+respectful. (Owner rulings 2026-08-04, in chat.)
+
+### The header search is a field, not a button that opens one
+
+**[Trade-off]**
+
+**The search entry in the header is the real text field, and its
+results hang below it as an overlay rather than in a popover.**
+
+It shipped the other way round: a field-shaped button that opened
+a popover containing the actual field and the results. That was
+defensible while the button was a small pill — a popover takes
+the key window for free, so focus and dismissal come from AppKit
+— and it became indefensible the moment the field grew to the
+full width the design calls for. A search field you click and
+cannot type into is a lie about what the control is, and the
+second field appearing on top of the first is the user's evidence
+for it.
+
+The trade-off is that a popover cannot be used for the results
+either: it would take the key window away from the header field
+on the first keystroke that produced a result, which is precisely
+why the field lived inside the popover before. So the results are
+a plain overlay, and the shell must lift the header's `zIndex`
+above the content below it or the list is drawn over. That lift
+looks like a cosmetic line and is load-bearing.
+
+What breaks if this is ignored: someone "simplifies" the overlay
+back into a popover and the field stops accepting the second
+keystroke — or removes the `zIndex` and the results become
+invisible while every test still passes, since nothing about
+paint order is observable from the view tree. (Owner report
+2026-08-04, in chat.)
+
 ### Hover help appears sooner than AppKit's default
 
 **[Trade-off]**
@@ -1399,7 +1467,8 @@ Light / Dark*; System is the default and stores nothing.
   a dark counterpart, and the bars and border overlays are their
   own windows a Settings-view modifier never reaches. And it does
   not cleanly revert: AppKit-backed subviews (`NSViewRepresentable`
-  captions, the visual-effect sidebar) resolve their appearance
+  captions, and at the time the sidebar's visual-effect
+  backing) resolve their appearance
   when made and do not re-read it when the modifier returns to
   `nil`, so *Dark → System* stranded them dark while *Dark → Light*
   — a new concrete value — looked fine (found on device before it
@@ -1468,52 +1537,103 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
-**Two-group sidebar, topic-named: "Design" vs "System".**
-Every control either travels with the profile being edited or
-is app-wide, and the old flat tabs hid which was which — the
-single biggest source of confusion. The sidebar makes the
-split part of the navigation, but names the groups by *topic*,
-not scope (System Settings groups by subject, never by
-per-machine/per-user scope): **Design** holds the
-profile-scoped content, **System** the app-level surfaces
-(`SettingsDestination.thisProfile` / `.wholeApp` are the
-membership, and the only copy of it). Scope stays the underlying
-model — the header's profile picker shows which profile
-"Design" edits — it's just no longer the group label, since a
-new user can't predict placement from "is this a Profile
-thing?". The membership is unchanged from the earlier "This
-Profile" / "Whole App" split; only the labels are topical.
-(#68 §3.1)
+**Home is the only navigator: a card grid, not a sidebar.**
+(#678 turn 9, superseding the #68/#297 fixed source list.) A
+sidebar is a menu the user pays for on every visit — a column
+of names that answers nothing until clicked. Home inverts
+that: each destination is a card carrying its **current
+values** (and, where a real renderer exists, a small live
+picture), so "is my gap 8 or 10?" is answered without opening
+anything, and the window opens as a status board rather than a
+launcher. An area screen is a pushed view behind a "← Home"
+back chip (⌘[ and Escape pop it; Escape only when no inner
+view claimed the key). What this buys over the sidebar it
+replaced: the full window width for content, an entry screen
+that scales to the mode's card count instead of a fixed
+taxonomy column, and per-language label budgets that die with
+the fixed column (a card flexes; an over-long label truncates
+visibly). What it costs, accepted: a second click to move
+between sibling areas until the pill row lands (Phase 4). The
+old `HStack`-not-`NavigationSplitView` finding stands as
+history — macOS 26 cannot lock a split-view divider — but
+nothing composes columns any more, so nothing rests on it.
 
-**The sidebar is a fixed-width, floating, non-resizable
-column.** (#297) The taxonomy is **closed** — the sidebar shows
-exactly the `SettingsDestination` cases, never a user-grown list
-— so whatever its length it never needs more or less room than
-its longest label, and a draggable divider is the same
-"bespoke panel" tell that got the collapse toggle removed
-(#68) — and a collapsed sidebar had no affordance to reopen
-it. System Settings, the GUI north star, fixes its sidebar
-too. Mechanically the shell composes the two columns with a
-plain `HStack`, not `NavigationSplitView`: on macOS 26 the
-split view's divider cannot be locked by any supported means
-(the column-width modifier is ignored, `NSSplitViewItem`
-thickness writes are reverted by the private controller,
-delegate interception crashes), so the static column is fixed
-by construction rather than by fighting the framework —
-revisit if a later macOS/SwiftUI exposes a supported
-fixed-width sidebar. The
-column renders as the macOS 26 floating pane: a rounded,
-shadowed card inset from the window edges with the traffic
-lights inside its top-left, in near-window-background gray
-(settled by eye against System Settings), with no divider
-line, and softly-shadowed icon tiles. When the window resigns
-key the card goes flat #F7F7F7 (sampled from System Settings'
-inactive sidebar; dark mode falls back to the flat window
-background) and the hand-built chrome above the list
-(identity, search, icon tiles) fades uniformly — hue kept,
-never desaturated (`InactiveDimmed`), keyed to fully-inactive
-only so the shared color panel taking key does not dim the
-sidebar.
+**Home's two groups are scope-named: "This Profile" / "Whole
+App".** (#678 turn 9, reversing the #68 "Design"/"System"
+topical naming — deliberately, not by drift.) The topical
+names existed because a *sidebar* label had to predict
+placement for a user who couldn't see the contents. A card
+grid shows the contents: every This Profile card renders
+values from the draft the header's profile chip names, so the
+scope label is no longer a prediction the user must make — it
+is a caption over evidence. Scope was always the primary
+navigation axis (turn 2 kept it through every concept);
+naming it honestly beats a topical alias once the cards carry
+the proof. `SettingsDestination.thisProfile` / `.wholeApp`
+remain the membership's one copy, and `HomeCardOrderTests`
+pins the grid's groups to them.
+
+**A card's picture comes from a renderer that already asks the
+real data, or the card stays text-only.** (#678 turn 9.) The
+turn-9 frames draw every profile card with a dark preview tile
+from a unified draft renderer that does not exist until Phase
+4, and hand-drawing stand-ins would ship previews that teach
+what the app does not do — the #702 class of defect, at grid
+scale. So the Bars card mounts the real `SpaceBarPreviewStrip`
+(Plain really drops the plate, thickness really moves the
+strip), Layout Defaults a real `LayoutSchematicView`, Monitors
+the real `MonitorArrangement` maths, Shortcuts the recorder's
+own combo glyphs — and Gaps & Borders, Colours, Advanced
+Colours, Behaviour and General carry no picture at all rather
+than a sketch. A card that gains a picture gains it by
+reusing a renderer, never by drawing beside one.
+
+**The Simple/Power User segment gates whole cards, and navigation
+into a withheld card switches the mode rather than refusing.**
+(#678 turns 4/9.) Mode depth is per area
+(`SettingsArea.minimumMode`) — never per row, and never an
+input to anything that resolves behavior. Monitors is the one
+COMPUTED promotion: it joins Simple while 2+ displays are
+connected, decided at read so a disconnect cannot strand a
+stored flag. Search and cross-references index both modes, so
+a landing in a Power-User-only area flips the segment (visible in
+the header) instead of dead-ending; flipping Power User → Simple
+while standing in a Power-User-only area pops to Home, because the
+area ceased to exist — mode gates cards, so this is the
+"which cards exist" rule, not a grey-don't-hide violation.
+The pick persists like the appearance choice (`UserDefaults`,
+absent = Simple, never `gui.json` — a sidecar write would
+flip config ownership).
+
+**The header shows a count of the draft, not a second save
+surface.** (#678 turn 9.) The turn-9 frame draws three views
+of one draft on one screen — the floating save pill, the
+top-right unsaved button's popover, and (in this codebase) the
+docked three-verb footer. The footer already is the pill's
+final form (turn 17: below 900 pt "the pill docks as a real
+footer"), so the pill is not built, and the popover waits for
+the Phase 4 renderer work that gives diff rows their label
+authority — a popover listing a partial diff would claim the
+list is the whole draft. What ships is the honest subset: a
+count-only chip fed by `SettingsDraftDiff`, which resolves
+changed model leaves to census settings (many leaves under one
+setting count once), so the number is the number of settings
+the user changed, not an implementation detail. Save and
+Revert stay in the footer alone.
+
+**The first-run banner orients once, then gets out of the
+way.** (#678 turn 14c.) Home opens already full — the tour
+seeded a real setup — so the first visit gets a banner saying
+so ("You are already set up"), never a wizard or an outlined
+empty state. It seeds when the tour reaches its closing beats,
+and retires permanently on dismiss or on the first clean
+transition of a dirty draft (save, revert, or a confirmed
+discard): a user who just acted on their settings is past
+needing orientation, and a welcome that lingers becomes
+chrome. "Show me around" is the welcome tour's first
+*voluntary* entry point — the other callers are all
+involuntary (permission loss, discovery resume) — so replay
+starts at the top rather than at the step a trigger needed.
 
 **Live-apply is the rare exception, earned per control — not
 per tab.** (Settled 2026-07-10, full-Settings audit; #123.) A
@@ -1783,7 +1903,7 @@ spotlight, never a gate** (QA 2026-07-19): a "Start here"
 lead-in, ONE accent-prominent Apply — the appliable count's
 Standard preset, since prominence on every appliable preset
 put three accent buttons in one field — an accent dot on
-the Profiles sidebar tile, and a pre-filled first-save
+the Profiles Home card's tile, and a pre-filled first-save
 name. A hard first-run gate was
 considered and rejected — System Settings never gates a
 pane, the zero-profile state recurs whenever the last
@@ -1862,7 +1982,7 @@ exist yet", which is a runtime gate rather than a depth. That is
 what `SettingTier.immediate` is for, and why an `.immediate` row
 without a gate is meaningless.
 
-**Overrides always resolve; the Simple/Nerd mode never
+**Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's
 shortcut overrides apply — an early draft of the redesign
 specified one, with a default and an upgrade migration, and it
@@ -1897,7 +2017,7 @@ add a mode parameter to it.
 **A named alternate keybinding set is a LAYER, never a
 mode.** "Mode" was already carrying two unrelated meanings —
 a space's layout (monocle, grid, …) and the Settings window's
-Simple/Nerd depth — and a third sense made every sentence
+Simple/Power-User depth — and a third sense made every sentence
 about any of them ambiguous: "switch mode" could mean three
 things, and "only the active mode's shortcuts fire" had to
 name which kind of mode it meant to be read at all. Layer
@@ -2284,6 +2404,38 @@ parking decision, and an overshoot yanks a parked window back
 into the layout. If demand for reaching minimized windows ever
 materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
+
+**Close-return focus: closing the focused window returns focus
+to the previously focused window, same space only — and this is
+not the MRU the cycling ruling rejected.** [Rationale] The
+#637 argument against MRU is about a *repeating* gesture: a
+self-reordering ring makes the third press unpredictable. A
+close-return is a single step back to the window the user just
+left — one-deep, and the history it reads is the user's own
+last action, so the target is exactly as visible as ⌘W's
+native behavior (macOS itself hands focus down the z-order,
+which is the most recent survivor). Reading #637 as banning
+this trades the predictable outcome for a spatial successor
+the user may never have visited. The candidate is one
+`WindowID?`, never a stack: a deeper walk-back only fires when
+the one candidate is already dead — where the successor-slot
+pick is already good — and each step further back is more of
+the invisible history #637 rejected. Validation happens at
+close time against current state, and the candidate must be
+alive (a minimized one left state, so #673's never-un-park
+holds by construction), in the *same space* (never a
+cross-space yank; a sticky focused from a foreign space, #414,
+is how a foreign member enters the history), not
+native-fullscreen (#670), and not a transient
+overlay (#671). A candidate failing any of these falls through
+to the successor-slot pick `Space.remove` already makes —
+spatial stability is the right tiebreak once recency has run
+out, because the forward neighbor inherits the closed slot and
+focus lands where the user's eyes already are; an
+index-minus-one pick would move focus against the direction
+everything just slid. Fixed behavior, no setting: no peer WM
+ships a knob here, and if demand materializes it becomes a
+Lua-only setting later. `CloseFocusReturnTests` pins all of it.
 
 ### Overrides & appearance
 
@@ -2717,7 +2869,7 @@ way before the rule was written down — `site/src/styles/theme.css`
 themes the Starlight title ink while its header mark stays fixed
 — so this generalizes a precedent rather than importing one. So the kiwi symbol is byte-identical in both
 appearances — there is deliberately **no dark symbol master**,
-and `logo.svg` serves the app sidebar, the bundle's `AppIcon`,
+and `logo.svg` serves the Settings header, the bundle's `AppIcon`,
 the site nav and the Starlight header in either theme. (The
 *runtime* Dock icon it once also served is gone with the
 activation-policy promotion — an `.accessory` app has no tile.) (The retired
@@ -2911,17 +3063,20 @@ oversight in it.
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
-Sidebar search indexes destination titles, so a page keeping a
+Settings search indexes destination titles, so a page keeping a
 name for content it no longer holds keeps winning the query for
 that content — Appearance, the most colour-sounding word in the
 app, would have gone on answering "where do I change the ring
 colour" after the split left it owning no colour. It is **Gaps
-& Borders**, the name the census already gives that area, so
-the interim sidebar teaches the name that survives. **And the colour pages
-sit after the things they paint** in the sidebar: search returns
-one hit per destination in sidebar order, so a colour page above
-Bars would answer "App Bar" with a grid of swatches instead of
-with the App Bar's own card.
+& Borders**, the name the census already gives that area — the
+name the Home card teaches. **And the colour pages
+sit after the things they paint**: search returns one hit per
+destination in the search catalog's own order
+(`SettingsDestination.thisProfile` + `.wholeApp` — a separate
+list from the Home grid's card order, pinned set-equal to it by
+`HomeCardOrderTests`), so a colour
+page above Bars would answer "App Bar" with a grid of swatches
+instead of with the App Bar's own card.
 
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
@@ -3734,16 +3889,76 @@ safeguard.
 
 **[Rationale]**
 
-**One representation: monitor cards.** The old tab rendered
-the same space→monitor mapping three ways (proportional
-canvas, drag palette, resolution list). Equal-sized cards in
-physical x-order hold the space chips that resolve to them;
-a dashed "Follows main display" card holds the Main-role
-spaces. Chips carry semantic micro-icons (pin/link) rather
-than border styles alone (accessibility), ⓧ clears to
-automatic, and the context menu is the keyboard/VoiceOver
-fallback. macOS's Displays pane owns true spatial layout —
-identity + order is enough here. (#68 §3.13)
+**One representation, and it is the arrangement itself.** A card
+on this page is a **drop target**, and a drop target must be
+identifiable by eye: the user aims at a rectangle, so they have
+to know which monitor on their desk it stands for before they
+release. Identity and order cannot tell them — three same-named
+cards in a row say nothing about which one is the portrait panel
+on the left. So the cards are the real arrangement, at their own
+sizes and positions, drawn from the live frames. This retires
+"macOS's Displays pane owns true spatial layout — identity +
+order is enough here", the earlier ruling that folded the old
+tab's three representations (proportional canvas, drag palette,
+resolution list) into one row of equal-sized cards in physical
+x-order: enough for a *list* of displays, and that consolidation
+kept the drag. Equal-sized cards can only come back together
+with the drop. (#68 §3.13, #678 turn 13b)
+
+**Drawn from POINTS — not pixels, and not physical millimetres.**
+Position is the reason, not fidelity: a display's global position
+only exists in point space, so sizing from EDID millimetres while
+positioning from points would tear the picture into gaps and
+overlaps that exist in neither space, and macOS publishes no
+physical arrangement to re-derive it from. `CGDisplayScreenSize`
+is EDID and unreliable besides — zeros for virtual, AirPlay and
+projector displays, wrong values on real panels — and a 0×0
+monitor drawn silently is worse than a slightly wrong proportion.
+Points already track physical size in practice, because people
+scale a display to a comfortable UI size at their viewing
+distance, and System Settings ▸ Displays ▸ Arrangement draws in
+points too, which is the surface users compare this one against.
+Pixels are the one option ruled out outright: a Retina display
+drawn twice the size of an identical non-Retina one is a picture
+of the framebuffer, not of the desk.
+
+**A drop target has a minimum size that a truthful picture does
+not — so the scale is clamped, and the clamp is stated.** Two
+clamps: the scale has a floor, so the smallest display is never
+drawn too small to hold one space chip (past that the picture
+scrolls rather than shrinking further), and the largest:smallest
+drawn ratio is capped, so one ultrawide cannot reduce everything
+beside it to slivers. The cap shrinks the outlier around its own
+centre, which can only open a gap and never move a rectangle onto
+its neighbour. A clamp that engages silently reads as a wrong
+arrangement rather than an approximate one, so the page says so —
+but only once the difference is visible. A caption pinned to an
+everyday desk teaches people to ignore captions, and the cap is
+easy to trip imperceptibly: a laptop beside a 4K reporting its
+full 3840 points is over the ratio by under two percent (measured
+at 1:1 scaling — at macOS's default HiDPI scaling that display
+reports far fewer points and does not approach the cap at all).
+
+**What the picture cannot say, it says in words.** Two facts have
+no rectangle: which space is *up* on a display right now
+(selecting one answers it), and the fact that two identical
+monitors are a single identity to KiwiDesk — `name:WxH` is what a
+pin is stored against, so a pinned space may open on either. The
+list this page replaced hid that second one; a picture cannot,
+and an unexplained duplicate reads as a bug in the drawing rather
+than a limit of the identity.
+
+**Chips: pinned, follows-main, automatic.** Semantic micro-icons
+(pin, arrow) rather than border styles alone (accessibility), and
+automatic is drawn as an outline rather than a dimmed capsule —
+dimming is this app's inert vocabulary, and an automatic chip is
+the one most worth dragging. The chip is a menu CONTROL, and
+that is what makes its menu reachable: the same items were
+available as a context menu for a year, on a plain stack with a
+drag gesture, which cannot take focus — so the route billed as
+the keyboard and VoiceOver fallback existed only for people using
+a mouse, the one group it was not for. Right-click still opens
+it; the control is what added the other two.
 
 ### App rules
 

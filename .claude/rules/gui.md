@@ -131,10 +131,11 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts and Profiles render from it now** (#678 Phases 2-3): each
+Layouts, Profiles, Monitors and Behaviour render from it now**
+(#678 Phases 2-3): each
 carries its own order list and a census-render suite pinning that
-order to the census (`ProfilesRowOrder` /
-`ProfilesCensusRenderTests` is the newest pair), so a row in a
+order to the census (`MonitorsRowOrder` /
+`MonitorsCensusRenderTests` is the newest pair), so a row in a
 `ForEach`-rendered container moves by editing the census — with
 the bespoke edge below. This bold list is itself a hand-kept
 claim with no guard,
@@ -152,19 +153,27 @@ three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
 by `ShortcutsCensusRenderTests` — so a fourth going bespoke has
 to edit that set; check it before assuming an edit will show up.
 
-General, Gaps & Borders, Spaces & Layouts and Profiles push that
-edge wider: EVERY container in them is bespoke
+General, Gaps & Borders, Spaces & Layouts, Profiles, Monitors
+and Behaviour push that edge wider: EVERY container in them is
+bespoke
 (`GeneralRowOrder.bespokeContainers` /
 `GapsBordersRowOrder.bespokeContainers` /
 `SpacesRowOrder.bespokeContainers` /
-`ProfilesRowOrder.bespokeContainers`, each the whole set,
+`ProfilesRowOrder.bespokeContainers` /
+`MonitorsRowOrder.bespokeContainers` /
+`BehaviorRowOrder.bespokeContainers`, each the whole set,
 asserted by `bespokeMeansNoForEach` in each area's render suite),
 so their order lists are membership-and-search only and editing
 one moves nothing on screen. In Profiles the reason is
 structural rather than incidental: every container there expands
 one key into a row per live instance, which is what an order-list
 `ForEach` cannot express at all — the paragraph below owns that
-seam.
+seam. Monitors is the far end of the same argument and worth
+knowing before you look for a list to reorder: its placement
+container is a PICTURE, positioned by the real display
+arrangement (`MonitorArrangement`), so its rows have no reading
+order to state — a card's place on screen is where that monitor
+is on the desk.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -176,7 +185,16 @@ draws*. Profiles has the same pair (`ProfilesFamilyRows`), and
 there the expansion is per live INSTANCE in every container it
 draws — a row per saved profile, per Desktop, per preset, held by
 `instanceCounts` in `ProfilesCensusRenderTests` because set
-equality over `SettingKey` cannot see a collapse to one row. An
+equality over `SettingKey` cannot see a collapse to one row.
+Monitors has the pair too (`MonitorsFamilyRows`), and adds the
+case where several families must be read TOGETHER: its three
+placement families partition the declared spaces — carded (a
+chip), following main (a chip in the tray), or waiting on an
+absent monitor (a row of its own) — so each one's own count can
+be right while a space falls through all three. Only a guard
+over the UNION sees that, so a family joining or leaving that
+partition joins `MonitorsCensusRenderTests`'
+`everySpaceLandsExactlyOnce` in the same change. An
 area whose keys expand this way owes both halves and
 a guard over each; **which keys may legitimately expand to
 nothing is data, never a skipped branch**, because a renderer
@@ -235,6 +253,30 @@ so a file resolving two gates reds if EITHER goes hand-rolled.
 (`.luaImportAvailable`) because that is a live-editor-state
 predicate the saved config cannot answer — not because of any
 shape split, which no longer exists.
+
+**Consulting a resolver is not drawing what it answered, and a
+SURFACING gate leaves nothing behind to prove the difference.**
+A greying gate ends in a dimmed control a test can find; a
+surfacing one ends in an `if` inside a `body`, and every guard
+above it — the resolver's own suite, the census parity, the
+family expansion — passes whether or not that `if` was ever
+written. Monitors shipped a cut where five such branches could
+each be deleted with the whole suite green (guard-prover,
+2026-08-04): the orphaned-pins card, both of the picture's
+notes, the chip overflow and the tray. So a view drawing off a
+resolved answer owes a needle naming the BRANCH, not only the
+consult — `MonitorsGateWiringTests`' `surfacingBranchesAreDrawn`
+is the worked example, and a new surfacing branch joins it in
+the same change. Two authoring rules the same run paid for:
+key a needle on the site that USES the value (a bare
+`overflowChip(` matched the helper's own declaration; a bare
+`rows.chips(on:)` matched a tooltip while the chips went
+hand-rolled), and strip comments before matching, or a comment
+quoting a deleted key stands in for the call site.
+
+Where the value is already arithmetic, the paragraph below on
+live previews owns which half a scan is for; a branch that was
+never written at all is what it cannot see.
 
 `AdvancedColorsGates` is deliberately NOT one of these resolvers
 and is not the regression the rule names: it answers no census
@@ -367,6 +409,79 @@ catch. Text stays key-only: `scripts/extract-keys` reads the
 views' `L(key, english)` call sites, so a change that deletes a
 view must re-author its keys through a scanner-visible shape in
 the same change or the keys are pruned from every locale.
+
+## Home, the shell (#678 turn 9)
+
+Home (a card grid; `model.destination == nil`) is the only
+navigator — there is no sidebar. The conventions a shell change
+must keep:
+
+- **One offer predicate.** Whether a destination is reachable —
+  the Simple/Power-User gate, the computed Monitors promotion, the
+  #18 stored-profile axis — is answered by
+  `HomeCardOrder.isOffered`, consulted by the grid, the
+  selection repairs and the `settingsNavigate` guard alike;
+  a hand-negated copy at any of those sites is the drift #18's
+  one-predicate rule exists to prevent
+  (`HomeCardOrderTests`). The `displayCount` axis has NO
+  selection repair, deliberately — a display disconnect never
+  pops an open area; `HomeCardOrder.isOffered`'s docstring
+  carries the argument.
+- **Navigation into a mode-withheld area switches the mode,
+  never refuses** (`ensureModeAdmits` — search and
+  cross-references index both modes), and a flip back to
+  Simple pops a `.powerUser`-gated area to Home
+  (`SettingsModeNavigationTests`). User-facing labels are
+  "Simple" / "Power User", wire and label alike
+  (`docs/localization-naming.md` owns the pair's policy).
+- **A card is an answer**: subtitles derive from the draft
+  (`HomeCardContentTests` holds the derivations), previews
+  come only from renderers that already ask the real data, and
+  only the Shortcuts conflict may shout — glyph + text, never
+  hue alone.
+- **A new surfacing branch or one-line wiring decision in the
+  shell joins `HomeSurfacingTests` in the same change**, keyed
+  on its use site — the Monitors lesson, which this shell
+  inherits whole.
+- The mode pick persists via `SettingsModePreference`
+  (`UserDefaults`, absent = Simple, never `gui.json`); the
+  header's unsaved count comes from `SettingsDraftDiff`, whose
+  every-leaf attribution net (`SettingsDraftDiffTests`) is
+  what a new `GuiConfig` or `TilingSettings` field reds until
+  its census row exists.
+
+## Colour (#678 turn 16b)
+
+Every surface, border and ink in the Settings tree comes from
+`SettingsTheme`. The obligations that fall out of it:
+
+- **A new colour goes through the theme.** A hex literal or a
+  system colour beside a view is the drift the type exists to
+  end. `SettingsThemeTokenTests` holds the only copy of the hex
+  table and resolves each token under `.aqua` AND `.darkAqua`, so
+  a token wired to one branch in both modes reds;
+  `SettingsThemeWiringTests` puts every declared token in exactly
+  one of two lists — wired at a named render site, or deferred
+  with a reason — so a token nothing draws cannot ship quietly.
+- **`Color.accentColor` is not the accent.** It reads the user's
+  *system* accent and is unaffected by `.tint`, so in this
+  window it renders the app's own decoration in a hue the app did
+  not choose. Retired outright, along with the two `NSColor`
+  window surfaces, by the lens in `SettingsThemeWiringTests` —
+  which carries no exemption map on purpose.
+- **The accent marks control FILLS, never text naming a value.**
+  A toggle track, a selected segment, a prominent Save. A
+  `.menuStyle(.borderlessButton)` paints its LABEL in the accent,
+  so every one of them carries `neutralMenuLabel()`, paired per
+  file by the same suite.
+- **Prefer a concrete ink to `.secondary` wherever an ancestor
+  may set a foreground.** `.secondary` and `.tertiary` are
+  *hierarchical* — derived from the enclosing foreground, not from
+  a fixed grey — so one container-level `.foregroundStyle` turns
+  every caption beneath it into a translucent shade of that
+  colour. A container-level foreground plus a tinted row is how
+  the header and the empty-icon placeholder both shipped
+  green-on-green for an afternoon.
 
 ## SwiftUI traps
 

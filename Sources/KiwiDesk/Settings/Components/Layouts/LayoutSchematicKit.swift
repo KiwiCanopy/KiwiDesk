@@ -15,8 +15,8 @@ enum LayoutSchematic {
     static let canvasHeight: CGFloat = 96
     static let corner: CGFloat = 3
     static let inset: CGFloat = 6
-    static let fill = Color.accentColor.opacity(0.25)
-    static let stroke = Color.accentColor.opacity(0.6)
+    static let fill = SettingsTheme.accent.opacity(0.25)
+    static let stroke = SettingsTheme.accent.opacity(0.6)
 
     /// Short enough to track a live slider drag without visible
     /// lag; still smooths stepper/typed jumps. Mirrors
@@ -193,7 +193,7 @@ struct SchematicNewWindow: View {
     var body: some View {
         ZStack(alignment: badgeAlignment) {
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-                .fill(Color.accentColor.opacity(0.45))
+                .fill(SettingsTheme.accent.opacity(0.45))
                 .overlay(
                     RoundedRectangle(
                         cornerRadius: LayoutSchematic.corner
@@ -239,7 +239,7 @@ struct SchematicPileTile: View {
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .fill(
                     isNew
-                        ? Color.accentColor.opacity(0.45)
+                        ? SettingsTheme.accent.opacity(0.45)
                         : LayoutSchematic.fill
                 )
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)

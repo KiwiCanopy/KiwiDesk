@@ -51,7 +51,7 @@ extension SpaceOverrideRows {
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(.quaternary.opacity(0.35))
+                    .fill(SettingsTheme.sunken)
             )
         }
     }

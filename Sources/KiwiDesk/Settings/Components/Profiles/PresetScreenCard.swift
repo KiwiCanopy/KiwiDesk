@@ -61,11 +61,11 @@ struct PresetScreenCard: View {
     /// claim about behavior that applying it would not produce.
     private func outlineView(_ screen: Int) -> some View {
         RoundedRectangle(cornerRadius: 3)
-            .fill(Color.accentColor.opacity(0.12))
+            .fill(SettingsTheme.accent.opacity(0.12))
             .overlay {
                 RoundedRectangle(cornerRadius: 3)
                     .strokeBorder(
-                        Color(nsColor: .separatorColor)
+                        SettingsTheme.hairline
                     )
             }
             .overlay {
