@@ -744,8 +744,6 @@
   "shortcuts.size_float.feedback": "Warnton, wenn Größenänderung nicht möglich ist",
   "shortcuts.size_float.layouts_caption": "Vergrößern/Verkleinern wirkt nur in den Layouts bsp, stack, scrolling und track; in monocle, grid und floating passiert nichts. Breite und Höhe ändern sich unabhängig; scrolling passt für beide seinen Slot entlang der Scroll-Achse an, und in track ändert eine Achse den Track des Fensters, die andere seinen Anteil darin.",
   "shortcuts.size_float.more": "Rückmeldung bei Größenänderung",
-  "sidebar.section.design": "Design",
-  "sidebar.section.system": "System",
   "slot_size.column_width": "Spaltenbreite",
   "slot_size.percent": "Prozent",
   "slot_size.points": "Punkte",

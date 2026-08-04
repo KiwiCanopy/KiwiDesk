@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "无法调整大小时播放提示音",
   "shortcuts.size_float.layouts_caption": "增大/减小仅在 bsp、堆叠、滚动和轨道布局中生效；在单窗、网格和浮动布局中不起作用。宽度和高度各自独立调整；滚动布局在两者上都沿滚动轴调整其槽位，而轨道布局中一个轴调整窗口所在的轨道，另一个轴调整它在轨道内的占比。",
   "shortcuts.size_float.more": "调整大小反馈",
-  "sidebar.section.design": "设计",
-  "sidebar.section.system": "系统",
   "slot_size.column_width": "列宽",
   "slot_size.percent": "百分比",
   "slot_size.points": "点",

@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "Alerta sonora cuando no se puede redimensionar",
   "shortcuts.size_float.layouts_caption": "Agrandar/Reducir solo se aplica en los diseños bsp, stack, desplazable y track; no tiene efecto en monocle, grid y floating. El ancho y la altura se redimensionan de forma independiente; desplazable redimensiona su hueco a lo largo del eje de desplazamiento para ambos, y en track un eje redimensiona la pista de la ventana y el otro su parte dentro de ella.",
   "shortcuts.size_float.more": "Aviso al redimensionar",
-  "sidebar.section.design": "Diseño",
-  "sidebar.section.system": "Sistema",
   "slot_size.column_width": "Ancho de columna",
   "slot_size.percent": "Porcentaje",
   "slot_size.points": "Puntos",

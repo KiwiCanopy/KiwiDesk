@@ -58,8 +58,13 @@ struct HomeSurfacingTests {
         "Settings/HomeCard.swift": [
             // The conflict shout is drawn on the card.
             "ifletshout{shoutBadge(shout)}",
-            // A preview card draws its preview.
-            "ifletpreview=HomeCardPreview.preview(",
+            // A preview card DRAWS its preview — the needle
+            // runs through the branch body, so a consult whose
+            // binding goes unrendered fails it (re-review
+            // 2026-08-04: the consult-only form passed with
+            // the body emptied).
+            "ifletpreview=HomeCardPreview.preview("
+                + "for:destination,model:model){preview}",
         ],
         "Settings/SettingsModel+EditTarget.swift": [
             // A dirty draft reaching a clean transition

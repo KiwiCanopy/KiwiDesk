@@ -43,7 +43,7 @@ struct HomeCardOrderTests {
     }
 
     /// Power User INSERTS, never reorders: Simple's sequence is
-    /// Nerd's with the Power-User-only cards removed, so no card
+    /// Power User's with its extra cards removed, so no card
     /// moves when the segment flips.
     @Test("Simple is a subsequence of Power User")
     func stablePositions() {

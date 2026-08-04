@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "Avviso sonoro quando il ridimensionamento non è applicabile",
   "shortcuts.size_float.layouts_caption": "Aumenta/Riduci vale solo nei layout bsp, pila, scorrimento e tracce; non ha effetto in monocolo, griglia e fluttuante. Larghezza e altezza si ridimensionano in modo indipendente; lo scorrimento ridimensiona il proprio slot lungo l'asse di scorrimento per entrambe, e nel layout a tracce un asse ridimensiona la traccia della finestra e l'altro la sua porzione al suo interno.",
   "shortcuts.size_float.more": "Feedback sul ridimensionamento",
-  "sidebar.section.design": "Design",
-  "sidebar.section.system": "Sistema",
   "slot_size.column_width": "Larghezza colonna",
   "slot_size.percent": "Percentuale",
   "slot_size.points": "Punti",

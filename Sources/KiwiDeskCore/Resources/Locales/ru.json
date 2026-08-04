@@ -744,8 +744,6 @@
   "shortcuts.size_float.feedback": "Звуковой сигнал, когда размер изменить нельзя",
   "shortcuts.size_float.layouts_caption": "«Увеличить/уменьшить» действует только в раскладках bsp, stack, scrolling и track; в monocle, grid и floating это ничего не делает. Ширина и высота меняются независимо; scrolling в обоих случаях меняет размер слота вдоль оси прокрутки, а в track одна ось меняет размер дорожки окна, другая — его долю внутри неё.",
   "shortcuts.size_float.more": "Отклик при изменении размера",
-  "sidebar.section.design": "Оформление",
-  "sidebar.section.system": "Система",
   "slot_size.column_width": "Ширина столбца",
   "slot_size.percent": "Проценты",
   "slot_size.points": "Пункты",

@@ -118,20 +118,9 @@ final class SettingsModel: ObservableObject {
     /// the dashboard sat open) — see `KiwiCore.mergeLiveSpaces`.
     var seedSpaces: [SpaceID] = []
 
-    func recomputeDirty() {
-        isDirty =
-            config != cleanConfig
-            || luaSource != cleanLuaSource
-        draftChangeCount =
-            isDirty
-            ? SettingsDraftDiff.between(
-                config: config,
-                cleanConfig: cleanConfig,
-                luaSource: luaSource,
-                cleanLuaSource: cleanLuaSource
-            ).total
-            : 0
-    }
+    // `recomputeDirty()` lives in `SettingsModel+Mode.swift`
+    // with the rest of the draft-state derivations (§2.1
+    // headroom — this file sits near the ceiling).
 
     /// Where the mode pick persists — a seam so tests write a
     /// scratch domain instead of the developer's real defaults

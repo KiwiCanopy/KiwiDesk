@@ -38,8 +38,8 @@ struct SettingsModePreferenceTests {
         )
     }
 
-    @Test("Nerd round-trips")
-    func nerdRoundTrips() {
+    @Test("Power User round-trips")
+    func powerUserRoundTrips() {
         let defaults = scratch()
         SettingsModePreference.write(.powerUser, to: defaults)
         #expect(

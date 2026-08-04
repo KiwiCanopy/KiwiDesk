@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "Alerte sonore quand le redimensionnement échoue",
   "shortcuts.size_float.layouts_caption": "Agrandir/Réduire s'applique uniquement dans les dispositions bsp, stack, défilante et track ; c'est sans effet dans monocle, grid et floating. La largeur et la hauteur se redimensionnent indépendamment ; scrolling redimensionne son emplacement le long de l'axe de défilement pour les deux, et dans track un axe redimensionne la piste de la fenêtre, l'autre sa part au sein de celle-ci.",
   "shortcuts.size_float.more": "Retour lors du redimensionnement",
-  "sidebar.section.design": "Apparence",
-  "sidebar.section.system": "Système",
   "slot_size.column_width": "Largeur de colonne",
   "slot_size.percent": "Pourcentage",
   "slot_size.points": "Points",

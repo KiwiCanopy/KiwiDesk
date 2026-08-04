@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "크기를 조절할 수 없을 때 경고음 재생",
   "shortcuts.size_float.layouts_caption": "늘리기/줄이기는 bsp, 스택, 스크롤, 트랙 레이아웃에서만 동작하며 모노클, 격자, 부동에서는 아무 일도 하지 않습니다. 너비와 높이는 독립적으로 조절됩니다. 스크롤에서는 둘 다 스크롤 축을 따라 슬롯 크기를 바꾸고, 트랙에서는 한 축이 윈도우의 트랙을, 다른 축이 그 안에서의 몫을 조절합니다.",
   "shortcuts.size_float.more": "크기 조절 피드백",
-  "sidebar.section.design": "디자인",
-  "sidebar.section.system": "시스템",
   "slot_size.column_width": "열 너비",
   "slot_size.percent": "퍼센트",
   "slot_size.points": "포인트",

@@ -743,8 +743,6 @@
   "shortcuts.size_float.feedback": "Som de alerta quando o redimensionamento não pode ser aplicado",
   "shortcuts.size_float.layouts_caption": "Aumentar/Reduzir só vale nos layouts bsp, pilha, rolagem e trilhas; não tem efeito em monóculo, grade e flutuante. Largura e altura são redimensionadas de forma independente; a rolagem redimensiona seu slot ao longo do eixo de rolagem para ambas, e no layout de trilhas um eixo redimensiona a trilha da janela e o outro a sua parcela dentro dela.",
   "shortcuts.size_float.more": "Feedback de redimensionamento",
-  "sidebar.section.design": "Design",
-  "sidebar.section.system": "Sistema",
   "slot_size.column_width": "Largura da coluna",
   "slot_size.percent": "Porcentagem",
   "slot_size.points": "Pontos",

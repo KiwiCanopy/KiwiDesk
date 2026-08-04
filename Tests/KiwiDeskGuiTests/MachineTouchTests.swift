@@ -125,6 +125,14 @@ struct MachineTouchTests {
     /// omission class as `makeTestCore`; `TestModel.swift`'s
     /// factory mints scratch domains. GUI tree only — the Core
     /// target cannot see `SettingsModel`.
+    ///
+    /// Stated residue (this family's usual cut): the needle is
+    /// the literal type name, so a construction spelled through
+    /// `SettingsModel.init(` or a local typealias slips past
+    /// the stray scan — only the factory-alive canary would
+    /// notice the factory itself going dark. No test spells it
+    /// either way today; widen the matcher before excusing one
+    /// that does.
     @Test("tests build SettingsModel via makeTestModel")
     func settingsModelConstruction() throws {
         let guiTree = Self.testTrees.first {

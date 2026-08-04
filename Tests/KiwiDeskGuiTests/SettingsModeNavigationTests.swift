@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The mode flip's navigation contract (#678 turn 9): Nerd →
+/// The mode flip's navigation contract (#678 turn 9): Power User →
 /// Simple pops an area the flip removed back to Home (mode
 /// gates whole cards — the area ceased to exist, so this is not
 /// a grey-don't-hide case), leaves a Simple area alone, and the
@@ -19,8 +19,8 @@ struct SettingsModeNavigationTests {
         return (makeTestModel(defaults: defaults), defaults)
     }
 
-    @Test("Nerd → Simple pops a Power-User-only area to Home")
-    func flipPopsNerdArea() {
+    @Test("a flip to Simple pops a Power-User-only area")
+    func flipPopsPowerUserArea() {
         let (model, _) = model()
         model.setSettingsMode(.powerUser)
         model.destination = .layoutDefaults
@@ -28,7 +28,7 @@ struct SettingsModeNavigationTests {
         #expect(model.destination == nil)
     }
 
-    @Test("Nerd → Simple leaves a Simple area alone")
+    @Test("a flip to Simple leaves a Simple area alone")
     func flipKeepsSimpleArea() {
         let (model, _) = model()
         model.setSettingsMode(.powerUser)
