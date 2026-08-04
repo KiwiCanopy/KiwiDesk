@@ -114,14 +114,17 @@ struct ProfilesFamilyRows {
 
     /// Both halves of the seam answer from ONE derivation.
     ///
-    /// The static helpers below are what the three containers
-    /// call; this expansion is what the census guards read. An
-    /// earlier cut had them computed separately from the same
-    /// inputs, which made `familiesExpand` and `instanceCounts`
-    /// assert over a structure the screen never touched — the
-    /// dead seam moved rather than removed. So the instance is
-    /// built FROM the statics (`ProfilesSection.familyRows`),
-    /// and the two cannot answer differently.
+    /// The static helpers ABOVE are what the three containers
+    /// call; this expansion is what the census guards read, and
+    /// it reaches those same statics rather than re-deriving
+    /// beside them. An earlier cut computed the two separately
+    /// from the same inputs, which made `familiesExpand` and
+    /// `instanceCounts` assert over a structure the screen never
+    /// touched — the dead seam moved rather than removed. The
+    /// join is proved, not asserted: mutating `orderedProfiles`
+    /// reds `ProfilesFamilyRowsTests` AND
+    /// `ProfilesCensusRenderTests.instanceCounts` together
+    /// (guard-prover, 2026-08-04).
     private func rows(
         for family: ProfilesKey
     ) -> [ProfilesRowInstance]? {

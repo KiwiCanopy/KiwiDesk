@@ -125,4 +125,41 @@ struct OnboardingTests {
             )
         )
     }
+
+    /// The overload that takes an ALREADY-READ preference (#678
+    /// turn 13a) — the Settings dashboard snapshots the
+    /// `CFPreferences` value but must evaluate the display half
+    /// live, and routing through Core is what keeps #8's
+    /// one-predicate promise from quietly becoming two copies.
+    ///
+    /// Unlike the live-read overload above, both halves ARE
+    /// unit-testable here, so all four combinations are pinned:
+    /// inverting either arm is otherwise silent.
+    @Test("the pre-read overload agrees on every combination")
+    func preReadOverloadTruthTable() {
+        #expect(
+            DisplaySpacesSetting.recommendsSharedSpaces(
+                separateSpaces: true,
+                displayCount: 2
+            )
+        )
+        #expect(
+            !DisplaySpacesSetting.recommendsSharedSpaces(
+                separateSpaces: true,
+                displayCount: 1
+            )
+        )
+        #expect(
+            !DisplaySpacesSetting.recommendsSharedSpaces(
+                separateSpaces: false,
+                displayCount: 2
+            )
+        )
+        #expect(
+            !DisplaySpacesSetting.recommendsSharedSpaces(
+                separateSpaces: false,
+                displayCount: 1
+            )
+        )
+    }
 }

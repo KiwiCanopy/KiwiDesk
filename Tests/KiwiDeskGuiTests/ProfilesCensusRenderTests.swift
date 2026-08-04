@@ -199,19 +199,31 @@ struct ProfilesCensusRenderTests {
     /// `familiesExpand`.
     @Test("families expand once per instance")
     func instanceCounts() {
+        // A BOUND desktop past the present ones, deliberately:
+        // with `boundDesktops: []` this fixture cannot see that
+        // input at all, and dropping it from the expansion then
+        // passes the whole suite (guard-prover, 2026-08-04) —
+        // silently retiring the "a binding to a now-absent Space
+        // stays listed, and so stays clearable" promise.
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
             presentDesktops: 3,
-            boundDesktops: [],
+            boundDesktops: [7],
             presets: StandardProfiles.layouts(for: 1)
         )
         #expect(
             expander.rows(for: .profiles(.profilesLoad))
                 == [.profile("Desk"), .profile("Laptop")]
         )
+        // Present desktops UNION the bound ones — the absent 7
+        // is listed, which is the only way its binding can be
+        // read or cleared.
         #expect(
             expander.rows(for: .profiles(.profileBindings))
-                == [.desktop(1), .desktop(2), .desktop(3)]
+                == [
+                    .desktop(1), .desktop(2), .desktop(3),
+                    .desktop(7),
+                ]
         )
         #expect(
             expander.rows(for: .profiles(.presetsApply))?.count

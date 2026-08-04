@@ -65,6 +65,50 @@ struct ProfilesGateTests {
         )
     }
 
+    /// A `.runtimeAnyOf` names the arms it stands for — every
+    /// one of them, and more than one.
+    ///
+    /// Nothing else reads a gate's PAYLOAD: `everyGatedRowIsResolved`
+    /// only asks `gate != nil`, so `.runtimeAnyOf([])` — a row
+    /// declaring a compound gate that names nothing — passed the
+    /// whole suite (guard-prover, 2026-08-04). That is the exact
+    /// failure the case was introduced to prevent, since a gate
+    /// naming no condition records less than the single tag it
+    /// replaced.
+    ///
+    /// Repo-wide, not area-scoped: the case is census vocabulary,
+    /// and the second area to use it inherits this guard rather
+    /// than writing its own.
+    @Test("a compound runtime gate names at least two arms")
+    func compoundGatesNameTheirArms() {
+        var compound = 0
+        for key in SettingKey.allCases {
+            guard
+                case .runtimeAnyOf(let conditions) =
+                    key.placement.gate
+            else { continue }
+            compound += 1
+            #expect(
+                conditions.count > 1,
+                Comment(
+                    rawValue:
+                        "\(key.id) declares a compound gate "
+                        + "naming \(conditions.count) "
+                        + "condition(s) — one arm or none is a "
+                        + "plain `.runtime`, or a gate that "
+                        + "records nothing"
+                )
+            )
+            #expect(
+                Set(conditions).count == conditions.count,
+                "\(key.id) names a condition twice"
+            )
+        }
+        // Vacuity: the sweep must have found the rows it is
+        // about, or every check above held over nothing.
+        #expect(compound == 2)
+    }
+
     /// No container in this area carries a gate, so the resolver
     /// answers only ROW gates — a CONTAINER gate here would grey
     /// a whole card with nothing to resolve it, since this

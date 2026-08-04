@@ -25,31 +25,6 @@ struct ProfileBindingEscapeTests {
         SettingsModel(core: makeTestCore())
     }
 
-    /// The hatch appears only under the ambiguity reason, and
-    /// nothing but the resolver's ARM ORDER keeps it out of the
-    /// stored-profile case — where a global write is exactly
-    /// what a profile edit may never do. Swap the two arms in
-    /// `ProfilesGates.inertReason` and the button would be
-    /// offered in a mode whose Save writes a profile.
-    @Test("the stored-profile reason hides the hatch")
-    func storedProfileReasonWinsOverAmbiguity() {
-        let gates = ProfilesGates(
-            editingStoredProfile: true,
-            separateDisplaySpaces: true,
-            connectedScreens: 2
-        )
-        #expect(
-            gates.inertReason(for: .profiles(.profileBindings))
-                == .bindingsAreGlobal
-        )
-        // And the hatch keys on the OTHER reason, so this is
-        // what keeps it off the stored-profile card.
-        #expect(
-            ProfilesGates.InertReason.bindingsAreGlobal
-                != .desktopsAreAmbiguous
-        )
-    }
-
     @Test("clearing removes every binding")
     func clearsEveryBinding() {
         let model = model()
@@ -126,6 +101,25 @@ struct ProfileBindingEscapeTests {
                     "the escape hatch lost its presence "
                     + "condition — it must be absent, not "
                     + "dimmed, with nothing to clear"
+            )
+        )
+        // And it is offered ONLY under the ambiguity reason. The
+        // stored-profile grey must not carry it: bindings are
+        // global, and a profile edit may never write a global.
+        // (That the resolver reports THAT reason first when both
+        // hold is `ProfilesGateTests.bindingsReasonPrecedence`;
+        // this is the other half — that the button keys on the
+        // reason at all rather than on the grey being present.)
+        #expect(
+            squashed.contains(
+                "ifreason==.desktopsAreAmbiguous{"
+            ),
+            Comment(
+                rawValue:
+                    "the escape hatch no longer keys on the "
+                    + "ambiguity reason — it would appear while "
+                    + "a stored profile is the edit target, "
+                    + "offering a global write that mode forbids"
             )
         )
     }

@@ -132,28 +132,9 @@ struct ProfilesSection: View {
         )
     }
 
-    /// The family seam for this page, built from live state.
-    ///
-    /// The views drive their rows off THIS instance, and the
-    /// census guards read `rows(for:)` off the same type over
-    /// the same derivations — so the structure the guards assert
-    /// about is the structure the screen draws. Building it here
-    /// is what stops the seam being a shape that only tests
-    /// touch.
-    var familyRows: ProfilesFamilyRows {
-        ProfilesFamilyRows(
-            profiles: model.profileSummaries,
-            presentDesktops: model.nativeSpaceCount,
-            boundDesktops: Array(
-                model.config.profileBindings.keys
-            ),
-            presets: ProfilesFamilyRows.presets(
-                forScreens: model.displays.count
-            )
-        )
-    }
-
-    /// The saved-profile rows, in display order.
+    /// The saved-profile rows, in display order — from the
+    /// family seam's own derivation, which is what the census
+    /// guards read too.
     private var orderedSummaries: [ProfileSummary] {
         ProfilesFamilyRows.orderedProfiles(
             model.profileSummaries

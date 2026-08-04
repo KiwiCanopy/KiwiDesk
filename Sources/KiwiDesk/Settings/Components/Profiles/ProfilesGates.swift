@@ -13,19 +13,17 @@ import KiwiDeskCore
 /// `SettingsContainer.gate` — and it takes no `SettingsMode`
 /// input: the mode never changes what runs (8c).
 ///
-/// **One census gate slot, more than one arm — and the tag says
-/// so.** Both gated rows here die for two independent reasons:
-/// Apply is dead on a screen-count mismatch AND while a stored
-/// profile is being edited (applying a preset switches the LIVE
-/// layout, which editing a stored profile never does); the
-/// bindings are dead while a stored profile is being edited AND
-/// while displays have separate Spaces. The resolver owns the
-/// whole predicate either way, but the census tag must not name
-/// only one arm — `profileBindings` therefore declares
-/// `.runtime(.desktopBindingsUnavailable)`, whose docstring
-/// carries both, and `SettingGate`'s register lists it beside
-/// the two conjunctions. The reasons stay APART here because
-/// their sentences differ and only some of them name a fix.
+/// **Two arms per gated row, and the census names both.** Apply
+/// is dead on a screen-count mismatch AND while a stored profile
+/// is being edited (applying a preset switches the LIVE layout,
+/// which editing a stored profile never does); the bindings are
+/// dead while a stored profile is being edited AND while
+/// displays have separate Spaces. The resolver owns the whole
+/// predicate either way, so both rows declare `.runtimeAnyOf`
+/// rather than a single tag standing for the pair — a tag named
+/// for the row's own outcome would record nothing a reader could
+/// not see from the greyed row. The reasons stay APART here
+/// because their sentences differ and only some name a fix.
 ///
 /// Returning the reason rather than a Bool keeps the grey and its
 /// inline sentence from being two decisions that can disagree
