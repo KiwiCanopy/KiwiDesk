@@ -45,13 +45,13 @@ final class SettingsModel: ObservableObject {
     @Published var nav = SettingsNavigation()
     /// Which appearance the window follows (#678 item 8).
     ///
-    /// Read from `UserDefaults` at init and written back through
-    /// `setAppearance`, so it never enters the dirty-tracked
-    /// config — it is app-wide, not part of a profile, and the
-    /// footer's Save has nothing to do with it. Storage lives in
-    /// `AppearancePreference`, which argues why it is not
-    /// `gui.json`.
-    @Published var appearance = AppearancePreference.read()
+    /// Read at init through the `preferences` seam and written
+    /// back through `setAppearance`, so it never enters the
+    /// dirty-tracked config — it is app-wide, not part of a
+    /// profile, and the footer's Save has nothing to do with
+    /// it. Storage lives in `AppearancePreference`, which
+    /// argues why it is not `gui.json`.
+    @Published var appearance: AppearanceChoice = .system
     /// The live auto-start status (#678 item 16).
     ///
     /// Held here, not in `LoginItemCard`, because turn 14b draws
@@ -93,8 +93,8 @@ final class SettingsModel: ObservableObject {
     /// `SettingsWindowController.show()` resets this each time
     /// the window is opened.
     @Published var destination: SettingsDestination?
-    /// The Simple/Power User pick (#678 turn 9). Read at init through
-    /// `settingsModeDefaults` and written back through
+    /// The Simple/Power User pick (#678 turn 9). Read at init
+    /// through the `preferences` seam and written back through
     /// `setSettingsMode`, so it never enters the dirty-tracked
     /// config — same shape and reasoning as `appearance`.
     @Published var settingsMode: SettingsMode = .simple
@@ -122,17 +122,16 @@ final class SettingsModel: ObservableObject {
     // with the rest of the draft-state derivations (§2.1
     // headroom — this file sits near the ceiling).
 
-    /// Where the mode pick persists — a seam so tests write a
-    /// scratch domain instead of the developer's real defaults
-    /// (tests.md: process-global state). The setter lives in
-    /// `SettingsModel+Mode.swift` (§2.1 headroom); the init
-    /// read comes through the same seam, so a test-constructed
-    /// model never inherits the runner's real domain.
-    let settingsModeDefaults: UserDefaults
-    /// The first-run banner's domain, same seam and reason:
-    /// `apply(_:)` retires the banner on a dirty→clean
-    /// transition, a path ordinary model tests drive every run.
-    let firstRunDefaults: UserDefaults
+    /// The ONE `UserDefaults` seam for everything this model
+    /// persists outside the config — the mode pick, the
+    /// first-run banner's flags, the appearance choice — so
+    /// tests write a scratch domain instead of the developer's
+    /// real defaults (tests.md: process-global state). One
+    /// domain, not one per consumer: the split carried no
+    /// information and grew the init a parameter per consumer
+    /// (architect re-review 2026-08-04, which also caught the
+    /// appearance read bypassing the split seams entirely).
+    let preferences: UserDefaults
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
@@ -284,21 +283,22 @@ final class SettingsModel: ObservableObject {
     /// Global float rules used to resolve and diff a stored profile.
     var profileEditingBaseFloatRules: [String]?
 
-    /// The two `UserDefaults` seams default live and are
-    /// injected by tests — a bare default read inside the class
-    /// would hand a test-constructed model the runner's real
-    /// domain (tests.md: process-global state).
+    /// The preferences seam defaults live and is injected by
+    /// tests — a bare default read inside the class would hand
+    /// a test-constructed model the runner's real domain
+    /// (tests.md: process-global state).
     init(
         core: KiwiCore,
-        modeDefaults: UserDefaults = .standard,
-        firstRunDefaults: UserDefaults = .standard
+        preferences: UserDefaults = .standard
     ) {
         self.core = core
         self.config = GuiConfig()
-        self.settingsModeDefaults = modeDefaults
-        self.firstRunDefaults = firstRunDefaults
+        self.preferences = preferences
         self.settingsMode = SettingsModePreference.read(
-            from: modeDefaults
+            from: preferences
+        )
+        self.appearance = AppearancePreference.read(
+            from: preferences
         )
         reload()
     }

@@ -56,7 +56,7 @@ struct HomeScreen: View {
         }
         .onAppear {
             firstRunVisible = HomeFirstRunState.shouldShow(
-                model.firstRunDefaults
+                model.preferences
             )
             if let last = model.nav.homeReturnFocus {
                 focusedCard = last

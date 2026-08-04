@@ -86,7 +86,7 @@ extension SettingsModel {
         // (Window open never lands here dirty: `show()` guards
         // its reload on `!isDirty`.)
         if isDirty {
-            HomeFirstRunState.retire(firstRunDefaults)
+            HomeFirstRunState.retire(preferences)
         }
         suppressDirty = true
         config = state.config

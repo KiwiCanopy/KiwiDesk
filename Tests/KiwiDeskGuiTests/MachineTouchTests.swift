@@ -118,7 +118,7 @@ struct MachineTouchTests {
         )
     }
 
-    /// `SettingsModel`'s two `UserDefaults` seams default to
+    /// `SettingsModel`'s `preferences` seam defaults to
     /// `.standard`, and a model driven dirty→clean retires the
     /// first-run banner — a persistent real-domain write from
     /// any suite that constructs one bare (#678 turn 9). Same

@@ -14,7 +14,7 @@ enum HomeFirstRunState {
     static let retiredKey = "home.firstRunRetired"
 
     static func shouldShow(
-        _ defaults: UserDefaults = .standard
+        _ defaults: UserDefaults
     ) -> Bool {
         defaults.bool(forKey: seededKey)
             && !defaults.bool(forKey: retiredKey)
@@ -22,11 +22,11 @@ enum HomeFirstRunState {
 
     /// The tour's close marks Home's banner pending — same
     /// moment `OnboardingDiscovery.markShown()` fires.
-    static func seed(_ defaults: UserDefaults = .standard) {
+    static func seed(_ defaults: UserDefaults) {
         defaults.set(true, forKey: seededKey)
     }
 
-    static func retire(_ defaults: UserDefaults = .standard) {
+    static func retire(_ defaults: UserDefaults) {
         defaults.set(true, forKey: retiredKey)
     }
 }
@@ -68,7 +68,7 @@ struct HomeFirstRunBanner: View {
             .controlSize(.small)
             Button {
                 HomeFirstRunState.retire(
-                    model.firstRunDefaults
+                    model.preferences
                 )
                 visible = false
             } label: {

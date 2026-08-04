@@ -30,7 +30,7 @@ extension SettingsModel {
     func setSettingsMode(_ mode: SettingsMode) {
         SettingsModePreference.write(
             mode,
-            to: settingsModeDefaults
+            to: preferences
         )
         settingsMode = mode
         if let current = destination,

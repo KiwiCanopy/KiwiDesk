@@ -18,7 +18,7 @@ enum SettingsModePreference {
     static let key = "settingsMode"
 
     static func read(
-        from defaults: UserDefaults = .standard
+        from defaults: UserDefaults
     ) -> SettingsMode {
         guard
             let raw = defaults.string(forKey: key),
@@ -31,7 +31,7 @@ enum SettingsModePreference {
 
     static func write(
         _ mode: SettingsMode,
-        to defaults: UserDefaults = .standard
+        to defaults: UserDefaults
     ) {
         if mode == .simple {
             defaults.removeObject(forKey: key)

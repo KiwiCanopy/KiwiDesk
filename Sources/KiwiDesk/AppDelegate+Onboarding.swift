@@ -166,7 +166,7 @@ extension AppDelegate {
             // The tour reached its closing beats, so Home's
             // 14c banner goes pending — the next Settings
             // visit opens oriented, not empty (turn 14c).
-            HomeFirstRunState.seed()
+            HomeFirstRunState.seed(.standard)
         }
     }
 }

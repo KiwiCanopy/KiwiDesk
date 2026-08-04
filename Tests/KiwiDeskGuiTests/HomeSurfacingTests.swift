@@ -71,7 +71,7 @@ struct HomeSurfacingTests {
             // retires the first-run banner (through the
             // injected-domain seam).
             "ifisDirty{"
-                + "HomeFirstRunState.retire(firstRunDefaults)}"
+                + "HomeFirstRunState.retire(preferences)}"
         ],
         "Settings/SettingsWindowController.swift": [
             // Home is the entry point on every open.
@@ -79,14 +79,14 @@ struct HomeSurfacingTests {
         ],
         "Settings/HomeFirstRunBanner.swift": [
             // Dismiss retires permanently and unmounts.
-            "HomeFirstRunState.retire(model.firstRunDefaults)"
+            "HomeFirstRunState.retire(model.preferences)"
                 + "visible=false"
         ],
         "AppDelegate+Onboarding.swift": [
             // The tour's close seeds the banner beside the
             // discovery flag.
             "OnboardingDiscovery.markShown()"
-                + "HomeFirstRunState.seed()"
+                + "HomeFirstRunState.seed(.standard)"
         ],
         "AppDelegate.swift": [
             // "Show me around" reaches the real replay.
