@@ -125,10 +125,28 @@ enum MonitorArrangement {
     /// rather than one on some other display, because a fallback
     /// here would be a second derivation of which display is main
     /// (`MonitorTray.fold` argues it).
+    ///
+    /// `hostsChips` is false for a picture that is only LOOKED
+    /// at — the Home card's thumbnail, which is read-only and
+    /// hit-test-transparent. It governs the two concessions this
+    /// layout makes to being droppable on, and they are one
+    /// decision rather than two: the follows-main tray's reserved
+    /// band, and the minimum-card floor that keeps a card big
+    /// enough to hold a chip. Both exist so a chip has somewhere
+    /// to land; a thumbnail has no chips.
+    ///
+    /// Applied unconditionally they are a bug on any small
+    /// canvas, and the Home card is one. The band (62 pt) exceeds
+    /// its 56 pt height, so the subtraction clamped to a 1 pt
+    /// canvas; and the floor then beat the fit outright, so the
+    /// displays were drawn at chip-holding size regardless. That
+    /// shipped as a display rectangle drawn outside its own card,
+    /// across the subtitle below it.
     static func layout(
         displays: [Display],
         mainID: DisplayID?,
-        canvas: CGSize
+        canvas: CGSize,
+        hostsChips: Bool = true
     ) -> Layout {
         let drawable = displays.filter {
             $0.frame.width > 0 && $0.frame.height > 0
@@ -140,6 +158,7 @@ enum MonitorArrangement {
         let scale = self.scale(
             for: capped.map(\.rect.size),
             bounds: bounds.size,
+            floored: hostsChips,
             // The tray is added AFTER scaling, so the canvas the
             // displays are fitted into is the canvas minus the
             // band it will occupy. Fitting the displays alone
@@ -150,10 +169,12 @@ enum MonitorArrangement {
             // tray lands on, since it never takes both.
             canvas: CGSize(
                 width: canvas.width,
-                height: max(
-                    1,
-                    canvas.height - trayHeight - trayGap
-                )
+                height: hostsChips
+                    ? max(
+                        1,
+                        canvas.height - trayHeight - trayGap
+                    )
+                    : canvas.height
             )
         )
         let cards = capped.map { entry in
@@ -165,6 +186,14 @@ enum MonitorArrangement {
                     scale: scale
                 )
             )
+        }
+        // No band reserved, no band returned — a `Layout` whose
+        // `tray` a caller could draw into space that was never
+        // set aside for it is the same bug one step later.
+        guard hostsChips else {
+            var bare = Layout()
+            bare.displays = cards
+            return bare
         }
         return MonitorTray.fold(cards: cards, main: mainID)
     }
@@ -224,15 +253,22 @@ enum MonitorArrangement {
     /// a chip onto is a broken control, while a picture wider
     /// than its pane is one the user can still reach every part
     /// of.
+    ///
+    /// `floored` is what keeps a card big enough to hold a chip,
+    /// at the price of overflowing a canvas too small to honour
+    /// it. A picture nobody can drop onto wants the fit alone —
+    /// see `hostsChips` on `layout`.
     private static func scale(
         for sizes: [CGSize],
         bounds: CGSize,
+        floored: Bool,
         canvas: CGSize
     ) -> CGFloat {
         let fit = min(
             canvas.width / max(bounds.width, 1),
             canvas.height / max(bounds.height, 1)
         )
+        guard floored else { return fit }
         let floor =
             sizes.map { size in
                 max(

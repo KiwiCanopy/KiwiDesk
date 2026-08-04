@@ -24,12 +24,25 @@ struct MonitorsPicture: View {
     /// time a monitor was plugged in.
     private static let canvasHeight: CGFloat = 240
 
+    /// The breathing room around the picture inside its well.
+    ///
+    /// SUBTRACTED from the canvas the arrangement is fitted into,
+    /// not merely added around it: `layout` fills the canvas it
+    /// is handed almost exactly — it fits the displays into
+    /// `canvas − trayHeight − trayGap` and then puts the band
+    /// back — so padding applied afterwards pushed the content
+    /// past the frame by twice this, and the picture scrolled by
+    /// a few points on a desk that fits comfortably (owner,
+    /// 2026-08-04). A many-display desk still scrolls, which is
+    /// the minimum-card floor doing its job.
+    private static let inset: CGFloat = 4
+
     var body: some View {
         GeometryReader { proxy in
             let layout = arrangement(
                 for: CGSize(
-                    width: proxy.size.width,
-                    height: Self.canvasHeight
+                    width: proxy.size.width - Self.inset * 2,
+                    height: Self.canvasHeight - Self.inset * 2
                 )
             )
             ScrollView([.horizontal, .vertical]) {
@@ -38,7 +51,7 @@ struct MonitorsPicture: View {
                         width: layout.contentSize.width,
                         height: layout.contentSize.height
                     )
-                    .padding(4)
+                    .padding(Self.inset)
             }
             .frame(
                 width: proxy.size.width,

@@ -162,7 +162,15 @@ enum HomeCardPreview {
             let layout = MonitorArrangement.layout(
                 displays: model.displays,
                 mainID: mainID,
-                canvas: proxy.size
+                canvas: proxy.size,
+                // Nothing is dropped on this picture, so it
+                // takes neither concession the droppable one
+                // makes: no reserved tray band, and no
+                // minimum-card floor. Both overflowed a 56 pt
+                // canvas — the floor by 135 pt on its own — and
+                // shipped as a display rectangle drawn outside
+                // its own card (owner, 2026-08-04).
+                hostsChips: false
             )
             ZStack(alignment: .topLeading) {
                 ForEach(layout.displays) { drawn in
