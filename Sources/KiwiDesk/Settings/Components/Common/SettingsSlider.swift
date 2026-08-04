@@ -115,13 +115,10 @@ struct SettingsSlider: View {
     /// dropped: it refracted the accent fill sliding beneath it,
     /// tinting the knob blue.
     ///
-    /// Deliberately NOT `SettingsTheme.onAccentKnob`, which was
-    /// tried in the turn-16b skin and reverted: that token flips
-    /// to near-black on the dark appearance, and on this control
-    /// it rendered as a dark green thumb (owner, 2026-08-04). The
-    /// table's note about a white knob glaring is about a knob on
-    /// a LARGE accent field, not a 20 pt thumb whose whole job is
-    /// to be the brightest thing on the track.
+    /// Deliberately NOT `SettingsTheme.onAccentKnob`: that token
+    /// flips near-black on the dark appearance, which suits a
+    /// knob on a large accent field and not a thumb whose whole
+    /// job is to be the brightest thing on a 4 pt track.
     private var knob: some View {
         Capsule()
             .fill(.white)

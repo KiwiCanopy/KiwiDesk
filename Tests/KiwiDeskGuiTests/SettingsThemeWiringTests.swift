@@ -50,13 +50,12 @@ struct SettingsThemeWiringTests {
             "the 392 pt preview column is Phase 4",
         "accentInk":
             "AppKit picks the label ink on a tinted prominent "
-            + "button; the first site that draws it explicitly "
-            + "is Phase 4's save pill",
+            + "button; Phase 4's save pill is the first site "
+            + "that draws it explicitly",
         "onAccentKnob":
-            "tried on the slider thumb in this lane and reverted "
-            + "— it flips near-black on dark and rendered a dark "
-            + "green thumb; the table means a knob on a LARGE "
-            + "accent field, which nothing draws until Phase 4",
+            "belongs to a knob on a LARGE accent field, which "
+            + "nothing draws until Phase 4 — never to a slider "
+            + "thumb, which stays white in both appearances",
     ]
 
     private var settingsDir: URL {
