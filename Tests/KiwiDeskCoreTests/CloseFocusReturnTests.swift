@@ -47,9 +47,14 @@ struct CloseFocusReturnTests {
         state.apply(.windowFocused(c))
         // Successor of c's slot would be b (`windows.last`);
         // the history says a.
-        state.apply(.windowDestroyed(c, wasMinimized: false))
+        let effects = state.apply(
+            .windowDestroyed(c, wasMinimized: false)
+        )
         let home = state.workspaces.space(of: a)!
         #expect(state.workspaces[home]?.focused == a)
+        // The erased fact the close handler re-derives the
+        // restack jump from (#674): c sat at tiled index 2.
+        #expect(effects.removedWindow?.tiledSlot == 2)
     }
 
     @Test("A dead candidate falls through to the successor slot")
@@ -64,7 +69,7 @@ struct CloseFocusReturnTests {
         // of the nets refusing a dead (or recycled-id) window;
         // close-time validation is the second. Pinned directly
         // because the fall-through below cannot tell them apart.
-        #expect(state.workspaces.previousFocused == nil)
+        #expect(state.workspaces.focusReturnCandidate == nil)
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
         #expect(state.workspaces[home]?.focused == c)
@@ -157,7 +162,7 @@ struct CloseFocusReturnTests {
         state.apply(.windowDestroyed(a, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
         #expect(state.workspaces[home]?.focused == c)
-        #expect(state.workspaces.previousFocused == b)
+        #expect(state.workspaces.focusReturnCandidate == b)
     }
 
     @Test("A re-focus of the same window keeps the history")

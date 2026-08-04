@@ -53,7 +53,7 @@ extension StateCoordinator {
         // argument lives in `docs/design-decisions.md`
         // ▸ Close-return focus.
         if heldFocus, let home,
-            let candidate = workspaces.previousFocused,
+            let candidate = workspaces.focusReturnCandidate,
             workspaces.space(of: candidate) == home,
             windows[candidate]?.isFullscreen == false,
             windows[candidate]?.isTransientOverlay == false

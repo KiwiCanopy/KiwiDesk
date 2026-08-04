@@ -44,5 +44,12 @@ public struct AppliedEffects: Sendable {
         let bundleID: String?
         let space: SpaceID?
         let focusLost: Bool
+        /// The gone window's index among its space's effective
+        /// tiled members, pre-removal; nil for a float or
+        /// fullscreen member. The close handler re-derives the
+        /// close-return jump distance from it, because after
+        /// the fold the anchor `focusWindow` classifies from
+        /// IS the pick (#674's arm sees distance zero).
+        let tiledSlot: Int?
     }
 }

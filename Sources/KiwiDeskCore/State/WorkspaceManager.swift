@@ -10,6 +10,9 @@ public struct WorkspaceManager: Sendable {
     /// Creation order, used for deterministic iteration.
     /// Internal (not private) with the three display maps
     /// below: the `+Displays` split reads them cross-file.
+    /// Writes stay inside the two `WorkspaceManager*` files —
+    /// `WorkspaceMapSealTests` pins the two scannable names
+    /// and states why these two are not.
     var order: [SpaceID] = []
     var displays: [DisplayID: Display] = [:]
     var spaceDisplay: [SpaceID: DisplayID] = [:]
@@ -50,7 +53,7 @@ public struct WorkspaceManager: Sendable {
     /// what the repeat-press-cycling ruling rejected, and one
     /// visible step back is the whole close-return promise
     /// (`docs/design-decisions.md` ▸ Close-return focus).
-    public private(set) var previousFocused: WindowID?
+    public private(set) var focusReturnCandidate: WindowID?
 
     public init() {}
 
@@ -275,7 +278,7 @@ public struct WorkspaceManager: Sendable {
     /// Removes a window from whatever space contains it.
     public mutating func remove(_ window: WindowID) {
         if lastFocused == window { lastFocused = nil }
-        if previousFocused == window { previousFocused = nil }
+        if focusReturnCandidate == window { focusReturnCandidate = nil }
         guard let id = space(of: window) else { return }
         spaces[id]?.remove(window)
     }
@@ -287,7 +290,7 @@ public struct WorkspaceManager: Sendable {
         // The close-return candidate must follow a native-tab
         // rekey like `lastFocused` does, or every tab switch
         // silently kills it.
-        if previousFocused == old { previousFocused = new }
+        if focusReturnCandidate == old { focusReturnCandidate = new }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
     }
@@ -302,7 +305,7 @@ public struct WorkspaceManager: Sendable {
         // A re-focus of the already-focused window must not
         // collapse the history to itself.
         if lastFocused != window {
-            previousFocused = lastFocused
+            focusReturnCandidate = lastFocused
         }
         spaces[id]?.focused = window
         lastFocused = window
