@@ -149,10 +149,23 @@ struct ProfilesGateTests {
         )
     }
 
-    @Test("editing a stored profile outranks a count match")
+    /// Both fixtures, because only the second pins the
+    /// PRECEDENCE this test is named for: with the counts equal
+    /// the mismatch branch never fires, so reordering the arms
+    /// leaves the first `#expect` green (guard-prover, 2026-08-04).
+    /// The mismatched one is also the case that matters on
+    /// screen — a user editing a stored profile must not read
+    /// "Needs 1 connected screen(s)" when connecting that screen
+    /// would change nothing.
+    @Test("editing a stored profile outranks any count verdict")
     func presetEditingStored() {
         #expect(
             gates(editing: true, screens: 3, preset: 3)
+                .inertReason(for: .profiles(.presetsApply))
+                == .presetSwitchesLiveLayout
+        )
+        #expect(
+            gates(editing: true, screens: 3, preset: 1)
                 .inertReason(for: .profiles(.presetsApply))
                 == .presetSwitchesLiveLayout
         )
@@ -161,6 +174,14 @@ struct ProfilesGateTests {
     /// An ungated key resolves to nil without reaching the
     /// switch at all — the `placement.gate` guard, which is what
     /// lets every renderer call the resolver unconditionally.
+    ///
+    /// Stated limit: dropping that guard trips the resolver's
+    /// `assertionFailure`, so this reds as a DEBUG trap (which
+    /// takes the runner's process with it), not as a failed
+    /// expectation. A release build would reach the fail-open
+    /// `default` arm and pass — deliberately, since fail-open is
+    /// what a shipped Settings window wants, and the debug trap
+    /// is what a developer wants.
     @Test("an ungated row is never inert")
     func ungatedRow() {
         #expect(

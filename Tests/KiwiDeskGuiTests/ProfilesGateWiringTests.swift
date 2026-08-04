@@ -85,6 +85,12 @@ struct ProfilesGateWiringTests {
     /// Every gate sentence is authored ONCE, in the help enum; a
     /// row that re-authors one is the duplication that let
     /// General describe one status two ways.
+    ///
+    /// Stated limit: this reads the NAMED files only, so a gate
+    /// sentence re-authored anywhere else under `Settings/` is
+    /// invisible to it. A new file in this area joins the list.
+    /// It also reads raw source including comments, so a comment
+    /// quoting a key reds it — fail-closed, and cheap to fix.
     private func sentencesAreAuthoredOnce(
         _ consulting: [String]
     ) throws {

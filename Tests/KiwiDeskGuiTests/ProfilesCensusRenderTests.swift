@@ -75,6 +75,12 @@ struct ProfilesCensusRenderTests {
     /// The bespoke claim, read off the TREE rather than restated
     /// against another literal: a container is bespoke exactly
     /// when nothing `ForEach`es its order list.
+    ///
+    /// Stated limit: the needle is `ForEach(ProfilesRowOrder.`,
+    /// so a container that walks a LOCAL COPY of a list
+    /// (`let order = ProfilesRowOrder.presets; ForEach(order)`)
+    /// passes. The `files.count` floor below is what keeps the
+    /// scan from passing over nothing at all.
     @Test("the bespoke containers really have no ForEach")
     func bespokeMeansNoForEach() throws {
         #expect(
@@ -197,6 +203,15 @@ struct ProfilesCensusRenderTests {
         // The preset instance carries the STABLE English name,
         // never the localized one — identity must not move with
         // the GUI language.
+        //
+        // Stated limit: this assertion cannot be the thing that
+        // holds that. `StandardLayout.displayName` is
+        // `@MainActor` and `ProfilesFamilyRows` is nonisolated,
+        // so the localized substitution does not COMPILE — the
+        // claim is sealed by isolation, and under the English
+        // test locale the two strings would be equal anyway.
+        // Read this as pinning the shape, not as coverage of the
+        // identity rule (guard-prover, 2026-08-04).
         #expect(
             expander.rows(for: .profiles(.presetsApply))?
                 .contains(.preset("Developer")) == true
