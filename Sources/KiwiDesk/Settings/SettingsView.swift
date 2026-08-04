@@ -1,11 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The dashboard shell (#68 §3.1): a full-height, two-group
-/// source list (This Profile / Whole App), and a detail column
-/// that carries the profile/state banner on top, the selected
-/// section (or the raw Lua editor when the file holds foreign
-/// code) in the middle, and the stable three-verb save footer
+/// The dashboard shell (#678 turn 9): Home — the card grid that
+/// replaced the sidebar — or one pushed area screen, both
+/// wrapped in the same chrome: the one header bar, the paused
+/// banner, the content, and the stable three-verb save footer
 /// (§3.12) at the bottom.
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
@@ -14,10 +13,11 @@ struct SettingsView: View {
     @State private var revealTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
-    /// The sidebar selection lives on the model, not in `@State`
-    /// — see `SettingsModel.destination`. A locale change re-keys
-    /// this view, and `@State` would not survive it.
-    private var selection: SettingsDestination {
+    /// The pushed area lives on the model, not in `@State` —
+    /// see `SettingsModel.destination`. A locale change re-keys
+    /// this view, and `@State` would not survive it. nil is
+    /// Home.
+    private var selection: SettingsDestination? {
         get { model.destination }
         nonmutating set { model.destination = newValue }
     }
@@ -30,10 +30,11 @@ struct SettingsView: View {
                 structuredShell
             }
         }
-        // 840, not 760: the floating sidebar card (#297) costs
-        // ~16pt of column width in insets, so the old minimum
-        // squeezed the detail pane (settled by eye).
-        .frame(minWidth: 840, minHeight: 540)
+        // The digest's hard minimum (17a): below 720 the window
+        // stops resizing — the tiled Settings window must
+        // survive whatever slot the layout gives it. The old
+        // 840 paid for the floating sidebar card, which is gone.
+        .frame(minWidth: 720, minHeight: 540)
         // The one discard dialog (#515). Hosted HERE, above the
         // `editingLua` branch, not inside `chrome` — `chrome` is
         // instantiated in both arms, and two of the gated actions
@@ -51,11 +52,15 @@ struct SettingsView: View {
         // boolean `true` and is exactly the case that needs it.
         .onChange(of: model.editingStoredProfile) { _, editing in
             // The selection must never point at a destination
-            // the sidebar just hid (#18).
-            if !selection.isReachable(
-                editingStoredProfile: editing
-            ) {
-                selection = .spaces
+            // the grid just hid (#18). Home is the repair
+            // target now — it always exists, and it is where
+            // the user re-orients.
+            if let selection,
+                !selection.isReachable(
+                    editingStoredProfile: editing
+                )
+            {
+                self.selection = nil
             }
         }
         .onChange(of: model.target) { _, _ in
@@ -88,28 +93,26 @@ struct SettingsView: View {
     /// collapse toggle (a nine-row taxonomy never needs to
     /// hide).
     private var structuredShell: some View {
-        HStack(spacing: 0) {
-            SettingsSidebar(
-                selection: $model.destination,
-                editingStoredProfile: model.editingStoredProfile,
-                spotlightProfiles:
-                    model.profileSummaries.isEmpty,
-                reveal: { model.nav.pendingReveal = $0 }
-            )
-            chrome { detailPane }
-                .frame(maxWidth: .infinity)
+        chrome {
+            if selection == nil {
+                HomeScreen(model: model)
+            } else {
+                detailPane
+            }
         }
-        // Both columns own the titlebar region themselves: the
-        // sidebar card floats up under the traffic lights (the
-        // System Settings look), the detail header sits flush at
-        // the top. Ignored here at the shell — a child's own
-        // `ignoresSafeArea` cannot reach past the stack cell.
+        .frame(maxWidth: .infinity)
         .ignoresSafeArea(.container, edges: .top)
+        // Escape pops an area back to Home whenever no inner
+        // view (a search field, an editor) claimed the key
+        // first.
+        .onExitCommand {
+            if selection != nil { selection = nil }
+        }
         .environment(\.settingsNavigate) { destination in
-            // Third #18 enforcement point beside the sidebar's
+            // Third #18 enforcement point beside the grid's
             // offer filter and the onChange repair above: links
-            // must refuse what the sidebar hides (the repair
-            // only fires on editing-flag transitions, not
+            // must refuse what the grid hides (the repair only
+            // fires on editing-flag transitions, not
             // selection).
             guard
                 destination.isReachable(
@@ -117,7 +120,36 @@ struct SettingsView: View {
                         model.editingStoredProfile
                 )
             else { return }
+            // A link into a Nerd-only area switches the mode
+            // (4c/4e: a cross-reference must exist in the
+            // current mode or offer the switch) — the segment
+            // in the header shows the flip.
+            ensureModeAdmits(destination)
             selection = destination
+        }
+    }
+
+    /// Flips Simple → Nerd when navigation targets an area the
+    /// current mode withholds — search and cross-references
+    /// index both modes, so landing must switch rather than
+    /// refuse (#678 4c). Internal, not private: the reveal
+    /// pipeline (`SettingsView+Reveal.apply`) is the second
+    /// caller.
+    func ensureModeAdmits(
+        _ destination: SettingsDestination
+    ) {
+        if !HomeCardOrder.isOffered(
+            destination,
+            mode: model.settingsMode,
+            displayCount: model.displays.count,
+            editingStoredProfile: model.editingStoredProfile
+        ),
+            destination.isReachable(
+                editingStoredProfile:
+                    model.editingStoredProfile
+            )
+        {
+            model.setSettingsMode(.nerd)
         }
     }
 
@@ -128,11 +160,7 @@ struct SettingsView: View {
         @ViewBuilder _ content: () -> some View
     ) -> some View {
         VStack(spacing: 0) {
-            ProfileHeaderBar(
-                model: model,
-                title: selection.title,
-                showsProfileContext: selection.showsProfileContext
-            )
+            SettingsHeaderBar(model: model)
             // Paused-permission banner outranks the per-section
             // Lua banner: it renders in the shared chrome (every
             // section *and* the raw Lua editor), because missing
@@ -287,6 +315,10 @@ struct SettingsView: View {
 
     @ViewBuilder private var detail: some View {
         switch selection {
+        // nil is Home, which mounts instead of this pane —
+        // unreachable here, but the switch must be total.
+        case nil:
+            EmptyView()
         case .spaces:
             SpacesSection(model: model)
         case .layoutDefaults:

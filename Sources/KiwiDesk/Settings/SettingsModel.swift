@@ -77,21 +77,31 @@ final class SettingsModel: ObservableObject {
     /// cancels an older timer instead of clearing the latest
     /// confirmation early.
     var autoStartFlashToken = 0
-    /// Which sidebar row is selected.
+    /// Which area screen is pushed — nil is Home, the card grid
+    /// that replaced the sidebar (#678 turn 9).
     ///
     /// Held here rather than as `@State` in `SettingsView`
     /// because the view is re-keyed on a GUI language change
     /// (`LocaleScopedRoot`), and `@State` does not survive that —
-    /// switching language silently threw the user back to
-    /// Profiles mid-task. The model outlives the rebuild, so the
-    /// selection does too.
+    /// switching language silently threw the user back to the
+    /// entry screen mid-task. The model outlives the rebuild, so
+    /// the selection does too.
     ///
-    /// Profiles stays the *entry* point for a first-run and a
-    /// returning user (§5.8): `SettingsWindowController.show()`
-    /// resets this each time the window is opened, so persisting
-    /// it here changes nothing a user sees except that a language
-    /// switch no longer moves them.
-    @Published var destination: SettingsDestination = .profiles
+    /// Home is the *entry* point for a first-run and a returning
+    /// user alike (turn 9 supersedes §5.8's Profiles ruling —
+    /// the grid IS the overview that made Profiles the landing):
+    /// `SettingsWindowController.show()` resets this each time
+    /// the window is opened.
+    @Published var destination: SettingsDestination?
+    /// The Simple/Nerd pick (#678 turn 9). Read from
+    /// `UserDefaults` at init and written back through
+    /// `setSettingsMode`, so it never enters the dirty-tracked
+    /// config — same shape and reasoning as `appearance`.
+    @Published var settingsMode = SettingsModePreference.read()
+    /// Distinct settings the draft changes — the header's
+    /// "N unsaved changes" count, recomputed beside `isDirty`
+    /// from the same baselines so the two cannot disagree.
+    @Published var draftChangeCount = 0
     /// A destructive action parked behind the unsaved-changes
     /// dialog (#515). Written only by `discardingEdits` and the
     /// two `*PendingDiscard` verbs in `SettingsModel+Discard`.
@@ -112,6 +122,35 @@ final class SettingsModel: ObservableObject {
         isDirty =
             config != cleanConfig
             || luaSource != cleanLuaSource
+        draftChangeCount =
+            isDirty
+            ? SettingsDraftDiff.between(
+                config: config,
+                cleanConfig: cleanConfig,
+                luaSource: luaSource,
+                cleanLuaSource: cleanLuaSource
+            ).total
+            : 0
+    }
+
+    /// Persists the Simple/Nerd pick and repairs the selection:
+    /// a Nerd-only area the flip just removed pops to Home (the
+    /// area ceased to exist — mode gates whole cards, so this is
+    /// the settled "which cards exist" rule, not a grey-don't-
+    /// hide case).
+    func setSettingsMode(_ mode: SettingsMode) {
+        SettingsModePreference.write(mode)
+        settingsMode = mode
+        if let current = destination,
+            !HomeCardOrder.isOffered(
+                current,
+                mode: mode,
+                displayCount: displays.count,
+                editingStoredProfile: editingStoredProfile
+            )
+        {
+            destination = nil
+        }
     }
 
     /// Active saved profile, or nil for a transient state.

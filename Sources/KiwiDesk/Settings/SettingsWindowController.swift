@@ -122,14 +122,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         if !model.isDirty {
             model.reload()
         }
-        // Profiles is the entry point for a first-run and a
-        // returning user alike (§5.8). The selection now lives on
-        // the model so it survives the locale re-key, so "default
-        // selection" has to be re-asserted on open rather than
-        // falling out of `@State` being fresh. A deep link set
-        // `pendingReveal` just above and still wins — the view
-        // consumes it after this.
-        model.destination = .profiles
+        // Home is the entry point for a first-run and a
+        // returning user alike (turn 9 — the grid is the
+        // overview §5.8 once sent to Profiles). The selection
+        // lives on the model so it survives the locale re-key,
+        // so the default has to be re-asserted on open rather
+        // than falling out of `@State` being fresh. A deep link
+        // set `pendingReveal` just above and still wins — the
+        // view consumes it after this.
+        model.destination = nil
         // The two surface selections live on the model too now
         // (#277), so they need the same re-assertion — otherwise
         // reopening Settings can land in the App Bar editor.
@@ -179,10 +180,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.delegate = self
         window.center()
         window.setFrameAutosaveName("KiwiDeskSettings")
-        // A frame saved by a pre-#297 build can be narrower
-        // than the shell's new 840pt minimum; min-size only
-        // gates user resizing, not the restore, so clamp once.
-        if window.frame.width < 840 {
+        // A frame saved by an older build can be narrower than
+        // the shell's minimum; min-size only gates user
+        // resizing, not the restore, so clamp once.
+        if window.frame.width < 720 {
             let content = window.contentRect(
                 forFrameRect: window.frame
             )

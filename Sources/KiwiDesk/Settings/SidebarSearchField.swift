@@ -1,16 +1,20 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The System Settings-style search field at the top of the
-/// sidebar (#90). Hand-built chrome, not `.searchable`: the
+/// The System Settings-style search field (#90), since #678
+/// turn 9 mounted inside the header's search popover rather
+/// than a sidebar. Hand-built chrome, not `.searchable`: the
 /// window's toolbar is deliberately empty (see
-/// `SettingsView.chrome`) and the identity header already
-/// hand-tunes the top safe area, so SwiftUI's toolbar-managed
+/// `SettingsView.chrome`), so SwiftUI's toolbar-managed
 /// placement would reopen exactly that brittle interaction.
 /// Matches the `AppPickerButton` / `IconPicker` field
 /// precedent instead.
 struct SidebarSearchField: View {
     @Binding var text: String
+    /// Takes keyboard focus the moment it appears — the field
+    /// only ever mounts inside the just-opened search popover,
+    /// where an unfocused field would cost the ⌘K user a click.
+    let focusOnAppear: Bool
     /// Moves the highlighted result while focus stays in the
     /// field, System Settings-style. Without this the results
     /// were mouse-only: the `List` never takes focus while the
@@ -39,11 +43,9 @@ struct SidebarSearchField: View {
         .padding(.vertical, 5)
         .background(fieldShape)
         .inactiveDimmed()
-        .padding(.horizontal, 10)
-        // Shift the field down within the same 8 pt vertical
-        // allowance so it sits midway between identity and header.
-        .padding(.top, 6)
-        .padding(.bottom, 2)
+        .onAppear {
+            if focusOnAppear { focused = true }
+        }
     }
 
     private var field: some View {

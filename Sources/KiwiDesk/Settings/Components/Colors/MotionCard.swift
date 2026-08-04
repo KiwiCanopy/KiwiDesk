@@ -117,9 +117,10 @@ struct MotionCard: View {
     var animationsMasterBinding: Binding<Bool> {
         Binding(
             get: {
-                let a = model.config.settings.animations
-                return a.onSpaceChange || a.onWindowResize
-                    || a.onWindowSwap || a.onRelayout
+                // The shared derivation (`anyEnabled`), so the
+                // Home card's subtitle and this toggle cannot
+                // disagree about "animations on".
+                model.config.settings.animations.anyEnabled
             },
             set: { on in
                 let defaults = AnimationSettings()

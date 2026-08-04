@@ -43,6 +43,10 @@ extension SettingsView {
                 editingStoredProfile: model.editingStoredProfile
             )
         else { return }
+        // A hit inside a Nerd-only area switches the mode —
+        // search indexes both modes (4c), so landing must
+        // switch rather than refuse.
+        ensureModeAdmits(resolved.destination)
         model.destination = resolved.destination
         switch resolved.surface {
         case .main:

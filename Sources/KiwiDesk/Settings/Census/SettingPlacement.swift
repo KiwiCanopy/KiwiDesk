@@ -12,7 +12,7 @@
 /// "Easy/Advanced" is spec-internal shorthand and never appears
 /// in code or copy; the word "mode" itself stays reserved for
 /// this pair and for layout modes.
-enum SettingsMode: CaseIterable, Hashable {
+enum SettingsMode: String, CaseIterable, Hashable {
     case simple
     case nerd
 }
@@ -46,6 +46,20 @@ enum SettingsArea: CaseIterable, Hashable {
             .general:
             return .simple
         }
+    }
+
+    /// `minimumMode` with the one COMPUTED promotion (turn 9):
+    /// Monitors joins Simple whenever two or more displays are
+    /// connected — a multi-monitor desk needs space placement in
+    /// its first week. Computed at read, never stored: writing
+    /// the promotion back would strand it after a disconnect.
+    func effectiveMinimumMode(
+        displayCount: Int
+    ) -> SettingsMode {
+        if self == .monitors, displayCount >= 2 {
+            return .simple
+        }
+        return minimumMode
     }
 }
 

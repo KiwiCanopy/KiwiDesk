@@ -53,8 +53,9 @@ struct GreyOutHidingTests {
         "ShortcutsSection.swift":
             "adds a banner; removes nothing",
         // Not a view at all — a `String?` computed property
-        // choosing which status sentence to return.
-        "ProfileHeader.swift":
+        // choosing which status sentence to return (moved here
+        // from ProfileHeader with the header merge, #678 turn 9).
+        "SettingsHeaderBar.swift":
             "String? branch, not a rendered control",
         // An either/or slot: every branch renders a control (or
         // EmptyView in raw-Lua mode, where a profile-copy verb
