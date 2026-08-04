@@ -95,7 +95,7 @@ struct NativeSpacesGroup: View {
     ) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
             VStack(alignment: .leading, spacing: 8) {
                 Text(ProfilesGateHelp.sentence(for: reason))
                     .font(.callout)
@@ -108,7 +108,7 @@ struct NativeSpacesGroup: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.orange.opacity(0.12))
+                .fill(SettingsTheme.warningSurface)
         )
     }
 

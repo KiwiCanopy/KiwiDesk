@@ -198,7 +198,7 @@ struct ProfilesSection: View {
     ) -> some View {
         if model.duplicateDefaultCounts.contains(summary.count) {
             Image(systemName: "exclamationmark.triangle")
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
                 .font(.caption)
                 .help(
                     L(

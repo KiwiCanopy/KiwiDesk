@@ -37,7 +37,7 @@ struct SettingsFooter: View {
                     systemImage: "pencil.circle"
                 )
                 .font(.caption)
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
             }
             if model.primarySaveAction == .saveGlobalsOnly {
                 // Names what is EXCLUDED, not the six fields it
@@ -46,7 +46,7 @@ struct SettingsFooter: View {
                 // for the why (#516, ui-designer).
                 Text(pausedScopeCaption)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             if let drift = model.layoutDrift {
                 VStack(alignment: .leading, spacing: 2) {
@@ -58,7 +58,7 @@ struct SettingsFooter: View {
                         )
                     )
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
                     Text(
                         L(
                             "footer.revert.restores_layout",
@@ -68,7 +68,7 @@ struct SettingsFooter: View {
                         )
                     )
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
                 }
             }
             Spacer()
@@ -83,6 +83,11 @@ struct SettingsFooter: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+        // Card fill, like the header it bookends. Without it the
+        // bar inherited the page and read as a third grey between
+        // the two — the hairline above (`SettingsView.chrome`) is
+        // what separates them now.
+        .background(SettingsTheme.card)
         .alert(
             L(
                 "footer.save_as_new.title",

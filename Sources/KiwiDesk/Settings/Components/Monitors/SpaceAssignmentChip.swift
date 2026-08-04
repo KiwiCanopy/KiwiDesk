@@ -54,6 +54,7 @@ struct SpaceAssignmentChip: View {
             capsule
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .menuIndicator(.hidden)
         .fixedSize()
         .draggable(DraggableSpace(raw: space.raw))

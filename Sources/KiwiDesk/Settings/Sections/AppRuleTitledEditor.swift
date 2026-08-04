@@ -122,6 +122,7 @@ struct AppRuleTitledEditor: View {
             .font(.caption)
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .fixedSize()
     }
 

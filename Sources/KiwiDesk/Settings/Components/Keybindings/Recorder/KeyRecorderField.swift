@@ -126,7 +126,7 @@ struct KeyRecorderField: View {
                 Image(
                     systemName: "exclamationmark.triangle.fill"
                 )
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
                 .help(conflict)
             }
         }
@@ -215,7 +215,7 @@ struct KeyRecorderField: View {
 
     private var buttonTint: Color? {
         if flashing { return .red }
-        return recording ? .accentColor : nil
+        return recording ? SettingsTheme.accent : nil
     }
 
     private var label: String {

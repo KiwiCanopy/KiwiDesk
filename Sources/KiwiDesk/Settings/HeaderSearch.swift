@@ -1,16 +1,37 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The header's search entry (#678 turn 9): a field-shaped
-/// button that opens the results popover, where the real field
-/// and the result list live. A popover rather than an inline
-/// dropdown because macOS gives it the key window for free —
-/// the `AppPickerButton` precedent — where an overlay would
-/// fight the header's siblings for hit-testing and focus.
+/// The header's search entry (#678 turn 9, rebuilt turn 16b):
+/// the REAL field, inline in the header, with its results
+/// hanging below it.
 ///
-/// ⌘K opens it from anywhere in the window; Escape closes it
-/// (clearing first, matching `NSSearchField`, via the field's
-/// own `onExitCommand`).
+/// It shipped as a field-shaped *button* that opened a popover
+/// holding the actual field — which was defensible while the
+/// button was a small pill, and became a lie the moment the skin
+/// made it look like the prototype's full-width field: clicking a
+/// search field opened a second search field, and the one you
+/// clicked could not be typed into (owner, 2026-08-04).
+///
+/// **The results are an overlay, not a popover, and that is
+/// forced.** A popover takes the key window, so the header field
+/// would lose focus on the first keystroke that produced a
+/// result — the very reason the field originally lived *inside*
+/// the popover. An overlay keeps focus where the user put it. The
+/// cost is paint order: an overlay hanging past its parent's
+/// bounds is drawn over by the next sibling in the shell's
+/// `VStack`, so `SettingsView.chrome` lifts the header's
+/// `zIndex`. Removing that lift hides the result list behind the
+/// content.
+///
+/// ⌘K focuses it from anywhere in the window; Escape clears
+/// (matching `NSSearchField`, via the field's own
+/// `onExitCommand`), which is also what closes the list.
+///
+/// It is the header row's ONE flexible element: it takes every
+/// point the chips beside it do not, which is what puts it in the
+/// middle of the bar. The alternative — a fixed pill and a
+/// `Spacer` — pushed the chips to the far edge and left a hole in
+/// the middle of the header (owner, 2026-08-04).
 struct HeaderSearch: View {
     /// The #18 axis the results filter on.
     let editingStoredProfile: Bool
@@ -22,45 +43,81 @@ struct HeaderSearch: View {
     /// destination and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
 
-    @State private var open = false
     @State private var query = ""
     /// The ↑/↓ highlight, tracked by destination exactly as the
     /// sidebar's list selection did.
     @State private var highlighted: SettingsDestination?
+    @FocusState private var focused: Bool
+
+    private var searching: Bool { !query.trimmed.isEmpty }
 
     var body: some View {
-        Button {
-            open = true
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 12, weight: .medium))
-                Text(L("search.placeholder", "Search"))
-                Text("⌘K")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(
-                Capsule().fill(Color.primary.opacity(0.06))
-            )
-        }
-        .buttonStyle(.plain)
-        .keyboardShortcut("k", modifiers: .command)
-        .accessibilityLabel(
-            L("search.placeholder", "Search")
+        SidebarSearchField(
+            text: $query,
+            focus: $focused,
+            onMove: move,
+            onCommit: commitHighlighted,
+            shortcutHint: true
         )
-        .popover(isPresented: $open, arrowEdge: .bottom) {
-            popoverContent
-        }
-        .onChange(of: open) { _, isOpen in
-            if !isOpen {
-                query = ""
-                highlighted = nil
-            }
+        // The flexible slot. A floor as well as a ceiling: at the
+        // 720 pt hard minimum the chips and the segment must not
+        // squeeze the field down to its glyph.
+        //
+        // 110, not the 140 first tried: measured across the row
+        // (back chip, profile chip, mode segment, unsaved chip,
+        // plus the 84 pt traffic-light inset) 140 left the row
+        // ~120 pt over the hard minimum, and a row that cannot fit
+        // does not truncate politely — AppKit clips the trailing
+        // element, which is a CONTROL. 17a's order is preview,
+        // then rows, then chrome, and "controls never".
+        .frame(minWidth: 110, maxWidth: .infinity)
+        .overlay(alignment: .topLeading) { resultPanel }
+        .background { focusShortcut }
+        // Typing moves the result set out from under the
+        // highlight, so the highlight goes rather than pointing
+        // at whatever now sits in that row.
+        .onChange(of: query) { _, _ in highlighted = nil }
+    }
+
+    /// ⌘K, as a zero-size button rather than on the field: a
+    /// `keyboardShortcut` on a `TextField` competes with the
+    /// field's own key handling, and this needs to fire while
+    /// focus is anywhere in the window.
+    private var focusShortcut: some View {
+        Button("") { focused = true }
+            .keyboardShortcut("k", modifiers: .command)
+            .opacity(0)
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true)
+    }
+
+    /// Hung below the field in the field's own coordinate space.
+    /// The offset is the field's height plus the gap; it is a
+    /// constant because a `GeometryReader` here would hand the
+    /// flexible slot a size to negotiate and collapse the row.
+    @ViewBuilder private var resultPanel: some View {
+        if searching {
+            resultList
+                .padding(8)
+                .frame(width: 340, alignment: .leading)
+                .background(
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.cardRadius
+                    )
+                    .fill(SettingsTheme.card)
+                    .overlay(
+                        RoundedRectangle(
+                            cornerRadius: SettingsTheme.cardRadius
+                        )
+                        .strokeBorder(SettingsTheme.hairline)
+                    )
+                    .shadow(
+                        color: .black.opacity(0.16),
+                        radius: 12,
+                        y: 4
+                    )
+                )
+                .offset(y: 40)
         }
     }
 
@@ -69,22 +126,6 @@ struct HeaderSearch: View {
             query: query,
             editingStoredProfile: editingStoredProfile
         )
-    }
-
-    private var popoverContent: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            SidebarSearchField(
-                text: $query,
-                focusOnAppear: true,
-                onMove: move,
-                onCommit: commitHighlighted
-            )
-            if !query.trimmed.isEmpty {
-                resultList
-            }
-        }
-        .padding(10)
-        .frame(width: 320)
     }
 
     @ViewBuilder private var resultList: some View {
@@ -123,7 +164,7 @@ struct HeaderSearch: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(
                     result.destination == highlighted
-                        ? Color.accentColor.opacity(0.16)
+                        ? SettingsTheme.accent.opacity(0.16)
                         : .clear
                 )
         )
@@ -139,8 +180,13 @@ struct HeaderSearch: View {
         return L("home.profiles.badge_ax", "start here")
     }
 
+    /// Clearing the query is what dismisses the list — the panel
+    /// is a function of `searching`, so there is no second piece
+    /// of open/closed state to disagree with it.
     private func pick(_ anchor: SettingsAnchor) {
-        open = false
+        query = ""
+        highlighted = nil
+        focused = false
         reveal(anchor)
     }
 

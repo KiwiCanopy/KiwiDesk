@@ -450,6 +450,39 @@ must keep:
   what a new `GuiConfig` or `TilingSettings` field reds until
   its census row exists.
 
+## Colour (#678 turn 16b)
+
+Every surface, border and ink in the Settings tree comes from
+`SettingsTheme`. The obligations that fall out of it:
+
+- **A new colour goes through the theme.** A hex literal or a
+  system colour beside a view is the drift the type exists to
+  end. `SettingsThemeTokenTests` holds the only copy of the hex
+  table and resolves each token under `.aqua` AND `.darkAqua`, so
+  a token wired to one branch in both modes reds;
+  `SettingsThemeWiringTests` puts every declared token in exactly
+  one of two lists — wired at a named render site, or deferred
+  with a reason — so a token nothing draws cannot ship quietly.
+- **`Color.accentColor` is not the accent.** It reads the user's
+  *system* accent and is unaffected by `.tint`, so in this
+  window it renders the app's own decoration in a hue the app did
+  not choose. Retired outright, along with the two `NSColor`
+  window surfaces, by the lens in `SettingsThemeWiringTests` —
+  which carries no exemption map on purpose.
+- **The accent marks control FILLS, never text naming a value.**
+  A toggle track, a selected segment, a prominent Save. A
+  `.menuStyle(.borderlessButton)` paints its LABEL in the accent,
+  so every one of them carries `neutralMenuLabel()`, paired per
+  file by the same suite.
+- **Prefer a concrete ink to `.secondary` wherever an ancestor
+  may set a foreground.** `.secondary` and `.tertiary` are
+  *hierarchical* — derived from the enclosing foreground, not from
+  a fixed grey — so one container-level `.foregroundStyle` turns
+  every caption beneath it into a translucent shade of that
+  colour. A container-level foreground plus a tinted row is how
+  the header and the empty-icon placeholder both shipped
+  green-on-green for an afternoon.
+
 ## SwiftUI traps
 
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

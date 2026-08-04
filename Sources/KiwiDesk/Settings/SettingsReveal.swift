@@ -137,7 +137,7 @@ private struct SearchRevealFlash: ViewModifier {
                     cornerRadius: SettingsReveal.cornerRadius
                 )
                 .fill(
-                    Color.accentColor.opacity(
+                    SettingsTheme.accent.opacity(
                         isMine ? SettingsReveal.peakOpacity : 0
                     )
                 )

@@ -18,8 +18,12 @@ struct KeyRecorderRejectionRow: View {
             // A shape cue beside the red text — the conflict must
             // not read by colour alone (WCAG 1.4.1). Hidden from
             // VoiceOver: the text below already states it.
+            //
+            // `danger`, not `.red`: system red is tuned against
+            // the system window background, and this row sits on
+            // the theme's own dark card, where it sinks.
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(SettingsTheme.danger)
                 .accessibilityHidden(true)
             Text(
                 L(
@@ -28,7 +32,7 @@ struct KeyRecorderRejectionRow: View {
                     rejection.holder
                 )
             )
-            .foregroundStyle(.red)
+            .foregroundStyle(SettingsTheme.danger)
             Button(L("key_recorder.steal", "Steal"), action: onSteal)
                 .pointingHandCursor()
             Button(L("key_recorder.go_to", "Go to"), action: onGoTo)
@@ -37,7 +41,7 @@ struct KeyRecorderRejectionRow: View {
                 Image(systemName: "xmark.circle.fill")
             }
             .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink3)
             .iconButtonAffordance(
                 L(
                     "key_recorder.dismiss_conflict",

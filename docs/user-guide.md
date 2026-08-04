@@ -60,8 +60,10 @@ Save.
 
 ### Search
 
-Press **⌘K** (or click the search field in the header) to
-search every area. Typing lists the areas that match — by
+The search field sits in the middle of the header and is a real
+field: click it and type, or press **⌘K** from anywhere in the
+window to put the cursor in it. Matches appear in a list under
+the field while you keep typing. Typing lists the areas that match — by
 area name or by any of the titled groups inside one
 (searching "sticky" finds Gaps & Borders, "focus" finds
 Shortcuts).
@@ -85,8 +87,8 @@ lands on that row, highlighted, ready to open.
 Only the first match per section is listed, so a broad word like
 "color" gives you one row per section instead of a wall of them;
 type a little more to reach a different one. Press Escape or the
-clear button to empty the query; closing the search popover
-clears it too.
+clear button to empty the query — an empty query is what closes
+the result list, and picking a result empties it for you.
 
 Matching ignores case, accents, and hyphens-versus-spaces, so
 "grosse" finds "Größe" and "space bar farben" finds

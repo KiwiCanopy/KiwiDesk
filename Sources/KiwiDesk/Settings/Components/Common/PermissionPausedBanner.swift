@@ -25,7 +25,7 @@ struct PermissionPausedBanner: View {
         // text can wrap to several lines).
         HStack(alignment: .center, spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(SettingsTheme.warningInk)
             Text(
                 L(
                     "settings.permission_paused",
@@ -34,6 +34,7 @@ struct PermissionPausedBanner: View {
                 )
             )
             .font(.callout)
+            .foregroundStyle(SettingsTheme.warningInk)
             .frame(maxWidth: .infinity, alignment: .leading)
             Button(
                 L(
@@ -45,9 +46,15 @@ struct PermissionPausedBanner: View {
             }
         }
         .padding(12)
+        // A solid warning surface, not `.orange.opacity(0.12)`:
+        // an opacity wash takes its result from whatever is
+        // behind it, so the bar drifted with the page and could
+        // not be given a dark counterpart at all. The pair also
+        // holds 4.5:1 for `warningInk` on it, which a wash over an
+        // unknown backdrop cannot promise.
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.orange.opacity(0.12))
+                .fill(SettingsTheme.warningSurface)
         )
     }
 }

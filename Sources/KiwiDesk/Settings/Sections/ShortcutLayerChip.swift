@@ -31,7 +31,7 @@ struct ShortcutLayerChip: View {
 
     private var fill: Color {
         if selected {
-            return Color.accentColor.opacity(0.25)
+            return SettingsTheme.accent.opacity(0.25)
         }
         return Color.secondary.opacity(
             hovering && isEnabled ? 0.18 : 0.12

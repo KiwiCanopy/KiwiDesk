@@ -90,7 +90,7 @@ struct AppRuleMatchPreview: View {
             )
             .font(.caption2)
             .foregroundStyle(
-                verdict == .tiles ? Color.secondary : .accentColor
+                verdict == .tiles ? Color.secondary : SettingsTheme.accent
             )
             Text(window.title)
                 .font(.caption)

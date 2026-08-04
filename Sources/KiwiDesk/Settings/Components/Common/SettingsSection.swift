@@ -109,13 +109,22 @@ struct SettingsSection<Content: View>: View {
                 maxWidth: .infinity,
                 alignment: .leading
             )
+            // Card fill on the SECTION radius, plus a hairline.
+            // The border is not decoration: on the dark
+            // appearance the container and the page behind it are
+            // within ten points of each other, so without it the
+            // card has no edge at all.
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(
-                        Color(
-                            nsColor: .controlBackgroundColor
-                        )
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.sectionRadius
+                )
+                .fill(SettingsTheme.card)
+                .overlay(
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.sectionRadius
                     )
+                    .strokeBorder(SettingsTheme.hairline)
+                )
             )
         }
         // The hoisted scroll markers (#610): any `scrollHoisted`
@@ -179,9 +188,10 @@ struct SettingsSection<Content: View>: View {
                 HStack(spacing: 6) {
                     if let symbol {
                         Image(systemName: symbol)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(SettingsTheme.ink2)
                     }
                     Text(title)
+                        .foregroundStyle(SettingsTheme.ink)
                 }
                 .font(
                     subsection
@@ -198,7 +208,7 @@ struct SettingsSection<Content: View>: View {
             if let caption {
                 Text(caption)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink3)
             }
         }
     }

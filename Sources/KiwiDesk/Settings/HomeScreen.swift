@@ -53,6 +53,15 @@ struct HomeScreen: View {
                 [.horizontal, .bottom],
                 SettingsMetrics.paneInset
             )
+            // Home had NO top gutter: the area panes get theirs
+            // from `SettingsView`'s scroll content margin, which
+            // this screen never passes through, so the first
+            // group heading sat flush under the header hairline
+            // and the grid read as cramped (owner, 2026-08-04).
+            // Larger than the panes' inset on purpose — a
+            // small-caps heading needs air above it to read as a
+            // heading rather than as a caption on the bar.
+            .padding(.top, 24)
         }
         .onAppear {
             firstRunVisible = HomeFirstRunState.shouldShow(
@@ -81,9 +90,21 @@ struct HomeScreen: View {
         cards: [SettingsDestination]
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
+            // Small-caps, tracked, green: the prototype's group
+            // label. A monospaced face at caption2 with real
+            // letter spacing, because uppercase text set solid is
+            // what makes a heading read as shouting rather than
+            // as a rule over the cards.
             Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .font(
+                    .system(
+                        size: 10,
+                        weight: .semibold,
+                        design: .monospaced
+                    )
+                )
+                .tracking(1.3)
+                .foregroundStyle(SettingsTheme.groupHeading)
                 .textCase(.uppercase)
                 .accessibilityAddTraits(.isHeader)
             LazyVGrid(

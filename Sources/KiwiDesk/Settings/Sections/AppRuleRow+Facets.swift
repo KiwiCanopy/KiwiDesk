@@ -47,6 +47,7 @@ extension AppRuleRow {
             )
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.space", "Space"))
     }
@@ -67,6 +68,7 @@ extension AppRuleRow {
             menuLabel(floatLabel)
         }
         .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.float", "Float"))
         .help(

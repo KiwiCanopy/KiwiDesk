@@ -20,11 +20,25 @@ struct SidebarTile: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white)
             }
+            // The badge must not be the colour of the tile it
+            // sits on, and one tile IS the accent: Profiles is
+            // the only destination that is ever badged, and its
+            // tint is `SettingsTheme.accent`. So the dot is drawn
+            // in `card` with an accent ring — legible on every
+            // tint, including its own, and for every viewer
+            // rather than only for those who can separate the two
+            // greens.
             .overlay(alignment: .topTrailing) {
                 if badged {
                     Circle()
-                        .fill(Color.accentColor)
+                        .fill(SettingsTheme.card)
                         .frame(width: 7, height: 7)
+                        .overlay(
+                            Circle().strokeBorder(
+                                SettingsTheme.ink,
+                                lineWidth: 1
+                            )
+                        )
                         .offset(x: 2, y: -2)
                 }
             }

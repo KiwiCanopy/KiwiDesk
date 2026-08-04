@@ -57,11 +57,11 @@ struct MonitorsPicture: View {
     /// faint outline on a flat field.
     private var well: some View {
         RoundedRectangle(cornerRadius: 8)
-            .fill(Color(nsColor: .underPageBackgroundColor))
+            .fill(SettingsTheme.sunken)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(
-                        Color(nsColor: .separatorColor),
+                        SettingsTheme.hairline,
                         lineWidth: 0.5
                     )
             )
