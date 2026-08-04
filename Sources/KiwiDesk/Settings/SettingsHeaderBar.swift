@@ -241,9 +241,19 @@ struct SettingsHeaderBar: View {
             Circle()
                 .fill(SettingsTheme.warningInk)
                 .frame(width: 8, height: 8)
+            // Truncates rather than holding the row open: this
+            // is the row's longest element in every locale
+            // ("12 nicht gespeicherte Änderungen" is ~218 pt) and
+            // the only one that is a LABEL rather than a control.
+            // At the 720 pt minimum something has to give, and a
+            // clipped segmented control is the outcome 17a
+            // forbids. The dot survives truncation, and the full
+            // sentence is in the `.help` below.
             Text(unsavedText)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink)
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .padding(.horizontal, ChipMetrics.padH)
         .padding(.vertical, ChipMetrics.padV)

@@ -60,10 +60,14 @@ struct SidebarSearchField: View {
         TextField(
             "",
             text: $text,
+            // `ink3`, not `.secondary.opacity(0.42)` (~1.64:1):
+            // the field carries no visible label, so the prompt
+            // is the only thing naming the control and cannot be
+            // a whisper.
             prompt: Text(
                 L("search.placeholder", "Search")
             )
-            .foregroundStyle(Color.secondary.opacity(0.42))
+            .foregroundStyle(SettingsTheme.ink3)
         )
         .textFieldStyle(.plain)
         .font(.body)
@@ -137,12 +141,19 @@ struct SidebarSearchField: View {
     private var fieldShape: some View {
         ChipMetrics.shape
             .fill(SettingsTheme.sunken)
+            // Full-strength accent, not 0.55: `.textFieldStyle`
+            // `.plain` removes the system focus ring, so this
+            // stroke IS the focus indicator and there is nothing
+            // underneath it. Blended at 0.55 over `sunken` it
+            // measured 1.52:1 against the field — a focus state
+            // that replaces the platform's must be at least as
+            // legible as the one it replaced.
             .overlay {
                 ChipMetrics.shape
                     .strokeBorder(
-                        SettingsTheme.accent.opacity(
-                            focus.wrappedValue ? 0.55 : 0
-                        ),
+                        focus.wrappedValue
+                            ? SettingsTheme.accent
+                            : Color.clear,
                         lineWidth: 3
                     )
             }

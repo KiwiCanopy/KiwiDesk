@@ -47,18 +47,33 @@ struct BadgeChip: View {
 }
 
 extension View {
-    /// The filled chip surface (#678 turn 16b): `sunken` fill on
-    /// `ChipMetrics.shape`, no border.
+    /// The filled chip surface (#678 turn 16b): `sunken` fill and
+    /// a hairline on `ChipMetrics.shape`.
     ///
     /// Owned here beside the other chip primitives rather than in
     /// the header, because it is what a chip IS — the header is
-    /// one consumer. Filled rather than stroked so it reads as a
-    /// token: the unsaved chip is the stroked shape, and a reader
-    /// must be able to tell the two apart at a glance.
+    /// one consumer.
+    ///
+    /// The hairline is not decoration. `sunken` on `card` is
+    /// **1.08:1 in both appearances**, so a fill-only chip is a
+    /// rectangle very nearly the colour of the bar behind it — and
+    /// the search field, which is the header's central affordance,
+    /// is one of these. The section container carries a hairline
+    /// one level up for exactly this reason: in a palette spaced
+    /// this closely, the border is what does the separating and
+    /// the fill only sets the mood.
     func chipSurface() -> some View {
         padding(.horizontal, ChipMetrics.padH)
             .padding(.vertical, ChipMetrics.padV)
-            .background(ChipMetrics.shape.fill(SettingsTheme.sunken))
+            .background(
+                ChipMetrics.shape
+                    .fill(SettingsTheme.sunken)
+                    .overlay(
+                        ChipMetrics.shape.strokeBorder(
+                            SettingsTheme.hairline
+                        )
+                    )
+            )
     }
 }
 

@@ -90,11 +90,13 @@ struct SettingsThemeWiringTests {
     @Test("a deferred token really has no consumer")
     func deferredTokensAreUnused() throws {
         var drawn: [String] = []
+        var scanned = 0
         for file in try SourceScan.swiftSources(under: settingsDir)
         where file.lastPathComponent != declaration {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
+            scanned += 1
             for token in deferred.keys
             where source.contains("SettingsTheme.\(token)") {
                 drawn.append(
@@ -102,6 +104,14 @@ struct SettingsThemeWiringTests {
                 )
             }
         }
+        // The floor its siblings carry, and it needs it MORE than
+        // they do: this test can only ever fail by finding
+        // something, so reading nothing is indistinguishable from
+        // passing. `FileManager.enumerator(at:)` returns a
+        // non-nil enumerator for a missing directory and yields
+        // nothing, so a moved or renamed `Settings/` makes
+        // `swiftSources` return `[]` without throwing.
+        #expect(scanned > 50)
         #expect(
             drawn.isEmpty,
             Comment(
@@ -184,8 +194,23 @@ struct SettingsThemeWiringTests {
     /// argument to have, not an entry to add quietly.
     @Test("no retired system colour survives in the tree")
     func retiredSystemColorsAreGone() throws {
+        // `.accentColor` with the LEADING DOT, not
+        // `Color.accentColor`: a guard-prover run put
+        // `hovering ? .accentColor : SettingsTheme.hairline` into
+        // a Home card, where the type is inferred from the other
+        // arm — the live defect, rendering the hover ring in the
+        // user's system accent — and the spelled-out needle
+        // passed green. Every escape hatch (`.foregroundColor(`,
+        // `.tint(`, a ternary arm) is an inferred position, so the
+        // dot form is the one that watches the COLOUR rather than
+        // one way of writing it, and it subsumes the qualified
+        // spelling. `SettingsTheme.accent` does not contain it.
+        //
+        // `controlAccentColor` is the same colour by another
+        // route and would otherwise be uncovered.
         let retired = [
-            "Color.accentColor",
+            ".accentColor",
+            ".controlAccentColor",
             ".controlBackgroundColor",
             ".separatorColor",
         ]

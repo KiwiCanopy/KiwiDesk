@@ -83,10 +83,17 @@ struct HomeFirstRunBanner: View {
         .padding(12)
         // Card chrome on the card radius — the same box a Home
         // card is, so the banner reads as belonging to the grid
-        // it sits above rather than as a fourth surface. The
-        // accent border is what marks it as the welcome beat;
-        // it deliberately never takes the paused bar's amber
+        // it sits above rather than as a fourth surface. It
+        // deliberately never takes the paused bar's amber
         // (failure outranks welcome).
+        //
+        // A plain HAIRLINE, not an accent border: a hovered Home
+        // card is card-fill + card-radius + an accent border, and
+        // this banner sits directly above the grid — so an accent
+        // border here put two pixel-identical boxes on screen
+        // meaning "you are hovering this" and "this is the
+        // welcome beat". The `checkmark.seal` glyph carries the
+        // beat on its own.
         .background(
             RoundedRectangle(
                 cornerRadius: SettingsTheme.cardRadius
@@ -96,7 +103,7 @@ struct HomeFirstRunBanner: View {
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
-                .strokeBorder(SettingsTheme.accent)
+                .strokeBorder(SettingsTheme.hairline)
             )
         )
     }

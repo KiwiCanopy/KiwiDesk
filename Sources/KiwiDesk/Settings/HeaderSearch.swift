@@ -62,7 +62,15 @@ struct HeaderSearch: View {
         // The flexible slot. A floor as well as a ceiling: at the
         // 720 pt hard minimum the chips and the segment must not
         // squeeze the field down to its glyph.
-        .frame(minWidth: 140, maxWidth: .infinity)
+        //
+        // 110, not the 140 first tried: measured across the row
+        // (back chip, profile chip, mode segment, unsaved chip,
+        // plus the 84 pt traffic-light inset) 140 left the row
+        // ~120 pt over the hard minimum, and a row that cannot fit
+        // does not truncate politely — AppKit clips the trailing
+        // element, which is a CONTROL. 17a's order is preview,
+        // then rows, then chrome, and "controls never".
+        .frame(minWidth: 110, maxWidth: .infinity)
         .overlay(alignment: .topLeading) { resultPanel }
         .background { focusShortcut }
         // Typing moves the result set out from under the

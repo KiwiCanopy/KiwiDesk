@@ -62,7 +62,7 @@ struct SettingsThemeTokenTests {
         ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),
         Pin("ink2", 0x55_63_5C, 0xA8_B3_A9, SettingsTheme.ink2),
-        Pin("ink3", 0x7C_8A_82, 0x86_91_84, SettingsTheme.ink3),
+        Pin("ink3", 0x6B_7A_72, 0x98_A2_96, SettingsTheme.ink3),
         Pin(
             "groupHeading",
             0x50_6C_37,

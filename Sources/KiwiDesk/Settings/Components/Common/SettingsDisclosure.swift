@@ -147,12 +147,22 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                     alignment: .leading
                 )
                 .padding(10)
+                // Fill AND hairline: `sunken` on `card` is
+                // 1.08:1, so a fill-only well says nothing about
+                // being nested — which is the well's whole job.
                 .background(
                     RoundedRectangle(
                         cornerRadius:
                             SettingsTheme.disclosureRadius
                     )
                     .fill(SettingsTheme.sunken)
+                    .overlay(
+                        RoundedRectangle(
+                            cornerRadius:
+                                SettingsTheme.disclosureRadius
+                        )
+                        .strokeBorder(SettingsTheme.hairline)
+                    )
                 )
         } label: {
             // The wash goes on the label alone; flashing the

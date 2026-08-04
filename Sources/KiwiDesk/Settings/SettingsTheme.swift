@@ -72,8 +72,14 @@ enum SettingsTheme {
     /// slider's readout.
     static let ink2 = token(light: 0x55_63_5C, dark: 0xA8_B3_A9)
 
-    /// Captions and disclosure hints, the quietest legible ink.
-    static let ink3 = token(light: 0x7C_8A_82, dark: 0x86_91_84)
+    /// Captions and disclosure hints, the quietest legible ink —
+    /// and *legible* is the operative word: this paints a
+    /// section's one-sentence explanation, which is body copy and
+    /// owes 4.5:1. The 16b table's `#7C8A82` / `#869184` measured
+    /// 3.61:1 on `card` in light and 4.43:1 on `sunken` in dark,
+    /// so both ends moved until the worst pairing clears. A
+    /// caption nobody can read is not quiet, it is missing.
+    static let ink3 = token(light: 0x6B_7A_72, dark: 0x98_A2_96)
 
     /// The small-caps group heading ("THIS PROFILE", a disclosure
     /// interior's group label).
