@@ -18,6 +18,21 @@ import Testing
 /// rows.
 @Suite("Profiles render ↔ census parity")
 struct ProfilesCensusRenderTests {
+    /// A summary carrying only what the expansion reads (the
+    /// name and the ordering keys) — the rest of the row's
+    /// content belongs to the view, not to this seam.
+    private func summary(_ name: String) -> ProfileSummary {
+        ProfileSummary(
+            name: name,
+            count: 1,
+            sets: [],
+            isDefault: false,
+            matchesLive: false,
+            spaceCount: 0,
+            shortcutOverrideCount: 0
+        )
+    }
+
     /// Rows the census places in this area's container, at a tier
     /// this area draws (`.atRest` / `.showMore`). Lua-only and
     /// internal rows carry no container and are excluded already,
@@ -142,8 +157,9 @@ struct ProfilesCensusRenderTests {
             .profiles(.isStarterLadder)
         ]
         let expander = ProfilesFamilyRows(
-            profiles: ["Desk", "Laptop"],
-            desktops: [1, 2, 3],
+            profiles: [summary("Desk"), summary("Laptop")],
+            presentDesktops: 3,
+            boundDesktops: [],
             presets: StandardProfiles.all
         )
         let placed = SettingKey.allCases.filter {
@@ -184,8 +200,9 @@ struct ProfilesCensusRenderTests {
     @Test("families expand once per instance")
     func instanceCounts() {
         let expander = ProfilesFamilyRows(
-            profiles: ["Desk", "Laptop"],
-            desktops: [1, 2, 3],
+            profiles: [summary("Desk"), summary("Laptop")],
+            presentDesktops: 3,
+            boundDesktops: [],
             presets: StandardProfiles.layouts(for: 1)
         )
         #expect(
@@ -224,8 +241,9 @@ struct ProfilesCensusRenderTests {
     @Test("a foreign key expands to nil")
     func foreignKey() {
         let expander = ProfilesFamilyRows(
-            profiles: ["Desk"],
-            desktops: [1],
+            profiles: [summary("Desk")],
+            presentDesktops: 1,
+            boundDesktops: [],
             presets: []
         )
         #expect(

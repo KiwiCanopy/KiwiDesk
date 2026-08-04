@@ -132,11 +132,28 @@ struct ProfilesSection: View {
         )
     }
 
-    /// The rows this container draws, from the family seam that
-    /// records what a Profiles census key expands to — the same
-    /// list `ProfilesCensusRenderTests` holds against the
-    /// census, so the guard watches what the screen shows rather
-    /// than a fixture of its own.
+    /// The family seam for this page, built from live state.
+    ///
+    /// The views drive their rows off THIS instance, and the
+    /// census guards read `rows(for:)` off the same type over
+    /// the same derivations — so the structure the guards assert
+    /// about is the structure the screen draws. Building it here
+    /// is what stops the seam being a shape that only tests
+    /// touch.
+    var familyRows: ProfilesFamilyRows {
+        ProfilesFamilyRows(
+            profiles: model.profileSummaries,
+            presentDesktops: model.nativeSpaceCount,
+            boundDesktops: Array(
+                model.config.profileBindings.keys
+            ),
+            presets: ProfilesFamilyRows.presets(
+                forScreens: model.displays.count
+            )
+        )
+    }
+
+    /// The saved-profile rows, in display order.
     private var orderedSummaries: [ProfileSummary] {
         ProfilesFamilyRows.orderedProfiles(
             model.profileSummaries

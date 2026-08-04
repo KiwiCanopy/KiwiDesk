@@ -164,9 +164,15 @@ final class SettingsModel: ObservableObject {
 
     /// The condition that makes a Desktop binding ambiguous:
     /// separate Spaces on AND more than one display. The
-    /// preference is the snapshot, the count is live.
+    /// preference is the snapshot, the count is live — and the
+    /// predicate itself stays Core's, which is the whole point
+    /// of `recommendsSharedSpaces` existing (#8: one predicate,
+    /// so onboarding and this page cannot drift).
     var displaysHaveSeparateSpaces: Bool {
-        separateDisplaySpacesPreference && displays.count > 1
+        DisplaySpacesSetting.recommendsSharedSpaces(
+            separateSpaces: separateDisplaySpacesPreference,
+            displayCount: displays.count
+        )
     }
     /// What loads right now, by which rule, and over how many
     /// screens (#678 turn 13a) — for the "Which profile loads"

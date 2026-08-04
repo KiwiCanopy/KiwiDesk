@@ -19,11 +19,17 @@ public enum ProfileVerdict: Equatable, Sendable {
     /// No exact set matches; this profile is the screen count's
     /// default.
     case countDefault(name: String)
-    /// No saved profile matches; a built-in Standard composes.
-    /// Carries the Standard's stable English `name`, which the
-    /// GUI localizes.
+    /// No saved profile matches; a built-in layout composes.
+    /// Carries its stable English `StandardLayout.name`, which
+    /// the GUI localizes.
     case builtInStandard(name: String)
-    /// Nothing matches and no Standard plans for this many
+    /// No saved profile matches, and the config is Lua-owned, so
+    /// nothing is adopted: a built-in layout steers PLACEMENT
+    /// while `activeProfile` (when any) keeps owning the tiling.
+    /// A distinct promise from `builtInStandard`, and the GUI
+    /// must not say "the built-in X loads" about it.
+    case placementOnlyStandard(name: String, activeProfile: String?)
+    /// Nothing matches and no built-in plans for this many
     /// screens.
     case none
 }
@@ -33,13 +39,27 @@ extension KiwiCore {
     /// paths use — a binding for the active Desktop first
     /// (`KiwiCore+MonitorChange`: "A native-Space binding wins
     /// over matching (#7)"), then the monitor match, then the
-    /// count's Standard.
+    /// count's built-in layout, which on a Lua-owned config
+    /// steers placement only.
     ///
-    /// The precedence is the whole point of this query existing.
-    /// A GUI that asked `profiles.match` alone would answer the
-    /// display half of the rule and name the wrong profile on
-    /// any machine that binds a Desktop — while the card that
-    /// configures those bindings sits on the same page.
+    /// **This query and `handleMonitorChange` read one rule from
+    /// two places, so every arm here mirrors an arm there.** Two
+    /// copies of a precedence is what drifted in the first
+    /// place: the GUI card first asked `ProfileManager.match`
+    /// alone and named the wrong profile on a bound Desktop,
+    /// then asked `StandardProfiles.standard(for:)` and named a
+    /// workflow Standard while the beginner ladder composed. A
+    /// change to the live path's precedence updates this query
+    /// in the same change set; `ProfileVerdictTests` fixes each
+    /// arm against a fixture built for it.
+    ///
+    /// The arms are not merged into `handleMonitorChange` itself
+    /// because that method APPLIES — it adopts, retiles, marks
+    /// dirty and logs — and a Settings card rendering a sentence
+    /// must not run any of it. What is shared instead is every
+    /// decision input: `read`, `match` and
+    /// `composeMonitorChangeFallback` are the same calls, in the
+    /// same order, over the same state.
     ///
     /// `activeDesktop` is passed in rather than read from
     /// `NativeSpaces` so this stays a pure query over injected
@@ -47,9 +67,22 @@ extension KiwiCore {
     ///
     /// COST: `match` scans the profile directory and decodes
     /// every profile, so this is a refresh-time query, never a
-    /// per-render one.
+    /// per-render one. It returns the display count it reasoned
+    /// over, so a caller cannot pair the verdict with a second,
+    /// later read of the same thing.
     public func profileVerdict(
         activeDesktop: Int?
+    ) -> (verdict: ProfileVerdict, screens: Int) {
+        let displays = state.workspaces.allDisplays
+        return (
+            verdict(activeDesktop: activeDesktop, displays: displays),
+            displays.count
+        )
+    }
+
+    private func verdict(
+        activeDesktop: Int?,
+        displays: [Display]
     ) -> ProfileVerdict {
         // A binding whose profile cannot be read falls THROUGH
         // to matching, exactly as the live path does — the
@@ -61,7 +94,6 @@ extension KiwiCore {
         {
             return .boundToDesktop(name: bound, desktop: desktop)
         }
-        let displays = state.workspaces.allDisplays
         switch profiles.match(
             fingerprints: displays.map(\.fingerprint)
         ) {
@@ -70,21 +102,29 @@ extension KiwiCore {
         case .countDefault(let profile):
             return .countDefault(name: profile.name)
         case .none:
-            // The SAME baseline-aware fallback the live path
-            // composes with, not `StandardProfiles.standard(for:)`
-            // — on the beginner ladder baseline a monitor change
-            // recomposes the LADDER (#485), which is
-            // `isStandard: false` and so can never be what
-            // `standard(for:)` returns. Asking the simpler query
-            // would name a workflow Standard while Starter is
-            // what actually composes, with the profile header
-            // two cards up already saying "Starter".
-            guard
-                let composed = composeMonitorChangeFallback(
-                    displays: displays
-                )
-            else { return .none }
-            return .builtInStandard(name: composed.sourceName)
+            return fallbackVerdict(displays: displays)
         }
+    }
+
+    /// The `.none` arm, mirroring `handleMonitorChange`'s: the
+    /// baseline-aware fallback (the beginner ladder while on the
+    /// ladder baseline, else the count's Standard), and then the
+    /// `isGuiManaged` split that decides whether the composed
+    /// layout is ADOPTED or merely steers placement.
+    private func fallbackVerdict(
+        displays: [Display]
+    ) -> ProfileVerdict {
+        guard
+            let composed = composeMonitorChangeFallback(
+                displays: displays
+            )
+        else { return .none }
+        guard isGuiManaged else {
+            return .placementOnlyStandard(
+                name: composed.sourceName,
+                activeProfile: profiles.currentName
+            )
+        }
+        return .builtInStandard(name: composed.sourceName)
     }
 }

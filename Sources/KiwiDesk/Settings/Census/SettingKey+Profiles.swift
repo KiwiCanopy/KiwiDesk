@@ -24,7 +24,10 @@ extension ProfilesKey {
                 .profiles,
                 .profilesPerMacOSSpace,
                 .showMore,
-                gate: .runtime(.desktopBindingsUnavailable)
+                gate: .runtimeAnyOf([
+                    .editingStoredProfile,
+                    .displaysHaveSeparateSpaces,
+                ])
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)
@@ -53,7 +56,10 @@ extension ProfilesKey {
                 .profiles,
                 .presets,
                 .atRest,
-                gate: .runtime(.presetApplyUnavailable)
+                gate: .runtimeAnyOf([
+                    .screenCountMismatch,
+                    .editingStoredProfile,
+                ])
             )
         }
     }

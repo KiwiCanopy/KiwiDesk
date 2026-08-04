@@ -37,7 +37,27 @@ public enum DisplaySpacesSetting {
     public static func recommendsSharedSpaces(
         displayCount: Int
     ) -> Bool {
-        displayCount > 1 && hasSeparateSpaces()
+        recommendsSharedSpaces(
+            separateSpaces: hasSeparateSpaces(),
+            displayCount: displayCount
+        )
+    }
+
+    /// The same predicate over an ALREADY-READ preference.
+    ///
+    /// A caller that snapshots the `CFPreferences` value — the
+    /// Settings dashboard does, since the setting needs a log out
+    /// to change and the read is not free — still needs the
+    /// display half evaluated live, because nothing refreshes
+    /// that dashboard when a monitor is plugged in. Without this
+    /// overload such a caller re-derives `count > 1 && …` itself
+    /// and #8's one-predicate promise quietly becomes two
+    /// copies; that is exactly what happened for one commit.
+    public static func recommendsSharedSpaces(
+        separateSpaces: Bool,
+        displayCount: Int
+    ) -> Bool {
+        displayCount > 1 && separateSpaces
     }
 
     /// Opens System Settings › Desktop & Dock, where the option

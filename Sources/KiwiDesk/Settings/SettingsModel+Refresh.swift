@@ -47,11 +47,15 @@ extension SettingsModel {
         // pass just read. The count is captured in the same
         // breath, so the card's sentence has one moment behind
         // it.
+        // Verdict and count come out of ONE Core read, so the
+        // card's sentence cannot pair a verdict with a later
+        // reading of the display list.
+        let resolved = core.profileVerdict(
+            activeDesktop: currentNativeSpace
+        )
         profileResolution = ProfileResolution(
-            verdict: core.profileVerdict(
-                activeDesktop: currentNativeSpace
-            ),
-            screens: displays.count
+            verdict: resolved.verdict,
+            screens: resolved.screens
         )
         separateDisplaySpacesPreference =
             DisplaySpacesSetting.hasSeparateSpaces()

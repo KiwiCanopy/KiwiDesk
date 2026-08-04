@@ -69,7 +69,7 @@ struct ProfileVerdictTests {
             profile("Other", monitors: ["Absent:1x1"], isDefault: true)
         )
         #expect(
-            core.profileVerdict(activeDesktop: nil)
+            core.profileVerdict(activeDesktop: nil).verdict
                 == .exactMonitors(name: "Desk")
         )
     }
@@ -85,19 +85,51 @@ struct ProfileVerdictTests {
             )
         )
         #expect(
-            core.profileVerdict(activeDesktop: nil)
+            core.profileVerdict(activeDesktop: nil).verdict
                 == .countDefault(name: "Fallback")
         )
     }
 
-    /// No saved profile at all: the count's Standard composes,
-    /// and the verdict carries its STABLE English name (the GUI
-    /// localizes it).
+    /// No saved profile at all, on a GUI-MANAGED config: the
+    /// count's Standard composes and is adopted, and the verdict
+    /// carries its STABLE English name (the GUI localizes it).
     @Test("a built-in Standard answers when nothing matches")
-    func builtInStandard() {
+    func builtInStandard() throws {
+        let core = core()
+        try core.saveGuiConfig(GuiConfig())
+        #expect(core.isGuiManaged)
         #expect(
-            core().profileVerdict(activeDesktop: nil)
+            core.profileVerdict(activeDesktop: nil).verdict
                 == .builtInStandard(name: "Developer")
+        )
+    }
+
+    /// The same state on a LUA-OWNED config is a different
+    /// promise, and the card must not describe it the same way:
+    /// nothing is adopted, the built-in only steers placement,
+    /// and whatever profile is active keeps owning the tiling.
+    /// `handleMonitorChange` branches here on `isGuiManaged`, so
+    /// a verdict without this arm states the wrong thing on
+    /// every hand-written config.
+    @Test("a Lua-owned config gets a placement-only verdict")
+    func placementOnlyOnLuaConfig() {
+        let core = core()
+        #expect(!core.isGuiManaged)
+        #expect(
+            core.profileVerdict(activeDesktop: nil).verdict
+                == .placementOnlyStandard(
+                    name: "Developer",
+                    activeProfile: nil
+                )
+        )
+    }
+
+    /// The count rides out of the SAME read the verdict reasons
+    /// from, so a caller cannot pair it with a later one.
+    @Test("the verdict carries the screens it reasoned over")
+    func verdictCarriesItsScreenCount() {
+        #expect(
+            core().profileVerdict(activeDesktop: nil).screens == 1
         )
     }
 
@@ -115,7 +147,7 @@ struct ProfileVerdictTests {
         )
         core.nativeSpaceBindings = [2: "Bound"]
         #expect(
-            core.profileVerdict(activeDesktop: 2)
+            core.profileVerdict(activeDesktop: 2).verdict
                 == .boundToDesktop(name: "Bound", desktop: 2)
         )
     }
@@ -131,7 +163,7 @@ struct ProfileVerdictTests {
         )
         core.nativeSpaceBindings = [2: "Bound"]
         #expect(
-            core.profileVerdict(activeDesktop: 1)
+            core.profileVerdict(activeDesktop: 1).verdict
                 == .exactMonitors(name: "Desk")
         )
     }
@@ -147,7 +179,7 @@ struct ProfileVerdictTests {
         try core.profiles.save(profile("Desk", monitors: live))
         core.nativeSpaceBindings = [2: "Deleted"]
         #expect(
-            core.profileVerdict(activeDesktop: 2)
+            core.profileVerdict(activeDesktop: 2).verdict
                 == .exactMonitors(name: "Desk")
         )
     }

@@ -40,11 +40,15 @@ enum ProfilesRowInstance: Hashable {
 /// `rows(for:) ?? []` cannot tell a key that never draws from one
 /// whose rows disappeared.
 struct ProfilesFamilyRows {
-    /// The saved profiles, in the list's display order.
-    let profiles: [String]
-    /// The native Desktops the bindings card lists — every
-    /// present desktop plus any number already bound.
-    let desktops: [Int]
+    /// The saved profiles, unordered — `orderedProfiles` is what
+    /// puts them in display order, and it is the same call the
+    /// list makes.
+    let profiles: [ProfileSummary]
+    /// How many native Desktops are detected right now.
+    let presentDesktops: Int
+    /// Desktop numbers a binding already names, so one to a
+    /// now-absent Space stays listed.
+    let boundDesktops: [Int]
     /// The presets the area offers, in catalog order.
     let presets: [StandardLayout]
 
@@ -108,15 +112,30 @@ struct ProfilesFamilyRows {
         }
     }
 
+    /// Both halves of the seam answer from ONE derivation.
+    ///
+    /// The static helpers below are what the three containers
+    /// call; this expansion is what the census guards read. An
+    /// earlier cut had them computed separately from the same
+    /// inputs, which made `familiesExpand` and `instanceCounts`
+    /// assert over a structure the screen never touched — the
+    /// dead seam moved rather than removed. So the instance is
+    /// built FROM the statics (`ProfilesSection.familyRows`),
+    /// and the two cannot answer differently.
     private func rows(
         for family: ProfilesKey
     ) -> [ProfilesRowInstance]? {
         switch family {
         case .profilesLoad, .profilesDelete, .profilesRename,
             .isDefault:
-            return profiles.map(ProfilesRowInstance.profile)
+            return Self.orderedProfiles(profiles)
+                .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:
-            return desktops.map(ProfilesRowInstance.desktop)
+            return Self.desktops(
+                present: presentDesktops,
+                bound: boundDesktops
+            )
+            .map(ProfilesRowInstance.desktop)
         case .presetsApply:
             return presets.map {
                 ProfilesRowInstance.preset($0.name)

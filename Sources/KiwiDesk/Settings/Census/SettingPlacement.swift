@@ -145,34 +145,16 @@ enum SettingRuntimeGate: Hashable {
     /// The gaps master slider reads "mixed" while the per-edge
     /// values differ.
     case perEdgeValuesDiffer
-    /// The Desktop bindings are dead for EITHER of two
-    /// independent reasons — a stored profile is being edited,
-    /// or macOS's "Displays have separate Spaces" is on with
-    /// more than one display, which gives every display its own
-    /// Desktop 1 and leaves a binding naming no single event.
-    ///
-    /// A DISJUNCTION, unlike the two conjunctions below, and the
-    /// third entry in the register `SettingGate` keeps: one gate
-    /// slot, a predicate with more than one arm. It is a case of
-    /// its own rather than a tag naming the stored-profile arm
-    /// alone, because a row declaring one arm while greying on
-    /// two says something false about its own owner.
-    /// `ProfilesGates` resolves both arms and names them apart
-    /// in its reason cases, since the sentences differ and only
-    /// one of them has a fix the user can act on.
-    case desktopBindingsUnavailable
-    /// A preset's Apply is dead for EITHER of two independent
-    /// reasons — the connected screen count does not match the
-    /// preset's, or a stored profile is being edited (applying
-    /// switches the LIVE layout, which editing a stored profile
-    /// never does).
-    ///
-    /// A disjunction, like `desktopBindingsUnavailable`, and in
-    /// the same register below. It replaced a
-    /// `screenCountMismatch` tag that named the count arm only
-    /// — which made the census claim an owner that was not the
-    /// whole owner while `ProfilesGates` greyed on both.
-    case presetApplyUnavailable
+    /// A stored profile is being edited, so a global setting
+    /// this profile may never override is dead (switch to Live).
+    case editingStoredProfile
+    /// macOS's "Displays have separate Spaces" is on with more
+    /// than one display attached, so every display has its own
+    /// Desktop 1 and a Desktop binding names no single event.
+    case displaysHaveSeparateSpaces
+    /// Presets apply only when the connected screen count
+    /// matches the preset's.
+    case screenCountMismatch
     /// The login item follows `SMAppService` status — the
     /// setter is guarded, the control greys (#342).
     case loginItemServiceStatus
@@ -221,28 +203,48 @@ enum SettingRuntimeGate: Hashable {
 /// values decide the grey — the exact predicate (resolved
 /// override chains, value comparisons) lives with the wiring,
 /// and gates on resolved values name every surfaced owner
-/// (#406: gate on RESOLVED, not global) — EXCEPT the four
-/// documented multi-arm slots, whose runtime tag carries the
-/// arms a single gate slot cannot: the two conjunctions
-/// (`paletteGlowPairing`, `luaImportAvailable`) and the two
-/// disjunctions (`desktopBindingsUnavailable`,
-/// `presetApplyUnavailable`). Each tag's own
-/// docstring states its arms; a fourth joins this register in
-/// the same change that declares it, because a tag naming one
-/// arm of a two-arm predicate makes the census claim an owner
-/// that is not the whole owner. `.runtime` names a condition
-/// that is not itself a setting.
+/// (#406: gate on RESOLVED, not global). `.runtime` names a
+/// condition that is not itself a setting, and `.runtimeAnyOf`
+/// names SEVERAL such conditions where a row dies for any of
+/// them — so a multi-arm predicate is spelled out in the census
+/// rather than hidden behind one tag standing for the whole
+/// disjunction.
+///
+/// That distinction is load-bearing: a tag named for the row's
+/// own OUTCOME ("this control is unavailable") records nothing a
+/// reader could not see from the greyed row itself, and leaves
+/// the predicate knowable only inside the area's resolver. Two
+/// such tags existed for one commit; `.runtimeAnyOf` replaced
+/// them, and with them a hand-kept register of which tags were
+/// secretly compound. The two remaining CONJUNCTIONS
+/// (`paletteGlowPairing`, `luaImportAvailable`) each state both
+/// arms in their own docstring — an `allOf` has no second
+/// client yet, and one client is not a shape.
 enum SettingGate: Hashable {
     case setting(SettingKey)
     case anyOf([SettingKey])
     case runtime(SettingRuntimeGate)
+    /// The row is inert while ANY of these conditions holds —
+    /// the runtime peer of `.anyOf`, so a row with a two-arm
+    /// predicate names both arms instead of one tag standing for
+    /// the pair.
+    case runtimeAnyOf([SettingRuntimeGate])
 
     /// The setting rows this gate reads, for the guards.
     var settings: [SettingKey] {
         switch self {
         case .setting(let key): return [key]
         case .anyOf(let keys): return keys
-        case .runtime: return []
+        case .runtime, .runtimeAnyOf: return []
+        }
+    }
+
+    /// The runtime conditions this gate names, for the guards.
+    var runtimeConditions: [SettingRuntimeGate] {
+        switch self {
+        case .setting, .anyOf: return []
+        case .runtime(let condition): return [condition]
+        case .runtimeAnyOf(let conditions): return conditions
         }
     }
 }

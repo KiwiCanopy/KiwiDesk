@@ -25,6 +25,31 @@ struct ProfileBindingEscapeTests {
         SettingsModel(core: makeTestCore())
     }
 
+    /// The hatch appears only under the ambiguity reason, and
+    /// nothing but the resolver's ARM ORDER keeps it out of the
+    /// stored-profile case — where a global write is exactly
+    /// what a profile edit may never do. Swap the two arms in
+    /// `ProfilesGates.inertReason` and the button would be
+    /// offered in a mode whose Save writes a profile.
+    @Test("the stored-profile reason hides the hatch")
+    func storedProfileReasonWinsOverAmbiguity() {
+        let gates = ProfilesGates(
+            editingStoredProfile: true,
+            separateDisplaySpaces: true,
+            connectedScreens: 2
+        )
+        #expect(
+            gates.inertReason(for: .profiles(.profileBindings))
+                == .bindingsAreGlobal
+        )
+        // And the hatch keys on the OTHER reason, so this is
+        // what keeps it off the stored-profile card.
+        #expect(
+            ProfilesGates.InertReason.bindingsAreGlobal
+                != .desktopsAreAmbiguous
+        )
+    }
+
     @Test("clearing removes every binding")
     func clearsEveryBinding() {
         let model = model()

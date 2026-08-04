@@ -662,6 +662,8 @@
   "profiles.which_loads.count_default": "Right now: %1$@ → %2$@ (the default for this screen count).",
   "profiles.which_loads.exact": "Right now: %1$@ → %2$@ (these exact monitors).",
   "profiles.which_loads.none": "Right now: %1$@ → no profile and no built-in layout match.",
+  "profiles.which_loads.placement_only": "Right now: %1$@ → your Lua config keeps the layout; the built-in %2$@ only places spaces on screens.",
+  "profiles.which_loads.placement_only_profile": "Right now: %1$@ → %2$@ keeps the layout; the built-in %3$@ only places spaces on screens.",
   "profiles.which_loads.rule": "A profile bound to the active Desktop loads first. Otherwise KiwiDesk picks the profile whose screen count matches, preferring the one marked default.",
   "profiles.which_loads.standard": "Right now: %1$@ → the built-in %2$@ (no saved profile matches).",
   "profiles.which_loads.title": "Which profile loads",
