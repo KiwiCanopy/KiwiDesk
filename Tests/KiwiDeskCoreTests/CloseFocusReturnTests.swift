@@ -60,6 +60,11 @@ struct CloseFocusReturnTests {
         // The candidate (a) dies first; closing b must then take
         // the forward successor (c), never index-minus-one.
         state.apply(.windowDestroyed(a, wasMinimized: false))
+        // The destroy clears the candidate outright — the first
+        // of the nets refusing a dead (or recycled-id) window;
+        // close-time validation is the second. Pinned directly
+        // because the fall-through below cannot tell them apart.
+        #expect(state.workspaces.previousFocused == nil)
         state.apply(.windowDestroyed(b, wasMinimized: false))
         let home = state.workspaces.space(of: c)!
         #expect(state.workspaces[home]?.focused == c)
