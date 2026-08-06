@@ -12,7 +12,7 @@ or reviewing a Settings surface. The GUI north-star these serve
 (simplicity, intuitiveness, Apple-native feeling, in that
 order) is defined in `AGENTS.md` §2. Entries are cross-cutting
 conventions; the layout-editor entries are included because
-they span all six layout editors, not one pane.
+they span all seven layout editors, not one pane.
 
 ## Help & cross-references
 

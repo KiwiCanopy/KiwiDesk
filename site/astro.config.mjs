@@ -48,7 +48,7 @@ export default defineConfig({
       title: "KiwiDesk",
       description:
         "A tiling window manager for macOS — flat arrays, " +
-        "Lua config, six layouts.",
+        "Lua config, seven layouts.",
       // Icon-only mark in the header (the stacked wordmark is
       // too tall for the top bar); the "KiwiDesk" title sits
       // beside it. Masters are symlinked from repo-root assets/.
