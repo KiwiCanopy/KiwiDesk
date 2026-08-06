@@ -10,9 +10,9 @@ a flat list per virtual space, layouts are pure functions over
 that list, and everything is configurable twice over: visually
 in the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
 
-Six layouts ship out of the box — **bsp**, **stack**,
-**scrolling** (PaperWM-style), **monocle**, **grid**, and
-**floating** — with per-space overrides, profiles that follow
+Seven layouts ship out of the box — **bsp**, **stack**,
+**scrolling** (PaperWM-style), **monocle**, **grid**, **track**,
+and **floating** — with per-space overrides, profiles that follow
 your monitor setup, and native macOS Spaces integration.
 
 ## Where to go

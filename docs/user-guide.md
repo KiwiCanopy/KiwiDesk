@@ -1716,7 +1716,7 @@ ladder plus workflow layouts for 1, 2, or 3 screens. One workflow
 layout per screen count is the *Standard* that resolves silently
 when no saved profile matches; the rest (Starter included) are
 Presets you can apply to spin up a starting point. (These are whole
-profiles — not to be confused with the six layout *modes* like bsp
+profiles — not to be confused with the seven layout *modes* like bsp
 or stack.)
 
 **1 Screen:**

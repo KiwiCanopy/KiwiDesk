@@ -8,7 +8,7 @@
 
 ### A tiling window manager for macOS
 
-Flat arrays instead of i3 trees · configured in Lua · six
+Flat arrays instead of i3 trees · configured in Lua · seven
 layouts · never disables SIP.
 
 **Start simple. Grow without limits.** KiwiDesk tiles your windows
@@ -21,8 +21,8 @@ Powerful when you reach for it, never in your way.
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
-![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
-![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)
+[![License MIT](https://img.shields.io/badge/License-MIT-8DB354)](LICENSE)
+[![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 ![Direct download — coming soon](https://img.shields.io/badge/Direct_download-coming_soon-inactive)
 
 <br>
@@ -35,6 +35,7 @@ Powerful when you reach for it, never in your way.
 </div>
 
 <!-- Add a screenshot or demo GIF here once one is captured. -->
+<!-- Add a short demo video here once one is recorded. -->
 
 > **Status: public beta, on Homebrew.** The core (layouts, Lua
 > config, CLI, profiles, per-native-space profiles, virtual
@@ -70,6 +71,7 @@ pure functions over that list:
 | `scrolling` | Niri/PaperWM-style horizontal columns |
 | `monocle` | Focused window maximized, rest behind it |
 | `grid` | Dynamic (auto-balanced) or rigid rows × columns |
+| `track` | Resizable columns (or rows) with per-track control |
 | `floating` | macOS default behavior, untouched |
 
 Switching layouts instantly rearranges the same window list with
@@ -77,6 +79,9 @@ a different formula — no tree surgery, no lost state.
 
 **More highlights:**
 
+- **GUI *and* full scriptability**: everyday settings live in a
+  visual Settings app; power users control everything through
+  Lua, the CLI, or both — same features, two paths.
 - **Smooth spring animations**, one display link per monitor, so
   mixed 60 Hz / 120 Hz setups each animate at native cadence.
 - **Lua configuration** (`~/.config/KiwiDesk/init.lua`) with a
@@ -84,6 +89,17 @@ a different formula — no tree surgery, no lost state.
   windows (500 ms timeout, faulty callbacks auto-disabled).
 - **CLI + UNIX socket IPC**: script everything, stream events to
   SketchyBar, JankyBorders, or your own tools.
+- **Real-time event stream**: `kiwidesk subscribe` emits
+  newline-delimited JSON — hook SketchyBar, JankyBorders, shell
+  scripts, or any external tool into live window events.
+- **Optional App Bar & Space Bar**: built-in window-tab and
+  space-overview overlays with Liquid Glass, fully themeable.
+- **Virtual spaces** with per-space window hiding — your own
+  workspace layer on top of native macOS Spaces, switchable
+  instantly via shortcut or the Space Bar.
+- **Per-app rules**: route apps to spaces, auto-float specific
+  windows, or fully ignore apps from tiling — from the GUI or
+  via `float_rules`, `app_rules`, and `ignore_rules` in Lua.
 - **Modal keybindings** via the Carbon API — no Input Monitoring
   (keylogger) permission needed.
 - **Profiles that follow your displays**: save a layout per
@@ -91,6 +107,8 @@ a different formula — no tree surgery, no lost state.
   those screens — with per-native-Space bindings on top.
 - **Crash recovery** and **sleep/wake restore** keep your window
   arrangement across restarts and lid cycles.
+- **15 languages** out of the box — and contributions for more
+  are always welcome.
 
 ## Installation
 
@@ -146,51 +164,34 @@ The CLI is the same binary — `kiwidesk` from the cask, or
 `.build/release/KiwiDesk` from a source build:
 
 ```sh
-kiwidesk set_mode monocle        # current space -> monocle
-kiwidesk set_mode 2 stack        # space "2" -> master/stack
+kiwidesk set_mode monocle        # current space → monocle
 kiwidesk focus left              # move focus
 kiwidesk set_gap_global 12       # breathing room
-kiwidesk get_state               # inspect everything as JSON
 kiwidesk help                    # list every command
 ```
 
-Everyday settings live in the **Settings** app — see the
-[user guide](docs/user-guide.md). Prefer Lua? The config file
-`~/.config/KiwiDesk/init.lua` is created **all-commented** on
-first launch (the built-in defaults apply until you uncomment a
-line); it's for optional custom config and event hooks:
-
-```lua
-KiwiDesk.set_gap_global(10)
-
--- Layouts are per SPACE (virtual workspace, number or name);
--- every space defaults to "bsp".
-KiwiDesk.set_mode("music", "floating")
-
-float_rules = { "Calculator", "Finder:Get Info" }
-app_rules   = { ["Spotify"] = "music" }
-
-KiwiDesk.bind("cmd+alt+left", function()
-    KiwiDesk.focus("left")
-end)
-```
+Everyday settings live in the **Settings** app. Prefer Lua?
+The config file `~/.config/KiwiDesk/init.lua` is created
+all-commented on first launch — see the
+[Lua reference](https://kiwidesk.kiwicanopy.com/docs/lua-reference/)
+for the full API.
 
 ## Documentation
 
-Full docs live at **[kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com)**
-(searchable, light/dark). The same pages are readable here on
-GitHub:
+Full docs live at
+**[kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/docs/)**
+(searchable, light/dark):
 
-- [User guide](docs/user-guide.md) — the Settings app, profiles,
-  and the visual editor
-- [Lua reference](docs/lua-reference.md) — the full init.lua API,
-  every setting in expects → does → example form
-- [CLI reference](docs/cli.md) — every command, IPC protocol,
-  event stream
-- [Recipes](docs/recipes/index.md) — SketchyBar, JankyBorders,
-  and other ready-to-copy integrations
-- [Design decisions](docs/design-decisions.md) — the why behind
-  settled product and UX behavior
+- [User guide](https://kiwidesk.kiwicanopy.com/docs/user-guide/) —
+  the Settings app, profiles, and the visual editor
+- [Lua reference](https://kiwidesk.kiwicanopy.com/docs/lua-reference/) —
+  the full init.lua API
+- [CLI & IPC reference](https://kiwidesk.kiwicanopy.com/docs/cli/) —
+  every command, event stream, socket protocol
+- [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) —
+  SketchyBar, JankyBorders, and more
+- [Design decisions](https://kiwidesk.kiwicanopy.com/docs/design-decisions/) —
+  the why behind settled behavior
 
 ## Contributing
 
@@ -215,6 +216,6 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 <div align="center">
 <br>
-<sub>A <strong>KiwiCanopy</strong> project — Planting Kiwis for a
+<sub>A <a href="https://kiwicanopy.com"><strong>KiwiCanopy</strong></a> project — Planting Kiwis for a
 richer world 🥝🥝🥝</sub>
 </div>
