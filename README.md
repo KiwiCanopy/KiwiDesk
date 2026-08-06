@@ -58,11 +58,11 @@ Integrity Protection**.
 
 ## Why KiwiDesk?
 
-**Flat arrays instead of i3 trees.** Classic tiling window
-managers organize windows in split-container trees — powerful,
-but hard to predict and hard to script. KiwiDesk keeps every
-space as a flat, one-dimensional list of windows. Layouts are
-pure functions over that list:
+**Flat arrays instead of i3 trees.** Classic tiling window managers
+organize windows in split-container trees — powerful, but hard to
+predict and hard to script. KiwiDesk keeps every space as a flat,
+one-dimensional list of windows. Layouts are pure functions over
+that list:
 
 | Layout | Behavior |
 |---|---|
@@ -74,41 +74,33 @@ pure functions over that list:
 | `track` | Resizable columns (or rows) with per-track control |
 | `floating` | macOS default behavior, untouched |
 
-Switching layouts instantly rearranges the same window list with
-a different formula — no tree surgery, no lost state.
+Switching layouts instantly rearranges the same window list with a
+different formula — no tree surgery, no lost state.
 
-**More highlights:**
+## Key Features
 
-- **GUI *and* full scriptability**: everyday settings live in a
-  visual Settings app; power users control everything through
-  Lua, the CLI, or both — same features, two paths.
-- **Smooth spring animations**, one display link per monitor, so
-  mixed 60 Hz / 120 Hz setups each animate at native cadence.
-- **Lua configuration** (`~/.config/KiwiDesk/init.lua`) with a
-  sandboxed Lua 5.5 VM — a broken config can never freeze your
-  windows (500 ms timeout, faulty callbacks auto-disabled).
-- **CLI + UNIX socket IPC**: script everything, stream events to
-  SketchyBar, JankyBorders, or your own tools.
-- **Real-time event stream**: `kiwidesk subscribe` emits
-  newline-delimited JSON — hook SketchyBar, JankyBorders, shell
-  scripts, or any external tool into live window events.
-- **Optional App Bar & Space Bar**: built-in window-tab and
-  space-overview overlays with Liquid Glass, fully themeable.
-- **Virtual spaces** with per-space window hiding — your own
-  workspace layer on top of native macOS Spaces, switchable
-  instantly via shortcut or the Space Bar.
-- **Per-app rules**: route apps to spaces, auto-float specific
-  windows, or fully ignore apps from tiling — from the GUI or
-  via `float_rules`, `app_rules`, and `ignore_rules` in Lua.
-- **Modal keybindings** via the Carbon API — no Input Monitoring
-  (keylogger) permission needed.
-- **Profiles that follow your displays**: save a layout per
-  monitor arrangement and it loads automatically when you connect
-  those screens — with per-native-Space bindings on top.
-- **Crash recovery** and **sleep/wake restore** keep your window
-  arrangement across restarts and lid cycles.
-- **15 languages** out of the box — and contributions for more
-  are always welcome.
+- **Virtual Spaces**: Instant per-space window hiding on top of native
+  macOS Spaces.
+- **GUI, CLI & Lua**: SwiftUI Settings app for simple tweaks; CLI &
+  sandboxed Lua 5.5 VM for advanced workflows.
+- **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`) and
+  smart app switching (`pull_or_spawn`) via Carbon — zero Input Monitoring needed.
+- **Cascading Profiles**: Display- or space-bound profiles with inherited
+  defaults and sparse overrides.
+- **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
+  overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
+- **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations, zero
+  SIP modifications, and localized in 15 languages out of the box.
+
+## Solving macOS Papercuts
+
+- **No Green-Button Space Isolation**: The `monocle` layout maximizes
+  windows on the *current space* without kicking you to a far-right desktop.
+- **No `⌘Tab` Black Holes**: `pull_or_spawn` opens the app, pulls its windows front-and-center, or cycles through all open windows of that app on repeated presses.
+- **Zero Layout Amnesia**: Moving windows between spaces automatically tiles
+  them into the target layout grid instead of forcing manual micro-resizing.
+- **Predictable Spatial Memory**: Virtual Spaces stay in fixed, predictable
+  slots rather than macOS automatically shuffling your desktops around.
 
 ## Installation
 
