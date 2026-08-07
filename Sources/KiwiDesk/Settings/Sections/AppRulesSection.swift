@@ -179,6 +179,7 @@ struct AppRulesSection: View {
                 )
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .disabled(newApp.trimmed.isEmpty)
             Spacer()
         }

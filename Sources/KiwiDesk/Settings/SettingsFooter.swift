@@ -76,6 +76,7 @@ struct SettingsFooter: View {
                 model.revert()
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .controlSize(.regular)
             .disabled(!(model.isDirty || model.hasLayoutDrift))
             copySlot
@@ -166,6 +167,7 @@ struct SettingsFooter: View {
                 namingProfileCopy = true
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .controlSize(.regular)
         } else if model.activeProfile != nil {
             // Live active profile → a copy captures the live
@@ -174,6 +176,7 @@ struct SettingsFooter: View {
                 namingNewProfile = true
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .controlSize(.regular)
             .disabled(model.profileSaveBlockedReason != nil)
             .help(model.profileSaveBlockedReason ?? "")

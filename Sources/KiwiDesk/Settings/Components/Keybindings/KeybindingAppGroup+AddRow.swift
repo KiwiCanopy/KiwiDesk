@@ -44,6 +44,7 @@ extension ApplicationsGroup {
                 )
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .disabled(newApp == nil || newAppFullyBound)
         }
     }

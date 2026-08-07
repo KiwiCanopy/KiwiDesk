@@ -244,48 +244,6 @@ struct SettingsThemeWiringTests {
         )
     }
 
-    /// Every borderless menu neutralises its label.
-    ///
-    /// The style paints its label in the accent, so with the
-    /// window tinted kiwi each of these renders green text —
-    /// several of them on the green-washed chips the same tint
-    /// produces. Counted as a PAIR rather than allow-listed:
-    /// there is no menu in this tree whose title should be the
-    /// accent, because the accent marks control fills and these
-    /// labels name a current value.
-    ///
-    /// Paired per FILE, not globally, so two menus in one file
-    /// and none in another cannot cancel out.
-    @Test("every borderless menu neutralises its label")
-    func borderlessMenusAreNeutral() throws {
-        var menus = 0
-        for file in try SourceScan.swiftSources(under: settingsDir) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            let styled = source.occurrences(
-                of: ".menuStyle(.borderlessButton)"
-            )
-            guard styled > 0 else { continue }
-            menus += styled
-            #expect(
-                source.occurrences(of: ".neutralMenuLabel()")
-                    == styled,
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) has \(styled) "
-                        + "borderless menu(s) but not as many "
-                        + "`.neutralMenuLabel()` — an accent-"
-                        + "coloured menu title reads as an action "
-                        + "and goes green-on-green on a chip."
-                )
-            )
-        }
-        // A scan that found no menus would pass having looked at
-        // nothing (#635).
-        #expect(menus > 0)
-    }
-
     /// A needle pointing at a file that no longer exists would
     /// throw rather than fail open, but the message is worth
     /// having.

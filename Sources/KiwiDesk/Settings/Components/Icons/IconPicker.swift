@@ -71,6 +71,7 @@ struct IconPicker: View {
             }
         }
         .buttonStyle(.bordered)
+        .neutralButtonLabel()
         // Large like the menu pickers beside it (the space
         // row's mode dropdown): the trigger is a chooser
         // button and must sit level with that family, even
@@ -242,6 +243,7 @@ struct IconPicker: View {
                 }
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .font(.caption)
         }
     }
@@ -280,6 +282,7 @@ struct IconPicker: View {
                 .foregroundStyle(.secondary)
         }
         .buttonStyle(.bordered)
+        .neutralButtonLabel()
         .help(
             L(
                 "icon_picker.clear.help",
@@ -298,6 +301,7 @@ struct IconPicker: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.bordered)
+        .neutralButtonLabel()
         .help(glyph)
     }
 

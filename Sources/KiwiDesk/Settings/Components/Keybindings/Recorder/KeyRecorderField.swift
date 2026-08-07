@@ -213,9 +213,16 @@ struct KeyRecorderField: View {
         )
     }
 
-    private var buttonTint: Color? {
+    /// The resting arm is `ink`, not `nil`. `nil` inherits the
+    /// window's accent, and `.bordered` paints its label from the
+    /// tint — so an idle recorder read as green text, the same
+    /// defect `neutralButtonLabel()` fixes everywhere else. The
+    /// other two arms stay: red is the flash, and the accent
+    /// while recording is the tint that `RecorderButtonChrome`
+    /// FILLS from, so there it marks a surface rather than words.
+    private var buttonTint: Color {
         if flashing { return .red }
-        return recording ? SettingsTheme.accent : nil
+        return recording ? SettingsTheme.accent : SettingsTheme.ink
     }
 
     private var label: String {
