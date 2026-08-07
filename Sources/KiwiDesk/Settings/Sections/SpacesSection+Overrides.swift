@@ -106,7 +106,14 @@ extension SpacesSection {
                     systemImage: "chevron.backward"
                 )
             }
+            // `.borderless` takes its label colour from the tint
+            // too, so this crumb read green while the shell's own
+            // back chip — same gesture, same chevron — is ink
+            // (`SettingsHeaderBar.backChip`). The chevron carries
+            // "this one goes back"; the colour was carrying it
+            // twice, in the one hue reserved for fills.
             .buttonStyle(.borderless)
+            .neutralButtonLabel()
             crumbSeparator
             Text(space.raw)
                 .foregroundStyle(.secondary)

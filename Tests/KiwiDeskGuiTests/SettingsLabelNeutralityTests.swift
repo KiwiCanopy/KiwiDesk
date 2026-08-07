@@ -16,11 +16,16 @@ import Testing
 ///
 /// **Two is not a claim that there are only two.**
 /// `.buttonStyle(.borderless)` takes its label colour the same
-/// way and is NOT held here: `docs/ui-patterns.md` declares that
-/// style icon-only, which is why it was left, but
-/// `SpacesSection+Overrides`' back breadcrumb pairs it with a
-/// text `Label` — so the declaration is the thing to check
-/// before adding a guard, not the style list.
+/// way and is NOT held here, because `docs/ui-patterns.md`
+/// declares that style icon-only and an icon has no label to
+/// neutralise. The declaration is what makes the omission safe,
+/// so it is the thing to re-check before trusting it — the one
+/// site that paired the style with a TEXT label,
+/// `SpacesSection+Overrides`' back breadcrumb, shipped green
+/// under exactly that assumption and carries
+/// `neutralButtonLabel()` now. A second text-labelled
+/// `.borderless` button means the declaration has stopped
+/// holding, and this style earns a guard of its own.
 ///
 /// That is why this is a suite rather than two loose tests: the
 /// defect recurs per control style, and the next style that
