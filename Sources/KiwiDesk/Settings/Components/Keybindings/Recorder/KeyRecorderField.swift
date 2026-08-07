@@ -213,16 +213,25 @@ struct KeyRecorderField: View {
         )
     }
 
-    /// The resting arm is `ink`, not `nil`. `nil` inherits the
-    /// window's accent, and `.bordered` paints its label from the
-    /// tint — so an idle recorder read as green text, the same
-    /// defect `neutralButtonLabel()` fixes everywhere else. The
-    /// other two arms stay: red is the flash, and the accent
-    /// while recording is the tint that `RecorderButtonChrome`
-    /// FILLS from, so there it marks a surface rather than words.
+    /// Ink unless the chord was rejected. `.bordered` paints its
+    /// label from the tint, so any other resting value is text in
+    /// the accent — the defect `neutralButtonLabel()` removes
+    /// everywhere else, and this field is not exempt from it.
+    ///
+    /// Red survives for the same reason a destructive button's
+    /// does: the flash IS the rejection, and there is nothing
+    /// else on screen saying so.
+    ///
+    /// **Recording used to return the accent and no longer
+    /// does.** The justification was that the tint fed the
+    /// chrome's fill, which is false — `KeyRecorderChrome` fills
+    /// and strokes from `SettingsTheme.accent` directly and never
+    /// reads the tint. So on that arm the tint's only remaining
+    /// job was painting "Press keys…" and the live combo preview
+    /// in the accent: text naming a value. The recording signal
+    /// is unaffected, because the chrome draws it independently.
     private var buttonTint: Color {
-        if flashing { return .red }
-        return recording ? SettingsTheme.accent : SettingsTheme.ink
+        flashing ? .red : SettingsTheme.ink
     }
 
     private var label: String {

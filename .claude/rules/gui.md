@@ -470,10 +470,22 @@ Every surface, border and ink in the Settings tree comes from
   window surfaces, by the lens in `SettingsThemeWiringTests` —
   which carries no exemption map on purpose.
 - **The accent marks control FILLS, never text naming a value.**
-  A toggle track, a selected segment, a prominent Save. A
-  `.menuStyle(.borderlessButton)` paints its LABEL in the accent,
-  so every one of them carries `neutralMenuLabel()`, paired per
-  file by the same suite.
+  A toggle track, a selected segment, a prominent Save.
+  **A control style that colours its label from the tint owes a
+  neutralising modifier at every call site and a pairing guard
+  in `SettingsLabelNeutralityTests`** — two are held there today,
+  `.menuStyle(.borderlessButton)` → `neutralMenuLabel()` and
+  `.buttonStyle(.bordered)` → `neutralButtonLabel()`, the second
+  added only after the first had shipped and the same defect
+  recurred in the other style. So treat the style as the unit,
+  not the site: the fix is never a local recolour. That suite's
+  `borderedExempt` map is the one copy of who may skip it, and
+  an entry there names the source token that IS its reason, so
+  an exemption whose grounds have gone reds. A button with no
+  `.buttonStyle` at all renders bordered on macOS and takes the
+  tint identically while matching no needle — give an action
+  button an explicit style, which is what brings it under the
+  guard.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from

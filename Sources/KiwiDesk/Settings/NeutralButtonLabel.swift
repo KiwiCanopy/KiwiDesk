@@ -30,8 +30,9 @@ extension View {
     ///   IS the fill this rule protects. Leave it alone.
     /// - A button that resolves its own tint per state
     ///   (`KeyRecorderField`) already decides this question and
-    ///   is exempt — see `SettingsThemeWiringTests`' `allowed`
-    ///   map, which is the one copy of who may skip this.
+    ///   is exempt — see `SettingsLabelNeutralityTests`'
+    ///   `borderedExempt` map, which is the one copy of who may
+    ///   skip this.
     ///
     /// `.tint` and not only `.foregroundStyle`, for the reason
     /// `neutralMenuLabel()` states: the label of an AppKit-backed
@@ -39,9 +40,10 @@ extension View {
     /// does not reach it. Both are set so the pair covers the
     /// SwiftUI-drawn and AppKit-drawn halves of one label.
     ///
-    /// Pinned by `SettingsThemeWiringTests` — every
+    /// Pinned by `SettingsLabelNeutralityTests` — every
     /// `.buttonStyle(.bordered)` in the Settings tree carries
-    /// this or names itself in that suite's `allowed` map.
+    /// this or names itself in that suite's `borderedExempt`
+    /// map.
     func neutralButtonLabel() -> some View {
         tint(SettingsTheme.ink)
             .foregroundStyle(SettingsTheme.ink)

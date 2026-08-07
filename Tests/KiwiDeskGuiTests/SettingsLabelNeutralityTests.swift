@@ -5,13 +5,22 @@ import Testing
 
 /// The accent must not land on TEXT.
 ///
-/// Two control styles in this tree colour their label from the
-/// tint, so once #678 turn 16b tinted the window kiwi both
-/// started rendering green words: `.menuStyle(.borderlessButton)`
-/// and `.buttonStyle(.bordered)`. The menu half was found and
-/// fixed on 2026-08-04; the button half shipped green until the
+/// A control style that colours its label from the tint renders
+/// green words in this window, since #678 turn 16b tinted it
+/// kiwi — so each such style owes a neutralising modifier and a
+/// guard here. Two are held below:
+/// `.menuStyle(.borderlessButton)`, found and fixed 2026-08-04,
+/// and `.buttonStyle(.bordered)`, which shipped green until the
 /// owner read "Add app rule", "Add application" and "Fit to
 /// layout gaps" off the screen two days later.
+///
+/// **Two is not a claim that there are only two.**
+/// `.buttonStyle(.borderless)` takes its label colour the same
+/// way and is NOT held here: `docs/ui-patterns.md` declares that
+/// style icon-only, which is why it was left, but
+/// `SpacesSection+Overrides`' back breadcrumb pairs it with a
+/// text `Label` — so the declaration is the thing to check
+/// before adding a guard, not the style list.
 ///
 /// That is why this is a suite rather than two loose tests: the
 /// defect recurs per control style, and the next style that
@@ -91,30 +100,38 @@ struct SettingsLabelNeutralityTests {
     /// Files allowed to carry a bordered button WITHOUT
     /// `.neutralButtonLabel()`, and how many each may carry.
     ///
-    /// **This map is the one copy of who may.** A count rather
-    /// than a bare name, so a file with one legitimate exemption
-    /// cannot quietly grow a second.
-    private let borderedExempt: [String: (count: Int, why: String)] =
-        [
+    /// **This map is the one copy of who may.** Three fields, and
+    /// the middle one is what makes it more than a licence:
+    ///
+    /// - `count` — how many, so a file with one legitimate
+    ///   exemption cannot quietly grow a second;
+    /// - `needle` — the source token that IS the reason, which
+    ///   must still appear at least `count` times. Without it the
+    ///   guard pins only that the file still has *some* bordered
+    ///   button, so swapping a destructive button for a plain one
+    ///   keeps it green while an accent label ships — and in a
+    ///   file with two bordered buttons it cannot even say which
+    ///   one carries the modifier;
+    /// - `why` — for the reader.
+    private let borderedExempt:
+        [String: (count: Int, needle: String, why: String)] = [
             "SpacesSection+Overrides.swift": (
-                1,
-                "role: .destructive — the system red IS the "
-                    + "warning and must survive"
+                1, "role: .destructive",
+                "the system red IS the warning and must survive"
             ),
             "SpaceOverrideRows+Footer.swift": (
-                1, "role: .destructive — reset-all"
+                1, "role: .destructive", "reset-all"
             ),
             "NativeSpacesGroup.swift": (
-                1,
-                "role: .destructive — unbind; its sibling "
-                    + "bind button is neutralised"
+                1, "role: .destructive",
+                "unbind; its sibling bind button is neutralised"
             ),
             "KeyRecorderField.swift": (
-                1,
-                "resolves its own tint per state "
-                    + "(`buttonTint`): red flashing, accent while "
-                    + "recording — where the chrome FILLS from "
-                    + "the same accent — and ink at rest"
+                1, ".tint(buttonTint)",
+                "resolves its own tint per state: red on a "
+                    + "rejected chord, ink otherwise. The recording "
+                    + "signal is the chrome's own accent fill, "
+                    + "which never reads the tint"
             ),
         ]
 
@@ -171,6 +188,10 @@ struct SettingsLabelNeutralityTests {
     /// An exemption for a file with no bordered button at all is
     /// a licence nothing needs — and it would silently absorb
     /// the first one added there.
+    ///
+    /// Checks the REASON too, not just the count: an exemption
+    /// whose grounds have gone is the same licence, and it fails
+    /// in the direction that ships an accent label.
     @Test("every bordered-button exemption is still used")
     func borderedExemptionsAreLive() throws {
         let sources = try SourceScan.swiftSources(under: settingsDir)
@@ -181,6 +202,19 @@ struct SettingsLabelNeutralityTests {
             )
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                source.occurrences(of: entry.needle)
+                    >= entry.count,
+                Comment(
+                    rawValue:
+                        "\(name) is exempted for \(entry.count) "
+                        + "bordered button(s) on the grounds "
+                        + "`\(entry.needle)` (\(entry.why)), but "
+                        + "that no longer appears \(entry.count) "
+                        + "time(s) — the reason is gone, so the "
+                        + "exemption goes with it."
+                )
             )
             #expect(
                 source.occurrences(of: ".buttonStyle(.bordered)")
