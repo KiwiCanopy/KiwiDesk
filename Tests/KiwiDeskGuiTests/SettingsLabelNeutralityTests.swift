@@ -8,13 +8,21 @@ import Testing
 /// A control style that colours its label from the tint renders
 /// green words in this window, since #678 turn 16b tinted it
 /// kiwi — so each such style owes a neutralising modifier and a
-/// guard here. Two are held below:
+/// guard here. Held below:
 /// `.menuStyle(.borderlessButton)`, found and fixed 2026-08-04,
 /// and `.buttonStyle(.bordered)`, which shipped green until the
 /// owner read "Add app rule", "Add application" and "Fit to
 /// layout gaps" off the screen two days later.
 ///
-/// **Two is not a claim that there are only two.**
+/// **`.buttonStyle(.link)` reads the tint too and is left
+/// accent on purpose** — a link that looks like a link is not
+/// the defect this suite names, and its sites are text by
+/// definition (`PaletteShelf`'s "Pair with Glow",
+/// `KeyRecorderRejectionRow`'s "Steal" / "Go to"). Recorded
+/// because an unlisted style reads as an unconsidered one, which
+/// is exactly how the bordered half came to ship green.
+///
+/// **Two guarded is not a claim that only two styles exist.**
 /// `.buttonStyle(.borderless)` takes its label colour the same
 /// way and is NOT held here, because `docs/ui-patterns.md`
 /// declares that style icon-only and an icon has no label to
@@ -35,24 +43,28 @@ import Testing
 /// Both guards count per FILE, so two labels in one file and
 /// none in another cannot cancel out.
 ///
-/// **Stated residue: a button with NO `.buttonStyle` is not
-/// covered.** macOS renders the default style as a bordered
-/// push button, so it takes the tint exactly like an explicit
-/// `.bordered` one — and the needle cannot see it. That is not
-/// hypothetical: `PaletteShelf`'s "Import…" and
-/// `ShortcutsHeader`'s "Import from init.lua…" were both still
-/// reading green after the sweep this suite guards, and both
-/// were found by eye rather than by any test.
+/// **A button with NO `.buttonStyle` is the hole these needles
+/// cannot see**, and it is a real one, not a technicality: macOS
+/// renders the default style as a bordered push button, so it
+/// takes the tint exactly like an explicit `.bordered` one.
+/// Eleven shipped green under a first cut of this suite that
+/// called them acceptable residue — the two Imports, both Reset
+/// actions, "Reveal", "Add", "Rename", "Open Login Items",
+/// "Back to visual editor", "Use … as text", and "Enable
+/// Accessibility…" green on the warning surface. All now name a
+/// style, which is what brings them under the needles above.
 ///
-/// It is left uncovered deliberately. A scan for an unstyled
-/// `Button(` matches ~53 sites in this tree, and nearly all of
-/// them are menu items, context-menu entries and alert buttons
-/// whose labels are styled by their container — a guard over
-/// that set would demand `.neutralButtonLabel()` at dozens of
-/// call sites where it does nothing or is wrong, which is worse
-/// than the gap. The mitigation is a convention instead: **give
-/// an action button an explicit `.buttonStyle`**, which is what
-/// brings it under the needle above.
+/// The convention that keeps it closed — **an action button
+/// names its style** — is still unguarded, and guarding the
+/// neutralisation is the wrong shape for it: a scan for an
+/// unstyled `Button(` matches ~53 sites here, nearly all menu
+/// items, context-menu entries and alert buttons whose
+/// containers style their labels, and demanding
+/// `.neutralButtonLabel()` there would be wrong at most of them.
+/// Guard the CONVENTION instead — an explicit `.buttonStyle` on
+/// any `Button` not lexically inside a `Menu` / `contextMenu` /
+/// `confirmationDialog` / `alert` closure — which asks nothing
+/// of the menu sites. Tractable, and not yet built.
 @Suite("Settings label neutrality")
 struct SettingsLabelNeutralityTests {
     private var settingsDir: URL {
@@ -151,12 +163,47 @@ struct SettingsLabelNeutralityTests {
     /// rather than allowed to inflate the pairing, which would
     /// hide a genuinely unneutralised bordered button in the same
     /// file.
-    private let neutralOnOtherStyles: [String: Int] = [
-        // The "‹ Spaces" back breadcrumb, a `.borderless` button
-        // with a TEXT label; the file's bordered button is the
-        // destructive one exempted above.
-        "SpacesSection+Overrides.swift": 1
+    /// The declared style is asserted **adjacent** to the
+    /// modifier, not merely present in the file. A bare count
+    /// here is position-blind, and in a file that also holds an
+    /// exemption the two cancel: `SpacesSection+Overrides` has
+    /// one bordered button (destructive, exempt) and one
+    /// `.borderless` breadcrumb, so `styled - exempt + other`
+    /// stays at 1 if the single modifier is moved OFF the
+    /// breadcrumb and ONTO the Delete — killing the system red
+    /// the exemption exists to protect, while every count still
+    /// balances. Adjacency is what says which control it sits on.
+    private let neutralOnOtherStyles: [String: (count: Int, style: String)] = [
+        "SpacesSection+Overrides.swift": (
+            1, ".buttonStyle(.borderless)"
+        )
     ]
+
+    /// How many `.neutralButtonLabel()` sit directly beneath
+    /// `style`, skipping blank lines. Line-wise rather than a
+    /// regex, and local rather than a `SourceScan` primitive:
+    /// `SourceScan` grows a helper when a SECOND guard needs the
+    /// same walk, and this is the first.
+    private static func adjacentNeutralisations(
+        in source: String,
+        under style: String
+    ) -> Int {
+        let lines = source.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        ).map { $0.trimmingCharacters(in: .whitespaces) }
+        var hits = 0
+        for (i, line) in lines.enumerated() where line == style {
+            var j = i + 1
+            while j < lines.count, lines[j].isEmpty { j += 1 }
+            if j < lines.count,
+                lines[j] == ".neutralButtonLabel()"
+            {
+                hits += 1
+            }
+        }
+        return hits
+    }
 
     /// Every bordered button neutralises its label, or says why
     /// not.
@@ -189,8 +236,31 @@ struct SettingsLabelNeutralityTests {
             buttons += styled
             let name = file.lastPathComponent
             let exempt = borderedExempt[name]?.count ?? 0
-            let other = neutralOnOtherStyles[name] ?? 0
+            let declared = neutralOnOtherStyles[name]
+            let other = declared?.count ?? 0
             let owed = styled - exempt + other
+            if let declared {
+                // Adjacent, so the count cannot be satisfied by
+                // the modifier sitting on some OTHER control in
+                // the same file.
+                let hits = Self.adjacentNeutralisations(
+                    in: source,
+                    under: declared.style
+                )
+                #expect(
+                    hits == declared.count,
+                    Comment(
+                        rawValue:
+                            "\(name) declares \(declared.count) "
+                            + "neutralisation(s) on "
+                            + "`\(declared.style)`, but "
+                            + "\(hits) sit directly under that "
+                            + "style — a declared offset whose "
+                            + "modifier moved elsewhere lets an "
+                            + "unneutralised label pass."
+                    )
+                )
+            }
             #expect(
                 source.occurrences(of: ".neutralButtonLabel()")
                     == owed,

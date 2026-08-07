@@ -473,7 +473,7 @@ Every surface, border and ink in the Settings tree comes from
   A toggle track, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
   neutralising modifier at every call site and a pairing guard
-  in `SettingsLabelNeutralityTests`** — two are held there today,
+  in `SettingsLabelNeutralityTests`** —
   `.menuStyle(.borderlessButton)` → `neutralMenuLabel()` and
   `.buttonStyle(.bordered)` → `neutralButtonLabel()`, the second
   added only after the first had shipped and the same defect

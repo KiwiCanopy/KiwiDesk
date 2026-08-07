@@ -163,7 +163,10 @@ struct KeyRecorderField: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.regular)
+        // Both halves: a field resolving its own tint owes the
+        // same pair `neutralButtonLabel()` argues for, not half.
         .tint(buttonTint)
+        .foregroundStyle(buttonTint)
         .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)
     }

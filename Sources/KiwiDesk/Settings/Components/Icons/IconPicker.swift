@@ -225,6 +225,8 @@ struct IconPicker: View {
                             systemImage: "textformat"
                         )
                     }
+                    .buttonStyle(.bordered)
+                    .neutralButtonLabel()
                 }
                 if isSymbolName(query),
                     !IconCatalog.symbols.contains(where: {

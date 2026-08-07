@@ -231,6 +231,8 @@ struct LoginItemCard: View {
                     LoginItemManager.openSystemSettingsLoginItems()
                 }
                 .controlSize(.small)
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
             }
         } else if let reason = model.generalGates.inertReason(
             for: .general(.startAtLogin)

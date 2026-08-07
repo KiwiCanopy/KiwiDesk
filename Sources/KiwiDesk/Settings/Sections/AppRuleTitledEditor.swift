@@ -38,6 +38,8 @@ struct AppRuleTitledEditor: View {
                         commitCustom()
                     }
                     .disabled(customPattern.trimmed.isEmpty)
+                    .buttonStyle(.bordered)
+                    .neutralButtonLabel()
                 }
             }
             AppRuleMatchPreview(

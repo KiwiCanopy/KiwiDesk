@@ -193,6 +193,8 @@ struct GeneralSection: View {
                                 [model.configURL]
                             )
                     }
+                    .buttonStyle(.bordered)
+                    .neutralButtonLabel()
                 }
                 Divider()
                 // Opening the raw editor swaps the primary Save

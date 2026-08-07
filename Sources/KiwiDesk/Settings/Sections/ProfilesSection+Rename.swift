@@ -48,6 +48,8 @@ extension ProfilesSection {
                     commitRename(of: name)
                 }
                 .disabled(!canRename(name))
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
             }
             .padding(10)
         }
