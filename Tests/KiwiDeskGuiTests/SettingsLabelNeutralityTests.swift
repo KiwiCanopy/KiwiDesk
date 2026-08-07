@@ -20,6 +20,25 @@ import Testing
 ///
 /// Both guards count per FILE, so two labels in one file and
 /// none in another cannot cancel out.
+///
+/// **Stated residue: a button with NO `.buttonStyle` is not
+/// covered.** macOS renders the default style as a bordered
+/// push button, so it takes the tint exactly like an explicit
+/// `.bordered` one — and the needle cannot see it. That is not
+/// hypothetical: `PaletteShelf`'s "Import…" and
+/// `ShortcutsHeader`'s "Import from init.lua…" were both still
+/// reading green after the sweep this suite guards, and both
+/// were found by eye rather than by any test.
+///
+/// It is left uncovered deliberately. A scan for an unstyled
+/// `Button(` matches ~53 sites in this tree, and nearly all of
+/// them are menu items, context-menu entries and alert buttons
+/// whose labels are styled by their container — a guard over
+/// that set would demand `.neutralButtonLabel()` at dozens of
+/// call sites where it does nothing or is wrong, which is worse
+/// than the gap. The mitigation is a convention instead: **give
+/// an action button an explicit `.buttonStyle`**, which is what
+/// brings it under the needle above.
 @Suite("Settings label neutrality")
 struct SettingsLabelNeutralityTests {
     private var settingsDir: URL {
