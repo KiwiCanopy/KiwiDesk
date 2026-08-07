@@ -140,6 +140,24 @@ struct SettingsLabelNeutralityTests {
             ),
         ]
 
+    /// Neutralisations in a file that pair something OTHER than a
+    /// bordered button, which the pairing count would otherwise
+    /// read as a surplus.
+    ///
+    /// The modifier is not bordered-only — it fixes any label
+    /// coloured from the tint — but this suite's arithmetic is,
+    /// and a count cannot see WHICH control a modifier sits on.
+    /// So a legitimate use on another style is declared here
+    /// rather than allowed to inflate the pairing, which would
+    /// hide a genuinely unneutralised bordered button in the same
+    /// file.
+    private let neutralOnOtherStyles: [String: Int] = [
+        // The "‹ Spaces" back breadcrumb, a `.borderless` button
+        // with a TEXT label; the file's bordered button is the
+        // destructive one exempted above.
+        "SpacesSection+Overrides.swift": 1
+    ]
+
     /// Every bordered button neutralises its label, or says why
     /// not.
     ///
@@ -171,14 +189,17 @@ struct SettingsLabelNeutralityTests {
             buttons += styled
             let name = file.lastPathComponent
             let exempt = borderedExempt[name]?.count ?? 0
+            let other = neutralOnOtherStyles[name] ?? 0
+            let owed = styled - exempt + other
             #expect(
                 source.occurrences(of: ".neutralButtonLabel()")
-                    == styled - exempt,
+                    == owed,
                 Comment(
                     rawValue:
                         "\(name) has \(styled) bordered "
-                        + "button(s) and \(exempt) exemption(s), "
-                        + "so it needs \(styled - exempt) "
+                        + "button(s), \(exempt) exemption(s) and "
+                        + "\(other) declared neutralisation(s) on "
+                        + "another style, so it needs \(owed) "
                         + "`.neutralButtonLabel()` — an accent-"
                         + "coloured button title is text painted "
                         + "in a colour reserved for fills."
