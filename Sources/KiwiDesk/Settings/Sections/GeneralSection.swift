@@ -238,6 +238,8 @@ struct GeneralSection: View {
                         systemImage: "curlybraces"
                     )
                 }
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
                 Text(editLuaCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)

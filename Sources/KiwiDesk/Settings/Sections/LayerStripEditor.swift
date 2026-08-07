@@ -138,6 +138,8 @@ struct LayerStripEditor: View {
                         role: .destructive,
                         action: deleteLayer
                     )
+                    .buttonStyle(.bordered)
+                    .neutralButtonLabel()
                 } else {
                     // O4 soft: a base layer the profile
                     // doesn't mention always survives —
@@ -189,6 +191,8 @@ struct LayerStripEditor: View {
             renameDraft = selected
             renamingLayer = true
         }
+        .buttonStyle(.bordered)
+        .neutralButtonLabel()
         .popover(isPresented: $renamingLayer) {
             HStack {
                 TextField(layerNamePlaceholder, text: $renameDraft)
