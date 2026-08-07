@@ -75,9 +75,25 @@ struct PaletteShelf: View {
             HStack {
                 groupHeader(L("palettes.mine", "My palettes"))
                 Spacer()
-                Button(L("palettes.import", "Import…")) {
+                // Explicitly `.bordered` rather than left to the
+                // default style: the two render alike, but only
+                // the named style is visible to the guard that
+                // keeps the accent off button labels. Left
+                // implicit, this was the one button in the tree
+                // still reading green after that sweep.
+                // Same glyph as Shortcuts' "Import from
+                // init.lua…": one verb, one symbol, wherever it
+                // appears.
+                Button {
                     importPalette()
+                } label: {
+                    Label(
+                        L("palettes.import", "Import…"),
+                        systemImage: "square.and.arrow.down"
+                    )
                 }
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
                 .controlSize(.small)
             }
             LazyVGrid(

@@ -34,6 +34,7 @@ struct FitGapsAction: View {
                 setGapValues()
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .controlSize(.large)
             .disabled(gapsMatch)
             .help(actionHelp)

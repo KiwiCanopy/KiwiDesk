@@ -29,6 +29,7 @@ struct AdvancedLuaGroup: View {
                 )
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
         }
     }
 

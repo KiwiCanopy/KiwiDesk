@@ -34,8 +34,10 @@ struct KeyRecorderRejectionRow: View {
             )
             .foregroundStyle(SettingsTheme.danger)
             Button(L("key_recorder.steal", "Steal"), action: onSteal)
+                .buttonStyle(.link)
                 .pointingHandCursor()
             Button(L("key_recorder.go_to", "Go to"), action: onGoTo)
+                .buttonStyle(.link)
                 .pointingHandCursor()
             Button(action: onDismiss) {
                 Image(systemName: "xmark.circle.fill")
@@ -50,6 +52,5 @@ struct KeyRecorderRejectionRow: View {
             )
         }
         .font(.caption)
-        .buttonStyle(.link)
     }
 }

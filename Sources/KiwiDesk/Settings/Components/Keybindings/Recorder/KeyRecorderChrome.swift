@@ -10,8 +10,12 @@ import SwiftUI
 /// faint recessed fill nudges it toward "field"; while
 /// recording an accent fill + ring extend slightly past the
 /// button so the one armed field among dozens of recorder
-/// rows reads at a glance (the tint alone only recolors the
-/// border). Negative padding keeps the layout footprint
+/// rows reads at a glance. This chrome is the WHOLE recording
+/// signal: it fills and strokes from `SettingsTheme.accent`
+/// directly and never reads the tint, and since the accent came
+/// off the recorder's own tint — it was painting the label, not
+/// this — nothing else says a field is armed.
+/// Negative padding keeps the layout footprint
 /// unchanged. Deliberately NOT a rounded pill like
 /// Save/Cancel: System Settings' own Keyboard Shortcuts
 /// recorder reads the same way — a stateful input well, not a

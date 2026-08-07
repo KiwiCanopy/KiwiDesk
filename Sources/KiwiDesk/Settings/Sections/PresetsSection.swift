@@ -225,6 +225,7 @@ struct PresetsSection: View {
             button.buttonStyle(.borderedProminent)
         } else {
             button.buttonStyle(.bordered)
+                .neutralButtonLabel()
         }
     }
 

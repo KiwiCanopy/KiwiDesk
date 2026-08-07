@@ -163,7 +163,10 @@ struct KeyRecorderField: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.regular)
+        // Both halves: a field resolving its own tint owes the
+        // same pair `neutralButtonLabel()` argues for, not half.
         .tint(buttonTint)
+        .foregroundStyle(buttonTint)
         .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)
     }
@@ -213,9 +216,25 @@ struct KeyRecorderField: View {
         )
     }
 
-    private var buttonTint: Color? {
-        if flashing { return .red }
-        return recording ? SettingsTheme.accent : nil
+    /// Ink unless the chord was rejected. `.bordered` paints its
+    /// label from the tint, so any other resting value is text in
+    /// the accent — the defect `neutralButtonLabel()` removes
+    /// everywhere else, and this field is not exempt from it.
+    ///
+    /// Red survives for the same reason a destructive button's
+    /// does: the flash IS the rejection, and there is nothing
+    /// else on screen saying so.
+    ///
+    /// **Recording used to return the accent and no longer
+    /// does.** The justification was that the tint fed the
+    /// chrome's fill, which is false — `KeyRecorderChrome` fills
+    /// and strokes from `SettingsTheme.accent` directly and never
+    /// reads the tint. So on that arm the tint's only remaining
+    /// job was painting "Press keys…" and the live combo preview
+    /// in the accent: text naming a value. The recording signal
+    /// is unaffected, because the chrome draws it independently.
+    private var buttonTint: Color {
+        flashing ? .red : SettingsTheme.ink
     }
 
     private var label: String {

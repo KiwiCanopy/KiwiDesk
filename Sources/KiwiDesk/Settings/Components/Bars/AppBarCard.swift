@@ -167,6 +167,7 @@ struct AppBarCard: View {
                 )
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
             .controlSize(.small)
             .help(
                 L(

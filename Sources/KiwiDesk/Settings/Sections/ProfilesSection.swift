@@ -231,6 +231,7 @@ struct ProfilesSection: View {
             ) { model.loadProfile(named: summary.name) }
         }
         .buttonStyle(.bordered)
+        .neutralButtonLabel()
         .controlSize(.large)
         .help(
             summary.matchesLive

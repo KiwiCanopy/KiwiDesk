@@ -73,6 +73,7 @@ extension MonitorsSection {
                 model.config.spacePins[orphan.space] = nil
             }
             .buttonStyle(.bordered)
+            .neutralButtonLabel()
         }
     }
 

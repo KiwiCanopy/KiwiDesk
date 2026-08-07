@@ -28,7 +28,7 @@ extension View {
     /// of the same label, and neither is redundant on every
     /// macOS.
     ///
-    /// Pinned by `SettingsThemeWiringTests` — every
+    /// Pinned by `SettingsLabelNeutralityTests` — every
     /// `.menuStyle(.borderlessButton)` in the Settings tree must
     /// carry this.
     func neutralMenuLabel() -> some View {

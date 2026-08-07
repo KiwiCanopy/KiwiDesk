@@ -38,6 +38,8 @@ extension GeneralSection {
                         systemImage: "clock.arrow.circlepath"
                     )
                 }
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
                 HelpButton(
                     explanation: L(
                         "general.advanced.discard_arrangement.help",
@@ -82,6 +84,8 @@ extension GeneralSection {
                         systemImage: "arrow.counterclockwise"
                     )
                 }
+                .buttonStyle(.bordered)
+                .neutralButtonLabel()
                 HelpButton(
                     explanation: L(
                         "general.advanced.reset_all.help",
