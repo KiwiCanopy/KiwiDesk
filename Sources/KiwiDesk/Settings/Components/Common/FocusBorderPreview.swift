@@ -45,10 +45,11 @@ struct FocusBorderPreview: View {
         glow: Bool
     ) -> some View {
         // Remap the 1–20 pt width onto the preview's smaller span
-        // so a thick border reads without swamping the mock.
-        let width = scale(
+        // so a thick border reads without swamping the mock —
+        // through the ONE remap the Home tile also reads
+        // (`BorderPreviewScale`, #786 review).
+        let width = BorderPreviewScale.width(
             style.clampedWidth,
-            from: 1...20,
             to: 1...7
         )
         // Remap the RESOLVED glow blur (auto formula or the

@@ -30,6 +30,7 @@ struct SchematicCanvas<Content: View>: View {
     /// either way: a tile with no caption would otherwise read
     /// as an unlabelled image.
     var showsCaption = true
+    @Environment(\.schematicPalette) private var palette
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -80,7 +81,10 @@ struct SchematicCanvas<Content: View>: View {
                 .padding(LayoutSchematic.inset)
                 .clipShape(RoundedRectangle(cornerRadius: 4))
             RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(Color.secondary.opacity(0.6))
+                .strokeBorder(
+                    palette?.frame
+                        ?? Color.secondary.opacity(0.6)
+                )
         }
         .frame(maxWidth: width == nil ? .infinity : nil)
         .frame(width: width, height: height)

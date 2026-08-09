@@ -54,6 +54,22 @@ struct SettingsThemeTokenTests {
             0x23_2B_26,
             SettingsTheme.sunken
         ),
+        // Identical in both modes on purpose (#786): the Home
+        // plate is a picture of the user's desktop, and what
+        // the picture shows must not change with the window's
+        // appearance (4g).
+        Pin(
+            "previewPlate",
+            0x12_25_1A,
+            0x12_25_1A,
+            SettingsTheme.previewPlate
+        ),
+        Pin(
+            "plateInk",
+            0xEA_F3_EE,
+            0xEA_F3_EE,
+            SettingsTheme.plateInk
+        ),
         Pin(
             "hairline",
             0xE4_E9_E1,

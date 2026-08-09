@@ -1,18 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The picture half of a Home card (#678 turn 9), drawn only
-/// from renderers that already exist and already ask the real
-/// data — a card is a mirror, not an illustration. Cards with
-/// nothing spatial to show return nil and stay text-only; the
-/// Phase 4 draft renderer is what upgrades the profile cards to
-/// the digest's dark preview tile.
+/// The data-row half of a Home card's picture (#678 turn 9,
+/// re-cut in #786): the whole-app cards' previews, drawn only
+/// from the real draft — a card is a mirror, not an
+/// illustration. The profile-group cards moved their pictures
+/// to the desktop plate (`HomeCardPlate`); what stays here are
+/// rows of data — key caps, profile chips, app icons, the
+/// version — that belong beside the title, not on a desktop.
 @MainActor
 enum HomeCardPreview {
-    /// The preview region's fixed height, so grid rows align.
-    static let height: CGFloat = 56
-
-    /// The card's picture, or nil for the text-only cards —
+    /// The card's data row, or nil for the cards with none —
     /// ONE switch, so "has a preview" and "which preview"
     /// cannot drift apart (review 2026-08-04: the earlier
     /// `hasPreview` twin was a second hand-kept copy of this
@@ -23,188 +21,151 @@ enum HomeCardPreview {
         model: SettingsModel
     ) -> AnyView? {
         switch destination {
-        case .spaces:
-            return AnyView(
-                nameChips(
-                    model.config.spaces.map { "\($0)" },
-                    cap: 6
-                )
-            )
-        case .bars:
-            return AnyView(barsStrip(model))
-        case .layoutDefaults:
-            return AnyView(schematics(model))
-        case .monitors:
-            return AnyView(miniArrangement(model))
         case .shortcuts:
             return AnyView(keyCaps(model))
         case .profiles:
-            return AnyView(
-                nameChips(
-                    model.profileSummaries.map(\.name),
-                    cap: 4
-                )
-            )
+            return AnyView(profileChips(model))
         case .appRules:
-            return AnyView(
-                nameChips(
-                    model.config.appRules.keys.sorted(),
-                    cap: 4
-                )
-            )
-        case .gapsAndBorders, .colors, .advancedColors,
-            .behavior, .general:
+            return AnyView(ruleIcons(model))
+        case .general:
+            return AnyView(versionLine)
+        case .spaces, .bars, .layoutDefaults, .monitors,
+            .gapsAndBorders, .colors, .advancedColors,
+            .behavior:
+            // The profile group draws on the plate or not at
+            // all (`HomeCardPlate.plate` is that partition's
+            // one switch).
             return nil
         }
     }
 
     // MARK: - Pieces
 
-    /// Capsule chips of real names, capped with a "+N" chip —
-    /// the +N is a label, not an affordance.
-    @ViewBuilder
-    private static func nameChips(
-        _ names: [String],
-        cap: Int
+    /// Capsule chips of the real profile names, the default one
+    /// inverted — the answer "which one wins" read without the
+    /// subtitle — capped with a "+N" chip that is a label, not
+    /// an affordance.
+    private static func profileChips(
+        _ model: SettingsModel
     ) -> some View {
-        let shown = Array(names.prefix(cap))
-        let overflow = names.count - shown.count
-        HStack(spacing: 4) {
-            ForEach(shown, id: \.self) { name in
-                Text(name)
+        let summaries = model.profileSummaries
+        let shown = Array(summaries.prefix(4))
+        let overflow = summaries.count - shown.count
+        return HStack(spacing: 4) {
+            ForEach(shown, id: \.name) { summary in
+                Text(summary.name)
                     .font(.caption)
                     .lineLimit(1)
+                    .foregroundStyle(
+                        summary.isDefault
+                            ? SettingsTheme.card
+                            : SettingsTheme.ink
+                    )
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(
                         Capsule()
-                            .fill(Color.primary.opacity(0.07))
-                    )
-            }
-            if overflow > 0 {
-                Text("+\(overflow)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule()
-                            .strokeBorder(
-                                Color.primary.opacity(0.2)
+                            .fill(
+                                summary.isDefault
+                                    ? SettingsTheme.ink
+                                    : SettingsTheme.sunken
                             )
                     )
             }
+            if overflow > 0 {
+                overflowChip(overflow)
+            }
         }
-        .frame(
-            maxWidth: .infinity,
-            alignment: .leading
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// The live bar strip — the same render the Bars editor
-    /// leads with, so Plain draws no plate and thickness moves
-    /// the strip on the card too.
-    private static func barsStrip(
-        _ model: SettingsModel
-    ) -> some View {
-        let settings = model.config.settings
-        // SCALED, never cropped: the strip's canvas is a fixed
-        // 96 pt, and a `maxHeight` + `clipped()` cut would keep
-        // its middle band — with the default top-edge bar
-        // cropped away, the card showed an empty plate (the
-        // 13b "picture drawn invisible" class, review
-        // 2026-08-04). ~0.55 lands the whole canvas inside the
-        // 56 pt region; the empty caption override suppresses
-        // the position caption, which the subtitle already
-        // carries.
-        return SpaceBarPreviewStrip(
-            style: settings.spaceBarStyle,
-            appBar: settings.appBarStyle,
-            sameEdge: settings.spaceBarStyle.edge
-                == settings.appBarStyle.edge,
-            captionOverride: ""
-        )
-        .scaleEffect(0.55, anchor: .topLeading)
-        .frame(height: height, alignment: .topLeading)
-        .clipped()
-        .allowsHitTesting(false)
-    }
-
-    /// One schematic tile of the most-used layout mode — the
-    /// engine-backed thumbnail family, never a sketch, and the
-    /// mode from `LayoutUsage.mostUsed`, the one owner of that
-    /// derivation (review 2026-08-04: a fourth inline copy had
-    /// already diverged from it).
-    private static func schematics(
-        _ model: SettingsModel
-    ) -> some View {
-        LayoutSchematicView(
-            mode: LayoutUsage.mostUsed(in: model.config),
-            settings: model.config.settings,
-            windows: 4,
-            scale: .tile
-        )
-        .scaleEffect(0.62, anchor: .topLeading)
-        .frame(height: height, alignment: .topLeading)
-        .clipped()
-        .allowsHitTesting(false)
-    }
-
-    /// The real display set, shrunk: the same arrangement maths
-    /// as the Monitors picture, so the card mirrors the screen
-    /// it opens. Read-only rectangles — the draggable chips
-    /// stay on the area screen.
-    private static func miniArrangement(
-        _ model: SettingsModel
-    ) -> some View {
-        let mainID = PositionalDisplays.liveMainID
-        return GeometryReader { proxy in
-            let layout = MonitorArrangement.layout(
-                displays: model.displays,
-                mainID: mainID,
-                canvas: proxy.size,
-                // Nothing is dropped on this picture, so it
-                // takes neither concession the droppable one
-                // makes: no reserved tray band, and no
-                // minimum-card floor. Both overflowed a 56 pt
-                // canvas — the floor by 135 pt on its own — and
-                // shipped as a display rectangle drawn outside
-                // its own card (owner, 2026-08-04).
-                hostsChips: false
+    private static func overflowChip(_ count: Int) -> some View {
+        Text("+\(count)")
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                Capsule()
+                    .strokeBorder(SettingsTheme.hairline)
             )
-            ZStack(alignment: .topLeading) {
-                ForEach(layout.displays) { drawn in
-                    RoundedRectangle(cornerRadius: 3)
-                        .strokeBorder(
-                            drawn.display.id == mainID
-                                ? SettingsTheme.accent
-                                : Color.secondary.opacity(0.6),
-                            lineWidth: 1.5
+    }
+
+    /// The ruled apps' real icons in small wells — through the
+    /// memoized cache the App Rules rows warm, never a raw
+    /// `NSWorkspace` read per card — with a "+N" well for the
+    /// rest. Union of both rule kinds, the same pair the
+    /// subtitle counts.
+    private static func ruleIcons(
+        _ model: SettingsModel
+    ) -> some View {
+        // Float rules are colon syntax ("app:Title") — the app
+        // segment comes from the ONE parse the area renders
+        // with (`FloatFacet.appSegment`), or a titled rule
+        // draws a generic well and a doubly-ruled app draws
+        // twice (code review, 2026-08-09).
+        let ids = Set(model.config.appRules.keys)
+            .union(
+                model.config.floatRules.map(
+                    FloatFacet.appSegment(of:)
+                )
+            )
+            .sorted()
+        let shown = Array(ids.prefix(5))
+        let overflow = ids.count - shown.count
+        return HStack(spacing: 4) {
+            ForEach(shown, id: \.self) { id in
+                well {
+                    Image(
+                        nsImage: AppIconCache.shared.icon(
+                            forBundleID: id
                         )
-                        .background(
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(
-                                    Color.primary.opacity(0.05)
-                                )
-                        )
-                        .frame(
-                            width: drawn.rect.width,
-                            height: drawn.rect.height
-                        )
-                        .offset(
-                            x: drawn.rect.minX,
-                            y: drawn.rect.minY
-                        )
+                    )
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                }
+            }
+            if overflow > 0 {
+                well {
+                    Text("+\(overflow)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(SettingsTheme.ink2)
                 }
             }
         }
-        .frame(height: height)
-        .allowsHitTesting(false)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private static func well(
+        @ViewBuilder _ content: () -> some View
+    ) -> some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(SettingsTheme.sunken)
+            .frame(width: 22, height: 22)
+            .overlay(content())
+    }
+
+    /// The version the About row states, through the one shared
+    /// derivation, so the card can never disagree with the area
+    /// it opens.
+    private static var versionLine: some View {
+        Text(
+            L(
+                "home.card.general.version",
+                "v%1$@",
+                KiwiDeskVersion.displayString
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(SettingsTheme.ink3)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// The first few default-layer combos as native key caps,
     /// through the same glyph pipeline the recorder displays
-    /// with.
+    /// with — the prototype's cut: small semibold mono on the
+    /// sunken chip fill, no stroke ring (owner, 2026-08-09:
+    /// "softer, smaller, sleeker").
     @ViewBuilder
     private static func keyCaps(
         _ model: SettingsModel
@@ -219,22 +180,17 @@ enum HomeCardPreview {
                 Text(capText(combo))
                     .font(
                         .system(
-                            size: 11,
-                            weight: .medium,
-                            design: .rounded
+                            size: 10.5,
+                            weight: .semibold,
+                            design: .monospaced
                         )
                     )
-                    .padding(.horizontal, 6)
+                    .foregroundStyle(SettingsTheme.ink)
+                    .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.primary.opacity(0.08))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(
-                                Color.primary.opacity(0.15)
-                            )
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(SettingsTheme.sunken)
                     )
             }
         }

@@ -17,34 +17,43 @@ struct HomeCard: View {
 
     var body: some View {
         Button(action: open) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Wash on the title band alone (#760): tinting
-                // the whole card would run the accent through
-                // the live preview below, briefly
-                // misrepresenting the very colours it renders.
-                titleRow.modeRevealWash(modeGated)
-                if let preview = HomeCardPreview.preview(
+            VStack(alignment: .leading, spacing: 0) {
+                // The desktop plate rides ABOVE the title and
+                // outside the reveal wash (#786): full-bleed,
+                // clipped through the card's own corners, so
+                // the card border is the picture's visible
+                // edge (4g).
+                if let plate = HomeCardPlate.plate(
                     for: destination,
                     model: model
                 ) {
-                    preview
-                } else {
-                    Spacer(minLength: 0)
+                    plate
                 }
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .frame(
-                        maxWidth: .infinity,
-                        alignment: .leading
-                    )
+                textBand
             }
-            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 148)
-            .background(cardShape)
+            // Two deliberate heights (#786): the profile group
+            // holds the plate band and the whole-app cards sit
+            // shorter.
+            .frame(
+                height: tall
+                    ? SettingsTheme.cardHeight
+                    : SettingsTheme.cardHeightCompact
+            )
+            .background(cardFill)
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+            )
+            // The border rides ABOVE the clip, never in the
+            // background: the plate is opaque and full-bleed,
+            // so a background stroke is painted over for the
+            // plate's whole band — which silenced the rest
+            // hairline, the hover accent and the #760
+            // mode-gated frame on every plated card
+            // (ui-designer blocker, 2026-08-09).
+            .overlay(cardStroke)
             .contentShape(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
@@ -55,6 +64,42 @@ struct HomeCard: View {
         .onHover { hovering = $0 }
         .accessibilityLabel(destination.title)
         .accessibilityValue(axValue)
+    }
+
+    /// The one group partition, read where the group order
+    /// already lives — never a second hand-kept list.
+    private var tall: Bool {
+        HomeCardOrder.thisProfile.contains(destination)
+    }
+
+    private var textBand: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            // Wash on the title band alone (#760): tinting
+            // the whole card would run the accent through
+            // the live preview, briefly misrepresenting the
+            // very colours it renders.
+            titleRow.modeRevealWash(modeGated)
+            if let preview = HomeCardPreview.preview(
+                for: destination,
+                model: model
+            ) {
+                preview
+            } else {
+                Spacer(minLength: 0)
+            }
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink2)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 11)
+        .padding(.bottom, 12)
     }
 
     private var subtitle: String {
@@ -122,35 +167,35 @@ struct HomeCard: View {
     /// 2026-08-04). It is the border and only the border, so it
     /// composes with — rather than competes against — the native
     /// focus ring a keyboard user gets from the plain `Button`.
-    private var cardShape: some View {
+    private var cardFill: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .fill(SettingsTheme.card)
-            .overlay(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.cardRadius
-                )
-                // The mode-gated frame speaks the mode's own
-                // colour — the accent at reduced strength, so
-                // the connection to the active Power User
-                // segment is legible (owner, 2026-08-09: a
-                // darker grey read as "different" but not
-                // "which") while hover keeps the full-strength
-                // accent as its own register on the same edge.
-                // Weight still steps too, so hue never carries
-                // alone.
-                .strokeBorder(
-                    hovering
-                        ? SettingsTheme.accent
-                        : modeGated
-                            ? SettingsTheme.accent.opacity(
-                                SettingsTheme.modeGatedStrokeOpacity
-                            )
-                            : SettingsTheme.hairline,
-                    lineWidth: modeGated
-                        ? SettingsTheme.containerStrokeModeGated
-                        : SettingsTheme.containerStroke
-                )
+    }
+
+    private var cardStroke: some View {
+        RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
+            // The mode-gated frame speaks the mode's own
+            // colour — the accent at reduced strength, so
+            // the connection to the active Power User
+            // segment is legible (owner, 2026-08-09: a
+            // darker grey read as "different" but not
+            // "which") while hover keeps the full-strength
+            // accent as its own register on the same edge.
+            // Weight still steps too, so hue never carries
+            // alone.
+            .strokeBorder(
+                hovering
+                    ? SettingsTheme.accent
+                    : modeGated
+                        ? SettingsTheme.accent.opacity(
+                            SettingsTheme.modeGatedStrokeOpacity
+                        )
+                        : SettingsTheme.hairline,
+                lineWidth: modeGated
+                    ? SettingsTheme.containerStrokeModeGated
+                    : SettingsTheme.containerStroke
             )
+            .allowsHitTesting(false)
     }
 
     private var axValue: String {

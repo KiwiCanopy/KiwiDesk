@@ -52,6 +52,31 @@ enum SettingsTheme {
     /// its neighbour on screen.
     static let sunken = token(light: 0xF4_F7_F1, dark: 0x23_2B_26)
 
+    /// The desktop-dark plate behind a Home card's picture
+    /// (#786): the tile is a picture of the user's desktop, so
+    /// its ground is a desktop at night, not a Settings surface.
+    /// Identical in both modes for the same reason the palette
+    /// inside it is (4g): what the picture shows must not change
+    /// with the window's appearance. Deliberately NOT `page`'s
+    /// dark `0x171C19`: in dark mode the plate must still read
+    /// as sitting below the card (`0x1E_25_21`), and the page
+    /// grey is within four points of it.
+    static let previewPlate = token(
+        light: 0x12_25_1A,
+        dark: 0x12_25_1A
+    )
+
+    /// The plate's own light ink — the fallback the palette fold
+    /// swaps in when the USER's ink or accent sinks into
+    /// `previewPlate` (a legal palette: Lua is open, and a
+    /// light-styled bar carries a dark ink that is legible on
+    /// its own fill and invisible on this fixed dark ground).
+    /// Identical in both modes for the plate's own reason.
+    static let plateInk = token(
+        light: 0xEA_F3_EE,
+        dark: 0xEA_F3_EE
+    )
+
     // MARK: - Borders
 
     /// Every container border: card, section, header underline,
@@ -179,6 +204,23 @@ enum SettingsTheme {
     /// softness a shadow would have.
     static let cardRadius: CGFloat = 14
 
+    /// The two Home card heights (#786) — deliberate, not a
+    /// residue: every profile card carries the 92 pt desktop
+    /// plate and a whole-app card never does, so one shared
+    /// height would either stretch the text cards around
+    /// absent pictures or crush the plates.
+    /// `HomeCardChromeTests` names the pair together, pins
+    /// both values, and holds the tall one above the plate
+    /// plus a minimum text band.
+    static let cardHeight: CGFloat = 152
+    static let cardHeightCompact: CGFloat = 105
+
+    /// The desktop plate's height inside a profile card —
+    /// full-bleed to the card's edges, clipped through the
+    /// card's own corners, so the card border IS the picture's
+    /// visible edge (4g).
+    static let plateHeight: CGFloat = 92
+
     /// A section container's corner. Larger than a card's on
     /// purpose: a section is the outer box, and equal radii make
     /// nested rounds read as a mistake.
@@ -262,7 +304,11 @@ enum SettingsTheme {
     /// they are NOT part of living in `MonitorCardChips`.
     static let monitorStandScale: CGFloat = 0.52
     static let monitorStandMin: CGFloat = 44
-    static let monitorStandMax: CGFloat = 230
+    // 230 → 320 (owner, 2026-08-09): on a wide single-display
+    // card the old cap cut the foot to well under half the
+    // screen while the Home tile — unclamped shares — kept the
+    // full relation, and the two pictures of one desk disagreed.
+    static let monitorStandMax: CGFloat = 320
     static let monitorNeckScale: CGFloat = 0.26
     static let monitorNeckMin: CGFloat = 14
     static let monitorNeckMax: CGFloat = 44

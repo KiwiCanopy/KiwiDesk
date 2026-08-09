@@ -30,6 +30,9 @@ struct SettingsThemeMetricTests {
     /// this", not an exhaustive map.
     private let wired: [String: String] = [
         "cardRadius": "HomeCard.swift",
+        "cardHeight": "HomeCard.swift",
+        "cardHeightCompact": "HomeCard.swift",
+        "plateHeight": "HomeCardPlate.swift",
         "sectionRadius": "SettingsSection.swift",
         "disclosureRadius": "SettingsDisclosure.swift",
         "chipRadius": "Chips.swift",

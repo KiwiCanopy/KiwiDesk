@@ -74,29 +74,19 @@ struct MonitorsPicture: View {
             )
         }
         .frame(height: Self.canvasHeight)
-        .background(well)
+        // No well any more (owner + ui-designer, 2026-08-09):
+        // the section container's own surface is the ground —
+        // a shape whose fill equals its parent's is only its
+        // frame, and it read as an empty box inside a box. The
+        // soft-green cards on their ink3 rest borders carry
+        // the separation; the dashed tray's stroke is its own
+        // edge and never leaned on the well.
     }
 
-    /// The desk the displays sit on: a recessed well, so each
-    /// card can be the LIGHTER thing on it. Without it the cards
-    /// and the section they live in painted the same colour and
-    /// the arrangement — the whole point of this area — was a
-    /// faint outline on a flat field.
-    private var well: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(SettingsTheme.sunken)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(
-                        SettingsTheme.hairline,
-                        lineWidth: 0.5
-                    )
-            )
-    }
-
-    /// A neck and a foot under each display, in the hairline the
-    /// cards are bordered with — quiet enough that the picture
-    /// still reads as an arrangement rather than as furniture.
+    /// A neck and a foot under each display, in `ink3` — the
+    /// hairline read as too shallow against the well on device
+    /// (owner, 2026-08-09); the quietest legible ink keeps the
+    /// picture reading as an arrangement, not furniture.
     ///
     /// SCALED from the card, within bounds. A fixed size was
     /// tried first, on the reasoning that a stand is a real
@@ -124,10 +114,10 @@ struct MonitorsPicture: View {
         )
         return VStack(spacing: 0) {
             Rectangle()
-                .fill(SettingsTheme.hairline)
+                .fill(SettingsTheme.ink3)
                 .frame(width: neck, height: 7)
             RoundedRectangle(cornerRadius: 2.5)
-                .fill(SettingsTheme.hairline)
+                .fill(SettingsTheme.ink3)
                 .frame(width: base, height: 5)
         }
         .allowsHitTesting(false)

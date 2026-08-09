@@ -134,16 +134,17 @@ enum SchematicMath {
 /// slot (the scrolling anchor, the focused track).
 struct SchematicTile: View {
     var active = false
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-            .fill(LayoutSchematic.fill)
+            .fill(palette?.fill ?? LayoutSchematic.fill)
             .overlay(
                 RoundedRectangle(
                     cornerRadius: LayoutSchematic.corner
                 )
                 .strokeBorder(
-                    LayoutSchematic.stroke,
+                    palette?.stroke ?? LayoutSchematic.stroke,
                     lineWidth: active ? 2 : 1
                 )
             )
@@ -154,15 +155,21 @@ struct SchematicTile: View {
 /// caps how many windows it draws.
 struct SchematicMoreChip: View {
     let hidden: Int
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         Text("+\(hidden)")
             .font(.system(size: 9, weight: .semibold))
             .monospacedDigit()
-            .foregroundStyle(.secondary)
+            .foregroundStyle(
+                palette?.ink ?? Color.secondary
+            )
             .padding(.horizontal, 3)
             .background(
-                Capsule().fill(Color(nsColor: .textBackgroundColor))
+                Capsule().fill(
+                    palette?.base
+                        ?? Color(nsColor: .textBackgroundColor)
+                )
             )
     }
 }
@@ -173,10 +180,13 @@ struct SchematicMoreChip: View {
 /// (a *future* window) and the off-monitor ghost (a *real*
 /// window off-screen).
 struct SchematicGap: View {
+    @Environment(\.schematicPalette) private var palette
+
     var body: some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
             .strokeBorder(
-                Color.secondary.opacity(0.4),
+                palette?.gapStroke
+                    ?? Color.secondary.opacity(0.4),
                 style: StrokeStyle(lineWidth: 1, dash: [3, 2])
             )
     }
@@ -198,17 +208,21 @@ struct SchematicNewWindow: View {
     /// badge stays in the visible half when the new-window tile is
     /// cropped by the canvas edge (a first/last window).
     var badgeAlignment: Alignment = .bottomTrailing
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         ZStack(alignment: badgeAlignment) {
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-                .fill(SettingsTheme.accent.opacity(0.45))
+                .fill(
+                    palette?.newFill
+                        ?? SettingsTheme.accent.opacity(0.45)
+                )
                 .overlay(
                     RoundedRectangle(
                         cornerRadius: LayoutSchematic.corner
                     )
                     .strokeBorder(
-                        LayoutSchematic.stroke,
+                        palette?.stroke ?? LayoutSchematic.stroke,
                         lineWidth: 1
                     )
                 )
@@ -240,20 +254,25 @@ struct SchematicPileTile: View {
     var active = false
     /// The "+" badge, when this piled window is the incoming one.
     var isNew = false
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-                .fill(Color(nsColor: .textBackgroundColor))
+                .fill(
+                    palette?.base
+                        ?? Color(nsColor: .textBackgroundColor)
+                )
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .fill(
                     isNew
-                        ? SettingsTheme.accent.opacity(0.45)
-                        : LayoutSchematic.fill
+                        ? palette?.newFill
+                            ?? SettingsTheme.accent.opacity(0.45)
+                        : palette?.fill ?? LayoutSchematic.fill
                 )
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .strokeBorder(
-                    LayoutSchematic.stroke,
+                    palette?.stroke ?? LayoutSchematic.stroke,
                     lineWidth: active ? 2 : 1
                 )
             if isNew {
@@ -271,15 +290,21 @@ struct SchematicPileTile: View {
 /// drawn straddling / outside the monitor rectangle. No "+"
 /// (that would collide with the spawn ghost). Used by Scrolling.
 struct SchematicGhostOverflow: View {
+    @Environment(\.schematicPalette) private var palette
+
     var body: some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-            .fill(Color.secondary.opacity(0.15))
+            .fill(
+                palette?.ghostFill
+                    ?? Color.secondary.opacity(0.15)
+            )
             .overlay(
                 RoundedRectangle(
                     cornerRadius: LayoutSchematic.corner
                 )
                 .strokeBorder(
-                    Color.secondary.opacity(0.5),
+                    palette?.ghostStroke
+                        ?? Color.secondary.opacity(0.5),
                     lineWidth: 1
                 )
             )

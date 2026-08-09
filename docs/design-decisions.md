@@ -1648,20 +1648,52 @@ the proof. `SettingsDestination.thisProfile` / `.wholeApp`
 remain the membership's one copy, and `HomeCardOrderTests`
 pins the grid's groups to them.
 
-**A card's picture comes from a renderer that already asks the
-real data, or the card stays text-only.** (#678 turn 9.) The
-turn-9 frames draw every profile card with a dark preview tile
-from a unified draft renderer that does not exist until Phase
-4, and hand-drawing stand-ins would ship previews that teach
-what the app does not do — the #702 class of defect, at grid
-scale. So the Bars card mounts the real `SpaceBarPreviewStrip`
-(Plain really drops the plate, thickness really moves the
-strip), Layout Defaults a real `LayoutSchematicView`, Monitors
-the real `MonitorArrangement` maths, Shortcuts the recorder's
-own combo glyphs — and Gaps & Borders, Colours, Advanced
-Colours, Behaviour and General carry no picture at all rather
-than a sketch. A card that gains a picture gains it by
-reusing a renderer, never by drawing beside one.
+**A card's picture asks the real data — reusing its editor's
+own maths where one exists, staying a data readout where none
+does — and is never a sketch drawn beside either.** (#678 turn
+9; the desktop plate #786, owner rulings 2026-08-09,
+superseding turn 9's text-only fallback.) A hand-drawn
+stand-in ships a preview that teaches what the app does not
+do — the #702 class of defect, at grid scale. So where an
+editor already owns the maths, the card calls it: the layout
+schematic family with its `SchematicPlacement` splice,
+`GapPreviewScale.mini` and `FocusBorderPreview`'s width remap
+on the Gaps & Borders tile, `MonitorArrangement.layout`,
+`BarsGates`' own shown-bar predicate. Where no editor maths
+exists, the picture is a readout of the draft, never a
+decorative sketch: one pane per declared space, the colour fan
+and swatch grid of the config's real hexes, the Behaviour
+divider answering the real mouse-resize choice. Turn 9's "or
+the card stays text-only" was this same rule under scarcity —
+the unified dark preview tile did not exist yet, so cards
+without a renderer went without a picture; #786 built the
+tile, and the fallback retired with it.
+
+That tile is the **desktop plate**: a profile card's picture
+is a picture of the user's desktop, so it sits on a fixed
+desktop-dark ground (`SettingsTheme.previewPlate`, identical
+in both appearances — what the picture shows must not change
+with the window's appearance) and draws in the USER's palette
+read from the draft, not the brand accent: brand describes the
+app, profile colours describe the desktop. Two follow-on
+rulings, both 2026-08-09:
+
+- **Two card heights, derived from the one group partition.**
+  Profile cards hold the plate band; whole-app cards sit
+  compact, because their previews are rows of data — key
+  caps, profile chips, app icons, the version — that belong
+  beside the title, not on a desktop. Each group thereby
+  reads as a uniform grid, and "which cards are tall" is read
+  off `HomeCardOrder.thisProfile`, never a second hand-kept
+  list. `HomeCardChromeTests` pins the heights pair and the
+  plate's geometry.
+- **The palette fold floors against the plate.** The plate is
+  KiwiDesk's fixed ground while the palette is the user's,
+  and a legal palette (Lua is open) can carry a colour
+  legible on its own bar yet invisible on this ground — so a
+  user colour that sinks into the plate swaps for a theme
+  fallback rather than drawing dark-on-dark, guarded by
+  `HomeCardChromeTests`.
 
 **The Simple/Power User segment gates whole cards, and navigation
 into a withheld card switches the mode rather than refusing.**
