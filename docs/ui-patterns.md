@@ -439,7 +439,8 @@ doesn't have. One mark sits outside both vocabularies: the
 Monitors picture's main-display card wears a soft accent
 bloom — decoration stating a fact, promising neither
 interaction nor an armed input, and always beside the
-textual "main" badge that carries the answer. Depth comes from the hairline stroke both chip
+textual "main" badge that carries the answer. Depth comes
+from the hairline stroke both chip
 types now share, matching the flat capsule language of
 native tags. A non-interactive value state in a control row
 (the slot size's "Default — orientation standard") renders in

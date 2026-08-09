@@ -4190,12 +4190,13 @@ than a limit of the identity.
 (pin, arrow) rather than border styles alone (accessibility), and
 automatic is drawn as an outline rather than a dimmed capsule —
 dimming is this app's inert vocabulary, and an automatic chip is
-the one most worth dragging. Two routes into a chip's menu —
-drag, or right-click — and the keyboard route is knowingly
-absent: a whole-chip `Menu` made it real for one release and
-consumed the mouse-down that `.draggable` needs, so a restored
-keyboard route must not reach for the control shape that took
-the drag (the argument lives on `SpaceAssignmentChip`). The
+the one most worth dragging. Two routes to move a space — drag
+it, or its right-click menu — and the keyboard and VoiceOver
+routes are knowingly absent: a whole-chip `Menu` made them real
+and consumed the mouse-down that `.draggable` needs, so a
+restored keyboard route must not reach for the control shape
+that took the drag (the argument lives on
+`SpaceAssignmentChip`). The
 clear affordance never participates in the chip's layout: a
 pinned chip and an automatic chip measure identically — the ⓧ
 rides the trailing-top corner as an overlay, and hover may
