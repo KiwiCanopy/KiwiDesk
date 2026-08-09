@@ -138,6 +138,22 @@ These are **exact contracts** and hold for any corpus:
   file's worth of identical values.
 - **collapsed translation** — one filler reused for many
   unrelated keys.
+- **withheld-argument position** — a frame interpolating an
+  argument the app may render EMPTY puts that specifier anywhere
+  but last.
+
+That last one carries an obligation on the Swift side, because
+the catalog cannot show it: **a frame whose argument the GUI may
+render empty registers that key in `WITHHELD_ARGUMENTS` in the
+same change set.** The frame owns the space before the clause and
+the caller trims it away with the clause — which only works at the
+end, and every other key is told the opposite (the numbering
+exists so a translation may move a specifier, and
+`placeholder_drift` deliberately ignores order). Unregistered, the
+failure is a doubled space and a stranded comma in a language
+nobody reviewing the change reads.
+`LocalizationWithheldArgumentTests` holds both directions and the
+scope.
 
 **English residue** in a translated sentence is instead a
 heuristic, and the only one carrying a *corpus* scope as well as
@@ -215,6 +231,7 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationProductNameGuardTests`,
 `LocalizationOverlapGuardTests`,
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
+`LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
 `LocaleWorksheetRejectionTests`
 — future scripts follow suit, so a

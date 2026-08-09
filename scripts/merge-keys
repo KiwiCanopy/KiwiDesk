@@ -89,6 +89,7 @@ from localization_guards import (
     placeholder_drift,
     tagged_stub,
     untranslated_mode_names,
+    withheld_argument_position,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -137,7 +138,11 @@ def _load_map(path: Path, label: str) -> dict | None:
 
 
 def _content_defect(
-    locale: str, value: str, english: str, residue: bool = True
+    key: str,
+    locale: str,
+    value: str,
+    english: str,
+    residue: bool = True,
 ) -> str | None:
     """Why `value` must not be written to `<locale>.json`, or None.
 
@@ -146,6 +151,10 @@ def _content_defect(
     divergent copy here would admit exactly what the gate rejects,
     so a translator would merge cleanly and then be unable to
     commit.
+
+    Takes the `key` because one predicate is keyed by it:
+    `withheld_argument_position` reads `WITHHELD_ARGUMENTS`, the
+    register of frames whose argument the app may render empty.
     """
     scripts = foreign_scripts(locale, value)
     if scripts:
@@ -159,6 +168,9 @@ def _content_defect(
     drift = placeholder_drift(value, english)
     if drift:
         return f"{drift} relative to the English"
+    stranded = withheld_argument_position(key, value)
+    if stranded:
+        return stranded
     dropped = dropped_product_names(value, english)
     if dropped:
         return (
@@ -279,7 +291,7 @@ def main(argv: list[str]) -> int:
         # is why the worksheet held them), so the re-mint recovery
         # above applies to them unchanged.
         defect = _content_defect(
-            locale, text, current, residue=not site
+            key, locale, text, current, residue=not site
         )
         if defect:
             broken[key] = defect

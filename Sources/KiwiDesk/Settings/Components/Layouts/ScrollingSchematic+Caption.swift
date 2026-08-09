@@ -5,12 +5,13 @@ import SwiftUI
 ///
 /// **The caption and the a11y label switch on the anchor.** The
 /// anchor is a picker the reader is operating, and one string
-/// covering all four says nothing when they move it — worse, the
-/// string that covered all four stated `follow`'s pan, so three
-/// anchors carried a sentence about a fourth and VoiceOver
-/// asserted it over a tile drawn with `center` selected. The
-/// family already splits a caption wherever a control splits the
-/// picture (`layout.schematic.monocle.caption_h` / `_v`,
+/// covering all four says nothing when they move it. Worse, it
+/// would have to state `follow`'s pan — the one fact the frame
+/// cannot carry — under `center`, `start` and `end` too, so three
+/// anchors would carry a sentence about a fourth and VoiceOver
+/// would assert it over a tile that never drew it. The family
+/// already splits a caption wherever a control splits the picture
+/// (`layout.schematic.monocle.caption_h` / `_v`,
 /// `layout.schematic.stack.caption_all` / `_overflow`).
 ///
 /// `center`, `start` and `end` share one frame of words on
@@ -93,13 +94,14 @@ extension ScrollingSchematic {
     /// `GeometryReader`'s width, so a pixel test here would be a
     /// model of the drawing rather than the drawing. A slot
     /// **adjacent to the focus** needs no width to answer — but
-    /// only where the monitor is a *slice* of the canvas: the
+    /// only where the monitor leaves a margin beside itself
+    /// (`hasMargin`, the same answer the outline turns on): the
     /// focused tile sits wholly inside the monitor, one step is
-    /// one slot plus 3 pt, and the margin the monitor leaves on
-    /// the far side is what the neighbour reaches into, at every
-    /// anchor, slot size and canvas length a panel can take.
+    /// one slot plus 3 pt, and that margin is what the neighbour
+    /// reaches into, at every anchor, slot size and canvas length
+    /// a panel can take.
     ///
-    /// Where the monitor IS the canvas that margin is zero, and
+    /// Where the monitor IS the canvas the margin is zero, and
     /// the neighbour's near edge lands 3 pt past the far border —
     /// `end` with New window ▸ After focused would claim a `+`
     /// nothing draws. So the scale is folded into the answer
@@ -121,7 +123,7 @@ extension ScrollingSchematic {
     /// anchor, placement, count, slot size and scale at the widths
     /// a pane can take.
     var drawsInsertionMark: Bool {
-        screenFraction < 1 && abs(row.incoming) <= 1
+        hasMargin && abs(row.incoming) <= 1
     }
 
     /// Named with the picker's own term, so every locale reads its
@@ -134,6 +136,12 @@ extension ScrollingSchematic {
     /// The frame carries the space before its optional clause, so
     /// a translator owns the spacing; with no clause to place, the
     /// space it left behind goes.
+    ///
+    /// Trimming can only reach a space at the END, so both frames
+    /// are registered in `WITHHELD_ARGUMENTS`
+    /// (`scripts/localization_guards.py`) and no catalog — nor a
+    /// future edit to the English — may move the clause into the
+    /// middle of the sentence.
     private func oneLine(_ sentence: String) -> String {
         sentence.trimmingCharacters(in: .whitespaces)
     }

@@ -24,7 +24,12 @@ only the mechanical contract.
 2. **Preserve every placeholder exactly**: `%1$@`, `%2$@`,
    `%1$d`. Same set, same spelling. They are numbered precisely
    so you *can* move them — put them where the sentence needs
-   them in your language, not where English has them.
+   them in your language, not where English has them. **One
+   exception, and the tooling names it**: a few frames end on a
+   placeholder the app fills only sometimes, and leaves empty
+   otherwise. Those have to stay at the end, or the empty case
+   leaves a hole mid-sentence. You do not have to know which
+   ones — `merge-keys` refuses the move and says so.
 3. **Keep `\n` escapes *inside* the string.** Leading and
    trailing whitespace is a different matter: `merge-keys` trims
    it, so it cannot survive and must never carry meaning. (It used

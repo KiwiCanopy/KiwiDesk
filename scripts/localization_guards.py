@@ -6,7 +6,7 @@ entry. Nothing else in the pipeline reads the copy, so a bad
 worksheet lands silently and renders live: a reviewer skimming a
 language they do not read sees plausible text.
 
-Eight predicates live here. Five are **exact contracts** and hold
+Nine predicates live here. Six are **exact contracts** and hold
 for any corpus of translated strings:
 
 1. `foreign_scripts` — the writing system is wrong for the locale
@@ -25,11 +25,19 @@ for any corpus of translated strings:
    for many unrelated English strings (the shape that caught 48
    interpolated strings per locale replaced with a bare
    `"Opzione %1$@"` / `"Opção %1$@"`).
+6. `withheld_argument_position` — a frame that interpolates an
+   argument the app may render **empty** puts that specifier
+   anywhere but last, so the sentence keeps a gap where the
+   clause was. Keyed by `WITHHELD_ARGUMENTS`, which is the only
+   thing that knows an argument can be empty — the catalog cannot
+   see it, and rule 2 of `TRANSLATION_BRIEF.md` otherwise tells a
+   translator to move specifiers freely, which is right for every
+   other key.
 
-The sixth is a **heuristic tuned on short app UI labels**, and the
-only one with a corpus scope:
+The seventh is a **heuristic tuned on short app UI labels**, and
+the only one with a corpus scope:
 
-6. `english_residue` — an English sentence with single words
+7. `english_residue` — an English sentence with single words
    swapped, `"追加 Window"`, `"編集ing init.lua directly"`. Runs on
    non-Latin-script locales only (see its docstring), and callers
    apply it to the app catalogs only — the marketing site's
@@ -41,7 +49,7 @@ only one with a corpus scope:
 
 A script guard catches the wrong *script*, never the wrong
 *language within one script* — French in Italian is Latin either
-way. That gap is why 2–6 exist alongside 1.
+way. That gap is why 2–7 exist alongside 1.
 
 Every predicate takes the strings it judges as arguments and is
 kept apart from the corpus walk, so the sibling Swift suite can
@@ -300,6 +308,33 @@ _STUB_TAGS = {
 # complete.
 _TAG = re.compile(r"[(（]\s*([A-Za-z][A-Za-z\-]{0,7})\s*[)）]")
 
+# Keys whose frame interpolates an argument the GUI may render as
+# the EMPTY string, and the specifier that carries it. Such a
+# specifier has to end the frame: the caller drops the trailing
+# space with the clause, and nothing can drop a gap left in the
+# middle of a sentence — or a comma stranded on either side of it.
+#
+# Only the calling code knows an argument can be empty. A catalog
+# shows a `%2$@` like any other, and `TRANSLATION_BRIEF.md` rule 2
+# tells the translator to move specifiers wherever the sentence
+# needs them, which is correct for every key not listed here. So
+# this is a register, and a frame that grows a withhold-able
+# argument joins it in the same change set — as the Scrolling
+# caption's `+` clause did (`ScrollingSchematic+Caption.swift`,
+# whose `insertionClause` returns "" when the mark is off the
+# frame).
+WITHHELD_ARGUMENTS = {
+    "layout.schematic.scrolling.caption_anchored": "%1$@",
+    "layout.schematic.scrolling.caption_follow": "%2$@",
+}
+
+# What may follow a withheld argument and still read cleanly when
+# it renders empty: whitespace, and the sentence-final punctuation
+# a language might keep outside the clause. Both ASCII and CJK
+# full-width forms — `。` after a Japanese clause is the same
+# case as `.` after an English one.
+_AFTER_WITHHELD = re.compile(r"^[\s.!?…:;,、。！？，：；]*$")
+
 
 def unregistered_locales(names: list[str]) -> list[str]:
     """Shipped locales this module has no policy for.
@@ -433,6 +468,44 @@ def placeholder_drift(value: str, english: str) -> str | None:
     if extra:
         parts.append(f"adds {', '.join(extra)}")
     return " and ".join(parts)
+
+
+def withheld_argument_position(
+    key: str, value: str
+) -> str | None:
+    """Why `value` places a withhold-able argument badly, or None.
+
+    `WITHHELD_ARGUMENTS` names the keys whose frame interpolates
+    an argument the app sometimes renders as `""`. The frame owns
+    the space before such a clause, so the caller can trim the
+    space away with it — but only at the end. Move the specifier
+    into the middle and the empty render leaves a doubled space,
+    and any punctuation the translator wrapped it in is stranded
+    beside nothing.
+
+    Silent on a key with no withheld argument, and silent on a
+    dropped specifier: `placeholder_drift` owns that, and
+    reporting it twice would name one defect as two.
+
+    The FIRST occurrence decides. A duplicate specifier is already
+    drift against an English frame that spells it once, and the
+    empty render would leave a gap at the earlier one either way.
+    """
+    specifier = WITHHELD_ARGUMENTS.get(key)
+    if specifier is None:
+        return None
+    at = value.find(specifier)
+    if at < 0:
+        return None
+    tail = value[at + len(specifier) :]
+    if _AFTER_WITHHELD.match(tail):
+        return None
+    return (
+        f"puts {specifier} mid-sentence — that argument is "
+        "withheld when the preview has nothing to point at, so "
+        f"it must end the frame, and {tail.strip()[:40]!r} would "
+        "be left with a gap in front of it"
+    )
 
 
 def _multiset_difference(

@@ -32,34 +32,30 @@ extension LayoutCard {
         )
     }
 
+    /// Every anchor the enum declares, labelled by
+    /// `ScrollAnchorLabel` — which owns the axis-relative
+    /// Top/Left branch and is shared with the per-space override
+    /// row, so a fifth anchor appears in both without an edit
+    /// here.
     var scrollAnchorRow: some View {
         SegmentedPicker(
             L("scroll_grid.focus_anchor", "Focus anchor"),
             selection: scrolling.anchor,
-            options: [
-                (
-                    L("scroll_grid.anchor.center", "Center"),
-                    ScrollingParams.Anchor.center
-                ),
-                // Axis-relative value `.start`; the label shows
-                // the concrete edge for the current orientation
-                // (Top vertical, Left horizontal — presentation
-                // only, #239).
-                (
-                    isVertical
-                        ? L("scroll_grid.anchor.start_v", "Top")
-                        : L("scroll_grid.anchor.start_h", "Left"),
-                    .start
-                ),
-                (
-                    isVertical
-                        ? L("scroll_grid.anchor.end_v", "Bottom")
-                        : L("scroll_grid.anchor.end_h", "Right"),
-                    .end
-                ),
-                (L("scroll_grid.anchor.follow", "Follow"), .follow),
-            ]
+            options: anchorOptions
         )
+    }
+
+    private var anchorOptions: [(title: String, value: ScrollingParams.Anchor)]
+    {
+        ScrollingParams.Anchor.allCases.map {
+            (
+                title: ScrollAnchorLabel.text(
+                    for: $0,
+                    isVertical: isVertical
+                ),
+                value: $0
+            )
+        }
     }
 
     var slotSizeUnitRow: some View {

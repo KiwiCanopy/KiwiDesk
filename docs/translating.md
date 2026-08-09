@@ -338,12 +338,13 @@ The other maintenance verbs take `--site` too:
 
 - `scripts/extract-keys --site --check` — validates every
   shipped `site/src/i18n/<locale>.json` decodes as a flat
-  `{string: string}` map, runs six of the eight *Content guards*
-  over its values, and warns on orphan keys (present in a
-  locale, absent from `en.json`). It does **not** check
+  `{string: string}` map, runs every *Content guard* below except
+  the English-residue heuristic over its values, and warns on
+  orphan keys (present in a locale, absent from `en.json`). It
+  does **not** check
   `en.json` freshness — there's no code to derive it from; it
-  *is* the source — and it does **not** run the English-residue
-  heuristic, because site copy legitimately keeps third-party
+  *is* the source — and the residue heuristic is the one skipped
+  because site copy legitimately keeps third-party
   product names and inline HTML. The `Site` workflow runs this on
   every PR that touches `site/**` or `docs/**`.
 - `scripts/extract-keys --site --prune` — drops orphan keys
@@ -508,8 +509,8 @@ CI to reject a broken or stale file.
 Everything above reads *keys*. Nothing there ever looks at a
 translated value, so a bad worksheet used to land silently and
 render live — a reviewer skimming a language they do not read
-sees plausible text. Eight checks read the copy itself
-(`scripts/localization_guards.py`), each a hard failure. Five are
+sees plausible text. Nine checks read the copy itself
+(`scripts/localization_guards.py`), each a hard failure. Six are
 exact contracts. `english_residue` is a heuristic scoped to
 non-Latin locales; the two feature-name checks are scoped by what
 the catalogs ship rather than by script:
@@ -539,6 +540,17 @@ the catalogs ship rather than by script:
   many languages must. A literal `%%` is ignored, because it
   carries no argument and several locales legitimately write
   `"%1$d%%"` where the English spells out "percent".
+- **A withheld argument moved off the end.** The exception to the
+  freedom above, and the tooling knows which keys it applies to,
+  so you do not have to. A handful of frames end on a placeholder
+  the app fills only *sometimes* — the Scrolling preview's caption
+  names its `+` mark, and says nothing at all about it when the
+  row puts the mark off the frame. The app drops the space in
+  front of such a clause along with the clause, which it can only
+  do at the end of the sentence; anywhere else, the empty case
+  leaves a hole and any punctuation you wrapped it in is stranded.
+  Keep that placeholder last. Every other placeholder in every
+  other key stays free to move.
 - **A collapsed translation** — one filler standing in for many
   unrelated keys. This is the check that caught the worst defect
   in the corpus: `it.json` and `pt-BR.json` had *every*

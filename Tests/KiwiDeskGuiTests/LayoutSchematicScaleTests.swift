@@ -132,6 +132,34 @@ struct LayoutSchematicScaleTests {
         }
     }
 
+    /// The authority the prose cites still exists.
+    ///
+    /// Four sites — gui.md, `docs/ui-patterns.md`,
+    /// `docs/design-decisions.md` and `ScrollingSchematic`'s own
+    /// doc comment — say "skip the drawing, the clip is no
+    /// substitute" and route the mechanism to
+    /// `SchematicCanvas.screen` rather than restating it. That
+    /// target is a `private var`: `RuleCitationTests` resolves
+    /// suite names and `scripts/…` paths only, so a rename or a
+    /// fold back into `body` would leave four pointers at nothing
+    /// with every other guard green. This is the resolver for
+    /// that one citation.
+    @Test("the clip authority the prose cites resolves")
+    func theClipAuthorityResolves() throws {
+        let source = try squashed("LayoutSchematicCanvas.swift")
+        #expect(
+            source.contains("privatevarscreen:someView{"),
+            Comment(
+                rawValue:
+                    "`SchematicCanvas.screen` is gone — it is "
+                    + "cited by name as the one account of why "
+                    + "the clip does not crop where a reader "
+                    + "assumes; move the argument before the "
+                    + "property"
+            )
+        )
+    }
+
     /// The retired vocabulary. `SchematicPair` and its arrow had
     /// one consumer, so nothing here is a rule about a type that
     /// still exists — this is what keeps the path retired, the way

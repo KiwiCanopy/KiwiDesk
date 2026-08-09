@@ -26,12 +26,13 @@ import Testing
 @Suite("Layout preview scrolling caption")
 @MainActor
 struct LayoutSchematicCaptionTests {
-    /// The words switch on the anchor, because the anchor is the
+    /// The words switch on the anchor, because the words are the
     /// only thing `follow` changes: its frame is `center`'s to the
     /// pixel (`LayoutSchematicScrollingTests`), so a caption
     /// shared with `center` makes selecting Follow a no-op on
-    /// screen — and made VoiceOver assert Follow's pan over a tile
-    /// drawn with Center selected.
+    /// screen — and a shared caption stating Follow's pan has
+    /// VoiceOver assert it over a tile drawn with Center
+    /// selected.
     @Test("Follow says something Center does not")
     func theAnchorReachesTheWords() {
         let follow = scrolling(anchor: .follow)

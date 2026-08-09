@@ -94,16 +94,16 @@ to invert the dim ladder).
   costing double the width in a strip built for comparison — the
   argument is in `docs/design-decisions.md`, and
   `LayoutSchematicScaleTests` reds on the retired vocabulary
-  coming back. Three obligations follow from putting the fact in
+  coming back. Two obligations follow from putting the fact in
   words instead:
   - **The caption switches with the control that changes it.**
     One string spanning a picker's options states the odd
-    option's fact under all of them, so the three that do not
-    have it carry a sentence about a fourth and VoiceOver
-    asserts it over a frame that was never drawn — which is
-    what Scrolling shipped, alongside a `follow` selection that
-    moved nothing on screen at all
-    (`LayoutSchematicCaptionTests`).
+    option's fact under all of them, so every option that does
+    not have that fact carries a sentence about one that does,
+    and VoiceOver asserts it over a frame that was never drawn
+    (`LayoutSchematicCaptionTests`). Where the odd option's
+    frame is another option's to the pixel, the words are the
+    only thing that can tell them apart at all.
   - **A caption may not point at a mark the frame does not
     draw.** A finite canvas crops a row long before the row
     ends, so a clause naming the insertion `+` is conditional on
@@ -112,21 +112,24 @@ to invert the dim ladder).
     condition owes the SCALE as well as the row, since a
     thumbnail whose monitor fills its canvas has no margin for
     the neighbouring slot to reach into.
-  - The scale half, `LayoutSchematicScaleTests` again: a fact a
-    thumbnail has no room to render (Scrolling's off-monitor
-    ghosts) is drawn at `.panel` and **not drawn** at `.tile` —
-    never paid for by shrinking the frame around it, and skipped
-    outright rather than left to the frame's clip, which does
-    not crop where a reader assumes (`SchematicCanvas.screen`
-    owns why).
+- **A thumbnail drops a fact it has no room to render — by not
+  drawing it, never by shrinking the frame around it**, and by
+  skipping the drawing rather than leaving it to the frame's
+  clip, which does not crop where a reader assumes
+  (`SchematicCanvas.screen` states the mechanism). Scrolling's
+  off-monitor ghosts are the worked case, drawn at `.panel` and
+  left undrawn at `.tile`; the argument for the trade lives on
+  `SchematicScale`, whose doc comment says what a thumbnail is
+  *for*, and `LayoutSchematicScaleTests` holds both halves.
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to
   label what's shown, not to teach — with one carve-out, named
   here so the two rules are not read as contradicting: **a
   schematic's caption also carries whatever its one frame cannot
-  denote.** That is the bullet above, and it is not licence to
-  gloss: it applies where the picture is the explanation and the
+  denote.** That is the one-frame bullet above, and it is not
+  licence to gloss: it applies where the picture is the
+  explanation and the
   missing piece is motion, not to a row whose control could take
   a `?` instead.
 

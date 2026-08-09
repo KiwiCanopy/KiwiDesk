@@ -51,16 +51,24 @@ struct ScrollingSchematic: View {
     /// halves; a scale-blind constant is exactly the regression.
     var screenFraction: CGFloat { scale == .panel ? 0.6 : 1 }
 
-    /// Whether the monitor draws an outline of its own. Only when
-    /// it is a *slice* of the canvas: where the two coincide the
-    /// canvas border already is the monitor, and a second rounded
-    /// stroke on the same bounds double-strikes it.
+    /// Whether the monitor is a **slice** of the canvas, leaving a
+    /// margin beside it — the one concept two different answers
+    /// turn on, so it is spelled once rather than as two
+    /// `screenFraction < 1`s that agree by coincidence. The margin
+    /// is what the off-monitor ghosts occupy, and what a slot
+    /// adjacent to the focus reaches into.
+    var hasMargin: Bool { screenFraction < 1 }
+
+    /// Whether the monitor draws an outline of its own. Only where
+    /// it is a slice: with no margin the canvas border already is
+    /// the monitor, and a second rounded stroke on the same bounds
+    /// double-strikes it.
     ///
     /// `LayoutSchematicScaleTests` needles the use site as well as
     /// the value — a view drawing off a resolved answer is
     /// deletable at its branch with every property assertion above
     /// it still green.
-    var drawsMonitorOutline: Bool { screenFraction < 1 }
+    var drawsMonitorOutline: Bool { hasMargin }
 
     private var horizontal: Bool { orientation == .horizontal }
 

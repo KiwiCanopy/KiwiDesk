@@ -1579,11 +1579,16 @@ behaviour *under motion*, which no frame of any count denotes.
 So the caption carries it, and the caption **switches on the
 anchor** — the words are what changes when the picker does, and
 they are also the only place `follow` can be described at all.
-The failure to avoid is the earlier one, where a single caption
-stated `follow`'s pan under all four anchors: three anchors then
-carried a sentence about a fourth, VoiceOver asserted it over a
-frame that was not drawn, and selecting `follow` changed nothing
-whatever on screen.
+
+That last point generalises, and it is the obligation the trade
+buys: **one string spanning a picker's options states the odd
+option's fact under all of them.** Every option that lacks the
+fact then carries a sentence about one that has it, and the a11y
+label asserts it over a frame that was never drawn — a shared
+caption is not a saving here, it is a false claim on three
+settings out of four. Where two options genuinely draw the same
+picture, a shared caption is also the one thing that would make
+selecting one of them do nothing at all.
 
 Two facts a caption may **not** claim, both because the frame is
 finite. The insertion `+` is the shape of what a still frame
