@@ -17,7 +17,7 @@ struct ColorsMotionSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 PaletteShelf(model: model)
                 // The live-colours scene moved to the detail
-                // PANEL (`PaletteScenePanel`, digest §1.1) —
+                // PANEL (`PaletteScenePanel`, #678 redesign spec) —
                 // the column beside these rows is where the
                 // draft is watched now.
                 MotionCard(model: model)

@@ -53,12 +53,14 @@ struct SettingsThemeWiringTests {
     private let deferred: [String: String] = [
         "accentInk":
             "AppKit picks the label ink on a tinted prominent "
-            + "button; Phase 4's save pill is the first site "
-            + "that draws it explicitly",
+            + "button — the pill's Save included — so no site "
+            + "draws it explicitly yet; the first custom "
+            + "accent-filled control will",
         "onAccentKnob":
-            "belongs to a knob on a LARGE accent field, which "
-            + "nothing draws until Phase 4 — never to a slider "
-            + "thumb, which stays white in both appearances",
+            "belongs to a knob on a LARGE accent field; the "
+            + "shell shipped without one (the pill's controls "
+            + "are buttons) — never a slider thumb, which "
+            + "stays white in both appearances",
     ]
 
     private var settingsDir: URL {

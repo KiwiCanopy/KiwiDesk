@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The live-colours scene, moved from the section body into
-/// the detail panel (digest §1.1) — the panel is where the
+/// the detail panel (#678 redesign spec) — the panel is where the
 /// draft is watched, and this was always a standalone
 /// illustration rather than a control's preview.
 ///

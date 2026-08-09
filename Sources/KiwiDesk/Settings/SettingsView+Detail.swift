@@ -55,8 +55,13 @@ extension SettingsView {
     @ViewBuilder var detailPane: some View {
         HStack(spacing: 0) {
             contentColumn
-            if let destination = model.destination,
-                SettingsDetailPanelOffer.offers(destination)
+            // `panelVisible` FIRST, the same predicate the
+            // pill's centring offset reads — one conjunct
+            // added there must move the pill and the mount
+            // together (review 2026-08-10; the two had
+            // already drifted on the `editingLua` half).
+            if panelVisible,
+                let destination = model.destination
             {
                 SettingsTheme.hairline.frame(width: 1)
                 SettingsDetailPanel(

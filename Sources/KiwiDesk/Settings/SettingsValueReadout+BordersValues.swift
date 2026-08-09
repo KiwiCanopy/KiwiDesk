@@ -39,27 +39,12 @@ extension SettingsValueReadout {
         bordersRow(census, points(old), points(new))
     }
 
-    /// `0` is the glow-size auto sentinel (#551) — the GUI's
-    /// slider readout prints "Automatic" there, so this does.
-    static func bordersAutoPoints(_ value: CGFloat) -> String {
-        value == 0
-            ? L("settings.readout.auto", "Automatic")
-            : points(value)
-    }
-
-    /// A stored hex, shown verbatim: uppercased, leading "#".
-    static func bordersHex(_ raw: String) -> String {
-        let digits =
-            raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
-        return "#" + digits.uppercased()
-    }
-
     static func bordersHexRow(
         _ census: SettingKey,
         _ old: String,
         _ new: String
     ) -> [SettingsDiffRow] {
-        bordersRow(census, bordersHex(old), bordersHex(new))
+        bordersRow(census, hexDisplay(old), hexDisplay(new))
     }
 
     /// Empty is the mark tints' stored "Automatic" sentinel —
@@ -79,7 +64,7 @@ extension SettingsValueReadout {
     static func bordersAutoHex(_ raw: String) -> String {
         raw.isEmpty
             ? L("color_field.hex.automatic", "Automatic")
-            : bordersHex(raw)
+            : hexDisplay(raw)
     }
 
     static func bordersCornerLabel(

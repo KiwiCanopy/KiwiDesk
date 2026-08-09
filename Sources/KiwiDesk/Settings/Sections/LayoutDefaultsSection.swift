@@ -41,7 +41,7 @@ struct LayoutDefaultsSection: View {
                 minSizeSection
                 LayoutStrip(model: model, selection: selected)
                 // The selected layout's own preview moved to
-                // the detail PANEL (digest §1.1) — the column
+                // the detail PANEL (#678 redesign spec) — the column
                 // beside these rows is where the draft is
                 // watched now, so mounting it here too would
                 // state one fact twice on one screen. The

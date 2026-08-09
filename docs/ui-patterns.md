@@ -327,6 +327,14 @@ The bare "Advanced" (General) is untouched by the rule: no noun,
 nothing to misparse, and it is the only advanced thing on its
 page.
 
+**An inline disclosure row leads with a hairline rule, and its
+drawer opens into one sunken well.** The thin top rule is the
+"different kind of row" signal that sets an accordion off from
+the plain rows around it without promoting the drawer to a
+card, and whatever the drawer reveals sits in a single well —
+never one well per child. `SettingsDisclosure` draws both; the
+ruling is in `docs/design-decisions.md`.
+
 **Weigh every title edit against the search index.**
 `SidebarSearch` indexes destination titles plus a *hand-listed*
 set of subsection headers; computed titles and per-control
@@ -413,7 +421,7 @@ gradients, borders, or shadows on buttons — the crisp shadow
 is reserved for controls that slide (pill, slider thumb).
 Class is expressed through native style + control size:
 `.borderedProminent` regular for the one surface commit
-(footer Save, popover confirms); `.bordered` large for row
+(the save pill's Save, popover confirms); `.bordered` large for row
 actions (Load, Apply, Customize, Set Gap Values), level with
 large dropdowns; `.bordered` regular for stateful input
 triggers (the shortcut recorder); and `.borderless` regular
@@ -478,12 +486,14 @@ eye learn one shape across every editor. Natural adjust-order
 placing a new field first asks **which tier**, then **where
 in it**. The tiers, top to bottom:
 
-1. **Preview / schematic** — leads unconditionally, *unless*
-   the section has one master on/off toggle whose own state
-   the preview depicts (Focus border's dimmed-when-off
-   preview): then the toggle sits directly above the preview,
-   the gate-above-gated rule extended to treat the preview as
-   a gated control.
+1. **Preview / schematic** — in an area without a detail
+   panel, leads unconditionally, *unless* the section has one
+   master on/off toggle whose own state the preview depicts
+   (Focus border's dimmed-when-off preview): then the toggle
+   sits directly above the preview, the gate-above-gated rule
+   extended to treat the preview as a gated control. In a
+   panel area the preview lives in the panel column instead,
+   and this tier is empty.
 2. **Defining / structural fields** the schematic takes as
    params — counts, ratios, axis / arrangement, positions —
    ordered coarse-to-fine (what fixes the shape before what
@@ -507,8 +517,9 @@ in it**. The tiers, top to bottom:
 An escape hatch that transforms other staged settings must expose
 the transaction locally: label transient inputs as action parameters,
 preview the resulting values before activation, warn when structure
-will be flattened, and confirm that the draft changed while footer
-Save is still required. Focus Border's **Fit layout gaps** group is
+will be flattened, and confirm that the draft changed while the
+save pill's Save is still required. Focus Border's **Fit layout
+gaps** group is
 the reference pattern; its action remains opt-in and one-shot rather
 than introducing automatic border-to-gap coupling.
 
@@ -600,6 +611,24 @@ asking "are its controls right here beside it," not by copying
 its page.
 
 ## Previews & schematics
+
+**Four areas watch their draft in a fixed detail panel; the
+rest keep full width.** Gaps & Borders, Bars, Colours & Motion
+and Layout Defaults open as two columns: the controls, then a
+fixed 392 pt right panel headed "Live preview · <area>" that
+redraws the area's preview from the *staged* draft, with a
+"Changed in this draft" list of old → new rows underneath,
+each a jump to the control that changed. Which areas offer a
+panel is data (`SettingsDetailPanelOffer.offering`), consulted
+by the two-column mount, the save pill's centring offset and
+the guards alike — an area with nothing to show hides the
+panel and takes the full width, so absence is a stated
+verdict, never a missing branch. The panel mounts an area's
+*existing* renderer, and that area's cards carry no duplicate
+preview; a new drawing beside a renderer is the duplication
+the migration removed (`DetailPanelTests` holds the offer set
+and the removed in-card mounts; the ruling is in
+`docs/design-decisions.md` ▸ two columns).
 
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
@@ -830,6 +859,19 @@ vanished control loses the cue that its stored value is
 return). Greying reads as "not right now"; hiding reads as
 "gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
 
+**One deliberate exception: the floating save pill vanishes at
+zero.** Save and Revert live in a dark pill floating over the
+content column — the unsaved count with the edit target's name
+("3 unsaved changes to Desk"), then **Revert**, **Save a
+copy…** and **Save** — shown only while there is something to
+act on, and offset left of an open detail panel. Once the
+draft is clean the pill disappears rather than greys: it is
+not an inapplicable control whose stored value greying would
+preserve, it is the narration of a draft, and with no draft it
+has no subject. `GreyOutHidingTests` carries the exemption;
+the ruling is in `docs/design-decisions.md` ▸ the floating
+pill.
+
 **A revealed target gets a transient wash, never a ring.** When
 search (or any later cross-reference) sends the user to a
 specific place in a pane, the pane scrolls that place's *card* to
@@ -932,8 +974,9 @@ Cancel are shared and must not be re-stated per site.
 
 Two rules that are easy to get wrong. **The parked action has
 to genuinely discard** — flipping a flag without reloading
-leaves the footer reading "Unsaved changes" after the user
-agreed to lose them, and prompts a second time on the way back.
+leaves the save pill up, still claiming unsaved changes, after
+the user agreed to lose them, and prompts a second time on the
+way back.
 **Return early on a no-op** before calling the gate: it cannot
 tell an inconsequential action from a destructive one and will
 prompt for nothing. Do not solve this by hiding or disabling

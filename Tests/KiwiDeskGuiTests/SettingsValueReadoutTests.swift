@@ -25,12 +25,13 @@ struct SettingsValueReadoutTests {
     }
 
     /// The keys the totality net covers: a model path the walk
-    /// can book. Suffix-stripping mirrors
-    /// `SettingsDraftDiff.censusBases()`.
+    /// can book. Membership consults the attribution's own
+    /// predicate (`SettingsDraftDiff.namesModelPath`), so the
+    /// net and the attribution share ONE key-space instead of
+    /// hand-mirrored prefixes.
     private var modelPathKeys: [SettingKey] {
         SettingKey.allCases.filter {
-            $0.id.hasPrefix("settings.")
-                || $0.id.hasPrefix("config.")
+            SettingsDraftDiff.namesModelPath($0.id)
         }
     }
 
@@ -96,8 +97,14 @@ struct SettingsValueReadoutTests {
     /// Instanced keys cannot be proven total generically (an
     /// unimplemented arm and a legitimately-empty diff both
     /// return []), so each family is proven on a real
-    /// mutation. A new instanced census key joins this battery
-    /// in the same change.
+    /// mutation — this battery IS the list, and a NEW
+    /// instanced census key joins it in the same change. The
+    /// one stated-unbookable residue is `floatRulesPattern`:
+    /// the walk cannot produce its leaf (a `[String]` entry
+    /// has no `.pattern` leaf), so its edits book under
+    /// `config.floatRules`, whose membership diff the arm
+    /// re-narrates — no mutation can reach it and none is
+    /// faked here.
     @Test("instanced families narrate their mutations")
     func instancedFamiliesNarrate() {
         pinEnglish()
@@ -163,6 +170,46 @@ struct SettingsValueReadoutTests {
             )
         ]
         expectRows(.shortcuts(.layers), clean, edited)
+
+        edited = clean
+        edited.layers[0].icon = "star"
+        expectRows(.shortcuts(.layersIcon), clean, edited)
+
+        edited = clean
+        var stackOvr = StackOverride()
+        stackOvr.masterRatio = 0.5
+        edited.settings.stack.override[SpaceID("a")] = stackOvr
+        expectRows(
+            .layout(.stackOverrideMasterRatio),
+            clean,
+            edited
+        )
+
+        edited = clean
+        var scrollOvr = ScrollingOverride()
+        scrollOvr.slotSize = .points(400)
+        edited.settings.scrolling.override[SpaceID("a")] =
+            scrollOvr
+        expectRows(
+            .layout(.scrollingOverrideSlotSize),
+            clean,
+            edited
+        )
+
+        var pinBase = clean
+        pinBase.spaces = [SpaceID("a")]
+        edited = pinBase
+        edited.spacePins[SpaceID("a")] = "fp"
+        expectRows(.monitors(.spacePins), pinBase, edited)
+
+        // Rename pairs positionally (same count, in-place map
+        // — `spacesRenameRows`' zip), so the mutation keeps
+        // the count and changes one name.
+        var renameBase = clean
+        renameBase.spaces = [SpaceID("a")]
+        edited = renameBase
+        edited.spaces = [SpaceID("b")]
+        expectRows(.spaces(.spacesName), renameBase, edited)
     }
 
     @Test("a value pair narrates both sides")

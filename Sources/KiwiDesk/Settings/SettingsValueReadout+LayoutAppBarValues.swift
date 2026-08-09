@@ -59,14 +59,12 @@ extension SettingsValueReadout {
 
     /// `0` is the auto sentinel on the size sliders, exactly as
     /// on the global style — an override CAN pin a layout back
-    /// to auto, so it reads "Automatic" rather than "0 pt".
+    /// to auto, so a set 0 reads "Automatic" (the shared
+    /// `autoPoints`) rather than "0 pt".
     static func layoutBarAutoPoints(
         _ value: CGFloat?
     ) -> String {
-        guard let value else { return unset }
-        return value == 0
-            ? L("settings.readout.auto", "Automatic")
-            : points(value)
+        value.map(autoPoints) ?? unset
     }
 
     /// Corner roundness is stored 0–100; the GUI row reads %.
@@ -83,12 +81,9 @@ extension SettingsValueReadout {
         value.map(trimmed) ?? unset
     }
 
-    /// A set override's hex, shown verbatim: uppercased,
-    /// leading "#".
+    /// A set override's hex through the shared `hexDisplay`;
+    /// unset inherits, so it reads as the dash.
     static func layoutBarHex(_ raw: String?) -> String {
-        guard let raw else { return unset }
-        let digits =
-            raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
-        return "#" + digits.uppercased()
+        raw.map(hexDisplay) ?? unset
     }
 }

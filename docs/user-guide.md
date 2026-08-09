@@ -54,14 +54,28 @@ briefly tints what it just added — the same highlight a search
 result gets — and the cards only Power User shows keep a soft
 green frame, the switch's own colour, so they stay
 recognizable after the tint fades; flipping back to Simple
-simply fades the extras out. While you have unsaved
-edits, the header counts them ("3 unsaved changes"); Save and
-Revert live in the footer.
+simply fades the extras out. While you have unsaved edits, the
+header shows a count chip ("3 unsaved changes") — click it for
+a popover listing every change as an old → new row, and click
+a row to jump straight to the control that changed.
 
 The header also shows which profile is loaded and lets you
-edit a saved profile without switching to it. At the bottom, a
-stable three-slot footer holds Revert, Save a Copy As…, and
-Save.
+edit a saved profile without switching to it.
+
+Two more pieces of the window's shape recur everywhere below.
+While there is anything to act on, a dark **save pill** floats
+over the bottom of the content — the count and its target
+("3 unsaved changes to Desk"), then **Revert**, **Save a
+copy…** and **Save**. It is not a fixed bar: it appears with
+your first edit and disappears once everything is saved (the
+verbs are detailed under [Saving](#saving)). And four areas —
+Gaps & Borders, Bars, Colors & Motion, and Layout Defaults —
+open as two columns: their controls on the left, and a **Live
+preview** panel on the right that redraws from your draft as
+you edit, with a **Changed in this draft** list underneath —
+the same old → new rows as the header popover, each jumping to
+its control. The pill shifts aside while a panel is open, and
+areas with nothing to preview take the full width instead.
 
 ### Search
 
@@ -111,8 +125,9 @@ shows the same text as a tooltip.
 
 The help is optional reading: every setting is meant to be
 understandable from its label, options, and the preview or
-schematic above it. The question mark is there just in case the
-short form didn't explain enough.
+schematic beside it in the preview panel (or above it, in
+areas without one). The question mark is there just in case
+the short form didn't explain enough.
 
 ### Permission & First Run
 
@@ -595,9 +610,11 @@ the strip, because it feeds every layout — it is the floor no
 window tiles below, and it also caps auto-sized grids and track
 limits.
 
-Below the selected layout's settings sits a **Live preview**:
-the same drawing at full width, with a **Window count** slider.
-Drag it and the preview re-runs the layout for that many windows —
+Beside the controls, the **Live preview** panel on the right
+redraws the selected layout from your draft, larger than the
+tiles and with a **Window count** slider — the **Changed in
+this draft** list under it tracks what you have edited so far.
+Drag the slider and the preview re-runs the layout for that many windows —
 which is where several of these settings first become visible.
 Cascade overflow and Cascade all draw the same picture until the
 stack is deep enough to overflow; a track limit means nothing
@@ -931,9 +948,11 @@ mouse drags. Every private symbol is resolved at runtime; if that
 surface is missing or an operation fails, the same border is redrawn with
 the AppKit overlay automatically. Neither path requires disabling SIP.
 
-A live two-window preview leads the controls, showing the border at
-your current color, width, and corner style before it touches real
-windows. Below it:
+The **Live preview** panel beside the controls shows the border
+on a live two-window mock — at your staged color, width, and
+corner style, before anything touches real windows — stacked
+with the area's gap diagram and drag ghost, all drawn from your
+draft, and the changed-list below them. The controls:
 
 - **Show focus border**: the master on/off switch.
 - **Show border on unfocused windows**: off by default — when on,
@@ -944,8 +963,8 @@ windows. Below it:
   only the focused border.
 - **Glow effect**: wraps the focused border in a soft colored bloom
   for a bit more presence. Off by default; it only ever touches the
-  focused window, never the unfocused borders. The live preview
-  shows the effect as you toggle it.
+  focused window, never the unfocused borders. The panel's
+  preview shows the effect as you toggle it.
 - **Auto glow size**: on by default — the bloom's reach follows the
   border width, so a hairline border gets a subtle rim and a thick
   one a proportional aura. Turn it off to pin an exact **Glow
@@ -955,8 +974,8 @@ windows. Below it:
   **Extra spacing** (0–100 pt, default 0). Inner gaps account for
   both borders when unfocused borders are shown. **Set Gap Values**
   stages those values and warns before replacing asymmetric
-  per-edge gaps; the local confirmation tells you which footer Save
-  action applies or persists them. Extra spacing is an action
+  per-edge gaps; the local confirmation tells you which of the
+  save pill's Save actions applies or persists them. Extra spacing is an action
   parameter, not another saved setting. The action can grow or
   shrink gaps. (Lua: `border.fit_gaps(remaining)`.)
 
@@ -1116,11 +1135,15 @@ badge visibility toggle is
 
 The **Bars** section is one page with a card per bar. The
 Space Bar's card leads: it appears in every layout, while the
-App Bar only renders in Monocle and Scrolling. Each card leads
-with its own preview, shows the settings you'd touch in the
-first week at rest — does the bar exist, where, how thick, and
-the content toggles — and folds the rest behind one **Style**
-disclosure whose subtitle names what it holds. Neither card
+App Bar only renders in Monocle and Scrolling. Each card shows
+the settings you'd touch in the first week at rest — does the
+bar exist, where, how thick, and the content toggles — and
+folds the rest behind one **Style** disclosure whose subtitle
+names what it holds. The **Live preview** panel beside the
+cards draws one mock desktop with both bars in place — each on
+its configured edge, in your draft's style and colors, the
+space strip showing your actual Spaces — with the changed-list
+below. Neither card
 holds a colour: every bar tint is in **Advanced Colors**.
 
 ### App Bar
@@ -1150,12 +1173,12 @@ dragged directly. (Lua: `app_bar.*` setters, and the
 rearrange gesture shares the drop visuals in
 [Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
 
-A **live mock strip** leads the card: three sample items — one
-grouped, one active, one plain — drawn with your configured
-position, style, sizes, corner radius, and colors, so you can
-judge a color or size change in place before Save. It is a
-static preview (no hover or interaction) and never touches your
-running windows.
+In the preview panel's desktop scene, the App Bar is drawn in
+place with your configured position, thickness, background
+style, corner roundness, and colors — its active item marked —
+so you can judge a change beside the controls before Save. It
+is a static preview (no hover or interaction) and never
+touches your running windows.
 
 **The settings** (Position, Thickness and the grouping toggle at
 rest; the rest behind **Style**):
@@ -1256,7 +1279,8 @@ field has a `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
 twin that overrides just that layout, and unset fields keep
 following the global value — see
 [Per-layout App Bar overrides](lua-reference.md#per-layout-app-bar-overrides).
-The card keeps editing (and previewing) the global values and
+The card keeps editing — and the panel previewing — the global
+values and
 renders no per-layout rows: an override adds a "why is my bar
 different here" question to every row above it, so the
 narrow-but-real need stays in the power layer.
@@ -1352,8 +1376,8 @@ pinned at the trailing end — only the Spaces scroll behind the
 chevrons — so the focused app is always in view; while the bar
 fits it sits at the row's tail as before.
 
-The card's order matches the App Bar card's: preview, then at
-rest **Show Space Bar**, **Position** (any of the four screen
+The card's order matches the App Bar card's: at rest **Show
+Space Bar**, **Position** (any of the four screen
 edges — sharing an edge with the App Bar is fine, the Space Bar
 sits at the screen edge and the App Bar next to the windows,
 and an inline note in both cards explains the order when both
@@ -1414,9 +1438,10 @@ so you judge the whole look, not isolated chips. Applying a palette
 is a **one-time paint**, not a live link: it overwrites the current
 colors (you can still tweak any individual color afterward), and the
 change is staged until you Save the profile like any other edit.
-Below the shelf, **Current colors** shows the same scene painted in
-the colors you are actually running — the bar plate and its active
-item, the focus ring, and the drag ghost. It is the shelf's own
+In the preview panel beside the shelf, **Current colors** shows
+the same scene painted in the colors you are editing — the bar
+plate and its active item, the focus ring, and the drag ghost —
+with the changed-list under it. It is the shelf's own
 tile at a larger size, so what a palette promises and what you have
 can never be drawn two different ways. Edit any individual color in
 Advanced Colors and this scene follows.
@@ -1632,8 +1657,8 @@ nothing show no third segment. Hover the subtitle to see which
 monitors each covered arrangement holds.
 
 A note under the list names where your live edits are landing, and
-points at **Save a Copy As…** in the footer if you want to keep them
-separately instead.
+points at **Save a copy…** in the save pill if you want to keep
+them separately instead.
 
 Profiles whose JSON will not decode appear under **Couldn't load**,
 dimmed, with a Delete — never hidden, so a broken file can always be
@@ -1693,7 +1718,7 @@ global config; every saved profile is listed below, one row each
 Saving a stored profile hot-reloads the running layout **only if
 that profile is the one on screen** (loaded, or bound to the
 active native Space); otherwise the change waits until the
-profile next loads. **Save a Copy As…** while editing a stored
+profile next loads. **Save a copy…** while editing a stored
 profile duplicates *that stored profile* — including your pending
 edits, its monitor sets (even for hardware that isn't connected),
 and its shortcut and app-rule overrides. The count-default flag
@@ -1703,14 +1728,17 @@ first.
 
 ### Saving
 
-The footer always holds the same three slots, clustered at the
-trailing edge — **Revert**, **Save a Copy As…**, and **Save**.
-Only the primary **Save**'s label and target change with
-context; there is no separate fourth button:
+Saving happens in the floating **save pill**. While anything is
+unsaved it floats over the bottom of the content, names the
+count and the edit target ("3 unsaved changes to Desk"), and
+holds the same three verbs everywhere — **Revert**, **Save a
+copy…**, and **Save**; with nothing to act on there is no pill
+at all. Only the primary **Save**'s label and target change
+with context; there is no separate fourth button:
 
 - **Revert** — discards pending edits and reloads the target's
   stored state.
-- **Save a Copy As…** — creates a new profile from the current
+- **Save a copy…** — creates a new profile from the current
   state. The new profile covers only the connected monitors.
   Names are suffixed `_1`, `_2`, … when taken.
 - **Save** — persists edits to the current target. When an
@@ -1726,7 +1754,7 @@ context; there is no separate fourth button:
   authoritatively.
 
 Any action that would replace what you have staged asks first.
-While the footer reads **Unsaved changes**, a confirmation names
+While the pill shows unsaved changes, a confirmation names
 what you are about to lose before it happens — switching the edit
 target in the banner picker, **Load**, **Delete** or renaming a
 saved profile, applying a preset, and moving into or out of the raw
@@ -1749,7 +1777,7 @@ profile.
 While window management is **paused** because Accessibility access
 is off, KiwiDesk has detected no displays — so any save that would
 capture the live monitor set (**Save as New Profile…**, **Save a
-Copy As…** from the active profile, and **Save** when it refreshes
+copy…** from the active profile, and **Save** when it refreshes
 the active profile's monitor set) is unavailable, with a tooltip
 explaining why. A profile saved with no monitors could never
 resolve later. Editing a *stored* profile (which keeps its own
@@ -1758,10 +1786,10 @@ on-disk monitor set) stays available.
 **Your settings still save while paused.** Shortcuts, app rules,
 float and ignore rules, your space list, and Desktop → profile
 bindings carry no monitor set, so **Save** stays available for
-them and writes `gui.json` as usual — a caption beside the footer
+them and writes `gui.json` as usual — a caption inside the pill
 reads "Layout and monitors stay paused; Save covers everything
 else." Only layout/tiling edits wait for a profile save, and if
-you have both pending, the footer keeps saying **Unsaved changes**
+you have both pending, the pill stays up, still counting them,
 until you grant access and save the profile too.
 
 After saving, if a global setting changed (keybindings, app/float/
@@ -2086,7 +2114,7 @@ runtime-active layer and it works, no Save needed, and a deleted
 row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
 "Active now", updated for an inactive layer, refused by macOS,
 shadowed by the active profile, or unable to compile/apply. The
-change is still *unsaved*: the footer's Save persists the base
+change is still *unsaved*: the pill's Save persists the base
 shortcut configuration globally in `gui.json`; profile-specific
 shortcut overrides remain separate. Revert (or switching the edit
 target) restores the saved shortcuts, also live. When editing a

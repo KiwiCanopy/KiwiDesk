@@ -41,8 +41,9 @@ struct HomeSurfacingTests {
             // branch, from the model's one timeline.
             ".environment(\\.settingsModeReveal,"
                 + "model.modeRevealActive)",
-            // The save pill FLOATS over the content (turn 9;
-            // owner overturned the docked footer 2026-08-09) —
+            // The save pill FLOATS over the content (#678
+            // redesign spec; owner overturned the docked
+            // footer 2026-08-09) —
             // an overlay, so it reserves no layout space, and
             // it re-centres on the content column while a
             // panel is open.
@@ -52,10 +53,10 @@ struct HomeSurfacingTests {
         ],
         "Settings/SettingsView+Detail.swift": [
             // The two-column detail consults the ONE offer set
-            // and DRAWS the panel through it (digest §1.1) —
-            // needle through the branch body, the Monitors
-            // lesson.
-            "SettingsDetailPanelOffer.offers(destination)"
+            // and DRAWS the panel through it (#678 redesign
+            // spec) — needle through the branch body, the
+            // Monitors lesson.
+            "ifpanelVisible,letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
                 + "SettingsDetailPanel("
         ],

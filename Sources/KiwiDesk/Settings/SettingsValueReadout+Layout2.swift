@@ -2,9 +2,15 @@ import KiwiDeskCore
 
 /// The Layout area's row builders and value formatters, shared
 /// by the global dispatch (`+Layout`) and the per-space override
-/// expansion (`+Layout3`/`+Layout4`). Every enum option spells
-/// its English exactly as the owning picker does, so the diff
-/// and the row it points at never name one choice two ways.
+/// expansion (`+Layout3`/`+Layout4`). Where one picker owns an
+/// option's words, the labeller REUSES that picker's key
+/// verbatim — key and English — so the diff and the row it
+/// points at cannot drift apart in any locale. Orientation is
+/// the deliberate exception: TWO picker families spell it
+/// (`layout_params.orientation.*` for stack master, and
+/// `scroll_grid.horizontal`/`vertical` for scrolling, grid and
+/// monocle), so one diff key cannot match both and
+/// `diff.value.orientation.*` stays the diff's own pair.
 extension SettingsValueReadout {
     // MARK: - Row builders
 
@@ -43,14 +49,11 @@ extension SettingsValueReadout {
         switch value {
         case .longestSide:
             return L(
-                "diff.value.bsp_strategy.longest_side",
+                "layout_params.longest_side",
                 "Longest side"
             )
         case .alternating:
-            return L(
-                "diff.value.bsp_strategy.alternating",
-                "Alternating"
-            )
+            return L("layout_params.alternating", "Alternating")
         }
     }
 
@@ -91,13 +94,13 @@ extension SettingsValueReadout {
     ) -> String {
         switch value {
         case .top:
-            return L("diff.value.position.top", "Top")
+            return L("layout_params.position.top", "Top")
         case .right:
-            return L("diff.value.position.right", "Right")
+            return L("layout_params.position.right", "Right")
         case .bottom:
-            return L("diff.value.position.bottom", "Bottom")
+            return L("layout_params.position.bottom", "Bottom")
         case .left:
-            return L("diff.value.position.left", "Left")
+            return L("layout_params.position.left", "Left")
         }
     }
 
@@ -107,14 +110,11 @@ extension SettingsValueReadout {
         switch value {
         case .cascadeOverflow:
             return L(
-                "diff.value.overflow.cascade_overflow",
+                "layout_params.cascade_overflow",
                 "Cascade overflow"
             )
         case .cascadeAll:
-            return L(
-                "diff.value.overflow.cascade_all",
-                "Cascade all"
-            )
+            return L("layout_params.cascade_all", "Cascade all")
         }
     }
 
@@ -123,9 +123,9 @@ extension SettingsValueReadout {
     ) -> String {
         switch value {
         case .dynamic:
-            return L("diff.value.grid_type.dynamic", "Dynamic")
+            return L("scroll_grid.dynamic", "Dynamic")
         case .rigid:
-            return L("diff.value.grid_type.rigid", "Rigid")
+            return L("scroll_grid.rigid", "Rigid")
         }
     }
 
@@ -137,12 +137,12 @@ extension SettingsValueReadout {
         switch value {
         case .horizontal:
             return L(
-                "diff.value.grid_arrange.columns_first",
+                "scroll_grid.arrange.columns_first",
                 "Columns first"
             )
         case .vertical:
             return L(
-                "diff.value.grid_arrange.rows_first",
+                "scroll_grid.arrange.rows_first",
                 "Rows first"
             )
         }
@@ -155,9 +155,9 @@ extension SettingsValueReadout {
     ) -> String {
         switch value {
         case .vertical:
-            return L("diff.value.track_axis.columns", "Columns")
+            return L("scroll_grid.arrange.columns", "Columns")
         case .horizontal:
-            return L("diff.value.track_axis.rows", "Rows")
+            return L("scroll_grid.arrange.rows", "Rows")
         }
     }
 

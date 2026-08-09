@@ -1,16 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The floating save pill (#678 turn 9, digest §1.1): "N
+/// The floating save pill (#678 redesign spec): "N
 /// unsaved changes to Desk | Revert · Save a copy… · Save",
 /// dark chrome floating over the content column. It exists
 /// only while there is something to act on — a dirty draft,
 /// profile-level edits, or layout drift — and disappears at
 /// zero (`GreyOutHidingTests` carries this file's exemption
 /// from grey-don't-hide). Owner 2026-08-09 overturned the
-/// earlier docked-footer ruling on sight; below 900 pt the
-/// pill docks back into a real footer bar, which is the
-/// responsive pass's one change of kind (turn 17).
+/// earlier docked-footer ruling on sight; the planned
+/// responsive pass will dock the pill back into a real footer
+/// bar below 900 pt, as its one change of kind.
 ///
 /// The verbs keep the docked footer's exact semantics per mode
 /// (#68 §3.12):
@@ -176,8 +176,12 @@ struct SettingsFooter: View {
     private var countLine: String {
         let count = model.draftChangeCount
         guard count > 0 else {
+            // The docked footer's own key, kept through the
+            // pill rewrite: identical English, same meaning
+            // class, ten shipped translations (review
+            // 2026-08-10 caught the re-mint discarding them).
             return L(
-                "footer.pending_changes",
+                "footer.unsaved_changes",
                 "Unsaved changes"
             )
         }

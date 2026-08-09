@@ -36,7 +36,7 @@ struct SpaceBarCard: View {
             help: reason.map(BarsGateHelp.sentence)
         ) {
             // The strip moved to the detail PANEL
-            // (`BarsPanelPreview`, digest §1.1) — the column
+            // (`BarsPanelPreview`, #678 redesign spec) — the column
             // beside these rows is where the draft is watched
             // now; the palette mirror keeps its own mount.
             rows(BarsRowOrder.spaceBarAtRest)

@@ -32,7 +32,7 @@ struct GapsEditor: View {
     var body: some View {
         SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
             // The gap miniature moved to the detail PANEL
-            // (`GapsBordersPanelPreview`, digest §1.1) — the
+            // (`GapsBordersPanelPreview`, #678 redesign spec) — the
             // column beside these rows is where the draft is
             // watched now.
             masterRow(

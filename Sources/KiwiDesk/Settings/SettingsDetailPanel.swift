@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Which destinations offer the live-preview panel (digest
-/// §1.1 / turn 2a). DATA, not a scattered condition: the
+/// Which destinations offer the live-preview panel (#678
+/// redesign spec). DATA, not a scattered condition: the
 /// two-column mount, the pill's centring offset and the tests
 /// all consult this one set, and a pass that teaches a new
 /// area to preview (the keyboard, pass 5) joins by adding its
@@ -28,11 +28,12 @@ enum SettingsDetailPanelOffer {
 /// The detail view's right column: "LIVE PREVIEW · <AREA>",
 /// the area's preview drawn from the DRAFT, and the "CHANGED
 /// IN THIS DRAFT" diff list — one draft, three views, this
-/// being the in-area one (§1.1). The digest's `›` collapse
-/// handle is deliberately NOT built (owner 2026-08-10): the
-/// responsive pass drops the panel by WIDTH below 1200 pt,
-/// and a manual collapse beside that is a persisted
-/// preference duplicating what the window already decides.
+/// being the in-area one (#678 redesign spec). The spec's `›`
+/// collapse handle is deliberately NOT built (owner
+/// 2026-08-10): the planned responsive pass will drop the
+/// panel by WIDTH below 1200 pt, and a manual collapse beside
+/// that is a persisted preference duplicating what the window
+/// already decides.
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination

@@ -196,21 +196,14 @@ extension SettingsValueReadout {
         appBarRow(census, points(old), points(new))
     }
 
-    /// `0` is the stored auto sentinel on the size sliders — the
-    /// GUI's slider readout prints "Automatic" there, so this
-    /// does too.
+    /// `0` is the stored auto sentinel on the size sliders —
+    /// the shared `autoPoints` reads "Automatic" there.
     private static func appBarAutoPointsRow(
         _ census: SettingKey,
         _ old: CGFloat,
         _ new: CGFloat
     ) -> [SettingsDiffRow] {
-        appBarRow(census, appBarAuto(old), appBarAuto(new))
-    }
-
-    private static func appBarAuto(_ value: CGFloat) -> String {
-        value == 0
-            ? L("settings.readout.auto", "Automatic")
-            : points(value)
+        appBarRow(census, autoPoints(old), autoPoints(new))
     }
 
     private static func appBarChoiceRow<T: Equatable>(
@@ -237,18 +230,11 @@ extension SettingsValueReadout {
             ?? String(describing: value)
     }
 
-    /// A stored hex, shown verbatim: uppercased, leading "#".
-    private static func appBarHex(_ raw: String) -> String {
-        let digits =
-            raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
-        return "#" + digits.uppercased()
-    }
-
     private static func appBarHexRow(
         _ census: SettingKey,
         _ old: String,
         _ new: String
     ) -> [SettingsDiffRow] {
-        appBarRow(census, appBarHex(old), appBarHex(new))
+        appBarRow(census, hexDisplay(old), hexDisplay(new))
     }
 }

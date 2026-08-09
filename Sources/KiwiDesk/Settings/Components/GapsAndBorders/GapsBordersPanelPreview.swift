@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Gaps & Borders panel content (digest §1.1): the two
+/// The Gaps & Borders panel content (#678 redesign spec): the two
 /// pictures this area always had, recycled whole — the gap
 /// miniature with its legend, and the focus-ring pair — now
 /// stacked in the panel column instead of leading their cards.

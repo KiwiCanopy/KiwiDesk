@@ -40,14 +40,17 @@ side-effect-free and must never create a sidecar or flip
 real call sites (it scans both `Sources/KiwiDesk` and
 `Sources/KiwiDeskCore`, and ignores `//` / `///` comments so a
 doc-comment example can't leak a phantom key). Since Phase 4 it
-is ALSO read at runtime, by exactly one caller class:
-`SettingsCensusLabel` loads it as the English fallback for
-surfaces that render a census-labelled key away from its owning
-row (diff rows, the search index) — the amendment is stated on
-`LocaleCatalog.load` and argued in `docs/design-decisions.md`,
-and it changes nothing about authoring: English still lives at
-the call sites, and a view deleted in a restructure still
-re-authors its keys in the same change. AI agents must not
+is ALSO read at runtime: **a surface that renders a
+census-labelled key away from its owning row (diff rows, the
+search index) routes through `SettingsCensusLabel`**, which
+loads the manifest as its English fallback — never a second
+`LocaleCatalog.load("en")` of its own, or two cached English
+copies drift. `DetailPanelTests` pins the caller set; the
+amendment is stated on `LocaleCatalog.load` and argued in
+`docs/design-decisions.md`, and it changes nothing about
+authoring: English still lives at the call sites, and a view
+deleted in a restructure still re-authors its keys in the same
+change. AI agents must not
 hand-edit **any** `Resources/Locales/*.json`. Use the scripts:
 
 | Task | Command |

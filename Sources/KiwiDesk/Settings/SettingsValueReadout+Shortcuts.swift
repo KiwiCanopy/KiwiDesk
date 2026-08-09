@@ -111,6 +111,7 @@ extension SettingsValueReadout {
         )
         var additions = added
         var rows: [SettingsDiffRow] = []
+        var unbound = -1
         for binding in removed {
             if let index = additions.firstIndex(where: {
                 $0.lua == binding.lua
@@ -133,12 +134,17 @@ extension SettingsValueReadout {
                     )
                 )
             } else {
+                // The enumeration index rides the instance so
+                // DUPLICATE bound/unbound bindings still mint
+                // distinct row ids inside one ForEach.
+                unbound += 1
                 rows.append(
                     shortcutsRow(
                         census,
                         layer: layer,
                         binding: binding,
-                        instance: "-" + binding.combo,
+                        instance: "-" + binding.combo
+                            + "#\(unbound)",
                         labels: labels,
                         old: shortcutsCombo(binding.combo),
                         new: unset
@@ -146,13 +152,13 @@ extension SettingsValueReadout {
                 )
             }
         }
-        for binding in additions {
+        for (index, binding) in additions.enumerated() {
             rows.append(
                 shortcutsRow(
                     census,
                     layer: layer,
                     binding: binding,
-                    instance: "+" + binding.combo,
+                    instance: "+" + binding.combo + "#\(index)",
                     labels: labels,
                     old: unset,
                     new: shortcutsCombo(binding.combo)

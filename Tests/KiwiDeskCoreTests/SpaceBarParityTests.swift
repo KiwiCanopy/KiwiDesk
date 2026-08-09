@@ -45,6 +45,38 @@ struct SpaceBarParityTests {
     /// is copied, and nothing else moves. Discovery is by key
     /// intersection, never a hand list, so a field added to
     /// both styles joins the copy or turns this red.
+    /// The REVERSED direction (owner flip 2026-08-10): the
+    /// App Bar card's button pulls Space Bar → App Bar. Same
+    /// contract surface — `SpaceBarStyle.copyAppearanceKeys`
+    /// is deliberately the one key set for both directions —
+    /// so this is the twin of the test above: every shared
+    /// key must change a field on the App Bar target too, or
+    /// the mirrored switch silently skipped one.
+    @Test("copy appearance fills every shared field reversed")
+    func copyAppearanceParityReversed() {
+        // A source Space Bar differing from App Bar defaults
+        // on every copyable field: seed it through the proven
+        // forward copy from the every-field fixture.
+        var source = SpaceBarStyle()
+        source.copyAppearance(
+            from: AppBarFixtures.everyGlobalField()
+        )
+        var target = AppBarStyle()
+        target.copyAppearance(from: source)
+        let changed = changedFields(target, from: AppBarStyle())
+        let expected = Set(
+            SpaceBarStyle.copyAppearanceKeys.compactMap {
+                key -> String? in
+                fieldNames(AppBarStyle()).first {
+                    snakeCased($0) == key
+                }
+            }
+        )
+        #expect(changed == expected)
+        // The exclusions stay untouched.
+        #expect(target.edge == AppBarStyle().edge)
+    }
+
     @Test("Copy-appearance covers exactly the shared keys")
     func copyAppearanceParity() {
         // Source differs from the default target on EVERY

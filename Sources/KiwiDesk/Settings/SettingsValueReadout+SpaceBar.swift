@@ -192,21 +192,14 @@ extension SettingsValueReadout {
         spaceBarRow(census, points(old), points(new))
     }
 
-    /// `0` is the stored auto sentinel on the size sliders — the
-    /// GUI's slider readout prints "Automatic" there, so this
-    /// does too.
+    /// `0` is the stored auto sentinel on the size sliders —
+    /// the shared `autoPoints` reads "Automatic" there.
     private static func spaceBarAutoPointsRow(
         _ census: SettingKey,
         _ old: CGFloat,
         _ new: CGFloat
     ) -> [SettingsDiffRow] {
-        spaceBarRow(census, spaceBarAuto(old), spaceBarAuto(new))
-    }
-
-    private static func spaceBarAuto(_ value: CGFloat) -> String {
-        value == 0
-            ? L("settings.readout.auto", "Automatic")
-            : points(value)
+        spaceBarRow(census, autoPoints(old), autoPoints(new))
     }
 
     private static func spaceBarChoiceRow<T: Equatable>(
@@ -243,18 +236,11 @@ extension SettingsValueReadout {
         )
     }
 
-    /// A stored hex, shown verbatim: uppercased, leading "#".
-    private static func spaceBarHex(_ raw: String) -> String {
-        let digits =
-            raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
-        return "#" + digits.uppercased()
-    }
-
     private static func spaceBarHexRow(
         _ census: SettingKey,
         _ old: String,
         _ new: String
     ) -> [SettingsDiffRow] {
-        spaceBarRow(census, spaceBarHex(old), spaceBarHex(new))
+        spaceBarRow(census, hexDisplay(old), hexDisplay(new))
     }
 }

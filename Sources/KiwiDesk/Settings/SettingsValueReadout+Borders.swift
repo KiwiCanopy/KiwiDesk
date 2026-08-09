@@ -77,8 +77,8 @@ extension SettingsValueReadout {
         case .borderGlowSize:
             return bordersRow(
                 census,
-                bordersAutoPoints(ob.glowSize),
-                bordersAutoPoints(nb.glowSize)
+                autoPoints(ob.glowSize),
+                autoPoints(nb.glowSize)
             )
         case .borderDrawOrder:
             return bordersRow(

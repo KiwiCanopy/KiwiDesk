@@ -42,7 +42,8 @@ struct DetailPanelTests {
             .bars: "case.bars:BarsPanelPreview(model:model)",
             .colors:
                 "case.colors:PaletteScenePanel(model:model)",
-            .layoutDefaults: "LayoutPreviewPanel(",
+            .layoutDefaults:
+                "case.layoutDefaults:LayoutPreviewPanel(",
         ]
         #expect(
             Set(branches.keys)
@@ -99,6 +100,11 @@ struct DetailPanelTests {
                 "FocusBorderPreview("
             ),
             (
+                "Components/GapsAndBorders/"
+                    + "DragVisualsEditor.swift",
+                "DragVisualPreview("
+            ),
+            (
                 "Components/Bars/SpaceBarCard.swift",
                 "SpaceBarPreviewStrip("
             ),
@@ -128,6 +134,32 @@ struct DetailPanelTests {
                 )
             )
         }
+    }
+
+    /// The census-label seam has ONE runtime reader of the
+    /// English manifest: `SettingsCensusLabel`. A second
+    /// `LocaleCatalog.load("en")` caller in the GUI would mint
+    /// a second cached English copy that drifts from the first
+    /// — `LocaleCatalog.load` went public for exactly one
+    /// caller class, and this is the guard the rule names.
+    @Test("the English manifest has one GUI reader")
+    func manifestHasOneReader() throws {
+        let root = Self.root.appendingPathComponent(
+            "Sources/KiwiDesk"
+        )
+        var callers: [String] = []
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            scanned += 1
+            if source.contains("LocaleCatalog.load(") {
+                callers.append(file.lastPathComponent)
+            }
+        }
+        #expect(scanned > 50)
+        #expect(callers == ["SettingsCensusLabel.swift"])
     }
 
     // MARK: - Plumbing

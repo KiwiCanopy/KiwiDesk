@@ -15,11 +15,14 @@ import KiwiDeskCore
 /// which is why the return is a list.
 ///
 /// Totality is guarded, not promised: every census key whose
-/// id names a model path (`settings.*` / `config.*`) must
-/// produce at least one row for a config pair that differs on
-/// that path, or sit in `noReadout` with its reason —
-/// `SettingsValueReadoutTests` reds the key that lands in
-/// neither.
+/// id names a model path (`SettingsDraftDiff.namesModelPath`)
+/// must produce at least one row for a config pair that
+/// differs on that path, or sit in `noReadout` with its
+/// reason — `SettingsValueReadoutTests` reds the key that
+/// lands in neither. Scalar keys are proven generically;
+/// instanced families each by a named mutation in that suite's
+/// battery — a NEW instanced key joins the battery in the same
+/// change, and the battery is the list.
 @MainActor
 enum SettingsValueReadout {
     /// Rows for one changed key. `old` is the clean baseline,
@@ -82,13 +85,32 @@ extension SettingsValueReadout {
         L("diff.value.milliseconds", "%1$@ ms", trimmed(value))
     }
 
-    /// "50 %".
+    /// "50%" — unspaced, matching the sliders' own readout.
     static func percent(_ fraction: Double) -> String {
         L(
             "diff.value.percent",
-            "%1$@ %%",
+            "%1$@%%",
             trimmed((fraction * 100).rounded())
         )
+    }
+
+    /// A stored hex, shown verbatim: uppercased, leading "#".
+    /// The one copy — Borders, both bars and the per-layout
+    /// override rows all render a colour through it.
+    static func hexDisplay(_ hex: String) -> String {
+        let digits =
+            hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
+        return "#" + digits.uppercased()
+    }
+
+    /// `0` is the stored auto sentinel on the size sliders
+    /// (glow size #551, the bars' item/font sizes) — the GUI's
+    /// slider readout prints "Automatic" there, so this does
+    /// too. The one copy for every auto-at-0 row.
+    static func autoPoints(_ value: CGFloat) -> String {
+        value == 0
+            ? L("settings.readout.auto", "Automatic")
+            : points(value)
     }
 
     /// Localized On / Off — toggles narrate their state, never

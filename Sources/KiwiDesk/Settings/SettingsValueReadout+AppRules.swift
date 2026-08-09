@@ -99,21 +99,24 @@ extension SettingsValueReadout {
             }
         }
         var rows: [SettingsDiffRow] = []
-        for entry in remaining {
+        // The enumeration index rides the instance so DUPLICATE
+        // list entries (each matched once above) still mint
+        // distinct row ids inside one ForEach.
+        for (index, entry) in remaining.enumerated() {
             rows.append(
                 .note(
                     census,
-                    instance: "+" + entry,
+                    instance: "+" + entry + "#\(index)",
                     label: instanceLabel(base, entry),
                     note: addedNote
                 )
             )
         }
-        for entry in removed {
+        for (index, entry) in removed.enumerated() {
             rows.append(
                 .note(
                     census,
-                    instance: "-" + entry,
+                    instance: "-" + entry + "#\(index)",
                     label: instanceLabel(base, entry),
                     note: removedNote
                 )

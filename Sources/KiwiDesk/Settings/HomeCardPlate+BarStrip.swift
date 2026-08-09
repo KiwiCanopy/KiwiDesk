@@ -18,7 +18,7 @@ struct BarStripView: View {
             if spec.spans {
                 // `full`: the plate runs edge-to-edge and the
                 // item run seats INSIDE it.
-                plate(spanning: true)
+                plate
                     .overlay(seated { run })
             } else if spec.boxed {
                 // Boxed draws no shared plate — the run seats
@@ -35,19 +35,25 @@ struct BarStripView: View {
                                 ? .vertical : .horizontal,
                             spec.gap
                         )
-                        .background(plate(spanning: false))
+                        .background(plate)
                 }
             }
         }
         .frame(
-            width: vertical ? 16 * scale : nil,
-            height: vertical ? nil : 16 * scale
+            width: vertical ? spec.thickness : nil,
+            height: vertical ? nil : spec.thickness
         )
+    }
+
+    /// The bare pip's cross size, carved from the strip's
+    /// remapped thickness so both move with the slider.
+    private var pipCross: CGFloat {
+        spec.thickness * 0.56
     }
 
     // MARK: - Plate & run
 
-    private func plate(spanning: Bool) -> some View {
+    private var plate: some View {
         RoundedRectangle(cornerRadius: spec.corner)
             .fill(Color(kiwiHex: spec.fill))
             .overlay(
@@ -118,9 +124,32 @@ struct BarStripView: View {
         if item.active, spec.indicator == .gap {
             Color.clear
                 .frame(
-                    width: vertical ? 9 * scale : item.length,
-                    height: vertical ? item.length : 9 * scale
+                    width: vertical ? pipCross : item.length,
+                    height: vertical ? item.length : pipCross
                 )
+        } else if spec.boxed {
+            // Boxed: each item wears its own box in the fill
+            // colour — the shared plate the style refuses is
+            // paid back per item (owner 2026-08-10).
+            pipBody(item)
+                .padding(1.5 * scale)
+                .background(
+                    RoundedRectangle(
+                        cornerRadius: spec.itemCorner
+                    )
+                    .fill(Color(kiwiHex: spec.fill))
+                    .overlay(
+                        RoundedRectangle(
+                            cornerRadius: spec.itemCorner
+                        )
+                        .strokeBorder(
+                            palette?.frame
+                                ?? SettingsTheme.plateInk
+                                .opacity(0.3)
+                        )
+                    )
+                )
+                .overlay(indicatorMark(item))
         } else {
             pipBody(item)
                 .overlay(indicatorMark(item))
@@ -150,19 +179,13 @@ struct BarStripView: View {
                 .padding(.horizontal, 2.5 * scale)
                 .padding(.vertical, 1.5 * scale)
         } else {
-            RoundedRectangle(cornerRadius: pipCorner)
+            RoundedRectangle(cornerRadius: spec.itemCorner)
                 .fill(Color(kiwiHex: item.color))
                 .frame(
-                    width: vertical ? 9 * scale : item.length,
-                    height: vertical ? item.length : 9 * scale
+                    width: vertical ? pipCross : item.length,
+                    height: vertical ? item.length : pipCross
                 )
         }
-    }
-
-    /// The item's own corner from the same roundness the plate
-    /// resolves, at the pip's cross size.
-    private var pipCorner: CGFloat {
-        min(spec.corner, 4.5 * scale)
     }
 
     @ViewBuilder
@@ -172,7 +195,7 @@ struct BarStripView: View {
         if item.active {
             switch spec.indicator {
             case .outline:
-                RoundedRectangle(cornerRadius: pipCorner)
+                RoundedRectangle(cornerRadius: spec.itemCorner)
                     .strokeBorder(
                         Color(kiwiHex: spec.highlight),
                         lineWidth: max(1, scale)

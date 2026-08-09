@@ -60,7 +60,7 @@ struct FocusBorderEditor: View {
                 isOn: style.enabled
             )
             // The ring preview moved to the detail PANEL
-            // (`GapsBordersPanelPreview`, digest §1.1); the
+            // (`GapsBordersPanelPreview`, #678 redesign spec); the
             // Advanced Colours mirror keeps its own mount.
             controls.modifier(
                 GreyOut(active: blockReason != nil, help: blockHelp)

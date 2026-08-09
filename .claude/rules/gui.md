@@ -595,6 +595,14 @@ Every surface, border and ink in the Settings tree comes from
   it blocks selection but won't grey. Never make it the sole gate
   on a side effect; guard the setter too, and grey the picker
   rather than the row so a `?` affordance stays live.
+- **Modifiers on a bare `ForEach` apply PER CHILD, never to the
+  run.** A container that hands a `ForEach` straight to its
+  chrome (a background well, padding, a border) stamps that
+  chrome onto every child — the Motion drawer shipped every
+  toggle, a caption and a lone divider each in its own sunken
+  well. Wrap the content in a `VStack` (or another single view)
+  before applying the chrome; `SettingsDisclosure`'s interior
+  states the mechanism at the seam.
 
 ## Strings
 

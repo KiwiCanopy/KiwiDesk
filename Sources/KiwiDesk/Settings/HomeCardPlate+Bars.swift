@@ -51,23 +51,46 @@ struct HomeCardBarsTile: View {
         var highlight: String
         var items: [BarItem]
         var alignment: AppBarStyle.BarAlignment
-        /// `!hasBox && backgroundFit == .full` — the strip
-        /// mock's own `plateSpansCanvas` rule.
+        /// The style's own `plateSpans` — the one copy of the
+        /// hug/span rule.
         var spans: Bool
-        /// Boxed draws no shared plate at all.
+        /// Boxed draws no shared plate; each ITEM wears its
+        /// own box in the fill colour instead.
         var boxed: Bool
+        /// The strip's cross size, the real thickness through
+        /// the mock remap — the Thickness slider moves the
+        /// scene (owner 2026-08-10).
+        var thickness: CGFloat
+        /// Corner roundness resolved PER SHAPE at its own
+        /// cross size, the real bar's rule: the plate at the
+        /// strip's thickness, an item at its own.
         var corner: CGFloat
+        var itemCorner: CGFloat
         var gap: CGFloat
         var indicator: AppBarStyle.ActiveIndicator
     }
 
-    /// The App Bar is shown per LAYOUT; whether any layout
-    /// shows one is `BarsGates`' own block predicate, consulted
-    /// rather than re-derived (the resolver rule) — a card that
-    /// drew the bar anyway would assert a bar the desktop never
-    /// shows.
-    private var appBarShown: Bool {
-        BarsGates(settings: settings).anyBarShown
+    /// Every DISTINCT edge an enabled bar-hosting layout's App
+    /// Bar resolves to — `appBarHosts` is Core's one place that
+    /// decides hosting, and `resolved(with:)` honors per-layout
+    /// edge overrides, the same resolution
+    /// `spaceBarSharesEdgeWithAppBar` reads (review 2026-08-10:
+    /// the raw global edge previewed an overridden bar on the
+    /// wrong side). Stated residue, the #708 shape: the real
+    /// desktop shows ONE layout's bar at a time; this scene
+    /// draws every enabled host's edge at once, because a
+    /// picture of the draft cannot know which layout the user
+    /// will stand in.
+    private var appBarEdges: Set<AppBarEdge> {
+        Set(
+            settings.appBarHosts
+                .filter(\.enabled)
+                .map {
+                    $0.resolved(
+                        with: settings.appBarStyle
+                    ).edge
+                }
+        )
     }
 
     var body: some View {
@@ -83,6 +106,18 @@ struct HomeCardBarsTile: View {
         // A screen's own shape, centred — the scene never
         // stretches to its container (owner 2026-08-10; the
         // Gaps tile's precedent).
+        .padding(3)
+        // The implied screen outline, the Gaps tile's idiom —
+        // the scene reads as a display, not loose chrome
+        // (owner 2026-08-10; deliberately no Monitors stand,
+        // which claims physical-arrangement knowledge).
+        .overlay(
+            RoundedRectangle(cornerRadius: 5)
+                .strokeBorder(
+                    palette?.frame
+                        ?? Color.secondary.opacity(0.3)
+                )
+        )
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -135,17 +170,21 @@ struct HomeCardBarsTile: View {
     ) -> some View {
         let style = settings.spaceBarStyle
         if style.enabled, style.edge == edge {
+            let cross = crossSize(style.thickness)
             BarStripView(
                 spec: BarSpec(
                     fill: style.fillColor,
                     highlight: style.highlightColor,
                     items: spaceItems(style),
                     alignment: style.alignment,
-                    spans: !style.hasBox
-                        && style.backgroundFit == .full,
+                    spans: style.plateSpans,
                     boxed: style.hasBox,
+                    thickness: cross,
                     corner: style.resolvedCornerRadius(
-                        forThickness: 16 * scale
+                        forThickness: cross
+                    ),
+                    itemCorner: style.resolvedCornerRadius(
+                        forThickness: cross * 0.56
                     ),
                     gap: gapSpacing(style.itemGap),
                     indicator: style.activeIndicator
@@ -191,18 +230,22 @@ struct HomeCardBarsTile: View {
         vertical: Bool = false
     ) -> some View {
         let style = settings.appBarStyle
-        if appBarShown, style.edge == edge {
+        if appBarEdges.contains(edge) {
+            let cross = crossSize(style.thickness)
             BarStripView(
                 spec: BarSpec(
                     fill: style.fillColor,
                     highlight: style.highlightColor,
                     items: appItems(style),
                     alignment: style.alignment,
-                    spans: !style.hasBox
-                        && style.backgroundFit == .full,
+                    spans: style.plateSpans,
                     boxed: style.hasBox,
+                    thickness: cross,
                     corner: style.resolvedCornerRadius(
-                        forThickness: 16 * scale
+                        forThickness: cross
+                    ),
+                    itemCorner: style.resolvedCornerRadius(
+                        forThickness: cross * 0.56
                     ),
                     gap: gapSpacing(style.itemGap),
                     indicator: style.activeIndicator
@@ -246,5 +289,13 @@ struct HomeCardBarsTile: View {
     private func gapSpacing(_ real: CGFloat) -> CGFloat {
         let t = min(max(real / 40, 0), 1)
         return (1 + t * 6) * scale
+    }
+
+    /// The thickness remap, same idiom: the stored 20–80 pt
+    /// band lands on 13–22 scene points per mount scale, so
+    /// the Thickness slider visibly moves the scene.
+    private func crossSize(_ real: CGFloat) -> CGFloat {
+        let t = min(max((real - 20) / 60, 0), 1)
+        return (13 + t * 9) * scale
     }
 }

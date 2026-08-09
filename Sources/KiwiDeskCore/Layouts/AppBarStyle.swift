@@ -156,6 +156,17 @@ public struct AppBarStyle: Sendable, Equatable {
     public var hasBox: Bool {
         backgroundStyle == .boxed && !glassEnabled
     }
+
+    /// Whether the shared plate spans its whole strip
+    /// edge-to-edge (`background_fit: full` on a style that
+    /// draws a shared plate at all). THE one copy of the
+    /// spans rule — the bar renderers and both Settings
+    /// preview mocks consult it (review 2026-08-10 found four
+    /// hand copies; a retune of hug/span had four places to
+    /// miss).
+    public var plateSpans: Bool {
+        !hasBox && backgroundFit == .full
+    }
 }
 
 // MARK: - Codable
