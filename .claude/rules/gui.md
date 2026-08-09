@@ -87,6 +87,17 @@ to invert the dim ladder).
   only because `LayoutSchematicTrackEngineTests` now requires it.
   Where a preview models part of an engine's rule, say which part
   and file the rest (#708 for the unmodelled spill).
+- **A schematic draws ONE frame, and a fact about motion goes in
+  the caption.** Never add a second mini-screen, an arrow between
+  panes, or a sub-caption under one: a pair denotes two *states*
+  and leaves the tween to the reader, so it buys no motion while
+  costing double the width in a strip built for comparison — the
+  argument is in `docs/design-decisions.md`, and
+  `LayoutSchematicScaleTests` reds on the retired vocabulary
+  coming back. The same suite holds the scale half: a fact a
+  thumbnail has no room to render (Scrolling's off-monitor
+  ghosts) is drawn at `.panel` and clipped away at `.tile`,
+  never paid for by shrinking the frame around it.
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to

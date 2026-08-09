@@ -28,6 +28,12 @@ import Testing
 /// first read traps in the concurrency runtime rather than failing
 /// an expectation, and nondeterministically — it depends which
 /// executor swift-testing lands the test on.
+///
+/// Scrolling's half lives in `LayoutSchematicScrollingTests`,
+/// which sweeps the focus anchors as well as the placements —
+/// split off at the file ceiling, and it carries its own copy of
+/// the promise below (a small duplication the test convention
+/// prefers to a shared harness).
 @Suite("Layout preview new-window placement")
 @MainActor
 struct LayoutSchematicPlacementTests {
@@ -196,35 +202,6 @@ struct LayoutSchematicPlacementTests {
                 #expect(!plainKinds.contains(.new))
                 #expect(
                     plainKinds.filter { $0 == .focus }.count == 1
-                )
-            }
-        }
-    }
-
-    /// Scrolling pins the focus to slot 0, so a splice that pushes
-    /// the focus shifts the *row* instead. Both come off the one
-    /// splice, which is why the bounds are asserted with the
-    /// landing rather than beside it.
-    @Test("Scrolling opens the window where the engine does")
-    func scrollingPlacement() {
-        for placement in placements {
-            for count in LayoutSchematic.windowCountRange {
-                let schematic = ScrollingSchematic(
-                    orientation: .horizontal,
-                    anchor: .center,
-                    slotSize: .auto,
-                    placement: placement,
-                    windows: count
-                )
-                let row = schematic.row
-                #expect(row.slots.count == count)
-                #expect(row.slots.contains(0))
-                check(
-                    incoming: row.incoming,
-                    focus: 0,
-                    slots: row.slots,
-                    placement: placement,
-                    what: "Scrolling at \(count)"
                 )
             }
         }

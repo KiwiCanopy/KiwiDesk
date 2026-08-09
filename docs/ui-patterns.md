@@ -637,38 +637,25 @@ Monitors card it opens a popover holding every chip, each
 working as it does on the card, because a chip that is merely
 counted has lost its clear button and its menu.
 
-**Intuitiveness over strict Apple-native, where they conflict
-(#125, owner call).** The first cut held to Apple's "one static
-frame per control" idiom, but that under-delivered on the knobs
-whose whole meaning is a transition. So the family uses a
-**mixed, deliberately legible grammar**: a **two-frame sequence**
-(mini-screen → arrow → mini-screen) for a layout whose meaning is
-a *transition* — today only **Scrolling**'s `follow` anchor
-(#239 — the viewport pans the minimum to reveal the focus,
-leaving the side you came from open), the one place
-`SchematicPair` is still mounted; **single frames** for the rest,
-carrying the conditional fact with one of a small shared
-**ghost vocabulary** — a **spawn ghost** (dashed accent tile +
+**One frame per layout, and the conditional facts ride a shared
+ghost vocabulary (#125, #753).** Every schematic is a **single
+frame** — see `docs/design-decisions.md` for why the two-frame
+sequence retired rather than for how it was gated — and each
+carries whatever is conditional about its layout with one of a
+small shared vocabulary: a **spawn ghost** (dashed accent tile +
 "+", "the next window lands here": BSP's incoming window, Track's
 own-vs-focused track), an **off-monitor ghost** (solid gray,
 straddling a drawn screen edge, "a real window scrolled
-off-screen": Scrolling), and the pre-existing **empty-cell gap**
-(dashed gray, "unused grid space": rigid Grid). Stack's
-overflow is a small iconic fanned-pile badge, not a permanently
-cascading column. The two-frame motif is gated by a *principle*,
-not a headcount: a layout earns a second frame only when it must
-teach a fact **inexpressible in one frame at any window count**.
-That bar rose when the count became an input: a fact the reader
-can reach by dragging the slider — a grid rebalancing as a fifth
-window opens — is now expressible in one frame, which is why
-dynamic Grid's sequence pair retired. Only a *transition between
-two states of the same count* still earns a pair. BSP was
-already one wide frame before the count arrived: its strategy
-divergence needs several windows, not two moments. Layouts
-whose meaning is a still position (Scrolling's
-center/start/end anchors, rigid Grid) stay single-frame; if
-every layout had two frames, "why two frames"
-would stop reading. The app bar shown in Scrolling/Monocle is
+off-screen": Scrolling's side panel), and the pre-existing
+**empty-cell gap** (dashed gray, "unused grid space": rigid
+Grid). Stack's overflow is a small iconic fanned-pile badge, not
+a permanently cascading column. A fact the reader can reach by
+dragging the window-count slider — a grid rebalancing as a fifth
+window opens — is expressible in that one frame; a fact about
+*motion* is the caption's to state, in words. Where a ghost needs
+more room than a thumbnail has, it is drawn in the panel and
+clipped away on the tile rather than shrinking the frame around
+it. The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`
 that points at the App Bar destination (#229), keeping app-bar

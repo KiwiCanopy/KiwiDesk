@@ -1537,6 +1537,47 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
+**A layout gets one frame, whatever it has to teach** (#753,
+superseding the #125/#239 two-frame bar). That earlier rule let
+a layout earn a second frame — two mini-screens with an arrow
+between them — for a fact "inexpressible in one frame at any
+window count", and exactly one claim ever cleared it: Scrolling's
+`follow` anchor, where the viewport pans the minimum to reveal
+the newly focused window. A still picture cannot show motion.
+
+The premise is true and the conclusion does not follow. **A pair
+does not show motion either.** It shows two *states* and asks the
+reader to infer the tween — a second inference stacked on the one
+the still frame already asked for. Against that inference it
+charges double the width in a chooser whose whole job is
+comparison at a glance, an arrow drawn nowhere else in the
+family, two sub-captions, and two more strings in eleven
+catalogs. The caption states the same fact in one clause, in the
+reader's own language, and every schematic already has one.
+
+What breaks without the rule is the chooser. A strip of
+thumbnails reads as a set only while the tiles are comparable;
+the moment one is twice the width of its neighbours it reads as
+broken rather than as special, which is precisely how the
+Scrolling tile read. And the bar itself cannot be applied
+consistently, because *every* transition is inexpressible in a
+still frame and none of them is expressible in two — so the bar
+was never a test, only a description of the one case that had
+already been built. The insertion `+` is the shape of what a
+still frame does answer perfectly, and it stays on every frame:
+"where does the next window open" is the question the preview
+exists for.
+
+The corollary is about scale rather than count. **A thumbnail
+spends its whole canvas on the layout.** Scrolling reserved half
+of its frame for the ghosts of windows past the monitor's edges —
+a real fact, readable in the side panel, and an unreadable sliver
+on a tile. Reserving the room there drew the monitor at half the
+scale of every sibling's outline, so a tile meaning "this layout
+continues past the screen" said "this preview is broken"
+instead. Draw a fact at the size it can be read; clip it away at
+the size it cannot.
+
 **Home is the only navigator: a card grid, not a sidebar.**
 (#678 turn 9, superseding the #68/#297 fixed source list.) A
 sidebar is a menu the user pays for on every visit — a column

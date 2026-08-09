@@ -189,30 +189,33 @@ struct LayoutSchematicCountTests {
     /// the *placement's* business, not the count's — the row
     /// shifts by a slot when the incoming window lands ahead of
     /// the focus (#702), which is `LayoutSchematicPlacementTests`'
-    /// half. The follow pair, a second frame of the same layout,
-    /// spans the same row.
+    /// half.
+    ///
+    /// Every anchor draws that one row, `follow` included since
+    /// #753 retired its two-frame pair — so the loop runs the
+    /// anchors too, and an anchor that stopped taking the count
+    /// (a branch back to a fixed second frame is exactly how)
+    /// reds here rather than in whatever the pair would be.
     @Test("Scrolling draws a finite row of the count")
     func scrollingRow() {
-        for count in LayoutSchematic.windowCountRange {
-            let schematic = ScrollingSchematic(
-                orientation: .horizontal,
-                anchor: .center,
-                slotSize: .auto,
-                placement: .last,
-                windows: count
-            )
-            #expect(schematic.row.slots.count == count)
-            let follow = ScrollingFollowPair(
-                orientation: .horizontal,
-                slotSize: .auto,
-                windows: count
-            )
-            #expect(follow.slots.count == count)
-            // Frame 2 steps the focus to slot 1, so that slot
-            // has to exist at every count in the band.
-            #expect(follow.slots.contains(1))
+        for anchor in anchors {
+            for count in LayoutSchematic.windowCountRange {
+                let schematic = ScrollingSchematic(
+                    orientation: .horizontal,
+                    anchor: anchor,
+                    slotSize: .auto,
+                    placement: .last,
+                    windows: count
+                )
+                #expect(schematic.row.slots.count == count)
+                #expect(schematic.row.slots.contains(0))
+            }
         }
     }
+
+    private let anchors: [ScrollingParams.Anchor] = [
+        .center, .start, .end, .follow,
+    ]
 
     /// Monocle has no fill logic — every window is full-screen —
     /// so the count changes the depth of the fan, capped where
@@ -272,11 +275,12 @@ struct LayoutSchematicCountTests {
         // A floor would let the scan pass having looked at
         // nothing — and a directory rename is exactly how that
         // happens, since the file enumerator yields an empty
-        // sequence for a missing path rather than throwing. The
-        // tuned layouts are derived; the one rider is Scrolling's
-        // follow pair, a second frame of the same layout that
-        // needs the count for the same reason.
-        #expect(checked == LayoutMode.placementTabs.count + 1)
+        // sequence for a missing path rather than throwing.
+        // One schematic per tuned layout, with no riders: #753
+        // retired the Scrolling follow pair, which was the only
+        // file here drawing a second frame of a layout already
+        // counted.
+        #expect(checked == LayoutMode.placementTabs.count)
     }
 
     // MARK: - Fixtures

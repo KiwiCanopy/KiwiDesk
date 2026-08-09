@@ -1,12 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Scrolling schematic (#125, #239): a fixed, centred
-/// **screen outline** (the monitor) with one continuous row of
-/// windows moving *through* it. The monitor stays in the middle of
-/// the whole row — windows continue off *both* edges — and the
-/// focus anchor sets where the **focused window** rests inside the
-/// frame, applied on every focus:
+/// The Scrolling schematic (#125, #239, #753): a **screen
+/// outline** (the monitor) with one continuous row of windows
+/// moving *through* it. The focus anchor sets where the **focused
+/// window** rests inside the frame, applied on every focus:
 ///
 /// - **center** → focus centred, a neighbour peeking in on each
 ///   side (two partials).
@@ -14,17 +12,18 @@ import SwiftUI
 ///   horizontal, top when vertical), one neighbour peeking on the
 ///   trailing side.
 /// - **end** → mirror image (right / bottom).
+/// - **follow** → the neutral resting frame, drawn centred. It
+///   fixes the focus nowhere: it pans the minimum needed to
+///   reveal it, so where the row rests depends on the direction
+///   the reader last moved — history a preview does not have. One
+///   still frame plus the caption's words is the whole of what
+///   can honestly be said, and the two-frame pair this replaced
+///   said no more (#753).
 ///
 /// The focused window is always fully visible; neighbours are cut
 /// by the frame so their partial width shows the real slot size
 /// (a wide slot shows slivers, a thin slot shows many). The dense
 /// `+` marks where the current placement opens the next window.
-///
-/// **follow** is the one anchor that can't be shown as a resting
-/// position — it is a *transition* (pan the minimum to reveal the
-/// focus), so it renders as a two-frame `ScrollingFollowPair`
-/// instead, branched below exactly as `GridSchematic` branches on
-/// `.dynamic`.
 struct ScrollingSchematic: View {
     let orientation: ScrollingParams.Orientation
     let anchor: ScrollingParams.Anchor
@@ -37,9 +36,25 @@ struct ScrollingSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
-    /// The monitor is a fixed slice of a wider canvas, so the
-    /// off-screen ghosts always have room to show.
-    private let screenFraction: CGFloat = 0.5
+    /// The monitor's share of the canvas along the scroll axis.
+    ///
+    /// At `.panel` it is a slice of a wider canvas, so the
+    /// off-monitor ghosts have room to be read and carry a real
+    /// fact — the row continues past both edges. At `.tile` there
+    /// is no such room, and reserving it drew the screen outline
+    /// at half the scale of every sibling's (#753), so the
+    /// thumbnail spends its whole canvas on the monitor and lets
+    /// `SchematicScreen`'s clip end the row at the edges.
+    ///
+    /// Internal so `LayoutSchematicScaleTests` can assert both
+    /// halves; a scale-blind constant is exactly the regression.
+    var screenFraction: CGFloat { scale == .panel ? 0.5 : 1 }
+
+    /// Whether the monitor draws an outline of its own. Only when
+    /// it is a *slice* of the canvas: where the two coincide the
+    /// canvas border already is the monitor, and a second rounded
+    /// stroke on the same bounds double-strikes it.
+    var drawsMonitorOutline: Bool { screenFraction < 1 }
 
     private var horizontal: Bool { orientation == .horizontal }
 
@@ -93,44 +108,27 @@ struct ScrollingSchematic: View {
     }
 
     var body: some View {
-        if anchor == .follow {
-            // A transition, not a resting position: two frames
-            // (#239), like GridSchematic's `.dynamic` pair.
-            ScrollingFollowPair(
-                orientation: orientation,
-                slotSize: slotSize,
-                windows: windows,
-                scale: scale
-            )
-        } else {
-            SchematicCanvas(
-                width: scale.width,
-                height: scale.height,
-                caption: caption,
-                axLabel: axLabel,
-                showsCaption: scale.showsCaption
-            ) {
-                GeometryReader { geo in
-                    strip(geo.size)
-                }
-                .animation(LayoutSchematic.damping, value: anchor)
-                .animation(
-                    LayoutSchematic.damping,
-                    value: orientation
-                )
-                .animation(LayoutSchematic.damping, value: slotSize)
-                .animation(
-                    LayoutSchematic.damping,
-                    value: placement
-                )
-                .animation(LayoutSchematic.damping, value: windows)
+        SchematicCanvas(
+            width: scale.width,
+            height: scale.height,
+            caption: caption,
+            axLabel: axLabel,
+            showsCaption: scale.showsCaption
+        ) {
+            GeometryReader { geo in
+                strip(geo.size)
             }
+            .animation(LayoutSchematic.damping, value: anchor)
+            .animation(LayoutSchematic.damping, value: orientation)
+            .animation(LayoutSchematic.damping, value: slotSize)
+            .animation(LayoutSchematic.damping, value: placement)
+            .animation(LayoutSchematic.damping, value: windows)
         }
     }
 
     /// Strip geometry derived once. The focused window is index 0,
     /// centred at `focusCenter`; window `i` sits `i` steps away.
-    private struct Metrics {
+    struct Metrics {
         var slot: CGFloat
         var step: CGFloat
         var screenStart: CGFloat
@@ -141,7 +139,7 @@ struct ScrollingSchematic: View {
         var high: Int
     }
 
-    private func metrics(along: CGFloat) -> Metrics {
+    func metrics(along: CGFloat) -> Metrics {
         let screenLen = along * screenFraction
         let screenStart = (along - screenLen) / 2
         let slot = max(14, screenLen * thickness)
@@ -151,9 +149,10 @@ struct ScrollingSchematic: View {
         // shows the peeking neighbour).
         let focusCenter: CGFloat
         switch anchor {
-        // `.follow` never reaches here (the body branches to the
-        // two-frame pair); folded with center so the switch stays
-        // exhaustive.
+        // `.follow` rests centred — it pins the focus nowhere, so
+        // the neutral frame (both neighbours in view) is the one
+        // resting position that claims nothing the settings do
+        // not decide. The pan is the caption's to state (#753).
         case .center, .follow:
             focusCenter = screenStart + screenLen / 2
         case .start: focusCenter = screenStart + slot / 2
@@ -193,7 +192,9 @@ struct ScrollingSchematic: View {
                         y: horizontal ? cross / 2 : center(i, m)
                     )
             }
-            outline(m, cross: cross)
+            if drawsMonitorOutline {
+                outline(m, cross: cross)
+            }
         }
     }
 
@@ -253,20 +254,26 @@ struct ScrollingSchematic: View {
             )
     }
 
+    /// One caption for every anchor, Follow included — the pan is
+    /// a fact about *this* layout, and the frame above cannot
+    /// denote motion however many panes it is given (#753).
     private var caption: String {
         L(
             "layout.schematic.scrolling.caption",
-            "Focus rests at the anchor; the row scrolls off past "
-                + "it. The + is where the next window opens."
+            "Focus rests at the anchor and the row scrolls past "
+                + "it; Follow instead pans the minimum, keeping "
+                + "the side you came from in view. The + is where "
+                + "the next window opens."
         )
     }
 
     private var axLabel: String {
         L(
             "layout.schematic.scrolling.ax",
-            "Scrolling preview: a row of windows framed by the "
-                + "screen, continuing off both edges; the anchor "
-                + "window holds focus."
+            "Scrolling preview: a row of windows moving through "
+                + "the screen frame; the anchor window holds "
+                + "focus, and Follow pans the minimum to reveal "
+                + "it, keeping the side you came from in view."
         )
     }
 }

@@ -5,7 +5,11 @@ import SwiftUI
 /// #205 Customize popover. The popover capped the editing surface
 /// at 392 pt — "the app's narrowest editing surface," by its own
 /// docstring — which a side-by-side live preview cannot fit; the
-/// full pane can. This is a view-state branch of `SpacesSection`
+/// full pane can. The preview is the surface here whose job is to
+/// *teach*, so give it the width the rows do not need rather than
+/// the leftovers of a bounded editor (#753).
+///
+/// This is a view-state branch of `SpacesSection`
 /// driven by `model.nav.spaceOverridesFocus`, not a
 /// `SettingsSurface`: the override controls are per-space and
 /// uncataloged, so there is nothing for search or the #326 bridge
@@ -32,18 +36,23 @@ extension SpacesSection {
                 VStack(alignment: .leading, spacing: 16) {
                     overridesHeader(space, mode: mode, gates: gates)
                     HStack(alignment: .top, spacing: 16) {
-                        // Bounded, not full-bleed: the override rows
-                        // carry their own label/control columns, so
-                        // stretching them only lengthens slider
-                        // travel past what the value needs.
                         SpaceOverrideRows(
                             model: model,
                             space: space,
                             pendingResetAll: $pendingResetAll
                         )
-                        .frame(maxWidth: 520, alignment: .leading)
-                        // Win the width negotiation, so a wide preview
-                        // (the scrolling two-panel schematic) can never
+                        // Bounded, not full-bleed: the rows carry
+                        // their own label/control columns, so
+                        // stretching them only lengthens slider
+                        // travel past what the value needs. 460
+                        // rather than the 520 this column held while
+                        // the Scrolling preview was a two-frame pair
+                        // — the preview takes whatever the rows
+                        // leave, so this cap IS the preview's width,
+                        // and one frame spends the 60 pt on slot
+                        // proportions and a legible `+` (#753).
+                        .frame(maxWidth: 460, alignment: .leading)
+                        // Win the width negotiation, so no preview can
                         // overconstrain the HStack and spill its frame
                         // over these rows' trailing checkboxes — which
                         // silently swallowed clicks on a scrolling
