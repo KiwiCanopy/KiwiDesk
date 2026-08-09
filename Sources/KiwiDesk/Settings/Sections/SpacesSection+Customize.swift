@@ -88,8 +88,7 @@ extension SpacesSection {
         } label: {
             overrideCellLabel(state)
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         .controlSize(.large)
         // Hug the label so the GeometryReader below measures its
         // true (untruncated) width, not a compressed one.

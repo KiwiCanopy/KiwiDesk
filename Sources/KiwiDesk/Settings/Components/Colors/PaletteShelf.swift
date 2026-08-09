@@ -92,8 +92,7 @@ struct PaletteShelf: View {
                         systemImage: "square.and.arrow.down"
                     )
                 }
-                .buttonStyle(.bordered)
-                .neutralButtonLabel()
+                .settingsActionButton()
                 .controlSize(.small)
             }
             LazyVGrid(

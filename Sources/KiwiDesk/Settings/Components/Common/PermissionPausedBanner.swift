@@ -44,8 +44,7 @@ struct PermissionPausedBanner: View {
             ) {
                 onResolve()
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
         }
         .padding(12)
         // A solid warning surface, not `.orange.opacity(0.12)`:

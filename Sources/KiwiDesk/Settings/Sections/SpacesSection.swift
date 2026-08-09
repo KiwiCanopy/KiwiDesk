@@ -261,8 +261,7 @@ struct SpacesSection: View {
                 Image(systemName: "plus")
             }
             .disabled(!canAdd)
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             // Icon-only, like its sibling icon buttons (#94).
             .help(L("spaces.add.help", "Add space"))
         }

@@ -28,8 +28,7 @@ struct AdvancedLuaGroup: View {
                     systemImage: "plus"
                 )
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
         }
     }
 

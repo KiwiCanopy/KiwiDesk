@@ -122,8 +122,7 @@ struct NativeSpacesGroup: View {
             ) {
                 DisplaySpacesSetting.openSystemSettings()
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             .controlSize(.large)
             // Absent, not greyed, with nothing to clear: an
             // affordance for a channel that does not exist reads

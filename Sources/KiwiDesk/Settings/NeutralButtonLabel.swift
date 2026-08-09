@@ -30,7 +30,7 @@ extension View {
     ///   IS the fill this rule protects. Leave it alone.
     /// - A button that resolves its own tint per state
     ///   (`KeyRecorderField`) already decides this question and
-    ///   is exempt — see `SettingsLabelNeutralityTests`'
+    ///   is exempt — see `SettingsBorderedSealTests`'
     ///   `borderedExempt` map, which is the one copy of who may
     ///   skip this.
     ///
@@ -40,10 +40,16 @@ extension View {
     /// does not reach it. Both are set so the pair covers the
     /// SwiftUI-drawn and AppKit-drawn halves of one label.
     ///
-    /// Pinned by `SettingsLabelNeutralityTests` — every
-    /// `.buttonStyle(.bordered)` in the Settings tree carries
-    /// this or names itself in that suite's `borderedExempt`
-    /// map.
+    /// A bordered action button does not call this directly any
+    /// more: `settingsActionButton()` seals the style and this
+    /// neutralisation into one call (#771), so the only direct
+    /// call sites left are non-bordered labels the tint reaches
+    /// anyway — today the one text-labelled `.borderless`
+    /// breadcrumb. `SettingsBorderedSealTests` pins the bordered
+    /// half (no raw `.buttonStyle(.bordered)` outside its
+    /// `borderedExempt` map) and `SettingsLabelNeutralityTests`
+    /// enumerates every direct use of this modifier with the
+    /// style it sits on.
     func neutralButtonLabel() -> some View {
         tint(SettingsTheme.ink)
             .foregroundStyle(SettingsTheme.ink)

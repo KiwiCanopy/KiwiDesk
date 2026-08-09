@@ -9,7 +9,9 @@ import Testing
 /// push button on macOS and takes the window tint, shipping green.
 /// Buttons inside `Menu`, `.contextMenu`, `.confirmationDialog`
 /// and `.alert` closures are styled by their containers and are
-/// exempt.
+/// exempt. `settingsActionButton()` names a style too — it IS
+/// `.bordered`, sealed to its neutralisation (#771) — so the
+/// count below reads both spellings.
 @Suite("Settings button style convention")
 struct SettingsButtonStyleConventionTests {
     private var settingsDir: URL {
@@ -182,7 +184,12 @@ struct SettingsButtonStyleConventionTests {
                 cursor += 1
             }
 
-            let styles = source.occurrences(of: ".buttonStyle(")
+            // The seal counts as naming a style: it applies
+            // `.bordered` (plus the neutralisation) inside
+            // `settingsActionButton()` (#771).
+            let styles =
+                source.occurrences(of: ".buttonStyle(")
+                + source.occurrences(of: ".settingsActionButton()")
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 

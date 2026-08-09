@@ -57,8 +57,7 @@ struct AppPickerButton: View {
             }
             .frame(minWidth: minWidth, alignment: .leading)
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         .controlSize(.large)
         .onAppear {
             AppIconCache.shared.warm()

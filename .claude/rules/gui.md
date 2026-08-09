@@ -513,20 +513,26 @@ Every surface, border and ink in the Settings tree comes from
 - **The accent marks control FILLS, never text naming a value.**
   A toggle track, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
-  neutralising modifier at every call site and a pairing guard
-  in `SettingsLabelNeutralityTests`** —
-  `.menuStyle(.borderlessButton)` → `neutralMenuLabel()` and
-  `.buttonStyle(.bordered)` → `neutralButtonLabel()`, the second
-  added only after the first had shipped and the same defect
-  recurred in the other style. So treat the style as the unit,
-  not the site: the fix is never a local recolour. That suite's
-  `borderedExempt` map is the one copy of who may skip it, and
-  an entry there names the source token that IS its reason, so
-  an exemption whose grounds have gone reds. A button with no
-  `.buttonStyle` at all renders bordered on macOS and takes the
-  tint identically while matching no needle — give an action
-  button an explicit style, which is what brings it under the
-  guard.
+  neutralising modifier sealed to the style, and a guard** —
+  `.menuStyle(.borderlessButton)` → `neutralMenuLabel()`
+  (`SettingsLabelNeutralityTests`), and a `.bordered` action
+  button through `settingsActionButton()`, which pairs the
+  style with `neutralButtonLabel()` by construction (#771)
+  after per-call-site pairing shipped the same defect in a
+  second style (#759). So treat the style as the unit, not the
+  site: the fix is never a local recolour. A raw
+  `.buttonStyle(.bordered)` is legal only in
+  `SettingsBorderedSealTests`' `borderedExempt` map — the one
+  copy of who may, whose entries name the source token that IS
+  each reason, so an exemption whose grounds have gone reds —
+  and a direct `.neutralButtonLabel()` on any other style stays
+  enumerated in `SettingsLabelNeutralityTests`'
+  `neutralisedDirectly`. A button with no `.buttonStyle` at all
+  renders bordered on macOS and takes the tint identically
+  while matching no needle — give an action button an explicit
+  style, which is what brings it under the guards
+  (`SettingsButtonStyleConventionTests`, whose arithmetic
+  counts the seal as naming one).
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
