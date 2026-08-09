@@ -117,12 +117,12 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             // from `.inline` also means `scrollHoisted` on a `.card`
             // drawer is inert rather than a double anchor.
             if scrollHoisted {
-                group.preference(
+                inlineRuled.preference(
                     key: HoistedRevealAnchorsKey.self,
                     value: [control]
                 )
             } else {
-                group.searchAnchorCard(control)
+                inlineRuled.searchAnchorCard(control)
             }
         case .card:
             group
@@ -155,35 +155,60 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         }
     }
 
+    /// The inline form leads with a thin rule (owner
+    /// 2026-08-10: the App Bar's Style accordion was nearly
+    /// overlooked among plain rows) — the prototype draws
+    /// every inline disclosure row with a top border, so the
+    /// rule is the row's "I am a different kind of row"
+    /// signal, matching the card rows around it without
+    /// promoting the drawer to a card.
+    private var inlineRuled: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SettingsTheme.hairline.frame(height: 1)
+            group
+        }
+        .padding(.top, 4)
+    }
+
     private var group: some View {
         DisclosureGroup(isExpanded: expansion) {
             // The Sunken interior: an expanded drawer's contents
             // sit in a well one step inside the card, so what the
             // disclosure REVEALS is legible as a nested thing
             // rather than as more of the card it opened from.
-            content()
-                .frame(
-                    maxWidth: .infinity,
-                    alignment: .leading
+            //
+            // The `VStack` is load-bearing, not layout taste: a
+            // caller may hand this a bare `ForEach`, and SwiftUI
+            // applies modifiers on a `ForEach` PER CHILD — the
+            // Motion drawer shipped every toggle, a caption and
+            // a lone `Divider` each in its own well before this
+            // wrapper made the well one (owner caught it on
+            // screen, 2026-08-10).
+            VStack(alignment: .leading, spacing: 8) {
+                content()
+            }
+            .frame(
+                maxWidth: .infinity,
+                alignment: .leading
+            )
+            .padding(10)
+            // Fill AND hairline: `sunken` on `card` is
+            // 1.08:1, so a fill-only well says nothing about
+            // being nested — which is the well's whole job.
+            .background(
+                RoundedRectangle(
+                    cornerRadius:
+                        SettingsTheme.disclosureRadius
                 )
-                .padding(10)
-                // Fill AND hairline: `sunken` on `card` is
-                // 1.08:1, so a fill-only well says nothing about
-                // being nested — which is the well's whole job.
-                .background(
+                .fill(SettingsTheme.sunken)
+                .overlay(
                     RoundedRectangle(
                         cornerRadius:
                             SettingsTheme.disclosureRadius
                     )
-                    .fill(SettingsTheme.sunken)
-                    .overlay(
-                        RoundedRectangle(
-                            cornerRadius:
-                                SettingsTheme.disclosureRadius
-                        )
-                        .strokeBorder(SettingsTheme.hairline)
-                    )
+                    .strokeBorder(SettingsTheme.hairline)
                 )
+            )
         } label: {
             // The wash goes on the label alone; flashing the
             // group would tint the expanded contents too — the

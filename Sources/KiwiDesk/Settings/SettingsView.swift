@@ -17,21 +17,12 @@ struct SettingsView: View {
     @State var revealTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
-    /// The preview panel's collapse pick (digest §1.1) —
-    /// remembered like disclosure state, one pick for every
-    /// area (the panel is one component that shows different
-    /// content, not twelve panels). Internal for the same
-    /// §2.1-split reason as `revealTask`: the two-column mount
-    /// lives in `SettingsView+Detail`.
-    @AppStorage("settings.panel_collapsed")
-    var panelCollapsed = false
-    /// Whether the current destination is showing an expanded
-    /// panel — the pill's centring offset and the two-column
-    /// mount both read this, so they cannot disagree.
-    var panelExpanded: Bool {
+    /// Whether the current destination shows the panel — the
+    /// pill's centring offset and the two-column mount both
+    /// read this, so they cannot disagree.
+    var panelVisible: Bool {
         SettingsDetailPanelOffer.offers(model.destination)
             && !model.editingLua
-            && !panelCollapsed
     }
     /// The pushed area lives on the model, not in `@State` —
     /// see `SettingsModel.destination`. A locale change re-keys
@@ -240,7 +231,7 @@ struct SettingsView: View {
                     // panel's width, the prototype's own
                     // `calc(50% - 196px)`.
                     .offset(
-                        x: panelExpanded
+                        x: panelVisible
                             ? -SettingsTheme.panelWidth / 2
                             : 0
                     )

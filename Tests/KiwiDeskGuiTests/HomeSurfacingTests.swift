@@ -48,7 +48,7 @@ struct HomeSurfacingTests {
             // panel is open.
             ".overlay(alignment:.bottom){"
                 + "SettingsFooter(model:model)",
-            "x:panelExpanded?-SettingsTheme.panelWidth/2:0",
+            "x:panelVisible?-SettingsTheme.panelWidth/2:0",
         ],
         "Settings/SettingsView+Detail.swift": [
             // The two-column detail consults the ONE offer set

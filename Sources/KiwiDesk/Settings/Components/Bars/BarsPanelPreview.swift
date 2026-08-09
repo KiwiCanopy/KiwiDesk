@@ -1,27 +1,37 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Bars panel content (digest §1.1, turn 7a's "both bars
-/// at their real thickness against a scaled desktop"): the two
-/// existing strips, recycled whole into the panel column
-/// instead of leading their cards. The Space Bar strip already
-/// knows about edge coexistence with the App Bar, so the pair
-/// here is the same pair the cards drew — one renderer each,
-/// no second drawing.
+/// The Bars panel content (digest §1.1, turn 7a): ONE desktop
+/// scene with both bars in place — the fused view the owner
+/// asked for (2026-08-10), so "both on top" coexistence is
+/// seen, not described. The scene is `HomeCardBarsTile`, the
+/// Home plate's own renderer, mounted larger with the same
+/// palette fold — one renderer, two sizes, never a second
+/// drawing. Space pips are the draft's real space count.
 struct BarsPanelPreview: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SpaceBarPreviewStrip(
-                style: model.config.settings.spaceBarStyle,
-                appBar: model.config.settings.appBarStyle,
-                sameEdge: model.config.settings
-                    .spaceBarSharesEdgeWithAppBar
+            HomeCardBarsTile(
+                settings: model.config.settings,
+                spaceCount: model.config.spaces.count,
+                scale: 1.8,
+                spaceLabels: spaceLabels
             )
-            AppBarPreviewStrip(
-                style: model.config.settings.appBarStyle
+            .padding(12)
+            .frame(height: 210)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(SettingsTheme.previewPlate)
             )
+            .environment(
+                \.schematicPalette,
+                HomeCardPlate.palette(model.config.settings)
+            )
+            .accessibilityHidden(true)
+            .allowsHitTesting(false)
             Text(
                 L(
                     "panel.caption.draft",
@@ -30,6 +40,17 @@ struct BarsPanelPreview: View {
             )
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink3)
+        }
+    }
+
+    /// Each declared space's identifier, the real bar's rule:
+    /// the stored icon, else the space's ordinal.
+    private var spaceLabels: [String] {
+        let icons = model.config.settings.spaceIcons
+        return model.config.spaces.enumerated().map {
+            index,
+            space in
+            icons[space] ?? String(index + 1)
         }
     }
 }

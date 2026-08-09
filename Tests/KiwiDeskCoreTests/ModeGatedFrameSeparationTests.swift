@@ -26,12 +26,28 @@ struct ModeGatedFrameSeparationTests {
             try #require(url.path != "/")
         }
         url.deleteLastPathComponent()
-        let source = try String(
-            contentsOf: url.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/SettingsTheme.swift"
-            ),
-            encoding: .utf8
+        // Both halves of the split declaration (Phase 4 moved
+        // the CGFloat metrics to `+Metrics` at the §2.1
+        // ceiling): the hex pairs live in the colour file, the
+        // opacity in the metrics file, and this guard parses
+        // one concatenated source so a further split cannot
+        // strand either needle silently — `#require` still
+        // fails loudly if a parse finds nothing.
+        let directory = url.appendingPathComponent(
+            "Sources/KiwiDesk/Settings"
         )
+        var source = ""
+        for file in [
+            "SettingsTheme.swift",
+            "SettingsTheme+Metrics.swift",
+        ] {
+            source += try String(
+                contentsOf: directory.appendingPathComponent(
+                    file
+                ),
+                encoding: .utf8
+            )
+        }
         try #require(!source.isEmpty)
         return source
     }

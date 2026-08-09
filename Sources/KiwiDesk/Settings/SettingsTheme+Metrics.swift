@@ -68,6 +68,15 @@ extension SettingsTheme {
     /// pass can reason about a constant.
     static let panelWidth: CGFloat = 392
 
+    /// The content column's ceiling (owner 2026-08-10): the
+    /// prototype's widest content column measures ~970 pt at
+    /// the 1440 canvas, and nothing was ever drawn wider — at
+    /// full screen an uncapped column stretches every row past
+    /// readability. The column centres in the surplus; the
+    /// responsive pass owns everything BELOW the breakpoints,
+    /// this owns the top end.
+    static let contentMaxWidth: CGFloat = 980
+
     /// A section container's corner. Larger than a card's on
     /// purpose: a section is the outer box, and equal radii make
     /// nested rounds read as a mistake.

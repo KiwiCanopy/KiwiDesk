@@ -65,31 +65,20 @@ struct DetailPanelTests {
         }
     }
 
-    /// The collapse pick persists — the `›` is remembered
-    /// disclosure state (§1.1), not per-visit view state.
-    @Test("the collapse pick is a persisted preference")
-    func collapsePersists() throws {
+    /// The digest's `›` collapse handle is deliberately NOT
+    /// built (owner 2026-08-10): the responsive pass drops the
+    /// panel by WIDTH, and a manual collapse beside that is a
+    /// persisted preference duplicating what the window
+    /// decides. This pin keeps the removal a decision — a
+    /// collapse quietly returning must re-argue it here.
+    @Test("the panel has no manual collapse")
+    func noManualCollapse() throws {
+        let source = try panelSource()
+        #expect(!source.contains("collapsed"))
         let shell = try squashed(
             "Sources/KiwiDesk/Settings/SettingsView.swift"
         )
-        #expect(
-            shell.contains(
-                "@AppStorage(\"settings.panel_collapsed\")"
-            )
-        )
-    }
-
-    /// Both collapse directions exist: the expanded header
-    /// carries the `›` hide, the collapsed strip carries the
-    /// `‹` show — an un-reopenable panel is a deleted feature
-    /// with a persisted flag.
-    @Test("both collapse directions are drawn")
-    func collapseChipsAreDrawn() throws {
-        let source = try panelSource()
-        #expect(source.contains("collapsed=true"))
-        #expect(source.contains("collapsed=false"))
-        #expect(source.contains("chevron.right"))
-        #expect(source.contains("chevron.left"))
+        #expect(!shell.contains("panel_collapsed"))
     }
 
     /// The in-card mounts the panel replaced stay replaced —

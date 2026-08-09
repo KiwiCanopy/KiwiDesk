@@ -28,25 +28,16 @@ enum SettingsDetailPanelOffer {
 /// The detail view's right column: "LIVE PREVIEW · <AREA>",
 /// the area's preview drawn from the DRAFT, and the "CHANGED
 /// IN THIS DRAFT" diff list — one draft, three views, this
-/// being the in-area one (§1.1). Collapsible via the `›`
-/// handle; the collapsed strip keeps a `‹` so the panel is
-/// one click away, and the pick persists.
+/// being the in-area one (§1.1). The digest's `›` collapse
+/// handle is deliberately NOT built (owner 2026-08-10): the
+/// responsive pass drops the panel by WIDTH below 1200 pt,
+/// and a manual collapse beside that is a persisted
+/// preference duplicating what the window already decides.
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel
     let destination: SettingsDestination
-    @Binding var collapsed: Bool
 
     var body: some View {
-        if collapsed {
-            collapsedStrip
-        } else {
-            expanded
-        }
-    }
-
-    // MARK: - Expanded
-
-    private var expanded: some View {
         VStack(alignment: .leading, spacing: 14) {
             header
             ScrollView {
@@ -84,12 +75,6 @@ struct SettingsDetailPanel: View {
             .textCase(.uppercase)
             .foregroundStyle(SettingsTheme.ink3)
             Spacer()
-            collapseChip(
-                glyph: "chevron.right",
-                label: L("panel.collapse", "Hide the preview")
-            ) {
-                collapsed = true
-            }
         }
     }
 
@@ -166,42 +151,6 @@ struct SettingsDetailPanel: View {
         model.nav.pendingReveal = anchor
     }
 
-    // MARK: - Collapsed
-
-    private var collapsedStrip: some View {
-        VStack {
-            collapseChip(
-                glyph: "chevron.left",
-                label: L("panel.expand", "Show the preview")
-            ) {
-                collapsed = false
-            }
-            .padding(.top, 18)
-            Spacer()
-        }
-        .frame(width: 36)
-        .frame(maxHeight: .infinity)
-        .background(SettingsTheme.panel)
-    }
-
-    private func collapseChip(
-        glyph: String,
-        label: String,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: glyph)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(SettingsTheme.ink2)
-                .frame(width: 22, height: 22)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(SettingsTheme.sunken)
-                )
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-    }
 }
 
 /// The draft's display rows: every changed setting through the

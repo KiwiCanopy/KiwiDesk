@@ -50,6 +50,7 @@ struct SettingsThemeMetricTests {
         "containerStrokeModeGated": "HomeCard.swift",
         "modeGatedStrokeOpacity": "HomeCard.swift",
         "panelWidth": "SettingsDetailPanel.swift",
+        "contentMaxWidth": "SettingsView+Detail.swift",
     ]
 
     /// Metric → why nothing draws it yet. Empty today, and kept

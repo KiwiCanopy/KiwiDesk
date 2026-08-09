@@ -43,8 +43,14 @@ struct LayoutPreviewPanel: View {
         return Double(band.lowerBound)...Double(band.upperBound)
     }
 
+    /// Label and readout hug their text instead of taking the
+    /// content pane's 210 pt label column: this row lives in
+    /// the 392 pt PANEL now, where that column left the track
+    /// a knob's width of room (owner caught it on screen,
+    /// 2026-08-10) — the slider is the row's point, so it gets
+    /// the flexible middle.
     private var countRow: some View {
-        HStack {
+        HStack(spacing: 10) {
             // "Window count", not a bare "Windows": beside a
             // slider and a numeric readout the short form is
             // unambiguous on screen, but a translator reading the
@@ -56,10 +62,7 @@ struct LayoutPreviewPanel: View {
                     "Window count"
                 )
             )
-            .frame(
-                width: SettingsMetrics.labelColumn,
-                alignment: .leading
-            )
+            .fixedSize()
             SettingsSlider(
                 value: Binding(
                     get: { Double(windows) },
@@ -68,11 +71,9 @@ struct LayoutPreviewPanel: View {
                 range: countRange,
                 step: 1
             )
+            .frame(maxWidth: .infinity)
             Text("\(windows)")
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
-                )
+                .frame(minWidth: 24, alignment: .trailing)
                 .foregroundStyle(.secondary)
                 .font(.body.monospacedDigit())
         }

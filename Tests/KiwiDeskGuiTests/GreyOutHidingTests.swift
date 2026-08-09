@@ -64,8 +64,16 @@ struct GreyOutHidingTests {
         // An either/or slot: every branch renders a control (or
         // EmptyView in raw-Lua mode, where a profile-copy verb
         // has no referent). Nothing is hidden that exists in the
-        // other branch.
+        // other branch. The pill itself is the second half of
+        // the exemption: it exists only while the draft does
+        // (design-decisions ▸ the floating pill), so hiding at
+        // zero is the surface's stated behaviour, not a greying
+        // dodge. The `+Slots` file is the same slots after the
+        // §2.1 split — the exemption follows the code.
         "SettingsFooter.swift":
+            "either/or slot; each mode renders its own verb; "
+            + "the pill exists only while the draft does",
+        "SettingsFooter+Slots.swift":
             "either/or slot; each mode renders its own verb",
         // "Clear all bindings" acts on bindings; with none
         // stored there is nothing for it to act ON, so it is

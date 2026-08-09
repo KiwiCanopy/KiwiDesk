@@ -21,16 +21,45 @@ struct HomeScreen: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    private var columns: [GridItem] {
-        [
-            GridItem(
-                .adaptive(minimum: 240, maximum: 360),
+    /// Never more than four columns, and the cards GROW into a
+    /// big screen instead of a fifth column appearing (owner
+    /// 2026-08-10) — up to the shipped 360 maximum, then the
+    /// surplus becomes symmetric margin (ui-designer verdict,
+    /// same day: 360 is the ratio every plate was eye-confirmed
+    /// at, and past it the desk-shaped tiles render a screen
+    /// shape no screen has). `.adaptive` cannot say "at most
+    /// four AND growing", so the count derives from the
+    /// measured width; the responsive pass owns the 3→2→1
+    /// steps below and inherits this as the top end.
+    private func columns(for width: CGFloat) -> [GridItem] {
+        let inset = SettingsMetrics.paneInset * 2
+        let usable = max(width - inset, 240)
+        let fit = Int((usable + 16) / (240 + 16))
+        let count = max(1, min(4, fit))
+        return Array(
+            repeating: GridItem(
+                .flexible(minimum: 240, maximum: 360),
                 spacing: 16
-            )
-        ]
+            ),
+            count: count
+        )
+    }
+
+    /// The saturated grid's own width: four 360 pt columns and
+    /// their gaps, plus the pane insets — past this the page
+    /// centres the whole group stack, headings staying flush
+    /// with the grid's left edge.
+    private var gridCap: CGFloat {
+        4 * 360 + 3 * 16 + SettingsMetrics.paneInset * 2
     }
 
     var body: some View {
+        GeometryReader { geo in
+            grid(width: geo.size.width)
+        }
+    }
+
+    private func grid(width: CGFloat) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if firstRunVisible {
@@ -44,17 +73,21 @@ struct HomeScreen: View {
                         "home.group.this_profile",
                         "This Profile"
                     ),
-                    cards: offered(HomeCardOrder.thisProfile)
+                    cards: offered(HomeCardOrder.thisProfile),
+                    columns: columns(for: width)
                 )
                 group(
                     L("home.group.whole_app", "Whole App"),
-                    cards: offered(HomeCardOrder.wholeApp)
+                    cards: offered(HomeCardOrder.wholeApp),
+                    columns: columns(for: width)
                 )
             }
             .padding(
                 [.horizontal, .bottom],
                 SettingsMetrics.paneInset
             )
+            .frame(maxWidth: gridCap)
+            .frame(maxWidth: .infinity, alignment: .center)
             // Home had NO top gutter: the area panes get theirs
             // from `SettingsView`'s scroll content margin, which
             // this screen never passes through, so the first
@@ -108,7 +141,8 @@ struct HomeScreen: View {
 
     @ViewBuilder private func group(
         _ title: String,
-        cards: [SettingsDestination]
+        cards: [SettingsDestination],
+        columns: [GridItem]
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             // Small-caps, tracked, green: the prototype's group

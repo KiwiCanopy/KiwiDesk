@@ -1802,22 +1802,52 @@ the pill alone.
 draft is watched.** (#678 Phase 4, digest §1.1.) An area that
 has something to show gets a fixed 392 pt right column: "Live
 preview · <area>" over the area's preview drawn from the
-DRAFT, then the diff list — collapsible via a `›` handle
-whose pick persists like any disclosure state. Which areas
-offer one is a single data set
+DRAFT, then the diff list. The digest's `›` collapse handle
+is deliberately NOT built (owner 2026-08-10): the responsive
+pass drops the panel by WIDTH below 1200 pt, and a manual
+collapse beside that is a persisted preference duplicating
+what the window already decides — `DetailPanelTests` pins the
+absence so a handle quietly returning must re-argue it. Which
+areas offer one is a single data set
 (`SettingsDetailPanelOffer.offering`), because the
 prototype's rule is a verdict either way: an area with
 nothing to show hides the panel and takes the full width —
 absence must be a decision, never a missing branch. The
 panel's previews are the areas' existing renderers moved,
 never new drawings beside them: the schematic-and-slider,
-the palette scene, the gap miniature and ring pair, the two
-bar strips. Their in-card mounts are REMOVED in the same
+the palette scene, the gap miniature with the ring and drag
+pair, the two bar strips. Their in-card mounts are REMOVED in the same
 change — one screen must not state one fact twice — which
 NARROWS the old "live preview leads its editor" convention
 to areas without a panel (Advanced Colours' group previews
 still lead their rows; the drag and sticky previews stay
 in-card because the panel does not cover them).
+
+**Wide windows cap the content, not the panel.** (#678
+Phase 4; owner 2026-08-10.) The prototype was drawn at 1440
+and the breakpoints only go DOWN, so full screen was
+unspecced — and an uncapped content column stretches every
+row past readability while the panel's previews are pt-tuned
+at 392. So the content column stops at 980 pt (the widest
+column the prototype drew) and centres in the surplus; the
+panel stays 392. Home follows the same instinct at its own
+scale: never more than the digest's four columns — on a big
+screen the CARDS grow instead of a fifth column appearing.
+Whether the panel should take some surplus at extreme widths
+is an open follow-up, not a decision this entry makes.
+
+**An inline disclosure row leads with a thin rule.** (Owner
+2026-08-10: the App Bar's Style accordion was nearly
+overlooked among plain rows.) The prototype draws every
+inline disclosure row with a top border — the rule is the
+"different kind of row" signal, separating the accordion and
+whatever follows it without promoting the drawer to a card.
+And the drawer's sunken well is ONE well: the interior wraps
+its content in a stack before the well chrome, because a
+bare `ForEach` handed to a drawer takes modifiers PER CHILD
+— the Motion drawer shipped every toggle, a caption and a
+lone divider each in its own well before the wrapper made
+the well one.
 
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a

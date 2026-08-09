@@ -20,6 +20,11 @@ struct GapsBordersPanelPreview: View {
             FocusBorderPreview(
                 style: model.config.settings.borderStyle
             )
+            DragVisualPreview(
+                visual: model.config.settings.dragGhost,
+                cornerRadius: model.config.settings
+                    .dragCornerRadius
+            )
             Text(
                 L(
                     "panel.caption.draft",
