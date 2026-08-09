@@ -20,10 +20,15 @@ struct GapsAndBordersSection: View {
 
     var body: some View {
         ScrollView {
+            // Focus border leads the drag visuals since #754:
+            // the ring is the stroke seen all day, and it is the
+            // one the other two match. The Borders card sits
+            // above all three because it holds what they share.
             VStack(alignment: .leading, spacing: 20) {
                 GapsEditor(model: model)
-                DragVisualsEditor(model: model)
+                BordersCard(model: model)
                 FocusBorderEditor(model: model)
+                DragVisualsEditor(model: model)
                 StickyMarkEditor(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)

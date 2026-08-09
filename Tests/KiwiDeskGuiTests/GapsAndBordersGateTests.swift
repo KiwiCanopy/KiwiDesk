@@ -40,12 +40,20 @@ struct GapsAndBordersGateTests {
         return s
     }
 
+    /// Unlinked unless a test says otherwise: the link is a
+    /// separate axis from every predicate below it, so folding
+    /// it into the default would grey three rows in tests that
+    /// are about something else.
     private func gates(
+        linkedWidth: Bool = false,
         _ overrides: (inout TilingSettings) -> Void = { _ in }
     ) -> GapsBordersGates {
         var s = settings()
         overrides(&s)
-        return GapsBordersGates(settings: s)
+        return GapsBordersGates(
+            settings: s,
+            linkedWidth: linkedWidth
+        )
     }
 
     /// The declared-vs-answered split, read off the census: a new
@@ -116,7 +124,8 @@ struct GapsAndBordersGateTests {
                 ghostBorder: false,
                 dropZone: false,
                 dropZoneBorder: false
-            )
+            ),
+            linkedWidth: true
         )
         for key in SettingKey.allCases
         where key.placement.area == .gapsAndBorders
@@ -221,7 +230,8 @@ struct GapsAndBordersGateTests {
     func gapMastersGateOnDiffer() {
         #expect(
             GapsBordersGates(
-                settings: settings(outerEdgesDiffer: true)
+                settings: settings(outerEdgesDiffer: true),
+                linkedWidth: false
             ).inertReason(for: .gaps(.outer)) == .gapsDiffer
         )
         #expect(
@@ -229,7 +239,8 @@ struct GapsAndBordersGateTests {
         )
         #expect(
             GapsBordersGates(
-                settings: settings(innerAxesDiffer: true)
+                settings: settings(innerAxesDiffer: true),
+                linkedWidth: false
             ).inertReason(for: .gaps(.inner)) == .gapsDiffer
         )
         #expect(
@@ -244,7 +255,7 @@ struct GapsAndBordersGateTests {
     func eachReasonHasItsOwnSentence() {
         let all: [GapsBordersGates.InertReason] = [
             .borderOff, .glowOff, .visualOff, .visualBorderOff,
-            .gapsDiffer,
+            .gapsDiffer, .widthLinked,
         ]
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {

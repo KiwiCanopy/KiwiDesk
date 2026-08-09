@@ -2326,7 +2326,10 @@ you drag, KiwiDesk shows two visuals:
   window a drop would swap with.
 
 Each visual has an on/off switch plus an independently toggle-able
-border and fill with configurable colors, thickness, and alignment.
+border and fill with configurable colors and width. Alignment is
+Lua-only and defaults to `outside` for both, matching the focus
+ring; the Settings app's Borders card can drive all three strokes
+off one width instead.
 
 ### drag.set_ghost_enabled
 
@@ -2366,9 +2369,13 @@ drag.set_ghost_border_width(5)
 
 ### drag.set_ghost_border_alignment
 
-**Expects:** `"inside"` or `"outside"`.
+**Expects:** `"inside"` or `"outside"` (default `"outside"`).
 
 **Does:** positions the border inside or outside the slot boundary.
+Lua-only: the Settings app offers no control for it, since the
+focus ring has no alignment concept and a control for two of the
+three strokes could not be made symmetric. Set per stroke, and
+never clamped against its twin.
 
 **Example:**
 
@@ -2454,9 +2461,11 @@ drag.set_drop_zone_border_width(5)
 
 ### drag.set_drop_zone_border_alignment
 
-**Expects:** `"inside"` or `"outside"`.
+**Expects:** `"inside"` or `"outside"` (default `"outside"`).
 
 **Does:** positions the border inside or outside the slot boundary.
+Lua-only, and independent of the ghost's alignment — see
+`drag.set_ghost_border_alignment`.
 
 **Example:**
 
@@ -3987,13 +3996,13 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "ghost": {
         "enabled": true, "border": true,
         "border_color": "#347957", "border_width": 5,
-        "border_alignment": "inside",
+        "border_alignment": "outside",
         "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,
         "border_color": "#C2790A", "border_width": 5,
-        "border_alignment": "inside",
+        "border_alignment": "outside",
         "fill": true, "fill_color": "#C2790A40"
       }
     },

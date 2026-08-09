@@ -1,5 +1,12 @@
 import Foundation
 
+/// Which side of the slot edge a drag visual's stroke is laid
+/// on. Lua-only since #754 — the GUI never offered it for the
+/// focus ring (which has no alignment concept at all), so a
+/// control for two of the three strokes could not be made
+/// symmetric, and at 1–3 pt the choice moves a stroke by half
+/// its width. `drag.set_ghost_border_alignment` and its
+/// drop-zone twin stay fully settable, per stroke, unclamped.
 public enum BorderAlignment: String, Sendable, Codable, Equatable {
     case inside
     case outside
@@ -44,12 +51,16 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     /// #578 — not this one).
     /// Defaults mirrored in docs/lua-reference.md (drag colors)
     /// — change both.
+    /// Aligned `.outside` since #754, matching the focus ring:
+    /// the ring outsets its window and has no alignment knob, so
+    /// an untouched app drew its three strokes two different
+    /// ways. Defaults mirrored in docs/lua-reference.md.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
         borderColor: "#347957",
         borderWidth: 5,
-        borderAlignment: .inside,
+        borderAlignment: .outside,
         fill: true,
         fillColor: "#34795740"
     )
@@ -64,7 +75,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         border: true,
         borderColor: "#C2790A",
         borderWidth: 5,
-        borderAlignment: .inside,
+        borderAlignment: .outside,
         fill: true,
         fillColor: "#C2790A40"
     )

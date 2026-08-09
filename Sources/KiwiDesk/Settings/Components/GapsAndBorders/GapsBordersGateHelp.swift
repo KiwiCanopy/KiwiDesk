@@ -6,9 +6,11 @@ import KiwiDeskCore
 /// assertable off the main actor; the reason and its sentence are
 /// one decision, never two that can disagree (#678, gui.md).
 ///
-/// Every key here is reused from the hand-wired gate this
-/// conversion replaced, so the English is unchanged and no
-/// translation is dropped.
+/// A sentence is authored once, here, and never beside a row —
+/// `GapsAndBordersGateWiringTests` reds on a second copy. When a
+/// sentence's MEANING moves, its key is dropped in the same
+/// change set (localization.md) rather than left to render a
+/// fluent translation of what the row no longer does.
 @MainActor
 enum GapsBordersGateHelp {
     static func sentence(
@@ -34,8 +36,13 @@ enum GapsBordersGateHelp {
         case .visualBorderOff:
             return L(
                 "drag.border.off_help",
-                "Turn on Border to edit its width and "
-                    + "alignment."
+                "Turn on Border to edit its width."
+            )
+        case .widthLinked:
+            return L(
+                "border.link_width.disabled",
+                "Turn off Use one width for all borders to "
+                    + "set this separately."
             )
         case .gapsDiffer:
             return L(

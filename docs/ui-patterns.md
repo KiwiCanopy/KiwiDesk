@@ -173,7 +173,8 @@ two never sit adjacent showing one field two ways. The #291
 audit applied the rule across every editor — converting the
 App Bar fields, Stack's Master
 orientation / Stack position / Overflow, Track's Overflow,
-Drag's Border alignment, and the Focus border Corners — and
+Drag's Border alignment (which itself left the GUI in #754,
+GUI_REMOVED_2026-08), and the Focus border Corners — and
 kept menus where the rule keeps them:
 new-window placement (comparative labels), the seven-option
 Space layout mode, and the dynamic Language and

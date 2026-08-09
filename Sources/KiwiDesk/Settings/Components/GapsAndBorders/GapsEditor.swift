@@ -26,7 +26,10 @@ struct GapsEditor: View {
     }
 
     private var gates: GapsBordersGates {
-        GapsBordersGates(settings: model.config.settings)
+        GapsBordersGates(
+            settings: model.config.settings,
+            linkedWidth: model.borderWidthLinked
+        )
     }
 
     var body: some View {

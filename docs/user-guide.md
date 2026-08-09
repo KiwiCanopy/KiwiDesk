@@ -853,59 +853,52 @@ space. Clicking the menu bar or the Dock does not move focus.
 
 The **Gaps & Borders** section (in the **This Profile** group) sets the
 STRUCTURE of everything KiwiDesk draws around your windows: the
-spacing, the drag overlays' shape, the focus ring's width and
-glow, and whether a sticky window carries a mark. What any of it
-is *painted* with lives in the two colour sections below — every
-colour KiwiDesk has renders in exactly one place, and this is not
-it.
+spacing, the width and rounding its three strokes share, the
+focus ring's glow, the drag overlays, and whether a sticky window
+carries a mark. What any of it is *painted* with lives in the two
+colour sections below — every colour KiwiDesk has renders in
+exactly one place, and this is not it.
 
-### Drag Visuals
+### Borders
 
-When you drag a tiled window, KiwiDesk shows two overlays:
+KiwiDesk strokes three things: the **focus ring** around the
+focused window, the **ghost** left where a dragged window came
+from, and the **drop zone** under the cursor. The **Borders**
+card at the top of the page holds what all three share.
 
-- **Ghost** (the dragged window's slot) — where it snaps back if you
-  release outside any other window.
-- **Drop zone** (the slot under the cursor) — the window this drop
-  acts on. The target follows the **cursor**, not the dragged
-  window's center, so it lands the instant the pointer reaches a
-  slot — even a big window dragged onto a smaller display.
+- **Use one width for all borders**: on by default. While it is
+  on, the **Width** slider below drives the ring, the ghost and
+  the drop zone together, and each stroke's own width slider
+  further down the page stays visible but dimmed, showing what
+  the master set. Turn it off and those sliders come back to
+  life; the master is then the focus ring's own width and
+  nothing more.
+- **Width**: 1–20 pt — for the focus ring, the visible thickness
+  reaching outward into the gap, and the value **Fit layout
+  gaps** sizes gaps from. The ring sits **behind** its window by
+  default, with a small overlap tucked under the window edge so
+  its corners stay closed; that overlap isn't part of the width.
+  Keep gaps at least as wide as the ring so neighbouring rings
+  don't touch.
+- **Corner radius**: 0–40 pt — the ghost's and the drop zone's
+  rounding and, while the widths are linked, what the focus
+  ring's **Corners** picker derives from: 0 pt reads as Square,
+  anything above it as Rounded.
 
-Releasing over another window's slot **on the same display swaps**
-the two; dragging **onto another display moves** the window there.
-The move happens **live**: once the cursor has settled on the
-other display for a beat, the destination's windows slide apart to
-open a real slot under the cursor — the dragged window itself
-stays pinned under the pointer — and from that moment the drag
-behaves exactly like a local one there (release over a window to
-swap, release outside every slot to snap into the opened gap).
-Pulling the cursor back before releasing moves the window home the
-same way. A fast flick across still commits the move at release —
-onto a window's slot it lands there (the windows below it shift
-down one), onto empty space (an empty monitor) it just moves
-across. Releasing outside every slot **on your own display** snaps
-the window back.
+Whether a stroke is laid *inside* or *outside* its slot edge is
+Lua-only (`drag.set_ghost_border_alignment` and its drop-zone
+twin), and both default to `outside` — the focus ring outsets its
+window and has no alignment knob at all, so a control for two of
+the three could never make the page symmetric. See
+[design decisions](design-decisions.md).
 
-Floating windows show neither overlay: they have no tile slot to
-preview, and dropping one over a tiled slot does nothing. Use
-*make tiled* to return a window to the grid first (see
-[design decisions](design-decisions.md) for why).
-
-Toggle each visual on/off and customize:
-
-- **Border**: show/hide, thickness (pt), and alignment (inside or
-  outside the slot edge).
-- **Fill**: show/hide.
-- **Corner radius**: match your windows' corner rounding.
-
-Both overlays' colours are in **Advanced Colors ▸ Drag colors**,
-laid out as the same two columns.
 
 ### Focus Border
 
-Below Drag Visuals, the **Focus border** group puts a thin border
-around the focused window so you never lose track of which window
-has focus in a gapped layout — the cue keyboard-driven focus
-otherwise lacks. It is **on by default**.
+Below the Borders card, the **Focus border** group puts a thin
+border around the focused window so you never lose track of which
+window has focus in a gapped layout — the cue keyboard-driven
+focus otherwise lacks. It is **on by default**.
 
 On supported macOS versions, KiwiDesk draws the border as a native
 WindowServer overlay and follows move, resize, and ordering events at
@@ -925,15 +918,11 @@ windows. Below it:
   Floating windows get no border when unfocused (only the focused
   window does, whether tiled or floating); monocle always shows
   only the focused border.
-- **Width**: 1–20 pt — the visible thickness reaching outward into
-  the gap, and the value **Fit layout gaps** sizes gaps from. The
-  border sits **behind** its window by default, with a small
-  overlap tucked under the window edge so its corners stay
-  closed; that overlap isn't part of the width. Keep gaps at least as wide as the border so
-  neighbouring borders don't touch.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
+  Dimmed while **Use one width for all borders** is on, showing
+  what the Borders card's **Corner radius** derives.
 - **Glow effect**: wraps the focused border in a soft colored bloom
   for a bit more presence. Off by default; it only ever touches the
   focused window, never the unfocused borders. The live preview
@@ -993,6 +982,51 @@ reaches a floating window sitting that way (including a
 floating sticky shown on the space). So a float parked beside
 the tiles is one keypress away, while navigating between tiles
 never detours through a float hovering over them.
+
+### Drag Visuals
+
+When you drag a tiled window, KiwiDesk shows two overlays:
+
+- **Ghost** (the dragged window's slot) — where it snaps back if you
+  release outside any other window.
+- **Drop zone** (the slot under the cursor) — the window this drop
+  acts on. The target follows the **cursor**, not the dragged
+  window's center, so it lands the instant the pointer reaches a
+  slot — even a big window dragged onto a smaller display.
+
+Releasing over another window's slot **on the same display swaps**
+the two; dragging **onto another display moves** the window there.
+The move happens **live**: once the cursor has settled on the
+other display for a beat, the destination's windows slide apart to
+open a real slot under the cursor — the dragged window itself
+stays pinned under the pointer — and from that moment the drag
+behaves exactly like a local one there (release over a window to
+swap, release outside every slot to snap into the opened gap).
+Pulling the cursor back before releasing moves the window home the
+same way. A fast flick across still commits the move at release —
+onto a window's slot it lands there (the windows below it shift
+down one), onto empty space (an empty monitor) it just moves
+across. Releasing outside every slot **on your own display** snaps
+the window back.
+
+Floating windows show neither overlay: they have no tile slot to
+preview, and dropping one over a tiled slot does nothing. Use
+*make tiled* to return a window to the grid first (see
+[design decisions](design-decisions.md) for why).
+
+Toggle each visual on/off and customize:
+
+- **Border**: show/hide, and its **Width** (pt) — dimmed while
+  **Use one width for all borders** is on, showing the width the
+  Borders card set.
+- **Fill**: show/hide.
+
+The corner radius both overlays round to is on the **Borders**
+card, and which side of the slot edge each stroke is laid on is
+Lua-only.
+
+Both overlays' colours are in **Advanced Colors ▸ Drag colors**,
+laid out as the same two columns.
 
 ### Sticky Windows
 

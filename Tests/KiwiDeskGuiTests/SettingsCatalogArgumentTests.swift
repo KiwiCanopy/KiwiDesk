@@ -138,7 +138,8 @@ struct SettingsCatalogArgumentTests {
         // `spacePlacement` is gone — the picture and the
         // not-connected banner are gated rows inside one card
         // rather than two cards sharing an anchor id.
-        #expect(direct.values.reduce(0, +) == 48)
+        // 49 since #754: the Borders card, mounted once.
+        #expect(direct.values.reduce(0, +) == 49)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

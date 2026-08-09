@@ -1,9 +1,16 @@
 /// Borders, sticky/floating marks and drag visuals
 /// (`BorderStyle`, `StickyStyle`, `FloatingStyle`,
 /// `DragGhost`, `DragDropZone`).
+///
+/// The three strokes KiwiDesk draws — the focus ring, the drag
+/// ghost and the drop zone — share one width and one corner
+/// decision in the `.borders` card (#754). The two per-stroke
+/// alignment rows left the GUI there (GUI_REMOVED_2026-08); the
+/// Lua verbs stay.
 
 enum BordersKey: String, CaseIterable, Hashable {
     case borderEnabled = "settings.borderStyle.enabled"
+    case linkedBorderWidth = "UserDefaults.borders.linkedWidth"
     case borderFocusedColor = "settings.borderStyle.focusedColor"
     case borderUnfocusedEnabled = "settings.borderStyle.unfocusedEnabled"
     case borderUnfocusedColor = "settings.borderStyle.unfocusedColor"
@@ -47,8 +54,19 @@ extension BordersKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .borderWidth, .borderFitGapsExtraSpacing:
-            return .row(.gapsAndBorders, .focusBorder, .atRest)
+        // The two shared decisions, lifted out of the sections
+        // they used to sit in (#754). Width is still the ring's
+        // own stored value and corner radius still the drag
+        // pair's — the link makes each of them drive the other
+        // strokes too, so the row belongs to neither section
+        // any more. Never inside `.focusBorder`: the ring going
+        // off must not grey a control the drag visuals read.
+        case .linkedBorderWidth, .borderWidth:
+            return .row(.gapsAndBorders, .borders, .atRest)
+        case .borderFitGapsExtraSpacing:
+            // Behind Show more with the glow rows: a parameter
+            // to one action, below the ring's own shape.
+            return .row(.gapsAndBorders, .focusBorder, .showMore)
         // The .borders container carries no block gate
         // (stickyColor shares it, deliberately ungated), so
         // the border colors ride borderEnabled on the row.
@@ -59,9 +77,19 @@ extension BordersKey {
                 .atRest,
                 gate: .setting(.borders(.borderEnabled))
             )
-        case .borderUnfocusedEnabled, .borderCorner, .borderGlow,
+        case .borderUnfocusedEnabled, .borderGlow,
             .borderGlowSizeAuto:
             return .row(.gapsAndBorders, .focusBorder, .showMore)
+        case .borderCorner:
+            // A follower of the Borders card's corner master
+            // while the link is on: greyed, showing what the
+            // radius derives (#754, #171).
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .showMore,
+                gate: .runtime(.borderWidthLinked)
+            )
         case .borderUnfocusedColor:
             return .row(
                 .advancedColours,
@@ -113,7 +141,10 @@ extension BordersKey {
                 .showMore
             )
         case .dragCornerRadius:
-            return .row(.gapsAndBorders, .dragAndDrop, .showMore)
+            // The corner master (#754) — already shared by ghost
+            // and drop zone, and now the source `borderCorner`
+            // derives from while the link is on.
+            return .row(.gapsAndBorders, .borders, .showMore)
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
         // Each drag column greys wholesale off its Enabled
@@ -154,25 +185,39 @@ extension BordersKey {
                     .borders(.dragGhostFill),
                 ])
             )
-        case .dragGhostBorderWidth, .dragGhostBorderAlignment:
+        case .dragGhostBorderWidth:
             return .row(
                 .gapsAndBorders,
                 .dragAndDrop,
                 .showMore,
-                gate: .anyOf([
-                    .borders(.dragGhostEnabled),
-                    .borders(.dragGhostBorder),
-                ])
+                gate: .anyOfMixed(
+                    settings: [
+                        .borders(.dragGhostEnabled),
+                        .borders(.dragGhostBorder),
+                    ],
+                    runtime: [.borderWidthLinked]
+                )
             )
-        case .dragDropZoneBorderWidth, .dragDropZoneBorderAlignment:
+        case .dragGhostBorderAlignment,
+            .dragDropZoneBorderAlignment:
+            // GUI_REMOVED_2026-08 (#754). The ring has no
+            // alignment concept, so the control could only ever
+            // cover two of the three strokes the page is making
+            // symmetric; both verbs stay Lua-settable per
+            // stroke. A surfaceless row carries no gate.
+            return .luaOnly
+        case .dragDropZoneBorderWidth:
             return .row(
                 .gapsAndBorders,
                 .dragAndDrop,
                 .showMore,
-                gate: .anyOf([
-                    .borders(.dragDropZoneEnabled),
-                    .borders(.dragDropZoneBorder),
-                ])
+                gate: .anyOfMixed(
+                    settings: [
+                        .borders(.dragDropZoneEnabled),
+                        .borders(.dragDropZoneBorder),
+                    ],
+                    runtime: [.borderWidthLinked]
+                )
             )
         case .dragDropZoneBorderColor:
             return .row(
@@ -211,6 +256,8 @@ extension BordersKey {
         switch self {
         case .borderEnabled:
             return .text("border.enabled")
+        case .linkedBorderWidth:
+            return .text("border.link_width")
         // On the Focus-border card each ring tint could be
         // "Color", the card being the context. In a Borders
         // group holding three tints, two rows named "Color" name
@@ -256,8 +303,10 @@ extension BordersKey {
             return .text("drag.border")
         case .dragGhostBorderWidth, .dragDropZoneBorderWidth:
             return .text("drag.border_width")
-        case .dragGhostBorderAlignment, .dragDropZoneBorderAlignment:
-            return .text("drag.border_alignment")
+        case .dragGhostBorderAlignment,
+            .dragDropZoneBorderAlignment:
+            // GUI_REMOVED_2026-08 — surfaceless, so no label.
+            return .none
         case .dragGhostFill, .dragDropZoneFill:
             return .text("drag.fill")
         case .dragGhostFillColor, .dragDropZoneFillColor:

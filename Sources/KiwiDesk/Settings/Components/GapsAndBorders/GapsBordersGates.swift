@@ -18,9 +18,10 @@ import KiwiDeskCore
 ///   gate resolves once at the container, not per row.
 /// - `inertReason(for:)` — the row and runtime gates inside a
 ///   live block: the glow-size row (glow off), the drag columns
-///   (visual or its border off), and the two gap masters (their
+///   (visual or its border off), the two gap masters (their
 ///   edges / axes differ, the `.runtime(.perEdgeValuesDiffer)`
-///   gate).
+///   gate) and the three strokes the one-width link owns (the
+///   `.runtime(.borderWidthLinked)` gate, #754).
 ///
 /// Returning the reason rather than a Bool keeps the grey and its
 /// inline sentence from being two decisions that can disagree
@@ -28,6 +29,13 @@ import KiwiDeskCore
 /// whole resolver assertable off the main actor.
 struct GapsBordersGates {
     let settings: TilingSettings
+    /// The "Use one width for all borders" pick — a GUI
+    /// preference (`BorderWidthLinkPreference`), not a config
+    /// field, so it arrives as an input rather than off
+    /// `settings`. Taken explicitly at every construction site
+    /// on purpose: a default here would let a view forget it and
+    /// quietly resolve the link gate the wrong way.
+    let linkedWidth: Bool
 
     /// Why a row (or the Focus-border block) is inert. One case
     /// per predicate; the sentence lives in `GapsBordersGateHelp`.
@@ -37,6 +45,7 @@ struct GapsBordersGates {
         case visualOff
         case visualBorderOff
         case gapsDiffer
+        case widthLinked
     }
 
     /// The one container gate in this area: the Focus-border block
@@ -67,25 +76,33 @@ struct GapsBordersGates {
         case .borders(.borderGlowSize):
             guard settings.borderStyle.enabled else { return nil }
             return settings.borderStyle.glow ? nil : .glowOff
+        case .borders(.borderCorner):
+            // Same stand-down as the glow row: with the ring off
+            // the block owns the grey, so this reason must not
+            // shadow the block's "turn on Show focus border".
+            guard settings.borderStyle.enabled else { return nil }
+            return linkedWidth ? .widthLinked : nil
         case .borders(.dragGhostBorder),
             .borders(.dragGhostFill):
             return settings.dragGhost.enabled ? nil : .visualOff
-        case .borders(.dragGhostBorderWidth),
-            .borders(.dragGhostBorderAlignment):
+        case .borders(.dragGhostBorderWidth):
             if !settings.dragGhost.enabled { return .visualOff }
-            return settings.dragGhost.border
-                ? nil : .visualBorderOff
+            if !settings.dragGhost.border {
+                return .visualBorderOff
+            }
+            return linkedWidth ? .widthLinked : nil
         case .borders(.dragDropZoneBorder),
             .borders(.dragDropZoneFill):
             return settings.dragDropZone.enabled
                 ? nil : .visualOff
-        case .borders(.dragDropZoneBorderWidth),
-            .borders(.dragDropZoneBorderAlignment):
+        case .borders(.dragDropZoneBorderWidth):
             if !settings.dragDropZone.enabled {
                 return .visualOff
             }
-            return settings.dragDropZone.border
-                ? nil : .visualBorderOff
+            if !settings.dragDropZone.border {
+                return .visualBorderOff
+            }
+            return linkedWidth ? .widthLinked : nil
         default:
             // A gated key with no arm here is a bug: the census
             // declared a gate this resolver cannot answer. Fail
@@ -107,14 +124,13 @@ struct GapsBordersGates {
         .gaps(.outer),
         .gaps(.inner),
         .borders(.borderGlowSize),
+        .borders(.borderCorner),
         .borders(.dragGhostBorder),
         .borders(.dragGhostFill),
         .borders(.dragGhostBorderWidth),
-        .borders(.dragGhostBorderAlignment),
         .borders(.dragDropZoneBorder),
         .borders(.dragDropZoneFill),
         .borders(.dragDropZoneBorderWidth),
-        .borders(.dragDropZoneBorderAlignment),
     ]
 
     /// Declared-but-answered-elsewhere. Empty and kept so a new

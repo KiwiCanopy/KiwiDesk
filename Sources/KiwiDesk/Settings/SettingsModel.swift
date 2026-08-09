@@ -98,6 +98,13 @@ final class SettingsModel: ObservableObject {
     /// `setSettingsMode`, so it never enters the dirty-tracked
     /// config — same shape and reasoning as `appearance`.
     @Published var settingsMode: SettingsMode = .simple
+    /// "Use one width for all borders" (#754). Read at init
+    /// through the `preferences` seam and written back through
+    /// `setBorderWidthLinked`, so it never enters the
+    /// dirty-tracked config — same shape and reasoning as
+    /// `appearance`, and `BorderWidthLinkPreference` argues why
+    /// it is not a `TilingSettings` field either.
+    @Published var borderWidthLinked = true
     /// Distinct settings the draft changes — the header's
     /// "N unsaved changes" count, recomputed beside `isDirty`
     /// from the same baselines so the two cannot disagree.
@@ -298,6 +305,9 @@ final class SettingsModel: ObservableObject {
             from: preferences
         )
         self.appearance = AppearancePreference.read(
+            from: preferences
+        )
+        self.borderWidthLinked = BorderWidthLinkPreference.read(
             from: preferences
         )
         reload()

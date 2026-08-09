@@ -34,7 +34,7 @@ struct DragVisualCommandTests {
         )
         core.execute(
             "drag.set_ghost_border_alignment",
-            args: [.string("outside")]
+            args: [.string("inside")]
         )
         core.execute(
             "drag.set_drop_zone_border_width",
@@ -52,9 +52,14 @@ struct DragVisualCommandTests {
         #expect(!settings.dragGhost.enabled)
         #expect(settings.dragGhost.fillColor == "#112233")
         #expect(settings.dragGhost.borderWidth == 4)
-        #expect(settings.dragGhost.borderAlignment == .outside)
+        #expect(settings.dragGhost.borderAlignment == .inside)
         #expect(settings.dragDropZone.borderWidth == 3)
-        #expect(settings.dragDropZone.borderAlignment == .inside)
+        // Per stroke, not per pair: the ghost was set
+        // `.inside` above and the drop zone keeps the shipped
+        // default, `.outside` since #754.
+        #expect(
+            settings.dragDropZone.borderAlignment == .outside
+        )
         #expect(!settings.dragDropZone.border)
         #expect(settings.dragCornerRadius == 26)
     }

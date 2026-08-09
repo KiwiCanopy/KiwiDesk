@@ -54,6 +54,7 @@ struct GapsAndBordersGateWiringTests {
             "FocusBorderEditor.swift": [
                 "gates.containerReason(for:.focusBorder)",
                 "gates.inertReason(for:.borders(.borderGlowSize))",
+                "gates.inertReason(for:.borders(.borderCorner))",
             ],
             "DragVisualsEditor.swift": [
                 "gates.inertReason(for:.borders(.dragGhostBorder))",
@@ -92,10 +93,12 @@ struct GapsAndBordersGateWiringTests {
         // General describe one status two ways.
         let help = try read("GapsBordersGateHelp.swift")
         let allEditors =
-            Array(consults.keys) + ["StickyMarkEditor.swift"]
+            Array(consults.keys)
+            + ["StickyMarkEditor.swift", "BordersCard.swift"]
         for key in [
             "border.controls.disabled",
             "border.glow_size.disabled",
+            "border.link_width.disabled",
             "drag.disabled.help",
             "drag.border.off_help",
             "gaps.mixed.help",
@@ -111,6 +114,56 @@ struct GapsAndBordersGateWiringTests {
                         rawValue:
                             "\(name) re-authors \(key) — it must "
                             + "come from GapsBordersGateHelp"
+                    )
+                )
+            }
+        }
+    }
+
+    /// The one-width link (#754), keyed on the sites that USE
+    /// the answer rather than on the properties that compute it.
+    /// A `cornerReason` nobody wraps a `GreyOut` in, or a link
+    /// toggle bound to `borderWidthLinked` without going through
+    /// the setter that persists it and syncs the followers, both
+    /// satisfy every consult needle above while shipping the
+    /// feature dead — the Monitors lesson (gui.md).
+    @Test("the width link is wired at its use sites")
+    func widthLinkIsWiredWhereItActs() throws {
+        func squashed(_ name: String) throws -> String {
+            SourceScan.stripComments(try read(name))
+                .split(whereSeparator: \.isWhitespace)
+                .joined()
+        }
+        let uses: [String: [String]] = [
+            // The follower rows' dim, per row.
+            "FocusBorderEditor.swift": [
+                "GreyOut(active:cornerReason!=nil,"
+            ],
+            "DragVisualsEditor.swift": [
+                "GreyOut(active:borderReason!=nil,"
+            ],
+            // The toggle writes through the model verb, and the
+            // masters are the model's fan-out bindings — a card
+            // reaching `$model.config.settings.borderStyle.width`
+            // directly would set the ring alone and leave the two
+            // greyed sliders lying.
+            "BordersCard.swift": [
+                "isOn:linked",
+                "model.setBorderWidthLinked($0)",
+                "value:model.borderWidthMaster,",
+                "value:model.borderCornerMaster,",
+            ],
+        ]
+        for (name, needles) in uses {
+            let source = try squashed(name)
+            for needle in needles {
+                #expect(
+                    source.contains(needle),
+                    Comment(
+                        rawValue:
+                            "\(name) no longer uses `\(needle)` — "
+                            + "the width link resolves and then "
+                            + "changes nothing on screen"
                     )
                 )
             }

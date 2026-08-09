@@ -150,12 +150,12 @@ item's only appearance in CLI output.
 | Drag | `drag.set_ghost_enabled` | true\|false |
 | | `drag.set_ghost_border` / `drag.set_ghost_fill` | true\|false |
 | | `drag.set_ghost_border_width` | pt (default 5) |
-| | `drag.set_ghost_border_alignment` | `inside\|outside` (default inside) |
+| | `drag.set_ghost_border_alignment` | `inside\|outside` (default outside, Lua-only) |
 | | `drag.set_ghost_border_color` / `drag.set_ghost_fill_color` | #RRGGBB[AA] |
 | | `drag.set_drop_zone_enabled` | true\|false |
 | | `drag.set_drop_zone_border` / `drag.set_drop_zone_fill` | true\|false |
 | | `drag.set_drop_zone_border_width` | pt (default 5) |
-| | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default inside) |
+| | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default outside, Lua-only) |
 | | `drag.set_drop_zone_border_color` / `drag.set_drop_zone_fill_color` | #RRGGBB[AA] |
 | | `drag.set_corner_radius` | pt (default 16) |
 | Stack | `stack.promote` / `stack.demote` | — |

@@ -3287,21 +3287,23 @@ which is exactly where macOS System Settings itself reaches
 for twin panels (Displays' Arrangement, Desktop & Dock's
 light/dark), so twin columns state the pairing once instead
 of duplicating preview-then-controls structure. The shared
-corner radius sits full-width above both (it styles neither
-alone). In the narrower columns, rows drop the group prefix
-already carried by the Border/Fill sub-grouping ("Border
-color" → "Color", "Border width" → "Width", "Border
-alignment" → "Alignment"), narrowed onto the
-`dragColumnLabelColumn` axis via the `settingsLabelColumn`
-override; VoiceOver keeps the full name through `a11yLabel`.
-The preview renders **Inside vs Outside** border alignment
-(inset within the tile vs a larger footprint outside its
-edge, offset scaling with the border width) — schematic, not
-pixel-exact, but the control was previously dead because
-SwiftUI `.strokeBorder` always draws inside; and both the
-corner-radius and
-border-width previews now remap the full slider range instead
-of hard-capping halfway (the `AppBarPreviewStrip` fix).
+corner radius sat full-width above both until #754 lifted it
+to the Borders card, where it styles the ring too — it never
+belonged to either column. In the narrower columns, rows drop
+the group prefix already carried by the Border/Fill
+sub-grouping ("Border color" → "Color", "Border width" →
+"Width"), narrowed onto the `dragColumnLabelColumn` axis via
+the `settingsLabelColumn` override; VoiceOver keeps the full
+name through `a11yLabel`. The alignment row was a third such
+case until it left the GUI in #754 (GUI_REMOVED_2026-08); its
+preview still renders **Inside vs Outside** (inset within the
+tile vs a larger footprint outside its edge, offset scaling
+with the border width) because the value is still settable
+from Lua — schematic, not pixel-exact, but the control was
+previously dead because SwiftUI `.strokeBorder` always draws
+inside. Both the corner-radius and border-width previews remap
+the full slider range instead of hard-capping halfway (the
+`AppBarPreviewStrip` fix).
 
 **[Trade-off]**
 
@@ -3347,6 +3349,61 @@ sibling takes, since a percent of a scroll axis is tens of
 points on any display this app targets;
 `SlotSizePercentRangeTests` holds the slider to the model's own
 bounds and to a step the standard lands on.
+
+**[Principle]**
+
+**One width, one rounding, three strokes — and the link that
+says so is GUI convenience, never a config axis.** KiwiDesk
+strokes three things around a window: the focus ring, the drag
+ghost and the drop zone. Asked as three independent decisions
+they were three chances to answer once and forget twice, and
+nobody holds the preference that comes out of that — a 3 pt
+ring beside a 1 pt ghost is an oversight wearing the clothes of
+a setting. So the Gaps &amp; Borders page leads with a Borders
+card holding what all three share, and **Use one width for all
+borders** is on by default.
+
+What the link must NOT become is a fourth stored value. The
+three widths already exist in `TilingSettings`; a `linked` field
+beside them would describe the other three rather than draw
+anything, and Lua would gain a knob whose effect it cannot read
+back. So the pick lives where the Settings mode and the
+appearance override live — app preferences, absent reading as
+linked — and the master sliders are a WRITE FAN-OUT over the
+values the config already has. Two consequences a future change
+must keep: turning the link ON converges the strokes right then
+(a dimmed slider that goes on showing a width the master does
+not own is the lie the card exists to remove), and turning it
+OFF changes nothing, because unlinking is a statement about
+future edits, not a reset.
+
+The followers stay on screen, dimmed (grey, don't hide, #171) —
+the grey is the whole hint, and a caption saying "this is
+controlled above" would only repeat what the dimming already
+says while the link toggle is two inches up the page.
+
+**[Rationale]**
+
+**Border alignment is Lua-only, and both strokes default to
+`outside`.** Inside-vs-outside is a real choice — at 1–3 pt it
+moves a stroke by half its width — but only two of KiwiDesk's
+three strokes can be asked it. The focus ring outsets its
+window and has no alignment concept at all, so a GUI control
+would make the page symmetric in every respect except the one
+row where it silently covers two of three. A page that asks the
+same question of some strokes and not others teaches the wrong
+model of what the strokes are, and the cost of not asking it in
+the GUI is a value a `drag.set_ghost_border_alignment` call
+sets in one line.
+
+The defaults flipped from `inside` to `outside` in the same
+breath, and for the same reason rather than for taste: with the
+ring outsetting and the drag pair insetting, an untouched
+install drew its three strokes two different ways, and every
+comparison a user made between them was against a difference
+nobody chose. The verbs stay per stroke and unclamped — the GUI
+curates, Lua stays open — so a deliberately mixed pair is still
+one call away.
 
 ### App Bar
 
