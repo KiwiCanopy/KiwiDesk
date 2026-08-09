@@ -29,7 +29,7 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Six ratified exceptions, none with setup/teardown coupling or
+  Seven ratified exceptions, none with setup/teardown coupling or
   assertions of their own, and all but the fake WindowServer
   *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
@@ -74,6 +74,18 @@ bite large test PRs:
     and not the other and the wider copy silently exempts a
     file from a fail-open guard (#573 proved that exact bug
     with a one-file probe that passed every check).
+  - *the schematic placement promise* in
+    `SchematicPlacementPromise.swift` — the four-arm statement of
+    where a preview's `+` lands, read by
+    `LayoutSchematicPlacementTests` and
+    `LayoutSchematicScrollingTests`. Admitted on the divergence
+    ground in its sharpest form: the copies would be of **the
+    rule under guard**, so retuning it in one suite leaves the
+    other green on the retired rule while both read as covering
+    the same promise. The two suites cannot simply be one — the
+    350-line ceiling is what split them. Only the statement is
+    shared; each suite keeps its own `check` wrapper, so no
+    assertion lives here.
   - *test-core construction* in `TestCore.swift` — the
     `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565),
     one copy per test target since test targets cannot see each

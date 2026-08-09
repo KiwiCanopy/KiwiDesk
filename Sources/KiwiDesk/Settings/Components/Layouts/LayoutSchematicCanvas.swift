@@ -1,45 +1,17 @@
 import SwiftUI
 
-/// The bordered mini-screen a schematic draws into: a rounded
-/// outline with the content clipped inside. Reused by the single-
-/// frame `SchematicCanvas` and each pane of the two-frame
-/// `SchematicPair`, so every frame in the family reads the same.
-/// A `nil` width means "fill the width available" — the panel
-/// scale spans its pane rather than sitting at a fixed size, so
-/// the live preview grows with the Settings window.
-struct SchematicScreen<Content: View>: View {
-    var width: CGFloat? = LayoutSchematic.canvasWidth
-    var height: CGFloat = LayoutSchematic.canvasHeight
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        ZStack {
-            content
-                .padding(LayoutSchematic.inset)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-            RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(Color.secondary.opacity(0.6))
-        }
-        .frame(maxWidth: width == nil ? .infinity : nil)
-        .frame(width: width, height: height)
-    }
-}
-
-/// The static arrow between the two panes of a *sequence* pair
-/// (BSP): it reads as "then this happens", never a play button
-/// (no motion — the schematics stay static, #123).
-struct SchematicArrow: View {
-    var body: some View {
-        Image(systemName: "arrow.right")
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(.secondary)
-            .accessibilityHidden(true)
-    }
-}
-
-/// A single-frame schematic: one mini-screen plus a caption,
-/// centred as a self-contained tile. Size defaults to the family
-/// 140×96 but a mode may grow it (Scrolling draws a monitor).
+/// A schematic: one mini-screen plus a caption, centred as a
+/// self-contained tile. Size defaults to the family 140×96 but a
+/// mode may grow it (BSP argues from a widescreen frame).
+///
+/// **One frame per layout, whatever it has to say** (#753). A
+/// two-frame pair shipped here for the one fact thought
+/// inexpressible in a still frame — Scrolling's `follow` pan —
+/// and bought nothing: two states with the tween left to the
+/// reader is not motion either, and it cost double the width, an
+/// arrow drawn nowhere else and two sub-captions. The caption
+/// says the fact in words for the price of a line, so a layout
+/// asking for a second frame is asking for a better caption.
 ///
 /// Centered on purpose (the `.frame(maxWidth:.infinity)` with no
 /// alignment): this is a **standalone illustration** — nothing is
@@ -62,49 +34,9 @@ struct SchematicCanvas<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            SchematicScreen(width: width, height: height) {
-                content
-            }
-            .accessibilityElement()
-            .accessibilityLabel(axLabel)
-            if showsCaption {
-                Text(caption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-/// A two-frame schematic. `sequence` puts a `SchematicArrow`
-/// between the panes ("before → after", BSP); otherwise a plain
-/// gutter reads as a side-by-side comparison. Each pane may carry
-/// its own sub-caption; a shared caption sits below both.
-struct SchematicPair<First: View, Second: View>: View {
-    var frameWidth: CGFloat? = 120
-    var frameHeight: CGFloat = 96
-    var sequence: Bool = true
-    var firstCaption: String? = nil
-    var secondCaption: String? = nil
-    let caption: String
-    let axLabel: String
-    var showsCaption = true
-    @ViewBuilder let first: First
-    @ViewBuilder let second: Second
-
-    var body: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 10) {
-                pane(first, sub: firstCaption)
-                if sequence {
-                    SchematicArrow()
-                }
-                pane(second, sub: secondCaption)
-            }
-            .accessibilityElement()
-            .accessibilityLabel(axLabel)
+            screen
+                .accessibilityElement()
+                .accessibilityLabel(axLabel)
             if showsCaption {
                 Text(caption)
                     .font(.caption)
@@ -115,25 +47,42 @@ struct SchematicPair<First: View, Second: View>: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func pane<C: View>(
-        _ content: C,
-        sub: String?
-    ) -> some View {
-        VStack(spacing: 3) {
-            SchematicScreen(
-                width: frameWidth,
-                height: frameHeight
-            ) {
-                content
-            }
-            // A sub-caption only ever appears with the shared one
-            // (both are the pair's prose), so a thumbnail drops
-            // both rather than keeping a dangling half-label.
-            if let sub, showsCaption {
-                Text(sub)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+    /// The bordered mini-screen itself: a rounded outline with the
+    /// content clipped at the frame's edge, so every frame in the
+    /// family reads the same and none draws past its own border.
+    ///
+    /// **The clip does not crop where a reader assumes, and this
+    /// is where that is written down.** Content is padded by
+    /// `LayoutSchematic.inset` and only then clipped at the
+    /// border, so the clip sits OUTSIDE the inset and a shape left
+    /// to it still bleeds a few points into that band. A schematic
+    /// that must not draw there therefore skips the drawing
+    /// instead (Scrolling's off-monitor ghosts at `.tile`, #753).
+    /// Prose binding schematics to that — gui.md,
+    /// `docs/ui-patterns.md`, `docs/design-decisions.md` — cites
+    /// this site rather than restating the mechanism: it had been
+    /// restated at each of them, and moving the clip inside the
+    /// inset would have falsified every copy while none of them
+    /// knew the others existed.
+    ///
+    /// Inlined here since #753: this was a `SchematicScreen` type
+    /// because each pane of the retired two-frame `SchematicPair`
+    /// mounted one too, and a look shared by two callers is worth
+    /// a name. With the pair gone it had exactly one, like the
+    /// three types that retired with it.
+    ///
+    /// A `nil` width means "fill the width available" — the panel
+    /// scale spans its pane rather than sitting at a fixed size,
+    /// so the live preview grows with the Settings window.
+    private var screen: some View {
+        ZStack {
+            content
+                .padding(LayoutSchematic.inset)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(Color.secondary.opacity(0.6))
         }
+        .frame(maxWidth: width == nil ? .infinity : nil)
+        .frame(width: width, height: height)
     }
 }

@@ -143,6 +143,7 @@ from localization_guards import (
     placeholder_drift,
     tagged_stub,
     unregistered_locales,
+    withheld_argument_position,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -560,6 +561,12 @@ def check_content(
                     f"the English — {value[:70]!r} (English: "
                     f"{english[:50]!r})"
                 )
+            stranded = withheld_argument_position(key, value)
+            if stranded:
+                problems.append(
+                    f"{locale}.json :: {key} {stranded} — "
+                    f"{value[:70]!r}"
+                )
             kept = untranslated_mode_names(
                 value, catalog, mapping
             )
@@ -603,6 +610,16 @@ def check_content(
             problems.append(
                 f"en.json :: {key} contains {script} characters, "
                 f"which English does not use — {value[:70]!r}"
+            )
+        # The English frame is authored in Swift, so this arm
+        # catches the author rather than the translator — and it
+        # is the arm that matters most: every locale copies the
+        # frame's shape from an English source that already had
+        # the clause in the wrong place.
+        stranded = withheld_argument_position(key, value)
+        if stranded:
+            problems.append(
+                f"en.json :: {key} {stranded} — {value[:70]!r}"
             )
 
     for first, second, keys in overlapping_locales(

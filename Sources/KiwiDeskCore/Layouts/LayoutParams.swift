@@ -106,7 +106,12 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
 {
     /// Where the focused slot rests in the viewport, applied on
     /// every focus change (#239).
-    public enum Anchor: String, Sendable, Codable {
+    ///
+    /// `CaseIterable` so the sweeps stop hand-listing the cases: a
+    /// fifth anchor has to be *drawn* by the Scrolling preview and
+    /// *placed* by it, and a hand-listed sweep would go on passing
+    /// over four of five (#753).
+    public enum Anchor: String, Sendable, Codable, CaseIterable {
         /// Focused slot centred in the viewport.
         case center
         /// Flush against the leading edge of the scroll axis —

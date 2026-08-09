@@ -171,9 +171,9 @@ struct LayoutSchematicPlacementScanTests {
     }
 
     /// BSP, Stack, Grid, Track and Scrolling take a placement;
-    /// Monocle and the Scrolling follow pair do not, so the
-    /// `read` floor is two short of the schematic count. Derived
-    /// rather than typed out, so adding a tuned layout moves it.
+    /// Monocle does not, so the `read` floor is one short of the
+    /// tuned-layout count. Derived rather than typed out, so
+    /// adding a tuned layout moves it.
     private var placementTakingSchematics: Int {
         LayoutMode.placementTabs.count - 1
     }

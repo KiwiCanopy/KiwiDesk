@@ -1537,6 +1537,81 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
+**A layout gets one frame, whatever it has to teach** (#753,
+superseding the #125/#239 two-frame bar, which stood in
+[UI patterns](ui-patterns.md) ▸ Previews & schematics). That
+earlier
+rule let a layout earn a second frame — two mini-screens with an
+arrow between them — for a fact "inexpressible in one frame at
+any window count", and exactly one claim ever cleared it:
+Scrolling's `follow` anchor, where the viewport pans the minimum
+to reveal the newly focused window. A still picture cannot show
+motion.
+
+The premise is true and the conclusion does not follow. **A pair
+does not show motion either.** It shows two *states* and asks the
+reader to infer the tween — a second inference stacked on the one
+the still frame already asked for. Against that inference it
+charges double the width in a chooser whose whole job is
+comparison at a glance, an arrow drawn nowhere else in the
+family, two sub-captions, and two more strings in eleven
+catalogs. The caption states the same fact in one clause, in the
+reader's own language, and every schematic already has one.
+
+What breaks without the rule is the chooser. A strip of
+thumbnails reads as a set only while the tiles are comparable;
+the moment one is twice the width of its neighbours it reads as
+broken rather than as special, which is precisely how the
+Scrolling tile read. And the bar itself cannot be applied
+consistently, because *every* transition is inexpressible in a
+still frame and none of them is expressible in two — so the bar
+was never a test, only a description of the one case that had
+already been built.
+
+**The cost is named rather than argued away: two picker options
+now draw the same picture.** `follow` pins the focus nowhere, so
+the only resting position it can honestly draw is the neutral
+one — which is `center`'s, to the pixel. A reader who clicks
+between the two sees the frame not move. That is accepted,
+because the preview's subject is the **rest state** and at rest
+the two genuinely are the same layout; what separates them is
+behaviour *under motion*, which no frame of any count denotes.
+So the caption carries it, and the caption **switches on the
+anchor** — the words are what changes when the picker does, and
+they are also the only place `follow` can be described at all.
+
+That last point generalises, and it is the obligation the trade
+buys: **one string spanning a picker's options states the odd
+option's fact under all of them.** Every option that lacks the
+fact then carries a sentence about one that has it, and the a11y
+label asserts it over a frame that was never drawn — a shared
+caption is not a saving here, it is a false claim on three
+settings out of four. Where two options genuinely draw the same
+picture, a shared caption is also the one thing that would make
+selecting one of them do nothing at all.
+
+Two facts a caption may **not** claim, both because the frame is
+finite. The insertion `+` is the shape of what a still frame
+answers perfectly — "where does the next window open" is the
+question the preview exists for — but Scrolling's row runs
+several canvases wide at most window counts, so the incoming
+slot is frequently clipped away: at the default five windows
+with New window ▸ Last it already is. The caption's `+` clause
+is therefore conditional on the row actually putting the mark on
+the frame, and stays silent otherwise, the way Stack's, Grid's
+and Monocle's captions are silent about theirs in every case. And
+the corollary about scale: **a thumbnail spends its whole canvas
+on the layout.** Scrolling reserved a margin of its frame for the
+ghosts of windows past the monitor's edges — a real fact,
+readable in the side panel, an unreadable sliver on a tile.
+Reserving the room there drew the monitor at half the scale of
+every sibling's outline, so a tile meaning "this layout continues
+past the screen" said "this preview is broken" instead. Draw a
+fact at the size it can be read; at the size it cannot, do not
+draw it at all — leaving it to the frame's clip is not the same
+thing, for the reason `SchematicCanvas.screen` states: the clip
+does not crop where a reader would assume.
+
 **Home is the only navigator: a card grid, not a sidebar.**
 (#678 turn 9, superseding the #68/#297 fixed source list.) A
 sidebar is a menu the user pays for on every visit — a column

@@ -32,18 +32,25 @@ extension SpacesSection {
                 VStack(alignment: .leading, spacing: 16) {
                     overridesHeader(space, mode: mode, gates: gates)
                     HStack(alignment: .top, spacing: 16) {
-                        // Bounded, not full-bleed: the override rows
-                        // carry their own label/control columns, so
-                        // stretching them only lengthens slider
-                        // travel past what the value needs.
                         SpaceOverrideRows(
                             model: model,
                             space: space,
                             pendingResetAll: $pendingResetAll
                         )
+                        // Bounded, not full-bleed: the override rows
+                        // carry their own label/control columns, so
+                        // stretching them only lengthens slider
+                        // travel past what the value needs. The
+                        // number is the ~520 pt the `.menu` picker
+                        // exception argues from
+                        // (`AppBarOverrideControls`,
+                        // `docs/ui-patterns.md`), so a preview that
+                        // wants more width buys it inside its own
+                        // frame — #753 widened the Scrolling
+                        // schematic by giving up its ghost margin,
+                        // not by narrowing this column.
                         .frame(maxWidth: 520, alignment: .leading)
-                        // Win the width negotiation, so a wide preview
-                        // (the scrolling two-panel schematic) can never
+                        // Win the width negotiation, so no preview can
                         // overconstrain the HStack and spill its frame
                         // over these rows' trailing checkboxes — which
                         // silently swallowed clicks on a scrolling

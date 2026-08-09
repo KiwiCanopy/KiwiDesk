@@ -14,10 +14,10 @@ import Testing
 /// the wrong window as focused.
 ///
 /// **These assert the promise a reader takes off the frame, not the
-/// call the schematics make.** `expectedSlot` states the four arms
-/// at the altitude the preview is read at — the `+` opens at the
-/// row's start, at its end, or immediately beside the focused tile
-/// — and shares no code with the engine or with
+/// call the schematics make.** `SchematicPlacementPromise` states
+/// the four arms at the altitude the preview is read at — the `+`
+/// opens at the row's start, at its end, or immediately beside the
+/// focused tile — and shares no code with the engine or with
 /// `SchematicPlacement`. Asserting that each schematic *calls* the
 /// helper would pass on one that called it and drew a constant, the
 /// failure mode guard-prover already demonstrated against this
@@ -28,6 +28,11 @@ import Testing
 /// first read traps in the concurrency runtime rather than failing
 /// an expectation, and nondeterministically — it depends which
 /// executor swift-testing lands the test on.
+///
+/// Scrolling's half lives in `LayoutSchematicScrollingTests`,
+/// which sweeps the focus anchors as well as the placements —
+/// split off at the file ceiling, and it reads the same
+/// `SchematicPlacementPromise` rather than a second copy of it.
 @Suite("Layout preview new-window placement")
 @MainActor
 struct LayoutSchematicPlacementTests {
@@ -201,57 +206,11 @@ struct LayoutSchematicPlacementTests {
         }
     }
 
-    /// Scrolling pins the focus to slot 0, so a splice that pushes
-    /// the focus shifts the *row* instead. Both come off the one
-    /// splice, which is why the bounds are asserted with the
-    /// landing rather than beside it.
-    @Test("Scrolling opens the window where the engine does")
-    func scrollingPlacement() {
-        for placement in placements {
-            for count in LayoutSchematic.windowCountRange {
-                let schematic = ScrollingSchematic(
-                    orientation: .horizontal,
-                    anchor: .center,
-                    slotSize: .auto,
-                    placement: placement,
-                    windows: count
-                )
-                let row = schematic.row
-                #expect(row.slots.count == count)
-                #expect(row.slots.contains(0))
-                check(
-                    incoming: row.incoming,
-                    focus: 0,
-                    slots: row.slots,
-                    placement: placement,
-                    what: "Scrolling at \(count)"
-                )
-            }
-        }
-    }
-
     // MARK: - The promise, and the fixtures
 
     private let placements: [SpawnPlacement] = [
         .first, .last, .beforeFocused, .afterFocused,
     ]
-
-    /// What the four arms promise a reader, stated at the altitude
-    /// the preview is read at. `focus` is where the focused tile
-    /// **ends up**: a landing at or before it moves it one slot
-    /// along, and a preview that forgets that is #702.
-    private func expectedSlot(
-        _ placement: SpawnPlacement,
-        focus: Int,
-        slots: ClosedRange<Int>
-    ) -> Int {
-        switch placement {
-        case .first: return slots.lowerBound
-        case .last: return slots.upperBound
-        case .beforeFocused: return focus - 1
-        case .afterFocused: return focus + 1
-        }
-    }
 
     private func check(
         incoming: Int,
@@ -262,7 +221,7 @@ struct LayoutSchematicPlacementTests {
     ) {
         #expect(
             incoming
-                == expectedSlot(
+                == SchematicPlacementPromise.expectedSlot(
                     placement,
                     focus: focus,
                     slots: slots

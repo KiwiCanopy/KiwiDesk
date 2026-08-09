@@ -148,22 +148,7 @@ struct SpaceOverrideRows: View {
             label: L("scroll_grid.focus_anchor", "Focus anchor"),
             value: binding(\.scrolling.override, space, \.anchor),
             global: g.scrolling.anchor,
-            options: [
-                (.center, L("scroll_grid.anchor.center", "Center")),
-                (
-                    .start,
-                    scrollingIsVertical
-                        ? L("scroll_grid.anchor.start_v", "Top")
-                        : L("scroll_grid.anchor.start_h", "Left")
-                ),
-                (
-                    .end,
-                    scrollingIsVertical
-                        ? L("scroll_grid.anchor.end_v", "Bottom")
-                        : L("scroll_grid.anchor.end_h", "Right")
-                ),
-                (.follow, L("scroll_grid.anchor.follow", "Follow")),
-            ]
+            options: anchorOptions
         )
         OverrideSlotSizeRow(
             model: model,
@@ -174,6 +159,22 @@ struct SpaceOverrideRows: View {
             // unchecked shows it and checking seeds it — no jump.
             global: g.scrolling.slotSize
         )
+    }
+
+    /// Every anchor the enum declares, labelled by
+    /// `ScrollAnchorLabel` — the same source the Layout Defaults
+    /// card's segmented picker reads, so the two offer the same
+    /// set without either hand-listing it.
+    private var anchorOptions: [(ScrollingParams.Anchor, String)] {
+        ScrollingParams.Anchor.allCases.map {
+            (
+                $0,
+                ScrollAnchorLabel.text(
+                    for: $0,
+                    isVertical: scrollingIsVertical
+                )
+            )
+        }
     }
 
     /// The effective scroll orientation for this space (its
