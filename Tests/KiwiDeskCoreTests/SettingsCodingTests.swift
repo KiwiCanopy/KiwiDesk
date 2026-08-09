@@ -209,12 +209,12 @@ struct SettingsCodingTests {
         #expect(ghost["border_color"] as? String == "#347957")
         #expect(ghost["fill_color"] as? String == "#34795740")
         #expect(ghost["border_width"] as? Double == 5)
-        #expect(ghost["border_alignment"] as? String == "outside")
+        #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
         #expect(zone["border_color"] as? String == "#C2790A")
         #expect(zone["fill_color"] as? String == "#C2790A40")
         #expect(zone["border_width"] as? Double == 5)
-        #expect(zone["border_alignment"] as? String == "outside")
+        #expect(zone["border_alignment"] as? String == "inside")
     }
 
     @Test("Partial drag visuals keep the default look")

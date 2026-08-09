@@ -3451,8 +3451,8 @@ overwrite an answer it did not show.
 
 **[Rationale]**
 
-**Border alignment is Lua-only, and both strokes default to
-`outside`.** Inside-vs-outside is a real choice — at 1–3 pt it
+**Border alignment is Lua-only, and both drag markers are laid
+`inside`.** Inside-vs-outside is a real choice — at 1–3 pt it
 moves a stroke by half its width — but only two of KiwiDesk's
 three strokes can be asked it. The focus ring outsets its
 window and has no alignment concept at all, so a GUI control
@@ -3463,14 +3463,53 @@ model of what the strokes are, and the cost of not asking it in
 the GUI is a value a `drag.set_ghost_border_alignment` call
 sets in one line.
 
-The defaults flipped from `inside` to `outside` in the same
-breath, and for the same reason rather than for taste: with the
-ring outsetting and the drag pair insetting, an untouched
-install drew its three strokes two different ways, and every
-comparison a user made between them was against a difference
-nobody chose. The verbs stay per stroke and unclamped — the GUI
-curates, Lua stays open — so a deliberately mixed pair is still
-one call away.
+**Inside, because a marker has to describe its target
+exactly.** The ghost and the drop zone exist to answer one
+question — where will this window land. Laid inside, the
+stroke's outer edge IS the slot boundary, so the marker traces
+the landing area and nothing else. Laid outside it claims a
+region larger than the slot by the stroke width on all four
+sides: the answer it gives is wrong by exactly the amount it is
+drawn, and wrong in the direction that matters, since the thing
+being promised is a size. A ring can afford that; a marker
+whose whole job is the promise cannot.
+
+**The ring outsets under a constraint the markers do not
+share**, which is what makes "match the ring" the wrong
+instinct rather than a competing taste. The ring surrounds a
+*real window* whose pixels must not be covered, so outward is
+the only direction left to it. A drag marker is painted over a
+target region — an empty slot, or a window the drop will act
+on — and has no content to protect. Reading the ring's
+appearance off it and applying it here copies the result
+without the reason, and pays the cost with none of the benefit.
+
+Inside is also the geometry that survives every gap. Two
+outward strokes on adjacent slots exactly fill the shipped
+inner gap at the shipped width (`2 × 5` into 10 pt, the
+coupling `Gaps.Inner` documents) and eat window pixels below
+`2 × width`; at zero gaps the ghost's stroke and the drop
+zone's land in the same band, where one hides the other and
+the drag loses the very marker it is being steered by. Drawn
+inside, adjacent markers sit flush and both stay wholly
+visible at any gap. The current stacking is no defence against
+that and must not be leaned on: both overlays are floating
+panels ordered front when shown, so the drop zone sits on top
+only for being shown second. Inside makes the question moot
+instead of resting on that.
+
+**Alignment must not become adaptive** — inside at narrow gaps,
+outward elsewhere. A setting whose effective value is decided
+by another setting is invisible in both places anyone reads it,
+the Lua call and the profile JSON, and the verb stops being
+authoritative:
+`drag.set_ghost_border_alignment("outside")` would come to mean
+*outside, unless*. It is the objection that already sank the
+shared width as a stored pick in the principle above, arriving
+here at the per-stroke value instead of at the master. The
+verbs stay per
+stroke and unclamped — the GUI curates, Lua stays open — so an
+outward pair is one call away for whoever wants it.
 
 ### App Bar
 

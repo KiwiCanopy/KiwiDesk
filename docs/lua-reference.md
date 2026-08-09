@@ -2338,8 +2338,9 @@ settable per stroke and is never clamped against its twin;
 what it costs is that touching the shared **Width** or
 **Corners** control overwrites all three at once.
 
-Alignment defaults to `outside` for both, matching the focus
-ring's outset.
+Alignment defaults to `inside` for both, so each marker's outer
+edge is the slot boundary itself. The focus ring outsets instead,
+because it wraps a real window whose pixels it must not cover.
 
 ### drag.set_ghost_enabled
 
@@ -2381,7 +2382,7 @@ drag.set_ghost_border_width(5)
 
 ### drag.set_ghost_border_alignment
 
-**Expects:** `"inside"` or `"outside"` (default `"outside"`).
+**Expects:** `"inside"` or `"outside"` (default `"inside"`).
 
 **Does:** positions the border inside or outside the slot
 boundary. Lua-only — the Settings app offers no control for it
@@ -2391,7 +2392,7 @@ at all, the focus ring having no alignment concept to share
 **Example:**
 
 ```lua
-drag.set_ghost_border_alignment("inside")
+drag.set_ghost_border_alignment("outside")
 ```
 
 ### drag.set_ghost_border_color
@@ -2474,7 +2475,7 @@ drag.set_drop_zone_border_width(5)
 
 ### drag.set_drop_zone_border_alignment
 
-**Expects:** `"inside"` or `"outside"` (default `"outside"`).
+**Expects:** `"inside"` or `"outside"` (default `"inside"`).
 
 **Does:** positions the border inside or outside the slot boundary.
 Lua-only, and independent of the ghost's alignment — see
@@ -2483,7 +2484,7 @@ Lua-only, and independent of the ghost's alignment — see
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_alignment("inside")
+drag.set_drop_zone_border_alignment("outside")
 ```
 
 ### drag.set_drop_zone_border_color
@@ -4027,13 +4028,13 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "ghost": {
         "enabled": true, "border": true,
         "border_color": "#347957", "border_width": 5,
-        "border_alignment": "outside",
+        "border_alignment": "inside",
         "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,
         "border_color": "#C2790A", "border_width": 5,
-        "border_alignment": "outside",
+        "border_alignment": "inside",
         "fill": true, "fill_color": "#C2790A40"
       }
     },

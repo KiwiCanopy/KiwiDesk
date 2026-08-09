@@ -7,6 +7,19 @@ import Foundation
 /// symmetric, and at 1–3 pt the choice moves a stroke by half
 /// its width. `drag.set_ghost_border_alignment` and its
 /// drop-zone twin stay fully settable, per stroke, unclamped.
+///
+/// Lay a drag marker `.inside`. Both markers answer one
+/// question — where will this window land — and inside, the
+/// stroke's outer edge IS the slot boundary, so the marker
+/// describes the target exactly; outside it overstates the
+/// landing area by the stroke width on every side, and two
+/// adjacent markers meet once the gap falls to twice it. The
+/// focus ring outsets for a reason that does not reach here:
+/// it surrounds a real window whose pixels must not be
+/// covered, which a marker drawn over a target region has
+/// none of. Both shipped defaults below are `.inside`, pinned
+/// by `SettingsCodingTests`; the argument is in
+/// docs/design-decisions.md.
 public enum BorderAlignment: String, Sendable, Codable, Equatable {
     case inside
     case outside
@@ -49,10 +62,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     /// partner to separate from, so nothing asks it to move for CVD
     /// (it later shifted to `#4A9816` for the unrelated moss reason,
     /// #578 — not this one).
-    /// Aligned `.outside` since #754, matching the focus ring:
-    /// the ring outsets its window and has no alignment knob, so
-    /// an untouched app drew its three strokes two different
-    /// ways.
     /// Defaults mirrored in docs/lua-reference.md (drag colors)
     /// — change both.
     public static let ghostDefault = DragVisual(
@@ -60,7 +69,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         border: true,
         borderColor: "#347957",
         borderWidth: 5,
-        borderAlignment: .outside,
+        borderAlignment: .inside,
         fill: true,
         fillColor: "#34795740"
     )
@@ -75,7 +84,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         border: true,
         borderColor: "#C2790A",
         borderWidth: 5,
-        borderAlignment: .outside,
+        borderAlignment: .inside,
         fill: true,
         fillColor: "#C2790A40"
     )

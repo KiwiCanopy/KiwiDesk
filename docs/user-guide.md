@@ -875,9 +875,9 @@ wants, so the page does not offer it.
   from. The ring sits **behind** its window by default, with a
   small overlap tucked under the window edge so its corners
   stay closed; that overlap isn't part of the width. Keep gaps
-  at least as wide as the borders so neighbouring strokes don't
-  touch — all three now reach *outward*, so this applies to the
-  drag overlays too.
+  at least *twice* the width, so two neighbouring rings reaching
+  into the same gap don't touch. The drag overlays are drawn
+  *inside* their slot and never reach into the gap at all.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows
   that are already square, an intentional squared frame on
@@ -903,10 +903,11 @@ says so rather than picking a side. Both rows also show a
 reminding you that choosing here sets all three. Tap either
 segment to bring them back together.
 
-Each stroke's own width, its alignment (whether it is laid
-*inside* or *outside* its slot edge — the ring has no such
-knob and always outsets) and the drag radius are all Lua-only
-and never clamped against each other. See
+Each stroke's own width, each drag overlay's alignment (whether
+it is laid *inside* or *outside* its slot edge — both default to
+*inside*, and the ring has no such knob, always outsetting) and
+the drag radius are all Lua-only and never clamped against each
+other. See
 [design decisions](design-decisions.md) for why the GUI removes
 these decisions instead of offering a switch to keep them, and
 the [Lua reference](lua-reference.md) for the verbs.
