@@ -20,6 +20,16 @@ import Testing
 @MainActor
 @Suite("Monitor readout sentence")
 struct MonitorReadoutTests {
+    /// Every assertion below compares `L()` output to English,
+    /// so the shared manager must be pinned per test — "System
+    /// default" resolves the HOST's language, and on a German
+    /// machine every sentence here came back from `de.json`
+    /// (caught 2026-08-09; `ShortcutsSelfRowTests` is the
+    /// standing idiom).
+    init() {
+        LocalizationManager.shared.select("en")
+    }
+
     private func display(
         _ id: UInt32,
         _ name: String = "Desk"
