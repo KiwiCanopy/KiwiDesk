@@ -75,9 +75,9 @@ struct PaletteShelf: View {
             HStack {
                 groupHeader(L("palettes.mine", "My palettes"))
                 Spacer()
-                // Explicitly `.bordered` rather than left to the
+                // Explicitly sealed rather than left to the
                 // default style: the two render alike, but only
-                // the named style is visible to the guard that
+                // a named style is visible to the guard that
                 // keeps the accent off button labels. Left
                 // implicit, this was the one button in the tree
                 // still reading green after that sweep.
@@ -92,8 +92,7 @@ struct PaletteShelf: View {
                         systemImage: "square.and.arrow.down"
                     )
                 }
-                .buttonStyle(.bordered)
-                .neutralButtonLabel()
+                .settingsActionButton()
                 .controlSize(.small)
             }
             LazyVGrid(

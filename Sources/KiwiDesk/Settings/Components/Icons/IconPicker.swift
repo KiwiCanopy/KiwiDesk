@@ -70,8 +70,7 @@ struct IconPicker: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         // Large like the menu pickers beside it (the space
         // row's mode dropdown): the trigger is a chooser
         // button and must sit level with that family, even
@@ -225,8 +224,7 @@ struct IconPicker: View {
                             systemImage: "textformat"
                         )
                     }
-                    .buttonStyle(.bordered)
-                    .neutralButtonLabel()
+                    .settingsActionButton()
                 }
                 if isSymbolName(query),
                     !IconCatalog.symbols.contains(where: {
@@ -244,8 +242,7 @@ struct IconPicker: View {
                     }
                 }
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             .font(.caption)
         }
     }
@@ -283,8 +280,7 @@ struct IconPicker: View {
             Image(systemName: "circle.slash")
                 .foregroundStyle(.secondary)
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         .help(
             L(
                 "icon_picker.clear.help",
@@ -302,8 +298,7 @@ struct IconPicker: View {
                 .frame(width: 32, height: 28)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         .help(glyph)
     }
 

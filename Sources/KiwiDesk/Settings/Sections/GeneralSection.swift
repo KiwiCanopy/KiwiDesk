@@ -193,8 +193,7 @@ struct GeneralSection: View {
                                 [model.configURL]
                             )
                     }
-                    .buttonStyle(.bordered)
-                    .neutralButtonLabel()
+                    .settingsActionButton()
                 }
                 Divider()
                 // Opening the raw editor swaps the primary Save
@@ -238,8 +237,7 @@ struct GeneralSection: View {
                         systemImage: "curlybraces"
                     )
                 }
-                .buttonStyle(.bordered)
-                .neutralButtonLabel()
+                .settingsActionButton()
                 Text(editLuaCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)

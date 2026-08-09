@@ -65,8 +65,7 @@ struct HomeFirstRunBanner: View {
             ) {
                 model.onShowTour()
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             .controlSize(.small)
             Button {
                 HomeFirstRunState.retire(

@@ -72,8 +72,7 @@ extension MonitorsSection {
             Button(backToAutomatic) {
                 model.config.spacePins[orphan.space] = nil
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
         }
     }
 

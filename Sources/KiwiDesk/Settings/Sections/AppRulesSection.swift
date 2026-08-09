@@ -178,8 +178,7 @@ struct AppRulesSection: View {
                     systemImage: "plus"
                 )
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             .disabled(newApp.trimmed.isEmpty)
             Spacer()
         }

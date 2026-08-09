@@ -119,8 +119,7 @@ struct LuaEditorTab: View {
                         model.reload()
                     }
                 }
-                .buttonStyle(.bordered)
-                .neutralButtonLabel()
+                .settingsActionButton()
             }
             .font(.callout)
         }

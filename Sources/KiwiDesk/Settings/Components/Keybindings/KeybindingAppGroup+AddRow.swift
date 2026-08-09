@@ -43,8 +43,7 @@ extension ApplicationsGroup {
                     systemImage: "plus"
                 )
             }
-            .buttonStyle(.bordered)
-            .neutralButtonLabel()
+            .settingsActionButton()
             .disabled(newApp == nil || newAppFullyBound)
         }
     }

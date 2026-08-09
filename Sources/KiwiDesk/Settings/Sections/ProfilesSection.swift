@@ -230,8 +230,7 @@ struct ProfilesSection: View {
                 )
             ) { model.loadProfile(named: summary.name) }
         }
-        .buttonStyle(.bordered)
-        .neutralButtonLabel()
+        .settingsActionButton()
         .controlSize(.large)
         .help(
             summary.matchesLive
