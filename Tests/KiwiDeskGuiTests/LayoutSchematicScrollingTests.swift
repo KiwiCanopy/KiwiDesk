@@ -72,14 +72,7 @@ struct LayoutSchematicScrollingTests {
                     #expect(m.newIdx == row.incoming)
                     #expect(m.low == row.slots.lowerBound)
                     #expect(m.high == row.slots.upperBound)
-                    #expect(
-                        m.focusCenter == restingCenter(anchor, m),
-                        Comment(
-                            rawValue:
-                                "\(anchor) rested at "
-                                + "\(m.focusCenter)"
-                        )
-                    )
+                    checkResting(anchor, m)
                 }
             }
         }
@@ -147,7 +140,59 @@ struct LayoutSchematicScrollingTests {
     ]
 
     /// Where each anchor rests the focused window, stated
-    /// independently of the schematic's own switch.
+    /// independently of the schematic's own switch — the resting
+    /// position, AND the engine's boundary promise the resting
+    /// position is clamped by (#776): a row shorter than the
+    /// screen sits flush at the leading edge, a longer one never
+    /// shows empty margin past either end. The old form of this
+    /// helper stated the resting position alone, which is
+    /// exactly the un-clamped copy the schematic shipped.
+    private func checkResting(
+        _ anchor: ScrollingParams.Anchor,
+        _ m: ScrollingSchematic.Metrics
+    ) {
+        let lead =
+            m.focusCenter - m.slot / 2 + CGFloat(m.low) * m.step
+        let trail =
+            m.focusCenter + m.slot / 2 + CGFloat(m.high) * m.step
+        let screenEnd = m.screenStart + m.screenLen
+        if trail - lead <= m.screenLen {
+            // Short row: flush leading, empty space trailing —
+            // `ScrollingLayout.offset`'s `rowLength > along`
+            // guard, restated rather than called.
+            #expect(
+                abs(lead - m.screenStart) < 0.001,
+                Comment(
+                    rawValue:
+                        "\(anchor): short row led at \(lead)"
+                )
+            )
+            return
+        }
+        // Long row: no empty margin past either row end.
+        #expect(lead <= m.screenStart + 0.001)
+        #expect(trail >= screenEnd - 0.001)
+        // And where neither clamp bites, the anchor's own
+        // resting position holds.
+        let resting = restingCenter(anchor, m)
+        let shift = resting - m.focusCenter
+        if lead + shift <= m.screenStart + 0.001,
+            trail + shift >= screenEnd - 0.001,
+            resting - m.slot / 2 >= m.screenStart - 0.001,
+            resting + m.slot / 2 <= screenEnd + 0.001
+        {
+            #expect(
+                abs(m.focusCenter - resting) < 0.001,
+                Comment(
+                    rawValue:
+                        "\(anchor) rested at \(m.focusCenter),"
+                        + " not \(resting)"
+                )
+            )
+        }
+    }
+
+    /// The un-clamped resting position each anchor aims for.
     private func restingCenter(
         _ anchor: ScrollingParams.Anchor,
         _ m: ScrollingSchematic.Metrics

@@ -157,26 +157,36 @@ struct ScrollingSchematic: View {
         let screenLen = along * screenFraction
         let screenStart = (along - screenLen) / 2
         let slot = max(14, screenLen * thickness)
-        let step = slot + 3
-        // Anchor the FOCUSED window in the frame: centred, or flush
-        // against the leading/trailing edge (its far side then
-        // shows the peeking neighbour).
-        let focusCenter: CGFloat
-        switch anchor {
-        // `.follow` rests centred — it pins the focus nowhere, so
-        // the neutral frame (both neighbours in view) is the one
-        // resting position that claims nothing the settings do
-        // not decide. The pan is the caption's to state (#753).
-        case .center, .follow:
-            focusCenter = screenStart + screenLen / 2
-        case .start: focusCenter = screenStart + slot / 2
-        case .end:
-            focusCenter = screenStart + screenLen - slot / 2
-        }
+        let gap: CGFloat = 3
+        let step = slot + gap
         let placed = row
         let low = placed.slots.lowerBound
         let high = placed.slots.upperBound
         let newIdx = placed.incoming
+        // Where the row rests is the ENGINE's answer (#776): the
+        // anchor arms lived here once, without the visibility and
+        // boundary clamps, so a row shorter than the screen drew
+        // a leading margin `ScrollingLayout.offset` clamps away —
+        // a state no real space can reach. `.follow` asks as
+        // `.center`: it pins the focus nowhere and the engine
+        // resolves it from the prior offset, pan history a static
+        // preview does not have, so the preview draws the neutral
+        // resting frame — the centred one, the collapse
+        // `LayoutSchematicScrollingTests` and the caption suite
+        // already hold (#753).
+        let count = high - low + 1
+        let rowLength = CGFloat(count) * step - gap
+        let focusedPos = CGFloat(-low) * step
+        let viewport = ScrollingLayout.offset(
+            anchor: anchor == .follow ? .center : anchor,
+            previous: nil,
+            along: screenLen,
+            size: slot,
+            rowLength: rowLength,
+            focusedPos: focusedPos
+        )
+        let focusCenter =
+            screenStart + viewport + focusedPos + slot / 2
         return Metrics(
             slot: slot,
             step: step,
