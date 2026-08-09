@@ -44,6 +44,12 @@ struct SettingsSection<Content: View>: View {
     let caption: String?
     let subsection: Bool
     let help: String?
+    /// The section's presence is mode-gated — it would leave the
+    /// page in Simple (#760). Picks the heavier stroke and lets
+    /// the mode-reveal wash mark the heading; call sites derive
+    /// it from their own offer predicate evaluated at `.simple`,
+    /// never a second copy of that predicate.
+    let modeGated: Bool
     @ViewBuilder let content: Content
 
     /// Computed-title init: renders identically but is NOT a
@@ -58,6 +64,7 @@ struct SettingsSection<Content: View>: View {
         caption: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
+        modeGated: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
@@ -66,6 +73,7 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
+        self.modeGated = modeGated
         self.content = content()
     }
 
@@ -79,6 +87,7 @@ struct SettingsSection<Content: View>: View {
         caption: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
+        modeGated: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.title = control.text
@@ -87,6 +96,7 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
+        self.modeGated = modeGated
         self.content = content()
     }
 
@@ -123,7 +133,18 @@ struct SettingsSection<Content: View>: View {
                     RoundedRectangle(
                         cornerRadius: SettingsTheme.sectionRadius
                     )
-                    .strokeBorder(SettingsTheme.hairline)
+                    .strokeBorder(
+                        modeGated
+                            ? SettingsTheme.accent.opacity(
+                                SettingsTheme
+                                    .modeGatedStrokeOpacity
+                            )
+                            : SettingsTheme.hairline,
+                        lineWidth: modeGated
+                            ? SettingsTheme
+                                .containerStrokeModeGated
+                            : SettingsTheme.containerStroke
+                    )
                 )
             )
         }
@@ -175,10 +196,14 @@ struct SettingsSection<Content: View>: View {
     /// flashed on `anchorID ?? ""`, a sentinel that no reveal can
     /// ever name and that reads as a second, disagreeing id.
     @ViewBuilder private var flashedHeader: some View {
+        // The mode-reveal wash rides the same heading band the
+        // search wash does (#760) — never the whole card.
         if let control {
-            header.searchFlashHeader(control)
-        } else {
             header
+                .searchFlashHeader(control)
+                .modeRevealWash(modeGated)
+        } else {
+            header.modeRevealWash(modeGated)
         }
     }
 

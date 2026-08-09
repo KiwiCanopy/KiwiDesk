@@ -43,6 +43,9 @@ struct SettingsThemeMetricTests {
         "monitorNeckMax": "MonitorsPicture.swift",
         "paletteCardStroke": "PaletteTile.swift",
         "paletteCardStrokeApplied": "PaletteTile.swift",
+        "containerStroke": "HomeCard.swift",
+        "containerStrokeModeGated": "HomeCard.swift",
+        "modeGatedStrokeOpacity": "HomeCard.swift",
     ]
 
     /// Metric → why nothing draws it yet. Empty today, and kept

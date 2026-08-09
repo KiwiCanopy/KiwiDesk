@@ -869,6 +869,55 @@ then yield one layout pass before asking the scroll
 proxy for the id — a `scrollTo` in the same synchronous pass as
 the state change that mints the view will miss it.
 
+**The mode flip answers twice: motion says what just changed,
+the accent-tinted frame says what is mode-gated** (#760,
+amended on device 2026-08-09). Flipping the header segment to
+Power User washes the title band of every *container* the flip
+inserted — the same transient accent wash as a search reveal,
+same numbers, decaying to nothing — and the reflow animates as
+pure insertion in both places the user can be standing: Home's
+grid (Simple's card order is a subsequence of Power User's) and
+the open area's pane. The durable half is the frame: a
+container whose *presence* depends on the mode draws its border
+at `SettingsTheme.containerStrokeModeGated` (1.5 pt) in the
+accent at `modeGatedStrokeOpacity`, against the 1 pt hairline
+rest. The first cut said "weight, hairline colour unchanged" and
+failed on device — a weight step in a ~1.2:1 stroke is a step
+in something invisible, and a stronger neutral said "different"
+but not *which*. The frame borrows THE accent (the colour the
+active Power User segment wears), never a second hue; hue still
+never carries alone, because the weight step remains and the
+strength is measured — `ModeGatedFrameSeparationTests` derives
+the CVD floors against both neighbours on the same edge (the
+hairline, and hover's full accent) from the shipped tokens. The
+weight stays below the doubling the Monitors (1.5→3 pt) and
+palette (1→2 pt) pairs spend on *selected/applied*, because a
+mode-gated card is present, not picked; hover keeps the
+full-strength accent as its own register.
+
+Three boundaries. **Only the explicit segment flip washes** —
+the implicit promotion (search or a cross-reference landing in a
+Power-User-only area) already owns its arrival wash, and a
+second one in the same landing would dilute the target the user
+asked for. **The flag is the site's own offer predicate
+evaluated at `.simple`** — never a hand-negated copy — so the
+weight states the same fact as presence: Monitors is unmarked on
+a multi-display machine, the Layers card is unmarked the moment
+a layer exists, and when config presence changes the flag at
+rest the weight steps with no wash (a bookkeeping fact, not a
+reveal). **The way back to Simple is a plain fade** — drawing
+attention to content that is leaving is noise. Reduce Motion
+keeps the wash flat for the same ≈1.2 s and drops only the
+reflow and the cross-fade. The vocabulary is
+container-granular on purpose: a per-row *control* offer the
+mode also unlocks (the Spaces "Customize…" cells) has no
+container border to weight, and washing a dozen sibling rows
+at once is the shouting the three-places-at-once reveal
+exists to avoid — such an offer appears plainly, and which
+offers stay unmarked is data in `ModeGatedChromeTests`'
+`unmarked` map, not a skipped site. `ModeGatedChromeTests`
+pins the chrome, `SettingsModeRevealTests` the timeline.
+
 **An action that reloads must ask before it discards.** Any
 Settings action whose tail is `model.reload()` re-seeds from
 disk and clears `isDirty`, so it destroys whatever the user has

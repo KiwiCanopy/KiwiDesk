@@ -10,9 +10,13 @@ struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     /// The in-flight scroll+flash choreography, held so a second
     /// search click supersedes the first instead of overlapping.
-    @State private var revealTask: Task<Void, Never>?
+    /// Internal like `ensureModeAdmits`, for the same reason: the
+    /// detail pane and its reveal driver live in
+    /// `SettingsView+Detail` (the §2.1 ceiling split) and `@State`
+    /// must be declared here.
+    @State var revealTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
+    var reduceMotion
     /// The pushed area lives on the model, not in `@State` —
     /// see `SettingsModel.destination`. A locale change re-keys
     /// this view, and `@State` would not survive it. nil is
@@ -197,6 +201,14 @@ struct SettingsView: View {
                 ClickAwayResignsFocus()
                 content()
             }
+            // Above BOTH panes on purpose: the segment is always
+            // in the header, so a flip can wash Home's inserted
+            // cards or an in-area surface alike (#760). One
+            // mount; the model owns the timeline.
+            .environment(
+                \.settingsModeReveal,
+                model.modeRevealActive
+            )
             // The footer's overline. A token rule rather than a
             // `Divider()`: the shell's three horizontal rules
             // (header underline, this, the card borders) are one
@@ -214,126 +226,6 @@ struct SettingsView: View {
         // toolbar strip above it — while the sidebar keeps the
         // traffic lights over its full height.
         .ignoresSafeArea(.container, edges: .top)
-    }
-
-    @ViewBuilder private var detailPane: some View {
-        VStack(spacing: 0) {
-            if model.hasCustomLua {
-                CustomLuaBanner()
-                    .padding(.horizontal, 12)
-                    .padding(.top, 10)
-                Divider()
-                    .padding(.top, 10)
-            }
-            // ONE reader for all ten sections (#277), above the
-            // `switch` rather than wrapped around each section's
-            // own `ScrollView`: the proxy scrolls any scroll view
-            // in its subtree that holds the id, so ten per-section
-            // wrappers would buy nothing and drift.
-            ScrollViewReader { proxy in
-                detail(selection)
-                    // The panes' top gutter, spent here rather
-                    // than as padding inside each one: a content
-                    // margin moves what "top of the viewport"
-                    // means, so `scrollTo(anchor: .top)` lands a
-                    // revealed card with the same gutter above it
-                    // that a pane's first card has at rest —
-                    // where padding would only have pushed the
-                    // resting content down and left the scrolled
-                    // card just as flush.
-                    //
-                    // One call site, not ten: the margin
-                    // propagates to every scroll view below,
-                    // which is the same reach the one
-                    // `ScrollViewReader` above already relies on.
-                    .contentMargins(
-                        .top,
-                        SettingsMetrics.paneInset,
-                        for: .scrollContent
-                    )
-                    .environment(\.settingsFlash, model.nav.flash)
-                    .environment(
-                        \.settingsRevealTarget,
-                        model.nav.revealTarget
-                    )
-                    .onChange(of: model.nav.pendingScroll) {
-                        _,
-                        anchor in
-                        reveal(anchor, proxy: proxy)
-                    }
-                    .onAppear {
-                        reveal(
-                            model.nav.pendingScroll,
-                            proxy: proxy
-                        )
-                    }
-            }
-        }
-    }
-
-    /// Phase 2: scrolls the pane to `anchor` and flashes it, then
-    /// clears the request. Runs after `apply` has selected the
-    /// destination and surface, so the target exists or is about
-    /// to.
-    private func reveal(
-        _ anchor: String?,
-        proxy: ScrollViewProxy
-    ) {
-        guard let anchor else { return }
-        model.nav.pendingScroll = nil
-        revealTask?.cancel()
-        // Captured, so a task that outlives its pane bails instead
-        // of relying on the id being absent from the new one.
-        // Cross-destination duplicate labels are legitimate (only
-        // one destination mounts), and nothing guards them — this
-        // stale window is the single place where that would bite.
-        let destination = selection
-        revealTask = Task { @MainActor in
-            // Yield one pass first: `apply` may have just flipped
-            // the surface that *creates* the target view, and
-            // asking the proxy for an id in the same synchronous
-            // pass as the state change that mints it misses.
-            await Task.yield()
-            if reduceMotion {
-                proxy.scrollTo(anchor, anchor: .top)
-            } else {
-                withAnimation(
-                    .easeInOut(duration: SettingsReveal.scroll)
-                ) { proxy.scrollTo(anchor, anchor: .top) }
-            }
-            try? await Task.sleep(
-                nanoseconds: SettingsReveal.nanoseconds(
-                    SettingsReveal.scroll + SettingsReveal.settle
-                )
-            )
-            guard
-                !Task.isCancelled,
-                selection == destination
-            else { return }
-            // Re-issue, un-animated. One cooperative yield drains
-            // queued main-actor work but does not promise SwiftUI
-            // has LAID OUT the new subtree, so the first
-            // `scrollTo` can be a silent no-op — and then the wash
-            // would paint off-screen and the user would see
-            // nothing at all. Layout has certainly run by now; if
-            // the first attempt landed, this is a no-op.
-            proxy.scrollTo(anchor, anchor: .top)
-            let token = model.nav.startFlash(anchor)
-            // Under Reduce Motion the wash has no fade to live
-            // through — clearing removes it instantly — so the
-            // hold absorbs the fade's duration instead. Without
-            // this the accessibility branch gets a 0.3 s cue
-            // against everyone else's 1.2 s, which is backwards.
-            try? await Task.sleep(
-                nanoseconds: SettingsReveal.nanoseconds(
-                    SettingsReveal.hold
-                        + (reduceMotion ? SettingsReveal.fade : 0)
-                )
-            )
-            // Clearing is what triggers the fade — the modifier
-            // keeps no timer of its own.
-            model.nav.endFlash(token: token)
-        }
     }
 
 }

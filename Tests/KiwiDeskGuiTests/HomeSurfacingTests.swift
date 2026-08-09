@@ -36,6 +36,11 @@ struct HomeSurfacingTests {
             // A link into a Power-User-only area switches the mode
             // before landing.
             "ensureModeAdmits(destination)selection=destination",
+            // The mode-reveal window reaches both panes (#760):
+            // the environment mounts above the Home/detail
+            // branch, from the model's one timeline.
+            ".environment(\\.settingsModeReveal,"
+                + "model.modeRevealActive)",
         ],
         "Settings/SettingsView+Reveal.swift": [
             // A search hit into a Power-User-only area switches the
@@ -50,6 +55,10 @@ struct HomeSurfacingTests {
             // The unsaved count surfaces only while the draft
             // has changes.
             "ifmodel.draftChangeCount>0{unsavedChip}",
+            // The segment is the one EXPLICIT flip — the entry
+            // point that washes what the flip inserts (#760).
+            // `ensureModeAdmits` stays on `setSettingsMode`.
+            "model.flipSettingsMode($0,reduceMotion:reduceMotion)",
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.

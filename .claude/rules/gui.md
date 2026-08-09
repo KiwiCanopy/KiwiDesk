@@ -490,6 +490,24 @@ must keep:
   every-leaf attribution net (`SettingsDraftDiffTests`) is
   what a new `GuiConfig` or `TilingSettings` field reds until
   its census row exists.
+- **The mode flip's reveal has one entry point and two
+  channels** (#760): only the header segment's explicit flip
+  washes (`flipSettingsMode` — `ensureModeAdmits`' promotion
+  stays on `setSettingsMode`, silent), the wash rides title
+  bands alone, and mode-gated *presence* draws the
+  accent-tinted frame (`containerStrokeModeGated` at
+  `modeGatedStrokeOpacity` — the mode's own colour, never a
+  second hue, the weight step keeping a hue-free channel) from
+  the site's own offer predicate evaluated at `.simple`, never
+  a hand-negated copy. `ModeGatedChromeTests` pins the chrome
+  and the predicates — membership is DERIVED (any Settings
+  offer consulting `.powerUser` threads `modeGated` or argues
+  its exemption in that suite's `unmarked` map, the one copy
+  of who may stay plain) — `ModeGatedFrameSeparationTests`
+  derives the frame's CVD floors from the shipped tokens, and
+  `SettingsModeRevealTests` pins the timeline; a new
+  mode-gated container passes `modeGated:` to its container
+  shape.
 
 ## Colour (#678 turn 16b)
 
