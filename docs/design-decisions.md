@@ -3286,22 +3286,29 @@ are a genuine A/B pair (same schema, edited by comparison),
 which is exactly where macOS System Settings itself reaches
 for twin panels (Displays' Arrangement, Desktop & Dock's
 light/dark), so twin columns state the pairing once instead
-of duplicating preview-then-controls structure. The shared
-corner radius sits full-width above both (it styles neither
-alone). In the narrower columns, rows drop the group prefix
-already carried by the Border/Fill sub-grouping ("Border
-color" → "Color", "Border width" → "Width", "Border
-alignment" → "Alignment"), narrowed onto the
-`dragColumnLabelColumn` axis via the `settingsLabelColumn`
-override; VoiceOver keeps the full name through `a11yLabel`.
-The preview renders **Inside vs Outside** border alignment
-(inset within the tile vs a larger footprint outside its
-edge, offset scaling with the border width) — schematic, not
-pixel-exact, but the control was previously dead because
-SwiftUI `.strokeBorder` always draws inside; and both the
-corner-radius and
-border-width previews now remap the full slider range instead
-of hard-capping halfway (the `AppBarPreviewStrip` fix).
+of duplicating preview-then-controls structure. What a column
+keeps is what only that column can answer — whether its border
+and its fill are drawn at all. Everything a column once asked
+that the other strokes are asked too has left it: the shared
+corner radius sat full-width above both until #754, the border
+width and the alignment picker sat inside each, and all three
+now belong to the page's shared card or to Lua alone. The
+narrowing that let a half-width row hold a slider
+(`dragColumnLabelColumn`) and the in-group short form it was
+for ("Border width" → "Width", with the full name kept for
+VoiceOver through `a11yLabel`) both moved WITH those rows: the
+last of them left this editor in #754, so it no longer pushes
+the narrow axis in through `settingsLabelColumn` at all — what
+remains there is toggles, which draw their own labels. The pair
+lives on in Advanced Colours' twin drag columns, which take the
+width as `AdvancedColorRow`'s `labelWidth:`. Each
+column's preview still draws the alignment, radius and width
+actually stored, because all three are still settable from
+Lua: schematic, not pixel-exact, and it remaps the full value
+range instead of hard-capping halfway (the `AppBarPreviewStrip`
+fix). The alignment preview earns its keep twice over, the
+control having been dead before it — SwiftUI `.strokeBorder`
+always draws inside.
 
 **[Trade-off]**
 
@@ -3347,6 +3354,162 @@ sibling takes, since a percent of a scroll axis is tens of
 points on any display this app targets;
 `SlotSizePercentRangeTests` holds the slider to the model's own
 bounds and to a step the standard lands on.
+
+**[Principle]**
+
+**One width and one corner for all three strokes — the GUI
+removes the decision rather than building a control to protect
+it.** KiwiDesk strokes three things around a window: the focus
+ring, the drag ghost and the drop zone. Asked as three
+independent decisions they were three chances to answer once
+and forget twice, and nobody holds the preference that comes
+out of that — a 3 pt ring beside a 1 pt ghost is an oversight
+wearing the clothes of a setting. So Gaps & Borders asks each
+question exactly once, in a card above the sections that draw
+the strokes, and every per-stroke width, alignment and radius
+control leaves the GUI (GUI_REMOVED_2026-08). The verbs stay
+open and unclamped, per stroke, for whoever genuinely wants
+three different ones.
+
+The first cut of this was a **Use one width for all borders**
+toggle over two masters, with the per-stroke sliders left on
+screen and dimmed. That is the wrong shape, and the reason
+generalises: a toggle that turns a defect on is still the
+defect, shipped with a switch. It asks a new question ("do you
+want them linked?") to protect an old answer nobody wanted, it
+needs a stored pick and a runtime gate and three dimmed rows
+to express, and the state it protects — three strokes drawn
+three ways — is the very state the card exists to end. Where
+the GUI would need a control to keep a bad option reachable,
+delete the option. This is not "grey, don't hide" (#171)
+overruled: that rule covers a control another mode brings back
+to life, and there is no mode here that revives a per-stroke
+width.
+
+**Corners passes the exact test alignment failed, which is why
+one is a control and the other is not.** The test is the entry
+below: can the question be put to all three strokes, or only
+to two? Square/Rounded can — but only as Square/Rounded. The
+ring stores a two-value corner STYLE and
+the drag pair a 0–40 pt radius, and the first cut derived the
+style from the radius (`> 0` ⇒ rounded), which is a slider
+collapsed into one bit: 1 pt and 40 pt drew an identical ring.
+A control whose range the thing it drives cannot represent is
+not a shared control, so the numeric radius left the GUI with
+the widths and the picker reads AND writes both halves — Square
+is a square ring and a 0 radius, Rounded is a rounded ring and
+any radius above zero, defaulting to the system window radius,
+which is also the radius's own shipped default.
+
+**The picker READS both halves and WRITES only on a pick**, and
+that asymmetry is deliberate. A profile whose radius Lua set to
+7 pt displays as Rounded — which is what the drag pair actually
+draws there — and stays at 7 pt: the getter never stores, so
+opening the page cannot silently normalise a value the user
+never came here to change. Re-deriving at load is the
+alternative and is worse — it rewrites a saved profile on the
+way past.
+
+**Re-affirming a segment must change nothing.** Picking the
+segment already shown is the one interaction where the user
+named no new answer, and treating it as a write is what would
+undo the promise above: a stray tap on Rounded would move that
+7 pt radius to 16 with the same word on screen before and
+after, and the header counting a change. So Rounded writes the
+system radius only where there is no rounding to keep (a zero
+radius); Square writes 0 outright, being the one shape with a
+single radius. This is also the behaviour a segmented control
+has everywhere else on macOS — neither SwiftUI's `Picker` nor
+`NSSegmentedControl` re-fires for an unchanged selection — and
+"the GUI is ours" licenses a different LOOK, never a control
+that acts differently from its twin.
+
+**Where the halves disagree the picker shows no segment at
+all.** The two are stored separately and Lua can move either
+alone, so `border.set_corner_style("square")` against a rounded
+radius is reachable — and the Corners row sits directly above a
+focus-ring preview drawing the ring's own answer. Selecting one
+of the two would make the row contradict the picture beneath
+it; making the preview read the master instead would be worse,
+since a preview that stops showing what the app draws teaches
+the wrong thing about the app rather than about one row. So the
+control asserts neither, which its sliding pill already
+expresses by hiding, and either segment then converges both
+halves. The width row cannot do the same — a slider has no
+blank thumb — so it keeps showing the ring's width.
+
+**Both rows acknowledge a disagreement rather than greying
+on it.** The gap masters, one card up, grey when their edges
+differ, because there is no single value to show and a per-edge
+drawer sits right under them to repair from. These two have no
+per-stroke row anywhere on the page: greying them would name
+the problem and withhold the only control that ends it. So the
+acknowledgement is a `?` beside a live control — *the three
+strokes are set differently right now; choosing here sets all
+three* — which is what a master owes when it is about to
+overwrite an answer it did not show.
+
+**[Rationale]**
+
+**Border alignment is Lua-only, and both drag markers are laid
+`inside`.** Inside-vs-outside is a real choice — at 1–3 pt it
+moves a stroke by half its width — but only two of KiwiDesk's
+three strokes can be asked it. The focus ring outsets its
+window and has no alignment concept at all, so a GUI control
+would make the page symmetric in every respect except the one
+row where it silently covers two of three. A page that asks the
+same question of some strokes and not others teaches the wrong
+model of what the strokes are, and the cost of not asking it in
+the GUI is a value a `drag.set_ghost_border_alignment` call
+sets in one line.
+
+**Inside, because a marker has to describe its target
+exactly.** The ghost and the drop zone exist to answer one
+question — where will this window land. Laid inside, the
+stroke's outer edge IS the slot boundary, so the marker traces
+the landing area and nothing else. Laid outside it claims a
+region larger than the slot by the stroke width on all four
+sides: the answer it gives is wrong by exactly the amount it is
+drawn, and wrong in the direction that matters, since the thing
+being promised is a size. A ring can afford that; a marker
+whose whole job is the promise cannot.
+
+**The ring outsets under a constraint the markers do not
+share**, which is what makes "match the ring" the wrong
+instinct rather than a competing taste. The ring surrounds a
+*real window* whose pixels must not be covered, so outward is
+the only direction left to it. A drag marker is painted over a
+target region — an empty slot, or a window the drop will act
+on — and has no content to protect. Reading the ring's
+appearance off it and applying it here copies the result
+without the reason, and pays the cost with none of the benefit.
+
+Inside is also the geometry that survives every gap. Two
+outward strokes on adjacent slots exactly fill the shipped
+inner gap at the shipped width (`2 × 5` into 10 pt, the
+coupling `Gaps.Inner` documents) and eat window pixels below
+`2 × width`; at zero gaps the ghost's stroke and the drop
+zone's land in the same band, where one hides the other and
+the drag loses the very marker it is being steered by. Drawn
+inside, adjacent markers sit flush and both stay wholly
+visible at any gap. The current stacking is no defence against
+that and must not be leaned on: both overlays are floating
+panels ordered front when shown, so the drop zone sits on top
+only for being shown second. Inside makes the question moot
+instead of resting on that.
+
+**Alignment must not become adaptive** — inside at narrow gaps,
+outward elsewhere. A setting whose effective value is decided
+by another setting is invisible in both places anyone reads it,
+the Lua call and the profile JSON, and the verb stops being
+authoritative:
+`drag.set_ghost_border_alignment("outside")` would come to mean
+*outside, unless*. It is the objection that already sank the
+shared width as a stored pick in the principle above, arriving
+here at the per-stroke value instead of at the master. The
+verbs stay per
+stroke and unclamped — the GUI curates, Lua stays open — so an
+outward pair is one call away for whoever wants it.
 
 ### App Bar
 

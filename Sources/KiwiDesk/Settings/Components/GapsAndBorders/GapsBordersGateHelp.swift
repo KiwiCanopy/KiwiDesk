@@ -6,9 +6,11 @@ import KiwiDeskCore
 /// assertable off the main actor; the reason and its sentence are
 /// one decision, never two that can disagree (#678, gui.md).
 ///
-/// Every key here is reused from the hand-wired gate this
-/// conversion replaced, so the English is unchanged and no
-/// translation is dropped.
+/// A sentence is authored once, here, and never beside a row —
+/// `GapsAndBordersGateWiringTests` reds on a second copy. When a
+/// sentence's MEANING moves, its key is dropped in the same
+/// change set (localization.md) rather than left to render a
+/// fluent translation of what the row no longer does.
 @MainActor
 enum GapsBordersGateHelp {
     static func sentence(
@@ -31,12 +33,6 @@ enum GapsBordersGateHelp {
                 "drag.disabled.help",
                 "Turn on Enabled to edit this visual."
             )
-        case .visualBorderOff:
-            return L(
-                "drag.border.off_help",
-                "Turn on Border to edit its width and "
-                    + "alignment."
-            )
         case .gapsDiffer:
             return L(
                 "gaps.mixed.help",
@@ -44,5 +40,19 @@ enum GapsBordersGateHelp {
                     + "individually below."
             )
         }
+    }
+
+    /// The shared masters' acknowledgement — not an
+    /// `InertReason`, because those two rows stay live: with no
+    /// per-stroke row anywhere on the page, greying them would
+    /// name a disagreement and withhold the fix. It is a `?`
+    /// beside a working control, so it says what a pick will do
+    /// rather than what is stopping one.
+    static var strokesDiffer: String {
+        L(
+            "border.shared.differ.help",
+            "The three strokes are set differently right now; "
+                + "choosing here sets all three."
+        )
     }
 }

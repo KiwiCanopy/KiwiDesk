@@ -1,10 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ Gaps & Borders ▸ Focus border (#278). Sits
-/// below Gaps and Drag & drop. Order per the settled design:
-/// enable toggle → live two-window preview → unfocused toggle →
-/// width → corner style (preview leads editor, AGENTS §2.7).
+/// This Profile ▸ Gaps & Borders ▸ Focus border (#278). Leads
+/// the drag visuals since #754 — the ring is the stroke seen all
+/// day. Order per the settled design: enable toggle → live
+/// two-window preview → unfocused toggle → glow (preview leads
+/// editor, AGENTS §2.7). The ring's WIDTH and CORNERS are the
+/// masters in the card above, which every stroke shares, so
+/// neither is drawn a second time here.
 ///
 /// The two ring COLOURS left in #678 Phase 3 — every colour
 /// KiwiDesk has now renders once, in Advanced Colours. What stays
@@ -72,19 +75,6 @@ struct FocusBorderEditor: View {
             isOn: style.unfocusedEnabled
         )
         Divider()
-        PtSlider(
-            label: L("border.width", "Width"),
-            value: style.width,
-            range: 1...20
-        )
-        SegmentedPicker(
-            cornerLabel,
-            selection: style.cornerStyle,
-            options: [
-                (L("border.corner.rounded", "Rounded"), .rounded),
-                (L("border.corner.square", "Square"), .square),
-            ]
-        )
         // A render trait of the ring like Width and Corners — a soft
         // bloom in the focused ring's hue (#358). Sits with the other
         // styling traits, no caption (the live preview above shows
@@ -142,9 +132,5 @@ struct FocusBorderEditor: View {
         }
         Divider()
         FitGapsAction(model: model)
-    }
-
-    private var cornerLabel: String {
-        L("border.corner_style", "Corners")
     }
 }

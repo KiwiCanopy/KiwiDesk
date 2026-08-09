@@ -1,5 +1,25 @@
 import Foundation
 
+/// Which side of the slot edge a drag visual's stroke is laid
+/// on. Lua-only since #754 — the GUI never offered it for the
+/// focus ring (which has no alignment concept at all), so a
+/// control for two of the three strokes could not be made
+/// symmetric, and at 1–3 pt the choice moves a stroke by half
+/// its width. `drag.set_ghost_border_alignment` and its
+/// drop-zone twin stay fully settable, per stroke, unclamped.
+///
+/// Lay a drag marker `.inside`. Both markers answer one
+/// question — where will this window land — and inside, the
+/// stroke's outer edge IS the slot boundary, so the marker
+/// describes the target exactly; outside it overstates the
+/// landing area by the stroke width on every side, and two
+/// adjacent markers meet once the gap falls to twice it. The
+/// focus ring outsets for a reason that does not reach here:
+/// it surrounds a real window whose pixels must not be
+/// covered, which a marker drawn over a target region has
+/// none of. Both shipped defaults below are `.inside`, pinned
+/// by `SettingsCodingTests`; the argument is in
+/// docs/design-decisions.md.
 public enum BorderAlignment: String, Sendable, Codable, Equatable {
     case inside
     case outside

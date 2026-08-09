@@ -1,6 +1,22 @@
 /// Borders, sticky/floating marks and drag visuals
 /// (`BorderStyle`, `StickyStyle`, `FloatingStyle`,
 /// `DragGhost`, `DragDropZone`).
+///
+/// The three strokes KiwiDesk draws — the focus ring, the drag
+/// ghost and the drop zone — share one width and one corner
+/// decision, and the GUI asks each of them exactly once, in the
+/// `.borders` card (#754). Everything that would ask a second
+/// time left the GUI there (GUI_REMOVED_2026-08): both per-stroke
+/// alignments, both per-stroke widths, and the drag pair's
+/// numeric corner radius. Every one of those Lua verbs stays
+/// open and unclamped.
+///
+/// The two card rows are their own `(master)` cases, the shape
+/// the gaps masters already use: a master is one control over
+/// several stored leaves, so naming it after any ONE of them
+/// tells a census reader that the others are untouched when the
+/// row overwrites them on every edit. Which leaves each writes
+/// is `SettingKey.masterWrites`.
 
 enum BordersKey: String, CaseIterable, Hashable {
     case borderEnabled = "settings.borderStyle.enabled"
@@ -9,6 +25,9 @@ enum BordersKey: String, CaseIterable, Hashable {
     case borderUnfocusedColor = "settings.borderStyle.unfocusedColor"
     case borderWidth = "settings.borderStyle.width"
     case borderCorner = "settings.borderStyle.cornerStyle"
+    case borderWidthMaster = "settings.borderStyle.width (master)"
+    case borderCornerMaster =
+        "settings.borderStyle.cornerStyle (master)"
     case borderGlow = "settings.borderStyle.glow"
     case borderGlowSizeAuto = "settings.borderStyle.glowSize (auto)"
     case borderGlowSize = "settings.borderStyle.glowSize"
@@ -47,8 +66,19 @@ extension BordersKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .borderWidth, .borderFitGapsExtraSpacing:
-            return .row(.gapsAndBorders, .focusBorder, .atRest)
+        // The two shared decisions, lifted out of the sections
+        // they used to sit in (#754). Each is one master row
+        // that WRITES all three strokes, so it belongs to no
+        // one section any more. Never inside `.focusBorder`:
+        // the ring going off must not grey a control the drag
+        // visuals read. Both draw as lead controls of the card
+        // with no disclosure over them, hence `.atRest`.
+        case .borderWidthMaster, .borderCornerMaster:
+            return .row(.gapsAndBorders, .borders, .atRest)
+        case .borderFitGapsExtraSpacing:
+            // Behind Show more with the glow rows: a parameter
+            // to one action, below the ring's own shape.
+            return .row(.gapsAndBorders, .focusBorder, .showMore)
         // The .borders container carries no block gate
         // (stickyColor shares it, deliberately ungated), so
         // the border colors ride borderEnabled on the row.
@@ -59,7 +89,7 @@ extension BordersKey {
                 .atRest,
                 gate: .setting(.borders(.borderEnabled))
             )
-        case .borderUnfocusedEnabled, .borderCorner, .borderGlow,
+        case .borderUnfocusedEnabled, .borderGlow,
             .borderGlowSizeAuto:
             return .row(.gapsAndBorders, .focusBorder, .showMore)
         case .borderUnfocusedColor:
@@ -112,8 +142,6 @@ extension BordersKey {
                 .stickyWindows,
                 .showMore
             )
-        case .dragCornerRadius:
-            return .row(.gapsAndBorders, .dragAndDrop, .showMore)
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
         // Each drag column greys wholesale off its Enabled
@@ -154,26 +182,31 @@ extension BordersKey {
                     .borders(.dragGhostFill),
                 ])
             )
-        case .dragGhostBorderWidth, .dragGhostBorderAlignment:
-            return .row(
-                .gapsAndBorders,
-                .dragAndDrop,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragGhostEnabled),
-                    .borders(.dragGhostBorder),
-                ])
-            )
-        case .dragDropZoneBorderWidth, .dragDropZoneBorderAlignment:
-            return .row(
-                .gapsAndBorders,
-                .dragAndDrop,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragDropZoneEnabled),
-                    .borders(.dragDropZoneBorder),
-                ])
-            )
+        // Two DIFFERENT reasons for one tier, kept apart so a
+        // reader can tell them apart (see `SettingPlacement`
+        // `.luaOnly`'s carve-out). First: written by a master
+        // on every edit of it, surfaced by nothing of their
+        // own. GUI_REMOVED_2026-08 (#754) for the last three —
+        // the ring has no corner RADIUS, so collapsing a 0–40 pt
+        // slider into its two-value style rendered 1 pt and
+        // 40 pt identically, and a per-stroke width row would
+        // undo the card above it. `SettingKey.masterWrites` is
+        // where the writing is declared.
+        case .borderWidth, .borderCorner,
+            .dragGhostBorderWidth,
+            .dragDropZoneBorderWidth,
+            .dragCornerRadius:
+            return .luaOnly
+        // Second: nothing in the GUI reads or writes these at
+        // all. Alignment left in #754 because the question
+        // cannot be put to all three strokes — the ring outsets
+        // and has no alignment concept — and a row covering two
+        // of three teaches the wrong model. Both verbs stay
+        // per stroke and unclamped. A surfaceless row carries
+        // no gate.
+        case .dragGhostBorderAlignment,
+            .dragDropZoneBorderAlignment:
+            return .luaOnly
         case .dragDropZoneBorderColor:
             return .row(
                 .advancedColours,
@@ -202,68 +235,6 @@ extension BordersKey {
             // tints a state badge, not one of the three accents
             // the bar is read by.
             return .row(.advancedColours, .spaceBar, .showMore)
-        }
-    }
-}
-
-extension BordersKey {
-    var text: SettingRowText {
-        switch self {
-        case .borderEnabled:
-            return .text("border.enabled")
-        // On the Focus-border card each ring tint could be
-        // "Color", the card being the context. In a Borders
-        // group holding three tints, two rows named "Color" name
-        // nothing, so both took the wording their VoiceOver
-        // labels already carried (#678 Phase 3).
-        case .borderFocusedColor:
-            return .text("border.color.focused")
-        case .borderUnfocusedEnabled:
-            return .text("border.unfocused_enabled")
-        case .borderUnfocusedColor:
-            return .text("border.color.unfocused")
-        case .borderWidth:
-            return .text("border.width")
-        case .borderCorner:
-            return .text("border.corner_style")
-        case .borderGlow:
-            return .text("border.glow")
-        case .borderGlowSizeAuto:
-            return .text("border.glow_size.auto")
-        case .borderGlowSize:
-            return .text("border.glow_size")
-        case .borderDrawOrder:
-            return .none
-        case .borderFitGapsExtraSpacing:
-            return .text("border.fit_gaps.extra_spacing")
-        case .borderFitGaps:
-            return .text("border.fit_gaps.action")
-        case .stickyMark:
-            return .text("sticky.mark", help: "sticky.mark.help")
-        case .stickyColor:
-            return .text("sticky.color")
-        case .dragCornerRadius:
-            return .text("drag.corner_radius")
-        case .dragGhostEnabled, .dragDropZoneEnabled:
-            return .text("drag.enabled")
-        case .dragGhostBorder, .dragDropZoneBorder:
-            return .text("drag.border")
-        // The drag tints go the other way: they reuse their
-        // toggles' labels, because the Border/Fill sub-grouping
-        // that made a bare "Color" readable is not on the colour
-        // page either.
-        case .dragGhostBorderColor, .dragDropZoneBorderColor:
-            return .text("drag.border")
-        case .dragGhostBorderWidth, .dragDropZoneBorderWidth:
-            return .text("drag.border_width")
-        case .dragGhostBorderAlignment, .dragDropZoneBorderAlignment:
-            return .text("drag.border_alignment")
-        case .dragGhostFill, .dragDropZoneFill:
-            return .text("drag.fill")
-        case .dragGhostFillColor, .dragDropZoneFillColor:
-            return .text("drag.fill")
-        case .floatingColor:
-            return .text("floating.color")
         }
     }
 }

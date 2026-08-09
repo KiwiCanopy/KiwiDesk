@@ -28,14 +28,24 @@ struct PtSlider: View {
     /// the range — a 1-floored slider without a sentinel must
     /// keep printing its number (QA 2026-07-19).
     var autoAtZero: Bool = false
+    /// Optional `?` popover (#94), label-adjacent and inside the
+    /// shared label column — the same slot `SecondsRow` and
+    /// `RatioRow` carry. Declared LAST so a call site can pass
+    /// it while leaving `unit` and `autoAtZero` at their
+    /// defaults.
+    var help: String? = nil
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
     var body: some View {
         HStack {
-            Text(label)
-                .frame(width: labelColumn, alignment: .leading)
-                .lineLimit(1)
+            HStack(spacing: 4) {
+                Text(label).lineLimit(1)
+                if let help {
+                    HelpButton(explanation: help, subject: label)
+                }
+            }
+            .frame(width: labelColumn, alignment: .leading)
             SettingsSlider(
                 value: Binding(
                     get: { Double(value) },

@@ -5,11 +5,15 @@ import Testing
 
 /// The Gaps & Borders area against the census (#678 Phase 3).
 ///
-/// As in General the promise is the WEAKER one: all four
-/// containers are bespoke views (the gap drawers, the ring
-/// preview and its auto-gated glow, the sticky toggle, the two
-/// drag columns), so the order lists record membership for the
-/// placement table and search without driving anything on screen.
+/// As in General the promise is the WEAKER one: every container
+/// here is a bespoke view (the gap drawers, the Borders card's
+/// two masters, the ring preview and its auto-gated glow, the
+/// sticky toggle, the two drag columns), so the order
+/// lists record membership for the placement table and search
+/// without driving anything on screen. How many there are is
+/// `GapsBordersRowOrder.byContainer`, which
+/// `bespokeMeansNoForEach` compares against the bespoke set —
+/// this prose names them rather than counting them.
 /// What is guarded is that the lists and the census agree, and
 /// that the bespoke declaration stays true of the tree.
 @Suite("Gaps & Borders render ↔ census parity")

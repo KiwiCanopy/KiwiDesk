@@ -20,10 +20,20 @@ struct GapsAndBordersSection: View {
 
     var body: some View {
         ScrollView {
+            // Focus border leads the drag visuals since #754:
+            // the ring is the stroke seen all day, and it is the
+            // one the other two match. `BordersCard` sits above
+            // all three because it holds what they share — and
+            // `GapsAndBordersGateWiringTests` pins that every
+            // one of these five is mounted here, each line
+            // included: each editor declares its own card, so a
+            // deleted mount takes a whole surface off screen
+            // with every other guard still green.
             VStack(alignment: .leading, spacing: 20) {
                 GapsEditor(model: model)
-                DragVisualsEditor(model: model)
+                BordersCard(model: model)
                 FocusBorderEditor(model: model)
+                DragVisualsEditor(model: model)
                 StickyMarkEditor(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)

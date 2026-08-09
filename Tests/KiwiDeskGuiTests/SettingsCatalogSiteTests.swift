@@ -37,7 +37,8 @@ struct SettingsCatalogSiteTests {
             .compactMap { $0.propertyPath.last }
         // 58 since turn 13a: Profiles adds the "Which profile
         // loads" card and the "For other setups" preset drawer.
-        #expect(names.count == 58)
+        // 59 since #754: the Borders card.
+        #expect(names.count == 59)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

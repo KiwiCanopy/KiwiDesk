@@ -63,7 +63,9 @@ struct SettingsCatalogTests {
         // never wrote down — and the "For other setups" drawer
         // that folds away the presets the live hardware cannot
         // apply.
-        #expect(allEntries.count == 64)
+        // 65 since #754: Gaps & Borders gains the Borders card
+        // that holds the decisions all three strokes share.
+        #expect(allEntries.count == 65)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

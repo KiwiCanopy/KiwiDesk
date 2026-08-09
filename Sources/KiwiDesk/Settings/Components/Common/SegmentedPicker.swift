@@ -78,7 +78,15 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    private var selectedIndex: Int? {
+    /// Which segment the pill sits on, or nil when the bound
+    /// value matches no option — a hand-edited config, or an
+    /// OPTIONAL-valued binding whose two halves disagree (the
+    /// shared Corners master, #754). Internal rather than
+    /// private because that nil is now load-bearing and
+    /// `SegmentedPickerUnmatchedTests` reads it: it is the
+    /// difference between "no answer yet" and a picker
+    /// asserting an answer the app is not drawing.
+    var selectedIndex: Int? {
         options.firstIndex { $0.value == selection }
     }
 

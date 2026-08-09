@@ -15,7 +15,11 @@ import KiwiDeskCore
 /// `settings.*` ids share. A changed leaf therefore resolves to
 /// its `SettingKey` by longest matching census base; several
 /// leaves under one setting (a per-space override dictionary, a
-/// master/value pair) count as ONE changed setting.
+/// master/value pair) count as ONE changed setting. Where a
+/// master's leaves are NOT under it — the two border masters
+/// write across the model — the prefix cannot see them, so the
+/// fan-out is declared in `SettingKey.masterWrites` and folded
+/// in below.
 struct SettingsDraftDiff {
     /// The distinct settings that differ, resolved to census
     /// keys where the path has an owner.
@@ -115,6 +119,17 @@ struct SettingsDraftDiff {
                     bases[container] = key
                 }
             }
+        }
+        // A master's followers have no row of their own, so the
+        // master owns their leaves outright — an OVERRIDE, not
+        // a first-wins registration, because the follower's own
+        // surfaceless census row claims its own path in the
+        // loop above and would book a second change for a
+        // value the user set once. Prefix matching cannot do
+        // this: these leaves sit outside the master's subtree
+        // (`SettingKey.masterWrites`).
+        for (key, paths) in SettingKey.masterWrites {
+            for path in paths { bases[path] = key }
         }
         return bases
     }

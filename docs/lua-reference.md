@@ -2326,7 +2326,21 @@ you drag, KiwiDesk shows two visuals:
   window a drop would swap with.
 
 Each visual has an on/off switch plus an independently toggle-able
-border and fill with configurable colors, thickness, and alignment.
+border and fill with configurable colors and width.
+
+**Per stroke, these are Lua-only.** The Settings app asks the
+width and the corner shape once, for the focus ring and both
+drag visuals together, so it offers no per-visual width, no
+per-visual alignment and no numeric radius — see
+[design decisions](design-decisions.md) for why the decision is
+removed rather than switched off. Everything below stays
+settable per stroke and is never clamped against its twin;
+what it costs is that touching the shared **Width** or
+**Corners** control overwrites all three at once.
+
+Alignment defaults to `inside` for both, so each marker's outer
+edge is the slot boundary itself. The focus ring outsets instead,
+because it wraps a real window whose pixels it must not cover.
 
 ### drag.set_ghost_enabled
 
@@ -2356,7 +2370,9 @@ drag.set_ghost_border(true)
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border width of the ghost.
+**Does:** sets the border width of the ghost. Lua-only per
+stroke: the Settings app's shared **Width** writes this, the
+drop zone's and the focus ring's together.
 
 **Example:**
 
@@ -2366,14 +2382,17 @@ drag.set_ghost_border_width(5)
 
 ### drag.set_ghost_border_alignment
 
-**Expects:** `"inside"` or `"outside"`.
+**Expects:** `"inside"` or `"outside"` (default `"inside"`).
 
-**Does:** positions the border inside or outside the slot boundary.
+**Does:** positions the border inside or outside the slot
+boundary. Lua-only — the Settings app offers no control for it
+at all, the focus ring having no alignment concept to share
+(see [design decisions](design-decisions.md)).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_alignment("inside")
+drag.set_ghost_border_alignment("outside")
 ```
 
 ### drag.set_ghost_border_color
@@ -2444,7 +2463,9 @@ drag.set_drop_zone_border(true)
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border width of the drop zone.
+**Does:** sets the border width of the drop zone. Lua-only per
+stroke: the Settings app's shared **Width** writes this, the
+ghost's and the focus ring's together.
 
 **Example:**
 
@@ -2454,14 +2475,16 @@ drag.set_drop_zone_border_width(5)
 
 ### drag.set_drop_zone_border_alignment
 
-**Expects:** `"inside"` or `"outside"`.
+**Expects:** `"inside"` or `"outside"` (default `"inside"`).
 
 **Does:** positions the border inside or outside the slot boundary.
+Lua-only, and independent of the ghost's alignment — see
+`drag.set_ghost_border_alignment`.
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_alignment("inside")
+drag.set_drop_zone_border_alignment("outside")
 ```
 
 ### drag.set_drop_zone_border_color
@@ -2507,7 +2530,18 @@ drag.set_drop_zone_fill_color("#C2790A40")
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the corner rounding of both visuals (default 16).
+**Does:** sets the corner rounding of both visuals (default 16,
+the system window radius). The full range is Lua-only: the
+Settings app offers **Square** / **Rounded**, which writes this
+and the focus ring's corner style together.
+
+It READS any value above zero as Rounded, so a radius set here
+is displayed rather than overwritten, and **re-picking Rounded
+leaves it alone** — that segment writes the system radius only
+from 0, where there is no rounding to keep. Square writes 0,
+being the one shape with a single radius. Set this to disagree
+with `border.set_corner_style` and the picker shows no segment
+selected until you choose one.
 
 **Example:**
 
@@ -2621,6 +2655,13 @@ border.set_unfocused_color("#8E8E93CC")
 radius; `square` draws sharp corners — seamless on windows that
 are already square (some Electron/utility windows), an intentional
 squared frame on rounded ones.
+
+The Settings app's shared **Corners** control writes this and
+`drag.set_corner_radius` together, and reads both back. Set one
+here that disagrees with the radius — a square ring over a
+rounded drag pair, or the reverse — and the picker shows **no
+segment selected** rather than picking a side; either segment
+then sets both. Nothing rewrites the pair until you do.
 
 **Example:**
 

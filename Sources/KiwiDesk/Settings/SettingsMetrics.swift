@@ -107,17 +107,20 @@ enum SettingsMetrics {
     /// labels).
     static let sidebarTile: CGFloat = 22
 
-    /// The label column for the Drag & drop editor's two
-    /// half-width columns (#231). Narrower than the shared 150,
-    /// pushed onto every row in a column via the
-    /// `\.settingsLabelColumn` override (the seam
-    /// `OverrideChrome` uses), so a half-width column still
-    /// leaves the slider real travel. The rows there are
-    /// relabeled to their
-    /// in-group short forms ("Color", "Width", "Alignment") so
-    /// this width holds; headroom over "Alignment" (~58 pt at
-    /// body) covers a longer localization before `lineLimit(1)`
-    /// would truncate.
+    /// The label column for a pair of half-width drag columns.
+    /// Narrower than the shared 150, so a half-width column
+    /// still leaves its control real travel, and the rows are
+    /// relabeled to their in-group short forms ("Color",
+    /// "Width") so this width holds; headroom over the longest
+    /// of those covers a longer localization before
+    /// `lineLimit(1)` would truncate.
+    ///
+    /// Born for the Gaps & Borders drag editor (#231), pushed
+    /// in there through the `\.settingsLabelColumn` override.
+    /// That editor's last narrow-axis row left in #754 and the
+    /// override with it; what reads this now is Advanced
+    /// Colours' twin drag columns, which pass it directly as
+    /// `AdvancedColorRow`'s `labelWidth:`.
     static let dragColumnLabelColumn: CGFloat = 80
 
     /// The trailing readout of a slider row. Sized for the

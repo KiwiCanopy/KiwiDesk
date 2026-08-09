@@ -1,10 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drag-and-drop visuals (#68 §3.14, restructured #231): the
-/// shared corner radius up top (it styles both visuals, so it
-/// belongs to neither column), then Ghost | Drop-zone as two
-/// side-by-side columns. Each column leads with its own live
+/// Drag-and-drop visuals (#68 §3.14, restructured #231, #754):
+/// Ghost | Drop-zone as two side-by-side columns inside the
+/// Drag & drop card. Each column leads with its own live
 /// preview and puts its controls directly beneath, so tuning a
 /// column's border width never scrolls its preview off-screen —
 /// the whole reason the previews were split out of one shared
@@ -12,6 +11,12 @@ import SwiftUI
 /// want different, edited by comparison, so twin columns state
 /// the pairing once (the System-Settings Displays/Desktop
 /// pattern). Static previews — no live drag (#123).
+///
+/// Both border WIDTHS and the shared corner radius left for the
+/// Borders card in #754, where two rows now decide them for all
+/// three strokes at once; the two alignment pickers left the GUI
+/// entirely there (GUI_REMOVED_2026-08). What stays in a column
+/// is what only that column can answer.
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
@@ -20,22 +25,14 @@ struct DragVisualsEditor: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            SettingsSection(
-                SettingsCatalog.gapsAndBorders.dragCard,
-                caption: L(
-                    "drag.caption",
-                    "Drag a window onto another to swap "
-                        + "their positions in the layout."
-                )
-            ) {
-                PtSlider(
-                    label: L("drag.corner_radius", "Corner radius"),
-                    value: $model.config.settings
-                        .dragCornerRadius,
-                    range: 0...40
-                )
-            }
+        SettingsSection(
+            SettingsCatalog.gapsAndBorders.dragCard,
+            caption: L(
+                "drag.caption",
+                "Drag a window onto another to swap "
+                    + "their positions in the layout."
+            )
+        ) {
             HStack(alignment: .top, spacing: 16) {
                 column(
                     control: SettingsCatalog.gapsAndBorders.dragGhost,
@@ -47,9 +44,6 @@ struct DragVisualsEditor: View {
                     visual: $model.config.settings.dragGhost,
                     enabledReason: gates.inertReason(
                         for: .borders(.dragGhostBorder)
-                    ),
-                    borderReason: gates.inertReason(
-                        for: .borders(.dragGhostBorderWidth)
                     )
                 )
                 column(
@@ -63,9 +57,6 @@ struct DragVisualsEditor: View {
                     visual: $model.config.settings.dragDropZone,
                     enabledReason: gates.inertReason(
                         for: .borders(.dragDropZoneBorder)
-                    ),
-                    borderReason: gates.inertReason(
-                        for: .borders(.dragDropZoneBorderWidth)
                     )
                 )
             }
@@ -73,14 +64,21 @@ struct DragVisualsEditor: View {
     }
 
     /// One self-contained column: preview leads, its controls
-    /// below, on the narrowed Drag label axis (#231) so the
-    /// half-width slider keeps real travel.
+    /// below.
+    ///
+    /// It no longer narrows the label axis (#231's
+    /// `dragColumnLabelColumn`, pushed in through the
+    /// environment). That existed so a half-width column could
+    /// still hold a slider with real travel, and #754 took the
+    /// last slider out — what remains is toggles, which draw
+    /// their own labels and never read the axis. The metric
+    /// itself stays: Advanced Colours' twin drag columns pass
+    /// it directly as `labelWidth:`.
     private func column(
         control: SettingsControl,
         caption: String,
         visual: Binding<DragVisual>,
-        enabledReason: GapsBordersGates.InertReason?,
-        borderReason: GapsBordersGates.InertReason?
+        enabledReason: GapsBordersGates.InertReason?
     ) -> some View {
         // The header `?` is the gate's live anchor (#527): with
         // the visual off the column below the Enabled toggle is
@@ -98,43 +96,28 @@ struct DragVisualsEditor: View {
             )
             DragVisualControls(
                 visual: visual,
-                enabledReason: enabledReason,
-                borderReason: borderReason
+                enabledReason: enabledReason
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .environment(
-            \.settingsLabelColumn,
-            SettingsMetrics.dragColumnLabelColumn
-        )
     }
 }
 
-/// The border + fill controls shared by ghost and drop zone.
-/// Rows are relabeled to their in-group short forms ("Width",
-/// "Alignment") since the Border/Fill sub-grouping already
-/// carries the prefix (#231). All rows read the narrowed Drag
-/// label axis from the environment. The two COLOUR rows left in
-/// #678 Phase 3 — Border and Fill still decide whether each part
-/// is drawn, which is this column's question; what it is painted
-/// with is Advanced Colours'.
+/// The border + fill switches shared by ghost and drop zone —
+/// whether each part is drawn at all, which is the one question
+/// only this column can answer. The two COLOUR rows left in
+/// #678 Phase 3 for Advanced Colours; the border WIDTH left in
+/// #754 for the shared master, which is why Border no longer
+/// gates anything below it here.
 struct DragVisualControls: View {
     @Binding var visual: DragVisual
     let enabledReason: GapsBordersGates.InertReason?
-    let borderReason: GapsBordersGates.InertReason?
 
-    /// Two gates the column already implies and none of it
-    /// enforced (#520): with the visual off nothing it draws
-    /// exists, and with Border off its width and alignment shape
-    /// nothing. The column's preview already prints "disabled"
-    /// beside them, so the controls were the only surface still
-    /// claiming to matter. Greyed, never hidden (#171).
-    ///
-    /// The one remaining inner gate needs no `visual.enabled &&`
-    /// conjunction: `GreyOut` dims once however deeply it nests
-    /// (`AutoGatedGroup`), and the colour rows that used to make
-    /// the hover-string shadowing matter here have moved to
-    /// Advanced Colours.
+    /// The one gate the column implies and did not enforce
+    /// (#520): with the visual off nothing it draws exists. The
+    /// column's preview already prints "disabled" beside it, so
+    /// the controls were the only surface still claiming to
+    /// matter. Greyed, never hidden (#171).
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()
@@ -143,30 +126,6 @@ struct DragVisualControls: View {
                 L("drag.border", "Border"),
                 isOn: $visual.border
             )
-            Group {
-                PtSlider(
-                    label: L("drag.border_width", "Width"),
-                    value: $visual.borderWidth,
-                    range: 0...20
-                )
-                SegmentedPicker(
-                    borderAlignmentLabel,
-                    selection: $visual.borderAlignment,
-                    options: [
-                        (L("drag.inside", "Inside"), .inside),
-                        (L("drag.outside", "Outside"), .outside),
-                    ]
-                )
-            }
-            .modifier(
-                GreyOut(
-                    active: borderReason != nil,
-                    help:
-                        borderReason
-                        .map(GapsBordersGateHelp.sentence) ?? ""
-                )
-            )
-            Divider()
             Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
         }
         .modifier(
@@ -177,9 +136,5 @@ struct DragVisualControls: View {
                     .map(GapsBordersGateHelp.sentence) ?? ""
             )
         )
-    }
-
-    private var borderAlignmentLabel: String {
-        L("drag.border_alignment", "Alignment")
     }
 }
