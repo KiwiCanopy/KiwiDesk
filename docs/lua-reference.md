@@ -1802,8 +1802,10 @@ app_bar.set_item_color("#EAF3EE")
 **Expects:** a hex color.
 
 **Does:** sets the fill under the items — a box per item
-(`boxed`) or one shared plate (`plain`). Default `#14201CCC`,
-dark moss at 80% opacity. With the `liquid_glass` finish on, it
+(`boxed`) or one shared plate (`plain`). Default `#14201CB3`,
+dark moss at 70% opacity — the alpha every bundled palette's bar
+fill also carries, so switching theme changes the hue and not how
+readable the bars are. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
 refracts it into its hue (see `app_bar.set_liquid_glass`). Under
 glass the backdrop's opacity is held at ~65 % so the blur stays
@@ -1813,7 +1815,7 @@ full).
 **Example:**
 
 ```lua
-app_bar.set_fill_color("#14201CCC")
+app_bar.set_fill_color("#14201CB3")
 ```
 
 ### app_bar.set_active_item_color

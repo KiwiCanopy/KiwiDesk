@@ -142,9 +142,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var hoverItemColor = "#EAF3EE"
     /// The fill under the items — a box per Space (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint (Material).
-    /// A cool-dark surface under the kiwi accent, 80% opaque to
-    /// match the App Bar (#660).
-    public var fillColor = "#14201CCC"
+    /// A cool-dark surface under the kiwi accent, 70% opaque to
+    /// match the App Bar (#660, retuned by #755 — the argument
+    /// is on `AppBarStyle.fillColor`).
+    public var fillColor = "#14201CB3"
     public var highlightColor = "#8DB354"
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from
