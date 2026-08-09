@@ -28,9 +28,10 @@ import Testing
 /// THROUGH the seal is invisible to every needle here — the
 /// role sits inside the `Button` initialiser, lines away from
 /// the modifier, so no substring count can bind the two. The
-/// seal silently suppresses such a button's system red (#770
-/// shipped exactly that on LayerStripEditor's delete, caught in
-/// #771's review); what keeps the class closed is that a
+/// seal silently suppresses such a button's system red (#770's
+/// hand-pairing did exactly that on LayerStripEditor's delete,
+/// carried into the seal by #771 and caught in its review);
+/// what keeps the class closed is that a
 /// destructive button styled RAW must name itself in
 /// `borderedExempt`, which is where a reviewer meets it.
 @Suite("Settings bordered seal")
@@ -76,9 +77,10 @@ struct SettingsBorderedSealTests {
             ),
             "LayerStripEditor.swift": (
                 1, "role: .destructive",
-                "delete layer; #770 shipped it sealed, which "
-                    + "suppressed the red — its sealed siblings "
-                    + "are rename and add"
+                "delete layer; #770's hand-pairing suppressed "
+                    + "its red, carried through by #771's seal "
+                    + "until this fix — its sealed sibling is "
+                    + "rename"
             ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
