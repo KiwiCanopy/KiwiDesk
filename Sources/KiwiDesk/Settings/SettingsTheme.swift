@@ -171,6 +171,17 @@ enum SettingsTheme {
     static let monitorCardStroke: CGFloat = 1.5
     static let monitorCardStrokeSelected: CGFloat = 3
 
+    /// A palette tile's frame at rest and once it is the applied
+    /// one (#757). The shelf's whole content is colour, so the
+    /// frame is the ONLY channel selection can use — no fill, no
+    /// glyph on the picture — and the two weights follow the
+    /// Monitors picture's ruling above: keep them apart or one
+    /// state swallows the other. Lighter than a display card's
+    /// pair because a palette tile is one of many in a grid
+    /// rather than an object on a well.
+    static let paletteCardStroke: CGFloat = 1
+    static let paletteCardStrokeApplied: CGFloat = 2
+
     /// A display card's stand: the foot as a share of the card's
     /// width and the neck as a share of the foot, each clamped.
     /// Long enough that the card sits ON its foot rather than

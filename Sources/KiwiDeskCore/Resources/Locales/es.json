@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk organiza tus ventanas automáticamente. Para mover y redimensionar ventanas de otras aplicaciones, macOS requiere que le concedas el permiso de Accesibilidad.\n\nKiwiDesk nunca lee tus pulsaciones de teclas y no requiere desactivar la Protección de la Integridad del Sistema (SIP).",
   "onboarding.welcome.title": "Te damos la bienvenida a KiwiDesk",
   "onboarding.window.title": "Configuración de KiwiDesk",
+  "palettes.applied": "Aplicada",
   "palettes.builtin": "Integrada",
   "palettes.bundled": "Paletas integradas",
   "palettes.caption": "Aplica un conjunto de colores incluido o guardado a la App Bar, la Space Bar, los bordes y los elementos visuales de arrastre: una pintura única, no un enlace en vivo.",

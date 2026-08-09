@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk 會自動排列你的視窗。若要移動並調整其他 App 的視窗，macOS 要求你授予「輔助使用」權限。\n\nKiwiDesk 從不讀取你的按鍵輸入，也不需要停用「系統完整保護」。",
   "onboarding.welcome.title": "歡迎使用 KiwiDesk",
   "onboarding.window.title": "KiwiDesk 設定",
+  "palettes.applied": "已套用",
   "palettes.builtin": "內建",
   "palettes.bundled": "隨附",
   "palettes.caption": "將隨附或已儲存的一組顏色套用到 App Bar、Space Bar、邊框與拖移視覺效果 — 這是一次性的上色，而非持續連動。",

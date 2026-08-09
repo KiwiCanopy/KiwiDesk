@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk ordnet deine Fenster automatisch an. Um Fenster anderer Apps bewegen und in der Größe verändern zu können, benötigt macOS die Erlaubnis für Bedienungshilfen.\n\nKiwiDesk liest niemals deine Tastatureingaben und erfordert keine Deaktivierung des Systemintegritätsschutzes (SIP).",
   "onboarding.welcome.title": "Willkommen bei KiwiDesk",
   "onboarding.window.title": "KiwiDesk Einrichtung",
+  "palettes.applied": "Angewendet",
   "palettes.builtin": "Integriert",
   "palettes.bundled": "Mitgeliefert",
   "palettes.caption": "Wende eine mitgelieferte oder gespeicherte Farbsammlung auf App Bar, Space Bar, Rahmen und Zieh-Elemente an — ein einmaliges Einfärben, keine Live-Verknüpfung.",

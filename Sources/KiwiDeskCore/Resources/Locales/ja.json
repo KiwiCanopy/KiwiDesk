@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDeskはウインドウを自動的に整列します。他アプリのウインドウを移動・リサイズするには、macOSのアクセシビリティ権限を付与する必要があります。\n\nKiwiDeskがキー入力内容を読み取ることはなく、システム整合性保護（SIP）を無効化する必要もありません。",
   "onboarding.welcome.title": "KiwiDeskへようこそ",
   "onboarding.window.title": "KiwiDeskの設定",
+  "palettes.applied": "適用中",
   "palettes.builtin": "組み込み",
   "palettes.bundled": "同梱パレット",
   "palettes.caption": "付属または保存済みのカラーセットを App Bar、Space Bar、ボーダー、ドラッグ表示に適用します。一度きりの塗り替えであり、以後は連動しません。",

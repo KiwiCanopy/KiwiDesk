@@ -1416,6 +1416,16 @@ tile at a larger size, so what a palette promises and what you have
 can never be drawn two different ways. Edit any individual color in
 Advanced Colors and this scene follows.
 
+The palette you are on is **checkmarked**. The mark is worked out
+from your live colors rather than remembered, so it means "these
+are the colors you have", not "this is the one you last clicked":
+change a single color by hand in Advanced Colors and the mark goes
+away, because the colors are no longer that palette's. No card
+carrying the mark is a normal state — it means your colors are
+your own. Every card is framed; the marked one is framed in green
+as well, and the frame is never the only signal, so the shelf
+reads the same whatever your color vision.
+
 - **Bundled** palettes (Kiwi (Default), Kiwi Gold, Kiwi Neon,
   Clean Light,
   Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in

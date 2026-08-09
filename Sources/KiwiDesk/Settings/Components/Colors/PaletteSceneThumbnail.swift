@@ -44,7 +44,7 @@ struct PaletteSceneThumbnail: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 6 * scale)
-                .fill(Color.secondary.opacity(0.12))
+                .fill(SettingsTheme.sunken)
             VStack(spacing: 6 * scale) {
                 barStrip
                 HStack(spacing: 6 * scale) {
@@ -92,7 +92,7 @@ struct PaletteSceneThumbnail: View {
     /// A mock focused window wearing its focus ring.
     private var window: some View {
         RoundedRectangle(cornerRadius: 4 * scale)
-            .fill(Color.secondary.opacity(0.18))
+            .fill(SettingsTheme.hairline)
             .overlay(
                 RoundedRectangle(cornerRadius: 4 * scale)
                     .stroke(

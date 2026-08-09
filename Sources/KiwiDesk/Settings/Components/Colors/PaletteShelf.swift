@@ -114,7 +114,7 @@ struct PaletteShelf: View {
                     )
                 )
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink3)
             }
         }
     }
@@ -147,27 +147,34 @@ struct PaletteShelf: View {
     /// One palette tile: the scene thumbnail, its name, and (for a
     /// bundled palette) a muted "Built-in" caption. Clicking paints
     /// the palette. A user tile also hosts its rename popover.
+    ///
+    /// The applied mark is COMPUTED, never remembered (#757): a
+    /// palette paints one-shot, so "last applied" would keep
+    /// claiming a theme the user has since edited a colour out
+    /// of. Asking whether the live colours still say what this
+    /// palette says is the only answer the shelf can make that a
+    /// glance at the bars cannot contradict — and it makes the
+    /// mark's disappearance the honest report of a hand edit,
+    /// which is why no third "modified" state exists.
     private func chip(
         _ palette: ColorPalette,
         builtin: Bool
     ) -> some View {
-        Button {
+        let applied = palette.isApplied(to: model.config.settings)
+        return Button {
             model.applyPalette(palette)
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            PaletteTile(
+                name: palette.name,
+                caption: builtin
+                    ? L("palettes.builtin", "Built-in") : nil,
+                isApplied: applied
+            ) {
                 PaletteSceneThumbnail(palette: palette)
-                Text(palette.name)
-                    .font(.caption)
-                    .lineLimit(1)
-                Text(
-                    builtin
-                        ? L("palettes.builtin", "Built-in") : " "
-                )
-                .font(.caption2)
-                .foregroundStyle(.secondary)
             }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(applied ? [.isSelected] : [])
         .popover(isPresented: renameBinding(palette.name)) {
             renamePopover(palette)
         }
@@ -221,36 +228,45 @@ struct PaletteShelf: View {
 
     /// The trailing "+" tile that saves the current colors as a new
     /// user palette (the grid's add idiom).
+    ///
+    /// Renders through `PaletteTile` like every palette card, so
+    /// it is the same height and shape and differs only in the
+    /// dashed frame. It can never carry the applied mark: there
+    /// is no palette here yet to be on.
     private var addTile: some View {
         Button {
             saveName = nextUserName()
             savingCurrent = true
         } label: {
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(
-                    Color.secondary.opacity(0.4),
-                    style: StrokeStyle(lineWidth: 1, dash: [4])
-                )
-                .frame(height: 72)
-                .overlay(
-                    VStack(spacing: 4) {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                        Text(
-                            L(
-                                "palettes.save_current",
-                                "Save current colors as…"
-                            )
-                        )
-                        .font(.caption2)
-                        .multilineTextAlignment(.center)
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(4)
-                )
+            // The label stays INSIDE the plate, where it can wrap:
+            // the name line is one truncating line by design (a
+            // palette name has to stay on it), and "Save current
+            // colors as…" does not survive that in any locale.
+            // The name line still renders, blank, so the tile
+            // keeps the grid's height.
+            PaletteTile(name: " ", dashed: true) {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(SettingsTheme.sunken)
+                    .overlay(
+                        VStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.title2)
+                            Text(saveCurrentLabel)
+                                .font(.caption2)
+                                .multilineTextAlignment(.center)
+                        }
+                        .foregroundStyle(SettingsTheme.ink3)
+                        .padding(4)
+                    )
+            }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(saveCurrentLabel)
         .popover(isPresented: $savingCurrent) { savePopover }
+    }
+
+    private var saveCurrentLabel: String {
+        L("palettes.save_current", "Save current colors as…")
     }
 
     private var savePopover: some View {
@@ -271,7 +287,7 @@ struct PaletteShelf: View {
                     )
                 )
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink3)
             }
             HStack {
                 Spacer()

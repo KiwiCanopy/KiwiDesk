@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk arranges your windows automatically. To move and resize windows of other apps, macOS requires you to grant Accessibility permission.\n\nKiwiDesk never reads your keystrokes and does not require disabling System Integrity Protection.",
   "onboarding.welcome.title": "Welcome to KiwiDesk",
   "onboarding.window.title": "KiwiDesk Setup",
+  "palettes.applied": "Applied",
   "palettes.builtin": "Built-in",
   "palettes.bundled": "Bundled",
   "palettes.caption": "Apply a bundled or saved set of colors to the App Bar, Space Bar, borders, and drag visuals — a one-time paint, not a live link.",

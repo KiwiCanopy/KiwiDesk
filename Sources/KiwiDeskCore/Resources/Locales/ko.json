@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk는 윈도우를 자동으로 정렬합니다. 다른 앱의 윈도우를 이동하고 크기를 조절하려면 macOS의 '손쉬운 사용' 권한 부여가 필요합니다.\n\nKiwiDesk는 키 입력을 읽지 않으며 시스템 무결성 보호(SIP)를 비활성화할 필요가 없습니다.",
   "onboarding.welcome.title": "KiwiDesk에 오신 것을 환영합니다",
   "onboarding.window.title": "KiwiDesk 설정",
+  "palettes.applied": "적용됨",
   "palettes.builtin": "내장",
   "palettes.bundled": "기본 제공 팔레트",
   "palettes.caption": "번들 또는 저장된 색상 세트를 App Bar, Space Bar, 테두리, 드래그 표시에 적용합니다. 한 번만 적용되며 이후에는 연동되지 않습니다.",
