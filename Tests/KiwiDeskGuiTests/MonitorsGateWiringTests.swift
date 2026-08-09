@@ -180,6 +180,19 @@ struct MonitorsGateWiringTests {
                 // needle two entries down, and the same fix.
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
+                // The main display's glow (#758). Decoration —
+                // the badge is the answer — but a decoration
+                // branch deletes as silently as any other.
+                "isMain?SettingsTheme.accent",
+            ],
+            "Components/Monitors/SpaceAssignmentChip.swift": [
+                // The clear-pin corner badge (#758): the overlay
+                // that mounts it, keyed on the USE site, and the
+                // glyph inside the branch — deleting either
+                // strands every pinned chip with no route back
+                // to automatic except the context menu.
+                ".overlay(alignment:.topTrailing){clearBadge}",
+                "Image(systemName:\"xmark.circle.fill\")",
             ],
             "Sections/MonitorsSection+Details.swift": [
                 // The orphan row's spoken label: its value is a
@@ -238,6 +251,51 @@ struct MonitorsGateWiringTests {
                 )
             )
         }
+    }
+
+    /// The picture's chrome reads its numbers from
+    /// `SettingsTheme`, which is the one copy (#758) — a stand
+    /// or stroke re-hardcoded beside the drawing is the drift
+    /// the theme constants exist to end.
+    ///
+    /// The stroke needle is the WHOLE ternary: the rest-weight
+    /// name is a substring of the selected-weight name, so a
+    /// bare `monitorCardStroke` check would stay green with the
+    /// rest weight hardcoded back to a literal.
+    @Test("the chrome reads its themed metrics")
+    func chromeReadsThemedMetrics() throws {
+        let picture = try squashed(
+            "Components/Monitors/MonitorsPicture.swift"
+        )
+        for needle in [
+            "SettingsTheme.monitorStandScale",
+            "SettingsTheme.monitorStandMin",
+            "SettingsTheme.monitorStandMax",
+        ] {
+            #expect(
+                picture.contains(needle),
+                Comment(
+                    rawValue:
+                        "MonitorsPicture no longer reads "
+                        + "`\(needle)` — the stand's size went "
+                        + "inline"
+                )
+            )
+        }
+        let card = try squashed(
+            "Components/Monitors/DisplayCard.swift"
+        )
+        #expect(
+            card.contains(
+                "SettingsTheme.monitorCardStrokeSelected"
+                    + ":SettingsTheme.monitorCardStroke)"
+            ),
+            Comment(
+                rawValue:
+                    "DisplayCard's border no longer takes both "
+                    + "weights from SettingsTheme"
+            )
+        )
     }
 
     /// The card's chip capacity comes from the shared arithmetic,

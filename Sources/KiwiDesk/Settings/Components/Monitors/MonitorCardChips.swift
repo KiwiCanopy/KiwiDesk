@@ -26,10 +26,12 @@ enum MonitorCardChips {
     /// padding, top and bottom (`SpaceAssignmentChip`).
     static let chipHeight: CGFloat = 22
     /// The narrowest a chip gets — horizontal padding either
-    /// side, a one-character name, and the clear button's hit
-    /// target. A longer name makes it wider, so a capacity
-    /// computed from this is an UPPER bound on how many fit;
-    /// erring that way keeps the card honest, since a `+n` that
+    /// side, a one-character name, and its kind glyph. The
+    /// clear button no longer takes flow width (#758 moved it
+    /// to a corner-badge overlay), so 52 now carries ~16 pt of
+    /// deliberate breathing room — kept, because a capacity
+    /// computed from this is an UPPER bound on how many fit,
+    /// and erring that way keeps the card honest: a `+n` that
     /// appears one chip early costs nothing and a chip that
     /// silently does not fit costs the affordance.
     static let minChipWidth: CGFloat = 52

@@ -18,10 +18,15 @@ struct SpaceAssignment: Identifiable, Hashable {
 /// One space chip inside a display card. Semantic micro-icons
 /// (pin / arrow) encode the resolution kind — border style alone
 /// would be an accessibility risk (§3.13). Explicit chips clear
-/// back to automatic via an always-visible ⓧ (a reserved trailing
-/// slot, like a Mail address token — a hover-only button grew the
-/// chip after the flow layout had sized it, so its ⓧ overflowed a
-/// narrow card).
+/// back to automatic via an always-visible ⓧ drawn as a CORNER
+/// BADGE overlay on the trailing-top corner (#758): an overlay
+/// never contributes to the parent's size, so the chip's metrics
+/// stop depending on whether it is pinned. Its two ancestors
+/// died of the same measurement — a hover-only button grew the
+/// chip after the flow layout had sized it, so its ⓧ overflowed
+/// a narrow card, and the in-flow trailing slot that replaced it
+/// ate label width on every pinned chip and made each read as a
+/// delete button.
 ///
 /// **A `Menu` inside the chip is what makes the keyboard route
 /// real** (#678 turn 13b). Before it, the chip was an `HStack`
@@ -119,27 +124,6 @@ struct SpaceAssignmentChip: View {
                 // 8-language add (#95) — localized names run
                 // longer.
                 .frame(maxWidth: 120, alignment: .leading)
-            if kind != .auto {
-                Button {
-                    clear()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 9))
-                        // A 9 pt glyph inside a draggable surface
-                        // is a click that starts a drag two points
-                        // off centre. The hit target is the
-                        // affordance, not the drawing.
-                        .frame(width: 16, height: 16)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.borderless)
-                .iconButtonAffordance(
-                    L(
-                        "monitors.clear_pin.label",
-                        "Back to automatic placement"
-                    )
-                )
-            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
@@ -164,6 +148,57 @@ struct SpaceAssignmentChip: View {
                 ? AnyShapeStyle(.secondary)
                 : AnyShapeStyle(.primary)
         )
+        // Always visible, never hover-revealed: a hover-inserted
+        // control changes the pill's size, which is the trap the
+        // overlay exists to close — hover may change only the
+        // badge's tint, never its presence or any metric.
+        .overlay(alignment: .topTrailing) { clearBadge }
+    }
+
+    /// The clear-pin control, riding the trailing-top corner and
+    /// slightly overlapping the border. In the accessibility
+    /// tree at full strength however quietly it draws: the
+    /// 16 × 16 hit target (the affordance is the target, not the
+    /// 9 pt glyph), the spoken label and keyboard reachability
+    /// all survive the move out of the flow (#758).
+    @ViewBuilder private var clearBadge: some View {
+        if kind != .auto {
+            Button {
+                clear()
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 9))
+                    // Grey disc, light x — the NSSearchField
+                    // cancel shape. The chip renders on three
+                    // surfaces (card plate, the tray's bare
+                    // well, the overflow popover), and a
+                    // card-coloured disc is invisible by
+                    // construction on the first and a punched
+                    // hole on the second; an ink2 disc reads on
+                    // all three, masks whatever stroke it
+                    // overlaps, and separates by lightness, not
+                    // hue (ui-designer, 2026-08-09).
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        SettingsTheme.card,
+                        SettingsTheme.ink2
+                    )
+                    .frame(width: 16, height: 16)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+            .iconButtonAffordance(
+                L(
+                    "monitors.clear_pin.label",
+                    "Back to automatic placement"
+                )
+            )
+            // y −2, not −4: the 16 pt hit target's top edge
+            // stays inside `stackSpacing`'s gap, so a click on
+            // the tail of a truncated header name cannot land
+            // on "clear this pin" (ui-designer, 2026-08-09).
+            .offset(x: 4, y: -2)
+        }
     }
 
     /// One glyph per kind, and the follows-main one is an ARROW

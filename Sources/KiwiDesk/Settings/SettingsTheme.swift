@@ -162,6 +162,28 @@ enum SettingsTheme {
     /// beside a segmented control reads as a second control.
     static let chipRadius: CGFloat = 9
 
+    /// The Monitors picture's card stroke at rest — heavier than
+    /// the app's hairline so a display card reads as an OBJECT
+    /// on the recessed well rather than as outlined content
+    /// (#758). Selection keeps its own, still-heavier weight:
+    /// the border is the SELECTED channel, and the two weights
+    /// must stay apart or one state swallows the other.
+    static let monitorCardStroke: CGFloat = 1.5
+    static let monitorCardStrokeSelected: CGFloat = 3
+
+    /// A display card's stand: the foot as a share of the card's
+    /// width, clamped. Long enough that the card sits ON its
+    /// foot rather than floating above a speck (#758); the clamp
+    /// is what stops the same share giving a laptop thumbnail a
+    /// plinth. The FLOOR stays at the pre-#758 44: the share
+    /// only takes over above ~85 pt of card, so a floor-sized
+    /// 64 pt card keeps its approved proportion instead of an
+    /// 87 % plinth, and neighbouring floored cards' feet do not
+    /// fuse into a rail (ui-designer, 2026-08-09).
+    static let monitorStandScale: CGFloat = 0.52
+    static let monitorStandMin: CGFloat = 44
+    static let monitorStandMax: CGFloat = 230
+
     // MARK: - Construction
 
     /// One dynamic colour from a light/dark `0xRRGGBB` pair.
