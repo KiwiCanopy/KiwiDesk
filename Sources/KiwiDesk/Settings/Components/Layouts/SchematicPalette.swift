@@ -31,7 +31,11 @@ struct SchematicPalette: Equatable {
     // on strokes and marks alone.
     var fill: Color { ink.opacity(0.08) }
     var stroke: Color { accent.opacity(0.6) }
-    var newFill: Color { ink.opacity(0.14) }
+    // Identical to `fill` on the plate (owner, 2026-08-09):
+    // even the denser ink wash read as "a different colour" on
+    // the tile — the "+" badge alone marks the incoming
+    // window; brand keeps its denser fill off-plate.
+    var newFill: Color { ink.opacity(0.08) }
     var gapStroke: Color { ink.opacity(0.4) }
     var ghostFill: Color { ink.opacity(0.08) }
     var ghostStroke: Color { ink.opacity(0.3) }
