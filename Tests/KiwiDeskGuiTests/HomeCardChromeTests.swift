@@ -1,20 +1,18 @@
+import AppKit
 import Foundation
 import Testing
 
 @testable import KiwiDesk
 
 /// The Home cards' plate-era chrome (#786): the two deliberate
-/// card heights, the desktop plate's shape and silence, and the
-/// palette injection that turns the schematics from brand to
-/// the user's colours inside a plate.
+/// card heights, the desktop plate's shape and silence, the
+/// plate↔tall-group parity and the stroke-above-clip order.
+/// The palette hand-off's needle net split to
+/// `HomeCardPaletteWiringTests` at the file ceiling.
 ///
 /// This is the chrome suite `SettingsThemeMetricTests` requires
 /// for the `cardHeight`/`cardHeightCompact` pair — both weights
-/// named together, so they cannot drift apart unseen — and the
-/// needle net for the wiring a render can lose silently: a
-/// plate that stops injecting the palette still renders, in
-/// brand, with every other guard green (the surfacing-gate
-/// silence, `MonitorsGateWiringTests`' lesson).
+/// named together, so they cannot drift apart unseen.
 @Suite("Home card chrome")
 struct HomeCardChromeTests {
     private static let root = SourceScan.repoRoot(
@@ -88,118 +86,37 @@ struct HomeCardChromeTests {
         #expect(plate.contains(".allowsHitTesting(false)"))
     }
 
-    /// The palette hand-off, at both ends: the plate injects
-    /// the user's colours, and the schematic types consult
-    /// them. Either end deleted leaves everything rendering —
-    /// in brand, on a plate that promised the user's desktop —
-    /// with every behaviour suite green. Needles are keyed PER
-    /// STRUCT, because the same consult expression occurs in
-    /// several types and a file-wide `contains` was satisfied
-    /// by the second occurrence while the first went bare —
-    /// guard-prover demonstrated exactly that (2026-08-09, the
-    /// twice-occurring-expression trap).
-    @Test("the plate injects and the schematics consult")
-    func paletteIsWired() throws {
-        #expect(
-            try squashed("HomeCardPlate.swift").contains(
-                ".environment(\\.schematicPalette,"
-                    + "palette(settings))"
-            )
-        )
-        let kit = try squashed(
-            "Components/Layouts/LayoutSchematicKit.swift"
-        )
-        let tile = try structBody(kit, "SchematicTile")
-        #expect(
-            tile.contains("palette?.fill??LayoutSchematic.fill")
-        )
-        #expect(
-            tile.contains(
-                "palette?.stroke??LayoutSchematic.stroke"
-            )
-        )
-        let newWindow = try structBody(
-            kit,
-            "SchematicNewWindow"
-        )
-        #expect(
-            newWindow.contains(
-                "palette?.newFill"
-                    + "??SettingsTheme.accent.opacity(0.45)"
-            )
-        )
-        #expect(
-            newWindow.contains(
-                "palette?.stroke??LayoutSchematic.stroke"
-            )
-        )
-        let pile = try structBody(kit, "SchematicPileTile")
-        // The pile's opaque base: without the consult a pile on
-        // the plate flashes the light window-background under
-        // the accent (#712's compounding trap, inverted).
-        #expect(
-            pile.contains(
-                "palette?.base"
-                    + "??Color(nsColor:.textBackgroundColor)"
-            )
-        )
-        #expect(pile.contains("palette?.newFill"))
-        #expect(
-            pile.contains("palette?.fill??LayoutSchematic.fill")
-        )
-        #expect(
-            pile.contains(
-                "palette?.stroke??LayoutSchematic.stroke"
-            )
-        )
-        #expect(
-            try structBody(kit, "SchematicGap").contains(
-                "palette?.gapStroke"
-            )
-        )
-        let ghost = try structBody(
-            kit,
-            "SchematicGhostOverflow"
-        )
-        #expect(ghost.contains("palette?.ghostFill"))
-        #expect(ghost.contains("palette?.ghostStroke"))
-        #expect(
-            try squashed(
-                "Components/Layouts/LayoutSchematicCanvas.swift"
-            ).contains("palette?.frame")
-        )
-    }
-
-    /// The fold's legibility floor (#786 ui-designer): the
-    /// plate is KiwiDesk's fixed ground, so a user colour that
-    /// sinks into it swaps for a theme fallback. Pinned with
-    /// the palettes that motivated it — the shipped defaults
-    /// pass (the picture IS the user's colours), the plate's
-    /// own hex, black, and the translucent bar fill all fail.
-    @Test("the palette fold floors against the plate")
+    /// A plate implies the tall group: the plate switch is a
+    /// third hand-kept mirror of the group partition, and a
+    /// plate added to a whole-app case would ship a 92 pt
+    /// picture into a 105 pt card with every list guard green
+    /// (architect review, 2026-08-09; parity-tests.md's
+    /// past-two-mirrors rule).
+    @Test("a plate implies the tall group")
     @MainActor
-    func paletteFoldFloors() throws {
-        #expect(HomeCardPlate.plateLegible("#8DB354"))
-        #expect(HomeCardPlate.plateLegible("#EAF3EE"))
-        #expect(!HomeCardPlate.plateLegible("#12251A"))
-        #expect(!HomeCardPlate.plateLegible("#000000"))
-        #expect(!HomeCardPlate.plateLegible("#14201CB3"))
-        #expect(!HomeCardPlate.plateLegible("not-a-hex"))
-        // And the fold consults it on both colours — a floor
-        // nothing reads is the dead-resolver trap.
-        let plate = try squashed("HomeCardPlate.swift")
-        #expect(
-            plate.contains(
-                "plateLegible(accent)?Color(kiwiHex:accent)"
-                    + ":SettingsTheme.accent"
+    func plateImpliesTheTallGroup() {
+        let model = makeTestModel()
+        var plated = 0
+        for destination in SettingsDestination.allCases {
+            guard
+                HomeCardPlate.plate(
+                    for: destination,
+                    model: model
+                ) != nil
+            else { continue }
+            plated += 1
+            #expect(
+                HomeCardOrder.thisProfile.contains(destination),
+                Comment(
+                    rawValue:
+                        "\(destination) plates outside the "
+                        + "tall group"
+                )
             )
-        )
-        #expect(
-            plate.contains(
-                "plateLegible(ink)?Color(kiwiHex:ink)"
-                    + ":SettingsTheme.plateInk"
-            )
-        )
+        }
+        // Every profile card plates today; a card leaving the
+        // partition is a decision, not a drift.
+        #expect(plated == HomeCardOrder.thisProfile.count)
     }
 
     /// The card's border rides ABOVE the clip, after the plate:
@@ -218,25 +135,6 @@ struct HomeCardChromeTests {
                     + ".overlay(cardStroke)"
             )
         )
-    }
-
-    /// The comment-stripped, squashed body of one struct — up
-    /// to the next `struct` keyword — so a needle names its
-    /// owning type rather than any occurrence in the file.
-    private func structBody(
-        _ source: String,
-        _ name: String
-    ) throws -> String {
-        let marker = "struct\(name):View{"
-        let start = try #require(
-            source.range(of: marker),
-            Comment(rawValue: "struct \(name) not found")
-        )
-        let rest = source[start.upperBound...]
-        let end =
-            rest.range(of: "struct")?.lowerBound
-            ?? rest.endIndex
-        return String(rest[..<end])
     }
 
     /// The grid the two heights live in: the adaptive column

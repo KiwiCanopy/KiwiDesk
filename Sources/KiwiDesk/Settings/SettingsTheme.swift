@@ -205,14 +205,13 @@ enum SettingsTheme {
     static let cardRadius: CGFloat = 14
 
     /// The two Home card heights (#786) — deliberate, not a
-    /// residue: a profile card carries the 92 pt desktop plate
-    /// and a whole-app card never does, so one shared height
-    /// would either stretch the text cards around absent
-    /// pictures or crush the plates. Behaviour keeps the tall
-    /// height plateless so its GROUP still reads as one row
-    /// grid. `HomeCardChromeTests` names the pair together and
-    /// derives the tall height from the plate plus the text
-    /// band rather than restating it.
+    /// residue: every profile card carries the 92 pt desktop
+    /// plate and a whole-app card never does, so one shared
+    /// height would either stretch the text cards around
+    /// absent pictures or crush the plates.
+    /// `HomeCardChromeTests` names the pair together, pins
+    /// both values, and holds the tall one above the plate
+    /// plus a minimum text band.
     static let cardHeight: CGFloat = 152
     static let cardHeightCompact: CGFloat = 105
 

@@ -485,8 +485,9 @@ must keep:
   parameter — with the fold floored against the plate; the
   two card heights derive from the group partition.
   `HomeCardChromeTests` pins the heights pair, the plate's
-  shape and silence, the per-struct palette consults and the
-  stroke-above-clip order.
+  shape, silence and group parity and the stroke-above-clip
+  order; `HomeCardPaletteWiringTests` the per-struct palette
+  consults, the floor and the shared border-width remap.
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

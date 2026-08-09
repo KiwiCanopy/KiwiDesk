@@ -77,14 +77,14 @@ struct MonitorsPicture: View {
         .background(well)
     }
 
-    /// The desk the displays sit on: a recessed well, so each
-    /// card can be the LIGHTER thing on it. Without it the cards
-    /// and the section they live in painted the same colour and
-    /// the arrangement — the whole point of this area — was a
-    /// faint outline on a flat field.
+    /// The desk the displays sit on. Inverted on device (owner,
+    /// 2026-08-09, the prototype's own colouring): the WELL is
+    /// the light thing now and each card the soft-green object
+    /// on it — a wall of white screens glared, and the cards'
+    /// strengthened rest border carries the separation.
     private var well: some View {
         RoundedRectangle(cornerRadius: 8)
-            .fill(SettingsTheme.sunken)
+            .fill(SettingsTheme.card)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(

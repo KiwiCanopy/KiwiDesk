@@ -54,12 +54,12 @@ struct MonitorArrangementFitTests {
     /// The Home card's own thumbnail size: the desktop plate's
     /// interior at the grid's minimum card width (#786 —
     /// `SettingsTheme.plateHeight` minus the Monitors tile's
-    /// 8 pt padding on each side, inside a 240 pt card). Still
-    /// SHORTER than `trayHeight + trayGap`, which is the case
-    /// that broke.
+    /// 8 pt padding on each side and the plate's 4 pt
+    /// `topAir`, inside a 240 pt card). Still SHORTER than
+    /// `trayHeight + trayGap`, which is the case that broke.
     private let cardCanvas = CGSize(
         width: 240 - 16,
-        height: SettingsTheme.plateHeight - 16
+        height: SettingsTheme.plateHeight - 16 - 4
     )
 
     @Test("a chip-less canvas holds every display")

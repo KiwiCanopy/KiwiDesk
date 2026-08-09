@@ -49,10 +49,11 @@ enum HomeCardPlate {
             return tile(padding: 7, settings: settings) {
                 HomeCardSchematicBand(
                     model: model,
-                    // −22, not the padding's −14: the schematic
+                    // The interior minus 4 more: the schematic
                     // earns extra air to the plate's edge
-                    // (owner, 2026-08-09).
-                    height: SettingsTheme.plateHeight - 22,
+                    // (owner, 2026-08-09) — derived, never a
+                    // hand-summed copy of the paddings.
+                    height: interior(padding: 7) - 4,
                     readout: LayoutReadout.value(
                         for: LayoutUsage.mostUsed(
                             in: model.config
@@ -87,6 +88,19 @@ enum HomeCardPlate {
     /// their own (`SchematicCanvas`), and a card is ONE button
     /// whose value is its subtitle; a plate that voiced its
     /// parts would read the picture over the answer.
+    /// Extra air under the card's top edge — at the uniform
+    /// inset alone the tiles sat visibly close to it (owner,
+    /// 2026-08-09, on device). Named so the interior height
+    /// derives from it rather than restating the sum.
+    static let topAir: CGFloat = 4
+
+    /// The room a tile's content actually gets at a given
+    /// dispatch padding — the one derivation, so a band height
+    /// cannot drift from the paddings it is carved from.
+    static func interior(padding: CGFloat) -> CGFloat {
+        SettingsTheme.plateHeight - padding * 2 - topAir
+    }
+
     private static func tile(
         padding: CGFloat,
         settings: TilingSettings,
@@ -99,11 +113,7 @@ enum HomeCardPlate {
                     maxHeight: .infinity
                 )
                 .padding(padding)
-                // Every picture takes extra air under the
-                // card's top edge — at the uniform inset alone
-                // the tiles sat visibly close to it (owner,
-                // 2026-08-09, on device).
-                .padding(.top, 4)
+                .padding(.top, Self.topAir)
                 .frame(height: SettingsTheme.plateHeight)
                 .frame(maxWidth: .infinity)
                 .background(SettingsTheme.previewPlate)
@@ -288,15 +298,21 @@ struct HomeCardSchematicBand: View {
 }
 
 /// The most-used mode's headline number — the value its own
-/// editor leads with, formatted as the editor formats it. A
-/// tile carrying a number it cannot explain still tells the
-/// truth: the number is the draft's, and the area it opens
-/// shows the control it belongs to.
+/// editor leads with where that value is a number, and the
+/// area's min-window default for the modes whose editors lead
+/// with non-numeric controls (Scrolling's anchor picker,
+/// Monocle and Floating). A tile carrying a number it cannot
+/// explain still tells the truth: the number is the draft's,
+/// and the area it opens shows the control it belongs to.
+@MainActor
 enum LayoutReadout {
     static func value(
         for mode: LayoutMode,
         settings: TilingSettings
     ) -> String {
+        // Exhaustive on purpose: a `default` arm handed a new
+        // mode the min-window readout silently; a new case must
+        // decide its own number here (code review, 2026-08-09).
         switch mode {
         case .bsp:
             return String(
@@ -314,8 +330,15 @@ enum LayoutReadout {
                 + "\(settings.grid.rows)"
         case .track:
             return "\(settings.track.limit)"
-        default:
-            return "\(Int(settings.minWindowSize)) pt"
+        case .scrolling, .monocle, .floating:
+            // A unit word is a translated frame, never a Swift
+            // literal — `border.fit_gaps.unit` is the binding
+            // precedent (localization-auditor, 2026-08-09).
+            return L(
+                "home.plate.readout.points",
+                "%1$d pt",
+                Int(settings.minWindowSize)
+            )
         }
     }
 }

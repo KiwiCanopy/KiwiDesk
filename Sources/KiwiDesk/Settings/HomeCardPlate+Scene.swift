@@ -28,21 +28,18 @@ struct HomeCardGapsTile: View {
         // centred in the plate, not stretched to its edges
         // (owner, 2026-08-09) — the outer-gap readouts inset
         // from the screen outline, air on all sides beyond it.
-        // The GAPS carry the highlight, not a window (owner,
-        // same round): the screen's interior is washed in the
-        // accent and the panes sit opaque on it, so the accent
-        // shows exactly where the gaps are — the seams and the
-        // outer margins, whose widths are the values the card
-        // answers with.
+        // No fill behind the panes: the owner tried an accent
+        // gap-wash on device and ruled the empty interior back
+        // in (2026-08-09) — the seams and margins read as
+        // spacing on the bare plate, matching the Layout
+        // Defaults band's ground, and no window carries a
+        // highlight fill either; the border rings are the only
+        // accent this tile speaks.
         ZStack {
             RoundedRectangle(cornerRadius: 4)
-                .fill(gapWash)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(
-                            palette?.frame
-                                ?? Color.secondary.opacity(0.3)
-                        )
+                .strokeBorder(
+                    palette?.frame
+                        ?? Color.secondary.opacity(0.3)
                 )
             VStack(spacing: mini(inner.vertical)) {
                 HStack(spacing: mini(inner.horizontal)) {
@@ -62,13 +59,10 @@ struct HomeCardGapsTile: View {
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
         // Vertical air beyond the aspect fit: height-bound
         // plates left the screen outline flush with the plate
-        // padding (owner, 2026-08-09; widened same round).
-        .padding(.vertical, 10)
+        // padding; 6 lands the margins level with the Layout
+        // Defaults band's (owner, 2026-08-09, third pass).
+        .padding(.vertical, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var gapWash: Color {
-        (palette?.accent ?? SettingsTheme.accent).opacity(0.3)
     }
 
     private func mini(_ real: CGFloat) -> CGFloat {
@@ -110,14 +104,15 @@ struct HomeCardGapsTile: View {
             }
     }
 
-    /// `FocusBorderPreview`'s remap, so the two readouts of one
-    /// width can never disagree about scale.
+    /// The one shared remap (`BorderPreviewScale`), into a band
+    /// proportional to this tile's third-size panes — the same
+    /// real width reads the same weight here and on the
+    /// editor's mock (owner scale round + review, 2026-08-09).
     private var strokeWidth: CGFloat {
-        let t = min(
-            max((settings.borderStyle.clampedWidth - 1) / 19, 0),
-            1
+        BorderPreviewScale.width(
+            settings.borderStyle.clampedWidth,
+            to: 1...3
         )
-        return 1 + t * 6
     }
 }
 

@@ -155,15 +155,21 @@ struct SchematicTile: View {
 /// caps how many windows it draws.
 struct SchematicMoreChip: View {
     let hidden: Int
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         Text("+\(hidden)")
             .font(.system(size: 9, weight: .semibold))
             .monospacedDigit()
-            .foregroundStyle(.secondary)
+            .foregroundStyle(
+                palette?.ink ?? Color.secondary
+            )
             .padding(.horizontal, 3)
             .background(
-                Capsule().fill(Color(nsColor: .textBackgroundColor))
+                Capsule().fill(
+                    palette?.base
+                        ?? Color(nsColor: .textBackgroundColor)
+                )
             )
     }
 }

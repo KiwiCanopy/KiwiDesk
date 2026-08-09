@@ -99,8 +99,17 @@ enum HomeCardPreview {
     private static func ruleIcons(
         _ model: SettingsModel
     ) -> some View {
+        // Float rules are colon syntax ("app:Title") — the app
+        // segment comes from the ONE parse the area renders
+        // with (`FloatFacet.appSegment`), or a titled rule
+        // draws a generic well and a doubly-ruled app draws
+        // twice (code review, 2026-08-09).
         let ids = Set(model.config.appRules.keys)
-            .union(model.config.floatRules)
+            .union(
+                model.config.floatRules.map(
+                    FloatFacet.appSegment(of:)
+                )
+            )
             .sorted()
         let shown = Array(ids.prefix(5))
         let overflow = ids.count - shown.count

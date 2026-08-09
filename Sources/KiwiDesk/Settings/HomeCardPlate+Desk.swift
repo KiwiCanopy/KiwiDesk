@@ -156,14 +156,20 @@ struct HomeCardBehaviorTile: View {
     }
 
     var body: some View {
+        // Equal panes on purpose: the prototype's 6/4 split was
+        // tried via `idealWidth`, which an HStack's concrete
+        // proposal never consults — a dead input claiming a
+        // ratio the layout ignored (code review, 2026-08-09) —
+        // and the divider, not the ratio, is the fact this
+        // tile answers with.
         HStack(spacing: 4) {
-            pane(flex: 6)
+            pane
             divider
-            pane(flex: 4)
+            pane
         }
     }
 
-    private func pane(flex: CGFloat) -> some View {
+    private var pane: some View {
         RoundedRectangle(cornerRadius: 5)
             .fill(
                 palette?.ghostFill
@@ -178,9 +184,6 @@ struct HomeCardBehaviorTile: View {
                     )
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .layoutPriority(0)
-            .frame(minWidth: 0)
-            .frame(idealWidth: flex * 20)
     }
 
     private var divider: some View {

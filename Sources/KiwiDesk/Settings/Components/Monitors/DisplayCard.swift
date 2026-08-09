@@ -197,7 +197,12 @@ struct DisplayCard: View {
 
     private var plate: some View {
         RoundedRectangle(cornerRadius: 6)
-            .fill(SettingsTheme.card)
+            // The soft green, not the white card surface: a
+            // wall of white screens on the well glared, and
+            // the strengthened rest border now carries the
+            // card/well separation (owner, 2026-08-09 — the
+            // prototype's own colouring).
+            .fill(SettingsTheme.sunken)
             .shadow(radius: 0.5, y: 0.5)
     }
 
@@ -216,8 +221,14 @@ struct DisplayCard: View {
             .strokeBorder(
                 isSelected || targeted
                     ? AnyShapeStyle(.tint)
+                    // ink3, not the hairline: on the sunken
+                    // well the hairline sits within a few
+                    // points of the ground and the resting
+                    // cards read borderless — every display
+                    // owes a visible frame, the main one keeps
+                    // the tint on top (owner, 2026-08-09).
                     : AnyShapeStyle(
-                        SettingsTheme.hairline
+                        SettingsTheme.ink3.opacity(0.5)
                     ),
                 lineWidth: isSelected
                     ? SettingsTheme.monitorCardStrokeSelected

@@ -24,9 +24,14 @@ struct SchematicPalette: Equatable {
     /// with the plate as the base).
     var base: Color
 
-    var fill: Color { accent.opacity(0.25) }
+    // Interiors are NEUTRAL on the plate — the quiet ink wash
+    // every tile shares — never the accent: the owner compared
+    // the tiles side by side and ruled the filled-green
+    // windows out (2026-08-09); on the plate the accent lives
+    // on strokes and marks alone.
+    var fill: Color { ink.opacity(0.08) }
     var stroke: Color { accent.opacity(0.6) }
-    var newFill: Color { accent.opacity(0.45) }
+    var newFill: Color { ink.opacity(0.14) }
     var gapStroke: Color { ink.opacity(0.4) }
     var ghostFill: Color { ink.opacity(0.08) }
     var ghostStroke: Color { ink.opacity(0.3) }

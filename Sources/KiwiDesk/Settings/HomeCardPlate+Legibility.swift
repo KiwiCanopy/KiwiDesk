@@ -7,7 +7,7 @@ extension HomeCardPlate {
     /// The plate's own weighted luminance — `previewPlate`'s
     /// `0x12251A`, restated as arithmetic so the floor below
     /// can composite translucent user colours against it.
-    private static let plateLuminance =
+    static let plateLuminance =
         0.2126 * (0x12 / 255.0)
         + 0.7152 * (0x25 / 255.0)
         + 0.0722 * (0x1A / 255.0)
