@@ -94,14 +94,36 @@ to invert the dim ladder).
   costing double the width in a strip built for comparison — the
   argument is in `docs/design-decisions.md`, and
   `LayoutSchematicScaleTests` reds on the retired vocabulary
-  coming back. The same suite holds the scale half: a fact a
-  thumbnail has no room to render (Scrolling's off-monitor
-  ghosts) is drawn at `.panel` and clipped away at `.tile`,
-  never paid for by shrinking the frame around it.
+  coming back. Three obligations follow from putting the fact in
+  words instead:
+  - **The caption switches with the control that changes it.**
+    One string spanning a picker's options states the odd
+    option's fact under all of them, so the three that do not
+    have it carry a sentence about a fourth and VoiceOver
+    asserts it over a frame that was never drawn — which is
+    what Scrolling shipped, alongside a `follow` selection that
+    moved nothing on screen at all.
+  - **A caption may not point at a mark the frame does not
+    draw.** A finite canvas crops a row long before the row
+    ends, so a clause naming the insertion `+` is conditional on
+    the `+` being on the frame (`drawsInsertionMark`, held to
+    the drawing by `LayoutSchematicScrollingTests`).
+  - The scale half, same suite as the vocabulary scan: a fact a
+    thumbnail has no room to render (Scrolling's off-monitor
+    ghosts) is drawn at `.panel` and **not drawn** at `.tile` —
+    never paid for by shrinking the frame around it, and never
+    left to the frame's clip, which sits outside the canvas
+    inset and lets a few points bleed into that band.
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to
-  label what's shown, not to teach.
+  label what's shown, not to teach — with one carve-out, named
+  here so the two rules are not read as contradicting: **a
+  schematic's caption also carries whatever its one frame cannot
+  denote.** That is the bullet above, and it is not licence to
+  gloss: it applies where the picture is the explanation and the
+  missing piece is motion, not to a row whose control could take
+  a `?` instead.
 
 Shared control conventions (help affordance, control choice, row
 tiers) are elaborated in `docs/ui-patterns.md`; the durable

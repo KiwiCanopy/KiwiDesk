@@ -652,10 +652,14 @@ Grid). Stack's overflow is a small iconic fanned-pile badge, not
 a permanently cascading column. A fact the reader can reach by
 dragging the window-count slider — a grid rebalancing as a fifth
 window opens — is expressible in that one frame; a fact about
-*motion* is the caption's to state, in words. Where a ghost needs
-more room than a thumbnail has, it is drawn in the panel and
-clipped away on the tile rather than shrinking the frame around
-it. The app bar shown in Scrolling/Monocle is
+*motion* is the caption's to state, in words, and a caption that
+carries one **switches with the control that changes it** rather
+than stating it under every setting. Where a ghost needs more
+room than a thumbnail has, the thumbnail leaves it undrawn
+rather than shrinking the frame around it — undrawn, not merely
+clipped: the frame's clip sits outside the canvas inset, so a
+shape left to it bleeds a few points into that band.
+The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`
 that points at the App Bar destination (#229), keeping app-bar

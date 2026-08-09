@@ -191,31 +191,27 @@ struct LayoutSchematicCountTests {
     /// the focus (#702), which is `LayoutSchematicPlacementTests`'
     /// half.
     ///
-    /// Every anchor draws that one row, `follow` included since
-    /// #753 retired its two-frame pair — so the loop runs the
-    /// anchors too, and an anchor that stopped taking the count
-    /// (a branch back to a fixed second frame is exactly how)
-    /// reds here rather than in whatever the pair would be.
+    /// The anchor is deliberately NOT a dimension here. `row`
+    /// reads the count and the placement and nothing else, so a
+    /// loop over the anchors would run four byte-identical
+    /// iterations and read as coverage of something — a re-added
+    /// `if anchor == .follow` in `body` leaves `row` untouched and
+    /// passes it. What the anchor reaches is `metrics`, held by
+    /// `LayoutSchematicScrollingTests`.
     @Test("Scrolling draws a finite row of the count")
     func scrollingRow() {
-        for anchor in anchors {
-            for count in LayoutSchematic.windowCountRange {
-                let schematic = ScrollingSchematic(
-                    orientation: .horizontal,
-                    anchor: anchor,
-                    slotSize: .auto,
-                    placement: .last,
-                    windows: count
-                )
-                #expect(schematic.row.slots.count == count)
-                #expect(schematic.row.slots.contains(0))
-            }
+        for count in LayoutSchematic.windowCountRange {
+            let schematic = ScrollingSchematic(
+                orientation: .horizontal,
+                anchor: .center,
+                slotSize: .auto,
+                placement: .last,
+                windows: count
+            )
+            #expect(schematic.row.slots.count == count)
+            #expect(schematic.row.slots.contains(0))
         }
     }
-
-    private let anchors: [ScrollingParams.Anchor] = [
-        .center, .start, .end, .follow,
-    ]
 
     /// Monocle has no fill logic — every window is full-screen —
     /// so the count changes the depth of the fan, capped where

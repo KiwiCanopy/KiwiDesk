@@ -1,29 +1,5 @@
 import SwiftUI
 
-/// The bordered mini-screen a schematic draws into: a rounded
-/// outline with the content clipped inside, so every frame in the
-/// family reads the same and none can draw past its own edges.
-/// A `nil` width means "fill the width available" — the panel
-/// scale spans its pane rather than sitting at a fixed size, so
-/// the live preview grows with the Settings window.
-struct SchematicScreen<Content: View>: View {
-    var width: CGFloat? = LayoutSchematic.canvasWidth
-    var height: CGFloat = LayoutSchematic.canvasHeight
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        ZStack {
-            content
-                .padding(LayoutSchematic.inset)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-            RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(Color.secondary.opacity(0.6))
-        }
-        .frame(maxWidth: width == nil ? .infinity : nil)
-        .frame(width: width, height: height)
-    }
-}
-
 /// A schematic: one mini-screen plus a caption, centred as a
 /// self-contained tile. Size defaults to the family 140×96 but a
 /// mode may grow it (BSP argues from a widescreen frame).
@@ -58,11 +34,9 @@ struct SchematicCanvas<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            SchematicScreen(width: width, height: height) {
-                content
-            }
-            .accessibilityElement()
-            .accessibilityLabel(axLabel)
+            screen
+                .accessibilityElement()
+                .accessibilityLabel(axLabel)
             if showsCaption {
                 Text(caption)
                     .font(.caption)
@@ -71,5 +45,34 @@ struct SchematicCanvas<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    /// The bordered mini-screen itself: a rounded outline with the
+    /// content clipped at the frame's edge, so every frame in the
+    /// family reads the same and none draws past its own border.
+    /// The clip sits OUTSIDE `LayoutSchematic.inset`, so content
+    /// may bleed into that band — a schematic that must not draw
+    /// there skips the drawing rather than leaving it to the clip
+    /// (Scrolling's off-monitor ghosts at `.tile`, #753).
+    ///
+    /// Inlined here since #753: this was a `SchematicScreen` type
+    /// because each pane of the retired two-frame `SchematicPair`
+    /// mounted one too, and a look shared by two callers is worth
+    /// a name. With the pair gone it had exactly one, like the
+    /// three types that retired with it.
+    ///
+    /// A `nil` width means "fill the width available" — the panel
+    /// scale spans its pane rather than sitting at a fixed size,
+    /// so the live preview grows with the Settings window.
+    private var screen: some View {
+        ZStack {
+            content
+                .padding(LayoutSchematic.inset)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(Color.secondary.opacity(0.6))
+        }
+        .frame(maxWidth: width == nil ? .infinity : nil)
+        .frame(width: width, height: height)
     }
 }

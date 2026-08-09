@@ -14,10 +14,10 @@ import Testing
 /// the wrong window as focused.
 ///
 /// **These assert the promise a reader takes off the frame, not the
-/// call the schematics make.** `expectedSlot` states the four arms
-/// at the altitude the preview is read at — the `+` opens at the
-/// row's start, at its end, or immediately beside the focused tile
-/// — and shares no code with the engine or with
+/// call the schematics make.** `SchematicPlacementPromise` states
+/// the four arms at the altitude the preview is read at — the `+`
+/// opens at the row's start, at its end, or immediately beside the
+/// focused tile — and shares no code with the engine or with
 /// `SchematicPlacement`. Asserting that each schematic *calls* the
 /// helper would pass on one that called it and drew a constant, the
 /// failure mode guard-prover already demonstrated against this
@@ -31,9 +31,8 @@ import Testing
 ///
 /// Scrolling's half lives in `LayoutSchematicScrollingTests`,
 /// which sweeps the focus anchors as well as the placements —
-/// split off at the file ceiling, and it carries its own copy of
-/// the promise below (a small duplication the test convention
-/// prefers to a shared harness).
+/// split off at the file ceiling, and it reads the same
+/// `SchematicPlacementPromise` rather than a second copy of it.
 @Suite("Layout preview new-window placement")
 @MainActor
 struct LayoutSchematicPlacementTests {
@@ -213,23 +212,6 @@ struct LayoutSchematicPlacementTests {
         .first, .last, .beforeFocused, .afterFocused,
     ]
 
-    /// What the four arms promise a reader, stated at the altitude
-    /// the preview is read at. `focus` is where the focused tile
-    /// **ends up**: a landing at or before it moves it one slot
-    /// along, and a preview that forgets that is #702.
-    private func expectedSlot(
-        _ placement: SpawnPlacement,
-        focus: Int,
-        slots: ClosedRange<Int>
-    ) -> Int {
-        switch placement {
-        case .first: return slots.lowerBound
-        case .last: return slots.upperBound
-        case .beforeFocused: return focus - 1
-        case .afterFocused: return focus + 1
-        }
-    }
-
     private func check(
         incoming: Int,
         focus: Int,
@@ -239,7 +221,7 @@ struct LayoutSchematicPlacementTests {
     ) {
         #expect(
             incoming
-                == expectedSlot(
+                == SchematicPlacementPromise.expectedSlot(
                     placement,
                     focus: focus,
                     slots: slots

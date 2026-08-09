@@ -15,15 +15,17 @@ import SwiftUI
 /// - **follow** → the neutral resting frame, drawn centred. It
 ///   fixes the focus nowhere: it pans the minimum needed to
 ///   reveal it, so where the row rests depends on the direction
-///   the reader last moved — history a preview does not have. One
-///   still frame plus the caption's words is the whole of what
-///   can honestly be said, and the two-frame pair this replaced
-///   said no more (#753).
+///   the reader last moved — history a preview does not have.
+///   Its frame is therefore pixel-identical to `center`'s, and
+///   the caption is the only place the two can be told apart —
+///   which is why the words switch on the anchor
+///   (`ScrollingSchematic+Caption`).
 ///
 /// The focused window is always fully visible; neighbours are cut
 /// by the frame so their partial width shows the real slot size
 /// (a wide slot shows slivers, a thin slot shows many). The dense
-/// `+` marks where the current placement opens the next window.
+/// `+` marks where the current placement opens the next window,
+/// at the counts where the row puts it on the canvas at all.
 struct ScrollingSchematic: View {
     let orientation: ScrollingParams.Orientation
     let anchor: ScrollingParams.Anchor
@@ -43,17 +45,21 @@ struct ScrollingSchematic: View {
     /// fact — the row continues past both edges. At `.tile` there
     /// is no such room, and reserving it drew the screen outline
     /// at half the scale of every sibling's (#753), so the
-    /// thumbnail spends its whole canvas on the monitor and lets
-    /// `SchematicScreen`'s clip end the row at the edges.
+    /// thumbnail spends its whole canvas on the monitor.
     ///
     /// Internal so `LayoutSchematicScaleTests` can assert both
     /// halves; a scale-blind constant is exactly the regression.
-    var screenFraction: CGFloat { scale == .panel ? 0.5 : 1 }
+    var screenFraction: CGFloat { scale == .panel ? 0.6 : 1 }
 
     /// Whether the monitor draws an outline of its own. Only when
     /// it is a *slice* of the canvas: where the two coincide the
     /// canvas border already is the monitor, and a second rounded
     /// stroke on the same bounds double-strikes it.
+    ///
+    /// `LayoutSchematicScaleTests` needles the use site as well as
+    /// the value — a view drawing off a resolved answer is
+    /// deletable at its branch with every property assertion above
+    /// it still green.
     var drawsMonitorOutline: Bool { screenFraction < 1 }
 
     private var horizontal: Bool { orientation == .horizontal }
@@ -73,7 +79,7 @@ struct ScrollingSchematic: View {
     /// same splice and not from a separate midpoint.
     ///
     /// Internal rather than private so `LayoutSchematicCountTests`
-    /// and `LayoutSchematicPlacementTests` can assert the
+    /// and `LayoutSchematicScrollingTests` can assert the
     /// arithmetic. A source scan for the count as an input is
     /// satisfiable by a schematic that takes it and draws a
     /// constant — guard-prover demonstrated exactly that — so
@@ -182,7 +188,7 @@ struct ScrollingSchematic: View {
         let m = metrics(along: along)
         ZStack {
             ForEach(m.low...m.high, id: \.self) { i in
-                slotView(i, m)
+                slotView(i, m, along: along)
                     .frame(
                         width: horizontal ? m.slot : cross,
                         height: horizontal ? cross : m.slot
@@ -199,17 +205,31 @@ struct ScrollingSchematic: View {
     }
 
     /// Along-axis centre of window `i` (index 0 is the focus).
-    private func center(_ i: Int, _ m: Metrics) -> CGFloat {
+    func center(_ i: Int, _ m: Metrics) -> CGFloat {
         m.focusCenter + CGFloat(i) * m.step
     }
 
-    /// The new window is the dense `+` tile; a window overlapping
-    /// the frame at all is on screen (accent, the focus heavier),
-    /// even partially; one entirely past an edge is an off-monitor
-    /// ghost (gray).
+    /// A slot the canvas cannot reach draws **nothing**, rather
+    /// than being left to the clip: the clip sits at the frame's
+    /// border while the content is inset by
+    /// `LayoutSchematic.inset`, so a tile just past the canvas
+    /// still bled a few points of itself into that band — most
+    /// visibly a grey ghost at a thumbnail's edge, where the
+    /// monitor IS the canvas and every off-monitor slot is one of
+    /// these. Otherwise: the new window is the dense `+` tile; a
+    /// window overlapping the monitor at all is on screen (accent,
+    /// the focus heavier), even partially; one entirely past a
+    /// monitor edge but still on the canvas is an off-monitor
+    /// ghost (gray), which only the panel's margin has room for.
     @ViewBuilder
-    private func slotView(_ i: Int, _ m: Metrics) -> some View {
-        if i == m.newIdx {
+    private func slotView(
+        _ i: Int,
+        _ m: Metrics,
+        along: CGFloat
+    ) -> some View {
+        if !onCanvas(i, m, along: along) {
+            EmptyView()
+        } else if i == m.newIdx {
             SchematicNewWindow(badgeAlignment: badgeAlignment(i))
         } else if onScreen(i, m) {
             SchematicTile(active: i == 0)
@@ -237,6 +257,17 @@ struct ScrollingSchematic: View {
             && c - m.slot / 2 < m.screenStart + m.screenLen
     }
 
+    /// Whether window `i` reaches the **canvas** at all. The row is
+    /// finite but several canvases wide at most counts, so this is
+    /// what decides how much of it is ever seen. Internal so
+    /// `LayoutSchematicScrollingTests` can hold the caption's `+`
+    /// clause to the drawing rather than to a second model of it
+    /// (#753).
+    func onCanvas(_ i: Int, _ m: Metrics, along: CGFloat) -> Bool {
+        let c = center(i, m)
+        return c + m.slot / 2 > 0 && c - m.slot / 2 < along
+    }
+
     private func outline(_ m: Metrics, cross: CGFloat) -> some View {
         let center = m.screenStart + m.screenLen / 2
         return RoundedRectangle(cornerRadius: 4)
@@ -252,28 +283,5 @@ struct ScrollingSchematic: View {
                 x: horizontal ? center : cross / 2,
                 y: horizontal ? cross / 2 : center
             )
-    }
-
-    /// One caption for every anchor, Follow included — the pan is
-    /// a fact about *this* layout, and the frame above cannot
-    /// denote motion however many panes it is given (#753).
-    private var caption: String {
-        L(
-            "layout.schematic.scrolling.caption",
-            "Focus rests at the anchor and the row scrolls past "
-                + "it; Follow instead pans the minimum, keeping "
-                + "the side you came from in view. The + is where "
-                + "the next window opens."
-        )
-    }
-
-    private var axLabel: String {
-        L(
-            "layout.schematic.scrolling.ax",
-            "Scrolling preview: a row of windows moving through "
-                + "the screen frame; the anchor window holds "
-                + "focus, and Follow pans the minimum to reveal "
-                + "it, keeping the side you came from in view."
-        )
     }
 }

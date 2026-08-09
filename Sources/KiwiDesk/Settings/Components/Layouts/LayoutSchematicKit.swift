@@ -77,14 +77,18 @@ enum LayoutSchematic {
 /// the live preview below the rows: it fills the pane, so a
 /// layout has room to be *read* rather than merely recognised.
 ///
-/// One deliberate loss at `tile`: the schematics that widen
-/// their own canvas to make an argument — BSP's 3:1 frame,
-/// where "cut the longer side" and "alternate" only diverge
-/// after several cuts, and Scrolling's over-wide strip — draw
-/// that argument at the panel and not on the thumbnail. A
-/// thumbnail answers "which of these do I want?"; the argument
-/// is one click away, and a strip of seven different-shaped
-/// tiles would answer neither question.
+/// One deliberate loss at `tile`: a schematic that needs more
+/// canvas than a thumbnail has to make its argument makes it at
+/// the panel and not on the thumbnail. BSP widens its own frame
+/// to 3:1, where "cut the longer side" and "alternate" only
+/// diverge after several cuts. Scrolling keeps its frame and
+/// gives up the *margin* instead — the room its off-monitor
+/// ghosts need — so a tile spends its whole canvas on the
+/// monitor rather than drawing it at half every sibling's scale
+/// (#753, `LayoutSchematicScaleTests`). A thumbnail answers
+/// "which of these do I want?"; the argument is one click away,
+/// and a strip of seven different-shaped tiles would answer
+/// neither question.
 enum SchematicScale: Hashable {
     case tile
     case panel
