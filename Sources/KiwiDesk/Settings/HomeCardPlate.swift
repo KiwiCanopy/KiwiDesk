@@ -198,7 +198,13 @@ struct HomeCardSpacesTile: View {
         .frame(
             width: Self.card.width
                 + CGFloat(count - 1) * Self.exposed,
-            height: Self.card.height
+            height: Self.card.height,
+            // Leading, not the frame default: the ZStack's own
+            // layout size is ONE pane (offsets are drawing
+            // only), so a centre-aligned frame shifted the
+            // whole run half a fan to the right — the first
+            // screen started mid-plate (owner, 2026-08-09).
+            alignment: .leading
         )
     }
 
