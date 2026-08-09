@@ -63,12 +63,36 @@ enum SourceScan {
         return nil
     }
 
-    /// Cuts each line at its first `//` — adequate for this repo
-    /// (no `/* */` convention). Note the direction depends on the
+    /// Cuts each line at its first `//`, then removes `/* … */`
+    /// spans. Note the direction depends on the
     /// consumer: for a *counting* guard a mis-cut erases a call
     /// and so fails OPEN, where for the balanced-walker consumers
     /// below it fails shut, as a mystifying red rather than a
     /// silent pass.
+    ///
+    /// The block half is not decoration: this used to say the
+    /// repo has "no `/* */` convention" and stop at `//`, which
+    /// made every positive needle in every consumer satisfiable
+    /// by commenting the call out in block form — a guard-prover
+    /// run deleted an `.accessibilityHidden` modifier, restated
+    /// it as `/* … */`, and the needle stayed green over a view
+    /// that had shipped the defect. A convention nobody follows
+    /// is not a guarantee; the stripper is what has to hold.
+    ///
+    /// Line comments go first, and the order is load-bearing: a
+    /// doc comment may legitimately contain `/*` (a glob such as
+    /// `Resources/Locales/*.json` does), and stripping blocks
+    /// first would open a comment there and swallow source until
+    /// the next `*/`.
+    ///
+    /// Neither half respects string literals, and the residue is
+    /// stated rather than chased because the direction differs by
+    /// consumer: a `/*` inside a literal blanks the rest of the
+    /// file, which reds a positive needle loudly and lets a
+    /// forbidding or counting scan pass SILENTLY. `Sources/`
+    /// carries no `/* */` span and no unbalanced opener at all
+    /// (audited 2026-08-09), so this is latent rather than live —
+    /// weigh it when a needle follows a literal on one line.
     ///
     /// A `//` inside a string literal is what triggers it, and it
     /// is NOT hypothetical: `ServiceManager.swift` carries two (a
@@ -77,7 +101,8 @@ enum SourceScan {
     /// the same line — which is luck, not design, so weigh it
     /// when adding a needle.
     static func stripComments(_ source: String) -> String {
-        source
+        let lined =
+            source
             .split(
                 separator: "\n",
                 omittingEmptySubsequences: false
@@ -89,6 +114,29 @@ enum SourceScan {
                 return line
             }
             .joined(separator: "\n")
+        return stripBlockComments(lined)
+    }
+
+    /// Removes each `/* … */` span, keeping the newlines inside
+    /// it so line-based consumers still count lines correctly.
+    /// An unterminated `/*` takes the rest of the file, which is
+    /// what the compiler does with it too.
+    private static func stripBlockComments(
+        _ source: String
+    ) -> String {
+        var out = ""
+        var rest = Substring(source)
+        while let open = rest.range(of: "/*") {
+            out += rest[..<open.lowerBound]
+            let after = rest[open.upperBound...]
+            guard let close = after.range(of: "*/") else {
+                return out
+            }
+            out += after[..<close.lowerBound]
+                .filter { $0 == "\n" }
+            rest = after[close.upperBound...]
+        }
+        return out + rest
     }
 
     static func swiftSources(
