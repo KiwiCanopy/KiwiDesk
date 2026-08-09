@@ -8,17 +8,21 @@ import Foundation
 /// suite of its own. It is the fourth ratified exception to the
 /// per-file-private-helper convention (AGENTS.md §5), extracted at
 /// the *second* copy on drift risk alone — the same argument that
-/// pulled `SourceScan.swift` out. Two suites now measure the same
-/// quantity (`SpaceBarAccentSeparationTests` for the Space Bar's
-/// active/focused pair, `DragPairSeparationTests` for the drag
-/// overlay's origin/target pair), and a hand-copied transform that
+/// pulled `SourceScan.swift` out. Several suites now measure the
+/// same quantity — `SpaceBarAccentSeparationTests` for the Space
+/// Bar's active/focused pair, `DragPairSeparationTests` for the
+/// drag overlay's origin/target pair,
+/// `PaletteHighlightRoleTests` for an accent against its own
+/// composited plate — and a hand-copied transform that
 /// drifted in one of them would silently move the number a guard
 /// is asserting on — a guard passing for the wrong reason, which
 /// is precisely what these guards exist to prevent. The numbers
 /// are the argument here (see `docs/design-decisions.md`), so
 /// there must be exactly one place that computes them.
 enum ColorVision {
-    /// The separation floor, shared by both guards.
+    /// The separation floor every CVD guard measures
+    /// against — a suite asserting on this quantity reads it
+    /// here rather than restating the number.
     ///
     /// One number on purpose, and the structural reason comes
     /// first: **the two families share hexes.** The drop-zone
@@ -154,6 +158,34 @@ enum ColorVision {
         return "#"
             + bytes.map { String(format: "%02X", $0) }
             .joined()
+    }
+
+    /// A translucent `top` laid over an opaque `bottom`, returned
+    /// as an opaque hex — what a bar's fill actually looks like
+    /// once a wallpaper shows through it.
+    ///
+    /// Mixed on the sRGB **bytes**, not in linear light, because
+    /// that is what the window server puts on screen: the plate a
+    /// reader sees is the encoded blend, and measuring a
+    /// physically-correct blend nobody renders would gate the
+    /// palettes on the wrong colour. Nil for either operand
+    /// unparseable, and an alpha on `bottom` is ignored — a
+    /// wallpaper is opaque.
+    static func composite(
+        _ top: String,
+        over bottom: String
+    ) -> String? {
+        guard let over = DragVisual.parseHex(top),
+            let under = components(bottom)
+        else { return nil }
+        let a = over.alpha
+        let mix = [
+            (over.red, under.r), (over.green, under.g),
+            (over.blue, under.b),
+        ]
+        .map { Int((($0.0 * a + $0.1 * (1 - a)) * 255).rounded()) }
+        return "#"
+            + mix.map { String(format: "%02X", $0) }.joined()
     }
 
     /// Euclidean distance in simulated sRGB, 0...441 (√3·255).

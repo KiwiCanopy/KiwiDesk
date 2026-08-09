@@ -2844,8 +2844,11 @@ don't assume from tone.
 - **The two accents must separate on an axis red-green vision
   loss *preserves* — lightness, or blue↔yellow.** (#470,
   widened catalog-wide by #511. **Enforced.**)
-  `active_item_color` / `highlight_color` /
-  `border.focused_color` share the *primary* hue;
+  The primary hue is the one `active_item_color`,
+  `highlight_color` and `border.focused_color` all carry — which
+  bullet states that as a rule, and what enforces it, is the
+  focus-is-one-colour entry below; this one is about the pair
+  that must SEPARATE.
   `space_bar.focused_item_color` is the second signal, and the
   test it must pass is not "a different hue" but "still a
   different colour after the loss". Exactly two axes survive.
@@ -2904,16 +2907,47 @@ don't assume from tone.
   argument. Other CVD models give different absolutes: Machado
   2009 reads the same two pairs as 28 and 96.)*
 - **Focus is one color across bar and border.**
-  `border.focused_color` = the primary accent; `highlight_color`
-  defaults to it too (borrow the secondary only as a flourish,
-  never invent a third hue for it).
+  `border.focused_color` = the primary accent, and
+  **`highlight_color` IS that accent — in every bundled palette,
+  without exception** (#756, narrowing this clause from the
+  permissive "borrow the secondary as a flourish" it used to
+  allow; `PaletteHighlightRoleTests` holds it). The flourish
+  reading did not survive contact with what the highlight
+  actually paints: under `active_indicator = outline` it strokes
+  a 2 pt ring around the whole active item, and on a `plain` bar
+  that ring plus one tinted glyph is the *entire* active state —
+  the item's own fill is clear. It is the largest mark either bar
+  makes, so a palette that gives it the second hue has the
+  subordinate colour outshouting the item it qualifies. Neither
+  palette loses the hue it gave up: both still carry it on
+  `drag.drop_zone.*`, where a second signal reads as distinct
+  rather than as competing. Where the *focused* accent sits is
+  the separation clause above's decision, not this one's.
+- **A primary that cannot carry the ring is LIGHTENED, never
+  swapped for the secondary.** Sunset is why the rule is phrased
+  that way: its `#FF375F` simulated for protanopia sat 11 from
+  its own fill composited over a white wallpaper — under a fifth
+  of the separation floor — so the ring was covering a defect
+  rather than expressing a theme, and the active *glyph*, drawn
+  in the same hex, was already unreadable there. Swapping the
+  ring's hue would have left the glyph exactly as invisible.
+  One lightness step (`#FF8099`, hue and saturation untouched)
+  fixes both, and the palette keeps its identity. The measurement
+  that decides this is an accent against **its own composited
+  plate at both wallpaper extremes**, because a translucent fill
+  sweeps the whole grey range as the wallpaper changes and a hue
+  can clear one end while failing the other.
 - **`border.unfocused_color` is always near-neutral grey**,
   low saturation, ~35–60 % alpha — it must never compete with
   the focused ring.
 - **`fill_color` sets the light/dark base; `item_color`
   inverts against it** (`hover_item_color` mirrors the item
-  family, doesn't flip it). Fill alpha ~40–85 % for solid
-  shapes; **under `liquid_glass` the backdrop is render-capped
+  family, doesn't flip it). **A bundled palette does not pick a
+  bar-fill alpha at all** — it carries the shipped one, which is
+  the App Bar entry's argument and `PaletteBarFillTests`' pin;
+  a hand-written config or Lua setter stays free, ~40–85 % being
+  the range that renders as a fill rather than as glass or a
+  wash. **Under `liquid_glass` the backdrop is render-capped
   to ~65 %** so the glass stays glassy (`GlassTint.maxAlpha`).
 - **`hover_fill_color` ~50 % alpha** (`0x80`) of a hue *a
   shade off* the accent — legible feedback that never reads as
@@ -3516,9 +3550,10 @@ outward pair is one call away for whoever wants it.
 **[Rationale]**
 
 **The two bars ship where macOS already puts a persistent
-strip.** (#660.) Space Bar on **top**, App Bar on **bottom**,
-both in the **plain** design language, both filled at **80 %**
-opacity.
+strip.** (#660; the fill number retuned by #755.) Space Bar on
+**top**, App Bar on **bottom**, both in the **plain** design
+language, both filled at the one opacity every bundled palette's
+bar also carries — `PaletteBarFillTests` owns the number.
 
 Each half of that is the same argument. Top and bottom are where
 the menu bar and the Dock have already taught the eye to look for
@@ -3527,11 +3562,25 @@ system rather than as two panels someone stuck on; the previous
 left-edge Space Bar competed with nothing and matched nothing.
 `plain` — one shared plate rather than a box per item — is what
 the menu bar itself does, and a boxed strip reads as a widget
-floating over the desktop. And the fill moved from 40 % to 80 %
-because a translucent default is a bet on the user's wallpaper:
-40 % was legible on the dark ones it was chosen against and a
-guess everywhere else, while opacity is the one axis where the
-safe default costs the confident user a single setting.
+floating over the desktop. And the fill left 40 % because a
+translucent default is a bet on the user's wallpaper: 40 % was
+legible on the dark ones it was chosen against and a guess
+everywhere else, while opacity is the one axis where the safe
+default costs the confident user a single setting.
+
+**Where it landed is a separate decision, and #755 moved it.**
+#660 tuned one bar in isolation and took the number that was
+clearly safe. #755 could read all nine bundled palettes side by
+side, where the spread ran 40 % to 85 % and the readable ones had
+converged on one value on their own — so every bar fill KiwiDesk
+ships now carries that one alpha, the built-in default included.
+The reason it is one number rather than a range: how solid a bar
+reads is not a per-theme preference. A palette picks hues, and a
+user who switches theme is not asking for a less legible App Bar.
+Palettes and Lua stay unclamped either way — this is a claim
+about what ships, and re-applying a palette is the only migration
+(a palette paints one-shot, so a config already carrying an old
+alpha keeps it until then).
 
 None of this narrows anything — all six values stay reachable
 from Lua and from Settings. It is a claim about which starting
@@ -3795,6 +3844,35 @@ copy that also painted colors would silently overwrite a
 palette the user applied on purpose, the same category of
 surprise the palette entry below bans in the other direction.
 (Owner ruling 2026-08-02, during Phase 2 device review.)
+
+**"Which palette am I on" is computed, never remembered.**
+(#757.) The shelf marks the card whose colors the config it is
+editing currently carries — it stores no "last applied palette"
+anywhere, and there is deliberately no third *modified* state
+between applied and not.
+
+The cheap alternative is to record the name on apply, and it is
+wrong for the reason the one-shot paint below exists: applying is
+a paint, not a link, so the moment a user edits one hex in
+Advanced Colors the stored name describes something that is no
+longer on screen. A picker whose entire job is to show state
+would then be the one surface in the window that lies about it —
+the same defect the live-preview rule names, one shelf over. The
+computed answer cannot: the mark's *disappearance* is the honest
+report of a hand edit, which is why no "modified" state is
+needed to explain one.
+
+Two consequences worth stating so they are not read as bugs.
+**No card marked is a normal, informative state** — it means the
+colors are the user's own. And **more than one card can be
+marked**, because the question is "do these colors say what this
+palette says", not "which card was clicked": save your current
+colors while wearing a bundled palette and your copy IS that
+palette. Ranking them would mean telling the user that one of
+their own palettes is not the colors they are looking at.
+`ColorPaletteMatchTests` holds both, and the comparison is by
+parsed color rather than by spelling, so re-typing a palette's
+own hex in lower case does not read as leaving the theme.
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to

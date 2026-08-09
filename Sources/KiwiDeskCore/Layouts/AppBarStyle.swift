@@ -90,12 +90,19 @@ public struct AppBarStyle: Sendable, Equatable {
     /// shared plate (Plain), or the Liquid Glass tint
     /// (Material). One knob, three renders.
     ///
-    /// 80% opaque (#660). The old 40% was legible over a dark
+    /// 70% opaque (#755, retuning #660's 80%). #660's argument
+    /// stands whole: the old 40% was legible over a dark
     /// wallpaper and a guess anywhere else, and which wallpaper
     /// a user has is not something a default can know — so the
     /// default takes the reading that holds over all of them and
-    /// leaves the translucent look to anyone who wants it.
-    public var fillColor = "#14201CCC"
+    /// leaves the translucent look to anyone who wants it. Only
+    /// the number moved, once all nine bundled palettes could be
+    /// read side by side: bar legibility is not a per-theme
+    /// preference, so every bar fill KiwiDesk ships is the same
+    /// alpha, and 70% is where the readable ones had converged.
+    /// `PaletteBarFillTests` holds this and the eight authored
+    /// palettes to it.
+    public var fillColor = "#14201CB3"
     public var activeItemColor = "#8DB354"
     public var highlightColor = "#8DB354"
     /// Hover feedback on clickable (non-active) items: a

@@ -617,6 +617,7 @@
   "onboarding.welcome.body": "KiwiDesk 会自动排列您的窗口。为了移动和调整其他应用程序的窗口大小，macOS 需要您授予“辅助功能”权限。\n\nKiwiDesk 绝不会读取您的按键输入，也不需要禁用系统完整性保护 (SIP)。",
   "onboarding.welcome.title": "欢迎使用 KiwiDesk",
   "onboarding.window.title": "KiwiDesk 设置",
+  "palettes.applied": "已应用",
   "palettes.builtin": "内置",
   "palettes.bundled": "内置调色板",
   "palettes.caption": "将内置或已保存的配色应用到 App Bar、Space Bar、边框和拖动显示。这是一次性上色，之后不会持续联动。",

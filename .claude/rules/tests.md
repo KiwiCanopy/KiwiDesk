@@ -46,11 +46,14 @@ bite large test PRs:
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
   - *colour-vision maths* in `ColorVision.swift` — the
-    Viénot protanopia transform plus luminance/contrast, shared
-    by `SpaceBarAccentSeparationTests` and
-    `DragPairSeparationTests`. Extracted at the **second** copy
-    (#511): those guards assert on the numbers it returns, and
-    the numbers *are* the argument the palette decisions rest
+    Viénot protanopia transform and the measures the CVD guards
+    assert on. **Which suites share it is that file's own doc
+    comment**, not a list here; a suite joining the family
+    extends it there (`PaletteHighlightRoleTests` was the third,
+    and the pair named here went stale the day it landed).
+    Extracted at the **second** copy
+    (#511): every one of them asserts on the numbers it returns,
+    and the numbers *are* the argument the palette decisions rest
     on, so a drifted copy silently moves a threshold without
     failing anything. It also owns the shared separation
     **floor**: the two families share hexes (the drop-zone amber
