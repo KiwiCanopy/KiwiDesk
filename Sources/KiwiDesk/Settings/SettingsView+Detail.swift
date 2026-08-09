@@ -46,7 +46,29 @@ extension SettingsView {
         }
     }
 
+    /// The two-column detail (digest §1.1): the flexing content
+    /// column, then — where the area offers one — the fixed
+    /// preview panel behind a hairline. The offer is consulted
+    /// through `SettingsDetailPanelOffer` only; an area outside
+    /// the set takes the full width, which is the prototype's
+    /// stated rule for areas with nothing to show.
     @ViewBuilder var detailPane: some View {
+        HStack(spacing: 0) {
+            contentColumn
+            if let destination = model.destination,
+                SettingsDetailPanelOffer.offers(destination)
+            {
+                SettingsTheme.hairline.frame(width: 1)
+                SettingsDetailPanel(
+                    model: model,
+                    destination: destination,
+                    collapsed: $panelCollapsed
+                )
+            }
+        }
+    }
+
+    @ViewBuilder private var contentColumn: some View {
         VStack(spacing: 0) {
             if model.hasCustomLua {
                 CustomLuaBanner()

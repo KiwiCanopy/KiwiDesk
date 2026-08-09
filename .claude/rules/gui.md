@@ -65,7 +65,12 @@ to invert the dim ladder).
   and it reads broken instead of forthcoming (the site's App Store
   badge, removed rather than greyed — permanently, the store being
   out of scope; see `docs/design-decisions.md`).
-- **The live preview leads** its editor.
+- **The live preview leads** its editor — in areas WITHOUT a
+  detail panel. An area in `SettingsDetailPanelOffer.offering`
+  watches its draft in the panel column instead, and its cards
+  carry no duplicate preview (`DetailPanelTests` holds the
+  migration and the offer set; the argument is in
+  `docs/design-decisions.md` ▸ two columns).
 - **A preview that claims to show engine behavior asks the
   engine.** Never re-implement a rule the engine owns beside the
   drawing of it — call it, and where the shape does not fit, wrap

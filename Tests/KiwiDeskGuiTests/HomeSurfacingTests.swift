@@ -41,6 +41,28 @@ struct HomeSurfacingTests {
             // branch, from the model's one timeline.
             ".environment(\\.settingsModeReveal,"
                 + "model.modeRevealActive)",
+            // The save pill FLOATS over the content (turn 9;
+            // owner overturned the docked footer 2026-08-09) —
+            // an overlay, so it reserves no layout space, and
+            // it re-centres on the content column while a
+            // panel is open.
+            ".overlay(alignment:.bottom){"
+                + "SettingsFooter(model:model)",
+            "x:panelExpanded?-SettingsTheme.panelWidth/2:0",
+        ],
+        "Settings/SettingsView+Detail.swift": [
+            // The two-column detail consults the ONE offer set
+            // and DRAWS the panel through it (digest §1.1) —
+            // needle through the branch body, the Monitors
+            // lesson.
+            "SettingsDetailPanelOffer.offers(destination)"
+                + "{SettingsTheme.hairline.frame(width:1)"
+                + "SettingsDetailPanel("
+        ],
+        "Settings/SettingsFooter.swift": [
+            // The pill exists only while the draft does —
+            // grey-don't-hide's one exempted surface here.
+            "ifhasWork{pill"
         ],
         "Settings/SettingsView+Reveal.swift": [
             // A search hit into a Power-User-only area switches the
@@ -55,6 +77,12 @@ struct HomeSurfacingTests {
             // The unsaved count surfaces only while the draft
             // has changes.
             "ifmodel.draftChangeCount>0{unsavedChip}",
+            // The chip is a BUTTON whose popover renders the
+            // one diff-rows renderer (turn 9's third view of
+            // the draft) — needle through the popover body so
+            // a chip that stops opening it reds.
+            "SettingsDiffRowsView("
+                + "rows:SettingsDiffRowSource.rows(for:model)",
             // The segment is the one EXPLICIT flip — the entry
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.

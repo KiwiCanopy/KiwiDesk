@@ -39,7 +39,9 @@ struct AppBarCard: View {
             caption: cardCaption,
             help: reason.map(BarsGateHelp.sentence)
         ) {
-            AppBarPreviewStrip(style: style.wrappedValue)
+            // The strip moved to the detail PANEL
+            // (`BarsPanelPreview`, digest §1.1); the palette
+            // mirror keeps its own mount.
             rows(BarsRowOrder.appBarAtRest)
             styleDisclosure
             showInBlock

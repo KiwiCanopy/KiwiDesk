@@ -1770,21 +1770,69 @@ would take the answer from precisely the users who lose the
 motion channel. `ModeGatedChromeTests` and
 `SettingsModeRevealTests` hold the two halves.
 
-**The header shows a count of the draft, not a second save
-surface.** (#678 turn 9.) The turn-9 frame draws three views
-of one draft on one screen — the floating save pill, the
-top-right unsaved button's popover, and (in this codebase) the
-docked three-verb footer. The footer already is the pill's
-final form (turn 17: below 900 pt "the pill docks as a real
-footer"), so the pill is not built, and the popover waits for
-the Phase 4 renderer work that gives diff rows their label
-authority — a popover listing a partial diff would claim the
-list is the whole draft. What ships is the honest subset: a
-count-only chip fed by `SettingsDraftDiff`, which resolves
-changed model leaves to census settings (many leaves under one
-setting count once), so the number is the number of settings
-the user changed, not an implementation detail. Save and
-Revert stay in the footer alone.
+**One draft, three views — and the save surface is the
+floating pill.** (#678 turn 9; Phase 4 shell.) The turn-9
+frame draws three views of one draft on one screen: the
+floating save pill, the top-right unsaved button's popover,
+and the detail panel's "Changed in this draft" list. All
+three ship now. An earlier ruling kept the docked three-verb
+footer, arguing it was the pill's final form since turn 17
+docks the pill below 900 pt anyway — the owner overturned
+that on sight (2026-08-09): at every width this window
+actually opens at, a full-width bar under the content reads
+as chrome that is always there, while the pill exists exactly
+when the draft does, which is the fact the surface is FOR.
+So the pill floats over the content column, centred on it
+(offset past the preview panel when one is open), appears
+only while there is something to act on, and disappears at
+zero — the one deliberate exception to grey-don't-hide,
+carried by `GreyOutHidingTests`. The docked bar returns only
+below 900 pt, as the responsive pass's one change of kind.
+The count stays the number of SETTINGS the user changed:
+`SettingsDraftDiff` resolves changed model leaves to census
+settings, many leaves under one setting count once. The
+popover and the panel list are no longer partial — the
+readout (`SettingsValueReadout`) narrates every attributed
+key, and its totality guard is what discharged the earlier
+partial-list objection — so each row states old → new and
+jumps to the control that changed. Save and Revert live in
+the pill alone.
+
+**The detail view is two columns, and the panel is where the
+draft is watched.** (#678 Phase 4, digest §1.1.) An area that
+has something to show gets a fixed 392 pt right column: "Live
+preview · <area>" over the area's preview drawn from the
+DRAFT, then the diff list — collapsible via a `›` handle
+whose pick persists like any disclosure state. Which areas
+offer one is a single data set
+(`SettingsDetailPanelOffer.offering`), because the
+prototype's rule is a verdict either way: an area with
+nothing to show hides the panel and takes the full width —
+absence must be a decision, never a missing branch. The
+panel's previews are the areas' existing renderers moved,
+never new drawings beside them: the schematic-and-slider,
+the palette scene, the gap miniature and ring pair, the two
+bar strips. Their in-card mounts are REMOVED in the same
+change — one screen must not state one fact twice — which
+NARROWS the old "live preview leads its editor" convention
+to areas without a panel (Advanced Colours' group previews
+still lead their rows; the drag and sticky previews stay
+in-card because the panel does not cover them).
+
+**Census labels render at runtime from the English
+manifest.** (#678 Phase 4.) A surface that renders a
+census-labelled key AWAY from its owning row — the diff
+rows, and pass 6's search index after them — cannot inline
+the English without becoming a second authoring surface that
+drifts from the rows. So `SettingsCensusLabel` resolves the
+current locale first and falls back to the `en.json`
+manifest `scripts/extract-keys` regenerates from the live
+call sites. That amends `en.json`'s build-time-only
+contract deliberately (stated on `LocaleCatalog`): the
+manifest is regenerated on every key change, so its
+staleness class is the same as any bundled catalog, and the
+alternative — 200-plus English literals in a second switch —
+is the drift this repo's one-list rules exist to prevent.
 
 **The first-run banner orients once, then gets out of the
 way.** (#678 turn 14c.) Home opens already full — the tour

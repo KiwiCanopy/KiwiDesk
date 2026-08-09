@@ -16,50 +16,13 @@ struct ColorsMotionSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 PaletteShelf(model: model)
-                currentScene
+                // The live-colours scene moved to the detail
+                // PANEL (`PaletteScenePanel`, digest §1.1) —
+                // the column beside these rows is where the
+                // draft is watched now.
                 MotionCard(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
-        }
-    }
-
-    /// The live-colours scene. Deliberately NOT a new preview
-    /// component: `PaletteSceneThumbnail` already composes bar
-    /// strip, ringed window and drag ghost, and it already reads
-    /// a colour dictionary — so feeding it the staged config's
-    /// own colours turns the palette picker's tile into "what you
-    /// are running", with no second drawing to keep in step. The
-    /// redesign's preview rule is exactly this: recycle, never
-    /// rebuild from a mock.
-    ///
-    /// A standalone illustration rather than a control's preview,
-    /// so it is centered with its caption below — unlike the four
-    /// group previews on Advanced Colours, which lead their rows.
-    private var currentScene: some View {
-        SettingsSection(
-            SettingsCatalog.colors.currentScene,
-            // Not "everything a palette paints" — the scene
-            // draws six of the twenty-five paths a palette
-            // carries, and this phase is what grew it to
-            // twenty-five. A caption labels what is shown.
-            caption: L(
-                "colors.scene.caption",
-                "A sample of what a palette paints: the bar "
-                    + "plate and its active item, the focus "
-                    + "ring, and the drag ghost."
-            )
-        ) {
-            PaletteSceneThumbnail(
-                palette: ColorPalette(
-                    name: "",
-                    colors: ColorPaletteKeys.extract(
-                        from: model.config.settings
-                    )
-                ),
-                height: 132
-            )
-            .frame(maxWidth: 420)
-            .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 }

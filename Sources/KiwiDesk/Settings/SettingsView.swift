@@ -17,6 +17,22 @@ struct SettingsView: View {
     @State var revealTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
+    /// The preview panel's collapse pick (digest §1.1) —
+    /// remembered like disclosure state, one pick for every
+    /// area (the panel is one component that shows different
+    /// content, not twelve panels). Internal for the same
+    /// §2.1-split reason as `revealTask`: the two-column mount
+    /// lives in `SettingsView+Detail`.
+    @AppStorage("settings.panel_collapsed")
+    var panelCollapsed = false
+    /// Whether the current destination is showing an expanded
+    /// panel — the pill's centring offset and the two-column
+    /// mount both read this, so they cannot disagree.
+    var panelExpanded: Bool {
+        SettingsDetailPanelOffer.offers(model.destination)
+            && !model.editingLua
+            && !panelCollapsed
+    }
     /// The pushed area lives on the model, not in `@State` —
     /// see `SettingsModel.destination`. A locale change re-keys
     /// this view, and `@State` would not survive it. nil is
@@ -209,13 +225,26 @@ struct SettingsView: View {
                 \.settingsModeReveal,
                 model.modeRevealActive
             )
-            // The footer's overline. A token rule rather than a
-            // `Divider()`: the shell's three horizontal rules
-            // (header underline, this, the card borders) are one
-            // colour in the prototype, and `Divider` renders a
-            // system separator that tracks neither.
-            SettingsTheme.hairline.frame(height: 1)
-            SettingsFooter(model: model)
+            // The save pill floats OVER the content instead of
+            // docking below it (#678 turn 9; owner 2026-08-09
+            // overturned the docked-footer ruling). An overlay
+            // never reserves layout space, so the content keeps
+            // the full height while the pill exists only when
+            // the draft does. Bottom-centred on the CONTENT
+            // column; `detailPane` offsets it past the preview
+            // panel when one is open.
+            .overlay(alignment: .bottom) {
+                SettingsFooter(model: model)
+                    .padding(.bottom, 22)
+                    // Centred on the CONTENT column: half the
+                    // panel's width, the prototype's own
+                    // `calc(50% - 196px)`.
+                    .offset(
+                        x: panelExpanded
+                            ? -SettingsTheme.panelWidth / 2
+                            : 0
+                    )
+            }
         }
         // The page, behind everything. Opaque and flat — the
         // prototype carries no vibrancy, and the header's `.bar`

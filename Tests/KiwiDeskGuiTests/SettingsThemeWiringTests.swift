@@ -32,7 +32,7 @@ struct SettingsThemeWiringTests {
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate.swift",
         "plateInk": "HomeCardPlate.swift",
-        "hairline": "SettingsView.swift",
+        "hairline": "SettingsDetailPanel.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SidebarSearchField.swift",
@@ -41,6 +41,9 @@ struct SettingsThemeWiringTests {
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar.swift",
         "danger": "KeyRecorderRejectionRow.swift",
+        "panel": "SettingsDetailPanel.swift",
+        "savePill": "SettingsFooter.swift",
+        "savePillInk": "SettingsFooter.swift",
     ]
 
     /// Token → why nothing draws it yet. Each ships with the
@@ -48,8 +51,6 @@ struct SettingsThemeWiringTests {
     /// phase; moving one here to `wired` is what a consumer
     /// landing looks like.
     private let deferred: [String: String] = [
-        "panel":
-            "the 392 pt preview column is Phase 4",
         "accentInk":
             "AppKit picks the label ink on a tinted prominent "
             + "button; Phase 4's save pill is the first site "
