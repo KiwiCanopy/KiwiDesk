@@ -98,11 +98,22 @@ struct SettingsThemeMetricTests {
         )
         #expect(Set(wired.keys).isDisjoint(with: deferred.keys))
         // The parse keys on a SPELLING, so a metric declared
-        // `static var … : CGFloat { }` or typed `Double` would
-        // sit outside the net while looking listed. Tie it to
-        // the file's own census: every `CGFloat` in this file is
-        // either one of these declarations or one of `srgb`'s
-        // three parameters.
+        // `static var … : CGFloat { }` would sit outside the net
+        // while looking listed. Tie it to the file's own census:
+        // every `CGFloat` here is either one of these
+        // declarations or one of `srgb`'s three parameters.
+        // The other evasion is a metric typed `Double`, which
+        // adds no `CGFloat` mention at all — so that spelling is
+        // refused outright rather than counted. A geometry
+        // number in this file is a `CGFloat`; SwiftUI's own
+        // metrics are.
+        #expect(
+            !source.contains(": Double"),
+            Comment(
+                rawValue:
+                    "a `Double` metric evades the CGFloat census"
+            )
+        )
         let mentions =
             source.components(separatedBy: "CGFloat")
             .count - 1
@@ -111,9 +122,10 @@ struct SettingsThemeMetricTests {
             Comment(
                 rawValue:
                     "\(mentions) CGFloat mentions against "
-                    + "\(declared.count) parsed declarations — a "
-                    + "metric is declared in a shape this parse "
-                    + "cannot see"
+                    + "\(declared.count) parsed declarations + "
+                    + "srgb's 3 parameters — either a metric is "
+                    + "declared in a shape this parse cannot "
+                    + "see, or srgb's signature changed"
             )
         )
     }
@@ -148,7 +160,7 @@ struct SettingsThemeMetricTests {
             #expect(
                 suites.contains {
                     $0.contains("SettingsTheme.\(metric)")
-                        && $0.contains("SettingsTheme.\(base)")
+                        && namesExactly($0, base)
                 },
                 Comment(
                     rawValue:
@@ -213,6 +225,32 @@ struct SettingsThemeMetricTests {
         for (metric, reason) in deferred {
             #expect(!reason.isEmpty, Comment(rawValue: metric))
         }
+    }
+
+    /// `SettingsTheme.paletteCardStroke` is a PREFIX of
+    /// `…StrokeApplied`, so a bare `contains` for the base name
+    /// is implied by the suffixed one and the `&&` collapses to
+    /// one claim — a suite needling only the applied branch left
+    /// the rest weight named nowhere in `Tests/` and this guard
+    /// passed (guard-prover, 2026-08-09). The base must be
+    /// followed by something that cannot continue an identifier.
+    private func namesExactly(
+        _ source: String,
+        _ base: String
+    ) -> Bool {
+        let needle = "SettingsTheme.\(base)"
+        var rest = Substring(source)
+        while let hit = rest.range(of: needle) {
+            let after = rest[hit.upperBound...].first
+            if after == nil
+                || !(after!.isLetter
+                    || after!.isNumber || after! == "_")
+            {
+                return true
+            }
+            rest = rest[hit.upperBound...]
+        }
+        return false
     }
 
     private func site(named file: String) throws -> URL {

@@ -126,6 +126,38 @@ struct SourceScanCommentTests {
                 )
                 #expect(kept.count == original.count)
                 for (index, line) in original.enumerated()
+                where index < kept.count {
+                    // A line that SHARES its line with a marker
+                    // is excluded from the verbatim check below,
+                    // and that exclusion was a hole: a stripper
+                    // cutting the whole line back to the last
+                    // newline at a `//` erased real code on 92
+                    // lines of the two trees with this suite
+                    // green (guard-prover, 2026-08-09). What
+                    // must survive on such a line is everything
+                    // BEFORE the marker.
+                    guard
+                        let marker = [
+                            line.range(of: "//"),
+                            line.range(of: "/*"),
+                            line.range(of: "*/"),
+                        ]
+                        .compactMap({ $0 })
+                        .map(\.lowerBound)
+                        .min()
+                    else { continue }
+                    #expect(
+                        kept[index]
+                            .hasPrefix(line[..<marker]),
+                        Comment(
+                            rawValue:
+                                "\(file.lastPathComponent) line "
+                                + "\(index + 1) lost code before "
+                                + "its comment marker"
+                        )
+                    )
+                }
+                for (index, line) in original.enumerated()
                 where index < kept.count
                     && !line.contains("//")
                     && !line.contains("/*")

@@ -215,7 +215,10 @@ struct PaletteShelfChromeTests {
             )
             .split(whereSeparator: \.isWhitespace)
             .joined()
-            for ink in [".secondary", ".tertiary"] {
+            for ink in [
+                ".secondary", ".tertiary", ".quaternary",
+                ".quinary",
+            ] {
                 #expect(
                     !source.contains(ink),
                     Comment(
