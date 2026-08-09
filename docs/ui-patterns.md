@@ -174,7 +174,8 @@ audit applied the rule across every editor — converting the
 App Bar fields, Stack's Master
 orientation / Stack position / Overflow, Track's Overflow,
 Drag's Border alignment (which itself left the GUI in #754,
-GUI_REMOVED_2026-08), and the Focus border Corners — and
+GUI_REMOVED_2026-08), and Corners (which #754 lifted out of
+the Focus border card to drive all three strokes) — and
 kept menus where the rule keeps them:
 new-window placement (comparative labels), the seven-option
 Space layout mode, and the dynamic Language and
@@ -962,7 +963,16 @@ was written down:
   adjacent (Background style over Background size, a toggle
   over its slider) — keeps just the `GreyOut` hover string: the
   adjacency answers "why", and a header `?` would gloss a
-  single self-explaining row. A *remote* control-scoped gate
+  single self-explaining row. A **master** control higher up
+  the *same* page, driving rows in later cards, is not a fourth
+  case to reach for: Gaps & Borders shipped one for a commit
+  (#754) and it was the wrong shape twice over — the followers
+  it dimmed were rows that should not have existed, and the
+  master needed a stored pick and a runtime gate to express a
+  choice nobody wanted. Where a shared control would need
+  dimmed per-instance twins to explain itself, delete the twins
+  instead ([Design decisions](design-decisions.md)). A *remote*
+  control-scoped gate
   (the gating field lives on another **destination**) has no
   adjacency to answer "why", so hover text alone is not enough:
   it takes a live `?` on the nearest live label above the dimmed

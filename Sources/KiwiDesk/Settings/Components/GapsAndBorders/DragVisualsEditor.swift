@@ -12,17 +12,16 @@ import SwiftUI
 /// the pairing once (the System-Settings Displays/Desktop
 /// pattern). Static previews — no live drag (#123).
 ///
-/// The shared corner radius left for the Borders card in #754,
-/// where it also drives the ring; the two alignment pickers left
-/// the GUI entirely there (GUI_REMOVED_2026-08).
+/// Both border WIDTHS and the shared corner radius left for the
+/// Borders card in #754, where two rows now decide them for all
+/// three strokes at once; the two alignment pickers left the GUI
+/// entirely there (GUI_REMOVED_2026-08). What stays in a column
+/// is what only that column can answer.
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
     private var gates: GapsBordersGates {
-        GapsBordersGates(
-            settings: model.config.settings,
-            linkedWidth: model.borderWidthLinked
-        )
+        GapsBordersGates(settings: model.config.settings)
     }
 
     var body: some View {
@@ -45,9 +44,6 @@ struct DragVisualsEditor: View {
                     visual: $model.config.settings.dragGhost,
                     enabledReason: gates.inertReason(
                         for: .borders(.dragGhostBorder)
-                    ),
-                    borderReason: gates.inertReason(
-                        for: .borders(.dragGhostBorderWidth)
                     )
                 )
                 column(
@@ -61,9 +57,6 @@ struct DragVisualsEditor: View {
                     visual: $model.config.settings.dragDropZone,
                     enabledReason: gates.inertReason(
                         for: .borders(.dragDropZoneBorder)
-                    ),
-                    borderReason: gates.inertReason(
-                        for: .borders(.dragDropZoneBorderWidth)
                     )
                 )
             }
@@ -77,8 +70,7 @@ struct DragVisualsEditor: View {
         control: SettingsControl,
         caption: String,
         visual: Binding<DragVisual>,
-        enabledReason: GapsBordersGates.InertReason?,
-        borderReason: GapsBordersGates.InertReason?
+        enabledReason: GapsBordersGates.InertReason?
     ) -> some View {
         // The header `?` is the gate's live anchor (#527): with
         // the visual off the column below the Enabled toggle is
@@ -96,8 +88,7 @@ struct DragVisualsEditor: View {
             )
             DragVisualControls(
                 visual: visual,
-                enabledReason: enabledReason,
-                borderReason: borderReason
+                enabledReason: enabledReason
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -108,33 +99,22 @@ struct DragVisualsEditor: View {
     }
 }
 
-/// The border + fill controls shared by ghost and drop zone.
-/// The width row is relabeled to its in-group short form
-/// ("Width") since the Border/Fill sub-grouping already carries
-/// the prefix (#231). All rows read the narrowed Drag label axis
-/// from the environment. The two COLOUR rows left in #678
-/// Phase 3 — Border and Fill still decide whether each part
-/// is drawn, which is this column's question; what it is painted
-/// with is Advanced Colours'.
+/// The border + fill switches shared by ghost and drop zone —
+/// whether each part is drawn at all, which is the one question
+/// only this column can answer. All rows read the narrowed Drag
+/// label axis from the environment. The two COLOUR rows left in
+/// #678 Phase 3 for Advanced Colours; the border WIDTH left in
+/// #754 for the shared master, which is why Border no longer
+/// gates anything below it here.
 struct DragVisualControls: View {
     @Binding var visual: DragVisual
     let enabledReason: GapsBordersGates.InertReason?
-    let borderReason: GapsBordersGates.InertReason?
 
-    /// Three gates the column implies and none of it enforced
-    /// (#520, #754): with the visual off nothing it draws
-    /// exists, with Border off its width shapes nothing, and
-    /// with the one-width link on the Borders card's master owns
-    /// that width. The column's preview already prints
-    /// "disabled" beside the first, so the controls were the
-    /// only surface still claiming to matter. Greyed, never
-    /// hidden (#171).
-    ///
-    /// The one remaining inner gate needs no `visual.enabled &&`
-    /// conjunction: `GreyOut` dims once however deeply it nests
-    /// (`AutoGatedGroup`), and the colour rows that used to make
-    /// the hover-string shadowing matter here have moved to
-    /// Advanced Colours.
+    /// The one gate the column implies and did not enforce
+    /// (#520): with the visual off nothing it draws exists. The
+    /// column's preview already prints "disabled" beside it, so
+    /// the controls were the only surface still claiming to
+    /// matter. Greyed, never hidden (#171).
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()
@@ -143,20 +123,6 @@ struct DragVisualControls: View {
                 L("drag.border", "Border"),
                 isOn: $visual.border
             )
-            PtSlider(
-                label: L("drag.border_width", "Width"),
-                value: $visual.borderWidth,
-                range: 0...20
-            )
-            .modifier(
-                GreyOut(
-                    active: borderReason != nil,
-                    help:
-                        borderReason
-                        .map(GapsBordersGateHelp.sentence) ?? ""
-                )
-            )
-            Divider()
             Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
         }
         .modifier(

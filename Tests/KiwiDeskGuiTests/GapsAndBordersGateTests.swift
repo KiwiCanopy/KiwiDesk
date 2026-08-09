@@ -40,20 +40,12 @@ struct GapsAndBordersGateTests {
         return s
     }
 
-    /// Unlinked unless a test says otherwise: the link is a
-    /// separate axis from every predicate below it, so folding
-    /// it into the default would grey three rows in tests that
-    /// are about something else.
     private func gates(
-        linkedWidth: Bool = false,
         _ overrides: (inout TilingSettings) -> Void = { _ in }
     ) -> GapsBordersGates {
         var s = settings()
         overrides(&s)
-        return GapsBordersGates(
-            settings: s,
-            linkedWidth: linkedWidth
-        )
+        return GapsBordersGates(settings: s)
     }
 
     /// The declared-vs-answered split, read off the census: a new
@@ -124,8 +116,7 @@ struct GapsAndBordersGateTests {
                 ghostBorder: false,
                 dropZone: false,
                 dropZoneBorder: false
-            ),
-            linkedWidth: true
+            )
         )
         for key in SettingKey.allCases
         where key.placement.area == .gapsAndBorders
@@ -159,10 +150,14 @@ struct GapsAndBordersGateTests {
         )
     }
 
-    @Test("the ghost column gates on enabled then border")
+    /// A column greys wholesale off its own Enabled toggle and
+    /// off nothing else. Its Border toggle gates no row in this
+    /// area since #754 took the width row out, so Border being
+    /// off must leave every row in the column live — a resolver
+    /// still reading it would grey Fill for a reason Fill does
+    /// not have.
+    @Test("the ghost column gates on enabled alone")
     func ghostColumnLayers() {
-        // Ghost off → border toggle, fill and the width row all
-        // read `.visualOff`.
         let off = gates { $0.dragGhost.enabled = false }
         #expect(
             off.inertReason(for: .borders(.dragGhostBorder))
@@ -172,32 +167,24 @@ struct GapsAndBordersGateTests {
             off.inertReason(for: .borders(.dragGhostFill))
                 == .visualOff
         )
-        #expect(
-            off.inertReason(for: .borders(.dragGhostBorderWidth))
-                == .visualOff
-        )
-        // Ghost on, its border off → width is `.visualBorderOff`,
-        // the border toggle itself stays live.
         let noBorder = gates { $0.dragGhost.border = false }
-        #expect(
-            noBorder.inertReason(
-                for: .borders(.dragGhostBorderWidth)
-            ) == .visualBorderOff
-        )
         #expect(
             noBorder.inertReason(
                 for: .borders(.dragGhostBorder)
             ) == nil
         )
-        // All on → live.
         #expect(
-            gates().inertReason(
-                for: .borders(.dragGhostBorderWidth)
+            noBorder.inertReason(
+                for: .borders(.dragGhostFill)
             ) == nil
+        )
+        #expect(
+            gates().inertReason(for: .borders(.dragGhostBorder))
+                == nil
         )
     }
 
-    @Test("the drop-zone column gates on enabled then border")
+    @Test("the drop-zone column gates on enabled alone")
     func dropZoneColumnLayers() {
         let off = gates { $0.dragDropZone.enabled = false }
         #expect(
@@ -208,20 +195,15 @@ struct GapsAndBordersGateTests {
             off.inertReason(for: .borders(.dragDropZoneFill))
                 == .visualOff
         )
-        #expect(
-            off.inertReason(
-                for: .borders(.dragDropZoneBorderWidth)
-            ) == .visualOff
-        )
         let noBorder = gates { $0.dragDropZone.border = false }
         #expect(
             noBorder.inertReason(
-                for: .borders(.dragDropZoneBorderWidth)
-            ) == .visualBorderOff
+                for: .borders(.dragDropZoneBorder)
+            ) == nil
         )
         #expect(
             noBorder.inertReason(
-                for: .borders(.dragDropZoneBorder)
+                for: .borders(.dragDropZoneFill)
             ) == nil
         )
     }
@@ -230,8 +212,7 @@ struct GapsAndBordersGateTests {
     func gapMastersGateOnDiffer() {
         #expect(
             GapsBordersGates(
-                settings: settings(outerEdgesDiffer: true),
-                linkedWidth: false
+                settings: settings(outerEdgesDiffer: true)
             ).inertReason(for: .gaps(.outer)) == .gapsDiffer
         )
         #expect(
@@ -239,8 +220,7 @@ struct GapsAndBordersGateTests {
         )
         #expect(
             GapsBordersGates(
-                settings: settings(innerAxesDiffer: true),
-                linkedWidth: false
+                settings: settings(innerAxesDiffer: true)
             ).inertReason(for: .gaps(.inner)) == .gapsDiffer
         )
         #expect(
@@ -254,8 +234,7 @@ struct GapsAndBordersGateTests {
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [GapsBordersGates.InertReason] = [
-            .borderOff, .glowOff, .visualOff, .visualBorderOff,
-            .gapsDiffer, .widthLinked,
+            .borderOff, .glowOff, .visualOff, .gapsDiffer,
         ]
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {

@@ -4,9 +4,10 @@ import SwiftUI
 /// This Profile ▸ Gaps & Borders ▸ Focus border (#278). Leads
 /// the drag visuals since #754 — the ring is the stroke seen all
 /// day. Order per the settled design: enable toggle → live
-/// two-window preview → unfocused toggle → corner style (preview
-/// leads editor, AGENTS §2.7). The ring's WIDTH is the Borders
-/// card's master above, so it is not drawn twice here.
+/// two-window preview → unfocused toggle → glow (preview leads
+/// editor, AGENTS §2.7). The ring's WIDTH and CORNERS are the
+/// masters in the card above, which every stroke shares, so
+/// neither is drawn a second time here.
 ///
 /// The two ring COLOURS left in #678 Phase 3 — every colour
 /// KiwiDesk has now renders once, in Advanced Colours. What stays
@@ -21,10 +22,7 @@ struct FocusBorderEditor: View {
     }
 
     private var gates: GapsBordersGates {
-        GapsBordersGates(
-            settings: model.config.settings,
-            linkedWidth: model.borderWidthLinked
-        )
+        GapsBordersGates(settings: model.config.settings)
     }
 
     /// The block gate: the whole card is inert while the ring is
@@ -42,12 +40,6 @@ struct FocusBorderEditor: View {
     /// the glow effect is off.
     private var glowSizeReason: GapsBordersGates.InertReason? {
         gates.inertReason(for: .borders(.borderGlowSize))
-    }
-
-    /// The corner picker's gate, inside a live block: greyed
-    /// while the Borders card's radius owns it (#754).
-    private var cornerReason: GapsBordersGates.InertReason? {
-        gates.inertReason(for: .borders(.borderCorner))
     }
 
     var body: some View {
@@ -83,26 +75,6 @@ struct FocusBorderEditor: View {
             isOn: style.unfocusedEnabled
         )
         Divider()
-        // A follower of the Borders card's corner radius while
-        // the link is on: greyed, still showing what the radius
-        // derives, so the ring's shape is never hidden from the
-        // person reading this card (#171).
-        SegmentedPicker(
-            cornerLabel,
-            selection: style.cornerStyle,
-            options: [
-                (L("border.corner.rounded", "Rounded"), .rounded),
-                (L("border.corner.square", "Square"), .square),
-            ]
-        )
-        .modifier(
-            GreyOut(
-                active: cornerReason != nil,
-                help:
-                    cornerReason
-                    .map(GapsBordersGateHelp.sentence) ?? ""
-            )
-        )
         // A render trait of the ring like Width and Corners — a soft
         // bloom in the focused ring's hue (#358). Sits with the other
         // styling traits, no caption (the live preview above shows
@@ -160,9 +132,5 @@ struct FocusBorderEditor: View {
         }
         Divider()
         FitGapsAction(model: model)
-    }
-
-    private var cornerLabel: String {
-        L("border.corner_style", "Corners")
     }
 }

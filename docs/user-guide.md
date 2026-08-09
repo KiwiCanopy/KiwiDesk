@@ -859,43 +859,52 @@ carries a mark. What any of it is *painted* with lives in the two
 colour sections below — every colour KiwiDesk has renders in
 exactly one place, and this is not it.
 
-### Borders
+### Shared by all borders
 
 KiwiDesk strokes three things: the **focus ring** around the
 focused window, the **ghost** left where a dragged window came
-from, and the **drop zone** under the cursor. The **Borders**
-card at the top of the page holds what all three share.
+from, and the **drop zone** under the cursor. The card at the
+top of the page asks the two questions all three answer the
+same way, and there is no per-stroke version of either further
+down — a 3 pt ring beside a 1 pt ghost is not a setting anyone
+wants, so the page does not offer it.
 
-- **Use one width for all borders**: on by default. While it is
-  on, the **Width** slider below drives the ring, the ghost and
-  the drop zone together, and each stroke's own width slider
-  further down the page stays visible but dimmed, showing what
-  the master set. Turn it off and those sliders come back to
-  life; the master is then the focus ring's own width and
-  nothing more.
-- **Width**: 1–20 pt — for the focus ring, the visible thickness
-  reaching outward into the gap, and the value **Fit layout
-  gaps** sizes gaps from. The ring sits **behind** its window by
-  default, with a small overlap tucked under the window edge so
-  its corners stay closed; that overlap isn't part of the width.
-  Keep gaps at least as wide as the ring so neighbouring rings
-  don't touch.
-- **Corner radius**: 0–40 pt — the ghost's and the drop zone's
-  rounding and, while the widths are linked, what the focus
-  ring's **Corners** picker derives from: 0 pt reads as Square,
-  anything above it as Rounded.
+- **Width**: 1–20 pt, written to all three strokes. For the
+  focus ring this is the visible thickness reaching outward
+  into the gap, and the value **Fit layout gaps** sizes gaps
+  from. The ring sits **behind** its window by default, with a
+  small overlap tucked under the window edge so its corners
+  stay closed; that overlap isn't part of the width. Keep gaps
+  at least as wide as the borders so neighbouring strokes don't
+  touch — all three now reach *outward*, so this applies to the
+  drag overlays too.
+- **Corners**: **Rounded** matches your windows' real corner
+  radius; **Square** draws sharp corners — seamless on windows
+  that are already square, an intentional squared frame on
+  rounded ones. It sets the focus ring's corner style and the
+  drag overlays' corner radius together: Rounded is the system
+  window radius, Square is no radius at all.
 
-Whether a stroke is laid *inside* or *outside* its slot edge is
-Lua-only (`drag.set_ghost_border_alignment` and its drop-zone
-twin), and both default to `outside` — the focus ring outsets its
-window and has no alignment knob at all, so a control for two of
-the three could never make the page symmetric. See
-[design decisions](design-decisions.md).
+The drag overlays' radius is a number underneath
+(`drag.set_corner_radius`), and the picker reads any value
+above zero as **Rounded**. So a radius you set from Lua — 7 pt,
+say — shows as Rounded and *stays* 7 pt: opening this page
+never rewrites it. Picking a segment is what writes, and it
+writes the full pair, so choosing Rounded on a 7 pt config
+moves it to the system radius. Pick a segment only when you
+mean to.
 
+Each stroke's own width, its alignment (whether it is laid
+*inside* or *outside* its slot edge — the ring has no such
+knob and always outsets) and the drag radius are all Lua-only
+and never clamped against each other. See
+[design decisions](design-decisions.md) for why the GUI removes
+these decisions instead of offering a switch to keep them, and
+the [Lua reference](lua-reference.md) for the verbs.
 
 ### Focus Border
 
-Below the Borders card, the **Focus border** group puts a thin
+Below the shared card, the **Focus border** group puts a thin
 border around the focused window so you never lose track of which
 window has focus in a gapped layout — the cue keyboard-driven
 focus otherwise lacks. It is **on by default**.
@@ -918,11 +927,6 @@ windows. Below it:
   Floating windows get no border when unfocused (only the focused
   window does, whether tiled or floating); monocle always shows
   only the focused border.
-- **Corners**: **Rounded** matches your windows' real corner
-  radius; **Square** draws sharp corners — seamless on windows that
-  are already square, an intentional squared frame on rounded ones.
-  Dimmed while **Use one width for all borders** is on, showing
-  what the Borders card's **Corner radius** derives.
 - **Glow effect**: wraps the focused border in a soft colored bloom
   for a bit more presence. Off by default; it only ever touches the
   focused window, never the unfocused borders. The live preview
@@ -1016,14 +1020,14 @@ preview, and dropping one over a tiled slot does nothing. Use
 
 Toggle each visual on/off and customize:
 
-- **Border**: show/hide, and its **Width** (pt) — dimmed while
-  **Use one width for all borders** is on, showing the width the
-  Borders card set.
+- **Border**: show/hide.
 - **Fill**: show/hide.
 
-The corner radius both overlays round to is on the **Borders**
-card, and which side of the slot edge each stroke is laid on is
-Lua-only.
+Each column asks only what that column alone can answer. The
+border **width** and the **corners** both overlays take come
+from the shared card at the top of the page, which sets them
+for the focus ring in the same move; per-stroke widths, radii
+and alignments are Lua-only.
 
 Both overlays' colours are in **Advanced Colors ▸ Drag colors**,
 laid out as the same two columns.

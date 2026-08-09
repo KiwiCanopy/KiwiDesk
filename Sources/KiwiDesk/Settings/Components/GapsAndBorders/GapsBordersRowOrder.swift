@@ -6,13 +6,14 @@
 ///
 /// - `.gaps` — the outer and inner master sliders, each with a
 ///   per-edge / per-axis drawer beneath it.
-/// - `.borders` — the decisions all three strokes share: the
-///   one-width link, the master width and the corner radius
-///   (#754). The container spans this area and Advanced
-///   Colours, which is where the same group's tints render.
-/// - `.focusBorder` — the ring: its corner, unfocused twin,
-///   glow, and the fit-layout-gaps action. The enable toggle
-///   owns the container gate.
+/// - `.borders` — the two decisions all three strokes share,
+///   each written to every stroke: the width master and the
+///   Square/Rounded corner master (#754). The container spans
+///   this area and Advanced Colours, which is where the same
+///   group's tints render.
+/// - `.focusBorder` — the ring: its unfocused twin, glow, and
+///   the fit-layout-gaps action. The enable toggle owns the
+///   container gate.
 /// - `.stickyWindows` — the one on-window sticky mark toggle.
 /// - `.dragAndDrop` — the ghost and drop-zone visual columns.
 ///
@@ -33,21 +34,21 @@ enum GapsBordersRowOrder {
         .gaps(.innerVertical),
     ]
 
-    /// The link toggle first — it says what the two masters
-    /// below it mean — then the width, then the corner radius.
+    /// The width master, then the Square/Rounded corner master.
+    /// `borderCorner` is the corner row for BOTH corner
+    /// settings — the drag pair's numeric radius left the GUI in
+    /// #754 and names no row.
     static let borders: [SettingKey] = [
-        .borders(.linkedBorderWidth),
         .borders(.borderWidth),
-        .borders(.dragCornerRadius),
+        .borders(.borderCorner),
     ]
 
     /// The enable toggle first (it owns the container gate),
-    /// then the ring's own shape, its glow, and the fit-gaps
-    /// action. Width left for `.borders` in #754.
+    /// then the unfocused twin, the glow, and the fit-gaps
+    /// action. Width and Corners left for `.borders` in #754.
     static let focusBorder: [SettingKey] = [
         .borders(.borderEnabled),
         .borders(.borderUnfocusedEnabled),
-        .borders(.borderCorner),
         .borders(.borderGlow),
         .borders(.borderGlowSizeAuto),
         .borders(.borderGlowSize),
@@ -60,17 +61,15 @@ enum GapsBordersRowOrder {
     ]
 
     /// The ghost column, then the drop-zone column — each
-    /// column's enable, border, width and fill. Alignment left
-    /// the GUI in #754 and the corner radius moved to
-    /// `.borders`.
+    /// column's enable, border and fill. Alignment, border
+    /// width and the corner radius all left the GUI in #754;
+    /// what stays is what only a column can answer.
     static let dragAndDrop: [SettingKey] = [
         .borders(.dragGhostEnabled),
         .borders(.dragGhostBorder),
-        .borders(.dragGhostBorderWidth),
         .borders(.dragGhostFill),
         .borders(.dragDropZoneEnabled),
         .borders(.dragDropZoneBorder),
-        .borders(.dragDropZoneBorderWidth),
         .borders(.dragDropZoneFill),
     ]
 
@@ -86,10 +85,10 @@ enum GapsBordersRowOrder {
     /// Containers drawn as BESPOKE views rather than a `ForEach`
     /// over the list above.
     ///
-    /// All five are: the gaps drawers, the Borders card's
-    /// link-plus-two-masters, the ring preview and its
-    /// auto-gated glow group, the single sticky toggle, and the
-    /// two-column drag layout are hand-built, not list-walked. So
+    /// All five are: the gaps drawers, the shared card's two
+    /// masters, the ring preview and its auto-gated glow group,
+    /// the single sticky toggle, and the two-column drag
+    /// layout are hand-built, not list-walked. So
     /// the lists exist to record membership for the placement
     /// table and search — and the guard holds that membership —
     /// but editing one moves nothing on screen (the edge `gui.md`

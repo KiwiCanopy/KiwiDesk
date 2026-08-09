@@ -1,80 +1,66 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two shared border decisions (#754): one width across the
-/// focus ring, the drag ghost and the drop zone, and one corner
-/// radius the ring's corner style derives from.
+/// The two shared border decisions (#754): one width and one
+/// corner shape across the focus ring, the drag ghost and the
+/// drop zone.
 ///
 /// The masters live here rather than in `BordersCard` because a
 /// master is a WRITE FAN-OUT, not a layout concern: a binding
 /// that sets one stored value beside a view is a place for a
-/// second copy to disagree about which strokes are linked. The
-/// card renders these; nothing else writes the followers.
+/// second copy to disagree about which strokes the card owns.
+/// The card renders these; nothing else writes the followers.
 extension SettingsModel {
-    /// Persists the link and, on turning it ON, makes the claim
-    /// true immediately: the followers are synced right then
-    /// rather than at the next master edit, so a user who links
-    /// and saves gets the one look the toggle promised.
-    /// (Turning it OFF changes no value — the three widths
-    /// simply become independent again.)
-    ///
-    /// One residue, stated rather than chased: a draft loaded
-    /// from a profile that Lua gave three different widths
-    /// arrives un-synced, and its greyed sliders read those
-    /// stored values until a master is touched. Re-deriving on
-    /// every load is the alternative and is worse — it would
-    /// rewrite a saved profile the user never opened this card
-    /// to change.
-    func setBorderWidthLinked(_ linked: Bool) {
-        BorderWidthLinkPreference.write(linked, to: preferences)
-        borderWidthLinked = linked
-        if linked { config.settings = linkedShape(config.settings) }
-    }
-
-    /// The master width: the focus ring's own stored value, and
-    /// — while linked — the ghost's and the drop zone's too.
+    /// The width every stroke takes. Writing it writes all
+    /// three stored widths — there is no per-stroke width row
+    /// in the GUI to disagree with it, and the per-stroke Lua
+    /// verbs stay open and unclamped for anyone who wants three
+    /// different ones.
     var borderWidthMaster: Binding<CGFloat> {
         Binding(
             get: { self.config.settings.borderStyle.width },
             set: { value in
                 var next = self.config.settings
                 next.borderStyle.width = value
-                self.config.settings =
-                    self.borderWidthLinked
-                    ? self.linkedShape(next) : next
+                next.dragGhost.borderWidth = value
+                next.dragDropZone.borderWidth = value
+                self.config.settings = next
             }
         )
     }
 
-    /// The master corner radius: the drag pair's own shared
-    /// value, and — while linked — the source the ring's
-    /// Rounded/Square choice derives from.
-    var borderCornerMaster: Binding<CGFloat> {
+    /// Square or Rounded, for all three strokes at once.
+    ///
+    /// The two halves are stored differently — the ring carries
+    /// a two-value `cornerStyle`, the drag pair a 0–40 pt
+    /// radius — so the master READS the radius and WRITES both.
+    /// Reading the radius rather than the ring's own style is
+    /// what lets a Lua-set 7 pt display as Rounded instead of
+    /// as a picker with no segment selected, and the write is
+    /// the only thing that ever normalises it: the getter never
+    /// stores, so a radius the user did not open this card to
+    /// change survives untouched. Picking a segment — including
+    /// re-picking the one already shown — writes the pair, so a
+    /// 7 pt radius becomes the system radius at that moment and
+    /// not before.
+    ///
+    /// Rounded is the system window radius, which is also
+    /// `dragCornerRadius`'s own default, so the shipped config
+    /// already reads as Rounded without this ever writing.
+    var borderCornersMaster: Binding<BorderStyle.CornerStyle> {
         Binding(
-            get: { self.config.settings.dragCornerRadius },
-            set: { value in
+            get: {
+                self.config.settings.dragCornerRadius > 0
+                    ? .rounded : .square
+            },
+            set: { style in
                 var next = self.config.settings
-                next.dragCornerRadius = value
-                self.config.settings =
-                    self.borderWidthLinked
-                    ? self.linkedShape(next) : next
+                next.borderStyle.cornerStyle = style
+                next.dragCornerRadius =
+                    style == .rounded
+                    ? GeometryUtils.systemWindowCornerRadius : 0
+                self.config.settings = next
             }
         )
-    }
-
-    /// The followers, derived from the two masters. Corner is a
-    /// derivation rather than a copy because the ring has no
-    /// radius: a zero radius is a square frame, anything above
-    /// it a rounded one, which is the whole of what the ring's
-    /// two-value picker can say.
-    private func linkedShape(
-        _ settings: TilingSettings
-    ) -> TilingSettings {
-        var next = settings
-        next.dragGhost.borderWidth = next.borderStyle.width
-        next.dragDropZone.borderWidth = next.borderStyle.width
-        next.borderStyle.cornerStyle =
-            next.dragCornerRadius > 0 ? .rounded : .square
-        return next
     }
 }

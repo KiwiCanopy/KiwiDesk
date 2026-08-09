@@ -3286,24 +3286,27 @@ are a genuine A/B pair (same schema, edited by comparison),
 which is exactly where macOS System Settings itself reaches
 for twin panels (Displays' Arrangement, Desktop & Dock's
 light/dark), so twin columns state the pairing once instead
-of duplicating preview-then-controls structure. The shared
-corner radius sat full-width above both until #754 lifted it
-to the Borders card, where it styles the ring too — it never
-belonged to either column. In the narrower columns, rows drop
-the group prefix already carried by the Border/Fill
-sub-grouping ("Border color" → "Color", "Border width" →
-"Width"), narrowed onto the `dragColumnLabelColumn` axis via
-the `settingsLabelColumn` override; VoiceOver keeps the full
-name through `a11yLabel`. The alignment row was a third such
-case until it left the GUI in #754 (GUI_REMOVED_2026-08); its
-preview still renders **Inside vs Outside** (inset within the
-tile vs a larger footprint outside its edge, offset scaling
-with the border width) because the value is still settable
-from Lua — schematic, not pixel-exact, but the control was
-previously dead because SwiftUI `.strokeBorder` always draws
-inside. Both the corner-radius and border-width previews remap
-the full slider range instead of hard-capping halfway (the
-`AppBarPreviewStrip` fix).
+of duplicating preview-then-controls structure. What a column
+keeps is what only that column can answer — whether its border
+and its fill are drawn at all. Everything a column once asked
+that the other strokes are asked too has left it: the shared
+corner radius sat full-width above both until #754, the border
+width and the alignment picker sat inside each, and all three
+now belong to the page's shared card or to Lua alone. The
+narrowing that let a half-width row hold a slider
+(`dragColumnLabelColumn`, applied through the
+`settingsLabelColumn` override) stays, and so does the
+in-group short form it was for ("Border width" → "Width", with
+the full name kept for VoiceOver through `a11yLabel`) — but
+every row that used one has now left, the colour pair for
+Advanced Colours in #678 Phase 3 and the rest in #754. Each
+column's preview still draws the alignment, radius and width
+actually stored, because all three are still settable from
+Lua: schematic, not pixel-exact, and it remaps the full value
+range instead of hard-capping halfway (the `AppBarPreviewStrip`
+fix). The alignment preview earns its keep twice over, the
+control having been dead before it — SwiftUI `.strokeBorder`
+always draws inside.
 
 **[Trade-off]**
 
@@ -3352,35 +3355,60 @@ bounds and to a step the standard lands on.
 
 **[Principle]**
 
-**One width, one rounding, three strokes — and the link that
-says so is GUI convenience, never a config axis.** KiwiDesk
-strokes three things around a window: the focus ring, the drag
-ghost and the drop zone. Asked as three independent decisions
-they were three chances to answer once and forget twice, and
-nobody holds the preference that comes out of that — a 3 pt
-ring beside a 1 pt ghost is an oversight wearing the clothes of
-a setting. So the Gaps &amp; Borders page leads with a Borders
-card holding what all three share, and **Use one width for all
-borders** is on by default.
+**One width and one corner for all three strokes — the GUI
+removes the decision rather than building a control to protect
+it.** KiwiDesk strokes three things around a window: the focus
+ring, the drag ghost and the drop zone. Asked as three
+independent decisions they were three chances to answer once
+and forget twice, and nobody holds the preference that comes
+out of that — a 3 pt ring beside a 1 pt ghost is an oversight
+wearing the clothes of a setting. So Gaps & Borders asks each
+question exactly once, in a card above the sections that draw
+the strokes, and every per-stroke width, alignment and radius
+control leaves the GUI (GUI_REMOVED_2026-08). The verbs stay
+open and unclamped, per stroke, for whoever genuinely wants
+three different ones.
 
-What the link must NOT become is a fourth stored value. The
-three widths already exist in `TilingSettings`; a `linked` field
-beside them would describe the other three rather than draw
-anything, and Lua would gain a knob whose effect it cannot read
-back. So the pick lives where the Settings mode and the
-appearance override live — app preferences, absent reading as
-linked — and the master sliders are a WRITE FAN-OUT over the
-values the config already has. Two consequences a future change
-must keep: turning the link ON converges the strokes right then
-(a dimmed slider that goes on showing a width the master does
-not own is the lie the card exists to remove), and turning it
-OFF changes nothing, because unlinking is a statement about
-future edits, not a reset.
+The first cut of this was a **Use one width for all borders**
+toggle over two masters, with the per-stroke sliders left on
+screen and dimmed. That is the wrong shape, and the reason
+generalises: a toggle that turns a defect on is still the
+defect, shipped with a switch. It asks a new question ("do you
+want them linked?") to protect an old answer nobody wanted, it
+needs a stored pick and a runtime gate and three dimmed rows
+to express, and the state it protects — three strokes drawn
+three ways — is the very state the card exists to end. Where
+the GUI would need a control to keep a bad option reachable,
+delete the option. This is not "grey, don't hide" (#171)
+overruled: that rule covers a control another mode brings back
+to life, and there is no mode here that revives a per-stroke
+width.
 
-The followers stay on screen, dimmed (grey, don't hide, #171) —
-the grey is the whole hint, and a caption saying "this is
-controlled above" would only repeat what the dimming already
-says while the link toggle is two inches up the page.
+**Corners passes the exact test alignment failed, which is why
+one is a control and the other is not.** The test is the entry
+below: can the question be put to all three strokes, or only
+to two? Square/Rounded can — but only as Square/Rounded. The
+ring stores a two-value corner STYLE and
+the drag pair a 0–40 pt radius, and the first cut derived the
+style from the radius (`> 0` ⇒ rounded), which is a slider
+collapsed into one bit: 1 pt and 40 pt drew an identical ring.
+A control whose range the thing it drives cannot represent is
+not a shared control, so the numeric radius left the GUI with
+the widths and the picker writes both halves — Square is a
+square ring and a 0 radius, Rounded is a rounded ring and the
+system window radius, which is also the radius's own shipped
+default.
+
+**The picker READS the radius and WRITES only when a segment is
+picked**, and that asymmetry is deliberate. A profile whose
+radius Lua set to 7 pt displays as Rounded — which is what the
+drag pair actually draws there — and stays at 7 pt: the getter
+never stores, so opening the page cannot silently normalise a
+value the user never came here to change. Picking a segment,
+including re-picking the one already shown, is what writes; a
+7 pt radius becomes the system radius at that moment and not
+before. Re-deriving at load is the alternative and is worse —
+it rewrites a saved profile on the way past.
 
 **[Rationale]**
 

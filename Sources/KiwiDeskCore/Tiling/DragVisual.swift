@@ -49,12 +49,12 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     /// partner to separate from, so nothing asks it to move for CVD
     /// (it later shifted to `#4A9816` for the unrelated moss reason,
     /// #578 — not this one).
-    /// Defaults mirrored in docs/lua-reference.md (drag colors)
-    /// — change both.
     /// Aligned `.outside` since #754, matching the focus ring:
     /// the ring outsets its window and has no alignment knob, so
     /// an untouched app drew its three strokes two different
-    /// ways. Defaults mirrored in docs/lua-reference.md.
+    /// ways.
+    /// Defaults mirrored in docs/lua-reference.md (drag colors)
+    /// — change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,

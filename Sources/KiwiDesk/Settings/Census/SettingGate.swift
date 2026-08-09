@@ -69,14 +69,6 @@ enum SettingRuntimeGate: Hashable {
     /// capability gate (#390); the `#available` check itself
     /// belongs to the renderer.
     case liquidGlassUnavailable
-    /// "Use one width for all borders" is on, so the Borders
-    /// card's masters own every per-stroke width and the ring's
-    /// corner style — those rows grey rather than vanish (#754,
-    /// #171). A GUI preference, never a `TilingSettings` field:
-    /// the link is convenience over the three stored widths, not
-    /// a fourth value, so it is a runtime condition here exactly
-    /// the way the appearance pick is.
-    case borderWidthLinked
 }
 
 /// What greys a surfaced row (the placement table's GATED
@@ -113,20 +105,6 @@ enum SettingGate: Hashable {
     /// predicate names both arms instead of one tag standing for
     /// the pair.
     case runtimeAnyOf([SettingRuntimeGate])
-    /// The row is inert while ANY of these settings is off OR
-    /// any of these runtime conditions holds — one disjunction
-    /// whose arms are of both kinds. Built for the drag widths
-    /// (#754), which die for their column's Enabled, for its
-    /// Border toggle, and for the one-width link: with only
-    /// `.anyOf` and `.runtimeAnyOf` to choose from, such a row
-    /// can name at most two of its three arms, and the arm it
-    /// drops is invisible to every reader of the census — the
-    /// exact "one tag standing for the whole disjunction" the
-    /// note above refuses.
-    case anyOfMixed(
-        settings: [SettingKey],
-        runtime: [SettingRuntimeGate]
-    )
 
     /// The setting rows this gate reads, for the guards.
     var settings: [SettingKey] {
@@ -134,7 +112,6 @@ enum SettingGate: Hashable {
         case .setting(let key): return [key]
         case .anyOf(let keys): return keys
         case .runtime, .runtimeAnyOf: return []
-        case .anyOfMixed(let keys, _): return keys
         }
     }
 
@@ -144,7 +121,6 @@ enum SettingGate: Hashable {
         case .setting, .anyOf: return []
         case .runtime(let condition): return [condition]
         case .runtimeAnyOf(let conditions): return conditions
-        case .anyOfMixed(_, let conditions): return conditions
         }
     }
 }

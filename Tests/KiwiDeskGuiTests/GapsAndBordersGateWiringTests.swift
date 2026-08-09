@@ -29,6 +29,12 @@ struct GapsAndBordersGateWiringTests {
         )
     }
 
+    private func squashed(_ source: String) -> String {
+        SourceScan.stripComments(source)
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+    }
+
     /// EACH gate's own resolver call, not a file-level "touches
     /// the resolver somewhere". A file with two gates (Focus
     /// border's block + glow) would satisfy a file check while one
@@ -38,14 +44,6 @@ struct GapsAndBordersGateWiringTests {
     /// deliberately ungated, so it is not a consumer.
     @Test("each gate is wired to the resolver, not a copy")
     func rowsConsultTheResolver() throws {
-        // Whitespace-free source, so a needle survives the
-        // formatter wrapping a `gates.inertReason(for:)` call
-        // across lines.
-        func squashed(_ name: String) throws -> String {
-            SourceScan.stripComments(try read(name))
-                .split(whereSeparator: \.isWhitespace)
-                .joined()
-        }
         let consults: [String: [String]] = [
             "GapsEditor.swift": [
                 "gates.inertReason(for:.gaps(.outer))",
@@ -54,20 +52,18 @@ struct GapsAndBordersGateWiringTests {
             "FocusBorderEditor.swift": [
                 "gates.containerReason(for:.focusBorder)",
                 "gates.inertReason(for:.borders(.borderGlowSize))",
-                "gates.inertReason(for:.borders(.borderCorner))",
             ],
             "DragVisualsEditor.swift": [
                 "gates.inertReason(for:.borders(.dragGhostBorder))",
                 "gates.inertReason("
-                    + "for:.borders(.dragGhostBorderWidth))",
-                "gates.inertReason("
                     + "for:.borders(.dragDropZoneBorder))",
-                "gates.inertReason("
-                    + "for:.borders(.dragDropZoneBorderWidth))",
             ],
         ]
         for (name, needles) in consults {
-            let source = try squashed(name)
+            // Whitespace-free source, so a needle survives the
+            // formatter wrapping a `gates.inertReason(for:)`
+            // call across lines.
+            let source = squashed(try read(name))
             for needle in needles {
                 #expect(
                     source.contains(needle),
@@ -98,9 +94,7 @@ struct GapsAndBordersGateWiringTests {
         for key in [
             "border.controls.disabled",
             "border.glow_size.disabled",
-            "border.link_width.disabled",
             "drag.disabled.help",
-            "drag.border.off_help",
             "gaps.mixed.help",
         ] {
             #expect(
@@ -120,53 +114,59 @@ struct GapsAndBordersGateWiringTests {
         }
     }
 
-    /// The one-width link (#754), keyed on the sites that USE
-    /// the answer rather than on the properties that compute it.
-    /// A `cornerReason` nobody wraps a `GreyOut` in, or a link
-    /// toggle bound to `borderWidthLinked` without going through
-    /// the setter that persists it and syncs the followers, both
-    /// satisfy every consult needle above while shipping the
-    /// feature dead — the Monitors lesson (gui.md).
-    @Test("the width link is wired at its use sites")
-    func widthLinkIsWiredWhereItActs() throws {
-        func squashed(_ name: String) throws -> String {
-            SourceScan.stripComments(try read(name))
-                .split(whereSeparator: \.isWhitespace)
-                .joined()
-        }
-        let uses: [String: [String]] = [
-            // The follower rows' dim, per row.
-            "FocusBorderEditor.swift": [
-                "GreyOut(active:cornerReason!=nil,"
-            ],
-            "DragVisualsEditor.swift": [
-                "GreyOut(active:borderReason!=nil,"
-            ],
-            // The toggle writes through the model verb, and the
-            // masters are the model's fan-out bindings — a card
-            // reaching `$model.config.settings.borderStyle.width`
-            // directly would set the ring alone and leave the two
-            // greyed sliders lying.
-            "BordersCard.swift": [
-                "isOn:linked",
-                "model.setBorderWidthLinked($0)",
-                "value:model.borderWidthMaster,",
-                "value:model.borderCornerMaster,",
-            ],
-        ]
-        for (name, needles) in uses {
-            let source = try squashed(name)
-            for needle in needles {
-                #expect(
-                    source.contains(needle),
-                    Comment(
-                        rawValue:
-                            "\(name) no longer uses `\(needle)` — "
-                            + "the width link resolves and then "
-                            + "changes nothing on screen"
-                    )
+    /// The two shared masters (#754), keyed on the sites that
+    /// USE them rather than on the model properties that build
+    /// them. A card reaching
+    /// `$model.config.settings.borderStyle.width` directly, or
+    /// `style.cornerStyle` for the picker, would set the ring
+    /// alone — every stroke the card claims to drive would keep
+    /// its old value, and no gate, census or parity guard above
+    /// can see that (the Monitors lesson, gui.md).
+    @Test("the shared masters are wired at their use sites")
+    func mastersAreWiredWhereTheyAct() throws {
+        let source = squashed(try read("BordersCard.swift"))
+        for needle in [
+            "value:model.borderWidthMaster,",
+            "selection:model.borderCornersMaster,",
+        ] {
+            #expect(
+                source.contains(needle),
+                Comment(
+                    rawValue:
+                        "BordersCard no longer uses `\(needle)` — "
+                        + "the master writes one stroke and the "
+                        + "other two silently keep their own"
                 )
-            }
+            )
         }
+    }
+
+    /// The card is MOUNTED, not merely declared. Every guard
+    /// around it is satisfied by `BordersCard.swift` existing:
+    /// the catalog site scan finds `.bordersCard` referenced
+    /// inside that very file, the census parity reads the order
+    /// list, and the area is bespoke so no render suite walks
+    /// it. Delete the one line in the section and the whole
+    /// surface — the page's only width and corner controls —
+    /// goes off screen with the suite green.
+    @Test("the shared card is mounted on the page")
+    func theCardIsMounted() throws {
+        let section = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "GapsAndBordersSection.swift"
+            )
+        let source = squashed(
+            try String(contentsOf: section, encoding: .utf8)
+        )
+        #expect(
+            source.contains("BordersCard(model:model)"),
+            Comment(
+                rawValue:
+                    "GapsAndBordersSection no longer mounts "
+                    + "BordersCard — the page has no width or "
+                    + "corner control at all"
+            )
+        )
     }
 }

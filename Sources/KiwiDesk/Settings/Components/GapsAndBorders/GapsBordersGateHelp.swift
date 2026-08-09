@@ -33,17 +33,6 @@ enum GapsBordersGateHelp {
                 "drag.disabled.help",
                 "Turn on Enabled to edit this visual."
             )
-        case .visualBorderOff:
-            return L(
-                "drag.border.off_help",
-                "Turn on Border to edit its width."
-            )
-        case .widthLinked:
-            return L(
-                "border.link_width.disabled",
-                "Turn off Use one width for all borders to "
-                    + "set this separately."
-            )
         case .gapsDiffer:
             return L(
                 "gaps.mixed.help",

@@ -22,8 +22,13 @@ struct GapsAndBordersSection: View {
         ScrollView {
             // Focus border leads the drag visuals since #754:
             // the ring is the stroke seen all day, and it is the
-            // one the other two match. The Borders card sits
-            // above all three because it holds what they share.
+            // one the other two match. `BordersCard` sits above
+            // all three because it holds what they share — and
+            // `GapsAndBordersCensusRenderTests` pins that every
+            // one of these five is mounted here, this line
+            // included: each editor declares its own card, so a
+            // deleted mount takes the whole surface off screen
+            // with every other guard still green.
             VStack(alignment: .leading, spacing: 20) {
                 GapsEditor(model: model)
                 BordersCard(model: model)

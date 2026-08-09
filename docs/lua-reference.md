@@ -2326,10 +2326,20 @@ you drag, KiwiDesk shows two visuals:
   window a drop would swap with.
 
 Each visual has an on/off switch plus an independently toggle-able
-border and fill with configurable colors and width. Alignment is
-Lua-only and defaults to `outside` for both, matching the focus
-ring; the Settings app's Borders card can drive all three strokes
-off one width instead.
+border and fill with configurable colors and width.
+
+**Per stroke, these are Lua-only.** The Settings app asks the
+width and the corner shape once, for the focus ring and both
+drag visuals together, so it offers no per-visual width, no
+per-visual alignment and no numeric radius — see
+[design decisions](design-decisions.md) for why the decision is
+removed rather than switched off. Everything below stays
+settable per stroke and is never clamped against its twin;
+what it costs is that touching the shared **Width** or
+**Corners** control overwrites all three at once.
+
+Alignment defaults to `outside` for both, matching the focus
+ring's outset.
 
 ### drag.set_ghost_enabled
 
@@ -2359,7 +2369,9 @@ drag.set_ghost_border(true)
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border width of the ghost.
+**Does:** sets the border width of the ghost. Lua-only per
+stroke: the Settings app's shared **Width** writes this, the
+drop zone's and the focus ring's together.
 
 **Example:**
 
@@ -2371,11 +2383,10 @@ drag.set_ghost_border_width(5)
 
 **Expects:** `"inside"` or `"outside"` (default `"outside"`).
 
-**Does:** positions the border inside or outside the slot boundary.
-Lua-only: the Settings app offers no control for it, since the
-focus ring has no alignment concept and a control for two of the
-three strokes could not be made symmetric. Set per stroke, and
-never clamped against its twin.
+**Does:** positions the border inside or outside the slot
+boundary. Lua-only — the Settings app offers no control for it
+at all, the focus ring having no alignment concept to share
+(see [design decisions](design-decisions.md)).
 
 **Example:**
 
@@ -2451,7 +2462,9 @@ drag.set_drop_zone_border(true)
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border width of the drop zone.
+**Does:** sets the border width of the drop zone. Lua-only per
+stroke: the Settings app's shared **Width** writes this, the
+ghost's and the focus ring's together.
 
 **Example:**
 
@@ -2516,7 +2529,13 @@ drag.set_drop_zone_fill_color("#C2790A40")
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the corner rounding of both visuals (default 16).
+**Does:** sets the corner rounding of both visuals (default 16,
+the system window radius). The full range is Lua-only: the
+Settings app offers **Square** / **Rounded**, which writes 0 or
+that default and sets the focus ring's corner style to match.
+It READS any value above zero as Rounded, so a radius set here
+is displayed rather than overwritten — until a segment is
+picked, which writes the pair.
 
 **Example:**
 

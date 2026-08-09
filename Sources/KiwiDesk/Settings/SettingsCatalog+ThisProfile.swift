@@ -153,10 +153,15 @@ struct GapsAndBordersControls: Sendable {
         "Per-axis…",
         children: GapAxisControls()
     )
-    /// The shared-decisions card (#754). Titled for all three
-    /// strokes it drives, not for any one of them — the Focus
-    /// border card keeps `border.title` beneath it.
-    let bordersCard = SettingsControl("borders.title", "Borders")
+    /// The shared-decisions card (#754). Titled for what it
+    /// DECIDES, not for the thing it decides about: a bare
+    /// "Borders" reads as a fourth section competing with the
+    /// two that draw the strokes, and sits one letter from the
+    /// `border.*` family whose own title is "Focus border".
+    let bordersCard = SettingsControl(
+        "border.shared.title",
+        "Shared by all borders"
+    )
     let dragCard = SettingsControl("drag.title", "Drag & drop")
     let dragGhost = SettingsControl("drag.ghost", "Ghost")
     let dragDropZone = SettingsControl(
