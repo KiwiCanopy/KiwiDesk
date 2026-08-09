@@ -24,20 +24,33 @@ struct HomeCardGapsTile: View {
     var body: some View {
         let outer = settings.gapsGlobal.outer
         let inner = settings.gapsGlobal.inner
-        VStack(spacing: mini(inner.vertical)) {
-            HStack(spacing: mini(inner.horizontal)) {
-                pane(focused: true)
-                pane(focused: false)
+        // The four windows live inside an implied 16:10 SCREEN
+        // centred in the plate, not stretched to its edges
+        // (owner, 2026-08-09) — the outer-gap readouts inset
+        // from the screen outline, air on all sides beyond it.
+        ZStack {
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(
+                    palette?.frame
+                        ?? Color.secondary.opacity(0.3)
+                )
+            VStack(spacing: mini(inner.vertical)) {
+                HStack(spacing: mini(inner.horizontal)) {
+                    pane(focused: true)
+                    pane(focused: false)
+                }
+                HStack(spacing: mini(inner.horizontal)) {
+                    pane(focused: false)
+                    pane(focused: false)
+                }
             }
-            HStack(spacing: mini(inner.horizontal)) {
-                pane(focused: false)
-                pane(focused: false)
-            }
+            .padding(.top, 2 + mini(outer.top))
+            .padding(.bottom, 2 + mini(outer.bottom))
+            .padding(.leading, 2 + mini(outer.left))
+            .padding(.trailing, 2 + mini(outer.right))
         }
-        .padding(.top, mini(outer.top))
-        .padding(.bottom, mini(outer.bottom))
-        .padding(.leading, mini(outer.left))
-        .padding(.trailing, mini(outer.right))
+        .aspectRatio(16.0 / 10.0, contentMode: .fit)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func mini(_ real: CGFloat) -> CGFloat {

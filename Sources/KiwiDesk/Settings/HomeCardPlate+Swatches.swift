@@ -72,7 +72,10 @@ struct HomeCardSwatchGridTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
 
-    private static let cell = CGSize(width: 34, height: 26)
+    // Landscape ~2:1 cells (owner, 2026-08-09): swatches read
+    // longer than tall, spread with breathing room to every
+    // side rather than squares crowding the centre.
+    private static let cell = CGSize(width: 46, height: 23)
 
     var body: some View {
         let hexes = self.hexes
