@@ -119,7 +119,18 @@ struct SettingsLabelNeutralityTests {
     /// it by hand belongs on the seal instead.
     @Test("direct neutralisations are enumerated")
     func directNeutralisationsAreEnumerated() throws {
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        let sources = try SourceScan.swiftSources(under: settingsDir)
+        // An entry for a file the scan cannot find is dead-green:
+        // the loop below only visits files that exist, so a
+        // renamed file would keep its declaration while the
+        // breadcrumb it covers goes unwatched.
+        for name in neutralisedDirectly.keys {
+            _ = try #require(
+                sources.first { $0.lastPathComponent == name },
+                Comment(rawValue: "no such file: \(name)")
+            )
+        }
+        for file in sources {
             let name = file.lastPathComponent
             // The definition and the seal are the mechanism, not
             // call sites; the seal's use is pinned by
