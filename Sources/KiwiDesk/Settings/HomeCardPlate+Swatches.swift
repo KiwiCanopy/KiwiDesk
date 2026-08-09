@@ -53,74 +53,74 @@ struct HomeCardColorsTile: View {
             .fill(Color(kiwiHex: hex))
             .overlay(
                 Circle().strokeBorder(
-                    (palette?.ink ?? Color.white).opacity(0.2)
+                    (palette?.ink ?? SettingsTheme.plateInk)
+                        .opacity(0.2)
                 )
             )
             .frame(width: size, height: size)
     }
 }
 
-/// The Advanced Colours answer as a picture: a grid of the
-/// colour surface's real values, through the same
-/// `ColorPaletteKeys` order the palette bridge reads, capped by
-/// the same census-derived count the subtitle states
-/// (`HomeCardContent.advancedColourCount`) so the grid and its
-/// caption cannot answer from two sources.
+/// The Advanced Colours answer as a picture: the prototype's
+/// 4×2 grid, drawn from the REAL paths whose shipped defaults
+/// are the prototype's own hexes (owner, 2026-08-09 — the
+/// curated eight over the surface's first eight, which were
+/// all App Bar values and half duplicates; the full ~24 would
+/// be too many). Fixed square-ish cells, centred — infinity
+/// cells stretched to bars at the grid's wide step.
 struct HomeCardSwatchGridTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
 
-    private static let columns = 4
-    private static let rows = 2
+    private static let cell = CGSize(width: 34, height: 26)
 
     var body: some View {
-        // One extract per render of this one tile — the surface
-        // read the bridge reads, not per-card work
-        // (`PaletteShelf.liveColors` lesson: never per row).
-        let values = ColorPaletteKeys.extract(from: settings)
-        let shown = ColorPaletteKeys.all
-            .compactMap { values[$0] }
-            .prefix(
-                min(
-                    Self.columns * Self.rows,
-                    HomeCardContent.advancedColourCount
-                )
-            )
+        let hexes = self.hexes
         VStack(spacing: 5) {
-            ForEach(0..<Self.rows, id: \.self) { row in
-                HStack(spacing: 5) {
-                    ForEach(
-                        0..<Self.columns,
-                        id: \.self
-                    ) { column in
-                        cell(
-                            Array(shown),
-                            index: row * Self.columns + column
-                        )
-                    }
-                }
-            }
+            row(Array(hexes[0..<4]))
+            row(Array(hexes[4..<8]))
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    @ViewBuilder
-    private func cell(
-        _ shown: [String],
-        index: Int
-    ) -> some View {
-        if index < shown.count {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color(kiwiHex: shown[index]))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(
-                            (palette?.ink ?? Color.white)
-                                .opacity(0.2)
-                        )
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            Color.clear
+    /// Eight voices across the families the area edits — bars,
+    /// borders, badges — one value each, no duplicates under
+    /// the defaults.
+    private var hexes: [String] {
+        [
+            settings.spaceBarStyle.activeItemColor,
+            settings.appBarStyle.hoverFillColor,
+            settings.spaceBarStyle.focusedItemColor,
+            settings.appBarStyle.itemColor,
+            settings.spaceBarStyle.fillColor,
+            settings.borderStyle.focusedColor,
+            settings.spaceBarStyle.groupBadgeColor,
+            settings.spaceBarStyle.itemColor,
+        ]
+    }
+
+    private func row(_ hexes: [String]) -> some View {
+        HStack(spacing: 5) {
+            ForEach(
+                Array(hexes.enumerated()),
+                id: \.offset
+            ) { _, hex in
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(kiwiHex: hex))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(
+                                (palette?.ink
+                                    ?? SettingsTheme
+                                    .plateInk)
+                                    .opacity(0.2)
+                            )
+                    )
+                    .frame(
+                        width: Self.cell.width,
+                        height: Self.cell.height
+                    )
+            }
         }
     }
 }

@@ -6,11 +6,9 @@ import SwiftUI
 /// draft in the user's palette (4g — brand describes the app,
 /// profile colours describe the desktop). The plate sits ABOVE
 /// the title and bleeds to the card's edges; the card's own
-/// border and corner clip are its visible edge. Behaviour stays
-/// plateless pending an owner ruling — its prototype pictogram
-/// derives from no data — and the whole-app cards never plate:
-/// their previews are data rows (`HomeCardPreview`), not
-/// desktops.
+/// border and corner clip are its visible edge. The whole-app
+/// cards never plate: their previews are data rows
+/// (`HomeCardPreview`), not desktops.
 @MainActor
 enum HomeCardPlate {
     /// The card's plate, or nil for the plateless cards — ONE
@@ -42,25 +40,39 @@ enum HomeCardPlate {
                 HomeCardColorsTile(settings: settings)
             }
         case .layoutDefaults:
-            // G stays (owner, 2026-08-09): the engine-backed
-            // schematic of the most-used mode, never the
-            // prototype's decorative ratio handles.
+            // The engine-backed schematic of the most-used mode
+            // (G stays), carrying the prototype's number
+            // readout — the mode's own headline value, so the
+            // tile says "settings with numbers live here"
+            // without a decorative sketch (owner, 2026-08-09).
             return tile(padding: 7, settings: settings) {
                 HomeCardSchematicBand(
                     model: model,
-                    height: SettingsTheme.plateHeight - 14
+                    height: SettingsTheme.plateHeight - 14,
+                    readout: LayoutReadout.value(
+                        for: LayoutUsage.mostUsed(
+                            in: model.config
+                        ),
+                        settings: settings
+                    )
                 )
             }
         case .monitors:
             return tile(padding: 8, settings: settings) {
                 HomeCardMonitorsTile(model: model)
             }
+        case .behavior:
+            // Owner ruled the prototype's pictogram IN
+            // (2026-08-09), made honest: the divider answers
+            // the real mouse-resize choice.
+            return tile(padding: 11, settings: settings) {
+                HomeCardBehaviorTile(settings: settings)
+            }
         case .advancedColors:
             return tile(padding: 11, settings: settings) {
                 HomeCardSwatchGridTile(settings: settings)
             }
-        case .behavior, .shortcuts, .profiles, .appRules,
-            .general:
+        case .shortcuts, .profiles, .appRules, .general:
             return nil
         }
     }
@@ -101,82 +113,179 @@ enum HomeCardPlate {
     /// light ink, and the plate itself the opaque base under
     /// piles. Read off the style structs directly — cheap field
     /// reads, never `ColorPaletteKeys.extract` per card (the
-    /// `PaletteShelf.liveColors` lesson).
+    /// `PaletteShelf.liveColors` lesson). Each colour passes
+    /// the legibility floor first: the plate is KiwiDesk's
+    /// fixed ground, so a user colour that sinks into it —
+    /// legible on the user's own bar, invisible here — swaps
+    /// for a theme fallback rather than drawing dark-on-dark
+    /// (ui-designer, 2026-08-09).
     private static func palette(
         _ settings: TilingSettings
     ) -> SchematicPalette {
-        SchematicPalette(
-            accent: Color(
-                kiwiHex: settings.spaceBarStyle.activeItemColor
-            ),
-            ink: Color(
-                kiwiHex: settings.appBarStyle.itemColor
-            ),
+        let accent = settings.spaceBarStyle.activeItemColor
+        let ink = settings.appBarStyle.itemColor
+        return SchematicPalette(
+            accent: plateLegible(accent)
+                ? Color(kiwiHex: accent)
+                : SettingsTheme.accent,
+            ink: plateLegible(ink)
+                ? Color(kiwiHex: ink)
+                : SettingsTheme.plateInk,
             base: SettingsTheme.previewPlate
+        )
+    }
+
+    /// The plate's own weighted luminance — `previewPlate`'s
+    /// `0x12251A`, restated as arithmetic so the floor below
+    /// can composite translucent user colours against it.
+    private static let plateLuminance =
+        0.2126 * (0x12 / 255.0)
+        + 0.7152 * (0x25 / 255.0)
+        + 0.0722 * (0x1A / 255.0)
+
+    /// Whether a user hex can be seen on the plate at all: its
+    /// alpha-composited weighted luminance must sit a floor's
+    /// width from the plate's own, in either direction — a
+    /// near-plate dark and a translucent wisp both fail.
+    /// Internal so `HomeCardChromeTests` can pin the floor with
+    /// the palettes that motivated it.
+    static func plateLegible(_ hex: String) -> Bool {
+        guard let c = rgba(hex) else { return false }
+        let lum =
+            0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        let effective =
+            c.a * lum + (1 - c.a) * plateLuminance
+        return abs(effective - plateLuminance) >= 0.15
+    }
+
+    private static func rgba(
+        _ hex: String
+    ) -> (r: Double, g: Double, b: Double, a: Double)? {
+        var s = hex.trimmingCharacters(in: .whitespaces)
+        if s.hasPrefix("#") { s.removeFirst() }
+        guard s.count == 6 || s.count == 8,
+            let v = UInt64(s, radix: 16)
+        else { return nil }
+        if s.count == 6 {
+            return (
+                Double((v >> 16) & 0xFF) / 255,
+                Double((v >> 8) & 0xFF) / 255,
+                Double(v & 0xFF) / 255,
+                1
+            )
+        }
+        return (
+            Double((v >> 24) & 0xFF) / 255,
+            Double((v >> 16) & 0xFF) / 255,
+            Double((v >> 8) & 0xFF) / 255,
+            Double(v & 0xFF) / 255
         )
     }
 }
 
-/// The Spaces & Layouts picture: the Space Bar as a strip of
-/// pips — one per declared space, in the bar's own colours,
-/// only while the bar is enabled — over the most-used layout's
-/// engine-backed schematic.
+/// The Spaces & Layouts picture: a FAN of mini-desktops, one
+/// per declared space in the draft's order, the active one
+/// forward and fully exposed in the palette accent, the rest
+/// ghosted behind it (ui-designer concept round, 2026-08-09 —
+/// over the schematic band, which duplicated the Layout
+/// Defaults card's picture). The fan reuses the Monocle
+/// schematic's several-full-screens-one-current vocabulary;
+/// interiors stay blank because the app has no per-layout
+/// glyph — the schematic IS a layout's label, and a 20 pt one
+/// is the 13b class. Position, exposure, fill density and
+/// stroke weight all step, so hue never carries alone; past
+/// the cap the family's "+N" grammar says so.
 struct HomeCardSpacesTile: View {
     @ObservedObject var model: SettingsModel
+    @Environment(\.schematicPalette) private var palette
+
+    private static let card = CGSize(width: 34, height: 56)
+    private static let exposed: CGFloat = 16
+    private static let cap = 8
 
     var body: some View {
-        let style = model.config.settings.spaceBarStyle
-        VStack(spacing: 5) {
-            if style.enabled {
-                strip(style)
-            }
-            HomeCardSchematicBand(
-                model: model,
-                height: style.enabled
-                    ? SettingsTheme.plateHeight - 14 - 17
-                    : SettingsTheme.plateHeight - 14
-            )
-        }
-    }
-
-    private func strip(_ style: SpaceBarStyle) -> some View {
-        RoundedRectangle(cornerRadius: 4)
-            .fill(Color(kiwiHex: style.fillColor))
-            .frame(height: 12)
-            .overlay(
-                HStack(spacing: 3) {
-                    pips(style)
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 4)
-            )
-    }
-
-    /// One pip per space, capped where the strip stops reading
-    /// as countable; the first is the active one, as the bar
-    /// draws a fresh session.
-    private func pips(_ style: SpaceBarStyle) -> some View {
-        let count = min(max(model.config.spaces.count, 1), 6)
-        return ForEach(0..<count, id: \.self) { index in
-            RoundedRectangle(cornerRadius: 2)
-                .fill(
-                    Color(
-                        kiwiHex: index == 0
-                            ? style.activeItemColor
-                            : style.itemColor
+        let total = max(model.config.spaces.count, 1)
+        let count = min(total, Self.cap)
+        HStack(spacing: 6) {
+            fan(count)
+            if total > count {
+                Text("+\(total - count)")
+                    .font(
+                        .system(size: 9, weight: .semibold)
                     )
-                )
-                .frame(width: 9, height: 6)
+                    .monospacedDigit()
+                    .foregroundStyle(
+                        palette?.ink ?? SettingsTheme.plateInk
+                    )
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func fan(_ count: Int) -> some View {
+        ZStack(alignment: .leading) {
+            ForEach(0..<count, id: \.self) { index in
+                pane(active: index == 0)
+                    .offset(
+                        x: CGFloat(index) * Self.exposed
+                    )
+                    .zIndex(Double(-index))
+            }
+        }
+        .frame(
+            width: Self.card.width
+                + CGFloat(count - 1) * Self.exposed,
+            height: Self.card.height
+        )
+    }
+
+    private func pane(active: Bool) -> some View {
+        // Hoisted picks: the chained ternaries over optional
+        // chains blew the type-checker's budget inline (the
+        // shallow-body rule's CI-only failure class).
+        let base: Color =
+            palette?.base ?? SettingsTheme.previewPlate
+        let fill: Color =
+            active
+            ? palette?.fill ?? LayoutSchematic.fill
+            : palette?.ghostFill ?? Color.secondary.opacity(0.15)
+        let stroke: Color =
+            active
+            ? palette?.stroke ?? LayoutSchematic.stroke
+            : palette?.ghostStroke
+                ?? Color.secondary.opacity(0.5)
+        // Opaque base first: the ghosts overlap, and
+        // translucent fills would sum where they do (the
+        // #712 compounding trap).
+        return RoundedRectangle(cornerRadius: 5)
+            .fill(base)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5).fill(fill)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(
+                        stroke,
+                        lineWidth: active ? 1.5 : 1
+                    )
+            )
+            .frame(
+                width: Self.card.width,
+                height: Self.card.height
+            )
     }
 }
 
 /// The most-used layout's schematic, scaled from its fixed
 /// `.tile` canvas into a plate band — scaled, never cropped
-/// (the 13b picture-drawn-invisible class).
+/// (the 13b picture-drawn-invisible class) — with the mode's
+/// headline value as a mono readout in the plate's corner when
+/// the caller passes one (the Layout Defaults card).
 struct HomeCardSchematicBand: View {
     @ObservedObject var model: SettingsModel
     let height: CGFloat
+    var readout: String?
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         let factor = height / SchematicScale.tile.height
@@ -188,5 +297,53 @@ struct HomeCardSchematicBand: View {
         )
         .scaleEffect(factor)
         .frame(height: height)
+        .overlay(alignment: .bottomLeading) {
+            if let readout {
+                Text(readout)
+                    .font(
+                        .system(
+                            size: 8,
+                            weight: .semibold,
+                            design: .monospaced
+                        )
+                    )
+                    .foregroundStyle(
+                        palette?.accent ?? SettingsTheme.accent
+                    )
+            }
+        }
+    }
+}
+
+/// The most-used mode's headline number — the value its own
+/// editor leads with, formatted as the editor formats it. A
+/// tile carrying a number it cannot explain still tells the
+/// truth: the number is the draft's, and the area it opens
+/// shows the control it belongs to.
+enum LayoutReadout {
+    static func value(
+        for mode: LayoutMode,
+        settings: TilingSettings
+    ) -> String {
+        switch mode {
+        case .bsp:
+            return String(
+                format: "%.2f · %.2f",
+                settings.bsp.splitRatioH,
+                1 - settings.bsp.splitRatioH
+            )
+        case .stack:
+            return String(
+                format: "%.2f",
+                settings.stack.masterRatio
+            )
+        case .grid:
+            return "\(settings.grid.columns)×"
+                + "\(settings.grid.rows)"
+        case .track:
+            return "\(settings.track.limit)"
+        default:
+            return "\(Int(settings.minWindowSize)) pt"
+        }
     }
 }

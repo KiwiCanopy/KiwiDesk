@@ -66,6 +66,17 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// The plate's own light ink — the fallback the palette fold
+    /// swaps in when the USER's ink or accent sinks into
+    /// `previewPlate` (a legal palette: Lua is open, and a
+    /// light-styled bar carries a dark ink that is legible on
+    /// its own fill and invisible on this fixed dark ground).
+    /// Identical in both modes for the plate's own reason.
+    static let plateInk = token(
+        light: 0xEA_F3_EE,
+        dark: 0xEA_F3_EE
+    )
+
     // MARK: - Borders
 
     /// Every container border: card, section, header underline,
@@ -294,7 +305,11 @@ enum SettingsTheme {
     /// they are NOT part of living in `MonitorCardChips`.
     static let monitorStandScale: CGFloat = 0.52
     static let monitorStandMin: CGFloat = 44
-    static let monitorStandMax: CGFloat = 230
+    // 230 → 320 (owner, 2026-08-09): on a wide single-display
+    // card the old cap cut the foot to well under half the
+    // screen while the Home tile — unclamped shares — kept the
+    // full relation, and the two pictures of one desk disagreed.
+    static let monitorStandMax: CGFloat = 320
     static let monitorNeckScale: CGFloat = 0.26
     static let monitorNeckMin: CGFloat = 14
     static let monitorNeckMax: CGFloat = 44

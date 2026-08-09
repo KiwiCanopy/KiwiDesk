@@ -65,6 +65,12 @@ struct SettingsThemeTokenTests {
             SettingsTheme.previewPlate
         ),
         Pin(
+            "plateInk",
+            0xEA_F3_EE,
+            0xEA_F3_EE,
+            SettingsTheme.plateInk
+        ),
+        Pin(
             "hairline",
             0xE4_E9_E1,
             0x2C_33_2D,

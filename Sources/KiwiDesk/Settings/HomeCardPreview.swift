@@ -68,8 +68,7 @@ enum HomeCardPreview {
                             .fill(
                                 summary.isDefault
                                     ? SettingsTheme.ink
-                                    : Color.primary
-                                        .opacity(0.07)
+                                    : SettingsTheme.sunken
                             )
                     )
             }
@@ -83,12 +82,12 @@ enum HomeCardPreview {
     private static func overflowChip(_ count: Int) -> some View {
         Text("+\(count)")
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink2)
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
             .background(
                 Capsule()
-                    .strokeBorder(Color.primary.opacity(0.2))
+                    .strokeBorder(SettingsTheme.hairline)
             )
     }
 
@@ -121,7 +120,7 @@ enum HomeCardPreview {
                 well {
                     Text("+\(overflow)")
                         .font(.system(size: 9))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(SettingsTheme.ink2)
                 }
             }
         }
@@ -155,7 +154,9 @@ enum HomeCardPreview {
 
     /// The first few default-layer combos as native key caps,
     /// through the same glyph pipeline the recorder displays
-    /// with.
+    /// with — the prototype's cut: small semibold mono on the
+    /// sunken chip fill, no stroke ring (owner, 2026-08-09:
+    /// "softer, smaller, sleeker").
     @ViewBuilder
     private static func keyCaps(
         _ model: SettingsModel
@@ -170,22 +171,17 @@ enum HomeCardPreview {
                 Text(capText(combo))
                     .font(
                         .system(
-                            size: 11,
-                            weight: .medium,
-                            design: .rounded
+                            size: 10.5,
+                            weight: .semibold,
+                            design: .monospaced
                         )
                     )
-                    .padding(.horizontal, 6)
+                    .foregroundStyle(SettingsTheme.ink)
+                    .padding(.horizontal, 7)
                     .padding(.vertical, 3)
                     .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.primary.opacity(0.08))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(
-                                Color.primary.opacity(0.15)
-                            )
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(SettingsTheme.sunken)
                     )
             }
         }

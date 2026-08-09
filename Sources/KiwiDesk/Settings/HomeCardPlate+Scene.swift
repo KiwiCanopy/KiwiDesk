@@ -2,17 +2,21 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The scene tiles of the Home card plates (#786): Gaps &
-/// Borders, Bars and Monitors. Split from `HomeCardPlate.swift`
-/// at the file-size target; the container, palette and dispatch
-/// stay there.
+/// Borders and Bars. Split from `HomeCardPlate.swift` at the
+/// file-size target — Monitors and Behaviour sit in
+/// `HomeCardPlate+Desk.swift` — and the container, palette and
+/// dispatch stay there.
 
-/// Two panes whose spacing IS the answer: the gap between them
-/// reads the inner gap, the insets to the plate edge the outer
-/// gaps — each through `GapPreviewScale.mini`, the same maths
-/// the Gaps editor teaches with — and the focused pane's stroke
-/// reads the border width through `FocusBorderPreview`'s 1–20 →
-/// 1–7 remap, in the border's own colour. Deliberately not a
-/// layout preview, like the diagram it echoes.
+/// The editor's own four-window picture on the plate (owner,
+/// 2026-08-09 — over the two-pane cut): a 2×2 grid whose
+/// spacing IS the answer — the seams read the inner gaps, the
+/// insets to the plate edge the outer gaps, each through
+/// `GapPreviewScale.mini`, the same maths the Gaps editor
+/// teaches with — and the borders highlighted: the focused
+/// window ringed in the real border colour at
+/// `FocusBorderPreview`'s 1–20 → 1–7 remap, its neighbours
+/// ringed only while unfocused borders are on. Deliberately not
+/// a layout preview, like the diagram it echoes.
 struct HomeCardGapsTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
@@ -20,9 +24,15 @@ struct HomeCardGapsTile: View {
     var body: some View {
         let outer = settings.gapsGlobal.outer
         let inner = settings.gapsGlobal.inner
-        HStack(spacing: mini(inner.horizontal)) {
-            pane(focused: true)
-            pane(focused: false)
+        VStack(spacing: mini(inner.vertical)) {
+            HStack(spacing: mini(inner.horizontal)) {
+                pane(focused: true)
+                pane(focused: false)
+            }
+            HStack(spacing: mini(inner.horizontal)) {
+                pane(focused: false)
+                pane(focused: false)
+            }
         }
         .padding(.top, mini(outer.top))
         .padding(.bottom, mini(outer.bottom))
@@ -40,7 +50,7 @@ struct HomeCardGapsTile: View {
         let ringed =
             border.enabled
             && (focused || border.unfocusedEnabled)
-        RoundedRectangle(cornerRadius: 6)
+        RoundedRectangle(cornerRadius: 4)
             .fill(
                 focused
                     ? palette?.fill ?? LayoutSchematic.fill
@@ -49,7 +59,7 @@ struct HomeCardGapsTile: View {
             )
             .overlay {
                 if ringed {
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 4)
                         .strokeBorder(
                             Color(
                                 kiwiHex: focused
@@ -73,13 +83,25 @@ struct HomeCardGapsTile: View {
     }
 }
 
-/// The Bars picture: each enabled bar as a plate on its own
-/// edge in its own fill, the desktop well between them. The
-/// edge-most bar on a shared edge is the Space Bar, matching
-/// `SpaceBarPreviewStrip`'s coexistence order.
+/// The Bars picture: each bar the desktop actually shows, as a
+/// plate on its own edge in its own fill, the desktop well
+/// between them. The edge-most bar on a shared edge is the
+/// Space Bar, matching `SpaceBarPreviewStrip`'s coexistence
+/// order. Every plate wears the well's hairline — the DEFAULT
+/// fill composites into the plate, the 13b invisible class
+/// (ui-designer, 2026-08-09).
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
+
+    /// The App Bar is shown per LAYOUT; whether any layout
+    /// shows one is `BarsGates`' own block predicate, consulted
+    /// rather than re-derived (the resolver rule) — a card that
+    /// drew the bar anyway would assert a bar the desktop never
+    /// shows.
+    private var appBarShown: Bool {
+        BarsGates(settings: settings).anyBarShown
+    }
 
     var body: some View {
         HStack(spacing: 3) {
@@ -159,7 +181,7 @@ struct HomeCardBarsTile: View {
         vertical: Bool = false
     ) -> some View {
         let style = settings.appBarStyle
-        if style.edge == edge {
+        if appBarShown, style.edge == edge {
             barPlate(
                 fill: style.fillColor,
                 items: [
@@ -178,6 +200,14 @@ struct HomeCardBarsTile: View {
     ) -> some View {
         RoundedRectangle(cornerRadius: 5)
             .fill(Color(kiwiHex: fill))
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .strokeBorder(
+                        palette?.frame
+                            ?? SettingsTheme.plateInk
+                            .opacity(0.3)
+                    )
+            )
             .frame(
                 width: vertical ? 16 : nil,
                 height: vertical ? nil : 16
@@ -215,115 +245,6 @@ struct HomeCardBarsTile: View {
                 content()
                 Spacer(minLength: 0)
             }
-        }
-    }
-}
-
-/// The Monitors picture, small: the real display set through
-/// the one arrangement maths (`MonitorArrangement.layout`,
-/// chip-less), each display on a stand derived from the #758
-/// share tokens — shares only; the point clamps belong to the
-/// area picture's card sizes — with the main display in the
-/// palette accent carrying two window pips.
-struct HomeCardMonitorsTile: View {
-    @ObservedObject var model: SettingsModel
-    @Environment(\.schematicPalette) private var palette
-
-    /// The mini stand band under each display card.
-    private static let standBand: CGFloat = 8
-
-    var body: some View {
-        let mainID = PositionalDisplays.liveMainID
-        GeometryReader { proxy in
-            let layout = MonitorArrangement.layout(
-                displays: model.displays,
-                mainID: mainID,
-                canvas: proxy.size,
-                hostsChips: false
-            )
-            ForEach(layout.displays) { drawn in
-                display(
-                    drawn,
-                    main: drawn.display.id == mainID
-                )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func display(
-        _ drawn: MonitorArrangement.Drawn,
-        main: Bool
-    ) -> some View {
-        let rect = drawn.rect
-        let cardHeight = max(rect.height - Self.standBand, 6)
-        let stroke =
-            main
-            ? palette?.accent ?? SettingsTheme.accent
-            : palette?.ghostStroke
-                ?? Color.secondary.opacity(0.6)
-        VStack(spacing: 0) {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(
-                    main
-                        ? palette?.fill ?? LayoutSchematic.fill
-                        : palette?.ghostFill
-                            ?? Color.primary.opacity(0.05)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 3)
-                        .strokeBorder(
-                            stroke,
-                            lineWidth: main ? 2 : 1.5
-                        )
-                )
-                .overlay {
-                    if main {
-                        pips
-                    }
-                }
-                .frame(height: cardHeight)
-            neck(width: rect.width)
-        }
-        .frame(width: rect.width)
-        .offset(x: rect.minX, y: rect.minY)
-    }
-
-    /// Stand shares from the #758 tokens, unclamped: the mini
-    /// display is far below `monitorStandMin`, where the floor
-    /// would draw a plinth wider than the screen.
-    private func neck(width: CGFloat) -> some View {
-        let foot = width * SettingsTheme.monitorStandScale
-        return VStack(spacing: 0) {
-            Rectangle()
-                .fill(
-                    palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
-                )
-                .frame(
-                    width: foot * SettingsTheme.monitorNeckScale,
-                    height: 5
-                )
-            Capsule()
-                .fill(
-                    palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
-                )
-                .frame(width: foot, height: 3)
-        }
-    }
-
-    private var pips: some View {
-        HStack(spacing: 3) {
-            RoundedRectangle(cornerRadius: 2)
-                .fill(palette?.accent ?? SettingsTheme.accent)
-                .frame(width: 8, height: 8)
-            RoundedRectangle(cornerRadius: 2)
-                .fill(
-                    palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
-                )
-                .frame(width: 8, height: 8)
         }
     }
 }
