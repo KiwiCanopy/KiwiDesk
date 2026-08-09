@@ -20,7 +20,9 @@ import Foundation
 /// are the argument here (see `docs/design-decisions.md`), so
 /// there must be exactly one place that computes them.
 enum ColorVision {
-    /// The separation floor, shared by both guards.
+    /// The separation floor every CVD guard measures
+    /// against — a suite asserting on this quantity reads it
+    /// here rather than restating the number.
     ///
     /// One number on purpose, and the structural reason comes
     /// first: **the two families share hexes.** The drop-zone

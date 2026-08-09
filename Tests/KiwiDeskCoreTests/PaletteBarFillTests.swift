@@ -10,9 +10,12 @@ import Testing
 /// from 40% to 85% — switching palette changed how legible the
 /// App Bar and Space Bar were, over any wallpaper. The shipped
 /// alpha lives HERE rather than in prose (it is the one number
-/// #755 chose), and every other bar fill in the tree is derived
+/// #755 chose), and every bar fill THIS SUITE reaches is derived
 /// from it rather than restated: a palette that retunes its own
 /// fill reds, and so does a change to either shipped default.
+/// Scoped honestly — `docs/lua-reference.md` also states the hex,
+/// legitimately, a reference doc's contract being the default
+/// value itself, and nothing scans docs.
 ///
 /// Scope is the bar fill alone. Item, hover, badge and border
 /// alphas are each their own decision — `space_bar.item_color`

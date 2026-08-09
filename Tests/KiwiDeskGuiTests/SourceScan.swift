@@ -26,10 +26,14 @@ enum SourceScan {
     /// String literals are skipped so a brace or paren inside
     /// one cannot unbalance the walk.
     ///
-    /// Known limits, all of which fail **shut** (a false red,
-    /// never a silent pass): `"""` multiline literals and raw
-    /// string delimiters desync the quote skip. No source in
-    /// the scanned trees uses either shape today.
+    /// The literal skip is `literalEnd`'s, not a second one of
+    /// its own: this file used to carry two walkers, and the
+    /// inline copy handled neither `"""` nor `#"…"#` while
+    /// claiming the trees used neither shape — six files in
+    /// `Sources/KiwiDeskCore` do, and the bounds-routing guards
+    /// walk that tree. Two walkers in the file `tests.md`
+    /// ratifies precisely against divergent walkers is the harm
+    /// arriving inside its own exception.
     static func balanced(
         _ text: [Character],
         from cursor: inout Int,
@@ -42,14 +46,12 @@ enum SourceScan {
         var depth = 0
         let start = i + 1
         while i < text.count {
+            if let end = literalEnd(text, from: i) {
+                i = end
+                continue
+            }
             let character = text[i]
-            if character == "\"" {
-                i += 1
-                while i < text.count, text[i] != "\"" {
-                    if text[i] == "\\" { i += 1 }
-                    i += 1
-                }
-            } else if character == open {
+            if character == open {
                 depth += 1
             } else if character == close {
                 depth -= 1
@@ -102,47 +104,44 @@ enum SourceScan {
     /// survives verbatim — because a scan handed less source
     /// than it thinks cannot red on its own.
     static func stripComments(_ source: String) -> String {
-        let lined =
-            source
-            .split(
-                separator: "\n",
-                omittingEmptySubsequences: false
-            )
-            .map { line -> Substring in
-                if let slash = line.range(of: "//") {
-                    return line[..<slash.lowerBound]
-                }
-                return line
-            }
-            .joined(separator: "\n")
-        return stripBlockComments(lined)
+        stripped(Array(source))
     }
 
-    /// Removes each `/* … */` span, keeping the newlines inside
-    /// it so line-based consumers still count lines correctly.
+    /// ONE walk for both comment shapes, tracking string
+    /// literals as it goes — and the single pass is the point,
+    /// not a tidy-up.
     ///
-    /// **Skips string literals**, and that is the whole reason
-    /// this is a character walk rather than a `range(of:)` loop.
-    /// A naive walk truncated three suites in `Tests/` the day it
-    /// landed — `entry.hasSuffix("/**")`,
-    /// `"Sources/KiwiDeskCore/*"` and `#""$LOCALES"/*.json"#` each
-    /// open a block comment that never closes — and one of them
-    /// was this file, whose own `"/*"` and `"*/"` literals blanked
-    /// 146 characters of the function you are reading. A
-    /// forbidding or counting scan cannot red for having read
-    /// less, so all of it was silent.
+    /// Two defects came out of doing it in two passes. A naive
+    /// block pass truncated three suites in `Tests/` at an
+    /// unterminated `/*` inside a literal —
+    /// `entry.hasSuffix("/**")` and two others, one of them this
+    /// file, whose own `"/*"` and `"*/"` literals blanked 146
+    /// characters of the function you are reading. Making only
+    /// the block half literal-aware then left a subtler one: a
+    /// line pass that cuts `"https://…"` at the `//` strands the
+    /// opening quote, which INVERTS literal-vs-code parity for
+    /// every paired quote after it — so the walk copied real code
+    /// verbatim, stripping nothing, through most of five suites
+    /// (`LinkedCaptionHitTests` at 151 of 281 insertion points).
+    /// A scan cannot red for having been handed source with the
+    /// comments still in it any more than for having been handed
+    /// less.
     ///
     /// Spans **nest**, as they do in Swift, so
     /// `/* outer /* inner */ tail */` leaves nothing behind
-    /// rather than stranding `tail */` for a needle to match.
-    /// An unterminated `/*` outside a literal takes the rest of
-    /// the file, which is what the compiler does with it too.
-    private static func stripBlockComments(
-        _ source: String
-    ) -> String {
+    /// rather than stranding `tail */` for a needle to match. A
+    /// `//` inside a span is already gone with the span; an
+    /// unterminated `/*` outside a literal takes the rest of the
+    /// file, which is what the compiler does with it too.
+    ///
+    /// Newlines are always emitted, inside a span or a line
+    /// comment alike, so the stripped form stays line-for-line
+    /// aligned with the source — `SourceScanCommentTests`
+    /// compares the two by index, which is only exact because of
+    /// that.
+    private static func stripped(_ text: [Character]) -> String {
         var out = ""
         var depth = 0
-        let text = Array(source)
         var i = 0
         while i < text.count {
             if depth == 0, let end = literalEnd(text, from: i) {
@@ -160,8 +159,10 @@ enum SourceScan {
                 i += 2
                 continue
             }
-            // Newlines inside a span are kept so a line-based
-            // consumer still counts the file's real lines.
+            if depth == 0, matches(text, at: i, lineComment) {
+                while i < text.count, text[i] != "\n" { i += 1 }
+                continue
+            }
             if depth == 0 || text[i] == "\n" {
                 out.append(text[i])
             }
@@ -174,7 +175,18 @@ enum SourceScan {
     /// nil when nothing starts there. Handles the three shapes
     /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
     /// the raw `#"…"#` — because each of them can legally carry a
-    /// `/*` that is not a comment.
+    /// `/*` that is not a comment, and it is the ONE literal
+    /// walker in this file: `balanced` and `stripped` both route
+    /// here.
+    ///
+    /// Residue, stated because it fails OPEN: an interpolation
+    /// carrying a nested literal (`"\(dict["k"])"`) desyncs the
+    /// quote pairing, so a `/* … */` inside the desynced region
+    /// is copied unstripped — the defect the block half exists
+    /// to close, in a narrow window. Nothing in either tree
+    /// writes that shape today; handling it means tracking
+    /// `\(` … `)` depth inside a literal, which is the next
+    /// widening rather than this one.
     private static func literalEnd(
         _ text: [Character],
         from i: Int
@@ -250,6 +262,7 @@ enum SourceScan {
         return true
     }
 
+    private static let lineComment: [Character] = ["/", "/"]
     private static let openSpan: [Character] = ["/", "*"]
     private static let closeSpan: [Character] = ["*", "/"]
     private static let rawQuote: [Character] = ["#", "\""]

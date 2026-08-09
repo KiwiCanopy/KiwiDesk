@@ -97,6 +97,67 @@ struct SettingsThemeMetricTests {
             )
         )
         #expect(Set(wired.keys).isDisjoint(with: deferred.keys))
+        // The parse keys on a SPELLING, so a metric declared
+        // `static var … : CGFloat { }` or typed `Double` would
+        // sit outside the net while looking listed. Tie it to
+        // the file's own census: every `CGFloat` in this file is
+        // either one of these declarations or one of `srgb`'s
+        // three parameters.
+        let mentions =
+            source.components(separatedBy: "CGFloat")
+            .count - 1
+        #expect(
+            mentions == declared.count + 3,
+            Comment(
+                rawValue:
+                    "\(mentions) CGFloat mentions against "
+                    + "\(declared.count) parsed declarations — a "
+                    + "metric is declared in a shape this parse "
+                    + "cannot see"
+            )
+        )
+    }
+
+    /// A metric named for another plus a STATE suffix is half of
+    /// a pair, and a pair is the shape whose whole point is that
+    /// the two weights stay apart — so some suite has to name
+    /// both together. That is the strong claim this net defers,
+    /// and deferring it to "the area will write one" is how a
+    /// third area lists a stroke pair here, points at its view,
+    /// and writes no chrome suite at all. The four radii carry no
+    /// state suffix and correctly escape.
+    @Test("a state-suffixed metric pair is guarded together")
+    func metricPairsAreGuardedTogether() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let suites = try SourceScan.swiftSources(
+            under: root.appendingPathComponent("Tests")
+        )
+        .map {
+            SourceScan.stripComments(
+                (try? String(contentsOf: $0, encoding: .utf8))
+                    ?? ""
+            )
+        }
+        #expect(suites.count > 100)
+        for metric in wired.keys {
+            guard
+                let base = wired.keys.first(where: {
+                    $0 != metric && metric.hasPrefix($0)
+                })
+            else { continue }
+            #expect(
+                suites.contains {
+                    $0.contains("SettingsTheme.\(metric)")
+                        && $0.contains("SettingsTheme.\(base)")
+                },
+                Comment(
+                    rawValue:
+                        "no suite names both \(base) and "
+                        + "\(metric) — the pair's two weights "
+                        + "can drift together unseen"
+                )
+            )
+        }
     }
 
     @Test("every wired metric is drawn by the file that claims it")

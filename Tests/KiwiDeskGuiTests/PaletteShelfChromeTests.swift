@@ -197,17 +197,31 @@ struct PaletteShelfChromeTests {
         // `.foregroundStyle(.secondary)` is idiomatic, was
         // shipping on two rows of this very file, and the guard
         // was green over its own violation.
-        for file in [
-            "PaletteShelf.swift", "PaletteShelf+Popovers.swift",
-            "PaletteTile.swift", "PaletteSceneThumbnail.swift",
-        ] {
-            let source = try squashed(file)
+        // A LENS over the shelf's own files, not a list of
+        // them: this suite's own commit had to edit the
+        // hand-listed version when the popovers split out, which
+        // is the drift a list guarantees. Scoped to `Palette*`
+        // rather than the whole directory because the rule is
+        // about THIS ancestor — the card — and Advanced Colours'
+        // rows next door are entitled to their own inks.
+        let files = try SourceScan.swiftSources(under: colorsDir)
+            .filter {
+                $0.lastPathComponent.hasPrefix("Palette")
+            }
+        #expect(files.count > 3)
+        for file in files {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
             for ink in [".secondary", ".tertiary"] {
                 #expect(
                     !source.contains(ink),
                     Comment(
                         rawValue:
-                            "\(file) paints with `\(ink)`, which "
+                            "\(file.lastPathComponent) paints "
+                            + "with `\(ink)`, which "
                             + "is derived from the enclosing "
                             + "foreground — the card is now that "
                             + "enclosure"

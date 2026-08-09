@@ -65,12 +65,18 @@ struct SourceScanCommentTests {
         #expect(!stripped.contains("swallowed()"))
     }
 
-    /// Files that legitimately carry a `/* … */` span, and whose
-    /// interior lines the stripper is therefore SUPPOSED to
-    /// remove. Empty, and the emptiness is the point: the repo
-    /// writes `//`. A file joining this list is opting out of the
-    /// check below, so it needs a reason.
-    private let usesBlockComments: Set<String> = []
+    /// Repo-relative path → why this file's interior lines may
+    /// legitimately vanish: it carries a real `/* … */` span, so
+    /// the lines inside it are SUPPOSED to be removed and the
+    /// check below cannot tell them from a truncation.
+    ///
+    /// Empty, and the emptiness is the point — the repo writes
+    /// `//`. Keyed on the path rather than the file name because
+    /// two trees are scanned and names repeat across them
+    /// (`TestCore.swift` exists in both); carrying a reason
+    /// rather than being a bare set because an exemption whose
+    /// grounds are gone should read as one.
+    private let usesBlockComments: [String: String] = [:]
 
     /// The canary, and the reason this suite is not three unit
     /// tests: a scan handed less source than it thinks cannot go
@@ -97,22 +103,31 @@ struct SourceScanCommentTests {
                 under: root.appendingPathComponent(tree)
             )
             for file in files
-            where !usesBlockComments.contains(
-                file.lastPathComponent
-            ) {
+            where usesBlockComments[
+                relativePath(of: file, from: root)
+            ] == nil {
                 let source = try String(
                     contentsOf: file,
                     encoding: .utf8
                 )
-                // Membership over the stripped file's own
-                // lines: a substring search per line turned this
-                // into a 20-second suite over 1165 files.
-                let kept = Set(
-                    SourceScan.stripComments(source)
-                        .split(separator: "\n")
+                // BY INDEX, not by membership. The stripper
+                // emits every newline, so the two forms stay
+                // line-for-line aligned — and a set lookup would
+                // miss a dropped line whose text recurs in the
+                // file, which 38% of lines do (`}`, `)`).
+                let kept = SourceScan.stripComments(source)
+                    .split(
+                        separator: "\n",
+                        omittingEmptySubsequences: false
+                    )
+                let original = source.split(
+                    separator: "\n",
+                    omittingEmptySubsequences: false
                 )
-                for line in source.split(separator: "\n")
-                where !line.contains("//")
+                #expect(kept.count == original.count)
+                for (index, line) in original.enumerated()
+                where index < kept.count
+                    && !line.contains("//")
                     && !line.contains("/*")
                     && !line.contains("*/")
                     && !line.trimmingCharacters(
@@ -123,7 +138,7 @@ struct SourceScanCommentTests {
                         in: .whitespaces
                     )
                     #expect(
-                        kept.contains(line),
+                        kept[index] == line,
                         Comment(
                             rawValue:
                                 "\(file.lastPathComponent) lost "
@@ -139,5 +154,17 @@ struct SourceScanCommentTests {
         // than throwing, so a scan of nothing would pass here
         // exactly as it does in every other consumer (#635).
         #expect(scanned > 300)
+        for (path, reason) in usesBlockComments {
+            #expect(!reason.isEmpty, Comment(rawValue: path))
+        }
+    }
+
+    private func relativePath(of file: URL, from root: URL)
+        -> String
+    {
+        file.path.replacingOccurrences(
+            of: root.path + "/",
+            with: ""
+        )
     }
 }

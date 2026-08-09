@@ -156,7 +156,14 @@ enum SettingsTheme {
     // arithmetic (the Monitors picture's capacity maths owns
     // its own), while pure chrome — strokes, radii, stands,
     // things nothing computes on — lives here with the radii so
-    // one restyle is one file.
+    // one restyle is one file. "Beside" means the same FILE as
+    // the arithmetic: a number declared on a view a file away
+    // from what derives with it is indistinguishable at review
+    // time from a number dodging the net, so it belongs here.
+    // `PaletteSceneThumbnail.plateRadius` is the one that sits
+    // outside on purpose — the thumbnail scales it by its own
+    // `scale`, which is arithmetic in that file, and the tile's
+    // inset derives FROM it.
     //
     // The colour tokens' totality guard cannot see these: it
     // parses `= token(` (`SettingsThemeTokenTests`,
