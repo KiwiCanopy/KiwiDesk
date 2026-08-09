@@ -10,6 +10,13 @@ import SwiftUI
 /// that sets one stored value beside a view is a place for a
 /// second copy to disagree about which strokes the card owns.
 /// The card renders these; nothing else writes the followers.
+///
+/// Which stored leaves each one writes is also declared as
+/// DATA, in `SettingKey.masterWrites`, because the
+/// unsaved-changes count has to attribute those leaves to one
+/// row. That is a second copy of the same fact, so
+/// `BorderMastersFanOutTests` writes each master and compares
+/// the leaves that actually moved against the declaration.
 extension SettingsModel {
     /// The width every stroke takes. Writing it writes all
     /// three stored widths — there is no per-stroke width row
@@ -29,36 +36,47 @@ extension SettingsModel {
         )
     }
 
-    /// Square or Rounded, for all three strokes at once.
+    /// Square or Rounded, for all three strokes at once — or
+    /// NOTHING selected, while the two stored halves disagree.
     ///
-    /// The two halves are stored differently — the ring carries
-    /// a two-value `cornerStyle`, the drag pair a 0–40 pt
-    /// radius — so the master READS the radius and WRITES both.
-    /// Reading the radius rather than the ring's own style is
-    /// what lets a Lua-set 7 pt display as Rounded instead of
-    /// as a picker with no segment selected, and the write is
-    /// the only thing that ever normalises it: the getter never
-    /// stores, so a radius the user did not open this card to
-    /// change survives untouched. Picking a segment — including
-    /// re-picking the one already shown — writes the pair, so a
-    /// 7 pt radius becomes the system radius at that moment and
-    /// not before.
+    /// The halves are stored differently: the ring carries a
+    /// two-value `cornerStyle`, the drag pair a 0–40 pt radius.
+    /// A Lua call can move one without the other, and the
+    /// picker then sits directly above a ring preview drawing
+    /// the answer it does not show. So the selection is
+    /// OPTIONAL and `GapsBordersGates.agreedCornerStyle` is the
+    /// one predicate that resolves it: nil when the halves
+    /// disagree, which `SegmentedPicker` renders as no segment
+    /// selected. Making the preview read this master instead
+    /// was the alternative and is worse — the preview would
+    /// then stop showing what the app draws.
     ///
-    /// Rounded is the system window radius, which is also
-    /// `dragCornerRadius`'s own default, so the shipped config
-    /// already reads as Rounded without this ever writing.
-    var borderCornersMaster: Binding<BorderStyle.CornerStyle> {
+    /// **The getter never stores, and a pick is idempotent.**
+    /// A 7 pt radius under a rounded ring reads as Rounded and
+    /// STAYS 7 pt, re-picking Rounded included: Rounded writes
+    /// the system radius only where there is no rounding to
+    /// keep. Re-affirming a segment must change nothing, or the
+    /// "opening this page rewrites nothing" promise lasts only
+    /// until a stray tap — which is likelier than a deliberate
+    /// one. Square is the one shape with a single radius, so it
+    /// writes 0 outright.
+    var borderCornersMaster: Binding<BorderStyle.CornerStyle?> {
         Binding(
             get: {
-                self.config.settings.dragCornerRadius > 0
-                    ? .rounded : .square
+                GapsBordersGates(
+                    settings: self.config.settings
+                ).agreedCornerStyle
             },
             set: { style in
+                guard let style else { return }
                 var next = self.config.settings
                 next.borderStyle.cornerStyle = style
-                next.dragCornerRadius =
-                    style == .rounded
-                    ? GeometryUtils.systemWindowCornerRadius : 0
+                if style == .square {
+                    next.dragCornerRadius = 0
+                } else if next.dragCornerRadius <= 0 {
+                    next.dragCornerRadius =
+                        GeometryUtils.systemWindowCornerRadius
+                }
                 self.config.settings = next
             }
         )

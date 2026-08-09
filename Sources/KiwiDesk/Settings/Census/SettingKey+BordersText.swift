@@ -18,12 +18,15 @@ extension BordersKey {
             return .text("border.unfocused_enabled")
         case .borderUnfocusedColor:
             return .text("border.color.unfocused")
-        case .borderWidth:
+        // The Borders card's two rows. Each is a master over
+        // several stored leaves, none of which names a row —
+        // `settings.borderStyle.width` and `.cornerStyle` fall
+        // through to the surfaceless group below with the drag
+        // pair's, because the card asks about all of them at
+        // once and about none of them individually.
+        case .borderWidthMaster:
             return .text("border.width")
-        // The Square/Rounded picker in the Borders card. It is
-        // what actually renders for BOTH corner settings, so
-        // `dragCornerRadius` names no row of its own below.
-        case .borderCorner:
+        case .borderCornerMaster:
             return .text("border.corner_style")
         case .borderGlow:
             return .text("border.glow")
@@ -51,11 +54,14 @@ extension BordersKey {
         // page either.
         case .dragGhostBorderColor, .dragDropZoneBorderColor:
             return .text("drag.border")
-        case .dragGhostBorderWidth, .dragDropZoneBorderWidth,
+        case .borderWidth, .borderCorner,
+            .dragGhostBorderWidth, .dragDropZoneBorderWidth,
             .dragGhostBorderAlignment,
             .dragDropZoneBorderAlignment,
             .dragCornerRadius:
-            // GUI_REMOVED_2026-08 — surfaceless, so no label.
+            // Surfaceless, so no label — either written by a
+            // master row that carries the label, or (the two
+            // alignments) untouched by the GUI at all.
             return .none
         case .dragGhostFill, .dragDropZoneFill:
             return .text("drag.fill")

@@ -35,12 +35,13 @@ enum GapsBordersRowOrder {
     ]
 
     /// The width master, then the Square/Rounded corner master.
-    /// `borderCorner` is the corner row for BOTH corner
-    /// settings — the drag pair's numeric radius left the GUI in
-    /// #754 and names no row.
+    /// Each is a `(master)` row over several stored leaves and
+    /// none of those leaves names a row of its own — the ring's
+    /// width and corner style included, since #754 asks about
+    /// all three strokes at once or not at all.
     static let borders: [SettingKey] = [
-        .borders(.borderWidth),
-        .borders(.borderCorner),
+        .borders(.borderWidthMaster),
+        .borders(.borderCornerMaster),
     ]
 
     /// The enable toggle first (it owns the container gate),

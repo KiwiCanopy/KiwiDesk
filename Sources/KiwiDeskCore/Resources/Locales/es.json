@@ -157,6 +157,7 @@
   "border.glow_size.auto": "Tamaño de resplandor automático",
   "border.glow_size.disabled": "Activa Efecto de resplandor para ajustar su tamaño.",
   "border.shared.caption": "El borde de foco, la silueta y la zona de destino son trazos que KiwiDesk dibuja alrededor de una ventana.",
+  "border.shared.differ.help": "Ahora mismo los tres trazos están configurados de forma distinta; lo que elijas aquí se aplica a los tres.",
   "border.shared.title": "Común a todos los bordes",
   "border.title": "Borde de foco",
   "border.unfocused_color.a11y": "Color del borde de las ventanas sin foco",

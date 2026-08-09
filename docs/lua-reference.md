@@ -2531,11 +2531,16 @@ drag.set_drop_zone_fill_color("#C2790A40")
 
 **Does:** sets the corner rounding of both visuals (default 16,
 the system window radius). The full range is Lua-only: the
-Settings app offers **Square** / **Rounded**, which writes 0 or
-that default and sets the focus ring's corner style to match.
+Settings app offers **Square** / **Rounded**, which writes this
+and the focus ring's corner style together.
+
 It READS any value above zero as Rounded, so a radius set here
-is displayed rather than overwritten — until a segment is
-picked, which writes the pair.
+is displayed rather than overwritten, and **re-picking Rounded
+leaves it alone** — that segment writes the system radius only
+from 0, where there is no rounding to keep. Square writes 0,
+being the one shape with a single radius. Set this to disagree
+with `border.set_corner_style` and the picker shows no segment
+selected until you choose one.
 
 **Example:**
 
@@ -2649,6 +2654,13 @@ border.set_unfocused_color("#8E8E93CC")
 radius; `square` draws sharp corners — seamless on windows that
 are already square (some Electron/utility windows), an intentional
 squared frame on rounded ones.
+
+The Settings app's shared **Corners** control writes this and
+`drag.set_corner_radius` together, and reads both back. Set one
+here that disagrees with the radius — a square ring over a
+rounded drag pair, or the reverse — and the picker shows **no
+segment selected** rather than picking a side; either segment
+then sets both. Nothing rewrites the pair until you do.
 
 **Example:**
 

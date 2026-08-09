@@ -64,8 +64,16 @@ struct DragVisualsEditor: View {
     }
 
     /// One self-contained column: preview leads, its controls
-    /// below, on the narrowed Drag label axis (#231) so the
-    /// half-width slider keeps real travel.
+    /// below.
+    ///
+    /// It no longer narrows the label axis (#231's
+    /// `dragColumnLabelColumn`, pushed in through the
+    /// environment). That existed so a half-width column could
+    /// still hold a slider with real travel, and #754 took the
+    /// last slider out — what remains is toggles, which draw
+    /// their own labels and never read the axis. The metric
+    /// itself stays: Advanced Colours' twin drag columns pass
+    /// it directly as `labelWidth:`.
     private func column(
         control: SettingsControl,
         caption: String,
@@ -92,17 +100,12 @@ struct DragVisualsEditor: View {
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .environment(
-            \.settingsLabelColumn,
-            SettingsMetrics.dragColumnLabelColumn
-        )
     }
 }
 
 /// The border + fill switches shared by ghost and drop zone —
 /// whether each part is drawn at all, which is the one question
-/// only this column can answer. All rows read the narrowed Drag
-/// label axis from the environment. The two COLOUR rows left in
+/// only this column can answer. The two COLOUR rows left in
 /// #678 Phase 3 for Advanced Colours; the border WIDTH left in
 /// #754 for the shared master, which is why Border no longer
 /// gates anything below it here.

@@ -157,6 +157,7 @@
   "border.glow_size.auto": "Tamanho do brilho automático",
   "border.glow_size.disabled": "Ative Efeito de brilho para ajustar seu tamanho.",
   "border.shared.caption": "A borda de foco, a silhueta e a zona de destino são traços que o KiwiDesk desenha ao redor de uma janela.",
+  "border.shared.differ.help": "Os três traços estão configurados de formas diferentes agora; o que você escolher aqui vale para os três.",
   "border.shared.title": "Comum a todas as bordas",
   "border.title": "Borda de foco",
   "border.unfocused_color.a11y": "Cor da borda das janelas fora de foco",

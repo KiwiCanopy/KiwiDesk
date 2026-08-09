@@ -108,7 +108,10 @@ enum SettingTier: Hashable {
     /// before that; it is NOT a `.showMore` row, and reading it
     /// as one hides a user's own configuration from them.
     case immediate
-    /// Reachable only from Lua (`init.lua`), by design.
+    /// No row of its own — reachable from Lua (`init.lua`) by
+    /// design. The tier is about the ROW, not about who may
+    /// write the value; `SettingPlacement.luaOnly` carries the
+    /// carve-out a master row creates.
     case luaOnly
     /// App-internal storage (picker recents) — no surface.
     case internalOnly
@@ -181,6 +184,16 @@ struct SettingPlacement: Hashable {
     /// it stays live while the App Bar editor greys).
     var exemptFromContainerGate = false
 
+    /// No Settings surface of its own — which is NOT the same
+    /// as "the GUI never writes it". A MASTER row is one
+    /// control over several stored leaves, and those leaves
+    /// have no row: the shared Width and Corners controls
+    /// overwrite five of them on every edit (#754), and a
+    /// reader who took `.luaOnly` to mean untouched could
+    /// retune or drop one and break the control silently. So
+    /// read this as "nothing in the GUI asks about this value
+    /// on its own", and take `SettingKey.masterWrites` as the
+    /// register of which leaves a master writes anyway.
     static let luaOnly = SettingPlacement(
         area: nil,
         container: nil,

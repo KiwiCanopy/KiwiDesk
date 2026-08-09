@@ -7,8 +7,8 @@ import Testing
 ///
 /// As in General the promise is the WEAKER one: every container
 /// here is a bespoke view (the gap drawers, the Borders card's
-/// link and its two masters, the ring preview and its auto-gated
-/// glow, the sticky toggle, the two drag columns), so the order
+/// two masters, the ring preview and its auto-gated glow, the
+/// sticky toggle, the two drag columns), so the order
 /// lists record membership for the placement table and search
 /// without driving anything on screen. How many there are is
 /// `GapsBordersRowOrder.byContainer`, which

@@ -157,6 +157,7 @@
   "border.glow_size.auto": "Dimensione alone automatica",
   "border.glow_size.disabled": "Attiva Effetto alone per modificare la sua dimensione.",
   "border.shared.caption": "Il bordo di focus, la sagoma e la zona di rilascio sono tratti che KiwiDesk disegna attorno a una finestra.",
+  "border.shared.differ.help": "I tre tratti sono impostati in modo diverso al momento; quello che scegli qui vale per tutti e tre.",
   "border.shared.title": "Comune a tutti i bordi",
   "border.title": "Bordo di focus",
   "border.unfocused_color.a11y": "Colore del bordo delle finestre non attive",

@@ -157,6 +157,7 @@
   "border.glow_size.auto": "자동 글로우 크기",
   "border.glow_size.disabled": "크기를 조절하려면 글로우 효과를 켜십시오.",
   "border.shared.caption": "포커스 테두리, 고스트, 놓을 위치는 KiwiDesk가 윈도우 주위에 그리는 선입니다.",
+  "border.shared.differ.help": "현재 세 선의 설정이 서로 다릅니다. 여기서 선택하면 세 선 모두에 적용됩니다.",
   "border.shared.title": "모든 테두리 공통",
   "border.title": "포커스 테두리",
   "border.unfocused_color.a11y": "포커스되지 않은 윈도우의 테두리 색상",

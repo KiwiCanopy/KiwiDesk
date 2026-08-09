@@ -888,11 +888,20 @@ wants, so the page does not offer it.
 The drag overlays' radius is a number underneath
 (`drag.set_corner_radius`), and the picker reads any value
 above zero as **Rounded**. So a radius you set from Lua — 7 pt,
-say — shows as Rounded and *stays* 7 pt: opening this page
-never rewrites it. Picking a segment is what writes, and it
-writes the full pair, so choosing Rounded on a 7 pt config
-moves it to the system radius. Pick a segment only when you
-mean to.
+say — shows as Rounded and *stays* 7 pt, including if you tap
+Rounded again: opening this page, or re-affirming what it
+already shows, never rewrites anything. Rounded writes the
+system radius only when there is no rounding to keep; Square
+writes none at all, being the one shape with a single radius.
+
+If the two halves disagree — a square focus ring over rounded
+drag overlays, which only a Lua call can produce — **neither
+segment is selected**. Nothing is broken and nothing is
+hidden: the strokes really are set two ways, and the picker
+says so rather than picking a side. Both rows also show a
+**?** while any of the three strokes are set differently,
+reminding you that choosing here sets all three. Tap either
+segment to bring them back together.
 
 Each stroke's own width, its alignment (whether it is laid
 *inside* or *outside* its slot edge — the ring has no such

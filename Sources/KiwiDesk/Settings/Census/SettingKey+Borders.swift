@@ -10,6 +10,13 @@
 /// alignments, both per-stroke widths, and the drag pair's
 /// numeric corner radius. Every one of those Lua verbs stays
 /// open and unclamped.
+///
+/// The two card rows are their own `(master)` cases, the shape
+/// the gaps masters already use: a master is one control over
+/// several stored leaves, so naming it after any ONE of them
+/// tells a census reader that the others are untouched when the
+/// row overwrites them on every edit. Which leaves each writes
+/// is `SettingKey.masterWrites`.
 
 enum BordersKey: String, CaseIterable, Hashable {
     case borderEnabled = "settings.borderStyle.enabled"
@@ -18,6 +25,9 @@ enum BordersKey: String, CaseIterable, Hashable {
     case borderUnfocusedColor = "settings.borderStyle.unfocusedColor"
     case borderWidth = "settings.borderStyle.width"
     case borderCorner = "settings.borderStyle.cornerStyle"
+    case borderWidthMaster = "settings.borderStyle.width (master)"
+    case borderCornerMaster =
+        "settings.borderStyle.cornerStyle (master)"
     case borderGlow = "settings.borderStyle.glow"
     case borderGlowSizeAuto = "settings.borderStyle.glowSize (auto)"
     case borderGlowSize = "settings.borderStyle.glowSize"
@@ -63,7 +73,7 @@ extension BordersKey {
         // the ring going off must not grey a control the drag
         // visuals read. Both draw as lead controls of the card
         // with no disclosure over them, hence `.atRest`.
-        case .borderWidth, .borderCorner:
+        case .borderWidthMaster, .borderCornerMaster:
             return .row(.gapsAndBorders, .borders, .atRest)
         case .borderFitGapsExtraSpacing:
             // Behind Show more with the glow rows: a parameter
@@ -172,22 +182,30 @@ extension BordersKey {
                     .borders(.dragGhostFill),
                 ])
             )
-        case .dragGhostBorderAlignment,
-            .dragDropZoneBorderAlignment,
+        // Two DIFFERENT reasons for one tier, kept apart so a
+        // reader can tell them apart (see `SettingPlacement`
+        // `.luaOnly`'s carve-out). First: written by a master
+        // on every edit of it, surfaced by nothing of their
+        // own. GUI_REMOVED_2026-08 (#754) for the last three —
+        // the ring has no corner RADIUS, so collapsing a 0–40 pt
+        // slider into its two-value style rendered 1 pt and
+        // 40 pt identically, and a per-stroke width row would
+        // undo the card above it. `SettingKey.masterWrites` is
+        // where the writing is declared.
+        case .borderWidth, .borderCorner,
             .dragGhostBorderWidth,
             .dragDropZoneBorderWidth,
             .dragCornerRadius:
-            // GUI_REMOVED_2026-08 (#754). Each of these asks a
-            // question the Borders card already asks once for
-            // all three strokes, or one it cannot ask of all
-            // three at all: the ring has no alignment concept,
-            // and it has no corner RADIUS either — collapsing a
-            // 0–40 pt slider into its two-value corner style
-            // rendered 1 pt and 40 pt identically. The masters
-            // WRITE these values; nothing offers a second,
-            // per-stroke surface for them. All five verbs stay
-            // Lua-settable per stroke and unclamped. A
-            // surfaceless row carries no gate.
+            return .luaOnly
+        // Second: nothing in the GUI reads or writes these at
+        // all. Alignment left in #754 because the question
+        // cannot be put to all three strokes — the ring outsets
+        // and has no alignment concept — and a row covering two
+        // of three teaches the wrong model. Both verbs stay
+        // per stroke and unclamped. A surfaceless row carries
+        // no gate.
+        case .dragGhostBorderAlignment,
+            .dragDropZoneBorderAlignment:
             return .luaOnly
         case .dragDropZoneBorderColor:
             return .row(

@@ -157,6 +157,7 @@
   "border.glow_size.auto": "Automatische Leuchtgröße",
   "border.glow_size.disabled": "Aktiviere „Leuchteffekt“, um seine Größe anzupassen.",
   "border.shared.caption": "Fokus-Rahmen, Ghost und Drop-Zone sind Linien, die KiwiDesk um ein Fenster zeichnet.",
+  "border.shared.differ.help": "Die drei Linien sind gerade unterschiedlich eingestellt; eine Auswahl hier gilt für alle drei.",
   "border.shared.title": "Für alle Rahmen",
   "border.title": "Fokus-Rahmen",
   "border.unfocused_color.a11y": "Rahmenfarbe nicht fokussierter Fenster",

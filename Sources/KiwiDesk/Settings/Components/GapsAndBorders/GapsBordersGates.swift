@@ -26,6 +26,13 @@ import KiwiDeskCore
 /// inline sentence from being two decisions that can disagree
 /// (`GapsBordersGateHelp` renders it). The reason cases keep the
 /// whole resolver assertable off the main actor.
+///
+/// It answers one question that is not a gate at all —
+/// `strokesDiffer(for:)`, whether a shared master's strokes
+/// currently disagree. That lives here because the same
+/// predicates resolve the corner master's own displayed value,
+/// and a view re-deriving "differ" beside the control is the
+/// drift `inertReason` exists to prevent one row further down.
 struct GapsBordersGates {
     let settings: TilingSettings
 
@@ -105,7 +112,55 @@ struct GapsBordersGates {
     /// rather than pass silently.
     static let resolvedElsewhere: Set<SettingKey> = []
 
+    // MARK: - Shared masters
+
+    /// Whether the strokes a shared MASTER row writes disagree
+    /// with each other right now.
+    ///
+    /// Deliberately NOT an `InertReason`. The gap masters grey
+    /// on their own version of this because a per-edge drawer
+    /// sits under them to repair from; these two have none, so
+    /// greying them would state the disagreement and then
+    /// withhold the only control that ends it. They stay live
+    /// and acknowledge instead, through the row's `?`
+    /// (`GapsBordersGateHelp.strokesDiffer`) — and the corner
+    /// master additionally shows no segment selected, which is
+    /// `agreedCornerStyle` below.
+    func strokesDiffer(for key: SettingKey) -> Bool {
+        switch key {
+        case .borders(.borderWidthMaster):
+            return widthsDiffer
+        case .borders(.borderCornerMaster):
+            return agreedCornerStyle == nil
+        default:
+            return false
+        }
+    }
+
+    /// The corner shape all three strokes agree on, or nil while
+    /// the ring's two-value style and the drag pair's radius
+    /// disagree. The ONE copy of that comparison: the master
+    /// binding's getter reads it as its displayed value and
+    /// `strokesDiffer` reads it as the `?` predicate, so the
+    /// blank picker and the sentence explaining it cannot
+    /// contradict each other.
+    var agreedCornerStyle: BorderStyle.CornerStyle? {
+        let fromRadius: BorderStyle.CornerStyle =
+            settings.dragCornerRadius > 0 ? .rounded : .square
+        return settings.borderStyle.cornerStyle == fromRadius
+            ? fromRadius : nil
+    }
+
     // MARK: - Predicates
+
+    /// The three stored stroke widths, compared. The master
+    /// keeps SHOWING the ring's — a slider has no blank state a
+    /// user could act on the way an unselected segment is one.
+    private var widthsDiffer: Bool {
+        let width = settings.borderStyle.width
+        return width != settings.dragGhost.borderWidth
+            || width != settings.dragDropZone.borderWidth
+    }
 
     /// The outer master is inert while its four edges disagree —
     /// there is no single value for it to show or write.

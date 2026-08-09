@@ -3294,12 +3294,14 @@ corner radius sat full-width above both until #754, the border
 width and the alignment picker sat inside each, and all three
 now belong to the page's shared card or to Lua alone. The
 narrowing that let a half-width row hold a slider
-(`dragColumnLabelColumn`, applied through the
-`settingsLabelColumn` override) stays, and so does the
-in-group short form it was for ("Border width" → "Width", with
-the full name kept for VoiceOver through `a11yLabel`) — but
-every row that used one has now left, the colour pair for
-Advanced Colours in #678 Phase 3 and the rest in #754. Each
+(`dragColumnLabelColumn`) and the in-group short form it was
+for ("Border width" → "Width", with the full name kept for
+VoiceOver through `a11yLabel`) both moved WITH those rows: the
+last of them left this editor in #754, so it no longer pushes
+the narrow axis in through `settingsLabelColumn` at all — what
+remains there is toggles, which draw their own labels. The pair
+lives on in Advanced Colours' twin drag columns, which take the
+width as `AdvancedColorRow`'s `labelWidth:`. Each
 column's preview still draws the alignment, radius and width
 actually stored, because all three are still settable from
 Lua: schematic, not pixel-exact, and it remaps the full value
@@ -3394,21 +3396,58 @@ style from the radius (`> 0` ⇒ rounded), which is a slider
 collapsed into one bit: 1 pt and 40 pt drew an identical ring.
 A control whose range the thing it drives cannot represent is
 not a shared control, so the numeric radius left the GUI with
-the widths and the picker writes both halves — Square is a
-square ring and a 0 radius, Rounded is a rounded ring and the
-system window radius, which is also the radius's own shipped
-default.
+the widths and the picker reads AND writes both halves — Square
+is a square ring and a 0 radius, Rounded is a rounded ring and
+any radius above zero, defaulting to the system window radius,
+which is also the radius's own shipped default.
 
-**The picker READS the radius and WRITES only when a segment is
-picked**, and that asymmetry is deliberate. A profile whose
-radius Lua set to 7 pt displays as Rounded — which is what the
-drag pair actually draws there — and stays at 7 pt: the getter
-never stores, so opening the page cannot silently normalise a
-value the user never came here to change. Picking a segment,
-including re-picking the one already shown, is what writes; a
-7 pt radius becomes the system radius at that moment and not
-before. Re-deriving at load is the alternative and is worse —
-it rewrites a saved profile on the way past.
+**The picker READS both halves and WRITES only on a pick**, and
+that asymmetry is deliberate. A profile whose radius Lua set to
+7 pt displays as Rounded — which is what the drag pair actually
+draws there — and stays at 7 pt: the getter never stores, so
+opening the page cannot silently normalise a value the user
+never came here to change. Re-deriving at load is the
+alternative and is worse — it rewrites a saved profile on the
+way past.
+
+**Re-affirming a segment must change nothing.** Picking the
+segment already shown is the one interaction where the user
+named no new answer, and treating it as a write is what would
+undo the promise above: a stray tap on Rounded would move that
+7 pt radius to 16 with the same word on screen before and
+after, and the header counting a change. So Rounded writes the
+system radius only where there is no rounding to keep (a zero
+radius); Square writes 0 outright, being the one shape with a
+single radius. This is also the behaviour a segmented control
+has everywhere else on macOS — neither SwiftUI's `Picker` nor
+`NSSegmentedControl` re-fires for an unchanged selection — and
+"the GUI is ours" licenses a different LOOK, never a control
+that acts differently from its twin.
+
+**Where the halves disagree the picker shows no segment at
+all.** The two are stored separately and Lua can move either
+alone, so `border.set_corner_style("square")` against a rounded
+radius is reachable — and the Corners row sits directly above a
+focus-ring preview drawing the ring's own answer. Selecting one
+of the two would make the row contradict the picture beneath
+it; making the preview read the master instead would be worse,
+since a preview that stops showing what the app draws teaches
+the wrong thing about the app rather than about one row. So the
+control asserts neither, which its sliding pill already
+expresses by hiding, and either segment then converges both
+halves. The width row cannot do the same — a slider has no
+blank thumb — so it keeps showing the ring's width.
+
+**Both rows acknowledge a disagreement rather than greying
+on it.** The gap masters, one card up, grey when their edges
+differ, because there is no single value to show and a per-edge
+drawer sits right under them to repair from. These two have no
+per-stroke row anywhere on the page: greying them would name
+the problem and withhold the only control that ends it. So the
+acknowledgement is a `?` beside a live control — *the three
+strokes are set differently right now; choosing here sets all
+three* — which is what a master owes when it is about to
+overwrite an answer it did not show.
 
 **[Rationale]**
 

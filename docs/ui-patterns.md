@@ -971,8 +971,20 @@ was written down:
   master needed a stored pick and a runtime gate to express a
   choice nobody wanted. Where a shared control would need
   dimmed per-instance twins to explain itself, delete the twins
-  instead ([Design decisions](design-decisions.md)). A *remote*
-  control-scoped gate
+  instead ([Design decisions](design-decisions.md)). What a
+  master owes once the twins are gone is not a gate but an
+  **acknowledgement**: it is about to overwrite values a
+  config can already have set three ways, so while they
+  disagree it carries a `?` saying so ("The three strokes are
+  set differently right now; choosing here sets all three")
+  and stays live. Greying is the gap masters' answer to the
+  same state and is only available to them because a per-edge
+  drawer sits directly below to repair from; grey a master with
+  no such drawer and the page names a problem it then offers no
+  way to fix. Where the control can also show *no answer* — a
+  segmented picker whose pill hides for an unmatched value —
+  it does that too, rather than assert one of the values.
+  A *remote* control-scoped gate
   (the gating field lives on another **destination**) has no
   adjacency to answer "why", so hover text alone is not enough:
   it takes a live `?` on the nearest live label above the dimmed

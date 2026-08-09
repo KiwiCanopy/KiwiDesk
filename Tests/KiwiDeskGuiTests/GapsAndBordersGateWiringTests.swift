@@ -96,6 +96,10 @@ struct GapsAndBordersGateWiringTests {
             "border.glow_size.disabled",
             "drag.disabled.help",
             "gaps.mixed.help",
+            // Not an InertReason, same authoring rule: the
+            // masters' mixed-strokes `?` is one sentence, in
+            // the help enum, never re-typed beside the card.
+            "border.shared.differ.help",
         ] {
             #expect(
                 help.contains(key),
@@ -122,12 +126,25 @@ struct GapsAndBordersGateWiringTests {
     /// alone — every stroke the card claims to drive would keep
     /// its old value, and no gate, census or parity guard above
     /// can see that (the Monitors lesson, gui.md).
+    ///
+    /// The `?` is the same shape of hole one level down: the
+    /// mixed-strokes sentence SURFACES on a predicate, and a
+    /// resolved answer nobody passes to a control leaves
+    /// nothing behind for the resolver's own suite to find. So
+    /// both halves are needled — the consult, and the `help:`
+    /// argument that is the whole point of it.
     @Test("the shared masters are wired at their use sites")
     func mastersAreWiredWhereTheyAct() throws {
         let source = squashed(try read("BordersCard.swift"))
         for needle in [
             "value:model.borderWidthMaster,",
             "selection:model.borderCornersMaster,",
+            "gates.strokesDiffer("
+                + "for:.borders(.borderWidthMaster))",
+            "gates.strokesDiffer("
+                + "for:.borders(.borderCornerMaster))",
+            "help:widthHelp",
+            "help:cornersHelp",
         ] {
             #expect(
                 source.contains(needle),
@@ -135,22 +152,24 @@ struct GapsAndBordersGateWiringTests {
                     rawValue:
                         "BordersCard no longer uses `\(needle)` — "
                         + "the master writes one stroke and the "
-                        + "other two silently keep their own"
+                        + "other two silently keep their own, or "
+                        + "it overwrites a disagreement in silence"
                 )
             )
         }
     }
 
-    /// The card is MOUNTED, not merely declared. Every guard
-    /// around it is satisfied by `BordersCard.swift` existing:
-    /// the catalog site scan finds `.bordersCard` referenced
-    /// inside that very file, the census parity reads the order
-    /// list, and the area is bespoke so no render suite walks
-    /// it. Delete the one line in the section and the whole
-    /// surface — the page's only width and corner controls —
-    /// goes off screen with the suite green.
-    @Test("the shared card is mounted on the page")
-    func theCardIsMounted() throws {
+    /// Each editor is MOUNTED, not merely declared. Every guard
+    /// around one is satisfied by its own file existing: the
+    /// catalog site scan finds each card's control referenced
+    /// inside the very file that draws it, the census parity
+    /// reads the order lists, and the area is bespoke so no
+    /// render suite walks it. Delete one line in the section
+    /// and that whole surface goes off screen with the rest of
+    /// the suite green — which for `BordersCard` is the page's
+    /// only width and corner control.
+    @Test("every editor is mounted on the page")
+    func theEditorsAreMounted() throws {
         let section = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Sections/"
@@ -159,14 +178,22 @@ struct GapsAndBordersGateWiringTests {
         let source = squashed(
             try String(contentsOf: section, encoding: .utf8)
         )
-        #expect(
-            source.contains("BordersCard(model:model)"),
-            Comment(
-                rawValue:
-                    "GapsAndBordersSection no longer mounts "
-                    + "BordersCard — the page has no width or "
-                    + "corner control at all"
+        for editor in [
+            "GapsEditor",
+            "BordersCard",
+            "FocusBorderEditor",
+            "DragVisualsEditor",
+            "StickyMarkEditor",
+        ] {
+            #expect(
+                source.contains("\(editor)(model:model)"),
+                Comment(
+                    rawValue:
+                        "GapsAndBordersSection no longer mounts "
+                        + "\(editor) — its whole card is off "
+                        + "screen and nothing else can tell"
+                )
             )
-        )
+        }
     }
 }

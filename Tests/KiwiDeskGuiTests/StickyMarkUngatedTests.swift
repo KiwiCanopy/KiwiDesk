@@ -41,7 +41,7 @@ import Testing
 ///   `ui-patterns.md`'s own block-gate convention pushes gates
 ///   there, so it is the likely spelling, not an exotic one.
 ///   It is left to review rather than scanned because the
-///   section composes four editors and pinning its exact
+///   section composes five editors and pinning its exact
 ///   spelling would red on any reordering of them.
 /// - The needles cover the shape the gate had when it shipped
 ///   and the shape the house style would give it today (a

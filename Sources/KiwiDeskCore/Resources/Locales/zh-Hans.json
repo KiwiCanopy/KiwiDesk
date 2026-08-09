@@ -157,6 +157,7 @@
   "border.glow_size.auto": "自动发光大小",
   "border.glow_size.disabled": "若要调整其大小，请打开“发光效果”。",
   "border.shared.caption": "焦点边框、残影和放置区域都是 KiwiDesk 在窗口周围绘制的线条。",
+  "border.shared.differ.help": "目前这三条线的设置各不相同；在此处选择将同时应用于三者。",
   "border.shared.title": "所有边框通用",
   "border.title": "焦点边框",
   "border.unfocused_color.a11y": "非焦点窗口的边框颜色",
