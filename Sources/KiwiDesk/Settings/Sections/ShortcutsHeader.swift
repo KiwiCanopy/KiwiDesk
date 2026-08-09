@@ -83,8 +83,8 @@ struct ShortcutsHeader: View {
                 systemImage: "square.and.arrow.down"
             )
         }
-        // Explicitly `.bordered` rather than left to the default
-        // style: the two render alike, but only the named style
+        // Explicitly sealed rather than left to the default
+        // style: the two render alike, but only a named style
         // is visible to the guard keeping the accent off button
         // labels.
         .settingsActionButton()

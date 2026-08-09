@@ -138,7 +138,7 @@ struct LayerStripEditor: View {
                         role: .destructive,
                         action: deleteLayer
                     )
-                    .settingsActionButton()
+                    .buttonStyle(.bordered)
                 } else {
                     // O4 soft: a base layer the profile
                     // doesn't mention always survives —

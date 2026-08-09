@@ -513,13 +513,13 @@ Every surface, border and ink in the Settings tree comes from
 - **The accent marks control FILLS, never text naming a value.**
   A toggle track, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
-  neutralising modifier sealed to the style, and a guard** —
-  `.menuStyle(.borderlessButton)` → `neutralMenuLabel()`
-  (`SettingsLabelNeutralityTests`), and a `.bordered` action
-  button through `settingsActionButton()`, which pairs the
-  style with `neutralButtonLabel()` by construction (#771)
-  after per-call-site pairing shipped the same defect in a
-  second style (#759). So treat the style as the unit, not the
+  neutralisation a guard can count** — the menus pair it per
+  call site, `.menuStyle(.borderlessButton)` →
+  `neutralMenuLabel()` (`SettingsLabelNeutralityTests`), and a
+  `.bordered` action button takes `settingsActionButton()`,
+  which seals the style to `neutralButtonLabel()` by
+  construction (#771) after per-call-site pairing shipped the
+  same defect in a second style (#759). So treat the style as the unit, not the
   site: the fix is never a local recolour. A raw
   `.buttonStyle(.bordered)` is legal only in
   `SettingsBorderedSealTests`' `borderedExempt` map — the one

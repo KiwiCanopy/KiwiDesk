@@ -30,12 +30,12 @@ extension View {
     /// - `.borderedProminent` is a filled control whose accent
     ///   IS the fill; it never goes through here.
     ///
-    /// The first link is written WITHOUT a leading dot on
-    /// purpose: the guards' needles are `.buttonStyle(` and
-    /// `.buttonStyle(.bordered)`, so the seal's own use stays
-    /// out of every call-site count and is pinned by its own
-    /// assertion instead (`SettingsBorderedSealTests`'
-    /// `sealPairsStyleAndNeutralisation`).
+    /// The raw-style guard skips this file by NAME (uniqueness
+    /// pinned) — never by spelling, so writing the first link
+    /// dot-free buys no invisibility anywhere else: the needle
+    /// is dot-free too and counts both spellings. The seal's
+    /// own body is pinned by `SettingsBorderedSealTests`'
+    /// `sealPairsStyleAndNeutralisation`.
     func settingsActionButton() -> some View {
         buttonStyle(.bordered)
             .neutralButtonLabel()

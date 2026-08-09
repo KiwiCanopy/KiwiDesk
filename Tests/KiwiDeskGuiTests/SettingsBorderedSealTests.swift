@@ -22,6 +22,17 @@ import Testing
 ///
 /// Split from `SettingsLabelNeutralityTests` (the menu half and
 /// the direct-use enumeration) at the 350-line ceiling.
+///
+/// One residue is knowingly unguarded and stated so it is not
+/// mistaken for coverage: a `role: .destructive` button routed
+/// THROUGH the seal is invisible to every needle here — the
+/// role sits inside the `Button` initialiser, lines away from
+/// the modifier, so no substring count can bind the two. The
+/// seal silently suppresses such a button's system red (#770
+/// shipped exactly that on LayerStripEditor's delete, caught in
+/// #771's review); what keeps the class closed is that a
+/// destructive button styled RAW must name itself in
+/// `borderedExempt`, which is where a reviewer meets it.
 @Suite("Settings bordered seal")
 struct SettingsBorderedSealTests {
     private var settingsDir: URL {
@@ -63,6 +74,12 @@ struct SettingsBorderedSealTests {
                 1, "role: .destructive",
                 "unbind; its sibling bind button is sealed"
             ),
+            "LayerStripEditor.swift": (
+                1, "role: .destructive",
+                "delete layer; #770 shipped it sealed, which "
+                    + "suppressed the red — its sealed siblings "
+                    + "are rename and add"
+            ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
                 "resolves its own tint per state: red on a "
@@ -91,8 +108,14 @@ struct SettingsBorderedSealTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
+            // Deliberately dot-free: the substring matches BOTH
+            // spellings, so a convenience wrapper written
+            // first-in-chain inside a View extension — the shape
+            // the seal itself takes — cannot escape the count by
+            // its spelling. `.borderedProminent` never matches:
+            // the needle's closing paren excludes it.
             let styled = source.occurrences(
-                of: ".buttonStyle(.bordered)"
+                of: "buttonStyle(.bordered)"
             )
             let sealed = source.occurrences(
                 of: ".settingsActionButton()"
@@ -132,10 +155,15 @@ struct SettingsBorderedSealTests {
     @Test("the seal pairs style and neutralisation")
     func sealPairsStyleAndNeutralisation() throws {
         let sources = try SourceScan.swiftSources(under: settingsDir)
+        // Exactly one: `rawBorderedStylesAreExempt` skips the
+        // seal by NAME, so a second file with this name anywhere
+        // under Settings/ would inherit the skip unwatched.
+        let matches = sources.filter {
+            $0.lastPathComponent == Self.sealFile
+        }
+        #expect(matches.count == 1)
         let file = try #require(
-            sources.first {
-                $0.lastPathComponent == Self.sealFile
-            },
+            matches.first,
             Comment(rawValue: "no such file: \(Self.sealFile)")
         )
         let source = SourceScan.stripComments(
