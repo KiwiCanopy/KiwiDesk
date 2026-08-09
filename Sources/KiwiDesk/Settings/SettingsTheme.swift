@@ -162,6 +162,39 @@ enum SettingsTheme {
     /// beside a segmented control reads as a second control.
     static let chipRadius: CGFloat = 9
 
+    /// The Monitors picture's card stroke at rest — heavier than
+    /// the app's hairline so a display card reads as an OBJECT
+    /// on the recessed well rather than as outlined content
+    /// (#758). Selection keeps its own, still-heavier weight:
+    /// the border is the SELECTED channel, and the two weights
+    /// must stay apart or one state swallows the other.
+    static let monitorCardStroke: CGFloat = 1.5
+    static let monitorCardStrokeSelected: CGFloat = 3
+
+    /// A display card's stand: the foot as a share of the card's
+    /// width and the neck as a share of the foot, each clamped.
+    /// Long enough that the card sits ON its foot rather than
+    /// floating above a speck (#758); the clamps stop the same
+    /// shares giving a laptop thumbnail a plinth. The foot's
+    /// FLOOR stays at its pre-#758 value: on a floor-sized card
+    /// (`MonitorArrangement.minimumCard`) the raised share
+    /// alone reads as a plinth, and neighbouring floored cards'
+    /// feet fuse into one rail (ui-designer, 2026-08-09).
+    ///
+    /// These are AREA-SCOPED metrics in the app-wide theme, on
+    /// a stated boundary: a number the picture's capacity
+    /// arithmetic derives from lives beside that arithmetic in
+    /// `MonitorCardChips`; pure chrome — strokes and stands
+    /// nothing computes on — lives here with the radii. The
+    /// colour suites cannot see these, so their wiring guard is
+    /// `MonitorsChromeWiringTests`' themed-metrics test.
+    static let monitorStandScale: CGFloat = 0.52
+    static let monitorStandMin: CGFloat = 44
+    static let monitorStandMax: CGFloat = 230
+    static let monitorNeckScale: CGFloat = 0.26
+    static let monitorNeckMin: CGFloat = 14
+    static let monitorNeckMax: CGFloat = 44
+
     // MARK: - Construction
 
     /// One dynamic colour from a light/dark `0xRRGGBB` pair.

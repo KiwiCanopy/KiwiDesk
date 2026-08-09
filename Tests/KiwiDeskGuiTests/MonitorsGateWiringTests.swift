@@ -180,6 +180,25 @@ struct MonitorsGateWiringTests {
                 // needle two entries down, and the same fix.
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
+                // The main display's glow (#758). Decoration —
+                // the badge is the answer — but a decoration
+                // branch deletes as silently as any other. TWO
+                // needles: the branch, and the flatten-shadow
+                // PAIRING — a shadow without the compositing
+                // group regresses to a per-primitive halo on
+                // every glyph with the branch needle still
+                // green (architect review, 2026-08-09).
+                "isMain?SettingsTheme.accent",
+                ".compositingGroup().shadow(",
+            ],
+            "Components/Monitors/SpaceAssignmentChip.swift": [
+                // The clear-pin corner badge (#758): the overlay
+                // that mounts it, keyed on the USE site, and the
+                // glyph inside the branch — deleting either
+                // strands every pinned chip with no route back
+                // to automatic except the context menu.
+                ".overlay(alignment:.topTrailing){clearBadge}",
+                "Image(systemName:\"xmark.circle.fill\")",
             ],
             "Sections/MonitorsSection+Details.swift": [
                 // The orphan row's spoken label: its value is a
@@ -212,33 +231,9 @@ struct MonitorsGateWiringTests {
         }
     }
 
-    /// The picture asks `MonitorArrangement` for its geometry and
-    /// computes none of its own.
-    ///
-    /// This is the #702 rule one surface over: a drawing that
-    /// re-derives what a shared function owns is right the day it
-    /// is written and drifts the day the rule moves. Here the
-    /// shared function is also the only thing the geometry guards
-    /// can see — a card positioned by arithmetic inline in the
-    /// view would pass every assertion in
-    /// `MonitorArrangementTests` while drawing something else.
-    @Test("the picture asks the arrangement for its geometry")
-    func pictureAsksTheArrangement() throws {
-        let name = "Components/Monitors/MonitorsPicture.swift"
-        let source = try squashed(name)
-        #expect(source.contains("MonitorArrangement.layout("))
-        for forbidden in ["frame.minX", "frame.width", "NSScreen"] {
-            #expect(
-                !source.contains(forbidden),
-                Comment(
-                    rawValue:
-                        "\(name) reads display geometry itself "
-                        + "(`\(forbidden)`) instead of drawing "
-                        + "the arrangement it was given"
-                )
-            )
-        }
-    }
+    // The picture-asks-the-arrangement and themed-metrics
+    // guards live in `MonitorsChromeWiringTests` — split there
+    // as this suite reached the 350-line ceiling.
 
     /// The card's chip capacity comes from the shared arithmetic,
     /// so a card can never resolve "more chips than fit" by

@@ -17,8 +17,11 @@ import SwiftUI
 /// whole point of the area — was then invisible.
 ///
 /// Three states, three channels, because an opacity step on one
-/// hue separates nothing: **main** is the badge, **selected** is
-/// the border, **targeted** is a fill wash.
+/// hue separates nothing: **main** is the badge (plus an accent
+/// glow, which is decoration — the badge is the answer, since a
+/// glow is hue alone and dies under colour-vision deficiency,
+/// #758), **selected** is the border, **targeted** is a fill
+/// wash.
 struct DisplayCard: View {
     @ObservedObject var model: SettingsModel
     let display: Display
@@ -59,6 +62,22 @@ struct DisplayCard: View {
         .overlay(dropWash)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        // The main display's glow — OUTSIDE the clip, so it can
+        // spill past the card's edge onto the well. Decoration
+        // only; the header's "main" badge stays the answer
+        // (#758). The compositing group is load-bearing:
+        // `.shadow` shadows every drawing primitive separately,
+        // so without flattening first the main card's text,
+        // chips and strokes each grow their own green halo
+        // while the silhouette gets none (ui-designer,
+        // 2026-08-09).
+        .compositingGroup()
+        .shadow(
+            color: isMain
+                ? SettingsTheme.accent.opacity(0.55)
+                : .clear,
+            radius: isMain ? 6 : 0
+        )
         .contentShape(RoundedRectangle(cornerRadius: 6))
         .dropDestination(for: DraggableSpace.self) { items, _ in
             pin(items)
@@ -200,7 +219,9 @@ struct DisplayCard: View {
                     : AnyShapeStyle(
                         SettingsTheme.hairline
                     ),
-                lineWidth: isSelected ? 2 : 1
+                lineWidth: isSelected
+                    ? SettingsTheme.monitorCardStrokeSelected
+                    : SettingsTheme.monitorCardStroke
             )
     }
 

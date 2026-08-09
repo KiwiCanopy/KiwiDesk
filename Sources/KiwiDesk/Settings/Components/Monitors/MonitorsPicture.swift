@@ -104,11 +104,24 @@ struct MonitorsPicture: View {
     /// which is true of desks and false of this picture, where a
     /// single display fills the whole canvas and a 34 pt foot
     /// under a 520 pt screen reads as a speck of dirt (owner,
-    /// 2026-08-04). The clamp is what stops the same proportion
-    /// giving a laptop thumbnail a plinth.
+    /// 2026-08-04). The share, its clamp and the card stroke all
+    /// come from `SettingsTheme` (#758), which is the one copy
+    /// of the numbers.
     private func stand(cardWidth: CGFloat) -> some View {
-        let base = min(max(cardWidth * 0.38, 44), 190)
-        let neck = min(max(base * 0.26, 14), 44)
+        let base = min(
+            max(
+                cardWidth * SettingsTheme.monitorStandScale,
+                SettingsTheme.monitorStandMin
+            ),
+            SettingsTheme.monitorStandMax
+        )
+        let neck = min(
+            max(
+                base * SettingsTheme.monitorNeckScale,
+                SettingsTheme.monitorNeckMin
+            ),
+            SettingsTheme.monitorNeckMax
+        )
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(SettingsTheme.hairline)
