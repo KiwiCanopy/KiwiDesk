@@ -435,7 +435,11 @@ quiet to spot at list speed.
 **Status badges stay flat.** The thumb/pill shadow is the
 settings' vocabulary for "interactive, movable"; putting it
 on a passive `BadgeChip` would promise interaction the chip
-doesn't have. Depth comes from the hairline stroke both chip
+doesn't have. One mark sits outside both vocabularies: the
+Monitors picture's main-display card wears a soft accent
+bloom — decoration stating a fact, promising neither
+interaction nor an armed input, and always beside the
+textual "main" badge that carries the answer. Depth comes from the hairline stroke both chip
 types now share, matching the flat capsule language of
 native tags. A non-interactive value state in a control row
 (the slot size's "Default — orientation standard") renders in
@@ -829,7 +833,7 @@ search (or any later cross-reference) sends the user to a
 specific place in a pane, the pane scrolls that place's *card* to
 the top — a control landing without the heading that names it
 reads as disembodied — and its **heading** takes a brief accent
-wash: `Color.accentColor` at `0.18`, a corner-6 rounded rect
+wash: `SettingsTheme.accent` at `0.18`, a corner-6 rounded rect
 bleeding 4 pt past the content, flat for 300 ms, then eased out
 over 900 ms (`SettingsReveal` owns the numbers). Reduce Motion
 drops the cross-fade only: the wash still shows for the same

@@ -182,8 +182,14 @@ struct MonitorsGateWiringTests {
                 "overflowChip(assignments,split.overflow)",
                 // The main display's glow (#758). Decoration —
                 // the badge is the answer — but a decoration
-                // branch deletes as silently as any other.
+                // branch deletes as silently as any other. TWO
+                // needles: the branch, and the flatten-shadow
+                // PAIRING — a shadow without the compositing
+                // group regresses to a per-primitive halo on
+                // every glyph with the branch needle still
+                // green (architect review, 2026-08-09).
                 "isMain?SettingsTheme.accent",
+                ".compositingGroup().shadow(",
             ],
             "Components/Monitors/SpaceAssignmentChip.swift": [
                 // The clear-pin corner badge (#758): the overlay
@@ -225,78 +231,9 @@ struct MonitorsGateWiringTests {
         }
     }
 
-    /// The picture asks `MonitorArrangement` for its geometry and
-    /// computes none of its own.
-    ///
-    /// This is the #702 rule one surface over: a drawing that
-    /// re-derives what a shared function owns is right the day it
-    /// is written and drifts the day the rule moves. Here the
-    /// shared function is also the only thing the geometry guards
-    /// can see — a card positioned by arithmetic inline in the
-    /// view would pass every assertion in
-    /// `MonitorArrangementTests` while drawing something else.
-    @Test("the picture asks the arrangement for its geometry")
-    func pictureAsksTheArrangement() throws {
-        let name = "Components/Monitors/MonitorsPicture.swift"
-        let source = try squashed(name)
-        #expect(source.contains("MonitorArrangement.layout("))
-        for forbidden in ["frame.minX", "frame.width", "NSScreen"] {
-            #expect(
-                !source.contains(forbidden),
-                Comment(
-                    rawValue:
-                        "\(name) reads display geometry itself "
-                        + "(`\(forbidden)`) instead of drawing "
-                        + "the arrangement it was given"
-                )
-            )
-        }
-    }
-
-    /// The picture's chrome reads its numbers from
-    /// `SettingsTheme`, which is the one copy (#758) — a stand
-    /// or stroke re-hardcoded beside the drawing is the drift
-    /// the theme constants exist to end.
-    ///
-    /// The stroke needle is the WHOLE ternary: the rest-weight
-    /// name is a substring of the selected-weight name, so a
-    /// bare `monitorCardStroke` check would stay green with the
-    /// rest weight hardcoded back to a literal.
-    @Test("the chrome reads its themed metrics")
-    func chromeReadsThemedMetrics() throws {
-        let picture = try squashed(
-            "Components/Monitors/MonitorsPicture.swift"
-        )
-        for needle in [
-            "SettingsTheme.monitorStandScale",
-            "SettingsTheme.monitorStandMin",
-            "SettingsTheme.monitorStandMax",
-        ] {
-            #expect(
-                picture.contains(needle),
-                Comment(
-                    rawValue:
-                        "MonitorsPicture no longer reads "
-                        + "`\(needle)` — the stand's size went "
-                        + "inline"
-                )
-            )
-        }
-        let card = try squashed(
-            "Components/Monitors/DisplayCard.swift"
-        )
-        #expect(
-            card.contains(
-                "SettingsTheme.monitorCardStrokeSelected"
-                    + ":SettingsTheme.monitorCardStroke)"
-            ),
-            Comment(
-                rawValue:
-                    "DisplayCard's border no longer takes both "
-                    + "weights from SettingsTheme"
-            )
-        )
-    }
+    // The picture-asks-the-arrangement and themed-metrics
+    // guards live in `MonitorsChromeWiringTests` — split there
+    // as this suite reached the 350-line ceiling.
 
     /// The card's chip capacity comes from the shared arithmetic,
     /// so a card can never resolve "more chips than fit" by

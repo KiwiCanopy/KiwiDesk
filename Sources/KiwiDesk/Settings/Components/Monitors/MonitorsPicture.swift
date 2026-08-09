@@ -115,7 +115,13 @@ struct MonitorsPicture: View {
             ),
             SettingsTheme.monitorStandMax
         )
-        let neck = min(max(base * 0.26, 14), 44)
+        let neck = min(
+            max(
+                base * SettingsTheme.monitorNeckScale,
+                SettingsTheme.monitorNeckMin
+            ),
+            SettingsTheme.monitorNeckMax
+        )
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(SettingsTheme.hairline)
