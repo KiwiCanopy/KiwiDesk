@@ -33,9 +33,8 @@ struct HomeCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             // Two deliberate heights (#786): the profile group
-            // holds the plate band — Behaviour plateless but
-            // tall, so its group still reads as one row grid —
-            // and the whole-app cards sit shorter.
+            // holds the plate band and the whole-app cards sit
+            // shorter.
             .frame(
                 height: tall
                     ? SettingsTheme.cardHeight

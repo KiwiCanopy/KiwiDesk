@@ -633,10 +633,11 @@ render of the reader's real windows — is in
 are still capped for legibility with a "+N" chip.
 
 **"+N" means the same thing wherever it appears: there are N
-more, and here is how to see them.** Two surfaces use it — the
-schematics' legibility cap above, and a Monitors card too small
-to draw all its chips — and a third must not invent a
-different grammar. It counts the items NOT shown (never the
+more, and here is how to see them.** The schematics' legibility
+cap above and a Monitors card too small to draw all its chips
+set the grammar; the Home cards' overflow chips and space fan
+reuse it, and a new surface must not invent a different one. It
+counts the items NOT shown (never the
 total), it takes a slot of its own so it never claims to hide
 exactly one, and it is an affordance rather than a label
 wherever the hidden items have their own controls: on the

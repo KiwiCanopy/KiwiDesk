@@ -479,7 +479,14 @@ must keep:
   (`HomeCardContentTests` holds the derivations), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
-  hue alone.
+  hue alone. A profile card's picture rides the desktop plate
+  (#786), drawn from the draft in the user's palette through
+  the `schematicPalette` environment — never an init
+  parameter — with the fold floored against the plate; the
+  two card heights derive from the group partition.
+  `HomeCardChromeTests` pins the heights pair, the plate's
+  shape and silence, the per-struct palette consults and the
+  stroke-above-clip order.
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell
