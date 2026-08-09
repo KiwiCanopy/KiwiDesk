@@ -50,10 +50,20 @@ struct SchematicCanvas<Content: View>: View {
     /// The bordered mini-screen itself: a rounded outline with the
     /// content clipped at the frame's edge, so every frame in the
     /// family reads the same and none draws past its own border.
-    /// The clip sits OUTSIDE `LayoutSchematic.inset`, so content
-    /// may bleed into that band — a schematic that must not draw
-    /// there skips the drawing rather than leaving it to the clip
-    /// (Scrolling's off-monitor ghosts at `.tile`, #753).
+    ///
+    /// **The clip does not crop where a reader assumes, and this
+    /// is where that is written down.** Content is padded by
+    /// `LayoutSchematic.inset` and only then clipped at the
+    /// border, so the clip sits OUTSIDE the inset and a shape left
+    /// to it still bleeds a few points into that band. A schematic
+    /// that must not draw there therefore skips the drawing
+    /// instead (Scrolling's off-monitor ghosts at `.tile`, #753).
+    /// Prose binding schematics to that — gui.md,
+    /// `docs/ui-patterns.md`, `docs/design-decisions.md` — cites
+    /// this site rather than restating the mechanism: it had been
+    /// restated at each of them, and moving the clip inside the
+    /// inset would have falsified every copy while none of them
+    /// knew the others existed.
     ///
     /// Inlined here since #753: this was a `SchematicScreen` type
     /// because each pane of the retired two-frame `SchematicPair`

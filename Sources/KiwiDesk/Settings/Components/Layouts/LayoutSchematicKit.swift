@@ -89,7 +89,12 @@ enum LayoutSchematic {
 /// "which of these do I want?"; the argument is one click away,
 /// and a strip of seven different-shaped tiles would answer
 /// neither question.
-enum SchematicScale: Hashable {
+///
+/// `CaseIterable` for the same reason `ScrollingParams.Anchor`
+/// is: a third scale has to satisfy every claim a caption makes
+/// about the frame, and a hand-listed sweep would go on passing
+/// over two of three (#753).
+enum SchematicScale: Hashable, CaseIterable {
     case tile
     case panel
 

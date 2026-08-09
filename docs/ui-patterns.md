@@ -657,8 +657,8 @@ carries one **switches with the control that changes it** rather
 than stating it under every setting. Where a ghost needs more
 room than a thumbnail has, the thumbnail leaves it undrawn
 rather than shrinking the frame around it — undrawn, not merely
-clipped: the frame's clip sits outside the canvas inset, so a
-shape left to it bleeds a few points into that band.
+clipped, the frame's clip being no substitute for skipping the
+drawing (`SchematicCanvas.screen` says why).
 The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`

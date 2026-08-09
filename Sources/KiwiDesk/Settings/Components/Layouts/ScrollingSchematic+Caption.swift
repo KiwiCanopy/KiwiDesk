@@ -86,18 +86,28 @@ extension ScrollingSchematic {
         )
     }
 
-    /// Whether the `+` is on the frame — a condition on the ROW,
-    /// deliberately, not on the pixels.
+    /// Whether the `+` is on the frame — a condition on the ROW
+    /// and the SCALE, deliberately, not on the pixels.
     ///
     /// The caption is drawn *beside* the frame and cannot read the
     /// `GeometryReader`'s width, so a pixel test here would be a
     /// model of the drawing rather than the drawing. A slot
-    /// **adjacent to the focus** needs no width to answer: the
+    /// **adjacent to the focus** needs no width to answer — but
+    /// only where the monitor is a *slice* of the canvas: the
     /// focused tile sits wholly inside the monitor, one step is
-    /// one slot plus 3 pt, and the monitor leaves
-    /// `screenFraction`'s margin on the far side — so the
-    /// neighbour reaches the canvas at every anchor, slot size and
-    /// canvas length a panel can take.
+    /// one slot plus 3 pt, and the margin the monitor leaves on
+    /// the far side is what the neighbour reaches into, at every
+    /// anchor, slot size and canvas length a panel can take.
+    ///
+    /// Where the monitor IS the canvas that margin is zero, and
+    /// the neighbour's near edge lands 3 pt past the far border —
+    /// `end` with New window ▸ After focused would claim a `+`
+    /// nothing draws. So the scale is folded into the answer
+    /// rather than assumed by it. Today `.tile` is the only
+    /// marginless scale and it suppresses the caption anyway
+    /// (`SchematicScale.showsCaption`), which is exactly what
+    /// would keep a wrong answer invisible until some thumbnail
+    /// gained a caption.
     ///
     /// Only *sufficient*, on purpose: at a thin slot the `+` can
     /// be three slots out and still show, and the caption then
@@ -106,11 +116,13 @@ extension ScrollingSchematic {
     /// every case. Silence under-labels; the alternative
     /// mislabels.
     ///
-    /// Internal because `LayoutSchematicScrollingTests` holds the
+    /// Internal because `LayoutSchematicCaptionTests` holds the
     /// claim against the drawing's own `onCanvas`, over every
-    /// anchor, placement, count and slot size at the widths a pane
-    /// can take.
-    var drawsInsertionMark: Bool { abs(row.incoming) <= 1 }
+    /// anchor, placement, count, slot size and scale at the widths
+    /// a pane can take.
+    var drawsInsertionMark: Bool {
+        screenFraction < 1 && abs(row.incoming) <= 1
+    }
 
     /// Named with the picker's own term, so every locale reads its
     /// own translation of the segment rather than the English

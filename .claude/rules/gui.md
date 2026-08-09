@@ -102,18 +102,23 @@ to invert the dim ladder).
     have it carry a sentence about a fourth and VoiceOver
     asserts it over a frame that was never drawn — which is
     what Scrolling shipped, alongside a `follow` selection that
-    moved nothing on screen at all.
+    moved nothing on screen at all
+    (`LayoutSchematicCaptionTests`).
   - **A caption may not point at a mark the frame does not
     draw.** A finite canvas crops a row long before the row
     ends, so a clause naming the insertion `+` is conditional on
     the `+` being on the frame (`drawsInsertionMark`, held to
-    the drawing by `LayoutSchematicScrollingTests`).
-  - The scale half, same suite as the vocabulary scan: a fact a
+    the drawing by `LayoutSchematicCaptionTests`) — and that
+    condition owes the SCALE as well as the row, since a
+    thumbnail whose monitor fills its canvas has no margin for
+    the neighbouring slot to reach into.
+  - The scale half, `LayoutSchematicScaleTests` again: a fact a
     thumbnail has no room to render (Scrolling's off-monitor
     ghosts) is drawn at `.panel` and **not drawn** at `.tile` —
-    never paid for by shrinking the frame around it, and never
-    left to the frame's clip, which sits outside the canvas
-    inset and lets a few points bleed into that band.
+    never paid for by shrinking the frame around it, and skipped
+    outright rather than left to the frame's clip, which does
+    not crop where a reader assumes (`SchematicCanvas.screen`
+    owns why).
 - **Defer per-control "why" to contextual help** (the planned `?`
   affordance, #94) rather than bloating labels or captions with
   glosses that would later duplicate it. A caption's job is to

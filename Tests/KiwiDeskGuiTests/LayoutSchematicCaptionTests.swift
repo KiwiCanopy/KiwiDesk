@@ -38,18 +38,20 @@ struct LayoutSchematicCaptionTests {
         let centre = scrolling(anchor: .center)
         #expect(follow.caption != centre.caption)
         #expect(follow.axLabel != centre.axLabel)
-        // And the anchored three are not carrying a sentence about
-        // a fourth: Follow's own name appears in Follow's words
-        // and nowhere else. Read through the picker's own key, so
-        // this holds in whatever locale the run is in — and so a
-        // translation that reuses the term for the anchored
-        // caption reds, which is the point rather than a
-        // side effect.
+        // And no other anchor carries a sentence about this one:
+        // Follow's own name appears in Follow's words and nowhere
+        // else. Read through the picker's own key, so this holds
+        // in whatever locale the run is in — and so a translation
+        // that reuses the term for the anchored caption reds,
+        // which is the point rather than a side effect.
         let name = L("scroll_grid.anchor.follow", "Follow")
         #expect(follow.caption.contains(name))
-        for anchor in [
-            ScrollingParams.Anchor.center, .start, .end,
-        ] {
+        // Off `allCases`, never a literal three. A fifth anchor is
+        // already swept for placement and for resting inside the
+        // frame, so a hand-listed loop here would leave it — and
+        // only it — unchecked for the term leak this lane fixed.
+        for anchor in ScrollingParams.Anchor.allCases
+        where anchor != .follow {
             let other = scrolling(anchor: anchor)
             #expect(!other.caption.contains(name))
             #expect(!other.axLabel.contains(name))
@@ -61,45 +63,50 @@ struct LayoutSchematicCaptionTests {
     /// The row runs several canvases wide at most counts, so the
     /// incoming slot is often clipped away entirely — at the
     /// default five windows with New window ▸ Last it already is.
-    /// The clause is a condition on the row rather than on the
-    /// pixels, since the caption cannot read the canvas, so what
-    /// is owed is the IMPLICATION: wherever it is claimed, the
-    /// drawing's own `onCanvas` agrees, at every width a pane can
-    /// be. Both directions of the pair are counted, so a clause
-    /// that never fires cannot pass for a correct one.
+    /// The clause is a condition on the row and the scale rather
+    /// than on the pixels, since the caption cannot read the
+    /// canvas, so what is owed is the IMPLICATION: wherever it is
+    /// claimed, the drawing's own `onCanvas` agrees, at every
+    /// width a pane can be. Both directions of the pair are
+    /// counted, so a clause that never fires cannot pass for a
+    /// correct one.
+    ///
+    /// **Swept over the scale too, not only `.panel`.** The
+    /// sufficiency argument for a slot adjacent to the focus runs
+    /// on the margin the monitor leaves beside itself, and a
+    /// thumbnail's monitor IS its canvas — so `end` with New
+    /// window ▸ After focused puts the neighbour 3 pt past the
+    /// border there. A scale-blind `drawsInsertionMark` claims
+    /// that `+`, and only this axis sees it: `.tile` suppresses
+    /// the caption today, so nothing else in the tree would go
+    /// red until some thumbnail gained one.
     @Test("the + clause is claimed only where the + is drawn")
     func theInsertionClauseMatchesTheDrawing() {
         var claimed = 0
         var withheld = 0
-        for anchor in ScrollingParams.Anchor.allCases {
-            for placement in placements {
-                for size in slotSizes {
-                    for count in LayoutSchematic.windowCountRange {
-                        let schematic = scrolling(
-                            anchor: anchor,
-                            placement: placement,
-                            slotSize: size,
-                            windows: count
-                        )
-                        guard schematic.drawsInsertionMark else {
-                            withheld += 1
-                            continue
-                        }
-                        claimed += 1
-                        for along in widths {
-                            let m = schematic.metrics(along: along)
-                            #expect(
-                                schematic.onCanvas(
-                                    m.newIdx,
-                                    m,
-                                    along: along
-                                ),
-                                Comment(
-                                    rawValue:
-                                        "\(anchor)/\(placement) "
-                                        + "at \(count), \(along) "
-                                        + "pt: + off the canvas"
-                                )
+        for scale in SchematicScale.allCases {
+            for anchor in ScrollingParams.Anchor.allCases {
+                for placement in placements {
+                    for size in slotSizes {
+                        for count in counts {
+                            let schematic = scrolling(
+                                anchor: anchor,
+                                placement: placement,
+                                slotSize: size,
+                                windows: count,
+                                scale: scale
+                            )
+                            guard
+                                schematic.drawsInsertionMark
+                            else {
+                                withheld += 1
+                                continue
+                            }
+                            claimed += 1
+                            expectDrawn(
+                                schematic,
+                                "\(scale)/\(anchor)/\(placement) "
+                                    + "at \(count)"
                             )
                         }
                     }
@@ -108,6 +115,24 @@ struct LayoutSchematicCaptionTests {
         }
         #expect(claimed > 0)
         #expect(withheld > 0)
+    }
+
+    /// The claim is width-free, so it owes every along-axis length
+    /// a pane can take rather than one convenient canvas.
+    private func expectDrawn(
+        _ schematic: ScrollingSchematic,
+        _ what: String
+    ) {
+        for along in widths {
+            let m = schematic.metrics(along: along)
+            #expect(
+                schematic.onCanvas(m.newIdx, m, along: along),
+                Comment(
+                    rawValue:
+                        "\(what), \(along) pt: + off the canvas"
+                )
+            )
+        }
     }
 
     /// And the clause is what the claim renders — the sentence is
@@ -135,6 +160,11 @@ struct LayoutSchematicCaptionTests {
         .first, .last, .beforeFocused, .afterFocused,
     ]
 
+    /// Every count the preview's own slider can reach.
+    private var counts: ClosedRange<Int> {
+        LayoutSchematic.windowCountRange
+    }
+
     /// The slot sizes the three `ScrollSize` arms can produce,
     /// including both ends of the points ramp: the 14 pt floor and
     /// the widest slot are where a width-free claim would break if
@@ -149,13 +179,17 @@ struct LayoutSchematicCaptionTests {
     /// window to a full-screen one.
     private let widths: [CGFloat] = [60, 120, 228, 400, 900, 1600]
 
-    /// `.panel` throughout: the caption is the subject, and a
-    /// thumbnail suppresses it.
+    /// `.panel` by default: the caption is the subject and a
+    /// thumbnail suppresses it, so every test whose subject is the
+    /// rendered words reads the scale that renders them. The one
+    /// that asks what the clause is *allowed* to claim overrides
+    /// it — see `theInsertionClauseMatchesTheDrawing`.
     private func scrolling(
         anchor: ScrollingParams.Anchor = .center,
         placement: SpawnPlacement = .last,
         slotSize: ScrollSize = .auto,
-        windows: Int = LayoutSchematic.defaultWindowCount
+        windows: Int = LayoutSchematic.defaultWindowCount,
+        scale: SchematicScale = .panel
     ) -> ScrollingSchematic {
         ScrollingSchematic(
             orientation: .horizontal,
@@ -163,7 +197,7 @@ struct LayoutSchematicCaptionTests {
             slotSize: slotSize,
             placement: placement,
             windows: windows,
-            scale: .panel
+            scale: scale
         )
     }
 }

@@ -210,13 +210,14 @@ struct ScrollingSchematic: View {
     }
 
     /// A slot the canvas cannot reach draws **nothing**, rather
-    /// than being left to the clip: the clip sits at the frame's
-    /// border while the content is inset by
-    /// `LayoutSchematic.inset`, so a tile just past the canvas
-    /// still bled a few points of itself into that band — most
-    /// visibly a grey ghost at a thumbnail's edge, where the
-    /// monitor IS the canvas and every off-monitor slot is one of
-    /// these. Otherwise: the new window is the dense `+` tile; a
+    /// than being left to the clip — which does not crop where a
+    /// reader would assume, as `SchematicCanvas.screen` explains.
+    /// A tile just past the canvas therefore still bled a few
+    /// points of itself in, most visibly as a grey ghost at a
+    /// thumbnail's edge, where the monitor IS the canvas and every
+    /// off-monitor slot is one of these.
+    ///
+    /// Otherwise: the new window is the dense `+` tile; a
     /// window overlapping the monitor at all is on screen (accent,
     /// the focus heavier), even partially; one entirely past a
     /// monitor edge but still on the canvas is an off-monitor
@@ -260,7 +261,7 @@ struct ScrollingSchematic: View {
     /// Whether window `i` reaches the **canvas** at all. The row is
     /// finite but several canvases wide at most counts, so this is
     /// what decides how much of it is ever seen. Internal so
-    /// `LayoutSchematicScrollingTests` can hold the caption's `+`
+    /// `LayoutSchematicCaptionTests` can hold the caption's `+`
     /// clause to the drawing rather than to a second model of it
     /// (#753).
     func onCanvas(_ i: Int, _ m: Metrics, along: CGFloat) -> Bool {

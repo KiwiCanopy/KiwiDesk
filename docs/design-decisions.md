@@ -1604,8 +1604,8 @@ every sibling's outline, so a tile meaning "this layout continues
 past the screen" said "this preview is broken" instead. Draw a
 fact at the size it can be read; at the size it cannot, do not
 draw it at all — leaving it to the frame's clip is not the same
-thing, since the clip sits outside the canvas inset and lets a
-few points of the thing bleed through.
+thing, for the reason `SchematicCanvas.screen` states: the clip
+does not crop where a reader would assume.
 
 **Home is the only navigator: a card grid, not a sidebar.**
 (#678 turn 9, superseding the #68/#297 fixed source list.) A

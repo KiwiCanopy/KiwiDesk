@@ -105,8 +105,8 @@ struct LayoutSchematicScrollingTests {
         // `.center`'s own answer rather than against the midpoint,
         // so the two cannot drift apart silently. The collapse is
         // deliberate and argued in `docs/design-decisions.md`; the
-        // caption is what tells the pair apart, which the test
-        // below holds.
+        // caption is what tells the pair apart, held next door by
+        // `LayoutSchematicCaptionTests.theAnchorReachesTheWords`.
         let follow = scrolling(anchor: .follow)
             .metrics(along: along)
         let centre = scrolling(anchor: .center)
