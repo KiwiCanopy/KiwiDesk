@@ -21,12 +21,16 @@ import Testing
 @Suite("Monitor readout sentence")
 struct MonitorReadoutTests {
     /// Every assertion below compares `L()` output to English,
-    /// so the shared manager must be pinned per test — "System
-    /// default" resolves the HOST's language, and on a German
-    /// machine every sentence here came back from `de.json`
-    /// (caught 2026-08-09; `ShortcutsSelfRowTests` is the
-    /// standing idiom).
-    init() {
+    /// so each test pins the shared manager as its FIRST line —
+    /// "System default" resolves the HOST's language, and on a
+    /// German machine every sentence here came back from
+    /// `de.json` (caught 2026-08-09; `ShortcutsSelfRowTests` is
+    /// the standing idiom). Inside the body, not `init`:
+    /// suites interleave on the main actor at the init→body
+    /// hop, and `LocalizationManagerTests`' own select() calls
+    /// landed in that window — a synchronous body has no
+    /// suspension point for them to land in.
+    private func pinEnglish() {
         LocalizationManager.shared.select("en")
     }
 
@@ -45,6 +49,7 @@ struct MonitorReadoutTests {
     /// plural arm and reading "0 spaces here".
     @Test("zero takes its own sentence")
     func zeroHasItsOwnPhrase() {
+        pinEnglish()
         let empty = MonitorReadout.sentence(held: 0, showing: nil)
         #expect(empty == "No spaces here")
         #expect(!empty.contains("0"))
@@ -55,6 +60,7 @@ struct MonitorReadoutTests {
     /// sentence claiming both would contradict itself.
     @Test("zero keeps its sentence when something is showing")
     func zeroIgnoresShowing() {
+        pinEnglish()
         let sentence = MonitorReadout.sentence(
             held: 0,
             showing: SpaceID("code")
@@ -67,6 +73,7 @@ struct MonitorReadoutTests {
     /// "%1$d space(s)".
     @Test("one and many are different sentences")
     func countPhrasesDiffer() {
+        pinEnglish()
         let one = MonitorReadout.sentence(held: 1, showing: nil)
         let many = MonitorReadout.sentence(held: 4, showing: nil)
         #expect(one == "1 space here")
@@ -79,6 +86,7 @@ struct MonitorReadoutTests {
     /// 2 is showing" is two numerals with no noun on either.
     @Test("the showing clause names its space")
     func showingNamesTheSpace() {
+        pinEnglish()
         let sentence = MonitorReadout.sentence(
             held: 3,
             showing: SpaceID("code")
@@ -94,6 +102,7 @@ struct MonitorReadoutTests {
 
     @Test("one-with-showing has its own sentence too")
     func singularWithShowing() {
+        pinEnglish()
         #expect(
             MonitorReadout.sentence(
                 held: 1,
@@ -114,6 +123,7 @@ struct MonitorReadoutTests {
     /// "No spaces here" on the display they are all sitting on.
     @Test("the main display counts the tray's spaces")
     func mainCountsTheTray() {
+        pinEnglish()
         let desk = display(1)
         let rows = MonitorsFamilyRows(
             spaces: [
@@ -141,6 +151,7 @@ struct MonitorReadoutTests {
     /// sit on that screen.
     @Test("a follows-main desk does not read as empty")
     func followsMainDeskIsNotEmpty() {
+        pinEnglish()
         let desk = display(1)
         let spaces = [
             SpaceID("code"), SpaceID("web"), SpaceID("chat"),
