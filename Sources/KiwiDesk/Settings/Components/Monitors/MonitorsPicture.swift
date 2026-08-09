@@ -74,24 +74,13 @@ struct MonitorsPicture: View {
             )
         }
         .frame(height: Self.canvasHeight)
-        .background(well)
-    }
-
-    /// The desk the displays sit on. Inverted on device (owner,
-    /// 2026-08-09, the prototype's own colouring): the WELL is
-    /// the light thing now and each card the soft-green object
-    /// on it — a wall of white screens glared, and the cards'
-    /// strengthened rest border carries the separation.
-    private var well: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(SettingsTheme.card)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(
-                        SettingsTheme.hairline,
-                        lineWidth: 0.5
-                    )
-            )
+        // No well any more (owner + ui-designer, 2026-08-09):
+        // the section container's own surface is the ground —
+        // a shape whose fill equals its parent's is only its
+        // frame, and it read as an empty box inside a box. The
+        // soft-green cards on their ink3 rest borders carry
+        // the separation; the dashed tray's stroke is its own
+        // edge and never leaned on the well.
     }
 
     /// A neck and a foot under each display, in `ink3` — the
