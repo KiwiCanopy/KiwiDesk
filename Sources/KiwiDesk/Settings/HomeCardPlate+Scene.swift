@@ -28,11 +28,21 @@ struct HomeCardGapsTile: View {
         // centred in the plate, not stretched to its edges
         // (owner, 2026-08-09) — the outer-gap readouts inset
         // from the screen outline, air on all sides beyond it.
+        // The GAPS carry the highlight, not a window (owner,
+        // same round): the screen's interior is washed in the
+        // accent and the panes sit opaque on it, so the accent
+        // shows exactly where the gaps are — the seams and the
+        // outer margins, whose widths are the values the card
+        // answers with.
         ZStack {
             RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(
-                    palette?.frame
-                        ?? Color.secondary.opacity(0.3)
+                .fill(gapWash)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .strokeBorder(
+                            palette?.frame
+                                ?? Color.secondary.opacity(0.3)
+                        )
                 )
             VStack(spacing: mini(inner.vertical)) {
                 HStack(spacing: mini(inner.horizontal)) {
@@ -50,13 +60,26 @@ struct HomeCardGapsTile: View {
             .padding(.trailing, 2 + mini(outer.right))
         }
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
+        // Vertical air beyond the aspect fit: height-bound
+        // plates left the screen outline flush with the plate
+        // padding (owner, 2026-08-09).
+        .padding(.vertical, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var gapWash: Color {
+        (palette?.accent ?? SettingsTheme.accent).opacity(0.3)
     }
 
     private func mini(_ real: CGFloat) -> CGFloat {
         GapPreviewScale.mini(real)
     }
 
+    /// A window pane: opaque plate base under a quiet ghost
+    /// fill — opaque so the gap wash beneath never tints the
+    /// windows, only the gaps — ringed with the real border
+    /// colour at the remapped width, the focused window always
+    /// and its neighbours only while unfocused borders are on.
     @ViewBuilder
     private func pane(focused: Bool) -> some View {
         let border = settings.borderStyle
@@ -64,11 +87,13 @@ struct HomeCardGapsTile: View {
             border.enabled
             && (focused || border.unfocusedEnabled)
         RoundedRectangle(cornerRadius: 4)
-            .fill(
-                focused
-                    ? palette?.fill ?? LayoutSchematic.fill
-                    : palette?.ghostFill
-                        ?? Color.secondary.opacity(0.15)
+            .fill(palette?.base ?? SettingsTheme.previewPlate)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(
+                        palette?.ghostFill
+                            ?? Color.secondary.opacity(0.15)
+                    )
             )
             .overlay {
                 if ringed {
