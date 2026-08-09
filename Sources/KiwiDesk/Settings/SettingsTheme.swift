@@ -52,6 +52,20 @@ enum SettingsTheme {
     /// its neighbour on screen.
     static let sunken = token(light: 0xF4_F7_F1, dark: 0x23_2B_26)
 
+    /// The desktop-dark plate behind a Home card's picture
+    /// (#786): the tile is a picture of the user's desktop, so
+    /// its ground is a desktop at night, not a Settings surface.
+    /// Identical in both modes for the same reason the palette
+    /// inside it is (4g): what the picture shows must not change
+    /// with the window's appearance. Deliberately NOT `page`'s
+    /// dark `0x171C19`: in dark mode the plate must still read
+    /// as sitting below the card (`0x1E_25_21`), and the page
+    /// grey is within four points of it.
+    static let previewPlate = token(
+        light: 0x12_25_1A,
+        dark: 0x12_25_1A
+    )
+
     // MARK: - Borders
 
     /// Every container border: card, section, header underline,
@@ -178,6 +192,24 @@ enum SettingsTheme {
     /// fill plus hairline, no shadow — so the radius carries the
     /// softness a shadow would have.
     static let cardRadius: CGFloat = 14
+
+    /// The two Home card heights (#786) — deliberate, not a
+    /// residue: a profile card carries the 92 pt desktop plate
+    /// and a whole-app card never does, so one shared height
+    /// would either stretch the text cards around absent
+    /// pictures or crush the plates. Behaviour keeps the tall
+    /// height plateless so its GROUP still reads as one row
+    /// grid. `HomeCardChromeTests` names the pair together and
+    /// derives the tall height from the plate plus the text
+    /// band rather than restating it.
+    static let cardHeight: CGFloat = 152
+    static let cardHeightCompact: CGFloat = 105
+
+    /// The desktop plate's height inside a profile card —
+    /// full-bleed to the card's edges, clipped through the
+    /// card's own corners, so the card border IS the picture's
+    /// visible edge (4g).
+    static let plateHeight: CGFloat = 92
 
     /// A section container's corner. Larger than a card's on
     /// purpose: a section is the outer box, and equal radii make

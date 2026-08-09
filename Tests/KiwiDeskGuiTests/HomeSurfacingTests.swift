@@ -74,6 +74,12 @@ struct HomeSurfacingTests {
             // the body emptied).
             "ifletpreview=HomeCardPreview.preview("
                 + "for:destination,model:model){preview}",
+            // A plated card DRAWS its desktop plate (#786) —
+            // same branch-body form, same reason — and the
+            // plate mounts ABOVE the washed title band, which
+            // keeps it outside the reveal wash by structure.
+            "ifletplate=HomeCardPlate.plate("
+                + "for:destination,model:model){plate}",
         ],
         "Settings/SettingsModel+EditTarget.swift": [
             // A dirty draft reaching a clean transition

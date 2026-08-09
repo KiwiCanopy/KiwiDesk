@@ -84,6 +84,10 @@ struct HomeScreen: View {
             firstRunVisible = HomeFirstRunState.shouldShow(
                 model.preferences
             )
+            // The App Rules card draws ruled apps' icons; warm
+            // the same cache its area rows read, off the main
+            // actor's hot path (#786).
+            AppIconCache.shared.warm()
             if let last = model.nav.homeReturnFocus {
                 focusedCard = last
                 model.nav.homeReturnFocus = nil

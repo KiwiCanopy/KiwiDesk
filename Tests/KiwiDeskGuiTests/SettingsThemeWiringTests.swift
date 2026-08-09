@@ -30,6 +30,7 @@ struct SettingsThemeWiringTests {
         "page": "SettingsView.swift",
         "card": "SettingsHeaderBar.swift",
         "sunken": "Chips.swift",
+        "previewPlate": "HomeCardPlate.swift",
         "hairline": "SettingsView.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",

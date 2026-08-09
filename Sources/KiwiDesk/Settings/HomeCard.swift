@@ -17,34 +17,36 @@ struct HomeCard: View {
 
     var body: some View {
         Button(action: open) {
-            VStack(alignment: .leading, spacing: 8) {
-                // Wash on the title band alone (#760): tinting
-                // the whole card would run the accent through
-                // the live preview below, briefly
-                // misrepresenting the very colours it renders.
-                titleRow.modeRevealWash(modeGated)
-                if let preview = HomeCardPreview.preview(
+            VStack(alignment: .leading, spacing: 0) {
+                // The desktop plate rides ABOVE the title and
+                // outside the reveal wash (#786): full-bleed,
+                // clipped through the card's own corners, so
+                // the card border is the picture's visible
+                // edge (4g).
+                if let plate = HomeCardPlate.plate(
                     for: destination,
                     model: model
                 ) {
-                    preview
-                } else {
-                    Spacer(minLength: 0)
+                    plate
                 }
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .frame(
-                        maxWidth: .infinity,
-                        alignment: .leading
-                    )
+                textBand
             }
-            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 148)
+            // Two deliberate heights (#786): the profile group
+            // holds the plate band — Behaviour plateless but
+            // tall, so its group still reads as one row grid —
+            // and the whole-app cards sit shorter.
+            .frame(
+                height: tall
+                    ? SettingsTheme.cardHeight
+                    : SettingsTheme.cardHeightCompact
+            )
             .background(cardShape)
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+            )
             .contentShape(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
@@ -55,6 +57,42 @@ struct HomeCard: View {
         .onHover { hovering = $0 }
         .accessibilityLabel(destination.title)
         .accessibilityValue(axValue)
+    }
+
+    /// The one group partition, read where the group order
+    /// already lives — never a second hand-kept list.
+    private var tall: Bool {
+        HomeCardOrder.thisProfile.contains(destination)
+    }
+
+    private var textBand: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            // Wash on the title band alone (#760): tinting
+            // the whole card would run the accent through
+            // the live preview, briefly misrepresenting the
+            // very colours it renders.
+            titleRow.modeRevealWash(modeGated)
+            if let preview = HomeCardPreview.preview(
+                for: destination,
+                model: model
+            ) {
+                preview
+            } else {
+                Spacer(minLength: 0)
+            }
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink2)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 11)
+        .padding(.bottom, 12)
     }
 
     private var subtitle: String {

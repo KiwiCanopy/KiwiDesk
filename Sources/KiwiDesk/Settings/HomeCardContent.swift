@@ -221,8 +221,10 @@ enum HomeCardContent {
 
     /// The census's own answer to "how many individual
     /// colours", so the card can never disagree with the area
-    /// it opens.
-    private static var advancedColourCount: Int {
+    /// it opens. Internal, not private: the plate's swatch grid
+    /// caps on the same derivation (#786), so the picture and
+    /// the caption cannot answer from two sources.
+    static var advancedColourCount: Int {
         SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
                 && [.atRest, .showMore].contains(
