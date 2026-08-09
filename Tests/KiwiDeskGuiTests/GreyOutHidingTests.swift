@@ -14,12 +14,19 @@ struct GreyOutHidingTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    /// The hiding shape, discovered rather than enumerated.
-    /// `if <predicate> {` around settings content removes it from
-    /// the tree, which loses the cue that the stored value is
-    /// preserved (`docs/ui-patterns.md`). Findings A7
-    /// (`if bar.enabled`) and A8 (`if !model.editingStoredProfile`)
-    /// were both exactly this.
+    /// The hiding shape. `if <predicate> {` around settings
+    /// content removes it from the tree, which loses the cue
+    /// that the stored value is preserved
+    /// (`docs/ui-patterns.md`). Findings A7 (`if bar.enabled`)
+    /// and A8 (`if !model.editingStoredProfile`) were both
+    /// exactly this.
+    ///
+    /// STATED LIMIT (guard-prover 2026-08-10): this list is a
+    /// closed set of SPELLINGS — the scan discovers new FILES
+    /// using a known spelling, never a novel predicate
+    /// spelling (`if model.isDirty {` passed it green). A
+    /// hiding predicate in a new spelling is caught only by
+    /// review; a recurring one earns its line here.
     private let hidingPredicates = [
         "if bar.enabled {",
         "if !model.editingStoredProfile {",

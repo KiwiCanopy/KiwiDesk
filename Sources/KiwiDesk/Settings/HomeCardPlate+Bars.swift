@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 import SwiftUI
 
@@ -5,9 +6,13 @@ import SwiftUI
 /// plate on its own edge in its own fill, the desktop well
 /// between them. The edge-most bar on a shared edge is the
 /// Space Bar, matching `SpaceBarPreviewStrip`'s coexistence
-/// order. Every plate wears the well's hairline — the DEFAULT
-/// fill composites into the plate, the 13b invisible class
-/// (ui-designer, 2026-08-09).
+/// order. The scene keeps a screen's shape (16:10, centred)
+/// rather than stretching to its container, and the bars
+/// answer their own Style rows: alignment seats the item run,
+/// `background_fit` decides hug vs span, corner roundness and
+/// item gap remap through the styles' own resolutions, and the
+/// active item is marked per `active_indicator` (owner batch,
+/// 2026-08-10).
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     /// The DRAFT's real space count — the pips are an answer,
@@ -38,6 +43,24 @@ struct HomeCardBarsTile: View {
         var active = false
     }
 
+    /// The style facts one strip draws from — read off the real
+    /// style struct at the call site, so the scene cannot
+    /// answer a row the style did not.
+    struct BarSpec {
+        var fill: String
+        var highlight: String
+        var items: [BarItem]
+        var alignment: AppBarStyle.BarAlignment
+        /// `!hasBox && backgroundFit == .full` — the strip
+        /// mock's own `plateSpansCanvas` rule.
+        var spans: Bool
+        /// Boxed draws no shared plate at all.
+        var boxed: Bool
+        var corner: CGFloat
+        var gap: CGFloat
+        var indicator: AppBarStyle.ActiveIndicator
+    }
+
     /// The App Bar is shown per LAYOUT; whether any layout
     /// shows one is `BarsGates`' own block predicate, consulted
     /// rather than re-derived (the resolver rule) — a card that
@@ -57,6 +80,11 @@ struct HomeCardBarsTile: View {
             }
             columnBars(.right)
         }
+        // A screen's own shape, centred — the scene never
+        // stretches to its container (owner 2026-08-10; the
+        // Gaps tile's precedent).
+        .aspectRatio(16.0 / 10.0, contentMode: .fit)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var well: some View {
@@ -107,10 +135,24 @@ struct HomeCardBarsTile: View {
     ) -> some View {
         let style = settings.spaceBarStyle
         if style.enabled, style.edge == edge {
-            barPlate(
-                fill: style.fillColor,
-                items: spaceItems(style),
-                vertical: vertical
+            BarStripView(
+                spec: BarSpec(
+                    fill: style.fillColor,
+                    highlight: style.highlightColor,
+                    items: spaceItems(style),
+                    alignment: style.alignment,
+                    spans: !style.hasBox
+                        && style.backgroundFit == .full,
+                    boxed: style.hasBox,
+                    corner: style.resolvedCornerRadius(
+                        forThickness: 16 * scale
+                    ),
+                    gap: gapSpacing(style.itemGap),
+                    indicator: style.activeIndicator
+                ),
+                edge: edge,
+                vertical: vertical,
+                scale: scale
             )
         }
     }
@@ -150,147 +192,59 @@ struct HomeCardBarsTile: View {
     ) -> some View {
         let style = settings.appBarStyle
         if appBarShown, style.edge == edge {
-            barPlate(
-                fill: style.fillColor,
-                items: [
-                    BarItem(
-                        color: style.activeItemColor,
-                        length: 20 * scale,
-                        glyph: scale > 1 ? "macwindow" : nil,
-                        active: true
+            BarStripView(
+                spec: BarSpec(
+                    fill: style.fillColor,
+                    highlight: style.highlightColor,
+                    items: appItems(style),
+                    alignment: style.alignment,
+                    spans: !style.hasBox
+                        && style.backgroundFit == .full,
+                    boxed: style.hasBox,
+                    corner: style.resolvedCornerRadius(
+                        forThickness: 16 * scale
                     ),
-                    BarItem(
-                        color: style.itemColor,
-                        length: 20 * scale,
-                        glyph: scale > 1 ? "macwindow" : nil
-                    ),
-                ],
-                vertical: vertical
+                    gap: gapSpacing(style.itemGap),
+                    indicator: style.activeIndicator
+                ),
+                edge: edge,
+                vertical: vertical,
+                scale: scale
             )
         }
     }
 
-    // Split into named halves for the type-checker budget
-    // (gui.md ▸ shallow `body`): the pip branch made the one
-    // chained expression die on CI-class machines.
-    private func barPlate(
-        fill: String,
-        items: [BarItem],
-        vertical: Bool
-    ) -> some View {
-        plateGround(fill: fill)
-            .frame(
-                width: vertical ? 16 * scale : nil,
-                height: vertical ? nil : 16 * scale
+    /// Three mock windows at panel scale — recognisable app
+    /// shapes (mail, browser, files), never real app claims
+    /// (owner 2026-08-10 over two identical windows); bare
+    /// pips on the Home plate.
+    private func appItems(
+        _ style: AppBarStyle
+    ) -> [BarItem] {
+        let glyphs = ["envelope", "globe", "folder"]
+        var items: [BarItem] = []
+        for (index, glyph) in glyphs.enumerated() {
+            let active = index == 0
+            items.append(
+                BarItem(
+                    color: active
+                        ? style.activeItemColor
+                        : style.itemColor,
+                    length: 20 * scale,
+                    glyph: scale > 1 ? glyph : nil,
+                    active: active
+                )
             )
-            .overlay(pipRow(items, vertical: vertical))
-    }
-
-    private func plateGround(fill: String) -> some View {
-        RoundedRectangle(cornerRadius: 5)
-            .fill(Color(kiwiHex: fill))
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .strokeBorder(
-                        palette?.frame
-                            ?? SettingsTheme.plateInk
-                            .opacity(0.3)
-                    )
-            )
-    }
-
-    private func pipRow(
-        _ items: [BarItem],
-        vertical: Bool
-    ) -> some View {
-        stack(vertical: vertical) {
-            ForEach(
-                Array(items.enumerated()),
-                id: \.offset
-            ) { _, item in
-                pip(item, vertical: vertical)
-            }
         }
-        .padding(vertical ? .vertical : .horizontal, 5)
+        return items
     }
 
-    /// A bare pip on the Home plate; at panel scale the item
-    /// carries its identifier the way the real bar does — the
-    /// active one as a filled chip with the plate's dark ink,
-    /// an inactive one as the identifier painted in
-    /// `itemColor` alone (the two-accent model).
-    @ViewBuilder
-    private func pip(
-        _ item: BarItem,
-        vertical: Bool
-    ) -> some View {
-        if let text = item.label {
-            pipContent(item) {
-                Text(text)
-                    .font(
-                        .system(
-                            size: 7.5 * scale,
-                            weight: .semibold
-                        )
-                    )
-                    .lineLimit(1)
-            }
-        } else if let glyph = item.glyph {
-            pipContent(item) {
-                Image(systemName: glyph)
-                    .font(.system(size: 7 * scale))
-            }
-        } else {
-            RoundedRectangle(cornerRadius: 2)
-                .fill(Color(kiwiHex: item.color))
-                .frame(
-                    width: vertical
-                        ? 9 * scale : item.length,
-                    height: vertical
-                        ? item.length : 9 * scale
-                )
-        }
-    }
-
-    @ViewBuilder
-    private func pipContent(
-        _ item: BarItem,
-        @ViewBuilder _ content: () -> some View
-    ) -> some View {
-        if item.active {
-            content()
-                .foregroundStyle(
-                    palette?.base
-                        ?? SettingsTheme.previewPlate
-                )
-                .padding(.horizontal, 4 * scale)
-                .padding(.vertical, 1.5 * scale)
-                .background(
-                    RoundedRectangle(cornerRadius: 3 * scale)
-                        .fill(Color(kiwiHex: item.color))
-                )
-        } else {
-            content()
-                .foregroundStyle(Color(kiwiHex: item.color))
-                .padding(.horizontal, 2 * scale)
-        }
-    }
-
-    @ViewBuilder
-    private func stack(
-        vertical: Bool,
-        @ViewBuilder content: () -> some View
-    ) -> some View {
-        if vertical {
-            VStack(spacing: 4) {
-                content()
-                Spacer(minLength: 0)
-            }
-        } else {
-            HStack(spacing: 4) {
-                content()
-                Spacer(minLength: 0)
-            }
-        }
+    /// The item-gap remap into the scene's own span, the strip
+    /// mock's scale idiom: the stored 0–40 pt band lands on
+    /// 1–7 scene points so a gap drag stays perceptible at
+    /// either mount size.
+    private func gapSpacing(_ real: CGFloat) -> CGFloat {
+        let t = min(max(real / 40, 0), 1)
+        return (1 + t * 6) * scale
     }
 }

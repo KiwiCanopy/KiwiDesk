@@ -78,7 +78,7 @@ struct SettingsThemeWiringTests {
                 )
             )
             #expect(
-                source.contains("SettingsTheme.\(token)"),
+                namesExactly(source, token),
                 Comment(
                     rawValue:
                         "\(file) no longer draws "
@@ -88,6 +88,34 @@ struct SettingsThemeWiringTests {
                 )
             )
         }
+    }
+
+    /// Identifier-boundary match, the metric suite's
+    /// `namesExactly` adopted here after guard-prover
+    /// (2026-08-10) proved the bare `contains` inert for
+    /// `panel`: "SettingsTheme.panel" is a strict prefix of
+    /// "SettingsTheme.panelWidth", which lives in the SAME
+    /// claimed file — the first token/metric prefix pair to
+    /// collide across the two declaration files. The name must
+    /// be followed by something that cannot continue an
+    /// identifier.
+    private func namesExactly(
+        _ source: String,
+        _ token: String
+    ) -> Bool {
+        let needle = "SettingsTheme.\(token)"
+        var rest = Substring(source)
+        while let hit = rest.range(of: needle) {
+            let after = rest[hit.upperBound...].first
+            if after == nil
+                || !(after!.isLetter
+                    || after!.isNumber || after! == "_")
+            {
+                return true
+            }
+            rest = rest[hit.upperBound...]
+        }
+        return false
     }
 
     @Test("a deferred token really has no consumer")
