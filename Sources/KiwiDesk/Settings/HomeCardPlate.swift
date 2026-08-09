@@ -49,7 +49,10 @@ enum HomeCardPlate {
             return tile(padding: 7, settings: settings) {
                 HomeCardSchematicBand(
                     model: model,
-                    height: SettingsTheme.plateHeight - 14,
+                    // −22, not the padding's −14: the schematic
+                    // earns extra air to the plate's edge
+                    // (owner, 2026-08-09).
+                    height: SettingsTheme.plateHeight - 22,
                     readout: LayoutReadout.value(
                         for: LayoutUsage.mostUsed(
                             in: model.config

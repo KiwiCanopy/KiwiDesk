@@ -62,8 +62,8 @@ struct HomeCardGapsTile: View {
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
         // Vertical air beyond the aspect fit: height-bound
         // plates left the screen outline flush with the plate
-        // padding (owner, 2026-08-09).
-        .padding(.vertical, 6)
+        // padding (owner, 2026-08-09; widened same round).
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
