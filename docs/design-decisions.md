@@ -1680,6 +1680,64 @@ The pick persists like the appearance choice (`UserDefaults`,
 absent = Simple, never `gui.json` — a sidecar write would
 flip config ownership).
 
+**The flip to Power User answers with motion plus an
+accent-tinted weight — the mode's own colour, at reduced
+strength.** (#760, amended on device 2026-08-09.) Without an
+answer, the flip changes the page silently and users toggle
+twice to compare — the tell that the transition carries no
+information. So the moment washes the *containers* it
+inserted (the search reveal's own transient accent wash, on
+title bands alone — a per-row control offer the mode also
+unlocks has no border to weight, and washing a dozen sibling
+rows is shouting, so those appear plainly and stay
+enumerated as data), the pane the user is standing in
+animates the insertion, and the durable half is the frame:
+1.5 pt of the accent at `modeGatedStrokeOpacity` against the
+1 pt hairline rest.
+
+The first cut of this ruling said "weight, never a hue", and
+its premise failed on real hardware: a weight step on the
+hairline is a step in a stroke whose contrast is ~1.2:1 —
+invisible in both appearances — and a stronger *neutral*
+read as "different" without saying *which* different. The
+frame borrows THE accent, not a second hue, and that
+distinction is what keeps the original argument's teeth: no
+ok/warn misread, because the accent's meaning here is "the
+mode whose segment wears this colour" — the wash paints it
+on exactly the containers that then keep the tinted frame,
+so the continuity from wash to frame to the active Power
+User segment is the legend, drawn nowhere. Hue still never
+carries alone: the weight step stays, and the strength is
+measured, not felt — 0.5 sat exactly on the CVD separation
+floor against the light hairline; the shipped value clears
+both neighbours on the same edge (the hairline on one side,
+hover's full accent on the other) in both appearances, and
+`ModeGatedFrameSeparationTests` derives those floors from
+the shipped tokens. The weight stays below the doubling the
+Monitors (1.5→3 pt) and palette (1→2 pt) pairs spend on
+selected/applied — a mode-gated card is present, not picked
+— and hover keeps the full-strength accent as its own
+register, which is also why the frame's strength has a
+ceiling: above it, hover collapses into the rest state.
+
+**Only the user's own flip glows; the implicit promotion
+stays silent.** (#760.) A search or cross-reference landing
+that flips the mode is a means to a destination the user
+already named, and that landing owns its wash — a second,
+simultaneous mode wash would dilute the one they asked for.
+The reverse trip draws no attention at all: content that is
+leaving is not worth pointing at, so Power User → Simple is
+a plain fade. And the mode-gated flag is *computed* from the
+site's own offer predicate at `.simple`, never remembered or
+hand-negated — so the border states the same fact as
+presence on exactly the surfaces where that fact moves
+(Monitors on a laptop vs a desk, the Layers card before and
+after the first layer). Under Reduce Motion the wash shows
+flat and the reflow stands down — dropping the wash entirely
+would take the answer from precisely the users who lose the
+motion channel. `ModeGatedChromeTests` and
+`SettingsModeRevealTests` hold the two halves.
+
 **The header shows a count of the draft, not a second save
 surface.** (#678 turn 9.) The turn-9 frame draws three views
 of one draft on one screen — the floating save pill, the

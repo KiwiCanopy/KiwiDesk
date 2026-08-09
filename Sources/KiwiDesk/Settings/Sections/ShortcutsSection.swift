@@ -239,8 +239,14 @@ struct ShortcutsSection: View {
     /// `init.lua` already carries bindings must not have the one
     /// surface that explains them hidden by a mode they did not
     /// know they were in.
+    private func offersAdvancedDrawer(
+        in mode: SettingsMode
+    ) -> Bool {
+        model.hasCustomLua || mode == .powerUser
+    }
+
     private var offersAdvancedDrawer: Bool {
-        model.hasCustomLua || model.settingsMode == .powerUser
+        offersAdvancedDrawer(in: model.settingsMode)
     }
 
     @ViewBuilder private var advancedDrawer: some View {
@@ -253,7 +259,10 @@ struct ShortcutsSection: View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,
-            isExpanded: $advancedExpanded
+            isExpanded: $advancedExpanded,
+            // One predicate at `.simple` (#760): with custom Lua
+            // in init.lua the drawer is Simple content, unmarked.
+            modeGated: !offersAdvancedDrawer(in: .simple)
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(advancedDrawerCaption)

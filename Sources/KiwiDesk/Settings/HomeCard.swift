@@ -18,7 +18,11 @@ struct HomeCard: View {
     var body: some View {
         Button(action: open) {
             VStack(alignment: .leading, spacing: 8) {
-                titleRow
+                // Wash on the title band alone (#760): tinting
+                // the whole card would run the accent through
+                // the live preview below, briefly
+                // misrepresenting the very colours it renders.
+                titleRow.modeRevealWash(modeGated)
                 if let preview = HomeCardPreview.preview(
                     for: destination,
                     model: model
@@ -67,6 +71,22 @@ struct HomeCard: View {
         )
     }
 
+    /// Whether this card would leave the page in Simple — THE
+    /// offer predicate at `.simple`, never a hand-negated copy
+    /// (the one-predicate rule, `HomeCardOrderTests`): the
+    /// Monitors promotion means the same card is mode-gated on a
+    /// laptop and Simple content on a desk, and only the real
+    /// predicate keeps the border stating the same fact as
+    /// presence (#760).
+    private var modeGated: Bool {
+        !HomeCardOrder.isOffered(
+            destination,
+            mode: .simple,
+            displayCount: model.displays.count,
+            editingStoredProfile: model.editingStoredProfile
+        )
+    }
+
     private var titleRow: some View {
         HStack(spacing: 8) {
             SidebarTile(
@@ -109,24 +129,56 @@ struct HomeCard: View {
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
+                // The mode-gated frame speaks the mode's own
+                // colour — the accent at reduced strength, so
+                // the connection to the active Power User
+                // segment is legible (owner, 2026-08-09: a
+                // darker grey read as "different" but not
+                // "which") while hover keeps the full-strength
+                // accent as its own register on the same edge.
+                // Weight still steps too, so hue never carries
+                // alone.
                 .strokeBorder(
                     hovering
                         ? SettingsTheme.accent
-                        : SettingsTheme.hairline
+                        : modeGated
+                            ? SettingsTheme.accent.opacity(
+                                SettingsTheme.modeGatedStrokeOpacity
+                            )
+                            : SettingsTheme.hairline,
+                    lineWidth: modeGated
+                        ? SettingsTheme.containerStrokeModeGated
+                        : SettingsTheme.containerStroke
                 )
             )
     }
 
     private var axValue: String {
-        guard let shout else { return subtitle }
         // One positional frame, not a hard-coded ", " — the
         // joiner between two localized statements is the
         // translator's (CJK wants 、/，).
+        let base =
+            if let shout {
+                L(
+                    "home.card.ax_value",
+                    "%1$@, %2$@",
+                    subtitle,
+                    shout
+                )
+            } else {
+                subtitle
+            }
+        // Sighted users read the mode fact off the frame's
+        // accent and the header segment; VoiceOver hears it
+        // here or nowhere (#760, ui-designer). Reuses the
+        // segment's own label key, so the spoken word and the
+        // switch cannot drift apart.
+        guard modeGated else { return base }
         return L(
             "home.card.ax_value",
             "%1$@, %2$@",
-            subtitle,
-            shout
+            base,
+            L("mode.power_user", "Power User")
         )
     }
 }

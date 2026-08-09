@@ -49,7 +49,12 @@ the eight everyday cards; Power User adds the deeper four (Layout
 Defaults, Monitors, Behavior, Advanced Colors). The switch
 only changes which cards exist — nothing behind it stops
 working, and the Monitors card joins Simple by itself while
-two or more displays are connected. While you have unsaved
+two or more displays are connected. Flipping to Power User
+briefly tints what it just added — the same highlight a search
+result gets — and the cards only Power User shows keep a soft
+green frame, the switch's own colour, so they stay
+recognizable after the tint fades; flipping back to Simple
+simply fades the extras out. While you have unsaved
 edits, the header counts them ("3 unsaved changes"); Save and
 Revert live in the footer.
 

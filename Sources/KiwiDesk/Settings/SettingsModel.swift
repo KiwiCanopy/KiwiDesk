@@ -98,6 +98,19 @@ final class SettingsModel: ObservableObject {
     /// `setSettingsMode`, so it never enters the dirty-tracked
     /// config — same shape and reasoning as `appearance`.
     @Published var settingsMode: SettingsMode = .simple
+    /// True while the mode-reveal wash shows (#760): set by
+    /// `flipSettingsMode` BEFORE the mode publish, so surfaces
+    /// the flip inserts mount already washed, and cleared by the
+    /// timeline it starts. Only the EXPLICIT segment flip
+    /// activates it — `ensureModeAdmits`' implicit promotion
+    /// goes through `setSettingsMode` and stays silent, because
+    /// search owns that landing's choreography (ui-designer,
+    /// 2026-08-09).
+    @Published var modeRevealActive = false
+    /// Cancels a running reveal timeline when a newer flip
+    /// supersedes it, so a rapid Simple→Power-User→Simple→…
+    /// cannot clear the latest wash early.
+    var modeRevealTask: Task<Void, Never>?
     /// Distinct settings the draft changes — the header's
     /// "N unsaved changes" count, recomputed beside `isDirty`
     /// from the same baselines so the two cannot disagree.

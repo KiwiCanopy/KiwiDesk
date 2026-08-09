@@ -14,6 +14,11 @@ struct SettingsHeaderBar: View {
     /// Focuses the back chip when an area is pushed (turn 20:
     /// every shape change names a focus destination).
     @FocusState private var backChipFocused: Bool
+    /// Passed into `flipSettingsMode` so the reveal timeline's
+    /// hold can absorb the fade it drops (#760) — the model has
+    /// no environment of its own.
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     private var destination: SettingsDestination? {
         model.destination
@@ -208,7 +213,14 @@ struct SettingsHeaderBar: View {
             L("home.mode_ax", "Settings mode"),
             selection: Binding(
                 get: { model.settingsMode },
-                set: { model.setSettingsMode($0) }
+                // The EXPLICIT flip — the one entry point that
+                // washes what the flip inserts (#760).
+                set: {
+                    model.flipSettingsMode(
+                        $0,
+                        reduceMotion: reduceMotion
+                    )
+                }
             )
         ) {
             Text(L("mode.simple", "Simple"))

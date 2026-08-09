@@ -212,6 +212,40 @@ enum SettingsTheme {
     static let paletteCardStroke: CGFloat = 1
     static let paletteCardStrokeApplied: CGFloat = 2
 
+    /// The mode-gateable container shapes' border — the three
+    /// that take `modeGated` (`HomeCard`, `SettingsSection`,
+    /// `SettingsDisclosure.card`) — at rest and when their
+    /// PRESENCE is mode-gated, i.e. the container would leave
+    /// the page in Simple (#760). Sibling cards that cannot be
+    /// mode-gated keep `strokeBorder`'s implicit default and
+    /// are deliberately outside this token. The gated frame
+    /// pairs the weight step with the ACCENT at
+    /// `modeGatedStrokeOpacity` — weight alone on the hairline
+    /// was invisible on device, and a stronger neutral said
+    /// "different" without saying which (owner + ui-designer,
+    /// 2026-08-09) — while the weight stays below the DOUBLING
+    /// the two pairs above spend on chosen things: a mode-gated
+    /// card is present, not picked. The flag each site passes
+    /// derives from its own offer predicate evaluated at
+    /// `.simple` — never a hand-negated copy beside the stroke.
+    /// `ModeGatedChromeTests` holds the pair, the predicates
+    /// and the derived membership;
+    /// `ModeGatedFrameSeparationTests` the frame's CVD floors.
+    static let containerStroke: CGFloat = 1
+    static let containerStrokeModeGated: CGFloat = 1.5
+
+    /// The mode-gated frame's accent strength. 0.6 measured,
+    /// not felt (ui-designer, 2026-08-09, Viénot protanopia
+    /// over the composited stroke): 0.5 landed the light-mode
+    /// gated-vs-plain pair at CVD separation 60 — exactly the
+    /// floor — while 0.6 sits at 82/100 (light/dark) from the
+    /// hairline AND 81 from hover's full accent in both
+    /// appearances, the midpoint of the register space; at 0.7
+    /// the hover register collapses to 61.
+    /// `ModeGatedFrameSeparationTests` derives those floors
+    /// from the shipped tokens rather than restating them.
+    static let modeGatedStrokeOpacity: CGFloat = 0.6
+
     /// A display card's stand: the foot as a share of the card's
     /// width and the neck as a share of the foot, each clamped.
     /// Long enough that the card sits ON its foot rather than

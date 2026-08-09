@@ -53,6 +53,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// A `.card` drawer paints its own card and anchors it, so it
     /// ignores this.
     private let scrollHoisted: Bool
+    /// The drawer's presence is mode-gated — it would leave the
+    /// page in Simple (#760). Heavier `.card` stroke, and the
+    /// mode-reveal wash marks the label; call sites derive it
+    /// from their own offer predicate evaluated at `.simple`.
+    private let modeGated: Bool
     /// Call-site expansion state, for a drawer with its own
     /// rules (Gaps force-expands while its values are mixed);
     /// nil means this view owns it.
@@ -68,6 +73,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         chrome: Chrome = .inline(font: nil),
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
+        modeGated: Bool = false,
         @ViewBuilder content: @escaping () -> Content,
         @ViewBuilder accessory: @escaping () -> Accessory
     ) {
@@ -75,6 +81,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         self.childIDs = drawer.childIDs
         self.chrome = chrome
         self.scrollHoisted = scrollHoisted
+        self.modeGated = modeGated
         self.externalExpansion = isExpanded
         self.content = content
         self.accessory = accessory
@@ -85,6 +92,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         chrome: Chrome = .inline(font: nil),
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
+        modeGated: Bool = false,
         @ViewBuilder content: @escaping () -> Content
     ) where Accessory == EmptyView {
         self.init(
@@ -92,6 +100,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             chrome: chrome,
             isExpanded: isExpanded,
             scrollHoisted: scrollHoisted,
+            modeGated: modeGated,
             content: content,
             accessory: { EmptyView() }
         )
@@ -128,7 +137,18 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                             cornerRadius:
                                 SettingsTheme.sectionRadius
                         )
-                        .strokeBorder(SettingsTheme.hairline)
+                        .strokeBorder(
+                            modeGated
+                                ? SettingsTheme.accent.opacity(
+                                    SettingsTheme
+                                        .modeGatedStrokeOpacity
+                                )
+                                : SettingsTheme.hairline,
+                            lineWidth: modeGated
+                                ? SettingsTheme
+                                    .containerStrokeModeGated
+                                : SettingsTheme.containerStroke
+                        )
                     )
                 )
                 .searchAnchorCard(control)
@@ -174,6 +194,10 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                 accessory()
             }
             .searchFlashHeader(control)
+            // The mode-reveal wash shares the label band the
+            // search wash uses (#760), for the same reason: a
+            // whole-group wash would tint the expanded interior.
+            .modeRevealWash(modeGated)
         }
         // Reads only — the reveal fields keep one writer and
         // one clearer (`SettingsView`); an observer that also

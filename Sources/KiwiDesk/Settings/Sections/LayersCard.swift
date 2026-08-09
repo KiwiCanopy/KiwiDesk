@@ -60,8 +60,21 @@ struct LayersCard: View {
     /// someone's own setup from them, which is the failure this
     /// card's earlier draft actually shipped by reading the tier
     /// as `.showMore`.
+    private func offered(in mode: SettingsMode) -> Bool {
+        layersExist || mode == .powerUser
+    }
+
     private var offered: Bool {
-        layersExist || model.settingsMode == .powerUser
+        offered(in: model.settingsMode)
+    }
+
+    /// One predicate, evaluated twice (#760): the card is
+    /// mode-gated exactly when Simple would withhold it — so
+    /// with layers configured it is Simple content and unmarked,
+    /// and creating the first layer drops the weight as a plain
+    /// bookkeeping fact, no wash (ui-designer, 2026-08-09).
+    private var modeGated: Bool {
+        !offered(in: .simple)
     }
 
     /// The selected layer decides what every card BELOW this one
@@ -71,7 +84,8 @@ struct LayersCard: View {
     @ViewBuilder var body: some View {
         if offered {
             SettingsSection(
-                SettingsCatalog.shortcuts.layersCard
+                SettingsCatalog.shortcuts.layersCard,
+                modeGated: modeGated
             ) {
                 VStack(alignment: .leading, spacing: 12) {
                     LayerStripEditor(
