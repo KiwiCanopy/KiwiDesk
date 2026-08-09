@@ -113,6 +113,29 @@ struct ColorPaletteMatchTests {
         #expect(!empty.isApplied(to: TilingSettings()))
     }
 
+    /// Two cards can carry the mark, and the shelf's own primary
+    /// action guarantees it: "Save current colors as…" writes a
+    /// dense extract of the staged config, so a palette saved
+    /// while wearing a bundled one is equal to it and both are
+    /// applied. Pinned rather than prevented — both answers are
+    /// true, and picking a winner would mean telling the user one
+    /// of their own palettes is not the colours they are looking
+    /// at. The user guide says the same in the plural.
+    @Test("A duplicate palette marks alongside its twin")
+    func aDuplicateMarksAlongsideItsTwin() throws {
+        var settings = TilingSettings()
+        let bundled = try #require(PaletteCatalog.authored().first)
+        bundled.apply(to: &settings)
+        // What `saveCurrent` writes: the whole surface, not a
+        // sparse diff.
+        let saved = ColorPalette(
+            name: "Mine",
+            colors: ColorPaletteKeys.extract(from: settings)
+        )
+        #expect(bundled.isApplied(to: settings))
+        #expect(saved.isApplied(to: settings))
+    }
+
     /// A path the settings do not have is a MISS, never a skip.
     /// An imported palette can carry anything, wire keys are
     /// renamed freely pre-release, and a matcher that ignored

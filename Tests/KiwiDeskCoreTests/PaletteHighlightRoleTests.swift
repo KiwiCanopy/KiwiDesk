@@ -16,12 +16,15 @@ import Testing
 /// split; both closed.
 ///
 /// A palette whose primary cannot carry the ring **lightens its
-/// primary** rather than borrowing its secondary, which is what
-/// the second test measures and why Sunset's `#FF375F` became
-/// `#FF8099`: simulated for protanopia, the old hex sat 12.5 from
-/// its own plate over a white wallpaper, so a protanope had no
-/// active marker there at all — the amber ring was covering a
-/// defect rather than expressing a theme.
+/// primary** rather than borrowing its secondary, which is why
+/// Sunset's `#FF375F` became `#FF8099`: simulated for
+/// protanopia the old hex did not clear the floor against its own
+/// plate over a white wallpaper, so a protanope had no active
+/// marker there at all and the amber ring was covering a defect
+/// rather than expressing a theme. `theRetiredSunsetAccentFails`
+/// measures that rather than restating it — three prose copies of
+/// the figure disagreed with each other and with the instrument
+/// before it was pinned here.
 @Suite("Palette highlight role")
 struct PaletteHighlightRoleTests {
     private static let accentPairs = [
@@ -133,6 +136,30 @@ struct PaletteHighlightRoleTests {
             ColorVision.composite("#2C2C2EB3", over: "#000000")
         )
         #expect(onWhite != onBlack)
+    }
+
+    /// The hex #756 retired, kept as a measurement rather than as
+    /// prose. It is the whole argument for lightening Sunset's
+    /// primary instead of leaving the ring a foreign hue, and it
+    /// is the one number a doc comment cannot be trusted with:
+    /// two prose copies and this suite's own docstring each
+    /// carried a different figure, none of them the instrument's.
+    ///
+    /// It also proves the floor is reachable at all — a guard
+    /// asserting `>=` over a set that has never been near the
+    /// bound is a guard nobody has seen fail.
+    @Test("The accent Sunset retired does not clear the floor")
+    func theRetiredSunsetAccentFails() throws {
+        let plate = try #require(
+            ColorVision.composite("#2C2C2EB3", over: "#FFFFFF")
+        )
+        let gap = try #require(
+            ColorVision.separation("#FF375F", plate)
+        )
+        #expect(gap < ColorVision.separationFloor)
+        // Under a fifth of it, which is why this was not a close
+        // call the eye could have settled either way.
+        #expect(gap < ColorVision.separationFloor / 5)
     }
 
     @Test("Every active accent clears its own composited plate")

@@ -18,6 +18,16 @@ struct PaletteShelf: View {
 
     var store: PaletteStore { model.paletteStore }
 
+    /// The staged config's colours, extracted ONCE per pass and
+    /// handed to every tile. Extraction encodes the whole of
+    /// `TilingSettings`, so asking each palette to extract for
+    /// itself would pay that a dozen times per redraw — and this
+    /// shelf redraws on every keystroke in the rename and save
+    /// popovers.
+    private var liveColors: [String: String] {
+        ColorPaletteKeys.extract(from: model.config.settings)
+    }
+
     private let columns = [
         GridItem(.adaptive(minimum: 132), spacing: 12)
     ]
@@ -32,13 +42,19 @@ struct PaletteShelf: View {
                     + "visuals — a one-time paint, not a live link."
             )
         ) {
-            bundledGroup
-            userGroup
+            // Extracted here, once, and handed down: the tiles
+            // all ask the same question of the same config, and
+            // the answer is the expensive half.
+            let live = liveColors
+            bundledGroup(live)
+            userGroup(live)
         }
         .onAppear(perform: reload)
     }
 
-    private var bundledGroup: some View {
+    private func bundledGroup(
+        _ live: [String: String]
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             groupHeader(L("palettes.bundled", "Bundled"))
             LazyVGrid(
@@ -59,18 +75,20 @@ struct PaletteShelf: View {
                         // once glow is already on: nothing left to
                         // pair.
                         VStack(alignment: .leading, spacing: 4) {
-                            chip(palette, builtin: true)
+                            chip(palette, builtin: true, live: live)
                             neonGlowLink
                         }
                     } else {
-                        chip(palette, builtin: true)
+                        chip(palette, builtin: true, live: live)
                     }
                 }
             }
         }
     }
 
-    private var userGroup: some View {
+    private func userGroup(
+        _ live: [String: String]
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 groupHeader(L("palettes.mine", "My palettes"))
@@ -101,7 +119,7 @@ struct PaletteShelf: View {
                 spacing: 12
             ) {
                 ForEach(userPalettes, id: \.name) { palette in
-                    chip(palette, builtin: false)
+                    chip(palette, builtin: false, live: live)
                         .contextMenu { userMenu(palette) }
                 }
                 addTile
@@ -158,9 +176,10 @@ struct PaletteShelf: View {
     /// which is why no third "modified" state exists.
     private func chip(
         _ palette: ColorPalette,
-        builtin: Bool
+        builtin: Bool,
+        live: [String: String]
     ) -> some View {
-        let applied = palette.isApplied(to: model.config.settings)
+        let applied = palette.isApplied(matching: live)
         return Button {
             model.applyPalette(palette)
         } label: {
@@ -245,19 +264,21 @@ struct PaletteShelf: View {
             // The name line still renders, blank, so the tile
             // keeps the grid's height.
             PaletteTile(name: " ", dashed: true) {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(SettingsTheme.sunken)
-                    .overlay(
-                        VStack(spacing: 4) {
-                            Image(systemName: "plus")
-                                .font(.title2)
-                            Text(saveCurrentLabel)
-                                .font(.caption2)
-                                .multilineTextAlignment(.center)
-                        }
-                        .foregroundStyle(SettingsTheme.ink3)
-                        .padding(4)
-                    )
+                RoundedRectangle(
+                    cornerRadius: PaletteSceneThumbnail.plateRadius
+                )
+                .fill(SettingsTheme.sunken)
+                .overlay(
+                    VStack(spacing: 4) {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                        Text(saveCurrentLabel)
+                            .font(.caption2)
+                            .multilineTextAlignment(.center)
+                    }
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(4)
+                )
             }
         }
         .buttonStyle(.plain)
@@ -267,55 +288,5 @@ struct PaletteShelf: View {
 
     private var saveCurrentLabel: String {
         L("palettes.save_current", "Save current colors as…")
-    }
-
-    private var savePopover: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            TextField(
-                L("palettes.name_placeholder", "Palette name"),
-                text: $saveName
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 220)
-            .onSubmit(saveCurrent)
-            if store.isBuiltinName(trimmed(saveName)) {
-                Text(
-                    L(
-                        "palettes.reserved",
-                        "That name is a built-in palette — "
-                            + "choose another."
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
-            }
-            HStack {
-                Spacer()
-                Button(saveLabel, action: saveCurrent)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canSave)
-            }
-        }
-        .padding(12)
-    }
-
-    private func renamePopover(
-        _ palette: ColorPalette
-    ) -> some View {
-        HStack {
-            TextField(
-                L("palettes.name_placeholder", "Palette name"),
-                text: $renameDraft
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 160)
-            .onSubmit { renamePalette(from: palette.name) }
-            Button(L("palettes.rename_confirm", "Rename")) {
-                renamePalette(from: palette.name)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canRename(from: palette.name))
-        }
-        .padding(10)
     }
 }

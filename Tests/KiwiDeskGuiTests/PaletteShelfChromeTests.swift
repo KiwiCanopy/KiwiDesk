@@ -40,14 +40,30 @@ struct PaletteShelfChromeTests {
     @Test("the shelf computes the applied answer")
     func shelfComputesTheAppliedAnswer() throws {
         let shelf = try squashed("PaletteShelf.swift")
+        // Three claims, because the answer is now computed in
+        // two steps: the colours come from the config the page
+        // is EDITING, they are extracted once per pass, and each
+        // tile is asked against that one map. Keyed on the use
+        // sites — the `liveColors` declaration alone would be
+        // satisfied by a property nothing reads.
         #expect(
             shelf.contains(
-                "palette.isApplied(to:model.config.settings)"
+                "ColorPaletteKeys.extract(from:model.config"
+                    + ".settings)"
             ),
             Comment(
                 rawValue:
-                    "the shelf no longer asks the live colours "
-                    + "which palette is applied"
+                    "the shelf no longer reads the staged "
+                    + "config's colours"
+            )
+        )
+        #expect(shelf.contains("letlive=liveColors"))
+        #expect(
+            shelf.contains("palette.isApplied(matching:live)"),
+            Comment(
+                rawValue:
+                    "the tiles no longer ask which palette is "
+                    + "applied"
             )
         )
         // VoiceOver's own answer, not only the glyph.
@@ -95,6 +111,16 @@ struct PaletteShelfChromeTests {
             tile.contains("L(\"palettes.applied\",\"Applied\")")
         )
         #expect(tile.contains(".accessibilityHidden(!isApplied)"))
+        // The add tile's label is the diff's other newly-authored
+        // accessibility name, and it had no needle beside its
+        // twin. Its button draws no text of its own — the label
+        // lives inside the plate — so dropping this leaves
+        // VoiceOver deriving a name from whatever the plate
+        // happens to contain.
+        let shelf = try squashed("PaletteShelf.swift")
+        #expect(
+            shelf.contains(".accessibilityLabel(saveCurrentLabel)")
+        )
     }
 
     /// Both tiles render through `PaletteTile`, which is what
@@ -172,8 +198,8 @@ struct PaletteShelfChromeTests {
         // shipping on two rows of this very file, and the guard
         // was green over its own violation.
         for file in [
-            "PaletteShelf.swift", "PaletteTile.swift",
-            "PaletteSceneThumbnail.swift",
+            "PaletteShelf.swift", "PaletteShelf+Popovers.swift",
+            "PaletteTile.swift", "PaletteSceneThumbnail.swift",
         ] {
             let source = try squashed(file)
             for ink in [".secondary", ".tertiary"] {

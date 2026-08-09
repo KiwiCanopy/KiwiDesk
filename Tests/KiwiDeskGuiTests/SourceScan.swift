@@ -85,14 +85,19 @@ enum SourceScan {
     /// first would open a comment there and swallow source until
     /// the next `*/`.
     ///
-    /// Neither half respects string literals, and the residue is
-    /// stated rather than chased because the direction differs by
-    /// consumer: a `/*` inside a literal blanks the rest of the
-    /// file, which reds a positive needle loudly and lets a
-    /// forbidding or counting scan pass SILENTLY. `Sources/`
-    /// carries no `/* */` span and no unbalanced opener at all
-    /// (audited 2026-08-09), so this is latent rather than live —
-    /// weigh it when a needle follows a literal on one line.
+    /// The block half skips string literals; the LINE half still
+    /// does not, and that residue is stated rather than chased
+    /// because it predates this and fails in the safe direction
+    /// for the needles that exist: a `//` inside a literal cuts
+    /// the rest of that one line, never the rest of the file.
+    /// Its reach is a needle following such a literal on the same
+    /// line — `ServiceManager.swift` carries two, harmlessly.
+    ///
+    /// What is NOT left to a claim is the whole-file truncation
+    /// this used to cause: `SourceScanCommentTests` strips every
+    /// Swift file under both scanned trees and requires the line
+    /// count back, so a file that goes dark reds instead of
+    /// reading short in silence.
     ///
     /// A `//` inside a string literal is what triggers it, and it
     /// is NOT hypothetical: `ServiceManager.swift` carries two (a
@@ -119,24 +124,117 @@ enum SourceScan {
 
     /// Removes each `/* … */` span, keeping the newlines inside
     /// it so line-based consumers still count lines correctly.
-    /// An unterminated `/*` takes the rest of the file, which is
-    /// what the compiler does with it too.
+    ///
+    /// **Skips string literals**, and that is the whole reason
+    /// this is a character walk rather than a `range(of:)` loop.
+    /// A naive walk truncated three suites in `Tests/` the day it
+    /// landed — `entry.hasSuffix("/**")`,
+    /// `"Sources/KiwiDeskCore/*"` and `#""$LOCALES"/*.json"#` each
+    /// open a block comment that never closes — and one of them
+    /// was this file, whose own `"/*"` and `"*/"` literals blanked
+    /// 146 characters of the function you are reading. A
+    /// forbidding or counting scan cannot red for having read
+    /// less, so all of it was silent.
+    ///
+    /// Spans **nest**, as they do in Swift, so
+    /// `/* outer /* inner */ tail */` leaves nothing behind
+    /// rather than stranding `tail */` for a needle to match.
+    /// An unterminated `/*` outside a literal takes the rest of
+    /// the file, which is what the compiler does with it too.
     private static func stripBlockComments(
         _ source: String
     ) -> String {
         var out = ""
-        var rest = Substring(source)
-        while let open = rest.range(of: "/*") {
-            out += rest[..<open.lowerBound]
-            let after = rest[open.upperBound...]
-            guard let close = after.range(of: "*/") else {
-                return out
+        var depth = 0
+        let text = Array(source)
+        var i = 0
+        while i < text.count {
+            if depth == 0, let end = literalEnd(text, from: i) {
+                out += String(text[i..<end])
+                i = end
+                continue
             }
-            out += after[..<close.lowerBound]
-                .filter { $0 == "\n" }
-            rest = after[close.upperBound...]
+            if matches(text, at: i, "/*") {
+                depth += 1
+                i += 2
+                continue
+            }
+            if depth > 0, matches(text, at: i, "*/") {
+                depth -= 1
+                i += 2
+                continue
+            }
+            // Newlines inside a span are kept so a line-based
+            // consumer still counts the file's real lines.
+            if depth == 0 || text[i] == "\n" {
+                out.append(text[i])
+            }
+            i += 1
         }
-        return out + rest
+        return out
+    }
+
+    /// The index just past the string literal starting at `i`, or
+    /// nil when nothing starts there. Handles the three shapes
+    /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
+    /// the raw `#"…"#` — because each of them can legally carry a
+    /// `/*` that is not a comment.
+    private static func literalEnd(
+        _ text: [Character],
+        from i: Int
+    ) -> Int? {
+        if matches(text, at: i, "#\"") {
+            return close(text, from: i + 2, on: "\"#", escaped: false)
+        }
+        if matches(text, at: i, "\"\"\"") {
+            return close(
+                text,
+                from: i + 3,
+                on: "\"\"\"",
+                escaped: true
+            )
+        }
+        if text[i] == "\"" {
+            return close(text, from: i + 1, on: "\"", escaped: true)
+        }
+        return nil
+    }
+
+    /// Scans to `delimiter`, honouring `\` escapes when the shape
+    /// has them. An unterminated literal ends at the file's end,
+    /// which keeps the walk total.
+    private static func close(
+        _ text: [Character],
+        from start: Int,
+        on delimiter: String,
+        escaped: Bool
+    ) -> Int {
+        var i = start
+        while i < text.count {
+            if escaped, text[i] == "\\" {
+                i += 2
+                continue
+            }
+            if matches(text, at: i, delimiter) {
+                return i + delimiter.count
+            }
+            i += 1
+        }
+        return text.count
+    }
+
+    private static func matches(
+        _ text: [Character],
+        at i: Int,
+        _ needle: String
+    ) -> Bool {
+        let chars = Array(needle)
+        guard i + chars.count <= text.count else { return false }
+        for (offset, character) in chars.enumerated()
+        where text[i + offset] != character {
+            return false
+        }
+        return true
     }
 
     static func swiftSources(

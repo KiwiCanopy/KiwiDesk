@@ -2844,8 +2844,11 @@ don't assume from tone.
 - **The two accents must separate on an axis red-green vision
   loss *preserves* — lightness, or blue↔yellow.** (#470,
   widened catalog-wide by #511. **Enforced.**)
-  `active_item_color` / `highlight_color` /
-  `border.focused_color` share the *primary* hue;
+  The primary hue is the one `active_item_color`,
+  `highlight_color` and `border.focused_color` all carry — which
+  bullet states that as a rule, and what enforces it, is the
+  focus-is-one-colour entry below; this one is about the pair
+  that must SEPARATE.
   `space_bar.focused_item_color` is the second signal, and the
   test it must pass is not "a different hue" but "still a
   different colour after the loss". Exactly two axes survive.
@@ -2915,24 +2918,25 @@ don't assume from tone.
   that ring plus one tinted glyph is the *entire* active state —
   the item's own fill is clear. It is the largest mark either bar
   makes, so a palette that gives it the second hue has the
-  subordinate colour outshouting the item it qualifies. The
-  second hue keeps `drag.drop_zone.*` and
-  `space_bar.focused_item_color`, where it reads as a distinct
-  signal rather than a competing one.
+  subordinate colour outshouting the item it qualifies. Neither
+  palette loses the hue it gave up: both still carry it on
+  `drag.drop_zone.*`, where a second signal reads as distinct
+  rather than as competing. Where the *focused* accent sits is
+  the separation clause above's decision, not this one's.
 - **A primary that cannot carry the ring is LIGHTENED, never
   swapped for the secondary.** Sunset is why the rule is phrased
-  that way: its `#FF375F` simulated for protanopia sat 12 from
-  its own fill composited over a white wallpaper — a fifth of the
-  separation floor — so the ring was covering a defect rather
-  than expressing a theme, and the active *glyph*, drawn in the
-  same hex, was already unreadable there. Swapping the ring's hue
-  would have left the glyph exactly as invisible. One lightness
-  step (`#FF8099`, hue and saturation untouched) fixes both, and
-  the palette keeps its identity. The measurement that decides
-  this is an accent against **its own composited plate at both
-  wallpaper extremes**, because a translucent fill sweeps the
-  whole grey range as the wallpaper changes and a hue can clear
-  one end while failing the other.
+  that way: its `#FF375F` simulated for protanopia sat 11 from
+  its own fill composited over a white wallpaper — under a fifth
+  of the separation floor — so the ring was covering a defect
+  rather than expressing a theme, and the active *glyph*, drawn
+  in the same hex, was already unreadable there. Swapping the
+  ring's hue would have left the glyph exactly as invisible.
+  One lightness step (`#FF8099`, hue and saturation untouched)
+  fixes both, and the palette keeps its identity. The measurement
+  that decides this is an accent against **its own composited
+  plate at both wallpaper extremes**, because a translucent fill
+  sweeps the whole grey range as the wallpaper changes and a hue
+  can clear one end while failing the other.
 - **`border.unfocused_color` is always near-neutral grey**,
   low saturation, ~35–60 % alpha — it must never compete with
   the focused ring.
@@ -3840,6 +3844,35 @@ copy that also painted colors would silently overwrite a
 palette the user applied on purpose, the same category of
 surprise the palette entry below bans in the other direction.
 (Owner ruling 2026-08-02, during Phase 2 device review.)
+
+**"Which palette am I on" is computed, never remembered.**
+(#757.) The shelf marks the card whose colors the config it is
+editing currently carries — it stores no "last applied palette"
+anywhere, and there is deliberately no third *modified* state
+between applied and not.
+
+The cheap alternative is to record the name on apply, and it is
+wrong for the reason the one-shot paint below exists: applying is
+a paint, not a link, so the moment a user edits one hex in
+Advanced Colors the stored name describes something that is no
+longer on screen. A picker whose entire job is to show state
+would then be the one surface in the window that lies about it —
+the same defect the live-preview rule names, one shelf over. The
+computed answer cannot: the mark's *disappearance* is the honest
+report of a hand edit, which is why no "modified" state is
+needed to explain one.
+
+Two consequences worth stating so they are not read as bugs.
+**No card marked is a normal, informative state** — it means the
+colors are the user's own. And **more than one card can be
+marked**, because the question is "do these colors say what this
+palette says", not "which card was clicked": save your current
+colors while wearing a bundled palette and your copy IS that
+palette. Ranking them would mean telling the user that one of
+their own palettes is not the colors they are looking at.
+`ColorPaletteMatchTests` holds both, and the comparison is by
+parsed color rather than by spelling, so re-typing a palette's
+own hex in lower case does not read as leaving the theme.
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to

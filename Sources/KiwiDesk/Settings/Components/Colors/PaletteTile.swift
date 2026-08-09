@@ -16,9 +16,11 @@ import SwiftUI
 /// Same colour, same weight, same radius, so the two read as one
 /// grid.
 struct PaletteTile<Plate: View>: View {
-    /// The name line. On the add tile this is its own label,
-    /// which is why the tile takes a string rather than a
-    /// palette.
+    /// The name line. A string rather than a palette because
+    /// the add tile has no palette to name — it passes a blank,
+    /// keeping the line's HEIGHT so the grid stays even, and
+    /// carries its own label inside its plate where the text can
+    /// wrap.
     let name: String
     /// The muted second line ("Built-in"). Absent still draws the
     /// line — an empty caption must not shorten one tile in a row
@@ -36,10 +38,15 @@ struct PaletteTile<Plate: View>: View {
         PaletteSceneThumbnail.baseHeight
     }
 
-    /// Padding between the frame and the plate. The frame's
-    /// radius minus this is the plate's own radius, which is what
-    /// makes the two rounds concentric rather than merely nested.
-    private static var inset: CGFloat { 6 }
+    /// Padding between the frame and the plate — DERIVED, so
+    /// the concentric relation is arithmetic rather than a claim
+    /// two files apart: the frame's radius minus the plate's own
+    /// is exactly the gap that makes the rounds concentric, and
+    /// retuning either radius carries this with it.
+    private static var inset: CGFloat {
+        SettingsTheme.disclosureRadius
+            - PaletteSceneThumbnail.plateRadius
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

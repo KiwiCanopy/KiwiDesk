@@ -20,6 +20,13 @@ struct PaletteSceneThumbnail: View {
     /// the wrong factor the day the tile is retuned.
     static let baseHeight: CGFloat = 72
 
+    /// The plate's corner at `baseHeight`. `PaletteTile` derives
+    /// its padding from this so the tile's frame and the plate
+    /// inside it stay concentric — nested rounds that are not
+    /// read as a mistake, and the relation cannot break by
+    /// retuning either number alone.
+    static let plateRadius: CGFloat = 6
+
     /// Tile height on the shelf; the page-level scene passes a
     /// larger one. Every element inside is laid out relative to
     /// the frame, so one number scales the whole picture.
@@ -43,8 +50,10 @@ struct PaletteSceneThumbnail: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6 * scale)
-                .fill(SettingsTheme.sunken)
+            RoundedRectangle(
+                cornerRadius: Self.plateRadius * scale
+            )
+            .fill(SettingsTheme.sunken)
             VStack(spacing: 6 * scale) {
                 barStrip
                 HStack(spacing: 6 * scale) {

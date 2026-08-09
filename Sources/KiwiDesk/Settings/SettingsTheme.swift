@@ -144,6 +144,29 @@ enum SettingsTheme {
 
     // MARK: - Shapes
 
+    // The metrics, and the boundary they are admitted on —
+    // stated here, at the head of the section, so the next area
+    // meets it by position rather than by archaeology (#758
+    // argued it inside one docstring further down, which the
+    // second area then cited as "the ruling above" while
+    // standing above it).
+    //
+    // AREA-SCOPED numbers in an app-wide theme, deliberately: a
+    // number some arithmetic derives from lives BESIDE that
+    // arithmetic (the Monitors picture's capacity maths owns
+    // its own), while pure chrome — strokes, radii, stands,
+    // things nothing computes on — lives here with the radii so
+    // one restyle is one file.
+    //
+    // The colour tokens' totality guard cannot see these: it
+    // parses `= token(` (`SettingsThemeTokenTests`,
+    // `SettingsThemeWiringTests`). Metrics are covered by their
+    // area's own chrome suite instead —
+    // `MonitorsChromeWiringTests`, `PaletteShelfChromeTests` —
+    // and `SettingsThemeMetricTests` is what refuses a metric
+    // that belongs to neither, so a third area cannot add one
+    // and quietly leave it unguarded.
+
     /// A Home card's corner. The prototype's cards are flat —
     /// fill plus hairline, no shadow — so the radius carries the
     /// softness a shadow would have.
@@ -192,13 +215,10 @@ enum SettingsTheme {
     /// alone reads as a plinth, and neighbouring floored cards'
     /// feet fuse into one rail (ui-designer, 2026-08-09).
     ///
-    /// These are AREA-SCOPED metrics in the app-wide theme, on
-    /// a stated boundary: a number the picture's capacity
-    /// arithmetic derives from lives beside that arithmetic in
-    /// `MonitorCardChips`; pure chrome — strokes and stands
-    /// nothing computes on — lives here with the radii. The
-    /// colour suites cannot see these, so their wiring guard is
-    /// `MonitorsChromeWiringTests`' themed-metrics test.
+    /// The section header states the boundary these are
+    /// admitted on; `MonitorsChromeWiringTests`' themed-metrics
+    /// test is this pair's wiring guard, the capacity arithmetic
+    /// they are NOT part of living in `MonitorCardChips`.
     static let monitorStandScale: CGFloat = 0.52
     static let monitorStandMin: CGFloat = 44
     static let monitorStandMax: CGFloat = 230
