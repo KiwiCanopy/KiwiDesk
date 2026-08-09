@@ -30,10 +30,11 @@ import Testing
 /// the modifier, so no substring count can bind the two. The
 /// seal silently suppresses such a button's system red (#770's
 /// hand-pairing did exactly that on LayerStripEditor's delete,
-/// carried into the seal by #771 and caught in its review);
-/// what keeps the class closed is that a
-/// destructive button styled RAW must name itself in
-/// `borderedExempt`, which is where a reviewer meets it.
+/// carried into the seal by #771 and caught in its review).
+/// Only the COMPLIANT path is registered — a destructive
+/// button styled raw names itself in `borderedExempt` — so a
+/// misrouted one is caught by review and the owner's eye, not
+/// by any needle here.
 @Suite("Settings bordered seal")
 struct SettingsBorderedSealTests {
     private var settingsDir: URL {
@@ -223,8 +224,10 @@ struct SettingsBorderedSealTests {
                         + "exemption goes with it."
                 )
             )
+            // Dot-free like `rawBorderedStylesAreExempt`'s
+            // needle — one concept, one spelling rule.
             #expect(
-                source.occurrences(of: ".buttonStyle(.bordered)")
+                source.occurrences(of: "buttonStyle(.bordered)")
                     >= entry.count,
                 Comment(
                     rawValue:
