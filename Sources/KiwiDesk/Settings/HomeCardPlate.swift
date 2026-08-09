@@ -231,9 +231,13 @@ struct HomeCardSpacesTile: View {
             active
             ? palette?.fill ?? LayoutSchematic.fill
             : palette?.ghostFill ?? Color.secondary.opacity(0.15)
+        // Full accent on the forward pane, not the family's
+        // 0.6 tile stroke: beside the Gaps ring's unified
+        // accent the softer alpha read as a third green
+        // (owner, 2026-08-09).
         let stroke: Color =
             active
-            ? palette?.stroke ?? LayoutSchematic.stroke
+            ? palette?.accent ?? SettingsTheme.accent
             : palette?.ghostStroke
                 ?? Color.secondary.opacity(0.5)
         // Opaque base first: the ghosts overlap, and
