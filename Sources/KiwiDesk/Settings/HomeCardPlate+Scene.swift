@@ -70,10 +70,14 @@ struct HomeCardGapsTile: View {
     }
 
     /// A window pane: opaque plate base under a quiet ghost
-    /// fill — opaque so the gap wash beneath never tints the
-    /// windows, only the gaps — ringed with the real border
-    /// colour at the remapped width, the focused window always
-    /// and its neighbours only while unfocused borders are on.
+    /// fill, ringed at the remapped real width — the focused
+    /// window always, its neighbours only while unfocused
+    /// borders are on. The ring speaks the PALETTE accent, not
+    /// `border.focused_color` (owner ruled unify, 2026-08-09):
+    /// side by side with the other tiles' accent marks, two
+    /// greens on one Home read as drift, so the width and the
+    /// presence stay the real readouts and the colour joins the
+    /// plate family's one voice.
     @ViewBuilder
     private func pane(focused: Bool) -> some View {
         let border = settings.borderStyle
@@ -93,11 +97,12 @@ struct HomeCardGapsTile: View {
                 if ringed {
                     RoundedRectangle(cornerRadius: 4)
                         .strokeBorder(
-                            Color(
-                                kiwiHex: focused
-                                    ? border.focusedColor
-                                    : border.unfocusedColor
-                            ),
+                            focused
+                                ? palette?.accent
+                                    ?? SettingsTheme.accent
+                                : palette?.ghostStroke
+                                    ?? Color.secondary
+                                    .opacity(0.5),
                             lineWidth: strokeWidth
                         )
                 }
