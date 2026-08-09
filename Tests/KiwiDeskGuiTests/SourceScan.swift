@@ -85,26 +85,22 @@ enum SourceScan {
     /// first would open a comment there and swallow source until
     /// the next `*/`.
     ///
-    /// The block half skips string literals; the LINE half still
-    /// does not, and that residue is stated rather than chased
-    /// because it predates this and fails in the safe direction
-    /// for the needles that exist: a `//` inside a literal cuts
-    /// the rest of that one line, never the rest of the file.
-    /// Its reach is a needle following such a literal on the same
-    /// line — `ServiceManager.swift` carries two, harmlessly.
+    /// The block half skips string literals; the LINE half does
+    /// not, and that residue predates this and stays: a `//`
+    /// inside a literal cuts the rest of that one line. It is
+    /// not hypothetical — `ServiceManager.swift` carries two (a
+    /// plist DOCTYPE and a URL) — and it is harmless to every
+    /// current consumer only because no needle follows them on
+    /// the same line, which is luck rather than design. Weigh it
+    /// when adding a needle. What that residue must NOT do is
+    /// widen: an unbalanced quote it leaves behind used to send
+    /// the block walk to EOF, which is why `close` refuses an
+    /// unterminated literal.
     ///
-    /// What is NOT left to a claim is the whole-file truncation
-    /// this used to cause: `SourceScanCommentTests` strips every
-    /// Swift file under both scanned trees and requires the line
-    /// count back, so a file that goes dark reds instead of
-    /// reading short in silence.
-    ///
-    /// A `//` inside a string literal is what triggers it, and it
-    /// is NOT hypothetical: `ServiceManager.swift` carries two (a
-    /// plist DOCTYPE and a URL). That file is harmless to every
-    /// current consumer because no guard needle follows them on
-    /// the same line — which is luck, not design, so weigh it
-    /// when adding a needle.
+    /// `SourceScanCommentTests` holds the whole-file property
+    /// this once broke — every line carrying no comment marker
+    /// survives verbatim — because a scan handed less source
+    /// than it thinks cannot red on its own.
     static func stripComments(_ source: String) -> String {
         let lined =
             source
@@ -154,12 +150,12 @@ enum SourceScan {
                 i = end
                 continue
             }
-            if matches(text, at: i, "/*") {
+            if matches(text, at: i, openSpan) {
                 depth += 1
                 i += 2
                 continue
             }
-            if depth > 0, matches(text, at: i, "*/") {
+            if depth > 0, matches(text, at: i, closeSpan) {
                 depth -= 1
                 i += 2
                 continue
@@ -183,32 +179,46 @@ enum SourceScan {
         _ text: [Character],
         from i: Int
     ) -> Int? {
-        if matches(text, at: i, "#\"") {
-            return close(text, from: i + 2, on: "\"#", escaped: false)
+        if matches(text, at: i, rawQuote) {
+            return close(
+                text,
+                from: i + 2,
+                on: rawEnd,
+                escaped: false
+            )
         }
-        if matches(text, at: i, "\"\"\"") {
+        if matches(text, at: i, tripleQuote) {
             return close(
                 text,
                 from: i + 3,
-                on: "\"\"\"",
+                on: tripleQuote,
                 escaped: true
             )
         }
         if text[i] == "\"" {
-            return close(text, from: i + 1, on: "\"", escaped: true)
+            return close(text, from: i + 1, on: quote, escaped: true)
         }
         return nil
     }
 
     /// Scans to `delimiter`, honouring `\` escapes when the shape
-    /// has them. An unterminated literal ends at the file's end,
-    /// which keeps the walk total.
+    /// has them. **Nil when the delimiter never arrives**, so the
+    /// caller treats the quote as an ordinary character and keeps
+    /// stripping.
+    ///
+    /// That arm is not defensive coding, it is the fix for a
+    /// defect this file's own line half creates: the line pass
+    /// cuts `"https://…"` at the `//` and leaves the opening
+    /// quote unbalanced, so a literal walk that ran to EOF would
+    /// copy the rest of the file verbatim and strip no comments
+    /// in it at all. Seven files in `Sources/` are in exactly
+    /// that state, two of them in trees the Settings guards scan.
     private static func close(
         _ text: [Character],
         from start: Int,
-        on delimiter: String,
+        on delimiter: [Character],
         escaped: Bool
-    ) -> Int {
+    ) -> Int? {
         var i = start
         while i < text.count {
             if escaped, text[i] == "\\" {
@@ -220,22 +230,32 @@ enum SourceScan {
             }
             i += 1
         }
-        return text.count
+        return nil
     }
 
+    /// Takes the needle as characters rather than a `String`:
+    /// this runs up to twice per character of every file every
+    /// scan guard reads, and an `Array(needle)` inside it cost
+    /// millions of small allocations per suite.
     private static func matches(
         _ text: [Character],
         at i: Int,
-        _ needle: String
+        _ needle: [Character]
     ) -> Bool {
-        let chars = Array(needle)
-        guard i + chars.count <= text.count else { return false }
-        for (offset, character) in chars.enumerated()
+        guard i + needle.count <= text.count else { return false }
+        for (offset, character) in needle.enumerated()
         where text[i + offset] != character {
             return false
         }
         return true
     }
+
+    private static let openSpan: [Character] = ["/", "*"]
+    private static let closeSpan: [Character] = ["*", "/"]
+    private static let rawQuote: [Character] = ["#", "\""]
+    private static let rawEnd: [Character] = ["\"", "#"]
+    private static let tripleQuote: [Character] = ["\"", "\"", "\""]
+    private static let quote: [Character] = ["\""]
 
     static func swiftSources(
         under directory: URL

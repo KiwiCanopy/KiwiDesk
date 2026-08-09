@@ -121,6 +121,12 @@ struct SettingsThemeMetricTests {
         }
     }
 
+    /// Vacuous while `deferred` is empty, deliberately and
+    /// stated rather than hidden: only the file floor is live
+    /// today. It ships now so a metric deferred later meets a
+    /// working check instead of an author remembering to write
+    /// one — the colour half needed exactly this list from its
+    /// first day.
     @Test("a deferred metric really has no consumer")
     func deferredMetricsAreUnused() throws {
         var drawn: [String] = []

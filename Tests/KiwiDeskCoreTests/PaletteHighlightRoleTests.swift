@@ -91,13 +91,6 @@ struct PaletteHighlightRoleTests {
         )
     }
 
-    /// The measurement the rule above rests on: the active accent
-    /// has to separate from the bar it is drawn ON, and the bar
-    /// is translucent, so what it is drawn on is the fill
-    /// composited over the user's wallpaper. Both extremes,
-    /// because a mid-grey plate sweeps between them as the
-    /// wallpaper changes and a hue can pass one end while failing
-    /// the other.
     /// The instrument, before the measurement that uses it.
     ///
     /// Every number in the test below flows through
@@ -157,11 +150,22 @@ struct PaletteHighlightRoleTests {
             ColorVision.separation("#FF375F", plate)
         )
         #expect(gap < ColorVision.separationFloor)
-        // Under a fifth of it, which is why this was not a close
-        // call the eye could have settled either way.
-        #expect(gap < ColorVision.separationFloor / 5)
+        // And far under it, which is why this was not a close
+        // call the eye could have settled either way. A literal
+        // rather than a fraction of the floor: this measures a
+        // RETIRED hex and cannot move, so tying it to a live
+        // tunable would red this test the day the floor is
+        // retuned for reasons that have nothing to do with it.
+        #expect(gap < 12)
     }
 
+    /// The measurement the rule above rests on: the active accent
+    /// has to separate from the bar it is drawn ON, and the bar
+    /// is translucent, so what it is drawn on is the fill
+    /// composited over the user's wallpaper. Both extremes,
+    /// because a mid-grey plate sweeps between them as the
+    /// wallpaper changes and a hue can pass one end while failing
+    /// the other.
     @Test("Every active accent clears its own composited plate")
     func accentSeparatesFromItsPlate() throws {
         #expect(!PaletteCatalog.authored().isEmpty)

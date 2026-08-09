@@ -65,39 +65,73 @@ struct SourceScanCommentTests {
         #expect(!stripped.contains("swallowed()"))
     }
 
-    /// The canary that would have caught the shipped defect, and
-    /// the reason this suite is not three unit tests.
+    /// Files that legitimately carry a `/* … */` span, and whose
+    /// interior lines the stripper is therefore SUPPOSED to
+    /// remove. Empty, and the emptiness is the point: the repo
+    /// writes `//`. A file joining this list is opting out of the
+    /// check below, so it needs a reason.
+    private let usesBlockComments: Set<String> = []
+
+    /// The canary, and the reason this suite is not three unit
+    /// tests: a scan handed less source than it thinks cannot go
+    /// red on its own, so something has to measure the darkness
+    /// from outside.
     ///
-    /// Balanced stripping keeps every newline it removes text
-    /// from, so the stripped form of a real file has exactly as
-    /// many lines as the file. A truncation is precisely a loss
-    /// of lines — which is what a consumer cannot see and this
-    /// can. Scans both trees, because the consumers do: a guard
-    /// reading `Tests/` is what went dark.
-    @Test("No file in either tree strips short")
-    func nothingStripsShort() throws {
+    /// It measures it **directly** — every line carrying no
+    /// comment marker survives verbatim — after the first cut
+    /// keyed on line COUNT, which could not fail: the walk
+    /// preserves newlines inside a span by construction, so no
+    /// input can strip short. Deleting the string-literal skip,
+    /// which is the defect this suite exists for, left 72% of
+    /// `CiPathFilterTests.swift` dark with that canary green on
+    /// all 1165 files (code review, 2026-08-09).
+    ///
+    /// Scans both trees, because the consumers do: the guards
+    /// reading `Tests/` are the ones that went dark.
+    @Test("No line without a comment marker is ever dropped")
+    func nothingGoesDark() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         var scanned = 0
         for tree in ["Sources", "Tests"] {
             let files = try SourceScan.swiftSources(
                 under: root.appendingPathComponent(tree)
             )
-            for file in files {
+            for file in files
+            where !usesBlockComments.contains(
+                file.lastPathComponent
+            ) {
                 let source = try String(
                     contentsOf: file,
                     encoding: .utf8
                 )
-                let stripped = SourceScan.stripComments(source)
-                #expect(
-                    stripped.filter { $0 == "\n" }.count
-                        == source.filter { $0 == "\n" }.count,
-                    Comment(
-                        rawValue:
-                            "\(file.lastPathComponent) strips "
-                            + "short — a scan of it reads part "
-                            + "of the file and cannot tell"
-                    )
+                // Membership over the stripped file's own
+                // lines: a substring search per line turned this
+                // into a 20-second suite over 1165 files.
+                let kept = Set(
+                    SourceScan.stripComments(source)
+                        .split(separator: "\n")
                 )
+                for line in source.split(separator: "\n")
+                where !line.contains("//")
+                    && !line.contains("/*")
+                    && !line.contains("*/")
+                    && !line.trimmingCharacters(
+                        in: .whitespaces
+                    ).isEmpty
+                {
+                    let lost = line.trimmingCharacters(
+                        in: .whitespaces
+                    )
+                    #expect(
+                        kept.contains(line),
+                        Comment(
+                            rawValue:
+                                "\(file.lastPathComponent) lost "
+                                + "`\(lost)` — a scan of it reads "
+                                + "part of the file and cannot tell"
+                        )
+                    )
+                }
                 scanned += 1
             }
         }
