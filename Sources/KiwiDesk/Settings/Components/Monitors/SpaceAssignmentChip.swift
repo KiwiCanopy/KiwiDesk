@@ -125,7 +125,12 @@ struct SpaceAssignmentChip: View {
                 // longer.
                 .frame(maxWidth: 120, alignment: .leading)
         }
-        .padding(.horizontal, 8)
+        .padding(.leading, 8)
+        // The clear badge rides the trailing-top corner, so a
+        // pinned chip's content earns extra trailing room — at
+        // the symmetric 8 the disc sat ON the space number
+        // (owner, 2026-08-09).
+        .padding(.trailing, kind == .auto ? 8 : 14)
         .padding(.vertical, 3)
         // Fill says EXPLICIT, outline says automatic — shape, not
         // opacity. A dimmed chip spends this app's inert
