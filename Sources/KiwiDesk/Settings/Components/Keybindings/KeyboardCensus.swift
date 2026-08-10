@@ -171,21 +171,20 @@ enum KeyboardCensus {
     }
 
     /// Whether macOS already owns this key under any selected
-    /// modifier combination.
-    ///
-    /// The predicate the repo never had: `SystemShortcuts.map`
-    /// is public but only ever read as a raw subscript, inline
-    /// in `KeybindingConflicts`. Keyed on the SELECTION, because
-    /// a key macOS owns under ⌘ is perfectly free under ⌃⌥ —
-    /// answering it selection-blind would grey half the board.
+    /// modifier combination. A convenience OVER `reservedKeys`,
+    /// never a second read of `SystemShortcuts.map` — the
+    /// original subscript-by-combo body was a parallel
+    /// derivation of "reserved" fourteen lines from the one the
+    /// board and legend share, which is the equivalent-by-luck
+    /// class the census exists to close (architect re-review
+    /// 2026-08-10). Keyed on the SELECTION, because a key macOS
+    /// owns under ⌘ is perfectly free under ⌃⌥.
     static func isSystemReserved(
         _ code: UInt32,
         under selected: Set<ModifierLayer>
     ) -> Bool {
-        selected.contains { layer in
-            SystemShortcuts.map[
-                KeyCombo(keyCode: code, modifiers: layer.modifiers)
-            ] != nil
+        selected.contains {
+            reservedKeys(scope: .one($0)).contains(code)
         }
     }
 

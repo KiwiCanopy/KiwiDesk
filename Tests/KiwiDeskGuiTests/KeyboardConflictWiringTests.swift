@@ -152,13 +152,30 @@ struct KeyboardConflictSetTests {
             scope: scope
         )
         #expect(!amber.isEmpty)
-        for code in amber {
-            #expect(
+        // BIDIRECTIONAL over the board's own keys (architect
+        // re-review 2026-08-10): the forward half alone let a
+        // future extra `.cantBind` source draw dashed rings
+        // the legend gate cannot see — a drawn mark with no
+        // entry, the historically dangerous direction.
+        let boardCodes = KeyboardMatrix.rows(for: .ansi)
+            .flatMap { $0 }
+            .compactMap(\.code)
+        #expect(!boardCodes.isEmpty)
+        for code in boardCodes {
+            let dashed =
                 KeyboardCensus.state(
                     of: code,
                     claims: [:],
                     scope: scope
                 ) == .cantBind
+            #expect(
+                dashed == amber.contains(code),
+                Comment(
+                    rawValue:
+                        "key \(code): ring "
+                        + "\(dashed) vs legend set "
+                        + "\(amber.contains(code))"
+                )
             )
         }
     }
