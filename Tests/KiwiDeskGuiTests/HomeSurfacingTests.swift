@@ -208,10 +208,12 @@ struct HomeSurfacingTests {
             "ifcollapsed{collapsedEntry}else{fieldEntry}",
             "privatevarcollapsed:Bool{"
                 + "width.collapsesChrome&&!expanded}",
-            // Opening focuses in the same act, and ⌘K reaches
-            // the collapsed entry rather than a field that is
-            // not on screen.
-            "expanded=truefocused=true",
+            // Opening focuses in the same act — one hop later,
+            // because the field does not exist in the update
+            // that opens it and a same-update focus write is
+            // dropped — and ⌘K reaches the collapsed entry
+            // rather than a field that is not on screen.
+            "expanded=trueTask{@MainActorinfocused=true}",
             "Button(\"\",action:open)"
                 + ".keyboardShortcut(\"k\",modifiers:.command)",
         ],

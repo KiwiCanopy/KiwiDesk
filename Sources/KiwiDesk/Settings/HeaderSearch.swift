@@ -165,9 +165,19 @@ struct HeaderSearch: View {
     /// Opening is one act: the field appears AND takes focus.
     /// Two clicks to type would make the glyph a worse field
     /// than the one it replaced.
+    ///
+    /// The focus write waits one main-actor hop, and that is
+    /// the load-bearing half. While the entry is collapsed
+    /// there is no `TextField` in the hierarchy at all — the
+    /// glyph replaces it — so `focused = true` in the same
+    /// update that mints the field aims at a focusable SwiftUI
+    /// has not created yet, and such a write is regularly
+    /// dropped. The symptom is the worst kind: the field opens,
+    /// looks ready, and swallows the first thing typed into it
+    /// (code review, 2026-08-11).
     private func open() {
         expanded = true
-        focused = true
+        Task { @MainActor in focused = true }
     }
 
     /// ⌘K, as a zero-size button rather than on the field: a
