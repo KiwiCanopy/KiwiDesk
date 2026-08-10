@@ -36,6 +36,14 @@ struct HomeSurfacingTests {
             // A link into a Power-User-only area switches the mode
             // before landing.
             "ensureModeAdmits(destination)selection=destination",
+            // The measured band is published ONCE, from the
+            // shell's own geometry: every responsive decision
+            // below reads it from the environment rather than
+            // measuring again.
+            "letwidth=SettingsWidthClass.of(width:geo.size.width)"
+                + "shell(width).environment(\\.settingsWidth,width)",
+        ],
+        "Settings/SettingsView+Chrome.swift": [
             // The mode-reveal window reaches both panes (#760):
             // the environment mounts above the Home/detail
             // branch, from the model's one timeline.
@@ -66,12 +74,6 @@ struct HomeSurfacingTests {
                 + "detachedPreview(width)}",
             ".overlay(alignment:.bottomTrailing){"
                 + "showPreviewOffer(width)}",
-            // The measured band is published ONCE, from the
-            // shell's own geometry: every responsive decision
-            // below reads it from the environment rather than
-            // measuring again.
-            "letwidth=SettingsWidthClass.of(width:geo.size.width)"
-                + "shell(width).environment(\\.settingsWidth,width)",
             // The search mode-switch notice DRAWS when set
             // (#678 4c) — needle through the branch body: a
             // consult that never mounts the strip would leave

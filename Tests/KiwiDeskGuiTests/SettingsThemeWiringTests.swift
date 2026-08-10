@@ -27,7 +27,11 @@ struct SettingsThemeWiringTests {
     /// this", and pinning every call site would make an ordinary
     /// restyle a test edit.
     private let wired: [String: String] = [
-        "page": "SettingsView.swift",
+        // The page is the chrome's background, and the chrome
+        // split out of `SettingsView` at the §2.1 ceiling
+        // (17a); the accent below stays at the root, where the
+        // one `.tint` is set.
+        "page": "SettingsView+Chrome.swift",
         "card": "SettingsHeaderBar.swift",
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate.swift",
