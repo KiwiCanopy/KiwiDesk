@@ -30,17 +30,25 @@ struct SettingsThemeTokenTests {
         let light: UInt32
         let dark: UInt32
         let color: Color
+        /// Per-mode alpha, 1 for every plain colour token —
+        /// `planeRing` is the construction that varies it.
+        let lightAlpha: Double
+        let darkAlpha: Double
 
         init(
             _ name: String,
             _ light: UInt32,
             _ dark: UInt32,
-            _ color: Color
+            _ color: Color,
+            lightAlpha: Double = 1,
+            darkAlpha: Double = 1
         ) {
             self.name = name
             self.light = light
             self.dark = dark
             self.color = color
+            self.lightAlpha = lightAlpha
+            self.darkAlpha = darkAlpha
         }
     }
 
@@ -99,9 +107,21 @@ struct SettingsThemeTokenTests {
             0x2C_33_2D,
             SettingsTheme.hairline
         ),
+        // The 16b dark construction: transparent in light (the
+        // fills separate the planes there), a faint light line
+        // in dark. The alpha pair IS the pin — a ring wired to
+        // one branch draws a solid white line in light.
+        Pin(
+            "planeRing",
+            0xFF_FF_FF,
+            0xFF_FF_FF,
+            SettingsTheme.planeRing,
+            lightAlpha: 0,
+            darkAlpha: 0.14
+        ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),
         Pin("ink2", 0x55_63_5C, 0xA8_B3_A9, SettingsTheme.ink2),
-        Pin("ink3", 0x6B_7A_72, 0x98_A2_96, SettingsTheme.ink3),
+        Pin("ink3", 0x64_72_6A, 0x98_A2_96, SettingsTheme.ink3),
         Pin(
             "groupHeading",
             0x50_6C_37,
@@ -161,13 +181,23 @@ struct SettingsThemeTokenTests {
     @Test("every token resolves to its pinned light/dark pair")
     func tokensResolveUnderBothAppearances() throws {
         for pin in pins {
+            let light = try resolve(pin.color, dark: false)
+            let dark = try resolve(pin.color, dark: true)
             #expect(
-                try resolve(pin.color, dark: false) == pin.light,
+                light.rgb == pin.light,
                 Comment(rawValue: "\(pin.name) light")
             )
             #expect(
-                try resolve(pin.color, dark: true) == pin.dark,
+                dark.rgb == pin.dark,
                 Comment(rawValue: "\(pin.name) dark")
+            )
+            #expect(
+                abs(light.alpha - pin.lightAlpha) < 0.005,
+                Comment(rawValue: "\(pin.name) light alpha")
+            )
+            #expect(
+                abs(dark.alpha - pin.darkAlpha) < 0.005,
+                Comment(rawValue: "\(pin.name) dark alpha")
             )
         }
     }
@@ -207,7 +237,10 @@ struct SettingsThemeTokenTests {
             )
     }
 
-    /// The token's sRGB under one appearance, packed `0xRRGGBB`.
+    /// The token's sRGB under one appearance, packed `0xRRGGBB`,
+    /// plus its alpha — pinned separately so a construction token
+    /// (`planeRing`) cannot ship solid in the mode it must be
+    /// invisible in.
     ///
     /// `performAsCurrentDrawingAppearance` is what makes the
     /// dynamic provider run — reading the colour outside it
@@ -217,7 +250,7 @@ struct SettingsThemeTokenTests {
     private func resolve(
         _ color: Color,
         dark: Bool
-    ) throws -> UInt32 {
+    ) throws -> (rgb: UInt32, alpha: Double) {
         let appearance = try #require(
             NSAppearance(named: dark ? .darkAqua : .aqua)
         )
@@ -230,6 +263,6 @@ struct SettingsThemeTokenTests {
         packed |= UInt32((srgb.redComponent * 255).rounded()) << 16
         packed |= UInt32((srgb.greenComponent * 255).rounded()) << 8
         packed |= UInt32((srgb.blueComponent * 255).rounded())
-        return packed
+        return (packed, Double(srgb.alphaComponent))
     }
 }

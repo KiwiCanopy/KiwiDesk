@@ -14,11 +14,12 @@ import Testing
 /// reason; this is the same walk.
 ///
 /// **Each ring is measured against the ONE fill it can sit on.**
-/// A reserved ring only ever rings a FREE key — a key the user
-/// has bound reads bound whatever macOS thinks — and a conflict
-/// ring only ever rings a BOUND one, since a collision is two of
-/// the user's bindings on one key. `KeyboardCollisionTests` holds
-/// the scoping that makes the second half true.
+/// The AMBER reserved ring only ever rings a FREE key — a bound
+/// key whose combo macOS owns rings the conflict RED instead
+/// (owner ruled the overwrite conflict-class, 2026-08-10) — and
+/// the red ring only ever rings a BOUND one, whichever of its
+/// two meanings applies. `KeyboardCollisionTests` holds the
+/// scoping that keeps the collision half true.
 @Suite("Keyboard ring separation")
 struct KeyboardRingSeparationTests {
 
@@ -41,7 +42,14 @@ struct KeyboardRingSeparationTests {
     }
 
     /// Against `accent`, which is what the board fills a bound
-    /// key with — the board declares no green of its own.
+    /// key with — the board declares no green of its own. This
+    /// pairing carries BOTH red rings since the owner ruled a
+    /// bound reserved combo conflict-class (2026-08-10): an
+    /// own-row collision and a macOS overwrite ring the same
+    /// solid red on the same green. Amber could not follow the
+    /// warning onto a bound key — it measures 10.5 here against
+    /// the floor of 60, which is the number that had confined
+    /// the reserved ring to free keys in the first place.
     @Test("The conflict ring reads on the bound key it rings")
     func conflictRingReadsOnBound() throws {
         let source = try themeSource()

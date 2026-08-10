@@ -36,11 +36,16 @@ struct SettingsThemeWiringTests {
         "keyReserved": "KeyboardBoard.swift",
         "keyConflict": "KeyboardBoard.swift",
         "hairline": "SettingsDetailPanel.swift",
+        "planeRing": "SettingsFooter.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SettingsSearchField.swift",
         "groupHeading": "HomeScreen.swift",
         "accent": "SettingsView.swift",
+        // First consumer landed in the dark pass: the schematic
+        // "+" badge off-plate (white failed in light on the pale
+        // accent wash).
+        "accentInk": "LayoutSchematicKit.swift",
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar+Status.swift",
         "danger": "KeyRecorderRejectionRow.swift",
@@ -54,16 +59,11 @@ struct SettingsThemeWiringTests {
     /// phase; moving one here to `wired` is what a consumer
     /// landing looks like.
     private let deferred: [String: String] = [
-        "accentInk":
-            "AppKit picks the label ink on a tinted prominent "
-            + "button — the pill's Save included — so no site "
-            + "draws it explicitly yet; the first custom "
-            + "accent-filled control will",
         "onAccentKnob":
             "belongs to a knob on a LARGE accent field; the "
             + "shell shipped without one (the pill's controls "
             + "are buttons) — never a slider thumb, which "
-            + "stays white in both appearances",
+            + "stays white in both appearances"
     ]
 
     private var settingsDir: URL {
@@ -249,6 +249,11 @@ struct SettingsThemeWiringTests {
             ".controlAccentColor",
             ".controlBackgroundColor",
             ".separatorColor",
+            // Retired by the dark pass: it follows the system
+            // WINDOW background, which this window no longer
+            // uses — the schematic kit's fallbacks were its
+            // last two sites.
+            ".textBackgroundColor",
         ]
         var offenders: [String] = []
         var scanned = 0

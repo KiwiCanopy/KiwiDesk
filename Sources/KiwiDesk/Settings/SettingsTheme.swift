@@ -101,23 +101,28 @@ enum SettingsTheme {
         dark: 0x37_46_3B
     )
 
-    /// The dashed ring on a key macOS already owns under the
-    /// shown modifier. A WARNING on an otherwise-free key, not a
-    /// third fill: the fill says whether the USER has claimed the
-    /// key, and blacking it out said "unavailable" about a key
-    /// that is free under every other modifier.
+    /// The dashed ring on a FREE key macOS already owns under
+    /// the shown modifier. A WARNING, not a third fill: the fill
+    /// says whether the USER has claimed the key, and blacking
+    /// it out said "unavailable" about a key that is free under
+    /// every other modifier.
     ///
-    /// Measured against `keyFree` alone, because that is the only
-    /// fill it can sit on — a key the user has bound reads bound
-    /// whatever macOS thinks (`KeyboardRingSeparationTests`).
+    /// Measured against `keyFree` alone, because that is the
+    /// only fill it can sit on — a BOUND key whose combo macOS
+    /// owns rings `keyConflict` instead (owner ruled the
+    /// overwrite conflict-class, 2026-08-10; this amber measures
+    /// 10.5 against the accent where the floor is 60 —
+    /// `KeyboardRingSeparationTests` carries both numbers).
     static let keyReserved = token(
         light: 0xE0_A3_4A,
         dark: 0xE0_A3_4A
     )
 
-    /// The solid ring on a key two of the user's OWN bindings
-    /// both claim. A clash with a macOS shortcut is the dashed
-    /// ring's, not this one's.
+    /// The solid ring on a key in conflict: two of the user's
+    /// OWN bindings claiming one combo, or a binding sitting
+    /// OVER a macOS reservation (owner ruled the overwrite
+    /// conflict-class, 2026-08-10). The dashed amber is only
+    /// ever a free key's warning.
     ///
     /// Deliberately not `SettingsTheme.danger`, which varies by
     /// appearance: its dark value measures 55.6 against `accent`,
@@ -140,6 +145,21 @@ enum SettingsTheme {
         dark: 0x2C_33_2D
     )
 
+    /// The 16b construction that is not a colour swap: an inset
+    /// light line that separates a dark plane from a dark ground
+    /// ONLY in dark mode. In light the fills do the separating —
+    /// the plate measures 15.6:1 against the page — so this
+    /// resolves fully transparent there; in dark the plate, the
+    /// save pill and the search panel all sit within ~1.1:1 of
+    /// their grounds and this line is the edge. Drawn OVER a
+    /// hairline where one exists, not instead of it.
+    static let planeRing = token(
+        light: 0xFF_FF_FF,
+        dark: 0xFF_FF_FF,
+        lightAlpha: 0,
+        darkAlpha: 0.14
+    )
+
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.
@@ -152,11 +172,16 @@ enum SettingsTheme {
     /// Captions and disclosure hints, the quietest legible ink —
     /// and *legible* is the operative word: this paints a
     /// section's one-sentence explanation, which is body copy and
-    /// owes 4.5:1. The 16b table's `#7C8A82` / `#869184` measured
-    /// 3.61:1 on `card` in light and 4.43:1 on `sunken` in dark,
-    /// so both ends moved until the worst pairing clears. A
-    /// caption nobody can read is not quiet, it is missing.
-    static let ink3 = token(light: 0x6B_7A_72, dark: 0x98_A2_96)
+    /// owes 4.5:1 on EVERY surface it draws on. The 16b table's
+    /// `#7C8A82` / `#869184` measured 3.61:1 on `card` in light
+    /// and 4.43:1 on `sunken` in dark; the first correction
+    /// (`#6B7A72`) cleared `card` and still missed `panel` and
+    /// `sunken` in light (4.15 / 4.17 — the detail panel's
+    /// notices and the disclosure captions). Both ends now clear
+    /// the worst pairing, which `SettingsThemeContrastTests`
+    /// derives from these very tokens. A caption nobody can read
+    /// is not quiet, it is missing.
+    static let ink3 = token(light: 0x64_72_6A, dark: 0x98_A2_96)
 
     /// The small-caps group heading ("THIS PROFILE", a disclosure
     /// interior's group label).
@@ -240,7 +265,9 @@ enum SettingsTheme {
 
     // MARK: - Construction
 
-    /// One dynamic colour from a light/dark `0xRRGGBB` pair.
+    /// One dynamic colour from a light/dark `0xRRGGBB` pair,
+    /// optionally with a per-mode alpha (`planeRing` is the one
+    /// consumer — a construction that exists in dark only).
     ///
     /// `bestMatch` rather than a raw name comparison: an
     /// appearance can be a vibrant or high-contrast variant of
@@ -248,7 +275,9 @@ enum SettingsTheme {
     /// belong to instead of silently falling through to light.
     private static func token(
         light: UInt32,
-        dark: UInt32
+        dark: UInt32,
+        lightAlpha: CGFloat = 1,
+        darkAlpha: CGFloat = 1
     ) -> Color {
         Color(
             nsColor: NSColor(name: nil) { appearance in
@@ -256,17 +285,23 @@ enum SettingsTheme {
                     appearance.bestMatch(
                         from: [.aqua, .darkAqua]
                     ) == .darkAqua
-                return srgb(isDark ? dark : light)
+                return srgb(
+                    isDark ? dark : light,
+                    alpha: isDark ? darkAlpha : lightAlpha
+                )
             }
         )
     }
 
-    private static func srgb(_ hex: UInt32) -> NSColor {
+    private static func srgb(
+        _ hex: UInt32,
+        alpha: CGFloat
+    ) -> NSColor {
         NSColor(
             srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
             green: CGFloat((hex >> 8) & 0xFF) / 255,
             blue: CGFloat(hex & 0xFF) / 255,
-            alpha: 1
+            alpha: alpha
         )
     }
 }

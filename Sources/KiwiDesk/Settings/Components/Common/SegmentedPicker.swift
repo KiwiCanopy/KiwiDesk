@@ -2,16 +2,19 @@ import SwiftUI
 
 /// The tab-style option chooser shared across the settings
 /// (#68): a capsule track where the selection is a solid
-/// white pill (the native tab-switcher look; dark mode gets
-/// a light gray) and the selected label is larger and
-/// semibold. Liquid Glass was tried and dropped here — the
-/// glass layer refracted whatever sat behind it, reading as
-/// blur under the text and stray tint. ONE persistent pill
-/// slides between segments via matched geometry: each
-/// segment anchors a frame and the pill adopts the selected
-/// anchor, so a selection change moves the same view (a
-/// slide) instead of swapping styling between labels, which
-/// crossfades.
+/// ACCENT pill with the on-accent ink — the settled "accent
+/// marks control fills" convention, which the dark pass
+/// extended here: the earlier white pill (light grey in dark)
+/// carried the near-white ambient ink at ~3:1 in dark, the
+/// worst text pairing in the control set, behind a manual
+/// `colorScheme` branch the theme exists to end. Liquid Glass
+/// was tried and dropped here — the glass layer refracted
+/// whatever sat behind it, reading as blur under the text and
+/// stray tint. ONE persistent pill slides between segments via
+/// matched geometry: each segment anchors a frame and the pill
+/// adopts the selected anchor, so a selection change moves the
+/// same view (a slide) instead of swapping styling between
+/// labels, which crossfades.
 ///
 /// Precondition: option `value`s must be unique — duplicates
 /// would make two segments claim the pill's anchor.
@@ -28,7 +31,6 @@ struct SegmentedPicker<Value: Hashable>: View {
     @State private var hoveredIndex: Int?
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
-    @Environment(\.colorScheme) private var scheme
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.settingsLabelColumn)
     private var labelColumn
@@ -160,6 +162,16 @@ struct SegmentedPicker<Value: Hashable>: View {
                     ? .body.weight(.semibold)
                     : .callout
             )
+            // Explicit inks: the selected label rides the
+            // accent pill (`accentInk` is the one ink for
+            // that), and the rest name `ink` so no ancestor
+            // foreground can recolour them (the hierarchical
+            // trap).
+            .foregroundStyle(
+                selected
+                    ? SettingsTheme.accentInk
+                    : SettingsTheme.ink
+            )
             .lineLimit(1)
             .padding(.vertical, 4)
             .padding(.horizontal, 10)
@@ -218,28 +230,14 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    /// The solid pill: white in light mode, a light gray in
-    /// dark, carrying the slider thumb's exact shadow so the
-    /// two controls read as one family. (The earlier soft
-    /// glass-era shadow read as the pill "fading out"; this
-    /// crisp one doesn't.)
+    /// The solid accent pill. No shadow: the white pill needed
+    /// one to lift off a same-luminance track, and its black
+    /// shadow was dead in dark anyway; the accent separates by
+    /// hue and luminance from the track in both modes, and the
+    /// selected state never rides colour alone — the font-step
+    /// carries it too.
     private var pill: some View {
         Capsule()
-            .fill(
-                scheme == .dark
-                    ? Color.white.opacity(0.28)
-                    : Color.white
-            )
-            .overlay(
-                Capsule().strokeBorder(
-                    Color.primary.opacity(0.06),
-                    lineWidth: 0.5
-                )
-            )
-            .shadow(
-                color: .black.opacity(0.25),
-                radius: 2,
-                y: 1
-            )
+            .fill(SettingsTheme.accent)
     }
 }

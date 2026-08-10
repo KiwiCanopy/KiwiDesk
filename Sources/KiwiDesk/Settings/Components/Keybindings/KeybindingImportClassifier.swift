@@ -66,17 +66,12 @@ enum KeybindingImportClassifier {
         // needs its own entry or an imported binding stays Custom
         // (#91). `toggle_floating` is the bindable one (#221);
         // `make_floating` is kept for recognition only so a
-        // hand-written one still classifies.
-        for command in [
-            KeybindingCatalog.toggleFloating,
-            KeybindingCatalog.makeFloating,
-            KeybindingCatalog.toggleSticky,
-            KeybindingCatalog.toggleDisplaySticky,
-            KeybindingCatalog.makeSticky,
-            KeybindingCatalog.makeDisplaySticky,
-            KeybindingCatalog.makeUnsticky,
-            KeybindingCatalog.showShortcuts,
-        ] {
+        // hand-written one still classifies. The list is
+        // `stepFreeCommands` — the ONE copy the banner's
+        // localizedLabel roster also consumes, so a command
+        // this map can assign is always one that roster can
+        // translate back (review 2026-08-10).
+        for command in KeybindingCatalog.stepFreeCommands {
             map[command.lua] = command.label
         }
         return map

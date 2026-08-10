@@ -83,7 +83,7 @@ struct SchematicCanvas<Content: View>: View {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(
                     palette?.frame
-                        ?? Color.secondary.opacity(0.6)
+                        ?? SettingsTheme.ink2.opacity(0.6)
                 )
         }
         .frame(maxWidth: width == nil ? .infinity : nil)

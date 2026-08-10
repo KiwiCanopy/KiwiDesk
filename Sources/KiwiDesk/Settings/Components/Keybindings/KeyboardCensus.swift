@@ -158,30 +158,33 @@ enum KeyboardCensus {
         scope: Scope
     ) -> KeyState {
         if claims[code]?.isEmpty == false { return .bound }
-        if case .one(let layer) = scope,
-            isSystemReserved(code, under: [layer])
-        {
+        // Through `reservedKeys`, the ONE derivation of
+        // "reserved" — the dashed ring this state draws and
+        // the legend entry gated on `reservedUnbound` must
+        // read one source, or the board↔legend disagreement
+        // class returns through the amber pair (re-review
+        // 2026-08-10).
+        if reservedKeys(scope: scope).contains(code) {
             return .cantBind
         }
         return .free
     }
 
     /// Whether macOS already owns this key under any selected
-    /// modifier combination.
-    ///
-    /// The predicate the repo never had: `SystemShortcuts.map`
-    /// is public but only ever read as a raw subscript, inline
-    /// in `KeybindingConflicts`. Keyed on the SELECTION, because
-    /// a key macOS owns under ⌘ is perfectly free under ⌃⌥ —
-    /// answering it selection-blind would grey half the board.
+    /// modifier combination. A convenience OVER `reservedKeys`,
+    /// never a second read of `SystemShortcuts.map` — the
+    /// original subscript-by-combo body was a parallel
+    /// derivation of "reserved" fourteen lines from the one the
+    /// board and legend share, which is the equivalent-by-luck
+    /// class the census exists to close (architect re-review
+    /// 2026-08-10). Keyed on the SELECTION, because a key macOS
+    /// owns under ⌘ is perfectly free under ⌃⌥.
     static func isSystemReserved(
         _ code: UInt32,
         under selected: Set<ModifierLayer>
     ) -> Bool {
-        selected.contains { layer in
-            SystemShortcuts.map[
-                KeyCombo(keyCode: code, modifiers: layer.modifiers)
-            ] != nil
+        selected.contains {
+            reservedKeys(scope: .one($0)).contains(code)
         }
     }
 
@@ -210,9 +213,10 @@ enum KeyboardCensus {
     /// while conflicts are per layer.
     ///
     /// It also answers only the `.otherBinding` case on purpose:
-    /// a clash with a macOS shortcut is what the dashed
-    /// `keyReserved` ring says, and drawing it red would tell the
-    /// user their own two bindings collide when they do not.
+    /// a clash with a macOS shortcut is `overwrittenReserved`'s
+    /// — the same solid red since the owner ruled the overwrite
+    /// conflict-class (2026-08-10), but a different question
+    /// with a different gate.
     static func collisions(
         in layers: [KeyLayer],
         scope: Scope
@@ -237,5 +241,54 @@ enum KeyboardCensus {
             }
         }
         return out
+    }
+
+    // MARK: - The conflict-class predicate (one owner)
+
+    /// Every key macOS reserves under the shown modifier. Empty
+    /// under `.all` on purpose — macOS reserves COMBINATIONS,
+    /// not keys, so there is no single combination to check
+    /// against there.
+    static func reservedKeys(scope: Scope) -> Set<UInt32> {
+        guard case .one(let layer) = scope else { return [] }
+        return Set(
+            SystemShortcuts.map.keys
+                .filter {
+                    ModifierLayer(modifiers: $0.modifiers)
+                        == layer
+                }
+                .map(\.keyCode)
+        )
+    }
+
+    /// The keys whose combo the user bound OVER a macOS
+    /// reservation — conflict-class (owner ruled 2026-08-10:
+    /// binding ⌘W does not un-own it), ringed the same solid
+    /// red as an own-row collision. ONE predicate: the board's
+    /// rings and the legend's gate both consume this, so the
+    /// two cannot drift (architect review 2026-08-10 — they
+    /// were composed independently at each site).
+    static func overwrittenReserved(
+        claims: [UInt32: [ModifierLayer]],
+        scope: Scope
+    ) -> Set<UInt32> {
+        reservedKeys(scope: scope).filter {
+            claims[$0]?.isEmpty == false
+        }
+    }
+
+    /// The reserved keys still FREE under the shown modifier —
+    /// the dashed amber ring's presence, and therefore its
+    /// legend entry's gate: under a chip whose reservations are
+    /// all bound (or a layer macOS reserves nothing under, ⌃⌥
+    /// included) the amber entry would point at a mark the
+    /// board does not draw.
+    static func reservedUnbound(
+        claims: [UInt32: [ModifierLayer]],
+        scope: Scope
+    ) -> Set<UInt32> {
+        reservedKeys(scope: scope).filter {
+            claims[$0]?.isEmpty != false
+        }
     }
 }

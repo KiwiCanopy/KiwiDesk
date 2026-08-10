@@ -147,6 +147,19 @@ struct HeaderSearch: View {
                     )
                     .strokeBorder(SettingsTheme.hairline)
                 )
+                // 16b dark seam OVER the hairline: the black
+                // shadow below is the panel's lift in light
+                // and is invisible on the dark page — see
+                // `SettingsTheme.planeRing`.
+                .overlay(
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.cardRadius
+                    )
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+                )
                 // Without this the shadow halos EVERY
                 // primitive — the hairline ring casts its own
                 // shadow INWARD, reading as a line ghosting
@@ -172,7 +185,7 @@ struct HeaderSearch: View {
         if results.isEmpty {
             Text(L("search.no_results", "No results"))
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink3)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 8)
         } else {
@@ -232,7 +245,7 @@ struct HeaderSearch: View {
     private var placesHeader: some View {
         Text(L("search.places", "Made by you"))
             .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink3)
             .padding(.horizontal, 8)
             .padding(.top, 6)
     }

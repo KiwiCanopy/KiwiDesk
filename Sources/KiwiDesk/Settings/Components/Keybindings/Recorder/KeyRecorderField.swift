@@ -47,6 +47,9 @@ struct KeyRecorderField: View {
     @State private var cancelledByClick: Date?
     @State private var rejection: RecorderRejection?
     @State private var flashing = false
+    /// The conflict popover (owner 2026-08-10) — internal, its
+    /// view lives in `KeyRecorderField+Conflict.swift`.
+    @State var conflictPopoverShown = false
     /// Transient live-apply caption (#123): "Active now" (or
     /// the system-denied branch), auto-fading after ~1.5 s.
     @State private var liveFeedback: LiveApplyFeedback?
@@ -104,32 +107,21 @@ struct KeyRecorderField: View {
     /// hover chip's padding fit inside 20 pt. (Deliberately not
     /// NavRow's 18 pt glyph slot — these icons carry a hover
     /// chip, that glyph doesn't.)
-    private static let iconSlotWidth: CGFloat = 20
+    static let iconSlotWidth: CGFloat = 20
 
     /// A fixed-width icon slot: `Color.clear` reserves the width
     /// even when `content` is empty, so the record button's
     /// leading edge holds its x across unbound/bound/conflict
     /// states instead of the varying cluster width letting the
     /// row's `Spacer` push it (#264). The glyph draws in an
-    /// overlay above the reserved base.
-    private func iconSlot<Content: View>(
+    /// overlay above the reserved base. Internal: the conflict
+    /// badge consumes it from its own file.
+    func iconSlot<Content: View>(
         @ViewBuilder _ content: () -> Content
     ) -> some View {
         Color.clear
             .frame(width: Self.iconSlotWidth)
             .overlay { content() }
-    }
-
-    private var conflictBadge: some View {
-        iconSlot {
-            if let conflict {
-                Image(
-                    systemName: "exclamationmark.triangle.fill"
-                )
-                .foregroundStyle(SettingsTheme.warningInk)
-                .help(conflict)
-            }
-        }
     }
 
     private var clearButton: some View {
@@ -139,7 +131,7 @@ struct KeyRecorderField: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
                 .iconButtonAffordance(
                     L(
                         "key_recorder.clear",
@@ -234,7 +226,7 @@ struct KeyRecorderField: View {
     /// in the accent: text naming a value. The recording signal
     /// is unaffected, because the chrome draws it independently.
     private var buttonTint: Color {
-        flashing ? .red : SettingsTheme.ink
+        flashing ? SettingsTheme.danger : SettingsTheme.ink
     }
 
     private var label: String {

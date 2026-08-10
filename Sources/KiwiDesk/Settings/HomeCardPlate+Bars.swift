@@ -121,7 +121,7 @@ struct HomeCardBarsTile: View {
             RoundedRectangle(cornerRadius: 5)
                 .strokeBorder(
                     palette?.frame
-                        ?? Color.secondary.opacity(0.3)
+                        ?? SettingsTheme.ink2.opacity(0.3)
                 )
         )
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
@@ -132,13 +132,13 @@ struct HomeCardBarsTile: View {
         RoundedRectangle(cornerRadius: 5)
             .fill(
                 palette?.ghostFill
-                    ?? Color.secondary.opacity(0.08)
+                    ?? SettingsTheme.ink2.opacity(0.08)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
                     .strokeBorder(
                         palette?.frame
-                            ?? Color.secondary.opacity(0.3)
+                            ?? SettingsTheme.ink2.opacity(0.3)
                     )
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)

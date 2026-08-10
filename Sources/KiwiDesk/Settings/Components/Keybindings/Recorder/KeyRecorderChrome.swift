@@ -81,13 +81,18 @@ struct LiveApplyCaption: View {
         }
     }
 
+    // Theme tokens, not `.green`/`.orange`/`.secondary` (dark
+    // pass): the system hues lift in dark while the kiwi accent
+    // does not, `.orange` beside the amber `keyReserved` is a
+    // saturated clash, and `.secondary` derives from whatever
+    // ink an ancestor set rather than from a fixed grey.
     private var color: Color {
         switch feedback.status {
-        case .applied: .green
-        case .inactiveLayer: .secondary
+        case .applied: SettingsTheme.accent
+        case .inactiveLayer: SettingsTheme.ink3
         case .denied, .profileShadowed, .compileFailed,
             .unavailable:
-            .orange
+            SettingsTheme.warningInk
         }
     }
 

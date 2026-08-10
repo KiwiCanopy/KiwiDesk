@@ -135,6 +135,7 @@ enum SchematicMath {
 struct SchematicTile: View {
     var active = false
     @Environment(\.schematicPalette) private var palette
+    @Environment(\.schematicFocusStroke) private var focusStroke
 
     var body: some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
@@ -144,7 +145,11 @@ struct SchematicTile: View {
                     cornerRadius: LayoutSchematic.corner
                 )
                 .strokeBorder(
-                    palette?.stroke ?? LayoutSchematic.stroke,
+                    active
+                        ? focusStroke ?? palette?.stroke
+                            ?? LayoutSchematic.stroke
+                        : palette?.stroke
+                            ?? LayoutSchematic.stroke,
                     lineWidth: active ? 2 : 1
                 )
             )
@@ -162,13 +167,17 @@ struct SchematicMoreChip: View {
             .font(.system(size: 9, weight: .semibold))
             .monospacedDigit()
             .foregroundStyle(
-                palette?.ink ?? Color.secondary
+                palette?.ink ?? SettingsTheme.ink2
             )
             .padding(.horizontal, 3)
             .background(
                 Capsule().fill(
-                    palette?.base
-                        ?? Color(nsColor: .textBackgroundColor)
+                    // `card`, not `.textBackgroundColor`: the
+                    // system colour follows the system window
+                    // background, which this window retired
+                    // (dark pass; the wiring suite's retired
+                    // lens now watches the needle).
+                    palette?.base ?? SettingsTheme.card
                 )
             )
     }
@@ -186,7 +195,7 @@ struct SchematicGap: View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
             .strokeBorder(
                 palette?.gapStroke
-                    ?? Color.secondary.opacity(0.4),
+                    ?? SettingsTheme.ink2.opacity(0.4),
                 style: StrokeStyle(lineWidth: 1, dash: [3, 2])
             )
     }
@@ -228,7 +237,14 @@ struct SchematicNewWindow: View {
                 )
             Image(systemName: "plus")
                 .font(.system(size: 7, weight: .bold))
-                .foregroundStyle(.white)
+                // `accentInk` off-plate — white on the pale
+                // accent wash fails in LIGHT mode, the exact
+                // rule the token's docstring states. On the
+                // plate the wash is faint over a dark ground,
+                // so the badge rides the palette ink instead.
+                .foregroundStyle(
+                    palette?.ink ?? SettingsTheme.accentInk
+                )
                 .padding(2)
         }
     }
@@ -255,13 +271,18 @@ struct SchematicPileTile: View {
     /// The "+" badge, when this piled window is the incoming one.
     var isNew = false
     @Environment(\.schematicPalette) private var palette
+    @Environment(\.schematicFocusStroke) private var focusStroke
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .fill(
-                    palette?.base
-                        ?? Color(nsColor: .textBackgroundColor)
+                    // `card`, not `.textBackgroundColor`: the
+                    // system colour follows the system window
+                    // background, which this window retired
+                    // (dark pass; the wiring suite's retired
+                    // lens now watches the needle).
+                    palette?.base ?? SettingsTheme.card
                 )
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .fill(
@@ -272,13 +293,19 @@ struct SchematicPileTile: View {
                 )
             RoundedRectangle(cornerRadius: LayoutSchematic.corner)
                 .strokeBorder(
-                    palette?.stroke ?? LayoutSchematic.stroke,
+                    active
+                        ? focusStroke ?? palette?.stroke
+                            ?? LayoutSchematic.stroke
+                        : palette?.stroke
+                            ?? LayoutSchematic.stroke,
                     lineWidth: active ? 2 : 1
                 )
             if isNew {
                 Image(systemName: "plus")
                     .font(.system(size: 7, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(
+                        palette?.ink ?? SettingsTheme.accentInk
+                    )
                     .padding(2)
             }
         }
@@ -296,7 +323,7 @@ struct SchematicGhostOverflow: View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
             .fill(
                 palette?.ghostFill
-                    ?? Color.secondary.opacity(0.15)
+                    ?? SettingsTheme.ink2.opacity(0.15)
             )
             .overlay(
                 RoundedRectangle(
@@ -304,7 +331,7 @@ struct SchematicGhostOverflow: View {
                 )
                 .strokeBorder(
                     palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.5),
+                        ?? SettingsTheme.ink2.opacity(0.5),
                     lineWidth: 1
                 )
             )

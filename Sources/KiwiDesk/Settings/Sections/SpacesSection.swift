@@ -222,6 +222,17 @@ struct SpacesSection: View {
             radius: 6,
             y: 2
         )
+        // The black lift above is the drag's only cue and dies
+        // on a dark ground — the 16b seam line takes over there
+        // (`SettingsTheme.planeRing`, transparent in light).
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(
+                    dragged == space
+                        ? SettingsTheme.planeRing : .clear,
+                    lineWidth: 1
+                )
+        )
         .zIndex(dragged == space ? 1 : 0)
         .background(
             GeometryReader { proxy in

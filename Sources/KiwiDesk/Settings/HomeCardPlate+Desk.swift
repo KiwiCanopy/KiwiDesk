@@ -74,7 +74,7 @@ struct HomeCardMonitorsTile: View {
             main
             ? palette?.accent ?? SettingsTheme.accent
             : palette?.ghostStroke
-                ?? Color.secondary.opacity(0.6)
+                ?? SettingsTheme.ink2.opacity(0.6)
         VStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 3)
                 .fill(
@@ -111,7 +111,7 @@ struct HomeCardMonitorsTile: View {
             Rectangle()
                 .fill(
                     palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
+                        ?? SettingsTheme.ink2.opacity(0.4)
                 )
                 .frame(
                     width: foot * SettingsTheme.monitorNeckScale,
@@ -120,7 +120,7 @@ struct HomeCardMonitorsTile: View {
             Capsule()
                 .fill(
                     palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
+                        ?? SettingsTheme.ink2.opacity(0.4)
                 )
                 .frame(width: foot, height: 3)
         }
@@ -134,7 +134,7 @@ struct HomeCardMonitorsTile: View {
             RoundedRectangle(cornerRadius: 2)
                 .fill(
                     palette?.ghostStroke
-                        ?? Color.secondary.opacity(0.4)
+                        ?? SettingsTheme.ink2.opacity(0.4)
                 )
                 .frame(width: 8, height: 8)
         }
@@ -173,13 +173,13 @@ struct HomeCardBehaviorTile: View {
         RoundedRectangle(cornerRadius: 5)
             .fill(
                 palette?.ghostFill
-                    ?? Color.secondary.opacity(0.08)
+                    ?? SettingsTheme.ink2.opacity(0.08)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
                     .strokeBorder(
                         palette?.frame
-                            ?? Color.secondary.opacity(0.3),
+                            ?? SettingsTheme.ink2.opacity(0.3),
                         lineWidth: 1.5
                     )
             )
@@ -191,7 +191,7 @@ struct HomeCardBehaviorTile: View {
             resizes
             ? palette?.accent ?? SettingsTheme.accent
             : palette?.ghostStroke
-                ?? Color.secondary.opacity(0.4)
+                ?? SettingsTheme.ink2.opacity(0.4)
         return RoundedRectangle(cornerRadius: 1)
             .fill(accent)
             .frame(width: 2)

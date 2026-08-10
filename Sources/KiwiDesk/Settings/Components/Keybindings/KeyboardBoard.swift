@@ -40,6 +40,14 @@ struct KeyboardBoard: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(SettingsTheme.previewPlate)
             )
+            // 16b dark seam — see `SettingsTheme.planeRing`.
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+            )
         }
         .frame(height: boardHeight)
     }
@@ -97,6 +105,8 @@ struct KeyboardBoard: View {
             state: state(of: key),
             isConflicted: key.code.map(conflicted.contains)
                 ?? false,
+            isOverwritten: key.code
+                .map(overwritten.contains) ?? false,
             legend: key.legend
         )
         .frame(width: max(width, 0), height: unit)
@@ -108,6 +118,16 @@ struct KeyboardBoard: View {
         guard let code = key.code else { return .free }
         return KeyboardCensus.state(
             of: code,
+            claims: claims,
+            scope: scope
+        )
+    }
+
+    /// The ONE conflict-class predicate — the legend's gate
+    /// reads the same set, so the ring and its entry cannot
+    /// drift (architect review 2026-08-10).
+    private var overwritten: Set<UInt32> {
+        KeyboardCensus.overwrittenReserved(
             claims: claims,
             scope: scope
         )
@@ -127,6 +147,13 @@ struct KeyCap: View {
     let code: UInt32?
     let state: KeyboardCensus.KeyState
     let isConflicted: Bool
+    /// The user bound this key OVER a macOS reservation —
+    /// conflict-class (owner 2026-08-10: binding ⌘W does not
+    /// un-own it, and suppressing the warning on bind hid
+    /// exactly the clash the user most needs to see). Member
+    /// of `KeyboardCensus.overwrittenReserved`, the one
+    /// predicate the legend gate shares.
+    let isOverwritten: Bool
     /// What a code-less cap prints (⇧, ⌘) — see
     /// `KeyboardMatrix.Key.legend`.
     let legend: String?
@@ -155,7 +182,13 @@ struct KeyCap: View {
     }
 
     @ViewBuilder private var border: some View {
-        if isConflicted {
+        if isConflicted || isOverwritten {
+            // An overwrite clashes with macOS exactly as two
+            // own rows clash with each other, and takes the
+            // same solid red — which is also what the CVD
+            // floor forces, amber measuring 10.5 against the
+            // accent where red measures 136.6
+            // (`KeyboardRingSeparationTests`).
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(SettingsTheme.keyConflict, lineWidth: 2)
         } else if state == .cantBind {

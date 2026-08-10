@@ -47,11 +47,28 @@ private struct SchematicPaletteKey: EnvironmentKey {
     static let defaultValue: SchematicPalette? = nil
 }
 
+private struct SchematicFocusStrokeKey: EnvironmentKey {
+    static let defaultValue: Color? = nil
+}
+
 extension EnvironmentValues {
     /// `nil` — the default everywhere outside a desktop plate —
     /// keeps the family's brand constants.
     var schematicPalette: SchematicPalette? {
         get { self[SchematicPaletteKey.self] }
         set { self[SchematicPaletteKey.self] = newValue }
+    }
+
+    /// The stroke an ACTIVE tile marks focus with: the draft's
+    /// real `border.focused_color` (owner ruled 2026-08-10,
+    /// extending the Gaps ring's honesty rule — a preview
+    /// claiming engine behavior shows the colour the app will
+    /// draw). `nil` — borders disabled, or a mount that has not
+    /// wired it — keeps the family stroke, which claims
+    /// nothing. On a plate the mount floors the colour against
+    /// the plate first (`HomeCardPlate.plateLegible`).
+    var schematicFocusStroke: Color? {
+        get { self[SchematicFocusStrokeKey.self] }
+        set { self[SchematicFocusStrokeKey.self] = newValue }
     }
 }

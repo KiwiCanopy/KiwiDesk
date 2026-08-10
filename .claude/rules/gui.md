@@ -535,11 +535,33 @@ Every surface, border and ink in the Settings tree comes from
 - **A new colour goes through the theme.** A hex literal or a
   system colour beside a view is the drift the type exists to
   end. `SettingsThemeTokenTests` holds the only copy of the hex
-  table and resolves each token under `.aqua` AND `.darkAqua`, so
-  a token wired to one branch in both modes reds;
-  `SettingsThemeWiringTests` puts every declared token in exactly
-  one of two lists — wired at a named render site, or deferred
-  with a reason — so a token nothing draws cannot ship quietly.
+  table (alphas included — `planeRing` is a construction that
+  exists in dark only) and resolves each token under `.aqua` AND
+  `.darkAqua`, so a token wired to one branch in both modes
+  reds; `SettingsThemeWiringTests` puts every declared token in
+  exactly one of two lists — wired at a named render site, or
+  deferred with a reason — so a token nothing draws cannot ship
+  quietly. Two lenses hold the pass-7 verdicts:
+  `SettingsThemeContrastTests` computes WCAG ratios from the
+  shipped tokens at the render's own alpha — its pairing list is
+  hand-kept, so **a change drawing an ink on a surface it did
+  not draw on before adds the pairing there in the same change
+  set** (the board's ring pairs stay `ColorVision`-governed in
+  `KeyboardRingSeparationTests` — one authority per pairing) —
+  and `SettingsRawColorTests` bans
+  fixed hues, RGB literals and fixed white/black outside its
+  reasoned maps, with `SettingsFixedGroundTests` banning
+  hierarchical greys on the FIXED-dark chrome families
+  (stem-derived, so a §2.1 split cannot fall out of it) — on
+  mode-varying surfaces `.secondary` still self-inverts and
+  "prefer a concrete ink" stays a preference.
+- **A dark plane on a dark ground takes the `planeRing` seam**
+  (16b's one non-swap construction): where a fixed-dark surface
+  meets a mode-varying one — the plate, the save pill, the
+  search panel, a drag lift whose black shadow dies in dark —
+  the inset light line is the edge, drawn OVER any hairline,
+  transparent in light by the token itself, never by a
+  `colorScheme` branch.
 - **`Color.accentColor` is not the accent.** It reads the user's
   *system* accent and is unaffected by `.tint`, so in this
   window it renders the app's own decoration in a hue the app did

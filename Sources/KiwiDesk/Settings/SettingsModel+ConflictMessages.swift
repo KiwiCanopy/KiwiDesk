@@ -12,7 +12,7 @@ extension SettingsModel {
     /// banner re-derives instead of latching stale text).
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
-        return Self.formatConflicts(
+        return formatConflicts(
             KeybindingConflicts.conflicts(
                 in: config.layers
             )
@@ -39,11 +39,11 @@ extension SettingsModel {
             for: binding,
             in: bindings
         ) != nil {
-            keybindingWarning = Self.formatConflicts(list)
+            keybindingWarning = formatConflicts(list)
         } else if list.isEmpty {
             keybindingWarning = nil
         } else if keybindingWarning != nil {
-            keybindingWarning = Self.formatConflicts(list)
+            keybindingWarning = formatConflicts(list)
         }
     }
 
@@ -57,12 +57,22 @@ extension SettingsModel {
             in: config.layers
         )
         keybindingWarning =
-            list.isEmpty ? nil : Self.formatConflicts(list)
+            list.isEmpty ? nil : formatConflicts(list)
+    }
+
+    /// The stored English canonical, narrated in the user's
+    /// locale (#96) — instance methods now, because the roster
+    /// lookup needs the config's spaces, layers and step.
+    private func localized(_ name: String) -> String {
+        KeybindingCatalog.localizedLabel(
+            for: name,
+            config: config
+        )
     }
 
     /// Renders a named, enumerated summary: a single sentence
     /// for one conflict, or a bulleted list for several.
-    private static func formatConflicts(
+    private func formatConflicts(
         _ conflicts: [Conflict]
     ) -> String? {
         guard let only = conflicts.first else { return nil }
@@ -90,29 +100,29 @@ extension SettingsModel {
     /// the quoted name relative to the rest of the sentence
     /// (issue #9 review: two `+`-concatenated fragments can't be
     /// reordered by a translation).
-    private static func sentence(_ conflict: Conflict) -> String {
+    private func sentence(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
                 "keybinding.conflict.unrecognized",
                 "Shortcut for \"%1$@\" isn't a recognized "
                     + "shortcut.",
-                conflict.name
+                localized(conflict.name)
             )
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
                 "Shortcut for \"%1$@\" is conflicting with "
                     + "\"%2$@\".",
-                conflict.name,
-                who
+                localized(conflict.name),
+                localized(who)
             )
         case .systemShortcut(let shortcut):
             return L(
                 "keybinding.conflict.system",
                 "Shortcut for \"%1$@\" is conflicting with "
                     + "the macOS shortcut \"%2$@\".",
-                conflict.name,
+                localized(conflict.name),
                 shortcut.localizedName
             )
         }
@@ -120,26 +130,26 @@ extension SettingsModel {
 
     /// One bullet line's text (no leading "– ", added by the
     /// caller).
-    private static func bulletLine(_ conflict: Conflict) -> String {
+    private func bulletLine(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:
             return L(
                 "keybinding.conflict.bullet.unrecognized",
                 "\"%1$@\" isn't a recognized shortcut",
-                conflict.name
+                localized(conflict.name)
             )
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.bullet.with",
                 "\"%1$@\" with \"%2$@\"",
-                conflict.name,
-                who
+                localized(conflict.name),
+                localized(who)
             )
         case .systemShortcut(let shortcut):
             return L(
                 "keybinding.conflict.bullet.system",
                 "\"%1$@\" with the macOS shortcut \"%2$@\"",
-                conflict.name,
+                localized(conflict.name),
                 shortcut.localizedName
             )
         }

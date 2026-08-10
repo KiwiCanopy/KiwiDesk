@@ -67,9 +67,9 @@ copy…** and **Save**. Click the count for a popover listing
 every change as an old → new row, and click a row to jump
 straight to the control that changed. It is not a fixed bar:
 it appears with your first edit and disappears once everything
-is saved (the verbs are detailed under [Saving](#saving)). And four areas —
-Gaps & Borders, Bars, Colors & Motion, and Layout Defaults —
-open as two columns: their controls on the left, and a **Live
+is saved (the verbs are detailed under [Saving](#saving)). And five areas —
+Gaps & Borders, Bars, Colors & Motion, Layout Defaults, and
+Shortcuts — open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as
 you edit, with a **Changed in this draft** list underneath —
 the same old → new rows as the pill count's popover, each
@@ -627,7 +627,11 @@ stack is deep enough to overflow; a track limit means nothing
 until there are more windows than tracks; a dynamic grid's
 balance only shows as it rebalances. The count is a question you
 ask the preview, not a setting: it is not saved and resets when
-you leave.
+you leave. The tile drawn as focused wears your real focused
+border colour — the same one the Gaps & Borders preview shows —
+while the focus border is on; with it off, that tile is simply
+outlined a little heavier, promising no ring the app would not
+draw.
 
 A last card lists the **spaces using this layout**, and says how
 many of them override the values above — Layout Defaults sets
@@ -2135,8 +2139,9 @@ A ⚠️ icon appears next to any row whose combo:
 - Duplicates another row in the same layer.
 - Conflicts with a reserved macOS shortcut.
 
-Hover the icon for a tooltip naming the conflict. This indicator
-updates live — no action needed to see it.
+Click the icon to read the conflict in a popover; hovering it
+shows the same sentence as a tooltip. This indicator updates
+live — no action needed to see it.
 
 When a conflict is introduced (by recording a clashing shortcut,
 adopting a hand-written config, or saving from the raw Lua
@@ -2154,6 +2159,59 @@ dismissed early). It does **not** appear on app launch, when
 Settings is simply opened, on Load Profile, or on a normal
 visual-editor Save — those already show any conflict through the
 persistent ⚠️.
+
+### The Keyboard Preview
+
+Shortcuts is one of the two-column areas: beside the shortcut
+groups, the **Live preview** panel draws your keyboard and marks
+which keys your bindings have already claimed, updating as you
+record, clear, and delete. It shows your *draft*, not the saved
+profile — the panel's caption says so.
+
+The board shows **one modifier combination at a time**. Chips
+above it list every combination your bindings use (⌃⌥, ⌃⌥⇧, …; a
+binding with no modifier at all appears as **No modifier**).
+**All** — the opening view — lights every key any binding claims;
+click a chip to narrow the board to that combination and answer
+the question you actually have while binding: *if I hold ⌃⌥, what
+is left?* A chip exists only while some binding uses its
+combination, so clearing your last ⌘ shortcut removes the ⌘ chip.
+
+Each legend entry is drawn the way the board draws it — a fill
+for a fill, a key-shaped ring for a ring:
+
+- **bound** — the key is filled in KiwiDesk's green: a binding in
+  the shown scope claims it.
+- **free** — the board's dark, unfilled key: nothing claims it
+  here.
+- **macOS owns it** — a dashed amber ring on a *free* key: macOS
+  reserves that key under the shown modifier combination (⌘Space
+  is Spotlight's). The ring — and its legend entry — appear only
+  while such a key is actually on the board: never under
+  **All** (macOS reserves combinations, not keys — a key it
+  owns under ⌘ is still free under ⌃⌥), and not under a
+  combination macOS reserves nothing for, ⌃⌥ included.
+- **conflict** — a solid red ring on a *bound* (green) key,
+  meaning one of two clashes: two of your own bindings in the
+  same layer claim the same combo (the board's view of the
+  duplicate-row ⚠️ above), or your binding overwrites a
+  combination macOS reserves — binding ⌘W does not un-reserve
+  it. The entry sits in the legend only while a red ring is
+  actually on the board.
+
+Under the legend, **Keys taken: N** counts the distinct keys the
+shown scope claims, and a **Keyboard layout** row reports what
+the board resolved — the physical shape (ANSI, ISO or JIS) and
+the active input source, e.g. *ISO · German*, "from macOS".
+
+That row is a reading, not a setting: **KiwiDesk binds the
+physical key**, and the row states what macOS reports your
+keyboard to be — there is nothing to choose. The keycaps print
+what *your* layout prints (a German board shows `ß` where a US
+board shows `-`), so the picture matches the keys in front of
+you, but a shortcut stays on its physical key — switching input
+sources changes the characters on the caps, not which key fires
+your bindings.
 
 ### Keyboard Modifiers & Keys
 

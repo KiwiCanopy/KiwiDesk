@@ -113,30 +113,47 @@ struct KeyboardPreviewPanel: View {
                 SettingsTheme.keyFree,
                 L("keyboard.legend.free", "free")
             )
-            if liveScope != .all {
-                // `.all` never yields `.cantBind` (macOS reserves
-                // a key UNDER a modifier), so naming the mark
-                // there would point at one the board cannot draw.
+            if !reservedFree.isEmpty {
+                // Gated on a DRAWN mark, not merely on a chip
+                // being picked: ⌃⌥ — the app's default pair —
+                // reserves nothing, and a chip whose
+                // reservations are all bound draws only red
+                // (code review 2026-08-10; an entry may not
+                // point at a mark the frame does not draw).
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,
                     L("keyboard.legend.blocked", "macOS owns it")
                 )
             }
-            lineSwatch(
-                SettingsTheme.keyConflict,
-                dashed: false,
-                L("keyboard.legend.conflict", "conflict")
-            )
+            // The caption rule, applied to a legend: an entry
+            // may not point at a mark the frame does not draw
+            // (owner, 2026-08-10) — the red entry exists only
+            // while a red ring is on the board: an own-row
+            // collision, or a bound key overwriting a macOS
+            // shortcut, which is the same solid red (owner
+            // ruled it conflict-class). ONE reused key: a
+            // second label would cost a translation round for
+            // a distinction the banner already narrates.
+            if !collisions.isEmpty || overwritesReserved {
+                lineSwatch(
+                    SettingsTheme.keyConflict,
+                    dashed: false,
+                    L("keyboard.legend.conflict", "conflict")
+                )
+            }
         }
     }
 
-    /// A fill swatch, delimited by a hairline rather than set on
-    /// a plate of its own. The plate was there because a pale
-    /// key fill vanished on the light panel; the fills are the
-    /// app's accent and a dark grey now, and a hairline states
-    /// the swatch's edge on either appearance without reading as
-    /// a frame around one item.
+    /// A fill swatch on the panel, delimited by a hairline —
+    /// which does light mode's work — with the `planeRing` seam
+    /// over it doing dark's, where the panel drops to within
+    /// ~1.3:1 of `keyFree` and the hairline sits eleven points
+    /// from it. A first dark-pass cut set every swatch on a
+    /// sliver of the board plate instead; the owner vetoed it
+    /// on sight (2026-08-10) — black chips beside caption text
+    /// in light mode read as blobs, and the legend is panel
+    /// furniture, not part of the picture.
     private func swatch(_ fill: Color, _ label: String) -> some View {
         HStack(spacing: 5) {
             RoundedRectangle(cornerRadius: 3)
@@ -145,6 +162,13 @@ struct KeyboardPreviewPanel: View {
                     RoundedRectangle(cornerRadius: 3)
                         .strokeBorder(
                             SettingsTheme.hairline,
+                            lineWidth: 1
+                        )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 3)
+                        .strokeBorder(
+                            SettingsTheme.planeRing,
                             lineWidth: 1
                         )
                 )
@@ -250,6 +274,17 @@ struct KeyboardPreviewPanel: View {
                             RoundedRectangle(cornerRadius: 5)
                                 .fill(SettingsTheme.card)
                         )
+                        // `card` sits within a point of
+                        // `sunken` in BOTH modes — without an
+                        // edge the chip is not a chip (dark
+                        // pass).
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .strokeBorder(
+                                    SettingsTheme.hairline,
+                                    lineWidth: 1
+                                )
+                        )
                 }
             }
             Spacer(minLength: 0)
@@ -275,13 +310,34 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Derived
 
-    /// The red ring's keys: two bindings in one layer claiming
-    /// the same combo. A clash with a macOS shortcut is NOT one
-    /// of these — the dashed ring says that, and saying it in red
-    /// would blame the user's own bindings for it.
+    /// One half of the solid red ring's keys: two bindings in
+    /// one layer claiming the same combo. The other half is
+    /// `overwritesReserved` — a binding over a macOS
+    /// reservation, the same solid red since the owner ruled
+    /// the overwrite conflict-class (2026-08-10).
     private var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
             in: model.config.layers,
+            scope: liveScope
+        )
+    }
+
+    /// The board's own predicate, not a re-derivation: the
+    /// rings and this gate read one census set, so the legend
+    /// cannot claim a mark the board does not draw (architect
+    /// review 2026-08-10).
+    private var overwritesReserved: Bool {
+        !KeyboardCensus.overwrittenReserved(
+            claims: claims,
+            scope: liveScope
+        ).isEmpty
+    }
+
+    /// The dashed amber ring's presence — its legend entry's
+    /// gate, same shape.
+    private var reservedFree: Set<UInt32> {
+        KeyboardCensus.reservedUnbound(
+            claims: claims,
             scope: liveScope
         )
     }

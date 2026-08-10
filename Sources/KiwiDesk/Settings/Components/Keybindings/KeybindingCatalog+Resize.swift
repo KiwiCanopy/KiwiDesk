@@ -22,6 +22,26 @@ extension KeybindingCatalog {
             ]
     }
 
+    /// The step-independent float/sticky bracket plus the
+    /// shortcuts-panel row — THE one copy (review 2026-08-10):
+    /// the import classifier's label map and the banner's
+    /// `localizedLabel` roster both consume this list, so a
+    /// command recognisable by one is resolvable by the other.
+    /// It shipped as two hand-mirrors first, and the drift is
+    /// user-visible: a command in the classifier's copy alone
+    /// classifies with an English label the banner then
+    /// interpolates untranslated.
+    static let stepFreeCommands: [NavCommand] = [
+        toggleFloating,
+        makeFloating,
+        toggleSticky,
+        toggleDisplaySticky,
+        makeSticky,
+        makeDisplaySticky,
+        makeUnsticky,
+        showShortcuts,
+    ]
+
     /// The four resize rows, one census family each (#678
     /// Phase 3). Named rather than positional: the Shortcuts
     /// area renders per family, and addressing these by index

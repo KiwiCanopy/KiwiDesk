@@ -291,7 +291,7 @@ struct ScrollingSchematic: View {
         let center = m.screenStart + m.screenLen / 2
         return RoundedRectangle(cornerRadius: 4)
             .strokeBorder(
-                Color.secondary.opacity(0.85),
+                SettingsTheme.ink2.opacity(0.85),
                 lineWidth: 2
             )
             .frame(

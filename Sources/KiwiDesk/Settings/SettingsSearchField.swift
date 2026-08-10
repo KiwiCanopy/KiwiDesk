@@ -124,7 +124,7 @@ struct SettingsSearchField: View {
         } label: {
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
         }
         .buttonStyle(.plain)
         .iconButtonAffordance(
