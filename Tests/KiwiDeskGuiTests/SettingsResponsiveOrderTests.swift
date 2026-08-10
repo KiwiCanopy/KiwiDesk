@@ -35,6 +35,14 @@ struct SettingsResponsiveOrderTests {
         ).map { CGFloat($0) }
     }
 
+    /// The three numbers, restated on purpose — the one place
+    /// in this suite that does. They are a RULING (digest turn
+    /// 17a), not a value derived from anything the tree owns,
+    /// so there is nothing to derive them from and this is the
+    /// only record that they are what was ruled. What it buys
+    /// is that a retune has to edit a test that says so, rather
+    /// than passing as an implementation detail; every other
+    /// assertion here derives from the enum instead.
     @Test("the bands are the digest's three breakpoints")
     func bandsAreTheBreakpoints() {
         #expect(SettingsWidthClass.panelBreakpoint == 1200)
@@ -170,7 +178,12 @@ struct SettingsResponsiveOrderTests {
         #expect(SettingsWidthClass.compact.homeColumnCap == 2)
         #expect(SettingsWidthClass.tight.homeColumnCap == 2)
         // Two 240 pt cards and their gap fit inside the
-        // minimum window's grid; three do not.
+        // minimum window's grid; three do not. Stated residue:
+        // 240 and 16 are `HomeScreen`'s private grid literals
+        // copied here, so a retune of the card band leaves this
+        // arithmetic green while it stops describing the grid —
+        // `HomeCardChromeTests` is what pins those two, and
+        // this reasons from them rather than owning them.
         let usable = SettingsWidthClass.minimum - 2 * 16
         #expect(2 * 240 + 16 <= usable)
         #expect(3 * 240 + 2 * 16 > usable)

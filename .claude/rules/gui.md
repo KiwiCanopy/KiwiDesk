@@ -529,8 +529,9 @@ must keep:
 
 ## Responsive width (#678 turn 17a)
 
-The window is tileable, so it gets whatever slot the layout
-hands it. What it sheds as it narrows, and in what order, is
+The window is the user's to make narrow — floated by default,
+tileable if they say so, and hand-draggable either way. What
+it sheds as it narrows, and in what order, is
 ruled: **preview (1200) → row layout (900) → chrome (820), and
 controls never.** 720 pt is the hard minimum, below which the
 window stops resizing. The argument is in
@@ -550,7 +551,9 @@ that fall on a change here:
 - **A capability may lose its layout, never its reachability.**
   An area offering a preview lands on exactly one of docked ·
   floating · offer (`SettingsPreviewForm`, total by
-  construction and proven so) — a fourth state, no card and
+  construction; `SettingsResponsiveOrderTests`'
+  `previewIsAlwaysReachable` walks every band against every
+  answer) — a fourth state, no card and
   no offer, is one deleted `else` away and is exactly what
   "controls never" forbids. The detached card's close is
   per-mount `@State` cleared on navigation, never a stored
@@ -558,8 +561,24 @@ that fall on a change here:
   that outlives the window growing back is the collapse
   handle `DetailPanelTests` bans, wearing a different name.
 - **A card the user can move is clamped by arithmetic**, not
-  by a gesture bound — dragged past an edge at 720 pt there
-  is nothing to bring it back (`SettingsFloatingPanelTests`).
+  by a gesture bound — dragged past an edge at the minimum
+  there is nothing to bring it back
+  (`SettingsFloatingPanelTests`).
+- **A gesture that moves a live preview owns no build of it.**
+  The `@GestureState` goes in a view that takes the preview as
+  an already-built child (`MovableCard`), never in one whose
+  body constructs it: a gesture update invalidates its
+  declaring view every frame, and `SettingsDetailPanel`'s body
+  diffs the whole draft and redraws a schematic. The symptom
+  is stutter under the pointer, which no suite can see — the
+  residue that survived even this shape is #813. The same
+  obligation binds any future surface that animates a preview.
+- **Two controls in one strip are two accessibility elements.**
+  A label on the row that CONTAINS a button either renames it,
+  swallows it or is dropped, and all three are invisible to
+  every locale guard — both keys are present, both render
+  somewhere. The card's grip and its × are named apart, held
+  by `SettingsFloatingPanelTests` on the modifier's shape.
 - **The row axis has one application site.**
   `SettingsRowShape` is where a label meets its control; a row
   framing `settingsLabelColumn` itself keeps the wide
@@ -569,12 +588,27 @@ that fall on a change here:
   `if`: both arrangements draw the same two children, so the
   identity survives and a menu stays open, a field keeps focus
   and the reflow animates instead of flickering under a drag.
+  What the scan watches is a label FRAMED to a settings column,
+  every spelling of it — a row laying its label out some third
+  way (a `Grid`, a `Spacer`) is review's to catch, and a new
+  column constant joins the needle list with its own site. One
+  such spelling was already loose when the list was first
+  written.
 - **A component that changes KIND stays one view.** The save
   pill docks into a full-width bar below 900 through a
   parameter on `SettingsFooter`, not a second footer type —
   two views describing one draft is two places for them to
   disagree — and the shell, not the footer, decides which
-  container it mounts in.
+  container it mounts in. Both mounts are needled in
+  `HomeSurfacingTests`, because either one alone leaves a
+  width band with no save affordance at all. Stated residue,
+  since it is the one place this pass accepts what it forbids
+  for rows: the two containers are different structural
+  positions, so crossing 900 rebuilds the footer and drops its
+  view state — an open unsaved popover closes, and a
+  half-typed profile name in its naming alert is lost. Both
+  need a resize mid-edit to reach, and the alternative is a
+  footer mounted in neither place properly.
 
 ## Colour (#678 turn 16b)
 

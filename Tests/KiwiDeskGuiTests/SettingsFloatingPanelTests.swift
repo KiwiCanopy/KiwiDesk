@@ -15,11 +15,18 @@ import Testing
 /// area from every direction.
 @Suite("Floating preview geometry")
 struct SettingsFloatingPanelTests {
+    private static let root = SourceScan.repoRoot(
+        from: #filePath
+    )
+
     /// The narrowest window the shell allows, less nothing:
     /// the card floats over the CONTENT area, which at the
     /// minimum is the whole width and the height under the
     /// header.
-    private let minimumBounds = CGSize(width: 720, height: 460)
+    private let minimumBounds = CGSize(
+        width: SettingsWidthClass.minimum,
+        height: 460
+    )
     private let roomyBounds = CGSize(width: 1100, height: 800)
 
     @Test("the card rests inside the trailing top corner")
@@ -92,6 +99,49 @@ struct SettingsFloatingPanelTests {
         )
     }
 
+    /// The grip and the close button are TWO accessibility
+    /// elements, each with its own name. Re-hoisting the label
+    /// onto the row that contains the button is the exact
+    /// regression the localization lane found and this pass
+    /// fixed — and it takes `panel.hide_preview`'s only
+    /// rendering site with it while the suite, `extract-keys`
+    /// and every content guard stay green, because both keys
+    /// are still present in every catalog and both still
+    /// render *somewhere*. Matched on the modifier's SHAPE, per
+    /// `AppRulesCensusRenderTests`' lesson: an earlier cut
+    /// elsewhere accepted any mention of a key and went green
+    /// when the modifier became a `.help()`.
+    @Test("the grip and the close button are named apart")
+    func namedApart() throws {
+        let source = try squashed(
+            "Sources/KiwiDesk/Settings/SettingsFloatingPanel.swift"
+        )
+        // The grip: its own element, its own label, and the
+        // gesture on the same view.
+        #expect(
+            source.contains(
+                ".accessibilityElement().accessibilityLabel("
+                    + "L(\"panel.move_preview\","
+            )
+        )
+        // The button names itself through the affordance, which
+        // is what applies both `.help` and the label.
+        #expect(
+            source.contains(
+                ".iconButtonAffordance(L(\"panel.hide_preview\","
+            )
+        )
+        // And the row holding them both names nothing — the
+        // container label is the defect, so its absence is the
+        // assertion.
+        #expect(
+            !source.contains(
+                "}.padding(.horizontal,12).padding(.top,8)"
+                    + ".padding(.bottom,2).accessibilityLabel("
+            )
+        )
+    }
+
     /// A window shorter than the card's ceiling gives the card
     /// the height it has, floored so a very short window still
     /// leaves something to read rather than a sliver.
@@ -118,5 +168,13 @@ struct SettingsFloatingPanelTests {
                 in: CGSize(width: 900, height: 200)
             ) == .zero
         )
+    }
+
+    private func squashed(_ path: String) throws -> String {
+        let url = Self.root.appendingPathComponent(path)
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        #expect(!raw.isEmpty)
+        return SourceScan.stripComments(raw)
+            .filter { !$0.isWhitespace }
     }
 }

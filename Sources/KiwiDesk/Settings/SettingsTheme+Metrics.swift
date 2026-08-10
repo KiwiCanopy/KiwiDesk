@@ -68,15 +68,22 @@ extension SettingsTheme {
     ///
     /// It went to 492 for a day, back-solved from pass 5's
     /// keyboard board so its keys came out square. That was
-    /// wrong while the responsive pass is unbuilt: the shell's
-    /// hard minimum is 720 (`SettingsView`), and 720 − 492 left
-    /// the content column at 227 against a fixed 210 pt
-    /// `SettingsMetrics.labelColumn` — every offering area
-    /// shipping rows with almost no room for their controls at a
-    /// supported window size. The board scales to whatever width
-    /// it is given, so IT yields; a wider panel is the
-    /// responsive pass's to grant, together with the breakpoint
-    /// that drops the panel before the content column starves.
+    /// wrong then because the panel was docked at every width:
+    /// the shell's hard minimum is `SettingsWidthClass.minimum`
+    /// and 720 − 492 left the content column at 227 against a
+    /// fixed 210 pt `SettingsMetrics.labelColumn` — every
+    /// offering area shipping rows with almost no room for
+    /// their controls at a supported window size. The board
+    /// scales to whatever width it is given, so IT yields.
+    ///
+    /// 17a answered the other half and the answer was to keep
+    /// this number: the panel now leaves its column entirely
+    /// below `SettingsWidthClass.panelBreakpoint`, so the
+    /// starvation case no longer exists and the width it is
+    /// granted is one the docked band can always afford
+    /// (1200 − 392 = 808 for content). Widening it is a live
+    /// question for the docked band alone, and the floating
+    /// card would inherit whatever it becomes.
     static let panelWidth: CGFloat = 392
 
     /// The content column's ceiling (owner 2026-08-10): the

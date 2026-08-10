@@ -66,7 +66,14 @@ struct HomeScreen: View {
     /// centres the whole group stack, headings staying flush
     /// with the grid's left edge.
     private var gridCap: CGFloat {
-        4 * 360 + 3 * 16 + SettingsMetrics.paneInset * 2
+        // Derived from the widest band's cap, not a second
+        // spelling of it: a retune of the ceiling has to move
+        // the saturated grid's width with it or the page
+        // centres a group stack that no longer matches its
+        // columns (code review, 2026-08-11).
+        let columns = CGFloat(SettingsWidthClass.wide.homeColumnCap)
+        return columns * 360 + (columns - 1) * 16
+            + SettingsMetrics.paneInset * 2
     }
 
     var body: some View {

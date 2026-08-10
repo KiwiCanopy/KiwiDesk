@@ -33,9 +33,9 @@ enum SettingsDetailPanelOffer {
 /// IN THIS DRAFT" diff list — one draft, three views, this
 /// being the in-area one (#678 redesign spec). The spec's `›`
 /// collapse handle is deliberately NOT built (owner
-/// 2026-08-10): the planned responsive pass will drop the
-/// panel by WIDTH below 1200 pt, and a manual collapse beside
-/// that is a persisted preference duplicating what the window
+/// 2026-08-10): the window drops the panel by WIDTH below
+/// 1200 pt (17a, shipped), and a manual collapse beside that
+/// is a persisted preference duplicating what the window
 /// already decides.
 struct SettingsDetailPanel: View {
     @ObservedObject var model: SettingsModel

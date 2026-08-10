@@ -58,6 +58,17 @@ struct SettingsView: View {
             )
             shell(width)
                 .environment(\.settingsWidth, width)
+                // Widening back into the docked band retires
+                // the card's per-mount answer. Without this a
+                // card closed at 1100 stays closed on the way
+                // back DOWN from 1400 — the user's "not now"
+                // outliving the band it was given in, which is
+                // the persisted-collapse behaviour this pass
+                // refused to build (architecture review,
+                // 2026-08-11).
+                .onChange(of: width) { _, now in
+                    if now.docksPanel { previewShown = nil }
+                }
         }
         // The digest's hard minimum (17a): below 720 the window
         // stops resizing — the tiled Settings window must
@@ -268,13 +279,10 @@ struct SettingsView: View {
                 \.settingsModeReveal,
                 model.modeRevealActive
             )
-            // The detached preview (17a), and the offer to
-            // summon it. Above the pill's overlay so a card
-            // dragged to the bottom of the window still reads
-            // as the nearer object.
-            .overlay(alignment: .topTrailing) {
-                detachedPreview(width)
-            }
+            // The offer to summon the detached preview. Below
+            // the card's own overlay because it exists only
+            // when the card does not — they are never both on
+            // screen, so their order is free.
             .overlay(alignment: .bottomTrailing) {
                 showPreviewOffer(width)
             }
@@ -305,6 +313,17 @@ struct SettingsView: View {
                                 : 0
                         )
                 }
+            }
+            // The detached card goes on LAST, and the order is
+            // the whole point: `.overlay` composes outward, so
+            // whatever is applied last paints and hit-tests
+            // above everything before it. Mounted before the
+            // pill — as it was first written — a card dragged
+            // low is covered by the pill, and its grab bar
+            // loses clicks to a control it is sitting on top
+            // of (code review, 2026-08-11).
+            .overlay(alignment: .topTrailing) {
+                detachedPreview(width)
             }
             // "Same content, same three verbs, different
             // physics" (17a): at this width a floating pill

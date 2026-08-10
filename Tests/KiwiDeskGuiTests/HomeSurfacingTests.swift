@@ -88,6 +88,19 @@ struct HomeSurfacingTests {
                 + "{SettingsTheme.hairline.frame(width:1)"
                 + "SettingsDetailPanel("
         ],
+        "Settings/SettingsFloatingPanel.swift": [
+            // The gesture is declared in the view that takes
+            // the preview as an already-built child, never in
+            // the one that constructs it (gui.md ▸ responsive
+            // width). Moving `@GestureState` up is a one-line
+            // edit that reintroduces a per-frame rebuild of a
+            // draft diff and a schematic, and nothing but this
+            // needle would notice — the symptom is stutter
+            // under a pointer.
+            "privatestructMovableCard<Content:View>:View{",
+            "@GestureStateprivatevardragging:CGSize=.zero",
+            "@ViewBuilderletcontent:Content",
+        ],
         "Settings/SettingsView+Preview.swift": [
             // The card mounts through the band predicate, and
             // its close is per-mount state — never a stored
@@ -95,6 +108,11 @@ struct HomeSurfacingTests {
             "ifdetachedPreviewShown(width),"
                 + "letdestination=model.destination",
             "close:{previewShown=false}",
+            // A new area gets a new card: without the key the
+            // structural position is identical across a
+            // destination change and the card's travel
+            // survives it.
+            ".id(destination)",
             // The offer exists exactly where the card does
             // not: 17a drops the preview's COLUMN, never the
             // preview, so an area that has one always has a

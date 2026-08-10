@@ -54,6 +54,15 @@ extension SettingsView {
                     close: { previewShown = false }
                 )
             }
+            // A new area gets a NEW card. The structural
+            // position is identical across a destination
+            // change, so without this the card's `@State`
+            // travel survives it and an area you never dragged
+            // opens with its preview parked wherever the last
+            // one was left — which is what the panel's own
+            // docstring claimed already happened (code review,
+            // 2026-08-11).
+            .id(destination)
         }
     }
 

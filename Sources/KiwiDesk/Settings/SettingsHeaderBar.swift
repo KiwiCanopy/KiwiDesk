@@ -119,6 +119,15 @@ struct SettingsHeaderBar: View {
         .onChange(of: destination) { _, _ in
             searchExpanded = false
         }
+        // And a window that grows out of the collapsed band
+        // retires the flag with it. Harmless while wide — the
+        // field is the default form there — but without it a
+        // narrowing window re-enters the band with the field
+        // already open and the title yielded to nobody
+        // (architecture review, 2026-08-11).
+        .onChange(of: width) { _, now in
+            if !now.collapsesChrome { searchExpanded = false }
+        }
     }
 
     private var titleRow: some View {
@@ -135,10 +144,15 @@ struct SettingsHeaderBar: View {
                 //
                 // Below the chrome breakpoint the title yields
                 // OUTRIGHT while the collapsed field is open:
-                // the two cannot both have the row, and at that
-                // width the screen the user is on is one glance
-                // away in the back chip beside it, while a
+                // the two cannot both have the row, and a
                 // 60 pt search field is not a search field.
+                // The cost is real and worth naming — the back
+                // chip says "Home", never the area's name, so
+                // while the field is open nothing on screen
+                // says which area you are in. It is bounded by
+                // being momentary: the field takes the row only
+                // while it is open, and closes on pick, on
+                // navigation, and on losing focus empty.
                 if !titleYields {
                     Text(destination.title)
                         .font(.title2.weight(.bold))

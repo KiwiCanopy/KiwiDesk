@@ -105,9 +105,15 @@ private struct MovableCard<Content: View>: View {
     let bounds: CGSize
     let close: () -> Void
     /// Where the user has put the card, as an offset from its
-    /// resting corner. Per-mount: a card dragged aside in Bars
+    /// resting corner. Per-mount — a card dragged aside in Bars
     /// starts back in the corner in Shortcuts, which is where
-    /// the eye looks for it.
+    /// the eye looks for it — and that is true only because the
+    /// MOUNT is keyed on the destination
+    /// (`SettingsView+Preview.detachedPreview`). The structural
+    /// position is otherwise identical across an area change,
+    /// so this `@State` would simply survive it; the claim
+    /// shipped here for a day before the key existed to make it
+    /// true (code review, 2026-08-11).
     @State private var moved: CGSize = .zero
     @GestureState private var dragging: CGSize = .zero
     @ViewBuilder let content: Content

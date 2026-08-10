@@ -57,9 +57,18 @@ struct SettingsRowShapeTests {
             )
             .filter { !$0.isWhitespace }
             scanned += 1
+            // Every spelling of "frame a label to a settings
+            // column". The override one was missing from the
+            // first cut, and an inheriting override row was
+            // hand-framing through it — the scan passed for not
+            // knowing the word (code review, 2026-08-11). A new
+            // column constant joins this list with its site.
             let needles = [
                 ".frame(width:labelColumn",
                 ".frame(width:SettingsMetrics.labelColumn",
+                ".frame(width:overrideLabelColumn",
+                ".frame(width:SettingsMetrics.overrideLabelColumn",
+                ".frame(width:SettingsMetrics.colorLabelColumn",
                 ".frame(width:labelWidth",
             ]
             if needles.contains(where: source.contains) {
@@ -118,6 +127,12 @@ struct SettingsRowShapeTests {
             "Components/Common/SegmentedPicker.swift",
             "Components/Common/SlotSizeRows.swift",
             "Components/GapsAndBorders/GapsEditor.swift",
+            // The override chrome's inheriting readout — it
+            // framed its own label through the OVERRIDE column
+            // and so matched none of the first cut's needles,
+            // drawing the wide arrangement inside a list whose
+            // live rows stacked (code review, 2026-08-11).
+            "Components/Bars/AppBarOverrideControls.swift",
         ]
         for file in files {
             let source = try squashed(

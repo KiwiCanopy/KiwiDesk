@@ -65,15 +65,17 @@ over the bottom of the content — the count and its target
 ("3 unsaved changes to Desk"), then **Revert**, **Save a
 copy…** and **Save**. Click the count for a popover listing
 every change as an old → new row, and click a row to jump
-straight to the control that changed. It is not a fixed bar:
-it appears with your first edit and disappears once everything
-is saved (the verbs are detailed under [Saving](#saving)). And five areas —
+straight to the control that changed. It is not permanent
+chrome: it appears with your first edit and disappears once
+everything is saved (the verbs are detailed under
+[Saving](#saving)). And five areas —
 Gaps & Borders, Bars, Colors & Motion, Layout Defaults, and
 Shortcuts — open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as
 you edit, with a **Changed in this draft** list underneath —
 the same old → new rows as the pill count's popover, each
-jumping to its control. The pill shifts aside while a panel is open, and
+jumping to its control. The pill shifts aside while the panel
+has a column of its own, and
 areas with nothing to preview take the full width instead.
 
 ### Search
@@ -120,6 +122,38 @@ Matching ignores case, accents, and hyphens-versus-spaces, so
 "Space Bar-Farben". It is a plain substring match, not a fuzzy one:
 type part of what you see and it will be found, but a typo returns
 nothing rather than a confident guess.
+
+### Narrow Windows
+
+Make the Settings window narrow — by dragging its edge, or
+because it shares a small screen — and it gives things up in a
+fixed order. Controls are never one of them.
+
+The **Live preview** panel goes first. Instead of its own
+column it becomes a card floating over the content: drag it by
+the grip on its top bar, or close it with the × at that bar's
+other end, and it always lands whole inside the window.
+Narrower still, the card waits behind a **Show preview** button
+rather than opening over the rows unasked — and that button is
+there whenever an area that has a preview is not showing one,
+so the preview is never simply gone.
+Closing the card answers for that screen only: open another
+area and you get whatever the width would have given you.
+
+Next, labelled rows put their control on a second line under
+its label — all of them at once, so a section still reads as
+one column — and the save pill stops floating and docks into a
+full-width bar at the foot of the window: the same count, the
+same three verbs, and still nothing at all once everything is
+saved. Home's card grid steps down to fewer columns on the same
+widths.
+
+Last, the search field collapses to its magnifying-glass icon.
+Click it — or press **⌘K** — and it opens in place, with the
+area's title stepping aside for as long as you are searching
+and coming back as soon as you close it. Nothing else in the
+header yields, and the window stops resizing before anything
+else has to.
 
 ### Contextual Help (?)
 
@@ -1738,8 +1772,8 @@ first.
 
 ### Saving
 
-Saving happens in the floating **save pill**. While anything is
-unsaved it floats over the bottom of the content, names the
+Saving happens in the **save pill**. While anything is
+unsaved it sits at the bottom of the content, names the
 count and the edit target ("3 unsaved changes to Desk"), and
 holds the same three verbs everywhere — **Revert**, **Save a
 copy…**, and **Save**; with nothing to act on there is no pill

@@ -155,6 +155,15 @@ struct SettingsAnchorPrimitiveTests {
         // target: the field is chrome, and nothing inside the
         // remounted subtree anchors.
         "SettingsHeaderBar.swift": 1,
+        // Navigation identity again, and for the same reason
+        // one level out (17a): the detached preview card keeps
+        // its travel in `@State`, and its structural position
+        // is identical across a destination change, so without
+        // a key an area you never dragged opens with its
+        // preview parked where the last one was left. Not a
+        // reveal target either — the card is chrome over the
+        // pane, and the panel inside it anchors nothing.
+        "SettingsView+Preview.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

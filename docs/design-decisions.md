@@ -1871,9 +1871,10 @@ only while there is something to act on, and disappears at
 zero — the one deliberate exception to grey-don't-hide,
 carried by `GreyOutHidingTests`. Below 900 pt it docks into
 a real footer bar (turn 17a, shipped): the pill's argument is
-that it costs 74 pt of gutter and covers nothing, and at 820
-that stops being true — the same pill sits on top of the rows
-it is about. So the pill is the form, not the fact; what
+that it costs a strip of gutter and covers nothing, and below
+900 that second half stops being true — the same pill sits on
+top of the rows it is about. So the pill is the form, not the
+fact; what
 survives both forms is that it exists only while the draft
 does. It is the one component in the shell that changes KIND
 rather than size, which is also why it stays ONE view with
@@ -1951,9 +1952,11 @@ Whether the panel should take some surplus at extreme widths
 is an open follow-up, not a decision this entry makes.
 
 **Narrow windows drop the preview before they drop a
-control.** (#678 turn 17a.) The window is tileable, so it
-gets whatever slot the layout hands it, and the question is
-not *whether* something gives but in what ORDER. Three
+control.** (#678 turn 17a.) The window is the user's to make
+narrow — KiwiDesk floats its own Settings window by default,
+but nothing stops it being tiled, and a hand-drag reaches the
+same widths either way. So the question is not *whether*
+something gives but in what ORDER. Three
 things can: the preview's column (1200), the row layout
 (900), the header chrome (820) — in that order, and controls
 never. The order is the whole ruling. A preview is a
@@ -1985,10 +1988,12 @@ another way and rejected:
   flicker rather than reflow.
 - **The chrome step costs the TITLE, and only while
   searching.** Below 820 the header's search field collapses
-  to its glyph; opening it takes the row from the area
-  title, which is one glance away in the back chip beside
-  it. Nothing else in the header yields, because everything
-  else in it is a control.
+  to its glyph; opening it takes the row from the area title,
+  because at that width the two cannot both have it and a
+  field squeezed to what is left is not a search field. The
+  title is back the moment the search closes, and that is the
+  whole extent of the cost. Nothing else in the header
+  yields, because everything else in it is a control.
 
 **An inline disclosure row leads with a thin rule.** (Owner
 2026-08-10: the App Bar's Style accordion was nearly

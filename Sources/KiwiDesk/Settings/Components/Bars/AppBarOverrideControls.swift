@@ -135,14 +135,19 @@ struct OverrideChrome<Content: View>: View {
     private func inheritedReadout(
         _ inherited: (label: String, value: String)
     ) -> some View {
-        HStack(spacing: SettingsMetrics.overrideRowInset) {
-            Text(inherited.label)
-                .lineLimit(1)
-                .frame(
-                    width: SettingsMetrics.overrideLabelColumn,
-                    alignment: .leading
-                )
-            helpButton
+        // Through the shared shape, on the override column the
+        // live controls beside it use (17a): an inheriting row
+        // that framed its own label kept the WIDE arrangement
+        // below the row breakpoint while every live sibling in
+        // the same list stacked, so one list drew two layouts
+        // (code review, 2026-08-11 — the scan could not see
+        // this spelling, and now does).
+        SettingsRowShape {
+            HStack(spacing: 4) {
+                Text(inherited.label).lineLimit(1)
+                helpButton
+            }
+        } control: {
             Text(
                 L(
                     "space_override.inherits",
@@ -154,6 +159,10 @@ struct OverrideChrome<Content: View>: View {
             .lineLimit(1)
             .truncationMode(.tail)
         }
+        .environment(
+            \.settingsLabelColumn,
+            SettingsMetrics.overrideLabelColumn
+        )
         .foregroundStyle(.secondary)
     }
 
