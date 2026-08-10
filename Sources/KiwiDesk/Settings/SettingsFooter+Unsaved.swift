@@ -190,6 +190,10 @@ private struct PillHoverWash: ViewModifier {
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(
+                        // 0.14 eyeball-confirmed on the dark
+                        // plate (owner 2026-08-10) — above the
+                        // light-surface chips' 0.06/0.12
+                        // ladder, below chalk.
                         SettingsTheme.savePillInk.opacity(
                             hovering ? 0.14 : 0
                         )
