@@ -419,7 +419,7 @@
   "home.title_ax": "Ajustes de KiwiDesk",
   "home.unsaved.count": "%1$d cambios sin guardar",
   "home.unsaved.count_one": "1 cambio sin guardar",
-  "home.unsaved.help": "Cambios aún sin guardar — haz clic para ver la lista; Guardar y Revertir están en la barra flotante de guardado.",
+  "home.unsaved.help": "Cambios aún sin guardar — haz clic para ver la lista; «Guardar» y «Revertir cambios» están en la barra flotante de guardado.",
   "icon_picker.choose.help": "Elegir un icono",
   "icon_picker.clear.help": "Eliminar el icono (usar el predeterminado)",
   "icon_picker.emoji": "Emoji",

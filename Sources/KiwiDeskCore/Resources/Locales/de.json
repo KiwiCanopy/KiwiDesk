@@ -419,7 +419,7 @@
   "home.title_ax": "KiwiDesk-Einstellungen",
   "home.unsaved.count": "%1$d ungesicherte Änderungen",
   "home.unsaved.count_one": "1 ungesicherte Änderung",
-  "home.unsaved.help": "Änderungen sind noch nicht gesichert — klicke für die Liste; Sichern und Verwerfen findest du in der Leiste unten.",
+  "home.unsaved.help": "Änderungen sind noch nicht gesichert — klicke für die Liste; „Sichern“ und „Änderungen verwerfen“ findest du unten im Fenster.",
   "icon_picker.choose.help": "Wähle ein Symbol",
   "icon_picker.clear.help": "Symbol entfernen (Standard verwenden)",
   "icon_picker.emoji": "Emoji",

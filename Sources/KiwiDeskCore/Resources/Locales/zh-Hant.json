@@ -693,7 +693,7 @@
   "palettes.save_current": "將目前顏色儲存為…",
   "palettes.title": "調色板",
   "panel.caption.draft": "顯示的是你的草稿，而非已儲存的描述檔。",
-  "panel.changed_in_draft": "這份草稿的變更 — %1$d",
+  "panel.changed_in_draft": "這份草稿的變更 — %1$d 項",
   "panel.draft_clean": "全部都與已儲存的描述檔相符。",
   "panel.draft_clean_area": "這個區域沒有變更 — 草稿中其他地方有 %1$d 項。",
   "panel.live_preview": "即時預覽 · %1$@",
