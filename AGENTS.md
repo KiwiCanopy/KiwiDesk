@@ -220,6 +220,20 @@ fields that fit awkwardly — answer them honestly from the dev
 machine rather than dropping them or inventing a new shape
 inline.
 
+Beyond the body: give every issue GitHub's **Type** (Bug /
+Feature / Task) and the repo's **Priority** and **Effort**
+issue fields at filing, not in a later sweep — an unranked
+issue is invisible to the roadmap's ordering. The templates
+stamp the Type for a human on the web form; `gh` applies
+neither the form nor its `type:` key, so an agent sets Type
+and both fields itself. The **`file-issue` skill**
+([.claude/skills/file-issue](.claude/skills/file-issue/SKILL.md))
+owns that procedure and the Priority/Effort ladders. Collector
+and roadmap issues take a Type but no Priority/Effort — they
+sequence work rather than being work. Type replaced the old
+`bug` / `enhancement` / `documentation` labels; do not re-add
+them.
+
 ### Commit messages (Angular / Conventional Commits)
 
 `type(scope): subject` — imperative, lower-case, no trailing
