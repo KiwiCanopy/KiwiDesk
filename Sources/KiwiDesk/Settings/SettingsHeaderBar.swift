@@ -132,6 +132,15 @@ struct SettingsHeaderBar: View {
                 reveal: { model.nav.pendingReveal = $0 },
                 armModeNotice: { model.nav.pendingModeNotice = $0 }
             )
+            // A navigation is a NEW search context: remounting
+            // on the destination clears the query and closes
+            // the result panel. Without it, macOS hands focus
+            // back to the field after a push/pop and the stale
+            // query re-opens the suggestions over the fresh
+            // screen (owner eyeball, 2026-08-10) — the panel's
+            // condition is pure state, so only the state can
+            // end it.
+            .id(destination)
             if showsProfileContext {
                 profileChip
             }

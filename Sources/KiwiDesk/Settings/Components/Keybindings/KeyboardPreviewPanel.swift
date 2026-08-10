@@ -120,89 +120,84 @@ struct KeyboardPreviewPanel: View {
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,
-                    on: SettingsTheme.keyFree,
                     L("keyboard.legend.blocked", "macOS owns it")
                 )
             }
-            lineSwatch(
-                SettingsTheme.keyConflict,
-                dashed: false,
-                on: SettingsTheme.accent,
-                L("keyboard.legend.conflict", "conflict")
-            )
+            // The caption rule, applied to a legend: an entry
+            // may not point at a mark the frame does not draw
+            // (owner, 2026-08-10) — the red entry exists only
+            // while a red ring is on the board: an own-row
+            // collision, or a bound key overwriting a macOS
+            // shortcut, which is the same solid red (owner
+            // ruled it conflict-class). ONE reused key: a
+            // second label would cost a translation round for
+            // a distinction the banner already narrates.
+            if !collisions.isEmpty || overwritesReserved {
+                lineSwatch(
+                    SettingsTheme.keyConflict,
+                    dashed: false,
+                    L("keyboard.legend.conflict", "conflict")
+                )
+            }
         }
     }
 
-    /// A fill swatch drawn as a mini KEY on a sliver of the
-    /// board's own plate. The earlier hairline-on-panel form
-    /// held while the panel was light; in dark the panel drops
-    /// to within ~1.3:1 of `keyFree` and the hairline is within
-    /// eleven points of it, so the "free" swatch became a hole
-    /// (dark pass). The plate chip is the board's own context —
-    /// every board colour is measured against it, so the legend
-    /// is legible exactly where the board is, in both modes.
+    /// A fill swatch on the panel, delimited by a hairline —
+    /// which does light mode's work — with the `planeRing` seam
+    /// over it doing dark's, where the panel drops to within
+    /// ~1.3:1 of `keyFree` and the hairline sits eleven points
+    /// from it. A first dark-pass cut set every swatch on a
+    /// sliver of the board plate instead; the owner vetoed it
+    /// on sight (2026-08-10) — black chips beside caption text
+    /// in light mode read as blobs, and the legend is panel
+    /// furniture, not part of the picture.
     private func swatch(_ fill: Color, _ label: String) -> some View {
         HStack(spacing: 5) {
-            plateChip {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(fill)
-            }
+            RoundedRectangle(cornerRadius: 3)
+                .fill(fill)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 3)
+                        .strokeBorder(
+                            SettingsTheme.hairline,
+                            lineWidth: 1
+                        )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 3)
+                        .strokeBorder(
+                            SettingsTheme.planeRing,
+                            lineWidth: 1
+                        )
+                )
+                .frame(width: 17, height: 12)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink2)
         }
     }
 
-    /// A ring, drawn as it is on the board: a KEY-SHAPED outline
-    /// sitting ON a key, on the plate — dashed reserved on a
-    /// free key, solid conflict on a bound one, which is the
-    /// only fill either ring can sit on there.
+    /// A ring, drawn as the KEY-SHAPED outline it is on the
+    /// board — dashed for reserved, solid for a conflict. A
+    /// capsule read as a pill rather than as a key edge.
     private func lineSwatch(
         _ stroke: Color,
         dashed: Bool,
-        on keyFill: Color,
         _ label: String
     ) -> some View {
         HStack(spacing: 5) {
-            plateChip {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(keyFill)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 3)
-                            .strokeBorder(
-                                stroke,
-                                style: StrokeStyle(
-                                    lineWidth: 2,
-                                    dash: dashed ? [3, 2] : []
-                                )
-                            )
+            RoundedRectangle(cornerRadius: 3)
+                .strokeBorder(
+                    stroke,
+                    style: StrokeStyle(
+                        lineWidth: 2,
+                        dash: dashed ? [3, 2] : []
                     )
-            }
+                )
+                .frame(width: 17, height: 12)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink2)
         }
-    }
-
-    /// The sliver of board plate under a legend key — the same
-    /// ground and dark seam the board itself takes.
-    private func plateChip(
-        @ViewBuilder _ key: () -> some View
-    ) -> some View {
-        key()
-            .frame(width: 17, height: 12)
-            .padding(3)
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(SettingsTheme.previewPlate)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(
-                        SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
-            )
     }
 
     // MARK: - Sentence and layout row
@@ -312,15 +307,32 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Derived
 
-    /// The red ring's keys: two bindings in one layer claiming
-    /// the same combo. A clash with a macOS shortcut is NOT one
-    /// of these — the dashed ring says that, and saying it in red
-    /// would blame the user's own bindings for it.
+    /// The solid red ring's keys: two bindings in one layer
+    /// claiming the same combo. A clash with a macOS shortcut
+    /// is the DASHED red ring (`overwritesReserved`), never
+    /// this — solid always means the user's own rows collide.
     private var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
             in: model.config.layers,
             scope: liveScope
         )
+    }
+
+    /// Whether any BOUND key's combo is macOS-reserved under
+    /// the shown modifier — a solid red ring like any other
+    /// conflict, and half of the red legend entry's gate (an
+    /// entry may not point at a mark the frame does not draw).
+    private var overwritesReserved: Bool {
+        guard case .one(let layer) = liveScope else {
+            return false
+        }
+        return claims.contains { code, layers in
+            !layers.isEmpty
+                && KeyboardCensus.isSystemReserved(
+                    code,
+                    under: [layer]
+                )
+        }
     }
 
 }

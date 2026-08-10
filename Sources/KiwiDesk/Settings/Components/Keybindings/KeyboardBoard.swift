@@ -105,6 +105,7 @@ struct KeyboardBoard: View {
             state: state(of: key),
             isConflicted: key.code.map(conflicted.contains)
                 ?? false,
+            isReserved: reserved(key),
             legend: key.legend
         )
         .frame(width: max(width, 0), height: unit)
@@ -118,6 +119,23 @@ struct KeyboardBoard: View {
             of: code,
             claims: claims,
             scope: scope
+        )
+    }
+
+    /// Whether macOS owns this key under the shown modifier —
+    /// independent of the fill, because binding a reserved
+    /// combo does not un-reserve it (owner revised the pass-5
+    /// bound-wins ruling, 2026-08-10). `.all` stays unringed:
+    /// macOS reserves combinations, not keys.
+    private func reserved(
+        _ key: KeyboardMatrix.Key
+    ) -> Bool {
+        guard let code = key.code,
+            case .one(let layer) = scope
+        else { return false }
+        return KeyboardCensus.isSystemReserved(
+            code,
+            under: [layer]
         )
     }
 
@@ -135,6 +153,12 @@ struct KeyCap: View {
     let code: UInt32?
     let state: KeyboardCensus.KeyState
     let isConflicted: Bool
+    /// macOS owns this key under the shown modifier —
+    /// independent of the fill (owner revised the bound-wins
+    /// ruling 2026-08-10: binding ⌘W does not un-own it, and
+    /// suppressing the ring on bind hid exactly the clash the
+    /// user most needs to see).
+    let isReserved: Bool
     /// What a code-less cap prints (⇧, ⌘) — see
     /// `KeyboardMatrix.Key.legend`.
     let legend: String?
@@ -163,10 +187,17 @@ struct KeyCap: View {
     }
 
     @ViewBuilder private var border: some View {
-        if isConflicted {
+        if isConflicted || (isReserved && state == .bound) {
+            // A BOUND reserved combo is conflict-class (owner
+            // ruled 2026-08-10): overwriting ⌘W clashes with
+            // macOS exactly as two own rows clash with each
+            // other, and it takes the same solid red — which
+            // is also what the CVD floor forces, amber
+            // measuring 10.5 against the accent where red
+            // measures 136.6 (`KeyboardRingSeparationTests`).
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(SettingsTheme.keyConflict, lineWidth: 2)
-        } else if state == .cantBind {
+        } else if isReserved {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(
                     SettingsTheme.keyReserved,

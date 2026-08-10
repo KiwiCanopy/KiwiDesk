@@ -2172,24 +2172,27 @@ the question you actually have while binding: *if I hold ⌃⌥, what
 is left?* A chip exists only while some binding uses its
 combination, so clearing your last ⌘ shortcut removes the ⌘ chip.
 
-Each legend entry is drawn the way the board draws it — a mini
-key on a sliver of the board's dark plate:
+Each legend entry is drawn the way the board draws it — a fill
+for a fill, a key-shaped ring for a ring:
 
 - **bound** — the key is filled in KiwiDesk's green: a binding in
   the shown scope claims it.
-- **free** — the dark, unfilled key: nothing claims it here.
+- **free** — the board's dark, unfilled key: nothing claims it
+  here.
 - **macOS owns it** — a dashed amber ring on a *free* key: macOS
   reserves that key under the shown modifier combination (⌘Space
-  is Spotlight's), so recording it would be refused. The ring —
-  and its legend entry — appear only while a modifier chip is
-  picked, because macOS reserves combinations, not keys: a key it
-  owns under ⌘ is still free under ⌃⌥, so under **All** there is
-  no single combination to check against.
-- **conflict** — a solid red ring on a *bound* (green) key: two
-  of your own bindings in the same layer claim the same combo —
-  the board's view of the duplicate-row ⚠️ above. A clash with a
-  reserved macOS shortcut is the dashed ring, never the red one;
-  red always means your own rows collide.
+  is Spotlight's). The ring — and its legend entry — appear only
+  while a modifier chip is picked, because macOS reserves
+  combinations, not keys: a key it owns under ⌘ is still free
+  under ⌃⌥, so under **All** there is no single combination to
+  check against.
+- **conflict** — a solid red ring on a *bound* (green) key,
+  meaning one of two clashes: two of your own bindings in the
+  same layer claim the same combo (the board's view of the
+  duplicate-row ⚠️ above), or your binding overwrites a
+  combination macOS reserves — binding ⌘W does not un-reserve
+  it. The entry sits in the legend only while a red ring is
+  actually on the board.
 
 Under the legend, **Keys taken: N** counts the distinct keys the
 shown scope claims, and a **Keyboard layout** row reports what

@@ -122,6 +122,12 @@ struct HomeSurfacingTests {
             "value:{[weakmodel]keyin"
                 + "model?.searchValue(for:key)}",
             "armModeNotice:{model.nav.pendingModeNotice=$0}",
+            // A navigation is a new search context: the field
+            // remounts on the destination, clearing the query
+            // and closing the panel — without this, restored
+            // focus re-opens stale suggestions after every
+            // push/pop (owner 2026-08-10).
+            ".id(destination)",
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.
