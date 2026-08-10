@@ -1,0 +1,69 @@
+import KiwiDeskCore
+import Testing
+
+@testable import KiwiDesk
+
+/// The conflict banner narrates binding names in the user's
+/// locale (#96): `KeyBinding.label` is the stable ENGLISH
+/// canonical, and the banner resolves it through the catalog
+/// roster before interpolating — "Focus window to the left"
+/// inside a German sentence is the shipped defect this guards
+/// (owner, 2026-08-10). A BEHAVIOR test, not a needle, on the
+/// prover's own advice: it reds on a dropped `localized(_:)`
+/// consult AND on a roster entry going missing, which no
+/// source scan can see. `.serialized` because
+/// `LocalizationManager` is a process-wide singleton (the
+/// `ImportClassifierLanguageTests` precedent).
+@Suite("Keybinding banner locale", .serialized)
+@MainActor
+struct KeybindingBannerLocaleTests {
+    private func reset() {
+        LocalizationManager.shared.select(nil)
+    }
+
+    @Test("the banner names bindings in the active locale")
+    func bannerNamesBindingsInGerman() {
+        reset()
+        LocalizationManager.shared.select("de")
+        defer { reset() }
+        let model = makeTestModel()
+        model.config.spaces = [SpaceID("1")]
+        model.config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "alt+h",
+                        lua: "KiwiDesk.focus(\"left\")",
+                        kind: .navigation,
+                        label: "Focus window to the left"
+                    ),
+                    KeyBinding(
+                        combo: "alt+h",
+                        lua: "KiwiDesk.focus(\"right\")",
+                        kind: .navigation,
+                        label: "Focus window to the right"
+                    ),
+                ]
+            )
+        ]
+        model.warnIfAnyConflict()
+        let warning = model.keybindingWarning
+        #expect(warning != nil)
+        // The de catalog's own rendering of the roster label —
+        // read through the same L() the banner uses, so a
+        // retuned translation moves both sides together.
+        let localized = L(
+            "keybinding.focus_dir",
+            "Focus window %1$@",
+            L("keybinding.dir.left", "to the left")
+        )
+        #expect(warning?.contains(localized) == true)
+        // The English canonical must NOT surface — its
+        // appearance is exactly the defect.
+        #expect(
+            warning?.contains("Focus window to the left")
+                != true
+        )
+    }
+}
