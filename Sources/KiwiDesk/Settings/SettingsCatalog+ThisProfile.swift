@@ -187,8 +187,8 @@ struct BarsControls: Sendable {
     ///
     /// Space Bar leads, matching everywhere else it does — the
     /// omnipresent bar, and the first card on the page — so a
-    /// bare "bar" query (which matches both under the one-row
-    /// cap) surfaces the leading bar, not App Bar.
+    /// bare "bar" query lists the leading bar's row above App
+    /// Bar's.
     let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",
         "Space Bar"

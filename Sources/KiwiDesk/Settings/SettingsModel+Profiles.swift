@@ -232,6 +232,18 @@ extension SettingsModel {
         reload()
     }
 
+    /// The condition that makes a Desktop binding ambiguous:
+    /// separate Spaces on AND more than one display. The
+    /// preference is the snapshot, the count is live — and the
+    /// predicate itself stays Core's, which is the whole point
+    /// of `recommendsSharedSpaces` existing (#8: one predicate,
+    /// so onboarding and this page cannot drift).
+    var displaysHaveSeparateSpaces: Bool {
+        DisplaySpacesSetting.recommendsSharedSpaces(
+            separateSpaces: separateDisplaySpacesPreference,
+            displayCount: displays.count
+        )
+    }
 }
 
 /// One saved profile as the load list shows it (#36).

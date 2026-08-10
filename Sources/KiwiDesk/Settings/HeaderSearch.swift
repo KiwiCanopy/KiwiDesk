@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The header's search entry (#678 turn 9, rebuilt turn 16b):
-/// the REAL field, inline in the header, with its results
-/// hanging below it.
+/// The header's search entry (#678 turn 9, rebuilt turn 16b;
+/// per-setting results turn 11): the REAL field, inline in the
+/// header, with its results hanging below it.
 ///
 /// It shipped as a field-shaped *button* that opened a popover
 /// holding the actual field — which was defensible while the
@@ -33,26 +33,47 @@ import SwiftUI
 /// `Spacer` — pushed the chips to the far edge and left a hole in
 /// the middle of the header (owner, 2026-08-04).
 struct HeaderSearch: View {
-    /// The #18 axis the results filter on.
-    let editingStoredProfile: Bool
+    /// Everything the result builder may read, collected by the
+    /// header bar from state already in memory (the search path
+    /// touches nothing else).
+    let context: SettingsSearchContext
     /// The Profiles spotlight badge state, passed through to
     /// result rows so which list renders the tile does not
     /// change it.
     let spotlightProfiles: Bool
+    /// Enrichment: the current value for a census key, from the
+    /// draft in memory — evaluated per rendered row, after the
+    /// list paints.
+    let value: (SettingKey) -> String?
     /// Hands a picked result up to the shell, which owns the
     /// destination and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
+    /// Arms the shell's one-line confirmation before a pick
+    /// whose result predicts a mode flip — the reveal pipeline
+    /// announces it only if the promotion actually happens
+    /// (`SettingsView.apply`), so a refused reveal stays
+    /// silent. Search's only mention of the mode.
+    let armModeNotice: (SettingsDestination) -> Void
 
     @State private var query = ""
-    /// The ↑/↓ highlight, tracked by destination exactly as the
-    /// sidebar's list selection did.
-    @State private var highlighted: SettingsDestination?
+    /// The ↑/↓ highlight, by result id — a result set is
+    /// per-setting now, so a destination no longer identifies a
+    /// row.
+    @State private var highlighted: String?
     @FocusState private var focused: Bool
+    /// Keeps the panel alive while the pointer is INSIDE it:
+    /// a row click lands outside the field's text editor, so
+    /// `ClickAwayResignsFocus` resigns focus on the mouse-down
+    /// — keyed on focus alone the row would vanish before its
+    /// own mouse-up. A click anywhere else finds the pointer
+    /// outside the panel and dismisses (owner, 2026-08-10:
+    /// click-away left the list standing).
+    @State private var panelHovered = false
 
     private var searching: Bool { !query.trimmed.isEmpty }
 
     var body: some View {
-        SidebarSearchField(
+        SettingsSearchField(
             text: $query,
             focus: $focused,
             onMove: move,
@@ -91,41 +112,56 @@ struct HeaderSearch: View {
             .accessibilityHidden(true)
     }
 
-    /// Hung below the field in the field's own coordinate space.
-    /// The offset is the field's height plus the gap; it is a
-    /// constant because a `GeometryReader` here would hand the
-    /// flexible slot a size to negotiate and collapse the row.
+    /// Hung below the field in the field's own coordinate
+    /// space; the offset is the field's height plus the gap —
+    /// a constant, since a `GeometryReader` around the FIELD
+    /// would negotiate the flexible slot and collapse the row.
+    ///
+    /// 380 wide, a card under the field's leading edge — NOT
+    /// the field's width. A full-width panel was tried against
+    /// the line-through-the-panel report and rejected on sight
+    /// once the real cause (the header separator's paint
+    /// order) was fixed (owner, 2026-08-10). The responsive
+    /// pass (17a) owns the final number.
     @ViewBuilder private var resultPanel: some View {
-        if searching {
-            resultList
-                .padding(8)
-                .frame(width: 340, alignment: .leading)
-                .background(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .fill(SettingsTheme.card)
-                    .overlay(
-                        RoundedRectangle(
-                            cornerRadius: SettingsTheme.cardRadius
-                        )
-                        .strokeBorder(SettingsTheme.hairline)
-                    )
-                    .shadow(
-                        color: .black.opacity(0.16),
-                        radius: 12,
-                        y: 4
-                    )
-                )
-                .offset(y: 40)
+        if searching, focused || panelHovered {
+            resultCard
         }
     }
 
-    private var results: [SidebarSearchResult] {
-        SidebarSearch.results(
-            query: query,
-            editingStoredProfile: editingStoredProfile
-        )
+    private var resultCard: some View {
+        resultList
+            .padding(8)
+            .frame(width: 380, alignment: .leading)
+            .background(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+                .fill(SettingsTheme.card)
+                .overlay(
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.cardRadius
+                    )
+                    .strokeBorder(SettingsTheme.hairline)
+                )
+                // Without this the shadow halos EVERY
+                // primitive — the hairline ring casts its own
+                // shadow INWARD, reading as a line ghosting
+                // through an opaque panel (#758's lesson, hit
+                // again here; owner report 2026-08-10).
+                .compositingGroup()
+                .shadow(
+                    color: .black.opacity(0.16),
+                    radius: 12,
+                    y: 4
+                )
+            )
+            .offset(y: 40)
+            .onHover { panelHovered = $0 }
+    }
+
+    private var results: SettingsSearchResults {
+        SettingsSearch.results(query: query, context: context)
     }
 
     @ViewBuilder private var resultList: some View {
@@ -137,22 +173,65 @@ struct HeaderSearch: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 8)
         } else {
+            // Lazy on purpose: rows compute their value
+            // enrichment when they appear, so a broad query
+            // enriches the ~8 visible rows, never the whole set.
+            // An overlay proposes the FIELD's size, and a
+            // ScrollView adopts whatever it is proposed — so
+            // without an explicit height the whole list
+            // collapses to one clipped row (owner eyeball,
+            // 2026-08-10). The height is the content's own
+            // estimate, capped; past the cap it scrolls.
             ScrollView {
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(results) { result in
+                LazyVStack(alignment: .leading, spacing: 2) {
+                    ForEach(results.settings) { result in
                         row(result)
+                    }
+                    if !results.places.isEmpty {
+                        placesHeader
+                        ForEach(results.places) { result in
+                            row(result)
+                        }
                     }
                 }
             }
-            .frame(maxHeight: 320)
+            .frame(height: panelHeight(results))
         }
     }
 
+    /// Estimated content height: two-line rows at ~40 pt, the
+    /// Places caption when present, capped at 320 (the shipped
+    /// max) — an estimate is safe because past the cap the list
+    /// scrolls and under it a few points of slack vanish into
+    /// the padding.
+    private func panelHeight(
+        _ results: SettingsSearchResults
+    ) -> CGFloat {
+        let rows = CGFloat(results.flat.count)
+        let header: CGFloat = results.places.isEmpty ? 0 : 26
+        return min(rows * 40 + header, 320)
+    }
+
+    /// The Places group's caption (spec 11a): the user's own
+    /// named things, below the settings rows.
+    private var placesHeader: some View {
+        Text(L("search.places", "Places"))
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.top, 6)
+    }
+
     private func row(
-        _ result: SidebarSearchResult
+        _ result: SettingsSearchResult
     ) -> some View {
-        SidebarSearchRow(
+        SettingsSearchRow(
             result: result,
+            value: value,
+            switchesMode: SettingsSearch.switchesMode(
+                result,
+                context: context
+            ),
             badged: spotlightProfiles
                 && result.destination == .profiles,
             badgeValue: badgeValue(for: result.destination),
@@ -160,10 +239,14 @@ struct HeaderSearch: View {
         )
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
+        // The list convention: no fill at rest, a quiet wash
+        // under the pointer (owner, 2026-08-10: rows read
+        // inert without it).
+        .rowHoverHighlight()
         .background(
             RoundedRectangle(cornerRadius: 6)
                 .fill(
-                    result.destination == highlighted
+                    result.id == highlighted
                         ? SettingsTheme.accent.opacity(0.16)
                         : .clear
                 )
@@ -183,21 +266,31 @@ struct HeaderSearch: View {
     /// Clearing the query is what dismisses the list — the panel
     /// is a function of `searching`, so there is no second piece
     /// of open/closed state to disagree with it.
-    private func pick(_ anchor: SettingsAnchor) {
+    ///
+    /// The mode question is answered BEFORE the reveal: the
+    /// reveal path promotes the mode (`ensureModeAdmits`), so
+    /// asking afterwards would always answer "no switch". The
+    /// arm goes first — the reveal is what consumes it.
+    private func pick(_ result: SettingsSearchResult) {
+        if SettingsSearch.switchesMode(
+            result,
+            context: context
+        ) {
+            armModeNotice(result.destination)
+        }
         query = ""
         highlighted = nil
         focused = false
-        reveal(anchor)
+        panelHovered = false
+        reveal(result.anchor)
     }
 
     /// ↑/↓ from the field move the highlight only — the reveal
-    /// (scroll and flash) waits for Return, as in the sidebar.
+    /// (scroll and flash) waits for Return.
     private func move(_ direction: MoveCommandDirection) {
-        let hits = results
+        let hits = results.flat
         guard !hits.isEmpty else { return }
-        let current = hits.firstIndex {
-            $0.destination == highlighted
-        }
+        let current = hits.firstIndex { $0.id == highlighted }
         let next: Int
         switch direction {
         case .up:
@@ -210,18 +303,18 @@ struct HeaderSearch: View {
         default:
             return
         }
-        highlighted = hits[next].destination
+        highlighted = hits[next].id
     }
 
     /// Falls back to the FIRST result: typing does not move the
     /// highlight, so after a fresh query a bare Return would
     /// otherwise be a dead key.
     private func commitHighlighted() {
-        let hits = results
+        let hits = results.flat
         let hit =
-            hits.first { $0.destination == highlighted }
+            hits.first { $0.id == highlighted }
             ?? hits.first
         guard let hit else { return }
-        pick(hit.anchor)
+        pick(hit)
     }
 }

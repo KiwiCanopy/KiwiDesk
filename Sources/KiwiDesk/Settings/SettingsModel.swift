@@ -193,19 +193,14 @@ final class SettingsModel: ObservableObject {
     /// System Settings and which needs a log out to take effect
     /// anyway — is cached.
     @Published var separateDisplaySpacesPreference = false
+    /// The one-line confirmation after a search pick flipped the
+    /// mode (#678 4c) — set and cleared only by
+    /// `noteSearchModeSwitch` (`SettingsModel+Search`).
+    @Published var searchModeNotice: String?
+    /// The notice's self-clear, held so a second flip supersedes
+    /// the first instead of racing it.
+    var searchNoticeTask: Task<Void, Never>?
 
-    /// The condition that makes a Desktop binding ambiguous:
-    /// separate Spaces on AND more than one display. The
-    /// preference is the snapshot, the count is live — and the
-    /// predicate itself stays Core's, which is the whole point
-    /// of `recommendsSharedSpaces` existing (#8: one predicate,
-    /// so onboarding and this page cannot drift).
-    var displaysHaveSeparateSpaces: Bool {
-        DisplaySpacesSetting.recommendsSharedSpaces(
-            separateSpaces: separateDisplaySpacesPreference,
-            displayCount: displays.count
-        )
-    }
     /// What loads right now, by which rule, and over how many
     /// screens (#678 turn 13a) — for the "Which profile loads"
     /// card.

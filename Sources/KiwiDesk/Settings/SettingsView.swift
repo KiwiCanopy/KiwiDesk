@@ -199,6 +199,16 @@ struct SettingsView: View {
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
             }
+            // The one-line mode-switch confirmation (#678 4c):
+            // a search pick into a Power-User-only area flips
+            // the mode silently (`ensureModeAdmits`), and this
+            // line is the only place that says so. Transient —
+            // the model clears it itself.
+            if let notice = model.searchModeNotice {
+                SettingsSearchNotice(text: notice)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 10)
+            }
             // `ClickAwayResignsFocus` installs a window-scoped
             // mouse-down monitor (#93) that commits an edited
             // field when the click lands outside it. It's a

@@ -38,7 +38,7 @@ struct SettingsThemeWiringTests {
         "hairline": "SettingsDetailPanel.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
-        "ink3": "SidebarSearchField.swift",
+        "ink3": "SettingsSearchField.swift",
         "groupHeading": "HomeScreen.swift",
         "accent": "SettingsView.swift",
         "warningSurface": "PermissionPausedBanner.swift",

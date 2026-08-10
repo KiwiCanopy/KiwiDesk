@@ -50,6 +50,12 @@ struct HomeSurfacingTests {
             ".overlay(alignment:.bottom){"
                 + "SettingsFooter(model:model)",
             "x:panelVisible?-SettingsTheme.panelWidth/2:0",
+            // The search mode-switch notice DRAWS when set
+            // (#678 4c) — needle through the branch body: a
+            // consult that never mounts the strip would leave
+            // the flip unannounced with every test green.
+            "ifletnotice=model.searchModeNotice{"
+                + "SettingsSearchNotice(text:notice)",
         ],
         "Settings/SettingsView+Detail.swift": [
             // The two-column detail consults the ONE offer set
@@ -66,10 +72,20 @@ struct HomeSurfacingTests {
             "ifhasWork{pill"
         ],
         "Settings/SettingsView+Reveal.swift": [
-            // A search hit into a Power-User-only area switches the
-            // mode before landing.
+            // A search hit into a Power-User-only area switches
+            // the mode BEFORE landing — one needle through the
+            // whole run (flip, announce, land), so the ORDER
+            // stays pinned, not just each statement's existence.
             "ensureModeAdmits(resolved.destination)"
-                + "model.destination=resolved.destination"
+                + "ifletarmedNotice,wasSimple,"
+                + "model.settingsMode==.powerUser{"
+                + "model.noteSearchModeSwitch(armedNotice)}"
+                + "model.destination=resolved.destination",
+            // The reveal CONSUMES the armed notice
+            // unconditionally (a refused request must not leave
+            // a stale arm)…
+            "letarmedNotice=model.nav.pendingModeNotice"
+                + "model.nav.pendingModeNotice=nil",
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home
@@ -88,6 +104,15 @@ struct HomeSurfacingTests {
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.
             "model.flipSettingsMode($0,reduceMotion:reduceMotion)",
+            // The search wiring is one-line-wiring territory
+            // (architect review 2026-08-10): swap any closure
+            // for a stub and Places, the value column or the
+            // notice dies with every suite green. Needles on
+            // the USE sites.
+            "context:searchContext",
+            "value:{[weakmodel]keyin"
+                + "model?.searchValue(for:key)}",
+            "armModeNotice:{model.nav.pendingModeNotice=$0}",
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.
@@ -109,6 +134,13 @@ struct HomeSurfacingTests {
             // keeps it outside the reveal wash by structure.
             "ifletplate=HomeCardPlate.plate("
                 + "for:destination,model:model){plate}",
+        ],
+        "Settings/SettingsSearchRow.swift": [
+            // Enrichment and the mode tag are surfacing
+            // branches: consulting the closure is not drawing
+            // its answer.
+            "ifletshownValue{Text(shownValue)",
+            "ifswitchesMode{modeTag}",
         ],
         "Settings/SettingsModel+EditTarget.swift": [
             // A dirty draft reaching a clean transition

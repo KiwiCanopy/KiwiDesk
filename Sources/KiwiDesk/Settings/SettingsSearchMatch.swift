@@ -1,7 +1,7 @@
 import Foundation
 
-/// The app's one search-matching predicate, shared by the sidebar
-/// search and the app picker so "one search-matching vocabulary"
+/// The app's one search-matching predicate, shared by the
+/// Settings search and the app picker so "one search-matching vocabulary"
 /// is a fact rather than a convention two files happen to follow.
 ///
 /// `localizedStandardContains` underneath — Apple's user-facing

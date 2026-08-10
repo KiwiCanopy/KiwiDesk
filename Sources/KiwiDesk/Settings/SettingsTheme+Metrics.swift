@@ -155,6 +155,13 @@ extension SettingsTheme {
     /// from the shipped tokens rather than restating them.
     static let modeGatedStrokeOpacity: CGFloat = 0.6
 
+    /// The search mode-switch notice's accent wash — a fill
+    /// behind ordinary ink, so it sits well below the
+    /// mode-gated STROKE strength: the strip confirms, it does
+    /// not gate anything (#678 4c). Rendered by
+    /// `SettingsSearchNotice`.
+    static let searchNoticeFillOpacity: CGFloat = 0.12
+
     /// A display card's stand: the foot as a share of the card's
     /// width and the neck as a share of the foot, each clamped.
     /// Long enough that the card sits ON its foot rather than

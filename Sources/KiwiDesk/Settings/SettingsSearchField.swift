@@ -9,7 +9,7 @@ import SwiftUI
 /// placement would reopen exactly that brittle interaction.
 /// Matches the `AppPickerButton` / `IconPicker` field
 /// precedent instead.
-struct SidebarSearchField: View {
+struct SettingsSearchField: View {
     @Binding var text: String
     /// Focus, owned by the caller. The field mounts in the header
     /// and lives as long as the window does, so it must NOT grab
