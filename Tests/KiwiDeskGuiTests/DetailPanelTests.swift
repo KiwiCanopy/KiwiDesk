@@ -13,17 +13,19 @@ struct DetailPanelTests {
         from: #filePath
     )
 
-    /// v1's owner-scoped offer set (2026-08-09). Pinned as
-    /// data: pass 5 (the keyboard) EXTENDS this deliberately —
-    /// an accidental member is a panel with an `EmptyView`
-    /// preview, which the branch test below cannot see on its
-    /// own.
-    @Test("the offer set is the scoped four")
+    /// The offer set, pinned as data: an accidental member is a
+    /// panel with an `EmptyView` preview, which the branch test
+    /// below cannot see on its own. v1 was owner-scoped to four
+    /// (2026-08-09) and pass 5 added Shortcuts, which is the
+    /// extension motion #793-#795 each repeat — so a member
+    /// arriving here without a branch in the map below is the
+    /// failure this pair exists to catch.
+    @Test("the offer set is the scoped five")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .colors,
-                .layoutDefaults,
+                .layoutDefaults, .shortcuts,
             ]
         )
     }
@@ -44,6 +46,8 @@ struct DetailPanelTests {
                 "case.colors:PaletteScenePanel(model:model)",
             .layoutDefaults:
                 "case.layoutDefaults:LayoutPreviewPanel(",
+            .shortcuts:
+                "case.shortcuts:KeyboardPreviewPanel(model:model)",
         ]
         #expect(
             Set(branches.keys)

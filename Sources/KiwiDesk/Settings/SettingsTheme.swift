@@ -77,6 +77,58 @@ enum SettingsTheme {
         dark: 0xEA_F3_EE
     )
 
+    // MARK: - Keyboard preview (#678 pass 5)
+
+    /// The board draws its BOUND keys in `accent` — the app's own
+    /// green, not a bespoke one — so only the three below are
+    /// its own. All are fixed in both modes for `previewPlate`'s
+    /// reason: the board is a picture of a keyboard on that same
+    /// dark ground, and what it shows must not change with the
+    /// window's appearance.
+    ///
+    /// A lighter bound green and a salmon conflict ring lived
+    /// here for a day. They came from a measurement taken with
+    /// the WRONG metric: `ColorVision.separation` is Euclidean
+    /// distance in SIMULATED sRGB, and a CIE-Lab proxy used
+    /// during the pass reported warm colours at 17–25 against the
+    /// accent where the repo's own measure puts them at 84–126.
+    /// Nothing needed a bespoke green. Use `ColorVision`, never a
+    /// re-derivation of it.
+
+    /// A key nothing claims — the board's unbound fill.
+    static let keyFree = token(
+        light: 0x37_46_3B,
+        dark: 0x37_46_3B
+    )
+
+    /// The dashed ring on a key macOS already owns under the
+    /// shown modifier. A WARNING on an otherwise-free key, not a
+    /// third fill: the fill says whether the USER has claimed the
+    /// key, and blacking it out said "unavailable" about a key
+    /// that is free under every other modifier.
+    ///
+    /// Measured against `keyFree` alone, because that is the only
+    /// fill it can sit on — a key the user has bound reads bound
+    /// whatever macOS thinks (`KeyboardRingSeparationTests`).
+    static let keyReserved = token(
+        light: 0xE0_A3_4A,
+        dark: 0xE0_A3_4A
+    )
+
+    /// The solid ring on a key two of the user's OWN bindings
+    /// both claim. A clash with a macOS shortcut is the dashed
+    /// ring's, not this one's.
+    ///
+    /// Deliberately not `SettingsTheme.danger`, which varies by
+    /// appearance: its dark value measures 55.6 against `accent`,
+    /// under the floor of 60, on a board pinned in both modes so
+    /// that cannot happen. This is danger's LIGHT value, fixed —
+    /// 136.6 on the accent it always sits on.
+    static let keyConflict = token(
+        light: 0xB0_3A_2A,
+        dark: 0xB0_3A_2A
+    )
+
     // MARK: - Borders
 
     /// Every container border: card, section, header underline,

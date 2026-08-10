@@ -102,12 +102,18 @@ public struct KeyCombo: Hashable, Sendable {
     /// The canonical name for a key code (reverse of
     /// `keyCodes`). Codes that carry both a symbol and a word
     /// alias resolve to the readable word form for display.
-    static func keyName(for code: UInt32) -> String? {
+    ///
+    /// Public alongside `keyCodes`: a caller drawing a physical
+    /// board holds a code and needs the name, and the public
+    /// `comboString(keyCode:…)` would make it synthesise a whole
+    /// combo string and re-parse it to get one.
+    public static func keyName(for code: UInt32) -> String? {
         let overrides: [UInt32: String] = [
             36: "return", 51: "delete", 53: "escape",
             41: "semicolon", 43: "comma", 47: "period",
             44: "slash", 42: "backslash", 39: "quote",
             50: "grave", 27: "minus", 24: "equal",
+            10: "section",
             30: "rightbracket", 33: "leftbracket",
         ]
         if let name = overrides[code] { return name }
@@ -115,7 +121,17 @@ public struct KeyCombo: Hashable, Sendable {
     }
 
     /// US-layout virtual key codes (Carbon kVK_*).
-    static let keyCodes: [String: UInt32] = [
+    ///
+    /// Public because binding by physical position makes this
+    /// the only description of the keyboard the app has, and the
+    /// GUI draws that board (the Shortcuts preview panel). Read
+    /// it as a name→code map, never as a key list: aliases
+    /// collapse onto one code (`esc`/`escape` → 53,
+    /// `return`/`enter` → 36), so enumerating physical keys means
+    /// de-duplicating by VALUE. It carries no order, no row and
+    /// no width — geometry is the caller's, and
+    /// `KeyboardMatrix` is where the GUI keeps it.
+    public static let keyCodes: [String: UInt32] = [
         "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5,
         "z": 6, "x": 7, "c": 8, "v": 9, "b": 11, "q": 12,
         "w": 13, "e": 14, "r": 15, "y": 16, "t": 17,
@@ -130,6 +146,12 @@ public struct KeyCombo: Hashable, Sendable {
         "semicolon": 41, "comma": 43, "period": 47,
         "slash": 44, "backslash": 42, "quote": 39,
         "apostrophe": 39, "grave": 50, "backtick": 50,
+        // ISO boards only: the extra key an ANSI board does
+        // not have. Bindable like any other — the preview draws
+        // it (`KeyboardMatrix`), and a key drawn as free that
+        // `parse` cannot name is a key the user is invited to
+        // bind and then cannot.
+        "section": 10, "iso_section": 10,
         "minus": 27, "equal": 24, "leftbracket": 33,
         "rightbracket": 30,
         "return": 36, "enter": 36, "tab": 48, "space": 49,

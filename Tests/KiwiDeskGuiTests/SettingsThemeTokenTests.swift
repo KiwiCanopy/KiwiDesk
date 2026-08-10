@@ -70,6 +70,29 @@ struct SettingsThemeTokenTests {
             0xEA_F3_EE,
             SettingsTheme.plateInk
         ),
+        // The keyboard board's own two tokens (#678 pass 5).
+        // Fixed in both modes for `previewPlate`'s reason — the
+        // board is a picture of a keyboard on that same dark
+        // ground. Bound keys and the conflict ring reuse
+        // `accent` and `danger`; only these two are the board's.
+        Pin(
+            "keyFree",
+            0x37_46_3B,
+            0x37_46_3B,
+            SettingsTheme.keyFree
+        ),
+        Pin(
+            "keyConflict",
+            0xB0_3A_2A,
+            0xB0_3A_2A,
+            SettingsTheme.keyConflict
+        ),
+        Pin(
+            "keyReserved",
+            0xE0_A3_4A,
+            0xE0_A3_4A,
+            SettingsTheme.keyReserved
+        ),
         Pin(
             "hairline",
             0xE4_E9_E1,
