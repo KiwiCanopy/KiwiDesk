@@ -527,6 +527,55 @@ must keep:
   mode-gated container passes `modeGated:` to its container
   shape.
 
+## Responsive width (#678 turn 17a)
+
+The window is tileable, so it gets whatever slot the layout
+hands it. What it sheds as it narrows, and in what order, is
+ruled: **preview (1200) → row layout (900) → chrome (820), and
+controls never.** 720 pt is the hard minimum, below which the
+window stops resizing. The argument is in
+`docs/design-decisions.md` ▸ narrow windows; the obligations
+that fall on a change here:
+
+- **`SettingsWidthClass` is the one derivation.** The shell
+  measures once and publishes the band through
+  `\.settingsWidth`; a site that compares a width of its own
+  is the drift the type exists to end, and a second literal
+  720 anywhere is how the window comes to resize below its
+  own narrowest band. Properties that share a threshold are
+  DERIVED from each other (`docksSavePill` *is*
+  `stacksRows`), never re-tested against the number.
+  `SettingsResponsiveOrderTests` walks every supported width
+  and holds the order as implications between them.
+- **A capability may lose its layout, never its reachability.**
+  An area offering a preview lands on exactly one of docked ·
+  floating · offer (`SettingsPreviewForm`, total by
+  construction and proven so) — a fourth state, no card and
+  no offer, is one deleted `else` away and is exactly what
+  "controls never" forbids. The detached card's close is
+  per-mount `@State` cleared on navigation, never a stored
+  preference: the panel is dropped by WIDTH, and an answer
+  that outlives the window growing back is the collapse
+  handle `DetailPanelTests` bans, wearing a different name.
+- **A card the user can move is clamped by arithmetic**, not
+  by a gesture bound — dragged past an edge at 720 pt there
+  is nothing to bring it back (`SettingsFloatingPanelTests`).
+- **The row axis has one application site.**
+  `SettingsRowShape` is where a label meets its control; a row
+  framing `settingsLabelColumn` itself keeps the wide
+  arrangement at every width, which is invisible in review and
+  in every other guard (`SettingsRowShapeTests`' `allowed` map
+  is the one copy of who may). It swaps `AnyLayout`, never an
+  `if`: both arrangements draw the same two children, so the
+  identity survives and a menu stays open, a field keeps focus
+  and the reflow animates instead of flickering under a drag.
+- **A component that changes KIND stays one view.** The save
+  pill docks into a full-width bar below 900 through a
+  parameter on `SettingsFooter`, not a second footer type —
+  two views describing one draft is two places for them to
+  disagree — and the shell, not the footer, decides which
+  container it mounts in.
+
 ## Colour (#678 turn 16b)
 
 Every surface, border and ink in the Settings tree comes from
