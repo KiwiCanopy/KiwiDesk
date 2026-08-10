@@ -105,7 +105,6 @@
   "bars.show_in.title": "Anzeigen in",
   "bars.space_bar.caption": "Ein Element pro Space, immer sichtbar — eine Leiste pro Display, in jedem Layout.",
   "bars.style": "Stil",
-  "bars.style.app_bar.summary": "Hintergrund, Inhalt, Indikator, Größen, Symbolstil, Kopieren auf die Space Bar",
   "bars.style.space_bar.summary": "Hintergrund, Ausrichtung, Indikator, Größen, Glyphen pro Space, Spring-Verzögerung",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

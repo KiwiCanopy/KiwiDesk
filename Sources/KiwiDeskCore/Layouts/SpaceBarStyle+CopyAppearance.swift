@@ -53,18 +53,20 @@ extension SpaceBarStyle {
             .subtracting(sharedColorKeys)
     }
 
-    /// Copies every shared appearance field from `appBar`. The
-    /// switch is exhaustive over our own CodingKeys, so a new
-    /// field cannot be silently skipped — a shared spelling
-    /// must pick a source line, a space-only one lands in the
-    /// keep-own list.
-    public mutating func copyAppearance(from appBar: AppBarStyle) {
+    /// Copies every shared appearance field from `appBar` —
+    /// the RETIRED forward direction: the shipped button pulls
+    /// the other way (`AppBarStyle.copyAppearance(from:)`,
+    /// owner flip 2026-08-10), and no production path calls
+    /// this any more. It stays, internal, as the parity
+    /// suite's seed and the symmetric statement of the
+    /// contract both directions share; if a Space Bar card
+    /// ever earns its own pull button this is it, re-argued.
+    mutating func copyAppearance(from appBar: AppBarStyle) {
         for key in Self.copyAppearanceKeys {
             copyField(key, from: appBar)
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private mutating func copyField(
         _ key: String,
         from appBar: AppBarStyle

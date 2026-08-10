@@ -105,7 +105,6 @@
   "bars.show_in.title": "Afficher dans",
   "bars.space_bar.caption": "Un élément par espace, toujours visible — une barre par écran, dans chaque disposition.",
   "bars.style": "Style",
-  "bars.style.app_bar.summary": "Fond, contenu, indicateur, tailles, style des symboles, copie vers la Space Bar",
   "bars.style.space_bar.summary": "Arrière-plan, alignement, indicateur, tailles, glyphes par espace, délai de survol",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

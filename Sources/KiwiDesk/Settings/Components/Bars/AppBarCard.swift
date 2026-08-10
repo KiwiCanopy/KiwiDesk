@@ -146,10 +146,11 @@ struct AppBarCard: View {
     }
 
     /// One-shot copy, then fully independent — never a live
-    /// link. Owner flipped the DIRECTION (2026-08-10): the
-    /// button sits at this card's tail, and a button here
-    /// fills in THIS bar from the Space Bar the user already
-    /// configured — pushing outward surprised on sight. It
+    /// link. Owner flipped the DIRECTION (2026-08-10): a
+    /// button on THIS card fills in THIS bar from the Space
+    /// Bar the user already configured — pushing outward
+    /// surprised on sight — and it rides at rest, always
+    /// visible (the adjust-gaps precedent). It
     /// needs the SOURCE (Space Bar) on, not the App Bar
     /// shown. Sizes and style ONLY — colours are the Advanced
     /// Colours area's concern (owner ruling 2026-08-02; a
@@ -216,7 +217,7 @@ struct AppBarCard: View {
         L(
             "bars.style.app_bar.summary",
             "Background, content, indicator, sizes, symbol "
-                + "style, copy to Space Bar"
+                + "style"
         )
     }
 

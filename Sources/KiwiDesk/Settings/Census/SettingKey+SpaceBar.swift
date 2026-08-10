@@ -116,14 +116,16 @@ extension SpaceBarKey {
                 ])
             )
         case .copyAppearance:
-            // The App Bar card's tail (owner flipped the
+            // At rest on the App Bar card (owner flipped the
             // direction 2026-08-10: it copies Space Bar → App
-            // Bar now, filling in THIS card's bar) — at rest,
-            // never behind the Style disclosure, the
-            // adjust-gaps precedent for a one-shot verb. The
-            // SOURCE bar must be on for the copy to mean
-            // anything; the card's own container gate already
-            // greys with the App Bar.
+            // Bar, filling in THIS card's bar), never behind
+            // the Style disclosure — the adjust-gaps precedent
+            // for a one-shot verb. Gated on the SOURCE bar
+            // being on, and deliberately EXEMPT from the
+            // card's container gate: styling the App Bar from
+            // the Space Bar before any layout shows one is
+            // configure-before-enable, the icon-source
+            // precedent one entry up.
             return .row(
                 .bars,
                 .appBar,

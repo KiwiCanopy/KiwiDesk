@@ -105,7 +105,6 @@
   "bars.show_in.title": "表示するレイアウト",
   "bars.space_bar.caption": "スペースごとに1つの項目を常に画面に表示します。バーはディスプレイごとに1本、どのレイアウトでも表示されます。",
   "bars.style": "スタイル",
-  "bars.style.app_bar.summary": "背景、表示内容、インジケーター、サイズ、シンボルスタイル、Space Barへコピー",
   "bars.style.space_bar.summary": "背景、配置、インジケーター、サイズ、グリフ上限、スプリング遅延",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

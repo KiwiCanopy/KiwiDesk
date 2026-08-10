@@ -105,7 +105,6 @@
   "bars.show_in.title": "Показывать в",
   "bars.space_bar.caption": "Один элемент на пространство, всегда на экране — одна панель на дисплей, в каждой раскладке.",
   "bars.style": "Стиль",
-  "bars.style.app_bar.summary": "Фон, содержимое, индикатор, размеры, стиль символов, копирование в Space Bar",
   "bars.style.space_bar.summary": "Фон, выравнивание, индикатор, размеры, лимит символов, задержка перехода",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

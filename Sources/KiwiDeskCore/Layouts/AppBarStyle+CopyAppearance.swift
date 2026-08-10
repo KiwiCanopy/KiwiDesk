@@ -26,7 +26,6 @@ extension AppBarStyle {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private mutating func copyField(
         _ key: String,
         from spaceBar: SpaceBarStyle

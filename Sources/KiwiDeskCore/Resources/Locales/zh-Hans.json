@@ -105,7 +105,6 @@
   "bars.show_in.title": "显示于",
   "bars.space_bar.caption": "每个空间一个项目，始终显示在屏幕上；每个显示器一个栏，适用于所有布局。",
   "bars.style": "样式",
-  "bars.style.app_bar.summary": "背景、内容、指示器、尺寸、符号样式、复制到 Space Bar",
   "bars.style.space_bar.summary": "背景、对齐方式、指示器、尺寸、图标上限、悬停弹跳延迟",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

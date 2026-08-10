@@ -105,7 +105,6 @@
   "bars.show_in.title": "顯示於",
   "bars.space_bar.caption": "每個空間一個項目，始終顯示在螢幕上；每部顯示器一個列，適用於每個佈局。",
   "bars.style": "樣式",
-  "bars.style.app_bar.summary": "背景、內容、指示器、尺寸、符號樣式、複製到 Space Bar",
   "bars.style.space_bar.summary": "背景、對齊、指示器、尺寸、符號數、彈開延遲",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

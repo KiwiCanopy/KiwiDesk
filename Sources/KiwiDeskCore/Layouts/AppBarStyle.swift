@@ -159,11 +159,14 @@ public struct AppBarStyle: Sendable, Equatable {
 
     /// Whether the shared plate spans its whole strip
     /// edge-to-edge (`background_fit: full` on a style that
-    /// draws a shared plate at all). THE one copy of the
-    /// spans rule — the bar renderers and both Settings
-    /// preview mocks consult it (review 2026-08-10 found four
-    /// hand copies; a retune of hug/span had four places to
-    /// miss).
+    /// draws a shared plate at all). The SETTINGS PREVIEWS'
+    /// one copy of the spans rule — both strip mocks and the
+    /// fused scene consult it. The LIVE bars resolve fit one
+    /// layer further down (`BarPlate.frame`, which adds the
+    /// hug→full fallback on overflow), so a retune of the
+    /// rule touches this and `BarPlate` together.
+    /// `SpaceBarStyle.plateSpans` is the same rule on the
+    /// twin struct.
     public var plateSpans: Bool {
         !hasBox && backgroundFit == .full
     }

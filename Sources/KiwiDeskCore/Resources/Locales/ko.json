@@ -105,7 +105,6 @@
   "bars.show_in.title": "표시할 레이아웃",
   "bars.space_bar.caption": "공간마다 항목 하나를 항상 화면에 표시합니다. 디스플레이마다 바 하나가 모든 레이아웃에서 표시됩니다.",
   "bars.style": "스타일",
-  "bars.style.app_bar.summary": "배경, 내용, 인디케이터, 크기, 심볼 스타일, Space Bar로 복사",
   "bars.style.space_bar.summary": "배경, 정렬, 인디케이터, 크기, 글리프 상한, 스프링 지연",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",

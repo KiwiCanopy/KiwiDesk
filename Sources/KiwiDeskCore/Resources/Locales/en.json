@@ -105,7 +105,7 @@
   "bars.show_in.title": "Show it in",
   "bars.space_bar.caption": "One item per Space, always on screen — one bar per display, every layout.",
   "bars.style": "Style",
-  "bars.style.app_bar.summary": "Background, content, indicator, sizes, symbol style, copy to Space Bar",
+  "bars.style.app_bar.summary": "Background, content, indicator, sizes, symbol style",
   "bars.style.space_bar.summary": "Background, alignment, indicator, sizes, glyph cap, spring delay",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",
