@@ -77,6 +77,46 @@ enum SettingsTheme {
         dark: 0xEA_F3_EE
     )
 
+    // MARK: - Keyboard preview key states
+
+    /// A key the draft binds, on the Shortcuts panel's board
+    /// (#678 pass 5). Fixed in both modes for `previewPlate`'s
+    /// reason — the board is a picture of a keyboard sitting on
+    /// that same dark ground, and what it shows must not change
+    /// with the window's appearance.
+    ///
+    /// It went NEUTRAL for one day and came back, and the reason
+    /// it left is worth recording so nobody repeats it: the
+    /// measurement that condemned green was taken with the wrong
+    /// metric. `ColorVision.separation` is Euclidean distance in
+    /// SIMULATED sRGB; a CIE-Lab proxy used during the pass
+    /// reported warm colours at 17–25 against this green, and on
+    /// the repo's own measure they are 84–126, comfortably past
+    /// the floor of 60. Green never denied the warm half of the
+    /// wheel. Use `ColorVision`, never a re-derivation of it.
+
+    static let keyFree = token(
+        light: 0x37_46_3B,
+        dark: 0x37_46_3B
+    )
+
+    /// The dashed ring on a key macOS already owns under the
+    /// shown modifier. A WARNING on an otherwise-free key, not a
+    /// third fill: the fill says whether the user has claimed the
+    /// key, and blacking it out said "unavailable" about a key
+    /// that is free under every other modifier.
+    ///
+    /// Measured against `keyFree` alone, because that is the only
+    /// fill it can sit on — a key the user HAS bound reads bound,
+    /// whatever macOS thinks. 62.9 under protanopia, floor 60.
+    static let keyReserved = token(
+        light: 0xE0_A3_4A,
+        dark: 0xE0_A3_4A
+    )
+
+    /// The solid ring on a key two bindings both claim.
+    ///
+
     // MARK: - Borders
 
     /// Every container border: card, section, header underline,

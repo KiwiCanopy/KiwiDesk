@@ -12,9 +12,12 @@ import SwiftUI
 /// a missing feature.
 enum SettingsDetailPanelOffer {
     /// v1 (owner-scoped 2026-08-09): the four areas whose
-    /// preview renderers exist this pass.
+    /// preview renderers exist this pass. Shortcuts joined in
+    /// pass 5 (the keyboard board), which is the extension motion
+    /// #793-#795 each repeat.
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .colors, .layoutDefaults,
+        .shortcuts,
     ]
 
     static func offers(
@@ -87,6 +90,8 @@ struct SettingsDetailPanel: View {
             BarsPanelPreview(model: model)
         case .colors:
             PaletteScenePanel(model: model)
+        case .shortcuts:
+            KeyboardPreviewPanel(model: model)
         case .layoutDefaults:
             // The section's `onAppear` latch writes the tab
             // before first render; `.bsp` only covers the

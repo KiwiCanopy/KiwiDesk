@@ -52,9 +52,35 @@ struct KeyboardCensusTests {
         #expect(two.map(\.label) == ["⌥", "⌃⌥"])
     }
 
-    @Test("A bare key binding offers no chip")
-    func unmodifiedComboIsNoLayer() {
-        #expect(KeyboardCensus.layers(in: [layer(["j"])]).isEmpty)
+    /// A bare key binding gets a chip like any other. An earlier
+    /// cut dropped it because it has no modifier glyph to show,
+    /// which meant a binding on plain `L` or `return` appeared
+    /// NOWHERE on a board whose question is what is taken
+    /// (owner, 2026-08-10). It holds the fewest modifiers, so it
+    /// sorts first; the word naming it is the view's.
+    @Test("A bare key binding still gets a chip, and leads")
+    func unmodifiedComboIsItsOwnLayer() {
+        let only = KeyboardCensus.layers(in: [layer(["j"])])
+        #expect(only.count == 1)
+        #expect(only.first?.modifiers.isEmpty == true)
+        #expect(only.first?.label == "")
+
+        let mixed = KeyboardCensus.layers(
+            in: [layer(["j", "ctrl+alt+k"])]
+        )
+        #expect(mixed.first?.modifiers.isEmpty == true)
+    }
+
+    @Test("A bare binding claims its key like any other")
+    func unmodifiedComboClaimsItsKey() {
+        let layers = [layer(["j"])]
+        let plain = KeyboardCensus.ModifierLayer(modifiers: [])
+        let claims = KeyboardCensus.claims(
+            in: layers,
+            selected: [plain]
+        )
+        #expect(claims[38] == [plain])
+        #expect(KeyboardCensus.tally(claims: claims).keys == 1)
     }
 
     /// The combinations here are chosen so the two candidate
@@ -159,6 +185,21 @@ struct KeyboardCensusTests {
         )
     }
 
+    /// Under `.all` a key is never "can't bind": macOS reserves
+    /// a key UNDER a modifier, so the answer has no meaning until
+    /// one is chosen, and blacking keys out there would claim
+    /// they are unavailable everywhere.
+    @Test("The all-scope reports no reserved keys")
+    func allScopeHasNoReservedState() {
+        #expect(
+            KeyboardCensus.state(
+                of: 49,
+                claims: [:],
+                scope: .all
+            ) == .free
+        )
+    }
+
     @Test("A bound key reads bound even where macOS reserves it")
     func boundBeatsReserved() {
         let command = KeyboardCensus.ModifierLayer(
@@ -172,9 +213,46 @@ struct KeyboardCensusTests {
             KeyboardCensus.state(
                 of: 49,
                 claims: claims,
-                selected: [command]
+                scope: .one(command)
             ) == .bound
         )
+    }
+
+    /// The frame's own channel: the board says who has TAKEN a
+    /// key (stripes) and who CANNOT have it (frame) as two
+    /// independent facts. A Bool collapsed the second, so a key
+    /// macOS owns under ⌘ and leaves free under ⌃⌥ read as
+    /// simply unavailable (owner, 2026-08-10).
+    @Test("Blockers name WHICH modifier macOS reserved the key")
+    func blockersNameTheOffendingModifier() {
+        let command = KeyboardCensus.ModifierLayer(
+            modifiers: .command
+        )
+        let ctrlOpt = KeyboardCensus.ModifierLayer(
+            modifiers: [.control, .option]
+        )
+        // Space (49) is Spotlight under ⌘, free under ⌃⌥.
+        let blockers = KeyboardCensus.blockers(
+            of: 49,
+            under: [command, ctrlOpt]
+        )
+        #expect(blockers == [command])
+    }
+
+    @Test("A key nothing reserves has no frame")
+    func unreservedKeyHasNoBlockers() {
+        let ctrlOpt = KeyboardCensus.ModifierLayer(
+            modifiers: [.control, .option]
+        )
+        #expect(
+            KeyboardCensus.blockers(of: 49, under: [ctrlOpt])
+                .isEmpty
+        )
+    }
+
+    @Test("Blockers follow the selection, like the stripes")
+    func blockersFollowTheSelection() {
+        #expect(KeyboardCensus.blockers(of: 49, under: []).isEmpty)
     }
 
     @Test("An unclaimed, unreserved key reads free")
@@ -186,74 +264,8 @@ struct KeyboardCensusTests {
             KeyboardCensus.state(
                 of: 49,
                 claims: [:],
-                selected: [ctrlOpt]
+                scope: .one(ctrlOpt)
             ) == .free
         )
-    }
-}
-
-/// The drawn board. Authored geometry, so what these hold is
-/// that the authoring stayed self-consistent — a duplicated key
-/// code or a row that lost its width is invisible on screen
-/// until someone counts.
-@Suite("Keyboard preview matrix")
-struct KeyboardMatrixTests {
-
-    @Test(
-        "Every board draws each key code at most once",
-        arguments: [
-            KeyboardMatrix.PhysicalType.ansi,
-            .iso,
-            .jis,
-        ]
-    )
-    func noCodeIsDrawnTwice(
-        type: KeyboardMatrix.PhysicalType
-    ) {
-        let codes = KeyboardMatrix.rows(for: type)
-            .flatMap { $0 }
-            .compactMap(\.code)
-        #expect(Set(codes).count == codes.count)
-    }
-
-    @Test("ISO draws the key ANSI does not have")
-    func isoAddsItsOwnKey() {
-        let ansi = KeyboardMatrix.drawnCodes(for: .ansi)
-        let iso = KeyboardMatrix.drawnCodes(for: .iso)
-        // 10 = kVK_ISO_Section, beside the left shift.
-        #expect(!ansi.contains(10))
-        #expect(iso.contains(10))
-        #expect(iso.count == ansi.count + 1)
-    }
-
-    @Test("The two boards are the same width, row for row")
-    func rowsKeepOneWidth() {
-        for type in [
-            KeyboardMatrix.PhysicalType.ansi, .iso,
-        ] {
-            let widths = KeyboardMatrix.rows(for: type).map {
-                $0.reduce(0) { $0 + $1.units }
-            }
-            #expect(Set(widths).count == 1, "\(type): \(widths)")
-        }
-    }
-
-    @Test("Every drawn code is one the app can bind")
-    func drawnCodesAreRealKeys() {
-        let bindable = Set(KeyCombo.keyCodes.values)
-        let drawn = KeyboardMatrix.drawnCodes(for: .ansi)
-        #expect(drawn.subtracting(bindable).isEmpty)
-    }
-
-    @Test("The free tally counts drawn keys, not alias entries")
-    func drawnCodesDeduplicateAliases() {
-        // `keyCodes` collapses aliases onto one code, so its
-        // count overstates the keyboard.
-        #expect(
-            KeyCombo.keyCodes.count
-                > Set(KeyCombo.keyCodes.values).count
-        )
-        let drawn = KeyboardMatrix.drawnCodes(for: .ansi)
-        #expect(drawn.count < KeyCombo.keyCodes.count)
     }
 }

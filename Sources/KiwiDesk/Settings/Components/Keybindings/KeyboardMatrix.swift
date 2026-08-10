@@ -27,10 +27,21 @@ enum KeyboardMatrix {
         let code: UInt32?
         /// Width in key units, 1.0 being a letter key.
         let units: Double
+        /// What a code-less cap prints. A modifier carries no
+        /// key code — a combo holds it in `HotkeyModifiers`, not
+        /// as a key — so nothing could name ⇧ or ⌘ from the code
+        /// alone, and they shipped blank. They are still
+        /// unclaimable; they are just no longer anonymous.
+        let legend: String?
 
-        init(_ code: UInt32?, _ units: Double = 1) {
+        init(
+            _ code: UInt32?,
+            _ units: Double = 1,
+            legend: String? = nil
+        ) {
             self.code = code
             self.units = units
+            self.legend = legend
         }
     }
 
@@ -74,30 +85,48 @@ enum KeyboardMatrix {
     // MARK: - Boards
 
     private static let ansiRows: [[Key]] = [
-        digitRow,
+        [Key(50)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(42, 1.5)],
-        [Key(nil, 1.75)] + homeRow + [Key(36, 2.25)],
-        [Key(nil, 2.25)] + bottomLetters + [Key(nil, 2.75)],
+        [Key(nil, 1.75, legend: "⇪")] + homeRow
+            + [Key(36, 2.25)],
+        [Key(nil, 2.25, legend: "⇧")] + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧")],
         spaceRow,
     ]
 
-    /// ISO: `section` (10) joins the bottom letter row, the left
-    /// shift shrinks to make room for it, and return is tall —
-    /// modelled as a 1.5u return on the QWERTY row with a filler
-    /// notch above the home row's end.
+    /// ISO adds a key beside the left shift, shrinks that shift
+    /// to make room, and makes return tall — modelled as a 1.5u
+    /// return on the QWERTY row with a filler notch at the home
+    /// row's end.
+    ///
+    /// **The two odd keycodes SWAP position on ISO**, which is
+    /// the part worth knowing before "fixing" this table. On
+    /// ANSI, 50 (`kVK_ANSI_Grave`) is the key left of `1` and 10
+    /// (`kVK_ISO_Section`) does not exist. On ISO the same two
+    /// codes sit the other way round: **10 is left of `1`** (the
+    /// German `^`, the Nordic `§`) and **50 is beside the left
+    /// shift** (the German `<`). Positions are what swap, not
+    /// labels — so a board that reuses the ANSI order draws both
+    /// keys with the right glyph in the wrong place, which is
+    /// exactly how this shipped to its first sitting
+    /// (owner, 2026-08-10, on a German ISO board).
     private static let isoRows: [[Key]] = [
-        digitRow,
+        [Key(10)] + digitRow,
         [Key(48, 1.5)] + qwertyRow + [Key(36, 1.5)],
-        [Key(nil, 1.75)] + homeRow + [Key(42), Key(nil, 1.25)],
-        [Key(nil, 1.25), Key(10)] + bottomLetters
-            + [Key(nil, 2.75)],
+        [Key(nil, 1.75, legend: "⇪")] + homeRow
+            + [Key(42), Key(nil, 1.25)],
+        [Key(nil, 1.25, legend: "⇧"), Key(50)] + bottomLetters
+            + [Key(nil, 2.75, legend: "⇧")],
         spaceRow,
     ]
 
     // MARK: - Shared runs
 
+    /// Digits and their two trailing punctuation keys. The
+    /// leading key is NOT here: it is 50 on ANSI and 10 on ISO
+    /// (see `isoRows`), so each board prepends its own.
     private static let digitRow: [Key] = [
-        Key(50), Key(18), Key(19), Key(20), Key(21), Key(23),
+        Key(18), Key(19), Key(20), Key(21), Key(23),
         Key(22), Key(26), Key(28), Key(25), Key(29), Key(27),
         Key(24), Key(51, 2),
     ]
@@ -121,8 +150,12 @@ enum KeyboardMatrix {
     /// can name on its own — a combo carries its modifiers in
     /// `HotkeyModifiers`, so ⌃⌥⌘ have no key code to bind.
     private static let spaceRow: [Key] = [
-        Key(nil, 1.25), Key(nil, 1.25), Key(nil, 1.25),
-        Key(49, 4.75), Key(nil, 1.25), Key(nil, 1.25),
+        Key(nil, 1.25, legend: "⌃"),
+        Key(nil, 1.25, legend: "⌥"),
+        Key(nil, 1.25, legend: "⌘"),
+        Key(49, 4.75),
+        Key(nil, 1.25, legend: "⌘"),
+        Key(nil, 1.25, legend: "⌥"),
         Key(123), Key(126), Key(125), Key(124),
     ]
 

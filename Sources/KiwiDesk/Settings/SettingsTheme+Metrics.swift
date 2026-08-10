@@ -60,13 +60,21 @@ extension SettingsTheme {
     static let plateHeight: CGFloat = 92
 
     /// The detail panel's fixed column width (digest §1.1 /
-    /// turn 2a) — the prototype draws every panel at 392 pt,
-    /// and `SettingsMetrics`' override-surface note has cited
-    /// this number since Phase 3. Fixed rather than flexible:
-    /// the CONTENT column is the one that flexes, so the
-    /// preview keeps one scale everywhere and the responsive
-    /// pass can reason about a constant.
-    static let panelWidth: CGFloat = 392
+    /// turn 2a). Fixed rather than flexible: the CONTENT column
+    /// is the one that flexes, so the preview keeps one scale
+    /// everywhere and the responsive pass can reason about a
+    /// constant — which is also why this stays ONE number rather
+    /// than becoming per-area.
+    ///
+    /// The prototype drew every panel at 392, and four of the
+    /// five previews are happy there. Pass 5's keyboard is not:
+    /// it is the first panel content with an intrinsic aspect
+    /// ratio, and 392 squeezed a 15-unit board to a 19 pt key
+    /// unit — under the 26 pt the caps stand, so the board read
+    /// as a squashed picture of a keyboard rather than a small
+    /// one (owner on device, 2026-08-10). 492 is that back-solved
+    /// rather than felt: `15·26 + 14·3 + 2·8 + 2·22`.
+    static let panelWidth: CGFloat = 492
 
     /// The content column's ceiling (owner 2026-08-10): the
     /// prototype's widest content column measures ~970 pt at

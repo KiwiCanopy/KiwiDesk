@@ -24,6 +24,11 @@ enum KeyboardCensus {
     struct ModifierLayer: Hashable, Comparable {
         let modifiers: HotkeyModifiers
 
+        /// The modifier glyphs, EMPTY for a bare-key binding —
+        /// which holds no modifier and so has no symbol. The
+        /// word that names that case is the view's
+        /// (`KeyboardKeyLabel.chipLabel`), because `L` is
+        /// main-actor isolated and this type is deliberately not.
         var label: String {
             ComboSymbols.modifierSymbols(modifiers)
         }
@@ -74,14 +79,17 @@ enum KeyboardCensus {
 
     /// The modifier combinations the draft uses, in chip order.
     ///
-    /// A combo with no modifiers at all is dropped: it would
-    /// render as an empty chip, and a bare key binding claims
-    /// its key under every layer rather than under one.
+    /// The bare-key combination is one of them. An earlier cut
+    /// dropped it on the grounds that it would render as an
+    /// empty chip — but the chip is named in words instead, and
+    /// dropping it meant a binding on plain `L` or `return`
+    /// appeared nowhere on a board whose question is what is
+    /// taken (owner, 2026-08-10). It sorts first, holding the
+    /// fewest modifiers.
     static func layers(in layers: [KeyLayer]) -> [ModifierLayer] {
         Set(
             combos(in: layers)
                 .map { ModifierLayer(modifiers: $0.modifiers) }
-                .filter { !$0.modifiers.isEmpty }
         ).sorted()
     }
 
@@ -102,17 +110,81 @@ enum KeyboardCensus {
         return out.mapValues { $0.sorted() }
     }
 
+    /// What the board is showing: everything at once, or one
+    /// modifier combination.
+    ///
+    /// Single-select, and the reason is that colour was never
+    /// carrying its weight. Showing several combinations at once
+    /// needed one hue each, hue is the channel colour-vision
+    /// deficiency takes away, and only four hues cleared the
+    /// separation floor against the key they sit on — so the
+    /// board capped what it could show, and the cap is what made
+    /// the panel's own headline answer false for anyone with
+    /// five. One combination at a time needs no hue at all: the
+    /// key's FILL says bound, free or can't-bind, and the
+    /// question a user actually has at binding time — "if I hold
+    /// ⌃⌥, what is left?" — is the drill-down rather than the
+    /// overlay. Two combinations on one key never denoted a
+    /// problem anyway; conflicts are per-layer and
+    /// `KeybindingConflicts` reports them separately.
+    enum Scope: Hashable {
+        /// Every combination at once. A key is bound if anything
+        /// claims it — the glance answer, and the only one that
+        /// is true regardless of how many combinations exist.
+        ///
+        /// It deliberately reports no `cantBind`: macOS reserves
+        /// a key UNDER a modifier, so "can't bind" has no meaning
+        /// until one is chosen, and colouring keys black here
+        /// would claim they are unavailable everywhere.
+        case all
+        case one(ModifierLayer)
+    }
+
+    /// The combinations in scope — all of them, or the one.
+    static func inScope(
+        _ scope: Scope,
+        among layers: [ModifierLayer]
+    ) -> Set<ModifierLayer> {
+        switch scope {
+        case .all: return Set(layers)
+        case .one(let layer): return [layer]
+        }
+    }
+
     /// The state of one drawn key under the current selection.
     static func state(
         of code: UInt32,
         claims: [UInt32: [ModifierLayer]],
-        selected: Set<ModifierLayer>
+        scope: Scope
     ) -> KeyState {
         if claims[code]?.isEmpty == false { return .bound }
-        if isSystemReserved(code, under: selected) {
+        if case .one(let layer) = scope,
+            isSystemReserved(code, under: [layer])
+        {
             return .cantBind
         }
         return .free
+    }
+
+    /// WHICH selected combinations macOS has reserved this key
+    /// under — the frame's colours.
+    ///
+    /// The board draws two independent facts about one key:
+    /// stripes say who has TAKEN it, the frame says who CANNOT
+    /// have it. Answering "is it blocked" with a single Bool
+    /// collapsed the second one, so a key macOS owns under ⌘ and
+    /// leaves free under ⌃⌥ read as simply unavailable.
+    static func blockers(
+        of code: UInt32,
+        under selected: Set<ModifierLayer>
+    ) -> [ModifierLayer] {
+        selected
+            .filter {
+                SystemShortcuts.map[
+                    KeyCombo(keyCode: code, modifiers: $0.modifiers)
+                ] != nil
+            }
+            .sorted()
     }
 
     /// Whether macOS already owns this key under any selected
@@ -134,12 +206,13 @@ enum KeyboardCensus {
         }
     }
 
-    /// The count sentence's two numbers: how many distinct keys
-    /// the selection claims, and how many modifier combinations
-    /// it spans.
+    /// The count sentence's number: how many distinct keys the
+    /// scope claims.
     ///
-    /// Both derive from `claims`, so the sentence cannot
-    /// disagree with the stripes it sits under.
+    /// It derives from `claims`, so the sentence cannot disagree
+    /// with the board above it. The modifier count went with the
+    /// stripes: under `.all` it restated the chip row, and under
+    /// `.one` it was always 1.
     static func tally(
         claims: [UInt32: [ModifierLayer]]
     ) -> (keys: Int, modifiers: Int) {
