@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d 项未保存的更改",
   "footer.unsaved.count_one_to": "%2$@ 有 %1$d 项未保存的更改",
   "footer.unsaved.count_to": "%2$@ 有 %1$d 项未保存的更改",
+  "footer.unsaved.help": "点按可查看更改列表。",
   "footer.unsaved_changes": "未存储的更改",
   "gaps.bottom": "底部",
   "gaps.horizontal": "水平",

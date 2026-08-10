@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d несохранённое изменение",
   "footer.unsaved.count_one_to": "%1$d несохранённое изменение в «%2$@»",
   "footer.unsaved.count_to": "Несохранённых изменений в «%2$@»: %1$d",
+  "footer.unsaved.help": "Нажми, чтобы увидеть список изменений.",
   "footer.unsaved_changes": "Несохранённые изменения",
   "gaps.bottom": "Снизу",
   "gaps.horizontal": "По горизонтали",

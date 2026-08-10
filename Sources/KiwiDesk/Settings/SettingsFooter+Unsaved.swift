@@ -9,19 +9,27 @@ import SwiftUI
 /// the verbs, and they change for different reasons.
 extension SettingsFooter {
 
-    /// The pill's first words: the settings count with the edit
+    /// The pill's first words: the change count with the edit
     /// target's name, plus — stacked small beneath — whichever
     /// scope caption applies (#516 keeps the paused scope and
     /// the drift adoption VISIBLE, never a hover-only fact).
     /// While the draft has attributed rows the count line is a
     /// BUTTON opening the diff popover (`countButton`); at zero
     /// rows there is no list to open, so it stays plain text.
+    ///
+    /// The N is the ROW count of the very list the popover
+    /// renders — one source, so the sentence and the list it
+    /// opens cannot disagree. `draftChangeCount` counts distinct
+    /// SETTINGS, and a per-instance family (three space modes
+    /// changed = one census key, three rows) made the pill say
+    /// "1" over a three-row list (owner, 2026-08-10).
     var leadingReadout: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            if model.draftChangeCount > 0 {
-                countButton
+        let rows = SettingsDiffRowSource.rows(for: model)
+        return VStack(alignment: .leading, spacing: 2) {
+            if !rows.isEmpty {
+                countButton(count: rows.count)
             } else {
-                Text(countLine)
+                Text(countLine(count: 0))
                     .foregroundStyle(SettingsTheme.savePillInk)
             }
             if model.primarySaveAction == .saveGlobalsOnly {
@@ -52,13 +60,18 @@ extension SettingsFooter {
     /// the pill's own ink — the pill is dark chrome in both
     /// modes, so the accent-label guards' bordered machinery
     /// has no business here; the chevron is what says
-    /// "clickable" where a border would read as a second pill.
-    private var countButton: some View {
+    /// "clickable" at rest, and hover confirms it with the
+    /// pill-ink wash + pointing hand (owner 2026-08-10 — the
+    /// search rows set the expectation). The shared
+    /// `hoverHighlight` chip is `Color.primary`-based, which
+    /// inverts with the appearance; on a pill that is dark in
+    /// BOTH modes the wash must ride the fixed pill ink.
+    private func countButton(count: Int) -> some View {
         Button {
             unsavedPopoverShown = true
         } label: {
             HStack(spacing: 5) {
-                Text(countLine)
+                Text(countLine(count: count))
                     .foregroundStyle(SettingsTheme.savePillInk)
                 Image(systemName: "chevron.up")
                     .font(.system(size: 9, weight: .semibold))
@@ -69,6 +82,7 @@ extension SettingsFooter {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .pillHoverWash()
         .help(
             L(
                 "footer.unsaved.help",
@@ -115,8 +129,7 @@ extension SettingsFooter {
             )
     }
 
-    var countLine: String {
-        let count = model.draftChangeCount
+    func countLine(count: Int) -> String {
         guard count > 0 else {
             // The docked footer's own key, kept through the
             // pill rewrite: identical English, same meaning
@@ -160,5 +173,41 @@ extension SettingsFooter {
     private var editTargetName: String? {
         if model.editingLua { return "init.lua" }
         return model.editingProfile ?? model.activeProfile
+    }
+}
+
+/// The count button's hover confirmation: the pill-ink wash and
+/// the pointing hand. Not the shared `hoverHighlight` chip on
+/// purpose — that one paints `Color.primary`, which flips with
+/// the appearance, and this sits on chrome that is dark in both.
+private struct PillHoverWash: ViewModifier {
+    @State private var hovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        SettingsTheme.savePillInk.opacity(
+                            hovering ? 0.14 : 0
+                        )
+                    )
+            )
+            .padding(.horizontal, -6)
+            .padding(.vertical, -3)
+            .animation(
+                .easeOut(duration: 0.12),
+                value: hovering
+            )
+            .onHover { hovering = $0 }
+            .pointingHandCursor()
+    }
+}
+
+extension View {
+    fileprivate func pillHoverWash() -> some View {
+        modifier(PillHoverWash())
     }
 }

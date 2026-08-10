@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "저장하지 않은 변경 사항 %1$d개",
   "footer.unsaved.count_one_to": "%2$@의 저장하지 않은 변경 사항 %1$d개",
   "footer.unsaved.count_to": "%2$@의 저장하지 않은 변경 사항 %1$d개",
+  "footer.unsaved.help": "클릭하면 변경 사항 목록이 열립니다.",
   "footer.unsaved_changes": "저장하지 않은 변경 사항",
   "gaps.bottom": "아래쪽",
   "gaps.horizontal": "수평",

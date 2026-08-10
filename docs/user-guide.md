@@ -72,8 +72,8 @@ Gaps & Borders, Bars, Colors & Motion, and Layout Defaults —
 open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as
 you edit, with a **Changed in this draft** list underneath —
-the same old → new rows as the header popover, each jumping to
-its control. The pill shifts aside while a panel is open, and
+the same old → new rows as the pill count's popover, each
+jumping to its control. The pill shifts aside while a panel is open, and
 areas with nothing to preview take the full width instead.
 
 ### Search

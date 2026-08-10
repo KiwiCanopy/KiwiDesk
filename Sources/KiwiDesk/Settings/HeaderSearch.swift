@@ -85,12 +85,15 @@ struct HeaderSearch: View {
         // squeeze the field down to its glyph.
         //
         // 110, not the 140 first tried: measured across the row
-        // (back chip, profile chip, mode segment, unsaved chip,
-        // plus the 84 pt traffic-light inset) 140 left the row
-        // ~120 pt over the hard minimum, and a row that cannot fit
-        // does not truncate politely — AppKit clips the trailing
-        // element, which is a CONTROL. 17a's order is preview,
-        // then rows, then chrome, and "controls never".
+        // (back chip, profile chip, mode segment, plus the
+        // 84 pt traffic-light inset — and, when it was
+        // measured, the since-retired unsaved chip, so the
+        // floor now runs with extra slack) 140 left the row
+        // ~120 pt over the hard minimum, and a row that cannot
+        // fit does not truncate politely — AppKit clips the
+        // trailing element, which is a CONTROL. 17a's order is
+        // preview, then rows, then chrome, and "controls
+        // never".
         .frame(minWidth: 110, maxWidth: .infinity)
         .overlay(alignment: .topLeading) { resultPanel }
         .background { focusShortcut }

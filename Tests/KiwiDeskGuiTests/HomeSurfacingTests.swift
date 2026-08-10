@@ -74,8 +74,13 @@ struct HomeSurfacingTests {
         "Settings/SettingsFooter+Unsaved.swift": [
             // The count line is a BUTTON only while the draft
             // has attributed rows — at zero there is no list
-            // to open, so it stays plain text.
-            "ifmodel.draftChangeCount>0{countButton",
+            // to open, so it stays plain text — and its N is
+            // the ROW COUNT of the very list the popover
+            // renders, one source, so sentence and list
+            // cannot disagree (owner 2026-08-10: the settings
+            // count said "1" over a three-row family).
+            "letrows=SettingsDiffRowSource.rows(for:model)",
+            "if!rows.isEmpty{countButton(count:rows.count)",
             // The button's popover renders the one diff-rows
             // renderer (turn 9's third view of the draft, moved
             // from the header chip 2026-08-10) — needle through

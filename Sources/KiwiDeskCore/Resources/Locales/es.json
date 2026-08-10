@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d cambio sin guardar",
   "footer.unsaved.count_one_to": "%1$d cambio sin guardar en %2$@",
   "footer.unsaved.count_to": "%1$d cambios sin guardar en %2$@",
+  "footer.unsaved.help": "Haz clic para ver la lista de cambios.",
   "footer.unsaved_changes": "Cambios sin guardar",
   "gaps.bottom": "Abajo",
   "gaps.horizontal": "Horizontal",

@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d alteração não salva",
   "footer.unsaved.count_one_to": "%1$d alteração não salva em %2$@",
   "footer.unsaved.count_to": "%1$d alterações não salvas em %2$@",
+  "footer.unsaved.help": "Clique para ver a lista de alterações.",
   "footer.unsaved_changes": "Alterações não salvas",
   "gaps.bottom": "Inferior",
   "gaps.horizontal": "Horizontal",

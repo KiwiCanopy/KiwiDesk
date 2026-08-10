@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d modification non enregistrée",
   "footer.unsaved.count_one_to": "%1$d modification non enregistrée pour %2$@",
   "footer.unsaved.count_to": "%1$d modifications non enregistrées pour %2$@",
+  "footer.unsaved.help": "Cliquez pour voir la liste des modifications.",
   "footer.unsaved_changes": "Modifications non enregistrées",
   "gaps.bottom": "Bas",
   "gaps.horizontal": "Horizontal",

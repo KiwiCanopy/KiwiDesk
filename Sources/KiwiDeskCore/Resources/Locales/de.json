@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d ungesicherte Änderung",
   "footer.unsaved.count_one_to": "%1$d ungesicherte Änderung an %2$@",
   "footer.unsaved.count_to": "%1$d ungesicherte Änderungen an %2$@",
+  "footer.unsaved.help": "Klicke für die Liste der Änderungen.",
   "footer.unsaved_changes": "Ungesicherte Änderungen",
   "gaps.bottom": "Unten",
   "gaps.horizontal": "Horizontal",

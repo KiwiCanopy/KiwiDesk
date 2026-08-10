@@ -322,6 +322,7 @@
   "footer.unsaved.count_one": "%1$d件の未保存の変更",
   "footer.unsaved.count_one_to": "%2$@の未保存の変更%1$d件",
   "footer.unsaved.count_to": "%2$@の未保存の変更%1$d件",
+  "footer.unsaved.help": "クリックすると変更の一覧が表示されます。",
   "footer.unsaved_changes": "保存していない変更",
   "gaps.bottom": "下",
   "gaps.horizontal": "水平",

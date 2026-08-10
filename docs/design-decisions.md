@@ -1853,7 +1853,8 @@ header chip (owner 2026-08-10, retiring the turn-9 top-right
 button): the pill already narrates the draft, so a second
 count in the header stated one fact in two corners of the
 window — and every corner the count occupies is one the
-responsive pass must defend at 720 pt. An earlier ruling kept the docked three-verb
+responsive pass must defend at 720 pt. An earlier ruling
+kept the docked three-verb
 footer, arguing it was the pill's final form since the spec's
 responsive pass would dock the pill below 900 pt anyway — the
 owner overturned
@@ -1869,15 +1870,23 @@ carried by `GreyOutHidingTests`. A planned responsive pass —
 not yet built; no width breakpoint ships today — will dock
 the pill back into a real footer bar below 900 pt, as its
 one change of kind.
-The count stays the number of SETTINGS the user changed:
-`SettingsDraftDiff` resolves changed model leaves to census
-settings, many leaves under one setting count once. The
-popover and the panel list are no longer partial — the
-readout (`SettingsValueReadout`) narrates every attributed
-key, and its totality guard is what discharged the earlier
-partial-list objection — so each row states old → new and
-jumps to the control that changed. Save and Revert live in
-the pill alone.
+The shown N is the ROW COUNT of the list it opens (owner
+2026-08-10, revising the earlier settings-count ruling): a
+per-instance family expands one census setting into a row
+per touched instance — three space modes changed is one
+setting, three rows — and a count a user can cross-check
+against a visible list must be that list's count, or the
+surface reads as dropping changes. Many leaves under one
+ROW still count once (`SettingsDraftDiff` resolves leaves
+to census settings; the readout expands instances), and the
+dirty-tracking `draftChangeCount` keeps the settings
+granularity internally — only surfaces beside a list state
+the list's number. The popover and the panel list are no
+longer partial — the readout (`SettingsValueReadout`)
+narrates every attributed key, and its totality guard is
+what discharged the earlier partial-list objection — so
+each row states old → new and jumps to the control that
+changed. Save and Revert live in the pill alone.
 
 **The detail view is two columns, and the panel is where the
 draft is watched.** (#678 Phase 4.) An area that
