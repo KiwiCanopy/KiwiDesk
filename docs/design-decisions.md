@@ -4681,3 +4681,48 @@ of it, rather than separate rulings:
   live-rewrite of already-bound rows are deliberately out of
   scope for now; the reserved slot is additive, so their later
   arrival won't re-layout the section.
+- **The keyboard preview shows one modifier at a time** (#678
+  pass 5). "KEYBOARD · WHAT'S TAKEN" opens on **All** — every key
+  any binding claims, lit in one colour — and a chip narrows it
+  to a single modifier combination. It is deliberately not a
+  multi-select overlay of several combinations at once, and the
+  reason is that such an overlay must encode identity as HUE:
+  one colour per combination, drawn as a stripe on the key. Hue
+  is the channel colour-vision deficiency removes, so the number
+  of combinations a board could show honestly was capped by how
+  many colours clear the separation floor against the key they
+  sit on — around four. A cap is not a detail there: it makes
+  the panel's own opening answer *false* for anyone with five
+  combinations, since the board silently shows a subset under a
+  heading that reads as the total. Single-select needs no hue at
+  all (the fill says bound, free or can't-bind), so the ceiling,
+  the palette, the legend of colours and the accessibility
+  residue all go with it — and it answers the question a user
+  actually has while binding: *if I hold ⌃⌥, what is left?*
+  Seeing two combinations at once was never the conflict signal;
+  conflicts are per layer and `KeybindingConflicts` reports them
+  separately.
+- **The board states two facts in two channels**: the FILL says
+  what your config has done with a key (bound, free), and a RING
+  warns about it — dashed amber where macOS already owns the key
+  under the shown modifier, solid red where two of your bindings
+  collide. A third fill for "reserved" was tried and is wrong:
+  macOS owns a key *under a modifier*, so blacking it out claims
+  it is unavailable everywhere, when it is free under every
+  other. The two rings differ by dash as well as by colour,
+  because amber and red are both warm and hue alone collapses
+  them for the viewers this rule exists for. Each ring's colour
+  is measured against the ONE fill it can ever meet — a reserved
+  ring only rings an unbound key, a conflict ring only a bound
+  one — which is what lets both clear the floor.
+- **Measure colour with `ColorVision`, never a re-derivation of
+  it.** `ColorVision.separation` is Euclidean distance in
+  *simulated sRGB*. A hand-rolled CIE-Lab proxy used during pass
+  5 reported warm colours at 17–25 against the accent green when
+  the repo's own measure puts them at 84–126, and that single
+  wrong yardstick drove a redesign of every key fill — a neutral
+  key, a bespoke lighter green, a generated hue ramp — before
+  anyone ran the real function. The suites are the authority
+  precisely because the numbers are unintuitive; a plausible
+  re-implementation is not a second opinion, it is a different
+  question.
