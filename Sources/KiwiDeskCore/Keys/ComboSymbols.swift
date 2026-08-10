@@ -30,7 +30,15 @@ public enum ComboSymbols {
     }
 
     /// Modifier symbols in the macOS-canonical ⌃⌥⇧⌘ order.
-    static func modifierSymbols(
+    ///
+    /// Public because a modifier set is a thing the GUI names on
+    /// its own, without a key beside it: the keyboard preview's
+    /// chips label one layer each (⌥, ⌃⌥, …) and `render` can
+    /// only ever draw a whole combo. The GUI's own
+    /// `ChordRecorder` is not a second copy of this — it renders
+    /// `NSEvent.ModifierFlags` mid-chord, before a `KeyCombo`
+    /// exists.
+    public static func modifierSymbols(
         _ modifiers: HotkeyModifiers
     ) -> String {
         var out = ""
