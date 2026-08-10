@@ -236,7 +236,7 @@ struct HomeCardBarsTile: View {
                 spec: BarSpec(
                     fill: style.fillColor,
                     highlight: style.highlightColor,
-                    items: appItems(style),
+                    items: appItems(style, vertical: vertical),
                     alignment: style.alignment,
                     spans: style.plateSpans,
                     boxed: style.hasBox,
@@ -260,24 +260,39 @@ struct HomeCardBarsTile: View {
     /// Three mock windows at panel scale — recognisable app
     /// shapes (mail, browser, files), never real app claims
     /// (owner 2026-08-10 over two identical windows); bare
-    /// pips on the Home plate.
+    /// pips on the Home plate. What each item shows follows
+    /// the style's own `content` row through the real
+    /// `rendered(horizontal:)` remap, so a vertical bar drops
+    /// names exactly like the real bar does.
     private func appItems(
-        _ style: AppBarStyle
+        _ style: AppBarStyle,
+        vertical: Bool
     ) -> [BarItem] {
-        let glyphs = ["envelope", "globe", "folder"]
+        let mocks: [(glyph: String, name: String)] = [
+            ("envelope", L("bars_scene.app_mail", "Mail")),
+            ("globe", L("bars_scene.app_web", "Web")),
+            ("folder", L("bars_scene.app_files", "Files")),
+        ]
+        let content = style.content.rendered(
+            horizontal: !vertical
+        )
         var items: [BarItem] = []
-        for (index, glyph) in glyphs.enumerated() {
+        for (index, mock) in mocks.enumerated() {
             let active = index == 0
-            items.append(
-                BarItem(
-                    color: active
-                        ? style.activeItemColor
-                        : style.itemColor,
-                    length: 20 * scale,
-                    glyph: scale > 1 ? glyph : nil,
-                    active: active
-                )
+            var item = BarItem(
+                color: active
+                    ? style.activeItemColor
+                    : style.itemColor,
+                length: 20 * scale
             )
+            if scale > 1 {
+                item.glyph =
+                    content == .name ? nil : mock.glyph
+                item.label =
+                    content == .icon ? nil : mock.name
+            }
+            item.active = active
+            items.append(item)
         }
         return items
     }

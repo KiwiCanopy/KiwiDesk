@@ -25,15 +25,25 @@ struct BarStripView: View {
                 // bare on the screen.
                 seated { run }
             } else {
-                // `hug`: the plate wraps the run plus one gap
-                // of air per end (the Dock's read), and the
-                // WRAPPED plate seats.
+                // `hug`: the plate wraps the run's LENGTH
+                // plus one gap of air per end (the Dock's
+                // read), and the WRAPPED plate seats. The
+                // CROSS stays the full thickness — fit never
+                // shrinks a bar's cross, so the Thickness
+                // slider moves the plate, not the air around
+                // it.
                 seated {
                     run
                         .padding(
                             vertical
                                 ? .vertical : .horizontal,
                             spec.gap
+                        )
+                        .frame(
+                            width: vertical
+                                ? spec.thickness : nil,
+                            height: vertical
+                                ? nil : spec.thickness
                         )
                         .background(plate)
                 }
@@ -160,24 +170,34 @@ struct BarStripView: View {
     private func pipBody(
         _ item: HomeCardBarsTile.BarItem
     ) -> some View {
-        if let text = item.label {
-            Text(text)
-                .font(
-                    .system(
-                        size: 7.5 * scale,
-                        weight: .semibold
-                    )
-                )
-                .lineLimit(1)
-                .foregroundStyle(Color(kiwiHex: item.color))
-                .padding(.horizontal, 2.5 * scale)
-                .padding(.vertical, 1.5 * scale)
-        } else if let glyph = item.glyph {
-            Image(systemName: glyph)
-                .font(.system(size: 7 * scale))
-                .foregroundStyle(Color(kiwiHex: item.color))
-                .padding(.horizontal, 2.5 * scale)
-                .padding(.vertical, 1.5 * scale)
+        if item.label != nil || item.glyph != nil {
+            // Icon and name together when the item carries
+            // both — the App Bar's `icon_and_name` content;
+            // truncation only ever eats the name, the real
+            // bar's rule.
+            HStack(spacing: 2 * scale) {
+                if let glyph = item.glyph {
+                    Image(systemName: glyph)
+                        .font(.system(size: 7 * scale))
+                }
+                if let text = item.label {
+                    Text(text)
+                        .font(
+                            .system(
+                                size: 7.5 * scale,
+                                weight: .semibold
+                            )
+                        )
+                        .lineLimit(1)
+                }
+            }
+            .foregroundStyle(Color(kiwiHex: item.color))
+            .padding(.horizontal, 2.5 * scale)
+            .padding(.vertical, 1.5 * scale)
+            .frame(
+                minWidth: vertical ? pipCross : nil,
+                minHeight: vertical ? nil : pipCross
+            )
         } else {
             RoundedRectangle(cornerRadius: spec.itemCorner)
                 .fill(Color(kiwiHex: item.color))
