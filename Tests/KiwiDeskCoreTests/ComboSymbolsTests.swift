@@ -72,3 +72,34 @@ struct ComboSymbolsTests {
         #expect(ComboSymbols.render(combo, layoutChar: german) == "⇧+")
     }
 }
+
+/// The capitalisation rule, which every combo-rendering surface
+/// shares — the recorder, the Shortcuts list, the draft diff rows
+/// and the quick menu all reach it through `render`.
+@Suite("Combo glyph capitalisation")
+struct ComboGlyphCapitalisationTests {
+
+    @Test("A key whose capital is two letters keeps its own form")
+    func multiCharacterUppercaseIsRefused() {
+        // The defect: German ß uppercases to "SS", so a shortcut
+        // on that key rendered as ⌃⌥SS — two characters for one
+        // key the keyboard prints as one.
+        #expect("ß".uppercased() == "SS")
+        #expect(ComboSymbols.capitalisedGlyph("ß") == "ß")
+    }
+
+    @Test("An ordinary letter still capitalises")
+    func singleCharacterUppercaseIsKept() {
+        #expect(ComboSymbols.capitalisedGlyph("a") == "A")
+        #expect(ComboSymbols.capitalisedGlyph("ü") == "Ü")
+        #expect(ComboSymbols.capitalisedGlyph("7") == "7")
+    }
+
+    @Test("The rendered combo carries the key's own form")
+    func renderKeepsTheKeysOwnForm() {
+        let combo = KeyCombo(keyCode: 27, modifiers: [.control])
+        let rendered = ComboSymbols.render(combo) { _ in "ß" }
+        #expect(rendered == "⌃ß")
+        #expect(!rendered.contains("SS"))
+    }
+}

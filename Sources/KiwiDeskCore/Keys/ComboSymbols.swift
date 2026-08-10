@@ -49,13 +49,28 @@ public enum ComboSymbols {
         return out
     }
 
+    /// A key's character, capitalised — but only where
+    /// capitalising it stays ONE key's worth of glyph.
+    ///
+    /// German ß uppercases to "SS", so a shortcut on that key
+    /// rendered `⌃⌥SS`: two characters for a key the user's
+    /// keyboard prints as one, in every surface that draws a
+    /// combo (the recorder, the Shortcuts list, the draft diff
+    /// rows, the quick menu). Turkish ı and Greek final sigma
+    /// have the same shape of problem, which is why the rule is
+    /// mechanical rather than a ß special case.
+    public static func capitalisedGlyph(_ char: String) -> String {
+        let upper = char.uppercased()
+        return upper.count == char.count ? upper : char
+    }
+
     private static func keyGlyph(
         _ code: UInt32,
         _ layoutChar: (UInt32) -> String?
     ) -> String {
         if let special = specialKeyGlyph(code) { return special }
         if let char = layoutChar(code), !char.isEmpty {
-            return char.uppercased()
+            return capitalisedGlyph(char)
         }
         if let name = KeyCombo.keyName(for: code) {
             return fallbackGlyph(name)
