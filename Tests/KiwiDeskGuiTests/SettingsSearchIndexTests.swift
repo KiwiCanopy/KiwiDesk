@@ -83,6 +83,26 @@ struct SettingsSearchIndexTests {
         }
     }
 
+    /// Overrides are reachable as LINKS, never as results (spec
+    /// item 11): a per-space key — `[space]` in its census id —
+    /// is an instance of a setting, and its editor is the
+    /// per-space popover no reveal can open, so a result for
+    /// one strands the user in an area where the label appears
+    /// nowhere (owner, 2026-08-10).
+    @Test("per-space instance keys are excluded")
+    func perSpaceKeysExcluded() {
+        let instanced = SettingKey.allCases.filter {
+            $0.id.contains("[space]")
+        }
+        #expect(!instanced.isEmpty)
+        for key in instanced {
+            #expect(
+                !SettingsSearchIndex.indexes(key),
+                Comment(rawValue: key.id)
+            )
+        }
+    }
+
     /// Search must not return a row that cannot exist on this
     /// machine (#390): the Liquid Glass rows follow the SAME
     /// predicate the renderer hides them by. Asserted through
@@ -166,7 +186,7 @@ struct SettingsSearchIndexTests {
         .mapValues(\.count)
         #expect(
             counts == [
-                .spaces: 21,
+                .spaces: 2,
                 .layoutDefaults: 34,
                 .monitors: 3,
                 .gapsAndBorders: 18,

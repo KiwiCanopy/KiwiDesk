@@ -104,7 +104,18 @@ enum SettingsSearchIndex {
         let placement = key.placement
         guard placement.area != nil,
             indexedTiers.contains(placement.tier),
-            SettingsCensusLabel.label(for: key) != nil
+            SettingsCensusLabel.label(for: key) != nil,
+            // A per-space key (`…[space]…` in the census id) is
+            // an INSTANCE of a setting, and overrides are
+            // reachable as links, never as results (spec item
+            // 11) — its editor is the per-space popover, which
+            // opens from a row button and is exactly the
+            // surface a reveal cannot land on
+            // (docs/accepted-limitations.md). Indexing one
+            // sends the user to an area where the label
+            // appears nowhere (owner, 2026-08-10: a Spaces
+            // "Spalten" result with no findable field).
+            !key.id.contains("[space]")
         else { return false }
         let conditions =
             placement.gate?.runtimeConditions ?? []
