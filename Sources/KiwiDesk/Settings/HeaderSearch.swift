@@ -61,6 +61,14 @@ struct HeaderSearch: View {
     /// row.
     @State private var highlighted: String?
     @FocusState private var focused: Bool
+    /// Keeps the panel alive while the pointer is INSIDE it:
+    /// a row click lands outside the field's text editor, so
+    /// `ClickAwayResignsFocus` resigns focus on the mouse-down
+    /// — keyed on focus alone the row would vanish before its
+    /// own mouse-up. A click anywhere else finds the pointer
+    /// outside the panel and dismisses (owner, 2026-08-10:
+    /// click-away left the list standing).
+    @State private var panelHovered = false
 
     private var searching: Bool { !query.trimmed.isEmpty }
 
@@ -111,7 +119,7 @@ struct HeaderSearch: View {
     /// it would negotiate the flexible slot and collapse the
     /// row. The responsive pass (17a) owns the final floor.
     @ViewBuilder private var resultPanel: some View {
-        if searching {
+        if searching, focused || panelHovered {
             // The panel matches the FIELD's width (the overlay's
             // proposal, read here where it cannot feed back into
             // the row's layout), floored at 380 for the 720 pt
@@ -152,6 +160,7 @@ struct HeaderSearch: View {
                 )
             )
             .offset(y: 40)
+            .onHover { panelHovered = $0 }
     }
 
     private var results: SettingsSearchResults {
@@ -233,6 +242,10 @@ struct HeaderSearch: View {
         )
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
+        // The list convention: no fill at rest, a quiet wash
+        // under the pointer (owner, 2026-08-10: rows read
+        // inert without it).
+        .rowHoverHighlight()
         .background(
             RoundedRectangle(cornerRadius: 6)
                 .fill(
@@ -271,6 +284,7 @@ struct HeaderSearch: View {
         query = ""
         highlighted = nil
         focused = false
+        panelHovered = false
         reveal(result.anchor)
     }
 

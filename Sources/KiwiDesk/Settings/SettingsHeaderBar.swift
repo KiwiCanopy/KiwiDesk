@@ -33,6 +33,22 @@ struct SettingsHeaderBar: View {
     }
 
     @ViewBuilder var body: some View {
+        VStack(spacing: 0) {
+            rows
+                // Above the hairline SIBLING below, so the
+                // search overlay hanging off `titleRow` paints
+                // OVER the header separator instead of the
+                // separator crossing the result panel (owner,
+                // 2026-08-10) — the one line that survived the
+                // panel's compositing fix was this one, drawn
+                // after the overlay inside the same lifted
+                // header composite.
+                .zIndex(1)
+            SettingsTheme.hairline.frame(height: 1)
+        }
+    }
+
+    private var rows: some View {
         VStack(alignment: .leading, spacing: 6) {
             titleRow
             if showsProfileContext {
@@ -82,7 +98,6 @@ struct SettingsHeaderBar: View {
         .onChange(of: destination != nil) { _, pushed in
             if pushed { backChipFocused = true }
         }
-        SettingsTheme.hairline.frame(height: 1)
     }
 
     private var titleRow: some View {
@@ -132,42 +147,6 @@ struct SettingsHeaderBar: View {
         // lights, so they keep the bar's ordinary 16 pt gutter
         // and stay aligned with the content column.
         .padding(.leading, SettingsHeaderBar.trafficLightInset)
-    }
-
-    /// 100 − the bar's own 16 pt gutter.
-    ///
-    /// The third light's trailing edge falls at about 78 pt on a
-    /// standard macOS titlebar (observed 2026-08-04, macOS 26),
-    /// and starting the row THERE is what the first cut did: the
-    /// app mark ended up 4 pt from the green button, touching it.
-    /// 100 buys the mark the same air the prototype gives it.
-    /// Neither number is published by any API, so this is a look
-    /// constant like the top padding above and breaks the same
-    /// silent way if Apple moves the buttons.
-    private static let trafficLightInset: CGFloat = 84
-
-    /// Home's identity: the mark beside "Settings" — decorative
-    /// pair, one accessibility element.
-    ///
-    /// 26 pt, over the §3 inventory's 22: the mark is the app's
-    /// one piece of identity on this screen and read as
-    /// undersized against the taller bar (owner, 2026-08-04).
-    private var identity: some View {
-        HStack(spacing: 8) {
-            if let mark = BrandAssets.appMark {
-                Image(nsImage: mark)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 26, height: 26)
-            }
-            Text(L("home.title", "Settings"))
-                .font(.title2.weight(.bold))
-                .foregroundStyle(SettingsTheme.ink)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(
-            L("home.title_ax", "KiwiDesk Settings")
-        )
     }
 
     /// "← [mark] Home", the area screen's one way back — beside
