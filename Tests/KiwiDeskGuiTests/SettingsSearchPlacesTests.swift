@@ -32,35 +32,38 @@ struct SettingsSearchPlacesTests {
             }
     }
 
-    /// One entry per named object, landing on the area that owns
-    /// its kind.
+    /// One entry per named object, landing on the area that
+    /// owns its kind — derived from `Kind.allCases` with an
+    /// exhaustive-switch context filler, so a future kind that
+    /// compiles but never produces a result reds here instead
+    /// of shipping silent (parity-tests.md, past-two-mirrors).
     @Test("each kind lands on its owning area")
     func kindsLandOnTheirAreas() {
         pinEnglish()
         defer { reset() }
-        let context = SettingsSearchContext(
-            spaces: ["mail"],
-            profiles: ["mail-desk"],
-            palettes: ["mailbox"],
-            appRules: ["Mail"]
-        )
+        var context = SettingsSearchContext()
+        for kind in SettingsSearchPlace.Kind.allCases {
+            switch kind {
+            case .space: context.spaces = ["mail"]
+            case .profile: context.profiles = ["mail-desk"]
+            case .appRule: context.appRules = ["Mail"]
+            }
+        }
         let hits = places("mail", context: context)
-        #expect(hits.count == 4)
+        #expect(
+            hits.count
+                == SettingsSearchPlace.Kind.allCases.count
+        )
         let byKind = Dictionary(
             uniqueKeysWithValues: hits.map { ($0.kind, $0) }
         )
-        #expect(
-            byKind[.space]?.anchor.destination == .spaces
-        )
-        #expect(
-            byKind[.profile]?.anchor.destination == .profiles
-        )
-        #expect(
-            byKind[.palette]?.anchor.destination == .colors
-        )
-        #expect(
-            byKind[.appRule]?.anchor.destination == .appRules
-        )
+        for kind in SettingsSearchPlace.Kind.allCases {
+            #expect(
+                byKind[kind]?.anchor.destination
+                    == kind.destination,
+                Comment(rawValue: kind.rawValue)
+            )
+        }
     }
 
     /// The cap counts MATCHES, not objects: seven matching
@@ -76,10 +79,12 @@ struct SettingsSearchPlacesTests {
         )
         let hits = places("web", context: context)
         #expect(hits.count == SettingsSearch.placesCap)
-        // The first five matches won — order is the input's.
+        // The first `placesCap` matches won — order is the
+        // input's, and the pin derives the number (#614).
         #expect(
             hits.map(\.name)
-                == (1...5).map { "web \($0)" }
+                == (1...SettingsSearch.placesCap)
+                .map { "web \($0)" }
         )
     }
 

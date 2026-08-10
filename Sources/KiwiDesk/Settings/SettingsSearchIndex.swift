@@ -10,7 +10,7 @@ import KiwiDeskCore
 /// at build time, so the match path allocates nothing and asks
 /// nothing beyond this array.
 ///
-/// Enrichment — the current value, gate state, the mode pill's
+/// Enrichment — the current value, gate state, the mode tag's
 /// resolution — deliberately does NOT live here: it is computed
 /// per visible row after the result list paints
 /// (`SettingsSearchRow`), from the draft in memory. Nothing on
@@ -39,7 +39,12 @@ struct SettingsSearchIndexRow: Identifiable, Equatable {
     /// Where committing the row lands: the catalog control that
     /// carries the row's label key when one exists (surface +
     /// scroll id + drawer auto-expand come free), else the bare
-    /// destination.
+    /// destination. The #277 catalog covers a fraction of the
+    /// census, so MOST census rows land destination-only today
+    /// and gain their scroll anchor as the catalog fills; the
+    /// per-destination anchor-less counts are pinned in
+    /// `SettingsSearchIndexTests`, so a label-key rename that
+    /// silently strips an existing match reds.
     let anchor: SettingsAnchor
     /// Breadcrumb above the label, outermost first — the
     /// destination, the local surface when one must be

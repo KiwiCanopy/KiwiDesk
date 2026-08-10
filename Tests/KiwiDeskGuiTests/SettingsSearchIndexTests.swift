@@ -130,6 +130,45 @@ struct SettingsSearchIndexTests {
         }
     }
 
+    /// The census↔catalog label-key join, held by exact
+    /// per-destination COUNTS (the three catalog guards'
+    /// pattern): a label-key rename on either side silently
+    /// strips a census row's scroll anchor — the hit still
+    /// opens the destination, the control resurfaces as a
+    /// duplicate extras row, and nothing else here can see it
+    /// (architect review 2026-08-10). The counts are large on
+    /// purpose: the #277 catalog covers a fraction of the
+    /// census, and each count FALLS as it fills — update with
+    /// the reason stated, never with a floor.
+    @Test("anchor-less census counts match the pinned table")
+    func unanchoredCountsArePinned() {
+        pinEnglish()
+        defer { reset() }
+        let anchorless = SettingsSearchIndex.rows()
+            .filter { $0.key != nil && $0.anchor.anchor == nil }
+        let counts = Dictionary(
+            grouping: anchorless,
+            by: \.destination
+        )
+        .mapValues(\.count)
+        #expect(
+            counts == [
+                .spaces: 21,
+                .layoutDefaults: 34,
+                .monitors: 3,
+                .gapsAndBorders: 18,
+                .bars: 36,
+                .colors: 12,
+                .advancedColors: 25,
+                .behavior: 3,
+                .profiles: 5,
+                .shortcuts: 11,
+                .appRules: 3,
+                .general: 8,
+            ]
+        )
+    }
+
     /// The catalog-only anchor rows exist — the mode tabs at
     /// least, which the census structurally cannot carry.
     @Test("mode tabs survive as catalog-only rows")

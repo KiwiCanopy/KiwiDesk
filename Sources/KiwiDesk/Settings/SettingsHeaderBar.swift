@@ -115,7 +115,7 @@ struct SettingsHeaderBar: View {
                     model?.searchValue(for: key)
                 },
                 reveal: { model.nav.pendingReveal = $0 },
-                modeSwitched: model.noteSearchModeSwitch
+                armModeNotice: { model.nav.pendingModeNotice = $0 }
             )
             if showsProfileContext {
                 profileChip

@@ -90,9 +90,9 @@ finds the gaps, "autostart" finds the login row), whatever
 language the window is in.
 
 Each result leads with the setting's own label, puts the trail
-to it in a smaller line underneath, and shows its **current
-value** on the right. An area name that matches on its own has
-no second line. Results from an area that only exists in Power
+to it in a smaller line underneath, and — when the setting has
+one value to state — shows its **current value** on the right.
+An area name that matches on its own has no second line. Results from an area that only exists in Power
 User mode carry a quiet **Power User** tag: opening one switches
 the mode for you and says so in one line under the header —
 that's all the switching there is to it. Below the settings, a
@@ -100,11 +100,13 @@ short **Places** group lists things you've named yourself — a
 space, a profile, an app rule — and jumps to where each one
 lives.
 
-Clicking a result **takes you to the match**, not just to its
-section: the pane scrolls to that group and tints it for about a
-second so your eye lands on it, and anything that would have
-hidden it is switched first — a hit inside one layout's editor
-opens that layout's tab. If the match sits **inside** a
+Clicking a result opens its area, and — where the row has its
+own place to land — **takes you to the match**: the pane scrolls
+to it and tints it for about a second so your eye lands on it,
+and anything that would have hidden it is switched first — a hit
+inside one layout's editor opens that layout's tab. Some rows
+open their area without scrolling yet; they gain their landing
+spot as the control catalog grows. If the match sits **inside** a
 collapsed drawer (searching "top" finds the per-edge gap
 sliders), the drawer opens on the way so you land on the row
 itself; a hit on the drawer's own name ("Per-edge…", "Advanced")

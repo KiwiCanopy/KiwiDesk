@@ -16,7 +16,8 @@ import SwiftUI
 struct SettingsSearchRow: View {
     let result: SettingsSearchResult
     /// Enrichment: the current value for a census key, from the
-    /// draft in memory. Called once per paint, on appear.
+    /// draft in memory. Read once per body evaluation, and only
+    /// while the row is instantiated — the list is lazy.
     let value: (SettingKey) -> String?
     /// Whether committing flips the mode (the pill).
     let switchesMode: Bool
@@ -28,6 +29,10 @@ struct SettingsSearchRow: View {
     let reveal: (SettingsSearchResult) -> Void
 
     var body: some View {
+        // ONE read per body evaluation, shared by the visible
+        // column and the AX sentence — the readout walks the
+        // draft, so the row must not run it twice per repaint.
+        let shownValue = shownValue
         HStack(spacing: 8) {
             SidebarTile(
                 destination: result.destination,
@@ -50,14 +55,14 @@ struct SettingsSearchRow: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
-            if switchesMode { pill }
+            if switchesMode { modeTag }
         }
         .contentShape(Rectangle())
         .onTapGesture { reveal(result) }
         // VoiceOver stops once per row and must hear the whole
         // context there, not split across unlabelled lines.
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(axLabel)
+        .accessibilityLabel(axLabel(shownValue))
         .accessibilityValue(badgeValue)
         // A tap gesture under a combined element is not reliably
         // reachable by VoiceOver's activate, and there is no
@@ -68,11 +73,14 @@ struct SettingsSearchRow: View {
         .accessibilityAction { reveal(result) }
     }
 
-    /// The mode pill: the mode's own accent, on the same
-    /// reduced-strength stroke channel the mode-gated container
-    /// frames use — one visual system, and text stays neutral
-    /// (the accent marks fills and frames, never words).
-    private var pill: some View {
+    /// The mode TAG — "tag", because the glossary rules
+    /// exactly two senses of "pill" and this Settings-chrome
+    /// capsule would collide with the save pill's. The mode's
+    /// own accent, on the same reduced-strength stroke channel
+    /// the mode-gated container frames use — one visual
+    /// system, and text stays neutral (the accent marks fills
+    /// and frames, never words).
+    private var modeTag: some View {
         // The SEGMENT's own key, reused on purpose: the pill
         // and the mode segment must say the same word in every
         // locale, and sharing the key makes that structural
@@ -145,14 +153,17 @@ struct SettingsSearchRow: View {
             return L("search.place.space", "Space")
         case .profile:
             return L("search.place.profile", "Profile")
-        case .palette:
-            return L("search.place.palette", "Palette")
         case .appRule:
             return L("search.place.app_rule", "App rule")
         }
     }
 
-    private var axLabel: String {
+    /// The spoken sentence, composed by NESTED positional
+    /// frames rather than `+`-stitched fragments: each locale
+    /// owns its separators (ja/zh enumerate with 、/，) and may
+    /// reorder either frame — the gui.md strings rule, applied
+    /// to the AX-only surface too (review 2026-08-10).
+    private func axLabel(_ shownValue: String?) -> String {
         var label = primary
         if let breadcrumb {
             label = L(
@@ -163,10 +174,20 @@ struct SettingsSearchRow: View {
             )
         }
         if let shownValue {
-            label += ", " + shownValue
+            label = L(
+                "search.result_value_ax",
+                "%1$@, %2$@",
+                label,
+                shownValue
+            )
         }
         if switchesMode {
-            label += ", " + L("mode.power_user", "Power User")
+            label = L(
+                "search.result_mode_ax",
+                "%1$@, %2$@",
+                label,
+                L("mode.power_user", "Power User")
+            )
         }
         return label
     }

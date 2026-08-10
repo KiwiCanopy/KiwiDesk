@@ -158,8 +158,9 @@ struct SettingsSearchAnchorTests {
     /// its label key: surface, scroll id and drawer expansion
     /// all come from the one declaration the render site
     /// mounts. (A census key whose label key no control carries
-    /// degrades to a destination-only anchor — the gaps MASTER
-    /// rows are that shape today.)
+    /// lands destination-only — most census rows today, until
+    /// the #277 catalog fills; `SettingsSearchIndexTests` pins
+    /// the per-destination counts.)
     @Test("a census hit lands on its catalog control")
     func censusHitCarriesCatalogAnchor() {
         pinEnglish()

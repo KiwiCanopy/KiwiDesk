@@ -1252,8 +1252,9 @@ one-per-destination cap existed to prevent, only data-driven and
 unbounded — and indexing *values* ("0.70" finding the space that
 overrides to it) is the same mistake through the back door. The
 things a user NAMES — spaces, profiles, palettes, app rules —
-are findable by name in a separate **Places** group, capped at
-five, one entry per object.
+are **Places** material: findable by name in a separate group,
+capped at five, one entry per object. (Palettes sit the group
+out today — the purity line below is why.)
 
 **The match path is pure, and enrichment is a second phase.**
 Matching is a synchronous substring scan over rows built once
@@ -1265,8 +1266,9 @@ translation. Everything else a result row shows — the current
 value, the mode pill — is computed per *rendered* row after the
 list paints, from the draft in memory. Nothing on either path
 touches AX, the filesystem or the running session
-(`SettingsSearchIndexTests` scans for the violation). That line
-is why palette names are absent from Places today:
+(`SettingsSearchIndexTests` scans the match-path files for the
+violation; enrichment reads only the draft the shell hands it).
+That line is why palette names are absent from Places today:
 `PaletteStore` is stateless and file-backed by design, so
 listing them would put a disk read on every keystroke.
 
@@ -1910,7 +1912,8 @@ well per row of its contents.
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a
 census-labelled key AWAY from its owning row — the diff
-rows, and pass 6's search index after them — cannot inline
+rows, and the search index after them (#678 turn 11) —
+cannot inline
 the English without becoming a second authoring surface that
 drifts from the rows. So `SettingsCensusLabel` resolves the
 current locale first and falls back to the `en.json`

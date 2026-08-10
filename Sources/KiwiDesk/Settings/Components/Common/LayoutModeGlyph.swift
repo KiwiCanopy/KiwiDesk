@@ -10,7 +10,7 @@ extension LayoutMode {
     /// The placement layouts in the order the Layout Defaults
     /// pane taught them (#204) — not `allCases` order, and
     /// without Floating. The one home for that curated list:
-    /// the tab strip renders it and the sidebar search indexes
+    /// the tab strip renders it and the Settings search indexes
     /// it, so the two can't drift (review of #90).
     static let placementTabs: [LayoutMode] = [
         .bsp, .stack, .scrolling, .grid, .monocle, .track,

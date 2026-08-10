@@ -17,11 +17,11 @@ import KiwiDeskCore
 /// state-machine value rather than more correlated optionals —
 /// worth weighing when the Shortcuts mode strip lands.
 struct SettingsNavigation {
-    /// A one-shot navigation request: a sidebar destination, the
+    /// A one-shot navigation request: a destination, the
     /// local surface to switch to, and optionally a label to
     /// scroll to and flash. Serves both the read-only shortcuts
     /// panel's "Edit in Settings…" bridge (#326, destination
-    /// only) and a sidebar search hit (#277, full anchor).
+    /// only) and a search hit (#277, full anchor).
     ///
     /// `SettingsView` applies the destination and surface; the
     /// detail pane's scroll driver performs the reveal and clears
@@ -30,6 +30,12 @@ struct SettingsNavigation {
     /// resolves when the visual editor comes back — the detail
     /// pane is where a scroll target can exist at all.
     var pendingReveal: SettingsAnchor?
+    /// Armed by a search pick whose result predicted a mode
+    /// flip; consumed (and always cleared) by the SAME apply
+    /// that performs the flip, so the confirmation is announced
+    /// by the flipper, never by the prediction — a refused or
+    /// superseded reveal announces nothing (#678 4c).
+    var pendingModeNotice: SettingsDestination?
     /// The flash in progress. Read into the environment so each
     /// anchored view can recognize itself; nil between reveals.
     /// Written only through `startFlash` / `endFlash`, which own

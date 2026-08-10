@@ -173,7 +173,7 @@ struct AppPickerButton: View {
 /// The picker's substring filter, split out pure so it is unit
 /// testable without the view. Matches through `searchMatches`,
 /// the app's one search-matching predicate (shared with the
-/// sidebar search: case-, diacritic- and separator-insensitive) on
+/// Settings search: case-, diacritic- and separator-insensitive) on
 /// the
 /// localized name OR the bundle id — the latter keeps an app
 /// findable by its English/habitual name (typing "preview"

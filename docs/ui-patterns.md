@@ -132,7 +132,7 @@ gives none of them.
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
 ("Bars ▸ App Bar"), not the section name alone: a link
-reading "App Bar" names no row Home or search shows, and only a
+reading "App Bar" names no card Home shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A
 pointer whose sentence names the **feature itself** rather
 than where to find it — a sentence turning on whether the
@@ -340,11 +340,16 @@ indexes destination titles, every census-labelled setting row
 (`SettingsSearchIndex`, one row per `SettingKey`) and the
 catalog's own controls — drawer titles, mode tabs — plus a
 sparse English synonym table (`SettingsSearchSynonyms`,
-match-only, never displayed). A word that appears in no indexed
-string still lives or dies with its title — a title that reads
-better but drops such a word makes its own drawer unfindable by
-the word a user would type. "Lua" and "fingerprint" are in that
-position today, which is part of why those two titles win.
+match-only, never displayed). A word that appears in no other
+indexed string still lives or dies with its title — a title
+that reads better but drops such a word makes its own drawer
+unfindable by the word a user would type. "Fingerprint" is in
+that position today: "Monitor fingerprints" is the one indexed
+string carrying it, which is part of why that title wins.
+("Lua" no longer is — the init.lua rows in General and
+Shortcuts carry it too — though results are per row now, so
+the raw-Lua drawer still needs its own title's words to be
+found at all.)
 Per-instance rows (a space's own binding row) stay out by
 design: their FAMILY is the setting, and the Places group is
 how a named thing is found.

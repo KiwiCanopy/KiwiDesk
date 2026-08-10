@@ -48,10 +48,12 @@ struct HeaderSearch: View {
     /// Hands a picked result up to the shell, which owns the
     /// destination and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
-    /// Fired after a pick that flips the window into Power User
-    /// mode — the shell shows the one-line confirmation
-    /// ("…is now on Home"), search's only mention of the mode.
-    let modeSwitched: (SettingsDestination) -> Void
+    /// Arms the shell's one-line confirmation before a pick
+    /// whose result predicts a mode flip — the reveal pipeline
+    /// announces it only if the promotion actually happens
+    /// (`SettingsView.apply`), so a refused reveal stays
+    /// silent. Search's only mention of the mode.
+    let armModeNotice: (SettingsDestination) -> Void
 
     @State private var query = ""
     /// The ↑/↓ highlight, by result id — a result set is
@@ -109,7 +111,7 @@ struct HeaderSearch: View {
     ///
     /// 380 wide, up from the one-per-destination list's 340: the
     /// rows now carry a right-aligned value and, sometimes, the
-    /// mode pill. The responsive pass (17a) owns the final
+    /// mode tag. The responsive pass (17a) owns the final
     /// number.
     @ViewBuilder private var resultPanel: some View {
         if searching {
@@ -242,19 +244,19 @@ struct HeaderSearch: View {
     ///
     /// The mode question is answered BEFORE the reveal: the
     /// reveal path promotes the mode (`ensureModeAdmits`), so
-    /// asking afterwards would always answer "no switch".
+    /// asking afterwards would always answer "no switch". The
+    /// arm goes first — the reveal is what consumes it.
     private func pick(_ result: SettingsSearchResult) {
-        let switches = SettingsSearch.switchesMode(
+        if SettingsSearch.switchesMode(
             result,
             context: context
-        )
+        ) {
+            armModeNotice(result.destination)
+        }
         query = ""
         highlighted = nil
         focused = false
         reveal(result.anchor)
-        if switches {
-            modeSwitched(result.destination)
-        }
     }
 
     /// ↑/↓ from the field move the highlight only — the reveal

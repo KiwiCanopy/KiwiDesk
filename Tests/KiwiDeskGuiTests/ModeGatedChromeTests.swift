@@ -146,6 +146,11 @@ struct ModeGatedChromeTests {
         // cells appear plainly.
         "SpaceOverrideOffer.swift":
             "per-row control offer; no container to mark",
+        // The reveal pipeline's promotion CHECK (did
+        // ensureModeAdmits flip?) — announces the search
+        // notice; it offers nothing and draws no chrome.
+        "SettingsView+Reveal.swift":
+            "promotion check for the notice; not an offer",
     ]
 
     @Test("a .powerUser offer is marked or enumerated")

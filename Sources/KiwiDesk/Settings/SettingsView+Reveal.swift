@@ -38,6 +38,11 @@ extension SettingsView {
     func apply(_ request: SettingsAnchor?) {
         guard let request else { return }
         model.nav.pendingReveal = nil
+        // Taken unconditionally, so a REFUSED request cannot
+        // leave a stale arm behind for the next reveal to
+        // announce.
+        let armedNotice = model.nav.pendingModeNotice
+        model.nav.pendingModeNotice = nil
         guard
             let resolved = request.resolved(
                 editingStoredProfile: model.editingStoredProfile
@@ -46,7 +51,16 @@ extension SettingsView {
         // A hit inside a Power-User-only area switches the mode —
         // search indexes both modes (4c), so landing must
         // switch rather than refuse.
+        let wasSimple = model.settingsMode == .simple
         ensureModeAdmits(resolved.destination)
+        // The one-line confirmation, from the FLIP site: only a
+        // search pick arms it, and only a promotion that
+        // actually happened announces (#678 4c).
+        if let armedNotice, wasSimple,
+            model.settingsMode == .powerUser
+        {
+            model.noteSearchModeSwitch(armedNotice)
+        }
         model.destination = resolved.destination
         switch resolved.surface {
         case .main:

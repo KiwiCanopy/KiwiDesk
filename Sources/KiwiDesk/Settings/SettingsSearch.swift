@@ -46,8 +46,14 @@ enum SettingsSearchResult: Identifiable, Equatable {
 /// owns it. Lua binding contents stay out (free text would swamp
 /// everything), and values are not indexed at all.
 struct SettingsSearchPlace: Identifiable, Equatable {
+    /// No `.palette` case, deliberately: `PaletteStore` is
+    /// stateless and file-backed, so palette names have no
+    /// in-memory production source yet, and a kind nothing can
+    /// feed is a seam without a consumer plus a translated
+    /// string nothing renders. The kind joins WITH the cache
+    /// seam (follow-up filed on the search rework PR).
     enum Kind: String, CaseIterable {
-        case space, profile, palette, appRule
+        case space, profile, appRule
     }
 
     let kind: Kind
@@ -67,8 +73,31 @@ struct SettingsSearchContext {
     var displayCount = 1
     var spaces: [String] = []
     var profiles: [String] = []
-    var palettes: [String] = []
     var appRules: [String] = []
+
+    /// Exhaustive by construction: a new `Kind` fails to
+    /// compile here (and in `Kind.destination`) before it can
+    /// ship as a kind no context feeds and no builder consumes
+    /// — the three hand-mirrors the architect review counted,
+    /// collapsed onto the enum (2026-08-10).
+    func names(of kind: SettingsSearchPlace.Kind) -> [String] {
+        switch kind {
+        case .space: return spaces
+        case .profile: return profiles
+        case .appRule: return appRules
+        }
+    }
+}
+
+extension SettingsSearchPlace.Kind {
+    /// The area that owns things of this kind.
+    var destination: SettingsDestination {
+        switch self {
+        case .space: return .spaces
+        case .profile: return .profiles
+        case .appRule: return .appRules
+        }
+    }
 }
 
 /// The two result groups, in commit order: settings rows, then
@@ -90,7 +119,7 @@ enum SettingsSearch {
     /// Matching is `searchMatches` — the app's one predicate —
     /// over the localized label, the destination title and the
     /// English synonyms. Search indexes BOTH modes, always; the
-    /// mode is mentioned nowhere but the result pill.
+    /// mode is mentioned nowhere but the result tag.
     static func results(
         query: String,
         context: SettingsSearchContext
@@ -106,7 +135,7 @@ enum SettingsSearch {
     }
 
     /// Whether committing `result` will flip the window into
-    /// Power User mode — the result rows' pill and the only
+    /// Power User mode — the result rows' mode tag and the only
     /// place search mentions the mode. Asks the one offer
     /// predicate (`HomeCardOrder.isOffered`), never a
     /// hand-negated copy: a destination not offered in the
@@ -169,12 +198,9 @@ enum SettingsSearch {
         _ query: String,
         _ context: SettingsSearchContext
     ) -> [SettingsSearchResult] {
-        let kinds: [(Kind, [String], SettingsDestination)] = [
-            (.space, context.spaces, .spaces),
-            (.profile, context.profiles, .profiles),
-            (.palette, context.palettes, .colors),
-            (.appRule, context.appRules, .appRules),
-        ]
+        let kinds = Kind.allCases.map { kind in
+            (kind, context.names(of: kind), kind.destination)
+        }
         // No reachability filter here, on purpose: every place
         // kind lands on a destination #18 never hides (only
         // General is withheld while a stored profile is
