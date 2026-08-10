@@ -144,8 +144,17 @@ struct SettingsSearchIndexTests {
     func unanchoredCountsArePinned() {
         pinEnglish()
         defer { reset() }
+        // The two liquid-glass keys are excluded before
+        // counting: they are anchor-less too, but whether they
+        // are INDEXED follows `AppBarStyle.glassAvailable`, so
+        // counting them would pin this host's macOS answer
+        // (`liquidGlassRowsFollowAvailability` owns that axis).
         let anchorless = SettingsSearchIndex.rows()
             .filter { $0.key != nil && $0.anchor.anchor == nil }
+            .filter {
+                !($0.key?.placement.gate?.runtimeConditions
+                    .contains(.liquidGlassUnavailable) ?? false)
+            }
         let counts = Dictionary(
             grouping: anchorless,
             by: \.destination
@@ -157,7 +166,7 @@ struct SettingsSearchIndexTests {
                 .layoutDefaults: 34,
                 .monitors: 3,
                 .gapsAndBorders: 18,
-                .bars: 36,
+                .bars: 34,
                 .colors: 12,
                 .advancedColors: 25,
                 .behavior: 3,

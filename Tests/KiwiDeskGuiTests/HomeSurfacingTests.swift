@@ -73,20 +73,19 @@ struct HomeSurfacingTests {
         ],
         "Settings/SettingsView+Reveal.swift": [
             // A search hit into a Power-User-only area switches
-            // the mode before landing (the notice consume now
-            // sits between the two statements).
-            "ensureModeAdmits(resolved.destination)",
-            "model.destination=resolved.destination",
+            // the mode BEFORE landing — one needle through the
+            // whole run (flip, announce, land), so the ORDER
+            // stays pinned, not just each statement's existence.
+            "ensureModeAdmits(resolved.destination)"
+                + "ifletarmedNotice,wasSimple,"
+                + "model.settingsMode==.powerUser{"
+                + "model.noteSearchModeSwitch(armedNotice)}"
+                + "model.destination=resolved.destination",
             // The reveal CONSUMES the armed notice
             // unconditionally (a refused request must not leave
             // a stale arm)…
             "letarmedNotice=model.nav.pendingModeNotice"
                 + "model.nav.pendingModeNotice=nil",
-            // …and announces only a promotion that happened —
-            // the flipper, never the prediction (#678 4c).
-            "ifletarmedNotice,wasSimple,"
-                + "model.settingsMode==.powerUser{"
-                + "model.noteSearchModeSwitch(armedNotice)}",
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home

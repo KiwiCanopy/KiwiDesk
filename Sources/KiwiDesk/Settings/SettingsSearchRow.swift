@@ -4,7 +4,7 @@ import SwiftUI
 /// One row in the search-result list (#678 turn 11, 4c): label
 /// on top, dimmed breadcrumb beneath, the current value
 /// right-aligned, and — only where committing would flip the
-/// window into Power User mode — the pill, the one place search
+/// window into Power User mode — the tag, the one place search
 /// mentions the mode.
 ///
 /// The value is ENRICHMENT: computed here, per rendered row,
@@ -19,7 +19,7 @@ struct SettingsSearchRow: View {
     /// draft in memory. Read once per body evaluation, and only
     /// while the row is instantiated — the list is lazy.
     let value: (SettingKey) -> String?
-    /// Whether committing flips the mode (the pill).
+    /// Whether committing flips the mode (the tag).
     let switchesMode: Bool
     /// Same state-driven badge rule as the Home grid: which
     /// list renders the tile must not change it.
@@ -81,7 +81,7 @@ struct SettingsSearchRow: View {
     /// system, and text stays neutral (the accent marks fills
     /// and frames, never words).
     private var modeTag: some View {
-        // The SEGMENT's own key, reused on purpose: the pill
+        // The SEGMENT's own key, reused on purpose: the tag
         // and the mode segment must say the same word in every
         // locale, and sharing the key makes that structural
         // (localization audit 2026-08-10) — a second key would
