@@ -113,29 +113,26 @@ struct HeaderSearch: View {
     }
 
     /// Hung below the field in the field's own coordinate
-    /// space; the offset is the field's height plus the gap.
-    /// The `GeometryReader` is INSIDE the overlay, where it
-    /// only measures the proposal — wrapped around the field
-    /// it would negotiate the flexible slot and collapse the
-    /// row. The responsive pass (17a) owns the final floor.
+    /// space; the offset is the field's height plus the gap —
+    /// a constant, since a `GeometryReader` around the FIELD
+    /// would negotiate the flexible slot and collapse the row.
+    ///
+    /// 380 wide, a card under the field's leading edge — NOT
+    /// the field's width. A full-width panel was tried against
+    /// the line-through-the-panel report and rejected on sight
+    /// once the real cause (the header separator's paint
+    /// order) was fixed (owner, 2026-08-10). The responsive
+    /// pass (17a) owns the final number.
     @ViewBuilder private var resultPanel: some View {
         if searching, focused || panelHovered {
-            // The panel matches the FIELD's width (the overlay's
-            // proposal, read here where it cannot feed back into
-            // the row's layout), floored at 380 for the 720 pt
-            // minimum: a narrower card left the banner behind
-            // visible on BOTH sides at one height, reading as a
-            // line through an opaque panel (owner, 2026-08-10).
-            GeometryReader { geo in
-                resultCard(width: max(380, geo.size.width))
-            }
+            resultCard
         }
     }
 
-    private func resultCard(width: CGFloat) -> some View {
+    private var resultCard: some View {
         resultList
             .padding(8)
-            .frame(width: width, alignment: .leading)
+            .frame(width: 380, alignment: .leading)
             .background(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
