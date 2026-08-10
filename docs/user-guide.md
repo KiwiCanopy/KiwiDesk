@@ -67,9 +67,9 @@ copy…** and **Save**. Click the count for a popover listing
 every change as an old → new row, and click a row to jump
 straight to the control that changed. It is not a fixed bar:
 it appears with your first edit and disappears once everything
-is saved (the verbs are detailed under [Saving](#saving)). And four areas —
-Gaps & Borders, Bars, Colors & Motion, and Layout Defaults —
-open as two columns: their controls on the left, and a **Live
+is saved (the verbs are detailed under [Saving](#saving)). And five areas —
+Gaps & Borders, Bars, Colors & Motion, Layout Defaults, and
+Shortcuts — open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as
 you edit, with a **Changed in this draft** list underneath —
 the same old → new rows as the pill count's popover, each
@@ -2154,6 +2154,56 @@ dismissed early). It does **not** appear on app launch, when
 Settings is simply opened, on Load Profile, or on a normal
 visual-editor Save — those already show any conflict through the
 persistent ⚠️.
+
+### The Keyboard Preview
+
+Shortcuts is one of the two-column areas: beside the shortcut
+groups, the **Live preview** panel draws your keyboard and marks
+which keys your bindings have already claimed, updating as you
+record, clear, and delete. It shows your *draft*, not the saved
+profile — the panel's caption says so.
+
+The board shows **one modifier combination at a time**. Chips
+above it list every combination your bindings use (⌃⌥, ⌃⌥⇧, …; a
+binding with no modifier at all appears as **No modifier**).
+**All** — the opening view — lights every key any binding claims;
+click a chip to narrow the board to that combination and answer
+the question you actually have while binding: *if I hold ⌃⌥, what
+is left?* A chip exists only while some binding uses its
+combination, so clearing your last ⌘ shortcut removes the ⌘ chip.
+
+Each legend entry is drawn the way the board draws it — a mini
+key on a sliver of the board's dark plate:
+
+- **bound** — the key is filled in KiwiDesk's green: a binding in
+  the shown scope claims it.
+- **free** — the dark, unfilled key: nothing claims it here.
+- **macOS owns it** — a dashed amber ring on a *free* key: macOS
+  reserves that key under the shown modifier combination (⌘Space
+  is Spotlight's), so recording it would be refused. The ring —
+  and its legend entry — appear only while a modifier chip is
+  picked, because macOS reserves combinations, not keys: a key it
+  owns under ⌘ is still free under ⌃⌥, so under **All** there is
+  no single combination to check against.
+- **conflict** — a solid red ring on a *bound* (green) key: two
+  of your own bindings in the same layer claim the same combo —
+  the board's view of the duplicate-row ⚠️ above. A clash with a
+  reserved macOS shortcut is the dashed ring, never the red one;
+  red always means your own rows collide.
+
+Under the legend, **Keys taken: N** counts the distinct keys the
+shown scope claims, and a **Keyboard layout** row reports what
+the board resolved — the physical shape (ANSI, ISO or JIS) and
+the active input source, e.g. *ISO · German*, "from macOS".
+
+That row is a reading, not a setting: **KiwiDesk binds the
+physical key**, and the row states what macOS reports your
+keyboard to be — there is nothing to choose. The keycaps print
+what *your* layout prints (a German board shows `ß` where a US
+board shows `-`), so the picture matches the keys in front of
+you, but a shortcut stays on its physical key — switching input
+sources changes the characters on the caps, not which key fires
+your bindings.
 
 ### Keyboard Modifiers & Keys
 
