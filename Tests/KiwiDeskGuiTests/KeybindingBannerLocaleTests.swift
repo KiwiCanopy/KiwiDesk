@@ -59,6 +59,19 @@ struct KeybindingBannerLocaleTests {
         model.warnIfAnyConflict()
         let warning = model.keybindingWarning
         #expect(warning != nil)
+        // The per-row tooltip narrates through the same roster
+        // (its popover made the raw canonical clickable —
+        // l10n review 2026-08-10).
+        let bindings = model.config.layers[0].bindings
+        let tooltip = ConflictText.tooltip(
+            for: bindings[0],
+            in: bindings,
+            config: model.config
+        )
+        #expect(
+            tooltip?.contains("Focus window to the right")
+                != true
+        )
         // The de catalog's own rendering of the roster label —
         // read through the same L() the banner uses, so a
         // retuned translation moves both sides together.
