@@ -129,6 +129,13 @@ struct HeaderSearch: View {
                         )
                         .strokeBorder(SettingsTheme.hairline)
                     )
+                    // Without this the shadow halos EVERY
+                    // primitive — the hairline ring casts its
+                    // own shadow INWARD, reading as a line
+                    // ghosting through an opaque panel (#758's
+                    // lesson, hit again here; owner report
+                    // 2026-08-10).
+                    .compositingGroup()
                     .shadow(
                         color: .black.opacity(0.16),
                         radius: 12,
