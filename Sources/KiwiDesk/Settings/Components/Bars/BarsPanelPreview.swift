@@ -26,6 +26,14 @@ struct BarsPanelPreview: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(SettingsTheme.previewPlate)
             )
+            // 16b dark seam — see `SettingsTheme.planeRing`.
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+            )
             .environment(
                 \.schematicPalette,
                 HomeCardPlate.palette(model.config.settings)

@@ -140,6 +140,21 @@ enum SettingsTheme {
         dark: 0x2C_33_2D
     )
 
+    /// The 16b construction that is not a colour swap: an inset
+    /// light line that separates a dark plane from a dark ground
+    /// ONLY in dark mode. In light the fills do the separating —
+    /// the plate measures 15.6:1 against the page — so this
+    /// resolves fully transparent there; in dark the plate, the
+    /// save pill and the search panel all sit within ~1.1:1 of
+    /// their grounds and this line is the edge. Drawn OVER a
+    /// hairline where one exists, not instead of it.
+    static let planeRing = token(
+        light: 0xFF_FF_FF,
+        dark: 0xFF_FF_FF,
+        lightAlpha: 0,
+        darkAlpha: 0.14
+    )
+
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.
@@ -245,7 +260,9 @@ enum SettingsTheme {
 
     // MARK: - Construction
 
-    /// One dynamic colour from a light/dark `0xRRGGBB` pair.
+    /// One dynamic colour from a light/dark `0xRRGGBB` pair,
+    /// optionally with a per-mode alpha (`planeRing` is the one
+    /// consumer — a construction that exists in dark only).
     ///
     /// `bestMatch` rather than a raw name comparison: an
     /// appearance can be a vibrant or high-contrast variant of
@@ -253,7 +270,9 @@ enum SettingsTheme {
     /// belong to instead of silently falling through to light.
     private static func token(
         light: UInt32,
-        dark: UInt32
+        dark: UInt32,
+        lightAlpha: CGFloat = 1,
+        darkAlpha: CGFloat = 1
     ) -> Color {
         Color(
             nsColor: NSColor(name: nil) { appearance in
@@ -261,17 +280,23 @@ enum SettingsTheme {
                     appearance.bestMatch(
                         from: [.aqua, .darkAqua]
                     ) == .darkAqua
-                return srgb(isDark ? dark : light)
+                return srgb(
+                    isDark ? dark : light,
+                    alpha: isDark ? darkAlpha : lightAlpha
+                )
             }
         )
     }
 
-    private static func srgb(_ hex: UInt32) -> NSColor {
+    private static func srgb(
+        _ hex: UInt32,
+        alpha: CGFloat
+    ) -> NSColor {
         NSColor(
             srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
             green: CGFloat((hex >> 8) & 0xFF) / 255,
             blue: CGFloat(hex & 0xFF) / 255,
-            alpha: 1
+            alpha: alpha
         )
     }
 }

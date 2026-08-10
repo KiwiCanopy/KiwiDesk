@@ -61,11 +61,13 @@ struct HomeCardPaletteWiringTests {
         let pile = try structBody(kit, "SchematicPileTile")
         // The pile's opaque base: without the consult a pile on
         // the plate flashes the light window-background under
-        // the accent (#712's compounding trap, inverted).
+        // the accent (#712's compounding trap, inverted). The
+        // fallback is `card` since the dark pass retired
+        // `.textBackgroundColor` (it follows the system window
+        // background this window no longer uses).
         #expect(
             pile.contains(
-                "palette?.base"
-                    + "??Color(nsColor:.textBackgroundColor)"
+                "palette?.base??SettingsTheme.card"
             )
         )
         #expect(pile.contains("palette?.newFill"))

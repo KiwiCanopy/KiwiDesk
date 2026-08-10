@@ -293,7 +293,9 @@ struct SchematicPileTile: View {
             if isNew {
                 Image(systemName: "plus")
                     .font(.system(size: 7, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(
+                        palette?.ink ?? SettingsTheme.accentInk
+                    )
                     .padding(2)
             }
         }

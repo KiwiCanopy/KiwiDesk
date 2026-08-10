@@ -147,6 +147,19 @@ struct HeaderSearch: View {
                     )
                     .strokeBorder(SettingsTheme.hairline)
                 )
+                // 16b dark seam OVER the hairline: the black
+                // shadow below is the panel's lift in light
+                // and is invisible on the dark page — see
+                // `SettingsTheme.planeRing`.
+                .overlay(
+                    RoundedRectangle(
+                        cornerRadius: SettingsTheme.cardRadius
+                    )
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+                )
                 // Without this the shadow halos EVERY
                 // primitive — the hairline ring casts its own
                 // shadow INWARD, reading as a line ghosting

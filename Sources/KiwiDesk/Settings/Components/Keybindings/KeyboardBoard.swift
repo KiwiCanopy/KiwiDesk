@@ -40,6 +40,14 @@ struct KeyboardBoard: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(SettingsTheme.previewPlate)
             )
+            // 16b dark seam — see `SettingsTheme.planeRing`.
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+            )
         }
         .frame(height: boardHeight)
     }

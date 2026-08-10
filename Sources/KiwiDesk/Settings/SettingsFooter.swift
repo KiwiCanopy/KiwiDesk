@@ -136,6 +136,16 @@ struct SettingsFooter: View {
                 y: 7
             )
         )
+        // The 16b dark construction: the self-coloured shadow
+        // above is the pill's lift in light and is invisible in
+        // dark, where the fill sits within ~1.1:1 of the page —
+        // there the inset light line is the edge.
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: SettingsTheme.cardRadius
+            )
+            .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
+        )
     }
 
     private var saveAsNewMessage: String {
