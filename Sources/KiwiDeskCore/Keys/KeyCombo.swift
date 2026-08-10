@@ -113,6 +113,7 @@ public struct KeyCombo: Hashable, Sendable {
             41: "semicolon", 43: "comma", 47: "period",
             44: "slash", 42: "backslash", 39: "quote",
             50: "grave", 27: "minus", 24: "equal",
+            10: "section",
             30: "rightbracket", 33: "leftbracket",
         ]
         if let name = overrides[code] { return name }
@@ -145,6 +146,12 @@ public struct KeyCombo: Hashable, Sendable {
         "semicolon": 41, "comma": 43, "period": 47,
         "slash": 44, "backslash": 42, "quote": 39,
         "apostrophe": 39, "grave": 50, "backtick": 50,
+        // ISO boards only: the extra key an ANSI board does
+        // not have. Bindable like any other — the preview draws
+        // it (`KeyboardMatrix`), and a key drawn as free that
+        // `parse` cannot name is a key the user is invited to
+        // bind and then cannot.
+        "section": 10, "iso_section": 10,
         "minus": 27, "equal": 24, "leftbracket": 33,
         "rightbracket": 30,
         "return": 36, "enter": 36, "tab": 48, "space": 49,

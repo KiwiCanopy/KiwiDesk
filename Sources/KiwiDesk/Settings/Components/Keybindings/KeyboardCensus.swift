@@ -166,27 +166,6 @@ enum KeyboardCensus {
         return .free
     }
 
-    /// WHICH selected combinations macOS has reserved this key
-    /// under — the frame's colours.
-    ///
-    /// The board draws two independent facts about one key:
-    /// stripes say who has TAKEN it, the frame says who CANNOT
-    /// have it. Answering "is it blocked" with a single Bool
-    /// collapsed the second one, so a key macOS owns under ⌘ and
-    /// leaves free under ⌃⌥ read as simply unavailable.
-    static func blockers(
-        of code: UInt32,
-        under selected: Set<ModifierLayer>
-    ) -> [ModifierLayer] {
-        selected
-            .filter {
-                SystemShortcuts.map[
-                    KeyCombo(keyCode: code, modifiers: $0.modifiers)
-                ] != nil
-            }
-            .sorted()
-    }
-
     /// Whether macOS already owns this key under any selected
     /// modifier combination.
     ///
@@ -213,10 +192,50 @@ enum KeyboardCensus {
     /// with the board above it. The modifier count went with the
     /// stripes: under `.all` it restated the chip row, and under
     /// `.one` it was always 1.
-    static func tally(
+    static func takenKeyCount(
         claims: [UInt32: [ModifierLayer]]
-    ) -> (keys: Int, modifiers: Int) {
-        let used = Set(claims.values.flatMap { $0 })
-        return (claims.keys.count, used.count)
+    ) -> Int {
+        claims.keys.count
+    }
+
+    /// Key codes where two bindings IN THE SAME LAYER claim the
+    /// same combo — the red ring.
+    ///
+    /// Computed rather than read back out of
+    /// `KebindingConflicts.conflicts(in:)`, because that returns
+    /// display NAMES and rejoining them to key codes meant
+    /// matching `Conflict.name` against `KeyBinding.label` — a
+    /// binding with no label falls back to its combo string and
+    /// was never ringed, and the match ran across every layer
+    /// while conflicts are per layer.
+    ///
+    /// It also answers only the `.otherBinding` case on purpose:
+    /// a clash with a macOS shortcut is what the dashed
+    /// `keyReserved` ring says, and drawing it red would tell the
+    /// user their own two bindings collide when they do not.
+    static func collisions(
+        in layers: [KeyLayer],
+        scope: Scope
+    ) -> Set<UInt32> {
+        var out: Set<UInt32> = []
+        for layer in layers {
+            var seen: Set<KeyCombo> = []
+            for binding in layer.bindings {
+                guard let combo = KeyCombo.parse(binding.combo)
+                else { continue }
+                let asLayer = ModifierLayer(
+                    modifiers: combo.modifiers
+                )
+                switch scope {
+                case .all: break
+                case .one(let only):
+                    guard asLayer == only else { continue }
+                }
+                if !seen.insert(combo).inserted {
+                    out.insert(combo.keyCode)
+                }
+            }
+        }
+        return out
     }
 }

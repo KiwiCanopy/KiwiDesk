@@ -60,7 +60,6 @@ struct KeyboardMatrixTests {
     func isoAddsItsOwnKey() {
         let ansi = KeyboardMatrix.drawnCodes(for: .ansi)
         let iso = KeyboardMatrix.drawnCodes(for: .iso)
-        // 10 = kVK_ISO_Section, beside the left shift.
         #expect(!ansi.contains(10))
         #expect(iso.contains(10))
         #expect(iso.count == ansi.count + 1)
@@ -78,10 +77,22 @@ struct KeyboardMatrixTests {
         }
     }
 
-    @Test("Every drawn code is one the app can bind")
-    func drawnCodesAreRealKeys() {
+    /// BOTH boards, which is the point: the ISO board draws code
+    /// 10, and while `KeyCombo.keyCodes` had no entry for it that
+    /// key rendered as "free" on every ISO keyboard while being
+    /// unbindable — `parse` could never produce it. A key the
+    /// board invites you to bind must be one the app can bind.
+    @Test(
+        "Every drawn code is one the app can bind",
+        arguments: [
+            KeyboardMatrix.PhysicalType.ansi, .iso, .jis,
+        ]
+    )
+    func drawnCodesAreRealKeys(
+        type: KeyboardMatrix.PhysicalType
+    ) {
         let bindable = Set(KeyCombo.keyCodes.values)
-        let drawn = KeyboardMatrix.drawnCodes(for: .ansi)
+        let drawn = KeyboardMatrix.drawnCodes(for: type)
         #expect(drawn.subtracting(bindable).isEmpty)
     }
 

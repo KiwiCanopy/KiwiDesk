@@ -66,15 +66,18 @@ extension SettingsTheme {
     /// constant — which is also why this stays ONE number rather
     /// than becoming per-area.
     ///
-    /// The prototype drew every panel at 392, and four of the
-    /// five previews are happy there. Pass 5's keyboard is not:
-    /// it is the first panel content with an intrinsic aspect
-    /// ratio, and 392 squeezed a 15-unit board to a 19 pt key
-    /// unit — under the 26 pt the caps stand, so the board read
-    /// as a squashed picture of a keyboard rather than a small
-    /// one (owner on device, 2026-08-10). 492 is that back-solved
-    /// rather than felt: `15·26 + 14·3 + 2·8 + 2·22`.
-    static let panelWidth: CGFloat = 492
+    /// It went to 492 for a day, back-solved from pass 5's
+    /// keyboard board so its keys came out square. That was
+    /// wrong while the responsive pass is unbuilt: the shell's
+    /// hard minimum is 720 (`SettingsView`), and 720 − 492 left
+    /// the content column at 227 against a fixed 210 pt
+    /// `SettingsMetrics.labelColumn` — every offering area
+    /// shipping rows with almost no room for their controls at a
+    /// supported window size. The board scales to whatever width
+    /// it is given, so IT yields; a wider panel is the
+    /// responsive pass's to grant, together with the breakpoint
+    /// that drops the panel before the content column starves.
+    static let panelWidth: CGFloat = 392
 
     /// The content column's ceiling (owner 2026-08-10): the
     /// prototype's widest content column measures ~970 pt at

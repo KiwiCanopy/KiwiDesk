@@ -7,9 +7,9 @@ import SwiftUI
 /// already claimed and under which modifier combinations.
 ///
 /// The chip row is the state everything else derives from: the
-/// board stripes, the stripe legend and the count sentence all
-/// read the same selection, through `KeyboardCensus`, so the
-/// sentence cannot disagree with the picture above it.
+/// board and the count sentence both read the same scope through
+/// `KeyboardCensus`, so the sentence cannot disagree with the
+/// picture above it.
 struct KeyboardPreviewPanel: View {
     @ObservedObject var model: SettingsModel
 
@@ -18,14 +18,11 @@ struct KeyboardPreviewPanel: View {
     /// starting empty would open on a board that answers nothing.
     /// Which combination the board is showing, or all of them.
     /// Opens on `.all` — the only answer that stays true however
-    /// many combinations the draft has.
+    /// many combinations the draft has, since a board narrowed to
+    /// a subset reads as the total under this panel's heading.
     @State private var scope: KeyboardCensus.Scope = .all
 
-    /// Every combination the draft uses. All of them get a chip;
-    /// only `KeyboardStripePalette.capacity` of them can stripe
-    /// at once, because that is how many colours hold the
-    /// colour-vision separation floor against each other and
-    /// against the key they sit on.
+    /// Every combination the draft uses. Each gets a chip.
     private var layers: [KeyboardCensus.ModifierLayer] {
         KeyboardCensus.layers(in: model.config.layers)
     }
@@ -62,7 +59,7 @@ struct KeyboardPreviewPanel: View {
                 type: KeyboardMatrix.PhysicalType.current(),
                 claims: claims,
                 scope: liveScope,
-                conflicted: conflictedCodes
+                conflicted: collisions
             )
             fillLegend
             tallySentence
@@ -81,7 +78,7 @@ struct KeyboardPreviewPanel: View {
     // MARK: - Chips
 
     private var chips: some View {
-        FlowRow(spacing: 6) {
+        FlowLayout(spacing: 6) {
             ScopeChip(
                 label: L("keyboard.scope.all", "All"),
                 isOn: liveScope == .all
@@ -107,7 +104,7 @@ struct KeyboardPreviewPanel: View {
     /// caption rule's failure in miniature — a legend may not
     /// point at a mark the frame does not draw.
     private var fillLegend: some View {
-        FlowRow(spacing: 12) {
+        FlowLayout(spacing: 12) {
             swatch(
                 SettingsTheme.accent,
                 L("keyboard.legend.bound", "bound")
@@ -116,13 +113,18 @@ struct KeyboardPreviewPanel: View {
                 SettingsTheme.keyFree,
                 L("keyboard.legend.free", "free")
             )
+            if liveScope != .all {
+                // `.all` never yields `.cantBind` (macOS reserves
+                // a key UNDER a modifier), so naming the mark
+                // there would point at one the board cannot draw.
+                lineSwatch(
+                    SettingsTheme.keyReserved,
+                    dashed: true,
+                    L("keyboard.legend.blocked", "macOS owns it")
+                )
+            }
             lineSwatch(
-                SettingsTheme.keyReserved,
-                dashed: true,
-                L("keyboard.legend.blocked", "macOS owns it")
-            )
-            lineSwatch(
-                SettingsTheme.danger,
+                SettingsTheme.keyConflict,
                 dashed: false,
                 L("keyboard.legend.conflict", "conflict")
             )
@@ -180,12 +182,12 @@ struct KeyboardPreviewPanel: View {
     // MARK: - Sentence and layout row
 
     private var tallySentence: some View {
-        let tally = KeyboardCensus.tally(claims: claims)
+        let taken = KeyboardCensus.takenKeyCount(claims: claims)
         return Text(
             L(
                 "keyboard.tally",
                 "%1$d keys taken.",
-                tally.keys
+                taken
             )
         )
         .font(.caption)
@@ -197,32 +199,46 @@ struct KeyboardPreviewPanel: View {
     /// binds by physical position and stores no layout, so this
     /// is a reading of the machine, which is what "from macOS"
     /// tells the user.
+    ///
+    /// ONE localized frame with the value at `%1$@`, rendered
+    /// through `SentenceFrame` — not `Text` · chip · `Text`.
+    /// Sibling views stitched around a value is the same defect
+    /// as `+`-concatenating fragments: the chip could only ever
+    /// land in the middle, and no catalog could move it (gui.md
+    /// ▸ Strings, the `CrossReferenceRow` case).
     private var layoutRow: some View {
-        HStack(spacing: 6) {
-            Text(L("keyboard.layout", "Layout"))
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
-            Text(
-                L(
-                    "keyboard.layout.value",
-                    "%1$@ · %2$@",
-                    KeyboardMatrix.PhysicalType.current().label,
-                    KeyboardInputSource.localizedName()
-                        ?? L("keyboard.layout.unknown", "Unknown")
-                )
-            )
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(SettingsTheme.ink)
-            .padding(.horizontal, 7)
-            .padding(.vertical, 3)
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(SettingsTheme.card)
-            )
-            Text(L("keyboard.layout.source", "from macOS"))
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
+        // Spacing 0: the frame's own literals carry it. A
+        // per-segment gap merely double-spaces English and is
+        // wrong outright wherever the literal after a slot opens
+        // with a particle that must hug the noun before it.
+        HStack(spacing: 0) {
+            ForEach(
+                SentenceFrame(
+                    L(
+                        "keyboard.layout.sentence",
+                        "Layout %1$@ from macOS"
+                    )
+                ).segments
+            ) { segment in
+                switch segment.slot {
+                case .text(let words):
+                    Text(words)
+                        .foregroundStyle(SettingsTheme.ink3)
+                case .argument:
+                    Text(layoutName)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(SettingsTheme.ink)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(SettingsTheme.card)
+                        )
+                }
+            }
+            Spacer(minLength: 0)
         }
+        .font(.caption)
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
@@ -231,23 +247,26 @@ struct KeyboardPreviewPanel: View {
         )
     }
 
+    private var layoutName: String {
+        L(
+            "keyboard.layout.value",
+            "%1$@ · %2$@",
+            KeyboardMatrix.PhysicalType.current().label,
+            KeyboardInputSource.localizedName()
+                ?? L("keyboard.layout.unknown", "Unknown")
+        )
+    }
+
     // MARK: - Derived
 
-    /// Conflicts are per layer and never across them, so this is
-    /// the set of codes the existing detector already reports —
-    /// the panel marks them, it does not re-decide them.
-    private var conflictedCodes: Set<UInt32> {
-        let names = Set(
-            KeybindingConflicts
-                .conflicts(in: model.config.layers)
-                .map(\.name)
-        )
-        guard !names.isEmpty else { return [] }
-        return Set(
-            model.config.layers
-                .flatMap(\.bindings)
-                .filter { names.contains($0.label) }
-                .compactMap { KeyCombo.parse($0.combo)?.keyCode }
+    /// The red ring's keys: two bindings in one layer claiming
+    /// the same combo. A clash with a macOS shortcut is NOT one
+    /// of these — the dashed ring says that, and saying it in red
+    /// would blame the user's own bindings for it.
+    private var collisions: Set<UInt32> {
+        KeyboardCensus.collisions(
+            in: model.config.layers,
+            scope: liveScope
         )
     }
 

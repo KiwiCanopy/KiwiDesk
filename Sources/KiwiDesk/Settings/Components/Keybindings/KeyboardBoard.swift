@@ -1,9 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The drawn keyboard. One board for the whole selection, never
-/// one per layer — a key claimed twice carries two stripes, which
-/// is what keeps a collision legible without a second picture.
+/// The drawn keyboard: one board, showing one scope at a time.
 struct KeyboardBoard: View {
     let type: KeyboardMatrix.PhysicalType
     let claims: [UInt32: [KeyboardCensus.ModifierLayer]]
@@ -49,29 +47,48 @@ struct KeyboardBoard: View {
     private static let gap: CGFloat = 3
     private static let padding: CGFloat = 8
 
-    /// ONE unit governs both axes. The width was unit-derived
-    /// and the height was a hardcoded 26, so the board's aspect
-    /// ratio was a function of the panel width — the single
-    /// thing a unit system exists to make invariant. At 392 that
-    /// drew a 15u × 5-row keyboard at 2.2:1 instead of ~3:1, and
-    /// what the eye reported was not "small" but "squashed".
+    /// ONE unit governs both axes, and it is DERIVED from the
+    /// column the board is given rather than pinned. The width
+    /// was unit-derived while the height was a hardcoded 26, so
+    /// the board's aspect ratio was a function of the panel
+    /// width — the single thing a unit system exists to make
+    /// invariant, and what the eye read as "squashed".
+    ///
+    /// Deriving it from `panelWidth` rather than from a
+    /// `GeometryReader` is deliberate: the height has to be known
+    /// before the body is proposed, and the panel's width is a
+    /// constant by design. A board asked to render in some other
+    /// column would need the reader; nothing asks.
+    static func unit(in width: CGFloat) -> CGFloat {
+        let available = width - padding * 2
+        return (available - gap * (unitsPerRow - 1))
+            / unitsPerRow
+    }
+
+    /// Every row of both boards totals this — asserted by
+    /// `KeyboardMatrixTests.rowsKeepOneWidth`.
+    private static let unitsPerRow: CGFloat = 15
+
     private var boardHeight: CGFloat {
         let rows = CGFloat(KeyboardMatrix.rows(for: type).count)
-        return rows * Self.capUnit + (rows - 1) * Self.gap
+        let capUnit = Self.unit(
+            in: SettingsTheme.panelWidth - Self.columnInset
+        )
+        return rows * capUnit + (rows - 1) * Self.gap
             + Self.padding * 2
     }
 
-    /// A letter key is `units: 1` wide in the matrix, so it is
-    /// one unit tall too. Pinned rather than measured because the
-    /// height has to be known before the width is proposed;
-    /// `panelWidth` is back-solved from it.
-    static let capUnit: CGFloat = 26
+    /// The panel's own horizontal padding, which the board never
+    /// sees — `SettingsDetailPanel` applies it outside.
+    private static let columnInset: CGFloat = 44
 
     @ViewBuilder
     private func cap(
         _ key: KeyboardMatrix.Key,
         unit: CGFloat
     ) -> some View {
+        // A letter key is `units: 1` in the matrix, so it is one
+        // unit tall as well as one wide.
         let width =
             unit * key.units
             + Self.gap * (key.units - 1)
@@ -82,7 +99,7 @@ struct KeyboardBoard: View {
                 ?? false,
             legend: key.legend
         )
-        .frame(width: max(width, 0), height: Self.capUnit)
+        .frame(width: max(width, 0), height: unit)
     }
 
     private func state(
@@ -98,17 +115,14 @@ struct KeyboardBoard: View {
 
 }
 
-/// One key. Draws its state as a fill and its claims as stripes
-/// along the bottom edge, with a conflict ringing the STRIPE —
-/// which is what names the offending modifier (owner,
-/// 2026-08-10).
+/// One key. The FILL says what the user's config has done with
+/// it — bound or free — and a RING warns about it: dashed where
+/// macOS already owns the key under the shown modifier, solid
+/// where two of the user's own bindings collide.
 ///
-/// The ring is drawn AROUND the stripe, not inside it. A stroke
-/// inside a 3 pt capsule leaves no interior, so it reads as a
-/// solid recolour and erases the very colour the stripe carries;
-/// ringing the whole key instead says a conflict is here but not
-/// which of two modifiers owns it. Outset by 2 pt, the stripe
-/// keeps its colour and still gains a mark.
+/// Two channels rather than one fill carrying three meanings,
+/// which is what let "can't bind" stop being a near-black hole
+/// on a key that is free under every other modifier.
 struct KeyCap: View {
     let code: UInt32?
     let state: KeyboardCensus.KeyState
@@ -143,7 +157,7 @@ struct KeyCap: View {
     @ViewBuilder private var border: some View {
         if isConflicted {
             RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(SettingsTheme.danger, lineWidth: 2)
+                .strokeBorder(SettingsTheme.keyConflict, lineWidth: 2)
         } else if state == .cantBind {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(

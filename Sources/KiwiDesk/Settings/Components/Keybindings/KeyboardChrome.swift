@@ -2,10 +2,6 @@ import Carbon.HIToolbox
 import KiwiDeskCore
 import SwiftUI
 
-/// One modifier-combination chip. Selected chips drive the board,
-/// the stripe legend and the count sentence; an unselected one
-/// shows its stripe colour greyed rather than hidden, so the row
-/// reads as a set of switches and not as a shrinking list.
 /// One scope chip: "All", or one modifier combination. Single
 /// select — the board shows one thing at a time, which is what
 /// let the stripe palette (and its colour-vision ceiling) go.
@@ -37,35 +33,6 @@ struct ScopeChip: View {
         .buttonStyle(.plain)
         .accessibilityLabel(label)
         .accessibilityAddTraits(isOn ? [.isSelected] : [])
-    }
-}
-
-/// How a key's stripes divide it: one claim fills the width, and
-/// each further claim splits it, up to three abreast, then wraps
-/// to another line (owner, 2026-08-10). Wrapping rather than
-/// thinning, because width is the channel saying how many claims
-/// a key carries and a stripe too fine to see reads as an
-/// unclaimed key.
-///
-/// Kept off `KeyCap` deliberately: a `View`'s statics are
-/// main-actor isolated, so a suite reading one off the main actor
-/// traps the runner instead of failing an expectation.
-enum KeyboardStripeLayout {
-    static let perRow = 3
-
-    /// The row shape as counts — the wrap rule, assertable
-    /// without building a view (`LayoutSchematicCountTests`'
-    /// lesson: a scan for the input is satisfied by a renderer
-    /// that draws a constant, so the arithmetic is asserted
-    /// directly).
-    static func rowShape(
-        count: Int,
-        perRow: Int = KeyboardStripeLayout.perRow
-    ) -> [Int] {
-        guard count > 0, perRow > 0 else { return [] }
-        return stride(from: 0, to: count, by: perRow).map {
-            min(perRow, count - $0)
-        }
     }
 }
 
@@ -157,74 +124,6 @@ enum KeyboardKeyLabel {
         }
         return !scalar.properties.isDefaultIgnorableCodePoint
             && scalar.value >= 0x20
-    }
-}
-
-/// A row that wraps. The chip row and the legends are lists of
-/// unknown length in a fixed-width column, and an `HStack` would
-/// push them off the panel's edge rather than wrapping.
-struct FlowRow: Layout {
-    var spacing: CGFloat = 6
-
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) -> CGSize {
-        let width = proposal.width ?? .infinity
-        let rows = layout(subviews, width: width)
-        let height =
-            rows.reduce(0) { $0 + $1.height }
-            + spacing * CGFloat(max(rows.count - 1, 0))
-        return CGSize(width: proposal.width ?? 0, height: height)
-    }
-
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) {
-        var y = bounds.minY
-        for row in layout(subviews, width: bounds.width) {
-            var x = bounds.minX
-            for index in row.indices {
-                let size = subviews[index].sizeThatFits(.unspecified)
-                subviews[index].place(
-                    at: CGPoint(x: x, y: y),
-                    proposal: ProposedViewSize(size)
-                )
-                x += size.width + spacing
-            }
-            y += row.height + spacing
-        }
-    }
-
-    private struct Row {
-        var indices: [Int] = []
-        var height: CGFloat = 0
-    }
-
-    private func layout(
-        _ subviews: Subviews,
-        width: CGFloat
-    ) -> [Row] {
-        var rows: [Row] = []
-        var row = Row()
-        var x: CGFloat = 0
-        for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
-            if !row.indices.isEmpty, x + size.width > width {
-                rows.append(row)
-                row = Row()
-                x = 0
-            }
-            row.indices.append(index)
-            row.height = max(row.height, size.height)
-            x += size.width + spacing
-        }
-        if !row.indices.isEmpty { rows.append(row) }
-        return rows
     }
 }
 

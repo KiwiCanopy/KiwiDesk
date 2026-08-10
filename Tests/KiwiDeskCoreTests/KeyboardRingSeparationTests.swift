@@ -1,55 +1,122 @@
+import Foundation
 import Testing
 
 /// The keyboard board's two ring warnings, measured through the
 /// same protanopia transform every other palette decision uses.
 ///
-/// The hexes mirror `SettingsTheme` (the colour-vision maths
-/// lives in this target and cannot see the GUI's types);
-/// `SettingsThemeTokenTests` pins the tokens themselves, so a
-/// change there without a change here reds one of the two.
+/// **The hexes are PARSED from `SettingsTheme.swift`**, never
+/// restated. An earlier cut hand-wrote four values, two of which
+/// matched no shipped token after the board moved onto `accent`
+/// and a dedicated conflict red — so the suite was green while
+/// measuring a pair the app does not draw, and the ruling in
+/// `docs/design-decisions.md` rested on it.
+/// `ModeGatedFrameSeparationTests` parses for exactly this
+/// reason; this is the same walk.
 ///
-/// **Each ring is measured against the ONE fill it can sit on**,
-/// which is what makes both possible at all. A reserved ring
-/// only ever rings a FREE key — a key the user has bound reads
-/// bound whatever macOS thinks — and a conflict ring only ever
-/// rings a BOUND one, since a conflict is two bindings on the
-/// same key. Measuring each against both grounds would reject
-/// colours that are never drawn on the ground that rejects them.
+/// **Each ring is measured against the ONE fill it can sit on.**
+/// A reserved ring only ever rings a FREE key — a key the user
+/// has bound reads bound whatever macOS thinks — and a conflict
+/// ring only ever rings a BOUND one, since a collision is two of
+/// the user's bindings on one key. `KeyboardCollisionTests` holds
+/// the scoping that makes the second half true.
 @Suite("Keyboard ring separation")
 struct KeyboardRingSeparationTests {
-    private let bound = "#B6D95F"
-    private let free = "#37463B"
-    private let reserved = "#E0A34A"
-    private let conflict = "#E87F72"
 
     @Test("The reserved ring reads on the free key it rings")
     func reservedRingReadsOnFree() throws {
-        let separation = try #require(
-            ColorVision.separation(reserved, free)
-        )
-        #expect(separation >= ColorVision.separationFloor)
+        let source = try themeSource()
+        let free = try token("keyFree", in: source)
+        let reserved = try token("keyReserved", in: source)
+        for (ring, fill) in [
+            (reserved.light, free.light), (reserved.dark, free.dark),
+        ] {
+            let separation = try #require(
+                ColorVision.separation(ring, fill)
+            )
+            #expect(
+                separation >= ColorVision.separationFloor,
+                Comment(rawValue: "\(ring) on \(fill): \(separation)")
+            )
+        }
     }
 
+    /// Against `accent`, which is what the board fills a bound
+    /// key with — the board declares no green of its own.
     @Test("The conflict ring reads on the bound key it rings")
     func conflictRingReadsOnBound() throws {
-        let separation = try #require(
-            ColorVision.separation(conflict, bound)
-        )
-        #expect(separation >= ColorVision.separationFloor)
+        let source = try themeSource()
+        let bound = try token("accent", in: source)
+        let conflict = try token("keyConflict", in: source)
+        for (ring, fill) in [
+            (conflict.light, bound.light), (conflict.dark, bound.dark),
+        ] {
+            let separation = try #require(
+                ColorVision.separation(ring, fill)
+            )
+            #expect(
+                separation >= ColorVision.separationFloor,
+                Comment(rawValue: "\(ring) on \(fill): \(separation)")
+            )
+        }
     }
 
-    /// The pairing a hand-rolled CIE-Lab proxy rejected during
-    /// the pass, at "42.4" against a floor of 60 — on THIS
-    /// metric it is 100.2 and always was. Kept as a standing
-    /// reminder that `ColorVision` is the measure and a
-    /// re-derivation of it is not: the wrong yardstick cost a
-    /// whole redesign of the key fills before anyone ran the
-    /// real one.
-    @Test("The board's own metric is the one that decides")
-    func theRepoMetricIsTheAuthority() throws {
+    /// `SettingsTheme.danger` was the conflict ring for a day.
+    /// It varies by appearance, and its DARK value is what fails
+    /// — on a board pinned in both modes precisely so a picture
+    /// of a keyboard cannot change with the window. Kept as the
+    /// statement of what the dedicated token buys.
+    @Test("The appearance-varying danger red would not clear it")
+    func dangerWouldNotClearTheFloor() throws {
+        let source = try themeSource()
+        let bound = try token("accent", in: source)
+        let danger = try token("danger", in: source)
         let separation = try #require(
-            ColorVision.separation(conflict, bound)
+            ColorVision.separation(danger.dark, bound.dark)
         )
-        #expect(separation > 90)
+        #expect(separation < ColorVision.separationFloor)
+    }
+
+    private func themeSource() throws -> String {
+        var url = URL(fileURLWithPath: #filePath)
+        for _ in 0..<3 { url.deleteLastPathComponent() }
+        let source = try String(
+            contentsOf: url.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsTheme.swift"
+            ),
+            encoding: .utf8
+        )
+        try #require(!source.isEmpty)
+        return source
+    }
+
+    /// `token(light: 0xAA_BB_CC, dark: …)` → the two hexes.
+    private func token(
+        _ name: String,
+        in source: String
+    ) throws -> (light: String, dark: String) {
+        let squashed =
+            source
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+        let needle = "let\(name)=token(light:0x"
+        let start = try #require(
+            squashed.range(of: needle),
+            Comment(rawValue: name)
+        )
+        let rest = squashed[start.upperBound...]
+        let parts = rest.split(separator: ",", maxSplits: 1)
+        let light = String(parts[0])
+            .replacingOccurrences(of: "_", with: "")
+        let darkPart = try #require(
+            String(parts[1]).range(of: "dark:0x").map {
+                String(parts[1])[$0.upperBound...]
+            }
+        )
+        let dark =
+            darkPart
+            .prefix { $0.isHexDigit || $0 == "_" }
+            .replacingOccurrences(of: "_", with: "")
+        try #require(light.count == 6 && dark.count == 6)
+        return ("#" + light, "#" + dark)
     }
 }

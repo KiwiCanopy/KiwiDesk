@@ -82,6 +82,12 @@ struct SettingsThemeTokenTests {
             SettingsTheme.keyFree
         ),
         Pin(
+            "keyConflict",
+            0xB0_3A_2A,
+            0xB0_3A_2A,
+            SettingsTheme.keyConflict
+        ),
+        Pin(
             "keyReserved",
             0xE0_A3_4A,
             0xE0_A3_4A,

@@ -80,7 +80,9 @@ struct KeyboardCensusTests {
             selected: [plain]
         )
         #expect(claims[38] == [plain])
-        #expect(KeyboardCensus.tally(claims: claims).keys == 1)
+        #expect(
+            KeyboardCensus.takenKeyCount(claims: claims) == 1
+        )
     }
 
     /// The combinations here are chosen so the two candidate
@@ -147,9 +149,9 @@ struct KeyboardCensusTests {
             in: layers,
             selected: selected
         )
-        let tally = KeyboardCensus.tally(claims: claims)
-        #expect(tally.keys == 2)
-        #expect(tally.modifiers == 2)
+        #expect(
+            KeyboardCensus.takenKeyCount(claims: claims) == 2
+        )
     }
 
     @Test("The tally follows the selection down to nothing")
@@ -158,9 +160,9 @@ struct KeyboardCensusTests {
             in: [layer(["alt+j"])],
             selected: []
         )
-        let tally = KeyboardCensus.tally(claims: claims)
-        #expect(tally.keys == 0)
-        #expect(tally.modifiers == 0)
+        #expect(
+            KeyboardCensus.takenKeyCount(claims: claims) == 0
+        )
     }
 
     @Test("Reserved is answered under the selection, not blind")
@@ -218,43 +220,6 @@ struct KeyboardCensusTests {
         )
     }
 
-    /// The frame's own channel: the board says who has TAKEN a
-    /// key (stripes) and who CANNOT have it (frame) as two
-    /// independent facts. A Bool collapsed the second, so a key
-    /// macOS owns under ⌘ and leaves free under ⌃⌥ read as
-    /// simply unavailable (owner, 2026-08-10).
-    @Test("Blockers name WHICH modifier macOS reserved the key")
-    func blockersNameTheOffendingModifier() {
-        let command = KeyboardCensus.ModifierLayer(
-            modifiers: .command
-        )
-        let ctrlOpt = KeyboardCensus.ModifierLayer(
-            modifiers: [.control, .option]
-        )
-        // Space (49) is Spotlight under ⌘, free under ⌃⌥.
-        let blockers = KeyboardCensus.blockers(
-            of: 49,
-            under: [command, ctrlOpt]
-        )
-        #expect(blockers == [command])
-    }
-
-    @Test("A key nothing reserves has no frame")
-    func unreservedKeyHasNoBlockers() {
-        let ctrlOpt = KeyboardCensus.ModifierLayer(
-            modifiers: [.control, .option]
-        )
-        #expect(
-            KeyboardCensus.blockers(of: 49, under: [ctrlOpt])
-                .isEmpty
-        )
-    }
-
-    @Test("Blockers follow the selection, like the stripes")
-    func blockersFollowTheSelection() {
-        #expect(KeyboardCensus.blockers(of: 49, under: []).isEmpty)
-    }
-
     @Test("An unclaimed, unreserved key reads free")
     func freeIsTheRemainder() {
         let ctrlOpt = KeyboardCensus.ModifierLayer(
@@ -266,6 +231,99 @@ struct KeyboardCensusTests {
                 claims: [:],
                 scope: .one(ctrlOpt)
             ) == .free
+        )
+    }
+}
+
+/// The red ring's own fold: two bindings in ONE layer claiming
+/// the same combo. It replaced a join through display NAMES —
+/// `Conflict.name` matched against `KeyBinding.label` — which
+/// never ringed an unlabelled binding and matched across layers,
+/// though conflicts are per layer.
+@Suite("Keyboard preview collisions")
+struct KeyboardCollisionTests {
+    private func layer(
+        _ combos: [String],
+        name: String = KeyLayer.defaultName,
+        labels: [String]? = nil
+    ) -> KeyLayer {
+        KeyLayer(
+            name: name,
+            bindings: combos.enumerated().map { index, combo in
+                KeyBinding(
+                    combo: combo,
+                    lua: "focus_dir('left')",
+                    label: labels?[index] ?? "row \(index)"
+                )
+            }
+        )
+    }
+
+    @Test("Two bindings on one combo in one layer collide")
+    func sameLayerDuplicateCollides() {
+        let codes = KeyboardCensus.collisions(
+            in: [layer(["ctrl+alt+j", "ctrl+alt+j"])],
+            scope: .all
+        )
+        #expect(codes == [38])
+    }
+
+    /// The defect the name-join shipped: a binding with no label
+    /// took `Conflict.name`'s combo fallback, so the filter could
+    /// never match it and the key went unringed.
+    @Test("An unlabelled binding still collides")
+    func unlabelledBindingStillCollides() {
+        let codes = KeyboardCensus.collisions(
+            in: [
+                layer(
+                    ["ctrl+alt+j", "ctrl+alt+j"],
+                    labels: ["", ""]
+                )
+            ],
+            scope: .all
+        )
+        #expect(codes == [38])
+    }
+
+    /// Conflicts are per layer — `KeybindingConflicts` never
+    /// compares across them, so neither may this.
+    @Test("The same combo in two layers is not a collision")
+    func acrossLayersIsNotACollision() {
+        let codes = KeyboardCensus.collisions(
+            in: [
+                layer(["ctrl+alt+j"]),
+                layer(["ctrl+alt+j"], name: "media"),
+            ],
+            scope: .all
+        )
+        #expect(codes.isEmpty)
+    }
+
+    /// Scope-blind was the other half of the defect: a ring drawn
+    /// on a key the current scope shows as FREE puts `danger` on
+    /// `keyFree`, a pair the ring's colour was never measured
+    /// against.
+    @Test("A collision outside the shown scope is not ringed")
+    func collisionsFollowTheScope() {
+        let layers = [layer(["cmd+j", "cmd+j"])]
+        let ctrlOpt = KeyboardCensus.ModifierLayer(
+            modifiers: [.control, .option]
+        )
+        #expect(
+            KeyboardCensus.collisions(
+                in: layers,
+                scope: .one(ctrlOpt)
+            ).isEmpty
+        )
+        #expect(
+            !KeyboardCensus.collisions(
+                in: layers,
+                scope: .one(
+                    KeyboardCensus.ModifierLayer(
+                        modifiers: .command
+                    )
+                )
+            ).isEmpty
         )
     }
 }
