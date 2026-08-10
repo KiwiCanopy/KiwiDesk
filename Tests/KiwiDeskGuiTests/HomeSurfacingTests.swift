@@ -71,6 +71,24 @@ struct HomeSurfacingTests {
             // grey-don't-hide's one exempted surface here.
             "ifhasWork{pill"
         ],
+        "Settings/SettingsFooter+Unsaved.swift": [
+            // The count line is a BUTTON only while the draft
+            // has attributed rows — at zero there is no list
+            // to open, so it stays plain text — and its N is
+            // the ROW COUNT of the very list the popover
+            // renders, one source, so sentence and list
+            // cannot disagree (owner 2026-08-10: the settings
+            // count said "1" over a three-row family).
+            "letrows=SettingsDiffRowSource.rows(for:model)",
+            "if!rows.isEmpty{countButton(count:rows.count)",
+            // The button's popover renders the one diff-rows
+            // renderer (turn 9's third view of the draft, moved
+            // from the header chip 2026-08-10) — needle through
+            // the popover body so a count that stops opening
+            // the list reds.
+            "SettingsDiffRowsView("
+                + "rows:SettingsDiffRowSource.rows(for:model)",
+        ],
         "Settings/SettingsView+Reveal.swift": [
             // A search hit into a Power-User-only area switches
             // the mode BEFORE landing — one needle through the
@@ -91,15 +109,6 @@ struct HomeSurfacingTests {
             // The pushed form draws the back chip, the Home
             // form the identity.
             "ifletdestination{backChipText(destination.title)",
-            // The unsaved count surfaces only while the draft
-            // has changes.
-            "ifmodel.draftChangeCount>0{unsavedChip}",
-            // The chip is a BUTTON whose popover renders the
-            // one diff-rows renderer (turn 9's third view of
-            // the draft) — needle through the popover body so
-            // a chip that stops opening it reds.
-            "SettingsDiffRowsView("
-                + "rows:SettingsDiffRowSource.rows(for:model)",
             // The segment is the one EXPLICIT flip — the entry
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.

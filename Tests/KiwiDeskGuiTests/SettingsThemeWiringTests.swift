@@ -42,7 +42,7 @@ struct SettingsThemeWiringTests {
         "groupHeading": "HomeScreen.swift",
         "accent": "SettingsView.swift",
         "warningSurface": "PermissionPausedBanner.swift",
-        "warningInk": "SettingsHeaderBar.swift",
+        "warningInk": "SettingsHeaderBar+Status.swift",
         "danger": "KeyRecorderRejectionRow.swift",
         "panel": "SettingsDetailPanel.swift",
         "savePill": "SettingsFooter.swift",

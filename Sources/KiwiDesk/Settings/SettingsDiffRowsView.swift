@@ -36,9 +36,18 @@ struct SettingsDiffRowsView: View {
             }
             .font(.callout)
             .padding(.vertical, 3)
+            .padding(.horizontal, 6)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // The search rows' hover treatment (owner 2026-08-10):
+        // a jump row is a full-row button whose list context is
+        // its rest affordance, and without the wash there is
+        // nothing saying which row the pointer is on. The
+        // shared `Color.primary` chip is right here — both
+        // mounts (popover, panel) sit on mode-varying surfaces.
+        .rowHoverHighlight()
+        .padding(.horizontal, -6)
         .accessibilityElement(children: .combine)
     }
 

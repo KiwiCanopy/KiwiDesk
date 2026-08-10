@@ -71,9 +71,11 @@ struct SettingsModeNavigationTests {
         )
     }
 
-    /// The count the header chip shows rides the same baselines
-    /// as the dirty flag, so the two can never disagree — and
-    /// it counts SETTINGS, not leaves.
+    /// The model's count rides the same baselines as the dirty
+    /// flag, so the two can never disagree — and it counts
+    /// SETTINGS, not leaves. (The pill's shown N is the row
+    /// count of the popover's list, derived separately; this
+    /// count is the dirty-tracking one.)
     @Test("the draft count follows edits and reverts")
     func draftCountFollowsEdits() {
         let (model, _) = model()
@@ -92,8 +94,8 @@ struct SettingsModeNavigationTests {
 
     /// The reload path (revert, every save) must recompute the
     /// count, not just hand-set the flag — a bare
-    /// `isDirty = false` left the chip showing a stale count on
-    /// a clean draft (review 2026-08-04).
+    /// `isDirty = false` left the count surface showing a stale
+    /// number on a clean draft (review 2026-08-04).
     @Test("revert clears the count through the reload path")
     func revertClearsTheCount() {
         let (model, _) = model()

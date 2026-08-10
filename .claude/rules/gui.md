@@ -499,10 +499,15 @@ must keep:
   inherits whole.
 - The mode pick persists via `SettingsModePreference`
   (`UserDefaults`, absent = Simple, never `gui.json`); the
-  header's unsaved count comes from `SettingsDraftDiff`, whose
-  every-leaf attribution net (`SettingsDraftDiffTests`) is
-  what a new `GuiConfig` or `TilingSettings` field reds until
-  its census row exists.
+  save pill's unsaved count (the header carries none — the
+  pill is the draft's one narrator) comes from
+  `SettingsDraftDiff` via the popover's own row list, and that
+  diff's every-leaf attribution net (`SettingsDraftDiffTests`)
+  is what a new `GuiConfig` or `TilingSettings` field reds
+  until its census row exists. A surface stating an N beside
+  a visible list derives the N from that list's rows, never
+  from the settings count — a per-instance family made the
+  two disagree on sight (owner 2026-08-10).
 - **The mode flip's reveal has one entry point and two
   channels** (#760): only the header segment's explicit flip
   washes (`flipSettingsMode` — `ensureModeAdmits`' promotion

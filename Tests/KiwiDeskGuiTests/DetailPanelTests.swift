@@ -112,14 +112,17 @@ struct DetailPanelTests {
         // And the panel VIEW consults the filter — the helper
         // alone cannot see its own mount bypassing it with
         // `rows(for:)` directly (guard-prover, 2026-08-10).
-        // Keyed on the use site: the call takes arguments, the
-        // declaration takes parameters, so the needle's `(`
-        // followed by the source list matches only the call.
+        // Keyed on the use site: the needle runs from the one
+        // rows fetch through the filter call, so the listed
+        // rows, the heading's N and the elsewhere remainder
+        // all derive from the same filtered array (the count
+        // ruling, owner 2026-08-10).
         let source = try panelSource()
         #expect(
             source.contains(
-                "SettingsDiffRowSource.areaRows("
-                    + "SettingsDiffRowSource.rows(for:model)"
+                "letall=SettingsDiffRowSource.rows(for:model)"
+                    + "letrows=SettingsDiffRowSource.areaRows("
+                    + "all,in:destination)"
             ),
             Comment(
                 rawValue:

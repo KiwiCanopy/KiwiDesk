@@ -226,9 +226,9 @@ enum SettingsTheme {
         dark: 0x3A_2A_18
     )
 
-    /// Warning text and glyphs, including the unsaved chip's dot.
-    /// Darker on light so it holds 4.5:1 against
-    /// `warningSurface`.
+    /// Warning text and glyphs — the paused banner, the
+    /// header's divergence status row. Darker on light so it
+    /// holds 4.5:1 against `warningSurface`.
     static let warningInk = token(
         light: 0x9A_62_00,
         dark: 0xE0_A3_4A

@@ -870,7 +870,11 @@ zero.** Save and Revert live in a dark pill floating over the
 content column — the unsaved count with the edit target's name
 ("3 unsaved changes to Desk"), then **Revert**, **Save a
 copy…** and **Save** — shown only while there is something to
-act on, and offset left of an open detail panel. Once the
+act on, and offset left of an open detail panel. The count line
+is the draft list's opener: while the draft has attributed
+rows, clicking it pops the old → new change list, each row a
+jump to the control that changed — the one such count in the
+window, the header deliberately carrying none. Once the
 draft is clean the pill disappears rather than greys: it is
 not an inapplicable control whose stored value greying would
 preserve, it is the narration of a draft, and with no draft it
