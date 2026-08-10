@@ -187,9 +187,10 @@ struct KeyboardPreviewPanel: View {
     /// grammatical number and be wrong at the others — "1 Tasten
     /// belegt", "0 touches attribuées". Putting the count last
     /// leaves nothing to agree with it. No terminal period for
-    /// the same reason it is not a sentence, and because a period
-    /// straight after a digit reads as a thousands separator in
-    /// six of the shipped locales.
+    /// the same reason it is not a sentence, and because after a
+    /// digit a period reads as a number separator in several of
+    /// the shipped locales (localization.md ▸ a frame
+    /// interpolating a count owns the argument).
     private var tallySentence: some View {
         let taken = KeyboardCensus.takenKeyCount(claims: claims)
         return Text(

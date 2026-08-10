@@ -196,8 +196,8 @@ lands.
 
 ## A translated label still has to fit, and still has to match
 
-Two obligations a translator meets while editing a catalog, which
-is why they are here rather than beside the views:
+Obligations a translator meets while editing a catalog, which is
+why they are here rather than beside the views:
 
 - **A destination label wants to be a short noun in every
   language** — it is a card title, a back-chip heading and a
@@ -222,20 +222,25 @@ is why they are here rather than beside the views:
   against an English 11–28 before an audit caught them, each
   losing exactly the clause that carried the setting's point.
 - **A frame interpolating a COUNT is authored so that nothing
-  has to agree with it.** A catalog value is one string with no
-  plural forms, so a locale that inflects around the numeral has
-  to pick a single grammatical number and is then wrong at every
-  other count — "1 Tasten belegt", "0 touches attribuées", and
-  the genitive plural `ru` shipped across the board in the #788
-  round. Put the count last behind a label ("Keys taken: %1$d"),
-  which is correct at every value in every locale, and author
-  the ENGLISH that way too: a translator handed a sentence
-  writes a sentence. Nothing guards this — a forced plural is
-  fluent, native and passes every predicate — which is why it
-  is stated here and why it has now cost two rounds. The same
-  string wants no terminal period: it is a label, and a period
-  straight after a digit reads as a thousands separator in six
-  of the shipped locales.
+  has to agree with it.** The app picks between at most two
+  values — a `.one` key and a plain one, the shape
+  `TRANSLATION_BRIEF.md` contracts — which serves English and
+  little else: Russian needs three. So a locale that inflects
+  around the numeral must pick a single grammatical number and
+  is then wrong at every other count, the way a German
+  "1 Tasten belegt" or a French "0 touches attribuées" would
+  be. #796's audit caught exactly that in `ru`, where the round
+  had forced genitive plural onto every numeral in two keys.
+  Put the count last behind a label ("Keys taken: %1$d"), which
+  is correct at every value in every locale, and author the
+  ENGLISH that way too: a translator handed a sentence writes a
+  sentence. Nothing registers a count frame the way
+  `WITHHELD_ARGUMENTS` registers a withheld one, so this is
+  stated rather than guarded — a forced plural is fluent,
+  native, and passes every predicate; register it there if you
+  build the guard. The same string wants no terminal period: it
+  is a label, and after a digit a period reads as a number
+  separator (de, es, it and pt-BR group thousands with it).
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own

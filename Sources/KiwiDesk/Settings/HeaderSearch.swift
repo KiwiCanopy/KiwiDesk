@@ -200,7 +200,7 @@ struct HeaderSearch: View {
     }
 
     /// Estimated content height: two-line rows at ~40 pt, the
-    /// Places caption when present, capped at 320 (the shipped
+    /// group caption when present, capped at 320 (the shipped
     /// max) — an estimate is safe because past the cap the list
     /// scrolls and under it a few points of slack vanish into
     /// the padding.
@@ -215,16 +215,17 @@ struct HeaderSearch: View {
     /// The group's caption (spec 11a): the user's own named
     /// things, below the settings rows.
     ///
-    /// Named by OWNERSHIP, not by location. "Places" was a
-    /// metaphor only English carries: the group holds a Space, a
-    /// Profile and an App rule, none of which is a location, and
-    /// the literal translation collided in half the catalogs —
-    /// fr "Emplacements" is already the tiling slot, zh 位置 is
+    /// Named by OWNERSHIP, not by location. A location word is a
+    /// metaphor only English carries here — the group holds a
+    /// Space, a Profile and an App rule — and the literal
+    /// translation collided outright in two catalogs: fr
+    /// "Emplacements" is already the tiling slot, zh 位置 is
     /// already the "Position" setting label on rows this very
     /// search indexes. "Item" was unavailable to translate into:
     /// it is a ruled noun for a bar entry
-    /// (config-vocabulary.md), and its Romance renderings collide
-    /// the same way.
+    /// (.claude/rules/config-vocabulary.md), and its Romance
+    /// renderings collide the same way. The wire keeps `place` —
+    /// in code the thing is a jump target.
     private var placesHeader: some View {
         Text(L("search.places", "Made by you"))
             .font(.caption2.weight(.semibold))

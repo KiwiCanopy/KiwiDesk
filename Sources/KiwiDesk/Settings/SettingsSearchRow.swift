@@ -184,10 +184,11 @@ struct SettingsSearchRow: View {
         if switchesMode {
             // The frame carries "mode" itself. On screen the name
             // gets that context from the capsule it sits in;
-            // VoiceOver has no capsule, so a bare name ends the
-            // sentence on a dangling adjective in every language
-            // this app ships — the mode name is adjectival in
-            // all ten catalogs, never a standalone noun phrase.
+            // VoiceOver has no capsule, so the frame has to
+            // supply the noun. Every catalog's own
+            // search.result_mode_ax places the name against its
+            // word for "mode" (de "%2$@-Modus", es "modo %2$@",
+            // ja "%2$@モード"); none leaves it standing alone.
             label = L(
                 "search.result_mode_ax",
                 "%1$@, %2$@ mode",
