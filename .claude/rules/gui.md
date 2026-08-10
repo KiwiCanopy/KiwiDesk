@@ -641,6 +641,13 @@ authoring rules apply here even though the catalogs live in Core:
   `NSViewRepresentable` reads on its own. `LinkedCaption` and
   `LinkedCaptionHitTests` are the worked example, and the first
   cut of it shipped none of the four.
+- A frame interpolating a **count** is authored so nothing has
+  to agree with it — put the number last behind a label ("Keys
+  taken: %1$d"), in the English too. The argument, and what the
+  app's two-form picking can and cannot express, is
+  [localization.md](localization.md) ▸ a frame interpolating a
+  COUNT; it is repeated here because that file never loads while
+  you are authoring a call site in this tree.
 - **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
   regenerated from real call sites; the other catalogs are
   translation-owned and edited only through `scripts/*-key(s)`.

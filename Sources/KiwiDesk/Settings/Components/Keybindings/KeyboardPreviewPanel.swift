@@ -181,12 +181,22 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Sentence and layout row
 
+    /// A label rather than a sentence ("Keys taken: 12", not "12
+    /// keys taken."), because one catalog string has no plural
+    /// forms: every inflected locale would have to pick a single
+    /// grammatical number and be wrong at the others — "1 Tasten
+    /// belegt", "0 touches attribuées". Putting the count last
+    /// leaves nothing to agree with it. No terminal period for
+    /// the same reason it is not a sentence, and because after a
+    /// digit a period reads as a number separator in several of
+    /// the shipped locales (localization.md ▸ a frame
+    /// interpolating a count owns the argument).
     private var tallySentence: some View {
         let taken = KeyboardCensus.takenKeyCount(claims: claims)
         return Text(
             L(
                 "keyboard.tally",
-                "%1$d keys taken.",
+                "Keys taken: %1$d",
                 taken
             )
         )
@@ -214,9 +224,15 @@ struct KeyboardPreviewPanel: View {
         HStack(spacing: 0) {
             ForEach(
                 SentenceFrame(
+                    // "Keyboard layout", never bare "Layout":
+                    // that word is this app's own tiling noun
+                    // (`destination.layout` is "Layout
+                    // Defaults"), and this sentence sits inside
+                    // Settings where both senses are one search
+                    // away from each other.
                     L(
                         "keyboard.layout.sentence",
-                        "Layout %1$@ from macOS"
+                        "Keyboard layout %1$@ from macOS"
                     )
                 ).segments
             ) { segment in

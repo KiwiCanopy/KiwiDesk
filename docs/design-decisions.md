@@ -1252,9 +1252,27 @@ one-per-destination cap existed to prevent, only data-driven and
 unbounded — and indexing *values* ("0.70" finding the space that
 overrides to it) is the same mistake through the back door. The
 things a user NAMES — spaces, profiles, palettes, app rules —
-are **Places** material: findable by name in a separate group,
-capped at five, one entry per object. (Palettes sit the group
-out today — the purity line below is why.)
+belong in the **Made by you** group: findable by name, capped at
+five, one entry per object. (Palettes sit the group out today —
+the purity line below is why.)
+
+**That group is named by ownership, not by location.** It holds
+a space, a profile and an app rule, and none of them is a
+location — so a location word makes every locale translate a
+metaphor only English carries, and the literal rendering
+*collides*: French's word for a tiling slot, Chinese's word for
+the "Position" setting label on rows this same search indexes,
+which would stand a group caption directly above result rows
+using that word for something else. "Items" is no way out
+either: `item` already names a bar entry in this app's
+vocabulary, and its Romance renderings collide the same way.
+What the group has in common is not where the things are but who
+made them, and that translates everywhere because it is a fact
+rather than a figure of speech. The **wire** name stays `place`
+(`search.places`, `SettingsSearchPlace`): in code the thing is a
+jump target, which is a place in the sense the caption could not
+use, and renaming the concept buys nothing a reader of the UI
+can see.
 
 **The match path is pure, and enrichment is a second phase.**
 Matching is a synchronous substring scan over rows built once
@@ -1268,7 +1286,7 @@ list paints, from the draft in memory. Nothing on either path
 touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
 violation; enrichment reads only the draft the shell hands it).
-That line is why palette names are absent from Places today:
+That line is why palette names are absent from the group today:
 `PaletteStore` is stateless and file-backed by design, so
 listing them would put a disk read on every keystroke.
 

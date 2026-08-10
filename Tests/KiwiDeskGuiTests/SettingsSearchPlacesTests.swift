@@ -4,7 +4,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Places group (#678 spec 11a) and the mode-switch notice:
+/// The "Made by you" group (#678 spec 11a, `place` in code) and
+/// the mode-switch notice:
 /// the user's own named things as capped results, and the
 /// one-line confirmation a Power-User pick leaves behind.
 @Suite("Settings search places", .serialized)

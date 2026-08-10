@@ -2,7 +2,8 @@ import KiwiDeskCore
 
 /// The search result model (#678 turn 11): one row per census
 /// setting from the static index, destination-title rows for
-/// area names, and a capped Places group for the user's own
+/// area names, and a capped "Made by you" group (`place` in
+/// code) for the user's own
 /// named things. Replaced `SidebarSearch`'s one-hit-per-
 /// destination cap — that cap existed because a result could
 /// not say WHICH row it meant; a per-setting index can, so a
@@ -40,7 +41,8 @@ enum SettingsSearchResult: Identifiable, Equatable {
     }
 }
 
-/// One entry in the Places group (spec 11a): a thing the user
+/// One entry in the "Made by you" group (spec 11a): a thing the
+/// user
 /// NAMED — a space, a profile, a palette, an app rule — findable
 /// by that name, one entry per object, landing on the area that
 /// owns it. Lua binding contents stay out (free text would swamp
@@ -111,7 +113,7 @@ struct SettingsSearchResults: Equatable {
 
 @MainActor
 enum SettingsSearch {
-    /// The Places group's cap (spec 11a): the group exists to
+    /// The "Made by you" group's cap (spec 11a): the group exists to
     /// jump to a thing you named, not to enumerate your config.
     static let placesCap = 5
 
