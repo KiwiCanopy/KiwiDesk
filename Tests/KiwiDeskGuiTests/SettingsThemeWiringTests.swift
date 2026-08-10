@@ -249,6 +249,11 @@ struct SettingsThemeWiringTests {
             ".controlAccentColor",
             ".controlBackgroundColor",
             ".separatorColor",
+            // Retired by the dark pass: it follows the system
+            // WINDOW background, which this window no longer
+            // uses — the schematic kit's fallbacks were its
+            // last two sites.
+            ".textBackgroundColor",
         ]
         var offenders: [String] = []
         var scanned = 0
