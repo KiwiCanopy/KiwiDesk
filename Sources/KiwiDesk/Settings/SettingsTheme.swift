@@ -152,11 +152,16 @@ enum SettingsTheme {
     /// Captions and disclosure hints, the quietest legible ink —
     /// and *legible* is the operative word: this paints a
     /// section's one-sentence explanation, which is body copy and
-    /// owes 4.5:1. The 16b table's `#7C8A82` / `#869184` measured
-    /// 3.61:1 on `card` in light and 4.43:1 on `sunken` in dark,
-    /// so both ends moved until the worst pairing clears. A
-    /// caption nobody can read is not quiet, it is missing.
-    static let ink3 = token(light: 0x6B_7A_72, dark: 0x98_A2_96)
+    /// owes 4.5:1 on EVERY surface it draws on. The 16b table's
+    /// `#7C8A82` / `#869184` measured 3.61:1 on `card` in light
+    /// and 4.43:1 on `sunken` in dark; the first correction
+    /// (`#6B7A72`) cleared `card` and still missed `panel` and
+    /// `sunken` in light (4.15 / 4.17 — the detail panel's
+    /// notices and the disclosure captions). Both ends now clear
+    /// the worst pairing, which `SettingsThemeContrastTests`
+    /// derives from these very tokens. A caption nobody can read
+    /// is not quiet, it is missing.
+    static let ink3 = token(light: 0x64_72_6A, dark: 0x98_A2_96)
 
     /// The small-caps group heading ("THIS PROFILE", a disclosure
     /// interior's group label).
