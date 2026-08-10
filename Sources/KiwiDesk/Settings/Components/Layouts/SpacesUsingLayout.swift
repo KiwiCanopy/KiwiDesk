@@ -2,8 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// "Spaces using <layout>" (turn 10): which of the reader's
-/// spaces the card above them actually governs, and how many of
-/// those deviate from it.
+/// spaces the selected layout's rows actually govern, and how
+/// many of those deviate from them. Mounted in the detail
+/// PANEL under the live preview — it is read-only, a fact
+/// about the draft rather than an editor.
 ///
 /// The card exists because Layout Defaults edits *defaults*, and
 /// a default with nothing running it is an hour spent on

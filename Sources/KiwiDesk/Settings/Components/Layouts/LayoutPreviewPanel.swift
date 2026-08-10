@@ -22,16 +22,22 @@ struct LayoutPreviewPanel: View {
     @State private var windows = LayoutSchematic.defaultWindowCount
 
     var body: some View {
-        SettingsSection(
-            SettingsCatalog.layoutDefaults.livePreview
-        ) {
-            LayoutSchematicView(
-                mode: mode,
-                settings: model.config.settings,
-                windows: windows,
-                scale: .panel
-            )
-            countRow
+        VStack(alignment: .leading, spacing: 14) {
+            SettingsSection(
+                SettingsCatalog.layoutDefaults.livePreview
+            ) {
+                LayoutSchematicView(
+                    mode: mode,
+                    settings: model.config.settings,
+                    windows: windows,
+                    scale: .panel
+                )
+                countRow
+            }
+            // Read-only, so it watches from the panel beside
+            // the rows rather than sitting among them (owner
+            // 2026-08-10).
+            SpacesUsingLayout(model: model, mode: mode)
         }
     }
 

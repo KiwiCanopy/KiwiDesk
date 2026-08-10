@@ -40,18 +40,14 @@ struct LayoutDefaultsSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
                 LayoutStrip(model: model, selection: selected)
-                // The selected layout's own preview moved to
-                // the detail PANEL (#678 redesign spec) — the column
-                // beside these rows is where the draft is
-                // watched now, so mounting it here too would
-                // state one fact twice on one screen. The
-                // strip stays: it is the selector, not the
-                // preview.
+                // The selected layout's own preview AND the
+                // spaces-using card moved to the detail PANEL
+                // (#678 redesign spec; owner 2026-08-10 for the
+                // spaces list — it is read-only, so it watches
+                // beside the preview rather than sitting among
+                // the editable rows). The strip stays: it is
+                // the selector, not the preview.
                 LayoutCard(
-                    model: model,
-                    mode: selected.wrappedValue
-                )
-                SpacesUsingLayout(
                     model: model,
                     mode: selected.wrappedValue
                 )
