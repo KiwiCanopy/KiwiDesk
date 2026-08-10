@@ -68,6 +68,10 @@ struct KeybindingBannerLocaleTests {
             in: bindings,
             config: model.config
         )
+        // Pinned non-nil first: `?.contains != true` alone
+        // passes on a vanished tooltip (guard-prover's
+        // fail-open note, 2026-08-10).
+        #expect(tooltip != nil)
         #expect(
             tooltip?.contains("Focus window to the right")
                 != true
