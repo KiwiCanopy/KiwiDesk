@@ -351,8 +351,8 @@ Shortcuts carry it too — though results are per row now, so
 the raw-Lua drawer still needs its own title's words to be
 found at all.)
 Per-instance rows (a space's own binding row) stay out by
-design: their FAMILY is the setting, and the Places group is
-how a named thing is found.
+design: their FAMILY is the setting, and the **Made by you**
+group is how a named thing is found.
 
 Localization splits here, and the split is the rule from §5:
 R5's capitalization and R3's connector were **cosmetic**, so

@@ -212,10 +212,21 @@ struct HeaderSearch: View {
         return min(rows * 40 + header, 320)
     }
 
-    /// The Places group's caption (spec 11a): the user's own
-    /// named things, below the settings rows.
+    /// The group's caption (spec 11a): the user's own named
+    /// things, below the settings rows.
+    ///
+    /// Named by OWNERSHIP, not by location. "Places" was a
+    /// metaphor only English carries: the group holds a Space, a
+    /// Profile and an App rule, none of which is a location, and
+    /// the literal translation collided in half the catalogs —
+    /// fr "Emplacements" is already the tiling slot, zh 位置 is
+    /// already the "Position" setting label on rows this very
+    /// search indexes. "Item" was unavailable to translate into:
+    /// it is a ruled noun for a bar entry
+    /// (config-vocabulary.md), and its Romance renderings collide
+    /// the same way.
     private var placesHeader: some View {
-        Text(L("search.places", "Places"))
+        Text(L("search.places", "Made by you"))
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.secondary)
             .padding(.horizontal, 8)

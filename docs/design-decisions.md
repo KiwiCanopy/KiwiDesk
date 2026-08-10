@@ -1252,9 +1252,24 @@ one-per-destination cap existed to prevent, only data-driven and
 unbounded — and indexing *values* ("0.70" finding the space that
 overrides to it) is the same mistake through the back door. The
 things a user NAMES — spaces, profiles, palettes, app rules —
-are **Places** material: findable by name in a separate group,
-capped at five, one entry per object. (Palettes sit the group
-out today — the purity line below is why.)
+belong in the **Made by you** group: findable by name, capped at
+five, one entry per object. (Palettes sit the group out today —
+the purity line below is why.)
+
+**That group is named by ownership, not by location.** It was
+"Places" for one release and the name did not survive contact
+with ten catalogs: the group holds a space, a profile and an app
+rule, and none of them is a location, so every locale had to
+translate a metaphor only English carries. Worse, the literal
+rendering *collided* — French's word for a slot, Chinese's word
+for the "Position" setting label on rows this same search
+indexes — which put a group caption directly above result rows
+carrying the same word for something else. "Items" was not the
+way out either: `item` is a ruled noun for a bar entry
+(`config-vocabulary.md`), and its Romance renderings collide the
+same way. What the group actually has in common is not where the
+things are but who made them, and that translates everywhere
+because it is a fact rather than a figure of speech.
 
 **The match path is pure, and enrichment is a second phase.**
 Matching is a synchronous substring scan over rows built once
@@ -1268,7 +1283,7 @@ list paints, from the draft in memory. Nothing on either path
 touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
 violation; enrichment reads only the draft the shell hands it).
-That line is why palette names are absent from Places today:
+That line is why palette names are absent from the group today:
 `PaletteStore` is stateless and file-backed by design, so
 listing them would put a disk read on every keystroke.
 

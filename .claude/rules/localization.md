@@ -221,6 +221,21 @@ is why they are here rather than beside the views:
   translation round shipped four labels at 45–52 characters
   against an English 11–28 before an audit caught them, each
   losing exactly the clause that carried the setting's point.
+- **A frame interpolating a COUNT is authored so that nothing
+  has to agree with it.** A catalog value is one string with no
+  plural forms, so a locale that inflects around the numeral has
+  to pick a single grammatical number and is then wrong at every
+  other count — "1 Tasten belegt", "0 touches attribuées", and
+  the genitive plural `ru` shipped across the board in the #788
+  round. Put the count last behind a label ("Keys taken: %1$d"),
+  which is correct at every value in every locale, and author
+  the ENGLISH that way too: a translator handed a sentence
+  writes a sentence. Nothing guards this — a forced plural is
+  fluent, native and passes every predicate — which is why it
+  is stated here and why it has now cost two rounds. The same
+  string wants no terminal period: it is a label, and a period
+  straight after a digit reads as a thousands separator in six
+  of the shipped locales.
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own

@@ -96,8 +96,8 @@ An area name that matches on its own has no second line. Results from an area th
 User mode carry a quiet **Power User** tag: opening one switches
 the mode for you and says so in one line under the header —
 that's all the switching there is to it. Below the settings, a
-short **Places** group lists things you've named yourself — a
-space, a profile, an app rule — and jumps to where each one
+short **Made by you** group lists things you've named yourself —
+a space, a profile, an app rule — and jumps to where each one
 lives.
 
 Clicking a result opens its area, and — where the row has its

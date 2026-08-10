@@ -77,10 +77,12 @@ enum KeyboardKeyLabel {
     /// "No modifier", not "plain key", and the reasons are the
     /// row's rather than the phrase's: every sibling chip names a
     /// modifier COMBINATION, so a label naming a *key* answers a
-    /// different question than the chips beside it; and the panel
-    /// already says "modifier" to the user twice
-    /// (`keyboard.legend.conflict`, `keyboard.tally`), so a third
-    /// noun for it on one surface is drift. Not "None" either —
+    /// different question than the chips beside it. This key is
+    /// the panel's ONE noun for a modifier — copy added here
+    /// reuses it rather than coining a second, which is drift a
+    /// translator pays for twice (four catalogs had no word for
+    /// "modifier" at all before this key, so each round would
+    /// otherwise mint its own). Not "None" either —
     /// in a multi-select row that reads as *clear the selection*.
     /// The chip is not where a user learns the option exists: it
     /// only appears once the draft already has such a binding.
