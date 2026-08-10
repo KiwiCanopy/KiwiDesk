@@ -139,7 +139,11 @@ struct SettingsSearchIndexTests {
     /// (architect review 2026-08-10). The counts are large on
     /// purpose: the #277 catalog covers a fraction of the
     /// census, and each count FALLS as it fills — update with
-    /// the reason stated, never with a floor.
+    /// the reason stated, never with a floor. Stated residue: a
+    /// count cannot see MEMBERSHIP, so an equal-count swap
+    /// inside one destination (row A loses its anchor in the
+    /// change that gives row B one) passes — granularity, not
+    /// coverage.
     @Test("anchor-less census counts match the pinned table")
     func unanchoredCountsArePinned() {
         pinEnglish()
