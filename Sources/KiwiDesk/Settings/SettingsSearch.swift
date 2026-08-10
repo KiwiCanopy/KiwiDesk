@@ -175,6 +175,13 @@ enum SettingsSearch {
             (.palette, context.palettes, .colors),
             (.appRule, context.appRules, .appRules),
         ]
+        // No reachability filter here, on purpose: every place
+        // kind lands on a destination #18 never hides (only
+        // General is withheld while a stored profile is
+        // edited), so a filter would be dead code no test can
+        // red (guard-prover, 2026-08-10). A NEW kind whose
+        // destination can be withheld owes the filter back —
+        // and a test that reds without it.
         let matched = kinds.flatMap { kind, names, destination in
             names.filter { $0.searchMatches(query) }
                 .map {
@@ -186,11 +193,6 @@ enum SettingsSearch {
                         )
                     )
                 }
-        }
-        .filter {
-            $0.anchor.destination.isReachable(
-                editingStoredProfile: context.editingStoredProfile
-            )
         }
         return matched.prefix(placesCap)
             .map(SettingsSearchResult.place)

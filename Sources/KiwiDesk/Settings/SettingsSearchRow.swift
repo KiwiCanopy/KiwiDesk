@@ -73,7 +73,12 @@ struct SettingsSearchRow: View {
     /// frames use — one visual system, and text stays neutral
     /// (the accent marks fills and frames, never words).
     private var pill: some View {
-        Text(L("search.power_user_pill", "Power User"))
+        // The SEGMENT's own key, reused on purpose: the pill
+        // and the mode segment must say the same word in every
+        // locale, and sharing the key makes that structural
+        // (localization audit 2026-08-10) — a second key would
+        // put the match on every future translation round.
+        Text(L("mode.power_user", "Power User"))
             .font(.caption2)
             .foregroundStyle(.secondary)
             .padding(.horizontal, 6)
@@ -161,8 +166,7 @@ struct SettingsSearchRow: View {
             label += ", " + shownValue
         }
         if switchesMode {
-            label +=
-                ", " + L("search.power_user_pill", "Power User")
+            label += ", " + L("mode.power_user", "Power User")
         }
         return label
     }

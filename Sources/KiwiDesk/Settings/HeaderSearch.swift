@@ -153,6 +153,12 @@ struct HeaderSearch: View {
             // Lazy on purpose: rows compute their value
             // enrichment when they appear, so a broad query
             // enriches the ~8 visible rows, never the whole set.
+            // An overlay proposes the FIELD's size, and a
+            // ScrollView adopts whatever it is proposed — so
+            // without an explicit height the whole list
+            // collapses to one clipped row (owner eyeball,
+            // 2026-08-10). The height is the content's own
+            // estimate, capped; past the cap it scrolls.
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(results.settings) { result in
@@ -166,8 +172,21 @@ struct HeaderSearch: View {
                     }
                 }
             }
-            .frame(maxHeight: 320)
+            .frame(height: panelHeight(results))
         }
+    }
+
+    /// Estimated content height: two-line rows at ~40 pt, the
+    /// Places caption when present, capped at 320 (the shipped
+    /// max) — an estimate is safe because past the cap the list
+    /// scrolls and under it a few points of slack vanish into
+    /// the padding.
+    private func panelHeight(
+        _ results: SettingsSearchResults
+    ) -> CGFloat {
+        let rows = CGFloat(results.flat.count)
+        let header: CGFloat = results.places.isEmpty ? 0 : 26
+        return min(rows * 40 + header, 320)
     }
 
     /// The Places group's caption (spec 11a): the user's own

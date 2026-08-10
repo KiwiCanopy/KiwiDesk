@@ -118,4 +118,26 @@ struct SettingsSearchPlacesTests {
         )
         model.searchNoticeTask?.cancel()
     }
+
+    /// The self-clear half, previously unguarded: guard-prover
+    /// (2026-08-10) showed the clear task could be deleted with
+    /// this suite green. A generous hang-guard poll, never a
+    /// tight deadline (#344): the notice clears at ~5 s, the
+    /// poll exits the moment it does, and the 30 s bound only
+    /// catches a genuine never-clears.
+    @Test("the mode-switch notice clears itself")
+    func modeNoticeSelfClears() async throws {
+        pinEnglish()
+        defer { reset() }
+        let model = makeTestModel()
+        model.noteSearchModeSwitch(.advancedColors)
+        #expect(model.searchModeNotice != nil)
+        let deadline = ContinuousClock.now + .seconds(30)
+        while model.searchModeNotice != nil,
+            ContinuousClock.now < deadline
+        {
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        #expect(model.searchModeNotice == nil)
+    }
 }
