@@ -44,17 +44,28 @@ struct SettingsThemeContrastTests {
         /// flatters the drawn pairing (code review 2026-08-10:
         /// the board's free-key glyph draws plateInk at 0.75).
         let inkAlpha: Double
+        /// A translucent fill the render lays over the surface
+        /// BEFORE the ink — the offer chip's accent wash (17a).
+        /// Same argument as `inkAlpha` from the other side:
+        /// measuring the ink against the bare token flatters a
+        /// pairing whose real ground is the composite, and an
+        /// accent wash moves the ground toward the ink's own
+        /// hue, which is the direction that costs ratio.
+        let wash: (color: Color, alpha: Double)?
 
         init(
             _ name: String,
             _ ink: Color,
             on surface: Color,
+            washedWith wash: (color: Color, alpha: Double)? =
+                nil,
             floor: Double = 4.5,
             inkAlpha: Double = 1
         ) {
             self.name = name
             self.ink = ink
             self.surface = surface
+            self.wash = wash
             self.floor = floor
             self.inkAlpha = inkAlpha
         }
@@ -206,6 +217,18 @@ struct SettingsThemeContrastTests {
             SettingsTheme.previewPlate,
             on: SettingsTheme.accent
         ),
+        // The narrow-window "Show preview" chip (17a): ordinary
+        // ink on a card plane the render washes with the accent
+        // at the search notice's strength.
+        Pairing(
+            "ink on the washed offer chip",
+            SettingsTheme.ink,
+            on: SettingsTheme.card,
+            washedWith: (
+                SettingsTheme.accent,
+                Double(SettingsTheme.searchNoticeFillOpacity)
+            )
+        ),
     ]
 
     @Test("every drawn pairing clears its floor in both modes")
@@ -218,6 +241,7 @@ struct SettingsThemeContrastTests {
                 let ratio = try contrast(
                     pairing.ink,
                     over: pairing.surface,
+                    wash: pairing.wash,
                     inkAlpha: pairing.inkAlpha,
                     dark: dark
                 )
@@ -245,11 +269,25 @@ struct SettingsThemeContrastTests {
     private func contrast(
         _ ink: Color,
         over surface: Color,
+        wash: (color: Color, alpha: Double)? = nil,
         inkAlpha: Double,
         dark: Bool
     ) throws -> Double {
         let inkRGB = try resolved(ink, dark: dark)
-        let surfaceRGB = try resolved(surface, dark: dark)
+        var surfaceRGB = try resolved(surface, dark: dark)
+        // The wash lands first — the ink is drawn on the
+        // composite, not on the bare token.
+        if let wash {
+            let washRGB = try resolved(wash.color, dark: dark)
+            surfaceRGB = (
+                r: wash.alpha * washRGB.r
+                    + (1 - wash.alpha) * surfaceRGB.r,
+                g: wash.alpha * washRGB.g
+                    + (1 - wash.alpha) * surfaceRGB.g,
+                b: wash.alpha * washRGB.b
+                    + (1 - wash.alpha) * surfaceRGB.b
+            )
+        }
         let drawn = (
             r: inkAlpha * inkRGB.r
                 + (1 - inkAlpha) * surfaceRGB.r,

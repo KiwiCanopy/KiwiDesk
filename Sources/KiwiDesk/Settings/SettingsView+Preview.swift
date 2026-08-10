@@ -109,6 +109,21 @@ extension SettingsView {
         .background(
             ChipMetrics.shape
                 .fill(SettingsTheme.card)
+                // The wash, one notch of presence above the
+                // border alone (owner, on device 2026-08-11,
+                // against a bare border and against the save
+                // pill's black chrome). The strength is the
+                // search notice's, deliberately reused: both
+                // are an accent behind ordinary ink on a
+                // surface, and a second number here would be
+                // the same decision spelled twice.
+                .overlay(
+                    ChipMetrics.shape.fill(
+                        SettingsTheme.accent.opacity(
+                            SettingsTheme.searchNoticeFillOpacity
+                        )
+                    )
+                )
                 .overlay(
                     ChipMetrics.shape.strokeBorder(
                         SettingsTheme.accent
