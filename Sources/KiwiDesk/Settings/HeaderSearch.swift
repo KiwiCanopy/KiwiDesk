@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The header's search entry (#678 turn 9, rebuilt turn 16b):
-/// the REAL field, inline in the header, with its results
-/// hanging below it.
+/// The header's search entry (#678 turn 9, rebuilt turn 16b;
+/// per-setting results turn 11): the REAL field, inline in the
+/// header, with its results hanging below it.
 ///
 /// It shipped as a field-shaped *button* that opened a popover
 /// holding the actual field — which was defensible while the
@@ -33,26 +33,37 @@ import SwiftUI
 /// `Spacer` — pushed the chips to the far edge and left a hole in
 /// the middle of the header (owner, 2026-08-04).
 struct HeaderSearch: View {
-    /// The #18 axis the results filter on.
-    let editingStoredProfile: Bool
+    /// Everything the result builder may read, collected by the
+    /// header bar from state already in memory (the search path
+    /// touches nothing else).
+    let context: SettingsSearchContext
     /// The Profiles spotlight badge state, passed through to
     /// result rows so which list renders the tile does not
     /// change it.
     let spotlightProfiles: Bool
+    /// Enrichment: the current value for a census key, from the
+    /// draft in memory — evaluated per rendered row, after the
+    /// list paints.
+    let value: (SettingKey) -> String?
     /// Hands a picked result up to the shell, which owns the
     /// destination and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
+    /// Fired after a pick that flips the window into Power User
+    /// mode — the shell shows the one-line confirmation
+    /// ("…is now on Home"), search's only mention of the mode.
+    let modeSwitched: (SettingsDestination) -> Void
 
     @State private var query = ""
-    /// The ↑/↓ highlight, tracked by destination exactly as the
-    /// sidebar's list selection did.
-    @State private var highlighted: SettingsDestination?
+    /// The ↑/↓ highlight, by result id — a result set is
+    /// per-setting now, so a destination no longer identifies a
+    /// row.
+    @State private var highlighted: String?
     @FocusState private var focused: Bool
 
     private var searching: Bool { !query.trimmed.isEmpty }
 
     var body: some View {
-        SidebarSearchField(
+        SettingsSearchField(
             text: $query,
             focus: $focused,
             onMove: move,
@@ -95,11 +106,16 @@ struct HeaderSearch: View {
     /// The offset is the field's height plus the gap; it is a
     /// constant because a `GeometryReader` here would hand the
     /// flexible slot a size to negotiate and collapse the row.
+    ///
+    /// 380 wide, up from the one-per-destination list's 340: the
+    /// rows now carry a right-aligned value and, sometimes, the
+    /// mode pill. The responsive pass (17a) owns the final
+    /// number.
     @ViewBuilder private var resultPanel: some View {
         if searching {
             resultList
                 .padding(8)
-                .frame(width: 340, alignment: .leading)
+                .frame(width: 380, alignment: .leading)
                 .background(
                     RoundedRectangle(
                         cornerRadius: SettingsTheme.cardRadius
@@ -121,11 +137,8 @@ struct HeaderSearch: View {
         }
     }
 
-    private var results: [SidebarSearchResult] {
-        SidebarSearch.results(
-            query: query,
-            editingStoredProfile: editingStoredProfile
-        )
+    private var results: SettingsSearchResults {
+        SettingsSearch.results(query: query, context: context)
     }
 
     @ViewBuilder private var resultList: some View {
@@ -137,10 +150,19 @@ struct HeaderSearch: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.vertical, 8)
         } else {
+            // Lazy on purpose: rows compute their value
+            // enrichment when they appear, so a broad query
+            // enriches the ~8 visible rows, never the whole set.
             ScrollView {
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(results) { result in
+                LazyVStack(alignment: .leading, spacing: 2) {
+                    ForEach(results.settings) { result in
                         row(result)
+                    }
+                    if !results.places.isEmpty {
+                        placesHeader
+                        ForEach(results.places) { result in
+                            row(result)
+                        }
                     }
                 }
             }
@@ -148,11 +170,26 @@ struct HeaderSearch: View {
         }
     }
 
+    /// The Places group's caption (spec 11a): the user's own
+    /// named things, below the settings rows.
+    private var placesHeader: some View {
+        Text(L("search.places", "Places"))
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 8)
+            .padding(.top, 6)
+    }
+
     private func row(
-        _ result: SidebarSearchResult
+        _ result: SettingsSearchResult
     ) -> some View {
-        SidebarSearchRow(
+        SettingsSearchRow(
             result: result,
+            value: value,
+            switchesMode: SettingsSearch.switchesMode(
+                result,
+                context: context
+            ),
             badged: spotlightProfiles
                 && result.destination == .profiles,
             badgeValue: badgeValue(for: result.destination),
@@ -163,7 +200,7 @@ struct HeaderSearch: View {
         .background(
             RoundedRectangle(cornerRadius: 6)
                 .fill(
-                    result.destination == highlighted
+                    result.id == highlighted
                         ? SettingsTheme.accent.opacity(0.16)
                         : .clear
                 )
@@ -183,21 +220,30 @@ struct HeaderSearch: View {
     /// Clearing the query is what dismisses the list — the panel
     /// is a function of `searching`, so there is no second piece
     /// of open/closed state to disagree with it.
-    private func pick(_ anchor: SettingsAnchor) {
+    ///
+    /// The mode question is answered BEFORE the reveal: the
+    /// reveal path promotes the mode (`ensureModeAdmits`), so
+    /// asking afterwards would always answer "no switch".
+    private func pick(_ result: SettingsSearchResult) {
+        let switches = SettingsSearch.switchesMode(
+            result,
+            context: context
+        )
         query = ""
         highlighted = nil
         focused = false
-        reveal(anchor)
+        reveal(result.anchor)
+        if switches {
+            modeSwitched(result.destination)
+        }
     }
 
     /// ↑/↓ from the field move the highlight only — the reveal
-    /// (scroll and flash) waits for Return, as in the sidebar.
+    /// (scroll and flash) waits for Return.
     private func move(_ direction: MoveCommandDirection) {
-        let hits = results
+        let hits = results.flat
         guard !hits.isEmpty else { return }
-        let current = hits.firstIndex {
-            $0.destination == highlighted
-        }
+        let current = hits.firstIndex { $0.id == highlighted }
         let next: Int
         switch direction {
         case .up:
@@ -210,18 +256,18 @@ struct HeaderSearch: View {
         default:
             return
         }
-        highlighted = hits[next].destination
+        highlighted = hits[next].id
     }
 
     /// Falls back to the FIRST result: typing does not move the
     /// highlight, so after a fresh query a bare Return would
     /// otherwise be a dead key.
     private func commitHighlighted() {
-        let hits = results
+        let hits = results.flat
         let hit =
-            hits.first { $0.destination == highlighted }
+            hits.first { $0.id == highlighted }
             ?? hits.first
         guard let hit else { return }
-        pick(hit.anchor)
+        pick(hit)
     }
 }

@@ -1237,6 +1237,59 @@ invisible while every test still passes, since nothing about
 paint order is observable from the view tree. (Owner report
 2026-08-04, in chat.)
 
+### Search: one result per setting, and a fast path kept pure
+
+**[Principle]**
+
+**A search result is a SETTING, never an instance of one** (#678
+turn 11). The index holds one static row per census `SettingKey`
+— the same fixed list whether the user has three spaces or
+thirty, plus the catalog-only anchors (mode tabs, drawer titles)
+the census structurally cannot carry. A keybinding family is one
+setting and one result; a per-space override row is an instance.
+Indexing instances re-introduces the wall of rows the old
+one-per-destination cap existed to prevent, only data-driven and
+unbounded — and indexing *values* ("0.70" finding the space that
+overrides to it) is the same mistake through the back door. The
+things a user NAMES — spaces, profiles, palettes, app rules —
+are findable by name in a separate **Places** group, capped at
+five, one entry per object.
+
+**The match path is pure, and enrichment is a second phase.**
+Matching is a synchronous substring scan over rows built once
+per locale: label (localized, through `SettingsCensusLabel`, so
+search and the diff rows cannot name one row two ways),
+destination title, and a sparse English synonym table that is
+match-only and never displayed — which is why it needs no
+translation. Everything else a result row shows — the current
+value, the mode pill — is computed per *rendered* row after the
+list paints, from the draft in memory. Nothing on either path
+touches AX, the filesystem or the running session
+(`SettingsSearchIndexTests` scans for the violation). That line
+is why palette names are absent from Places today:
+`PaletteStore` is stateless and file-backed by design, so
+listing them would put a disk read on every keystroke.
+
+**The pill is the only place the mode is mentioned.** Search
+indexes both modes, always. A result whose area the current
+mode withholds carries a quiet "Power User" tag — derived from
+the one offer predicate (`HomeCardOrder.isOffered`), never a
+hand-negated copy, so the Monitors display-count promotion
+silences its pill exactly when it silences its gate — and
+opening it flips the mode silently (`ensureModeAdmits`) with a
+one-line, self-clearing confirmation strip as the only
+announcement. Ranking is deliberately NOT mode-aware: results
+keep one stable destination order in both modes, because an
+exact match the user asked for must not sink for living in a
+Power-User area, and a list that reorders on a mode flip reads
+as random.
+
+What breaks if this is ignored: index instances and a
+twelve-space config turns "gap" into sixty rows; enrich on the
+match path and every keystroke pays a disk or AX round-trip the
+moment someone adds "just one" richer column; rank by mode and
+the same query answers differently before and after one click.
+
 ### Hover help appears sooner than AppKit's default
 
 **[Trade-off]**

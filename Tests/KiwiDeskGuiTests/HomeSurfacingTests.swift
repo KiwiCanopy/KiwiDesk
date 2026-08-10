@@ -50,6 +50,12 @@ struct HomeSurfacingTests {
             ".overlay(alignment:.bottom){"
                 + "SettingsFooter(model:model)",
             "x:panelVisible?-SettingsTheme.panelWidth/2:0",
+            // The search mode-switch notice DRAWS when set
+            // (#678 4c) — needle through the branch body: a
+            // consult that never mounts the strip would leave
+            // the flip unannounced with every test green.
+            "ifletnotice=model.searchModeNotice{"
+                + "SettingsSearchNotice(text:notice)",
         ],
         "Settings/SettingsView+Detail.swift": [
             // The two-column detail consults the ONE offer set

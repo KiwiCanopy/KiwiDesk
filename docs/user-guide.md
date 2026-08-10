@@ -82,16 +82,23 @@ areas with nothing to preview take the full width instead.
 The search field sits in the middle of the header and is a real
 field: click it and type, or press **⌘K** from anywhere in the
 window to put the cursor in it. Matches appear in a list under
-the field while you keep typing. Typing lists the areas that match — by
-area name or by any of the titled groups inside one
-(searching "sticky" finds Gaps & Borders, "focus" finds
-Shortcuts).
+the field while you keep typing. Every setting is its own
+result — searching "gap" lists each gap you can change, and a
+broad word like "color" lists every colour row rather than one
+per section. A few common alternate words work too ("padding"
+finds the gaps, "autostart" finds the login row), whatever
+language the window is in.
 
-Each result leads with the words that actually matched, and puts
-the trail to them in a smaller line underneath — so a hit on the
-Space Bar's colours reads **Space Bar colors** over
-"Advanced Colors", not the other way round. A section name that
-matches on its own has no second line.
+Each result leads with the setting's own label, puts the trail
+to it in a smaller line underneath, and shows its **current
+value** on the right. An area name that matches on its own has
+no second line. Results from an area that only exists in Power
+User mode carry a quiet **Power User** tag: opening one switches
+the mode for you and says so in one line under the header —
+that's all the switching there is to it. Below the settings, a
+short **Places** group lists things you've named yourself — a
+space, a profile, an app rule — and jumps to where each one
+lives.
 
 Clicking a result **takes you to the match**, not just to its
 section: the pane scrolls to that group and tints it for about a
@@ -103,11 +110,9 @@ sliders), the drawer opens on the way so you land on the row
 itself; a hit on the drawer's own name ("Per-edge…", "Advanced")
 lands on that row, highlighted, ready to open.
 
-Only the first match per section is listed, so a broad word like
-"color" gives you one row per section instead of a wall of them;
-type a little more to reach a different one. Press Escape or the
-clear button to empty the query — an empty query is what closes
-the result list, and picking a result empties it for you.
+Press Escape or the clear button to empty the query — an empty
+query is what closes the result list, and picking a result
+empties it for you.
 
 Matching ignores case, accents, and hyphens-versus-spaces, so
 "grosse" finds "Größe" and "space bar farben" finds

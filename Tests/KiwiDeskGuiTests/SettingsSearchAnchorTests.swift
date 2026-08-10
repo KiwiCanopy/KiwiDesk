@@ -3,19 +3,20 @@ import Testing
 
 @testable import KiwiDesk
 
-/// What a search hit LANDS on (#277 tier 2): the anchor id a hit
-/// scrolls to, the local surface it must select first, and the
-/// breadcrumb above it. Split from `SidebarSearchTests`, which
-/// owns matching semantics (AGENTS.md §5, split suites early).
-/// English pinned at each test body's start, per the #90
-/// convention — an `init` pin races the locale suites.
+/// What a search hit LANDS on (#277 tier 2, per-setting since
+/// #678 turn 11): the anchor id a hit scrolls to, the local
+/// surface it must select first, and the breadcrumb above it.
+/// Split from `SettingsSearchTests`, which owns matching
+/// semantics (AGENTS.md §5, split suites early). English pinned
+/// at each test body's start, per the #90 convention — an `init`
+/// pin races the locale suites.
 ///
 /// Anchor identity is `SettingsControl.id`, never the label text
 /// (see `SettingsAnchor`); id uniqueness and surface fit are
 /// pinned catalog-side in `SettingsCatalogTests`.
-@Suite("Sidebar search anchors", .serialized)
+@Suite("Settings search anchors", .serialized)
 @MainActor
-struct SidebarSearchAnchorTests {
+struct SettingsSearchAnchorTests {
     private func pinEnglish() {
         LocalizationManager.shared.select("en")
     }
@@ -24,19 +25,36 @@ struct SidebarSearchAnchorTests {
         LocalizationManager.shared.select(nil)
     }
 
+    private func rows(
+        _ query: String
+    ) -> [SettingsSearchIndexRow] {
+        SettingsSearch.results(
+            query: query,
+            context: SettingsSearchContext()
+        )
+        .settings
+        .compactMap {
+            guard case .setting(let row) = $0 else { return nil }
+            return row
+        }
+    }
+
     /// The fix #277 exists for: tier 1 could only *name* the mode
-    /// tab in a caption and leave the click to the user.
+    /// tab in a caption and leave the click to the user. A mode
+    /// tab is a catalog-only anchor row (`key == nil`) — the
+    /// census has no setting for a tab.
     @Test("a mode-gated hit carries its mode tab")
     func modeSurface() {
         pinEnglish()
         defer { reset() }
-        let result = SidebarSearch.results(
-            query: "Monocle",
-            editingStoredProfile: false
-        ).first
-        #expect(result?.destination == .layoutDefaults)
+        let row = rows("Monocle").first {
+            $0.anchor.anchor == "layout_mode/monocle"
+        }
+        #expect(row != nil)
+        #expect(row?.key == nil)
+        #expect(row?.destination == .layoutDefaults)
         #expect(
-            result?.anchor
+            row?.anchor
                 == SettingsAnchor(
                     destination: .layoutDefaults,
                     surface: .layoutMode(.monocle),
@@ -45,15 +63,14 @@ struct SidebarSearchAnchorTests {
         )
         // The mode is the match itself, so it is not repeated
         // above itself in the breadcrumb.
-        #expect(result?.path == ["Layout Defaults"])
+        #expect(row?.path == ["Layout Defaults"])
     }
 
-    /// The bare bar name is findable via the two cards (#277):
-    /// the one Bars page (turn 7a) means no surface to select —
-    /// searching "App Bar" scrolls to that card. The card entry
-    /// is declared first, so it wins the one-row-per-destination
-    /// cap over its own colour card.
-    @Test("a bare bar-name search lands on the bar's card")
+    /// The bare bar name is findable via the two switch chips
+    /// (#277): the one Bars page (turn 7a) means no surface to
+    /// select — searching "App Bar" reaches that card among its
+    /// results.
+    @Test("a bare bar-name search reaches the bar's card")
     func barNameHitsCard() {
         pinEnglish()
         defer { reset() }
@@ -61,23 +78,19 @@ struct SidebarSearchAnchorTests {
             ("App Bar", "bars.switch.app_bar"),
             ("Space Bar", "bars.switch.space_bar"),
         ] {
-            let result = SidebarSearch.results(
-                query: query,
-                editingStoredProfile: false
-            ).first
+            let row = rows(query).first {
+                $0.anchor.anchor == anchor
+            }
+            #expect(row != nil, Comment(rawValue: query))
             #expect(
-                result?.anchor.surface == .main,
-                Comment(rawValue: query)
-            )
-            #expect(
-                result?.anchor.anchor == anchor,
+                row?.anchor.surface == .main,
                 Comment(rawValue: query)
             )
             // The chip's own name IS the match, so the breadcrumb
             // is the destination alone — not "Bars › App Bar ›
             // App Bar".
             #expect(
-                result?.path == ["Bars"],
+                row?.path == ["Bars"],
                 Comment(rawValue: query)
             )
         }
@@ -92,34 +105,30 @@ struct SidebarSearchAnchorTests {
     func drawerInteriorHit() {
         pinEnglish()
         defer { reset() }
-        let result = SidebarSearch.results(
-            query: "Top",
-            editingStoredProfile: false
-        ).first
-        #expect(result?.destination == .gapsAndBorders)
-        #expect(result?.anchor.anchor == "gaps.top")
-        #expect(result?.primary == "Top")
+        let row = rows("Top").first {
+            $0.anchor.anchor == "gaps.top"
+        }
+        #expect(row != nil)
+        #expect(row?.destination == .gapsAndBorders)
+        #expect(row?.label == "Top")
         #expect(
-            result?.path == ["Gaps & Borders", "Per-edge…"]
+            row?.path == ["Gaps & Borders", "Per-edge…"]
         )
     }
 
     /// The twice-mounted shape (both bar cards mount a "Style"
     /// drawer, co-rendered on the one Bars page): each mount has
-    /// its own catalog declaration, so the hit's id is
-    /// instance-qualified and `scrollTo` is well-defined. First
-    /// declaration wins the one-row-per-destination cap — the
-    /// Space Bar's, the leading card.
-    @Test("a per-instance drawer hit carries its instance id")
-    func instanceQualifiedHit() {
+    /// its own catalog declaration, so a hit's id is
+    /// instance-qualified and `scrollTo` is well-defined — and
+    /// BOTH instances are results now that the per-destination
+    /// cap is gone.
+    @Test("per-instance drawer hits carry their instance ids")
+    func instanceQualifiedHits() {
         pinEnglish()
         defer { reset() }
-        let result = SidebarSearch.results(
-            query: "Style",
-            editingStoredProfile: false
-        ).first
-        #expect(result?.destination == .bars)
-        #expect(result?.anchor.anchor == "space_bar/bars.style")
+        let anchors = rows("Style").compactMap(\.anchor.anchor)
+        #expect(anchors.contains("space_bar/bars.style"))
+        #expect(anchors.contains("app_bar/bars.style"))
     }
 
     /// A destination-title hit has no finer target than the tab,
@@ -129,13 +138,38 @@ struct SidebarSearchAnchorTests {
     func titleHitHasNoAnchor() {
         pinEnglish()
         defer { reset() }
-        let result = SidebarSearch.results(
+        let results = SettingsSearch.results(
             query: "Behavior",
-            editingStoredProfile: false
-        ).first
-        #expect(result?.anchor.anchor == nil)
-        #expect(result?.anchor.surface == .main)
-        #expect(result?.path.isEmpty == true)
+            context: SettingsSearchContext()
+        ).settings
+        guard
+            case .destination(let destination) = results.first
+        else {
+            Issue.record("no destination row for its own title")
+            return
+        }
+        #expect(destination == .behavior)
+        let anchor = results.first?.anchor
+        #expect(anchor?.anchor == nil)
+        #expect(anchor?.surface == .main)
+    }
+
+    /// A census-keyed hit lands on the catalog control carrying
+    /// its label key: surface, scroll id and drawer expansion
+    /// all come from the one declaration the render site
+    /// mounts. (A census key whose label key no control carries
+    /// degrades to a destination-only anchor — the gaps MASTER
+    /// rows are that shape today.)
+    @Test("a census hit lands on its catalog control")
+    func censusHitCarriesCatalogAnchor() {
+        pinEnglish()
+        defer { reset() }
+        let row = rows("Top").first {
+            $0.key == .gaps(.outerTop)
+        }
+        #expect(row != nil)
+        #expect(row?.anchor.destination == .gapsAndBorders)
+        #expect(row?.anchor.anchor == "gaps.top")
     }
 
     /// The shell's decision, at the one place it is made. Pinned
@@ -147,7 +181,7 @@ struct SidebarSearchAnchorTests {
         pinEnglish()
         defer { reset() }
 
-        // #18: a destination the sidebar hides is refused outright.
+        // #18: a destination the shell hides is refused outright.
         #expect(
             SettingsAnchor(destination: .general)
                 .resolved(editingStoredProfile: true) == nil

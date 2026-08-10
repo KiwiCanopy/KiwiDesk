@@ -335,18 +335,19 @@ card, and whatever the drawer reveals sits in a single well —
 never one well per child. `SettingsDisclosure` draws both; the
 ruling is in `docs/design-decisions.md`.
 
-**Weigh every title edit against the search index.**
-`SidebarSearch` indexes destination titles plus a *hand-listed*
-set of subsection headers; computed titles and per-control
-labels stay out until #277. So a word that appears in no other
-**indexed** string lives or dies with its title — a title that
-reads better but drops such a word makes its own drawer
-unfindable by the word a user would type. Both "Lua" and
-"fingerprint" are in that position today, which is part of why
-those two titles win. Note the corollary, since it has already
-misled once: adding that word as a *visible row label* does not
-loosen the coupling, because a row label is not indexed. #540
-tracks it.
+**Weigh every title edit against the search index.** Search
+indexes destination titles, every census-labelled setting row
+(`SettingsSearchIndex`, one row per `SettingKey`) and the
+catalog's own controls — drawer titles, mode tabs — plus a
+sparse English synonym table (`SettingsSearchSynonyms`,
+match-only, never displayed). A word that appears in no indexed
+string still lives or dies with its title — a title that reads
+better but drops such a word makes its own drawer unfindable by
+the word a user would type. "Lua" and "fingerprint" are in that
+position today, which is part of why those two titles win.
+Per-instance rows (a space's own binding row) stay out by
+design: their FAMILY is the setting, and the Places group is
+how a named thing is found.
 
 Localization splits here, and the split is the rule from §5:
 R5's capitalization and R3's connector were **cosmetic**, so

@@ -108,11 +108,14 @@ struct SettingsHeaderBar: View {
             // the chips cluster at the trailing edge instead of
             // being flung to the window's corner.
             HeaderSearch(
-                editingStoredProfile:
-                    model.editingStoredProfile,
+                context: searchContext,
                 spotlightProfiles:
                     model.profileSummaries.isEmpty,
-                reveal: { model.nav.pendingReveal = $0 }
+                value: { [weak model] key in
+                    model?.searchValue(for: key)
+                },
+                reveal: { model.nav.pendingReveal = $0 },
+                modeSwitched: model.noteSearchModeSwitch
             )
             if showsProfileContext {
                 profileChip

@@ -30,11 +30,11 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// adjacent).
     ///
     /// The pair sits AFTER the things it paints, and the order
-    /// is load-bearing beyond taste: search returns one hit per
-    /// destination in this order, so a colour page listed above
-    /// Bars would answer "App Bar" with a grid of swatches
-    /// instead of with the App Bar's own card
-    /// (`SidebarSearchAnchorTests`). You arrive at colour having
+    /// is load-bearing beyond taste: search groups its results
+    /// by destination in this order, so a colour page listed
+    /// above Bars would answer "App Bar" with a grid of
+    /// swatches before the App Bar's own card
+    /// (`SettingsSearchTests`). You arrive at colour having
     /// noticed something on a surface you already know.
     /// (The GRID's own order is `HomeCardOrder`'s; only set
     /// membership is shared — `HomeCardOrderTests` pins it.)
