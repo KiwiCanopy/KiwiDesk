@@ -175,16 +175,23 @@ struct BarStripView: View {
             // both — the App Bar's `icon_and_name` content;
             // truncation only ever eats the name, the real
             // bar's rule.
+            // Sizes come through the bar's OWN font ladder
+            // (`BarSpec.fontSize`, resolved at the scene's
+            // cross), so the Thickness slider moves the
+            // symbols with the plate; the glyph steps down by
+            // the Space Bar's own glyph ratio.
             HStack(spacing: 2 * scale) {
                 if let glyph = item.glyph {
                     Image(systemName: glyph)
-                        .font(.system(size: 7 * scale))
+                        .font(
+                            .system(size: spec.fontSize * 0.9)
+                        )
                 }
                 if let text = item.label {
                     Text(text)
                         .font(
                             .system(
-                                size: 7.5 * scale,
+                                size: spec.fontSize,
                                 weight: .semibold
                             )
                         )

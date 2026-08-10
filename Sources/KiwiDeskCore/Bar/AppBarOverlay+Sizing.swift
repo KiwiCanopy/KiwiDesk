@@ -80,11 +80,9 @@ extension AppBarOverlay {
         guard horizontal else { return thickness }
         let pad = AppBarItemView.contentPadding
         let font = NSFont.systemFont(
-            ofSize: style.fontSize > 0
-                ? style.fontSize
-                : AppBarItemView.autoFontSize(
-                    forThickness: thickness
-                )
+            ofSize: style.resolvedFontSize(
+                forThickness: thickness
+            )
         )
         let iconSide =
             style.content == .name

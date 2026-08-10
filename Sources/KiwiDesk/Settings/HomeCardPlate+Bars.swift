@@ -68,6 +68,12 @@ struct HomeCardBarsTile: View {
         var itemCorner: CGFloat
         var gap: CGFloat
         var indicator: AppBarStyle.ActiveIndicator
+        /// Item text/glyph size through the bar's OWN font
+        /// ladder at the strip's scene cross — the real auto
+        /// rule scales fonts with thickness, so the Thickness
+        /// slider moves the symbols with the plate (owner
+        /// 2026-08-10).
+        var fontSize: CGFloat
     }
 
     /// Every DISTINCT edge an enabled bar-hosting layout's App
@@ -187,7 +193,10 @@ struct HomeCardBarsTile: View {
                         forThickness: cross * 0.56
                     ),
                     gap: gapSpacing(style.itemGap),
-                    indicator: style.activeIndicator
+                    indicator: style.activeIndicator,
+                    fontSize: style.identifierFontSize(
+                        forDepth: cross
+                    )
                 ),
                 edge: edge,
                 vertical: vertical,
@@ -248,7 +257,10 @@ struct HomeCardBarsTile: View {
                         forThickness: cross * 0.56
                     ),
                     gap: gapSpacing(style.itemGap),
-                    indicator: style.activeIndicator
+                    indicator: style.activeIndicator,
+                    fontSize: style.resolvedFontSize(
+                        forThickness: cross
+                    )
                 ),
                 edge: edge,
                 vertical: vertical,

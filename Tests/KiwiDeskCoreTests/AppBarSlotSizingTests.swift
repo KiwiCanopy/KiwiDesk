@@ -112,23 +112,22 @@ struct AppBarSlotSizingTests {
 
     @Test("Auto font size scales with thickness, clamped")
     func autoFontSize() {
-        let slim = AppBarItemView.autoFontSize(
-            forThickness: 20
-        )
-        let fat = AppBarItemView.autoFontSize(
-            forThickness: 48
-        )
+        // The ladder lives on the STYLE (one resolution site
+        // shared with the slot measurement and the GUI scene);
+        // the default style's `fontSize` 0 is the auto arm.
+        let auto = AppBarStyle()
+        #expect(auto.fontSize == 0)
+        let slim = auto.resolvedFontSize(forThickness: 20)
+        let fat = auto.resolvedFontSize(forThickness: 48)
         #expect(slim < fat)
         // Extremes stay readable and inside the strip.
+        #expect(auto.resolvedFontSize(forThickness: 4) == 9)
+        #expect(auto.resolvedFontSize(forThickness: 400) == 28)
+        // An explicit `font_size` wins over the ladder.
+        var pinned = AppBarStyle()
+        pinned.fontSize = 13
         #expect(
-            AppBarItemView.autoFontSize(
-                forThickness: 4
-            ) == 9
-        )
-        #expect(
-            AppBarItemView.autoFontSize(
-                forThickness: 400
-            ) == 28
+            pinned.resolvedFontSize(forThickness: 48) == 13
         )
     }
 

@@ -92,23 +92,13 @@ extension AppBarItemView {
     /// it can never re-truncate the widest name.
     nonisolated static let edgePadding: CGFloat = 6
 
-    /// `bar_font_size` 0 = auto: scale with the bar's cross
-    /// dimension (its thickness), so a fat bar gets readable
-    /// text and a slim one stays inside its strip.
+    /// The style's own ladder (`resolvedFontSize`), fed this
+    /// item's live cross dimension.
     private var effectiveFontSize: CGFloat {
-        if style.fontSize > 0 {
-            return style.fontSize
-        }
-        return Self.autoFontSize(
+        style.resolvedFontSize(
             forThickness: horizontal
                 ? bounds.height : bounds.width
         )
-    }
-
-    nonisolated static func autoFontSize(
-        forThickness thickness: CGFloat
-    ) -> CGFloat {
-        min(max(thickness * 0.42, 9), 28)
     }
 
     /// Icon and name sit centered in the slot as one group;
