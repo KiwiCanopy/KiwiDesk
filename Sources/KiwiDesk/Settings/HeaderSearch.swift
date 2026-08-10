@@ -104,46 +104,54 @@ struct HeaderSearch: View {
             .accessibilityHidden(true)
     }
 
-    /// Hung below the field in the field's own coordinate space.
-    /// The offset is the field's height plus the gap; it is a
-    /// constant because a `GeometryReader` here would hand the
-    /// flexible slot a size to negotiate and collapse the row.
-    ///
-    /// 380 wide, up from the one-per-destination list's 340: the
-    /// rows now carry a right-aligned value and, sometimes, the
-    /// mode tag. The responsive pass (17a) owns the final
-    /// number.
+    /// Hung below the field in the field's own coordinate
+    /// space; the offset is the field's height plus the gap.
+    /// The `GeometryReader` is INSIDE the overlay, where it
+    /// only measures the proposal — wrapped around the field
+    /// it would negotiate the flexible slot and collapse the
+    /// row. The responsive pass (17a) owns the final floor.
     @ViewBuilder private var resultPanel: some View {
         if searching {
-            resultList
-                .padding(8)
-                .frame(width: 380, alignment: .leading)
-                .background(
+            // The panel matches the FIELD's width (the overlay's
+            // proposal, read here where it cannot feed back into
+            // the row's layout), floored at 380 for the 720 pt
+            // minimum: a narrower card left the banner behind
+            // visible on BOTH sides at one height, reading as a
+            // line through an opaque panel (owner, 2026-08-10).
+            GeometryReader { geo in
+                resultCard(width: max(380, geo.size.width))
+            }
+        }
+    }
+
+    private func resultCard(width: CGFloat) -> some View {
+        resultList
+            .padding(8)
+            .frame(width: width, alignment: .leading)
+            .background(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+                .fill(SettingsTheme.card)
+                .overlay(
                     RoundedRectangle(
                         cornerRadius: SettingsTheme.cardRadius
                     )
-                    .fill(SettingsTheme.card)
-                    .overlay(
-                        RoundedRectangle(
-                            cornerRadius: SettingsTheme.cardRadius
-                        )
-                        .strokeBorder(SettingsTheme.hairline)
-                    )
-                    // Without this the shadow halos EVERY
-                    // primitive — the hairline ring casts its
-                    // own shadow INWARD, reading as a line
-                    // ghosting through an opaque panel (#758's
-                    // lesson, hit again here; owner report
-                    // 2026-08-10).
-                    .compositingGroup()
-                    .shadow(
-                        color: .black.opacity(0.16),
-                        radius: 12,
-                        y: 4
-                    )
+                    .strokeBorder(SettingsTheme.hairline)
                 )
-                .offset(y: 40)
-        }
+                // Without this the shadow halos EVERY
+                // primitive — the hairline ring casts its own
+                // shadow INWARD, reading as a line ghosting
+                // through an opaque panel (#758's lesson, hit
+                // again here; owner report 2026-08-10).
+                .compositingGroup()
+                .shadow(
+                    color: .black.opacity(0.16),
+                    radius: 12,
+                    y: 4
+                )
+            )
+            .offset(y: 40)
     }
 
     private var results: SettingsSearchResults {
