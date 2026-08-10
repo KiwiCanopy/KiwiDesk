@@ -105,6 +105,24 @@ struct DetailPanelTests {
             in: .bars
         )
         #expect(sliced.map(\.key) == [barsKey])
+        // And the panel VIEW consults the filter — the helper
+        // alone cannot see its own mount bypassing it with
+        // `rows(for:)` directly (guard-prover, 2026-08-10).
+        // Keyed on the use site: the call takes arguments, the
+        // declaration takes parameters, so the needle's `(`
+        // followed by the source list matches only the call.
+        let source = try panelSource()
+        #expect(
+            source.contains(
+                "SettingsDiffRowSource.areaRows("
+                    + "SettingsDiffRowSource.rows(for:model)"
+            ),
+            Comment(
+                rawValue:
+                    "the panel no longer routes its diff rows "
+                    + "through the area filter"
+            )
+        )
         if let orphan = SettingKey.allCases.first(where: {
             $0.placement.area == nil
         }) {
