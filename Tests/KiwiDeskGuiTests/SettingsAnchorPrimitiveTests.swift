@@ -147,6 +147,14 @@ struct SettingsAnchorPrimitiveTests {
         // an anchor, and it would swallow one if anybody nested
         // them.
         "LocaleScopedRoot.swift": 1,
+        // Navigation identity: the header search remounts per
+        // destination, clearing its query and closing the
+        // result panel — restored focus was re-opening stale
+        // suggestions over every push/pop (owner, 2026-08-10;
+        // `HomeSurfacingTests` pins the wire). Not a reveal
+        // target: the field is chrome, and nothing inside the
+        // remounted subtree anchors.
+        "SettingsHeaderBar.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")
