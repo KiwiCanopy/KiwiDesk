@@ -69,7 +69,7 @@ struct FitGapsAction: View {
     @ViewBuilder private var result: some View {
         if actionWasApplied, model.isDirty {
             Label(appliedStatus, systemImage: "checkmark.circle.fill")
-                .foregroundStyle(.green)
+                .foregroundStyle(SettingsTheme.groupHeading)
                 .accessibilityLabel(appliedStatus)
         } else if gapsMatch {
             Label(

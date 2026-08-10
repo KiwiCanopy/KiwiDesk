@@ -20,10 +20,13 @@ struct CustomLuaBanner: View {
                 )
             )
         } icon: {
+            // `ink2`, not `.blue`: a raw system hue in a
+            // green-tinted window, and the note is neutral
+            // information, not a link (dark pass).
             Image(systemName: "info.circle")
-                .foregroundStyle(.blue)
+                .foregroundStyle(SettingsTheme.ink2)
         }
         .font(.callout)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(SettingsTheme.ink2)
     }
 }

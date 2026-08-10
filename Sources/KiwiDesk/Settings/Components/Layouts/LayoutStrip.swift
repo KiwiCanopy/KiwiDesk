@@ -95,7 +95,7 @@ struct LayoutStrip: View {
                     .strokeBorder(
                         selected
                             ? SettingsTheme.accent
-                            : Color.secondary.opacity(0.25),
+                            : SettingsTheme.ink2.opacity(0.25),
                         lineWidth: selected ? 2 : 1
                     )
             )

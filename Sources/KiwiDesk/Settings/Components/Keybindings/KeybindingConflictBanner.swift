@@ -26,7 +26,12 @@ struct KeybindingConflictBanner: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
+                // `warningInk`, not `.secondary` (dark pass):
+                // the hierarchical grey lands at ~3.5:1 on the
+                // warm brown this surface flips to in dark,
+                // and the banner's own ink is the pairing the
+                // token table clears.
+                .foregroundStyle(SettingsTheme.warningInk)
                 .iconButtonAffordance(
                     L(
                         "keybinding_conflict.dismiss",

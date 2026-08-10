@@ -139,7 +139,7 @@ struct KeyRecorderField: View {
                     Image(systemName: "xmark.circle.fill")
                 }
                 .buttonStyle(.borderless)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
                 .iconButtonAffordance(
                     L(
                         "key_recorder.clear",
@@ -234,7 +234,7 @@ struct KeyRecorderField: View {
     /// in the accent: text naming a value. The recording signal
     /// is unaffected, because the chrome draws it independently.
     private var buttonTint: Color {
-        flashing ? .red : SettingsTheme.ink
+        flashing ? SettingsTheme.danger : SettingsTheme.ink
     }
 
     private var label: String {

@@ -65,7 +65,7 @@ struct MonocleSchematic: View {
             .fill(
                 front
                     ? LayoutSchematic.fill
-                    : Color.secondary.opacity(0.10)
+                    : SettingsTheme.ink2.opacity(0.10)
             )
             .overlay(
                 RoundedRectangle(
@@ -74,7 +74,7 @@ struct MonocleSchematic: View {
                 .strokeBorder(
                     front
                         ? LayoutSchematic.stroke
-                        : Color.secondary.opacity(0.4),
+                        : SettingsTheme.ink2.opacity(0.4),
                     lineWidth: front ? 1.5 : 1
                 )
             )

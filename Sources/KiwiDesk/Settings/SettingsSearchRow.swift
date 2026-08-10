@@ -44,7 +44,7 @@ struct SettingsSearchRow: View {
                 if let breadcrumb {
                     Text(breadcrumb)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(SettingsTheme.ink3)
                         .lineLimit(1)
                 }
             }
@@ -52,7 +52,7 @@ struct SettingsSearchRow: View {
             if let shownValue {
                 Text(shownValue)
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink3)
                     .lineLimit(1)
             }
             if switchesMode { modeTag }
@@ -88,7 +88,7 @@ struct SettingsSearchRow: View {
         // put the match on every future translation round.
         Text(L("mode.power_user", "Power User"))
             .font(.caption2)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink3)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(

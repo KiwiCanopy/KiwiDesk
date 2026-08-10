@@ -159,14 +159,16 @@ struct LoginItemCard: View {
         if model.autoStartBusy {
             Text(L("general.login_item.updating", "Updating…"))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
         } else if let applied = model.autoStartApplied {
+            // Green-emphasis text token, not `.green` — the
+            // diff rows' precedent (dark pass).
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
                 Text(confirmationText(applied))
             }
             .font(.caption)
-            .foregroundStyle(.green)
+            .foregroundStyle(SettingsTheme.groupHeading)
             .transition(.opacity)
         }
     }

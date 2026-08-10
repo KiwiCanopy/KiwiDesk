@@ -31,9 +31,14 @@ struct ShortcutsHeader: View {
                 }
             }
             if importedNote {
+                // `groupHeading` is the green-emphasis TEXT
+                // token (the diff rows' precedent) — `.green`
+                // lifts in dark while the app's greens do not,
+                // and full-strength `accent` on words reads
+                // clickable (dark pass).
                 Text(importedNoteText)
                     .font(.caption)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(SettingsTheme.groupHeading)
             }
         }
     }
