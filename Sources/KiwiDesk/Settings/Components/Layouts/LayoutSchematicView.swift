@@ -23,8 +23,37 @@ struct LayoutSchematicView: View {
     /// one parameter down. Every caller states its count.
     let windows: Int
     let scale: SchematicScale
+    @Environment(\.schematicPalette) private var palette
+
+    /// The active tile's focus stroke: the draft's REAL
+    /// `border.focused_color` (owner ruled 2026-08-10 — the
+    /// Gaps ring's honesty rule extended here). Set at this one
+    /// mount so the strip, the panel and the Home band cannot
+    /// disagree. `nil` — borders disabled, or a plate mount
+    /// whose colour fails the plate floor — keeps the family
+    /// stroke, which claims nothing. Stated residue: off-plate
+    /// the colour is shown raw, like the Gaps ring — a
+    /// user-invisible focused colour is shown invisible, which
+    /// is the truth about it.
+    private var focusStroke: Color? {
+        let style = settings.borderStyle
+        guard style.enabled else { return nil }
+        if palette != nil,
+            !HomeCardPlate.plateLegible(style.focusedColor)
+        {
+            return nil
+        }
+        return Color(kiwiHex: style.focusedColor)
+    }
 
     var body: some View {
+        schematic.environment(
+            \.schematicFocusStroke,
+            focusStroke
+        )
+    }
+
+    @ViewBuilder private var schematic: some View {
         switch mode {
         case .bsp:
             BspSchematic(

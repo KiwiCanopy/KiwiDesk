@@ -80,7 +80,7 @@ struct LayoutPreviewPanel: View {
             .frame(maxWidth: .infinity)
             Text("\(windows)")
                 .frame(minWidth: 24, alignment: .trailing)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
                 .font(.body.monospacedDigit())
         }
     }
