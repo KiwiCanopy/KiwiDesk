@@ -31,7 +31,10 @@ struct GapsEditor: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
-            GapsDiagram(outer: outer, inner: inner)
+            // The gap miniature moved to the detail PANEL
+            // (`GapsBordersPanelPreview`, #678 redesign spec) — the
+            // column beside these rows is where the draft is
+            // watched now.
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
                 unified: outerUnified,

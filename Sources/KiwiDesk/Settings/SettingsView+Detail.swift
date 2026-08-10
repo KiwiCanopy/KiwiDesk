@@ -46,7 +46,33 @@ extension SettingsView {
         }
     }
 
+    /// The two-column detail (digest §1.1): the flexing content
+    /// column, then — where the area offers one — the fixed
+    /// preview panel behind a hairline. The offer is consulted
+    /// through `SettingsDetailPanelOffer` only; an area outside
+    /// the set takes the full width, which is the prototype's
+    /// stated rule for areas with nothing to show.
     @ViewBuilder var detailPane: some View {
+        HStack(spacing: 0) {
+            contentColumn
+            // `panelVisible` FIRST, the same predicate the
+            // pill's centring offset reads — one conjunct
+            // added there must move the pill and the mount
+            // together (review 2026-08-10; the two had
+            // already drifted on the `editingLua` half).
+            if panelVisible,
+                let destination = model.destination
+            {
+                SettingsTheme.hairline.frame(width: 1)
+                SettingsDetailPanel(
+                    model: model,
+                    destination: destination
+                )
+            }
+        }
+    }
+
+    @ViewBuilder private var contentColumn: some View {
         VStack(spacing: 0) {
             if model.hasCustomLua {
                 CustomLuaBanner()
@@ -62,6 +88,18 @@ extension SettingsView {
             // wrappers would buy nothing and drift.
             ScrollViewReader { proxy in
                 detail(model.destination)
+                    // The wide-window cap (owner 2026-08-10):
+                    // rows never stretch past the widest column
+                    // the prototype drew; the surplus becomes
+                    // symmetric margin. Inside the reader so the
+                    // reveal proxy still spans the pane.
+                    .frame(
+                        maxWidth: SettingsTheme.contentMaxWidth
+                    )
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .center
+                    )
                     // The in-area half of the flip's reflow
                     // (#760): Home's grid animates its own, and
                     // an area the user is standing in animates

@@ -32,7 +32,7 @@ struct SettingsThemeWiringTests {
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate.swift",
         "plateInk": "HomeCardPlate.swift",
-        "hairline": "SettingsView.swift",
+        "hairline": "SettingsDetailPanel.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SidebarSearchField.swift",
@@ -41,6 +41,9 @@ struct SettingsThemeWiringTests {
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar.swift",
         "danger": "KeyRecorderRejectionRow.swift",
+        "panel": "SettingsDetailPanel.swift",
+        "savePill": "SettingsFooter.swift",
+        "savePillInk": "SettingsFooter.swift",
     ]
 
     /// Token → why nothing draws it yet. Each ships with the
@@ -48,16 +51,16 @@ struct SettingsThemeWiringTests {
     /// phase; moving one here to `wired` is what a consumer
     /// landing looks like.
     private let deferred: [String: String] = [
-        "panel":
-            "the 392 pt preview column is Phase 4",
         "accentInk":
             "AppKit picks the label ink on a tinted prominent "
-            + "button; Phase 4's save pill is the first site "
-            + "that draws it explicitly",
+            + "button — the pill's Save included — so no site "
+            + "draws it explicitly yet; the first custom "
+            + "accent-filled control will",
         "onAccentKnob":
-            "belongs to a knob on a LARGE accent field, which "
-            + "nothing draws until Phase 4 — never to a slider "
-            + "thumb, which stays white in both appearances",
+            "belongs to a knob on a LARGE accent field; the "
+            + "shell shipped without one (the pill's controls "
+            + "are buttons) — never a slider thumb, which "
+            + "stays white in both appearances",
     ]
 
     private var settingsDir: URL {
@@ -77,7 +80,7 @@ struct SettingsThemeWiringTests {
                 )
             )
             #expect(
-                source.contains("SettingsTheme.\(token)"),
+                namesExactly(source, token),
                 Comment(
                     rawValue:
                         "\(file) no longer draws "
@@ -87,6 +90,34 @@ struct SettingsThemeWiringTests {
                 )
             )
         }
+    }
+
+    /// Identifier-boundary match, the metric suite's
+    /// `namesExactly` adopted here after guard-prover
+    /// (2026-08-10) proved the bare `contains` inert for
+    /// `panel`: "SettingsTheme.panel" is a strict prefix of
+    /// "SettingsTheme.panelWidth", which lives in the SAME
+    /// claimed file — the first token/metric prefix pair to
+    /// collide across the two declaration files. The name must
+    /// be followed by something that cannot continue an
+    /// identifier.
+    private func namesExactly(
+        _ source: String,
+        _ token: String
+    ) -> Bool {
+        let needle = "SettingsTheme.\(token)"
+        var rest = Substring(source)
+        while let hit = rest.range(of: needle) {
+            let after = rest[hit.upperBound...].first
+            if after == nil
+                || !(after!.isLetter
+                    || after!.isNumber || after! == "_")
+            {
+                return true
+            }
+            rest = rest[hit.upperBound...]
+        }
+        return false
     }
 
     @Test("a deferred token really has no consumer")

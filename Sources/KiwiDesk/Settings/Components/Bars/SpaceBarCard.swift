@@ -35,12 +35,10 @@ struct SpaceBarCard: View {
             caption: cardCaption,
             help: reason.map(BarsGateHelp.sentence)
         ) {
-            SpaceBarPreviewStrip(
-                style: style.wrappedValue,
-                appBar: model.config.settings.appBarStyle,
-                sameEdge: model.config.settings
-                    .spaceBarSharesEdgeWithAppBar
-            )
+            // The strip moved to the detail PANEL
+            // (`BarsPanelPreview`, #678 redesign spec) — the column
+            // beside these rows is where the draft is watched
+            // now; the palette mirror keeps its own mount.
             rows(BarsRowOrder.spaceBarAtRest)
             styleDisclosure
         }

@@ -89,11 +89,10 @@ struct DragVisualsEditor: View {
             subsection: true,
             help: enabledReason.map(GapsBordersGateHelp.sentence)
         ) {
-            DragVisualPreview(
-                visual: visual.wrappedValue,
-                cornerRadius: model.config.settings
-                    .dragCornerRadius
-            )
+            // The ghost preview moved to the detail PANEL
+            // (`GapsBordersPanelPreview`) — one screen must
+            // not state one fact twice; the Advanced Colours
+            // mirror keeps its own mount.
             DragVisualControls(
                 visual: visual,
                 enabledReason: enabledReason

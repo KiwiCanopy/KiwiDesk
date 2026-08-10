@@ -40,23 +40,14 @@ struct LayoutDefaultsSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
                 LayoutStrip(model: model, selection: selected)
-                // The live preview LEADS its editor, the way
-                // every schematic led the editor it belonged to
-                // (gui.md; `docs/ui-patterns.md` row-order tier
-                // 1). The strip above does not discharge that:
-                // it is the selector, drawing every layout at
-                // one fixed count, while this panel is the
-                // selected layout's own preview and the only
-                // thing the count slider moves.
-                LayoutPreviewPanel(
-                    model: model,
-                    mode: selected.wrappedValue
-                )
+                // The selected layout's own preview AND the
+                // spaces-using card moved to the detail PANEL
+                // (#678 redesign spec; owner 2026-08-10 for the
+                // spaces list — it is read-only, so it watches
+                // beside the preview rather than sitting among
+                // the editable rows). The strip stays: it is
+                // the selector, not the preview.
                 LayoutCard(
-                    model: model,
-                    mode: selected.wrappedValue
-                )
-                SpacesUsingLayout(
                     model: model,
                     mode: selected.wrappedValue
                 )

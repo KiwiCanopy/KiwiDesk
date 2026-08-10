@@ -59,7 +59,9 @@ struct FocusBorderEditor: View {
                 L("border.enabled", "Show focus border"),
                 isOn: style.enabled
             )
-            FocusBorderPreview(style: style.wrappedValue)
+            // The ring preview moved to the detail PANEL
+            // (`GapsBordersPanelPreview`, #678 redesign spec); the
+            // Advanced Colours mirror keeps its own mount.
             controls.modifier(
                 GreyOut(active: blockReason != nil, help: blockHelp)
             )

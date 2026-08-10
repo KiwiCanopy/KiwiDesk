@@ -1,93 +1,56 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The stable three-verb footer (#68 §3.12): the same slots in
-/// every mode — Revert, "Save a Copy As…", and a primary Save
-/// (⌘S), clustered at the trailing edge. The banner above
-/// names the edit target authoritatively; a destination
-/// caption beside Save duplicated it and was dropped as
-/// confusing. What each verb does per mode:
+/// The floating save pill (#678 redesign spec): "N
+/// unsaved changes to Desk | Revert · Save a copy… · Save",
+/// dark chrome floating over the content column. It exists
+/// only while there is something to act on — a dirty draft,
+/// profile-level edits, or layout drift — and disappears at
+/// zero (`GreyOutHidingTests` carries this file's exemption
+/// from grey-don't-hide). Owner 2026-08-09 overturned the
+/// earlier docked-footer ruling on sight; the planned
+/// responsive pass will dock the pill back into a real footer
+/// bar below 900 pt, as its one change of kind.
 ///
+/// The verbs keep the docked footer's exact semantics per mode
+/// (#68 §3.12):
 /// - Live w/ active profile: Save = update the profile (+
 ///   monitor-set refresh); Copy = snapshot into a new profile.
 /// - Stored-profile edit: Save = write that profile's JSON
 ///   without switching the layout; Copy = duplicate with the
-///   pending edits (#82; enabled with no edits — a plain
-///   duplicate is legitimate).
-/// - Live w/ no profile (Standard/transient): the primary
-///   becomes "Save as New Profile…" — there is no target yet.
-/// - Raw-Lua editing: Save writes init.lua verbatim; the
-///   Adopt action lives in the editor's own banner (§3.12),
-///   not here.
+///   pending edits (#82). A CLEAN duplicate no longer has a
+///   footer to live in — that offer stays reachable from the
+///   Profiles area, which is its home.
+/// - Live w/ no profile: the primary becomes "Save as New
+///   Profile…".
+/// - Raw-Lua editing: Save writes init.lua verbatim.
 struct SettingsFooter: View {
     @ObservedObject var model: SettingsModel
-    @State private var namingNewProfile = false
-    @State private var newProfileName = ""
-    @State private var namingProfileCopy = false
-    @State private var profileCopyName = ""
+    @State var namingNewProfile = false
+    @State var newProfileName = ""
+    @State var namingProfileCopy = false
+    @State var profileCopyName = ""
+
+    /// Anything that gives a verb meaning. The
+    /// `.saveAsNewProfile` creation offer on a fully clean
+    /// setup deliberately does NOT summon the pill — creation
+    /// lives in Profiles; the pill narrates a draft.
+    private var hasWork: Bool {
+        model.isDirty || model.profileDirty
+            || model.hasLayoutDrift
+    }
 
     var body: some View {
-        HStack(spacing: 8) {
-            if model.isDirty {
-                Label(
-                    L(
-                        "footer.unsaved_changes",
-                        "Unsaved changes"
-                    ),
-                    systemImage: "pencil.circle"
-                )
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.warningInk)
-            }
-            if model.primarySaveAction == .saveGlobalsOnly {
-                // Names what is EXCLUDED, not the six fields it
-                // writes — one sentence beats a field list, and
-                // the reader already has the paused banner above
-                // for the why (#516, ui-designer).
-                Text(pausedScopeCaption)
-                    .font(.caption2)
-                    .foregroundStyle(SettingsTheme.ink2)
-            }
-            if let drift = model.layoutDrift {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(
-                        L(
-                            "footer.save.adopts_layout",
-                            "Save also adopts the session layout (%1$@).",
-                            drift.live.displayName
+        Group {
+            if hasWork {
+                pill
+                    .transition(
+                        .opacity.combined(
+                            with: .move(edge: .bottom)
                         )
                     )
-                    .font(.caption2)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    Text(
-                        L(
-                            "footer.revert.restores_layout",
-                            "Revert also restores the profile "
-                                + "layout (%1$@).",
-                            drift.saved.displayName
-                        )
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(SettingsTheme.ink2)
-                }
             }
-            Spacer()
-            Button(L("footer.revert", "Revert Changes")) {
-                model.revert()
-            }
-            .settingsActionButton()
-            .controlSize(.regular)
-            .disabled(!(model.isDirty || model.hasLayoutDrift))
-            copySlot
-            primarySlot
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        // Card fill, like the header it bookends. Without it the
-        // bar inherited the page and read as a third grey between
-        // the two — the hairline above (`SettingsView.chrome`) is
-        // what separates them now.
-        .background(SettingsTheme.card)
         .alert(
             L(
                 "footer.save_as_new.title",
@@ -133,6 +96,130 @@ struct SettingsFooter: View {
         }
     }
 
+    private var pill: some View {
+        HStack(spacing: 12) {
+            leadingReadout
+            Text(verbatim: "|")
+                .foregroundStyle(
+                    SettingsTheme.savePillInk.opacity(0.4)
+                )
+            Button(L("footer.revert", "Revert")) {
+                model.revert()
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(
+                SettingsTheme.savePillInk.opacity(0.8)
+            )
+            .disabled(!(model.isDirty || model.hasLayoutDrift))
+            copySlot
+            primarySlot
+        }
+        .font(.callout)
+        .padding(.leading, 18)
+        .padding(.trailing, 10)
+        .padding(.vertical, 9)
+        .background(
+            RoundedRectangle(
+                cornerRadius: SettingsTheme.cardRadius
+            )
+            .fill(SettingsTheme.savePill)
+            .shadow(
+                color: SettingsTheme.savePill.opacity(0.45),
+                radius: 17,
+                y: 7
+            )
+        )
+    }
+
+    // MARK: - Leading readout
+
+    /// The pill's first words: the settings count with the edit
+    /// target's name, plus — stacked small beneath — whichever
+    /// scope caption applies (#516 keeps the paused scope and
+    /// the drift adoption VISIBLE, never a hover-only fact).
+    private var leadingReadout: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(countLine)
+                .foregroundStyle(SettingsTheme.savePillInk)
+            if model.primarySaveAction == .saveGlobalsOnly {
+                caption(pausedScopeCaption)
+            }
+            if let drift = model.layoutDrift {
+                caption(
+                    L(
+                        "footer.save.adopts_layout",
+                        "Save also adopts the session layout "
+                            + "(%1$@).",
+                        drift.live.displayName
+                    )
+                )
+                caption(
+                    L(
+                        "footer.revert.restores_layout",
+                        "Revert also restores the profile "
+                            + "layout (%1$@).",
+                        drift.saved.displayName
+                    )
+                )
+            }
+        }
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2)
+            .foregroundStyle(
+                SettingsTheme.savePillInk.opacity(0.65)
+            )
+    }
+
+    private var countLine: String {
+        let count = model.draftChangeCount
+        guard count > 0 else {
+            // The docked footer's own key, kept through the
+            // pill rewrite: identical English, same meaning
+            // class, ten shipped translations (review
+            // 2026-08-10 caught the re-mint discarding them).
+            return L(
+                "footer.unsaved_changes",
+                "Unsaved changes"
+            )
+        }
+        if let target = editTargetName {
+            return count == 1
+                ? L(
+                    "footer.unsaved.count_one_to",
+                    "%1$d unsaved change to %2$@",
+                    count,
+                    target
+                )
+                : L(
+                    "footer.unsaved.count_to",
+                    "%1$d unsaved changes to %2$@",
+                    count,
+                    target
+                )
+        }
+        return count == 1
+            ? L(
+                "footer.unsaved.count_one",
+                "%1$d unsaved change",
+                count
+            )
+            : L(
+                "footer.unsaved.count",
+                "%1$d unsaved changes",
+                count
+            )
+    }
+
+    /// The banner above stays the authoritative naming of the
+    /// edit target; this is the pill's short echo of it.
+    private var editTargetName: String? {
+        if model.editingLua { return "init.lua" }
+        return model.editingProfile ?? model.activeProfile
+    }
+
     private var saveAsNewMessage: String {
         L(
             "footer.save_as_new.message",
@@ -151,137 +238,5 @@ struct SettingsFooter: View {
                 + "changed.",
             model.editingProfile ?? ""
         )
-    }
-
-    // MARK: - Secondary slot: Save a Copy As…
-
-    /// Hidden in the raw-Lua mode (no profile is being
-    /// edited) and in the no-profile live mode (it would
-    /// duplicate the primary).
-    @ViewBuilder private var copySlot: some View {
-        if model.editingLua {
-            EmptyView()
-        } else if model.editingStoredProfile {
-            Button(saveCopyAsLabel) {
-                namingProfileCopy = true
-            }
-            .settingsActionButton()
-            .controlSize(.regular)
-        } else if model.activeProfile != nil {
-            // Live active profile → a copy captures the live
-            // monitor set, so it is blocked while paused (#335).
-            Button(saveCopyAsLabel) {
-                namingNewProfile = true
-            }
-            .settingsActionButton()
-            .controlSize(.regular)
-            .disabled(model.profileSaveBlockedReason != nil)
-            .help(model.profileSaveBlockedReason ?? "")
-        }
-    }
-
-    private var pausedScopeCaption: String {
-        L(
-            "footer.save.globals_only",
-            "Layout and monitors stay paused; Save covers "
-                + "everything else."
-        )
-    }
-
-    private var saveCopyAsLabel: String {
-        L("footer.save_a_copy_as", "Save a Copy As…")
-    }
-
-    // MARK: - Primary slot: Save (⌘S)
-
-    @ViewBuilder private var primarySlot: some View {
-        let save = L("footer.save", "Save")
-        switch model.primarySaveAction {
-        case .saveLua:
-            Button(save) { model.saveLuaSource() }
-                .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .disabled(!model.isDirty)
-        case .updateStoredProfile:
-            Button(save) { model.saveEditedProfile() }
-                .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .disabled(!model.isDirty)
-        case .updateActiveProfile:
-            // Update refreshes the live monitor set, so it is
-            // blocked while paused (#335).
-            Button(save) { model.updateActiveProfile() }
-                .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .disabled(
-                    model.profileSaveBlockedReason != nil
-                        || !model.updateEnabled
-                        || !(model.isDirty
-                            || model.profileDirty
-                            || model.hasLayoutDrift)
-                )
-                .help(
-                    model.profileSaveBlockedReason
-                        ?? model.updateHint ?? ""
-                )
-        case .saveGlobalsOnly:
-            // Accessibility is off, so no profile may capture
-            // the empty monitor set — but a global changed, and
-            // globals carry no monitor set. Plain "Save", like
-            // its two profile siblings: scope rides the caption
-            // beside the footer, not the label (#516).
-            Button(save) { model.saveGlobalsWhilePaused() }
-                .keyboardShortcut("s")
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .disabled(!model.isDirty)
-        case .saveAsNewProfile:
-            // No profile yet — the create action takes the
-            // primary slot; it captures the live monitor set,
-            // so it is blocked while paused (#335).
-            Button(
-                L(
-                    "footer.save_as_new_profile",
-                    "Save as New Profile…"
-                )
-            ) {
-                prefillNewProfileName()
-                namingNewProfile = true
-            }
-            .keyboardShortcut("s")
-            .buttonStyle(.borderedProminent)
-            .controlSize(.regular)
-            .disabled(model.profileSaveBlockedReason != nil)
-            .help(model.profileSaveBlockedReason ?? "")
-        }
-    }
-
-    /// Pre-fills the first-save naming sheet (ui-designer
-    /// 2026-07-19) so confirming is one Enter instead of
-    /// composing a name cold. Uniqued against existing
-    /// profiles for the edge where profiles exist but none is
-    /// active; a name the user already typed is never
-    /// overwritten.
-    private func prefillNewProfileName() {
-        guard newProfileName.trimmed.isEmpty else { return }
-        let base = L(
-            "footer.default_profile_name",
-            "My Setup"
-        )
-        // Availability via the facade query, not a local copy
-        // of the collision rule — canRename holds the one
-        // sanctioned mirror (review 2026-07); this is the
-        // second consumer that decision reserved for the
-        // query. Case-insensitivity (APFS) rides along.
-        var name = base
-        var suffix = 2
-        while !model.core.isProfileNameFree(name) {
-            name = "\(base) \(suffix)"
-            suffix += 1
-        }
-        newProfileName = name
     }
 }

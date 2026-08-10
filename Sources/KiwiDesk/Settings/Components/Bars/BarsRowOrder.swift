@@ -45,11 +45,13 @@ enum BarsRowOrder {
         .appBar(.appBarEdge),
         .appBar(.appBarThickness),
         .appBar(.appBarGroupAdjacentWindows),
+        // The copy verb rides at rest, the adjust-gaps
+        // precedent (owner 2026-08-10) — a one-shot action
+        // nearly nobody found behind the drawer.
+        .spaceBar(.copyAppearance),
     ]
 
-    /// App Bar card, behind the Style disclosure. "Copy
-    /// appearance to Space Bar" closes the drawer — a one-shot
-    /// action over everything above it.
+    /// App Bar card, behind the Style disclosure.
     static let appBarStyle: [SettingKey] = [
         .appBar(.appBarBackground),
         .appBar(.appBarLiquidGlass),
@@ -64,7 +66,6 @@ enum BarsRowOrder {
         .appBar(.appBarItemGap),
         .appBar(.appBarFontSizeAuto),
         .appBar(.appBarFontSize),
-        .spaceBar(.copyAppearance),
     ]
 
     /// The "Show it in" block, after the Style disclosure: the

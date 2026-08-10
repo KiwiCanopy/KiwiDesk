@@ -14,12 +14,19 @@ struct GreyOutHidingTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    /// The hiding shape, discovered rather than enumerated.
-    /// `if <predicate> {` around settings content removes it from
-    /// the tree, which loses the cue that the stored value is
-    /// preserved (`docs/ui-patterns.md`). Findings A7
-    /// (`if bar.enabled`) and A8 (`if !model.editingStoredProfile`)
-    /// were both exactly this.
+    /// The hiding shape. `if <predicate> {` around settings
+    /// content removes it from the tree, which loses the cue
+    /// that the stored value is preserved
+    /// (`docs/ui-patterns.md`). Findings A7 (`if bar.enabled`)
+    /// and A8 (`if !model.editingStoredProfile`) were both
+    /// exactly this.
+    ///
+    /// STATED LIMIT (guard-prover 2026-08-10): this list is a
+    /// closed set of SPELLINGS — the scan discovers new FILES
+    /// using a known spelling, never a novel predicate
+    /// spelling (`if model.isDirty {` passed it green). A
+    /// hiding predicate in a new spelling is caught only by
+    /// review; a recurring one earns its line here.
     private let hidingPredicates = [
         "if bar.enabled {",
         "if !model.editingStoredProfile {",
@@ -64,8 +71,16 @@ struct GreyOutHidingTests {
         // An either/or slot: every branch renders a control (or
         // EmptyView in raw-Lua mode, where a profile-copy verb
         // has no referent). Nothing is hidden that exists in the
-        // other branch.
+        // other branch. The pill itself is the second half of
+        // the exemption: it exists only while the draft does
+        // (design-decisions ▸ the floating pill), so hiding at
+        // zero is the surface's stated behaviour, not a greying
+        // dodge. The `+Slots` file is the same slots after the
+        // §2.1 split — the exemption follows the code.
         "SettingsFooter.swift":
+            "either/or slot; each mode renders its own verb; "
+            + "the pill exists only while the draft does",
+        "SettingsFooter+Slots.swift":
             "either/or slot; each mode renders its own verb",
         // "Clear all bindings" acts on bindings; with none
         // stored there is nothing for it to act ON, so it is

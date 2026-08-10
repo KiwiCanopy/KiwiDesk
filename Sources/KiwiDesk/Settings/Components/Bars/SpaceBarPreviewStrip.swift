@@ -130,7 +130,8 @@ struct SpaceBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        !style.hasBox && style.backgroundFit == .full
+        // The one copy of the spans rule lives on the style.
+        style.plateSpans
     }
 
     @ViewBuilder private func stack<C: View>(

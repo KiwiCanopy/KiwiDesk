@@ -39,7 +39,9 @@ struct AppBarCard: View {
             caption: cardCaption,
             help: reason.map(BarsGateHelp.sentence)
         ) {
-            AppBarPreviewStrip(style: style.wrappedValue)
+            // The strip moved to the detail PANEL
+            // (`BarsPanelPreview`, #678 redesign spec); the palette
+            // mirror keeps its own mount.
             rows(BarsRowOrder.appBarAtRest)
             styleDisclosure
             showInBlock
@@ -144,25 +146,29 @@ struct AppBarCard: View {
     }
 
     /// One-shot copy, then fully independent — never a live
-    /// link (the census's `(action)` row, moved here from the
-    /// Space Bar colours block: it copies App Bar → Space Bar,
-    /// so it needs the Space Bar on, not the App Bar shown).
-    /// Sizes and style ONLY — colours are the Advanced Colours
-    /// area's concern (owner ruling 2026-08-02; a colours-copy,
-    /// if it ships, lives there). The one-shot caveat rides a
-    /// persistent caption, never hover alone.
+    /// link. Owner flipped the DIRECTION (2026-08-10): a
+    /// button on THIS card fills in THIS bar from the Space
+    /// Bar the user already configured — pushing outward
+    /// surprised on sight — and it rides at rest, always
+    /// visible (the adjust-gaps precedent). It
+    /// needs the SOURCE (Space Bar) on, not the App Bar
+    /// shown. Sizes and style ONLY — colours are the Advanced
+    /// Colours area's concern (owner ruling 2026-08-02; a
+    /// colours-copy, if it ships, lives there). The one-shot
+    /// caveat rides a persistent caption, never hover alone.
     private var copyAppearanceRow: some View {
         VStack(alignment: .leading, spacing: 4) {
             Button {
-                model.config.settings.spaceBarStyle
+                model.config.settings.appBarStyle
                     .copyAppearance(
-                        from: model.config.settings.appBarStyle
+                        from: model.config.settings
+                            .spaceBarStyle
                     )
             } label: {
                 Text(
                     L(
-                        "space_bar.copy_appearance",
-                        "Copy sizes and style to Space Bar…"
+                        "app_bar.copy_appearance",
+                        "Copy sizes and style from Space Bar…"
                     )
                 )
             }
@@ -170,8 +176,8 @@ struct AppBarCard: View {
             .controlSize(.small)
             .help(
                 L(
-                    "space_bar.copy_appearance.help",
-                    "Takes the App Bar's current sizes and "
+                    "app_bar.copy_appearance.help",
+                    "Takes the Space Bar's current sizes and "
                         + "style once — thickness, background, "
                         + "indicator and the rest. Colors are "
                         + "not copied; edits afterwards stay "
@@ -180,8 +186,8 @@ struct AppBarCard: View {
             )
             Text(
                 L(
-                    "space_bar.copy_appearance.caption",
-                    "Copies the App Bar's current sizes and "
+                    "app_bar.copy_appearance.caption",
+                    "Copies the Space Bar's current sizes and "
                         + "style — not its colors — as a "
                         + "one-time starting point, never a "
                         + "live link."
@@ -211,7 +217,7 @@ struct AppBarCard: View {
         L(
             "bars.style.app_bar.summary",
             "Background, content, indicator, sizes, symbol "
-                + "style, copy to Space Bar"
+                + "style"
         )
     }
 

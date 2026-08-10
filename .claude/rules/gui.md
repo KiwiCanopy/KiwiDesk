@@ -65,7 +65,12 @@ to invert the dim ladder).
   and it reads broken instead of forthcoming (the site's App Store
   badge, removed rather than greyed — permanently, the store being
   out of scope; see `docs/design-decisions.md`).
-- **The live preview leads** its editor.
+- **The live preview leads** its editor — in areas WITHOUT a
+  detail panel. An area in `SettingsDetailPanelOffer.offering`
+  watches its draft in the panel column instead, and its cards
+  carry no duplicate preview (`DetailPanelTests` holds the
+  migration and the offer set; the argument is in
+  `docs/design-decisions.md` ▸ two columns).
 - **A preview that claims to show engine behavior asks the
   engine.** Never re-implement a rule the engine owns beside the
   drawing of it — call it, and where the shape does not fit, wrap
@@ -590,6 +595,14 @@ Every surface, border and ink in the Settings tree comes from
   it blocks selection but won't grey. Never make it the sole gate
   on a side effect; guard the setter too, and grey the picker
   rather than the row so a `?` affordance stays live.
+- **Modifiers on a bare `ForEach` apply PER CHILD, never to the
+  run.** A container that hands a `ForEach` straight to its
+  chrome (a background well, padding, a border) stamps that
+  chrome onto every child — the Motion drawer shipped every
+  toggle, a caption and a lone divider each in its own sunken
+  well. Wrap the content in a `VStack` (or another single view)
+  before applying the chrome; `SettingsDisclosure`'s interior
+  states the mechanism at the seam.
 
 ## Strings
 

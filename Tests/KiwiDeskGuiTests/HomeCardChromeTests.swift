@@ -137,16 +137,28 @@ struct HomeCardChromeTests {
         )
     }
 
-    /// The grid the two heights live in: the adaptive column
-    /// band the responsive pass will measure against, and the
-    /// width `MonitorArrangementFitTests`' card canvas is
-    /// derived from.
+    /// The grid the two heights live in: the 240–360 column
+    /// band the plates were eye-confirmed at (ui-designer
+    /// 2026-08-10 kept 360 as the ceiling when the four-column
+    /// cap landed), the four-column cap itself, and the
+    /// saturated grid centring — the width
+    /// `MonitorArrangementFitTests`' card canvas is derived
+    /// from the band's floor.
     @Test("the grid keeps its column band")
     func gridKeepsItsBand() throws {
+        let source = try squashed("HomeScreen.swift")
         #expect(
-            try squashed("HomeScreen.swift").contains(
-                "GridItem(.adaptive(minimum:240,maximum:360),"
+            source.contains(
+                "GridItem(.flexible(minimum:240,maximum:360),"
                     + "spacing:16)"
+            )
+        )
+        #expect(source.contains("letcount=max(1,min(4,fit))"))
+        #expect(
+            source.contains(
+                ".frame(maxWidth:gridCap)"
+                    + ".frame(maxWidth:.infinity,"
+                    + "alignment:.center)"
             )
         )
     }

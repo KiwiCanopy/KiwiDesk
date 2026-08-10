@@ -1770,21 +1770,116 @@ would take the answer from precisely the users who lose the
 motion channel. `ModeGatedChromeTests` and
 `SettingsModeRevealTests` hold the two halves.
 
-**The header shows a count of the draft, not a second save
-surface.** (#678 turn 9.) The turn-9 frame draws three views
-of one draft on one screen — the floating save pill, the
-top-right unsaved button's popover, and (in this codebase) the
-docked three-verb footer. The footer already is the pill's
-final form (turn 17: below 900 pt "the pill docks as a real
-footer"), so the pill is not built, and the popover waits for
-the Phase 4 renderer work that gives diff rows their label
-authority — a popover listing a partial diff would claim the
-list is the whole draft. What ships is the honest subset: a
-count-only chip fed by `SettingsDraftDiff`, which resolves
-changed model leaves to census settings (many leaves under one
-setting count once), so the number is the number of settings
-the user changed, not an implementation detail. Save and
-Revert stay in the footer alone.
+**One draft, three views — and the save surface is the
+floating pill.** (#678 turn 9; Phase 4 shell.) The turn-9
+frame draws three views of one draft on one screen: the
+floating save pill, the top-right unsaved button's popover,
+and the detail panel's "Changed in this draft" list. All
+three ship now. An earlier ruling kept the docked three-verb
+footer, arguing it was the pill's final form since the spec's
+responsive pass would dock the pill below 900 pt anyway — the
+owner overturned
+that on sight (2026-08-09): at every width this window
+actually opens at, a full-width bar under the content reads
+as chrome that is always there, while the pill exists exactly
+when the draft does, which is the fact the surface is FOR.
+So the pill floats over the content column, centred on it
+(offset past the preview panel when one is open), appears
+only while there is something to act on, and disappears at
+zero — the one deliberate exception to grey-don't-hide,
+carried by `GreyOutHidingTests`. A planned responsive pass —
+not yet built; no width breakpoint ships today — will dock
+the pill back into a real footer bar below 900 pt, as its
+one change of kind.
+The count stays the number of SETTINGS the user changed:
+`SettingsDraftDiff` resolves changed model leaves to census
+settings, many leaves under one setting count once. The
+popover and the panel list are no longer partial — the
+readout (`SettingsValueReadout`) narrates every attributed
+key, and its totality guard is what discharged the earlier
+partial-list objection — so each row states old → new and
+jumps to the control that changed. Save and Revert live in
+the pill alone.
+
+**The detail view is two columns, and the panel is where the
+draft is watched.** (#678 Phase 4.) An area that
+has something to show gets a fixed 392 pt right column: "Live
+preview · <area>" over the area's preview drawn from the
+DRAFT, then the diff list. The redesign spec's `›` collapse
+handle is deliberately NOT built (owner 2026-08-10): the
+planned responsive pass will drop the panel by WIDTH below
+1200 pt, and a manual collapse beside that is a persisted
+preference duplicating what the window already decides —
+`DetailPanelTests` pins the absence so a handle quietly
+returning must re-argue it. Which
+areas offer one is a single data set
+(`SettingsDetailPanelOffer.offering`), because the
+prototype's rule is a verdict either way: an area with
+nothing to show hides the panel and takes the full width —
+absence must be a decision, never a missing branch. The
+panel's previews are existing renderers moved or recycled,
+never new drawings beside them: the schematic-and-slider,
+the palette scene, the gap miniature with the ring and the
+drag ghost, and — for Bars — the Home plate's fused two-bar
+desktop scene mounted at panel size (the two card strips
+retired with their cards). The in-card mounts are REMOVED in
+the same change — one screen must not state one fact twice —
+which NARROWS the old "live preview leads its editor"
+convention to areas without a panel: Advanced Colours' group
+previews still lead their rows because that area offers no
+panel, while in the four panel areas no migrated preview
+survives in its card (`DetailPanelTests` holds the offer set
+and the removals both).
+
+**Wide windows cap the content, not the panel.** (#678
+Phase 4; owner 2026-08-10.) The prototype was drawn at 1440
+and the breakpoints only go DOWN, so full screen was
+unspecced — and an uncapped content column stretches every
+row past readability while the panel's previews are pt-tuned
+at 392. So the content column stops at 980 pt (the widest
+column the prototype drew) and centres in the surplus; the
+panel stays 392. Home follows the same instinct at its own
+scale: never more than the redesign spec's four columns — on
+a big screen the CARDS grow instead of a fifth column
+appearing.
+Whether the panel should take some surplus at extreme widths
+is an open follow-up, not a decision this entry makes.
+
+**An inline disclosure row leads with a thin rule.** (Owner
+2026-08-10: the App Bar's Style accordion was nearly
+overlooked among plain rows.) The prototype draws every
+inline disclosure row with a top border — the rule is the
+"different kind of row" signal, separating the accordion and
+whatever follows it without promoting the drawer to a card.
+And what a drawer reveals sits in ONE sunken well, never one
+well per row of its contents.
+
+**Census labels render at runtime from the English
+manifest.** (#678 Phase 4.) A surface that renders a
+census-labelled key AWAY from its owning row — the diff
+rows, and pass 6's search index after them — cannot inline
+the English without becoming a second authoring surface that
+drifts from the rows. So `SettingsCensusLabel` resolves the
+current locale first and falls back to the `en.json`
+manifest `scripts/extract-keys` regenerates from the live
+call sites. That amends `en.json`'s build-time-only
+contract deliberately (stated on `LocaleCatalog`): the
+manifest is regenerated on every key change, so its
+staleness class is the same as any bundled catalog, and the
+alternative — 200-plus English literals in a second switch —
+is the drift this repo's one-list rules exist to prevent.
+The VALUE words in those rows obey the same
+one-authoring-surface reason: where exactly one picker
+family owns an enum option's words, the diff row reuses that
+picker's key verbatim — key and English — so the diff and
+the control it jumps to cannot name one choice two ways in
+any locale (`SettingsValueReadout` states the rule on its
+Layout labellers; `PlacementPicker`'s words, reused
+verbatim, are the worked case). The orientation pair is the
+stated exception: TWO picker families spell
+Vertical/Horizontal (`layout_params.orientation.*` and
+`scroll_grid.*`), one diff key cannot match both, so the
+diff keeps its own pair spelled identically.
 
 **The first-run banner orients once, then gets out of the
 way.** (#678 turn 14c.) Home opens already full — the tour
@@ -1823,12 +1918,14 @@ rename/delete/make-default/preset-apply are immediate file
 The Spaces tab's per-space layout picker stays staged. **No
 control besides the key recorder passes the live-apply bar.**
 
-**One stable save footer: Revert / Save a Copy As… / Save.**
+**Three save verbs: Revert / Save a copy… / Save.**
 The old footer showed up to seven differently-labeled verbs
 depending on invisible mode state, but they expressed only
 two intents: "persist to what I'm editing" and "duplicate
-under a new name". Three stable slots, clustered at the
-trailing edge. The header's profile picker names the edit
+under a new name". Three stable slots — a consolidation the
+floating pill inherits whole, verbs and per-mode semantics
+alike (see "One draft, three views" above). The header's
+profile picker names the edit
 target authoritatively — a destination caption beside Save
 duplicated it, read as confusing, and its fixed width split
 the button cluster apart, so it was dropped. Adopt is not a
@@ -1906,7 +2003,7 @@ bar and content scrolls straight under the blurred titlebar.
 **"Unsaved changes" is a live comparison, not a latched
 flag.** `isDirty` compares the edited config and Lua source
 against the as-loaded baselines on every change, so manually
-undoing an edit clears the footer again — a latched flag
+undoing an edit clears the save pill again — a latched flag
 kept claiming unsaved changes after the user had already
 put everything back.
 
@@ -1948,7 +2045,7 @@ because the difference matters: the guard covers what it has
 needles for, and `adoptIntoGui` now carries one.
 
 *Deliberate exceptions, so they are not "fixed" later.* The
-footer's **Revert** is unconfirmed on purpose — the verb is the
+pill's **Revert** is unconfirmed on purpose — the verb is the
 confirmation, and that is the macOS norm. **Adopt** keeps its
 own dialog instead of stacking the shared one, so one gesture
 prompts once; that dialog names the dropped buffer itself when
@@ -1986,7 +2083,7 @@ things that are load-bearing rather than incidental:
 
 - *Ahead of the two profile verbs only.* `.saveLua` and
   `.updateStoredProfile` write no monitor set either, so they were
-  never blocked and must not be rerouted. **Save a Copy As** stays
+  never blocked and must not be rerouted. **Save a copy…** stays
   unconditionally gated — a copy always captures the live set.
 - *Its own narrow method.* Routing through `persist(named:)` would
   drag in the overlapping-monitor-set warning and a "Saving
@@ -1994,7 +2091,7 @@ things that are load-bearing rather than incidental:
 - *Partial-clean, never `reload()`.* Only the six fields are
   adopted as clean; a blanket reload would discard staged tiling
   edits this save did not persist, and with both pending the
-  footer must keep reading "Unsaved changes".
+  pill must stay up, still counting the unsaved changes.
 
 The copy names what is **excluded** ("Layout and monitors stay
 paused; Save covers everything else") rather than listing six
@@ -2012,9 +2109,10 @@ rewriting their configuration. If they want to keep the layout, a
 "Save Current Layout to Profile" row is provided. Saving adopts the
 whole live state (whole-state snapshot semantics), avoiding partial
 saves or complex tracking; a failed save (e.g. a screen-count
-mismatch) raises an alert — the menu has no footer to warn in.
+mismatch) raises an alert — the menu has no save surface to
+warn in.
 Reverting in Settings re-applies the saved profile **only while
-layout drift exists** — matching the footer caption that announces
+layout drift exists** — matching the pill caption that announces
 it; a plain staged-edit revert stays model-only, exactly as before.
 The drift-revert reuses the in-effect re-apply path, so it also
 prunes spaces created since the profile was saved (their windows
@@ -2286,7 +2384,7 @@ shortcut fields never hitchhike on a recording. A new row's
 action is required payload for its first recording; later
 non-recorder edits to it stay staged. The base then resolves
 through the active profile's override, matching Save + reload
-semantics. `isDirty` and the footer keep their meaning ("the
+semantics. `isDirty` and the save pill keep their meaning ("the
 file hasn't caught up"); Save persists base shortcuts globally
 in `gui.json`, while stored-profile editing owns sparse profile
 overrides.

@@ -4,7 +4,7 @@ import Foundation
 /// #9). Kept separate from `LocalizationManager` so the manager
 /// stays focused on lookup + current-locale state (§1 of the
 /// design brief).
-enum LocaleCatalog {
+public enum LocaleCatalog {
     /// Locale codes shipped as `Resources/Locales/<code>.json`,
     /// excluding `en` (English lives inline in call sites, not
     /// as a bundled file the manager reads). `en.json` on disk
@@ -39,7 +39,17 @@ enum LocaleCatalog {
 
     /// Loads and decodes `<locale>.json`, or an empty dictionary
     /// if the file is missing or malformed.
-    static func load(_ locale: String) -> [String: String] {
+    ///
+    /// Public for one caller class: surfaces that render a
+    /// CENSUS-labelled key away from its owning row (the diff
+    /// rows, the search index) load the `en.json` manifest as
+    /// their English fallback through
+    /// `SettingsCensusLabel` — the Phase 4 amendment to the
+    /// manifest's build-time-only contract stated on
+    /// `availableLocales()` above. The manager's own lookup
+    /// path is unchanged: English still lives inline at row
+    /// call sites everywhere a row renders itself.
+    public static func load(_ locale: String) -> [String: String] {
         guard
             let url = Bundle.kiwiDeskCore.url(
                 forResource: locale,

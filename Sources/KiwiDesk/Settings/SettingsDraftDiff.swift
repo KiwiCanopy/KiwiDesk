@@ -77,21 +77,28 @@ struct SettingsDraftDiff {
 
     // MARK: - Path → SettingKey attribution
 
-    /// The census's model-path ids — `settings.*` for
-    /// `TilingSettings` fields and `config.*` for `GuiConfig`'s
-    /// top-level ones — normalized exactly as
-    /// `SettingKeyModelParityTests` normalizes the settings half
-    /// (synthetic row suffixes stripped, instance brackets
-    /// `[space]`/`[app]`/`[n]` → `[]`). Action/readonly/state
-    /// ids name no model path and stay out.
+    /// Whether a census id names a model path the walk can
+    /// book — `settings.*` for `TilingSettings` fields and
+    /// `config.*` for `GuiConfig`'s top-level ones. The ONE
+    /// copy of that key-space: `censusBases()` builds the
+    /// attribution from it and the readout totality net
+    /// (`SettingsValueReadoutTests`) consults it, so the two
+    /// cannot drift apart.
+    static func namesModelPath(_ id: String) -> Bool {
+        id.hasPrefix("settings.") || id.hasPrefix("config.")
+    }
+
+    /// The census's model-path ids (`namesModelPath`),
+    /// normalized exactly as `SettingKeyModelParityTests`
+    /// normalizes the settings half (synthetic row suffixes
+    /// stripped, instance brackets `[space]`/`[app]`/`[n]` →
+    /// `[]`). Action/readonly/state ids name no model path and
+    /// stay out.
     static func censusBases() -> [String: SettingKey] {
         var bases: [String: SettingKey] = [:]
         for key in SettingKey.allCases {
             var id = key.id
-            guard
-                id.hasPrefix("settings.")
-                    || id.hasPrefix("config.")
-            else { continue }
+            guard namesModelPath(id) else { continue }
             for suffix in [
                 " (auto)", " (unit)", " (value)", " (master)",
             ] where id.hasSuffix(suffix) {

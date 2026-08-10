@@ -121,6 +121,18 @@ struct SettingsThemeTokenTests {
             0xE0_82_76,
             SettingsTheme.danger
         ),
+        Pin(
+            "savePill",
+            0x12_25_1A,
+            0x0C_14_10,
+            SettingsTheme.savePill
+        ),
+        Pin(
+            "savePillInk",
+            0xEA_F3_EE,
+            0xEA_F3_EE,
+            SettingsTheme.savePillInk
+        ),
     ]
 
     @Test("every token resolves to its pinned light/dark pair")

@@ -34,7 +34,10 @@ enum HomeCardPlate {
             }
         case .bars:
             return tile(padding: 7, settings: settings) {
-                HomeCardBarsTile(settings: settings)
+                HomeCardBarsTile(
+                    settings: settings,
+                    spaceCount: model.config.spaces.count
+                )
             }
         case .colors:
             return tile(padding: 11, settings: settings) {
@@ -82,16 +85,15 @@ enum HomeCardPlate {
         }
     }
 
-    /// The shared plate: fixed height, desktop-dark ground, the
-    /// user's palette injected for every schematic inside, and
-    /// silent to VoiceOver — the renderers carry AX elements of
-    /// their own (`SchematicCanvas`), and a card is ONE button
-    /// whose value is its subtitle; a plate that voiced its
-    /// parts would read the picture over the answer.
+    /// The shared plate: fixed height, desktop-dark ground,
+    /// the user's palette injected for every schematic inside,
+    /// silent to VoiceOver — the renderers carry AX elements
+    /// of their own (`SchematicCanvas`), a card is ONE button
+    /// whose value is its subtitle, and a plate that voiced
+    /// its parts would read the picture over the answer.
     /// Extra air under the card's top edge — at the uniform
-    /// inset alone the tiles sat visibly close to it (owner,
-    /// 2026-08-09, on device). Named so the interior height
-    /// derives from it rather than restating the sum.
+    /// inset the tiles sat visibly close to it (owner,
+    /// 2026-08-09). Named so the interior height derives.
     static let topAir: CGFloat = 4
 
     /// The room a tile's content actually gets at a given
@@ -138,7 +140,7 @@ enum HomeCardPlate {
     /// legible on the user's own bar, invisible here — swaps
     /// for a theme fallback rather than drawing dark-on-dark
     /// (ui-designer, 2026-08-09).
-    private static func palette(
+    static func palette(
         _ settings: TilingSettings
     ) -> SchematicPalette {
         let accent = settings.spaceBarStyle.activeItemColor

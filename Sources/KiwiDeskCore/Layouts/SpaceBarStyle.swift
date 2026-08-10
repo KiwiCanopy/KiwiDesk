@@ -166,6 +166,14 @@ public struct SpaceBarStyle: Sendable, Equatable {
         backgroundStyle == .boxed && !glassEnabled
     }
 
+    /// `AppBarStyle.plateSpans`' twin — same rule, same
+    /// consult set (the Settings previews; the live bar
+    /// resolves through `BarPlate.frame`). Kept per struct
+    /// because each preview reads the style it draws.
+    public var plateSpans: Bool {
+        !hasBox && backgroundFit == .full
+    }
+
 }
 
 // MARK: - Codable

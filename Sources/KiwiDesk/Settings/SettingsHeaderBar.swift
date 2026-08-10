@@ -19,6 +19,10 @@ struct SettingsHeaderBar: View {
     /// no environment of its own.
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    /// The unsaved-changes popover (turn 9's third view of the
+    /// draft). View state: closing the window closes it, and
+    /// nothing else needs to open it.
+    @State private var unsavedPopoverShown = false
 
     private var destination: SettingsDestination? {
         model.destination
@@ -237,11 +241,12 @@ struct SettingsHeaderBar: View {
         .accessibilityLabel(L("home.mode_ax", "Settings mode"))
     }
 
-    /// The count view of the one draft (turn 9). A LABEL, not a
-    /// button: the per-row diff popover ships with the Phase 4
-    /// renderer work, and a count that opened a partial list
-    /// would claim the list is the whole draft. Save and Revert
-    /// stay in the footer.
+    /// The count view of the one draft (turn 9) — a BUTTON now:
+    /// the Phase 4 readout gave diff rows their label authority
+    /// (`SettingsValueReadout` narrates every attributed key,
+    /// and the attribution net is total), so the popover lists
+    /// the whole draft and the earlier partial-list objection
+    /// is discharged. Save and Revert stay in the pill.
     ///
     /// Neutral ink on a bordered chip with an amber DOT, not
     /// amber text on an amber outline: unsaved work is a state,
@@ -249,40 +254,78 @@ struct SettingsHeaderBar: View {
     /// that means something is wrong. The dot keeps the warning
     /// hue where it is cheap and the sentence readable.
     private var unsavedChip: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(SettingsTheme.warningInk)
-                .frame(width: 8, height: 8)
-            // Truncates rather than holding the row open: this
-            // is the row's longest element in every locale
-            // ("12 nicht gespeicherte Änderungen" is ~218 pt) and
-            // the only one that is a LABEL rather than a control.
-            // At the 720 pt minimum something has to give, and a
-            // clipped segmented control is the outcome 17a
-            // forbids. The dot survives truncation, and the full
-            // sentence is in the `.help` below.
-            Text(unsavedText)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink)
-                .lineLimit(1)
-                .truncationMode(.tail)
+        Button {
+            unsavedPopoverShown = true
+        } label: {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(SettingsTheme.warningInk)
+                    .frame(width: 8, height: 8)
+                // Truncates rather than holding the row open:
+                // this is the row's longest element in every
+                // locale ("12 nicht gespeicherte Änderungen" is
+                // ~218 pt) and the only one that is not a fixed
+                // control. At the 720 pt minimum something has
+                // to give, and a clipped segmented control is
+                // the outcome 17a forbids. The dot survives
+                // truncation; the full sentence is in `.help`.
+                Text(unsavedText)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+            .padding(.horizontal, ChipMetrics.padH)
+            .padding(.vertical, ChipMetrics.padV)
+            .background(
+                ChipMetrics.shape
+                    .fill(SettingsTheme.card)
+                    .overlay(
+                        ChipMetrics.shape.strokeBorder(
+                            SettingsTheme.hairline
+                        )
+                    )
+            )
+            .contentShape(ChipMetrics.shape)
         }
-        .padding(.horizontal, ChipMetrics.padH)
-        .padding(.vertical, ChipMetrics.padV)
-        .background(
-            ChipMetrics.shape
-                .fill(SettingsTheme.card)
-                .overlay(
-                    ChipMetrics.shape.strokeBorder(SettingsTheme.hairline)
-                )
-        )
+        .buttonStyle(.plain)
         .help(
             L(
                 "home.unsaved.help",
-                "Changes not saved yet — Save and Revert "
-                    + "are in the footer."
+                "Changes not saved yet — click for the list; "
+                    + "Save and Revert are in the save pill."
             )
         )
+        .popover(
+            isPresented: $unsavedPopoverShown,
+            arrowEdge: .bottom
+        ) {
+            unsavedPopover
+        }
+    }
+
+    /// The popover view of the one draft (turn 9): every change
+    /// as a labelled old → new row, each a jump to the control
+    /// that changed. It renders the SAME rows as the panel's
+    /// diff list — one renderer, so the two views of the draft
+    /// cannot disagree.
+    private var unsavedPopover: some View {
+        ScrollView {
+            SettingsDiffRowsView(
+                rows: SettingsDiffRowSource.rows(for: model)
+            ) { row in
+                unsavedPopoverShown = false
+                guard
+                    let anchor = SettingsDiffJump.anchor(
+                        for: row
+                    )
+                else { return }
+                model.nav.pendingReveal = anchor
+            }
+            .padding(14)
+        }
+        .frame(width: 340)
+        .frame(maxHeight: 360)
     }
 
     /// Singular has its own frame — "1 unsaved changes" is not

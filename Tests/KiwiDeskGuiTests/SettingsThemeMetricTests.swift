@@ -49,6 +49,8 @@ struct SettingsThemeMetricTests {
         "containerStroke": "HomeCard.swift",
         "containerStrokeModeGated": "HomeCard.swift",
         "modeGatedStrokeOpacity": "HomeCard.swift",
+        "panelWidth": "SettingsDetailPanel.swift",
+        "contentMaxWidth": "SettingsView+Detail.swift",
     ]
 
     /// Metric → why nothing draws it yet. Empty today, and kept
@@ -62,7 +64,7 @@ struct SettingsThemeMetricTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    private let declaration = "SettingsTheme.swift"
+    private let declaration = "SettingsTheme+Metrics.swift"
 
     /// Derived from production on one side and the two lists on
     /// the other, so a new metric belongs to exactly one of them
@@ -106,13 +108,14 @@ struct SettingsThemeMetricTests {
         // The parse keys on a SPELLING, so a metric declared
         // `static var … : CGFloat { }` would sit outside the net
         // while looking listed. Tie it to the file's own census:
-        // every `CGFloat` here is either one of these
-        // declarations or one of `srgb`'s three parameters.
-        // The other evasion is a metric typed `Double`, which
-        // adds no `CGFloat` mention at all — so that spelling is
-        // refused outright rather than counted. A geometry
-        // number in this file is a `CGFloat`; SwiftUI's own
-        // metrics are.
+        // every `CGFloat` in the metrics file is one of these
+        // declarations (the colour file keeps `srgb` and its
+        // parameters — the split at the §2.1 ceiling moved the
+        // shapes out whole). The other evasion is a metric
+        // typed `Double`, which adds no `CGFloat` mention at
+        // all — so that spelling is refused outright rather
+        // than counted. A geometry number in this file is a
+        // `CGFloat`; SwiftUI's own metrics are.
         #expect(
             !source.contains(": Double"),
             Comment(
@@ -123,15 +126,16 @@ struct SettingsThemeMetricTests {
         let mentions =
             source.components(separatedBy: "CGFloat")
             .count - 1
+        // One import line (`import CoreGraphics`) mentions no
+        // CGFloat, so the count is exactly the declarations.
         #expect(
-            mentions == declared.count + 3,
+            mentions == declared.count,
             Comment(
                 rawValue:
                     "\(mentions) CGFloat mentions against "
-                    + "\(declared.count) parsed declarations + "
-                    + "srgb's 3 parameters — either a metric is "
-                    + "declared in a shape this parse cannot "
-                    + "see, or srgb's signature changed"
+                    + "\(declared.count) parsed declarations — "
+                    + "a metric is declared in a shape this "
+                    + "parse cannot see"
             )
         )
     }

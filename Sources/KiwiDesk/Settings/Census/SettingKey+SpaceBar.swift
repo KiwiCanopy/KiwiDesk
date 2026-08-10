@@ -116,13 +116,20 @@ extension SpaceBarKey {
                 ])
             )
         case .copyAppearance:
-            // Table moves it into the App Bar card (it copies
-            // App Bar → Space Bar); it needs the Space Bar on,
-            // not the App Bar shown.
+            // At rest on the App Bar card (owner flipped the
+            // direction 2026-08-10: it copies Space Bar → App
+            // Bar, filling in THIS card's bar), never behind
+            // the Style disclosure — the adjust-gaps precedent
+            // for a one-shot verb. Gated on the SOURCE bar
+            // being on, and deliberately EXEMPT from the
+            // card's container gate: styling the App Bar from
+            // the Space Bar before any layout shows one is
+            // configure-before-enable, the icon-source
+            // precedent one entry up.
             return .row(
                 .bars,
                 .appBar,
-                .showMore,
+                .atRest,
                 gate: .setting(.spaceBar(.spaceBarEnabled)),
                 exemptFromContainerGate: true
             )
@@ -227,9 +234,9 @@ extension SpaceBarKey {
             return .text("space_bar.color.badge_text")
         case .copyAppearance:
             return .text(
-                "space_bar.copy_appearance",
-                caption: "space_bar.copy_appearance.caption",
-                help: "space_bar.copy_appearance.help"
+                "app_bar.copy_appearance",
+                caption: "app_bar.copy_appearance.caption",
+                help: "app_bar.copy_appearance.help"
             )
         }
     }
