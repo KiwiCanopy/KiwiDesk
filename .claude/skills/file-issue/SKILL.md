@@ -3,21 +3,29 @@ description: File a KiwiDesk GitHub issue the way an agent must — render the t
 argument-hint: "[template: bug_report|feature_request|docs_report|collector|roadmap]"
 ---
 
-File a GitHub issue for this repository. `gh issue create` does
-not apply the `.github/ISSUE_TEMPLATE/*.yml` forms — neither the
-body fields nor the `type:` key — so an agent reproduces by hand
-what the web form gives a human for free. AGENTS.md §3
-(Branching & Pull Requests) owns the *why* of the templates and
-which template an issue takes; this skill owns the mechanics.
+File a GitHub issue for this repository. AGENTS.md §3 (Branching
+& Pull Requests) owns the *why* — which template an issue takes,
+and why its questions must be answered rather than skipped. This
+skill owns the mechanics.
+
+`gh issue create` does not apply the
+`.github/ISSUE_TEMPLATE/*.yml` forms: the body observation is
+AGENTS.md §3's (2026-08-02, `gh` 2.x — a `--body-file` filing
+starts blank), and since the form never runs, its `type:` key
+cannot apply either (inferred from that observation, not
+separately tested — a filing that does land with a Type set is
+news worth updating this line with). So reproduce by hand what
+the web form gives a human for free.
 
 ## 1. Render the template
 
-Read the chosen `.github/ISSUE_TEMPLATE/<template>.yml` and
+The template to use is `$ARGUMENTS` (pick per AGENTS.md §3 if
+not given). Read `.github/ISSUE_TEMPLATE/$ARGUMENTS.yml` and
 reproduce it:
 
 - each `label:` becomes a `###` heading, in declared order,
-  answered honestly (an internal issue answers the user-shaped
-  questions from the dev machine — never drops them);
+  answered honestly — an internal issue answers the user-shaped
+  questions from the dev machine, never drops them;
 - the template's `title:` prefix goes on the title;
 - any `labels:` the template declares go on the command line
   (`--label …`).
@@ -30,12 +38,13 @@ gh issue create --title "<prefix> <title>" --body-file <file>
 
 ## 2. Set the Type
 
-The template's `type:` key applies only via the web form. Set it
-explicitly — `Bug`, `Feature`, or `Task`, matching the template's
-`type:` value:
+Set it explicitly — `Bug`, `Feature`, or `Task`, matching the
+template's `type:` value. `{owner}/{repo}` is literal: `gh`
+resolves it from the current repository, so never substitute a
+hand-written owner.
 
 ```sh
-gh api -X PATCH repos/hajiboy95/KiwiDesk/issues/<n> -f type=Bug
+gh api -X PATCH repos/{owner}/{repo}/issues/<n> -f type=Bug
 ```
 
 ## 3. Set Priority and Effort
@@ -46,17 +55,19 @@ Priority/Effort.
 
 For everything else, set both single-select issue fields.
 Discover the current field and option IDs rather than trusting a
-stale copy:
+stale copy (`:owner`/`:repo` are literal too — `gh` fills them):
 
 ```sh
-gh api graphql -f query='{ repository(owner:"hajiboy95",
-  name:"KiwiDesk") { issueFields(first:20) { nodes {
-  ... on IssueFieldSingleSelect { id name
-  options { id name } } } } } }'
+gh api graphql -F owner=':owner' -F name=':repo' -f query='
+  query($owner:String!, $name:String!) {
+    repository(owner:$owner, name:$name) {
+      issueFields(first:20) { nodes {
+        ... on IssueFieldSingleSelect { id name
+          options { id name } } } } } }'
 ```
 
 Then, with the issue's node id
-(`gh api repos/hajiboy95/KiwiDesk/issues/<n> --jq .node_id`):
+(`gh api repos/{owner}/{repo}/issues/<n> --jq .node_id`):
 
 ```sh
 gh api graphql -f query='mutation($id:ID!){
@@ -100,7 +111,7 @@ The honest size of the fix, not its importance:
 Read the issue back and confirm all three landed:
 
 ```sh
-gh api repos/hajiboy95/KiwiDesk/issues/<n> \
+gh api repos/{owner}/{repo}/issues/<n> \
   --jq '{type: .type.name, fields: [.issue_field_values[]
   | {(.issue_field_name): .single_select_option.name}]}'
 ```
