@@ -30,6 +30,13 @@ struct SettingsFooter: View {
     @State var newProfileName = ""
     @State var namingProfileCopy = false
     @State var profileCopyName = ""
+    /// The unsaved-changes popover — turn 9's third view of the
+    /// draft, moved here from the header chip (owner
+    /// 2026-08-10): the pill already narrates the draft, so the
+    /// count it carries is the one that opens the list. View
+    /// state: closing the window closes it, and nothing else
+    /// needs to open it.
+    @State var unsavedPopoverShown = false
 
     /// Anything that gives a verb meaning. The
     /// `.saveAsNewProfile` creation offer on a fully clean
@@ -129,95 +136,6 @@ struct SettingsFooter: View {
                 y: 7
             )
         )
-    }
-
-    // MARK: - Leading readout
-
-    /// The pill's first words: the settings count with the edit
-    /// target's name, plus — stacked small beneath — whichever
-    /// scope caption applies (#516 keeps the paused scope and
-    /// the drift adoption VISIBLE, never a hover-only fact).
-    private var leadingReadout: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(countLine)
-                .foregroundStyle(SettingsTheme.savePillInk)
-            if model.primarySaveAction == .saveGlobalsOnly {
-                caption(pausedScopeCaption)
-            }
-            if let drift = model.layoutDrift {
-                caption(
-                    L(
-                        "footer.save.adopts_layout",
-                        "Save also adopts the session layout "
-                            + "(%1$@).",
-                        drift.live.displayName
-                    )
-                )
-                caption(
-                    L(
-                        "footer.revert.restores_layout",
-                        "Revert also restores the profile "
-                            + "layout (%1$@).",
-                        drift.saved.displayName
-                    )
-                )
-            }
-        }
-    }
-
-    private func caption(_ text: String) -> some View {
-        Text(text)
-            .font(.caption2)
-            .foregroundStyle(
-                SettingsTheme.savePillInk.opacity(0.65)
-            )
-    }
-
-    private var countLine: String {
-        let count = model.draftChangeCount
-        guard count > 0 else {
-            // The docked footer's own key, kept through the
-            // pill rewrite: identical English, same meaning
-            // class, ten shipped translations (review
-            // 2026-08-10 caught the re-mint discarding them).
-            return L(
-                "footer.unsaved_changes",
-                "Unsaved changes"
-            )
-        }
-        if let target = editTargetName {
-            return count == 1
-                ? L(
-                    "footer.unsaved.count_one_to",
-                    "%1$d unsaved change to %2$@",
-                    count,
-                    target
-                )
-                : L(
-                    "footer.unsaved.count_to",
-                    "%1$d unsaved changes to %2$@",
-                    count,
-                    target
-                )
-        }
-        return count == 1
-            ? L(
-                "footer.unsaved.count_one",
-                "%1$d unsaved change",
-                count
-            )
-            : L(
-                "footer.unsaved.count",
-                "%1$d unsaved changes",
-                count
-            )
-    }
-
-    /// The banner above stays the authoritative naming of the
-    /// edit target; this is the pill's short echo of it.
-    private var editTargetName: String? {
-        if model.editingLua { return "init.lua" }
-        return model.editingProfile ?? model.activeProfile
     }
 
     private var saveAsNewMessage: String {

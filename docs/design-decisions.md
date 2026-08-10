@@ -1846,9 +1846,14 @@ motion channel. `ModeGatedChromeTests` and
 **One draft, three views — and the save surface is the
 floating pill.** (#678 turn 9; Phase 4 shell.) The turn-9
 frame draws three views of one draft on one screen: the
-floating save pill, the top-right unsaved button's popover,
-and the detail panel's "Changed in this draft" list. All
-three ship now. An earlier ruling kept the docked three-verb
+floating save pill, the change-list popover, and the detail
+panel's "Changed in this draft" list. All three ship now.
+The popover opens from the pill's own count line, not from a
+header chip (owner 2026-08-10, retiring the turn-9 top-right
+button): the pill already narrates the draft, so a second
+count in the header stated one fact in two corners of the
+window — and every corner the count occupies is one the
+responsive pass must defend at 720 pt. An earlier ruling kept the docked three-verb
 footer, arguing it was the pill's final form since the spec's
 responsive pass would dock the pill below 900 pt anyway — the
 owner overturned

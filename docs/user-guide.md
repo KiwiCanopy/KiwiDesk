@@ -54,10 +54,7 @@ briefly tints what it just added — the same highlight a search
 result gets — and the cards only Power User shows keep a soft
 green frame, the switch's own colour, so they stay
 recognizable after the tint fades; flipping back to Simple
-simply fades the extras out. While you have unsaved edits, the
-header shows a count chip ("3 unsaved changes") — click it for
-a popover listing every change as an old → new row, and click
-a row to jump straight to the control that changed.
+simply fades the extras out.
 
 The header also shows which profile is loaded and lets you
 edit a saved profile without switching to it.
@@ -66,9 +63,11 @@ Two more pieces of the window's shape recur everywhere below.
 While there is anything to act on, a dark **save pill** floats
 over the bottom of the content — the count and its target
 ("3 unsaved changes to Desk"), then **Revert**, **Save a
-copy…** and **Save**. It is not a fixed bar: it appears with
-your first edit and disappears once everything is saved (the
-verbs are detailed under [Saving](#saving)). And four areas —
+copy…** and **Save**. Click the count for a popover listing
+every change as an old → new row, and click a row to jump
+straight to the control that changed. It is not a fixed bar:
+it appears with your first edit and disappears once everything
+is saved (the verbs are detailed under [Saving](#saving)). And four areas —
 Gaps & Borders, Bars, Colors & Motion, and Layout Defaults —
 open as two columns: their controls on the left, and a **Live
 preview** panel on the right that redraws from your draft as

@@ -3,12 +3,16 @@ import SwiftUI
 
 /// The one header bar (#678 turn 9): on Home the app identity,
 /// on an area screen the "← Home" back chip and the area title —
-/// followed either way by the same search entry, profile chip,
-/// Simple|Power User segment and, while the draft has changes, the
-/// unsaved-changes count. The status sentence and profile
+/// followed either way by the same search entry, profile chip
+/// and Simple|Power User segment. The status sentence and profile
 /// warning ride a second row exactly as the old header drew
 /// them. One bar for both screens so the chrome reads as
 /// continuous across push and pop.
+///
+/// The unsaved-changes count is NOT here (owner 2026-08-10): the
+/// draft has one narrator, the save pill, which carries the
+/// count and its popover — a second count in the header was the
+/// same fact in two corners of one window.
 struct SettingsHeaderBar: View {
     @ObservedObject var model: SettingsModel
     /// Focuses the back chip when an area is pushed (turn 20:
@@ -19,10 +23,6 @@ struct SettingsHeaderBar: View {
     /// no environment of its own.
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
-    /// The unsaved-changes popover (turn 9's third view of the
-    /// draft). View state: closing the window closes it, and
-    /// nothing else needs to open it.
-    @State private var unsavedPopoverShown = false
 
     private var destination: SettingsDestination? {
         model.destination
@@ -136,9 +136,6 @@ struct SettingsHeaderBar: View {
                 profileChip
             }
             modeSegment
-            if model.draftChangeCount > 0 {
-                unsavedChip
-            }
         }
         // Clears the three traffic lights, which AppKit places at
         // a fixed offset from the window's leading edge whatever
@@ -223,106 +220,4 @@ struct SettingsHeaderBar: View {
         .accessibilityLabel(L("home.mode_ax", "Settings mode"))
     }
 
-    /// The count view of the one draft (turn 9) — a BUTTON now:
-    /// the Phase 4 readout gave diff rows their label authority
-    /// (`SettingsValueReadout` narrates every attributed key,
-    /// and the attribution net is total), so the popover lists
-    /// the whole draft and the earlier partial-list objection
-    /// is discharged. Save and Revert stay in the pill.
-    ///
-    /// Neutral ink on a bordered chip with an amber DOT, not
-    /// amber text on an amber outline: unsaved work is a state,
-    /// not a fault, and the paused banner below owns the amber
-    /// that means something is wrong. The dot keeps the warning
-    /// hue where it is cheap and the sentence readable.
-    private var unsavedChip: some View {
-        Button {
-            unsavedPopoverShown = true
-        } label: {
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(SettingsTheme.warningInk)
-                    .frame(width: 8, height: 8)
-                // Truncates rather than holding the row open:
-                // this is the row's longest element in every
-                // locale ("12 nicht gespeicherte Änderungen" is
-                // ~218 pt) and the only one that is not a fixed
-                // control. At the 720 pt minimum something has
-                // to give, and a clipped segmented control is
-                // the outcome 17a forbids. The dot survives
-                // truncation; the full sentence is in `.help`.
-                Text(unsavedText)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            .padding(.horizontal, ChipMetrics.padH)
-            .padding(.vertical, ChipMetrics.padV)
-            .background(
-                ChipMetrics.shape
-                    .fill(SettingsTheme.card)
-                    .overlay(
-                        ChipMetrics.shape.strokeBorder(
-                            SettingsTheme.hairline
-                        )
-                    )
-            )
-            .contentShape(ChipMetrics.shape)
-        }
-        .buttonStyle(.plain)
-        .help(
-            L(
-                "home.unsaved.help",
-                "Changes not saved yet — click for the list; "
-                    + "Save and Revert are in the save pill."
-            )
-        )
-        .popover(
-            isPresented: $unsavedPopoverShown,
-            arrowEdge: .bottom
-        ) {
-            unsavedPopover
-        }
-    }
-
-    /// The popover view of the one draft (turn 9): every change
-    /// as a labelled old → new row, each a jump to the control
-    /// that changed. It renders the SAME rows as the panel's
-    /// diff list — one renderer, so the two views of the draft
-    /// cannot disagree.
-    private var unsavedPopover: some View {
-        ScrollView {
-            SettingsDiffRowsView(
-                rows: SettingsDiffRowSource.rows(for: model)
-            ) { row in
-                unsavedPopoverShown = false
-                guard
-                    let anchor = SettingsDiffJump.anchor(
-                        for: row
-                    )
-                else { return }
-                model.nav.pendingReveal = anchor
-            }
-            .padding(14)
-        }
-        .frame(width: 340)
-        .frame(maxHeight: 360)
-    }
-
-    /// Singular has its own frame — "1 unsaved changes" is not
-    /// a plural rule any locale can fix from one key.
-    private var unsavedText: String {
-        guard model.draftChangeCount > 1 else {
-            return L(
-                "home.unsaved.count_one",
-                "1 unsaved change"
-            )
-        }
-        return L(
-            "home.unsaved.count",
-            "%1$d unsaved changes",
-            model.draftChangeCount
-        )
-    }
 }
