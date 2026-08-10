@@ -88,7 +88,8 @@ struct SystemShortcutNamesTests {
         guard
             let tooltip = ConflictText.tooltip(
                 for: bindings[0],
-                in: bindings
+                in: bindings,
+                config: GuiConfig()
             )
         else {
             Issue.record("⌘W did not report a system conflict")
@@ -112,8 +113,11 @@ struct SystemShortcutNamesTests {
         defer { reset() }
         let bindings = [KeyBinding(combo: "not+a+key", lua: "a")]
         #expect(
-            ConflictText.tooltip(for: bindings[0], in: bindings)
-                == "Not a recognized shortcut."
+            ConflictText.tooltip(
+                for: bindings[0],
+                in: bindings,
+                config: GuiConfig()
+            ) == "Not a recognized shortcut."
         )
     }
 }

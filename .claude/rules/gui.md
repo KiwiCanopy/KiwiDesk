@@ -542,10 +542,13 @@ Every surface, border and ink in the Settings tree comes from
   exactly one of two lists — wired at a named render site, or
   deferred with a reason — so a token nothing draws cannot ship
   quietly. Two lenses hold the pass-7 verdicts:
-  `SettingsThemeContrastTests` derives every drawn ink/surface
-  WCAG ratio from the shipped tokens (the board's ring pairs
-  stay `ColorVision`-governed in `KeyboardRingSeparationTests` —
-  one authority per pairing), and `SettingsRawColorTests` bans
+  `SettingsThemeContrastTests` computes WCAG ratios from the
+  shipped tokens at the render's own alpha — its pairing list is
+  hand-kept, so **a change drawing an ink on a surface it did
+  not draw on before adds the pairing there in the same change
+  set** (the board's ring pairs stay `ColorVision`-governed in
+  `KeyboardRingSeparationTests` — one authority per pairing) —
+  and `SettingsRawColorTests` bans
   fixed hues, RGB literals and fixed white/black outside its
   reasoned maps, plus hierarchical greys on the FIXED-dark
   chrome files — on mode-varying surfaces `.secondary` still

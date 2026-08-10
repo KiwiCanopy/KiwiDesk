@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -15,12 +16,19 @@ struct KeyboardConflictWiringTests {
 
     private static let needles: [String: [String]] = [
         "Components/Keybindings/KeyboardBoard.swift": [
-            // A bound key whose combo macOS reserves rings the
-            // SAME solid conflict red as an own-row collision
-            // (the overwrite is conflict-class) — needle runs
-            // through the stroke so a branch that stops
-            // drawing red reds.
-            "ifisConflicted||(isReserved&&state==.bound){"
+            // A conflicted OR overwritten key rings the solid
+            // conflict red — the needle runs THROUGH the
+            // stroke, so a branch that keeps its condition and
+            // stops drawing red reds too (code review
+            // 2026-08-10: the first cut ended at `{`).
+            "ifisConflicted||isOverwritten{"
+                + "RoundedRectangle(cornerRadius:4)"
+                + ".strokeBorder(SettingsTheme.keyConflict,"
+                + "lineWidth:2)",
+            // …and the overwritten set is the census's ONE
+            // predicate, never a re-derivation beside it.
+            "KeyboardCensus.overwrittenReserved(claims:claims,"
+                + "scope:scope)",
         ],
         "Components/Keybindings/KeyboardPreviewPanel.swift": [
             // The red legend entry exists only while a red
@@ -28,11 +36,22 @@ struct KeyboardConflictWiringTests {
             // to a legend) — needle through the gate AND the
             // swatch it draws.
             "if!collisions.isEmpty||overwritesReserved{"
-                + "lineSwatch(SettingsTheme.keyConflict"
+                + "lineSwatch(SettingsTheme.keyConflict",
+            // The amber entry likewise: gated on a DRAWN
+            // dashed ring, not on a chip being picked — ⌃⌥
+            // reserves nothing (code review 2026-08-10).
+            "if!reservedFree.isEmpty{"
+                + "lineSwatch(SettingsTheme.keyReserved",
+            // Both gates read the census sets, the board's own
+            // predicate.
+            "KeyboardCensus.overwrittenReserved(claims:claims,"
+                + "scope:liveScope)",
+            "KeyboardCensus.reservedUnbound(claims:claims,"
+                + "scope:liveScope)",
         ],
     ]
 
-    @Test("both conflict-class wires survive in their bodies")
+    @Test("the conflict-class wires survive in their bodies")
     func wiresAreDrawn() throws {
         for (file, wants) in Self.needles {
             let url = Self.root.appendingPathComponent(
@@ -55,5 +74,63 @@ struct KeyboardConflictWiringTests {
                 )
             }
         }
+    }
+}
+
+/// The behavior half: the census's conflict-class sets, which
+/// the needles above pin the views to consuming.
+@Suite("Keyboard conflict-class sets")
+struct KeyboardConflictSetTests {
+    /// ⌘W is `closeWindow` in `SystemShortcuts.map` — the
+    /// worked example the ruling used.
+    private var commandW: KeyCombo {
+        KeyCombo.parse("command+w")!
+    }
+
+    @Test("a bound reserved combo is overwritten, not amber")
+    func boundReservedIsOverwritten() {
+        let scope = KeyboardCensus.Scope.one(
+            KeyboardCensus.ModifierLayer(
+                modifiers: commandW.modifiers
+            )
+        )
+        let bound = [
+            commandW.keyCode: [
+                KeyboardCensus.ModifierLayer(
+                    modifiers: commandW.modifiers
+                )
+            ]
+        ]
+        let overwritten = KeyboardCensus.overwrittenReserved(
+            claims: bound,
+            scope: scope
+        )
+        #expect(overwritten.contains(commandW.keyCode))
+        // …and it leaves the amber set the moment it is bound.
+        #expect(
+            !KeyboardCensus.reservedUnbound(
+                claims: bound,
+                scope: scope
+            ).contains(commandW.keyCode)
+        )
+        // Unbound, the same key is amber, not overwritten.
+        let free = KeyboardCensus.reservedUnbound(
+            claims: [:],
+            scope: scope
+        )
+        #expect(free.contains(commandW.keyCode))
+        #expect(
+            KeyboardCensus.overwrittenReserved(
+                claims: [:],
+                scope: scope
+            ).isEmpty
+        )
+    }
+
+    @Test("`.all` draws no reserved marks — combos, not keys")
+    func allScopeReservesNothing() {
+        #expect(
+            KeyboardCensus.reservedKeys(scope: .all).isEmpty
+        )
     }
 }

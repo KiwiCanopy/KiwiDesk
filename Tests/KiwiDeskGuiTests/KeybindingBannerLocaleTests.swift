@@ -14,6 +14,15 @@ import Testing
 /// source scan can see. `.serialized` because
 /// `LocalizationManager` is a process-wide singleton (the
 /// `ImportClassifierLanguageTests` precedent).
+///
+/// Stated coupling (code review 2026-08-10): the assertions
+/// lean on the shipped `de` catalog carrying
+/// `keybinding.focus_dir` / `keybinding.dir.left` — a
+/// legitimate `drop-key` on either reds this suite with the
+/// wiring intact. Accepted: the expectation is built through
+/// the SAME `L()` calls production uses, so the coupling is to
+/// one corpus both sides read, and an injected-roster seam
+/// would cost a production parameter for a test's comfort.
 @Suite("Keybinding banner locale", .serialized)
 @MainActor
 struct KeybindingBannerLocaleTests {

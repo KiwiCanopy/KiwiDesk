@@ -75,7 +75,8 @@ struct NavRow: View {
         guard let index else { return nil }
         return ConflictText.tooltip(
             for: bindings[index],
-            in: bindings
+            in: bindings,
+            config: model.config
         )
     }
 

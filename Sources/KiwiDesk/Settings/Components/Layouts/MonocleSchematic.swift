@@ -11,6 +11,7 @@ import SwiftUI
 /// inconsistency honestly, without inventing spatial content.
 struct MonocleSchematic: View {
     let orientation: MonocleParams.Orientation
+    @Environment(\.schematicFocusStroke) private var focusStroke
     /// Windows on screen. Monocle's fill logic is that there
     /// isn't any — every window is full-screen — so the count
     /// changes the DEPTH of the fan and nothing else, which is
@@ -72,8 +73,14 @@ struct MonocleSchematic: View {
                     cornerRadius: LayoutSchematic.corner
                 )
                 .strokeBorder(
+                    // Monocle's front card IS its focus mark,
+                    // so it consults the honesty stroke like
+                    // every active tile — the strip must not
+                    // show two focus colours disagreeing about
+                    // what the colour means (code review
+                    // 2026-08-10).
                     front
-                        ? LayoutSchematic.stroke
+                        ? focusStroke ?? LayoutSchematic.stroke
                         : SettingsTheme.ink2.opacity(0.4),
                     lineWidth: front ? 1.5 : 1
                 )

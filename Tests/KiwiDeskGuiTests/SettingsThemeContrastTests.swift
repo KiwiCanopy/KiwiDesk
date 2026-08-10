@@ -19,11 +19,17 @@ import Testing
 /// (4.15/4.17), because the check was a hand measurement of one
 /// pairing.
 ///
-/// Stated scope: pairings the tree draws today. `accent` as a
-/// control FILL on light surfaces measures ~2.2:1 and is the
-/// platform's own convention for tinted controls (a selected
-/// state never rides colour alone here — the font step carries
-/// it too), so fills-on-surface are deliberately not rows.
+/// Scope, stated as the obligation it is: **a change that draws
+/// an ink on a surface it did not draw on before adds the
+/// pairing here in the same change set** — the list is
+/// hand-kept, and a pairing it misses is measured by nobody
+/// (the board's bound-key glyph shipped unmeasured for a day).
+/// `accent` as a control FILL on light surfaces measures ~2.2:1
+/// and is the platform's own convention for tinted controls (a
+/// selected state never rides colour alone here — the font step
+/// carries it too), so fills-on-surface are deliberately not
+/// rows; the board's RING pairs are `ColorVision`-governed in
+/// `KeyboardRingSeparationTests` — one authority per pairing.
 @MainActor
 @Suite("Settings theme contrast floors")
 struct SettingsThemeContrastTests {
@@ -32,17 +38,25 @@ struct SettingsThemeContrastTests {
         let ink: Color
         let surface: Color
         let floor: Double
+        /// The alpha the RENDER applies to the ink — the
+        /// measured colour is the composite over the surface,
+        /// because measuring a translucent ink at full alpha
+        /// flatters the drawn pairing (code review 2026-08-10:
+        /// the board's free-key glyph draws plateInk at 0.75).
+        let inkAlpha: Double
 
         init(
             _ name: String,
             _ ink: Color,
             on surface: Color,
-            floor: Double = 4.5
+            floor: Double = 4.5,
+            inkAlpha: Double = 1
         ) {
             self.name = name
             self.ink = ink
             self.surface = surface
             self.floor = floor
+            self.inkAlpha = inkAlpha
         }
     }
 
@@ -182,7 +196,15 @@ struct SettingsThemeContrastTests {
         Pairing(
             "plateInk glyphs on keyFree",
             SettingsTheme.plateInk,
-            on: SettingsTheme.keyFree
+            on: SettingsTheme.keyFree,
+            inkAlpha: 0.75
+        ),
+        // The bound key's glyph — `KeyCap.ink` draws
+        // previewPlate on the accent fill.
+        Pairing(
+            "previewPlate glyph on accent",
+            SettingsTheme.previewPlate,
+            on: SettingsTheme.accent
         ),
     ]
 
@@ -195,7 +217,8 @@ struct SettingsThemeContrastTests {
             for dark in [false, true] {
                 let ratio = try contrast(
                     pairing.ink,
-                    pairing.surface,
+                    over: pairing.surface,
+                    inkAlpha: pairing.inkAlpha,
                     dark: dark
                 )
                 #expect(
@@ -217,39 +240,61 @@ struct SettingsThemeContrastTests {
 
     // MARK: - WCAG arithmetic over resolved tokens
 
+    /// Contrast of the ink AS DRAWN — alpha-composited over the
+    /// surface first when the render applies an opacity.
     private func contrast(
-        _ a: Color,
-        _ b: Color,
+        _ ink: Color,
+        over surface: Color,
+        inkAlpha: Double,
         dark: Bool
     ) throws -> Double {
-        let la = try luminance(a, dark: dark)
-        let lb = try luminance(b, dark: dark)
+        let inkRGB = try resolved(ink, dark: dark)
+        let surfaceRGB = try resolved(surface, dark: dark)
+        let drawn = (
+            r: inkAlpha * inkRGB.r
+                + (1 - inkAlpha) * surfaceRGB.r,
+            g: inkAlpha * inkRGB.g
+                + (1 - inkAlpha) * surfaceRGB.g,
+            b: inkAlpha * inkRGB.b
+                + (1 - inkAlpha) * surfaceRGB.b
+        )
+        let la = luminance(drawn)
+        let lb = luminance(surfaceRGB)
         return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
     }
 
-    /// WCAG relative luminance of the token as resolved under
-    /// one appearance — the same resolution path the token
-    /// suite pins, so the two suites measure one truth.
-    private func luminance(
+    /// The token's sRGB components as resolved under one
+    /// appearance — the same resolution path the token suite
+    /// pins, so the two suites measure one truth.
+    private func resolved(
         _ color: Color,
         dark: Bool
-    ) throws -> Double {
+    ) throws -> (r: Double, g: Double, b: Double) {
         let appearance = try #require(
             NSAppearance(named: dark ? .darkAqua : .aqua)
         )
-        var resolved: NSColor?
+        var resolvedColor: NSColor?
         appearance.performAsCurrentDrawingAppearance {
-            resolved = NSColor(color).usingColorSpace(.sRGB)
+            resolvedColor =
+                NSColor(color).usingColorSpace(.sRGB)
         }
-        let srgb = try #require(resolved)
-        func lin(_ c: CGFloat) -> Double {
-            let v = Double(c)
-            return v <= 0.04045
+        let srgb = try #require(resolvedColor)
+        return (
+            Double(srgb.redComponent),
+            Double(srgb.greenComponent),
+            Double(srgb.blueComponent)
+        )
+    }
+
+    private func luminance(
+        _ rgb: (r: Double, g: Double, b: Double)
+    ) -> Double {
+        func lin(_ v: Double) -> Double {
+            v <= 0.04045
                 ? v / 12.92
                 : pow((v + 0.055) / 1.055, 2.4)
         }
-        return 0.2126 * lin(srgb.redComponent)
-            + 0.7152 * lin(srgb.greenComponent)
-            + 0.0722 * lin(srgb.blueComponent)
+        return 0.2126 * lin(rgb.r) + 0.7152 * lin(rgb.g)
+            + 0.0722 * lin(rgb.b)
     }
 }

@@ -31,33 +31,64 @@ struct SettingsRawColorTests {
     /// System hues lift in dark while the app's tokens do not —
     /// the recorder's `.green`/`.orange`, the Lua banner's
     /// `.blue` and the recorder flash's `.red` were this class.
-    /// Scoped to `foregroundStyle`/`fill`/`tint` call shapes so
-    /// prose and identifiers cannot match.
+    ///
+    /// Any boundary-terminated `.hue` token counts, NOT just
+    /// call shapes: the first cut matched only
+    /// `foregroundStyle(.green)` forms, and two of its own
+    /// motivating defects — a switch arm's `case .applied:
+    /// .green` and a ternary's `flashing ? .red : …` — were
+    /// invisible to it (review 2026-08-10; "a needle that
+    /// CANNOT FAIL is worse than none"). `.redacted` and
+    /// friends survive via the identifier-boundary check. The
+    /// map is the one copy of who may, and an entry whose
+    /// grounds have gone reds.
+    private let hueExempt: [String: String] = [
+        "SettingsDestination.swift":
+            "the destination tile hue set (.indigo/.blue/"
+            + ".purple beside two RGB literals) — the tile "
+            + "retune is an eyeball item of the responsive "
+            + "pass, and until it lands these are the shipped "
+            + "design",
+        "AppBarPreviewStrip+Mock.swift":
+            "the mock desktop's app windows carry varied "
+            + "native hues on purpose — a PICTURE of "
+            + "third-party content, not app chrome",
+        "Color+KiwiHex.swift":
+            "RGBA tuple member accessors (c.red, c.green) in "
+            + "the hex parser — the token scan cannot tell a "
+            + "tuple member from a Color hue, and no Color is "
+            + "drawn here",
+        "ColorField.swift":
+            "same RGBA tuple accessors in the swatch's "
+            + "conversion plumbing",
+    ]
+
     @Test("no fixed system hue is drawn in the Settings tree")
     func noFixedHues() throws {
         let hues = [
-            ".green", ".blue", ".orange", ".red", ".yellow",
-            ".purple", ".pink", ".mint", ".teal", ".cyan",
-            ".indigo", ".brown",
-        ]
-        let shapes = [
-            ".foregroundStyle(", ".fill(", ".tint(",
+            "green", "blue", "orange", "red", "yellow",
+            "purple", "pink", "mint", "teal", "cyan",
+            "indigo", "brown",
         ]
         var scanned = 0
         var hits: [String] = []
+        var used: Set<String> = []
         for file in try swiftFiles(under: Self.settingsDir) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
-            ).replacingOccurrences(of: " ", with: "")
+            )
             scanned += 1
-            for shape in shapes {
-                for hue in hues
-                where source.contains(shape + hue + ")") {
-                    hits.append(
-                        "\(file.lastPathComponent): "
-                            + shape + hue + ")"
-                    )
-                }
+            let found = hues.filter {
+                containsToken(source, dotted: $0)
+            }
+            guard !found.isEmpty else { continue }
+            if hueExempt[file.lastPathComponent] != nil {
+                used.insert(file.lastPathComponent)
+            } else {
+                hits.append(
+                    "\(file.lastPathComponent): "
+                        + found.joined(separator: ", ")
+                )
             }
         }
         // A scan that read nothing passes having looked at
@@ -70,6 +101,36 @@ struct SettingsRawColorTests {
                     "fixed hues drawn: \(hits.joined(separator: ", "))"
             )
         )
+        #expect(
+            used == Set(hueExempt.keys),
+            Comment(
+                rawValue:
+                    "stale hue exemptions: "
+                    + Set(hueExempt.keys).subtracting(used)
+                    .sorted().joined(separator: ", ")
+            )
+        )
+    }
+
+    /// Whether `.hue` occurs as a complete member token —
+    /// boundary-checked on both sides so `.redacted` cannot
+    /// match `.red` and `Color.green` still does.
+    private func containsToken(
+        _ source: String,
+        dotted name: String
+    ) -> Bool {
+        let needle = "." + name
+        var rest = Substring(source)
+        while let hit = rest.range(of: needle) {
+            let after = rest[hit.upperBound...].first
+            let boundary =
+                after == nil
+                || !(after!.isLetter || after!.isNumber
+                    || after! == "_")
+            if boundary { return true }
+            rest = rest[hit.upperBound...]
+        }
+        return false
     }
 
     // MARK: - RGB literals
@@ -217,22 +278,16 @@ struct SettingsRawColorTests {
 
     /// Chrome that is dark in BOTH modes: the ambient-derived
     /// greys land near-white or near-black by the WINDOW's
-    /// appearance while the ground never moves. The pill's
-    /// readout and the board files ban them outright.
-    private let fixedGroundFiles = [
-        "SettingsFooter.swift",
-        "SettingsFooter+Unsaved.swift",
-        "SettingsFooter+Slots.swift",
-        "HomeCardPlate.swift",
-        "HomeCardPlate+Bars.swift",
-        "HomeCardPlate+BarStrip.swift",
-        "HomeCardPlate+Desk.swift",
-        "HomeCardPlate+Legibility.swift",
-        "HomeCardPlate+Scene.swift",
-        "HomeCardPlate+SpacesTile.swift",
-        "HomeCardPlate+Swatches.swift",
-        "KeyboardBoard.swift",
-        "KeyboardChrome.swift",
+    /// appearance while the ground never moves. Membership is
+    /// STEM-derived, not a file list — the §2.1 ceiling keeps
+    /// splitting exactly these families (`HomeCardPlate+X`,
+    /// `SettingsFooter+Y`), and a hand list let the next split
+    /// land outside the ban silently (architect review
+    /// 2026-08-10; this very branch split `+SpacesTile` off
+    /// and had to remember the entry).
+    private let fixedGroundStems = [
+        "SettingsFooter", "HomeCardPlate", "KeyboardBoard",
+        "KeyboardChrome",
     ]
 
     @Test("no hierarchical grey on a fixed-dark ground")
@@ -241,8 +296,14 @@ struct SettingsRawColorTests {
             ".secondary", ".tertiary", ".quaternary",
         ]
         var scanned = 0
-        for file in try swiftFiles(under: Self.settingsDir)
-        where fixedGroundFiles.contains(file.lastPathComponent) {
+        for file in try swiftFiles(under: Self.settingsDir) {
+            let name = file.lastPathComponent
+            guard
+                fixedGroundStems.contains(where: {
+                    name == "\($0).swift"
+                        || name.hasPrefix("\($0)+")
+                })
+            else { continue }
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -252,15 +313,16 @@ struct SettingsRawColorTests {
                     !source.contains(needle),
                     Comment(
                         rawValue:
-                            "\(file.lastPathComponent) draws "
-                            + "\(needle) on fixed-dark chrome"
+                            "\(name) draws \(needle) on "
+                            + "fixed-dark chrome"
                     )
                 )
             }
         }
-        // The file list is hand-kept; a rename must red, not
-        // shrink the scan.
-        #expect(scanned == fixedGroundFiles.count)
+        // Every stem must still match something — a renamed
+        // family must red, not shrink the scan (13 files as of
+        // 2026-08-10, and growth is the point).
+        #expect(scanned >= 13)
     }
 
     // MARK: - Enumeration

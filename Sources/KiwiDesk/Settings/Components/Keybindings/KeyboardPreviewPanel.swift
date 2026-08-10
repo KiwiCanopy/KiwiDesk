@@ -113,10 +113,13 @@ struct KeyboardPreviewPanel: View {
                 SettingsTheme.keyFree,
                 L("keyboard.legend.free", "free")
             )
-            if liveScope != .all {
-                // `.all` never yields `.cantBind` (macOS reserves
-                // a key UNDER a modifier), so naming the mark
-                // there would point at one the board cannot draw.
+            if !reservedFree.isEmpty {
+                // Gated on a DRAWN mark, not merely on a chip
+                // being picked: ⌃⌥ — the app's default pair —
+                // reserves nothing, and a chip whose
+                // reservations are all bound draws only red
+                // (code review 2026-08-10; an entry may not
+                // point at a mark the frame does not draw).
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,
@@ -307,10 +310,11 @@ struct KeyboardPreviewPanel: View {
 
     // MARK: - Derived
 
-    /// The solid red ring's keys: two bindings in one layer
-    /// claiming the same combo. A clash with a macOS shortcut
-    /// is the DASHED red ring (`overwritesReserved`), never
-    /// this — solid always means the user's own rows collide.
+    /// One half of the solid red ring's keys: two bindings in
+    /// one layer claiming the same combo. The other half is
+    /// `overwritesReserved` — a binding over a macOS
+    /// reservation, the same solid red since the owner ruled
+    /// the overwrite conflict-class (2026-08-10).
     private var collisions: Set<UInt32> {
         KeyboardCensus.collisions(
             in: model.config.layers,
@@ -318,21 +322,24 @@ struct KeyboardPreviewPanel: View {
         )
     }
 
-    /// Whether any BOUND key's combo is macOS-reserved under
-    /// the shown modifier — a solid red ring like any other
-    /// conflict, and half of the red legend entry's gate (an
-    /// entry may not point at a mark the frame does not draw).
+    /// The board's own predicate, not a re-derivation: the
+    /// rings and this gate read one census set, so the legend
+    /// cannot claim a mark the board does not draw (architect
+    /// review 2026-08-10).
     private var overwritesReserved: Bool {
-        guard case .one(let layer) = liveScope else {
-            return false
-        }
-        return claims.contains { code, layers in
-            !layers.isEmpty
-                && KeyboardCensus.isSystemReserved(
-                    code,
-                    under: [layer]
-                )
-        }
+        !KeyboardCensus.overwrittenReserved(
+            claims: claims,
+            scope: liveScope
+        ).isEmpty
+    }
+
+    /// The dashed amber ring's presence — its legend entry's
+    /// gate, same shape.
+    private var reservedFree: Set<UInt32> {
+        KeyboardCensus.reservedUnbound(
+            claims: claims,
+            scope: liveScope
+        )
     }
 
 }

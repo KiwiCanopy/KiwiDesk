@@ -114,7 +114,8 @@ struct ApplicationsGroup: View {
                 combo: binding.wrappedValue.combo,
                 conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,
-                    in: bindings
+                    in: bindings,
+                    config: model.config
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(

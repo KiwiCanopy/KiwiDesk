@@ -391,10 +391,16 @@ Two things decide how far the combined element reaches:
 Every pick-one-of-few chooser (layout parameters, mouse
 resize, icon picker tabs) uses `SegmentedPicker`
 instead of the native segmented picker: a capsule track
-where the selection is a solid white pill (light gray in
-dark mode) wearing the slider thumb's exact crisp shadow —
-the earlier soft glass-era shadow read as the pill "fading
-out" — and the selected label is larger and semibold
+where the selection is a solid **accent** pill carrying the
+on-accent ink — the accent-marks-control-fills convention.
+The earlier white pill (light gray in dark) needed the
+slider thumb's crisp shadow to lift off a same-luminance
+track, its black shadow was dead in dark anyway, and in dark
+its label was the worst text pairing in the control set; the
+accent separates from the track by hue and luminance in both
+modes with no shadow at all, and the selected state never
+rides colour alone — the font step below carries it too.
+The selected label is larger and semibold
 — a real font-size step, because `scaleEffect` rasterizes
 the text and reads as blur. Liquid Glass was tried in three
 variants (bare, accent-tinted, clear + specular rim) and
@@ -424,7 +430,8 @@ exactly the control it replaces.
 
 **Buttons stay native; semantic role chooses their class.** No
 gradients, borders, or shadows on buttons — the crisp shadow
-is reserved for controls that slide (pill, slider thumb).
+is the slider thumb's alone, now that the segment pill is a
+solid accent fill that needs no lift.
 Class is expressed through native style + control size:
 `.borderedProminent` regular for the one surface commit
 (the save pill's Save, popover confirms); `.bordered` large for row
@@ -446,7 +453,7 @@ accent-layer vocabulary as `OverrideChrome`'s active rows —
 because a tinted border plus a label swap alone was too
 quiet to spot at list speed.
 
-**Status badges stay flat.** The thumb/pill shadow is the
+**Status badges stay flat.** The thumb's shadow is the
 settings' vocabulary for "interactive, movable"; putting it
 on a passive `BadgeChip` would promise interaction the chip
 doesn't have. One mark sits outside both vocabularies: the
@@ -618,9 +625,10 @@ its page.
 
 ## Previews & schematics
 
-**Four areas watch their draft in a fixed detail panel; the
-rest keep full width.** Gaps & Borders, Bars, Colours & Motion
-and Layout Defaults open as two columns: the controls, then a
+**Five areas watch their draft in a fixed detail panel; the
+rest keep full width.** Gaps & Borders, Bars, Colours & Motion,
+Layout Defaults and Shortcuts (its keyboard board, pass 5)
+open as two columns: the controls, then a
 fixed 392 pt right panel headed "Live preview · <area>" that
 redraws the area's preview from the *staged* draft, with a
 "Changed in this draft" list of old → new rows underneath,
@@ -629,9 +637,11 @@ panel is data (`SettingsDetailPanelOffer.offering`), consulted
 by the two-column mount, the save pill's centring offset and
 the guards alike — an area with nothing to show hides the
 panel and takes the full width, so absence is a stated
-verdict, never a missing branch. The panel mounts an area's
-*existing* renderer, and that area's cards carry no duplicate
-preview; a new drawing beside a renderer is the duplication
+verdict, never a missing branch. The panel mounts the area's
+*one* renderer — a migrated card preview, or (Shortcuts) a
+panel-first drawing with no card twin — and that area's cards
+carry no duplicate preview; a new drawing beside a renderer is
+the duplication
 the migration removed (`DetailPanelTests` holds the offer set
 and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).

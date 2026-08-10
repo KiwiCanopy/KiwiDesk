@@ -7,10 +7,14 @@ import KiwiDeskCore
 /// the left" inside a German sentence — owner, 2026-08-10).
 extension KeybindingCatalog {
     /// The localized display name for a persisted binding
-    /// label, resolved over the same roster the import
-    /// classifier recognises. A label the roster does not
-    /// carry — an app name, a custom row, a resize row from a
-    /// retired step — returns unchanged: an app name needs no
+    /// label. The roster is the classifier's own, piece by
+    /// piece: the navigation groups, the per-layer switches,
+    /// the current-step resize rows (their labels are
+    /// step-independent — "Grow width" — so retired-step rows
+    /// resolve too), and `stepFreeCommands`, the one shared
+    /// copy of the float/sticky bracket. A label outside it —
+    /// an app name, a custom row, a deleted space's or layer's
+    /// row — returns unchanged: an app name needs no
     /// translation and a custom label is the user's own text.
     @MainActor static func localizedLabel(
         for label: String,
@@ -25,11 +29,7 @@ extension KeybindingCatalog {
         commands += resizeAndFloat(
             step: Int(config.settings.resizeStep)
         )
-        commands += [
-            toggleFloating, makeFloating, toggleSticky,
-            toggleDisplaySticky, makeSticky,
-            makeDisplaySticky, makeUnsticky, showShortcuts,
-        ]
+        commands += stepFreeCommands
         guard
             let match = commands.first(where: {
                 $0.label == label

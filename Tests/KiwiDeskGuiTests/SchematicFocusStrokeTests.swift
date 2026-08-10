@@ -31,6 +31,14 @@ struct SchematicFocusStrokeTests {
             // Both tile shapes CONSULT it on their active arm.
             "active?focusStroke??palette?.stroke"
         ],
+        "Components/Layouts/MonocleSchematic.swift": [
+            // Monocle's front card IS its focus mark and
+            // consults like every active tile — the strip must
+            // not show two focus colours (code review
+            // 2026-08-10, which caught it drawing brand green
+            // beside honest siblings).
+            "front?focusStroke??LayoutSchematic.stroke"
+        ],
     ]
 
     @Test("the mount sets the stroke and the tiles consult it")

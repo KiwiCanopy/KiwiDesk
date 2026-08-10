@@ -1194,9 +1194,12 @@ banner's amber could not be given one at all while it was
 inside this one window, and that is the price. What it buys is
 that the window looks like KiwiDesk rather than like a generic
 form, which is the same argument as the entry above: the IA and
-the look are ours. The accent is also the one token that does not
-change between light and dark, because brand recognisability is
-the thing it carries.
+the look are ours. The accent is also identical in light and
+dark, because brand recognisability is the thing it carries —
+the same reason the tokens that paint *pictures* (the desktop
+plate, the keyboard board's fills) hold one value in both modes:
+what a picture shows must not change with the window's
+appearance.
 
 What breaks if this is ignored: a second hex literal beside a
 view, which is invisible until the day the palette moves and one
@@ -1909,12 +1912,15 @@ never new drawings beside them: the schematic-and-slider,
 the palette scene, the gap miniature with the ring and the
 drag ghost, and — for Bars — the Home plate's fused two-bar
 desktop scene mounted at panel size (the two card strips
-retired with their cards). The in-card mounts are REMOVED in
+retired with their cards); Shortcuts later joined with the
+keyboard board (pass 5), a panel-first renderer with no card
+twin to retire — the rule bans duplicates, not first
+previews. The in-card mounts are REMOVED in
 the same change — one screen must not state one fact twice —
 which NARROWS the old "live preview leads its editor"
 convention to areas without a panel: Advanced Colours' group
 previews still lead their rows because that area offers no
-panel, while in the four panel areas no migrated preview
+panel, while in the panel areas no migrated preview
 survives in its card (`DetailPanelTests` holds the offer set
 and the removals both).
 
@@ -4783,7 +4789,8 @@ of it, rather than separate rulings:
   the panel's own opening answer *false* for anyone with five
   combinations, since the board silently shows a subset under a
   heading that reads as the total. Single-select needs no hue at
-  all (the fill says bound, free or can't-bind), so the ceiling,
+  all (the fill says bound or free; rings carry the warnings),
+  so the ceiling,
   the palette, the legend of colours and the accessibility
   residue all go with it — and it answers the question a user
   actually has while binding: *if I hold ⌃⌥, what is left?*
@@ -4792,17 +4799,41 @@ of it, rather than separate rulings:
   separately.
 - **The board states two facts in two channels**: the FILL says
   what your config has done with a key (bound, free), and a RING
-  warns about it — dashed amber where macOS already owns the key
-  under the shown modifier, solid red where two of your bindings
-  collide. A third fill for "reserved" was tried and is wrong:
+  warns about it — dashed amber where macOS owns the key under
+  the shown modifier and nothing of yours claims it, solid red
+  where the key's combo clashes. A third fill for "reserved" was
+  tried and is wrong:
   macOS owns a key *under a modifier*, so blacking it out claims
   it is unavailable everywhere, when it is free under every
   other. The two rings differ by dash as well as by colour,
   because amber and red are both warm and hue alone collapses
   them for the viewers this rule exists for. Each ring's colour
-  is measured against the ONE fill it can ever meet — a reserved
+  is measured against the ONE fill it can ever meet — the dashed
   ring only rings an unbound key, a conflict ring only a bound
-  one — which is what lets both clear the floor.
+  one — which is what lets both clear the floor
+  (`KeyboardRingSeparationTests` derives the pairs from the
+  shipped tokens).
+- **A bound reserved combo is conflict-class** (owner ruling
+  2026-08-10, revising pass 5's bound-wins reading). Binding ⌘W
+  does not un-reserve it: the user's row and macOS now contest
+  one chord, which is a clash of exactly the kind two of the
+  user's own rows have with each other — and the earlier
+  reading, where binding a key silently dropped its reserved
+  ring, hid the warning on precisely the key that most needs it.
+  So an overwrite takes the same solid red ring as an own-row
+  collision, sharing one legend word (a second label would cost
+  a translation round for a distinction the conflict banner
+  already narrates row by row). The colour is forced as well as
+  chosen: a warning that follows a key from free to bound moves
+  from `keyFree` onto the accent, and amber fails the separation
+  floor against the accent outright where the conflict red
+  clears it — the same suite holds that pairing — so "keep the
+  amber on bound keys" is not an available alternative. The
+  legend obeys the caption rule: the red entry exists only while
+  a red ring is actually drawn on the board, and the amber one
+  only while a modifier chip is picked, because under **All**
+  there is no single combination to check a reserved key
+  against.
 - **Measure colour with `ColorVision`, never a re-derivation of
   it.** `ColorVision.separation` is Euclidean distance in
   *simulated sRGB*. A hand-rolled CIE-Lab proxy used during pass

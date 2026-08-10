@@ -627,7 +627,11 @@ stack is deep enough to overflow; a track limit means nothing
 until there are more windows than tracks; a dynamic grid's
 balance only shows as it rebalances. The count is a question you
 ask the preview, not a setting: it is not saved and resets when
-you leave.
+you leave. The tile drawn as focused wears your real focused
+border colour — the same one the Gaps & Borders preview shows —
+while the focus border is on; with it off, that tile is simply
+outlined a little heavier, promising no ring the app would not
+draw.
 
 A last card lists the **spaces using this layout**, and says how
 many of them override the values above — Layout Defaults sets
@@ -2135,8 +2139,9 @@ A ⚠️ icon appears next to any row whose combo:
 - Duplicates another row in the same layer.
 - Conflicts with a reserved macOS shortcut.
 
-Hover the icon for a tooltip naming the conflict. This indicator
-updates live — no action needed to see it.
+Click the icon to read the conflict in a popover; hovering it
+shows the same sentence as a tooltip. This indicator updates
+live — no action needed to see it.
 
 When a conflict is introduced (by recording a clashing shortcut,
 adopting a hand-written config, or saving from the raw Lua
@@ -2182,10 +2187,10 @@ for a fill, a key-shaped ring for a ring:
 - **macOS owns it** — a dashed amber ring on a *free* key: macOS
   reserves that key under the shown modifier combination (⌘Space
   is Spotlight's). The ring — and its legend entry — appear only
-  while a modifier chip is picked, because macOS reserves
-  combinations, not keys: a key it owns under ⌘ is still free
-  under ⌃⌥, so under **All** there is no single combination to
-  check against.
+  while such a key is actually on the board: never under
+  **All** (macOS reserves combinations, not keys — a key it
+  owns under ⌘ is still free under ⌃⌥), and not under a
+  combination macOS reserves nothing for, ⌃⌥ included.
 - **conflict** — a solid red ring on a *bound* (green) key,
   meaning one of two clashes: two of your own bindings in the
   same layer claim the same combo (the board's view of the

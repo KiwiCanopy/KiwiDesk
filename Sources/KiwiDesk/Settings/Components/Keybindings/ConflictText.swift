@@ -13,11 +13,16 @@ import SwiftUI
 /// tooltip.
 enum ConflictText {
     /// The tooltip for one row, or nil when the row is empty,
-    /// unique, or valid.
+    /// unique, or valid. Takes the config because the clashing
+    /// row's name is the stored ENGLISH canonical and must be
+    /// narrated through the catalog roster (#96) — the banner
+    /// fix's own defect class, amplified here the day the ⚠️
+    /// became a popover (l10n review 2026-08-10).
     @MainActor
     static func tooltip(
         for binding: KeyBinding,
-        in bindings: [KeyBinding]
+        in bindings: [KeyBinding],
+        config: GuiConfig
     ) -> String? {
         guard
             let conflict = KeybindingConflicts.conflict(
@@ -35,7 +40,10 @@ enum ConflictText {
             return L(
                 "keybinding.conflict.tooltip.other_binding",
                 "Already bound in this layer: %1$@",
-                who
+                KeybindingCatalog.localizedLabel(
+                    for: who,
+                    config: config
+                )
             )
         case .systemShortcut(let shortcut):
             return L(
