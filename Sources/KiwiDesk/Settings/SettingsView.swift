@@ -15,12 +15,23 @@ struct SettingsView: View {
     /// `SettingsView+Detail` (the §2.1 ceiling split) and `@State`
     /// must be declared here.
     @State var revealTask: Task<Void, Never>?
+    /// The detached preview card's per-mount answer, and `nil`
+    /// while the band's own default stands (17a): `.medium`
+    /// floats it open, the narrower bands wait behind "Show
+    /// preview". Deliberately NOT persisted — the panel is
+    /// dropped by WIDTH, and a stored open/closed flag beside
+    /// that is a preference duplicating what the window already
+    /// decides (`DetailPanelTests`). Cleared on every
+    /// destination change, so an area starts at its band's
+    /// default rather than inheriting the last area's answer.
+    @State var previewShown: Bool?
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
-    /// Whether the current destination shows the panel — the
-    /// pill's centring offset and the two-column mount both
-    /// read this, so they cannot disagree.
-    var panelVisible: Bool {
+    /// Whether the current destination HAS a panel at all — the
+    /// capability, not the layout. Every responsive verdict
+    /// below is this AND a width question, so an area outside
+    /// the offer set can never reach one.
+    var panelOffered: Bool {
         SettingsDetailPanelOffer.offers(model.destination)
             && !model.editingLua
     }
@@ -34,18 +45,28 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        Group {
-            if model.editingLua {
-                chrome { LuaEditorTab(model: model) }
-            } else {
-                structuredShell
-            }
+        // The one measurement (17a). Everything that yields as
+        // the window narrows — the panel's column, the row axis,
+        // the save pill's kind, the header's search field —
+        // derives from the class this hands down, so no site
+        // compares a width of its own. `HomeScreen` reads its
+        // own geometry for the column COUNT below the cap, which
+        // is the one measurement that is not a band question.
+        GeometryReader { geo in
+            let width = SettingsWidthClass.of(
+                width: geo.size.width
+            )
+            shell(width)
+                .environment(\.settingsWidth, width)
         }
         // The digest's hard minimum (17a): below 720 the window
         // stops resizing — the tiled Settings window must
         // survive whatever slot the layout gives it. The old
         // 840 paid for the floating sidebar card, which is gone.
-        .frame(minWidth: 720, minHeight: 540)
+        .frame(
+            minWidth: SettingsWidthClass.minimum,
+            minHeight: 540
+        )
         // The window's accent, set ONCE at the root (owner ruled
         // full kiwi over the system accent, 2026-08-04): every
         // toggle, segment and prominent Save below inherits it,
@@ -93,6 +114,24 @@ struct SettingsView: View {
             apply(request)
         }
         .onAppear { apply(model.nav.pendingReveal) }
+        // A new area starts at its band's preview default: the
+        // card the user closed in Bars says nothing about
+        // whether they want one in Shortcuts.
+        .onChange(of: model.destination) { _, _ in
+            previewShown = nil
+        }
+    }
+
+    /// The window's two shells, both under the same chrome and
+    /// both taking the measured band.
+    @ViewBuilder private func shell(
+        _ width: SettingsWidthClass
+    ) -> some View {
+        if model.editingLua {
+            chrome(width) { LuaEditorTab(model: model) }
+        } else {
+            structuredShell(width)
+        }
     }
 
     /// The structured settings shell: a fixed-width source list
@@ -110,12 +149,14 @@ struct SettingsView: View {
     /// System Settings behavior #68 wanted when it removed the
     /// collapse toggle (a nine-row taxonomy never needs to
     /// hide).
-    private var structuredShell: some View {
-        chrome {
+    private func structuredShell(
+        _ width: SettingsWidthClass
+    ) -> some View {
+        chrome(width) {
             if selection == nil {
                 HomeScreen(model: model)
             } else {
-                detailPane
+                detailPane(width)
             }
         }
         .frame(maxWidth: .infinity)
@@ -175,6 +216,7 @@ struct SettingsView: View {
     /// profile banner and three-verb footer stay put whether the
     /// raw Lua editor or the structured detail is showing.
     @ViewBuilder private func chrome(
+        _ width: SettingsWidthClass,
         @ViewBuilder _ content: () -> some View
     ) -> some View {
         VStack(spacing: 0) {
@@ -226,6 +268,16 @@ struct SettingsView: View {
                 \.settingsModeReveal,
                 model.modeRevealActive
             )
+            // The detached preview (17a), and the offer to
+            // summon it. Above the pill's overlay so a card
+            // dragged to the bottom of the window still reads
+            // as the nearer object.
+            .overlay(alignment: .topTrailing) {
+                detachedPreview(width)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                showPreviewOffer(width)
+            }
             // The save pill floats OVER the content instead of
             // docking below it (#678 turn 9; owner 2026-08-09
             // overturned the docked-footer ruling). An overlay
@@ -233,18 +285,35 @@ struct SettingsView: View {
             // the full height while the pill exists only when
             // the draft does. Bottom-centred on the CONTENT
             // column; `detailPane` offsets it past the preview
-            // panel when one is open.
+            // panel when one is docked.
+            //
+            // Below the row breakpoint it stops floating and
+            // becomes the sibling bar below — see the branch
+            // after this stack. The overlay is EMPTY there
+            // rather than conditionally applied, so the content
+            // subtree's identity survives the crossing.
             .overlay(alignment: .bottom) {
-                SettingsFooter(model: model)
-                    .padding(.bottom, 22)
-                    // Centred on the CONTENT column: half the
-                    // panel's width, the prototype's own
-                    // `calc(50% - 196px)`.
-                    .offset(
-                        x: panelVisible
-                            ? -SettingsTheme.panelWidth / 2
-                            : 0
-                    )
+                if !width.docksSavePill {
+                    SettingsFooter(model: model)
+                        .padding(.bottom, 22)
+                        // Centred on the CONTENT column: half
+                        // the panel's width, the prototype's
+                        // own `calc(50% - 196px)`.
+                        .offset(
+                            x: panelDocked(width)
+                                ? -SettingsTheme.panelWidth / 2
+                                : 0
+                        )
+                }
+            }
+            // "Same content, same three verbs, different
+            // physics" (17a): at this width a floating pill
+            // sits on top of the rows it is about, so it docks
+            // into a real footer bar — a SIBLING, which reserves
+            // its own height, rather than an overlay. The one
+            // component in the shell that changes kind.
+            if width.docksSavePill {
+                SettingsFooter(model: model, docked: true)
             }
         }
         // The page, behind everything. Opaque and flat — the

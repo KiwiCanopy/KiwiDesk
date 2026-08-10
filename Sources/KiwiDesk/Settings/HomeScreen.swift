@@ -20,6 +20,11 @@ struct HomeScreen: View {
     @State private var firstRunVisible = false
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    /// The shell's measured band (17a) — the column ceiling,
+    /// never a second measurement: the `GeometryReader` below
+    /// reads the GRID's own width, which is the window's minus
+    /// whatever chrome the shell has already spent.
+    @Environment(\.settingsWidth) private var band
 
     /// Never more than four columns, and the cards GROW into a
     /// big screen instead of a fifth column appearing (owner
@@ -29,13 +34,24 @@ struct HomeScreen: View {
     /// at, and past it the desk-shaped tiles render a screen
     /// shape no screen has). `.adaptive` cannot say "at most
     /// four AND growing", so the count derives from the
-    /// measured width; the responsive pass owns the 3→2→1
-    /// steps below and inherits this as the top end.
-    private func columns(for width: CGFloat) -> [GridItem] {
+    /// measured width.
+    ///
+    /// 17a's steps are the BAND's ceiling over that (4 · 3 · 2
+    /// on the same 1200 / 900 thresholds everything else moves
+    /// on), and the measurement still owns the way down —
+    /// whichever is smaller. Without the ceiling the fit alone
+    /// reaches four at ~1040, so the grid would gain a column
+    /// while the panel beside every other screen was still
+    /// waiting for 1200, and Home would be the one screen that
+    /// stepped on a threshold of its own.
+    private func columns(
+        for width: CGFloat,
+        band: SettingsWidthClass
+    ) -> [GridItem] {
         let inset = SettingsMetrics.paneInset * 2
         let usable = max(width - inset, 240)
         let fit = Int((usable + 16) / (240 + 16))
-        let count = max(1, min(4, fit))
+        let count = max(1, min(band.homeColumnCap, fit))
         return Array(
             repeating: GridItem(
                 .flexible(minimum: 240, maximum: 360),
@@ -74,12 +90,12 @@ struct HomeScreen: View {
                         "This Profile"
                     ),
                     cards: offered(HomeCardOrder.thisProfile),
-                    columns: columns(for: width)
+                    columns: columns(for: width, band: band)
                 )
                 group(
                     L("home.group.whole_app", "Whole App"),
                     cards: offered(HomeCardOrder.wholeApp),
-                    columns: columns(for: width)
+                    columns: columns(for: width, band: band)
                 )
             }
             .padding(

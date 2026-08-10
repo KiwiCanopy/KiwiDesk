@@ -6,6 +6,12 @@ import SwiftUI
 /// dropdowns, segmented pickers) or pushes its control to the
 /// trailing edge (steppers), so controls of the same kind line
 /// up across sections.
+///
+/// Since #678 turn 17a the label/control arrangement itself is
+/// `SettingsRowShape`'s, not each row's: below the row
+/// breakpoint the label moves above its control and the shared
+/// column stops applying. A row here supplies the two children
+/// and never the axis.
 
 /// A pt-valued slider row with a numeric readout, shared by the
 /// monocle and drag-visual editors. The label column comes from
@@ -34,49 +40,48 @@ struct PtSlider: View {
     /// it while leaving `unit` and `autoAtZero` at their
     /// defaults.
     var help: String? = nil
-    @Environment(\.settingsLabelColumn)
-    private var labelColumn
 
     var body: some View {
-        HStack {
-            HStack(spacing: 4) {
-                Text(label).lineLimit(1)
-                if let help {
-                    HelpButton(explanation: help, subject: label)
-                }
+        SettingsRowShape {
+            SettingsRowLabel(label: label, help: help)
+        } control: {
+            HStack {
+                SettingsSlider(
+                    value: Binding(
+                        get: { Double(value) },
+                        set: { value = CGFloat($0) }
+                    ),
+                    range: range,
+                    step: 1
+                )
+                readout
             }
-            .frame(width: labelColumn, alignment: .leading)
-            SettingsSlider(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { value = CGFloat($0) }
-                ),
-                range: range,
-                step: 1
-            )
-            Text(
-                autoAtZero && value == 0
-                    ? L("settings.readout.auto", "Automatic")
-                    : "\(Int(value)) \(unit)"
-            )
-            .frame(
-                width: SettingsMetrics.readoutColumn,
-                alignment: .trailing
-            )
-            .foregroundStyle(.secondary)
-            .font(.body.monospacedDigit())
-            // A locale whose word for "Automatic" runs longer
-            // than the column shrinks rather than truncating —
-            // a clipped readout reads as a rendering bug, a
-            // slightly smaller one does not. Load-bearing: the
-            // word ONLY renders on an `AutoGatedGroup`-gated
-            // row, so it is always dimmed and disabled beside
-            // full-size numbers — a slightly smaller word there
-            // reads as "inert", not "broken". Don't "fix" the
-            // scale factor away.
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
         }
+    }
+
+    private var readout: some View {
+        Text(
+            autoAtZero && value == 0
+                ? L("settings.readout.auto", "Automatic")
+                : "\(Int(value)) \(unit)"
+        )
+        .frame(
+            width: SettingsMetrics.readoutColumn,
+            alignment: .trailing
+        )
+        .foregroundStyle(.secondary)
+        .font(.body.monospacedDigit())
+        // A locale whose word for "Automatic" runs longer
+        // than the column shrinks rather than truncating —
+        // a clipped readout reads as a rendering bug, a
+        // slightly smaller one does not. Load-bearing: the
+        // word ONLY renders on an `AutoGatedGroup`-gated
+        // row, so it is always dimmed and disabled beside
+        // full-size numbers — a slightly smaller word there
+        // reads as "inert", not "broken". Don't "fix" the
+        // scale factor away.
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
     }
 }
 
@@ -90,35 +95,30 @@ struct SecondsRow: View {
     var range: ClosedRange<Double> = 0.5...4.0
     /// Optional `?` popover (#94), label-adjacent.
     var help: String? = nil
-    @Environment(\.settingsLabelColumn)
-    private var labelColumn
 
     var body: some View {
-        HStack {
-            HStack(spacing: 4) {
-                Text(label).lineLimit(1)
-                if let help {
-                    HelpButton(explanation: help, subject: label)
-                }
+        SettingsRowShape {
+            SettingsRowLabel(label: label, help: help)
+        } control: {
+            HStack {
+                SettingsSlider(
+                    value: Binding(
+                        get: { Double(ms) / 1000 },
+                        set: { ms = Int(($0 * 1000).rounded()) }
+                    ),
+                    range: range,
+                    step: 0.1
+                )
+                Text(
+                    String(format: "%.1f s", Double(ms) / 1000)
+                )
+                .frame(
+                    width: SettingsMetrics.readoutColumn,
+                    alignment: .trailing
+                )
+                .foregroundStyle(.secondary)
+                .font(.body.monospacedDigit())
             }
-            .frame(width: labelColumn, alignment: .leading)
-            SettingsSlider(
-                value: Binding(
-                    get: { Double(ms) / 1000 },
-                    set: { ms = Int(($0 * 1000).rounded()) }
-                ),
-                range: range,
-                step: 0.1
-            )
-            Text(
-                String(format: "%.1f s", Double(ms) / 1000)
-            )
-            .frame(
-                width: SettingsMetrics.readoutColumn,
-                alignment: .trailing
-            )
-            .foregroundStyle(.secondary)
-            .font(.body.monospacedDigit())
         }
     }
 }
@@ -131,32 +131,27 @@ struct RatioRow: View {
     /// question is born at the label, so the affordance sits
     /// where the confusion starts.
     var help: String? = nil
-    @Environment(\.settingsLabelColumn)
-    private var labelColumn
 
     var body: some View {
-        HStack {
-            HStack(spacing: 4) {
-                Text(label).lineLimit(1)
-                if let help {
-                    HelpButton(explanation: help, subject: label)
-                }
-            }
-            .frame(width: labelColumn, alignment: .leading)
-            SettingsSlider(
-                value: $value,
-                range: 0.1...0.9,
-                step: 0.01
-            )
-            // Rounded, not truncated: a stored exact 0.29
-            // (Lua/profile) must read "29%", not "28%".
-            Text("\(Int((value * 100).rounded()))%")
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
+        SettingsRowShape {
+            SettingsRowLabel(label: label, help: help)
+        } control: {
+            HStack {
+                SettingsSlider(
+                    value: $value,
+                    range: 0.1...0.9,
+                    step: 0.01
                 )
-                .foregroundStyle(.secondary)
-                .font(.body.monospacedDigit())
+                // Rounded, not truncated: a stored exact 0.29
+                // (Lua/profile) must read "29%", not "28%".
+                Text("\(Int((value * 100).rounded()))%")
+                    .frame(
+                        width: SettingsMetrics.readoutColumn,
+                        alignment: .trailing
+                    )
+                    .foregroundStyle(.secondary)
+                    .font(.body.monospacedDigit())
+            }
         }
     }
 }
@@ -171,23 +166,18 @@ struct DropdownRow<P: View>: View {
     /// Optional `?` popover (#94), label-adjacent.
     var help: String? = nil
     @ViewBuilder let picker: P
-    @Environment(\.settingsLabelColumn)
-    private var labelColumn
 
     var body: some View {
-        HStack {
-            HStack(spacing: 4) {
-                Text(label).lineLimit(1)
-                if let help {
-                    HelpButton(explanation: help, subject: label)
-                }
+        SettingsRowShape {
+            SettingsRowLabel(label: label, help: help)
+        } control: {
+            HStack {
+                picker
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .controlSize(.large)
+                Spacer()
             }
-            .frame(width: labelColumn, alignment: .leading)
-            picker
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .controlSize(.large)
-            Spacer()
         }
     }
 }

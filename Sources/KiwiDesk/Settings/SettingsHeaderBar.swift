@@ -18,6 +18,12 @@ struct SettingsHeaderBar: View {
     /// Focuses the back chip when an area is pushed (turn 20:
     /// every shape change names a focus destination).
     @FocusState private var backChipFocused: Bool
+    /// Whether the collapsed search entry is open (17a). Lives
+    /// here, not in `HeaderSearch`: the area title is what
+    /// yields the row to the field, and one fact two views act
+    /// on cannot be either view's private state.
+    @State private var searchExpanded = false
+    @Environment(\.settingsWidth) private var width
     /// Passed into `flipSettingsMode` so the reveal timeline's
     /// hold can absorb the fade it drops (#760) — the model has
     /// no environment of its own.
@@ -30,6 +36,14 @@ struct SettingsHeaderBar: View {
 
     private var showsProfileContext: Bool {
         destination?.showsProfileContext ?? true
+    }
+
+    /// The title (or, on Home, the app identity) steps out of
+    /// the row for as long as the collapsed field is open — the
+    /// one place 17a's "chrome" step actually costs something,
+    /// and it costs it only while the user is searching.
+    private var titleYields: Bool {
+        width.collapsesChrome && searchExpanded
     }
 
     @ViewBuilder var body: some View {
@@ -98,6 +112,13 @@ struct SettingsHeaderBar: View {
         .onChange(of: destination != nil) { _, pushed in
             if pushed { backChipFocused = true }
         }
+        // A navigation closes the collapsed field with the same
+        // reasoning `HeaderSearch.id(destination)` clears the
+        // query: the new screen is a new search context, and it
+        // wants its title.
+        .onChange(of: destination) { _, _ in
+            searchExpanded = false
+        }
     }
 
     private var titleRow: some View {
@@ -111,11 +132,20 @@ struct SettingsHeaderBar: View {
                 // or the segment clipped. A priority here inverts
                 // that and drops a control, which the responsive
                 // rule forbids ("controls never", 17a).
-                Text(destination.title)
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(SettingsTheme.ink)
-                    .lineLimit(1)
-            } else {
+                //
+                // Below the chrome breakpoint the title yields
+                // OUTRIGHT while the collapsed field is open:
+                // the two cannot both have the row, and at that
+                // width the screen the user is on is one glance
+                // away in the back chip beside it, while a
+                // 60 pt search field is not a search field.
+                if !titleYields {
+                    Text(destination.title)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(SettingsTheme.ink)
+                        .lineLimit(1)
+                }
+            } else if !titleYields {
                 identity
             }
             // No `Spacer` here on purpose: the search field is
@@ -123,6 +153,7 @@ struct SettingsHeaderBar: View {
             // the chips cluster at the trailing edge instead of
             // being flung to the window's corner.
             HeaderSearch(
+                expanded: $searchExpanded,
                 context: searchContext,
                 spotlightProfiles:
                     model.profileSummaries.isEmpty,

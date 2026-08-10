@@ -46,10 +46,32 @@ struct HomeSurfacingTests {
             // footer 2026-08-09) —
             // an overlay, so it reserves no layout space, and
             // it re-centres on the content column while a
-            // panel is open.
+            // panel is DOCKED. Below the row breakpoint the
+            // overlay is empty and the bar mounts as a
+            // sibling instead (17a): both halves are needled,
+            // because either one alone leaves a width band
+            // with no save affordance at all.
             ".overlay(alignment:.bottom){"
+                + "if!width.docksSavePill{"
                 + "SettingsFooter(model:model)",
-            "x:panelVisible?-SettingsTheme.panelWidth/2:0",
+            "x:panelDocked(width)?-SettingsTheme.panelWidth/2:0",
+            "ifwidth.docksSavePill{"
+                + "SettingsFooter(model:model,docked:true)}",
+            // The detached preview and its offer are drawn
+            // where the band decides them (17a) — needles
+            // through the overlay bodies, since a consult that
+            // mounts nothing leaves every narrow window with
+            // no preview and the whole suite green.
+            ".overlay(alignment:.topTrailing){"
+                + "detachedPreview(width)}",
+            ".overlay(alignment:.bottomTrailing){"
+                + "showPreviewOffer(width)}",
+            // The measured band is published ONCE, from the
+            // shell's own geometry: every responsive decision
+            // below reads it from the environment rather than
+            // measuring again.
+            "letwidth=SettingsWidthClass.of(width:geo.size.width)"
+                + "shell(width).environment(\\.settingsWidth,width)",
             // The search mode-switch notice DRAWS when set
             // (#678 4c) — needle through the branch body: a
             // consult that never mounts the strip would leave
@@ -62,14 +84,35 @@ struct HomeSurfacingTests {
             // and DRAWS the panel through it (#678 redesign
             // spec) — needle through the branch body, the
             // Monitors lesson.
-            "ifpanelVisible,letdestination=model.destination"
+            "ifpanelDocked(width),letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
                 + "SettingsDetailPanel("
         ],
+        "Settings/SettingsView+Preview.swift": [
+            // The card mounts through the band predicate, and
+            // its close is per-mount state — never a stored
+            // preference (`DetailPanelTests` owns that half).
+            "ifdetachedPreviewShown(width),"
+                + "letdestination=model.destination",
+            "close:{previewShown=false}",
+            // The offer exists exactly where the card does
+            // not: 17a drops the preview's COLUMN, never the
+            // preview, so an area that has one always has a
+            // way to it. Both branches read the ONE form
+            // derivation, which is what makes "exactly one of
+            // three" provable at all.
+            "ifpreviewForm(width)==.offer{",
+            "guardpanelOfferedelse{returnnil}"
+                + "returnSettingsPreviewForm.at("
+                + "width,shown:previewShown)",
+        ],
         "Settings/SettingsFooter.swift": [
-            // The pill exists only while the draft does —
-            // grey-don't-hide's one exempted surface here.
-            "ifhasWork{pill"
+            // The bar exists only while the draft does —
+            // grey-don't-hide's one exempted surface here —
+            // and its two forms are one view (17a): same
+            // verbs, different physics.
+            "ifhasWork{bar",
+            "ifdocked{dockedBar}else{pill}",
         ],
         "Settings/SettingsFooter+Unsaved.swift": [
             // The count line is a BUTTON only while the draft
@@ -107,8 +150,15 @@ struct HomeSurfacingTests {
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home
-            // form the identity.
-            "ifletdestination{backChipText(destination.title)",
+            // form the identity — and below the chrome
+            // breakpoint both yield the row to the opened
+            // search field (17a), which is the one thing that
+            // step costs.
+            "ifletdestination{backChipif!titleYields{"
+                + "Text(destination.title)",
+            "elseif!titleYields{identity}",
+            "privatevartitleYields:Bool{"
+                + "width.collapsesChrome&&searchExpanded}",
             // The segment is the one EXPLICIT flip — the entry
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.
@@ -128,6 +178,22 @@ struct HomeSurfacingTests {
             // focus re-opens stale suggestions after every
             // push/pop (owner 2026-08-10).
             ".id(destination)",
+        ],
+        "Settings/HeaderSearch.swift": [
+            // The collapsed entry is a BRANCH in the body, and
+            // the only thing standing between a 720 pt window
+            // and a clipped control — needle through both
+            // arms, since either one deleted leaves a band
+            // with no search at all.
+            "ifcollapsed{collapsedEntry}else{fieldEntry}",
+            "privatevarcollapsed:Bool{"
+                + "width.collapsesChrome&&!expanded}",
+            // Opening focuses in the same act, and ⌘K reaches
+            // the collapsed entry rather than a field that is
+            // not on screen.
+            "expanded=truefocused=true",
+            "Button(\"\",action:open)"
+                + ".keyboardShortcut(\"k\",modifiers:.command)",
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.
