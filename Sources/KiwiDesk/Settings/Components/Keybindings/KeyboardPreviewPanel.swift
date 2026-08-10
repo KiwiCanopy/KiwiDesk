@@ -120,63 +120,89 @@ struct KeyboardPreviewPanel: View {
                 lineSwatch(
                     SettingsTheme.keyReserved,
                     dashed: true,
+                    on: SettingsTheme.keyFree,
                     L("keyboard.legend.blocked", "macOS owns it")
                 )
             }
             lineSwatch(
                 SettingsTheme.keyConflict,
                 dashed: false,
+                on: SettingsTheme.accent,
                 L("keyboard.legend.conflict", "conflict")
             )
         }
     }
 
-    /// A fill swatch, delimited by a hairline rather than set on
-    /// a plate of its own. The plate was there because a pale
-    /// key fill vanished on the light panel; the fills are the
-    /// app's accent and a dark grey now, and a hairline states
-    /// the swatch's edge on either appearance without reading as
-    /// a frame around one item.
+    /// A fill swatch drawn as a mini KEY on a sliver of the
+    /// board's own plate. The earlier hairline-on-panel form
+    /// held while the panel was light; in dark the panel drops
+    /// to within ~1.3:1 of `keyFree` and the hairline is within
+    /// eleven points of it, so the "free" swatch became a hole
+    /// (dark pass). The plate chip is the board's own context —
+    /// every board colour is measured against it, so the legend
+    /// is legible exactly where the board is, in both modes.
     private func swatch(_ fill: Color, _ label: String) -> some View {
         HStack(spacing: 5) {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(fill)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 3)
-                        .strokeBorder(
-                            SettingsTheme.hairline,
-                            lineWidth: 1
-                        )
-                )
-                .frame(width: 17, height: 12)
+            plateChip {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(fill)
+            }
             Text(label)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink2)
         }
     }
 
-    /// A ring, drawn as the KEY-SHAPED outline it is on the
-    /// board — dashed for reserved, solid for a conflict. A
-    /// capsule read as a pill rather than as a key edge.
+    /// A ring, drawn as it is on the board: a KEY-SHAPED outline
+    /// sitting ON a key, on the plate — dashed reserved on a
+    /// free key, solid conflict on a bound one, which is the
+    /// only fill either ring can sit on there.
     private func lineSwatch(
         _ stroke: Color,
         dashed: Bool,
+        on keyFill: Color,
         _ label: String
     ) -> some View {
         HStack(spacing: 5) {
-            RoundedRectangle(cornerRadius: 3)
-                .strokeBorder(
-                    stroke,
-                    style: StrokeStyle(
-                        lineWidth: 2,
-                        dash: dashed ? [3, 2] : []
+            plateChip {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(keyFill)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 3)
+                            .strokeBorder(
+                                stroke,
+                                style: StrokeStyle(
+                                    lineWidth: 2,
+                                    dash: dashed ? [3, 2] : []
+                                )
+                            )
                     )
-                )
-                .frame(width: 17, height: 12)
+            }
             Text(label)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink2)
         }
+    }
+
+    /// The sliver of board plate under a legend key — the same
+    /// ground and dark seam the board itself takes.
+    private func plateChip(
+        @ViewBuilder _ key: () -> some View
+    ) -> some View {
+        key()
+            .frame(width: 17, height: 12)
+            .padding(3)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(SettingsTheme.previewPlate)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .strokeBorder(
+                        SettingsTheme.planeRing,
+                        lineWidth: 1
+                    )
+            )
     }
 
     // MARK: - Sentence and layout row
@@ -249,6 +275,17 @@ struct KeyboardPreviewPanel: View {
                         .background(
                             RoundedRectangle(cornerRadius: 5)
                                 .fill(SettingsTheme.card)
+                        )
+                        // `card` sits within a point of
+                        // `sunken` in BOTH modes — without an
+                        // edge the chip is not a chip (dark
+                        // pass).
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .strokeBorder(
+                                    SettingsTheme.hairline,
+                                    lineWidth: 1
+                                )
                         )
                 }
             }
