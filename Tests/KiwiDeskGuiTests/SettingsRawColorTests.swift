@@ -274,56 +274,8 @@ struct SettingsRawColorTests {
         )
     }
 
-    // MARK: - Hierarchical greys on fixed-dark grounds
-
-    /// Chrome that is dark in BOTH modes: the ambient-derived
-    /// greys land near-white or near-black by the WINDOW's
-    /// appearance while the ground never moves. Membership is
-    /// STEM-derived, not a file list — the §2.1 ceiling keeps
-    /// splitting exactly these families (`HomeCardPlate+X`,
-    /// `SettingsFooter+Y`), and a hand list let the next split
-    /// land outside the ban silently (architect review
-    /// 2026-08-10; this very branch split `+SpacesTile` off
-    /// and had to remember the entry).
-    private let fixedGroundStems = [
-        "SettingsFooter", "HomeCardPlate", "KeyboardBoard",
-        "KeyboardChrome",
-    ]
-
-    @Test("no hierarchical grey on a fixed-dark ground")
-    func fixedGroundsBanHierarchicalGreys() throws {
-        let needles = [
-            ".secondary", ".tertiary", ".quaternary",
-        ]
-        var scanned = 0
-        for file in try swiftFiles(under: Self.settingsDir) {
-            let name = file.lastPathComponent
-            guard
-                fixedGroundStems.contains(where: {
-                    name == "\($0).swift"
-                        || name.hasPrefix("\($0)+")
-                })
-            else { continue }
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            scanned += 1
-            for needle in needles {
-                #expect(
-                    !source.contains(needle),
-                    Comment(
-                        rawValue:
-                            "\(name) draws \(needle) on "
-                            + "fixed-dark chrome"
-                    )
-                )
-            }
-        }
-        // Every stem must still match something — a renamed
-        // family must red, not shrink the scan (13 files as of
-        // 2026-08-10, and growth is the point).
-        #expect(scanned >= 13)
-    }
+    // The hierarchical-grey fixed-ground ban lives in
+    // `SettingsFixedGroundTests` — split at the §2.1 ceiling.
 
     // MARK: - Enumeration
 

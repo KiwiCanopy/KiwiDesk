@@ -4829,11 +4829,13 @@ of it, rather than separate rulings:
   floor against the accent outright where the conflict red
   clears it — the same suite holds that pairing — so "keep the
   amber on bound keys" is not an available alternative. The
-  legend obeys the caption rule: the red entry exists only while
-  a red ring is actually drawn on the board, and the amber one
-  only while a modifier chip is picked, because under **All**
-  there is no single combination to check a reserved key
-  against.
+  legend obeys the caption rule: each ring's entry exists only
+  while its ring is actually drawn on the board — the red while
+  a collision or an overwrite shows, the amber while a reserved
+  key is still free under the shown combination. A chip being
+  picked is not enough for the amber: ⌃⌥, the app's default
+  pair, reserves nothing, and under **All** there is no single
+  combination to check a reserved key against.
 - **Measure colour with `ColorVision`, never a re-derivation of
   it.** `ColorVision.separation` is Euclidean distance in
   *simulated sRGB*. A hand-rolled CIE-Lab proxy used during pass

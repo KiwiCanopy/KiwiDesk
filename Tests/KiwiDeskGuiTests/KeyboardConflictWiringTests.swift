@@ -133,4 +133,33 @@ struct KeyboardConflictSetTests {
             KeyboardCensus.reservedKeys(scope: .all).isEmpty
         )
     }
+
+    /// The amber PAIR reads one derivation: the `.cantBind`
+    /// the board's dashed ring draws and the `reservedUnbound`
+    /// its legend entry gates on must agree key for key — two
+    /// parallel readings of `SystemShortcuts.map` were
+    /// equivalent-by-luck until `state` was routed through
+    /// `reservedKeys` (re-review 2026-08-10).
+    @Test("the dashed ring and its legend entry agree")
+    func amberPairReadsOneDerivation() {
+        let scope = KeyboardCensus.Scope.one(
+            KeyboardCensus.ModifierLayer(
+                modifiers: commandW.modifiers
+            )
+        )
+        let amber = KeyboardCensus.reservedUnbound(
+            claims: [:],
+            scope: scope
+        )
+        #expect(!amber.isEmpty)
+        for code in amber {
+            #expect(
+                KeyboardCensus.state(
+                    of: code,
+                    claims: [:],
+                    scope: scope
+                ) == .cantBind
+            )
+        }
+    }
 }

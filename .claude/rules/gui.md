@@ -550,9 +550,11 @@ Every surface, border and ink in the Settings tree comes from
   `KeyboardRingSeparationTests` — one authority per pairing) —
   and `SettingsRawColorTests` bans
   fixed hues, RGB literals and fixed white/black outside its
-  reasoned maps, plus hierarchical greys on the FIXED-dark
-  chrome files — on mode-varying surfaces `.secondary` still
-  self-inverts and "prefer a concrete ink" stays a preference.
+  reasoned maps, with `SettingsFixedGroundTests` banning
+  hierarchical greys on the FIXED-dark chrome families
+  (stem-derived, so a §2.1 split cannot fall out of it) — on
+  mode-varying surfaces `.secondary` still self-inverts and
+  "prefer a concrete ink" stays a preference.
 - **A dark plane on a dark ground takes the `planeRing` seam**
   (16b's one non-swap construction): where a fixed-dark surface
   meets a mode-varying one — the plate, the save pill, the

@@ -158,9 +158,13 @@ enum KeyboardCensus {
         scope: Scope
     ) -> KeyState {
         if claims[code]?.isEmpty == false { return .bound }
-        if case .one(let layer) = scope,
-            isSystemReserved(code, under: [layer])
-        {
+        // Through `reservedKeys`, the ONE derivation of
+        // "reserved" — the dashed ring this state draws and
+        // the legend entry gated on `reservedUnbound` must
+        // read one source, or the board↔legend disagreement
+        // class returns through the amber pair (re-review
+        // 2026-08-10).
+        if reservedKeys(scope: scope).contains(code) {
             return .cantBind
         }
         return .free
