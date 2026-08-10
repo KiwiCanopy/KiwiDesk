@@ -211,6 +211,16 @@ is why they are here rather than beside the views:
   the whole meaning intact — the trimmed label is the only name
   the user ever reads. Ordinary *row* labels take the OPPOSITE
   line: the control is fixed and the label flexes and wraps.
+- **A diff row's label follows the destination line, not the
+  ordinary-row one** — shorten it to fit. It is drawn
+  single-line (`SettingsDiffRowsView` owns the `lineLimit`)
+  inside the detail panel, sharing that width with the
+  old→new value pair, so a label sized for a section body
+  truncates mid-meaning instead of wrapping. Nothing guards
+  the fit, which is why it is stated here: the #788
+  translation round shipped four labels at 45–52 characters
+  against an English 11–28 before an audit caught them, each
+  losing exactly the clause that carried the setting's point.
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own
