@@ -1,6 +1,6 @@
 name: Docs
 description: Report missing, wrong, or unclear documentation
-labels: ["documentation"]
+type: "Task"
 title: "📝 "
 body:
   - type: markdown

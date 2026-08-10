@@ -1,6 +1,7 @@
 name: Collector (tracking)
 description: Themed collecting issue grouping related issues
 labels: ["roadmap"]
+type: "Task"
 title: "📦 Collector: "
 body:
   - type: markdown

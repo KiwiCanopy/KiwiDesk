@@ -198,10 +198,8 @@ writing whatever shape it likes.** GitHub applies a `.yml` form
 only when a human opens the *New issue* page (observed
 2026-08-02, `gh` 2.x), so `gh issue create --body-file` — the way
 an agent files one — starts from a blank body and silently keeps
-none of it. Read the
-template, then reproduce it: each `label:` as a `###` heading in
-declared order, its `labels:` on the command line, its `title:`
-prefix on the title. The reason is not tidiness. Those fields are
+none of it. The reason the template must be reproduced anyway is
+not tidiness. Those fields are
 the questions a maintainer needs answered *before* triaging, and
 an agent that skips them is skipping the questions, not just the
 formatting — the templates ask for the macOS version and the
@@ -219,6 +217,18 @@ written for a **user**, so an internal engineering issue will have
 fields that fit awkwardly — answer them honestly from the dev
 machine rather than dropping them or inventing a new shape
 inline.
+
+Beyond the body: give every issue GitHub's **Type** (Bug /
+Feature / Task) and the repo's **Priority** and **Effort**
+issue fields at filing, not in a later sweep — an unranked
+issue is invisible to the roadmap's ordering. The
+**`file-issue` skill**
+([.claude/skills/file-issue](.claude/skills/file-issue/SKILL.md))
+owns the whole filing procedure — the template reproduction,
+setting the Type and both fields, and the Priority/Effort
+ladders. Type says what the retired `bug` / `enhancement` /
+`documentation` / `feat` labels used to say; never apply those
+labels to an issue again.
 
 ### Commit messages (Angular / Conventional Commits)
 
