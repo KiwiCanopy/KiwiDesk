@@ -190,9 +190,11 @@ enum SettingsSearchIndex {
             return k
         }()
         let hit = entries.first { $0.control.key == labelKey }
+        let surface =
+            hit?.control.surface ?? fallbackSurface(for: key)
         var path = [destination.title]
-        if let surface = hit?.control.surface.displayName {
-            path.append(surface)
+        if let name = surface.displayName {
+            path.append(name)
         }
         if let parent = hit?.parent {
             path.append(parent.text)
@@ -202,16 +204,35 @@ enum SettingsSearchIndex {
             label: SettingsCensusLabel.label(for: key) ?? key.id,
             synonyms: SettingsSearchSynonyms.terms(for: key),
             destination: destination,
-            anchor: hit.map {
-                SettingsAnchor(
-                    destination: destination,
-                    surface: $0.control.surface,
-                    anchor: $0.control.id
-                )
-            } ?? SettingsAnchor(destination: destination),
+            anchor: SettingsAnchor(
+                destination: destination,
+                surface: surface,
+                anchor: hit?.control.id
+            ),
             path: path,
             tier: key.placement.tier
         )
+    }
+
+    /// The anchor-less fallback for LAYOUT keys: their census
+    /// ids are `settings.<mode>.…`, so the tab a row belongs to
+    /// is derivable from the key alone — a "Columns" hit with
+    /// no catalog control still opens the Grid tab instead of
+    /// dumping the user on whatever tab renders first (owner
+    /// eyeball, 2026-08-10). Every other key stays `.main`.
+    private static func fallbackSurface(
+        for key: SettingKey
+    ) -> SettingsSurface {
+        guard case .layout = key else { return .main }
+        let segments = key.id.split(separator: ".")
+        guard segments.count >= 2,
+            segments[0] == "settings",
+            let mode = LayoutMode(
+                rawValue: String(segments[1])
+            ),
+            LayoutMode.placementTabs.contains(mode)
+        else { return .main }
+        return .layoutMode(mode)
     }
 }
 

@@ -57,10 +57,21 @@ struct SettingsSearchPlacesTests {
         let byKind = Dictionary(
             uniqueKeysWithValues: hits.map { ($0.kind, $0) }
         )
+        // The expected side is HAND-PINNED per case, never
+        // `kind.destination` — the builder constructs anchors
+        // FROM that mapping, so asserting against it moves both
+        // sides together and proves nothing (guard-prover found
+        // the first cut inert, 2026-08-10; the exhaustive
+        // switch still makes a new kind a compile error here).
         for kind in SettingsSearchPlace.Kind.allCases {
+            let expected: SettingsDestination
+            switch kind {
+            case .space: expected = .spaces
+            case .profile: expected = .profiles
+            case .appRule: expected = .appRules
+            }
             #expect(
-                byKind[kind]?.anchor.destination
-                    == kind.destination,
+                byKind[kind]?.anchor.destination == expected,
                 Comment(rawValue: kind.rawValue)
             )
         }

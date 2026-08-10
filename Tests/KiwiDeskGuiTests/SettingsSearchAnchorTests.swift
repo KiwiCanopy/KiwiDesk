@@ -173,6 +173,25 @@ struct SettingsSearchAnchorTests {
         #expect(row?.anchor.anchor == "gaps.top")
     }
 
+    /// An anchor-less LAYOUT hit still opens ITS tab: the
+    /// census id (`settings.<mode>.…`) names the mode, so the
+    /// row lands on the Grid tab instead of whatever tab
+    /// renders first — the owner hit exactly this with a
+    /// German "Spalten" query landing on BSP (2026-08-10). No
+    /// scroll id until the #277 catalog carries the control.
+    @Test("an anchor-less layout hit opens its mode tab")
+    func layoutFallbackSurface() {
+        pinEnglish()
+        defer { reset() }
+        let row = rows("Columns").first {
+            $0.key == .layout(.gridColumns)
+        }
+        #expect(row != nil)
+        #expect(row?.anchor.anchor == nil)
+        #expect(row?.anchor.surface == .layoutMode(.grid))
+        #expect(row?.path == ["Layout Defaults", "Grid"])
+    }
+
     /// The shell's decision, at the one place it is made. Pinned
     /// because `apply` is `private` on a `View` and unreachable,
     /// and because the extraction's stated purpose was to make
