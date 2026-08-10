@@ -706,7 +706,7 @@
   "panel.draft_clean_area": "No changes in this area — %1$d elsewhere in the draft.",
   "panel.hide_preview": "Hide preview",
   "panel.live_preview": "Live preview · %1$@",
-  "panel.move_preview": "Move preview",
+  "panel.move_preview": "Drag to move the preview",
   "panel.show_preview": "Show preview",
   "placement.after_focused": "After focused",
   "placement.before_focused": "Before focused",

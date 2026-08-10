@@ -66,10 +66,12 @@ extension SettingsView {
         _ width: SettingsWidthClass
     ) -> some View {
         if previewForm(width) == .offer {
-            Button(L("panel.show_preview", "Show preview")) {
+            Button {
                 previewShown = true
+            } label: {
+                showPreviewLabel
             }
-            .settingsActionButton()
+            .buttonStyle(.plain)
             .padding(.trailing, SettingsMetrics.paneInset)
             // Clears the docked save bar's own row when the
             // draft has summoned one, and sits on the pill's
@@ -77,5 +79,48 @@ extension SettingsView {
             // content, never something stacked on the footer.
             .padding(.bottom, 22)
         }
+    }
+
+    /// The offer's chip (owner, on device 2026-08-11): a
+    /// bordered button read as transparent over the content it
+    /// floats on, so this is an opaque `card` plane with the
+    /// ACCENT as its edge — the same colour that marks the
+    /// profile chip in the header, which is where the owner
+    /// pointed.
+    ///
+    /// The accent is on the border, never the words: it marks
+    /// an affordance, not a value, and the glyph beside the
+    /// label is the non-hue half of the same signal, so the
+    /// chip still reads as a control with hue removed. Drawn
+    /// as a plain-styled chip rather than a `.bordered` button
+    /// because a bordered one takes the tint on its LABEL,
+    /// which is exactly the pairing the seal exists to
+    /// prevent.
+    private var showPreviewLabel: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "sidebar.trailing")
+                .font(.system(size: 11, weight: .semibold))
+            Text(L("panel.show_preview", "Show preview"))
+                .font(.callout)
+        }
+        .foregroundStyle(SettingsTheme.ink)
+        .padding(.horizontal, ChipMetrics.padH)
+        .padding(.vertical, ChipMetrics.padV)
+        .background(
+            ChipMetrics.shape
+                .fill(SettingsTheme.card)
+                .overlay(
+                    ChipMetrics.shape.strokeBorder(
+                        SettingsTheme.accent
+                    )
+                )
+                .compositingGroup()
+                .shadow(
+                    color: .black.opacity(0.12),
+                    radius: 8,
+                    y: 3
+                )
+        )
+        .contentShape(ChipMetrics.shape)
     }
 }
