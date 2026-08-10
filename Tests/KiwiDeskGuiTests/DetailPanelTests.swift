@@ -66,6 +66,62 @@ struct DetailPanelTests {
         }
     }
 
+    /// The panel's diff list is the AREA's slice of the draft
+    /// (owner 2026-08-10) — the whole draft lives in Home's
+    /// popover, so a Bars panel listing a Gaps edit is the
+    /// noise this filter removes. Driven through the census's
+    /// own placement so the pick survives key reshuffles, and
+    /// the nil-area residue (a key with no Settings surface)
+    /// is pinned dropped, not defaulted in.
+    @Test("the panel diff list is the area's slice")
+    @MainActor
+    func diffListIsTheAreasSlice() throws {
+        let barsKey = try #require(
+            SettingKey.allCases.first {
+                $0.placement.area == .bars
+            }
+        )
+        let gapsKey = try #require(
+            SettingKey.allCases.first {
+                $0.placement.area == .gapsAndBorders
+            }
+        )
+        let rows = [
+            SettingsDiffRow.change(
+                barsKey,
+                label: "bars",
+                old: "a",
+                new: "b"
+            ),
+            SettingsDiffRow.change(
+                gapsKey,
+                label: "gaps",
+                old: "a",
+                new: "b"
+            ),
+        ]
+        let sliced = SettingsDiffRowSource.areaRows(
+            rows,
+            in: .bars
+        )
+        #expect(sliced.map(\.key) == [barsKey])
+        if let orphan = SettingKey.allCases.first(where: {
+            $0.placement.area == nil
+        }) {
+            let orphanRow = SettingsDiffRow.note(
+                orphan,
+                label: "orphan",
+                note: "Edited"
+            )
+            #expect(
+                SettingsDiffRowSource.areaRows(
+                    [orphanRow],
+                    in: .bars
+                ).isEmpty
+            )
+        }
+    }
+
     /// The digest's `›` collapse handle is deliberately NOT
     /// built (owner 2026-08-10): the responsive pass drops the
     /// panel by WIDTH, and a manual collapse beside that is a

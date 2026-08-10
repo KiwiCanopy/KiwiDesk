@@ -108,13 +108,14 @@ struct SettingsDetailPanel: View {
     // MARK: - Diff list
 
     private var diffList: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let rows = areaRows
+        return VStack(alignment: .leading, spacing: 12) {
             SettingsTheme.hairline.frame(height: 1)
             Text(
                 L(
                     "panel.changed_in_draft",
                     "Changed in this draft — %1$d",
-                    model.draftChangeCount
+                    Set(rows.map(\.key)).count
                 )
             )
             .font(
@@ -124,7 +125,11 @@ struct SettingsDetailPanel: View {
             .kerning(1.4)
             .textCase(.uppercase)
             .foregroundStyle(SettingsTheme.ink3)
-            if model.draftChangeCount == 0 {
+            if !rows.isEmpty {
+                SettingsDiffRowsView(rows: rows) { row in
+                    jump(to: row)
+                }
+            } else if model.draftChangeCount == 0 {
                 Text(
                     L(
                         "panel.draft_clean",
@@ -134,13 +139,25 @@ struct SettingsDetailPanel: View {
                 .font(.callout)
                 .foregroundStyle(SettingsTheme.ink3)
             } else {
-                SettingsDiffRowsView(
-                    rows: SettingsDiffRowSource.rows(for: model)
-                ) { row in
-                    jump(to: row)
-                }
+                Text(
+                    L(
+                        "panel.draft_clean_area",
+                        "No changes in this area — %1$d "
+                            + "elsewhere in the draft.",
+                        model.draftChangeCount
+                    )
+                )
+                .font(.callout)
+                .foregroundStyle(SettingsTheme.ink3)
             }
         }
+    }
+
+    private var areaRows: [SettingsDiffRow] {
+        SettingsDiffRowSource.areaRows(
+            SettingsDiffRowSource.rows(for: model),
+            in: destination
+        )
     }
 
     /// The prototype's "each row is clickable — jumps to the
@@ -198,5 +215,24 @@ enum SettingsDiffRowSource {
             )
         }
         return rows
+    }
+
+    /// The panel's slice of the draft: only rows whose census
+    /// placement lands in `destination` — the whole draft
+    /// lives in Home's popover, and a row the user cannot see
+    /// change on this screen is noise (owner 2026-08-10). Same
+    /// area mapping as the row's own jump. Stated residue: a
+    /// row whose key has no Settings surface (nil placement
+    /// area — a Lua-only override) appears only in the popover.
+    static func areaRows(
+        _ rows: [SettingsDiffRow],
+        in destination: SettingsDestination
+    ) -> [SettingsDiffRow] {
+        rows.filter { row in
+            guard let area = row.key.placement.area else {
+                return false
+            }
+            return SettingsDestination(area: area) == destination
+        }
     }
 }
