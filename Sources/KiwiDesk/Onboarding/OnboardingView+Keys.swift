@@ -73,8 +73,12 @@ extension OnboardingView {
             Text(
                 L(
                     "onboarding.keys.body",
-                    "All bound already. Try one now — nothing "
-                        + "will break."
+                    // About the ROWS, not the set. `families`
+                    // returns only what is bound and silently
+                    // omits the rest, so "all bound already"
+                    // asserted completeness over a filtered list.
+                    "These are ready to use. Try one now — "
+                        + "nothing will break."
                 )
             )
             .multilineTextAlignment(.center)

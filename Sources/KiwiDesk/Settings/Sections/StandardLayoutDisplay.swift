@@ -105,8 +105,8 @@ extension StandardLayout {
         case StarterSetup.name:
             return L(
                 "presets.starter.summary",
-                "Spaces chosen for the screens you have, each "
-                    + "with the layout that screen suits."
+                "Spaces chosen for your screens, each with its "
+                    + "own layout."
             )
         default:
             // Unreachable for anything in `StandardProfiles.all`,

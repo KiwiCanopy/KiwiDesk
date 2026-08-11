@@ -7,12 +7,9 @@ extension OnboardingView {
     /// REAL `LayoutSchematic` family — so the picture a user meets
     /// on day one is the picture they meet again in Settings.
     ///
-    /// The copy claims the spaces were chosen for these screens,
-    /// and since pass 11 that is true: `ScreenClass` picks each
-    /// screen's layouts from its shape. Against the retired ladder
-    /// — five per display, the same five everywhere — the same
-    /// sentence was a preview claiming engine behavior the engine
-    /// did not have.
+    /// The copy says the setup was chosen, not that each screen
+    /// chose its own tile — see `spacesBody`, which carries why
+    /// the stronger claim is false.
     var spaces: some View {
         VStack(spacing: 14) {
             Text(spacesTitle)
@@ -108,44 +105,54 @@ extension OnboardingView {
         L("onboarding.starter_spaces.title", "Spaces, ready to use")
     }
 
-    /// One sentence, no interpolation.
+    /// One sentence, no interpolation, and no per-screen claim.
     ///
-    /// It used to say "Each one uses a different layout, chosen
-    /// for: <screens>", and that was wrong three ways at once
-    /// (localization audit, 2026-08-11):
+    /// Three separate defects were written into this one string
+    /// before it settled, each caught by a localization audit
+    /// rather than by any guard — worth listing, because the
+    /// sentence looks harmless every time:
     ///
-    /// - **"different" is false whenever the budget forces a
-    ///   repeat**, which `StarterAllocation` explicitly permits
-    ///   and which is guaranteed at four or more screens — and
-    ///   the strip drawn directly beneath would show the two
-    ///   identical tiles disproving it;
-    /// - the screen list was `joined(separator: ", ")` in SWIFT,
-    ///   before the frame, so no catalog could supply `、` for
-    ///   ja/zh-Hant and no locale could drop the ASCII space;
-    /// - "chosen for: <list>" did not say what was chosen for
-    ///   what, and three locales independently read it as a
-    ///   PURPOSE — ja `用途`, ko `용도`, ru `назначение`.
-    ///   Three locales patching one frame is how the English
-    ///   announces it is the defect.
+    /// 1. **"Each one uses a DIFFERENT layout"** — false whenever
+    ///    the budget forces a repeat, which `StarterAllocation`
+    ///    explicitly permits and which is guaranteed past four
+    ///    screens. The strip beneath would show the two identical
+    ///    tiles disproving it.
+    /// 2. **"chosen for: <screens>"** — the list was
+    ///    `joined(separator: ", ")` in SWIFT, so no catalog could
+    ///    supply `、` for ja/zh-Hant; and it did not say what was
+    ///    chosen for what, which three locales independently read
+    ///    as a PURPOSE (ja `用途`, ko `용도`, ru `назначение`).
+    ///    Three locales patching one frame is how the English
+    ///    announces it is the defect.
+    /// 3. **"the layout ITS SCREEN suits"** —
+    ///    `ScreenClass.layouts` carries no `.floating` at all,
+    ///    because where the one Floating space goes is a rule
+    ///    about the SETUP rather than a screen's preference. So
+    ///    one tile in every setup with room for it is, by design,
+    ///    not derived from the screen it sits on. That claim
+    ///    became false the day Floating moved out, and all ten
+    ///    catalogs had already translated it.
     ///
-    /// Each tile already prints its own screen under its own
-    /// layout, attributed per space, which a sentence naming all
-    /// the screens at once cannot do — it implies every layout
-    /// was chosen for every screen. So the sentence states the
-    /// rule and the tiles carry the facts.
+    /// What survives all three: the SETUP was chosen, each space
+    /// has its own layout. The tiles carry the per-space facts,
+    /// which a sentence about every screen at once cannot.
     private var spacesBody: String {
         L(
             "onboarding.starter_spaces.body",
-            "Each one has the layout its screen suits."
+            "Each one has its own layout, chosen for your setup."
         )
     }
 
     private var spacesFooter: String {
         L(
             "onboarding.starter_spaces.footer",
+            // "any of these SPACES", not "any of this": the only
+            // plural noun in the preceding sentence is Desktops,
+            // which Settings cannot rename — and pt-BR's
+            // translator produced a pronoun agreeing with it.
             "Your Mac's own Desktops still exist underneath. "
-                + "Rename or change any of this in Settings, "
-                + "whenever you want to."
+                + "Rename or change any of these spaces in "
+                + "Settings, whenever you want to."
         )
     }
 }

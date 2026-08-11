@@ -175,8 +175,13 @@ private struct MenuBarCoachMarkView: View {
             Text(
                 L(
                     "onboarding.coach_mark.body",
-                    "KiwiDesk lives up here. Click it for "
-                        + "Settings and your shortcuts."
+                    // The closing card already said where the app
+                    // lives, and `windowWillClose` fires this
+                    // seconds later — so the card says WHERE and
+                    // the mark says WHAT, rather than both saying
+                    // the same sentence twice.
+                    "That's KiwiDesk. Settings and your "
+                        + "shortcuts are in here."
                 )
             )
             .font(.callout)

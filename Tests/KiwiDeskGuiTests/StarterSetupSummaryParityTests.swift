@@ -122,16 +122,18 @@ struct StarterSetupSummaryParityTests {
         let files = try FileManager.default
             .contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "json" }
-        var checked = 0
+        var read = 0
+        var carried = 0
         for file in files {
             let data = try Data(contentsOf: file)
             let catalog =
                 try JSONSerialization.jsonObject(with: data)
                 as? [String: String] ?? [:]
+            read += 1
             guard
                 let summary = catalog["presets.starter.summary"]
             else { continue }
-            checked += 1
+            carried += 1
             // Each mode's name AS THIS LOCALE WRITES IT, falling
             // back to the English key name where a locale has not
             // translated it.
@@ -154,14 +156,33 @@ struct StarterSetupSummaryParityTests {
             }
         }
         // A scan that read nothing passes for having found
-        // nothing (#635). Eleven catalogs ship the key.
+        // nothing (#635) — so the floor is on the CATALOGS READ,
+        // not on how many carry the key.
+        //
+        // Those are different claims, and the second one is
+        // wrong: a key mid-translation-round is absent from every
+        // locale by design and falls back to English per key.
+        // Requiring each catalog to carry it would make a
+        // half-translated locale a test failure, which
+        // `PresetSummaryCoverageTests` already argues against in
+        // as many words. What must not happen is the scan reading
+        // no files at all.
         #expect(
-            checked >= 10,
+            read >= 10,
             Comment(
                 rawValue:
-                    "only \(checked) catalog(s) carried "
-                    + "presets.starter.summary — the key moved "
-                    + "and this guard went quiet"
+                    "read only \(read) catalog(s) — the locale "
+                    + "directory moved and this guard went quiet"
+            )
+        )
+        // …and English must still carry it, or there is no key
+        // left to be wrong about.
+        #expect(
+            carried >= 1,
+            Comment(
+                rawValue:
+                    "no catalog carried presets.starter.summary "
+                    + "— the key was renamed or retired"
             )
         )
     }
