@@ -216,7 +216,7 @@ extension KiwiCore {
         // First run reports only the ACTIVE Space (#270): the live
         // list is a single numbered space (usually ["1"]), which
         // would seed only ⌃⌥1. Pad just that bare signature to the
-        // per-display ladder the empty state already uses, so the
+        // per-display set the empty state already uses, so the
         // scaled digit shortcuts (⌃⌥1–5 on one display, …+0 on two)
         // all work out of the box (#466). A named or multi-space
         // list is a configured setup — left exactly as discovered

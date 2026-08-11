@@ -48,7 +48,7 @@ extension KiwiCore {
     /// place: the GUI card first asked `ProfileManager.match`
     /// alone and named the wrong profile on a bound Desktop,
     /// then asked `StandardProfiles.standard(for:)` and named a
-    /// workflow Standard while the beginner ladder composed. A
+    /// workflow Standard while the starter setup composed. A
     /// change to the live path's precedence updates this query
     /// in the same change set; `ProfileVerdictTests` fixes each
     /// arm against a fixture built for it.
@@ -107,8 +107,8 @@ extension KiwiCore {
     }
 
     /// The `.none` arm, mirroring `handleMonitorChange`'s: the
-    /// baseline-aware fallback (the beginner ladder while on the
-    /// ladder baseline, else the count's Standard), and then the
+    /// baseline-aware fallback (the starter setup while on the
+    /// Starter baseline, else the count's Standard), and then the
     /// `isGuiManaged` split that decides whether the composed
     /// layout is ADOPTED or merely steers placement.
     private func fallbackVerdict(

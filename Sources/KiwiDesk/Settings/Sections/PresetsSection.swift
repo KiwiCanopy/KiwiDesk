@@ -57,7 +57,13 @@ struct PresetsSection: View {
 
     // MARK: - Groups
 
-    private var liveCount: Int { model.displays.count }
+    /// Derived from `liveSizes`, so the "floor at one screen"
+    /// rule is applied ONCE, in Core. Counting `model.displays`
+    /// separately made the two disagree with nothing published:
+    /// the live group said "no plans for this many screens" while
+    /// a Starter for the nominal screen existed and was filtered
+    /// out by `screenCount != 0` (architect review, 2026-08-11).
+    private var liveCount: Int { liveSizes.count }
 
     /// The live screens in positional order, which the `Starter`
     /// preset is derived from. Ordered by the same helper the

@@ -70,9 +70,9 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Marks this profile as its screen count's default (the
     /// dirty-load fallback when no set matches exactly).
     public var isDefault: Bool
-    /// Marks this profile as the beginner `Starter` ladder seed
+    /// Marks this profile as the beginner `Starter` setup seed
     /// (#466/#485). While it is the active baseline, a monitor
-    /// change that no stored set covers recomposes the *ladder*
+    /// change that no stored set covers recomposes the *setup*
     /// at the live display count instead of a workflow Standard,
     /// so the five-per-display shape survives every reconnect.
     /// Survives edits (a tweaked mode keeps the identity) but not

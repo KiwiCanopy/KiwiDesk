@@ -63,7 +63,7 @@ extension KiwiCore {
         if seedGuiConfig {
             try? guiConfigStore.save(guiConfigSeed())
         }
-        // The beginner ladder's profile-scoped half is materialized
+        // The starter setup's profile-scoped half is materialized
         // (once displays are known, below) only on a TRULY fresh
         // install — no profile of any kind exists yet — so a Lua
         // config that already saved a profile keeps it and is never
@@ -128,7 +128,7 @@ extension KiwiCore {
         // once against the FINAL effective rules. Without this,
         // verdicts stay stale until an unrelated AX event (#164).
         eventLoop.reconcileAll()
-        // Author the beginner ladder's "Starter" profile (modes,
+        // Author the starter setup's "Starter" profile (modes,
         // pins, tuning). It reads displays from NSScreen itself
         // (the event loop hasn't published them yet) and runs
         // before the loop's first monitor change, which then

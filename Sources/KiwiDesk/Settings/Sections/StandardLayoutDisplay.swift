@@ -133,10 +133,12 @@ extension StandardLayout {
 /// `String` rather than a `StandardLayout`, so `ProfileHeader`
 /// shows the same translated name as the Presets list.
 @MainActor func standardDisplayName(_ name: String) -> String {
-    // Empty sizes deliberately: a layout's display NAME is keyed
-    // on its stable English `name` alone, so the Starter entry's
-    // screens do not enter into it and asking for them here would
-    // thread live hardware through a pure string lookup.
-    StandardProfiles.all(sizes: []).first { $0.name == name }?
+    // The WORKFLOW list, not the live catalog. A display name is
+    // keyed on the stable English `name`, and `displayName` has
+    // no Starter case — so the Starter entry resolved through
+    // `default: return name`, byte-identical to the fallback
+    // below, after three allocations and a tuning build ran to
+    // produce it (architect review, 2026-08-11).
+    StandardProfiles.workflows.first { $0.name == name }?
         .displayName ?? name
 }

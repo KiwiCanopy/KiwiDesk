@@ -55,7 +55,7 @@ extension KiwiCore {
         )
         copy.isDefault = false
         // A save-as-new copy is the user's own profile, never the
-        // beginner-ladder baseline — the sibling of `isDefault`
+        // beginner-Starter baseline — the sibling of `isDefault`
         // here, and both identity flags the copy must neutralize
         // (#485, AGENTS.md §5 mirror rule).
         copy.isStarterSetup = false

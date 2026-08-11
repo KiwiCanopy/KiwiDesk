@@ -126,3 +126,26 @@ struct ScreenClassTests {
         }
     }
 }
+
+/// The nominal screen a screen-less read falls back to.
+@Suite("Starter setup's nominal screen")
+struct NominalScreenTests {
+    /// `StarterSetup.nominalDesktop` is justified by "they get the
+    /// middle class", which is true only while the thresholds
+    /// bracket it — an unguarded claim a threshold move falsifies
+    /// in silence (architect review, 2026-08-11).
+    @Test("the nominal screen really is the middle class")
+    func nominalIsDesktop() {
+        #expect(
+            ScreenClass.of(StarterSetup.nominalDesktop) == .desktop
+        )
+    }
+
+    /// And a screen-less read produces a real setup rather than
+    /// an empty one, which is the whole point of the floor.
+    @Test("no screens still yields one screen's worth of spaces")
+    func flooredAtOneScreen() {
+        #expect(StarterSetup.spaceCount(sizes: []) > 0)
+        #expect(StarterSetup.spaces(sizes: []).count > 0)
+    }
+}

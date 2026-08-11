@@ -253,11 +253,25 @@ public enum DefaultKeybindings {
     /// is the hard cap — the number row has no eleventh digit — so
     /// spaces past the tenth ship unbound by default (#466);
     /// they stay bindable in the Keybindings editor.
+    /// How many spaces can carry a default digit shortcut: the
+    /// number row, `1`…`9` then `0`. Public because it is the
+    /// reason the starter setup's own budget stops where it does
+    /// — we run out of keys before we run out of spaces — and a
+    /// second copy of the number over there would be a restated
+    /// constant rather than a derived one.
+    public static let digitCapacity = 10
+
     private static func numbered(
         _ spaces: [SpaceID]
     ) -> [(String, SpaceID)] {
-        spaces.prefix(10).enumerated().map { index, space in
-            (index == 9 ? "0" : String(index + 1), space)
+        spaces.prefix(digitCapacity).enumerated().map {
+            index,
+            space in
+            (
+                index == digitCapacity - 1
+                    ? "0" : String(index + 1),
+                space
+            )
         }
     }
 }

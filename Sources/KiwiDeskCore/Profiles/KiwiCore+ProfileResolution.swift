@@ -182,7 +182,7 @@ extension KiwiCore {
         }
         // Honor the composed layout's own positional plan (#485):
         // for a workflow Standard this equals what
-        // `resolveSpaceDisplays` re-derives below, but the ladder's
+        // `resolveSpaceDisplays` re-derives below, but the setup's
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
         adoptComposedPlacement(composed)
@@ -237,7 +237,7 @@ extension KiwiCore {
         // If the save below fails, state honestly reflects a
         // transient Standard instead of a stale profile. Adopting
         // the standard first also lets `buildProfile` tag the
-        // beginner ladder from `currentStandard` (#485).
+        // starter setup from `currentStandard` (#485).
         profiles.adoptStandard(named: composed.sourceName)
         let name = profiles.freeName(base: layout.name)
         try profiles.save(buildProfile(name: name))
@@ -314,7 +314,7 @@ extension KiwiCore {
         {
             // Recompose through the same baseline-aware fallback as
             // a monitor change, so a reload while on the transient
-            // ladder Standard re-applies the LADDER, not the count's
+            // Starter Standard re-applies the LADDER, not the count's
             // workflow Standard (#485). `apply` adopts its placement.
             apply(composed: composed, forceRetile: true)
         }

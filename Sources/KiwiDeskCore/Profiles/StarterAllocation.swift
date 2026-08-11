@@ -21,10 +21,12 @@ public enum StarterAllocation {
     /// Spaces for 1…5 screens. The second and third screen add
     /// two each; every one after that adds one.
     static let ladder = [3, 5, 7, 8, 9]
-    /// Past ⌥1–9 and ⌥0 there are no default go-to keys left, so
-    /// the total stops growing here. We run out of keys, not
-    /// spaces.
-    public static let softCap = 10
+    /// Past ⌃⌥1–9 and ⌃⌥0 there are no default go-to keys left,
+    /// so the total stops growing here. We run out of keys, not
+    /// spaces — which is why this is DERIVED from the number
+    /// row's capacity rather than restating it: the two are one
+    /// fact, and `DefaultKeybindings` owns it.
+    public static let softCap = DefaultKeybindings.digitCapacity
     /// A screen with no space would have nowhere for a window to
     /// resolve to, so this floor outranks `softCap`.
     public static let minShare = 1

@@ -56,15 +56,38 @@ public enum StarterSetup {
         )
     }
 
-    /// Every space's layout, in positional display order — the
-    /// allocation flattened, which is what the space ids number.
-    static func flattened(_ sizes: [CGSize]) -> [LayoutMode] {
-        StarterAllocation.modes(sizes: floored(sizes)).flatMap { $0 }
+    /// One space of the setup: its number, the screen it sits on
+    /// (0 = main) and the layout it opens in.
+    struct Slot: Equatable {
+        let number: Int
+        let screen: Int
+        let mode: LayoutMode
+    }
+
+    /// **The one walk.** Space numbering used to be written twice
+    /// — `flattened` numbered by `enumerated()` while
+    /// `spaceScreens` kept its own counter over the same blocks —
+    /// and the two had to agree or a space took its mode from one
+    /// screen and its pin from another, silently (architect
+    /// review, 2026-08-11). Every map below derives from this.
+    static func slots(_ sizes: [CGSize]) -> [Slot] {
+        var slots: [Slot] = []
+        var number = 1
+        let blocks = StarterAllocation.modes(sizes: floored(sizes))
+        for (screen, modes) in blocks.enumerated() {
+            for mode in modes {
+                slots.append(
+                    Slot(number: number, screen: screen, mode: mode)
+                )
+                number += 1
+            }
+        }
+        return slots
     }
 
     /// Total spaces for these screens.
     public static func spaceCount(sizes: [CGSize]) -> Int {
-        flattened(sizes).count
+        slots(sizes).count
     }
 
     /// The spaces, ids `"1"`…`"N"`, in positional display order —
@@ -82,8 +105,8 @@ public enum StarterSetup {
         sizes: [CGSize]
     ) -> [SpaceID: LayoutMode] {
         var modes: [SpaceID: LayoutMode] = [:]
-        for (index, mode) in flattened(sizes).enumerated() {
-            modes[SpaceID(index + 1)] = mode
+        for slot in slots(sizes) {
+            modes[SpaceID(slot.number)] = slot.mode
         }
         return modes
     }
@@ -92,7 +115,7 @@ public enum StarterSetup {
     /// spaces are omitted (unlisted ⇒ main), so only the second
     /// display's block onward is named.
     ///
-    /// Unlike the ladder's, this map cannot be re-derived from a
+    /// Unlike the setup's, this map cannot be re-derived from a
     /// space id by arithmetic — the blocks are no longer equal, so
     /// there is no `(n - 1) / 5`. Anything needing a space's
     /// screen reads this map.
@@ -100,13 +123,8 @@ public enum StarterSetup {
         sizes: [CGSize]
     ) -> [SpaceID: Int] {
         var screens: [SpaceID: Int] = [:]
-        var number = 1
-        let blocks = StarterAllocation.modes(sizes: floored(sizes))
-        for (screen, modes) in blocks.enumerated() {
-            for _ in modes {
-                if screen >= 1 { screens[SpaceID(number)] = screen }
-                number += 1
-            }
+        for slot in slots(sizes) where slot.screen >= 1 {
+            screens[SpaceID(slot.number)] = slot.screen
         }
         return screens
     }

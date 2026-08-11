@@ -1,8 +1,8 @@
 import Foundation
 
-/// First-run materialization of the beginner ladder (#466).
+/// First-run materialization of the starter setup (#466).
 extension KiwiCore {
-    /// Materializes the beginner ladder as a real, adopted
+    /// Materializes the starter setup as a real, adopted
     /// "Starter" profile on a fresh first run — the only durable
     /// home for the per-space modes, monitor pins, and tuning that
     /// `gui.json` (globals only) can't carry. The `gui.json` seed
@@ -11,7 +11,7 @@ extension KiwiCore {
     ///
     /// `loadConfig` runs before the event loop's first
     /// `publishDisplays`, so displays aren't in state yet — the
-    /// ladder needs them for its pins and for a non-empty monitor
+    /// setup needs them for its pins and for a non-empty monitor
     /// set (without which the first `handleMonitorChange` couldn't
     /// match the profile and would drop it for a composed
     /// Standard). So it reads the same `NSScreen` source and
