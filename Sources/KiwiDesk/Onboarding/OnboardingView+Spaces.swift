@@ -93,19 +93,27 @@ extension OnboardingView {
     /// whole claim. `screenNames` comes from the same source the
     /// Monitors area draws, so the two never disagree — and never
     /// says a diagonal, because EDID lies about it.
+    ///
+    /// **"Uses a different layout", not "arranges windows a
+    /// different way."** One of the spaces this sentence sits
+    /// above is Floating on every setup that has room for it, and
+    /// Floating is the layout that does NOT arrange windows — so
+    /// the livelier phrasing was false about a tile drawn beside
+    /// it, which is the defect class the localization audit
+    /// exists to catch (#678 Phase 4 pass 11). Floating IS a
+    /// layout; it is only not an arranging one.
     private var spacesBody: String {
         let screens = model.screenNames()
         guard !screens.isEmpty else {
             return L(
                 "onboarding.starter_spaces.body.generic",
-                "Each one arranges windows a different way, "
-                    + "chosen for your screen."
+                "Each one uses a different layout, chosen for "
+                    + "your screen."
             )
         }
         return L(
             "onboarding.starter_spaces.body",
-            "Each one arranges windows a different way, chosen "
-                + "for: %1$@",
+            "Each one uses a different layout, chosen for: %1$@",
             screens.joined(separator: ", ")
         )
     }

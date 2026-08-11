@@ -16,12 +16,20 @@ extension OnboardingView {
             Text(keysTitle)
                 .font(.title.bold())
                 .multilineTextAlignment(.center)
+            // States no clash with macOS, deliberately. The app
+            // HAS a conflict detector and this call site does not
+            // ask it, so "none of them clash" was a claim with no
+            // evidence behind it — false for anyone who had
+            // rebound a system shortcut, and confidently so
+            // (#678 Phase 4 pass 11; the pass 9/10 rule that a
+            // cause the GUI states must be evidence the code
+            // actually has). Real clashes surface in Settings,
+            // where the detector is consulted.
             Text(
                 L(
                     "onboarding.keys.body",
-                    "All bound already, and none of them clash "
-                        + "with macOS. Try one now — nothing will "
-                        + "break."
+                    "All bound already. Try one now — nothing "
+                        + "will break."
                 )
             )
             .multilineTextAlignment(.center)
@@ -46,11 +54,17 @@ extension OnboardingView {
             // Every chord is looked up, so a keymap with none of
             // these bound draws no rows at all. Say why, rather
             // than leaving a gap where a table was.
+            // "The BUTTON below", not "the panel below": the
+            // panel opens elsewhere, and what sits below this
+            // sentence is the button that opens it. A sentence
+            // describing a screen the reader is not looking at
+            // is the same defect as one contradicting a tile
+            // beside it.
             Text(
                 L(
                     "onboarding.keys.none",
-                    "Your shortcuts are yours to set — the panel "
-                        + "below lists everything that is bound."
+                    "Your shortcuts are yours to set — the button "
+                        + "below opens the full list."
                 )
             )
             .font(.callout)
