@@ -26,20 +26,19 @@ enum ProfileBrokenText {
         case .malformedJSON:
             return L(
                 "profiles.broken.malformed",
-                "Couldn't load — the file isn't valid JSON. "
-                    + "Opening it will show where it broke."
+                "Not valid JSON — opening it will show where it "
+                    + "broke."
             )
         case .unexpectedShape:
             return L(
                 "profiles.broken.unexpected_shape",
-                "Couldn't load — saved by another version, or a "
-                    + "hand edit changed one of its fields."
+                "Saved by another version, or a hand edit changed "
+                    + "one of its fields."
             )
         case .unreadable:
             return L(
                 "profiles.broken.unreadable",
-                "Couldn't be read — the file may have been moved "
-                    + "or deleted."
+                "The file may have been moved or deleted."
             )
         }
     }

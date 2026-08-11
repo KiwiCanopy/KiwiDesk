@@ -172,7 +172,7 @@ struct OnboardingView: View {
             } else {
                 Button(
                     L(
-                        "onboarding.grant.open_settings",
+                        "common.open_system_settings",
                         "Open System Settings"
                     )
                 ) {

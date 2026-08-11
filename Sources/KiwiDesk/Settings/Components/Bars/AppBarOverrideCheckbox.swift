@@ -32,8 +32,14 @@ extension OverrideChrome {
         Toggle("", isOn: isOn)
             .labelsHidden()
             .toggleStyle(.checkbox)
+            // The column header's OWN key, not a twin of it: this
+            // checkbox sits under `SpaceOverrideRows`' visible
+            // "Override" header, so a second key would hand ten
+            // translators the same bare word with no context and
+            // let VoiceOver announce a noun the header doesn't
+            // show (localization audit, 2026-08-11).
             .accessibilityLabel(
-                L("app_bar.override.axlabel", "Override")
+                L("space_override.override_column", "Override")
             )
             .accessibilityHint(overrideStateSentence)
             .help(overrideStateSentence)

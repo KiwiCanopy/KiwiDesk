@@ -95,9 +95,9 @@ struct MonitorsSection: View {
             Text(
                 L(
                     "monitors.none_detected",
-                    "No monitors detected, so there is nothing to "
-                        + "place spaces on. Windows still tile, in "
-                        + "a single space."
+                    "No monitors detected, so there's nothing to "
+                        + "place spaces on. Windows still tile, "
+                        + "all in a single space."
                 )
             )
             .foregroundStyle(.secondary)

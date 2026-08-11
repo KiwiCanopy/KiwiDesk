@@ -137,9 +137,18 @@ struct PaletteShelf: View {
                 // Says what holds INSTEAD of the empty list, not
                 // that the list is empty (#678 Phase 4 pass 9,
                 // turn 18): "no palettes saved" is a fact the
-                // reader can already see, while "the built-ins
-                // above are what colours the app" is the answer to
-                // the question the emptiness actually raises.
+                // reader can already see, while what the palettes
+                // above are FOR is the question the emptiness
+                // actually raises.
+                //
+                // It may not answer it by calling the built-ins
+                // what colours the app: `palettes.caption` two
+                // rows up rules a palette "a one-time paint, not
+                // a live link", so no palette IS the app's
+                // colour, and a sentence that says otherwise
+                // cannot be translated faithfully — the
+                // contradiction rides into ten languages
+                // (localization audit, 2026-08-11).
                 Text(
                     L(
                         "palettes.empty_hint",
@@ -150,9 +159,9 @@ struct PaletteShelf: View {
                         // spelling in one card is what ten
                         // catalogs inherit (code review,
                         // 2026-08-11).
-                        "The built-ins above are what colors "
-                            + "KiwiDesk. Save one and it joins them "
-                            + "here."
+                        "The palettes above paint KiwiDesk in one "
+                            + "click. Save colors of your own and "
+                            + "they appear here."
                     )
                 )
                 .font(.caption)

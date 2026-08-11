@@ -29,9 +29,15 @@ struct FocusBorderPreview: View {
             .accessibilityElement()
             .accessibilityLabel(
                 L(
-                    "borders.preview.axlabel",
-                    "Preview: a focused window with its ring, "
-                        + "beside an unfocused one."
+                    // Names its subject, as the sibling preview
+                    // keys do (`app_bar.preview.ax`,
+                    // `space_bar.preview.ax`): in the VoiceOver
+                    // rotor there is no visual context, and a bare
+                    // "Preview:" announces a preview of nothing
+                    // (l10n audit, 2026-08-11).
+                    "border.preview.ax",
+                    "Border preview: a focused window with its "
+                        + "ring, beside an unfocused one."
                 )
             )
     }

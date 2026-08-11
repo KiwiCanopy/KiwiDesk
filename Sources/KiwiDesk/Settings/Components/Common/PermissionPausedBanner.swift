@@ -45,9 +45,16 @@ struct PermissionPausedBanner: View {
             .font(.callout)
             .foregroundStyle(SettingsTheme.warningInk)
             .frame(maxWidth: .infinity, alignment: .leading)
+            // ONE key with the onboarding button, not a twin of
+            // it (l10n audit, 2026-08-11): `onboarding.grant.body`
+            // QUOTES this label in its numbered steps, so two keys
+            // holding one English let a later round split the
+            // quote from the button it quotes — in one language,
+            // invisibly. Renamed out of `onboarding.` because this
+            // banner outlives onboarding.
             Button(
                 L(
-                    "settings.permission_paused.action",
+                    "common.open_system_settings",
                     "Open System Settings"
                 )
             ) {

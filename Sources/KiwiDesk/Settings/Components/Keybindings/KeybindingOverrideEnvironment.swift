@@ -79,8 +79,8 @@ extension View {
                 inherited
                     ? L(
                         "shortcuts.row.inherited.axhint",
-                        "Inherited from the base layer. Record a "
-                            + "key here to override it."
+                        "Inherited from the base shortcuts. "
+                            + "Record a key here to override it."
                     )
                     : ""
             )
