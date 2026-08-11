@@ -665,6 +665,25 @@ on:
   `ColorField`'s swatches do — could not be observed headlessly.
   `GreyOut`'s docstring carries the two failure modes; re-adding
   it needs an Accessibility Inspector session recorded first.
+- **A destination has to be able to HOLD focus, which is not
+  what "always drawn" means.** macOS gates keyboard focus for
+  everything except text fields and lists behind System
+  Settings ▸ Keyboard ▸ Keyboard navigation, which is OFF by
+  default and which no app may set for the user. So a pop-up
+  menu, a checkbox or a button accepts a `@FocusState`
+  assignment only on a machine that has turned it on; where it
+  has not, the assignment lands nowhere and focus falls to the
+  window's first text field — the search field at the top,
+  which is the "focus goes to the top" outcome the rule below
+  exists to prevent, arriving by a different road. Deleting a
+  space shipped exactly that way: the destination was correct,
+  always drawn, needled, and reachable by nobody on a default
+  Mac (owner eye-confirm, 2026-08-11).
+  **Verify a focus destination with keyboard navigation ON, and
+  read a green needle as saying only that a destination was
+  named.** Nothing headless separates drawn from focusable, and
+  `docs/user-guide.md` ▸ Using Settings from the Keyboard is
+  where the user is told which setting this all presumes.
 - **Every shape change states a focus destination**, and the
   destination must be a control that is always DRAWN. Binding a
   return to a mode-gated affordance sends focus to a value no

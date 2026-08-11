@@ -169,6 +169,26 @@ schematic beside it in the preview panel (or above it, in
 areas without one). The question mark is there just in case
 the short form didn't explain enough.
 
+### Using Settings from the Keyboard
+
+Settings is built to be driven without a mouse, but macOS gates
+that on a system setting KiwiDesk cannot turn on for you. Out of
+the box, **Tab reaches text fields and lists only** — pop-up
+menus, checkboxes, and buttons are skipped. Turn on **System
+Settings ▸ Keyboard ▸ Keyboard navigation** and Tab reaches every
+control.
+
+Leave it off and the keyboard paths here still *run*, they just
+have nowhere to land: deleting a space moves focus to the next
+row's layout picker, and with keyboard navigation off a pop-up
+menu cannot hold focus, so it goes to the search field at the top
+of the window instead. The same is true of the space chips under
+Monitors, and of every other place this guide says a control
+takes focus.
+
+VoiceOver is not affected — it navigates every control either
+way, because its cursor is its own.
+
 ### Permission & First Run
 
 On first launch, a wizard prompts you to grant Accessibility
@@ -878,7 +898,9 @@ non-Retina one.
 pinned space always appears on that monitor when the profile loads.
 Every chip is also a menu — click it, or right-click it, for the
 same moves. The menu is the route to use from the keyboard: the
-chip takes focus with Tab and opens with Return.
+chip takes focus with Tab and opens with Return — with macOS
+keyboard navigation on, see [Using Settings from the
+Keyboard](#using-settings-from-the-keyboard).
 
 **Drag onto the dashed "Follows main display" tray** (it hangs off
 whichever display is currently main) to give a space the **Main
@@ -1721,12 +1743,14 @@ dimmed, with a Reveal and a Delete — never hidden, so a broken file
 can always be opened or cleared.
 
 Each row says which kind of failure it was, because that decides
-whether opening the file will tell you anything. *"The file isn't
-valid JSON"* means something outside KiwiDesk wrote it and lost a
-brace or a quote — you will see the damage in a text editor.
-*"Saved by another version, or a hand edit changed one of its
-fields"* means the JSON parses but this KiwiDesk does not accept
-its shape, and nothing on disk can say which of the two it was.
+whether opening the file will tell you anything. *"Not valid
+JSON"* means something outside KiwiDesk wrote it and lost a brace
+or a quote — you will see the damage in a text editor. *"Saved by
+another version, or a hand edit changed one of its fields"* means
+the JSON parses but this KiwiDesk does not accept its shape, and
+nothing on disk can say which of the two it was. A third,
+*"The file may have been moved or deleted"*, means it could not
+be read at all.
 
 ### Which Profile Loads
 
