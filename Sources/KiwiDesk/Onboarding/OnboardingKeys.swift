@@ -170,8 +170,15 @@ enum OnboardingKeys {
         // 2026-08-11). It also catches the tenth space, which
         // `DefaultKeybindings` maps to `0`: "1–0" runs backwards
         // and is not a range at all.
-        guard combos.count == spaces.count,
-            sameModifiers(combos),
+        //
+        // Contiguity is the WHOLE test. An earlier cut also
+        // required a chord per live space, which suppressed a
+        // range that was true — five spaces with only 1…3 bound
+        // renders "⌃⌥ 1–3", an honest statement about the chords
+        // the user has. Nothing watched that clause, and removing
+        // it reds nothing, because it forbade nothing the
+        // invariant forbids (guard-prover, 2026-08-11).
+        guard sameModifiers(combos),
             let run = contiguousDigits(combos)
         else { return listed(combos) ?? head }
         return modifiers + " " + run.first + "–" + run.last

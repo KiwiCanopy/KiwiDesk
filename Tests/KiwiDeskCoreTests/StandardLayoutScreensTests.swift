@@ -206,7 +206,14 @@ struct SparseModeFallbackTests {
                 )
             )
             for space in layout.plannedSpaces {
-                let mode = composed.spaceModes[space]
+                // `?? .bsp` deliberately: `spaceModes` is
+                // `[SpaceID: LayoutMode]`, so a bare `!= .bsp`
+                // over the Optional PASSES on nil — a composer
+                // that wrote no mode at all left this whole suite
+                // green (guard-prover, 2026-08-11). The fallback
+                // makes "wrote nothing" read as the thing it
+                // resolves to at every consumer anyway.
+                let mode = composed.spaceModes[space] ?? .bsp
                 #expect(
                     mode != .bsp,
                     Comment(
@@ -228,13 +235,19 @@ struct SparseModeFallbackTests {
         )
     }
 
+    /// `try #require` in a throwing test, not `try?` behind a
+    /// `guard … else { return }`: that shape swallows the
+    /// failure and returns from a test having asserted nothing,
+    /// so renaming the preset would retire this guard in silence
+    /// (guard-prover, 2026-08-11).
     @Test("a declared mode is never overridden by the screen")
-    func declaredModesWin() {
-        let minimalist = StandardProfiles.workflows.first {
-            $0.name == "Minimalist"
-        }
-        let declared = try? #require(minimalist)
-        guard let layout = declared else { return }
+    func declaredModesWin() throws {
+        let layout = try #require(
+            StandardProfiles.workflows.first {
+                $0.name == "Minimalist"
+            }
+        )
+        #expect(!layout.spaceModes.isEmpty)
         for (space, mode) in layout.spaceModes {
             #expect(
                 layout.mode(of: space, on: .laptop) == mode,

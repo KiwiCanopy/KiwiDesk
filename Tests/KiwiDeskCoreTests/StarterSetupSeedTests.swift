@@ -115,6 +115,14 @@ struct StarterSetupSeedTests {
             #expect(screen >= 0 && screen < 3)
         }
         #expect(Set(screens.values) == [1, 2])
+        // The map's SIZE, not just one nil: "main ⇒ omitted"
+        // rested on a single `== nil`, and a pin drift that kept
+        // every secondary index correct passed everything else
+        // (guard-prover, 2026-08-11).
+        let offMain = StarterSetup.slots(sizes(3))
+            .filter { $0.screen >= 1 }
+        #expect(screens.count == offMain.count)
+        #expect(offMain.count < all.count)
     }
 
     @Test("tuning follows the MAIN screen's class")

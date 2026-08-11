@@ -106,6 +106,28 @@ struct StarterAllocationTests {
             "the narrowest screen took the most: \(mixed)"
         )
 
+        // A setup where a raw share falls BELOW one, which is the
+        // only place the clamped-vs-floor remainder distinction
+        // exists at all. Every other fixture here sits strictly
+        // inside 1...3, where the two formulas are identical by
+        // construction — so measuring the remainder against the
+        // floor went unnoticed by this test and was caught only
+        // by `widthOrderIsNeverInverted` (guard-prover,
+        // 2026-08-11).
+        let clamped = StarterAllocation.shares(
+            widths: [1080, 1440, 1512, 1728, 2560, 3440],
+            budget: 10
+        )
+        #expect(
+            clamped[0] <= clamped[1],
+            Comment(
+                rawValue:
+                    "a screen clamped up from zero out-ranked a "
+                    + "wider one: \(clamped)"
+            )
+        )
+        #expect(clamped.reduce(0, +) == 10)
+
         // Five identical screens split as evenly as the budget
         // allows — never [3,3,1,1,1].
         let five = StarterAllocation.shares(

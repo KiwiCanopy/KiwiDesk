@@ -125,6 +125,28 @@ struct OnboardingKeysTests {
         #expect(go?.glyphs.contains("1–5") == false)
     }
 
+    /// A run that stops short of the space list is still a run.
+    /// The tour states what is BOUND, so "⌃⌥ 1–3" over five
+    /// spaces with three chords is true — and an earlier cut
+    /// suppressed it with a clause nothing guarded.
+    @Test("a truthful short run is still written as a range")
+    func shortRunIsStillARange() {
+        let bindings = (1...3).map { digit in
+            (
+                "control+option+\(digit)",
+                "KiwiDesk.focus_space(\"\(digit)\")"
+            )
+        }
+        let families = OnboardingKeys.families(
+            layer: layer(bindings),
+            spaces: spaces(5)
+        )
+        #expect(
+            families.first { $0.id == "focus_space" }?.glyphs
+                == "⌃⌥ 1–3"
+        )
+    }
+
     /// The tenth space binds ⌃⌥0, so "1–0" would run backwards.
     @Test("a ten-space setup is not written as 1–0")
     func tenSpacesIsNotAReversedRange() {
