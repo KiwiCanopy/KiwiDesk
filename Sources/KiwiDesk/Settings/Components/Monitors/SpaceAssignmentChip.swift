@@ -40,15 +40,25 @@ struct SpaceAssignment: Identifiable, Hashable {
 /// borderless menu consumes the mouse-down to open itself, so
 /// `.draggable` never saw a press to begin from.
 ///
-/// **Two routes now, and the keyboard one is knowingly gone**
-/// (owner ruling 2026-08-04): drag the chip, or right-click it.
-/// A visible chevron carrying the `Menu` was tried in between and
-/// rejected as clutter — first beside the pill, then inside it.
-/// The cost is the one 13b was written to fix: `.contextMenu` has
-/// no keyboard or VoiceOver equivalent, so "move this space to
-/// another display" is once again pointer-only. Anyone restoring
-/// a keyboard route should read 13b's argument before reaching
-/// for a whole-chip `Menu` again — that is what took the drag.
+/// **Three routes now, and the Tab-only one is knowingly gone.**
+/// Drag the chip, right-click it, or reach the same items as
+/// VoiceOver actions (`.accessibilityActions`, added in #678
+/// Phase 4 pass 10 — it draws nothing, so it costs the drag
+/// nothing).
+///
+/// A visible chevron carrying the `Menu` was tried twice and
+/// rejected as clutter (owner ruling 2026-08-04) — first beside
+/// the pill, then inside it — and the owner upheld that on
+/// 2026-08-11 against turn 20a's ask for a visible trigger in
+/// every draggable row. So the residue is narrower than it was
+/// but real: a keyboard user who is NOT running VoiceOver still
+/// cannot move a space to another display, `.contextMenu` having
+/// no key that opens it.
+///
+/// Anyone restoring a Tab-reachable route should read 13b's
+/// argument before reaching for a whole-chip `Menu` again — that
+/// is what took the drag, the borderless menu consuming the
+/// mouse-down `.draggable` needed to begin from.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -83,6 +93,31 @@ struct SpaceAssignmentChip: View {
             // decision (docs review, 2026-08-04). Both open the same
             // menu.
             .contextMenu { menu }
+            // The SAME builder as the context menu, exposed as
+            // named VoiceOver actions (#678 Phase 4 pass 10, turn
+            // 20a rule 1: the drag is the shortcut, the menu is
+            // the mechanism). One builder, not a mirrored list —
+            // a second copy of these buttons would be a second
+            // place for the display list to go stale, and this
+            // menu is already built from a `displays` the area
+            // passes in precisely so the menu and the cards
+            // cannot disagree.
+            //
+            // This adds NO chrome, which is what lets it coexist
+            // with the 2026-08-04 ruling above: a visible chevron
+            // was tried twice and rejected as clutter, and a
+            // whole-chip `Menu` is what took the drag. An
+            // accessibility action is neither — it draws nothing
+            // and consumes no mouse-down.
+            //
+            // Stated residue, so it is not mistaken for coverage:
+            // this reaches VoiceOver, not the pointer-free
+            // keyboard. A user who navigates by Tab alone still
+            // has no route to move a space between displays —
+            // owner ruled 2026-08-11 that the ruling above wins
+            // over turn 20a's "⋯ button in the chip", so the gap
+            // is deliberate rather than missed.
+            .accessibilityActions { menu }
     }
 
     private var capsule: some View {

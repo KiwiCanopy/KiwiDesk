@@ -48,7 +48,41 @@ extension KeyBinding {
 extension View {
     /// Dimmed when inherited, full strength when overridden
     /// or while editing live.
+    ///
+    /// The dim carries the whole distinction, so it also goes out
+    /// as a spoken hint (#678 Phase 4 pass 10, turn 20a rule 3).
+    /// The only explanation on screen is a caption at the top of
+    /// the card — "Dimmed rows are inherited from the base" —
+    /// which a screen-reader user reaches once, long before the
+    /// row it explains, and cannot re-read from inside the list.
+    /// A per-row hint is the version that survives arriving at
+    /// row forty by keyboard.
+    ///
+    /// One site, three consumers (the nav rows, the app group and
+    /// the raw-Lua drawer), which is why the hint belongs on the
+    /// shared modifier rather than at each of them.
+    ///
+    /// **Unverified in one respect, and kept anyway because the
+    /// two outcomes are not symmetric**: this modifier is applied
+    /// to a whole ROW, and whether a hint on a container reaches
+    /// the control inside it could not be observed headlessly
+    /// (see `GreyOut`, where the same question sent the same
+    /// change back out). Here the worse case is that the hint is
+    /// inert — nothing in a keybinding row sets a hint of its
+    /// own, so there is none for an empty inherited value to
+    /// displace. `GreyOut` was backed out because there the worse
+    /// case was DELETING hints that ship today. Confirm both in
+    /// one Accessibility Inspector pass.
     func keybindingRowStyle(inherited: Bool) -> some View {
         opacity(inherited ? 0.55 : 1)
+            .accessibilityHint(
+                inherited
+                    ? L(
+                        "shortcuts.row.inherited.axhint",
+                        "Inherited from the base shortcuts. "
+                            + "Record a key here to override it."
+                    )
+                    : ""
+            )
     }
 }

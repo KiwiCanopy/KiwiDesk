@@ -104,6 +104,39 @@ struct AutoGatedGroup<Gated: View>: View {
 /// inner predicate by hand was the alternative and is one more
 /// thing to forget; this makes the invariant unrepresentable
 /// instead of merely documented.
+///
+/// **The reason a grey carries still does not reach the keyboard
+/// path, and that is a KNOWN gap, not an oversight** (#678 Phase
+/// 4 pass 10). A greyed row announces its name and "dimmed"; the
+/// sentence explaining why lives in `.help()`, which needs a
+/// pointer to read.
+///
+/// An `.accessibilityHint(active ? help : "")` beside the
+/// `.help()` was written here and then BACKED OUT, because two
+/// things about it could not be verified without a live
+/// accessibility client and both failure modes are real:
+///
+/// - This modifier is applied at BLOCK granularity in several
+///   places (`BarColorCards`, `AppBarCard`, `LayoutCard`), so
+///   whether a hint on the wrapper reaches the controls inside
+///   decides between "twelve gates announce nothing" and "every
+///   control in a greyed card repeats one sentence".
+/// - The empty string when inactive is on the path of every
+///   descendant that sets a hint of its OWN — `ColorField`'s
+///   swatches do, under exactly these block gates — so if an
+///   ancestor's empty hint wins, the change silently deletes
+///   hints that ship today.
+///
+/// A headless probe cannot answer either: SwiftUI builds its
+/// accessibility children lazily and a hosted view reports only
+/// its root group. So the mechanism needs an Accessibility
+/// Inspector / VoiceOver session on a gated colour card first,
+/// and the answer may well be that a grey's reason belongs
+/// INLINE as text (the redesign's item 19 — "why-you-cannot
+/// always inline, VoiceOver reads it" — which `GeneralRestartRow`
+/// and `LoginItemCard` already do) rather than in a hint at all.
+/// Tracked as its own issue; do not re-add the hint here without
+/// that observation recorded.
 struct GreyOut: ViewModifier {
     let active: Bool
     var help: String = ""

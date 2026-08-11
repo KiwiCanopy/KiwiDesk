@@ -18,12 +18,12 @@ enum ConfigIssueText {
     @MainActor
     static func message(for kind: ConfigIssue.Kind) -> String {
         switch kind {
-        case .profileUnreadable:
-            return L(
-                "config_issues.profile_unreadable",
-                "Couldn't be loaded — it was saved by a "
-                    + "different version or edited by hand."
-            )
+        case .profileBroken(let cause):
+            // Delegated, not duplicated: the Settings row under
+            // App ▸ Profiles names the same file for the same
+            // reason, and two strings about one condition drift
+            // (#678 Phase 4 pass 9).
+            return ProfileBrokenText.message(for: cause)
         case .luaVMUnavailable:
             return L(
                 "config_issues.lua_vm_unavailable",

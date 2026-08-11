@@ -27,11 +27,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         if let existing = dashboardIfCreated { return existing }
         let created = SettingsWindowController(core: core)
         // Seed the dashboard's permission banner from live state
-        // and route its "Enable Accessibility…" button through the
-        // same guided fix as the quick-menu warning row.
-        created.setResolvePermission { [weak self] in
-            self?.showAccessibilityHelp()
+        // and send its button straight to the macOS pane (#678
+        // Phase 4 pass 9, turn 18). Deliberately NOT the quick
+        // menu's route: that warning row opens the tour's grant
+        // step, because someone clicking a menu-bar warning has
+        // been told nothing yet. The banner has already said what
+        // is wrong, one line above the button, to a reader who is
+        // sitting in Settings — putting the tour between them and
+        // the switch is a second explanation of what they just
+        // read.
+        created.setResolvePermission {
+            PermissionMonitor.openSystemSettings()
         }
+        // The SAME handler the Config Issues panel gets: Reveal
+        // is one behaviour and both surfaces name the same file
+        // (#246, architect review 2026-08-11).
+        created.setRevealProfile(revealProfile)
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
         }
@@ -103,7 +114,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 active: self?.core.profiles.currentName,
                 all: self?.core.profiles.list() ?? [],
                 broken: Set(
-                    self?.core.profiles.brokenNames() ?? []
+                    self?.core.profiles.brokenProfiles()
+                        .map(\.name) ?? []
                 )
             )
         }
@@ -189,14 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             // (the command only refreshes the panel/badge) (#246).
             self?.dashboardIfCreated?.refreshProfiles()
         }
-        configIssues.model.onRevealProfile = { [weak self] name in
-            guard
-                let url = try? self?.core.profiles.fileURL(
-                    name: name
-                )
-            else { return }
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-        }
+        configIssues.model.onRevealProfile = revealProfile
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues

@@ -40,23 +40,43 @@ struct ConfigIssueTextTests {
     /// skip the assertions below. Associated values rule out
     /// `CaseIterable`; the count check at the end is the
     /// backstop.
-    private let kinds: [ConfigIssue.Kind] = [
-        .profileUnreadable,
-        .luaVMUnavailable,
-        .luaError("attempt to index a nil value"),
-        .guiConfigUnreadable,
-        .unknownCall(name: "KiwiDesk.focsu", suggestion: "focus"),
-        .unknownCall(name: "KiwiDesk.nope", suggestion: nil),
-    ]
+    ///
+    /// `profileBroken` appears once per `ProfileBrokenCause`,
+    /// which is also this suite's coverage of `ProfileBrokenText`:
+    /// that renderer has no suite of its own because every one of
+    /// its sentences reaches the user through this switch, and the
+    /// distinctness assertion below is what pins that the three
+    /// causes do not collapse to one string (#678 Phase 4 pass 9).
+    /// The row's OTHER reader — App ▸ Profiles — calls the same
+    /// function, so a collapse here is a collapse there.
+    private var kinds: [ConfigIssue.Kind] {
+        // DERIVED from `allCases`, not restated: a fourth cause
+        // then reaches the distinctness assertion below instead
+        // of being forced into `ProfileBrokenText`'s switch by
+        // the compiler and skipping every test here (architect
+        // review, 2026-08-11).
+        ProfileBrokenCause.allCases.map { .profileBroken($0) } + [
+            .luaVMUnavailable,
+            .luaError("attempt to index a nil value"),
+            .guiConfigUnreadable,
+            .unknownCall(
+                name: "KiwiDesk.focsu",
+                suggestion: "focus"
+            ),
+            .unknownCall(name: "KiwiDesk.nope", suggestion: nil),
+        ]
+    }
 
     @Test("Every kind renders non-empty, distinct text")
     func everyKindRenders() {
         pinEnglish()
         defer { reset() }
-        // Five cases, six fixtures (`unknownCall` twice). Bump
-        // deliberately when a case is added — the failure is the
-        // reminder the compiler cannot give.
-        #expect(kinds.count == 6)
+        // Five cases; the fixture count is three causes plus the
+        // five hand-listed entries (`unknownCall` twice). The
+        // cause half derives, so only the hand-listed half is
+        // pinned — bump the 5 deliberately when a `Kind` is
+        // added, which is the reminder the compiler cannot give.
+        #expect(kinds.count == ProfileBrokenCause.allCases.count + 5)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)

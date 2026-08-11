@@ -68,7 +68,7 @@ public final class ProfileManager {
 
     /// Every profile file with its decode outcome, in one disk
     /// pass: a readable `Profile`, or the error that makes it
-    /// broken. The single source `allProfiles`, `brokenNames`,
+    /// broken. The single source `allProfiles`, `brokenProfiles`,
     /// and the config-issue scan all derive from (#246).
     func scan() -> [(name: String, result: Result<Profile, Error>)] {
         list().map { name in
@@ -87,16 +87,6 @@ public final class ProfileManager {
                 onLog("profile '\(name)' is invalid: \(error)")
                 return nil
             }
-        }
-    }
-
-    /// Names whose JSON won't decode — greyed out, never hidden,
-    /// so a broken profile stays deletable wherever listed
-    /// (#246, #171).
-    public func brokenNames() -> [String] {
-        scan().compactMap { name, result in
-            if case .failure = result { return name }
-            return nil
         }
     }
 

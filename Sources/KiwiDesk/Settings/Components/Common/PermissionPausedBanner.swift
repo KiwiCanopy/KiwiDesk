@@ -7,13 +7,22 @@ import SwiftUI
 /// silently inert. Unlike the keybinding-conflict nudge this
 /// tracks a persistent fact — there is no dismiss (hiding "nothing
 /// works" while it's still true would be a grey-don't-hide
-/// violation), and the "Enable Accessibility…" button routes to
-/// the same onboarding grant step as the quick-menu warning row.
+/// violation).
+///
+/// The rows below stay EDITABLE while it shows, which is the
+/// whole reason the banner says "paused" rather than greying the
+/// dashboard out: a setup prepared before the grant lands is
+/// waiting the moment it does. That is also why the banner is the
+/// only thing on screen that changes — greying every control
+/// would say the app is broken, when what is true is that one
+/// switch is off.
 struct PermissionPausedBanner: View {
-    /// The "Enable Accessibility…" action. Passed directly rather
-    /// than through the model: this view has no reactive state of
-    /// its own — visibility is gated externally in `chrome()` by
-    /// `model.permissionPaused`.
+    /// The "Open System Settings" action — the macOS pane
+    /// directly, not the tour's grant step (#678 Phase 4 pass 9;
+    /// `AppDelegate`'s wiring carries why the two routes differ).
+    /// Passed directly rather than through the model: this view
+    /// has no reactive state of its own — visibility is gated
+    /// externally in `chrome()` by `model.permissionPaused`.
     let onResolve: () -> Void
 
     var body: some View {
@@ -36,10 +45,17 @@ struct PermissionPausedBanner: View {
             .font(.callout)
             .foregroundStyle(SettingsTheme.warningInk)
             .frame(maxWidth: .infinity, alignment: .leading)
+            // ONE key with the onboarding button, not a twin of
+            // it (l10n audit, 2026-08-11): `onboarding.grant.body`
+            // QUOTES this label in its numbered steps, so two keys
+            // holding one English let a later round split the
+            // quote from the button it quotes — in one language,
+            // invisibly. Renamed out of `onboarding.` because this
+            // banner outlives onboarding.
             Button(
                 L(
-                    "settings.permission_paused.action",
-                    "Enable Accessibility…"
+                    "common.open_system_settings",
+                    "Open System Settings"
                 )
             ) {
                 onResolve()

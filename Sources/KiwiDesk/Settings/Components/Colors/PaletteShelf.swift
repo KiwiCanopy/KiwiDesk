@@ -121,14 +121,47 @@ struct PaletteShelf: View {
                 ForEach(userPalettes, id: \.name) { palette in
                     chip(palette, builtin: false, live: live)
                         .contextMenu { userMenu(palette) }
+                        // Same builder as named VoiceOver actions
+                        // (#678 Phase 4 pass 10, turn 20a rule 1).
+                        // The tile itself is a `Button`, so it
+                        // takes focus and applies the palette —
+                        // but Rename, Export and Delete lived
+                        // behind the right-click alone, which
+                        // makes a saved palette impossible to
+                        // remove without a pointer.
+                        .accessibilityActions { userMenu(palette) }
                 }
                 addTile
             }
             if userPalettes.isEmpty {
+                // Says what holds INSTEAD of the empty list, not
+                // that the list is empty (#678 Phase 4 pass 9,
+                // turn 18): "no palettes saved" is a fact the
+                // reader can already see, while what the palettes
+                // above are FOR is the question the emptiness
+                // actually raises.
+                //
+                // It may not answer it by calling the built-ins
+                // what colours the app: `palettes.caption` two
+                // rows up rules a palette "a one-time paint, not
+                // a live link", so no palette IS the app's
+                // colour, and a sentence that says otherwise
+                // cannot be translated faithfully — the
+                // contradiction rides into ten languages
+                // (localization audit, 2026-08-11).
                 Text(
                     L(
                         "palettes.empty_hint",
-                        "Palettes you save appear here."
+                        // "colors", not "colours": English is the
+                        // translators' source of truth and the
+                        // rest of the corpus (`palettes.caption`
+                        // two rows up) is American. A split
+                        // spelling in one card is what ten
+                        // catalogs inherit (code review,
+                        // 2026-08-11).
+                        "The palettes above paint KiwiDesk in one "
+                            + "click. Save colors of your own and "
+                            + "they appear here."
                     )
                 )
                 .font(.caption)

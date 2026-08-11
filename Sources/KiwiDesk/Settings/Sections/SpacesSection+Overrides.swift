@@ -106,6 +106,12 @@ extension SpacesSection {
     private func overridesBreadcrumb(_ space: SpaceID) -> some View {
         HStack(spacing: 6) {
             Button {
+                // State the return destination BEFORE the pop, so
+                // the list is built with it already set — a focus
+                // assigned after the branch swaps has no view to
+                // land on yet and is dropped (#678 Phase 4 pass
+                // 10, turn 20a rule 4).
+                returningRow = space
                 model.nav.spaceOverridesFocus = nil
             } label: {
                 Label(
@@ -113,6 +119,7 @@ extension SpacesSection {
                     systemImage: "chevron.backward"
                 )
             }
+            .focused($overridesBackFocused)
             // `.borderless` takes its label colour from the tint
             // too, so this crumb read green while the shell's own
             // back chip — same gesture, same chevron — is ink
@@ -133,6 +140,13 @@ extension SpacesSection {
         .lineLimit(1)
         .padding(.horizontal, SettingsMetrics.paneInset)
         .padding(.vertical, 10)
+        // Entering the sub-view puts focus on its back button —
+        // never inside the rows, which would strand a keyboard
+        // user one Shift-Tab short of the only way out. On the
+        // crumb rather than the editor's root so it fires when
+        // this view is built, which is the moment the branch
+        // swaps.
+        .onAppear { overridesBackFocused = true }
     }
 
     private var crumbSeparator: some View {

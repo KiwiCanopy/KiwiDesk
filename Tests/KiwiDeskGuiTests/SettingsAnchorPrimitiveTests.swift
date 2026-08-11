@@ -138,7 +138,7 @@ struct SettingsAnchorPrimitiveTests {
         // recycle state onto the wrong row. Nothing here is a
         // reveal target.
         "KeybindingNavRow.swift": 1,
-        "KeybindingAppGroup.swift": 1,
+        "KeybindingAppGroup+Row.swift": 1,
         "AdvancedLuaGroup.swift": 1,
         // Locale identity: `L()` is not observable state, so a
         // language change rebuilds the whole hosting root by

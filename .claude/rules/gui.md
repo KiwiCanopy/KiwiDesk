@@ -378,8 +378,9 @@ the quantity it derives, so a correct derivation feeding a
 constant frame passes.
 
 **A census-named row that draws no visible label authors its
-label key as an `.accessibilityLabel`.** The App Rules sentence
-is the worked case: its two menus sit inside a statement with no
+label key as an `.accessibilityLabel` — and gives back whatever
+that label displaced.** The App Rules sentence is the worked
+case: its two menus sit inside a statement with no
 label beside them, and the census still names those rows by
 `app_rules.space` / `app_rules.float`. That one call site is
 load-bearing three ways — VoiceOver has nothing else to call the
@@ -391,6 +392,20 @@ modifier's SHAPE over stripped source, because an earlier cut
 accepted any mention of the key and went green when the
 modifier became a `.help()`, leaving the menu with no
 accessibility name at all.
+
+The second half is not a nicety, and this instruction is what
+produced the defect that forced it: **`.accessibilityLabel`
+REPLACES the name SwiftUI derives, which for a `Menu` is its
+current choice.** Both facet menus announced "Space, pop up
+button" and never *which* space, for as long as they shipped —
+a sighted reader takes the value out of the sentence, so nothing
+looks wrong, and every guard was green because the label was
+exactly where it was required to be. So a control named this way
+owes an `.accessibilityValue` carrying what it announced before,
+drawn and spoken from ONE expression
+(`AppRuleRow.spaceFacetLabel`); `facetsAnnounceTheirValue` holds
+the count. Read the rule as: whenever you name a control for
+VoiceOver, ask what naming it took away.
 
 **A sentence with controls in it is one localized frame, not
 connectives between fixed stack positions.** Author the frame
@@ -609,6 +624,84 @@ that fall on a change here:
   half-typed profile name in its naming alert is lost. Both
   need a resize mid-edit to reach, and the alternative is a
   footer mounted in neither place properly.
+
+## The keyboard path (#678 turn 20a)
+
+"Accessible with VoiceOver" and "usable without a mouse" are two
+claims, and this tree has historically shipped the first while
+believing it shipped both. The argument is in
+`docs/design-decisions.md`; the obligations a change here takes
+on:
+
+- **A `.contextMenu` is right-click and nothing else**, macOS
+  having no default key that opens a focused control's
+  contextual menu. Any mechanism behind one is also offered as
+  `.accessibilityActions`, **from the same builder** — never a
+  mirrored list, which is a second place for the menu's contents
+  to go stale. `KeyboardActionParityTests` compares the builder
+  token inside each pair of braces across `Sources/KiwiDesk`, so
+  a hand-copied twin reds exactly like a missing one. Stated
+  residue, deliberately not closed: this reaches VoiceOver, not
+  a Tab-only keyboard, because a visible `⋯` trigger per
+  draggable row was rejected as clutter twice (owner 2026-08-04,
+  upheld 2026-08-11 against turn 20a's ask) and a whole-chip
+  `Menu` eats the `.draggable` it would sit on.
+- **A control whose label is a sibling `Text` has no name.**
+  VoiceOver derives a name from the label a control OWNS;
+  a `Text` beside it in an `HStack` names nothing, and the
+  control announces a bare value — a percentage, for the window
+  count sliders. Name the control and hide the decorative twin,
+  rather than leaving one value spoken as three elements.
+- **A dim is not a sentence.** A greyed row that announces only
+  "dimmed" is a dead end: the dimming says an answer exists and
+  withholds it. The reachable form is the one `NativeSpacesGroup`
+  already uses and `GreyOutAnchorTests` records — the reason
+  drawn INLINE, outside the dimmed subtree, where it is read
+  without a click. **A hint is not a proven substitute**: an
+  `.accessibilityHint` on `GreyOut` was written and backed out
+  because that modifier wraps whole blocks, so whether it
+  reaches the controls inside — and whether its empty value
+  displaces a hint a descendant sets for itself, as
+  `ColorField`'s swatches do — could not be observed headlessly.
+  `GreyOut`'s docstring carries the two failure modes; re-adding
+  it needs an Accessibility Inspector session recorded first.
+- **A destination has to be able to HOLD focus, which is not
+  what "always drawn" means.** macOS gates keyboard focus for
+  everything except text fields and lists behind System
+  Settings ▸ Keyboard ▸ Keyboard navigation, which no app may
+  set for the user and which was OFF by default as observed on
+  macOS 26.6.1, 2026-08-11 — check it again rather than trusting
+  this sentence, the default having moved across releases before. So a pop-up
+  menu, a checkbox or a button accepts a `@FocusState`
+  assignment only on a machine that has turned it on; where it
+  has not, the assignment lands nowhere and focus falls to the
+  window's first text field — the search field at the top,
+  which is the "focus goes to the top" outcome the rule below
+  exists to prevent, arriving by a different road. Deleting a
+  space shipped exactly that way: the destination was correct,
+  always drawn, needled, and reachable by nobody on a default
+  Mac (owner eye-confirm, 2026-08-11).
+  **Verify a focus destination with keyboard navigation ON, and
+  read a green needle as saying only that a destination was
+  named.** Nothing headless separates drawn from focusable, and
+  `docs/user-guide.md` ▸ Using Settings from the Keyboard is
+  where the user is told which setting this all presumes.
+- **Every shape change states a focus destination**, and the
+  destination must be a control that is always DRAWN. Binding a
+  return to a mode-gated affordance sends focus to a value no
+  view claims, which lands at the top of the list — the exact
+  behaviour the rule exists to prevent, and invisible to a
+  source-needle guard, which is why the wirings in
+  `KeyboardActionParityTests` are keyed on their use sites.
+  The shell states two of these itself (push focuses the back
+  chip, return restores `nav.homeReturnFocus`); a sub-view the
+  shell cannot see states its own. Owed and NOT yet done:
+  deleting a rule, a profile, a layer or a palette names no
+  destination at all, so it drops focus to the top however the
+  machine is configured (#816). Deleting a space names one —
+  which by the bullet above is a different claim from focus
+  arriving there, and on a machine without keyboard navigation
+  the two outcomes look identical.
 
 ## Colour (#678 turn 16b)
 

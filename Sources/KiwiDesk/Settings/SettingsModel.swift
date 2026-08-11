@@ -171,9 +171,10 @@ final class SettingsModel: ObservableObject {
     /// sets, screen count, default flag, live match.
     @Published var profileSummaries: [ProfileSummary] = []
     /// Profiles whose JSON won't decode — shown greyed with a
-    /// Delete, never hidden (#246, #171). No summary: the file
-    /// can't be read to build one.
-    @Published var brokenProfiles: [String] = []
+    /// Reveal and a Delete, never hidden (#246, #171). No summary:
+    /// the file can't be read to build one, which is why the cause
+    /// rides along instead (#678 Phase 4 pass 9).
+    @Published var brokenProfiles: [BrokenProfile] = []
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
@@ -257,9 +258,15 @@ final class SettingsModel: ObservableObject {
     /// state directly. Not dismissible: it tracks a persistent
     /// fact, unlike the transient `keybindingWarning`.
     @Published var permissionPaused = false
-    /// Routes the paused banner's "Enable Accessibility…" button
-    /// to the shared onboarding grant flow (wired by the app).
+    /// Routes the paused banner's "Open System Settings" button
+    /// to the macOS pane (wired by the app).
     var onResolvePermission: () -> Void = {}
+    /// Shows a profile's file in the Finder — the broken-profile
+    /// row's one action besides Delete (#246). The SAME closure
+    /// the Config Issues panel gets, wired once in `AppDelegate`
+    /// rather than a second `fileURL` + `NSWorkspace` body for
+    /// one behaviour; `AppDelegate+Onboarding` holds it.
+    var onRevealProfile: (String) -> Void = { _ in }
     /// Routes the 14c banner's "Show me around" to the welcome
     /// tour's voluntary replay (wired by the app) — the tour's
     /// first willing caller; the other three are involuntary.

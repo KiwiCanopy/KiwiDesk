@@ -134,4 +134,55 @@ struct AppRulesCensusRenderTests {
         }
     }
 
+    /// Naming the control took its VALUE away, and only from the
+    /// people who needed the name (#678 Phase 4 pass 10, turn 20a
+    /// rule 3).
+    ///
+    /// `.accessibilityLabel` REPLACES the name SwiftUI derives,
+    /// and for a `Menu` that derived name is its current choice.
+    /// So the modifier the test above requires is exactly what
+    /// silenced "which space" — a sighted reader still reads the
+    /// choice out of the sentence, which is why nothing looked
+    /// wrong. Both halves are now required together, and the pair
+    /// is why they are asserted in one test: a future edit that
+    /// drops the value to fix an over-verbose announcement has to
+    /// meet this comment.
+    ///
+    /// The needle is the modifier's shape over stripped source,
+    /// the same lens and for the same reason as the label half.
+    @Test("the facets announce their value, not just their name")
+    func facetsAnnounceTheirValue() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow+Facets.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        // Keyed on each menu's OWN value expression, not on a
+        // count of call sites. A bare count of two is satisfied
+        // by both values landing on one control while the other
+        // menu has none — guard-prover did exactly that and the
+        // first cut stayed green (2026-08-11), which is the drift
+        // its comment claimed to catch. The expressions differ
+        // per menu, so one missing reds however many the file
+        // holds in total.
+        for value in ["spaceFacetLabel", "floatLabel"] {
+            #expect(
+                source.contains(".accessibilityValue(\(value))"),
+                Comment(
+                    rawValue:
+                        "the facet menu whose choice is "
+                        + "`\(value)` no longer announces it — an "
+                        + "`.accessibilityLabel` on a Menu "
+                        + "replaces the choice VoiceOver would "
+                        + "otherwise read, so the value has to be "
+                        + "given back explicitly"
+                )
+            )
+        }
+    }
 }

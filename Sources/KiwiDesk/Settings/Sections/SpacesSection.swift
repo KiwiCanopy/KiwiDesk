@@ -50,6 +50,14 @@ struct SpacesSection: View {
     /// another app) still commits, since that path reaches
     /// neither `onEnded` nor `onDisappear` (#299).
     @Environment(\.controlActiveState) var activeState
+    /// The pushed editor's back crumb, and the row to return to
+    /// when it pops (#678 Phase 4 pass 10, turn 20a rule 4). The
+    /// shell's back chip and Home's `nav.homeReturnFocus` are the
+    /// same pair one altitude up; this branch is a sub-view the
+    /// shell cannot see, so it states its own. Both are wired in
+    /// `+Overrides` and `+Customize`, which carry the argument.
+    @FocusState var overridesBackFocused: Bool
+    @FocusState var returningRow: SpaceID?
 
     var body: some View {
         Group {
@@ -213,6 +221,23 @@ struct SpacesSection: View {
                 )
         )
         .contextMenu { contextActions(space) }
+        // The same builder as named VoiceOver actions (#678
+        // Phase 4 pass 10, turn 20a rule 1). It matters more here
+        // than anywhere else in the tree: Move Up, Move Down and
+        // Make Fallback have no on-screen control at ALL — the
+        // context menu is their only site — so before this the
+        // reorder was not merely pointer-preferred, it was
+        // pointer-only, and so was the fallback choice. The drag
+        // handle beside it is not a control and takes no focus.
+        //
+        // `contextActions`' own docstring claimed these were
+        // "keyboard-reachable equivalents of the drag/badge
+        // affordances"; a `.contextMenu` on a non-focusable
+        // `VStack` is right-click and nothing else, so the claim
+        // was false when written. This is the modifier that makes
+        // it true for VoiceOver — the Tab-only path is the
+        // residue stated on `SpaceAssignmentChip`.
+        .accessibilityActions { contextActions(space) }
         // Lifted while dragged: the row itself is what moves
         // (no system ghost), stepping slot to slot — it never
         // leaves the column.
@@ -298,13 +323,6 @@ struct SpacesSection: View {
     /// reference (pin, Main role, fallback, per-space settings
     /// maps) — a leftover reference would resurrect the space on
     /// the next profile load (#68 review).
-    func removeSpace(_ space: SpaceID) {
-        model.config.removeSpace(space)
-        if model.nav.spaceOverridesFocus == space {
-            model.nav.spaceOverridesFocus = nil
-        }
-    }
-
     /// The space's optional recognition icon (#68 §6.5):
     /// empty clears the sparse `space.icon` entry.
     private func iconBinding(

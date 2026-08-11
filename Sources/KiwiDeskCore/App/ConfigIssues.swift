@@ -23,8 +23,18 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
     /// not see: four of the five never entered a catalog, so no
     /// locale could translate them however complete it was.
     public enum Kind: Sendable, Equatable {
-        /// A profile JSON that no longer decodes (#246).
-        case profileUnreadable
+        /// A profile JSON that no longer decodes (#246), carrying
+        /// why so the panel and the Settings row say the same
+        /// thing about one file. The cause is the structure Core
+        /// owns; `ProfileBrokenText` renders both.
+        ///
+        /// Named `profileBroken`, not `profileUnreadable`:
+        /// `.unreadable` is one of the three causes, so the old
+        /// spelling made the outer case read as a contradiction
+        /// of the other two — one word doing duty at two scopes,
+        /// which `config-vocabulary.md` bans one layer down
+        /// (architect review, 2026-08-11).
+        case profileBroken(ProfileBrokenCause)
         /// The Lua VM could not be created at all.
         case luaVMUnavailable
         /// `init.lua` raised. The payload is the interpreter's
@@ -88,8 +98,8 @@ extension KiwiCore {
 
     /// Unreadable profile JSONs, as issues — derived from the
     /// same `ProfileManager.scan()` that `allProfiles()` and
-    /// `brokenNames()` use, so "broken" means one thing across
-    /// every surface (#246).
+    /// `brokenProfiles()` use, so "broken" means one thing across
+    /// every surface (#246), the cause included.
     func profileConfigIssues() -> [ConfigIssue] {
         profiles.scan().compactMap { name, result in
             guard case .failure(let error) = result else {
@@ -105,7 +115,9 @@ extension KiwiCore {
             onLog("profile '\(name)' is invalid: \(error)")
             return ConfigIssue(
                 source: "\(name).json",
-                kind: .profileUnreadable,
+                kind: .profileBroken(
+                    ProfileManager.cause(of: error)
+                ),
                 profileName: name
             )
         }

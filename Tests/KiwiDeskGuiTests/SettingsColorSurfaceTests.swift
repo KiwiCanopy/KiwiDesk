@@ -157,13 +157,22 @@ struct SettingsColorSurfaceTests {
         // swatch given `automatic: someExpression` would
         // contribute zero to a literal count and pass silently,
         // which is a fail-open in a guard whose whole job is to
-        // catch a wrongly-flagged row. `ColorField.swift`
-        // declares the parameter and plumbs it through, so it is
-        // the one file excluded — every other occurrence in the
-        // tree is a call site handing a swatch the flag.
+        // catch a wrongly-flagged row. The excluded files are
+        // the ones that DECLARE and plumb the parameter rather
+        // than hand it to a swatch — every other occurrence in
+        // the tree is a call site. There are two of them since
+        // the §2.1 split moved the right-click clear path into
+        // `ColorField+AutomaticMenu.swift`, which takes the flag
+        // as a parameter and passes it along; the exclusion is
+        // by that role, so a THIRD file appearing here should be
+        // read as a call site until shown otherwise.
+        let plumbing: Set<String> = [
+            "ColorField.swift",
+            "ColorField+AutomaticMenu.swift",
+        ]
         var flags = 0
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where file.lastPathComponent != "ColorField.swift" {
+        where !plumbing.contains(file.lastPathComponent) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )

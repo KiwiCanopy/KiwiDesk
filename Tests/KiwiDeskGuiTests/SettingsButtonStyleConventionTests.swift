@@ -34,9 +34,19 @@ struct SettingsButtonStyleConventionTests {
             "PaletteShelf.swift": (
                 3, "menuItem", "Returned to a contextMenu builder"
             ),
-            "ColorField.swift": (
-                1, "contextMenu",
-                "Inside a contextMenu builder using extension name"
+            // Moved out of `ColorField.swift` with the §2.1
+            // split (#678 Phase 4 pass 10). The needle changed
+            // with it and is the reason: the item is no longer
+            // written INSIDE the `contextMenu` builder — it is
+            // built once by `automaticItem` and handed to both
+            // that builder and `.accessibilityActions`, which is
+            // what stops the two routes from drifting. A button
+            // in a shared menu-item builder is as unstyleable as
+            // one written inline in the menu.
+            "ColorField+AutomaticMenu.swift": (
+                1, "automaticItem",
+                "Menu item from the builder shared by contextMenu "
+                    + "and accessibilityActions"
             ),
             "HeaderSearch.swift": (
                 1, "focusShortcut", "Invisible zero-size shortcut sink"

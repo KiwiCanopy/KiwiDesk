@@ -215,8 +215,48 @@ struct ProfileManagerTests {
         #expect(manager.list() == ["bad", "good"])
         #expect(manager.allProfiles().map(\.name) == ["good"])
         // The same file `allProfiles()` skips is the one the GUI
-        // greys out and offers a Delete for (#246).
-        #expect(manager.brokenNames() == ["bad"])
+        // greys out and offers a Reveal and a Delete for (#246).
+        #expect(manager.brokenProfiles().map(\.name) == ["bad"])
+        // "not json" is not JSON, so the row may promise that
+        // opening the file shows the damage (#678 Phase 4 pass 9).
+        #expect(
+            manager.brokenProfiles().map(\.cause) == [.malformedJSON]
+        )
+    }
+
+    @Test("A broken profile's cause splits syntax from shape")
+    func brokenCauseSplitsSyntaxFromShape() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-profiles-\(UUID().uuidString)"
+            )
+        let manager = ProfileManager(directory: directory)
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+        // Valid JSON the decoder reaches into and rejects: an
+        // object with none of the keys `Profile` requires. The
+        // user cannot see anything wrong by opening it, which is
+        // the whole reason the two causes read differently.
+        try "{\"nope\": 1}".write(
+            to: directory.appendingPathComponent("shape.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        // Not JSON at all — a lost brace, visible on sight.
+        try "{".write(
+            to: directory.appendingPathComponent("syntax.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let causes = Dictionary(
+            uniqueKeysWithValues: manager.brokenProfiles().map {
+                ($0.name, $0.cause)
+            }
+        )
+        #expect(causes["shape"] == .unexpectedShape)
+        #expect(causes["syntax"] == .malformedJSON)
     }
 
     @Test("Delete repairs a count left without a default")

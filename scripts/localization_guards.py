@@ -198,6 +198,7 @@ GLOSSARY = {
     # The product, and the technologies it wraps or names.
     "bsp",
     "ide",
+    "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     "lua",
     "macos",

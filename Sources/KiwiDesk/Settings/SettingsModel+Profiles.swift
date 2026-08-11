@@ -267,6 +267,20 @@ struct ProfileSummary: Identifiable {
     var id: String { name }
 }
 
+/// One profile whose file will not decode (#246), with why.
+///
+/// A sibling of `ProfileSummary` rather than a field on it: a
+/// broken file yields no count, no monitor sets and no default
+/// flag, so every one of that type's fields would be an optional
+/// nobody could fill. The name is the only thing both rows share,
+/// which is exactly the shape two types express and one type with
+/// eight optionals hides.
+struct BrokenProfile: Identifiable, Equatable {
+    let name: String
+    let cause: ProfileBrokenCause
+    var id: String { name }
+}
+
 /// The "Which profile loads" answer as one value (#678 turn
 /// 13a): what resolves, and the screen count it resolved over.
 ///

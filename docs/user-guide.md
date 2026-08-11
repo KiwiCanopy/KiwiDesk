@@ -169,6 +169,34 @@ schematic beside it in the preview panel (or above it, in
 areas without one). The question mark is there just in case
 the short form didn't explain enough.
 
+### Using Settings from the Keyboard
+
+Settings is built to be driven from the keyboard, but macOS gates
+that on a system setting KiwiDesk cannot turn on for you. Out of
+the box, **Tab reaches text fields and lists only** — pop-up
+menus, checkboxes, and buttons are skipped. Turn on **System
+Settings ▸ Keyboard ▸ Keyboard navigation** and Tab reaches every
+control.
+
+Leave it off and the keyboard paths here still *run*, they just
+have nowhere to land: deleting a space moves focus to the next
+row's layout picker, and with keyboard navigation off a pop-up
+menu cannot hold focus, so it goes to the search field at the top
+of the window instead. The same is true of the space chips under
+Monitors, and of every other place this guide says a control
+takes focus.
+
+VoiceOver is not affected — it navigates every control either
+way, because its cursor is its own.
+
+One gap stays open even with keyboard navigation on: where a row
+carries extra moves behind a right-click (renaming a palette,
+exporting it, deleting it), those moves are offered to VoiceOver
+as actions but have no plain-keyboard route, macOS having no
+standard key that opens a focused control's contextual menu. A
+visible ⋯ button per row was weighed and turned down as clutter.
+Use the right-click menu, or VoiceOver's actions rotor.
+
 ### Permission & First Run
 
 On first launch, a wizard prompts you to grant Accessibility
@@ -198,9 +226,21 @@ wizard, or the permission was revoked later — window management
 pauses and KiwiDesk makes it easy to find your way back. The menu
 bar icon shows a warning triangle, the quick menu gains a
 **Window Management Paused…** row at the top, and the Settings
-window shows a banner across every section. Any of them reopens
-the wizard at the grant step so you can turn the permission back
-on; management resumes automatically once you do.
+window shows a banner across every section. Management resumes
+automatically once you grant it.
+
+The two routes differ on purpose. The menu bar's row reopens the
+wizard at its grant step, which explains what the permission is
+for and waits for it; the Settings banner's **Open System
+Settings** goes straight to the macOS pane, since the banner has
+already said what is wrong to someone who is sitting in Settings.
+
+No row on the page greys out while it is paused. Every control
+still edits, so you can prepare a whole setup before granting
+anything and have it waiting the moment you do — one switch being
+off is not the same as the app being broken. What the pause does
+reach is the save verbs that need a live monitor set, described
+under [Profiles](#profiles); the rows themselves never.
 
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
@@ -866,7 +906,9 @@ non-Retina one.
 pinned space always appears on that monitor when the profile loads.
 Every chip is also a menu — click it, or right-click it, for the
 same moves. The menu is the route to use from the keyboard: the
-chip takes focus with Tab and opens with Return.
+chip takes focus with Tab and opens with Return — with macOS
+keyboard navigation on, see [Using Settings from the
+Keyboard](#using-settings-from-the-keyboard).
 
 **Drag onto the dashed "Follows main display" tray** (it hangs off
 whichever display is currently main) to give a space the **Main
@@ -1705,8 +1747,18 @@ points at **Save a copy…** in the save pill if you want to keep
 them separately instead.
 
 Profiles whose JSON will not decode appear under **Couldn't load**,
-dimmed, with a Delete — never hidden, so a broken file can always be
-cleared.
+dimmed, with a Reveal and a Delete — never hidden, so a broken file
+can always be opened or cleared.
+
+Each row says which kind of failure it was, because that decides
+whether opening the file will tell you anything. *"Not valid
+JSON"* means something outside KiwiDesk wrote it and lost a brace
+or a quote — you will see the damage in a text editor. *"Saved by
+another version, or a hand edit changed one of its fields"* means
+the JSON parses but this KiwiDesk does not accept its shape, and
+nothing on disk can say which of the two it was. A third,
+*"The file may have been moved or deleted"*, means it could not
+be read at all.
 
 ### Which Profile Loads
 
