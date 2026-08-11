@@ -23,8 +23,11 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
     /// not see: four of the five never entered a catalog, so no
     /// locale could translate them however complete it was.
     public enum Kind: Sendable, Equatable {
-        /// A profile JSON that no longer decodes (#246).
-        case profileUnreadable
+        /// A profile JSON that no longer decodes (#246), carrying
+        /// why so the panel and the Settings row say the same
+        /// thing about one file. The cause is the structure Core
+        /// owns; `ProfileText` renders both.
+        case profileUnreadable(ProfileBrokenCause)
         /// The Lua VM could not be created at all.
         case luaVMUnavailable
         /// `init.lua` raised. The payload is the interpreter's
@@ -88,8 +91,8 @@ extension KiwiCore {
 
     /// Unreadable profile JSONs, as issues — derived from the
     /// same `ProfileManager.scan()` that `allProfiles()` and
-    /// `brokenNames()` use, so "broken" means one thing across
-    /// every surface (#246).
+    /// `brokenProfiles()` use, so "broken" means one thing across
+    /// every surface (#246), the cause included.
     func profileConfigIssues() -> [ConfigIssue] {
         profiles.scan().compactMap { name, result in
             guard case .failure(let error) = result else {
@@ -105,7 +108,9 @@ extension KiwiCore {
             onLog("profile '\(name)' is invalid: \(error)")
             return ConfigIssue(
                 source: "\(name).json",
-                kind: .profileUnreadable,
+                kind: .profileUnreadable(
+                    ProfileManager.cause(of: error)
+                ),
                 profileName: name
             )
         }

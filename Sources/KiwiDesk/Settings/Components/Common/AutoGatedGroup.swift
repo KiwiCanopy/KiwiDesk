@@ -104,6 +104,25 @@ struct AutoGatedGroup<Gated: View>: View {
 /// inner predicate by hand was the alternative and is one more
 /// thing to forget; this makes the invariant unrepresentable
 /// instead of merely documented.
+///
+/// **The reason is spoken as well as hovered** (#678 Phase 4
+/// pass 10, turn 20a rule 3). A greyed row that announces only
+/// "dimmed" is a dead end for a screen-reader user: the dimming
+/// says an answer exists and then withholds it, which is worse
+/// than a control that was never gated. `.help()` cannot carry
+/// it — a hover string needs a pointer, and this whole pass is
+/// about the path that has none — so the same sentence goes out
+/// as an `.accessibilityHint`. It is ONE string either way,
+/// which is the point: the grey and its reason must not be two
+/// decisions that can disagree, and pairing them here means
+/// every gate in the tree inherits both from the one modifier
+/// rather than each call site remembering the second.
+///
+/// The empty string when inactive mirrors `.help`'s, and is
+/// what keeps the modifier chain — and therefore the view's
+/// identity — the same in both states. An inherited empty hint
+/// does not displace one a descendant sets for itself, so a
+/// `HelpButton` inside gated content keeps its own.
 struct GreyOut: ViewModifier {
     let active: Bool
     var help: String = ""
@@ -114,6 +133,7 @@ struct GreyOut: ViewModifier {
             .disabled(active)
             .opacity(active && !alreadyDimmed ? 0.5 : 1)
             .help(active ? help : "")
+            .accessibilityHint(active ? help : "")
             .environment(
                 \.isInsideGreyOut,
                 alreadyDimmed || active

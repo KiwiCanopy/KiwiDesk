@@ -27,10 +27,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         if let existing = dashboardIfCreated { return existing }
         let created = SettingsWindowController(core: core)
         // Seed the dashboard's permission banner from live state
-        // and route its "Enable Accessibility…" button through the
-        // same guided fix as the quick-menu warning row.
-        created.setResolvePermission { [weak self] in
-            self?.showAccessibilityHelp()
+        // and send its button straight to the macOS pane (#678
+        // Phase 4 pass 9, turn 18). Deliberately NOT the quick
+        // menu's route: that warning row opens the tour's grant
+        // step, because someone clicking a menu-bar warning has
+        // been told nothing yet. The banner has already said what
+        // is wrong, one line above the button, to a reader who is
+        // sitting in Settings — putting the tour between them and
+        // the switch is a second explanation of what they just
+        // read.
+        created.setResolvePermission {
+            PermissionMonitor.openSystemSettings()
         }
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
@@ -103,7 +110,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 active: self?.core.profiles.currentName,
                 all: self?.core.profiles.list() ?? [],
                 broken: Set(
-                    self?.core.profiles.brokenNames() ?? []
+                    self?.core.profiles.brokenProfiles()
+                        .map(\.name) ?? []
                 )
             )
         }

@@ -131,4 +131,66 @@ struct GreyOutAnchorTests {
             )
         }
     }
+
+    /// The reason a grey carries must reach the keyboard path,
+    /// not only the pointer (#678 Phase 4 pass 10, turn 20a
+    /// rule 3). `GreyOut` is the one place every gate in the
+    /// tree passes through, so the pairing is asserted there
+    /// rather than at the ~12 row sites that hand it a string.
+    ///
+    /// DERIVED, not restated: the guard counts `.help(` against
+    /// `.accessibilityHint(` inside the modifier's own body and
+    /// requires them equal and non-zero. A needle quoting one
+    /// exact expression would go green the moment the modifier
+    /// grew a second hover string with no spoken twin — which is
+    /// the shape of the drift, since adding a `.help` is the easy
+    /// half. Equality catches a deletion and an unpaired addition
+    /// with the same assertion.
+    @Test("GreyOut speaks every reason it hovers")
+    func greyOutPairsHoverWithHint() throws {
+        let files = try SourceScan.swiftSources(under: settingsDir)
+        let file = try #require(
+            files.first {
+                $0.lastPathComponent == "AutoGatedGroup.swift"
+            },
+            "AutoGatedGroup.swift is gone"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        // The modifier's body alone: `AutoGatedGroup` above it
+        // renders its own controls, and a `.help` there is not
+        // a gate reason.
+        let start = try #require(
+            source.range(of: "struct GreyOut: ViewModifier {"),
+            "GreyOut is gone or renamed"
+        )
+        let tail = String(source[start.upperBound...])
+        let body = String(
+            tail[
+                ..<(tail.range(of: "\nprivate struct")?.lowerBound
+                    ?? tail.endIndex)
+            ]
+        )
+        let hovered = body.components(separatedBy: ".help(").count - 1
+        let spoken =
+            body.components(
+                separatedBy: ".accessibilityHint("
+            ).count - 1
+        #expect(
+            hovered > 0,
+            "GreyOut stopped carrying a reason at all"
+        )
+        #expect(
+            hovered == spoken,
+            Comment(
+                rawValue:
+                    "GreyOut hovers \(hovered) reason(s) but "
+                    + "speaks \(spoken) — a greyed row that "
+                    + "announces only 'dimmed' is a dead end for "
+                    + "a screen-reader user, and the reason is "
+                    + "already in hand (turn 20a rule 3)"
+            )
+        )
+    }
 }

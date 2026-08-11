@@ -104,6 +104,20 @@ struct OverrideChrome<Content: View>: View {
                     // inheriting row inside a gated block would
                     // otherwise compound to 0.25.
                     .opacity(!alreadyDimmed ? 0.5 : 1)
+                    // The dim is the only thing saying why this
+                    // control is inert, and a dim is not a
+                    // sentence (#678 Phase 4 pass 10, turn 20a
+                    // rule 3). This is the branch with no
+                    // inherited VALUE to read out — the other one
+                    // already narrates through `inheritedReadout`
+                    // — so without the hint the row announces a
+                    // disabled control and no reason at all.
+                    .accessibilityHint(
+                        L(
+                            "app_bar.override.off.help",
+                            "Inheriting the global value"
+                        )
+                    )
                     .environment(\.isInsideGreyOut, true)
                 helpButton
             }
@@ -166,32 +180,6 @@ struct OverrideChrome<Content: View>: View {
         .foregroundStyle(.secondary)
     }
 
-    /// The trailing OVERRIDE checkbox: checked means this row
-    /// overrides the layout default (owner call 2026-08-04). Bound
-    /// straight to `isOn`, so the tick agrees with the row's other
-    /// "engaged" signals — the left accent bar, the tint, and the
-    /// live control all appear together on a checked (overriding)
-    /// row, and ticking-to-customize is the native inspector idiom.
-    private var overrideCheckbox: some View {
-        Toggle("", isOn: isOn)
-            .labelsHidden()
-            .toggleStyle(.checkbox)
-            .help(
-                isOn.wrappedValue
-                    ? L(
-                        "app_bar.override.on.help",
-                        "Overriding the global value"
-                    )
-                    : L(
-                        "app_bar.override.off.help",
-                        "Inheriting the global value"
-                    )
-            )
-            .frame(
-                width: SettingsMetrics.overrideStateColumn,
-                alignment: .center
-            )
-    }
 }
 
 /// Bindings that map an optional override field + its global

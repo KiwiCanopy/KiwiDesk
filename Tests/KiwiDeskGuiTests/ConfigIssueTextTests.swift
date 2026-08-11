@@ -40,8 +40,19 @@ struct ConfigIssueTextTests {
     /// skip the assertions below. Associated values rule out
     /// `CaseIterable`; the count check at the end is the
     /// backstop.
+    ///
+    /// `profileUnreadable` appears once per `ProfileBrokenCause`,
+    /// which is also this suite's coverage of `ProfileBrokenText`:
+    /// that renderer has no suite of its own because every one of
+    /// its sentences reaches the user through this switch, and the
+    /// distinctness assertion below is what pins that the three
+    /// causes do not collapse to one string (#678 Phase 4 pass 9).
+    /// The row's OTHER reader — App ▸ Profiles — calls the same
+    /// function, so a collapse here is a collapse there.
     private let kinds: [ConfigIssue.Kind] = [
-        .profileUnreadable,
+        .profileUnreadable(.malformedJSON),
+        .profileUnreadable(.unexpectedShape),
+        .profileUnreadable(.unreadable),
         .luaVMUnavailable,
         .luaError("attempt to index a nil value"),
         .guiConfigUnreadable,
@@ -53,10 +64,11 @@ struct ConfigIssueTextTests {
     func everyKindRenders() {
         pinEnglish()
         defer { reset() }
-        // Five cases, six fixtures (`unknownCall` twice). Bump
-        // deliberately when a case is added — the failure is the
-        // reminder the compiler cannot give.
-        #expect(kinds.count == 6)
+        // Five cases, eight fixtures (`profileUnreadable` once per
+        // cause, `unknownCall` twice). Bump deliberately when a
+        // case is added — the failure is the reminder the compiler
+        // cannot give.
+        #expect(kinds.count == 8)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)

@@ -83,6 +83,31 @@ struct SpaceAssignmentChip: View {
             // decision (docs review, 2026-08-04). Both open the same
             // menu.
             .contextMenu { menu }
+            // The SAME builder as the context menu, exposed as
+            // named VoiceOver actions (#678 Phase 4 pass 10, turn
+            // 20a rule 1: the drag is the shortcut, the menu is
+            // the mechanism). One builder, not a mirrored list —
+            // a second copy of these buttons would be a second
+            // place for the display list to go stale, and this
+            // menu is already built from a `displays` the area
+            // passes in precisely so the menu and the cards
+            // cannot disagree.
+            //
+            // This adds NO chrome, which is what lets it coexist
+            // with the 2026-08-04 ruling above: a visible chevron
+            // was tried twice and rejected as clutter, and a
+            // whole-chip `Menu` is what took the drag. An
+            // accessibility action is neither — it draws nothing
+            // and consumes no mouse-down.
+            //
+            // Stated residue, so it is not mistaken for coverage:
+            // this reaches VoiceOver, not the pointer-free
+            // keyboard. A user who navigates by Tab alone still
+            // has no route to move a space between displays —
+            // owner ruled 2026-08-11 that the ruling above wins
+            // over turn 20a's "⋯ button in the chip", so the gap
+            // is deliberate rather than missed.
+            .accessibilityActions { menu }
     }
 
     private var capsule: some View {

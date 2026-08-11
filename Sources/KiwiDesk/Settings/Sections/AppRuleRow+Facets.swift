@@ -38,18 +38,32 @@ extension AppRuleRow {
                 }
             }
         } label: {
-            menuLabel(
-                model.config.appRules[app]?.raw
-                    ?? L(
-                        "app_rules.space.anywhere",
-                        "whichever space you open it in"
-                    )
-            )
+            menuLabel(spaceFacetLabel)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.space", "Space"))
+        // The label above REPLACES the name VoiceOver would have
+        // derived, which for a menu is its current choice — so
+        // without this the control announced "Space, pop up
+        // button" and never which space (#678 Phase 4 pass 10,
+        // turn 20a rule 3: a row announces its state, not just
+        // its name). Sighted readers get the value from the
+        // sentence; naming the control took it away from everyone
+        // else.
+        .accessibilityValue(spaceFacetLabel)
+    }
+
+    /// The current space choice as the sentence renders it —
+    /// drawn and spoken from one expression, so the two cannot
+    /// come to disagree.
+    var spaceFacetLabel: String {
+        model.config.appRules[app]?.raw
+            ?? L(
+                "app_rules.space.anywhere",
+                "whichever space you open it in"
+            )
     }
 
     var floatMenu: some View {
@@ -71,6 +85,9 @@ extension AppRuleRow {
         .neutralMenuLabel()
         .fixedSize()
         .accessibilityLabel(L("app_rules.float", "Float"))
+        // Same reason as the space menu's: the label replaces the
+        // choice VoiceOver would otherwise read.
+        .accessibilityValue(floatLabel)
         .help(
             // The catalog string carries Markdown emphasis for
             // the `?` popover that renders it richly. A tooltip

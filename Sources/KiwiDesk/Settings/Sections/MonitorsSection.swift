@@ -84,10 +84,20 @@ struct MonitorsSection: View {
         rows: MonitorsFamilyRows
     ) -> some View {
         if rows.displays.isEmpty {
+            // What happens instead, not merely that the list is
+            // empty (#678 Phase 4 pass 9, turn 18). Deliberately
+            // modest about the cause: this fires when the display
+            // enumeration comes back empty, which on a Mac with a
+            // screen means the private path is unavailable rather
+            // than that the hardware is gone — so the sentence
+            // promises only what the fallback keeps doing, which
+            // is tile on one space.
             Text(
                 L(
                     "monitors.none_detected",
-                    "No monitors detected."
+                    "No monitors detected, so there is nothing to "
+                        + "place spaces on. Windows still tile, in "
+                        + "a single space."
                 )
             )
             .foregroundStyle(.secondary)

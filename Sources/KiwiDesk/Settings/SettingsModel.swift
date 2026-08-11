@@ -171,9 +171,10 @@ final class SettingsModel: ObservableObject {
     /// sets, screen count, default flag, live match.
     @Published var profileSummaries: [ProfileSummary] = []
     /// Profiles whose JSON won't decode — shown greyed with a
-    /// Delete, never hidden (#246, #171). No summary: the file
-    /// can't be read to build one.
-    @Published var brokenProfiles: [String] = []
+    /// Reveal and a Delete, never hidden (#246, #171). No summary:
+    /// the file can't be read to build one, which is why the cause
+    /// rides along instead (#678 Phase 4 pass 9).
+    @Published var brokenProfiles: [BrokenProfile] = []
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []

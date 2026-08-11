@@ -162,6 +162,25 @@ extension SettingsModel {
         reload()
     }
 
+    /// Shows a profile's file in the Finder (#246, #678 Phase 4
+    /// pass 9). The one action a broken profile has besides
+    /// Delete, and the reason its row states WHY it broke: for a
+    /// file whose JSON is malformed, opening it shows the damage.
+    ///
+    /// On the model rather than inline in the button so the row
+    /// and the Config Issues panel — which has offered Reveal all
+    /// along — reach the file the same way, through
+    /// `ProfileManager.fileURL`'s path validation. Silent when the
+    /// path won't validate: the name came from a directory
+    /// listing that already filtered invalid ones, so a failure
+    /// here means the file went away between the two, and the next
+    /// refresh drops the row anyway.
+    func revealProfile(named name: String) {
+        guard let url = try? core.profiles.fileURL(name: name)
+        else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
     /// Removes every Desktop → profile binding (#678 turn 13a).
     ///
     /// On the model, not inline in the button, because it is the
@@ -264,6 +283,20 @@ struct ProfileSummary: Identifiable {
     /// the profile carries a keybinding set of its own; it
     /// carries a diff over the global one (#678 turn 13a).
     let shortcutOverrideCount: Int
+    var id: String { name }
+}
+
+/// One profile whose file will not decode (#246), with why.
+///
+/// A sibling of `ProfileSummary` rather than a field on it: a
+/// broken file yields no count, no monitor sets and no default
+/// flag, so every one of that type's fields would be an optional
+/// nobody could fill. The name is the only thing both rows share,
+/// which is exactly the shape two types express and one type with
+/// eight optionals hides.
+struct BrokenProfile: Identifiable, Equatable {
+    let name: String
+    let cause: ProfileBrokenCause
     var id: String { name }
 }
 

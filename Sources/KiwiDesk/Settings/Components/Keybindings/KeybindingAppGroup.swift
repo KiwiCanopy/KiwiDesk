@@ -32,6 +32,24 @@ struct ApplicationsGroup: View {
         SettingsSection(
             SettingsCatalog.shortcuts.openApplications
         ) {
+            if orderedAppIDs.isEmpty {
+                // What holds instead of the empty list (#678
+                // Phase 4 pass 9, turn 18). "No app shortcuts" is
+                // a fact the reader can see; that an app opens or
+                // comes forward on the SAME key is the thing the
+                // emptiness leaves them wondering about, since
+                // that behaviour is what a binding here changes.
+                Text(
+                    L(
+                        "shortcuts.apps.empty",
+                        "No app has a key of its own yet. Add one "
+                            + "and it opens that app, or brings it "
+                            + "forward when it is already running."
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
             ForEach(orderedAppIDs, id: \.self) { id in
                 if let binding = bindingFor(id) {
                     row(binding)

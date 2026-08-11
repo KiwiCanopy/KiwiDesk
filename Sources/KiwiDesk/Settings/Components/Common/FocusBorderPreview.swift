@@ -16,6 +16,27 @@ struct FocusBorderPreview: View {
     let style: BorderStyle
 
     var body: some View {
+        picture
+            // One element with one summary, never a tour of the
+            // shapes (#678 Phase 4 pass 10, turn 20a rule 2):
+            // it is a picture of the result, so tabbing through
+            // its two windows would be tabbing through nothing
+            // actionable. Every other preview in the tree already
+            // reads aloud through text it happens to contain — a
+            // legend, a caption, a chip — and this one is the pure
+            // drawing that had nothing, so it announced nothing at
+            // all.
+            .accessibilityElement()
+            .accessibilityLabel(
+                L(
+                    "borders.preview.axlabel",
+                    "Preview: a focused window with its ring, "
+                        + "beside an unfocused one."
+                )
+            )
+    }
+
+    private var picture: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.secondary.opacity(0.12))

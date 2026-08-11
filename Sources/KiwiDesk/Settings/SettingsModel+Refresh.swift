@@ -38,7 +38,9 @@ extension SettingsModel {
                     profile.layers?.overrideCount ?? 0
             )
         }
-        brokenProfiles = core.profiles.brokenNames()
+        brokenProfiles = core.profiles.brokenProfiles().map {
+            BrokenProfile(name: $0.name, cause: $0.cause)
+        }
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()

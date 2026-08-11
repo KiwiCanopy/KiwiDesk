@@ -134,4 +134,51 @@ struct AppRulesCensusRenderTests {
         }
     }
 
+    /// Naming the control took its VALUE away, and only from the
+    /// people who needed the name (#678 Phase 4 pass 10, turn 20a
+    /// rule 3).
+    ///
+    /// `.accessibilityLabel` REPLACES the name SwiftUI derives,
+    /// and for a `Menu` that derived name is its current choice.
+    /// So the modifier the test above requires is exactly what
+    /// silenced "which space" — a sighted reader still reads the
+    /// choice out of the sentence, which is why nothing looked
+    /// wrong. Both halves are now required together, and the pair
+    /// is why they are asserted in one test: a future edit that
+    /// drops the value to fix an over-verbose announcement has to
+    /// meet this comment.
+    ///
+    /// The needle is the modifier's shape over stripped source,
+    /// the same lens and for the same reason as the label half.
+    @Test("the facets announce their value, not just their name")
+    func facetsAnnounceTheirValue() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow+Facets.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        // One per facet menu, and EXACT: a floor would let the
+        // space menu keep its value while the float menu lost
+        // one, which is the drift a shared count cannot see.
+        let found =
+            source.components(
+                separatedBy: ".accessibilityValue("
+            ).count - 1
+        #expect(
+            found == 2,
+            Comment(
+                rawValue:
+                    "\(found) of 2 facet menus announce their "
+                    + "current choice — an `.accessibilityLabel` "
+                    + "on a Menu replaces the choice VoiceOver "
+                    + "would otherwise read, so the value has to "
+                    + "be given back explicitly"
+            )
+        )
+    }
 }

@@ -198,9 +198,21 @@ wizard, or the permission was revoked later — window management
 pauses and KiwiDesk makes it easy to find your way back. The menu
 bar icon shows a warning triangle, the quick menu gains a
 **Window Management Paused…** row at the top, and the Settings
-window shows a banner across every section. Any of them reopens
-the wizard at the grant step so you can turn the permission back
-on; management resumes automatically once you do.
+window shows a banner across every section. Management resumes
+automatically once you grant it.
+
+The two routes differ on purpose. The menu bar's row reopens the
+wizard at its grant step, which explains what the permission is
+for and waits for it; the Settings banner's **Open System
+Settings** goes straight to the macOS pane, since the banner has
+already said what is wrong to someone who is sitting in Settings.
+
+No row on the page greys out while it is paused. Every control
+still edits, so you can prepare a whole setup before granting
+anything and have it waiting the moment you do — one switch being
+off is not the same as the app being broken. What the pause does
+reach is the save verbs that need a live monitor set, described
+under [Profiles](#profiles); the rows themselves never.
 
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
@@ -1705,8 +1717,16 @@ points at **Save a copy…** in the save pill if you want to keep
 them separately instead.
 
 Profiles whose JSON will not decode appear under **Couldn't load**,
-dimmed, with a Delete — never hidden, so a broken file can always be
-cleared.
+dimmed, with a Reveal and a Delete — never hidden, so a broken file
+can always be opened or cleared.
+
+Each row says which kind of failure it was, because that decides
+whether opening the file will tell you anything. *"The file isn't
+valid JSON"* means something outside KiwiDesk wrote it and lost a
+brace or a quote — you will see the damage in a text editor.
+*"Saved by another version, or a hand edit changed one of its
+fields"* means the JSON parses but this KiwiDesk does not accept
+its shape, and nothing on disk can say which of the two it was.
 
 ### Which Profile Loads
 

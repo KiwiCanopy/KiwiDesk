@@ -78,10 +78,30 @@ struct LayoutPreviewPanel: View {
                 step: 1
             )
             .frame(maxWidth: .infinity)
+            // The label above is a SIBLING `Text`, which names
+            // nothing as far as VoiceOver is concerned — so the
+            // slider announced a bare percentage, and the count it
+            // was actually setting sat in a third element beside
+            // it (#678 Phase 4 pass 10, turn 20a rule 2: the
+            // preview is skipped, but the controls that change
+            // what it shows are not). Naming and valuing the
+            // control puts both back on the thing being adjusted.
+            .accessibilityLabel(
+                L(
+                    "layout_defaults.preview_windows",
+                    "Window count"
+                )
+            )
+            .accessibilityValue("\(windows)")
             Text("\(windows)")
                 .frame(minWidth: 24, alignment: .trailing)
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.body.monospacedDigit())
+                // The readout is the slider's value drawn again
+                // for the eye; spoken twice it is just noise, and
+                // the value above is the copy that travels with
+                // the control.
+                .accessibilityHidden(true)
         }
     }
 }
