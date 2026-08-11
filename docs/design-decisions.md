@@ -1135,6 +1135,58 @@ home space no longer reserves a phantom tiled slot when it has
 traveled away, which is what let the same window fight for two
 frames across monitors before. (#445)
 
+**The starter setup is chosen from the screens, not demonstrated
+on them.** The first version of it (#466) gave every display the
+same five spaces — one per layout mode — so a newcomer met the
+whole range at once. That is a showroom, and it is the wrong
+reading of "approachable by default": approachable means a setup
+you KEEP. So the layouts now come from each screen's shape, in
+points (`ScreenClass`): a laptop under 1900 pt gets Scrolling and
+Monocle and never Track, which has no width to work in; a screen
+at or past 3000 pt — or past a 2.1 aspect, which catches a short
+ultrawide the width test misses — leads with Track, and BSP
+exists only in the middle class, producing absurd windows above
+it and unusable ones below. Points and not pixels, because a 5K
+27" and a 1440p 27" both report 2560 pt and want the same
+answer, while a Retina laptop reports 1728 and wants laptop
+layouts despite having more pixels than either.
+
+**Spaces are budgeted, never added up per screen.** A laptop's
+three plus a 27"'s five would be eight keys to learn on day one,
+most of them empty — so the total is 3 · 5 · 7 · 8 · 9 by screen
+count and then one more each, soft-capped at ten, with each
+screen's share proportional to its width and clamped to 1...3.
+The cap is on *spaces*, so min-one-per-screen outranks it:
+eleven displays gets eleven spaces, because a screen with none
+has nowhere for a window to resolve to. Two rules ride on top —
+exactly one Floating space, on the largest screen that has room
+beside it, and no layout twice unless the budget forces it. The
+count tails off because screens four and five are almost always
+glanceable (logs, chat, a stream) and want one space that is
+always the same; the cost of a space is a key to bind and a name
+to recall, not screen area. And we run out of keys before we run
+out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
+left.
+
+**One tuning per profile, and it is the main screen's.** This is
+not a preference — `TilingSettings` is profile-wide, so a laptop
+beside a 27" has exactly one gap value and one stack ratio to
+give, and the only question is which screen names them.
+Per-space overrides express the rest. Do not read the
+`StarterTuning` seam as a per-display one waiting to be built:
+making it one would put a second config behind every value the
+Settings window shows.
+
+**There is one Starter preset, and it is for the screens you
+have.** There used to be three, one per screen count, because
+the ladder planned for a count in the abstract. A setup derived
+from screen shapes cannot answer "which two screens?", so a
+count you are not running offers the workflow layouts alone —
+that is what "For other setups" now means. The preset's summary
+loses the sentences that named its rungs for the same reason: a
+list of modes would be a different sentence on every Mac, so it
+states the rule and the thumbnails show the modes.
+
 ## Settings GUI & UX
 
 ### "Apple-native" binds behavior, not the Settings GUI's visual idiom
@@ -1398,6 +1450,82 @@ This is a consequence of the entry above rather than a taste call
 about any one window, which is why it is stated over all of them:
 a new content window inherits the reason, and giving it a
 minimize button would be the bug.
+
+### The tour is chrome, and chrome is not tiled
+
+**[Principle]**
+
+**Tiling manages the windows a user keeps; a surface with a
+completion condition is chrome, and chrome is outside the tiler's
+domain.** The tour, the ⌃⌥K panel and the Config Issues window
+all end, so none of them is managed — and none of them is a
+"floating exception", which is the framing every future surface
+would otherwise claim. Settings persists and is resized beside
+your work, so it tiles.
+
+The question this answers is a fair one: a tiling manager whose
+own first window floats looks like it is exempting itself, and a
+new user has no way to read that as anything but inconsistency.
+But making the tour a managed window answers it wrongly. At the
+grant step there is no permission yet, so nothing tiles whatever
+the policy says; by the time tiling begins the space holds the
+user's browser, their terminal and the System Settings window
+they just granted from, so the tour would become one slot among
+them at whatever width the layout hands it, with copy authored
+for its own fitting size. It would also have to give up the
+floating *level* it takes at exactly that moment, which is the
+only thing stopping the retile burying it. And the lesson it
+would teach is not "KiwiDesk tiles" — it is "KiwiDesk grabbed
+and resized the window I was reading", which is the fear a new
+tiling user arrives with.
+
+**The demonstration was already happening, unnarrated.** The
+moment the grant lands, management starts and every window behind
+the tour is arranged. That is a better demonstration than tiling
+the tour could ever be — the user's own windows, at the moment it
+means something, at no cost — and the tour used to answer it with
+"Permission granted!". It now points at it, and says once that
+setup windows are left alone because they go away. Said once, the
+exception stops reading as an inconsistency and starts reading as
+a rule. (#678 Phase 4 pass 11)
+
+### The coach mark is built, and skips itself when hidden
+
+**[Rationale]**
+
+**A one-time mark points at the real menu-bar item after the tour
+closes** — the window vanishing is the moment someone wonders
+where the app went, and a picture inside a closed window cannot
+answer that.
+
+#331 retired a *timed* menu-bar popover because it fails when the
+menu bar auto-hides, which is common among the keyboard-driven
+users this app attracts, and a coach mark inherits that defect
+exactly: it would point at a strip that is not on screen. The
+repair is the skip, not a redesign — with the menu bar hidden,
+the closing card's sentence is what teaches where the app lives,
+and words survive a hidden menu bar where any picture does not.
+It also skips when the item has no on-screen button at all, which
+is what a menu-bar manager parking it off the visible strip looks
+like from the app's side.
+
+So the rule is stated over *facts* rather than over AppKit
+(`MenuBarCoachMark.canPoint(menuBarAutoHides:button:screen:)`),
+which is what makes "it is built, and honest" assertable rather
+than a claim about a window nobody can see in a test.
+
+### The tour draws no step counter
+
+**[Rationale]**
+
+**No screen of the tour says "step 3 of 5".** Three of its steps
+are conditional — the keys step behind the one-time discovery
+flag, the Displays recommendation behind the display count, and
+the coach mark behind the menu bar being visible — so any total
+is a lie on some machine, and the machine it lies on is the one
+whose user is most likely to be confused by it. A counter that
+cannot be right is worse than no counter: it turns a tour that
+adapts into one that looks broken.
 
 ### Open at login
 
@@ -2649,72 +2777,79 @@ the first Save. Per-space rows number the digits
 by display position but bind each to its space **by name**
 (`⌃⌥3` → the third space's name at seed time; a later rename
 rewrites the binding to follow it, so it survives). The first run
-pads the discovered list to the **per-display beginner ladder**
-(see below) so the digit shortcuts seed even though a fresh macOS
-reports only the active Space (#270). Digits scale to the seeded
-count: `⌃⌥1`–`⌃⌥5` on one display, and up to `⌃⌥1`–`⌃⌥9` plus
-`⌃⌥0` for the tenth space on two (`0` is the top-row key after
-`9`; there is no eleventh, so spaces past the tenth ship unbound —
-see [Accepted limitations](accepted-limitations.md)). The seeded Lua and labels mirror
+pads the discovered list to the **starter setup** (see below) so
+the digit shortcuts seed even though a fresh macOS reports only
+the active Space (#270). Digits scale to the seeded count,
+whatever the setup's budget makes it: up to `⌃⌥1`–`⌃⌥9` plus
+`⌃⌥0` for a tenth space (`0` is the top-row key after `9`; there
+is no eleventh, so spaces past the tenth ship unbound — see
+[Accepted limitations](accepted-limitations.md)). The seeded Lua and labels mirror
 `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91/#466)
 
-**A fresh install seeds a five-per-display beginner ladder, not
-nine flat spaces (#466).** The old first run padded to nine
-numbered `bsp` spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go
-(#270). But a shortcut never needs a pre-created space — `focus_space`
-already `ensureSpace`s on first press — so the nine existed only to
-back the digits, and every new user stared at nine identical `bsp`
-desktops. The ladder replaces them: **five spaces per connected
-display**, one per layout mode — scrolling (the infinite column
-row), stack (single master, 80/20), track (new window → own
-track), grid (3×2), floating — repeating whole on each monitor
-(1–5 main, 6–10 second, 11–15 third). It is a
-guided tour of what KiwiDesk does, sized to the hardware. Because the
-per-space modes, monitor pins, and tuning are **profile-scoped** and
-`gui.json` carries only globals, the ladder is materialized as a real,
-adopted **Starter** profile at first run (`seedFirstRunStarterProfile`,
-after the event loop reconciles displays) — the same durable store any
-saved profile uses, so a reload re-applies it and the user owns and
-edits it like any other. The identical ladder is also offered as the
-**Starter** preset for each screen count (`StandardProfiles`), sharing
-one pure generator (`StarterLadder`) with the seed so the two never
-drift; it is deliberately **not** the silent `isStandard` fallback —
-landing in a demo of empty modes on a monitor change would be a poor
-default, so the workflow Standards keep that job. First-run-only, and
-gated on the same "no authored binding disarms the seed" guard, so it
-never touches a configured setup. (#466, supersedes the #270 nine-pad)
+**A fresh install seeds a real starter setup, not nine flat
+spaces (#466).** The old first run padded to nine numbered `bsp`
+spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go (#270). But a
+shortcut never needs a pre-created space — `focus_space` already
+`ensureSpace`s on first press — so the nine existed only to back
+the digits, and every new user stared at nine identical `bsp`
+desktops.
 
-**The ladder IS the unmatched-change fallback — but only while it's
-the active baseline (#485).** [Rationale] #466 keeps the ladder out
-of the silent `isStandard` fallback so nobody *else* lands in a demo
-of empty modes. But the beginner who started on the ladder hit the
-mirror-image bug: the seeded **Starter** profile only covers its
-first-run display count, so plugging a second monitor matched no
-stored set, fell to `.none`, and composed a *workflow* Standard —
-handing the newcomer fewer spaces (Dual Developer's 8, not the
-ladder's 10) and no `⌃⌥N` past the seeded count. The fix scopes the
+*What the seed CONTAINS is now ruled above, under "the starter
+setup is chosen from the screens" (#678 Phase 4 pass 11), which
+supersedes #466's five-per-display ladder.* What survives from
+#466 is everything about how it is delivered, and those parts are
+load-bearing whatever the layouts are:
+
+Because the per-space modes, monitor pins, and tuning are
+**profile-scoped** while `gui.json` carries only globals, the
+setup is materialized as a real, adopted **Starter** profile at
+first run (`seedFirstRunStarterProfile`, after the event loop
+reconciles displays) — the same durable store any saved profile
+uses, so a reload re-applies it and the user owns and edits it
+like any other. The identical setup is also offered as the
+**Starter** preset (`StandardProfiles`), sharing one pure
+generator (`StarterSetup`) with the seed so the two never drift.
+It is deliberately **not** the silent `isStandard` fallback:
+landing in a hardware-derived setup on a monitor change would be
+a poor default, so the workflow Standards keep that job.
+First-run-only, and gated on the same "no authored binding
+disarms the seed" guard, so it never touches a configured setup.
+(#466, supersedes the #270 nine-pad; superseded in its own turn
+on WHICH layouts by #678 Phase 4 pass 11)
+
+**The starter setup IS the unmatched-change fallback — but only
+while it's the active baseline (#485).** [Rationale] #466 keeps
+it out of the silent `isStandard` fallback so nobody *else* lands
+in a setup derived from someone else's hardware. But the beginner
+who started on it hit the mirror-image bug: the seeded **Starter**
+profile only covers its first-run display count, so plugging a
+second monitor matched no stored set, fell to `.none`, and
+composed a *workflow* Standard — handing the newcomer a different
+number of spaces and no `⌃⌥N` past the seeded count. The fix scopes the
 override tightly: `handleMonitorChange`'s `.none` branch recomposes
-the **ladder** at the live display count *only when the user is on the
-Starter baseline* (`isOnStarterBaseline` — the adopted seed profile,
-flagged `Profile.isStarterLadder` so the identity survives a rename or
-an edited mode, or a transient ladder Standard from an earlier change,
+the **starter setup** for the live screens *only when the user is
+on the Starter baseline* (`isOnStarterBaseline` — the adopted seed profile,
+flagged `Profile.isStarterSetup` so the identity survives a rename
+or an edited mode, or a transient Starter Standard from an earlier
+change,
 sticky via `currentStandard`). Every other baseline still gets the
 workflow Standard, so #466's "no silent demo layout" promise holds for
-everyone who didn't choose the ladder. The flag rides re-saves and
+everyone who didn't choose it. The flag rides re-saves and
 edits but **not** a save-as-new — an explicitly named copy is the
 user's own profile and resolves normally (`copyProfile` clears it
 beside `isDefault`, the two identity flags a copy must neutralize). A
-transient ladder Standard carries the flag onto the first profile the
+transient Starter Standard carries the flag onto the first profile the
 user *saves* of it, via `buildProfile` reading `currentStandard`, so a
-save doesn't drop them off the ladder either. Both recompose sites are
+save doesn't drop them off the baseline either. Both recompose sites are
 covered: `handleMonitorChange`'s `.none` branch and
 `reapplyActiveProfileState` (a config reload) both route through
 `composeMonitorChangeFallback`, and `apply(composed:)` now adopts its
 own `composed.assignment` (`adoptComposedPlacement`) rather than
-discarding it — equivalent for a workflow Standard, correct for the
-ladder's five-per-display blocks. The digit-shortcut half is the
+discarding it — equivalent for a workflow Standard, correct for
+the starter setup's per-screen blocks, which are no longer even
+the same size as each other. The digit-shortcut half is the
 additive twin: `topUpDigitShortcuts` binds only the `⌃⌥N` a growth
 left unbound (GUI-managed, never overwriting a custom chord, capped at
 ten), so the shortcuts follow the spaces. Do not "simplify" either
