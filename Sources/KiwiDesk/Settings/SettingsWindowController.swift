@@ -219,6 +219,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             OwnWindowTiling.identifier
         )
         window.center()
+        // The saved frame has two owners since the window began
+        // tiling (#678 item 18): the user's own drag while it
+        // floats, and the tiler's placement while it does not.
+        // Restoring a layout slot as if it were a chosen size is
+        // harmless — a tiled window is re-placed on the next
+        // retile regardless — and the clamp below is what keeps
+        // a degenerate saved width out of the bands.
         window.setFrameAutosaveName("KiwiDeskSettings")
         // A frame saved by an older build can be narrower than
         // the shell's minimum; min-size only gates user

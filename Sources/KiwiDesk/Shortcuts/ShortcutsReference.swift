@@ -164,6 +164,21 @@ enum ShortcutsReferenceBuilder {
                     )
                 )
             ),
+            // The General band is the census's `generalKeys`
+            // container, minus the panel's own opener — which
+            // `build` already removed from the working set, so
+            // this band holds whatever else that container
+            // grows. Without it a bound Open Settings fell
+            // through to Custom and rendered as raw
+            // `KiwiDesk.open_settings()`, untranslated, in
+            // every locale (#678 item 18).
+            ShortcutSubgroup(
+                title: L(
+                    "shortcuts.section.general",
+                    "General"
+                ),
+                rows: rows([KeybindingCatalog.openSettings])
+            ),
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.switch_layers",

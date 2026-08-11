@@ -3,14 +3,14 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A recovered `KiwiDesk.show_settings()` binding must classify
+/// A recovered `KiwiDesk.open_settings()` binding must classify
 /// as navigation with its catalog label, not demote to Custom —
 /// the catalog row, the classifier map (`stepFreeCommands`) and
 /// the Core verb all speak of one Lua body (#678 item 18, the
 /// #330 shape).
-@Suite("show_settings import classification")
+@Suite("open_settings import classification")
 @MainActor
-struct ShowSettingsClassifyTests {
+struct OpenSettingsClassifyTests {
     @Test("An open-settings row upgrades out of Custom")
     func classifies() {
         var config = GuiConfig()
@@ -36,8 +36,8 @@ struct ShowSettingsClassifyTests {
     func luaMatchesCoreVerb() {
         #expect(
             KeybindingCatalog.openSettings.lua
-                == "KiwiDesk.show_settings()"
+                == "KiwiDesk.open_settings()"
         )
-        #expect(APIReference.luaOnly.contains("show_settings"))
+        #expect(APIReference.luaOnly.contains("open_settings"))
     }
 }

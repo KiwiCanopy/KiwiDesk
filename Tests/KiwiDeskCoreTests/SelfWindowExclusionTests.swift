@@ -168,6 +168,27 @@ struct SelfWindowExclusionTests {
         )
     }
 
+    /// The live verdict, through the seam the mark is read by.
+    /// The static above proves the RULE; this proves the read —
+    /// hardcode `tilesAsOwnWindow: false` at the call site, or
+    /// compare a different constant, and only this reds
+    /// (`tests.md`: a behavior change owes a test that fails
+    /// when it is reverted).
+    @MainActor
+    @Test("The float verdict reads the mark through the seam")
+    func forceFloatConsultsTheMark() {
+        let loop = EventLoop()
+        let id = WindowID(4242)
+        loop.ownWindowIdentifier = { _ in OwnWindowTiling.identifier }
+        #expect(!loop.shouldForceFloat(pid: getpid(), id: id))
+        // Own chrome: a window with no mark, and one carrying
+        // somebody else's — both stay force-floated.
+        loop.ownWindowIdentifier = { _ in nil }
+        #expect(loop.shouldForceFloat(pid: getpid(), id: id))
+        loop.ownWindowIdentifier = { _ in "kiwidesk.some.other" }
+        #expect(loop.shouldForceFloat(pid: getpid(), id: id))
+    }
+
     @Test("The marked own window tiles; the mark exempts nobody else")
     func ownWindowTilingMark() {
         // The Settings window (#678 item 18): own process, marked

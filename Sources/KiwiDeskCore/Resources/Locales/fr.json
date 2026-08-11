@@ -467,7 +467,7 @@
   "keybinding.make_unsticky": "Retirer Sticky",
   "keybinding.move_to_space": "Déplacer vers l'espace %1$@",
   "keybinding.move_to_space_follow": "Déplacer vers l'espace %1$@ et suivre",
-  "keybinding.move_window_to_track": "Déplacer la fenêtre vers la traccia %1$@",
+  "keybinding.move_window_to_track": "Déplacer la fenêtre vers la piste %1$@",
   "keybinding.open_settings": "Ouvrir les Réglages",
   "keybinding.seq.next": "suivante",
   "keybinding.seq.prev": "précédente",

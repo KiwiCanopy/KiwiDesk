@@ -30,40 +30,52 @@ struct OwnWindowTilingSeamTests {
     /// File path (repo-relative) -> how many times it may name
     /// the mark. **This map is the one copy of who may stamp
     /// it**: the Settings window controller, once, at window
-    /// construction.
+    /// construction — plus the declaration itself and the one
+    /// place the engine reads it back.
     private let allowed = [
         "Sources/KiwiDesk/Settings/SettingsWindowController.swift":
-            1
+            1,
+        // The constant's own file: the name and the literal, so
+        // two hits.
+        "Sources/KiwiDeskCore/Events/OwnWindowTiling.swift": 2,
+        // The read side — `shouldForceFloat`'s own-window arm.
+        "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift":
+            1,
     ]
 
     @Test("Only the Settings window carries the tiling mark")
     func markStaysWhereItBelongs() throws {
         let root = SourceScan.repoRoot(from: #filePath)
-        let gui =
-            root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDesk")
         let prefix = root.path + "/"
+        // BOTH trees: Core builds its own `NSWindow`s (the bars,
+        // the border overlays), so a stamp added there would be
+        // invisible to a GUI-only scan — and the claim this map
+        // makes is about the whole app, not one target.
+        let trees = ["KiwiDesk", "KiwiDeskCore"].map {
+            root
+                .appendingPathComponent("Sources")
+                .appendingPathComponent($0)
+        }
 
         var counts: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: gui) {
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            // One use site may match both needles (the constant
-            // resolves to the literal only in Core), so count
-            // the maximum, not the sum — a file naming either
-            // needle is a stamping site.
-            let hits =
-                needles.map {
-                    source.occurrences(of: $0)
-                }.max() ?? 0
-            guard hits > 0 else { continue }
-            let key =
-                file.path.hasPrefix(prefix)
-                ? String(file.path.dropFirst(prefix.count))
-                : file.path
-            counts[key] = hits
+        for tree in trees {
+            for file in try SourceScan.swiftSources(under: tree) {
+                let source = SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                // Summed, never maxed: a second stamp added
+                // beside a first is exactly what this counts,
+                // and a max would absorb it silently.
+                let hits = needles.reduce(0) {
+                    $0 + source.occurrences(of: $1)
+                }
+                guard hits > 0 else { continue }
+                let key =
+                    file.path.hasPrefix(prefix)
+                    ? String(file.path.dropFirst(prefix.count))
+                    : file.path
+                counts[key] = hits
+            }
         }
 
         // Asserted as a whole map rather than per-file, so a NEW

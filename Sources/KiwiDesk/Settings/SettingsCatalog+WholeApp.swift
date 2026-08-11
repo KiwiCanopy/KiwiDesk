@@ -86,9 +86,9 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
-    /// Also a drawer: its one row (`showShortcuts`) is census
-    /// `.showMore`, being app chrome rather than a workspace
-    /// action.
+    /// Also a drawer: every row it holds (`showShortcuts`,
+    /// `openSettings`) is census `.showMore`, being app chrome
+    /// rather than a workspace action.
     let generalKeys = SettingsDrawer(
         "shortcuts.section.general",
         "General"

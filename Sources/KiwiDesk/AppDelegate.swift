@@ -177,7 +177,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // The bindable "Open Settings" action (#678 item 18):
         // opens or raises, never toggles — a key that closed
         // Settings would discard draft state.
-        core.uiBridge.onShowSettings = { [weak self] in
+        core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()
         }
         // The quick-menu row shows the bound open-combo (if any),
