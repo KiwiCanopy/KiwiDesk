@@ -107,12 +107,25 @@ struct KeyboardActionParityTests {
     /// `marker` carries no leading dot on purpose: `ColorField`
     /// calls `contextMenu` on `self` from a `View` extension, and
     /// that spelling is a context menu like any other.
+    /// Leading whitespace AND newlines are skipped before the
+    /// token is read, because both brace spellings are in the
+    /// tree: `.contextMenu { menu }` on one line, and
+    /// `ColorField+AutomaticMenu`'s body on the next. The first
+    /// cut stopped at the newline, so the multi-line spelling
+    /// reduced to `""` on both sides and its pairing was asserted
+    /// by presence alone — guard-prover replaced that file's
+    /// action body with an unrelated `Button` and this stayed
+    /// GREEN (2026-08-11), in exactly the case the comparison was
+    /// written for.
     private func builders(
         in source: String,
         after marker: String
     ) -> [String] {
         source.components(separatedBy: marker).dropFirst().map {
-            let body = $0.prefix { $0 != "}" && $0 != "\n" }
+            let body =
+                $0
+                .drop { $0.isWhitespace }
+                .prefix { $0 != "}" && $0 != "\n" }
             return body.trimmingCharacters(in: .whitespaces)
         }
     }

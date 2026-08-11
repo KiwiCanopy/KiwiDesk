@@ -162,23 +162,27 @@ struct AppRulesCensusRenderTests {
                 encoding: .utf8
             )
         )
-        // One per facet menu, and EXACT: a floor would let the
-        // space menu keep its value while the float menu lost
-        // one, which is the drift a shared count cannot see.
-        let found =
-            source.components(
-                separatedBy: ".accessibilityValue("
-            ).count - 1
-        #expect(
-            found == 2,
-            Comment(
-                rawValue:
-                    "\(found) of 2 facet menus announce their "
-                    + "current choice — an `.accessibilityLabel` "
-                    + "on a Menu replaces the choice VoiceOver "
-                    + "would otherwise read, so the value has to "
-                    + "be given back explicitly"
+        // Keyed on each menu's OWN value expression, not on a
+        // count of call sites. A bare count of two is satisfied
+        // by both values landing on one control while the other
+        // menu has none — guard-prover did exactly that and the
+        // first cut stayed green (2026-08-11), which is the drift
+        // its comment claimed to catch. The expressions differ
+        // per menu, so one missing reds however many the file
+        // holds in total.
+        for value in ["spaceFacetLabel", "floatLabel"] {
+            #expect(
+                source.contains(".accessibilityValue(\(value))"),
+                Comment(
+                    rawValue:
+                        "the facet menu whose choice is "
+                        + "`\(value)` no longer announces it — an "
+                        + "`.accessibilityLabel` on a Menu "
+                        + "replaces the choice VoiceOver would "
+                        + "otherwise read, so the value has to be "
+                        + "given back explicitly"
+                )
             )
-        )
+        }
     }
 }
