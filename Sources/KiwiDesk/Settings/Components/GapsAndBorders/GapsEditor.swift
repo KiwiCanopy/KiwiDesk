@@ -104,42 +104,45 @@ struct GapsEditor: View {
         unified: Binding<CGFloat>,
         mixed: Bool
     ) -> some View {
-        HStack {
-            Text(label)
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
+        SettingsRowShape {
+            SettingsRowLabel(label: label)
+        } control: {
+            HStack {
+                SettingsSlider(
+                    value: Binding(
+                        get: { Double(unified.wrappedValue) },
+                        set: {
+                            unified.wrappedValue = CGFloat($0)
+                        }
+                    ),
+                    range: 0...100,
+                    step: 1
                 )
-            SettingsSlider(
-                value: Binding(
-                    get: { Double(unified.wrappedValue) },
-                    set: { unified.wrappedValue = CGFloat($0) }
-                ),
-                range: 0...100,
-                step: 1
-            )
-            .disabled(mixed)
-            Text(
-                mixed
-                    ? L("gaps.mixed", "mixed")
-                    : "\(Int(unified.wrappedValue)) pt"
-            )
-            .frame(
-                width: SettingsMetrics.readoutColumn,
-                alignment: .trailing
-            )
-            .foregroundStyle(.secondary)
-            .font(.body.monospacedDigit())
-            // The other word-valued readout (see `PtSlider`):
-            // a longer locale shrinks rather than wrapping and
-            // growing the row's height.
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-            .help(
-                mixed
-                    ? GapsBordersGateHelp.sentence(for: .gapsDiffer)
-                    : ""
-            )
+                .disabled(mixed)
+                Text(
+                    mixed
+                        ? L("gaps.mixed", "mixed")
+                        : "\(Int(unified.wrappedValue)) pt"
+                )
+                .frame(
+                    width: SettingsMetrics.readoutColumn,
+                    alignment: .trailing
+                )
+                .foregroundStyle(.secondary)
+                .font(.body.monospacedDigit())
+                // The other word-valued readout (see
+                // `PtSlider`): a longer locale shrinks rather
+                // than wrapping and growing the row's height.
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .help(
+                    mixed
+                        ? GapsBordersGateHelp.sentence(
+                            for: .gapsDiffer
+                        )
+                        : ""
+                )
+            }
         }
     }
 
@@ -231,27 +234,26 @@ private struct GapRow: View {
     }
 
     private var row: some View {
-        HStack {
-            Text(control.text)
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
+        SettingsRowShape {
+            SettingsRowLabel(label: control.text)
+        } control: {
+            HStack {
+                SettingsSlider(
+                    value: Binding(
+                        get: { Double(value) },
+                        set: { value = CGFloat($0) }
+                    ),
+                    range: 0...100,
+                    step: 1
                 )
-            SettingsSlider(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { value = CGFloat($0) }
-                ),
-                range: 0...100,
-                step: 1
-            )
-            Text("\(Int(value)) pt")
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
-                )
-                .foregroundStyle(.secondary)
-                .font(.body.monospacedDigit())
+                Text("\(Int(value)) pt")
+                    .frame(
+                        width: SettingsMetrics.readoutColumn,
+                        alignment: .trailing
+                    )
+                    .foregroundStyle(.secondary)
+                    .font(.body.monospacedDigit())
+            }
         }
     }
 }

@@ -38,11 +38,11 @@ struct SlotSizeRows: View {
 
     enum UnitStyle { case segmented, menu }
 
-    /// The label-column width, read from the environment like the
-    /// sibling row types (`PtSlider`, `RatioRow`), so the value
-    /// row narrows to the override column when `OverrideChrome`
-    /// wraps it and stays at the full width otherwise (#290).
-    @Environment(\.settingsLabelColumn) private var labelColumn
+    // The label-column width is `SettingsRowShape`'s to read
+    // (#290's environment override still applies — the shape
+    // reads the same `settingsLabelColumn`, so the value row
+    // still narrows inside `OverrideChrome` and still reflows
+    // with every other row below the 17a row breakpoint).
 
     enum Part { case unit, control, both }
 
@@ -210,48 +210,45 @@ struct SlotSizeRows: View {
     private var sizeControl: some View {
         switch sizeUnit {
         case .points:
-            HStack {
-                Text(sizeLabel)
-                    .frame(
-                        width: labelColumn,
-                        alignment: .leading
+            SettingsRowShape {
+                SettingsRowLabel(label: sizeLabel)
+            } control: {
+                HStack {
+                    SettingsSlider(
+                        // Floored at the global minimum window
+                        // size: the layout clamps a smaller slot
+                        // up to it anyway, so the control
+                        // shouldn't offer below it.
+                        value: pointsBinding,
+                        range: minPointsFloor...2000,
+                        step: 10
                     )
-                SettingsSlider(
-                    // Floored at the global minimum window size: the
-                    // layout clamps a smaller slot up to it anyway,
-                    // so the control shouldn't offer below it.
-                    value: pointsBinding,
-                    range: minPointsFloor...2000,
-                    step: 10
-                )
-                Text("\(Int(currentPoints)) pt")
-                    .frame(
-                        width: SettingsMetrics.readoutColumn,
-                        alignment: .trailing
-                    )
-                    .foregroundStyle(.secondary)
-                    .font(.body.monospacedDigit())
+                    readout("\(Int(currentPoints)) pt")
+                }
             }
         case .percent:
-            HStack {
-                Text(sizeLabel)
-                    .frame(
-                        width: labelColumn,
-                        alignment: .leading
+            SettingsRowShape {
+                SettingsRowLabel(label: sizeLabel)
+            } control: {
+                HStack {
+                    SettingsSlider(
+                        value: percentBinding,
+                        range: Self.percentRange,
+                        step: Self.percentStep
                     )
-                SettingsSlider(
-                    value: percentBinding,
-                    range: Self.percentRange,
-                    step: Self.percentStep
-                )
-                Text("\(Int(currentFraction * 100)) %")
-                    .frame(
-                        width: SettingsMetrics.readoutColumn,
-                        alignment: .trailing
-                    )
-                    .foregroundStyle(.secondary)
-                    .font(.body.monospacedDigit())
+                    readout("\(Int(currentFraction * 100)) %")
+                }
             }
         }
+    }
+
+    private func readout(_ text: String) -> some View {
+        Text(text)
+            .frame(
+                width: SettingsMetrics.readoutColumn,
+                alignment: .trailing
+            )
+            .foregroundStyle(.secondary)
+            .font(.body.monospacedDigit())
     }
 }

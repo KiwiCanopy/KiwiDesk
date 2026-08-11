@@ -9,6 +9,22 @@ import SwiftUI
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let model: SettingsModel
     private var window: NSWindow?
+
+    /// The width a window opens at when it has no saved frame,
+    /// and the width a too-narrow saved frame is restored to.
+    ///
+    /// The widest band's floor, and derived rather than chosen
+    /// beside it (17a). It was 860 — picked when nothing
+    /// degraded and any width above the minimum was as good as
+    /// another. Now 860 names the COMPACT band, so that default
+    /// would have opened every first launch into two-line rows
+    /// and a docked save bar: a user meeting the app for the
+    /// first time in the most degraded arrangement it has,
+    /// having asked for nothing. Opening at the panel
+    /// breakpoint shows the shell as designed — docked preview,
+    /// rows on their shared axis — and the bands still take
+    /// over the moment the window is resized or tiled.
+    static let firstRunWidth = SettingsWidthClass.panelBreakpoint
     init(core: KiwiCore) {
         self.model = SettingsModel(core: core)
         super.init()
@@ -149,9 +165,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             contentRect: NSRect(
                 x: 0,
                 y: 0,
-                // Comfortably above the shell's 720pt hard
-                // minimum (#678 turn 9) on first launch.
-                width: 860,
+                // Comfortably above the shell's hard
+                // minimum on first launch — `firstRunWidth`
+                // derives from it rather than restating a
+                // number the bands own (17a).
+                width: Self.firstRunWidth,
                 height: 620
             ),
             styleMask: [
@@ -188,12 +206,21 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // A frame saved by an older build can be narrower than
         // the shell's minimum; min-size only gates user
         // resizing, not the restore, so clamp once.
-        if window.frame.width < 720 {
+        //
+        // Through `SettingsWidthClass.minimum`, never a literal
+        // (17a): this restore is the one path that can seat the
+        // window BELOW the narrowest band, so a second spelling
+        // of the number here is precisely how the window comes
+        // to open somewhere the bands do not describe.
+        if window.frame.width < SettingsWidthClass.minimum {
             let content = window.contentRect(
                 forFrameRect: window.frame
             )
             window.setContentSize(
-                NSSize(width: 860, height: content.height)
+                NSSize(
+                    width: Self.firstRunWidth,
+                    height: content.height
+                )
             )
         }
         self.window = window

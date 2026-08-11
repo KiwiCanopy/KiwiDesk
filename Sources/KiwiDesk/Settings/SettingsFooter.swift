@@ -8,9 +8,19 @@ import SwiftUI
 /// profile-level edits, or layout drift — and disappears at
 /// zero (`GreyOutHidingTests` carries this file's exemption
 /// from grey-don't-hide). Owner 2026-08-09 overturned the
-/// earlier docked-footer ruling on sight; the planned
-/// responsive pass will dock the pill back into a real footer
-/// bar below 900 pt, as its one change of kind.
+/// earlier docked-footer ruling on sight — at 1440 the pill
+/// costs 74 px of gutter and covers nothing.
+///
+/// Below the row breakpoint it docks (17a, `docked:`): the same
+/// three verbs and the same count, in a full-width bar the
+/// shell gives its own height, because at 820 pt the floating
+/// version sits on top of the rows it is about. One view, two
+/// physics — never a second footer type, which is how the two
+/// would come to say different things about one draft.
+///
+/// The naming stays POSITIONAL in both forms (owner ruling
+/// 2026-08-10, re-affirmed for this pass): no locale coins a
+/// noun for it, so docking changes nothing a translator sees.
 ///
 /// The verbs keep the docked footer's exact semantics per mode
 /// (#68 §3.12):
@@ -26,6 +36,11 @@ import SwiftUI
 /// - Raw-Lua editing: Save writes init.lua verbatim.
 struct SettingsFooter: View {
     @ObservedObject var model: SettingsModel
+    /// The docked form (17a). A parameter rather than a read of
+    /// `\.settingsWidth`: the shell decides WHERE this mounts —
+    /// overlay or sibling — and a footer that answered the
+    /// width itself could disagree with the container it is in.
+    var docked = false
     @State var namingNewProfile = false
     @State var newProfileName = ""
     @State var namingProfileCopy = false
@@ -50,7 +65,7 @@ struct SettingsFooter: View {
     var body: some View {
         Group {
             if hasWork {
-                pill
+                bar
                     .transition(
                         .opacity.combined(
                             with: .move(edge: .bottom)
@@ -103,7 +118,9 @@ struct SettingsFooter: View {
         }
     }
 
-    private var pill: some View {
+    /// The verbs, identical in both forms — only the container
+    /// under them changes.
+    private var verbs: some View {
         HStack(spacing: 12) {
             leadingReadout
             Text(verbatim: "|")
@@ -122,30 +139,63 @@ struct SettingsFooter: View {
             primarySlot
         }
         .font(.callout)
-        .padding(.leading, 18)
-        .padding(.trailing, 10)
-        .padding(.vertical, 9)
-        .background(
-            RoundedRectangle(
-                cornerRadius: SettingsTheme.cardRadius
+    }
+
+    @ViewBuilder private var bar: some View {
+        if docked { dockedBar } else { pill }
+    }
+
+    private var pill: some View {
+        verbs
+            .padding(.leading, 18)
+            .padding(.trailing, 10)
+            .padding(.vertical, 9)
+            .background(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+                .fill(SettingsTheme.savePill)
+                .shadow(
+                    color: SettingsTheme.savePill.opacity(0.45),
+                    radius: 17,
+                    y: 7
+                )
             )
-            .fill(SettingsTheme.savePill)
-            .shadow(
-                color: SettingsTheme.savePill.opacity(0.45),
-                radius: 17,
-                y: 7
+            // The 16b dark construction: the self-coloured
+            // shadow above is the pill's lift in light and is
+            // invisible in dark, where the fill sits within
+            // ~1.1:1 of the page — there the inset light line
+            // is the edge.
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.cardRadius
+                )
+                .strokeBorder(
+                    SettingsTheme.planeRing,
+                    lineWidth: 1
+                )
             )
-        )
-        // The 16b dark construction: the self-coloured shadow
-        // above is the pill's lift in light and is invisible in
-        // dark, where the fill sits within ~1.1:1 of the page —
-        // there the inset light line is the edge.
-        .overlay(
-            RoundedRectangle(
-                cornerRadius: SettingsTheme.cardRadius
-            )
-            .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
-        )
+    }
+
+    /// The docked form: full width, square, and trailing-aligned
+    /// so the primary verb keeps the corner the pill's did. No
+    /// shadow — a bar the window's own edge terminates is not a
+    /// floating object, and the lift that reads as elevation on
+    /// a pill reads as a smear along a full-width edge.
+    private var dockedBar: some View {
+        VStack(spacing: 0) {
+            // The same seam the pill's ring is: this fixed-dark
+            // plane meets the mode-varying page above it, and in
+            // dark the fill sits within ~1.1:1 of that page.
+            SettingsTheme.planeRing.frame(height: 1)
+            HStack(spacing: 0) {
+                Spacer(minLength: 0)
+                verbs
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(SettingsTheme.savePill)
+        }
     }
 
     private var saveAsNewMessage: String {

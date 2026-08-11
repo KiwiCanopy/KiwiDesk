@@ -32,8 +32,6 @@ struct SegmentedPicker<Value: Hashable>: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.settingsLabelColumn)
-    private var labelColumn
 
     init(
         _ label: String? = nil,
@@ -49,14 +47,9 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     var body: some View {
         if let label {
-            HStack {
-                HStack(spacing: 4) {
-                    Text(label).lineLimit(1)
-                    if let help {
-                        HelpButton(explanation: help, subject: label)
-                    }
-                }
-                .frame(width: labelColumn, alignment: .leading)
+            SettingsRowShape {
+                SettingsRowLabel(label: label, help: help)
+            } control: {
                 labeledTrack
             }
         } else if let help {

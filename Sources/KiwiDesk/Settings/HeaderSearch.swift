@@ -32,7 +32,23 @@ import SwiftUI
 /// middle of the bar. The alternative — a fixed pill and a
 /// `Spacer` — pushed the chips to the far edge and left a hole in
 /// the middle of the header (owner, 2026-08-04).
+///
+/// **Below the chrome breakpoint the field collapses to its own
+/// glyph** (#678 turn 17a) — the LAST thing the shell gives up,
+/// after the preview's column and the row axis, and the only one
+/// that touches the header at all. It gives up nothing: the icon
+/// opens the same field in the same slot, ⌘K still lands in it
+/// from anywhere, and the area title yields for as long as it is
+/// open. The alternative at 720 pt was the field's 110 pt floor
+/// against a back chip, a profile chip and the mode segment,
+/// which leaves the title nothing and clips whatever AppKit
+/// reaches last — a CONTROL, which 17a's order forbids.
 struct HeaderSearch: View {
+    /// Whether the collapsed entry has been opened. Owned by the
+    /// header bar, which is the view that has to yield the area
+    /// title while the field is up — two views, one fact, so it
+    /// cannot be `@State` here.
+    @Binding var expanded: Bool
     /// Everything the result builder may read, collected by the
     /// header bar from state already in memory (the search path
     /// touches nothing else).
@@ -55,12 +71,12 @@ struct HeaderSearch: View {
     /// silent. Search's only mention of the mode.
     let armModeNotice: (SettingsDestination) -> Void
 
-    @State private var query = ""
+    @State var query = ""
     /// The ↑/↓ highlight, by result id — a result set is
     /// per-setting now, so a destination no longer identifies a
     /// row.
-    @State private var highlighted: String?
-    @FocusState private var focused: Bool
+    @State var highlighted: String?
+    @FocusState var focused: Bool
     /// Keeps the panel alive while the pointer is INSIDE it:
     /// a row click lands outside the field's text editor, so
     /// `ClickAwayResignsFocus` resigns focus on the mouse-down
@@ -68,11 +84,26 @@ struct HeaderSearch: View {
     /// own mouse-up. A click anywhere else finds the pointer
     /// outside the panel and dismisses (owner, 2026-08-10:
     /// click-away left the list standing).
-    @State private var panelHovered = false
+    @State var panelHovered = false
+    @Environment(\.settingsWidth) private var width
 
-    private var searching: Bool { !query.trimmed.isEmpty }
+    var searching: Bool { !query.trimmed.isEmpty }
 
-    var body: some View {
+    /// The glyph stands in for the field only while the chrome
+    /// is collapsed AND nobody has opened it.
+    private var collapsed: Bool {
+        width.collapsesChrome && !expanded
+    }
+
+    @ViewBuilder var body: some View {
+        if collapsed {
+            collapsedEntry
+        } else {
+            fieldEntry
+        }
+    }
+
+    private var fieldEntry: some View {
         SettingsSearchField(
             text: $query,
             focus: $focused,
@@ -101,194 +132,66 @@ struct HeaderSearch: View {
         // highlight, so the highlight goes rather than pointing
         // at whatever now sits in that row.
         .onChange(of: query) { _, _ in highlighted = nil }
+        // An opened field that is done — focus gone, nothing
+        // typed — hands the row back to the area title. Only
+        // when it is EMPTY: a query is a result list the user
+        // may still be reaching for with the mouse.
+        .onChange(of: focused) { _, now in
+            if !now, !searching { expanded = false }
+        }
+    }
+
+    /// The collapsed entry: the field's own glyph, in the field's
+    /// own slot, still the row's flexible element — the `Spacer`
+    /// is what keeps the chips clustered at the trailing edge
+    /// once the field stops filling the middle.
+    private var collapsedEntry: some View {
+        HStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Button(action: open) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .frame(width: 20, height: 20)
+            }
+            .buttonStyle(.plain)
+            .iconButtonAffordance(
+                L("search.placeholder", "Search")
+            )
+            .background { focusShortcut }
+        }
+    }
+
+    /// Opening is one act: the field appears AND takes focus.
+    /// Two clicks to type would make the glyph a worse field
+    /// than the one it replaced.
+    ///
+    /// The focus write waits one main-actor hop, and that is
+    /// the load-bearing half. While the entry is collapsed
+    /// there is no `TextField` in the hierarchy at all — the
+    /// glyph replaces it — so `focused = true` in the same
+    /// update that mints the field aims at a focusable SwiftUI
+    /// has not created yet, and such a write is regularly
+    /// dropped. The symptom is the worst kind: the field opens,
+    /// looks ready, and swallows the first thing typed into it
+    /// (code review, 2026-08-11).
+    private func open() {
+        expanded = true
+        Task { @MainActor in focused = true }
     }
 
     /// ⌘K, as a zero-size button rather than on the field: a
     /// `keyboardShortcut` on a `TextField` competes with the
     /// field's own key handling, and this needs to fire while
-    /// focus is anywhere in the window.
+    /// focus is anywhere in the window. Mounted in BOTH entries,
+    /// so the shortcut opens the collapsed one rather than
+    /// focusing a field that is not on screen.
     private var focusShortcut: some View {
-        Button("") { focused = true }
+        Button("", action: open)
             .keyboardShortcut("k", modifiers: .command)
             .opacity(0)
             .frame(width: 0, height: 0)
             .accessibilityHidden(true)
-    }
-
-    /// Hung below the field in the field's own coordinate
-    /// space; the offset is the field's height plus the gap —
-    /// a constant, since a `GeometryReader` around the FIELD
-    /// would negotiate the flexible slot and collapse the row.
-    ///
-    /// 380 wide, a card under the field's leading edge — NOT
-    /// the field's width. A full-width panel was tried against
-    /// the line-through-the-panel report and rejected on sight
-    /// once the real cause (the header separator's paint
-    /// order) was fixed (owner, 2026-08-10). The responsive
-    /// pass (17a) owns the final number.
-    @ViewBuilder private var resultPanel: some View {
-        if searching, focused || panelHovered {
-            resultCard
-        }
-    }
-
-    private var resultCard: some View {
-        resultList
-            .padding(8)
-            .frame(width: 380, alignment: .leading)
-            .background(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.cardRadius
-                )
-                .fill(SettingsTheme.card)
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(SettingsTheme.hairline)
-                )
-                // 16b dark seam OVER the hairline: the black
-                // shadow below is the panel's lift in light
-                // and is invisible on the dark page — see
-                // `SettingsTheme.planeRing`.
-                .overlay(
-                    RoundedRectangle(
-                        cornerRadius: SettingsTheme.cardRadius
-                    )
-                    .strokeBorder(
-                        SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
-                )
-                // Without this the shadow halos EVERY
-                // primitive — the hairline ring casts its own
-                // shadow INWARD, reading as a line ghosting
-                // through an opaque panel (#758's lesson, hit
-                // again here; owner report 2026-08-10).
-                .compositingGroup()
-                .shadow(
-                    color: .black.opacity(0.16),
-                    radius: 12,
-                    y: 4
-                )
-            )
-            .offset(y: 40)
-            .onHover { panelHovered = $0 }
-    }
-
-    private var results: SettingsSearchResults {
-        SettingsSearch.results(query: query, context: context)
-    }
-
-    @ViewBuilder private var resultList: some View {
-        let results = results
-        if results.isEmpty {
-            Text(L("search.no_results", "No results"))
-                .font(.callout)
-                .foregroundStyle(SettingsTheme.ink3)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.vertical, 8)
-        } else {
-            // Lazy on purpose: rows compute their value
-            // enrichment when they appear, so a broad query
-            // enriches the ~8 visible rows, never the whole set.
-            // An overlay proposes the FIELD's size, and a
-            // ScrollView adopts whatever it is proposed — so
-            // without an explicit height the whole list
-            // collapses to one clipped row (owner eyeball,
-            // 2026-08-10). The height is the content's own
-            // estimate, capped; past the cap it scrolls.
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(results.settings) { result in
-                        row(result)
-                    }
-                    if !results.places.isEmpty {
-                        placesHeader
-                        ForEach(results.places) { result in
-                            row(result)
-                        }
-                    }
-                }
-            }
-            .frame(height: panelHeight(results))
-        }
-    }
-
-    /// Estimated content height: two-line rows at ~40 pt, the
-    /// group caption when present, capped at 320 (the shipped
-    /// max) — an estimate is safe because past the cap the list
-    /// scrolls and under it a few points of slack vanish into
-    /// the padding.
-    private func panelHeight(
-        _ results: SettingsSearchResults
-    ) -> CGFloat {
-        let rows = CGFloat(results.flat.count)
-        let header: CGFloat = results.places.isEmpty ? 0 : 26
-        return min(rows * 40 + header, 320)
-    }
-
-    /// The group's caption (spec 11a): the user's own named
-    /// things, below the settings rows.
-    ///
-    /// Named by OWNERSHIP, not by location. A location word is a
-    /// metaphor only English carries here — the group holds a
-    /// Space, a Profile and an App rule — and the literal
-    /// translation collided outright in two catalogs: fr
-    /// "Emplacements" is already the tiling slot, zh 位置 is
-    /// already the "Position" setting label on rows this very
-    /// search indexes. "Item" was unavailable to translate into:
-    /// it is a ruled noun for a bar entry
-    /// (.claude/rules/config-vocabulary.md), and its Romance
-    /// renderings collide the same way. The wire keeps `place` —
-    /// in code the thing is a jump target.
-    private var placesHeader: some View {
-        Text(L("search.places", "Made by you"))
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(SettingsTheme.ink3)
-            .padding(.horizontal, 8)
-            .padding(.top, 6)
-    }
-
-    private func row(
-        _ result: SettingsSearchResult
-    ) -> some View {
-        SettingsSearchRow(
-            result: result,
-            value: value,
-            switchesMode: SettingsSearch.switchesMode(
-                result,
-                context: context
-            ),
-            badged: spotlightProfiles
-                && result.destination == .profiles,
-            badgeValue: badgeValue(for: result.destination),
-            reveal: pick
-        )
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        // The list convention: no fill at rest, a quiet wash
-        // under the pointer (owner, 2026-08-10: rows read
-        // inert without it).
-        .rowHoverHighlight()
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(
-                    result.id == highlighted
-                        ? SettingsTheme.accent.opacity(0.16)
-                        : .clear
-                )
-        )
-    }
-
-    /// The spotlight dot's VoiceOver twin — empty when unbadged
-    /// (the sidebar's rule, carried whole).
-    private func badgeValue(
-        for destination: SettingsDestination
-    ) -> String {
-        guard spotlightProfiles, destination == .profiles
-        else { return "" }
-        return L("home.profiles.badge_ax", "start here")
     }
 
     /// Clearing the query is what dismisses the list — the panel
@@ -299,7 +202,7 @@ struct HeaderSearch: View {
     /// reveal path promotes the mode (`ensureModeAdmits`), so
     /// asking afterwards would always answer "no switch". The
     /// arm goes first — the reveal is what consumes it.
-    private func pick(_ result: SettingsSearchResult) {
+    func pick(_ result: SettingsSearchResult) {
         if SettingsSearch.switchesMode(
             result,
             context: context
@@ -310,6 +213,10 @@ struct HeaderSearch: View {
         highlighted = nil
         focused = false
         panelHovered = false
+        // A picked result is a navigation, and the screen it
+        // lands on wants its title back — the collapsed entry's
+        // whole reason for existing.
+        expanded = false
         reveal(result.anchor)
     }
 

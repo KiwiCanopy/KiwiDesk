@@ -1869,10 +1869,17 @@ So the pill floats over the content column, centred on it
 (offset past the preview panel when one is open), appears
 only while there is something to act on, and disappears at
 zero — the one deliberate exception to grey-don't-hide,
-carried by `GreyOutHidingTests`. A planned responsive pass —
-not yet built; no width breakpoint ships today — will dock
-the pill back into a real footer bar below 900 pt, as its
-one change of kind.
+carried by `GreyOutHidingTests`. Below 900 pt it docks into
+a real footer bar (turn 17a, shipped): the pill's argument is
+that it costs a strip of gutter and covers nothing, and below
+900 that second half stops being true — the same pill sits on
+top of the rows it is about. So the pill is the form, not the
+fact; what
+survives both forms is that it exists only while the draft
+does. It is the one component in the shell that changes KIND
+rather than size, which is also why it stays ONE view with
+two containers: two footer types is two places for one draft
+to be described differently.
 The shown N is the ROW COUNT of the list it opens (owner
 2026-08-10, revising the earlier settings-count ruling): a
 per-instance family expands one census setting into a row
@@ -1897,11 +1904,17 @@ has something to show gets a fixed 392 pt right column: "Live
 preview · <area>" over the area's preview drawn from the
 DRAFT, then the diff list. The redesign spec's `›` collapse
 handle is deliberately NOT built (owner 2026-08-10): the
-planned responsive pass will drop the panel by WIDTH below
-1200 pt, and a manual collapse beside that is a persisted
-preference duplicating what the window already decides —
+window drops the panel by WIDTH below 1200 pt (turn 17a), and
+a manual collapse beside that is a persisted preference
+duplicating what the window already decides —
 `DetailPanelTests` pins the absence so a handle quietly
-returning must re-argue it. Which
+returning must re-argue it. The detached card's close button
+is not that handle and the difference is one stored key wide:
+it is per-mount state, cleared on every navigation, so it
+answers "not on this screen, right now" rather than "this
+area has no preview" — an answer that outlived the window
+growing back past 1200 would leave a docked column the user
+could not explain. Which
 areas offer one is a single data set
 (`SettingsDetailPanelOffer.offering`), because the
 prototype's rule is a verdict either way: an area with
@@ -1937,6 +1950,50 @@ a big screen the CARDS grow instead of a fifth column
 appearing.
 Whether the panel should take some surplus at extreme widths
 is an open follow-up, not a decision this entry makes.
+
+**Narrow windows drop the preview before they drop a
+control.** (#678 turn 17a.) The window is the user's to make
+narrow — KiwiDesk floats its own Settings window by default,
+but nothing stops it being tiled, and a hand-drag reaches the
+same widths either way. So the question is not *whether*
+something gives but in what ORDER. Three
+things can: the preview's column (1200), the row layout
+(900), the header chrome (820) — in that order, and controls
+never. The order is the whole ruling. A preview is a
+convenience that repeats what the rows already say; a row's
+control is the only way to change anything, and a segmented
+control that wraps or a menu clipped to its chevron is worse
+than a preview you have to move. Below 720 the window stops
+resizing outright, because a settings window narrower than
+that is one where every row is two lines and nothing is
+comparable — a minimum size is a kinder answer than a layout
+nobody wants.
+
+Three consequences worth stating, because each was reachable
+another way and rejected:
+
+- **The preview loses its COLUMN, never its existence.** It
+  detaches into a card over the content — draggable, and
+  clamped so it always lands whole inside the window, since
+  a card dragged off a 720 pt edge has no scrollbar or menu
+  to bring it back. Between 900 and 1200 the card opens with
+  the screen; below 900 it waits behind "Show preview". One
+  card, two defaults — not two features — so that an area
+  offering a preview always has exactly one way to it.
+- **The reflow swaps the LAYOUT, not the view.** A row below
+  900 puts its label above its control, and it must stay the
+  same row while it does: tear the subtree down at the
+  breakpoint and an open menu closes, a focused field loses
+  focus, and the user dragging the window edge sees the app
+  flicker rather than reflow.
+- **The chrome step costs the TITLE, and only while
+  searching.** Below 820 the header's search field collapses
+  to its glyph; opening it takes the row from the area title,
+  because at that width the two cannot both have it and a
+  field squeezed to what is left is not a search field. The
+  title is back the moment the search closes, and that is the
+  whole extent of the cost. Nothing else in the header
+  yields, because everything else in it is a control.
 
 **An inline disclosure row leads with a thin rule.** (Owner
 2026-08-10: the App Bar's Style accordion was nearly

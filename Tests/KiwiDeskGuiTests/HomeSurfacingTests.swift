@@ -36,6 +36,21 @@ struct HomeSurfacingTests {
             // A link into a Power-User-only area switches the mode
             // before landing.
             "ensureModeAdmits(destination)selection=destination",
+            // The measured band is published ONCE, from the
+            // shell's own geometry: every responsive decision
+            // below reads it from the environment rather than
+            // measuring again.
+            "letwidth=SettingsWidthClass.of(width:geo.size.width)"
+                + "shell(width).environment(\\.settingsWidth,width)",
+            // Widening back into the docked band retires the
+            // card's per-mount answer — a one-line `onChange`
+            // whose deletion nothing else notices, and whose
+            // absence is what both docs would then describe
+            // wrongly (architecture review, 2026-08-11).
+            ".onChange(of:width){_,nowin"
+                + "ifnow.docksPanel{previewShown=nil}}",
+        ],
+        "Settings/SettingsView+Chrome.swift": [
             // The mode-reveal window reaches both panes (#760):
             // the environment mounts above the Home/detail
             // branch, from the model's one timeline.
@@ -46,10 +61,32 @@ struct HomeSurfacingTests {
             // footer 2026-08-09) —
             // an overlay, so it reserves no layout space, and
             // it re-centres on the content column while a
-            // panel is open.
-            ".overlay(alignment:.bottom){"
+            // panel is DOCKED. Below the row breakpoint the
+            // overlay is empty and the bar mounts as a
+            // sibling instead (17a): both halves are needled,
+            // because either one alone leaves a width band
+            // with no save affordance at all.
+            "x:panelDocked(width)?-SettingsTheme.panelWidth/2:0",
+            "ifwidth.docksSavePill{"
+                + "SettingsFooter(model:model,docked:true)}",
+            // The detached preview and its offer are drawn
+            // where the band decides them (17a) — needles
+            // through the overlay bodies, since a consult that
+            // mounts nothing leaves every narrow window with
+            // no preview and the whole suite green.
+            // ONE needle over both overlays IN SEQUENCE: the
+            // order is the fix (`.overlay` composes outward, so
+            // the card must be applied after the pill or the
+            // pill covers it and eats its grab bar's clicks),
+            // and two independent strings could not see a swap
+            // (guard-prover, 2026-08-11).
+            ".overlay(alignment:.bottomTrailing){"
+                + "showPreviewOffer(width)}"
+                + ".overlay(alignment:.bottom){"
+                + "if!width.docksSavePill{"
                 + "SettingsFooter(model:model)",
-            "x:panelVisible?-SettingsTheme.panelWidth/2:0",
+            ".overlay(alignment:.topTrailing){"
+                + "detachedPreview(width)}",
             // The search mode-switch notice DRAWS when set
             // (#678 4c) — needle through the branch body: a
             // consult that never mounts the strip would leave
@@ -62,14 +99,64 @@ struct HomeSurfacingTests {
             // and DRAWS the panel through it (#678 redesign
             // spec) — needle through the branch body, the
             // Monitors lesson.
-            "ifpanelVisible,letdestination=model.destination"
+            "ifpanelDocked(width),letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
                 + "SettingsDetailPanel("
         ],
+        "Settings/SettingsFloatingPanel.swift": [
+            // The gesture is declared in the view that takes
+            // the preview as an already-built child, never in
+            // the one that constructs it (gui.md ▸ responsive
+            // width). Moving `@GestureState` up is a one-line
+            // edit that reintroduces a per-frame rebuild of a
+            // draft diff and a schematic, and nothing but this
+            // needle would notice — the symptom is stutter
+            // under a pointer.
+            // ONE needle spanning the declaration and its
+            // owner, because the file-wide match this started
+            // as was satisfied by the property existing
+            // ANYWHERE in the file — including inside
+            // `SettingsFloatingPanel`, which is the violation
+            // (guard-prover, 2026-08-11: the mutation this
+            // comment describes stayed green).
+            "privatestructMovableCard<Content:View>:View{"
+                + "letbounds:CGSizeletclose:()->Void"
+                + "@Stateprivatevarmoved:CGSize=.zero"
+                + "@GestureStateprivatevardragging:CGSize=.zero"
+                + "@ViewBuilderletcontent:Content"
+        ],
+        "Settings/SettingsView+Preview.swift": [
+            // The card mounts through the band predicate, and
+            // its close is per-mount state — never a stored
+            // preference (`DetailPanelTests` owns that half).
+            "ifdetachedPreviewShown(width),"
+                + "letdestination=model.destination",
+            "close:{previewShown=false}",
+            // A new area gets a new card: without the key the
+            // structural position is identical across a
+            // destination change and the card's travel
+            // survives it.
+            ".id(destination)",
+            // The offer exists exactly where the card does
+            // not: 17a drops the preview's COLUMN, never the
+            // preview, so an area that has one always has a
+            // way to it. Both branches read the ONE form
+            // derivation, which is what makes "exactly one of
+            // three" provable at all.
+            "ifpreviewForm(width)==.offer{"
+                + "Button{previewShown=true}label:{"
+                + "showPreviewLabel}",
+            "guardpanelOfferedelse{returnnil}"
+                + "returnSettingsPreviewForm.at("
+                + "width,shown:previewShown)",
+        ],
         "Settings/SettingsFooter.swift": [
-            // The pill exists only while the draft does —
-            // grey-don't-hide's one exempted surface here.
-            "ifhasWork{pill"
+            // The bar exists only while the draft does —
+            // grey-don't-hide's one exempted surface here —
+            // and its two forms are one view (17a): same
+            // verbs, different physics.
+            "ifhasWork{bar",
+            "ifdocked{dockedBar}else{pill}",
         ],
         "Settings/SettingsFooter+Unsaved.swift": [
             // The count line is a BUTTON only while the draft
@@ -107,8 +194,22 @@ struct HomeSurfacingTests {
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home
-            // form the identity.
-            "ifletdestination{backChipText(destination.title)",
+            // form the identity — and below the chrome
+            // breakpoint both yield the row to the opened
+            // search field (17a), which is the one thing that
+            // step costs.
+            "ifletdestination{backChipif!titleYields{"
+                + "Text(destination.title)",
+            "elseif!titleYields{identity}",
+            "privatevartitleYields:Bool{"
+                + "width.collapsesChrome&&searchExpanded}",
+            // And the flag retires when the window leaves the
+            // collapsed band, so a narrowing window does not
+            // re-enter it with the field already open and the
+            // title yielded to nobody. One line, no other net
+            // (architecture review, 2026-08-11).
+            ".onChange(of:width){_,nowin"
+                + "if!now.collapsesChrome{searchExpanded=false}}",
             // The segment is the one EXPLICIT flip — the entry
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.
@@ -128,6 +229,24 @@ struct HomeSurfacingTests {
             // focus re-opens stale suggestions after every
             // push/pop (owner 2026-08-10).
             ".id(destination)",
+        ],
+        "Settings/HeaderSearch.swift": [
+            // The collapsed entry is a BRANCH in the body, and
+            // the only thing standing between a 720 pt window
+            // and a clipped control — needle through both
+            // arms, since either one deleted leaves a band
+            // with no search at all.
+            "ifcollapsed{collapsedEntry}else{fieldEntry}",
+            "privatevarcollapsed:Bool{"
+                + "width.collapsesChrome&&!expanded}",
+            // Opening focuses in the same act — one hop later,
+            // because the field does not exist in the update
+            // that opens it and a same-update focus write is
+            // dropped — and ⌘K reaches the collapsed entry
+            // rather than a field that is not on screen.
+            "expanded=trueTask{@MainActorinfocused=true}",
+            "Button(\"\",action:open)"
+                + ".keyboardShortcut(\"k\",modifiers:.command)",
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.

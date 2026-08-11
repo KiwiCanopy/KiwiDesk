@@ -153,6 +153,15 @@ struct DetailPanelTests {
     /// persisted preference duplicating what the window
     /// decides. This pin keeps the removal a decision — a
     /// collapse quietly returning must re-argue it here.
+    ///
+    /// 17a's detached card does NOT re-open that question, and
+    /// the line between them is worth stating because it is
+    /// one `UserDefaults` key wide: the card's close is
+    /// per-mount `@State` cleared on every destination change,
+    /// so it answers "not on this screen, right now" and never
+    /// "this area has no preview". A stored answer would
+    /// survive the window growing back past 1200 and leave a
+    /// docked column the user could not explain.
     @Test("the panel has no manual collapse")
     func noManualCollapse() throws {
         let source = try panelSource()
@@ -161,6 +170,20 @@ struct DetailPanelTests {
             "Sources/KiwiDesk/Settings/SettingsView.swift"
         )
         #expect(!shell.contains("panel_collapsed"))
+        #expect(shell.contains("@StatevarpreviewShown:Bool?"))
+        #expect(
+            shell.contains(
+                ".onChange(of:model.destination){_,_in"
+                    + "previewShown=nil}"
+            )
+        )
+        // The card's answer never reaches the preferences seam
+        // — the one route anything in this shell persists by.
+        let preview = try squashed(
+            "Sources/KiwiDesk/Settings/SettingsView+Preview.swift"
+        )
+        #expect(!preview.contains("preferences"))
+        #expect(!preview.contains("UserDefaults"))
     }
 
     /// The in-card mounts the panel replaced stay replaced —

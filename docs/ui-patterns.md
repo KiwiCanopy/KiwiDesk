@@ -646,6 +646,17 @@ the migration removed (`DetailPanelTests` holds the offer set
 and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
+**The panel keeps its column only above 1200 pt** (turn 17a).
+Between 900 and 1200 it detaches into a card floating over
+the content — draggable by its grab bar, closable, and always
+landing whole inside the window; below 900 the same card
+waits behind a "Show preview" button. So an area that offers
+a preview always has exactly one way to it at every width,
+and the pill's centring offset answers to the docked form
+alone. The card's close is per-mount, never a stored
+preference: navigating clears the answer, and above 1200 the
+panel takes its column back whatever the answer was.
+
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
 (`LayoutSchematicKit` / `LayoutSchematicCanvas` hold the shared
@@ -880,7 +891,8 @@ zero.** Save and Revert live in a dark pill floating over the
 content column — the unsaved count with the edit target's name
 ("3 unsaved changes to Desk"), then **Revert**, **Save a
 copy…** and **Save** — shown only while there is something to
-act on, and offset left of an open detail panel. The count line
+act on, and offset left of a panel holding its own column.
+The count line
 is the draft list's opener: while the draft has attributed
 rows, clicking it pops the old → new change list, each row a
 jump to the control that changed — the one such count in the
@@ -890,7 +902,23 @@ not an inapplicable control whose stored value greying would
 preserve, it is the narration of a draft, and with no draft it
 has no subject. `GreyOutHidingTests` carries the exemption;
 the ruling is in `docs/design-decisions.md` ▸ the floating
-pill.
+pill. Below 900 pt the same three verbs and the same count
+dock into a full-width bar at the foot of the window (turn
+17a) — one view, two containers, because at that width the
+floating form covers the rows it is about. The vanishing rule
+crosses with it: no draft, no bar.
+
+**Rows go two-line below 900 pt.** A labelled row's control
+normally hangs off the shared 210 pt label axis; below the row
+breakpoint the label moves above it and the control starts at
+the row's leading edge with the whole width in front of it,
+every row in the window at once, so the alignment that makes a
+section scannable is traded whole rather than per-row. Nothing
+is removed and nothing shrinks — that is the point of trading
+the axis instead. Home's card grid steps
+4 · 3 · 2 on the same thresholds, and below 820 the header's
+search field collapses to its glyph, opening in place when
+clicked or with ⌘K.
 
 **A revealed target gets a transient wash, never a ring.** When
 search (or any later cross-reference) sends the user to a

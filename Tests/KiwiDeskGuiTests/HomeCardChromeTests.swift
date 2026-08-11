@@ -140,10 +140,19 @@ struct HomeCardChromeTests {
     /// The grid the two heights live in: the 240–360 column
     /// band the plates were eye-confirmed at (ui-designer
     /// 2026-08-10 kept 360 as the ceiling when the four-column
-    /// cap landed), the four-column cap itself, and the
+    /// cap landed), the per-band cap, and the
     /// saturated grid centring — the width
     /// `MonitorArrangementFitTests`' card canvas is derived
     /// from the band's floor.
+    ///
+    /// The cap became the BAND's in #678 turn 17a, so this
+    /// pins the two-source form — measurement AND ceiling,
+    /// whichever is smaller. The ceiling's own values are
+    /// `SettingsResponsiveOrderTests`' (they are arithmetic
+    /// over the class, not chrome), and 4 is still the top of
+    /// them, which is why this suite keeps the needle at all:
+    /// a `min` dropped here would let a fifth column appear on
+    /// a wide screen with that suite green.
     @Test("the grid keeps its column band")
     func gridKeepsItsBand() throws {
         let source = try squashed("HomeScreen.swift")
@@ -153,7 +162,12 @@ struct HomeCardChromeTests {
                     + "spacing:16)"
             )
         )
-        #expect(source.contains("letcount=max(1,min(4,fit))"))
+        #expect(
+            source.contains(
+                "letcount=max(1,min(band.homeColumnCap,fit))"
+            )
+        )
+        #expect(SettingsWidthClass.wide.homeColumnCap == 4)
         #expect(
             source.contains(
                 ".frame(maxWidth:gridCap)"
