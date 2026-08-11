@@ -8,9 +8,8 @@ import SwiftUI
 /// members it touches are `internal` there for the same reason.
 extension AppDelegate {
     /// The QUICK MENU's "fix Accessibility" route: reopen the
-    /// onboarding wizard straight at its grant step (skipping the
-    /// welcome copy), which explains what the permission is for
-    /// and waits for it.
+    /// tour at its grant step, which explains what the permission
+    /// is for and waits for it.
     ///
     /// The Settings banner deliberately does NOT come through
     /// here any more (#678 Phase 4 pass 9) — it opens the macOS
@@ -21,6 +20,18 @@ extension AppDelegate {
     func showAccessibilityHelp() {
         onboardingModel.step = .grant
         showOnboarding()
+    }
+
+    /// Where a replay of the tour opens.
+    ///
+    /// The grant step, only while the permission is still
+    /// missing. With `.welcome` deleted (#678 Phase 4 pass 11)
+    /// the grant step became the tour's first screen — so a
+    /// trusted user replaying the tour would otherwise open on a
+    /// permission screen reading "Permission granted", which is
+    /// the one entry point where nothing is being fixed.
+    private var replayEntryStep: OnboardingModel.Step {
+        permissions.isTrusted ? .spaces : .grant
     }
 
     /// Shows a profile's file in the Finder — the ONE
@@ -39,11 +50,12 @@ extension AppDelegate {
     }
 
     /// The tour's one VOLUNTARY entry point — Home's "Show me
-    /// around" (turn 14c). Resets to the welcome step so a
-    /// replay starts at the top, where the involuntary callers
-    /// land on the step their trigger needs.
+    /// around" (turn 14c). Starts at the top, where the
+    /// involuntary callers land on the step their trigger needs —
+    /// with the top being whichever screen still has something to
+    /// say (`replayEntryStep`).
     func replayOnboardingTour() {
-        onboardingModel.step = .welcome
+        onboardingModel.step = replayEntryStep
         showOnboarding()
     }
 
@@ -68,10 +80,6 @@ extension AppDelegate {
         onboardingModel.onShowShortcuts = { [weak self] in
             self?.shortcutsPanel?.toggle()
         }
-        onboardingModel.shortcutGlyphs = { [weak self] in
-            guard let core = self?.core else { return "⌃⌥K" }
-            return ShortcutsOpenBinding.comboGlyphs(core: core) ?? "⌃⌥K"
-        }
         // The closing card's "open at login" checkbox registers the
         // app as a login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
@@ -85,6 +93,21 @@ extension AppDelegate {
         }
         onboardingModel.onExploreSettings = { [weak self] in
             self?.openSettingsFromOnboarding()
+        }
+        // The spaces step draws the setup that was actually
+        // seeded, from live state — never a description of it.
+        onboardingModel.starterSpaces = { [weak self] in
+            self?.starterSpaceCards() ?? []
+        }
+        onboardingModel.tilingSettings = { [weak self] in
+            self?.core.tiler.settings ?? TilingSettings()
+        }
+        onboardingModel.screenNames = { [weak self] in
+            self?.core.state.workspaces.allDisplays.map(\.name)
+                ?? []
+        }
+        onboardingModel.keyFamilies = { [weak self] in
+            self?.onboardingKeyFamilies() ?? []
         }
 
         let window = NSWindow(
@@ -181,14 +204,63 @@ extension AppDelegate {
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
-        if onboardingModel.step == .discoverShortcuts
-            || onboardingModel.step == .readyToExplore
-        {
+        // Keyed on the MODEL's own "did this tour reach its end",
+        // never on a list of terminal step cases (#678 Phase 4
+        // pass 11). The case list was a second copy of the flow's
+        // shape, and reordering the steps would have silently
+        // killed both effects below with every test still green.
+        if onboardingModel.reachedEnd {
             OnboardingDiscovery.markShown()
-            // The tour reached its closing beats, so Home's
-            // 14c banner goes pending — the next Settings
+            // Home's 14c banner goes pending — the next Settings
             // visit opens oriented, not empty (turn 14c).
             HomeFirstRunState.seed(.standard)
+            showMenuBarCoachMark()
+        }
+    }
+
+    /// Points the one-time coach mark at the real menu-bar item.
+    /// Skips itself when it cannot be honest — see
+    /// `MenuBarCoachMark`, which owns both conditions.
+    private func showMenuBarCoachMark() {
+        coachMark.show(under: statusItem?.anchorButton)
+    }
+
+    /// The live default layer's chord families, for the keys step.
+    private func onboardingKeyFamilies() -> [OnboardingKeyFamily] {
+        guard
+            let layer = core.loadGuiConfig().layers.first(
+                where: { $0.isDefault }
+            )
+        else { return [] }
+        return OnboardingKeys.families(
+            layer: layer,
+            spaces: SpaceID.deduplicated(
+                core.state.workspaces.allSpaces.map(\.id)
+            )
+        )
+    }
+
+    /// The seeded spaces as the tour draws them, from LIVE state
+    /// rather than from `StarterSetup` re-derived here: a replay
+    /// after the user has renamed a space or changed a layout
+    /// must show what they have, not what they were given.
+    private func starterSpaceCards() -> [OnboardingSpaceCard] {
+        let workspaces = core.state.workspaces
+        return workspaces.allSpaces.map { space in
+            OnboardingSpaceCard(
+                id: space.id.raw,
+                mode: space.mode,
+                screen: workspaces.display(of: space.id)
+                    .flatMap { id in
+                        workspaces.allDisplays.first {
+                            $0.id == id
+                        }?.name
+                    }
+                    ?? L(
+                        "onboarding.starter_spaces.main_screen",
+                        "Main screen"
+                    )
+            )
         }
     }
 }

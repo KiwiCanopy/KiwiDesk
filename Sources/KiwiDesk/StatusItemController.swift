@@ -97,6 +97,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         render()
     }
 
+    /// The live button, for a surface that must point AT the menu
+    /// bar item rather than drive it — the one-time coach mark
+    /// (#678 Phase 4 pass 11). Read-only and nil behind the test
+    /// seam, which is what makes "there is nothing to point at"
+    /// the same answer as "there is no real item".
+    var anchorButton: NSStatusBarButton? { item.button }
+
     private func render() {
         guard let button = item.button else { return }
         if warning {
