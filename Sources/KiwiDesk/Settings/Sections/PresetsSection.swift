@@ -91,7 +91,9 @@ struct PresetsSection: View {
         } else {
             SettingsGroupHeader(liveHeading)
                 .padding(.top, 4)
-            ForEach(presets, id: \.name) { presetRow($0) }
+            ForEach(presets, id: \.name) {
+                presetRow($0, sizes: liveSizes)
+            }
         }
     }
 
@@ -168,13 +170,17 @@ struct PresetsSection: View {
         ForEach(
             others.filter { $0.screenCount == count },
             id: \.name
-        ) { presetRow($0) }
+        ) { presetRow($0, sizes: nil) }
     }
 
     // MARK: - Rows
 
+    /// `sizes` is the live screen list for an APPLIABLE card and
+    /// nil for the drawer — the card resolves its glyph against
+    /// the same hardware the apply path will.
     private func presetRow(
-        _ layout: StandardLayout
+        _ layout: StandardLayout,
+        sizes: [CGSize]?
     ) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
@@ -193,7 +199,7 @@ struct PresetsSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                PresetScreenCard(layout: layout)
+                PresetScreenCard(layout: layout, liveSizes: sizes)
             }
             Spacer()
             applyButton(layout)

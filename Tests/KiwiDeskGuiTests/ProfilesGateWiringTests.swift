@@ -113,6 +113,20 @@ struct ProfilesGateWiringTests {
             "Sections/PresetsSection.swift": [
                 "ProfilesFamilyRows.presets(forScreens:",
                 "ProfilesFamilyRows.presets(excludingScreens:",
+                // The APPLIABLE cards get the live screens; the
+                // drawer gets nil. A card resolving an unlisted
+                // mode without the hardware names a layout Apply
+                // will not produce, and every assertion over the
+                // types passes because both sides are then handed
+                // the same shape by the test (code review,
+                // 2026-08-11).
+                "presetRow($0,sizes:liveSizes)",
+                "presetRow($0,sizes:nil)",
+            ],
+            "Components/Profiles/PresetScreenCard.swift": [
+                // …and the card must actually spend it.
+                "on:shape(of:screen)",
+                "ScreenClass.of(liveSizes[screen])",
             ],
         ]
         for (name, needles) in consults {

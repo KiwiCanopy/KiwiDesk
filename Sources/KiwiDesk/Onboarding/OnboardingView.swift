@@ -108,8 +108,6 @@ final class OnboardingModel {
     /// The live tuning the schematics draw, so the picture on day
     /// one is the picture Settings shows.
     var tilingSettings: () -> TilingSettings = { TilingSettings() }
-    /// Connected screens, named as the Monitors area names them.
-    var screenNames: () -> [String] = { [] }
     /// The chord families the keys step teaches, read from the
     /// live layer.
     var keyFamilies: () -> [OnboardingKeyFamily] = { [] }

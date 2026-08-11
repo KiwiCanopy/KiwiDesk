@@ -115,8 +115,8 @@ public enum StarterSetup {
     /// spaces are omitted (unlisted ⇒ main), so only the second
     /// display's block onward is named.
     ///
-    /// Unlike the setup's, this map cannot be re-derived from a
-    /// space id by arithmetic — the blocks are no longer equal, so
+    /// Unlike the retired ladder's, this map cannot be re-derived
+    /// from a space id by arithmetic — the blocks are no longer equal, so
     /// there is no `(n - 1) / 5`. Anything needing a space's
     /// screen reads this map.
     public static func spaceScreens(

@@ -247,12 +247,6 @@ public enum DefaultKeybindings {
         return rows
     }
 
-    /// The first ten spaces paired with the digit key each
-    /// per-space combo uses: positions 1…9 map to `"1"`…`"9"`, and
-    /// the tenth to `"0"` (⌃⌥0 = space 10, the top-row order). Ten
-    /// is the hard cap — the number row has no eleventh digit — so
-    /// spaces past the tenth ship unbound by default (#466);
-    /// they stay bindable in the Keybindings editor.
     /// How many spaces can carry a default digit shortcut: the
     /// number row, `1`…`9` then `0`. Public because it is the
     /// reason the starter setup's own budget stops where it does
@@ -261,6 +255,12 @@ public enum DefaultKeybindings {
     /// constant rather than a derived one.
     public static let digitCapacity = 10
 
+    /// The first ten spaces paired with the digit key each
+    /// per-space combo uses: positions 1…9 map to `"1"`…`"9"`, and
+    /// the tenth to `"0"` (⌃⌥0 = space 10, the top-row order). Ten
+    /// is the hard cap — the number row has no eleventh digit — so
+    /// spaces past the tenth ship unbound by default (#466);
+    /// they stay bindable in the Keybindings editor.
     private static func numbered(
         _ spaces: [SpaceID]
     ) -> [(String, SpaceID)] {

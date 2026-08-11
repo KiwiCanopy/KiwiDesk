@@ -141,6 +141,11 @@ enum OnboardingKeys {
     /// `⌃⌥ 1–5`: the shared modifiers, then the first and last
     /// bound digit. A single space renders as one digit, never a
     /// range of one.
+    ///
+    /// A keymap that cannot be written as a range falls back the
+    /// way the arrows path already does — `collapsed` first, so
+    /// ten spaces render `⌃⌥ 1 2 4 5 …` rather than ten full
+    /// chords stacked in a 520 pt window.
     private static func digits(
         layer: KeyLayer,
         command: String,
@@ -180,7 +185,7 @@ enum OnboardingKeys {
         // invariant forbids (guard-prover, 2026-08-11).
         guard sameModifiers(combos),
             let run = contiguousDigits(combos)
-        else { return listed(combos) ?? head }
+        else { return collapsed(combos) ?? listed(combos) ?? head }
         return modifiers + " " + run.first + "–" + run.last
     }
 

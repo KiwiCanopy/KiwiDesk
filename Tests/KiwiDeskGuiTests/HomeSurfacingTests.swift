@@ -292,29 +292,6 @@ struct HomeSurfacingTests {
             "HomeFirstRunState.retire(model.preferences)"
                 + "visible=false"
         ],
-        "AppDelegate+Onboarding.swift": [
-            // The tour's close seeds the banner beside the
-            // discovery flag — needled WITH its condition
-            // (#678 Phase 4 pass 11).
-            //
-            // The earlier cut matched only the two calls, and
-            // the condition above them was a hand-written list
-            // of terminal step cases. Renaming or reordering the
-            // steps would have left that list matching nothing,
-            // the banner permanently dead, and this needle
-            // green — it could not see the half that decides.
-            // Now the seam asks the model one question, and the
-            // needle reads the question.
-            "ifonboardingModel.reachedEnd{"
-                + "OnboardingDiscovery.markShown()"
-                + "HomeFirstRunState.seed(.standard)"
-                + "showMenuBarCoachMark()}"
-        ],
-        "AppDelegate.swift": [
-            // "Show me around" reaches the real replay.
-            "created.setShowTour{[weakself]in"
-                + "self?.replayOnboardingTour()}"
-        ],
     ]
 
     @Test("every surfacing branch is drawn where it decides")

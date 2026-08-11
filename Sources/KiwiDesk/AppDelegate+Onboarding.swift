@@ -89,10 +89,6 @@ extension AppDelegate {
         onboardingModel.tilingSettings = { [weak self] in
             self?.core.tiler.settings ?? TilingSettings()
         }
-        onboardingModel.screenNames = { [weak self] in
-            self?.core.state.workspaces.allDisplays.map(\.name)
-                ?? []
-        }
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
