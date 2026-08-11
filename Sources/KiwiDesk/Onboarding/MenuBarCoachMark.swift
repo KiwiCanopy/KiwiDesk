@@ -33,15 +33,37 @@ final class MenuBarCoachMark {
 
     /// Whether the mark can point at something the user can see.
     ///
-    /// Two ways it cannot, and both are ordinary configurations
-    /// rather than failures: the menu bar auto-hides, or the item
-    /// has no on-screen button — which is what a menu-bar manager
-    /// parking it off the visible strip looks like from here.
+    /// **The rule, stated over facts rather than over AppKit**, so
+    /// the owner's ruling is assertable: the mark is built, and it
+    /// skips itself when it would point at nothing. Three ways it
+    /// would, and all three are ordinary configurations rather
+    /// than failures:
+    ///
+    /// - the menu bar auto-hides, which is the defect #331 retired
+    ///   a timed popover for and which a coach mark inherits
+    ///   whole;
+    /// - the item has no button at all — no real status item, as
+    ///   behind the test seam;
+    /// - the button's window sits outside its screen, which is
+    ///   what a menu-bar manager parking the item off the visible
+    ///   strip looks like from here.
+    static func canPoint(
+        menuBarAutoHides: Bool,
+        button: CGRect?,
+        screen: CGRect?
+    ) -> Bool {
+        guard !menuBarAutoHides else { return false }
+        guard let button, let screen else { return false }
+        return screen.intersects(button)
+    }
+
+    /// The live face of the rule above.
     static func canPoint(at button: NSStatusBarButton?) -> Bool {
-        guard !GeometryUtils.menuBarAutoHides else { return false }
-        guard let window = button?.window else { return false }
-        guard let screen = window.screen else { return false }
-        return screen.frame.intersects(window.frame)
+        canPoint(
+            menuBarAutoHides: GeometryUtils.menuBarAutoHides,
+            button: button?.window?.frame,
+            screen: button?.window?.screen?.frame
+        )
     }
 
     /// Shows the mark under `button`, or does nothing at all —

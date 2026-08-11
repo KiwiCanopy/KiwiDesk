@@ -22,18 +22,6 @@ extension AppDelegate {
         showOnboarding()
     }
 
-    /// Where a replay of the tour opens.
-    ///
-    /// The grant step, only while the permission is still
-    /// missing. With `.welcome` deleted (#678 Phase 4 pass 11)
-    /// the grant step became the tour's first screen — so a
-    /// trusted user replaying the tour would otherwise open on a
-    /// permission screen reading "Permission granted", which is
-    /// the one entry point where nothing is being fixed.
-    private var replayEntryStep: OnboardingModel.Step {
-        permissions.isTrusted ? .spaces : .grant
-    }
-
     /// Shows a profile's file in the Finder — the ONE
     /// implementation, handed to both surfaces that offer it: the
     /// Config Issues panel row and the broken-profile row under
@@ -55,7 +43,9 @@ extension AppDelegate {
     /// with the top being whichever screen still has something to
     /// say (`replayEntryStep`).
     func replayOnboardingTour() {
-        onboardingModel.step = replayEntryStep
+        onboardingModel.step = OnboardingEntry.replayStep(
+            isTrusted: permissions.isTrusted
+        )
         showOnboarding()
     }
 

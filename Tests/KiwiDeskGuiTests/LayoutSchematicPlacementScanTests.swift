@@ -17,19 +17,34 @@ import Testing
 /// and it is the only thing that can.
 @Suite("Layout preview placement rule ownership")
 struct LayoutSchematicPlacementScanTests {
+    /// Every directory that draws a schematic.
+    ///
+    /// The Onboarding tree joined in #678 Phase 4 pass 11, when
+    /// the tour's spaces step began rendering the real
+    /// `LayoutSchematicView` — a scan pointed only at the Settings
+    /// components would not see a bespoke schematic written
+    /// alongside it, which is precisely the "a schematic written
+    /// tomorrow" case this suite exists for. A tree that imports
+    /// the family joins this list in the same change.
+    private static var roots: [URL] {
+        let repo = SourceScan.repoRoot(from: #filePath)
+        return [
+            "Sources/KiwiDesk/Settings/Components/Layouts",
+            "Sources/KiwiDesk/Onboarding",
+        ].map { repo.appendingPathComponent($0) }
+    }
+
     /// `PlacementPicker` is the one file that may name a relative
     /// placement, and only to *offer* the choice — pinned to its
     /// `.tag` lines rather than exempted wholesale, since a
     /// file-level exemption would let a copy move in beside them.
     @Test("the placement rule lives in exactly one place")
     func theRuleIsNotCopied() throws {
-        let dir = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Layouts"
-            )
         var checked = 0
         var sawPicker = false
-        for file in try SourceScan.swiftSources(under: dir) {
+        for file in try Self.roots.flatMap({
+            try SourceScan.swiftSources(under: $0)
+        }) {
             let name = file.lastPathComponent
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
@@ -68,7 +83,27 @@ struct LayoutSchematicPlacementScanTests {
                 #expect(line.contains(".tag(SpawnPlacement."))
             }
         }
-        try schematicsConsumePlacementOnlyByPassingItOn(under: dir)
+        var seen = 0
+        var read = 0
+        for root in Self.roots {
+            let counted =
+                try schematicsConsumePlacementOnlyByPassingItOn(
+                    under: root
+                )
+            seen += counted.seen
+            read += counted.read
+        }
+        // Enumerating files proves nothing about having read
+        // them: if `stripComments` or the needle stops matching,
+        // zero lines are examined and the sweep passes for having
+        // found no violations. Every placement-taking schematic
+        // declares the value, so the floor is one line each.
+        //
+        // Counted over ALL roots rather than per root, since a
+        // root may legitimately draw schematics without defining
+        // any — which is what the Onboarding tree does.
+        #expect(seen > LayoutMode.placementTabs.count)
+        #expect(read >= placementTakingSchematics)
         // A scan that read nothing passes for having found no
         // violations — the file enumerator yields an empty
         // sequence for a missing directory rather than throwing,
@@ -77,6 +112,21 @@ struct LayoutSchematicPlacementScanTests {
         // directory holds their editors and helpers besides.
         #expect(checked > LayoutMode.placementTabs.count)
         #expect(sawPicker)
+        // Each root has to have been READ, or widening the list
+        // buys nothing: one missing directory is invisible in the
+        // total above, which the Layouts tree alone satisfies.
+        for root in Self.roots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue:
+                        "\(root.lastPathComponent) yielded no "
+                        + "Swift files — the scan root moved and "
+                        + "this guard went quiet"
+                )
+            )
+        }
     }
 
     /// Naming the two cases is only the *obvious* way to copy the
@@ -104,7 +154,7 @@ struct LayoutSchematicPlacementScanTests {
     ///   matches `Schematic` anywhere in the stem.
     private func schematicsConsumePlacementOnlyByPassingItOn(
         under dir: URL
-    ) throws {
+    ) throws -> (seen: Int, read: Int) {
         let allowed = [
             "let placement: SpawnPlacement",
             ".animation(LayoutSchematic.damping, value: placement)",
@@ -161,13 +211,7 @@ struct LayoutSchematicPlacementScanTests {
                 )
             }
         }
-        // Enumerating files proves nothing about having read
-        // them: if `stripComments` or the needle stops matching,
-        // zero lines are examined and this passes for having
-        // found no violations. Every placement-taking schematic
-        // declares the value, so the floor is one line each.
-        #expect(seen > LayoutMode.placementTabs.count)
-        #expect(read >= placementTakingSchematics)
+        return (seen, read)
     }
 
     /// BSP, Stack, Grid, Track and Scrolling take a placement;
