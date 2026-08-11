@@ -32,12 +32,15 @@ extension OverrideChrome {
         Toggle("", isOn: isOn)
             .labelsHidden()
             .toggleStyle(.checkbox)
-            // The column header's OWN key, not a twin of it: this
-            // checkbox sits under `SpaceOverrideRows`' visible
-            // "Override" header, so a second key would hand ten
-            // translators the same bare word with no context and
-            // let VoiceOver announce a noun the header doesn't
-            // show (localization audit, 2026-08-11).
+            // The column header's OWN key, not a twin of it: a
+            // second key would hand ten translators the same bare
+            // word with no context and let VoiceOver announce a
+            // noun the header doesn't show (localization audit,
+            // 2026-08-11). What makes the reuse legal is that
+            // this chrome has ONE consumer, argued on
+            // `OverridePickerRow` in `AppBarOverrideControls` —
+            // so the header above it is always the one this key
+            // names.
             .accessibilityLabel(
                 L("space_override.override_column", "Override")
             )
@@ -55,11 +58,11 @@ extension OverrideChrome {
     var overrideStateSentence: String {
         isOn.wrappedValue
             ? L(
-                "app_bar.override.on.help",
+                "space_override.on.help",
                 "Overriding the global value"
             )
             : L(
-                "app_bar.override.off.help",
+                "space_override.off.help",
                 "Inheriting the global value"
             )
     }

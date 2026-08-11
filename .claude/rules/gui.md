@@ -668,8 +668,10 @@ on:
 - **A destination has to be able to HOLD focus, which is not
   what "always drawn" means.** macOS gates keyboard focus for
   everything except text fields and lists behind System
-  Settings ▸ Keyboard ▸ Keyboard navigation, which is OFF by
-  default and which no app may set for the user. So a pop-up
+  Settings ▸ Keyboard ▸ Keyboard navigation, which no app may
+  set for the user and which was OFF by default as observed on
+  macOS 26.6.1, 2026-08-11 — check it again rather than trusting
+  this sentence, the default having moved across releases before. So a pop-up
   menu, a checkbox or a button accepts a `@FocusState`
   assignment only on a machine that has turned it on; where it
   has not, the assignment lands nowhere and focus falls to the
@@ -694,8 +696,12 @@ on:
   The shell states two of these itself (push focuses the back
   chip, return restores `nav.homeReturnFocus`); a sub-view the
   shell cannot see states its own. Owed and NOT yet done:
-  deleting a rule, a profile, a layer or a palette still drops
-  focus to the top.
+  deleting a rule, a profile, a layer or a palette names no
+  destination at all, so it drops focus to the top however the
+  machine is configured (#816). Deleting a space names one —
+  which by the bullet above is a different claim from focus
+  arriving there, and on a machine without keyboard navigation
+  the two outcomes look identical.
 
 ## Colour (#678 turn 16b)
 

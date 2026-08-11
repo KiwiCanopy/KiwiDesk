@@ -126,77 +126,6 @@ struct ApplicationsGroup: View {
         )
     }
 
-    func appMenu(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        AppPickerButton(
-            placeholder: L(
-                "shortcuts.choose_app",
-                "Choose app…"
-            ),
-            selection: binding.wrappedValue.label.isEmpty
-                ? nil
-                : binding.wrappedValue.label,
-            onPick: { assign(binding, app: $0) },
-            escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
-            onEscape: {
-                if let app = pickBundleFromPanel() {
-                    assign(binding, app: app)
-                }
-            },
-            // Drop apps every behavior of which is already bound on
-            // *other* rows — re-picking to one could only duplicate
-            // (this row excluded, so its own app stays pickable).
-            exclude: fullyBoundBundleIDs(
-                excluding: binding.wrappedValue.id
-            )
-        )
-        // Hug the content: the row's `Spacer()` pins the recorder
-        // to the trailing edge, so the picker's width doesn't gate
-        // recorder alignment — no fixed column needed.
-        .fixedSize()
-    }
-
-    private func assign(
-        _ binding: Binding<KeyBinding>,
-        app: KeybindingCatalog.InstalledApp
-    ) {
-        let id = binding.wrappedValue.id
-        // Decline a re-pick onto an app every behavior of which is
-        // already bound on *other* rows — any assignment would
-        // duplicate. The picker hides these, but the "Other…"
-        // escape bypasses that list, so guard at this choke point
-        // (mirrors the add-row's `addApplication` bail — #334
-        // review).
-        let taken = KeybindingCatalog.takenBehaviors(
-            for: app.bundleID,
-            in: bindings,
-            excluding: id
-        )
-        guard taken.count < AppLaunchBehavior.allCases.count else {
-            return
-        }
-        // Keep the row's launch behavior across a re-pick when it's
-        // still free for the new app, else take the first free one —
-        // so a re-pick can't silently collide with another row's
-        // app+behavior.
-        let current =
-            KeybindingCatalog.appLaunchBehavior(
-                from: binding.wrappedValue.lua
-            ) ?? .openOrFocus
-        let behavior = KeybindingCatalog.behaviorForAssignment(
-            to: app.bundleID,
-            preferred: current,
-            in: bindings,
-            excluding: id
-        )
-        binding.wrappedValue.label = app.name
-        binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            app.bundleID,
-            behavior: behavior
-        )
-    }
-
     /// The "Other…" escape hatch: pick any app bundle by file,
     /// returning it as an `InstalledApp` (nil on cancel). Shared
     /// by the per-row re-pick and the add-row (in `+AddRow`).
@@ -221,8 +150,8 @@ struct ApplicationsGroup: View {
         )
     }
 
-    /// Deleting a row must unregister its hotkey, exactly as
-    /// `onClear` does above (#517). Without this the row
+    /// Deleting a row must unregister its hotkey, exactly as the
+    /// recorder's `onClear` in `+Row` does (#517). Without this the row
     /// vanishes while its shortcut keeps firing until Save or
     /// Revert — `liveApplyRecorded` rebuilds the running table
     /// from its own session copy, which never saw the removal.

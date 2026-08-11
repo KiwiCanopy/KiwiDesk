@@ -114,7 +114,7 @@ struct OverrideChrome<Content: View>: View {
                     // disabled control and no reason at all.
                     .accessibilityHint(
                         L(
-                            "app_bar.override.off.help",
+                            "space_override.off.help",
                             "Inheriting the global value"
                         )
                     )

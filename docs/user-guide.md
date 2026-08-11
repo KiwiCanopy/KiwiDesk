@@ -171,7 +171,7 @@ the short form didn't explain enough.
 
 ### Using Settings from the Keyboard
 
-Settings is built to be driven without a mouse, but macOS gates
+Settings is built to be driven from the keyboard, but macOS gates
 that on a system setting KiwiDesk cannot turn on for you. Out of
 the box, **Tab reaches text fields and lists only** — pop-up
 menus, checkboxes, and buttons are skipped. Turn on **System
@@ -188,6 +188,14 @@ takes focus.
 
 VoiceOver is not affected — it navigates every control either
 way, because its cursor is its own.
+
+One gap stays open even with keyboard navigation on: where a row
+carries extra moves behind a right-click (renaming a palette,
+exporting it, deleting it), those moves are offered to VoiceOver
+as actions but have no plain-keyboard route, macOS having no
+standard key that opens a focused control's contextual menu. A
+visible ⋯ button per row was weighed and turned down as clutter.
+Use the right-click menu, or VoiceOver's actions rotor.
 
 ### Permission & First Run
 

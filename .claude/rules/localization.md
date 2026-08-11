@@ -29,6 +29,19 @@ through the `L(key, english, args...)` overload with **positional**
 translation can't reorder pieces stitched together in Swift, and
 many languages need to.
 
+A key joins `common.` only when the same ENGLISH names the same
+ACTION at every call site, **checked at each site rather than
+inferred from the two values being byte-identical**. Identical
+English is the symptom that prompts the look; two surfaces
+happening to say "Open" is not one key. Where the test passes,
+merge with `scripts/rename-key` — one key cannot disagree with
+itself across ten locales, and a twin can, silently, at the next
+round that touches one of them. Where it fails, an area-owned
+key in each namespace is correct even when the two read alike.
+Say in the merge which call sites you verified: nothing can
+re-derive that they route to the same behavior, and `common.`
+is one careless merge away from being a drawer.
+
 The GUI language pick persists in `UserDefaults`
 (`LocalizationPreference`), never `gui.json` — it is documented as
 side-effect-free and must never create a sidecar or flip
