@@ -71,10 +71,16 @@ public enum ProfileComposition {
             // through its accessors, so the Settings preset card
             // cannot answer them differently
             // (`StandardLayout+Screens`).
-            modes[space] = layout.mode(of: space)
+            // Screen FIRST, so an unlisted mode can be answered
+            // by the display the space actually lands on rather
+            // than by a fixed `bsp` (owner ruling, 2026-08-11).
             let position = layout.screen(
                 of: space,
                 screens: ordered.count
+            )
+            modes[space] = layout.mode(
+                of: space,
+                on: ScreenClass.of(ordered[position])
             )
             assignment[space] = ordered[position].id
         }

@@ -76,6 +76,14 @@ final class OnboardingModel {
     /// first-run banner permanently dead.
     private(set) var reachedEnd = false
 
+    /// Consumed by the close seam, so the flag scopes to ONE
+    /// presentation of the tour rather than to the model, which
+    /// is a stored property on the delegate and outlives every
+    /// window it ever fills.
+    func clearReachedEnd() {
+        reachedEnd = false
+    }
+
     /// Registers/unregisters the login item to match `openAtLogin`.
     /// Wired to `LoginItemManager`; a no-op stub keeps the model
     /// testable without touching `SMAppService`.

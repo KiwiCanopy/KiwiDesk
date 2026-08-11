@@ -203,6 +203,16 @@ extension AppDelegate {
             HomeFirstRunState.seed(.standard)
             showMenuBarCoachMark()
         }
+        // Consumed, so the flag means "THIS presentation reached
+        // the end" and not "this model ever did". The model is a
+        // stored `let` on the delegate and outlives every window,
+        // so without this a later reopen at the grant step — the
+        // quick menu's "fix Accessibility" route — would close
+        // having fired all three effects again. They are each
+        // idempotent behind their own persisted flag today; the
+        // fourth effect added inside that `if` would not be
+        // (code review, 2026-08-11).
+        onboardingModel.clearReachedEnd()
     }
 
     /// Points the one-time coach mark at the real menu-bar item.

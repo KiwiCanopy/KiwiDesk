@@ -99,6 +99,52 @@ struct OnboardingKeysTests {
         #expect(go?.glyphs.contains("–") == false)
     }
 
+    /// A range is a claim that every digit between its ends
+    /// works. `combos` is compacted, so a gap used to vanish and
+    /// the range still spanned first→last.
+    @Test("a gap in the digits is never written as a range")
+    func gappedDigitsAreNotARange() {
+        // Spaces 1…5 with ⌃⌥3 unbound.
+        let bindings = [1, 2, 4, 5].map { digit in
+            (
+                "control+option+\(digit)",
+                "KiwiDesk.focus_space(\"\(digit)\")"
+            )
+        }
+        let families = OnboardingKeys.families(
+            layer: layer(bindings),
+            spaces: spaces(5)
+        )
+        let go = families.first { $0.id == "focus_space" }
+        #expect(go != nil)
+        #expect(
+            go?.glyphs.contains("–") == false,
+            "wrote a range over a gap: \(go?.glyphs ?? "")"
+        )
+        // …and it must not claim the missing digit either way.
+        #expect(go?.glyphs.contains("1–5") == false)
+    }
+
+    /// The tenth space binds ⌃⌥0, so "1–0" would run backwards.
+    @Test("a ten-space setup is not written as 1–0")
+    func tenSpacesIsNotAReversedRange() {
+        var bindings = (1...9).map { digit in
+            (
+                "control+option+\(digit)",
+                "KiwiDesk.focus_space(\"\(digit)\")"
+            )
+        }
+        bindings.append(
+            ("control+option+0", "KiwiDesk.focus_space(\"10\")")
+        )
+        let families = OnboardingKeys.families(
+            layer: layer(bindings),
+            spaces: spaces(10)
+        )
+        let go = families.first { $0.id == "focus_space" }
+        #expect(go?.glyphs.contains("1–0") == false)
+    }
+
     @Test("an unbound family draws no row at all")
     func unboundFamiliesAreOmitted() {
         // The tour teaches what is BOUND. A row with an empty

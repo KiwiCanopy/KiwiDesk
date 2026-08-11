@@ -71,7 +71,14 @@ final class MenuBarCoachMark {
     /// chose.
     func show(under button: NSStatusBarButton?) {
         guard !Self.hasShown, Self.canPoint(at: button),
-            let anchor = button?.window?.frame
+            let anchor = button?.window?.frame,
+            // The anchor's OWN screen. Asking the panel for one
+            // before positioning it resolves the display holding
+            // the global origin — the MAIN screen — so with the
+            // menu bar on a second display the mark was clamped
+            // hundreds of points from the item it points at
+            // (code review, 2026-08-11).
+            let screen = button?.window?.screen?.frame
         else { return }
         UserDefaults.standard.set(true, forKey: Self.shownKey)
 
@@ -98,12 +105,17 @@ final class MenuBarCoachMark {
         panel.contentView = host
         let size = host.fittingSize
         panel.setContentSize(size)
+        // `setFrameTopLeftPoint` takes the panel's LEFT edge, so
+        // the right limit is the screen's max minus the panel's
+        // own width — and there is a left edge to respect too, for
+        // an item near the start of the bar.
+        let centred = anchor.midX - size.width / 2
+        let rightLimit = screen.maxX - size.width
         panel.setFrameTopLeftPoint(
             CGPoint(
                 x: min(
-                    anchor.midX - size.width / 2,
-                    (panel.screen ?? NSScreen.main)?.frame.maxX
-                        ?? anchor.maxX
+                    max(centred, screen.minX),
+                    max(rightLimit, screen.minX)
                 ),
                 y: anchor.minY - 6
             )
@@ -120,19 +132,21 @@ final class MenuBarCoachMark {
         let mask: NSEvent.EventTypeMask = [
             .leftMouseDown, .rightMouseDown, .otherMouseDown,
         ]
-        monitors.append(
-            NSEvent.addGlobalMonitorForEvents(matching: mask) {
-                [weak self] _ in
-                self?.dismiss()
-            } as Any
-        )
-        monitors.append(
-            NSEvent.addLocalMonitorForEvents(matching: mask) {
-                [weak self] event in
+        if let global = NSEvent.addGlobalMonitorForEvents(
+            matching: mask,
+            handler: { [weak self] _ in self?.dismiss() }
+        ) {
+            monitors.append(global)
+        }
+        if let local = NSEvent.addLocalMonitorForEvents(
+            matching: mask,
+            handler: { [weak self] event in
                 self?.dismiss()
                 return event
-            } as Any
-        )
+            }
+        ) {
+            monitors.append(local)
+        }
     }
 
     func dismiss() {

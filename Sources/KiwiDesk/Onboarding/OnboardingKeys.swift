@@ -154,13 +154,42 @@ enum OnboardingKeys {
         let modifiers = ComboSymbols.modifierSymbols(
             parsed.modifiers
         )
-        guard combos.count > 1,
-            let last = combos.last,
+        guard combos.count > 1 else { return head }
+        // A range may only be written where the digits ACTUALLY
+        // run unbroken from the first to the last. `combos` is
+        // compacted, so an unbound space in the middle vanishes
+        // and "1–5" would name a chord the user does not have —
+        // the same lie the arrows path refuses (code review,
+        // 2026-08-11). It also catches the tenth space, which
+        // `DefaultKeybindings` maps to `0`: "1–0" runs backwards
+        // and is not a range at all.
+        guard combos.count == spaces.count,
             sameModifiers(combos),
-            let tail = keyOnly(combo: last)
-        else { return head }
-        return modifiers + " " + (keyOnly(combo: first) ?? "")
-            + "–" + tail
+            let run = contiguousDigits(combos)
+        else { return listed(combos) ?? head }
+        return modifiers + " " + run.first + "–" + run.last
+    }
+
+    /// The first and last key glyph, but only when every chord in
+    /// between is a single digit stepping up by one.
+    private static func contiguousDigits(
+        _ combos: [String]
+    ) -> (first: String, last: String)? {
+        let keys = combos.compactMap { keyOnly(combo: $0) }
+        guard keys.count == combos.count else { return nil }
+        let values = keys.compactMap { key -> Int? in
+            guard key.count == 1 else { return nil }
+            return Int(key)
+        }
+        guard values.count == keys.count, let start = values.first
+        else { return nil }
+        for (offset, value) in values.enumerated()
+        where value != start + offset {
+            return nil
+        }
+        guard let firstKey = keys.first, let lastKey = keys.last
+        else { return nil }
+        return (firstKey, lastKey)
     }
 
     /// The shared modifiers once, then each chord's key glyph.
