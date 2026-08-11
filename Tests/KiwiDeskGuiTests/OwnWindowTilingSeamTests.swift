@@ -43,19 +43,47 @@ struct OwnWindowTilingSeamTests {
             1,
     ]
 
+    /// BOTH source trees: Core builds its own `NSWindow`s (the
+    /// bars, the border overlays), so a stamp added there would
+    /// be invisible to a GUI-only scan — and the claim the map
+    /// makes is about the whole app, not one target.
+    private static var scanRoots: [URL] {
+        let sources = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+        return ["KiwiDesk", "KiwiDeskCore"].map {
+            sources.appendingPathComponent($0)
+        }
+    }
+
+    /// A root that reads nothing scans nothing, and a scan over
+    /// no files agrees with any map it is compared against — so
+    /// a renamed or moved tree reds here rather than going
+    /// quiet (the sibling lenses' root-coverage check).
+    @Test("Every scan root is actually read")
+    func everyRootIsRead() throws {
+        for root in Self.scanRoots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue:
+                        "\(root.lastPathComponent) yielded no "
+                        + "Swift files — this seam no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        // A target added under `Sources/` joins the roster
+        // above; this is what makes dropping one visible.
+        #expect(Self.scanRoots.count == 2)
+    }
+
     @Test("Only the Settings window carries the tiling mark")
     func markStaysWhereItBelongs() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-        let prefix = root.path + "/"
-        // BOTH trees: Core builds its own `NSWindow`s (the bars,
-        // the border overlays), so a stamp added there would be
-        // invisible to a GUI-only scan — and the claim this map
-        // makes is about the whole app, not one target.
-        let trees = ["KiwiDesk", "KiwiDeskCore"].map {
-            root
-                .appendingPathComponent("Sources")
-                .appendingPathComponent($0)
-        }
+        let prefix =
+            SourceScan.repoRoot(from: #filePath).path
+            + "/"
+        let trees = Self.scanRoots
 
         var counts: [String: Int] = [:]
         for tree in trees {

@@ -33,6 +33,12 @@ struct OpenSettingsVerbTests {
             Issue.record("open_settings run failed: \(result)")
             return
         }
+        // The counter is the whole discriminator, and the
+        // `.success` arm above cannot stand in for it: the typo
+        // guard's `__index` metamethod turns an UNREGISTERED
+        // verb into a reporting no-op rather than a Lua error,
+        // so dropping the registration still runs clean
+        // (guard-prover, 2026-08-12).
         #expect(fired == 1)
     }
 

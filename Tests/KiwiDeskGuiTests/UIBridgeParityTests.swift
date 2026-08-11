@@ -74,6 +74,11 @@ struct UIBridgeParityTests {
 
     @Test("Every hook field is registered on the Lua table")
     func hooksAreRegistered() throws {
+        // Each test repeats the floor rather than leaning on a
+        // sibling's: a `--filter` run names one, and a roster
+        // reflection stopped reporting would leave that one
+        // passing over nothing.
+        #expect(verbs.count >= 2)
         let source = try SourceScan.stripComments(
             String(
                 contentsOf: SourceScan.repoRoot(from: #filePath)
@@ -94,6 +99,7 @@ struct UIBridgeParityTests {
 
     @Test("Every hook field is wired by the app delegate")
     func hooksAreWired() throws {
+        #expect(verbs.count >= 2)
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
         var wired = ""
