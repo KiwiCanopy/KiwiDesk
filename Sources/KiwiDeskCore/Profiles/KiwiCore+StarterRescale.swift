@@ -16,7 +16,7 @@ import Foundation
 extension KiwiCore {
     /// Whether the layout currently on screen is the beginner
     /// `Starter` ladder — either the adopted seed profile (flagged
-    /// via `Profile.isStarterLadder`, so the identity survives a
+    /// via `Profile.isStarterSetup`, so the identity survives a
     /// renamed file or an edited mode) or a transient ladder
     /// Standard already recomposed by an earlier display change
     /// (`currentStandard`, sticky across further changes). Only
@@ -24,13 +24,13 @@ extension KiwiCore {
     /// rather than a workflow Standard. A saved-as-new copy is the
     /// user's own profile (unflagged) and resolves normally.
     var isOnStarterBaseline: Bool {
-        if profiles.currentStandard == StarterLadder.name {
+        if profiles.currentStandard == StarterSetup.name {
             return true
         }
         guard let name = profiles.currentName,
             let profile = try? profiles.read(name: name)
         else { return false }
-        return profile.isStarterLadder
+        return profile.isStarterSetup
     }
 
     /// The fallback layout for a monitor change no stored set
@@ -49,8 +49,9 @@ extension KiwiCore {
             )
         }
         return ProfileComposition.compose(
-            layout: StarterLadder.standardLayout(
-                displayCount: displays.count
+            layout: StarterSetup.standardLayout(
+                displays: displays,
+                mainID: mainID
             ),
             displays: displays,
             mainID: mainID

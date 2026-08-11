@@ -220,32 +220,53 @@ struct FirstRunSeedTests {
     /// #270/#466: at first run macOS reports only the active
     /// Space, so the live list is just ["1"] — not empty, so the
     /// empty-state pad is skipped. The seed pads that bare
-    /// signature to the per-display ladder anyway, so with two
-    /// displays spaces 1–10 all exist and the top digit ⌃⌥0
-    /// (= space 10) binds out of the box rather than only ⌃⌥1.
-    @Test("partial first-run discovery pads to the ladder")
+    /// signature to the starter setup anyway, so every space the
+    /// two-screen budget defines exists and its top digit binds
+    /// out of the box rather than only ⌃⌥1.
+    ///
+    /// The count is DERIVED rather than written here (#678 Phase
+    /// 4 pass 11): the setup is no longer five per display, and a
+    /// hand-written 10 would have to be re-found every time the
+    /// budget moves. What the test claims is that the pad reaches
+    /// the whole setup, not that the setup is any given size.
+    @Test("partial first-run discovery pads to the starter setup")
     func partialDiscoveryPadsToLadder() {
         let core = makeCore()
-        core.state.apply(
-            .displaysChanged([
-                twoBySide(1, name: "Main", x: 0),
-                twoBySide(2, name: "Second", x: 1920),
-            ])
-        )
+        let displays = [
+            twoBySide(1, name: "Main", x: 0),
+            twoBySide(2, name: "Second", x: 1920),
+        ]
+        core.state.apply(.displaysChanged(displays))
         core.state.workspaces.ensureSpace(SpaceID("1"))
+
+        let expected = StarterSetup.spaces(
+            sizes: StarterSetup.sizes(
+                displays: displays,
+                mainID: PositionalDisplays.liveMainID
+            )
+        )
+        // Vacuity: the pad must reach past the one live space, or
+        // "pads to the setup" is satisfied by doing nothing.
+        #expect(expected.count > 1)
 
         let seed = core.guiConfigSeed()
         let spaces = Set(seed.spaces.map(\.raw))
-        for n in 1...10 {
-            #expect(spaces.contains("\(n)"), "missing space \(n)")
+        for space in expected {
+            #expect(
+                spaces.contains(space.raw),
+                "missing space \(space.raw)"
+            )
         }
+        let top = expected.count
+        let digit = top == 10 ? "0" : "\(top)"
         let base = seed.layers.first { $0.isDefault }
         #expect(
             (base?.bindings ?? []).contains {
-                $0.combo == "control+option+0"
-                    && $0.lua == "KiwiDesk.focus_space(\"10\")"
+                $0.combo == "control+option+\(digit)"
+                    && $0.lua
+                        == "KiwiDesk.focus_space(\"\(top)\")"
             },
-            "⌃⌥0 not seeded despite two displays discovered"
+            "⌃⌥\(digit) not seeded despite two displays discovered"
         )
     }
 }

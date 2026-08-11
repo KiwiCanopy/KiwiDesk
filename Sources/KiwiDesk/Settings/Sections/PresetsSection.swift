@@ -59,12 +59,24 @@ struct PresetsSection: View {
 
     private var liveCount: Int { model.displays.count }
 
+    /// The live screens in positional order, which the `Starter`
+    /// preset is derived from. Ordered by the same helper the
+    /// first-run seed uses, so the preset a user applies and the
+    /// setup they were seeded with are the same thing.
+    private var liveSizes: [CGSize] {
+        StarterSetup.sizes(
+            displays: model.displays,
+            mainID: PositionalDisplays.liveMainID
+        )
+    }
+
     // Both preset lists come from the family seam that records
     // what `presetsApply` expands to, so the guard over that
     // expansion watches the cards this section actually draws.
     @ViewBuilder private var liveGroup: some View {
         let presets = ProfilesFamilyRows.presets(
-            forScreens: liveCount
+            forScreens: liveCount,
+            sizes: liveSizes
         )
         if presets.isEmpty {
             Text(noPresetsForCount)

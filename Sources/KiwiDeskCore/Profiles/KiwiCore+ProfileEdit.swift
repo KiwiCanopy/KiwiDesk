@@ -58,7 +58,7 @@ extension KiwiCore {
         // beginner-ladder baseline — the sibling of `isDefault`
         // here, and both identity flags the copy must neutralize
         // (#485, AGENTS.md §5 mirror rule).
-        copy.isStarterLadder = false
+        copy.isStarterSetup = false
         try profiles.write(copy)
         return copy.name
     }

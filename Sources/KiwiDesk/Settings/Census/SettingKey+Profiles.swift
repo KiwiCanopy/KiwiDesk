@@ -6,7 +6,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case profilesDelete = "(action) profiles.delete"
     case profilesRename = "(action) profiles.rename"
     case isDefault = "profile.isDefault"
-    case isStarterLadder = "profile.isStarterLadder"
+    case isStarterSetup = "profile.isStarterSetup"
     case presetsApply = "(action) presets.apply"
 }
 
@@ -31,7 +31,7 @@ extension ProfilesKey {
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)
-        case .isStarterLadder:
+        case .isStarterSetup:
             return .luaOnly
         case .presetsApply:
             // Its own card since #678 turn 13a — "Start from a
@@ -79,7 +79,7 @@ extension ProfilesKey {
             return .text("profiles.rename", help: "profiles.rename.help")
         case .isDefault:
             return .text("profiles.make_default")
-        case .isStarterLadder:
+        case .isStarterSetup:
             return .none
         case .presetsApply:
             return .text("presets.apply")

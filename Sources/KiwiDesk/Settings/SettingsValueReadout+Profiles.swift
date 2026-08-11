@@ -19,7 +19,7 @@ extension SettingsValueReadout {
                 new: new.profileBindings
             )
         case .profilesLoad, .profilesDelete, .profilesRename,
-            .isDefault, .isStarterLadder, .presetsApply:
+            .isDefault, .isStarterSetup, .presetsApply:
             // no model path — never booked by the diff
             return []
         }

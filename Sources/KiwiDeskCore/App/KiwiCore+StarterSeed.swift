@@ -39,8 +39,9 @@ extension KiwiCore {
         state.apply(.displaysChanged(displays))
         do {
             try applyStandard(
-                StarterLadder.standardLayout(
-                    displayCount: displays.count
+                StarterSetup.standardLayout(
+                    displays: displays,
+                    mainID: PositionalDisplays.liveMainID
                 )
             )
         } catch {

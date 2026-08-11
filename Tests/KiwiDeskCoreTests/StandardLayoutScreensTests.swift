@@ -97,7 +97,21 @@ struct StandardLayoutScreensTests {
     /// the per-accessor tests above and fail here.
     @Test("the composer places spaces where the plan says")
     func composerAgreesWithThePlan() throws {
-        for plan in StandardProfiles.all {
+        // Every layout that can reach a Presets list: the
+        // hardware-agnostic workflows, plus the Starter as each
+        // supported screen count derives it (#678 pass 11).
+        let composerSize = CGSize(width: 1000, height: 800)
+        let plans =
+            StandardProfiles.workflows
+            + (1...3).map { count in
+                StarterSetup.standardLayout(
+                    sizes: [CGSize](
+                        repeating: composerSize,
+                        count: count
+                    )
+                )
+            }
+        for plan in plans {
             let displays = (0..<plan.screenCount).map {
                 index in
                 Display(

@@ -78,7 +78,7 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Survives edits (a tweaked mode keeps the identity) but not
     /// a "save as new" — an explicitly named copy is the user's
     /// own profile. Legacy/other profiles decode to `false`.
-    public var isStarterLadder: Bool
+    public var isStarterSetup: Bool
     /// Persisted display order of the profile's spaces (#75).
     /// This is the authoritative order for the Spaces list and
     /// for the reconcile rehome fallback on profile switch.
@@ -160,7 +160,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case monitorSets = "monitor_sets"
         case mainSpaces = "main_spaces"
         case isDefault = "default"
-        case isStarterLadder = "starter_ladder"
+        case isStarterSetup = "starter_setup"
         case spaces
         case fallbackSpace = "fallback_space"
         case spaceModes = "space_modes"
@@ -177,7 +177,7 @@ public struct Profile: Codable, Sendable, Equatable {
         monitorSets: [MonitorSet],
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
-        isStarterLadder: Bool = false,
+        isStarterSetup: Bool = false,
         spaces: [SpaceID] = [],
         fallbackSpace: SpaceID? = nil,
         spaceModes: [SpaceID: LayoutMode],
@@ -192,7 +192,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.monitorSets = Self.sanitized(monitorSets)
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
-        self.isStarterLadder = isStarterLadder
+        self.isStarterSetup = isStarterSetup
         self.spaces = SpaceID.deduplicated(spaces)
         self.fallbackSpace = fallbackSpace
         self.spaceModes = spaceModes
@@ -238,10 +238,10 @@ public struct Profile: Codable, Sendable, Equatable {
             ) ?? false
         // Lenient: absent on every profile authored before #485
         // (and on user-authored copies), decoding to `false`.
-        isStarterLadder =
+        isStarterSetup =
             try container.decodeIfPresent(
                 Bool.self,
-                forKey: .isStarterLadder
+                forKey: .isStarterSetup
             ) ?? false
         // Lenient: missing key on legacy profiles → empty,
         // which `orderedSpaces` converts to the derived order.

@@ -166,8 +166,8 @@ extension KiwiCore {
             // changes. `applyStandard` adopts the standard before
             // this, so the preset path is covered here too; a
             // save-as-new copy (which reads, not builds) is not.
-            isStarterLadder: profiles.currentStandard
-                == StarterLadder.name,
+            isStarterSetup: profiles.currentStandard
+                == StarterSetup.name,
             spaces: liveSpaces,
             fallbackSpace: fallbackSpace.flatMap {
                 liveSpaces.contains($0) ? $0 : nil
