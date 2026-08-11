@@ -40,6 +40,7 @@ extension KeybindingCatalog {
         makeDisplaySticky,
         makeUnsticky,
         showShortcuts,
+        openSettings,
     ]
 
     /// The four resize rows, one census family each (#678

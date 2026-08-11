@@ -26,8 +26,8 @@ extension SettingsValueReadout {
             .moveToSpaceFollow, .growWidth, .shrinkWidth,
             .growHeight, .shrinkHeight, .toggleFloating,
             .toggleSticky, .toggleDisplaySticky, .showShortcuts,
-            .switchToLayer, .openApplications, .advanced,
-            .`import`:
+            .openSettings, .switchToLayer, .openApplications,
+            .advanced, .`import`:
             // no model path — never booked by the diff (these
             // families' bindings book under `config.layers`).
             return []

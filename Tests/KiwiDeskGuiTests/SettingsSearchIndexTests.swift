@@ -195,7 +195,11 @@ struct SettingsSearchIndexTests {
                 .advancedColors: 25,
                 .behavior: 3,
                 .profiles: 5,
-                .shortcuts: 11,
+                // 12: `keybinding.open_settings` joined
+                // anchor-less (#678 item 18 — the bindable
+                // "Open Settings" row has no #277 catalog
+                // anchor yet).
+                .shortcuts: 12,
                 .appRules: 3,
                 .general: 8,
             ]

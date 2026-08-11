@@ -24,7 +24,7 @@ struct ShowShortcutsVerbTests {
         let lua = try #require(LuaInterpreter())
         core.registerLuaAPI(on: lua)
         var fired = 0
-        core.onShowShortcuts = { fired += 1 }
+        core.uiBridge.onShowShortcuts = { fired += 1 }
         let result = lua.run("KiwiDesk.show_shortcuts()")
         guard case .success = result else {
             Issue.record("show_shortcuts run failed: \(result)")

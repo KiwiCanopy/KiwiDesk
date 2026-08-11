@@ -544,8 +544,11 @@ must keep:
 
 ## Responsive width (#678 turn 17a)
 
-The window is the user's to make narrow — floated by default,
-tileable if they say so, and hand-draggable either way. What
+The window is the user's to make narrow — tiled like any other
+window (#678 item 18; the per-window mark is
+`OwnWindowTiling.identifier`, and `OwnWindowTilingSeamTests`'
+map is the one copy of who may stamp it), floatable if they
+say so, and hand-draggable either way. What
 it sheds as it narrows, and in what order, is
 ruled: **preview (1200) → row layout (900) → chrome (820), and
 controls never.** 720 pt is the hard minimum, below which the

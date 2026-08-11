@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "移至空間 %1$@",
   "keybinding.move_to_space_follow": "移至空間 %1$@ 並跟隨",
   "keybinding.move_window_to_track": "將視窗移至%1$@軌道",
+  "keybinding.open_settings": "打開設定",
   "keybinding.seq.next": "下一個",
   "keybinding.seq.prev": "上一個",
   "keybinding.show_shortcuts": "顯示快速鍵面板",

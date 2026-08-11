@@ -277,4 +277,18 @@ enum KeybindingCatalog {
             L("keybinding.show_shortcuts", "Show shortcuts panel")
         }
     )
+
+    /// The bindable "Open Settings" row (#678 item 18): a GUI
+    /// action verb (`KiwiDesk.show_settings()`), deliberately
+    /// UNBOUND by default — Settings is not a prerequisite, so
+    /// no default chord is spent on it. The catalog row is the
+    /// one production copy of the Lua body;
+    /// `ShowSettingsVerbTests` pins it to the Core verb.
+    static let openSettings = NavCommand(
+        label: "Open Settings",
+        lua: "KiwiDesk.show_settings()",
+        displayLabel: {
+            L("keybinding.open_settings", "Open Settings")
+        }
+    )
 }

@@ -209,6 +209,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // The one own window that tiles (#678 item 18): the
+        // engine discriminates own windows per window, never
+        // per process, and this identifier is the mark it
+        // reads back through the AX bridge. The tour and the
+        // Config Issues window stay unmarked on purpose —
+        // `OwnWindowTiling`'s doc carries the argument.
+        window.identifier = NSUserInterfaceItemIdentifier(
+            OwnWindowTiling.identifier
+        )
         window.center()
         window.setFrameAutosaveName("KiwiDeskSettings")
         // A frame saved by an older build can be narrower than

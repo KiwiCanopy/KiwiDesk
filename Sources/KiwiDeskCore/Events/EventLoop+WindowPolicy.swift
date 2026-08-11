@@ -53,20 +53,48 @@ extension EventLoop {
     /// Standard windows from accessory/menu-bar apps are real
     /// managed windows, but float by default: their utility UI
     /// should never be absorbed into a desktop layout.
+    ///
+    /// Own windows discriminate per WINDOW, never per process
+    /// (#678 item 18): the Settings window tiles like any other
+    /// window, marked by `OwnWindowTiling.identifier`; every
+    /// other own titled window — the onboarding tour, the
+    /// Config Issues window — is chrome with a completion
+    /// condition and stays force-floated. That type's doc
+    /// carries the argument and names each window.
     nonisolated static func shouldForceFloat(
         pid: pid_t,
-        activationPolicy: NSApplication.ActivationPolicy
+        activationPolicy: NSApplication.ActivationPolicy,
+        tilesAsOwnWindow: Bool
     ) -> Bool {
-        isOwnProcess(pid) || activationPolicy == .accessory
+        if isOwnProcess(pid) { return !tilesAsOwnWindow }
+        return activationPolicy == .accessory
     }
 
-    func shouldForceFloat(pid: pid_t) -> Bool {
+    func shouldForceFloat(
+        pid: pid_t,
+        element: AXUIElement
+    ) -> Bool {
         Self.shouldForceFloat(
             pid: pid,
             activationPolicy: NSRunningApplication(
                 processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+            )?.activationPolicy ?? .prohibited,
+            tilesAsOwnWindow: Self.isOwnProcess(pid)
+                && ownWindow(of: element)?.identifier?
+                    .rawValue == OwnWindowTiling.identifier
         )
+    }
+
+    /// Maps an own AX window element back to its `NSWindow` —
+    /// the one place AX identity meets AppKit identity, shared
+    /// by the ignore gate (`canBecomeMain`) and the force-float
+    /// exemption (`identifier`).
+    private func ownWindow(of element: AXUIElement) -> NSWindow? {
+        AXHelper.windowID(of: element).flatMap { id in
+            NSApp.windows.first {
+                $0.windowNumber == Int(id.raw)
+            }
+        }
     }
 
     /// The *structural* half of the transient-overlay
@@ -75,11 +103,12 @@ extension EventLoop {
     /// tracking is main-capable by construction
     /// (`shouldIgnoreOwnWindow` dropped every own panel — ghost,
     /// drop zone, border ring — before classification), so the
-    /// own-process half of `shouldForceFloat` must not sweep the
-    /// Settings window into the launcher class: it still floats
-    /// by default, it just keeps its focus ring. Third-party
-    /// accessory apps stay swept — their windows are menu-bar
-    /// utility UI, the #300 case.
+    /// own-process half of `shouldForceFloat` must not sweep an
+    /// own window into the launcher class: the Settings window
+    /// tiles outright (#678 item 18), and the force-floated own
+    /// chrome (tour, Config Issues) keeps its focus ring.
+    /// Third-party accessory apps stay swept — their windows
+    /// are menu-bar utility UI, the #300 case.
     ///
     /// Load-bearing since #448: the hard ignore gate
     /// (`FloatDetection.shouldIgnore`'s `isAccessory` arm) also
@@ -95,7 +124,8 @@ extension EventLoop {
         !isOwnProcess(pid)
             && shouldForceFloat(
                 pid: pid,
-                activationPolicy: activationPolicy
+                activationPolicy: activationPolicy,
+                tilesAsOwnWindow: false
             )
     }
 
@@ -138,12 +168,7 @@ extension EventLoop {
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             let canBecomeMain =
-                AXHelper.windowID(of: element)
-                .flatMap { id in
-                    NSApp.windows.first {
-                        $0.windowNumber == Int(id.raw)
-                    }
-                }?.canBecomeMain ?? false
+                ownWindow(of: element)?.canBecomeMain ?? false
             return Self.shouldIgnoreOwnWindow(
                 pid: pid,
                 canBecomeMain: canBecomeMain

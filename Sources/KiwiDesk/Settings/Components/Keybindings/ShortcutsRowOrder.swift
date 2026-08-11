@@ -122,7 +122,8 @@ enum ShortcutsRowOrder {
     /// App chrome rather than a workspace action, so it sits
     /// below the action groups and behind a disclosure.
     static let generalKeysMore: [SettingKey] = [
-        .shortcuts(.showShortcuts)
+        .shortcuts(.showShortcuts),
+        .shortcuts(.openSettings),
     ]
 
     /// Layers: the strip itself, the selected layer's menu-bar

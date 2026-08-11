@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "Sposta nello spazio %1$@",
   "keybinding.move_to_space_follow": "Sposta nello spazio %1$@ e segui",
   "keybinding.move_window_to_track": "Sposta la finestra sulla traccia %1$@",
+  "keybinding.open_settings": "Apri Impostazioni",
   "keybinding.seq.next": "successiva",
   "keybinding.seq.prev": "precedente",
   "keybinding.show_shortcuts": "Mostra il pannello delle abbreviazioni",

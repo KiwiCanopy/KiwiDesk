@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "공간 %1$@ (으)로 이동",
   "keybinding.move_to_space_follow": "공간 %1$@ (으)로 이동 및 추종",
   "keybinding.move_window_to_track": "창을 트랙 %1$@ (으)로 이동",
+  "keybinding.open_settings": "설정 열기",
   "keybinding.seq.next": "다음",
   "keybinding.seq.prev": "이전",
   "keybinding.show_shortcuts": "단축키 패널 보기",

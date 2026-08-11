@@ -20,6 +20,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleSticky = "keybinding.toggle_sticky"
     case toggleDisplaySticky = "keybinding.toggle_display_sticky"
     case showShortcuts = "keybinding.show_shortcuts"
+    case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
     case openApplications = "(rows) shortcuts.open_applications"
     case advanced = "(rows) shortcuts.advanced"
@@ -48,7 +49,7 @@ extension ShortcutsKey {
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
-        case .showShortcuts:
+        case .showShortcuts, .openSettings:
             return .row(.shortcuts, .generalKeys, .showMore)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -108,6 +109,8 @@ extension ShortcutsKey {
             )
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
+        case .openSettings:
+            return .text("keybinding.open_settings")
         case .`import`:
             return .text("shortcuts.import", help: "shortcuts.import.help")
         }

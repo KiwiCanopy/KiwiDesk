@@ -36,7 +36,10 @@ extension SettingsValueReadout {
             + KeybindingCatalog.moveToTrackRows
             + KeybindingCatalog.trackSwapRows
             + KeybindingCatalog.moveToSpace(spaces)
-            + [KeybindingCatalog.showShortcuts]
+            + [
+                KeybindingCatalog.showShortcuts,
+                KeybindingCatalog.openSettings,
+            ]
             + layerNames.map(
                 KeybindingCatalog.switchLayerCommand
             )

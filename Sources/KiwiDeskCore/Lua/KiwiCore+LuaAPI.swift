@@ -59,7 +59,11 @@ extension KiwiCore {
     /// `luaOnly` for `help()`. The VM never holds the UI ref.
     private func registerUIAPI(on lua: LuaInterpreter) {
         lua.register("show_shortcuts") { [weak self] _ in
-            self?.onShowShortcuts()
+            self?.uiBridge.onShowShortcuts()
+            return .none
+        }
+        lua.register("show_settings") { [weak self] _ in
+            self?.uiBridge.onShowSettings()
             return .none
         }
     }
@@ -177,4 +181,24 @@ extension KiwiCore {
             return .none
         }
     }
+}
+
+/// The UI-bridge verbs' `@MainActor` GUI hooks, bundled (the
+/// `OpenOrFocusSeams` shape) so `KiwiCore.swift` carries one
+/// line for the family rather than one block per verb. Each
+/// verb raises its hook and returns nothing to Lua; the GUI
+/// (`AppDelegate`) wires both, weakly, and each is a no-op
+/// until wired.
+public struct UIBridgeHooks {
+    /// `KiwiDesk.show_shortcuts()` (#330): opens (toggles) the
+    /// read-only shortcuts reference panel (#326).
+    public var onShowShortcuts: @MainActor () -> Void = {}
+
+    /// `KiwiDesk.show_settings()` (#678 item 18): the bindable
+    /// "Open Settings" action, unbound by default. Opens or
+    /// raises, never toggles — a key that closed Settings
+    /// would discard the draft state the save pill narrates.
+    public var onShowSettings: @MainActor () -> Void = {}
+
+    public init() {}
 }

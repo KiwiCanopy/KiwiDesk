@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "Move to Space %1$@",
   "keybinding.move_to_space_follow": "Move to Space %1$@ & follow",
   "keybinding.move_window_to_track": "Move window to %1$@ track",
+  "keybinding.open_settings": "Open Settings",
   "keybinding.seq.next": "next",
   "keybinding.seq.prev": "previous",
   "keybinding.show_shortcuts": "Show shortcuts panel",

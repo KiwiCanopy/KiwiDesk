@@ -27,9 +27,19 @@ space uses, the gaps, the bars, and the shortcuts.
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while KiwiDesk is the active app. The window opens on
-**Home** — a grid of cards, one per settings area, in two
-groups:
+**⌘,** while KiwiDesk is the active app. You can also give it a
+global key of its own: **Shortcuts ▸ General** offers a
+bindable **Open Settings** row, unbound out of the box.
+
+The Settings window is a normal window to KiwiDesk itself: it
+**tiles into your layout** like anything else, shows up in the
+App Bar, and can be floated or moved between spaces with the
+same shortcuts as any other window. (The setup tour and the
+small helper panels stay floating — they are transient, so they
+never take a layout slot.)
+
+The window opens on **Home** — a grid of cards, one per
+settings area, in two groups:
 
 - **This Profile** — areas scoped to the profile being edited
   (Spaces, Gaps & Borders, Bars, Colors & Motion,

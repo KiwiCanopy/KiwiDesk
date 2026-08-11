@@ -3395,6 +3395,29 @@ KiwiDesk.bind("alt+space", function()
 end)
 ```
 
+### show_settings
+
+**Expects:** nothing.
+
+**Does:** opens the **Settings** window, or brings it to the
+front if it is already open. It never closes the window — a
+toggle would discard unsaved draft edits — so pressing the key
+again with Settings frontmost does nothing.
+
+It is deliberately **not bound to any key by default**: KiwiDesk
+works out of the box without Settings, so no default chord is
+spent on it. It is offered as a bindable preset in the Settings
+app under **Shortcuts ▸ General** ("Open Settings"), where you
+can bind it per layer without hand-writing Lua.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+comma", function()
+    KiwiDesk.show_settings()
+end)
+```
+
 ## Keybindings
 
 ```lua

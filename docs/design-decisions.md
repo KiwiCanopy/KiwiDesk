@@ -1504,6 +1504,46 @@ setup windows are left alone because they go away. Said once, the
 exception stops reading as an inconsistency and starts reading as
 a rule. (#678 Phase 4 pass 11)
 
+### Settings tiles — discriminated per window, never per process
+
+**[Principle]**
+
+**The Settings window tiles like any other window, and the
+force-float policy asks which own WINDOW it is looking at,
+never merely whose process it belongs to.** (#678 item 18,
+Phase 5.) The engine used to force-float every own window by
+`isOwnProcess(pid)` — one predicate for four windows with three
+different fates. Relaxing that per process would have swept the
+tour and the Config Issues window into layouts alongside
+Settings, so the exemption rides a per-window mark instead
+(`OwnWindowTiling.identifier`, stamped by
+`SettingsWindowController` alone —
+`OwnWindowTilingSeamTests`' map is the one copy of who may).
+The entry above rules WHICH windows are chrome; this one rules
+the mechanism: an own window is chrome by DEFAULT, and tiling
+is the marked exception — a new own window floats until someone
+argues otherwise, which is the failure direction that costs a
+misplaced float rather than a stolen layout slot.
+
+What follows from tiling: Settings appears in the App Bar like
+any tiled window, keeps its focus ring, and answers
+`toggle_floating` like anything else. The app stays `.accessory`
+throughout — tiling a window and promoting a process are
+unrelated axes, and the activation-policy seam is untouched.
+The ⌃⌥K panel needs no mark and no bar exclusion: it is an own
+`NSPanel` that cannot become main, so `shouldIgnoreOwnWindow`
+drops it before tracking and it never reaches a bar's
+enumeration at all.
+
+The companion affordance: **"Open Settings" is bindable and
+unbound by default** (`KiwiDesk.show_settings()`, offered under
+Shortcuts ▸ General). Settings is not a prerequisite — the app
+works untouched out of the box — so no default chord is spent
+on it; but a window that now lives among the user's tiled
+windows earns a keyboard road back. It opens or raises, never
+toggles: a close bound to the same key would discard the draft
+the save pill narrates.
+
 ### The coach mark is built, and skips itself when hidden
 
 **[Rationale]**
@@ -2096,9 +2136,9 @@ is an open follow-up, not a decision this entry makes.
 
 **Narrow windows drop the preview before they drop a
 control.** (#678 turn 17a.) The window is the user's to make
-narrow — KiwiDesk floats its own Settings window by default,
-but nothing stops it being tiled, and a hand-drag reaches the
-same widths either way. So the question is not *whether*
+narrow — the Settings window tiles like any other (#678
+item 18), can be floated like any other, and a hand-drag
+reaches the same widths either way. So the question is not *whether*
 something gives but in what ORDER. Three
 things can: the preview's column (1200), the row layout
 (900), the header chrome (820) — in that order, and controls

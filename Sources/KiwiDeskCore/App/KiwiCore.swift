@@ -308,12 +308,10 @@ public final class KiwiCore {
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
 
-    /// Fired by the `KiwiDesk.show_shortcuts()` Lua verb (#330):
-    /// a bindable action that opens (toggles) the read-only
-    /// shortcuts reference panel (#326). The VM holds no UI ref —
-    /// Core just raises this hook and the GUI (`AppDelegate`) wires
-    /// it to the panel controller, weakly. No-op until wired.
-    public var onShowShortcuts: @MainActor () -> Void = {}
+    /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
+    /// declared and argued as a bundle in `KiwiCore+LuaAPI`,
+    /// the `openOrFocus` seam shape.
+    public var uiBridge = UIBridgeHooks()
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
