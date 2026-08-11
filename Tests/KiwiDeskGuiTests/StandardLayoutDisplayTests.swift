@@ -28,7 +28,9 @@ struct StandardLayoutDisplayTests {
     func displayNameLocalizes() throws {
         reset()
         let layout = try #require(
-            StandardProfiles.all.first { $0.name == "Developer" }
+            StandardProfiles.workflows.first {
+                $0.name == "Developer"
+            }
         )
         // Explicit English (not System default) → canonical.
         LocalizationManager.shared.select("en")

@@ -61,18 +61,41 @@ struct PositionalDisplaysTests {
 
 @Suite("Standard layout catalog")
 struct StandardCatalogTests {
+    /// A live setup of `count` identical 27" screens.
+    private func catalogSizes(_ count: Int) -> [CGSize] {
+        [CGSize](
+            repeating: CGSize(width: 2560, height: 1440),
+            count: count
+        )
+    }
+
+    /// Every layout that can reach a Presets list on some Mac:
+    /// the hardware-agnostic workflows, plus the one `Starter`
+    /// as each supported screen count derives it. The catalog
+    /// stopped being a constant when the Starter began deriving
+    /// from live screens (#678 Phase 4 pass 11).
+    private func everyShippedLayout() -> [StandardLayout] {
+        StandardProfiles.workflows
+            + (1...3).map {
+                StarterSetup.standardLayout(sizes: catalogSizes($0))
+            }
+    }
+
     @Test("Each shipped count has exactly one Standard")
     func oneStandardPerCount() {
         for count in 1...3 {
-            let standards = StandardProfiles.layouts(for: count)
-                .filter(\.isStandard)
+            let standards = StandardProfiles.layouts(
+                for: count,
+                sizes: catalogSizes(count)
+            )
+            .filter(\.isStandard)
             #expect(standards.count == 1)
         }
     }
 
     @Test("Layouts only address screens they plan for")
     func positionsWithinPlan() {
-        for layout in StandardProfiles.all {
+        for layout in everyShippedLayout() {
             for position in layout.spaceScreens.values {
                 #expect(position >= 0)
                 #expect(position < layout.screenCount)
@@ -82,7 +105,7 @@ struct StandardCatalogTests {
 
     @Test("Sparse maps only name defined spaces")
     func sparseMapsWithinSpaces() {
-        for layout in StandardProfiles.all {
+        for layout in everyShippedLayout() {
             let defined = Set(
                 (1...layout.spaceCount).map { SpaceID($0) }
             )

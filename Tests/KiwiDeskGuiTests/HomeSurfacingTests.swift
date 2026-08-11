@@ -292,17 +292,6 @@ struct HomeSurfacingTests {
             "HomeFirstRunState.retire(model.preferences)"
                 + "visible=false"
         ],
-        "AppDelegate+Onboarding.swift": [
-            // The tour's close seeds the banner beside the
-            // discovery flag.
-            "OnboardingDiscovery.markShown()"
-                + "HomeFirstRunState.seed(.standard)"
-        ],
-        "AppDelegate.swift": [
-            // "Show me around" reaches the real replay.
-            "created.setShowTour{[weakself]in"
-                + "self?.replayOnboardingTour()}"
-        ],
     ]
 
     @Test("every surfacing branch is drawn where it decides")

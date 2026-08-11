@@ -50,8 +50,10 @@ struct StandardLayoutScreensTests {
             spaces: 2,
             modes: ["2": .monocle]
         )
-        #expect(plan.mode(of: "1") == .bsp)
-        #expect(plan.mode(of: "2") == .monocle)
+        // `on: nil` is the plan-as-a-plan reading — no hardware
+        // in hand, so the historic bsp answer stands.
+        #expect(plan.mode(of: "1", on: nil) == .bsp)
+        #expect(plan.mode(of: "2", on: nil) == .monocle)
     }
 
     /// A hand-edited layout planning past the displays it is
@@ -97,7 +99,21 @@ struct StandardLayoutScreensTests {
     /// the per-accessor tests above and fail here.
     @Test("the composer places spaces where the plan says")
     func composerAgreesWithThePlan() throws {
-        for plan in StandardProfiles.all {
+        // Every layout that can reach a Presets list: the
+        // hardware-agnostic workflows, plus the Starter as each
+        // supported screen count derives it (#678 pass 11).
+        let composerSize = CGSize(width: 1000, height: 800)
+        let plans =
+            StandardProfiles.workflows
+            + (1...3).map { count in
+                StarterSetup.standardLayout(
+                    sizes: [CGSize](
+                        repeating: composerSize,
+                        count: count
+                    )
+                )
+            }
+        for plan in plans {
             let displays = (0..<plan.screenCount).map {
                 index in
                 Display(
@@ -142,7 +158,18 @@ struct StandardLayoutScreensTests {
                 #expect(
                     plan.openingMode(
                         onScreen: position,
-                        screens: plan.screenCount
+                        screens: plan.screenCount,
+                        // The shape the CARD passes for an
+                        // appliable preset, which is the same one
+                        // the composer used. Reading both sides
+                        // from `ScreenClass.of(composerSize)`
+                        // makes them agree by construction and
+                        // observes nothing — which is what this
+                        // assertion did after it was "fixed",
+                        // leaving the production `nil` in
+                        // `PresetScreenCard` unwatched (code
+                        // review, 2026-08-11).
+                        on: ScreenClass.of(composerSize)
                     )
                         == planned.first.map {
                             composed.spaceModes[$0] ?? .bsp

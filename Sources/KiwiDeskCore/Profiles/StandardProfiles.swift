@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// A built-in, hardware-agnostic layout for one screen count
@@ -24,43 +25,65 @@ public struct StandardLayout: Sendable, Equatable {
 /// The shipped per-count layouts. Never deletable; a count with
 /// no saved user profile falls back to its Standard.
 public enum StandardProfiles {
-    /// The catalog, ordered by screen count. The beginner
-    /// `Starter` ladder leads each count (the "start here" preset,
-    /// #466); the workflow layouts follow, silent-fallback
-    /// Standard among them.
-    public static let all: [StandardLayout] = [
-        starterOne, developer, minimalist, focusStack,
-        starterTwo, dualDeveloper, coderAndMonitor,
-        starterThree, commandCenter, visualCreative,
+    /// The hardware-agnostic layouts, ordered by screen count.
+    /// These plan for a screen COUNT and nothing else, so they are
+    /// the same on every Mac — the silent-fallback Standards are
+    /// among them.
+    public static let workflows: [StandardLayout] = [
+        developer, minimalist, focusStack,
+        dualDeveloper, coderAndMonitor,
+        commandCenter, visualCreative,
     ]
 
-    /// The beginner ladder as an applyable preset per screen
-    /// count (#466) — the same `StarterLadder` generator the
-    /// first-run seed uses, so the two never drift. Never the
-    /// silent `isStandard` fallback: a demo layout of empty modes
-    /// is a poor thing to land in silently on a monitor change.
-    static let starterOne = starter(screens: 1)
-    static let starterTwo = starter(screens: 2)
-    static let starterThree = starter(screens: 3)
-
-    private static func starter(screens: Int) -> StandardLayout {
-        StarterLadder.standardLayout(displayCount: screens)
+    /// The catalog for a live setup: the `Starter` derived from
+    /// these screens, leading its own count, then the workflow
+    /// layouts.
+    ///
+    /// **There is exactly one Starter, and it is for the screens
+    /// you have.** It used to be three — one per screen count —
+    /// because the ladder planned for a count in the abstract.
+    /// Since #678 Phase 4 pass 11 the setup is chosen from the
+    /// screens' actual shapes, and a preset planning for "two
+    /// screens" could not answer *which* two. So a count you are
+    /// not running offers the workflow layouts alone, which is
+    /// what "For other setups" now means.
+    ///
+    /// Never the silent `isStandard` fallback: a setup derived
+    /// from live hardware is a poor thing to land in silently on
+    /// a monitor change — `composeMonitorChangeFallback` asks for
+    /// it by name when the user is on that baseline (#485).
+    public static func all(sizes: [CGSize]) -> [StandardLayout] {
+        let starter = StarterSetup.standardLayout(sizes: sizes)
+        guard
+            let lead = workflows.firstIndex(where: {
+                $0.screenCount == starter.screenCount
+            })
+        else { return workflows + [starter] }
+        var catalog = workflows
+        catalog.insert(starter, at: lead)
+        return catalog
     }
 
-    /// The layouts planning for exactly `count` screens.
+    /// The layouts planning for exactly `count` screens, on a
+    /// setup whose live screens are `sizes`.
     public static func layouts(
-        for count: Int
+        for count: Int,
+        sizes: [CGSize]
     ) -> [StandardLayout] {
-        all.filter { $0.screenCount == count }
+        all(sizes: sizes).filter { $0.screenCount == count }
     }
 
     /// The Standard used as fallback for a live screen count:
     /// the marked default of the closest defined count that is
     /// less than or equal to `count`. Nil below one screen.
+    /// Reads `workflows`, not the live catalog: the Starter is
+    /// never `isStandard`, so the silent fallback needs no screen
+    /// sizes and stays answerable anywhere.
     public static func standard(
         for count: Int
     ) -> StandardLayout? {
-        all.filter { $0.isStandard && $0.screenCount <= count }
+        workflows
+            .filter { $0.isStandard && $0.screenCount <= count }
             .max { $0.screenCount < $1.screenCount }
     }
 

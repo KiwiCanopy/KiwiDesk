@@ -18,6 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     var statusItem: StatusItemController?
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
+    /// The one-time menu-bar coach mark shown after the tour
+    /// closes (#678 Phase 4 pass 11). Held here so its event
+    /// monitors outlive `windowWillClose`.
+    let coachMark = MenuBarCoachMark()
     /// Created on first `dashboard` access. Kept alongside so
     /// the quick-menu closures can refresh an *already open*
     /// dashboard without constructing the whole settings stack
@@ -247,7 +251,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             if OnboardingDiscovery.shouldResume(
                 isTrusted: trusted
             ) {
-                onboardingModel.step = .discoverShortcuts
+                onboardingModel.step = .keys
                 showOnboarding()
             }
         } else {

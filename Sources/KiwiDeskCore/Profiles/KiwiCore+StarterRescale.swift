@@ -1,40 +1,43 @@
 import Foundation
 
-/// Keeping the beginner ladder scaled to the hardware (#485).
+/// Keeping the starter setup scaled to the hardware (#485).
 ///
-/// A fresh install seeds the `Starter` ladder sized to its
-/// displays (#466), but the seeded profile only covers that one
-/// display count — so a later monitor change matched no stored
-/// set, fell to the composed *workflow* Standard, and dropped the
-/// beginner onto fewer spaces (e.g. Dual Developer's 8, not the
-/// ladder's 10) with no digit shortcut past the seeded count.
+/// A fresh install seeds the `Starter` setup for its displays
+/// (#466), but the seeded profile only covers that one display
+/// count — so a later monitor change matched no stored set, fell
+/// to the composed *workflow* Standard, and dropped the beginner
+/// onto a DIFFERENT number of spaces with no digit shortcut past
+/// the seeded count. It used to be strictly fewer; now that the
+/// setup's budget is screen-derived the workflow Standard can
+/// hand out more instead. The defect is that the count changes
+/// at all, not its direction.
 ///
 /// These helpers close both halves while the user stays on the
-/// ladder baseline: the unmatched-monitor fallback recomposes the
-/// *ladder* at the live display count, and the ⌃⌥N digit
-/// shortcuts top up additively for the spaces that appear.
+/// Starter baseline: the unmatched-monitor fallback recomposes the
+/// *setup* for the live displays, and the ⌃⌥N digit shortcuts top
+/// up additively for the spaces that appear.
 extension KiwiCore {
     /// Whether the layout currently on screen is the beginner
-    /// `Starter` ladder — either the adopted seed profile (flagged
-    /// via `Profile.isStarterLadder`, so the identity survives a
-    /// renamed file or an edited mode) or a transient ladder
+    /// `Starter` setup — either the adopted seed profile (flagged
+    /// via `Profile.isStarterSetup`, so the identity survives a
+    /// renamed file or an edited mode) or a transient Starter
     /// Standard already recomposed by an earlier display change
     /// (`currentStandard`, sticky across further changes). Only
-    /// then does an unmatched monitor change recompose the ladder
+    /// then does an unmatched monitor change recompose the starter setup
     /// rather than a workflow Standard. A saved-as-new copy is the
     /// user's own profile (unflagged) and resolves normally.
     var isOnStarterBaseline: Bool {
-        if profiles.currentStandard == StarterLadder.name {
+        if profiles.currentStandard == StarterSetup.name {
             return true
         }
         guard let name = profiles.currentName,
             let profile = try? profiles.read(name: name)
         else { return false }
-        return profile.isStarterLadder
+        return profile.isStarterSetup
     }
 
     /// The fallback layout for a monitor change no stored set
-    /// covers (#53): the beginner ladder scaled to the live
+    /// covers (#53): the starter setup scaled to the live
     /// display count while on the Starter baseline (#485),
     /// otherwise the count's built-in workflow Standard. Nil only
     /// when no display is connected.
@@ -49,8 +52,9 @@ extension KiwiCore {
             )
         }
         return ProfileComposition.compose(
-            layout: StarterLadder.standardLayout(
-                displayCount: displays.count
+            layout: StarterSetup.standardLayout(
+                displays: displays,
+                mainID: mainID
             ),
             displays: displays,
             mainID: mainID

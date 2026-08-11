@@ -247,6 +247,14 @@ public enum DefaultKeybindings {
         return rows
     }
 
+    /// How many spaces can carry a default digit shortcut: the
+    /// number row, `1`…`9` then `0`. Public because it is the
+    /// reason the starter setup's own budget stops where it does
+    /// — we run out of keys before we run out of spaces — and a
+    /// second copy of the number over there would be a restated
+    /// constant rather than a derived one.
+    public static let digitCapacity = 10
+
     /// The first ten spaces paired with the digit key each
     /// per-space combo uses: positions 1…9 map to `"1"`…`"9"`, and
     /// the tenth to `"0"` (⌃⌥0 = space 10, the top-row order). Ten
@@ -256,8 +264,14 @@ public enum DefaultKeybindings {
     private static func numbered(
         _ spaces: [SpaceID]
     ) -> [(String, SpaceID)] {
-        spaces.prefix(10).enumerated().map { index, space in
-            (index == 9 ? "0" : String(index + 1), space)
+        spaces.prefix(digitCapacity).enumerated().map {
+            index,
+            space in
+            (
+                index == digitCapacity - 1
+                    ? "0" : String(index + 1),
+                space
+            )
         }
     }
 }

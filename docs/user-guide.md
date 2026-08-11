@@ -211,8 +211,15 @@ basic tiling still works with separate display Spaces, and a single
 display is never affected. Changing the macOS option requires
 logging out and back in.
 
-When setup finishes, a shortcuts page lets you open the live
-shortcut panel before continuing. It stays in the wizard rather
+When the permission lands, KiwiDesk arranges every window that
+was already open — that first retile is the tour telling you it
+works. The tour then shows the spaces it chose for your screens
+and the keys it bound, and ends by saying where the app lives.
+Setup windows like the tour itself are never arranged: they have
+an end, so the tiler leaves them alone.
+
+A shortcuts page lets you open the live shortcut panel before
+continuing. It stays in the wizard rather
 than pointing at the menu bar, so it also works when the menu bar
 is auto-hidden. The final card then confirms KiwiDesk is arranging
 your windows and offers to **Open Settings** (landing on Layout)
@@ -1901,19 +1908,33 @@ mode (see [Per-Profile Shortcut Overrides](#per-profile-shortcut-overrides)).
 
 ### Built-in Standards & Presets
 
-KiwiDesk ships ten built-in **profiles** — a beginner **Starter**
-ladder plus workflow layouts for 1, 2, or 3 screens. One workflow
-layout per screen count is the *Standard* that resolves silently
-when no saved profile matches; the rest (Starter included) are
-Presets you can apply to spin up a starting point. (These are whole
-profiles — not to be confused with the seven layout *modes* like bsp
-or stack.)
+Where a preset does not name a layout for one of its spaces,
+that space takes **the layout its screen suits** rather than a
+fixed default — so applying a one-screen preset on a laptop
+never hands it BSP, which a laptop has no width for. See
+[Which layouts](#your-first-run) for what each screen shape
+gets.
+
+KiwiDesk ships eight built-in **profiles** — seven workflow
+layouts for 1, 2, or 3 screens, plus the **Starter** setup
+derived from the screens you have. One workflow layout per screen
+count is the *Standard* that resolves silently when no saved
+profile matches; the rest (Starter included) are Presets you can
+apply to spin up a starting point. (These are whole profiles —
+not to be confused with the seven layout *modes* like bsp or
+stack.)
+
+There is exactly one Starter, and it is offered for the number of
+screens you are running right now — it is built from those
+screens' shapes, so there is nothing for it to be derived from on
+a setup you do not have. That is why **For other setups** lists
+the workflow layouts alone.
 
 **1 Screen:**
 
-- **Starter** — One space per layout mode: scrolling, stack, track,
-  grid, and floating. The fresh-install tour; a good way back to a
-  known-good starting point.
+- **Starter** — The spaces chosen for your screen, each with its
+  own layout (see [Your first run](#your-first-run)). A good way
+  back to a known-good starting point.
 - **Developer** *(Standard)* — IDE in stack (space 2), docs in scrolling
   (space 3), preview fullscreen (space 4). Best for software dev.
 - **Minimalist** — Spacious gaps (20 pt), scrolling reading (space 1),
@@ -1924,8 +1945,10 @@ or stack.)
 
 **2 Screens:**
 
-- **Starter** — The five-mode ladder repeated on each display
-  (spaces 1–5 on the main, 6–10 on the second).
+- **Starter** — Five spaces split across the two screens by
+  width, each screen taking the tiled layouts its shape suits —
+  plus the one Floating space, which goes to the largest screen
+  rather than being chosen for it.
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
@@ -1933,8 +1956,10 @@ or stack.)
 
 **3 Screens:**
 
-- **Starter** — The five-mode ladder on all three displays
-  (spaces 1–5 / 6–10 / 11–15).
+- **Starter** — Seven spaces split across the three screens by
+  width, each screen taking the tiled layouts its shape suits —
+  plus the one Floating space, which goes to the largest screen
+  rather than being chosen for it.
 - **Command Center** *(Standard)* — Left: communication (stack).
   Center: workspace (IDE/docs/preview). Right: logs/monitoring.
 - **Visual Creative & Developer** — Left: design canvas. Center:
@@ -2115,27 +2140,62 @@ layout, and one word for two things is one too many.)
 ### Your first run
 
 A fresh install doesn't drop you onto an empty desktop. It seeds a
-**beginner ladder** — five spaces per connected display, each set to
-a different layout mode so you meet the whole range at once:
+setup **chosen for the screens you actually have** — the layouts
+come from each screen's shape, and the number of spaces from how
+many screens there are.
 
-| Space | Mode | Shows off |
-| --- | --- | --- |
-| 1 | track | a new window opens its own new track |
-| 2 | stack | a single master with an 80/20 split |
-| 3 | bsp | the default binary layout |
-| 4 | grid | a 3×2 grid |
-| 5 | floating | windows left untiled |
+**Which layouts.** Every screen is measured in points, not
+pixels, so a 5K 27" and a 1440p 27" get the same answer while a
+Retina laptop gets laptop layouts despite having more pixels than
+either:
 
-With a second display the block repeats — spaces 6–10 on the second
-monitor, 11–15 on a third, and so on. The ladder keeps this shape as
-you plug and unplug displays: while you're still on the Starter
-layout, connecting or removing a monitor re-scales it to five spaces
-per screen, and the `⌃⌥N` space shortcuts extend to cover the new
-spaces (up to ten — the number row's limit). The ladder is saved as
-an ordinary, editable profile named **Starter**, so nothing here is
-locked in: change any space's mode, delete spaces, or apply a
-different [preset](#built-in-standards--presets) whenever you like. (The same ladder is
-always available as the **Starter** preset if you want it back.)
+| Your screen | Gets, best first |
+| --- | --- |
+| Laptop (under 1900 pt wide) | scrolling · monocle |
+| 2K / 4K desktop (1900–3000 pt) | grid · stack · bsp · scrolling |
+| Ultrawide (3000 pt +, or wider than 2.1:1) | track · grid · stack |
+| Pivoted (taller than wide) | stack · grid · monocle |
+
+**Floating is not in those lists.** It is not a layout a screen
+wants more or less of — every setup gets exactly one Floating
+space and it goes to the largest screen with room beside it,
+which is a rule about the setup rather than about a screen.
+
+The gaps are as deliberate as the entries. Track never lands on a
+laptop, which has no width to give it. BSP appears only in the
+middle class — above it you get absurdly wide windows, below it
+unusable ones.
+
+**How many spaces.** Not five per display: a laptop's three plus
+a 27"'s five would be eight keys to learn on day one, most of
+them empty. The total is 3 spaces for one screen, 5 for two, 7
+for three, then 8, 9 and one more per screen up to ten — with
+each screen's share proportional to its width, between one and
+three. Every screen always gets at least one, so eleven displays
+gets eleven spaces. Exactly one Floating space is created, on
+your largest screen.
+
+So a 14" laptop on its own starts with three spaces — scrolling,
+monocle, floating. Add a 27" and you have five: the laptop keeps
+scrolling and monocle, the 27" takes grid, stack and floating.
+
+**The tuning follows your main screen**, since gaps and ratios
+belong to the profile rather than to a monitor: a laptop main
+screen gets tighter 6 pt gaps and 28 pt bars, an ultrawide gets
+two stack masters and a larger minimum window size, a pivoted one
+flips the stack to the bottom and scrolling to vertical.
+Per-space overrides are how you vary it from there.
+
+The setup keeps this shape as you plug and unplug displays: while
+you're still on the Starter layout, connecting or removing a
+monitor re-derives it for the new screens, and the `⌃⌥N` space
+shortcuts extend to cover any spaces that appear (up to ten — the
+number row's limit). It is saved as an ordinary, editable profile
+named **Starter**, so nothing is locked in: change any space's
+mode, delete spaces, or apply a different
+[preset](#built-in-standards--presets) whenever you like. The
+same setup is always available as the **Starter** preset if you
+want it back.
 
 ### Default Shortcuts
 
@@ -2165,9 +2225,9 @@ Directions use the arrow keys, which are identical on every layout.
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that
 space in Settings rewrites the shortcut to follow it, so the binding
-survives a rename. The digit shortcuts scale to the seeded ladder —
-`⌃⌥1`…`⌃⌥5` on one display, up to `⌃⌥1`…`⌃⌥9` plus `⌃⌥0` (the tenth
-space) on two. The number row stops at ten keys, so **spaces past
+survives a rename. The digit shortcuts scale to however many
+spaces the [starter setup](#your-first-run) created — one digit
+each, in order. The number row stops at ten keys, so **spaces past
 the tenth ship without a default digit shortcut** — reach them from
 the Space Bar or bind them yourself in the Keybindings editor.
 

@@ -42,6 +42,54 @@ override; float and ignore share the generic list-rule primitive
 because two real clients now remove drift — see
 [parity-tests.md](parity-tests.md).
 
+## The starter setup is derived, and its tuning is profile-wide
+
+A fresh install's `Starter` profile is **chosen from the screens
+that are connected** — `ScreenClass` (shape, in points) →
+`StarterAllocation` (how many spaces, and which layouts) →
+`StarterTuning` (the settings) → `StarterSetup` (assembles). The
+argument, and why it superseded #466's five-per-display ladder,
+is in `docs/design-decisions.md`. The obligations that fall on a
+change here:
+
+- **The tuning is profile-wide and named by the MAIN screen.**
+  `TilingSettings` has one gap value and one stack ratio to give,
+  so a laptop beside a 27" gets one answer and the only question
+  is which screen names it. Per-space overrides express the rest.
+  `StarterTuning.settings(mainShape:)` takes ONE `ScreenClass`,
+  so a per-display answer cannot be expressed without changing
+  the signature — do not change it into a per-display seam, which
+  would put a second config behind every value the Settings
+  window shows. `StarterSetupSeedTests` holds the tuning against
+  each class.
+- **Which entry point a call site takes is a rule, not a
+  preference.** `StandardProfiles.workflows` is the
+  hardware-agnostic list; `all(sizes:)` / `layouts(for:sizes:)`
+  are the live catalog, and the ONE `Starter` they carry is
+  derived from those screens; `standard(for:)` is the silent
+  monitor-change fallback and reads `workflows` alone, so it
+  needs no screens and stays answerable anywhere. A string
+  lookup takes `workflows` — asking the live catalog builds a
+  whole setup to read a name.
+  (`StarterSetupSeedTests` pins which face carries the Starter.)
+- **An unlisted mode in a sparse preset follows the screen.**
+  `StandardLayout.mode(of:on:)` answers a space the map does not
+  declare with that screen's own best layout, never a fixed
+  `bsp` — the layout `ScreenClass` rules out on a laptop, which
+  owns that threshold. Pass `nil` only where the hardware
+  genuinely is not knowable, and the historic `bsp` stands there;
+  a caller that CAN know and passes nil makes the preview and the
+  apply disagree. `SparseModeFallbackTests` holds both arms.
+- **`StarterSetup.slots` is the one walk.** Space numbering, the
+  mode map and the screen pins all derive from it; a second walk
+  is how a space takes its mode from one screen and its pin from
+  another (`StarterSetupSeedTests`).
+- **The share arithmetic is proportional, not merely summing.**
+  `StarterAllocation.shares` must keep equal screens equal and
+  never let a narrower screen out-rank a wider one — both are
+  invisible to a sum-and-clamp assertion, and both shipped
+  (`StarterAllocationTests`).
+
 ## API shape
 
 - `ProfileManager` mutators are `internal` **by design** — mutate

@@ -19,10 +19,29 @@ extension StandardLayout {
         return (1...spaceCount).map { SpaceID($0) }
     }
 
-    /// The layout mode `space` opens in — `bsp` where the sparse
-    /// map says nothing.
-    public func mode(of space: SpaceID) -> LayoutMode {
-        spaceModes[space] ?? .bsp
+    /// The layout mode `space` opens in.
+    ///
+    /// Where the sparse map says nothing, the answer is **the
+    /// screen's own best layout** — not a fixed `bsp` (owner
+    /// ruling, 2026-08-11). The workflow presets predate the
+    /// screen-shape theory and several are sparse: applying
+    /// `Minimalist` or `Focus Stack` on a laptop silently handed
+    /// it a BSP space, which is the one layout `ScreenClass`
+    /// rules out there — at 1728 pt a three-window BSP is already
+    /// under the minimum in one axis.
+    ///
+    /// `shape` is nil where the caller genuinely cannot know: a
+    /// preset card draws a plan for a screen COUNT, not for the
+    /// hardware in front of you, and a three-screen preset is
+    /// drawn on a one-screen Mac. Then the historic `bsp` stands,
+    /// because inventing a shape would be a worse answer than the
+    /// old one.
+    public func mode(
+        of space: SpaceID,
+        on shape: ScreenClass?
+    ) -> LayoutMode {
+        if let declared = spaceModes[space] { return declared }
+        return shape?.layouts.first ?? .bsp
     }
 
     /// The positional screen `space` plans for (0 = main, 1 = the
@@ -53,12 +72,14 @@ extension StandardLayout {
     /// The mode the FIRST space on `position` opens in — what
     /// that screen shows when the layout applies — or nil when
     /// the layout plans nothing for it.
+    /// `shape` nil draws the plan as a plan — see `mode(of:on:)`.
     public func openingMode(
         onScreen position: Int,
-        screens: Int
+        screens: Int,
+        on shape: ScreenClass? = nil
     ) -> LayoutMode? {
         spaces(onScreen: position, screens: screens)
             .first
-            .map { mode(of: $0) }
+            .map { mode(of: $0, on: shape) }
     }
 }

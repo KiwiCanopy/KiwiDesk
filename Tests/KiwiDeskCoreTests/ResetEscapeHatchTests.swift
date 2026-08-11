@@ -98,12 +98,22 @@ struct ResetEscapeHatchTests {
         let spaces = core.state.workspaces.allSpaces.map(\.id)
         #expect(!spaces.contains(SpaceID("poison")))
         #expect(!core.profiles.list().contains("Poisoned"))
-        // First-launch state is the starter ladder's tuning
-        // (the Starter profile seed applies it), not bare
-        // TilingSettings() — derive from the one source.
+        // First-launch state is the starter setup's tuning (the
+        // Starter profile seed applies it), not bare
+        // TilingSettings() — derive from the one source, and
+        // from the same MAIN screen the seed derived it from,
+        // since the tuning follows that screen's class (#678
+        // Phase 4 pass 11).
+        let seededShape = ScreenClass.of(
+            StarterSetup.sizes(
+                displays: core.state.workspaces.allDisplays,
+                mainID: PositionalDisplays.liveMainID
+            )[0]
+        )
         #expect(
             core.tiler.settings.gapsGlobal
-                == StarterLadder.settings().gapsGlobal
+                == StarterTuning.settings(mainShape: seededShape)
+                .gapsGlobal
         )
         #expect(
             try String(

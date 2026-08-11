@@ -18,6 +18,12 @@ import Testing
 /// rows.
 @Suite("Profiles render ↔ census parity")
 struct ProfilesCensusRenderTests {
+    /// The live screens the preset catalog is derived from since
+    /// #678 Phase 4 pass 11. One 27" — a single `.desktop`
+    /// screen, so the catalog this suite reasons over is the
+    /// one-screen one.
+    private let censusSizes = [CGSize(width: 2560, height: 1440)]
+
     /// A summary carrying only what the expansion reads (the
     /// name and the ordering keys) — the rest of the row's
     /// content belongs to the view, not to this seam.
@@ -147,20 +153,20 @@ struct ProfilesCensusRenderTests {
     /// branch — a renderer reading `rows(for:) ?? []` cannot tell
     /// a key that never draws from one whose rows disappeared.
     ///
-    /// Only `isStarterLadder` is in that set here, and it is
+    /// Only `isStarterSetup` is in that set here, and it is
     /// Lua-only: a profile identity flag with no Settings surface
     /// at all. A second entry means a container went hand-drawn
     /// and owes the same argument.
     @Test("every placed key expands to rows")
     func familiesExpand() {
         let drawsNothing: Set<SettingKey> = [
-            .profiles(.isStarterLadder)
+            .profiles(.isStarterSetup)
         ]
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
             presentDesktops: 3,
             boundDesktops: [],
-            presets: StandardProfiles.all
+            presets: StandardProfiles.all(sizes: censusSizes)
         )
         let placed = SettingKey.allCases.filter {
             if case .profiles = $0 { return true }
@@ -209,7 +215,10 @@ struct ProfilesCensusRenderTests {
             profiles: [summary("Desk"), summary("Laptop")],
             presentDesktops: 3,
             boundDesktops: [7],
-            presets: StandardProfiles.layouts(for: 1)
+            presets: StandardProfiles.layouts(
+                for: 1,
+                sizes: censusSizes
+            )
         )
         #expect(
             expander.rows(for: .profiles(.profilesLoad))
@@ -227,7 +236,10 @@ struct ProfilesCensusRenderTests {
         )
         #expect(
             expander.rows(for: .profiles(.presetsApply))?.count
-                == StandardProfiles.layouts(for: 1).count
+                == StandardProfiles.layouts(
+                    for: 1,
+                    sizes: censusSizes
+                ).count
         )
         // The preset instance carries the STABLE English name,
         // never the localized one — identity must not move with

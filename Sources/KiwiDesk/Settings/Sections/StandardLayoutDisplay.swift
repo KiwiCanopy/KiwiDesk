@@ -88,28 +88,25 @@ extension StandardLayout {
                 "Frontend IDE and previews center, design "
                     + "canvas left, inspectors right."
             )
-        // The Starter ladder (#466), which leads each screen
-        // count in the Presets list. These used to fall through
-        // to a `summary` string built in Core, so the first
-        // three presets a new user sees rendered raw English in
-        // every locale (#601).
-        case StarterLadder.name where screenCount <= 1:
+        // The Starter setup, which leads its own screen count in
+        // the Presets list. It used to fall through to a
+        // `summary` string built in Core, so the first preset a
+        // new user sees rendered raw English in every locale
+        // (#601).
+        //
+        // ONE key, where the ladder had three. The ladder planned
+        // for a screen COUNT, so its copy could name the modes it
+        // would lay down; this setup derives them from the shapes
+        // of the screens actually connected, and a sentence
+        // listing them would be a different sentence on every
+        // Mac. What stays true everywhere is the rule, so that is
+        // what the summary states — the modes themselves are on
+        // the thumbnails beside it (#678 Phase 4 pass 11).
+        case StarterSetup.name:
             return L(
-                "presets.starter_one.summary",
-                "One space per layout mode — Scrolling, Stack, "
-                    + "Track, Grid, and Floating."
-            )
-        case StarterLadder.name where screenCount == 2:
-            return L(
-                "presets.starter_two.summary",
-                "The five-mode set repeated on each display, "
-                    + "Scrolling through Floating."
-            )
-        case StarterLadder.name:
-            return L(
-                "presets.starter_three.summary",
-                "The five-mode set on all three displays, "
-                    + "Scrolling through Floating."
+                "presets.starter.summary",
+                "Spaces chosen for your screens, each with its "
+                    + "own layout."
             )
         default:
             // Unreachable for anything in `StandardProfiles.all`,
@@ -136,6 +133,12 @@ extension StandardLayout {
 /// `String` rather than a `StandardLayout`, so `ProfileHeader`
 /// shows the same translated name as the Presets list.
 @MainActor func standardDisplayName(_ name: String) -> String {
-    StandardProfiles.all.first { $0.name == name }?
+    // The WORKFLOW list, not the live catalog. A display name is
+    // keyed on the stable English `name`, and `displayName` has
+    // no Starter case — so the Starter entry resolved through
+    // `default: return name`, byte-identical to the fallback
+    // below, after three allocations and a tuning build ran to
+    // produce it (architect review, 2026-08-11).
+    StandardProfiles.workflows.first { $0.name == name }?
         .displayName ?? name
 }

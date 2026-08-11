@@ -7,13 +7,13 @@ import Testing
 /// Every shipped preset must render localized copy (#601).
 ///
 /// This is the guard the boundary scan cannot be: `StandardLayout`
-/// used to carry a `summary` String built in Core, and the three
-/// Starter rungs — the presets that LEAD each screen count in the
-/// list, so the first three a new user sees — had no case in
-/// `displaySummary` and fell through to it. They rendered Core's
-/// hardcoded English in all eleven locales. That string never went
-/// near `L()`, so `CoreLocalizationBoundaryTests` could not have
-/// seen it and `scripts/extract-keys` never put it in a catalog.
+/// used to carry a `summary` String built in Core, and the Starter
+/// rungs — the presets that LEAD each screen count in the list, so
+/// the first a new user sees — had no case in `displaySummary` and
+/// fell through to it. They rendered Core's hardcoded English in
+/// all eleven locales. That string never went near `L()`, so
+/// `CoreLocalizationBoundaryTests` could not have seen it and
+/// `scripts/extract-keys` never put it in a catalog.
 ///
 /// Two things now make it impossible rather than merely fixed:
 /// Core no longer holds the copy at all (there is nothing to fall
@@ -27,11 +27,29 @@ struct PresetSummaryCoverageTests {
         LocalizationManager.shared.select(nil)
     }
 
+    /// Every layout that can reach the Presets list on some Mac:
+    /// the hardware-agnostic workflows, plus the one `Starter`
+    /// as each supported screen count would derive it.
+    ///
+    /// The catalog stopped being a constant when the Starter
+    /// began deriving from live screens (#678 Phase 4 pass 11),
+    /// so "every shipped preset" has to be enumerated over the
+    /// setups rather than read off a static list.
+    private func everyShippedLayout() -> [StandardLayout] {
+        let screen = CGSize(width: 2560, height: 1440)
+        return StandardProfiles.workflows
+            + (1...3).map { count in
+                StarterSetup.standardLayout(
+                    sizes: [CGSize](repeating: screen, count: count)
+                )
+            }
+    }
+
     @Test("Every shipped preset renders a name and a summary")
     func everyPresetRendersCopy() {
         LocalizationManager.shared.select("en")
         defer { reset() }
-        for layout in StandardProfiles.all {
+        for layout in everyShippedLayout() {
             let summary = layout.displaySummary
             let missing =
                 "\(layout.name) (\(layout.screenCount) screen) "
@@ -45,19 +63,31 @@ struct PresetSummaryCoverageTests {
         }
     }
 
-    @Test("Each screen count's Starter reads differently")
-    func starterRungsAreDistinct() {
+    @Test("The Starter's summary says nothing hardware-specific")
+    func starterSummaryIsCountIndependent() {
         LocalizationManager.shared.select("en")
         defer { reset() }
-        // All three rungs share one `name`, so the switch has to
-        // discriminate on `screenCount`. A case that forgot the
-        // `where` clause would silently give all three the
-        // one-screen sentence.
-        let rungs = StandardProfiles.all
-            .filter { $0.name == StarterLadder.name }
-            .map(\.displaySummary)
-        #expect(rungs.count == 3)
-        #expect(Set(rungs).count == 3)
+        // The ladder had three summaries, one per screen count,
+        // because it laid down the same modes whatever the
+        // hardware was. This setup derives its modes from the
+        // screens' shapes, so a sentence naming them would be a
+        // different sentence on every Mac — and a `where
+        // screenCount` arm re-introducing one is exactly the
+        // regression to catch. One key, same sentence, whatever
+        // the setup (#678 Phase 4 pass 11).
+        let shapes: [CGSize] = [
+            CGSize(width: 1728, height: 1117),
+            CGSize(width: 2560, height: 1440),
+            CGSize(width: 3440, height: 1440),
+            CGSize(width: 1440, height: 2560),
+        ]
+        let summaries = (1...shapes.count).map { count in
+            StarterSetup.standardLayout(
+                sizes: Array(shapes.prefix(count))
+            ).displaySummary
+        }
+        #expect(summaries.allSatisfy { !$0.isEmpty })
+        #expect(Set(summaries).count == 1)
     }
 
     @Test("Preset copy actually resolves through a catalog")
@@ -83,7 +113,7 @@ struct PresetSummaryCoverageTests {
         let english = try catalogValues(locale: "en")
         LocalizationManager.shared.select("en")
         defer { reset() }
-        for layout in StandardProfiles.all {
+        for layout in everyShippedLayout() {
             let rendered = layout.displaySummary
             // Resolve to a Bool first: passing the Set into the
             // expectation makes a failure print all 843 values.

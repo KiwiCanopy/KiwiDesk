@@ -19,6 +19,17 @@ import SwiftUI
 /// in when the preset applies.
 struct PresetScreenCard: View {
     let layout: StandardLayout
+    /// The live screens, when this card is one the user can
+    /// actually apply — `nil` in the "For other setups" drawer,
+    /// where the plan is drawn for a screen COUNT and there is no
+    /// hardware to resolve it against.
+    ///
+    /// Without this the card drew the historic `bsp` for an
+    /// unlisted first space while `ProfileComposition.compose`
+    /// answered the same space from the display it lands on, so
+    /// the three appliable multi-screen presets named a layout
+    /// Apply never produces (code review, 2026-08-11).
+    var liveSizes: [CGSize]?
 
     private static let outline = CGSize(width: 34, height: 22)
 
@@ -101,8 +112,18 @@ struct PresetScreenCard: View {
     private func openingMode(_ screen: Int) -> LayoutMode? {
         layout.openingMode(
             onScreen: screen,
-            screens: layout.screenCount
+            screens: layout.screenCount,
+            on: shape(of: screen)
         )
+    }
+
+    /// The shape of the display this positional screen resolves
+    /// to, or nil where the card is not appliable.
+    private func shape(of screen: Int) -> ScreenClass? {
+        guard let liveSizes, screen < liveSizes.count else {
+            return nil
+        }
+        return ScreenClass.of(liveSizes[screen])
     }
 
     /// Named for the reader who cannot see the glyph — the count

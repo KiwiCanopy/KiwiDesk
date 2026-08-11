@@ -111,16 +111,28 @@ extension KiwiCore {
         }
     }
 
-    /// The starter space set a fresh install gets — the beginner
-    /// ladder sized to the connected displays: five spaces per
-    /// display (#466, superseding the flat nine of #270). One
-    /// generator behind both first-run pads (empty list and the
-    /// single-space signature) so the count can't drift between
-    /// them; the ladder's per-space MODES and pins are applied and
-    /// persisted separately by `seedFirstRunStarterProfile()`,
-    /// since `gui.json` carries only the space list and shortcuts.
+    /// The starter space set a fresh install gets — chosen for the
+    /// connected screens' shapes (#678 Phase 4 pass 11, turn 15b;
+    /// superseding the five-per-display ladder of #466 and the
+    /// flat nine of #270). One generator behind both first-run
+    /// pads (empty list and the single-space signature) so the
+    /// count can't drift between them; the per-space MODES and
+    /// pins are applied and persisted separately by
+    /// `seedFirstRunStarterProfile()`, since `gui.json` carries
+    /// only the space list and shortcuts.
     func starterSpaces() -> [SpaceID] {
-        StarterLadder.spaces(displayCount: firstRunDisplayCount())
+        StarterSetup.spaces(sizes: firstRunSizes())
+    }
+
+    /// First-run display sizes in positional order — the one
+    /// accessor behind both the `gui.json` space list and the
+    /// Starter profile, so the two can't size to different
+    /// screens.
+    func firstRunSizes() -> [CGSize] {
+        StarterSetup.sizes(
+            displays: firstRunDisplays(),
+            mainID: PositionalDisplays.liveMainID
+        )
     }
 
     /// Connected displays for first-run seeding. `loadConfig` runs
@@ -204,7 +216,7 @@ extension KiwiCore {
         // First run reports only the ACTIVE Space (#270): the live
         // list is a single numbered space (usually ["1"]), which
         // would seed only ⌃⌥1. Pad just that bare signature to the
-        // per-display ladder the empty state already uses, so the
+        // per-display set the empty state already uses, so the
         // scaled digit shortcuts (⌃⌥1–5 on one display, …+0 on two)
         // all work out of the box (#466). A named or multi-space
         // list is a configured setup — left exactly as discovered

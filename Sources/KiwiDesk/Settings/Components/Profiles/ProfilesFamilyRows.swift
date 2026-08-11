@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 
 /// One instance a Profiles census key expands into (#678 Phase 3,
@@ -96,10 +97,17 @@ struct ProfilesFamilyRows {
     }
 
     /// The presets a screen count offers, in catalog order.
+    ///
+    /// `sizes` are the LIVE screens, which the `Starter` entry is
+    /// derived from (#678 Phase 4 pass 11). It follows that the
+    /// drawer below offers no Starter at all: a count you are not
+    /// running has no screen shapes to choose layouts from, so
+    /// "For other setups" is the workflow layouts alone.
     static func presets(
-        forScreens screens: Int
+        forScreens screens: Int,
+        sizes: [CGSize]
     ) -> [StandardLayout] {
-        StandardProfiles.layouts(for: screens)
+        StandardProfiles.layouts(for: screens, sizes: sizes)
     }
 
     /// Every preset for a count that is NOT connected — the
@@ -107,7 +115,7 @@ struct ProfilesFamilyRows {
     static func presets(
         excludingScreens screens: Int
     ) -> [StandardLayout] {
-        StandardProfiles.all.filter {
+        StandardProfiles.workflows.filter {
             $0.screenCount != screens
         }
     }
@@ -143,7 +151,7 @@ struct ProfilesFamilyRows {
             return presets.map {
                 ProfilesRowInstance.preset($0.name)
             }
-        case .isStarterLadder:
+        case .isStarterSetup:
             // Lua-only: a profile identity flag with no Settings
             // surface at all (`SettingPlacement.luaOnly`), so it
             // draws nothing here and never will.

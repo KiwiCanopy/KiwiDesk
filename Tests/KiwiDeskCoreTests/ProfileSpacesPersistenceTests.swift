@@ -104,24 +104,24 @@ struct ProfileSpacesPersistenceTests {
         #expect(json.contains("\"spaces\":["))
     }
 
-    @Test("starter_ladder flag round-trips (#485)")
+    @Test("starter_setup flag round-trips (#485)")
     func starterLadderRoundTrips() throws {
         var profile = makeProfile(name: "s", monitors: ["A:1x1"])
-        profile.isStarterLadder = true
+        profile.isStarterSetup = true
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(profile)
         #expect(
             String(decoding: data, as: UTF8.self)
-                .contains("\"starter_ladder\":true")
+                .contains("\"starter_setup\":true")
         )
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let decoded = try decoder.decode(Profile.self, from: data)
-        #expect(decoded.isStarterLadder)
+        #expect(decoded.isStarterSetup)
     }
 
-    @Test("starter_ladder defaults false when absent (#485)")
+    @Test("starter_setup defaults false when absent (#485)")
     func starterLadderDecodeDefault() throws {
         // Legacy profiles predate the key — they decode to false,
         // never the ladder baseline.
@@ -138,7 +138,7 @@ struct ProfileSpacesPersistenceTests {
             Profile.self,
             from: Data(json.utf8)
         )
-        #expect(!profile.isStarterLadder)
+        #expect(!profile.isStarterSetup)
     }
 
     @Test("Profile.orderedSpaces uses stored order")

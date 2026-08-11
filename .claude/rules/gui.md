@@ -776,6 +776,21 @@ Every surface, border and ink in the Settings tree comes from
   the header and the empty-icon placeholder both shipped
   green-on-green for an afternoon.
 
+## Source-scanning guards have scan ROOTS, and a new tree joins them
+
+Two guards scan directories rather than the whole target, so a
+GUI tree outside their roots is simply not covered:
+`SettingsRawColorTests.scanRoots` (the raw-colour lens) and
+`LayoutSchematicPlacementScanTests.roots` (the placement-rule
+scan). **A new directory under `Sources/KiwiDesk` that draws
+chrome or renders a schematic joins those lists in the same
+change that creates it**, and each guard carries a
+root-coverage check so a moved or renamed directory reds instead
+of going quiet. The Onboarding tree is the worked case: it
+shipped a raw `.green`/`.orange` status hero in the first window
+every user sees, for as long as it existed, because the lens
+stopped at `Settings/`.
+
 ## SwiftUI traps
 
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

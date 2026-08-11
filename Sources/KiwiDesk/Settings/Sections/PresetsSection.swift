@@ -57,14 +57,32 @@ struct PresetsSection: View {
 
     // MARK: - Groups
 
-    private var liveCount: Int { model.displays.count }
+    /// Derived from `liveSizes`, so the "floor at one screen"
+    /// rule is applied ONCE, in Core. Counting `model.displays`
+    /// separately made the two disagree with nothing published:
+    /// the live group said "no plans for this many screens" while
+    /// a Starter for the nominal screen existed and was filtered
+    /// out by `screenCount != 0` (architect review, 2026-08-11).
+    private var liveCount: Int { liveSizes.count }
+
+    /// The live screens in positional order, which the `Starter`
+    /// preset is derived from. Ordered by the same helper the
+    /// first-run seed uses, so the preset a user applies and the
+    /// setup they were seeded with are the same thing.
+    private var liveSizes: [CGSize] {
+        StarterSetup.sizes(
+            displays: model.displays,
+            mainID: PositionalDisplays.liveMainID
+        )
+    }
 
     // Both preset lists come from the family seam that records
     // what `presetsApply` expands to, so the guard over that
     // expansion watches the cards this section actually draws.
     @ViewBuilder private var liveGroup: some View {
         let presets = ProfilesFamilyRows.presets(
-            forScreens: liveCount
+            forScreens: liveCount,
+            sizes: liveSizes
         )
         if presets.isEmpty {
             Text(noPresetsForCount)
@@ -73,7 +91,9 @@ struct PresetsSection: View {
         } else {
             SettingsGroupHeader(liveHeading)
                 .padding(.top, 4)
-            ForEach(presets, id: \.name) { presetRow($0) }
+            ForEach(presets, id: \.name) {
+                presetRow($0, sizes: liveSizes)
+            }
         }
     }
 
@@ -150,13 +170,17 @@ struct PresetsSection: View {
         ForEach(
             others.filter { $0.screenCount == count },
             id: \.name
-        ) { presetRow($0) }
+        ) { presetRow($0, sizes: nil) }
     }
 
     // MARK: - Rows
 
+    /// `sizes` is the live screen list for an APPLIABLE card and
+    /// nil for the drawer — the card resolves its glyph against
+    /// the same hardware the apply path will.
     private func presetRow(
-        _ layout: StandardLayout
+        _ layout: StandardLayout,
+        sizes: [CGSize]?
     ) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
@@ -175,7 +199,7 @@ struct PresetsSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                PresetScreenCard(layout: layout)
+                PresetScreenCard(layout: layout, liveSizes: sizes)
             }
             Spacer()
             applyButton(layout)

@@ -53,7 +53,10 @@ struct StarterRescaleTests {
         let core = makeGuiManagedCore()
         connect(core, [display(1, "A")])
         try core.applyStandard(
-            StarterLadder.standardLayout(displayCount: 1)
+            StarterSetup.standardLayout(
+                displays: [display(1, "A")],
+                mainID: DisplayID(1)
+            )
         )
         return core
     }
@@ -65,7 +68,7 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         #expect(core.profiles.currentName == "Starter")
         #expect(
-            try core.profiles.read(name: "Starter").isStarterLadder
+            try core.profiles.read(name: "Starter").isStarterSetup
         )
         #expect(core.isOnStarterBaseline)
     }
@@ -77,7 +80,7 @@ struct StarterRescaleTests {
         try core.applyStandard(StandardProfiles.developer)
         #expect(
             try core.profiles.read(name: "Developer")
-                .isStarterLadder == false
+                .isStarterSetup == false
         )
         #expect(!core.isOnStarterBaseline)
     }
@@ -91,22 +94,28 @@ struct StarterRescaleTests {
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
 
-        // Ten spaces on the ladder — not the eight-space Dual
-        // Developer workflow Standard.
+        // The two-screen budget is five spaces — not the
+        // eight-space Dual Developer workflow Standard. The
+        // fixtures are 100 pt wide, so both screens are
+        // `ScreenClass.laptop` and take that class's list.
         #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 10)
+        #expect(core.state.workspaces.allSpaces.count == 5)
         #expect(
-            core.state.workspaces[SpaceID(6)]?.mode == .scrolling
+            core.state.workspaces[SpaceID(1)]?.mode == .scrolling
         )
-        #expect(core.state.workspaces[SpaceID(9)]?.mode == .grid)
-        #expect(core.state.workspaces[SpaceID(3)]?.mode == .track)
-        // Five per display, not the Dual Developer 4/4/2 scatter:
-        // each five-space block lands whole on one screen, and the
+        #expect(
+            core.state.workspaces[SpaceID(2)]?.mode == .monocle
+        )
+        #expect(
+            core.state.workspaces[SpaceID(3)]?.mode == .floating
+        )
+        // Each screen's block lands whole on one screen, and the
         // two blocks are on different screens. (Asserted by block
         // cohesion, not fixed ids — the test's live "main" depends
-        // on CGMainDisplayID.)
-        let blockOne = displaysOf(core, 1...5)
-        let blockTwo = displaysOf(core, 6...10)
+        // on CGMainDisplayID.) The blocks are no longer equal:
+        // the widest screen takes the larger share.
+        let blockOne = displaysOf(core, 1...3)
+        let blockTwo = displaysOf(core, 4...5)
         #expect(blockOne.count == 1)
         #expect(blockTwo.count == 1)
         #expect(blockOne != blockTwo)
@@ -129,20 +138,22 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        // Now on a transient ladder Standard; a THIRD display must
-        // still recompose the ladder (15 spaces), not a Standard.
+        // Now on a transient Starter Standard; a THIRD display
+        // must still recompose the setup (the seven-space budget),
+        // not a workflow Standard.
         connect(core, [display(3, "C", x: 200)])
         core.handleMonitorChange()
         #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 15)
+        #expect(core.state.workspaces.allSpaces.count == 7)
         #expect(
-            core.state.workspaces[SpaceID(11)]?.mode == .scrolling
+            core.state.workspaces[SpaceID(6)]?.mode == .scrolling
         )
-        // Three whole five-space blocks, one per display.
+        // Three whole blocks, one per display — 3 · 2 · 2, the
+        // widest screen taking the larger share.
         let blocks = [
-            displaysOf(core, 1...5),
-            displaysOf(core, 6...10),
-            displaysOf(core, 11...15),
+            displaysOf(core, 1...3),
+            displaysOf(core, 4...5),
+            displaysOf(core, 6...7),
         ]
         #expect(blocks.allSatisfy { $0.count == 1 })
         #expect(Set(blocks.flatMap { $0 }).count == 3)
@@ -167,14 +178,14 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        // A transient ladder Standard is on screen (10 spaces).
+        // A transient Starter Standard is on screen (5 spaces).
         #expect(core.profiles.currentStandard == "Starter")
         // The user saves it under a new name.
         core.execute("save_profile", args: [.string("Both")])
         // buildProfile tags it from currentStandard, so the saved
         // profile is still the ladder baseline — a later change
         // won't drop them to a workflow Standard.
-        #expect(try core.profiles.read(name: "Both").isStarterLadder)
+        #expect(try core.profiles.read(name: "Both").isStarterSetup)
         #expect(core.isOnStarterBaseline)
     }
 
@@ -183,16 +194,16 @@ struct StarterRescaleTests {
         let core = try onStarterBaseline()
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
-        #expect(core.state.workspaces.allSpaces.count == 10)
+        #expect(core.state.workspaces.allSpaces.count == 5)
         // The profile re-apply a config reload performs must keep
-        // the ladder, not recompose the workflow Standard (#485,
-        // the second recompose site).
+        // the starter setup, not recompose the workflow Standard
+        // (#485, the second recompose site).
         core.reapplyActiveProfileState()
         #expect(core.profiles.currentStandard == "Starter")
-        #expect(core.state.workspaces.allSpaces.count == 10)
-        let blockTwo = displaysOf(core, 6...10)
+        #expect(core.state.workspaces.allSpaces.count == 5)
+        let blockTwo = displaysOf(core, 4...5)
         #expect(blockTwo.count == 1)
-        #expect(displaysOf(core, 1...5) != blockTwo)
+        #expect(displaysOf(core, 1...3) != blockTwo)
     }
 
     // MARK: - Additive shortcut top-up
@@ -200,14 +211,15 @@ struct StarterRescaleTests {
     @Test("display change tops up ⌃⌥N for the new spaces")
     func displayChangeTopsUpShortcuts() throws {
         let core = try onStarterBaseline()
-        // The one-display seed bound ⌃⌥1-5 only.
+        // The one-display seed bound ⌃⌥1-3 only (the one-screen
+        // budget is three spaces).
         let seeded = Set(
             (core.persistedGuiConfig()?.layers
                 .first { $0.isDefault }?.bindings ?? [])
                 .map(\.combo)
         )
-        #expect(seeded.contains("control+option+5"))
-        #expect(!seeded.contains("control+option+6"))
+        #expect(seeded.contains("control+option+3"))
+        #expect(!seeded.contains("control+option+4"))
         #expect(!seeded.contains("control+option+0"))
 
         connect(core, [display(2, "B", x: 100)])
@@ -218,31 +230,38 @@ struct StarterRescaleTests {
                 .first { $0.isDefault }?.bindings ?? [])
                 .map(\.combo)
         )
-        // ⌃⌥6-9 and ⌃⌥0 (tenth space) now bound, all three tiers.
-        #expect(grown.contains("control+option+6"))
-        #expect(grown.contains("control+option+0"))
-        #expect(grown.contains("control+option+shift+9"))
-        #expect(grown.contains("control+option+command+0"))
-        // The original ⌃⌥1-5 are untouched (still present once).
-        let goToSix =
+        // ⌃⌥4-5 (the spaces the second screen added) now bound,
+        // all three tiers.
+        #expect(grown.contains("control+option+4"))
+        #expect(grown.contains("control+option+5"))
+        #expect(grown.contains("control+option+shift+5"))
+        #expect(grown.contains("control+option+command+5"))
+        // The original ⌃⌥1-3 are untouched (still present once).
+        let goToFive =
             (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
-            .filter { $0.combo == "control+option+0" }
-        #expect(goToSix.count == 1)
+            .filter { $0.combo == "control+option+5" }
+        #expect(goToFive.count == 1)
         #expect(
-            goToSix.first?.lua == "KiwiDesk.focus_space(\"10\")"
+            goToFive.first?.lua == "KiwiDesk.focus_space(\"5\")"
         )
     }
 
     @Test("top-up leaves a user's custom digit chord intact")
     func topUpPreservesCustomChord() throws {
         let core = try onStarterBaseline()
-        // The user rebinds ⌃⌥6 in the sidecar before the change.
+        // ⌃⌥5, deliberately: the second display grows the setup
+        // from three spaces to five, so this is a digit the
+        // top-up WANTS. Keyed on a digit outside the grown range
+        // the test passes without the collision ever occurring —
+        // which is what it did when the budget was five per
+        // display and this fixture said ⌃⌥6 (#678 pass 11).
+        let contested = "control+option+5"
         var config = core.persistedGuiConfig() ?? GuiConfig()
         let index = config.layers.firstIndex { $0.isDefault }!
         config.layers[index].bindings.append(
             KeyBinding(
-                combo: "control+option+6",
+                combo: contested,
                 lua: "KiwiDesk.toggle_floating()",
                 kind: .custom,
                 label: "Mine"
@@ -253,13 +272,16 @@ struct StarterRescaleTests {
         connect(core, [display(2, "B", x: 100)])
         core.handleMonitorChange()
 
-        let sixes =
+        // Vacuity: the change must actually have reached a fifth
+        // space, or the top-up had no reason to want this digit.
+        #expect(core.state.workspaces.allSpaces.count == 5)
+        let claimed =
             (core.persistedGuiConfig()?.layers
             .first { $0.isDefault }?.bindings ?? [])
-            .filter { $0.combo == "control+option+6" }
-        // Still exactly one ⌃⌥6 — the user's, not overwritten by
+            .filter { $0.combo == contested }
+        // Still exactly one ⌃⌥5 — the user's, not overwritten by
         // the default focus_space row.
-        #expect(sixes.count == 1)
-        #expect(sixes.first?.lua == "KiwiDesk.toggle_floating()")
+        #expect(claimed.count == 1)
+        #expect(claimed.first?.lua == "KiwiDesk.toggle_floating()")
     }
 }

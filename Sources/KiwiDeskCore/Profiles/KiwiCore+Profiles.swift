@@ -108,7 +108,7 @@ extension KiwiCore {
     /// pin to their display's fingerprint. For a workflow Standard
     /// this equals what `resolveSpaceDisplays` re-derives from the
     /// count's Standard, so it's a no-op in effect; for the beginner
-    /// ladder, whose five-per-display plan is NOT the count's
+    /// setup, whose five-per-display plan is NOT the count's
     /// Standard, it's load-bearing — without it the blocks scatter
     /// into the Standard's slots (#485).
     func adoptComposedPlacement(
@@ -159,15 +159,15 @@ extension KiwiCore {
             name: name,
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
-            // Carry the beginner-ladder identity when the live
-            // layout IS the ladder (#485): the transient ladder
+            // Carry the starter-setup identity when the live
+            // layout IS that setup (#485): the transient Starter
             // Standard sets `currentStandard`, so a first save of
             // it stays a baseline that re-scales on later display
             // changes. `applyStandard` adopts the standard before
             // this, so the preset path is covered here too; a
             // save-as-new copy (which reads, not builds) is not.
-            isStarterLadder: profiles.currentStandard
-                == StarterLadder.name,
+            isStarterSetup: profiles.currentStandard
+                == StarterSetup.name,
             spaces: liveSpaces,
             fallbackSpace: fallbackSpace.flatMap {
                 liveSpaces.contains($0) ? $0 : nil

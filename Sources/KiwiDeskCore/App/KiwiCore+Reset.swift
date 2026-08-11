@@ -98,9 +98,9 @@ extension KiwiCore {
         // reload's seed reads them; windows are forwarded, so
         // nothing is stranded in a pruned space. The target
         // depends on who owns settings: a GUI-managed config's
-        // first launch seeds the starter ladder, but a
+        // first launch seeds the starter setup, but a
         // Lua-owned one (`configDeclaresManagedSettings`) never
-        // gets a ladder — its first launch is the single
+        // gets a starter setup — its first launch is the single
         // default space plus whatever the Lua declares on the
         // reload below, so grafting starter spaces here would
         // produce a state no first launch ever shows.

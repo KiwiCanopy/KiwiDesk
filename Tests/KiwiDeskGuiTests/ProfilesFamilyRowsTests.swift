@@ -105,14 +105,18 @@ struct ProfilesFamilyRowsTests {
     /// preset falling out of both would silently vanish from the
     /// page.
     ///
-    /// Split by screen COUNT, not by name: `Starter` names three
-    /// different layouts, one per count, so a name-keyed
-    /// disjointness check reds on a correct partition.
+    /// Split by screen COUNT, not by name, and swept with the
+    /// live sizes the count implies — since #678 Phase 4 pass 11
+    /// the `Starter` entry is DERIVED from those sizes, so a
+    /// sweep passing one fixed size list would ask about a
+    /// catalog no Mac ever shows.
     @Test("the two preset lists partition the catalog")
     func presetListsPartition() {
-        for screens in 0...4 {
+        for screens in 1...4 {
+            let sizes = liveSizes(screens)
             let mine = ProfilesFamilyRows.presets(
-                forScreens: screens
+                forScreens: screens,
+                sizes: sizes
             )
             let others = ProfilesFamilyRows.presets(
                 excludingScreens: screens
@@ -125,15 +129,51 @@ struct ProfilesFamilyRowsTests {
             )
             #expect(
                 mine.count + others.count
-                    == StandardProfiles.all.count
+                    == StandardProfiles.all(sizes: sizes).count,
+                "\(screens) screens: the lists lost a preset"
             )
         }
         // Vacuity: the sweep must run over a real catalog, and
         // over a count that actually has presets — otherwise
         // every `allSatisfy` above holds over an empty list.
-        #expect(StandardProfiles.all.count > 1)
+        #expect(StandardProfiles.all(sizes: liveSizes(1)).count > 1)
         #expect(
-            !ProfilesFamilyRows.presets(forScreens: 1).isEmpty
+            !ProfilesFamilyRows.presets(
+                forScreens: 1,
+                sizes: liveSizes(1)
+            ).isEmpty
+        )
+    }
+
+    /// The drawer offers no Starter, whatever the live setup.
+    ///
+    /// Not a tidiness claim: a count you are not running has no
+    /// screen SHAPES to choose layouts from, so there is nothing
+    /// a Starter for it could be derived from. The drawer is the
+    /// workflow layouts alone, and an entry appearing there would
+    /// mean someone had invented hardware to derive it from.
+    @Test("For other setups never offers a Starter")
+    func drawerHasNoStarter() {
+        for screens in 0...4 {
+            let others = ProfilesFamilyRows.presets(
+                excludingScreens: screens
+            )
+            #expect(
+                others.allSatisfy { $0.name != StarterSetup.name },
+                "\(screens) screens: the drawer offered a Starter"
+            )
+        }
+        // Vacuity: the drawer must have had something in it.
+        #expect(
+            !ProfilesFamilyRows.presets(excludingScreens: 1)
+                .isEmpty
+        )
+    }
+
+    private func liveSizes(_ count: Int) -> [CGSize] {
+        [CGSize](
+            repeating: CGSize(width: 2560, height: 1440),
+            count: count
         )
     }
 }

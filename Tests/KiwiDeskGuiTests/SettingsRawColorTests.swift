@@ -22,8 +22,23 @@ import Testing
 struct SettingsRawColorTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    private static var settingsDir: URL {
-        root.appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// The trees this lens covers.
+    ///
+    /// The Onboarding tree joined in #678 Phase 4 pass 11. It is
+    /// not a Settings surface, and it earns the same lens for a
+    /// sharper reason than consistency: it is the FIRST window
+    /// every user sees, and it shipped a raw `.green`/`.orange`
+    /// status hero and a green "Permission granted!" for as long
+    /// as it existed — a hue that lifts in dark mode, against
+    /// this app's own green primary, where hue was the only
+    /// channel separating two states. A tree drawing chrome
+    /// outside `Settings/` joins this list in the same change
+    /// that gives it colour.
+    private static var scanRoots: [URL] {
+        [
+            "Sources/KiwiDesk/Settings",
+            "Sources/KiwiDesk/Onboarding",
+        ].map { root.appendingPathComponent($0) }
     }
 
     // MARK: - Fixed hues
@@ -73,7 +88,7 @@ struct SettingsRawColorTests {
         var scanned = 0
         var hits: [String] = []
         var used: Set<String> = []
-        for file in try swiftFiles(under: Self.settingsDir) {
+        for file in try scannedFiles() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -149,7 +164,7 @@ struct SettingsRawColorTests {
     func noRGBLiterals() throws {
         var scanned = 0
         var hits: [String] = []
-        for file in try swiftFiles(under: Self.settingsDir) {
+        for file in try scannedFiles() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             ).replacingOccurrences(of: " ", with: "")
@@ -172,7 +187,7 @@ struct SettingsRawColorTests {
         // literal is grounds that have gone (#614).
         for (file, _) in rgbLiteralExempt {
             let url = try #require(
-                try swiftFiles(under: Self.settingsDir).first {
+                try scannedFiles().first {
                     $0.lastPathComponent == file
                 }
             )
@@ -236,7 +251,7 @@ struct SettingsRawColorTests {
             "init(color:.white", "init(color:.black",
             "??.black", "??.white",
         ]
-        for file in try swiftFiles(under: Self.settingsDir) {
+        for file in try scannedFiles() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             ).replacingOccurrences(of: " ", with: "")
@@ -278,6 +293,31 @@ struct SettingsRawColorTests {
     // `SettingsFixedGroundTests` — split at the §2.1 ceiling.
 
     // MARK: - Enumeration
+
+    /// A root that yields nothing is invisible in every `scanned`
+    /// floor above — the Settings tree alone clears all of them —
+    /// so a renamed or moved directory would retire this lens over
+    /// that tree in silence, which is the failure mode #635 owns.
+    @Test("every scan root is actually read")
+    func everyRootIsRead() throws {
+        for root in Self.scanRoots {
+            #expect(
+                !(try swiftFiles(under: root)).isEmpty,
+                Comment(
+                    rawValue:
+                        "\(root.lastPathComponent) yielded no "
+                        + "Swift files — this lens no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        #expect(Self.scanRoots.count > 1)
+    }
+
+    /// Every Swift file under every scan root.
+    private func scannedFiles() throws -> [URL] {
+        try Self.scanRoots.flatMap { try swiftFiles(under: $0) }
+    }
 
     private func swiftFiles(under dir: URL) throws -> [URL] {
         var result: [URL] = []
