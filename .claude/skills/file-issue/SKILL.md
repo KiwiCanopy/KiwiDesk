@@ -106,12 +106,41 @@ The honest size of the fix, not its importance:
 - **High** — a dedicated session or more: cross-subsystem, a
   new surface, or an unscoped investigation.
 
-## 4. Verify
+## 4. Set the milestone, or deliberately don't
 
-Read the issue back and confirm all three landed:
+Unlike the three above, this is not something the web form would
+have set — it is a triage decision, and it has its own question.
+**A milestone says which release must not ship without this.** It
+is not a second priority: Priority ranks work *within* a release,
+the milestone decides whether the release *waits*.
+
+- **Set `1.0`** for a defect a user can meet in a shipped
+  surface, a terminology or docs error that would ship wrong, or
+  work an open roadmap wave names.
+- **Leave it empty** for new behavior deliberately deferred, an
+  icebox idea, or anything blocked on the OS. Empty is an
+  ANSWER — it says the release does not wait for this — so
+  decide it rather than skipping it.
+
+```sh
+gh issue edit <n> --milestone "1.0"
+```
+
+Read the bar off the milestone's current contents, not off the
+two lines above: `gh issue list --milestone "1.0"` is the
+authority on what the release has actually committed to, and a
+ladder restated here would rot against it.
+
+Collector and roadmap issues take a milestone when they scope a
+release (`#663` does) — they only skip Priority and Effort.
+
+## 5. Verify
+
+Read the issue back and confirm all four landed:
 
 ```sh
 gh api repos/{owner}/{repo}/issues/<n> \
-  --jq '{type: .type.name, fields: [.issue_field_values[]
+  --jq '{type: .type.name, milestone: .milestone.title,
+  fields: [.issue_field_values[]
   | {(.issue_field_name): .single_select_option.name}]}'
 ```
