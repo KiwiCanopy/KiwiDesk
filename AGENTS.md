@@ -221,12 +221,16 @@ inline.
 Beyond the body: give every issue GitHub's **Type** (Bug /
 Feature / Task) and the repo's **Priority** and **Effort**
 issue fields at filing, not in a later sweep — an unranked
-issue is invisible to the roadmap's ordering. The
+issue is invisible to the roadmap's ordering. **Rule the
+milestone at filing too**, including ruling it EMPTY: a
+milestone says which release must not ship without the issue,
+so leaving it unanswered is not the same as answering "the
+release does not wait for this". The
 **`file-issue` skill**
 ([.claude/skills/file-issue](.claude/skills/file-issue/SKILL.md))
 owns the whole filing procedure — the template reproduction,
-setting the Type and both fields, and the Priority/Effort
-ladders. Type says what the retired `bug` / `enhancement` /
+setting the Type and both fields, the milestone question, and
+the Priority/Effort ladders. Type says what the retired `bug` / `enhancement` /
 `documentation` / `feat` labels used to say; never apply those
 labels to an issue again.
 
