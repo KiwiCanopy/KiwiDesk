@@ -30,7 +30,15 @@ extension SpacesSection {
     private func neighbourAfterDeleting(
         _ space: SpaceID
     ) -> SpaceID? {
-        let spaces = model.config.spaces
+        // `displayedSpaces`, not `model.config.spaces`: while a
+        // drag is in flight the rows render from the local
+        // `dragOrder`, and the neighbour has to be the one the
+        // user can SEE below the row they deleted. Practically
+        // unreachable today (the delete goes through a
+        // confirmation dialog, which no drag survives) — read
+        // this way so the claim in the comment above is true
+        // rather than nearly true (code review, 2026-08-11).
+        let spaces = displayedSpaces
         guard let index = spaces.firstIndex(of: space) else {
             return nil
         }

@@ -39,6 +39,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         created.setResolvePermission {
             PermissionMonitor.openSystemSettings()
         }
+        // The SAME handler the Config Issues panel gets: Reveal
+        // is one behaviour and both surfaces name the same file
+        // (#246, architect review 2026-08-11).
+        created.setRevealProfile(revealProfile)
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
         }
@@ -197,14 +201,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             // (the command only refreshes the panel/badge) (#246).
             self?.dashboardIfCreated?.refreshProfiles()
         }
-        configIssues.model.onRevealProfile = { [weak self] name in
-            guard
-                let url = try? self?.core.profiles.fileURL(
-                    name: name
-                )
-            else { return }
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-        }
+        configIssues.model.onRevealProfile = revealProfile
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues

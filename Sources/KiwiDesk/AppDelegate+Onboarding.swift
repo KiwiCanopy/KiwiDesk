@@ -7,13 +7,35 @@ import SwiftUI
 /// `AppDelegate` file to keep both under the §2.1 size target; the
 /// members it touches are `internal` there for the same reason.
 extension AppDelegate {
-    /// The shared "fix Accessibility" entry point for both the
-    /// quick-menu warning row and the Settings banner: reopen the
+    /// The QUICK MENU's "fix Accessibility" route: reopen the
     /// onboarding wizard straight at its grant step (skipping the
-    /// welcome copy) so both routes land in the one explainer.
+    /// welcome copy), which explains what the permission is for
+    /// and waits for it.
+    ///
+    /// The Settings banner deliberately does NOT come through
+    /// here any more (#678 Phase 4 pass 9) — it opens the macOS
+    /// pane directly, having already said what is wrong to a
+    /// reader who is sitting in Settings. `AppDelegate`'s
+    /// `setResolvePermission` wiring carries that argument.
+    /// Changing this function therefore changes ONE surface.
     func showAccessibilityHelp() {
         onboardingModel.step = .grant
         showOnboarding()
+    }
+
+    /// Shows a profile's file in the Finder — the ONE
+    /// implementation, handed to both surfaces that offer it: the
+    /// Config Issues panel row and the broken-profile row under
+    /// App ▸ Profiles (#246).
+    ///
+    /// Silent when the path won't validate. The name came from a
+    /// directory listing that already rejected invalid ones, so a
+    /// failure here means the file went away between the listing
+    /// and the click — and the next refresh drops the row anyway.
+    func revealProfile(_ name: String) {
+        guard let url = try? core.profiles.fileURL(name: name)
+        else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
     /// The tour's one VOLUNTARY entry point — Home's "Show me

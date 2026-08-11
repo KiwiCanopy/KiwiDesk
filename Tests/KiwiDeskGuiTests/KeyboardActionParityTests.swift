@@ -30,43 +30,56 @@ import Testing
 /// deliberate. This guard holds the half that was ruled in.
 @Suite("Keyboard action parity")
 struct KeyboardActionParityTests {
-    private var settingsDir: URL {
+    /// The WHOLE GUI target, not just `Settings/`: a context
+    /// menu added at target root (`ConfigIssuesWindow`,
+    /// `StatusItemController+Menu`) is a pointer-only mechanism
+    /// exactly like one inside the Settings tree, and a walk
+    /// scoped to Settings reds on none of them (architect
+    /// review, 2026-08-11).
+    private var guiDir: URL {
         SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("Sources/KiwiDesk")
+    }
+
+    private var settingsDir: URL {
+        guiDir.appendingPathComponent("Settings")
     }
 
     @Test("every context menu is also a set of named actions")
     func everyContextMenuHasAccessibilityActions() throws {
-        let files = try SourceScan.swiftSources(under: settingsDir)
+        let files = try SourceScan.swiftSources(under: guiDir)
         var checked = 0
         for file in files {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            // No leading dot: `ColorField` calls it on `self`
-            // from a `View` extension, and that spelling is a
-            // context menu like any other.
-            let menus =
-                source.components(
-                    separatedBy: "contextMenu {"
-                ).count - 1
-            guard menus > 0 else { continue }
+            let menus = builders(in: source, after: "contextMenu {")
+            guard !menus.isEmpty else { continue }
             checked += 1
-            let actions =
-                source.components(
-                    separatedBy: "accessibilityActions {"
-                ).count - 1
+            let actions = builders(
+                in: source,
+                after: "accessibilityActions {"
+            )
+            // Compares the BUILDERS, not the counts. The design's
+            // invariant is that both routes run the same builder
+            // (`SpaceAssignmentChip` says outright that a second
+            // copy is a second place for the display list to go
+            // stale), and equal counts admit exactly what that
+            // forbids: a hand-mirrored button list, or a two-menu
+            // file whose two action sets both wrap the same menu
+            // while the other stays pointer-only (architect
+            // review, 2026-08-11).
             #expect(
-                menus == actions,
+                menus.sorted() == actions.sorted(),
                 Comment(
                     rawValue:
-                        "\(file.lastPathComponent) has \(menus) "
-                        + "context menu(s) and \(actions) "
-                        + "accessibility action set(s) — a "
-                        + "mechanism that lives only behind a "
-                        + "right-click is pointer-only, and macOS "
-                        + "has no key that opens one (turn 20a "
-                        + "rule 1)"
+                        "\(file.lastPathComponent) opens "
+                        + "\(menus.sorted()) by right-click but "
+                        + "\(actions.sorted()) as named actions "
+                        + "— a mechanism reachable only behind a "
+                        + "right-click is pointer-only, macOS "
+                        + "having no key that opens one, and the "
+                        + "two routes must run ONE builder"
                 )
             )
         }
@@ -85,6 +98,23 @@ struct KeyboardActionParityTests {
                     + "was not actually checked"
             )
         )
+    }
+
+    /// The first token inside each `{ ... }` opened by `marker` —
+    /// the builder the braces hand off to (`menu`,
+    /// `contextActions(space)`, `userMenu(palette)`).
+    ///
+    /// `marker` carries no leading dot on purpose: `ColorField`
+    /// calls `contextMenu` on `self` from a `View` extension, and
+    /// that spelling is a context menu like any other.
+    private func builders(
+        in source: String,
+        after marker: String
+    ) -> [String] {
+        source.components(separatedBy: marker).dropFirst().map {
+            let body = $0.prefix { $0 != "}" && $0 != "\n" }
+            return body.trimmingCharacters(in: .whitespaces)
+        }
     }
 
     /// Turn 20a rule 4: **every shape change states a focus
@@ -119,9 +149,13 @@ struct KeyboardActionParityTests {
                 "and something has to raise the flag"
             ),
             Wiring(
-                "SpacesSection+Customize.swift",
+                "SpacesSection+ModePicker.swift",
                 ".focused($returningRow, equals: space)",
-                "the row is the return destination"
+                "the row's ALWAYS-drawn control is the return "
+                    + "destination — the Overrides button that "
+                    + "opens the editor is mode-gated, so binding "
+                    + "there sent focus to the top of the list on "
+                    + "a Simple-mode install"
             ),
             Wiring(
                 "SpacesSection+Remove.swift",

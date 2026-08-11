@@ -162,25 +162,6 @@ extension SettingsModel {
         reload()
     }
 
-    /// Shows a profile's file in the Finder (#246, #678 Phase 4
-    /// pass 9). The one action a broken profile has besides
-    /// Delete, and the reason its row states WHY it broke: for a
-    /// file whose JSON is malformed, opening it shows the damage.
-    ///
-    /// On the model rather than inline in the button so the row
-    /// and the Config Issues panel — which has offered Reveal all
-    /// along — reach the file the same way, through
-    /// `ProfileManager.fileURL`'s path validation. Silent when the
-    /// path won't validate: the name came from a directory
-    /// listing that already filtered invalid ones, so a failure
-    /// here means the file went away between the two, and the next
-    /// refresh drops the row anyway.
-    func revealProfile(named name: String) {
-        guard let url = try? core.profiles.fileURL(name: name)
-        else { return }
-        NSWorkspace.shared.activateFileViewerSelecting([url])
-    }
-
     /// Removes every Desktop → profile binding (#678 turn 13a).
     ///
     /// On the model, not inline in the button, because it is the

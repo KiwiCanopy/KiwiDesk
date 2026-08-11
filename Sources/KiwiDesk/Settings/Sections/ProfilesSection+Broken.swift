@@ -49,13 +49,18 @@ extension ProfilesSection {
             }
             Spacer()
             Button {
-                model.revealProfile(named: name)
+                model.onRevealProfile(name)
             } label: {
                 Image(systemName: "magnifyingglass")
             }
             .buttonStyle(.borderless)
+            // The Config Issues panel's own key, not a second
+            // one: it labels this exact action on this exact
+            // file, and coining a twin is the defect this file's
+            // docstring argues against, one level down from the
+            // sentence (code review, 2026-08-11).
             .iconButtonAffordance(
-                L("profiles.broken.reveal", "Reveal file in Finder")
+                L("config_issues.reveal", "Reveal in Finder")
             )
             // Same `reload()` tail as the healthy-row Delete, so
             // the same discard gate (#515). Found by the

@@ -61,6 +61,18 @@ extension View {
     /// One site, three consumers (the nav rows, the app group and
     /// the raw-Lua drawer), which is why the hint belongs on the
     /// shared modifier rather than at each of them.
+    ///
+    /// **Unverified in one respect, and kept anyway because the
+    /// two outcomes are not symmetric**: this modifier is applied
+    /// to a whole ROW, and whether a hint on a container reaches
+    /// the control inside it could not be observed headlessly
+    /// (see `GreyOut`, where the same question sent the same
+    /// change back out). Here the worse case is that the hint is
+    /// inert — nothing in a keybinding row sets a hint of its
+    /// own, so there is none for an empty inherited value to
+    /// displace. `GreyOut` was backed out because there the worse
+    /// case was DELETING hints that ship today. Confirm both in
+    /// one Accessibility Inspector pass.
     func keybindingRowStyle(inherited: Bool) -> some View {
         opacity(inherited ? 0.55 : 1)
             .accessibilityHint(

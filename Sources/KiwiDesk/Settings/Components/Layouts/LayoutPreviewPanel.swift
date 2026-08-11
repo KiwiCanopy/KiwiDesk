@@ -69,6 +69,11 @@ struct LayoutPreviewPanel: View {
                 )
             )
             .fixedSize()
+            // Drawn, not spoken: it names the slider below, and
+            // the slider says the name itself. Left visible it
+            // is read once standing alone and again as the
+            // control's name (code review, 2026-08-11).
+            .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
                     get: { Double(windows) },

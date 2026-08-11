@@ -258,9 +258,15 @@ final class SettingsModel: ObservableObject {
     /// state directly. Not dismissible: it tracks a persistent
     /// fact, unlike the transient `keybindingWarning`.
     @Published var permissionPaused = false
-    /// Routes the paused banner's "Enable Accessibility…" button
-    /// to the shared onboarding grant flow (wired by the app).
+    /// Routes the paused banner's "Open System Settings" button
+    /// to the macOS pane (wired by the app).
     var onResolvePermission: () -> Void = {}
+    /// Shows a profile's file in the Finder — the broken-profile
+    /// row's one action besides Delete (#246). The SAME closure
+    /// the Config Issues panel gets, wired once in `AppDelegate`
+    /// rather than a second `fileURL` + `NSWorkspace` body for
+    /// one behaviour; `AppDelegate+Onboarding` holds it.
+    var onRevealProfile: (String) -> Void = { _ in }
     /// Routes the 14c banner's "Show me around" to the welcome
     /// tour's voluntary replay (wired by the app) — the tour's
     /// first willing caller; the other three are involuntary.

@@ -58,9 +58,15 @@ struct SpaceOverridePreview: View {
     /// layout, so this is slider + count readout only.
     private var countRow: some View {
         HStack(spacing: 8) {
+            // Both texts are drawn for the eye and hidden from
+            // VoiceOver, which hears them from the slider itself
+            // — see the naming below. Spoken as siblings they
+            // are three elements for one value, and the middle
+            // one is the only one that can be adjusted.
             Text(L("layout_defaults.preview_windows", "Window count"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
                     get: { Double(windows) },
@@ -69,10 +75,20 @@ struct SpaceOverridePreview: View {
                 range: countRange,
                 step: 1
             )
+            // A sibling `Text` names nothing to VoiceOver, so
+            // this slider announced a bare percentage — the same
+            // defect the Layout Defaults panel carried, in its
+            // second copy, which the first fix left behind (code
+            // review, 2026-08-11).
+            .accessibilityLabel(
+                L("layout_defaults.preview_windows", "Window count")
+            )
+            .accessibilityValue("\(windows)")
             Text("\(windows)")
                 .frame(width: 24, alignment: .trailing)
                 .foregroundStyle(.secondary)
                 .font(.caption.monospacedDigit())
+                .accessibilityHidden(true)
         }
     }
 }

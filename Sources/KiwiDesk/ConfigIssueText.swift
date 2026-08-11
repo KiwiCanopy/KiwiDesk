@@ -18,7 +18,7 @@ enum ConfigIssueText {
     @MainActor
     static func message(for kind: ConfigIssue.Kind) -> String {
         switch kind {
-        case .profileUnreadable(let cause):
+        case .profileBroken(let cause):
             // Delegated, not duplicated: the Settings row under
             // App ▸ Profiles names the same file for the same
             // reason, and two strings about one condition drift

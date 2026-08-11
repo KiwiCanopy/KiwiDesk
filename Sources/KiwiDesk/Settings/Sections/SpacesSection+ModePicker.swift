@@ -30,6 +30,28 @@ extension SpacesSection {
             // hover hint names it (#94).
             .help(modeHint)
             .accessibilityLabel(modeHint)
+            // The row's focus representative (#678 Phase 4 pass
+            // 10, turn 20a rule 4): where a deletion lands, and
+            // where leaving the pushed override editor returns.
+            //
+            // This picker rather than the Overrides button that
+            // actually opened the editor, because that button is
+            // MODE-GATED (`SpaceOverrideOffer.isOffered`) and an
+            // absent preference means Simple — so on a fresh
+            // install it is not drawn at all, and a focus
+            // assigned to a value no view claims goes to the top
+            // of the list, which is the behaviour this rule
+            // exists to prevent (code review, 2026-08-11; the
+            // first cut bound the gated button and its guard,
+            // being a source needle, stayed green). Resetting
+            // the last override retires the offer mid-editor
+            // too, so even the return path cannot rely on it.
+            //
+            // A picker is also the benign choice among the row's
+            // always-drawn controls: the name field would open an
+            // edit and the delete button would put a destructive
+            // action under the next keypress.
+            .focused($returningRow, equals: space)
 
             // The one drift source (`model.layoutDrift`), shared
             // with the footer captions — never a second inline

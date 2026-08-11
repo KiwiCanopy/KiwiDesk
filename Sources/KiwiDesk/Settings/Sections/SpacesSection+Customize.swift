@@ -88,13 +88,6 @@ extension SpacesSection {
         } label: {
             overrideCellLabel(state)
         }
-        // The return destination when the pushed editor pops
-        // (#678 Phase 4 pass 10, turn 20a rule 4): leaving a
-        // sub-view returns focus to the row you came from, which
-        // for this row is the button that opened it. Without it a
-        // keyboard user lands back at the top of the list every
-        // time and re-walks to where they were.
-        .focused($returningRow, equals: space)
         .settingsActionButton()
         .controlSize(.large)
         // Hug the label so the GeometryReader below measures its

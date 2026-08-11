@@ -84,11 +84,19 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
     }
 
-    /// Routes the paused-permission banner's "Enable
-    /// Accessibility…" button; the app wires it to the shared
-    /// onboarding grant flow.
+    /// Routes the paused-permission banner's "Open System
+    /// Settings" button; the app wires it to the macOS pane.
     func setResolvePermission(_ handler: @escaping () -> Void) {
         model.onResolvePermission = handler
+    }
+
+    /// Routes the broken-profile row's Reveal; the app wires it
+    /// to the same handler the Config Issues panel uses, so one
+    /// behaviour keeps one implementation (#246).
+    func setRevealProfile(
+        _ handler: @escaping (String) -> Void
+    ) {
+        model.onRevealProfile = handler
     }
 
     /// Drives the dashboard-wide paused banner: true while

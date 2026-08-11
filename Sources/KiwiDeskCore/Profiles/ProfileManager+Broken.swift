@@ -10,7 +10,12 @@ import Foundation
 /// version" from "edited by hand" outright would be inventing the
 /// evidence. What the decoder DOES know is whether the bytes are
 /// JSON at all, and that is the useful half.
-public enum ProfileBrokenCause: Sendable, Equatable {
+/// `CaseIterable` so its renderer's coverage DERIVES: the text
+/// suite builds one fixture per case rather than restating three
+/// by hand, and a fourth cause then reaches the distinctness
+/// assertion instead of shipping a sentence identical to
+/// another's, green (architect review, 2026-08-11).
+public enum ProfileBrokenCause: Sendable, Equatable, CaseIterable {
     /// The bytes are not JSON. Nothing this app writes can come
     /// out this way, so a human edited it and lost a brace, a
     /// quote or a comma — visible on sight in an editor.

@@ -143,7 +143,14 @@ struct PaletteShelf: View {
                 Text(
                     L(
                         "palettes.empty_hint",
-                        "The built-ins above are what colours "
+                        // "colors", not "colours": English is the
+                        // translators' source of truth and the
+                        // rest of the corpus (`palettes.caption`
+                        // two rows up) is American. A split
+                        // spelling in one card is what ten
+                        // catalogs inherit (code review,
+                        // 2026-08-11).
+                        "The built-ins above are what colors "
                             + "KiwiDesk. Save one and it joins them "
                             + "here."
                     )
