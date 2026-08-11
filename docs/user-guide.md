@@ -1925,9 +1925,9 @@ the workflow layouts alone.
 
 **1 Screen:**
 
-- **Starter** — The spaces chosen for your screen, each with the
-  layout that screen suits (see [Your first run](#your-first-run)).
-  A good way back to a known-good starting point.
+- **Starter** — The spaces chosen for your screen, each with its
+  own layout (see [Your first run](#your-first-run)). A good way
+  back to a known-good starting point.
 - **Developer** *(Standard)* — IDE in stack (space 2), docs in scrolling
   (space 3), preview fullscreen (space 4). Best for software dev.
 - **Minimalist** — Spacious gaps (20 pt), scrolling reading (space 1),
@@ -1939,7 +1939,9 @@ the workflow layouts alone.
 **2 Screens:**
 
 - **Starter** — Five spaces split across the two screens by
-  width, each screen taking the layouts its shape suits.
+  width, each screen taking the tiled layouts its shape suits —
+  plus the one Floating space, which goes to the largest screen
+  rather than being chosen for it.
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
@@ -1948,7 +1950,9 @@ the workflow layouts alone.
 **3 Screens:**
 
 - **Starter** — Seven spaces split across the three screens by
-  width, each screen taking the layouts its shape suits.
+  width, each screen taking the tiled layouts its shape suits —
+  plus the one Floating space, which goes to the largest screen
+  rather than being chosen for it.
 - **Command Center** *(Standard)* — Left: communication (stack).
   Center: workspace (IDE/docs/preview). Right: logs/monitoring.
 - **Visual Creative & Developer** — Left: design canvas. Center:
@@ -2140,10 +2144,15 @@ either:
 
 | Your screen | Gets, best first |
 | --- | --- |
-| Laptop (under 1900 pt wide) | scrolling · monocle · floating |
-| 2K / 4K desktop (1900–3000 pt) | grid · stack · bsp · scrolling · floating |
-| Ultrawide (3000 pt +, or wider than 2.1:1) | track · grid · stack · floating |
-| Pivoted (taller than wide) | stack · grid · monocle · floating |
+| Laptop (under 1900 pt wide) | scrolling · monocle |
+| 2K / 4K desktop (1900–3000 pt) | grid · stack · bsp · scrolling |
+| Ultrawide (3000 pt +, or wider than 2.1:1) | track · grid · stack |
+| Pivoted (taller than wide) | stack · grid · monocle |
+
+**Floating is not in those lists.** It is not a layout a screen
+wants more or less of — every setup gets exactly one Floating
+space and it goes to the largest screen with room beside it,
+which is a rule about the setup rather than about a screen.
 
 The gaps are as deliberate as the entries. Track never lands on a
 laptop, which has no width to give it. BSP appears only in the

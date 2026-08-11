@@ -666,6 +666,7 @@
   "onboarding.grant.body": "1. Clique em “Abrir Ajustes do Sistema” abaixo.\n2. Encontre o KiwiDesk na lista e ative-o.\n3. Volte aqui — detectamos automaticamente.",
   "onboarding.grant.done.body": "Dê uma olhada atrás desta janela: suas janelas abertas foram organizadas.\n\nJanelas de configuração como esta permanecem intocadas, pois são temporárias.",
   "onboarding.grant.done.title": "Suas janelas estão organizadas",
+  "onboarding.grant.granted": "Permissão concedida",
   "onboarding.grant.title": "O KiwiDesk precisa de Acessibilidade",
   "onboarding.grant.trust": "O KiwiDesk nunca lê suas teclas digitadas e nunca pede para desativar o System Integrity Protection.",
   "onboarding.grant.waiting": "Aguardando a permissão…",

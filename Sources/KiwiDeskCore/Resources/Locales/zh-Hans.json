@@ -666,6 +666,7 @@
   "onboarding.grant.body": "1. 点按下方的“打开系统设置”。\n2. 在列表中找到 KiwiDesk 并将其打开。\n3. 回到这里 — 我们会自动检测。",
   "onboarding.grant.done.body": "看看此窗口背后的画面 — 你打开的窗口均已排列整齐。\n\n类似本窗口的设置窗口将保持原样，因为它们会在完成后自动消失。",
   "onboarding.grant.done.title": "你的窗口已排列整齐",
+  "onboarding.grant.granted": "已授予权限",
   "onboarding.grant.title": "KiwiDesk 需要辅助功能权限",
   "onboarding.grant.trust": "KiwiDesk 绝不读取你的按键，也绝不会要求你停用系统完整性保护（SIP）。",
   "onboarding.grant.waiting": "正在等待授权…",
