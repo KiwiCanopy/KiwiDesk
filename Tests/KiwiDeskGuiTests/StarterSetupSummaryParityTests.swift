@@ -37,15 +37,28 @@ import Testing
 @Suite("Starter summary independence", .serialized)
 @MainActor
 struct StarterSetupSummaryParityTests {
-    /// Four setups whose derived modes differ, so a summary that
-    /// leaked ANY of them is caught whichever shape leaked it.
-    private var setups: [[CGSize]] {
+    private var shapes: [CGSize] {
         [
-            [CGSize(width: 1728, height: 1117)],
-            [CGSize(width: 2560, height: 1440)],
-            [CGSize(width: 3440, height: 1440)],
-            [CGSize(width: 1440, height: 2560)],
+            CGSize(width: 1728, height: 1117),
+            CGSize(width: 2560, height: 1440),
+            CGSize(width: 3440, height: 1440),
+            CGSize(width: 1440, height: 2560),
         ]
+    }
+
+    /// Setups whose derived modes differ, so a summary that
+    /// leaked ANY of them is caught whichever shape leaked it —
+    /// and whose screen COUNTS differ too.
+    ///
+    /// The count matters and its absence was a hole: an earlier
+    /// cut listed four one-screen setups, so a
+    /// `where screenCount == 1` arm returning a second key was
+    /// taken by every fixture and the "one summary, whatever the
+    /// screens" test could not see it at all (guard-prover,
+    /// 2026-08-11). Varying the shape proves one thing, varying
+    /// the count another.
+    private var setups: [[CGSize]] {
+        (1...shapes.count).map { Array(shapes.prefix($0)) }
     }
 
     @Test("The summary names no layout mode")
@@ -82,6 +95,75 @@ struct StarterSetupSummaryParityTests {
             StarterSetup.spaceModes(sizes: sizes)
         }
         #expect(Set(derived.map { String(describing: $0) }).count > 1)
+    }
+
+    /// The same claim over the SHIPPED CATALOGS, which the
+    /// rendered-string tests above cannot reach.
+    ///
+    /// `LocalizationManager.select("en")` leaves `effectiveLocale`
+    /// nil by design, so every test that renders a string reads
+    /// only the inline call-site English — the ten translations
+    /// are never consulted. That is exactly the drift this
+    /// suite's own history describes: `016cc50a` left eleven
+    /// catalogs faithfully saying "Stack" about a rung that had
+    /// become `.bsp`. So the catalogs get their own read
+    /// (guard-prover, 2026-08-11 — putting a mode name into
+    /// `en.json` left the whole suite green).
+    ///
+    /// Matched case-insensitively and against every locale's OWN
+    /// name for each mode, since a translated summary would leak
+    /// a translated mode name, not the English one.
+    @Test("no catalog's Starter summary names a layout mode")
+    func catalogsNameNoMode() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Resources/Locales"
+            )
+        let files = try FileManager.default
+            .contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "json" }
+        var checked = 0
+        for file in files {
+            let data = try Data(contentsOf: file)
+            let catalog =
+                try JSONSerialization.jsonObject(with: data)
+                as? [String: String] ?? [:]
+            guard
+                let summary = catalog["presets.starter.summary"]
+            else { continue }
+            checked += 1
+            // Each mode's name AS THIS LOCALE WRITES IT, falling
+            // back to the English key name where a locale has not
+            // translated it.
+            for mode in LayoutMode.allCases {
+                let key = "layout.\(mode.rawValue).name"
+                let name = catalog[key] ?? mode.rawValue
+                guard name.count > 2 else { continue }
+                #expect(
+                    !summary.lowercased()
+                        .contains(name.lowercased()),
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent) names "
+                            + "\"\(name)\" in the Starter "
+                            + "summary — the modes come from the "
+                            + "screens, so no catalog may name "
+                            + "one. Summary: \"\(summary)\""
+                    )
+                )
+            }
+        }
+        // A scan that read nothing passes for having found
+        // nothing (#635). Eleven catalogs ship the key.
+        #expect(
+            checked >= 10,
+            Comment(
+                rawValue:
+                    "only \(checked) catalog(s) carried "
+                    + "presets.starter.summary — the key moved "
+                    + "and this guard went quiet"
+            )
+        )
     }
 
     /// The one sentence is the same sentence everywhere, which is

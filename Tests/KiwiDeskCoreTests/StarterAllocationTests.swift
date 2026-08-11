@@ -156,13 +156,35 @@ struct StarterAllocationTests {
 
     @Test("the largest screen picks first, so it is not starved")
     func largestPicksFirst() {
-        // The ultrawide is second positionally and still takes
-        // Track, its best layout, rather than losing it to a
-        // narrower screen filled earlier.
+        // The two screens must COMPETE, or the claim is untested.
+        // An earlier cut paired a 27" with an ultrawide and
+        // asserted the ultrawide got Track — but Track is absent
+        // from the desktop list entirely, so no fill order could
+        // ever have taken it away, and reversing `fillOrder` left
+        // this green (guard-prover, 2026-08-11).
+        //
+        // Pivoted and desktop both open on layouts the other also
+        // wants — stack and grid — so whoever picks first keeps
+        // its own head and the loser falls down its list. Shares
+        // are [2, 3] and the 27" hosts Floating.
         let modes = StarterAllocation.modes(
-            sizes: [screen27, ultrawide]
+            sizes: [pivoted, screen27]
         )
-        #expect(modes[1].first == .track)
+        // Widest first: the 27" keeps Grid, its own best.
+        #expect(modes[1].first == .grid)
+        // The pivoted screen fills second and finds BOTH its
+        // heads taken — grid and stack are the 27"'s two — so it
+        // falls to Monocle, third on its list. That is the cost
+        // of picking second, and it is what makes the order
+        // matter: reverse `fillOrder` and this becomes `.stack`
+        // while the 27" drops to `.bsp`.
+        #expect(modes[0].first == .monocle)
+        // Vacuity: the heads really are contested, or "picks
+        // first" decides nothing.
+        let contested = Set(ScreenClass.pivoted.layouts)
+            .intersection(ScreenClass.desktop.layouts)
+            .subtracting([.floating])
+        #expect(!contested.isEmpty)
     }
 
     @Test("every space gets a layout, and the total is the budget")

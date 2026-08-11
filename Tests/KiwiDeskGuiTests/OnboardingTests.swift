@@ -68,10 +68,22 @@ struct OnboardingTests {
         #expect(model.step == .done)
     }
 
-    /// The close seam asks `reachedEnd`, so what that flag means
-    /// is load-bearing for Home's first-run banner AND for the
-    /// discovery flag that stops the tour re-pitching.
-    @Test("reaching a closing beat is what sets reachedEnd")
+    /// Proves the `didSet` WIRING — that arriving at a step
+    /// consults `isClosingBeat` at all — and nothing about which
+    /// steps are in that set.
+    ///
+    /// Read the limit literally, because it is not obvious and it
+    /// shipped: both sides of this sweep read the same enum, so
+    /// any edit to `isClosingBeat`'s MEMBERSHIP moves the
+    /// expectation and the actual together and the sweep stays
+    /// green. Removing `.done` from the set passed the entire
+    /// suite — 3140 tests — with the tour's final card no longer
+    /// counting as the end, i.e. the discovery flag never marked,
+    /// Home's banner never seeded and the coach mark never shown
+    /// on the ordinary finish path (guard-prover, 2026-08-11).
+    /// `everyTerminalRouteReachesTheEnd` below is what holds the
+    /// membership; this holds the wiring.
+    @Test("arriving at a step consults its closing-beat verdict")
     func reachedEndOnArrival() {
         for step in OnboardingModel.Step.allCases {
             let model = OnboardingModel()
@@ -87,6 +99,72 @@ struct OnboardingTests {
             .filter(\.isClosingBeat)
         #expect(!beats.isEmpty)
         #expect(beats.count < OnboardingModel.Step.allCases.count)
+    }
+
+    /// The membership half, pinned against the FLOW rather than
+    /// against the enum that defines it.
+    ///
+    /// Every route a real user can take to the end of the tour is
+    /// driven through the model's own transitions, and each must
+    /// arrive with `reachedEnd` set — because three shipped
+    /// effects hang off that flag at `windowWillClose`
+    /// (`OnboardingDiscovery.markShown`, `HomeFirstRunState.seed`,
+    /// the coach mark). A step dropped from `isClosingBeat` reds
+    /// here even though the sweep above cannot see it.
+    @Test("every terminal route arrives having reached the end")
+    func everyTerminalRouteReachesTheEnd() {
+        // Route 1 — discovery already shown, one display: the
+        // spaces step goes straight to the closing card.
+        let direct = OnboardingModel()
+        direct.wantsDiscovery = { false }
+        direct.displayCount = { 1 }
+        direct.continueAfterAccessibility()
+        direct.continueAfterSpaces()
+        #expect(direct.step == .done)
+        #expect(direct.reachedEnd, "the direct route did not count")
+
+        // Route 2 — through the keys step.
+        let viaKeys = OnboardingModel()
+        viaKeys.wantsDiscovery = { true }
+        viaKeys.displayCount = { 1 }
+        viaKeys.continueAfterAccessibility()
+        viaKeys.continueAfterSpaces()
+        #expect(viaKeys.step == .keys)
+        viaKeys.continueAfterKeys()
+        #expect(viaKeys.step == .done)
+        #expect(viaKeys.reachedEnd, "the keys route did not count")
+
+        // Route 3 — through the Displays recommendation, which is
+        // the last substantive step when it appears at all.
+        let viaSpaces = OnboardingModel()
+        viaSpaces.continueAfterSeparateSpaces()
+        #expect(viaSpaces.step == .done)
+        #expect(
+            viaSpaces.reachedEnd,
+            "the Displays route did not count"
+        )
+
+        // Route 4 — the user closes ON the keys step rather than
+        // continuing. `shouldResume` puts a returning user there
+        // directly, so this is a real ending, not an abandonment.
+        let closedOnKeys = OnboardingModel()
+        closedOnKeys.wantsDiscovery = { true }
+        closedOnKeys.continueAfterAccessibility()
+        closedOnKeys.continueAfterSpaces()
+        #expect(closedOnKeys.step == .keys)
+        #expect(closedOnKeys.reachedEnd)
+
+        // And the steps that are NOT an ending stay uncounted, or
+        // the flag would be true from the first screen and mean
+        // nothing at all.
+        let opening = OnboardingModel()
+        #expect(!opening.reachedEnd)
+        opening.continueAfterAccessibility()
+        #expect(opening.step == .spaces)
+        #expect(
+            !opening.reachedEnd,
+            "the spaces step counted as the end of the tour"
+        )
     }
 
     /// `shouldResume` drops a returning user straight onto the
