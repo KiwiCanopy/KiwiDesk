@@ -209,7 +209,23 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // The one own window that tiles (#678 item 18): the
+        // engine discriminates own windows per window, never
+        // per process, and this identifier is the mark it
+        // reads back through the AX bridge. The tour and the
+        // Config Issues window stay unmarked on purpose —
+        // `OwnWindowTiling`'s doc carries the argument.
+        window.identifier = NSUserInterfaceItemIdentifier(
+            OwnWindowTiling.identifier
+        )
         window.center()
+        // The saved frame has two owners since the window began
+        // tiling (#678 item 18): the user's own drag while it
+        // floats, and the tiler's placement while it does not.
+        // Restoring a layout slot as if it were a chosen size is
+        // harmless — a tiled window is re-placed on the next
+        // retile regardless — and the clamp below is what keeps
+        // a degenerate saved width out of the bands.
         window.setFrameAutosaveName("KiwiDeskSettings")
         // A frame saved by an older build can be narrower than
         // the shell's minimum; min-size only gates user

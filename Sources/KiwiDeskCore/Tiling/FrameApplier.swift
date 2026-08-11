@@ -168,11 +168,17 @@ final class FrameApplier {
     // MARK: - Internals
 
     private func queue(for pid: pid_t) -> DispatchQueue {
-        // Frame-sets for our own windows (the floating Settings
-        // window) must run on the main queue: an in-process AX
-        // call never crosses to the AX server — HIServices runs
-        // the AppKit window move synchronously on the calling
-        // thread, and AppKit traps off the main thread.
+        // Frame-sets for our own windows must run on the main
+        // queue: an in-process AX call never crosses to the AX
+        // server — HIServices runs the AppKit window move
+        // synchronously on the calling thread, and AppKit traps
+        // off the main thread. Since #678 Phase 5 this is no
+        // longer the exceptional path it was written for (a
+        // floating Settings window, nudged): the Settings window
+        // tiles, so an animated retile drives it every tick. It
+        // is still one in-process window whose move AppKit
+        // performs synchronously — the same work the main queue
+        // would do at the end of the tick anyway.
         if pid == getpid() {
             return DispatchQueue.main
         }

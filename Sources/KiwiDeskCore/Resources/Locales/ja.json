@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "スペース %1$@ に移動",
   "keybinding.move_to_space_follow": "スペース %1$@ に移動して追従",
   "keybinding.move_window_to_track": "ウインドウをトラック %1$@ に移動",
+  "keybinding.open_settings": "設定を開く",
   "keybinding.seq.next": "次",
   "keybinding.seq.prev": "前",
   "keybinding.show_shortcuts": "ショートカットパネルを表示",

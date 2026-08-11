@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "Nach Space %1$@ verschieben",
   "keybinding.move_to_space_follow": "Nach Space %1$@ verschieben & folgen",
   "keybinding.move_window_to_track": "Fenster in den %1$@ Track verschieben",
+  "keybinding.open_settings": "Einstellungen öffnen",
   "keybinding.seq.next": "nächste",
   "keybinding.seq.prev": "vorherige",
   "keybinding.show_shortcuts": "Tastenkürzel-Übersicht anzeigen",

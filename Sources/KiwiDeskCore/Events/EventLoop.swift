@@ -48,6 +48,21 @@ public final class EventLoop {
     /// Bundle identifiers match case-insensitively.
     public var ignoreRules = IgnoreRules()
 
+    /// Reads one of KiwiDesk's OWN windows' AppKit identifier —
+    /// the tiling mark's lookup (#678 item 18). The production
+    /// default bridges AX identity to AppKit identity through
+    /// `NSApp.windows`; it is a seam because the mark is
+    /// otherwise unobservable from a test, so a call site that
+    /// stops consulting it — or compares the wrong constant —
+    /// would silently restore the old float-everything-own
+    /// behaviour with every suite green. Injected in tests
+    /// (`SelfWindowExclusionTests`); never nil, since a window
+    /// with no identifier answers nil on its own.
+    var ownWindowIdentifier: (WindowID) -> String? = { id in
+        EventLoop.ownWindow(number: Int(id.raw))?
+            .identifier?.rawValue
+    }
+
     var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop

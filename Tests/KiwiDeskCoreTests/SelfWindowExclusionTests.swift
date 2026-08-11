@@ -107,10 +107,11 @@ struct SelfWindowExclusionTests {
 
     @Test("Own window is never a transient overlay (#315)")
     func ownWindowKeepsRing() {
-        // The Settings window floats by default (force-float
-        // below) but must NOT classify as a launcher-style
-        // overlay — that classification suppresses its focus
-        // ring. Any own window that reaches tracking is
+        // No own window classifies as a launcher-style overlay —
+        // that classification suppresses the focus ring. The
+        // Settings window tiles outright (#678 item 18); the
+        // force-floated own chrome (tour, Config Issues) keeps
+        // its ring. Any own window that reaches tracking is
         // main-capable by construction.
         #expect(
             !EventLoop.classifiesAsOverlay(
@@ -140,24 +141,73 @@ struct SelfWindowExclusionTests {
         )
     }
 
-    @Test("Accessory and own-process windows force floating")
+    @Test("Accessory and unmarked own windows force floating")
     func forceFloatPolicy() {
         #expect(
             EventLoop.shouldForceFloat(
                 pid: 1,
-                activationPolicy: .accessory
+                activationPolicy: .accessory,
+                tilesAsOwnWindow: false
             )
         )
+        // Own chrome — the tour, the Config Issues window —
+        // carries no tiling mark and stays force-floated.
         #expect(
             EventLoop.shouldForceFloat(
                 pid: getpid(),
-                activationPolicy: .regular
+                activationPolicy: .regular,
+                tilesAsOwnWindow: false
             )
         )
         #expect(
             !EventLoop.shouldForceFloat(
                 pid: 1,
-                activationPolicy: .regular
+                activationPolicy: .regular,
+                tilesAsOwnWindow: false
+            )
+        )
+    }
+
+    /// The live verdict, through the seam the mark is read by.
+    /// The static above proves the RULE; this proves the read —
+    /// hardcode `tilesAsOwnWindow: false` at the call site, or
+    /// compare a different constant, and only this reds
+    /// (`tests.md`: a behavior change owes a test that fails
+    /// when it is reverted).
+    @MainActor
+    @Test("The float verdict reads the mark through the seam")
+    func forceFloatConsultsTheMark() {
+        let loop = EventLoop()
+        let id = WindowID(4242)
+        loop.ownWindowIdentifier = { _ in OwnWindowTiling.identifier }
+        #expect(!loop.shouldForceFloat(pid: getpid(), id: id))
+        // Own chrome: a window with no mark, and one carrying
+        // somebody else's — both stay force-floated.
+        loop.ownWindowIdentifier = { _ in nil }
+        #expect(loop.shouldForceFloat(pid: getpid(), id: id))
+        loop.ownWindowIdentifier = { _ in "kiwidesk.some.other" }
+        #expect(loop.shouldForceFloat(pid: getpid(), id: id))
+    }
+
+    @Test("The marked own window tiles; the mark exempts nobody else")
+    func ownWindowTilingMark() {
+        // The Settings window (#678 item 18): own process, marked
+        // by `OwnWindowTiling.identifier` — tiles like any other
+        // window.
+        #expect(
+            !EventLoop.shouldForceFloat(
+                pid: getpid(),
+                activationPolicy: .accessory,
+                tilesAsOwnWindow: true
+            )
+        )
+        // The mark discriminates OWN windows only: a third-party
+        // accessory window stays swept whatever the flag claims.
+        #expect(
+            EventLoop.shouldForceFloat(
+                pid: 1,
+                activationPolicy: .accessory,
+                tilesAsOwnWindow: true
             )
         )
     }

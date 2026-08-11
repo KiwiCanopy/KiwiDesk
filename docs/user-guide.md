@@ -27,9 +27,21 @@ space uses, the gaps, the bars, and the shortcuts.
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while KiwiDesk is the active app. The window opens on
-**Home** — a grid of cards, one per settings area, in two
-groups:
+**⌘,** while KiwiDesk is the active app. You can also give it a
+global key of its own: **Shortcuts ▸ General** offers a
+bindable **Open Settings** row, unbound out of the box.
+
+The Settings window is a normal window to KiwiDesk itself: it
+**tiles into your layout** like anything else, shows up in the
+App Bar, and answers the window shortcuts — float it with
+`toggle_floating`, move it between spaces, resize it. KiwiDesk's
+other windows are not managed that way: the setup tour and the
+Config Issues window always float, because each one ends, and
+the shortcuts reference panel is not a managed window at all,
+which is why it appears in no bar.
+
+The window opens on **Home** — a grid of cards, one per
+settings area, in two groups:
 
 - **This Profile** — areas scoped to the profile being edited
   (Spaces, Gaps & Borders, Bars, Colors & Motion,
@@ -2410,6 +2422,11 @@ Each row has an action. Built-in actions live under headings:
   collide. Rows are sorted alphabetically by app name (settled when
   the section opens, so a row never shifts out from under you while
   you are recording its shortcut).
+- **General** — the two app-chrome actions, behind the
+  section's *Show more*: **Show shortcuts panel** (the ⌃⌥K
+  reference, seeded by default) and **Open Settings** (this
+  window — deliberately unbound, since Settings is never a
+  prerequisite; bind it if you want a key of your own for it).
 - **Lua bindings** — custom Lua (from Adopt/Import or hand-written).
   Named "Advanced Lua bindings" until #406: there is no basic Lua
   binding to contrast it with, so the qualifier only misread.

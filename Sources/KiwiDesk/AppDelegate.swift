@@ -171,8 +171,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // panel — one close action for the key, the menu row, and
         // click-away, so the footer's "press it again to close"
         // hint holds.
-        core.onShowShortcuts = { [weak shortcutsPanel] in
+        core.uiBridge.onShowShortcuts = { [weak shortcutsPanel] in
             shortcutsPanel?.toggle()
+        }
+        // The bindable "Open Settings" action (#678 item 18):
+        // opens or raises, never toggles — a key that closed
+        // Settings would discard draft state.
+        core.uiBridge.onOpenSettings = { [weak self] in
+            self?.dashboard.show()
         }
         // The quick-menu row shows the bound open-combo (if any),
         // read live from the resolved binding on each menu open.

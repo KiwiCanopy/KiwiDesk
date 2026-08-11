@@ -53,20 +53,60 @@ extension EventLoop {
     /// Standard windows from accessory/menu-bar apps are real
     /// managed windows, but float by default: their utility UI
     /// should never be absorbed into a desktop layout.
+    ///
+    /// Own windows discriminate per WINDOW, never per process
+    /// (#678 item 18): a window marked with
+    /// `OwnWindowTiling.identifier` tiles like any other, and
+    /// every other own window is chrome and stays force-floated.
+    /// That type's doc carries the argument and the census of
+    /// which own window is which — do not re-list them here.
     nonisolated static func shouldForceFloat(
         pid: pid_t,
-        activationPolicy: NSApplication.ActivationPolicy
+        activationPolicy: NSApplication.ActivationPolicy,
+        tilesAsOwnWindow: Bool
     ) -> Bool {
-        isOwnProcess(pid) || activationPolicy == .accessory
+        if isOwnProcess(pid) { return !tilesAsOwnWindow }
+        return floatsAsAccessory(activationPolicy)
     }
 
-    func shouldForceFloat(pid: pid_t) -> Bool {
+    /// The third-party clause, named once and shared by the two
+    /// predicates that need it. `shouldForceFloat` and
+    /// `classifiesAsOverlay` answer disjoint domains — own
+    /// windows vs everyone else — so neither is expressible as
+    /// the other with an argument pinned, and pinning one was
+    /// how a parameter came to be passed into a branch that
+    /// could not reach it.
+    nonisolated static func floatsAsAccessory(
+        _ activationPolicy: NSApplication.ActivationPolicy
+    ) -> Bool {
+        activationPolicy == .accessory
+    }
+
+    /// The live force-float verdict for one tracked window. The
+    /// own-window arm reads the tiling mark through
+    /// `ownWindowIdentifier`, which is the injected seam — so a
+    /// test proves BOTH arms without a real `NSWindow`, and a
+    /// call site that stops consulting it reds
+    /// (`SelfWindowExclusionTests`, the flag being otherwise
+    /// unobservable from outside).
+    func shouldForceFloat(pid: pid_t, id: WindowID) -> Bool {
         Self.shouldForceFloat(
             pid: pid,
             activationPolicy: NSRunningApplication(
                 processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+            )?.activationPolicy ?? .prohibited,
+            tilesAsOwnWindow: Self.isOwnProcess(pid)
+                && ownWindowIdentifier(id)
+                    == OwnWindowTiling.identifier
         )
+    }
+
+    /// Maps an own window id to its `NSWindow` — the one place
+    /// AX identity meets AppKit identity, shared by the ignore
+    /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s
+    /// production default (the tiling mark).
+    static func ownWindow(number: Int) -> NSWindow? {
+        NSApp.windows.first { $0.windowNumber == number }
     }
 
     /// The *structural* half of the transient-overlay
@@ -75,11 +115,12 @@ extension EventLoop {
     /// tracking is main-capable by construction
     /// (`shouldIgnoreOwnWindow` dropped every own panel — ghost,
     /// drop zone, border ring — before classification), so the
-    /// own-process half of `shouldForceFloat` must not sweep the
-    /// Settings window into the launcher class: it still floats
-    /// by default, it just keeps its focus ring. Third-party
-    /// accessory apps stay swept — their windows are menu-bar
-    /// utility UI, the #300 case.
+    /// own-process half of `shouldForceFloat` must not sweep an
+    /// own window into the launcher class: a marked own window
+    /// tiles outright (#678 item 18) and force-floated own
+    /// chrome keeps its focus ring. Third-party accessory apps
+    /// stay swept — their windows are menu-bar utility UI, the
+    /// #300 case.
     ///
     /// Load-bearing since #448: the hard ignore gate
     /// (`FloatDetection.shouldIgnore`'s `isAccessory` arm) also
@@ -93,10 +134,7 @@ extension EventLoop {
         activationPolicy: NSApplication.ActivationPolicy
     ) -> Bool {
         !isOwnProcess(pid)
-            && shouldForceFloat(
-                pid: pid,
-                activationPolicy: activationPolicy
-            )
+            && floatsAsAccessory(activationPolicy)
     }
 
     func classifiesAsOverlay(pid: pid_t) -> Bool {
@@ -139,11 +177,8 @@ extension EventLoop {
         if Self.isOwnProcess(pid) {
             let canBecomeMain =
                 AXHelper.windowID(of: element)
-                .flatMap { id in
-                    NSApp.windows.first {
-                        $0.windowNumber == Int(id.raw)
-                    }
-                }?.canBecomeMain ?? false
+                .flatMap { Self.ownWindow(number: Int($0.raw)) }?
+                .canBecomeMain ?? false
             return Self.shouldIgnoreOwnWindow(
                 pid: pid,
                 canBecomeMain: canBecomeMain

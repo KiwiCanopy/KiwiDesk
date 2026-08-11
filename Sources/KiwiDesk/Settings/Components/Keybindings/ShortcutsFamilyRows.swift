@@ -96,6 +96,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.toggleDisplaySticky]
         case .showShortcuts:
             return [KeybindingCatalog.showShortcuts]
+        case .openSettings:
+            return [KeybindingCatalog.openSettings]
         case .switchToLayer:
             return
                 layerNames

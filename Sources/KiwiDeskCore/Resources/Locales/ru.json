@@ -468,6 +468,7 @@
   "keybinding.move_to_space": "Переместить в пространство %1$@",
   "keybinding.move_to_space_follow": "Переместить в пространство %1$@ и перейти",
   "keybinding.move_window_to_track": "Переместить окно в дорожку %1$@",
+  "keybinding.open_settings": "Открыть настройки",
   "keybinding.seq.next": "следующая",
   "keybinding.seq.prev": "предыдущая",
   "keybinding.show_shortcuts": "Показать панель сочетаний клавиш",

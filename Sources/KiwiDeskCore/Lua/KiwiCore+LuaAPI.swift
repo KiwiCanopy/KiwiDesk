@@ -57,9 +57,22 @@ extension KiwiCore {
     /// hook the app wires to a window — so, like `bind`/`on`, they
     /// live outside `APIReference.commands` and are listed in
     /// `luaOnly` for `help()`. The VM never holds the UI ref.
+    ///
+    /// **The family is four hand-mirrored lists** — a
+    /// `UIBridgeHooks` field, a `register` call here, an
+    /// `APIReference.luaOnly` entry and the `AppDelegate`
+    /// wiring — and a verb missing any one of them is a silent
+    /// no-op rather than a build error. `UIBridgeParityTests`
+    /// derives the roster from the struct's own fields and holds
+    /// the other three against it (`parity-tests.md`: past two
+    /// mirrors, ship the forget-proof test).
     private func registerUIAPI(on lua: LuaInterpreter) {
         lua.register("show_shortcuts") { [weak self] _ in
-            self?.onShowShortcuts()
+            self?.uiBridge.onShowShortcuts()
+            return .none
+        }
+        lua.register("open_settings") { [weak self] _ in
+            self?.uiBridge.onOpenSettings()
             return .none
         }
     }
@@ -177,4 +190,32 @@ extension KiwiCore {
             return .none
         }
     }
+}
+
+/// The UI-bridge verbs' `@MainActor` GUI hooks, bundled (the
+/// `OpenOrFocusSeams` shape) so `KiwiCore.swift` carries one
+/// line for the family rather than one block per verb. Each
+/// verb raises its hook and returns nothing to Lua; the GUI
+/// (`AppDelegate`) wires both, weakly, and each is a no-op
+/// until wired.
+///
+/// **A field's name IS its verb name**, lower-snake with the
+/// `on` dropped (`onOpenSettings` ↔ `open_settings`), which is
+/// what lets `UIBridgeParityTests` derive the roster by
+/// reflection rather than re-listing it. The two verbs do not
+/// share a prefix on purpose: `show_shortcuts` toggles a panel
+/// and `open_settings` opens-or-raises a window, and naming
+/// both `show_*` would promise one behaviour for both.
+public struct UIBridgeHooks {
+    /// `KiwiDesk.show_shortcuts()` (#330): opens (toggles) the
+    /// read-only shortcuts reference panel (#326).
+    public var onShowShortcuts: @MainActor () -> Void = {}
+
+    /// `KiwiDesk.open_settings()` (#678 item 18): the bindable
+    /// "Open Settings" action, unbound by default. Opens or
+    /// raises, never toggles — a key that closed Settings
+    /// would discard the draft state the save pill narrates.
+    public var onOpenSettings: @MainActor () -> Void = {}
+
+    public init() {}
 }

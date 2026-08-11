@@ -79,7 +79,7 @@ extension EventLoop {
             return
         }
         window.isFloating =
-            shouldForceFloat(pid: pid)
+            shouldForceFloat(pid: pid, id: window.id)
             || FloatDetection.shouldFloat(
                 element: element,
                 bundleID: app.bundleID,
@@ -174,7 +174,7 @@ extension EventLoop {
     ) {
         recheckFullscreen(element, id: id)
         let floating =
-            shouldForceFloat(pid: pid)
+            shouldForceFloat(pid: pid, id: id)
             || FloatDetection.shouldFloat(
                 element: element,
                 bundleID: app.bundleID,

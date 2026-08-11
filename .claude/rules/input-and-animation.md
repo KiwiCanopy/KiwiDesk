@@ -13,6 +13,29 @@ editing here:
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
   CGEventTap — this avoids the Input Monitoring permission. Event
   taps are only for mouse drag tracking.
+- **KiwiDesk's own windows are discriminated per WINDOW, never
+  per process (#678 item 18).** `shouldForceFloat`'s own-process
+  arm reads the tiling mark
+  (`OwnWindowTiling.identifier`, through the
+  `ownWindowIdentifier` seam) rather than floating everything
+  the app itself opened: the Settings window tiles, and the
+  tour and the Config Issues window do not. So **never widen
+  that arm back to a bare `isOwnProcess(pid)`** — the two
+  windows the mark separates want opposite fates, and the
+  polarity is what keeps the failure cheap: an own window is
+  chrome unless marked, so forgetting the mark costs a stray
+  float, never a chrome window taking a layout slot. The
+  census of which own window is which lives on
+  `OwnWindowTiling` — cite it, do not re-list it, since a new
+  own window falsifies every copy and reds none of them.
+  Two guards, reading different halves:
+  `SelfWindowExclusionTests.forceFloatConsultsTheMark` injects
+  the seam and pins that the verdict follows it (the flag is
+  otherwise unobservable, so a call site that stops consulting
+  it reds nowhere else), and `OwnWindowTilingSeamTests`' map is
+  the one copy of who may stamp the mark. The product argument
+  is in `docs/design-decisions.md`; the GUI half of it, in
+  [gui.md](gui.md).
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **The spring integrator must stay inside its stability bound

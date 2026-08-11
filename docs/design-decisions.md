@@ -1504,6 +1504,57 @@ setup windows are left alone because they go away. Said once, the
 exception stops reading as an inconsistency and starts reading as
 a rule. (#678 Phase 4 pass 11)
 
+### Settings tiles — discriminated per window, never per process
+
+**[Principle]**
+
+**The Settings window tiles like any other window, and the
+force-float policy asks which own WINDOW it is looking at,
+never merely whose process it belongs to.** (#678 item 18,
+Phase 5.) The engine used to force-float every own window by
+`isOwnProcess(pid)` — one predicate answering for three titled
+windows that want two different fates, Settings against the
+tour and the Config Issues window. (The app's panels never
+reach it: `shouldIgnoreOwnWindow` drops anything that cannot
+become main before tracking.) Relaxing that predicate per
+PROCESS would have swept the tour and the Config Issues window
+into layouts alongside Settings, so the exemption rides a
+per-window mark instead
+(`OwnWindowTiling.identifier`, stamped by
+`SettingsWindowController` alone —
+`OwnWindowTilingSeamTests`' map is the one copy of who may).
+The entry above rules WHICH windows are chrome; this one rules
+the mechanism: an own window is chrome by DEFAULT, and tiling
+is the marked exception — a new own window floats until someone
+argues otherwise, which is the failure direction that costs a
+misplaced float rather than a stolen layout slot.
+
+Two consequences worth stating because each was reachable
+another way. **The app stays `.accessory` throughout** — tiling
+a window and promoting a process are unrelated axes, and a
+window that takes a layout slot is not thereby a reason to grow
+a Dock icon; the activation-policy seam is untouched. And **the
+⌃⌥K panel needs no mark and no bar exclusion**: item 18 asks for
+one, but an own `NSPanel` cannot become main, so
+`shouldIgnoreOwnWindow` already drops it before tracking and it
+reaches no bar's enumeration to be excluded from. A written
+exclusion would have been dead code asserting a fact the type
+system already holds.
+
+The companion affordance: **"Open Settings" is bindable and
+unbound by default** (`KiwiDesk.open_settings()`, offered under
+Shortcuts ▸ General). Settings is not a prerequisite — the app
+works untouched out of the box — so no default chord is spent
+on it; but a window that now lives among the user's tiled
+windows earns a keyboard road back. It opens or raises, never
+toggles: a close bound to the same key would discard the draft
+the save pill narrates. The key spelling follows the verb rather
+than the label — `open_settings`, matching
+`keybinding.open_settings`, while the row reads "Open
+Settings" — and it is a different word from its sibling
+`show_shortcuts` on purpose, one toggling a panel and the other
+opening a window.
+
 ### The coach mark is built, and skips itself when hidden
 
 **[Rationale]**
@@ -2096,9 +2147,9 @@ is an open follow-up, not a decision this entry makes.
 
 **Narrow windows drop the preview before they drop a
 control.** (#678 turn 17a.) The window is the user's to make
-narrow — KiwiDesk floats its own Settings window by default,
-but nothing stops it being tiled, and a hand-drag reaches the
-same widths either way. So the question is not *whether*
+narrow — the Settings window tiles like any other (#678
+item 18), can be floated like any other, and a hand-drag
+reaches the same widths either way. So the question is not *whether*
 something gives but in what ORDER. Three
 things can: the preview's column (1200), the row layout
 (900), the header chrome (820) — in that order, and controls

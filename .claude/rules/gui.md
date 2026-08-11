@@ -544,8 +544,15 @@ must keep:
 
 ## Responsive width (#678 turn 17a)
 
-The window is the user's to make narrow — floated by default,
-tileable if they say so, and hand-draggable either way. What
+The window is the user's to make narrow — tiled like any other
+window (#678 item 18: `SettingsWindowController` stamps
+`OwnWindowTiling.identifier` and
+`OwnWindowTilingSeamTests`' map is the one copy of who may;
+the engine-side obligation this creates — own windows
+discriminate per window, and a new one is chrome by default —
+is in [input-and-animation.md](input-and-animation.md), which
+owns the `Events/` lane that enforces it), floatable if they
+say so, and hand-draggable either way. What
 it sheds as it narrows, and in what order, is
 ruled: **preview (1200) → row layout (900) → chrome (820), and
 controls never.** 720 pt is the hard minimum, below which the

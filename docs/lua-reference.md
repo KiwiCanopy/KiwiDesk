@@ -2909,10 +2909,17 @@ ignored, so pressing the Globe key never creates a managed window or
 KiwiDesk focus border. Auxiliary AX proxy windows with no matching
 WindowServer window are ignored by the same policy.
 
-**KiwiDesk's Settings window** is tracked as a floating window, so
-window-list integrations can see it and the top App Bar clamp keeps
-its title bar reachable. KiwiDesk's own panels — drag/drop overlays,
-App Bar overlays, and focus borders — remain fully ignored.
+**KiwiDesk's Settings window** is tracked and **tiled like any
+other window** — it takes a layout slot, appears in the App Bar,
+and answers `make_floating` / `toggle_floating` and the other
+window verbs. Its float rules work the same way yours do, so a
+`float_rules` entry can keep it out of the layout permanently.
+KiwiDesk's *other* windows are not managed: the setup tour and
+the Config Issues window are tracked but always floating (each
+one ends, so neither takes a slot), and its panels — the ⌃⌥K
+shortcuts reference, drag/drop overlays, App Bar overlays and
+focus borders — remain fully ignored, which is why they appear
+in no bar and no window list KiwiDesk publishes.
 
 **Example:**
 
@@ -3392,6 +3399,31 @@ rebind or clear it per layer without hand-writing Lua.
 ```lua
 KiwiDesk.bind("alt+space", function()
     KiwiDesk.show_shortcuts()
+end)
+```
+
+### open_settings
+
+**Expects:** nothing.
+
+**Does:** opens the **Settings** window and brings it to the
+front. It never closes the window — a toggle would discard
+unsaved draft edits — so pressing the key again with Settings
+already open returns it to **Home** rather than dismissing it,
+the same as opening Settings from the menu bar. Unsaved edits
+survive that; only the place you were reading resets.
+
+It is deliberately **not bound to any key by default** — see
+`docs/design-decisions.md` ▸ *Settings tiles* for why. It is
+offered as a bindable preset in the Settings app under
+**Shortcuts ▸ General** ("Open Settings"), where you can bind it
+per layer without hand-writing Lua.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+comma", function()
+    KiwiDesk.open_settings()
 end)
 ```
 
@@ -4400,9 +4432,11 @@ it out of the raise circle.
 So the window you quit from stays visible and on top of its own
 pile, and nothing it covers is a window the grid meant to show
 above it. Every other window lands where the circle puts it
-regardless of the z-order at quit. If KiwiDesk's own window is
-frontmost when it stops, or the frontmost app has no window in
-the grid, none of this applies and the circle is followed exactly.
+regardless of the z-order at quit. If the frontmost app has no
+window in the grid, none of this applies and the circle is
+followed exactly. KiwiDesk's own Settings window is no longer an
+exception here: it tiles, so quitting with it frontmost places
+it last exactly like any other window.
 
 A pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from
