@@ -7,7 +7,13 @@ struct OnboardingSpaceCard: Identifiable, Equatable {
     let mode: LayoutMode
     /// The screen it sits on, named as the Monitors area names
     /// it — never in inches, which EDID lies about.
-    let screen: String
+    ///
+    /// `nil` when the space is on no connected display, which is
+    /// reachable on a replay with a monitor unplugged. It used to
+    /// fall back to "Main screen", asserting the one thing the
+    /// code had just failed to determine (localization audit,
+    /// 2026-08-11).
+    let screen: String?
 }
 
 /// View state for the first-launch tour.
@@ -78,8 +84,6 @@ final class OnboardingModel {
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
-    /// Opens the shortcuts reference without leaving onboarding.
-    var onShowShortcuts: () -> Void = {}
     /// Closes onboarding and opens the dashboard (#331).
     var onExploreSettings: () -> Void = {}
     /// Whether the one-time keys step should be shown now (false
@@ -324,8 +328,8 @@ struct OnboardingView: View {
         L(
             "onboarding.grant.done.body",
             """
-            Take a look behind this window — everything that was \
-            open has been arranged.
+            Take a look behind this window — your open windows \
+            have been arranged.
 
             Setup windows like this one are left alone, because \
             they go away.

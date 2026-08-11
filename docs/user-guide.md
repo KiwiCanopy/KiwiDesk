@@ -2209,9 +2209,9 @@ Directions use the arrow keys, which are identical on every layout.
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that
 space in Settings rewrites the shortcut to follow it, so the binding
-survives a rename. The digit shortcuts scale to the seeded ladder —
-`⌃⌥1`…`⌃⌥5` on one display, up to `⌃⌥1`…`⌃⌥9` plus `⌃⌥0` (the tenth
-space) on two. The number row stops at ten keys, so **spaces past
+survives a rename. The digit shortcuts scale to however many
+spaces the [starter setup](#your-first-run) created — one digit
+each, in order. The number row stops at ten keys, so **spaces past
 the tenth ship without a default digit shortcut** — reach them from
 the Space Bar or bind them yourself in the Keybindings editor.
 

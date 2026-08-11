@@ -74,30 +74,39 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
     /// produces absurd 1700 pt-wide windows and at 1728 pt it
     /// produces unusable ones.
     ///
-    /// `floating` is last in every list, and is also the one
-    /// entry the allocator may place out of order — see
-    /// `StarterAllocation`, which owns the one-Floating rule.
+    /// **`floating` is not in any list**, deliberately. It is not
+    /// a layout a shape wants more or less of — every setup gets
+    /// exactly one Floating space and it goes on the largest
+    /// screen with room beside it, which is a rule about the
+    /// SETUP rather than about a screen. `StarterAllocation` owns
+    /// it end to end.
+    ///
+    /// It used to sit last in all four lists and the allocator
+    /// filtered it back out before reading them, so the entry and
+    /// its position were decorative — and the guard pinning
+    /// "floating is always last" passed on data no production
+    /// path consumed (architect review, 2026-08-11).
     public var layouts: [LayoutMode] {
         switch self {
         case .laptop:
             // Scrolling is the real laptop answer: full-width
             // windows, one keystroke apart. Monocle is what a
             // small screen is best at.
-            [.scrolling, .monocle, .floating]
+            [.scrolling, .monocle]
         case .desktop:
             // Grid leads because it is the one you can predict —
             // two windows are two halves, four are quarters.
-            [.grid, .stack, .bsp, .scrolling, .floating]
+            [.grid, .stack, .bsp, .scrolling]
         case .ultrawide:
             // Track is why Track exists. Grid replaces Scrolling,
             // which solves "not enough width" — the one problem
             // this screen does not have.
-            [.track, .grid, .stack, .floating]
+            [.track, .grid, .stack]
         case .pivoted:
             // Everything that assumes width has to flip; a
             // pivoted screen is usually the reference screen
             // (docs, logs, chat), so Monocle belongs too.
-            [.stack, .grid, .monocle, .floating]
+            [.stack, .grid, .monocle]
         }
     }
 }

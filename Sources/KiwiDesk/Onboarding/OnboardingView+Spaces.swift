@@ -66,22 +66,41 @@ extension OnboardingView {
             )
             Text(card.mode.displayName)
                 .font(.caption.weight(.medium))
-            Text(card.screen)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            // No screen line when the space is on no connected
+            // display: the line said "Main screen" in exactly the
+            // case the code had failed to determine one.
+            if let screen = card.screen {
+                Text(screen)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(width: SchematicScale.tile.width)
         // One element, one sentence: three separate labels would
         // be read as three items with no relation between them.
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(
-            L(
-                "onboarding.starter_spaces.tile.axlabel",
-                "Space %1$@, %2$@, on %3$@",
+        .accessibilityLabel(axLabel(card))
+    }
+
+    /// Two frames rather than one with a withheld argument: a
+    /// space on no connected display has no screen to name, and
+    /// a frame whose last slot may be empty would leave every
+    /// locale ending on a preposition.
+    private func axLabel(_ card: OnboardingSpaceCard) -> String {
+        guard let screen = card.screen else {
+            return L(
+                "onboarding.starter_spaces.tile.axlabel.no_screen",
+                "Space %1$@, %2$@",
                 card.id,
-                card.mode.displayName,
-                card.screen
+                card.mode.displayName
             )
+        }
+        return L(
+            "onboarding.starter_spaces.tile.axlabel",
+            "Space %1$@, %2$@, on %3$@",
+            card.id,
+            card.mode.displayName,
+            screen
         )
     }
 
@@ -89,32 +108,35 @@ extension OnboardingView {
         L("onboarding.starter_spaces.title", "Spaces, ready to use")
     }
 
-    /// Names the screens the setup was derived from, which is the
-    /// whole claim. `screenNames` comes from the same source the
-    /// Monitors area draws, so the two never disagree — and never
-    /// says a diagonal, because EDID lies about it.
+    /// One sentence, no interpolation.
     ///
-    /// **"Uses a different layout", not "arranges windows a
-    /// different way."** One of the spaces this sentence sits
-    /// above is Floating on every setup that has room for it, and
-    /// Floating is the layout that does NOT arrange windows — so
-    /// the livelier phrasing was false about a tile drawn beside
-    /// it, which is the defect class the localization audit
-    /// exists to catch (#678 Phase 4 pass 11). Floating IS a
-    /// layout; it is only not an arranging one.
+    /// It used to say "Each one uses a different layout, chosen
+    /// for: <screens>", and that was wrong three ways at once
+    /// (localization audit, 2026-08-11):
+    ///
+    /// - **"different" is false whenever the budget forces a
+    ///   repeat**, which `StarterAllocation` explicitly permits
+    ///   and which is guaranteed at four or more screens — and
+    ///   the strip drawn directly beneath would show the two
+    ///   identical tiles disproving it;
+    /// - the screen list was `joined(separator: ", ")` in SWIFT,
+    ///   before the frame, so no catalog could supply `、` for
+    ///   ja/zh-Hant and no locale could drop the ASCII space;
+    /// - "chosen for: <list>" did not say what was chosen for
+    ///   what, and three locales independently read it as a
+    ///   PURPOSE — ja `用途`, ko `용도`, ru `назначение`.
+    ///   Three locales patching one frame is how the English
+    ///   announces it is the defect.
+    ///
+    /// Each tile already prints its own screen under its own
+    /// layout, attributed per space, which a sentence naming all
+    /// the screens at once cannot do — it implies every layout
+    /// was chosen for every screen. So the sentence states the
+    /// rule and the tiles carry the facts.
     private var spacesBody: String {
-        let screens = model.screenNames()
-        guard !screens.isEmpty else {
-            return L(
-                "onboarding.starter_spaces.body.generic",
-                "Each one uses a different layout, chosen for "
-                    + "your screen."
-            )
-        }
-        return L(
+        L(
             "onboarding.starter_spaces.body",
-            "Each one uses a different layout, chosen for: %1$@",
-            screens.joined(separator: ", ")
+            "Each one has the layout its screen suits."
         )
     }
 

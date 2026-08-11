@@ -71,23 +71,44 @@ public enum StarterAllocation {
         var share = raw.map {
             min(maxShare, max(minShare, Int($0.rounded(.down))))
         }
-        let remainder = raw.map { $0 - $0.rounded(.down) }
+        // Remainder measured against the CLAMPED base, not the
+        // floor: a screen whose raw share was below one has
+        // already been given more than it earned by `minShare`,
+        // and ranking it on `raw - floor(raw)` handed it a second
+        // bonus on top — which inverted width order outright
+        // (a 1080 pt screen taking two spaces beside a 1440 pt
+        // one taking one). Zero means "already paid".
+        let remainder = zip(raw, share).map {
+            max(0, $0 - Double($1))
+        }
         var deficit = budget - share.reduce(0, +)
+        // One unit per screen per PASS, in ranked order — not
+        // "give the top-ranked screen everything it can take".
+        // `remainder` is fixed, so re-ranking inside the loop
+        // returns the same head every time and a single screen
+        // absorbed the whole deficit: two identical 1080 pt
+        // screens beside a 1728 pt one apportioned [3, 1, 3],
+        // and a narrower screen could out-rank a wider one
+        // outright — both contradicting "proportional to its
+        // width" while still summing to the budget, which is all
+        // the tests checked (code review, 2026-08-11).
         while deficit > 0 {
-            guard
-                let pick = rank(remainder, widths, ascending: false)
-                    .first(where: { share[$0] < maxShare })
-            else { break }
-            share[pick] += 1
-            deficit -= 1
+            let eligible = rank(remainder, widths, ascending: false)
+                .filter { share[$0] < maxShare }
+            guard !eligible.isEmpty else { break }
+            for index in eligible where deficit > 0 {
+                share[index] += 1
+                deficit -= 1
+            }
         }
         while deficit < 0 {
-            guard
-                let pick = rank(remainder, widths, ascending: true)
-                    .first(where: { share[$0] > minShare })
-            else { break }
-            share[pick] -= 1
-            deficit += 1
+            let eligible = rank(remainder, widths, ascending: true)
+                .filter { share[$0] > minShare }
+            guard !eligible.isEmpty else { break }
+            for index in eligible where deficit < 0 {
+                share[index] -= 1
+                deficit += 1
+            }
         }
         return share
     }
@@ -120,9 +141,11 @@ public enum StarterAllocation {
                 quota -= 1
                 used.insert(.floating)
             }
-            let list = shapes[index].layouts.filter {
-                $0 != .floating
-            }
+            // No filter: `ScreenClass.layouts` carries no
+            // `.floating` at all, because where the one Floating
+            // space goes is this type's rule, not a screen's
+            // preference.
+            let list = shapes[index].layouts
             var modes = take(quota, from: list, used: &used)
             if index == host { modes.append(.floating) }
             result[index] = modes

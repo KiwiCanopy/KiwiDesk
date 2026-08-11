@@ -106,8 +106,8 @@ extension OnboardingView {
             chosen for your screens.
 
             It lives in the menu bar — click the kiwi for \
-            Settings and help. If this is your first tiling \
-            manager, you do not need Settings today.
+            Settings and your shortcuts. If this is your first \
+            tiling manager, you do not need Settings today.
             """
         )
     }

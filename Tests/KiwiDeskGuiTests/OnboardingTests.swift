@@ -179,15 +179,6 @@ struct OnboardingTests {
         #expect(model.reachedEnd)
     }
 
-    @Test("shortcuts panel opens from the keys step")
-    func shortcutsPanelOpens() {
-        let model = OnboardingModel()
-        var opened = false
-        model.onShowShortcuts = { opened = true }
-        model.onShowShortcuts()
-        #expect(opened)
-    }
-
     @Test("open-at-login defaults to pre-checked (#342)")
     func loginItemPreChecked() {
         #expect(OnboardingModel().openAtLogin)

@@ -79,6 +79,67 @@ struct StarterAllocationTests {
         }
     }
 
+    /// The apportionment must be PROPORTIONAL, not merely
+    /// summing to the budget. The first cut re-ranked a fixed
+    /// remainder array inside the repair loop and handed the
+    /// whole deficit to one screen, which every existing
+    /// assertion — sum, clamps, determinism — was blind to (code
+    /// review, 2026-08-11).
+    @Test("equal screens get equal shares, wider screens more")
+    func sharesAreProportional() {
+        // Two identical screens beside a wider one: the twins
+        // must not differ, whatever the budget arithmetic does.
+        let twins = StarterAllocation.shares(
+            widths: [1080, 1080, 1728],
+            budget: 7
+        )
+        #expect(twins[0] == twins[1], "identical screens: \(twins)")
+        #expect(twins[2] >= twins[0], "the widest lost: \(twins)")
+
+        // The narrowest screen may never out-rank a wider one.
+        let mixed = StarterAllocation.shares(
+            widths: [1080, 1512, 1512],
+            budget: 7
+        )
+        #expect(
+            mixed[0] <= mixed[1] && mixed[0] <= mixed[2],
+            "the narrowest screen took the most: \(mixed)"
+        )
+
+        // Five identical screens split as evenly as the budget
+        // allows — never [3,3,1,1,1].
+        let five = StarterAllocation.shares(
+            widths: Array(repeating: 1920, count: 5),
+            budget: 9
+        )
+        #expect(
+            (five.max() ?? 0) - (five.min() ?? 0) <= 1,
+            "identical screens split unevenly: \(five)"
+        )
+    }
+
+    /// Width order is never inverted, at any supported setup.
+    @Test("a wider screen never gets fewer spaces than a narrower")
+    func widthOrderIsNeverInverted() {
+        let pool: [CGFloat] = [1080, 1440, 1512, 1728, 2560, 3440]
+        for count in 2...pool.count {
+            let widths = Array(pool.prefix(count))
+            let budget = StarterAllocation.budget(screenCount: count)
+            let shares = StarterAllocation.shares(
+                widths: widths,
+                budget: budget
+            )
+            for i in widths.indices {
+                for j in widths.indices where widths[i] < widths[j] {
+                    #expect(
+                        shares[i] <= shares[j],
+                        "\(count) screens: \(widths) → \(shares)"
+                    )
+                }
+            }
+        }
+    }
+
     @Test("identical screens apportion deterministically")
     func identicalScreensAreStable() {
         let widths = [CGFloat](repeating: 1920, count: 3)

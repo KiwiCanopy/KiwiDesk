@@ -161,8 +161,8 @@ private struct MenuBarCoachMarkView: View {
             Text(
                 L(
                     "onboarding.coach_mark.body",
-                    "KiwiDesk lives up here. Click it for Settings "
-                        + "and help."
+                    "KiwiDesk lives up here. Click it for "
+                        + "Settings and your shortcuts."
                 )
             )
             .font(.callout)

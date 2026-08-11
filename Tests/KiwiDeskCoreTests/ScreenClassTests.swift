@@ -69,17 +69,33 @@ struct ScreenClassTests {
         #expect(ScreenClass.of(size(1920, 0)) == .desktop)
     }
 
-    @Test("every class offers Floating, and it is always last")
-    func floatingIsAlwaysTheTail() {
+    /// Floating belongs to the SETUP, not to a screen.
+    ///
+    /// It used to sit last in all four lists while
+    /// `StarterAllocation` filtered it straight back out, so the
+    /// entry was decorative and the guard that pinned its
+    /// position asserted over data no production path read
+    /// (architect review, 2026-08-11). The rule now lives in one
+    /// place, and this is the half that keeps it there.
+    @Test("no class lists Floating — the allocator places it")
+    func floatingIsNotAScreenPreference() {
         for shape in ScreenClass.allCases {
             #expect(
-                shape.layouts.last == .floating,
-                "\(shape) does not end in floating"
+                !shape.layouts.contains(.floating),
+                Comment(
+                    rawValue:
+                        "\(shape) lists floating; only the "
+                        + "allocator may place it"
+                )
             )
-            #expect(
-                shape.layouts.filter { $0 == .floating }.count == 1
-            )
+            #expect(!shape.layouts.isEmpty)
         }
+        // …and it still reaches every real setup, or moving the
+        // rule would have quietly dropped the Floating space.
+        let modes = StarterAllocation.modes(
+            sizes: [CGSize(width: 2560, height: 1440)]
+        )
+        #expect(modes[0].contains(.floating))
     }
 
     @Test("the deliberate absences stay absent")

@@ -67,9 +67,6 @@ extension AppDelegate {
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
-        onboardingModel.onShowShortcuts = { [weak self] in
-            self?.shortcutsPanel?.toggle()
-        }
         // The closing card's "open at login" checkbox registers the
         // app as a login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
@@ -246,10 +243,6 @@ extension AppDelegate {
                             $0.id == id
                         }?.name
                     }
-                    ?? L(
-                        "onboarding.starter_spaces.main_screen",
-                        "Main screen"
-                    )
             )
         }
     }
