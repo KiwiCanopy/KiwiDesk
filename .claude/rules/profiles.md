@@ -60,7 +60,8 @@ change here:
   so a per-display answer cannot be expressed without changing
   the signature — do not change it into a per-display seam, which
   would put a second config behind every value the Settings
-  window shows.
+  window shows. `StarterSetupSeedTests` holds the tuning against
+  each class.
 - **Which entry point a call site takes is a rule, not a
   preference.** `StandardProfiles.workflows` is the
   hardware-agnostic list; `all(sizes:)` / `layouts(for:sizes:)`
@@ -70,17 +71,24 @@ change here:
   needs no screens and stays answerable anywhere. A string
   lookup takes `workflows` — asking the live catalog builds a
   whole setup to read a name.
+  (`StarterSetupSeedTests` pins which face carries the Starter.)
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
   declare with that screen's own best layout, never a fixed
-  `bsp` — the layout `ScreenClass` rules out below 1900 pt. Pass
-  `nil` only where the hardware genuinely is not knowable (a
-  preset card draws a plan for a screen COUNT), and the historic
-  `bsp` stands there.
+  `bsp` — the layout `ScreenClass` rules out on a laptop, which
+  owns that threshold. Pass `nil` only where the hardware
+  genuinely is not knowable, and the historic `bsp` stands there;
+  a caller that CAN know and passes nil makes the preview and the
+  apply disagree. `SparseModeFallbackTests` holds both arms.
 - **`StarterSetup.slots` is the one walk.** Space numbering, the
   mode map and the screen pins all derive from it; a second walk
   is how a space takes its mode from one screen and its pin from
-  another.
+  another (`StarterSetupSeedTests`).
+- **The share arithmetic is proportional, not merely summing.**
+  `StarterAllocation.shares` must keep equal screens equal and
+  never let a narrower screen out-rank a wider one — both are
+  invisible to a sum-and-clamp assertion, and both shipped
+  (`StarterAllocationTests`).
 
 ## API shape
 

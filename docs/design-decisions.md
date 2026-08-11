@@ -1177,6 +1177,21 @@ Per-space overrides express the rest. Do not read the
 making it one would put a second config behind every value the
 Settings window shows.
 
+**An unlisted mode in a sparse preset follows the screen it lands
+on, not a fixed `bsp`.** The workflow presets predate the
+screen-shape theory and several declare a mode for only some of
+their spaces — `Minimalist` leaves space 2 unlisted, `Focus
+Stack` space 3 — with the rest resolving to `bsp`. Those are
+one-screen presets, so applying either on a laptop silently
+handed it the one layout `ScreenClass` rules out there: below
+1900 pt a three-window BSP is already under the minimum in one
+axis. The unlisted mode now resolves to that screen's own best
+layout. Where the hardware genuinely is not knowable — a preset
+card draws a plan for a screen COUNT, and a three-screen preset
+is drawn on a one-screen Mac — the historic `bsp` stands, because
+inventing a shape is a worse answer than the old one. (Owner
+ruling, 2026-08-11.)
+
 **There is one Starter preset, and it is for the screens you
 have.** There used to be three, one per screen count, because
 the ladder planned for a count in the abstract. A setup derived

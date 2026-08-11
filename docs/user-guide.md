@@ -1908,6 +1908,13 @@ mode (see [Per-Profile Shortcut Overrides](#per-profile-shortcut-overrides)).
 
 ### Built-in Standards & Presets
 
+Where a preset does not name a layout for one of its spaces,
+that space takes **the layout its screen suits** rather than a
+fixed default — so applying a one-screen preset on a laptop
+never hands it BSP, which a laptop has no width for. See
+[Which layouts](#your-first-run) for what each screen shape
+gets.
+
 KiwiDesk ships eight built-in **profiles** — seven workflow
 layouts for 1, 2, or 3 screens, plus the **Starter** setup
 derived from the screens you have. One workflow layout per screen
