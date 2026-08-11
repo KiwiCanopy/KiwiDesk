@@ -675,7 +675,7 @@
   "onboarding.keys.body": "All bound already. Try one now — nothing will break.",
   "onboarding.keys.focus": "Move focus",
   "onboarding.keys.go_to_space": "Go to a space",
-  "onboarding.keys.move_to_space": "Move it to a space",
+  "onboarding.keys.move_to_space": "Move the window to a space",
   "onboarding.keys.none": "Your shortcuts are yours to set, and none are bound yet. Settings has the full list whenever you want it.",
   "onboarding.keys.swap": "Swap the window",
   "onboarding.keys.title": "Your shortcuts",

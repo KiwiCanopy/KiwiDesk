@@ -87,7 +87,14 @@ enum OnboardingKeys {
                     id: "move_to_space",
                     label: L(
                         "onboarding.keys.move_to_space",
-                        "Move it to a space"
+                        // Names the window. Each row is one
+                        // accessibility element, so VoiceOver
+                        // reads it alone and "it" referred to
+                        // nothing — and every locale guessed
+                        // differently, two producing labels
+                        // indistinguishable from the row above
+                        // (localization audit, 2026-08-11).
+                        "Move the window to a space"
                     ),
                     glyphs: move
                 )
