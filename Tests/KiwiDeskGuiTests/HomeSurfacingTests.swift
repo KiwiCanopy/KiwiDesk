@@ -42,6 +42,13 @@ struct HomeSurfacingTests {
             // measuring again.
             "letwidth=SettingsWidthClass.of(width:geo.size.width)"
                 + "shell(width).environment(\\.settingsWidth,width)",
+            // Widening back into the docked band retires the
+            // card's per-mount answer — a one-line `onChange`
+            // whose deletion nothing else notices, and whose
+            // absence is what both docs would then describe
+            // wrongly (architecture review, 2026-08-11).
+            ".onChange(of:width){_,nowin"
+                + "ifnow.docksPanel{previewShown=nil}}",
         ],
         "Settings/SettingsView+Chrome.swift": [
             // The mode-reveal window reaches both panes (#760):
@@ -59,9 +66,6 @@ struct HomeSurfacingTests {
             // sibling instead (17a): both halves are needled,
             // because either one alone leaves a width band
             // with no save affordance at all.
-            ".overlay(alignment:.bottom){"
-                + "if!width.docksSavePill{"
-                + "SettingsFooter(model:model)",
             "x:panelDocked(width)?-SettingsTheme.panelWidth/2:0",
             "ifwidth.docksSavePill{"
                 + "SettingsFooter(model:model,docked:true)}",
@@ -70,10 +74,19 @@ struct HomeSurfacingTests {
             // through the overlay bodies, since a consult that
             // mounts nothing leaves every narrow window with
             // no preview and the whole suite green.
+            // ONE needle over both overlays IN SEQUENCE: the
+            // order is the fix (`.overlay` composes outward, so
+            // the card must be applied after the pill or the
+            // pill covers it and eats its grab bar's clicks),
+            // and two independent strings could not see a swap
+            // (guard-prover, 2026-08-11).
+            ".overlay(alignment:.bottomTrailing){"
+                + "showPreviewOffer(width)}"
+                + ".overlay(alignment:.bottom){"
+                + "if!width.docksSavePill{"
+                + "SettingsFooter(model:model)",
             ".overlay(alignment:.topTrailing){"
                 + "detachedPreview(width)}",
-            ".overlay(alignment:.bottomTrailing){"
-                + "showPreviewOffer(width)}",
             // The search mode-switch notice DRAWS when set
             // (#678 4c) — needle through the branch body: a
             // consult that never mounts the strip would leave
@@ -99,9 +112,18 @@ struct HomeSurfacingTests {
             // draft diff and a schematic, and nothing but this
             // needle would notice — the symptom is stutter
             // under a pointer.
-            "privatestructMovableCard<Content:View>:View{",
-            "@GestureStateprivatevardragging:CGSize=.zero",
-            "@ViewBuilderletcontent:Content",
+            // ONE needle spanning the declaration and its
+            // owner, because the file-wide match this started
+            // as was satisfied by the property existing
+            // ANYWHERE in the file — including inside
+            // `SettingsFloatingPanel`, which is the violation
+            // (guard-prover, 2026-08-11: the mutation this
+            // comment describes stayed green).
+            "privatestructMovableCard<Content:View>:View{"
+                + "letbounds:CGSizeletclose:()->Void"
+                + "@Stateprivatevarmoved:CGSize=.zero"
+                + "@GestureStateprivatevardragging:CGSize=.zero"
+                + "@ViewBuilderletcontent:Content"
         ],
         "Settings/SettingsView+Preview.swift": [
             // The card mounts through the band predicate, and
@@ -121,7 +143,9 @@ struct HomeSurfacingTests {
             // way to it. Both branches read the ONE form
             // derivation, which is what makes "exactly one of
             // three" provable at all.
-            "ifpreviewForm(width)==.offer{",
+            "ifpreviewForm(width)==.offer{"
+                + "Button{previewShown=true}label:{"
+                + "showPreviewLabel}",
             "guardpanelOfferedelse{returnnil}"
                 + "returnSettingsPreviewForm.at("
                 + "width,shown:previewShown)",
@@ -179,6 +203,13 @@ struct HomeSurfacingTests {
             "elseif!titleYields{identity}",
             "privatevartitleYields:Bool{"
                 + "width.collapsesChrome&&searchExpanded}",
+            // And the flag retires when the window leaves the
+            // collapsed band, so a narrowing window does not
+            // re-enter it with the field already open and the
+            // title yielded to nobody. One line, no other net
+            // (architecture review, 2026-08-11).
+            ".onChange(of:width){_,nowin"
+                + "if!now.collapsesChrome{searchExpanded=false}}",
             // The segment is the one EXPLICIT flip — the entry
             // point that washes what the flip inserts (#760).
             // `ensureModeAdmits` stays on `setSettingsMode`.

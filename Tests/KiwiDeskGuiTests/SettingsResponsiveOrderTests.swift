@@ -84,6 +84,53 @@ struct SettingsResponsiveOrderTests {
         }
     }
 
+    /// Each step gets a band of its own — the ladder is three
+    /// separate widths, not two steps landing together.
+    ///
+    /// `theOrderHolds` cannot see this and that is not a gap in
+    /// it: implications forbid chrome collapsing BEFORE rows
+    /// reflow, and say nothing about the two happening at the
+    /// same width. Collapsing the header at 900 satisfies every
+    /// one of them (guard-prover, 2026-08-11), and it would
+    /// silently retire the compact band — an arrangement the
+    /// digest drew a frame for.
+    @Test("each step has a band of its own")
+    func stepsDoNotMerge() {
+        let bands = supportedWidths.map(SettingsWidthClass.of)
+        // Shed the preview, and nothing else yet.
+        #expect(
+            bands.contains {
+                !$0.docksPanel && !$0.stacksRows
+            }
+        )
+        // Shed the row axis, and still keep the chrome.
+        #expect(
+            bands.contains {
+                $0.stacksRows && !$0.collapsesChrome
+            }
+        )
+        // And shed the chrome.
+        #expect(bands.contains { $0.collapsesChrome })
+        // The fullest form is reachable too, or the ladder has
+        // no top.
+        #expect(bands.contains { $0.docksPanel })
+    }
+
+    /// A window with no saved frame opens in the FULLEST band.
+    /// The old default (860) predates the bands and now names
+    /// the compact one, so it would have met every new user
+    /// with two-line rows and a docked save bar — the most
+    /// degraded arrangement the app has, for someone who asked
+    /// for nothing (code review + architecture review,
+    /// 2026-08-11).
+    @Test("a first launch opens in the fullest band")
+    @MainActor
+    func firstLaunchOpensWide() {
+        let width = SettingsWindowController.firstRunWidth
+        #expect(SettingsWidthClass.of(width: width) == .wide)
+        #expect(width >= SettingsWidthClass.minimum)
+    }
+
     /// Widening never takes something away. The nesting is
     /// what makes the order a ladder rather than four
     /// independent verdicts — a band that dropped the preview
@@ -178,13 +225,17 @@ struct SettingsResponsiveOrderTests {
         #expect(SettingsWidthClass.compact.homeColumnCap == 2)
         #expect(SettingsWidthClass.tight.homeColumnCap == 2)
         // Two 240 pt cards and their gap fit inside the
-        // minimum window's grid; three do not. Stated residue:
-        // 240 and 16 are `HomeScreen`'s private grid literals
-        // copied here, so a retune of the card band leaves this
-        // arithmetic green while it stops describing the grid —
-        // `HomeCardChromeTests` is what pins those two, and
-        // this reasons from them rather than owning them.
-        let usable = SettingsWidthClass.minimum - 2 * 16
+        // minimum window's grid; three do not. The pane inset
+        // is read rather than restated — it was a literal 16
+        // here for a day, standing for a DIFFERENT 16 than the
+        // grid spacing `HomeCardChromeTests` pins
+        // (guard-prover, 2026-08-11). Stated residue: 240 and
+        // the grid's own 16 are still `HomeScreen`'s private
+        // literals, covered by that suite rather than owned
+        // here.
+        let usable =
+            SettingsWidthClass.minimum
+            - 2 * SettingsMetrics.paneInset
         #expect(2 * 240 + 16 <= usable)
         #expect(3 * 240 + 2 * 16 > usable)
     }
