@@ -80,11 +80,27 @@ struct StartupSweepWiringTests {
         let text = try source(
             "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
         )
-        let folds =
-            #"driveChunkedPass\([\s\S]{0,200}?onChunk:"#
+        // Both halves anchored to their OWN function's closing
+        // brace, like `theFoldDoesNotArm`. File-scoped needles
+        // were defeatable: `driveChunkedPass` is a shared driver
+        // by design, so a SECOND chunked pass landing in this
+        // file satisfied the fold needle with the sweep's own
+        // fold removed, and `drainDeferredBootApps()` appears in
+        // the boot tail too (guard-prover, 2026-08-13).
+        let schedule =
+            #"func scheduleStartupSweep\(\)[\s\S]{0,1600}?\n    \}"#
+        let scheduleBody = String(
+            text[
+                try #require(
+                    text.range(
+                        of: schedule,
+                        options: .regularExpression
+                    )
+                )
+            ]
+        )
         #expect(
-            text.range(of: folds, options: .regularExpression)
-                != nil,
+            scheduleBody.contains("onChunk:"),
             """
             The startup sweep no longer folds per chunk — it
             holds defersEventRetiles for its whole span while
@@ -92,8 +108,20 @@ struct StartupSweepWiringTests {
             seconds after boot stays untiled.
             """
         )
+        let finish =
+            #"func finishStartupSweep\([\s\S]{0,1600}?\n    \}"#
+        let finishBody = String(
+            text[
+                try #require(
+                    text.range(
+                        of: finish,
+                        options: .regularExpression
+                    )
+                )
+            ]
+        )
         #expect(
-            text.contains("drainDeferredBootApps()"),
+            finishBody.contains("drainDeferredBootApps()"),
             """
             The sweep's epilogue no longer drains the deferred
             apps — the sweep budgets too, so one it cut short

@@ -148,6 +148,25 @@ public final class SleepWakeManager {
     /// snapshot's one consumer is the return leg above.
     var holdsSnapshot: Bool { snapshot != nil }
 
+    /// The in-flight replay, for a test to await instead of
+    /// polling for its effect (#791).
+    ///
+    /// The poll this replaces bounded a 30 s WALL-CLOCK deadline,
+    /// and wall clock is the wrong instrument: swift-testing runs
+    /// suites concurrently, so under a full run the shared main
+    /// actor is starved and one 10 ms `Task.sleep` resumption was
+    /// measured at 65 s. Past the deadline the loop exits without
+    /// giving the replay's continuation a turn, so whether the
+    /// suite passed came down to which continuation drained
+    /// first — which is why the reported failure hit three tests
+    /// of four rather than all of them. Awaiting the task itself
+    /// has no deadline to outlive; it is also the pattern the
+    /// deferred-task suites already use (`task(for:)?.value`).
+    ///
+    /// Production must not read it: the replay's one consumer is
+    /// the return leg that armed it.
+    var pendingReplay: Task<Void, Never>? { restoreTask }
+
     // MARK: - Internals
 
     private func observe(

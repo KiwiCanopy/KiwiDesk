@@ -296,6 +296,28 @@ the instant the condition holds, so a passing run is never slowed
 the gap (a short watchdog against a much longer sleep), never by a
 tight wait. New async tests here follow suit.
 
+**Where the thing waited on IS an awaitable handle, await it
+rather than polling for its effect.** A wall-clock deadline
+bounds a hang the test caused *and* starvation it did not: under
+a full concurrent run one 10 ms `Task.sleep` resumption measured
+65 s (#791), after which the poll exits on a stale deadline
+without giving the pending continuation a turn, and the result
+comes down to which continuation drains first. Reach for a poll
+only when there is nothing to await — a real subprocess
+(`ExecTests`), a `DisplayLink` callback (`DragCoordinatorTests`).
+When a `Task` or a `DeferredTasks` slot exists, take it:
+`await core.deferred.task(for: .startupSweep)?.value`,
+`await manager.pendingReplay?.value`. Exposing one for a test is
+cheap and needs saying so — both of those carry a doc comment
+barring production from reading them.
+
+The tell that a suite is on the wrong side of this: a green that
+takes the *whole* hang guard. `SleepWakeManagerTests` was
+reported as failing only while KiwiDesk itself ran, which read as
+shared state and was not — it was CPU contention against that
+deadline, and no amount of injection-seam hardening would have
+touched it.
+
 ## Running the suite
 
 **A test reaches the machine only through a seam it injects,

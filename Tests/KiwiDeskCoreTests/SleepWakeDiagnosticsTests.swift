@@ -16,9 +16,21 @@ import Testing
 /// alone, which is why an empty log could not tell "restored
 /// correctly" from "never restored".
 ///
-/// The session read is faked in every test here (tests.md — a
-/// production default that grabs live host state gets an injected
-/// fake), so no run touches `CGSessionCopyCurrentDictionary`.
+/// Two conventions here, each bought by a guard-prover run
+/// (2026-08-13):
+///
+/// - **Assert on the LINE, not on the joined log.** The arm line
+///   and the replay line both carry the session clause, so a
+///   whole-log `contains` stayed green with the replay line
+///   deleted outright. A test named for one line must read that
+///   line.
+/// - **Await `pendingReplay`, never poll.** The green above was
+///   bought at the full 30 s hang guard, which is the same
+///   starvation #791 turned out to be.
+///
+/// The session read is faked throughout (tests.md — a production
+/// default that grabs live host state gets an injected fake), so
+/// no run here touches `CGSessionCopyCurrentDictionary`.
 @Suite("Wake restore diagnostics (#835)")
 @MainActor
 struct SleepWakeDiagnosticsTests {
@@ -35,19 +47,22 @@ struct SleepWakeDiagnosticsTests {
         )
     }
 
-    /// The shared generous hang-guard (#344): polls until `done`
-    /// holds; 30 s bounds a genuine hang only.
-    private func pollUntil(_ done: @MainActor () -> Bool) async {
-        let deadline = Date().addingTimeInterval(30)
-        while !done() && Date() < deadline {
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-    }
-
     @MainActor
     private final class LogBox {
         var lines: [String] = []
-        var joined: String { lines.joined(separator: "\n") }
+    }
+
+    /// The one line containing `needle`. Fails the test when no
+    /// line matches, so an assertion about a line's CONTENT can
+    /// never pass by that line being absent.
+    private func line(
+        _ needle: String,
+        in log: LogBox
+    ) throws -> String {
+        try #require(
+            log.lines.first { $0.contains(needle) },
+            "no logged line contains \"\(needle)\""
+        )
     }
 
     private func makeManager(
@@ -78,9 +93,10 @@ struct SleepWakeDiagnosticsTests {
         let manager = makeManager(log)
         manager.systemDidReturn(.unlock)
         #expect(
-            log.joined.contains(
-                "unlock found no held capture"
-            )
+            log.lines == [
+                "wake restore: unlock found no held capture — "
+                    + "nothing to replay"
+            ]
         )
     }
 
@@ -88,15 +104,16 @@ struct SleepWakeDiagnosticsTests {
     /// Without it an untroubled log is indistinguishable from a
     /// replay that never ran.
     @Test("a replay records what it replayed, and how stale")
-    func replayIsRecorded() async {
+    func replayIsRecorded() async throws {
         let log = LogBox()
         let manager = makeManager(log)
         manager.systemWillRest(.sleep)
         manager.systemDidReturn(.wake)
-        await pollUntil { log.joined.contains("replayed") }
-        #expect(log.joined.contains("wake replayed 1 windows"))
-        #expect(log.joined.contains("captured "))
-        #expect(log.joined.contains("s ago"))
+        await manager.pendingReplay?.value
+        let replay = try line("replayed", in: log)
+        #expect(replay.contains("wake replayed 1 windows"))
+        #expect(replay.contains("captured "))
+        #expect(replay.contains("s ago"))
     }
 
     /// The fact the next failing capture turns on. `screenLocked`
@@ -104,20 +121,23 @@ struct SleepWakeDiagnosticsTests {
     /// (`kCGSessionOnConsoleKey`) cannot make — see
     /// `SessionPresence` — so the replay line has to carry it.
     @Test("the replay line carries the session's lock state")
-    func replayCarriesTheSessionLockState() async {
+    func replayCarriesTheSessionLockState() async throws {
         let log = LogBox()
         let manager = makeManager(log, locked: true)
         manager.systemWillRest(.sleep)
         manager.systemDidReturn(.wake)
-        await pollUntil { log.joined.contains("replayed") }
-        #expect(log.joined.contains("screen locked"))
+        await manager.pendingReplay?.value
+        #expect(
+            try line("replayed", in: log)
+                .contains("screen locked")
+        )
     }
 
     /// The topology skip already logged; it now carries the same
     /// session clause, so a skip and a replay are read the same
     /// way rather than one of them being the informative one.
     @Test("the topology skip carries them too")
-    func skipCarriesTheSessionLockState() async {
+    func skipCarriesTheSessionLockState() async throws {
         let log = LogBox()
         let manager = makeManager(log, locked: true)
         var displays = ["main", "side"]
@@ -125,28 +145,34 @@ struct SleepWakeDiagnosticsTests {
         manager.systemWillRest(.lock)
         displays = ["main"]
         manager.systemDidReturn(.unlock)
-        await pollUntil {
-            log.joined.contains("wake restore skipped")
-        }
-        #expect(log.joined.contains("screen locked"))
+        await manager.pendingReplay?.value
+        #expect(
+            try line("wake restore skipped", in: log)
+                .contains("screen locked")
+        )
     }
 
     /// A lock → lid cycle rests TWICE before returning once. The
     /// second capture silently discards the first, and the
     /// sequence of events is the thing the log has to make
     /// legible for the mechanism to be arguable at all.
+    ///
+    /// Asserted as whole lines rather than by `contains`: the
+    /// clause must be absent from the FIRST capture as well as
+    /// present on the second, and a `contains` on the first line
+    /// caught only one of those directions (guard-prover).
     @Test("a second rest names itself and says it replaced")
     func secondRestIsAnnounced() {
         let log = LogBox()
         let manager = makeManager(log)
         manager.systemWillRest(.lock)
         manager.systemWillRest(.sleep)
-        #expect(log.lines.first?.contains("lock captured") == true)
         #expect(
-            log.joined.contains(
-                "sleep captured 1 windows in 0 spaces, "
-                    + "replacing a held capture"
-            )
+            log.lines == [
+                "wake restore: lock captured 1 windows in 0 spaces",
+                "wake restore: sleep captured 1 windows in 0 "
+                    + "spaces, replacing a held capture",
+            ]
         )
     }
 
@@ -158,7 +184,12 @@ struct SleepWakeDiagnosticsTests {
         let manager = makeManager(log)
         manager.captureState = { nil }
         manager.systemWillRest(.sleep)
-        #expect(log.joined.contains("captured nothing"))
+        #expect(
+            log.lines == [
+                "wake restore: sleep captured nothing "
+                    + "(capture returned no state)"
+            ]
+        )
         #expect(!manager.holdsSnapshot)
     }
 

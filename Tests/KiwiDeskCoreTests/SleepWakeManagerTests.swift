@@ -14,10 +14,18 @@ private final class DisplayFingerprintState {
 }
 
 /// The wake/unlock preserve-and-replay cycle, and its display
-/// topology gate (#633). The rest/return pair is driven
-/// directly — never through the real workspace notification
-/// centers — and the restore wait uses a generous hang-guard
-/// poll, never a tight deadline (#344).
+/// topology gate (#633). The rest/return pair is driven directly
+/// — never through the real workspace notification centers — and
+/// the session read is faked, so no test here touches the host.
+///
+/// The replay is AWAITED through `pendingReplay`, never polled
+/// for its effect (#791). The 30 s hang-guard poll this replaces
+/// was not generous enough to be a hang guard: under a full
+/// concurrent run one 10 ms `Task.sleep` resumption measured
+/// 65 s, after which the loop exited on a stale deadline and the
+/// result came down to which continuation drained first. That is
+/// what "the suite fails while KiwiDesk is running" actually was
+/// — CPU contention, never shared state.
 @Suite("SleepWakeManager")
 @MainActor
 struct SleepWakeManagerTests {
@@ -39,15 +47,11 @@ struct SleepWakeManagerTests {
         )
     }
 
-    /// The shared generous hang-guard (#344): polls until
-    /// `done` holds; 30 s bounds a genuine hang only — a
-    /// passing run exits on the first true.
-    private func pollUntil(
-        _ done: @MainActor () -> Bool
-    ) async {
-        let deadline = Date().addingTimeInterval(30)
-        while !done() && Date() < deadline {
-            try? await Task.sleep(nanoseconds: 10_000_000)
+    /// No live session read in a suite (tests.md): the presence
+    /// seam defaults to the host dictionary.
+    private func quietSession(_ manager: SleepWakeManager) {
+        manager.sessionPresence = {
+            SessionPresence(onConsole: true, screenLocked: false)
         }
     }
 
@@ -56,11 +60,7 @@ struct SleepWakeManagerTests {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
-        // No live session read in a suite (tests.md): the
-        // presence seam defaults to the host dictionary.
-        manager.sessionPresence = {
-            SessionPresence(onConsole: true, screenLocked: false)
-        }
+        quietSession(manager)
         let saved = sample()
         manager.captureState = { saved }
         manager.displayFingerprints = { ["main", "side"] }
@@ -68,7 +68,7 @@ struct SleepWakeManagerTests {
         manager.restoreState = { restored = $0 }
         manager.systemWillRest()
         manager.systemDidReturn()
-        await pollUntil { restored != nil }
+        await manager.pendingReplay?.value
         #expect(restored == saved)
     }
 
@@ -76,11 +76,7 @@ struct SleepWakeManagerTests {
     func changedTopologySkips() async {
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
-        // No live session read in a suite (tests.md): the
-        // presence seam defaults to the host dictionary.
-        manager.sessionPresence = {
-            SessionPresence(onConsole: true, screenLocked: false)
-        }
+        quietSession(manager)
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
@@ -92,9 +88,7 @@ struct SleepWakeManagerTests {
         // The side monitor was unplugged while asleep.
         displays.values = ["main"]
         manager.systemDidReturn()
-        await pollUntil {
-            logged.contains { $0.contains("topology") }
-        }
+        await manager.pendingReplay?.value
         #expect(!restored)
         #expect(
             logged.contains {
@@ -108,11 +102,7 @@ struct SleepWakeManagerTests {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
-        // No live session read in a suite (tests.md): the
-        // presence seam defaults to the host dictionary.
-        manager.sessionPresence = {
-            SessionPresence(onConsole: true, screenLocked: false)
-        }
+        quietSession(manager)
         manager.captureState = { self.sample() }
         let displays = DisplayFingerprintState(["main", "side"])
         manager.displayFingerprints = { displays.values }
@@ -121,7 +111,7 @@ struct SleepWakeManagerTests {
         manager.systemWillRest()
         displays.values = ["side", "main"]
         manager.systemDidReturn()
-        await pollUntil { restored }
+        await manager.pendingReplay?.value
         #expect(restored)
     }
 
@@ -132,11 +122,7 @@ struct SleepWakeManagerTests {
         // the loss of one; the multiset must not.
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
-        // No live session read in a suite (tests.md): the
-        // presence seam defaults to the host dictionary.
-        manager.sessionPresence = {
-            SessionPresence(onConsole: true, screenLocked: false)
-        }
+        quietSession(manager)
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
@@ -147,13 +133,10 @@ struct SleepWakeManagerTests {
         manager.systemWillRest()
         displays.values = ["twin"]
         manager.systemDidReturn()
-        await pollUntil {
-            logged.contains { $0.contains("topology") }
-        }
+        await manager.pendingReplay?.value
         #expect(!restored)
-        // The explicit skip line, so a return leg that
-        // regresses to a no-op fails here instead of passing
-        // vacuously after the poll's 30 s guard burns out.
+        // The explicit skip line, so a return leg that regresses
+        // to a no-op fails here instead of passing vacuously.
         #expect(
             logged.contains {
                 $0.contains("wake restore skipped")

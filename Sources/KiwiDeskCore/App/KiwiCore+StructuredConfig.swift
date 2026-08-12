@@ -199,6 +199,17 @@ extension KiwiCore {
     ///   `StartupSweepWiringTests` pins the boot tail still
     ///   scheduling it.
     ///
+    /// What the delay costs, stated because it is not obvious
+    /// from here: the skipped pass would have run BEFORE
+    /// `finishBoot`'s session restore, so a window it alone would
+    /// have discovered is now absent when `restore` runs. That is
+    /// already safe rather than newly safe — `StateCoordinator`'s
+    /// `adopt` files a snapshot window it cannot see yet through
+    /// `remember(_:in:)`, so the window returns to its space when
+    /// the sweep surfaces it. The residue is the same one
+    /// `docs/accepted-limitations.md` already accepts for the
+    /// windowless-app warmup skip, and it lands in the same band.
+    ///
     /// Deliberately NOT widened to "any open pass". The startup
     /// sweep publishes no displays, so a monitor change arriving
     /// during one is a change the user just made, with no later
