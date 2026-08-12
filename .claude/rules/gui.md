@@ -156,6 +156,24 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
+## A window that must clear the bars derives its level
+
+The bars render at `BarPanel.level`. **A window that must not be
+covered by one takes `BarPanel.aboveLevel` rather than writing
+`.floating` — or `.floating` plus a step — again at the raising
+site.** The two spellings are one fact ("the bars are here, and
+this is above them"), and written apart they drift the day the
+bars move. The first-launch tour is what asked for the constant
+(#828), and it takes it only once the grant lands: raised
+earlier it would sit over the System Settings window the grant
+step sends the user to.
+
+Not every overlay wants that step, and the ones that do not are
+deliberate: some of the app's own panels are the bars' PEERS and
+settle with them in raise order. Which they are, and why each
+stays a peer, is `BarPanel.level`'s own doc comment — the
+authority for this rule, and the one place that list lives.
+
 ## File layout
 
 Section bodies in `Settings/Sections/`, their widgets in
@@ -773,7 +791,20 @@ Every surface, border and ink in the Settings tree comes from
   while matching no needle — give an action button an explicit
   style, which is what brings it under the guards
   (`SettingsButtonStyleConventionTests`, whose arithmetic
-  counts the seal as naming one).
+  counts a seal as naming one).
+- **A button carrying an accent FILL takes the second seal.**
+  `.borderedProminent` picks its own label colour, and on macOS
+  that is white — which `SettingsTheme.accentInk`'s docstring
+  rules out on kiwi, and whose legal replacement
+  `SettingsThemeContrastTests` measures. So an
+  accent-filled primary action takes `kiwiProminentButton()`,
+  which pairs the fill with `accentInk` by construction exactly
+  as `settingsActionButton()` pairs the bordered rank with its
+  neutralisation one rank down; both spellings count as naming a
+  style in `SettingsButtonStyleConventionTests`. Read neither
+  seal as a finished sweep: a site still on `.borderedProminent`
+  is drawing white on the accent, and adopting the seal there is
+  its own change and its own eye-confirm.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
@@ -785,17 +816,26 @@ Every surface, border and ink in the Settings tree comes from
 
 ## Source-scanning guards have scan ROOTS, and a new tree joins them
 
-Two guards scan directories rather than the whole target, so a
-GUI tree outside their roots is simply not covered:
-`SettingsRawColorTests.scanRoots` (the raw-colour lens) and
-`LayoutSchematicPlacementScanTests.roots` (the placement-rule
-scan). **A new directory under `Sources/KiwiDesk` that draws
-chrome or renders a schematic joins those lists in the same
-change that creates it**, and each guard carries a
-root-coverage check so a moved or renamed directory reds instead
-of going quiet. The Onboarding tree is the worked case: it
-shipped a raw `.green`/`.orange` status hero in the first window
-every user sees, for as long as it existed, because the lens
+Several guards scan directories rather than the whole target, so
+a GUI tree outside their roots is not partly covered — it is
+silently exempt from a fail-open guard. **A new directory under
+`Sources/KiwiDesk` that draws chrome joins `ChromeScanRoots` in
+the same change that creates it**, and one that renders a
+**schematic** joins `LayoutSchematicPlacementScanTests`' roots
+as well. Each guard carries a root-coverage check, so a moved or
+renamed directory reds rather than going quiet.
+
+`ChromeScanRoots` is the ONE list of which trees draw the app's
+own chrome, and a guard that scans chrome reads it rather than
+hand-listing the trees again — the membership test, and why the
+list is shared at all, are its own doc comment's. A guard
+scanning a different question (the placement scan watches the
+trees that draw schematics, which is not the same set) declares
+its own roots and says in the suite what makes them narrower.
+
+The Onboarding tree is the worked case: it shipped a raw
+`.green`/`.orange` status hero in the first window every user
+sees, for as long as it existed, because the lens
 stopped at `Settings/`.
 
 ## SwiftUI traps
