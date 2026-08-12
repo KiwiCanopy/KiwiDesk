@@ -15,7 +15,8 @@ import Testing
 /// inertness, and the `reconcileAll` scan dedup. What it cannot
 /// see is `start()` still *calling* `scheduleStartupSweep()` —
 /// `StartupSweepTests` pins the scheduled task's reconcile, and
-/// accessibility.md carries the remaining obligation. Everything
+/// `StartupSweepWiringTests` needles the tail's call itself
+/// (#836, which made a second skip rest on it). Everything
 /// here drives the funnels through the injected machine seams
 /// (tests.md); no real app, observer, or AX call is touched.
 @MainActor

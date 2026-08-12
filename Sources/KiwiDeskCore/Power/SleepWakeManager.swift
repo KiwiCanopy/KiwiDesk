@@ -45,6 +45,26 @@ public final class SleepWakeManager {
     /// that wiring on a live core.
     public var displayFingerprints: @MainActor () -> [String] = { [] }
 
+    /// What macOS says about the login session, read where the
+    /// replay decides.
+    ///
+    /// **Diagnostic only — nothing branches on it (#835.)** A
+    /// lock → lid → unlock cycle produces two rest events and two
+    /// return events, and the open question is whether the replay
+    /// fires while the screen is still locked, leaving the unlock
+    /// leg with nothing to replay. No failing cycle has been
+    /// captured with logging on, so this ships the observation
+    /// and not the fix: a predicate chosen before that capture is
+    /// a guess with tests around it. It records BOTH facts
+    /// because the fix's obvious predicate is the wrong one —
+    /// `kCGSessionOnConsoleKey` reports fast user switching, not
+    /// the lock, and `SessionPresence` carries the measurement.
+    ///
+    /// Live by default, like every other host read here; a suite
+    /// that wants a quiet, deterministic session assigns its own.
+    public var sessionPresence: @MainActor () -> SessionPresence =
+        { .live() }
+
     private var snapshot: StateSnapshot?
     /// Sorted at capture; see `displayFingerprints`.
     private var snapshotFingerprints: [String] = []
@@ -54,29 +74,48 @@ public final class SleepWakeManager {
 
     public init() {}
 
+    /// Which notification drove a rest or a return.
+    ///
+    /// Carried into every log line so a lock → lid → unlock cycle
+    /// reads as the four events it is, rather than as two
+    /// anonymous pairs — which is the whole of what the #835 log
+    /// could not say.
+    enum Leg: String {
+        case sleep, wake, lock, unlock
+        /// Driven with no notification behind it: the tests, and
+        /// the one value production never logs.
+        case direct
+
+        /// Whether this leg captures (a rest) or replays (a
+        /// return). Derived from the leg rather than passed
+        /// beside it, so a leg added later cannot be wired to
+        /// the wrong half of the pair.
+        var isRest: Bool { self == .sleep || self == .lock }
+    }
+
     public func start() {
         guard tokens.isEmpty else { return }
         let workspace = NSWorkspace.shared.notificationCenter
         observe(
             workspace,
             NSWorkspace.willSleepNotification,
-            capture: true
+            leg: .sleep
         )
         observe(
             workspace,
             NSWorkspace.didWakeNotification,
-            capture: false
+            leg: .wake
         )
         let distributed = DistributedNotificationCenter.default()
         observe(
             distributed,
             Notification.Name("com.apple.screenIsLocked"),
-            capture: true
+            leg: .lock
         )
         observe(
             distributed,
             Notification.Name("com.apple.screenIsUnlocked"),
-            capture: false
+            leg: .unlock
         )
     }
 
@@ -114,7 +153,7 @@ public final class SleepWakeManager {
     private func observe(
         _ center: NotificationCenter,
         _ name: Notification.Name,
-        capture: Bool
+        leg: Leg
     ) {
         let token = center.addObserver(
             forName: name,
@@ -122,10 +161,10 @@ public final class SleepWakeManager {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                if capture {
-                    self?.systemWillRest()
+                if leg.isRest {
+                    self?.systemWillRest(leg)
                 } else {
-                    self?.systemDidReturn()
+                    self?.systemDidReturn(leg)
                 }
             }
         }
@@ -135,18 +174,40 @@ public final class SleepWakeManager {
     /// Internal, not private: the notification observers above
     /// are the production trigger, and tests drive the pair
     /// directly instead of posting to the shared centers.
-    func systemWillRest() {
+    func systemWillRest(_ leg: Leg = .direct) {
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil
+        let replaced = snapshot != nil
         snapshot = captureState()
         snapshotFingerprints = displayFingerprints().sorted()
+        onLog(
+            "wake restore: \(leg.rawValue) captured "
+                + describe(snapshot)
+                + (replaced ? ", replacing a held capture" : "")
+        )
     }
 
-    func systemDidReturn() {
-        guard isEnabled, let saved = snapshot else { return }
+    func systemDidReturn(_ leg: Leg = .direct) {
+        guard isEnabled else { return }
+        // The silent arm the #835 log could not distinguish from
+        // a healthy cycle: if the wake leg's replay has already
+        // fired and cleared the capture, the unlock leg lands
+        // here with nothing left to do, and the log said nothing
+        // either way.
+        guard let saved = snapshot else {
+            onLog(
+                "wake restore: \(leg.rawValue) found no held "
+                    + "capture — nothing to replay"
+            )
+            return
+        }
         restoreTask?.cancel()
         let delay = restoreDelayMS
+        onLog(
+            "wake restore: \(leg.rawValue) armed a replay in "
+                + "\(delay)ms (\(sessionPresence().summary))"
+        )
         restoreTask = Task { [weak self] in
             let ns = UInt64(delay) * 1_000_000
             try? await Task.sleep(nanoseconds: ns)
@@ -154,17 +215,45 @@ public final class SleepWakeManager {
             // Re-read at fire time, not at wake: the delay
             // exists precisely so the topology can finish
             // settling first.
+            let note =
+                "\(self.sessionPresence().summary), "
+                + self.age(of: saved)
             if self.displayFingerprints().sorted()
                 == self.snapshotFingerprints
             {
                 self.restoreState(saved)
+                // The positive line #835 asked for. Without it a
+                // silent log cannot tell "restored correctly"
+                // from "never restored", so no capture of a
+                // failing cycle could be decisive.
+                self.onLog(
+                    "wake restore: \(leg.rawValue) replayed "
+                        + self.describe(saved) + " (\(note))"
+                )
             } else {
                 self.onLog(
                     "wake restore skipped: display topology "
-                        + "changed while away"
+                        + "changed while away (\(note))"
                 )
             }
             self.snapshot = nil
         }
+    }
+
+    /// `12 windows in 3 spaces`, or why there was nothing.
+    private func describe(_ snapshot: StateSnapshot?) -> String {
+        guard let snapshot else {
+            return "nothing (capture returned no state)"
+        }
+        return "\(snapshot.windows.count) windows in "
+            + "\(snapshot.spaces.count) spaces"
+    }
+
+    /// How stale the replayed capture is. The mechanism under
+    /// suspicion needs the return to outlive `restoreDelayMS`,
+    /// so the gap between capture and replay is evidence.
+    private func age(of snapshot: StateSnapshot) -> String {
+        let seconds = Date().timeIntervalSince(snapshot.capturedAt)
+        return String(format: "captured %.1fs ago", seconds)
     }
 }

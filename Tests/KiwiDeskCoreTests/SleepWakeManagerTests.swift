@@ -56,6 +56,11 @@ struct SleepWakeManagerTests {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
+        // No live session read in a suite (tests.md): the
+        // presence seam defaults to the host dictionary.
+        manager.sessionPresence = {
+            SessionPresence(onConsole: true, screenLocked: false)
+        }
         let saved = sample()
         manager.captureState = { saved }
         manager.displayFingerprints = { ["main", "side"] }
@@ -71,6 +76,11 @@ struct SleepWakeManagerTests {
     func changedTopologySkips() async {
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
+        // No live session read in a suite (tests.md): the
+        // presence seam defaults to the host dictionary.
+        manager.sessionPresence = {
+            SessionPresence(onConsole: true, screenLocked: false)
+        }
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
@@ -98,6 +108,11 @@ struct SleepWakeManagerTests {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
+        // No live session read in a suite (tests.md): the
+        // presence seam defaults to the host dictionary.
+        manager.sessionPresence = {
+            SessionPresence(onConsole: true, screenLocked: false)
+        }
         manager.captureState = { self.sample() }
         let displays = DisplayFingerprintState(["main", "side"])
         manager.displayFingerprints = { displays.values }
@@ -117,6 +132,11 @@ struct SleepWakeManagerTests {
         // the loss of one; the multiset must not.
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
+        // No live session read in a suite (tests.md): the
+        // presence seam defaults to the host dictionary.
+        manager.sessionPresence = {
+            SessionPresence(onConsole: true, screenLocked: false)
+        }
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }

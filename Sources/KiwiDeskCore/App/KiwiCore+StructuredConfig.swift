@@ -162,9 +162,49 @@ extension KiwiCore {
             ) ?? globalIgnoreRuleBase
         eventLoop.floatRules = FloatRules(resolvedFloat)
         eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)
-        if !defersWindowRuleReconcile {
+        if mayReconcileWindowRulesNow {
             eventLoop.reconcileAll()
         }
+    }
+
+    /// Whether a window-rule write may re-check every app from
+    /// this call site, or must leave that to a pass that already
+    /// will.
+    ///
+    /// `reconcileAll` is unchunked and unbudgeted on purpose —
+    /// the per-app budget is raised for a queued STEP and never
+    /// for a pass, so an OS- or config-driven reconcile is never
+    /// cut short (accessibility.md). That makes it the wrong
+    /// thing to run twice, and boot ran it twice: the chunked
+    /// scan's epilogue publishes displays from inside
+    /// `scanChunk`, the monitor-change handler loads the matching
+    /// profile, and that profile's window rules land here — a
+    /// second full pass over every app, still inside the boot
+    /// phase and billed to the boot summary's `scan` figure. One
+    /// AX-unresponsive helper was therefore paid for twice: a
+    /// 10.3 s `scan` figure against a 4.9 s scan (#836).
+    ///
+    /// Two callers skip it, and neither loses the re-check:
+    ///
+    /// - `defersWindowRuleReconcile` — `loadConfig` writes the
+    ///   rules several times over and runs one pass itself
+    ///   afterwards.
+    /// - **the boot scan is still open** — `finishBoot` schedules
+    ///   the startup sweep, which mirrors `reconcileAll`'s two
+    ///   loops per app, chunked and budgeted
+    ///   (`EventLoop.beginSweep`), against these very rules, one
+    ///   second later. That is the dependency this skip rests on,
+    ///   so it is pinned rather than promised here:
+    ///   `StartupSweepTests` pins the sweep doing the work and
+    ///   `StartupSweepWiringTests` pins the boot tail still
+    ///   scheduling it.
+    ///
+    /// Deliberately NOT widened to "any open pass". The startup
+    /// sweep publishes no displays, so a monitor change arriving
+    /// during one is a change the user just made, with no later
+    /// pass behind it to heal a skip.
+    private var mayReconcileWindowRulesNow: Bool {
+        !defersWindowRuleReconcile && !boot.phase.isStarting
     }
 
     /// The one write of the resolved app-rule tier — shared by

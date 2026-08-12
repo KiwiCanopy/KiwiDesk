@@ -74,23 +74,28 @@ editing AX code:
   and no AX. `AdoptionHealTests` pins the gate and both repair
   funnels; `AdoptionHealScheduleTests` pins the scheduled tasks.
   Nothing machine-checks that the boot tail (`finishBoot`, in
-  `KiwiCore+Boot`) still calls `scheduleAdoptionHeal()` — the
-  same unpinnable link as the `scheduleStartupSweep()` bullet
-  below — so do not drop or
-  re-time that call without adding the pin and re-deriving the
-  `docs/accepted-limitations.md` heal-latency row.
+  `KiwiCore+Boot`) still calls `scheduleAdoptionHeal()`, so do
+  not drop or re-time that call without adding the pin and
+  re-deriving the `docs/accepted-limitations.md` heal-latency
+  row. The sibling link below is no longer in that state —
+  `StartupSweepWiringTests` needles it — and pinning this one
+  takes the same shape: a needle anchored to `finishBoot`'s own
+  closing brace, since the tail is not test-drivable but a call
+  MOVED out of it heals nothing.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Three links
-  carry that promise, guarded two-and-a-half ways: the skip
-  gate and the reconcile-warms retry are pinned by
-  `StartupWarmupSkipTests`, and the scheduled sweep's task
-  actually opening its pass and reconciling is pinned by
-  `StartupSweepTests` — but nothing machine-checks that the boot
-  tail still *calls* `scheduleStartupSweep()`, so do not drop or
-  re-time that call without adding the pin and re-deriving the
-  ceiling `docs/accepted-limitations.md` accepts for the
-  user-visible residue. **Re-timing includes making the sweep
+  carry that promise, and all three are pinned now: the skip
+  gate and the reconcile-warms retry by
+  `StartupWarmupSkipTests`, the scheduled sweep's task actually
+  opening its pass and reconciling by `StartupSweepTests`, and
+  the boot tail still *calling* `scheduleStartupSweep()` by
+  `StartupSweepWiringTests` — which #836 added, having made a
+  second skip rest on the same call. Re-timing is still yours to
+  weigh: the needle sees the call, never the latency, so re-time
+  it only alongside the ceiling `docs/accepted-limitations.md`
+  accepts for the user-visible residue. **Re-timing includes
+  making the sweep
   take longer**: it is chunked now (#801), so the last app in
   its queue is warmed at 1 s plus the sweep's own duration
   rather than at 1 s — and a sweep-budgeted app later still.
