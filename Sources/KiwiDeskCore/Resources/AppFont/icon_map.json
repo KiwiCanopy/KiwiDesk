@@ -608,7 +608,8 @@
     {
         "iconName": ":cmux:",
         "appNames": [
-            "cmux"
+            "cmux",
+            "cmux NIGHTLY"
         ]
     },
     {
@@ -2035,6 +2036,12 @@
         ]
     },
     {
+        "iconName": ":mole:",
+        "appNames": [
+            "Mole"
+        ]
+    },
+    {
         "iconName": ":mongodb:",
         "appNames": [
             "MongoDB Compass*"
@@ -2352,6 +2359,12 @@
         ]
     },
     {
+        "iconName": ":openclaw:",
+        "appNames": [
+            "OpenClaw"
+        ]
+    },
+    {
         "iconName": ":opencode:",
         "appNames": [
             "opencode",
@@ -2491,6 +2504,13 @@
         "iconName": ":pearcleaner:",
         "appNames": [
             "Pearcleaner"
+        ]
+    },
+    {
+        "iconName": ":permute:",
+        "appNames": [
+            "Permute 3",
+            "Permute 4"
         ]
     },
     {
@@ -3004,7 +3024,8 @@
         "appNames": [
             "SF Symbols",
             "SF Symbole",
-            "SF-Symbole"
+            "SF-Symbole",
+            " SF Symbols Beta"
         ]
     },
     {
@@ -3619,6 +3640,12 @@
         ]
     },
     {
+        "iconName": ":whatcable:",
+        "appNames": [
+            "WhatCable"
+        ]
+    },
+    {
         "iconName": ":whats_app:",
         "appNames": [
             "WhatsApp",
@@ -3749,7 +3776,8 @@
     {
         "iconName": ":zoom:",
         "appNames": [
-            "zoom.us"
+            "zoom.us",
+            "Zoom"
         ]
     },
     {
