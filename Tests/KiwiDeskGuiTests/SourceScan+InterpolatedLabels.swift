@@ -130,7 +130,7 @@ extension SourceScan {
     /// The case name is NOT derivable from the key
     /// (`.layoutDefaults` returns `destination.layout`), so the
     /// pairing is read out of the switch rather than guessed.
-    private static func destinationTitleKeys() throws
+    static func destinationTitleKeys() throws
         -> [String: String]
     {
         let source = SourceScan.stripComments(
@@ -145,33 +145,43 @@ extension SourceScan {
                 encoding: .utf8
             )
         )
+        // Scanned over the WHOLE source, not line by line: a
+        // case's `L(` and its key literal need not share a line,
+        // and `.advancedColors` is exactly that shape. The
+        // line-scoped first cut missed it, silently — the frame
+        // naming that destination simply went undiscovered and
+        // lost its floor, which is how a fail-open parser hurts.
         var pairs: [String: String] = [:]
         var pending: String?
-        for raw in source.split(separator: "\n") {
-            let line = raw.trimmingCharacters(
-                in: .whitespaces
-            )
-            if line.hasPrefix("case ."),
-                let name = line.dropFirst("case .".count)
-                    .split(separator: ":").first
+        var index = source.startIndex
+        while index < source.endIndex {
+            let rest = source[index...]
+            if rest.hasPrefix("case ."),
+                let colon = rest.firstIndex(of: ":")
             {
-                pending = String(name)
-                    .trimmingCharacters(in: .whitespaces)
-            }
-            if let name = pending,
-                let range = line.range(
-                    of: #"L\(\s*"(destination\.[a-z_]+)""#,
-                    options: .regularExpression
-                )
-            {
-                let matched = String(line[range])
-                if let key = matched.split(separator: "\"")
-                    .dropFirst().first
-                {
-                    pairs[name] = String(key)
-                    pending = nil
+                let name = rest[
+                    rest.index(rest.startIndex, offsetBy: 6)..<colon
+                ]
+                if name.allSatisfy({ $0.isLetter || $0.isNumber }) {
+                    pending = String(name)
                 }
             }
+            if let name = pending, rest.hasPrefix("L(") {
+                if let open = rest.firstIndex(of: "\""),
+                    let close = rest[
+                        rest.index(after: open)...
+                    ].firstIndex(of: "\"")
+                {
+                    let key = String(
+                        rest[rest.index(after: open)..<close]
+                    )
+                    if key.hasPrefix("destination.") {
+                        pairs[name] = key
+                        pending = nil
+                    }
+                }
+            }
+            index = source.index(after: index)
         }
         return pairs
     }

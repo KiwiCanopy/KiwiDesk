@@ -78,18 +78,34 @@ struct DestinationNameCollisionTests {
         )
     }
 
-    /// Enumerates locale CODES and decodes none of them — the one
-    /// shape allowed to filter `missing_` by name (#692), so a
-    /// stray worksheet cannot be mis-reported as a shipped locale
-    /// before `extract-keys --check` has rejected it.
+    /// Every shipped locale — and this suite DECODES each one, so
+    /// it may not skip a stray by name. `localization.md` ▸ "Only
+    /// catalogs live in the catalog directory" is explicit: a
+    /// reader that would decode a file names the one it cannot,
+    /// because skipping is how a misplaced worksheet survives and
+    /// the skip is invisible in a green run. The name-filtering
+    /// shape is reserved for a walker that enumerates codes and
+    /// decodes nothing, which this is not.
     private static func shippedLocales() throws -> [String] {
-        try FileManager.default
+        let names = try FileManager.default
             .contentsOfDirectory(atPath: localesDirectory.path)
             .filter { $0.hasSuffix(".json") }
+            .sorted()
+        for name in names where name.hasPrefix("missing_") {
+            Issue.record(
+                """
+                \(name) is a translator worksheet sitting in the \
+                catalog directory. It belongs under \
+                locale-worksheets/ — every reader of this \
+                directory globs *.json and will try to decode it.
+                """
+            )
+        }
+        return
+            names
             .filter { !$0.hasPrefix("missing_") }
             .map { String($0.dropLast(".json".count)) }
             .filter { $0 != "en" }
-            .sorted()
     }
 
     /// Two English strings name one thing when they differ only
@@ -98,6 +114,19 @@ struct DestinationNameCollisionTests {
     /// `Spaces` ≡ `Space` as a collision, not to judge synonymy —
     /// anything subtler is the `allowed` map's job, where it has
     /// to be argued in writing.
+    ///
+    /// **Know its real size before trusting the `allowed` map as
+    /// the only exemption channel.** Measured over the shipped
+    /// corpus, this stemmer silently suppresses **43** pairs, not
+    /// the one or two the example suggests — `Spaces`/`Space`,
+    /// `Spaces`/`spaces.title`, `General`/`shortcuts.section
+    /// .general`, `Profiles`/`search.place.profile` and so on.
+    /// Every one of them names one concept today, so nothing is
+    /// masked that should fire; but a future destination whose
+    /// English differs from an unrelated key's only by case or a
+    /// trailing `s` would be excused here with no record
+    /// anywhere. If that lands, narrow the stem rather than
+    /// widening `allowed`.
     private static func sameThing(_ a: String, _ b: String) -> Bool {
         func stem(_ s: String) -> String {
             let trimmed = s.trimmingCharacters(
@@ -143,12 +172,20 @@ struct DestinationNameCollisionTests {
     func destinationsAreUnique() throws {
         let english = try Self.catalog("en")
         let destinations = try Self.destinationKeys()
+        // Counted, because `inputsAreNotEmpty` proves the two
+        // LISTS are populated and not that any pair was ever
+        // compared: a locale missing its `destination.*` keys
+        // `continue`s past every check with that canary still
+        // green, and a `drop-key --locale` sweep is exactly how
+        // that arrives.
+        var compared = 0
         for locale in try Self.shippedLocales() {
             let catalog = try Self.catalog(locale)
             for destination in destinations {
                 guard let name = catalog[destination] else {
                     continue
                 }
+                compared += 1
                 let permitted =
                     Self.allowed[destination] ?? []
                 for (key, value) in catalog
@@ -187,6 +224,21 @@ struct DestinationNameCollisionTests {
                 }
             }
         }
+        // Ten locales × twelve destinations, less any a catalog
+        // genuinely lacks. Derived from the two lists rather
+        // than pinned to a number, so adding a destination or a
+        // locale does not have to edit a constant here.
+        let expected =
+            try Self.shippedLocales().count * destinations.count
+        #expect(
+            compared >= expected - destinations.count,
+            """
+            compared \(compared) destination name(s) against an \
+            expected ~\(expected) — a catalog has lost its \
+            destination.* keys, so this guard is silently \
+            narrower than it reads.
+            """
+        )
     }
 
     /// Every `allowed` entry still names keys that exist, so an

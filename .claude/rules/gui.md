@@ -891,7 +891,7 @@ authoring rules apply here even though the catalogs live in Core:
   with a common noun instead. And **do not name a place
   deictically** ("below", "above") unless the thing is on this
   page: `app_bar.icon_source.help` said its colour rows were
-  below while they render on Advanced Colours, two of them
+  below while they render on Advanced Colours, all three
   Power-User-only.
 - **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
   regenerated from real call sites; the other catalogs are

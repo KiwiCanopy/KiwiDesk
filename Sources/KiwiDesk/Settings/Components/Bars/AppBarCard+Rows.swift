@@ -270,7 +270,7 @@ extension AppBarCard {
             // this sentence sends the reader to, and the page
             // they are on. The rows are NOT below — they render
             // at `.row(.advancedColours, .appBar, .showMore)`,
-            // two of them Power-User-only — so the sentence
+            // all three Power-User-only — so the sentence
             // names the destination instead of saying "below",
             // which sent the reader looking down this card.
             help: L(

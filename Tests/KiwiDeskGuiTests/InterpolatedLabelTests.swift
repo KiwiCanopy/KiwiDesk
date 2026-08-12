@@ -78,14 +78,16 @@ struct InterpolatedLabelTests {
     /// still passes, and the revert has erased its own evidence.
     /// A floor is the only thing that survives that, because it
     /// is the one number the call site cannot restate.
-    /// `colors.unfocused_off.help` is the family's precedent and
-    /// is deliberately ABSENT: it interpolates a destination
-    /// title through a computed property
-    /// (`AdvancedColorsGates.gapsAndBorders`), not an inline
-    /// `L(`, so the scan below cannot see it — and that is the
-    /// scan's stated blind spot, not an oversight. A frame that
-    /// reaches its label through any accessor is invisible here;
-    /// only an inline `L("key", …)` argument is discovered.
+    /// The `colors.*_off.help` family USED to be absent here,
+    /// on the ground that a frame reaching its label through a
+    /// property was beyond a source scan. That is no longer true
+    /// and the exemption is gone: `SourceScan
+    /// .destinationTitleKeys` resolves
+    /// `SettingsDestination.<case>.title` out of the switch, so
+    /// those seven frames and `layout_defaults.spaces_using.none`
+    /// are discovered and floored like any other. What remains
+    /// invisible is a label reached through a LOCAL alias — which
+    /// is why `AdvancedColorsHelp` no longer has one.
     /// The four below `track.…` were never #818 conversions —
     /// they already interpolated a label, and the scan found
     /// them. They are listed anyway, because the floor's job is
@@ -103,11 +105,15 @@ struct InterpolatedLabelTests {
     /// reading "En caja", `it` a colour row "Elemento sotto il
     /// puntatore" against a row reading "Elemento al passaggio
     /// mouse" — which is the strongest evidence this suite's
-    /// premise is right rather than tidy. Note the two
-    /// `*.alignment.label.help` frames interpolate TWO labels
-    /// but spend three specifiers: they name Start twice, the
-    /// second being the mapping the sentence exists for. The
-    /// count here is labels, which is what the scan derives.
+    /// premise is right rather than tidy. The count here is
+    /// LABELS, which is what the scan derives — not the
+    /// specifier count, which a ternary can make smaller. The
+    /// two `*.alignment.label.help` frames briefly spent `%1$@`
+    /// twice, and that was backed out: `placeholder_drift`
+    /// compares a multiset, so a repeat makes a stylistic second
+    /// mention mandatory in every language and fails a
+    /// translation that pronominalises it. `gui.md` ▸ Strings
+    /// now bans it outright.
     static let converted: [String: Int] = [
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
@@ -120,7 +126,7 @@ struct InterpolatedLabelTests {
         "app_bar.alignment.label.help": 2,
         "app_bar.background_fit.boxed_only": 1,
         "app_bar.color.gap_only": 1,
-        "app_bar.icon_source.help": 4,
+        "app_bar.icon_source.help": 5,
         "app_bar.icon_source.name_only": 2,
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,
