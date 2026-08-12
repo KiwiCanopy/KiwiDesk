@@ -22,23 +22,18 @@ import Testing
 struct SettingsRawColorTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    /// The trees this lens covers.
+    /// The trees this lens covers — `ChromeScanRoots`, the one
+    /// list of which GUI trees draw chrome.
     ///
-    /// The Onboarding tree joined in #678 Phase 4 pass 11. It is
-    /// not a Settings surface, and it earns the same lens for a
-    /// sharper reason than consistency: it is the FIRST window
-    /// every user sees, and it shipped a raw `.green`/`.orange`
-    /// status hero and a green "Permission granted!" for as long
-    /// as it existed — a hue that lifts in dark mode, against
-    /// this app's own green primary, where hue was the only
-    /// channel separating two states. A tree drawing chrome
-    /// outside `Settings/` joins this list in the same change
-    /// that gives it colour.
+    /// The Onboarding tree joined it in #678 Phase 4 pass 11, and
+    /// earned the same lens for a sharper reason than
+    /// consistency: it is the FIRST window every user sees, and
+    /// it shipped a raw `.green`/`.orange` status hero for as
+    /// long as it existed — a hue that lifts in dark mode,
+    /// against this app's own green primary, where hue was the
+    /// only channel separating two states.
     private static var scanRoots: [URL] {
-        [
-            "Sources/KiwiDesk/Settings",
-            "Sources/KiwiDesk/Onboarding",
-        ].map { root.appendingPathComponent($0) }
+        ChromeScanRoots.urls(from: #filePath)
     }
 
     // MARK: - Fixed hues

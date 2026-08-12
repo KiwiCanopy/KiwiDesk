@@ -26,7 +26,13 @@ struct FloatingSchematic: View {
     @Environment(\.schematicFocusStroke) private var focusStroke
     @Environment(\.schematicPalette) private var palette
 
-    private var drawn: Int { min(max(windows, 1), 3) }
+    /// Windows actually drawn. `internal` and asserted directly
+    /// (`LayoutSchematicCountTests`), never left to the source
+    /// scan: a schematic that TAKES the count and draws a
+    /// constant satisfies every substring a scan can look for
+    /// while answering nothing — the mutation `guard-prover`
+    /// shipped past that suite's first cut.
+    var drawn: Int { min(max(windows, 1), 3) }
 
     var body: some View {
         SchematicCanvas(
@@ -60,30 +66,27 @@ struct FloatingSchematic: View {
         }
     }
 
+    /// The family's fallback ladder, stated once in
+    /// `SchematicCardColors` — the two card-fan schematics drew
+    /// byte-identical copies of it for a day, and what they were
+    /// copying was the rule rather than a value.
+    private func fill(front: Bool) -> Color {
+        SchematicCardColors.fill(front: front, palette: palette)
+    }
+
+    private func edge(front: Bool) -> Color {
+        SchematicCardColors.edge(
+            front: front,
+            focusStroke: focusStroke,
+            palette: palette
+        )
+    }
+
     /// Overlapping, not tiled: each window sits offset from the
     /// one behind it, and the frontmost carries the focus stroke
     /// the rest of the family uses — a floating window can be
     /// focused like any other, and drawing it otherwise would say
     /// the mode is outside the app's own focus model.
-
-    /// Hoisted out of the drawing: the pair of ternaries blew the
-    /// type-checker's budget inline, which gui.md's shallow-body
-    /// rule exists to prevent.
-    private func fill(front: Bool) -> Color {
-        if front { return palette?.fill ?? LayoutSchematic.fill }
-        return palette?.ghostFill
-            ?? SettingsTheme.ink2.opacity(0.10)
-    }
-
-    private func edge(front: Bool) -> Color {
-        if front {
-            return focusStroke ?? palette?.stroke
-                ?? LayoutSchematic.stroke
-        }
-        return palette?.ghostStroke
-            ?? SettingsTheme.ink2.opacity(0.4)
-    }
-
     private func window(front: Bool) -> some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
             .fill(fill(front: front))

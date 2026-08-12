@@ -56,7 +56,13 @@ final class OnboardingModel {
     /// `shouldResume` puts a returning user straight onto `.keys`
     /// (#331), and closing there must still mark discovery shown
     /// or the tour re-pitches on the next launch.
-    var step: Step = .grant {
+    /// `private(set)`, and the whole flow is why (#828, review):
+    /// a presentation's plan is resolved once from the step it
+    /// opens on, so a door that assigns `step` directly gets a
+    /// tour walking one itinerary while the row draws another.
+    /// Every entry goes through `beginPresentation(at:)` and
+    /// every advance through `advance()`.
+    private(set) var step: Step = .grant {
         didSet {
             if step.isClosingBeat { reachedEnd = true }
         }
@@ -84,9 +90,12 @@ final class OnboardingModel {
     ///   that is a fact about the door rather than about the
     ///   machine, so nothing later can re-derive it.
     ///
-    /// Its stated cost, which is the honest one: unplug a display
-    /// mid-tour and `.separateSpaces` is skipped, so the marker
-    /// advances two pips at once. It still ends on the last.
+    /// It is also the ITINERARY, not a description of one:
+    /// `advance()` walks this list, so a display unplugged
+    /// mid-tour changes neither the row nor the route and the
+    /// tour shows the screen it promised. The alternative — a
+    /// flow re-asking the predicate while the row does not — is
+    /// the disagreement that bit this branch twice.
     ///
     /// Empty until the first presentation begins — the model is a
     /// stored property on `AppDelegate` and exists long before any
@@ -177,11 +186,33 @@ final class OnboardingModel {
     /// live layer.
     var keyFamilies: () -> [OnboardingKeyFamily] = { [] }
 
+    /// One step forward along THIS presentation's plan.
+    ///
+    /// The plan is the itinerary, not a description of one. Every
+    /// `continueAfter*` below is a named call site for it rather
+    /// than a decision of its own — which is what makes a
+    /// disagreement between the row and the flow unconstructible
+    /// instead of test-caught (architecture review, 2026-08-12).
+    /// The branch that used to live in `continueAfterKeys` is now
+    /// the plan's own membership, resolved once, so a display
+    /// unplugged mid-tour can no longer make the flow skip a
+    /// screen the row still counts.
+    ///
+    /// Silent at the end of the plan: the last step's action is
+    /// an exit, and a `Continue` that ran off the end would be a
+    /// programming error the user should not meet as a crash.
+    func advance() {
+        guard let index = progressIndex,
+            index + 1 < plannedSteps.count
+        else { return }
+        step = plannedSteps[index + 1]
+    }
+
     /// The grant landed, so tiling just arranged every window
     /// behind this one. The step says so rather than announcing
     /// a permission — see `OnboardingView.grant`.
     func continueAfterAccessibility() {
-        step = .spaces
+        advance()
     }
 
     /// The keys step is ALWAYS next (#828, owner 2026-08-12).
@@ -200,7 +231,7 @@ final class OnboardingModel {
     /// is what must not re-pitch. Being part of a tour the user
     /// opened is a different question, and the answer is yes.
     func continueAfterSpaces() {
-        step = .keys
+        advance()
     }
 
     /// Shared display Spaces match KiwiDesk's one-active-profile
@@ -209,19 +240,17 @@ final class OnboardingModel {
     /// LAST of the substantive steps (#678 Phase 4 pass 11):
     /// straight after the grant it made a macOS setting requiring
     /// a logout the second thing KiwiDesk ever said.
+    ///
+    /// Whether it appears at all is the PLAN's question now, not
+    /// this method's: it asked `recommendsSharedSpaces` itself
+    /// until #828's review, which is the second copy of the same
+    /// predicate the row derives from.
     func continueAfterKeys() {
-        if DisplaySpacesSetting.recommendsSharedSpaces(
-            separateSpaces: hasSeparateSpaces(),
-            displayCount: displayCount()
-        ) {
-            step = .separateSpaces
-        } else {
-            step = .done
-        }
+        advance()
     }
 
     func continueAfterSeparateSpaces() {
-        step = .done
+        advance()
     }
 
     /// Applies the closing card's "open at login" choice, then runs

@@ -30,10 +30,17 @@ struct OnboardingProgressTests {
     /// test that wrote both down.
     @Test("the plan is the route the tour actually walks")
     func planMatchesTheWalkedRoute() {
-        for wantsKeys in [true, false] {
+        // The axis is the one conditional step there is. The
+        // first cut looped over `wantsKeys`, a seam deleted
+        // earlier in the branch, so both iterations ran the same
+        // route — and the fixture pinned the Displays gate OFF,
+        // which meant the one net for plan-versus-route
+        // disagreement never ran on the arm where a disagreement
+        // is possible (architecture review, 2026-08-12).
+        for (separate, displays) in [(true, 2), (false, 1)] {
             let model = OnboardingModel()
-            model.hasSeparateSpaces = { false }
-            model.displayCount = { 1 }
+            model.hasSeparateSpaces = { separate }
+            model.displayCount = { displays }
             model.beginPresentation(at: .grant)
 
             let planned = model.plannedSteps
@@ -53,11 +60,23 @@ struct OnboardingProgressTests {
             #expect(
                 planned == walked,
                 Comment(
-                    rawValue: "keys \(wantsKeys): planned "
-                        + "\(planned) walked \(walked)"
+                    rawValue: "separate \(separate), displays "
+                        + "\(displays): planned \(planned) "
+                        + "walked \(walked)"
                 )
             )
         }
+        // Vacuity: the two arms must differ, or the sweep is one
+        // route run twice — which is exactly what it was.
+        let long = OnboardingModel()
+        long.hasSeparateSpaces = { true }
+        long.displayCount = { 2 }
+        long.beginPresentation(at: .grant)
+        let short = OnboardingModel()
+        short.hasSeparateSpaces = { false }
+        short.displayCount = { 1 }
+        short.beginPresentation(at: .grant)
+        #expect(long.plannedSteps != short.plannedSteps)
     }
 
     /// Vacuity, and the whole point: two machines get two plans.
@@ -131,14 +150,18 @@ struct OnboardingProgressTests {
         #expect(model.progressIndex == 1)
     }
 
-    /// The snapshot's promise, and its stated cost.
+    /// The snapshot's promise, now that the plan IS the
+    /// itinerary.
     ///
-    /// The plan is resolved once, at `beginPresentation`, so a
-    /// gate falsified mid-tour does not re-number the row under
-    /// the reader — the row keeps its length and the marker
-    /// advances past the screen the flow now skips. A recomputing
-    /// plan would shorten while the user watched, which is the
-    /// counter pass 11 banned in motion rather than at rest.
+    /// A gate falsified mid-tour changes neither the row nor the
+    /// route: the presentation keeps the list it opened with, and
+    /// `advance()` walks that list. Before the collapse
+    /// (architecture review, 2026-08-12) the flow re-asked the
+    /// predicate while the row did not, so an unplugged display
+    /// made the tour skip a screen the row still counted — the
+    /// marker jumped two pips, which this suite recorded as a
+    /// stated cost rather than a defect. There is no such cost
+    /// now, and no way to construct the disagreement.
     ///
     /// Falsifies the INJECTED preference, never the host's: the
     /// first cut moved `displayCount` on a machine where the live
@@ -146,7 +169,7 @@ struct OnboardingProgressTests {
     /// it compared two identical lists and the whole snapshot
     /// could be deleted with the suite green (`guard-prover`,
     /// 2026-08-12).
-    @Test("a gate falsified mid-tour does not re-plan the row")
+    @Test("a gate falsified mid-tour changes neither row nor route")
     func theRowDoesNotRePlanUnderTheReader() {
         let model = OnboardingModel()
         var separate = true
@@ -159,9 +182,12 @@ struct OnboardingProgressTests {
         separate = false
         #expect(model.plannedSteps == planned)
 
-        // …and the flow, which does read the gate live, walks
-        // past the step. The row still ends on its last pip.
+        // The route follows the plan, so the screen the tour
+        // promised is the screen it shows.
         model.continueAfterKeys()
+        #expect(model.step == .separateSpaces)
+        #expect(model.progressIndex == 1)
+        model.continueAfterSeparateSpaces()
         #expect(model.step == .done)
         #expect(
             model.progressIndex == model.plannedSteps.count - 1

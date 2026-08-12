@@ -89,12 +89,11 @@ extension OnboardingView {
             // The link rides INSIDE the sentence, at its own
             // specifier, so a translation places it (#828, owner
             // ruled it a link rather than a button above the
-            // fold).
-            // The RAW frame, slot intact: `LinkedCaption` draws
-            // the label AT `%1$@` and formatting it in first
-            // would leave the sentence with no slot to draw at —
-            // which is how the first cut shipped the words with
-            // no link under them.
+            // fold) — and the frame arrives RAW, slot intact:
+            // `LinkedCaption` draws the label AT `%1$@`, so
+            // formatting it in first leaves the sentence with
+            // nothing to draw at, which is how the first cut
+            // shipped the words with no link under them.
             hint: L(
                 "onboarding.ready.hint",
                 "Tiled before? %1$@"
@@ -149,7 +148,7 @@ extension OnboardingView {
             // the sentence is quiet, the permission to ignore
             // Settings is the part that has to land.
             "Settings is where you change any of this — different "
-                + "keys, more spaces, other colours. **If this is "
+                + "keys, more Spaces, other colours. **If this is "
                 + "your first tiling manager, you do not need it "
                 + "today.**"
         )
@@ -235,11 +234,17 @@ extension OnboardingView {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(SettingsTheme.accent, lineWidth: 2)
             )
+            // Illustration, not text: it is part of the PICTURE
+            // of a menu bar, which is why it is drawn at 0.45 of
+            // the plate ink rather than at a contrast-measured
+            // pairing — and why VoiceOver must not read a clock
+            // in the middle of the sentence beside it.
             Text(menuBarClock)
                 .font(.system(size: 10).monospaced())
                 .foregroundStyle(
                     SettingsTheme.plateInk.opacity(0.45)
                 )
+                .accessibilityHidden(true)
         }
         .padding(.horizontal, 11)
         .frame(height: 30)

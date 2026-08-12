@@ -58,6 +58,16 @@ extension AppDelegate {
     /// cannot arrange (#828).
     func showOnboarding(at entry: OnboardingModel.Step) {
         if let window = onboardingWindow {
+            // A REOPEN navigates, it does not merely raise. Every
+            // caller used to assign `model.step` before this
+            // early return, so the revoke path and the quick
+            // menu's "fix Accessibility" both landed on the grant
+            // screen even with the tour already up; taking the
+            // step as a parameter silently dropped that until the
+            // review caught it. Re-planning here is also what
+            // keeps the row honest — the plan starts at the step
+            // the presentation is now on.
+            onboardingModel.beginPresentation(at: entry)
             NSApp.forceFront(window)
             return
         }
@@ -157,15 +167,16 @@ extension AppDelegate {
     /// early would cover the System Settings window the grant
     /// step opens (#331).
     ///
-    /// One level ABOVE `.floating`, which is where the App Bar and
-    /// Space Bar panels sit (`BarPanel`): as peers the two settle
-    /// in raise order. The bars reserve their strip and the tour
-    /// is centred, so on the reported setup they never actually
-    /// met — the raise is what keeps that true on a setup where
-    /// they would (owner confirmed the behaviour on device,
-    /// 2026-08-12).
+    /// `BarPanel.aboveLevel`, derived from where the bars render
+    /// rather than written as `.floating` + 1 here: as peers the
+    /// two settle in raise order, so a bar could cover the window
+    /// the user is being asked to read. The bars reserve their
+    /// strip and the tour is centred, so on the reported setup
+    /// they never actually met — the raise is what keeps that
+    /// true on a setup where they would (owner confirmed the
+    /// behaviour on device, 2026-08-12).
     func floatOnboardingAboveManagedWindows() {
-        onboardingWindow?.level = .aboveBarPanels
+        onboardingWindow?.level = BarPanel.aboveLevel
     }
 
     func closeOnboarding() {

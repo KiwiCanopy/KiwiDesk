@@ -62,22 +62,20 @@ struct MonocleSchematic: View {
         }
     }
 
-    /// Hoisted out of the drawing: the pair of ternaries blew the
-    /// type-checker's budget inline, which gui.md's shallow-body
-    /// rule exists to prevent.
+    /// The family's fallback ladder, stated once in
+    /// `SchematicCardColors` — the two card-fan schematics drew
+    /// byte-identical copies of it for a day, and what they were
+    /// copying was the rule rather than a value.
     private func fill(front: Bool) -> Color {
-        if front { return palette?.fill ?? LayoutSchematic.fill }
-        return palette?.ghostFill
-            ?? SettingsTheme.ink2.opacity(0.10)
+        SchematicCardColors.fill(front: front, palette: palette)
     }
 
     private func edge(front: Bool) -> Color {
-        if front {
-            return focusStroke ?? palette?.stroke
-                ?? LayoutSchematic.stroke
-        }
-        return palette?.ghostStroke
-            ?? SettingsTheme.ink2.opacity(0.4)
+        SchematicCardColors.edge(
+            front: front,
+            focusStroke: focusStroke,
+            palette: palette
+        )
     }
 
     private func card(front: Bool) -> some View {
@@ -94,11 +92,7 @@ struct MonocleSchematic: View {
                     // show two focus colours disagreeing about
                     // what the colour means (code review
                     // 2026-08-10).
-                    front
-                        ? focusStroke ?? palette?.stroke
-                            ?? LayoutSchematic.stroke
-                        : (palette?.ghostStroke
-                            ?? SettingsTheme.ink2.opacity(0.4)),
+                    edge(front: front),
                     lineWidth: front ? 1.5 : 1
                 )
             )

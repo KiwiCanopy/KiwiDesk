@@ -47,6 +47,15 @@ final class CaptionTextView: NSTextView {
         return element
     }()
 
+    /// The prose's resting colour, handed down by the caller so
+    /// a surface with its own ink tiers is not stuck with the
+    /// system grey (#828). The LINK's own two colours stay this
+    /// view's: they are the hover lift, which is one idiom
+    /// app-wide.
+    var restingInk: NSColor = .secondaryLabelColor {
+        didSet { paintLink() }
+    }
+
     private var hover: NSTrackingArea?
     private var linkRange = NSRange(location: 0, length: 0)
     private var overLink = false
@@ -79,7 +88,7 @@ final class CaptionTextView: NSTextView {
         else { return }
         storage.addAttribute(
             .foregroundColor,
-            value: NSColor.secondaryLabelColor,
+            value: restingInk,
             range: NSRange(location: 0, length: storage.length)
         )
         guard linkRange.upperBound <= storage.length else {

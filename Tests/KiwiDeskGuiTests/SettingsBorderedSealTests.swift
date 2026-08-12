@@ -37,30 +37,17 @@ import Testing
 /// by any needle here.
 @Suite("Settings bordered seal")
 struct SettingsBorderedSealTests {
-    /// The trees this guard covers.
-    ///
-    /// The Onboarding tree joined when #828 tinted it: the tour
-    /// had no `.tint` at all, so every unstyled button there
-    /// rendered a system-blue default and nothing was wrong with
-    /// it. The moment the root took `SettingsTheme.accent` those
-    /// same buttons started painting their labels from it, which
-    /// is #759 arriving in the first window every user sees — so
-    /// the bordered seal follows the tint rather than the
-    /// directory it was written for. `everyScanRootIsRead` is
-    /// what keeps a renamed tree from retiring it in silence.
+    /// The trees this guard covers — `ChromeScanRoots`, which
+    /// is the ONE list of "which GUI trees draw chrome". It was
+    /// hand-copied into five suites when the Onboarding tree
+    /// joined (#828), which is five registers a sixth tree has
+    /// to be added to and four places for it to be forgotten.
     private var scanRoots: [URL] {
-        let repo = SourceScan.repoRoot(from: #filePath)
-        return [
-            "Sources/KiwiDesk/Settings",
-            "Sources/KiwiDesk/Onboarding",
-        ].map { repo.appendingPathComponent($0) }
+        ChromeScanRoots.urls(from: #filePath)
     }
 
-    /// Every Swift file under every scan root.
     private func scannedSources() throws -> [URL] {
-        try scanRoots.flatMap {
-            try SourceScan.swiftSources(under: $0)
-        }
+        try ChromeScanRoots.sources(from: #filePath)
     }
 
     @Test("every scan root is actually read")
@@ -77,9 +64,8 @@ struct SettingsBorderedSealTests {
             )
         }
         // Derived from what the scan READ, never from the
-        // literal list: deleting the Onboarding entry leaves the
-        // loop above green, having faithfully checked whatever
-        // roots remain.
+        // literal list: deleting a root leaves the loop above
+        // green, having faithfully checked whatever remains.
         #expect(
             try scannedSources().contains {
                 $0.path.contains("/Onboarding/")

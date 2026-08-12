@@ -6,10 +6,29 @@ import AppKit
 /// Bar became its second real consumer — each overlay still owns
 /// its subview tree and layout.
 public enum BarPanel {
-    /// The level both bars render at, named once so a window that
-    /// must sit above them derives its own from it rather than
-    /// restating `.floating` (`NSWindow.Level.aboveBarPanels`).
+    /// The level both bars render at.
+    ///
+    /// **A window that must not be covered by a bar derives its
+    /// level from `aboveLevel` rather than writing `.floating`
+    /// again.** The two are one fact — "the bars are here, and
+    /// this is above them" — and spelled apart they drift the
+    /// day the bars move.
+    ///
+    /// The bars' PEERS are deliberate and stay peers: the drag
+    /// overlay (`DragOverlay`) and the shortcuts panel
+    /// (`ShortcutsPanelController`) both render at `.floating` of
+    /// their own accord, and settling with the bars in raise
+    /// order is right for both — a drag visual belongs beside the
+    /// bar it is dragging over, and the panel is an overlay the
+    /// user summons and dismisses.
     public static let level: NSWindow.Level = .floating
+
+    /// One step above the bars, for a window the user is being
+    /// asked to read while tiling runs behind it — the onboarding
+    /// tour is what asked for it (#828).
+    public static let aboveLevel = NSWindow.Level(
+        rawValue: level.rawValue + 1
+    )
 
     /// Like the drag visuals' panels, but clickable. The
     /// `.nonactivatingPanel` mask keeps KiwiDesk out of the key
@@ -41,15 +60,4 @@ public enum BarPanel {
         ]
         return panel
     }
-}
-
-extension NSWindow.Level {
-    /// One step above the bars, DERIVED from `BarPanel.level`
-    /// rather than written as `.floating` a second time — a
-    /// window that must not be covered by a bar and a bar that
-    /// moved level would otherwise be two facts that can
-    /// disagree. The onboarding tour is the one consumer (#828).
-    public static let aboveBarPanels = NSWindow.Level(
-        rawValue: BarPanel.level.rawValue + 1
-    )
 }

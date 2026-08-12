@@ -13,6 +13,9 @@ struct OnboardingTests {
     @Test("the grant step hands off to the spaces step")
     func grantLeadsToSpaces() {
         let model = OnboardingModel()
+        model.hasSeparateSpaces = { false }
+        model.displayCount = { 1 }
+        model.beginPresentation(at: .grant)
         model.continueAfterAccessibility()
         #expect(model.step == .spaces)
         // Nothing has been said yet, so the close seam must not
@@ -29,32 +32,48 @@ struct OnboardingTests {
     @Test("the spaces step always leads to the keys step")
     func spacesAlwaysLeadToKeys() {
         let model = OnboardingModel()
+        model.hasSeparateSpaces = { false }
         model.displayCount = { 1 }
+        model.beginPresentation(at: .spaces)
         model.continueAfterSpaces()
         #expect(model.step == .keys)
     }
 
+    /// The recommendation is the LAST substantive step, reached
+    /// from the keys step rather than from the grant.
+    ///
+    /// Driven through the INJECTED preference, never the host's:
+    /// deriving the expectation from the same live read the model
+    /// makes puts the same value on both sides of the `==`, so
+    /// the test agrees with itself on every machine and
+    /// discriminates on none — the shape `guard-prover` proved
+    /// vacuous here on 2026-08-12.
     @Test("multi-display separate Spaces show the recommendation")
     func separateSpacesRecommendSharedModel() {
         let model = OnboardingModel()
-        // The recommendation is now the LAST substantive step,
-        // reached from the keys step rather than from the grant.
+        model.hasSeparateSpaces = { true }
         model.displayCount = { 2 }
+        model.beginPresentation(at: .keys)
         model.continueAfterKeys()
-        // Only meaningful where the live pref has separate Spaces
-        // on; the predicate's display half is what this drives.
-        let recommends =
-            DisplaySpacesSetting
-            .recommendsSharedSpaces(displayCount: 2)
-        #expect(
-            model.step == (recommends ? .separateSpaces : .done)
-        )
+        #expect(model.step == .separateSpaces)
+    }
+
+    @Test("shared display Spaces skip the recommendation")
+    func sharedSpacesSkipTheRecommendation() {
+        let model = OnboardingModel()
+        model.hasSeparateSpaces = { false }
+        model.displayCount = { 2 }
+        model.beginPresentation(at: .keys)
+        model.continueAfterKeys()
+        #expect(model.step == .done)
     }
 
     @Test("a single display goes straight to the closing card")
     func singleDisplaySkipsTheRecommendation() {
         let model = OnboardingModel()
+        model.hasSeparateSpaces = { true }
         model.displayCount = { 1 }
+        model.beginPresentation(at: .keys)
         model.continueAfterKeys()
         #expect(model.step == .done)
     }
@@ -62,6 +81,9 @@ struct OnboardingTests {
     @Test("the recommendation's Continue reaches the closing card")
     func separateSpacesLeadsToDone() {
         let model = OnboardingModel()
+        model.hasSeparateSpaces = { true }
+        model.displayCount = { 2 }
+        model.beginPresentation(at: .separateSpaces)
         model.continueAfterSeparateSpaces()
         #expect(model.step == .done)
     }
@@ -76,16 +98,23 @@ struct OnboardingTests {
     /// expectation and the actual together and the sweep stays
     /// green. Removing `.done` from the set passed the entire
     /// suite — 3140 tests — with the tour's final card no longer
-    /// counting as the end, i.e. the discovery flag never marked,
-    /// Home's banner never seeded and the coach mark never shown
-    /// on the ordinary finish path (guard-prover, 2026-08-11).
+    /// counting as the end, i.e. the discovery flag never marked
+    /// and Home's banner never seeded on the ordinary finish path
+    /// (guard-prover, 2026-08-11 — a third effect, the desktop
+    /// coach mark, hung off the same flag until #828 moved
+    /// where-the-app-lives inside the closing card).
     /// `everyTerminalRouteReachesTheEnd` below is what holds the
     /// membership; this holds the wiring.
     @Test("arriving at a step consults its closing-beat verdict")
     func reachedEndOnArrival() {
         for step in OnboardingModel.Step.allCases {
             let model = OnboardingModel()
-            model.step = step
+            // Through the one door, since `step` is `private(set)`
+            // (#828 review): a presentation's plan is resolved
+            // from the step it opens on, so a test that assigned
+            // the step directly would be exercising a state no
+            // door can produce.
+            model.beginPresentation(at: step)
             #expect(
                 model.reachedEnd == step.isClosingBeat,
                 "\(step) disagreed with its own closing-beat verdict"
@@ -104,17 +133,20 @@ struct OnboardingTests {
     ///
     /// Every route a real user can take to the end of the tour is
     /// driven through the model's own transitions, and each must
-    /// arrive with `reachedEnd` set — because three shipped
+    /// arrive with `reachedEnd` set — because two shipped
     /// effects hang off that flag at `windowWillClose`
-    /// (`OnboardingDiscovery.markShown`, `HomeFirstRunState.seed`,
-    /// the coach mark). A step dropped from `isClosingBeat` reds
-    /// here even though the sweep above cannot see it.
+    /// (`OnboardingDiscovery.markShown`, `HomeFirstRunState.seed`;
+    /// the coach mark was a third until #828). A step dropped
+    /// from `isClosingBeat` reds here even though the sweep above
+    /// cannot see it.
     @Test("every terminal route arrives having reached the end")
     func everyTerminalRouteReachesTheEnd() {
         // Route 1 — one display: grant, spaces, keys, done. The
         // keys step is on every route since #828.
         let direct = OnboardingModel()
+        direct.hasSeparateSpaces = { false }
         direct.displayCount = { 1 }
+        direct.beginPresentation(at: .grant)
         direct.continueAfterAccessibility()
         direct.continueAfterSpaces()
         #expect(direct.step == .keys)
@@ -125,6 +157,9 @@ struct OnboardingTests {
         // Route 3 — through the Displays recommendation, which is
         // the last substantive step when it appears at all.
         let viaSpaces = OnboardingModel()
+        viaSpaces.hasSeparateSpaces = { true }
+        viaSpaces.displayCount = { 2 }
+        viaSpaces.beginPresentation(at: .separateSpaces)
         viaSpaces.continueAfterSeparateSpaces()
         #expect(viaSpaces.step == .done)
         #expect(
@@ -136,7 +171,9 @@ struct OnboardingTests {
         // continuing. `shouldResume` puts a returning user there
         // directly, so this is a real ending, not an abandonment.
         let closedOnKeys = OnboardingModel()
+        closedOnKeys.hasSeparateSpaces = { false }
         closedOnKeys.displayCount = { 1 }
+        closedOnKeys.beginPresentation(at: .grant)
         closedOnKeys.continueAfterAccessibility()
         closedOnKeys.continueAfterSpaces()
         #expect(closedOnKeys.step == .keys)
@@ -146,6 +183,9 @@ struct OnboardingTests {
         // the flag would be true from the first screen and mean
         // nothing at all.
         let opening = OnboardingModel()
+        opening.hasSeparateSpaces = { false }
+        opening.displayCount = { 1 }
+        opening.beginPresentation(at: .grant)
         #expect(!opening.reachedEnd)
         opening.continueAfterAccessibility()
         #expect(opening.step == .spaces)
@@ -163,7 +203,7 @@ struct OnboardingTests {
     @Test("a resumed tour that opens on keys has reached the end")
     func resumedTourCounts() {
         let model = OnboardingModel()
-        model.step = .keys
+        model.beginPresentation(at: .keys)
         #expect(model.reachedEnd)
     }
 

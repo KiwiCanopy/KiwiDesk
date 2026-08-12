@@ -37,6 +37,19 @@ struct LinkedCaption: NSViewRepresentable {
     let linkTitle: String
     let trailing: String
     let navigate: () -> Void
+    /// The prose's size and its resting ink.
+    ///
+    /// Defaulted to the caption tier every cross-reference row
+    /// draws at, so those call sites say nothing. The tour passes
+    /// its own: its footer hints are 12.5 pt `ink3`, and a link
+    /// sentence arriving at the system caption size in the
+    /// system's secondary grey made the ONE screen with a link in
+    /// it read a tier apart from the other four (code review,
+    /// 2026-08-12).
+    var pointSize: CGFloat = NSFont.preferredFont(
+        forTextStyle: .caption1
+    ).pointSize
+    var ink: NSColor = .secondaryLabelColor
     /// `.disabled()` is environment-only, so an `NSView` inside a
     /// representable keeps its own tracking areas and hit
     /// testing and would stay live inside a `GreyOut`. Read here
@@ -65,6 +78,7 @@ struct LinkedCaption: NSViewRepresentable {
         view.onLink = navigate
         view.linkLabel = linkTitle
         view.isLive = isEnabled
+        view.restingInk = ink
         view.setSentence(sentence, linkRange: linkRange)
     }
 
@@ -128,9 +142,7 @@ struct LinkedCaption: NSViewRepresentable {
         out.append(NSAttributedString(string: trailing))
         out.addAttributes(
             [
-                .font: NSFont.preferredFont(
-                    forTextStyle: .caption1
-                )
+                .font: NSFont.systemFont(ofSize: pointSize)
             ],
             range: NSRange(location: 0, length: out.length)
         )

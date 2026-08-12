@@ -18,11 +18,20 @@ import SwiftUI
 /// argument `settingsActionButton()` already makes for the
 /// bordered rank, one rank down.
 ///
-/// Stated residue: the floating save pill and Settings' own
-/// prominent buttons still take the system style, so they still
-/// draw white on kiwi. That is the same defect at a second set of
-/// call sites rather than a different one; adopting this style
-/// there is its own change, and its own eye-confirm.
+/// **It lives in `Onboarding/` because its consumers do.** It was
+/// filed under `Settings/` for a day, which made it an Onboarding
+/// style policed by Settings-named guards — and `gui.md`'s file
+/// layout admits section bodies, area widgets and root-composed
+/// Settings widgets there, none of which this is. If Settings
+/// ever adopts it, it moves to whatever shelf both trees share
+/// rather than back to one of them.
+///
+/// Stated residue, carried in `gui.md` ▸ Colour rather than only
+/// here, because the next prominent button is written in that
+/// tree and not this one: the floating save pill and Settings'
+/// own `.borderedProminent` sites still draw white on kiwi.
+/// Same defect, second set of call sites; adopting this style
+/// there is its own change and its own eye-confirm.
 struct KiwiProminentButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
@@ -33,8 +42,10 @@ struct KiwiProminentButtonStyle: ButtonStyle {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: 9)
-                    .fill(SettingsTheme.accent)
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.chipRadius
+                )
+                .fill(SettingsTheme.accent)
             )
             // A hair of the accent's own ink for an edge. A flat
             // fill on a near-white page has no boundary of its
@@ -43,18 +54,24 @@ struct KiwiProminentButtonStyle: ButtonStyle {
             // fill is the edge that fixes it without coining a
             // second green.
             .overlay(
-                RoundedRectangle(cornerRadius: 9)
-                    .stroke(
-                        SettingsTheme.accentInk.opacity(0.22),
-                        lineWidth: 1
-                    )
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.chipRadius
+                )
+                .stroke(
+                    SettingsTheme.accentInk.opacity(0.22),
+                    lineWidth: 1
+                )
             )
             // Pressed and disabled both read through the FILL,
             // which keeps the label's contrast fixed — dimming
             // dark ink on a dimmed green is how a pressed button
             // becomes unreadable at the moment it is clicked.
             .opacity(pressedOrDisabled(configuration) ? 0.72 : 1)
-            .contentShape(RoundedRectangle(cornerRadius: 9))
+            .contentShape(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.chipRadius
+                )
+            )
     }
 
     private func pressedOrDisabled(

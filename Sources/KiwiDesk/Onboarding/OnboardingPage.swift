@@ -129,7 +129,11 @@ struct OnboardingPage<Content: View, Action: View>: View {
                 leading: parts.0,
                 linkTitle: hintLink.label,
                 trailing: parts.1,
-                navigate: hintLink.action
+                navigate: hintLink.action,
+                // The hint tier, so the one screen with a link in
+                // its footer reads like the four without one.
+                pointSize: 12.5,
+                ink: NSColor(SettingsTheme.ink3)
             )
         } else {
             hintText(text)

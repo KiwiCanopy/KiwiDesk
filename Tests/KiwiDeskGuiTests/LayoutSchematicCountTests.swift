@@ -283,7 +283,17 @@ struct LayoutSchematicCountTests {
         // until #828. Stated as the sum rather than folded into
         // the tab count, so a layout that gains a tab still moves
         // this number.
-        #expect(checked == LayoutMode.placementTabs.count + 1)
+        // Derived, never a literal `+ 1`: the schematics are the
+        // placement tabs PLUS the modes that have a picture and
+        // no tuning to place, and spelling the second set as an
+        // integer would need the number bumped by hand for the
+        // next one (architecture review, 2026-08-12).
+        let untuned: Set<LayoutMode> = [.floating]
+        #expect(
+            checked
+                == Set(LayoutMode.placementTabs).union(untuned)
+                .count
+        )
     }
 
     // MARK: - Fixtures

@@ -28,7 +28,7 @@ extension OnboardingView {
             footnoteAtBottom: true,
             hint: L(
                 "onboarding.starter_spaces.hint",
-                "More spaces or other layouts? Settings, "
+                "More Spaces or other layouts? Settings, "
                     + "whenever you want them."
             )
         ) {
@@ -82,6 +82,15 @@ extension OnboardingView {
     private var thumbHeight: CGFloat { 46 }
     private var thumbFactor: CGFloat {
         thumbHeight / SchematicScale.tile.height
+    }
+    /// Derived from the scale, never a second copy of its 132:
+    /// a retune of the tile width would otherwise leave this row
+    /// drawing at the old one. `.tile`'s width is non-nil by
+    /// construction — `.panel` is the scale that fills its pane —
+    /// and a zero here would draw nothing rather than something
+    /// wrong.
+    private var thumbWidth: CGFloat {
+        (SchematicScale.tile.width ?? 0) * thumbFactor
     }
 
     private func row(_ card: OnboardingSpaceCard) -> some View {
@@ -137,11 +146,7 @@ extension OnboardingView {
             scale: .tile
         )
         .scaleEffect(thumbFactor)
-        .frame(
-            width: (SchematicScale.tile.width ?? 132)
-                * thumbFactor,
-            height: thumbHeight
-        )
+        .frame(width: thumbWidth, height: thumbHeight)
         .padding(5)
         .background(
             RoundedRectangle(cornerRadius: 7)
