@@ -71,7 +71,21 @@ struct InterpolatedLabelTests {
     /// scan's stated blind spot, not an oversight. A frame that
     /// reaches its label through any accessor is invisible here;
     /// only an inline `L("key", …)` argument is discovered.
+    /// The four below `track.…` were never #818 conversions —
+    /// they already interpolated a label, and the scan found
+    /// them. They are listed anyway, because the floor's job is
+    /// to notice a frame going back to literal text and that is
+    /// worth having wherever it interpolates, not only where a
+    /// conversion put it. Two shapes to know when adding one:
+    /// `layout.schematic.grid.ax` picks between two labels for
+    /// ONE slot with a ternary (so 2), and `home.card.ax_value`
+    /// has two call sites of which only one interpolates a key
+    /// (the count is the larger).
     static let converted: [String: Int] = [
+        "home.card.ax_value": 1,
+        "keyboard.layout.value": 1,
+        "layout.schematic.grid.ax": 2,
+        "search.result_mode_ax": 1,
         "track.new_window_position.help": 4,
         "space_override.slot_size.help": 4,
         "onboarding.grant.body": 1,
@@ -197,6 +211,24 @@ struct InterpolatedLabelTests {
     @Test("a converted frame keeps interpolating")
     func conversionsHold() throws {
         let frames = try SourceScan.interpolatingFrames()
+        // Total, not a sample. The floor only protects the
+        // frames it lists, so a conversion that forgets its
+        // entry silently has no full-revert protection at all —
+        // which four discovered frames were missing when this
+        // check was added. The keys still come only from the
+        // scan; the entry contributes just the number a call
+        // site cannot restate.
+        for frame in frames {
+            #expect(
+                Self.converted[frame.key] != nil,
+                """
+                \(frame.key) (\(frame.file)) interpolates a \
+                label but has no floor in `converted` — add it \
+                with the count it interpolates today, or a \
+                revert to literal text will pass unseen.
+                """
+            )
+        }
         for (key, floor) in Self.converted {
             let found = frames.filter { $0.key == key }
             #expect(

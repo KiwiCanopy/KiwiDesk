@@ -42,10 +42,22 @@ extension SourceScan {
             let text = Array(source)
             var index = 0
             while index < text.count {
+                // Skip literals: an `L(` inside one would start a
+                // balanced parse mid-string, invert quote parity
+                // from there and then jump the cursor past
+                // whatever it consumed — fail-open, real frames
+                // silently unscanned.
+                if text[index] == "\"",
+                    let literal = literal(text, from: index)
+                {
+                    index = literal.end
+                    continue
+                }
                 guard
                     text[index] == "L",
                     index + 1 < text.count,
-                    text[index + 1] == "("
+                    text[index + 1] == "(",
+                    isCallStart(text, at: index)
                 else {
                     index += 1
                     continue
@@ -81,6 +93,24 @@ extension SourceScan {
         return frames
     }
 
+    /// Whether the `L` at `index` starts a call rather than
+    /// ending an identifier. Without this, `URL(` and
+    /// `fileURL(` parse as `L(` — five live occurrences under
+    /// `Sources/KiwiDesk` today. Harmless there because neither
+    /// body yields two literals, but inside a real frame's
+    /// argument list such a token re-arms the key hunt and the
+    /// next literal registers as a "label".
+    private static func isCallStart(
+        _ text: [Character],
+        at index: Int
+    ) -> Bool {
+        guard index > 0 else { return true }
+        let previous = text[index - 1]
+        return
+            !(previous.isLetter || previous.isNumber
+            || previous == "_" || previous == ".")
+    }
+
     /// The `L(` key literal of the body and of each nested `L(`,
     /// in source order. A key is the FIRST string literal after
     /// an `L(`, which is what `scripts/extract-keys` parses too.
@@ -99,7 +129,8 @@ extension SourceScan {
                 }
             }
             if text[index] == "L", index + 1 < text.count,
-                text[index + 1] == "("
+                text[index + 1] == "(",
+                isCallStart(text, at: index)
             {
                 wantKey = true
                 index += 2
@@ -126,8 +157,8 @@ extension SourceScan {
                 continue
             }
             switch text[index] {
-            case "(", "[": depth += 1
-            case ")", "]": depth -= 1
+            case "(", "[", "{": depth += 1
+            case ")", "]", "}": depth -= 1
             case "," where depth == 0: commas += 1
             default: break
             }

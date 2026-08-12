@@ -250,8 +250,8 @@ extension KiwiCore {
             -- KiwiDesk.set_gap_global(10)
 
             -- Every Space has its own layout; the first
-            -- argument is the SPACE id
-            -- (number or name), never a monitor. All Spaces
+            -- argument is the SPACE id (number or name),
+            -- never a monitor. All Spaces
             -- default to "bsp". Modes: bsp | stack |
             -- scrolling | monocle | grid | floating
             -- KiwiDesk.set_mode(1, "stack")
