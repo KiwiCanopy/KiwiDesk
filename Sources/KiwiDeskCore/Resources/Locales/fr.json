@@ -990,7 +990,7 @@
   "space_override.reset_all_confirm.action": "Tout réinitialiser",
   "space_override.reset_all_confirm.message": "Ceci efface les surcharges enregistrées de chaque disposition pour cet espace, pas seulement la disposition actuelle. Cette action est irréversible.",
   "space_override.reset_all_confirm.title": "Réinitialiser toutes les surcharges de disposition ?",
-  "space_override.slot_size.help": "Définit la taille de chaque fenêtre en défilement le long du sens de défilement : la largeur de colonne quand l'orientation est %1$@, la hauteur de ligne quand elle est %2$@. Comme unité, %3$@ s'adapte à cette largeur ou à cette hauteur (95 %% par défaut) et %4$@ fixe une taille exacte.",
+  "space_override.slot_size.help": "Définit la taille de chaque fenêtre en défilement le long du sens de défilement : la largeur de colonne quand l'orientation est %1$@, la hauteur de ligne quand elle est %2$@. Comme unité, %3$@ s'adapte à cette largeur ou à cette hauteur (95 %% par défaut) et %4$@ fixent une taille exacte.",
   "space_override.title": "%1$@ — surcharges de %2$@",
   "spaces.add.help": "Ajouter un espace",
   "spaces.add.placeholder": "Nom du nouvel espace",

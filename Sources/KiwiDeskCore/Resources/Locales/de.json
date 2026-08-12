@@ -990,7 +990,7 @@
   "space_override.reset_all_confirm.action": "Alle zurücksetzen",
   "space_override.reset_all_confirm.message": "Dies löscht die gespeicherten Überschreibungen jedes Layouts für diesen Space, nicht nur des aktuellen. Dies kann nicht rückgängig gemacht werden.",
   "space_override.reset_all_confirm.title": "Alle Layout-Überschreibungen zurücksetzen?",
-  "space_override.slot_size.help": "Legt die Größe jedes scrollenden Fensters entlang der Scroll-Richtung fest — die Spaltenbreite, wenn die Ausrichtung %1$@ ist, die Zeilenhöhe, wenn sie %2$@ ist. Als Einheit skaliert %3$@ mit dieser Breite oder Höhe (ab Werk 95 %%), %4$@ legt eine exakte Größe fest.",
+  "space_override.slot_size.help": "Legt die Größe jedes scrollenden Fensters entlang der Scroll-Richtung fest — die Spaltenbreite, wenn die Ausrichtung %1$@ ist, die Zeilenhöhe, wenn sie %2$@ ist. Als Einheit skaliert %3$@ mit dieser Breite oder Höhe (ab Werk 95 %%), und %4$@ legen eine exakte Größe fest.",
   "space_override.title": "%1$@ — %2$@ Überschreibungen",
   "spaces.add.help": "Space hinzufügen",
   "spaces.add.placeholder": "Neuer Space-Name",

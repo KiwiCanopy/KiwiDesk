@@ -655,7 +655,7 @@
   "native_spaces.clear_all.help": "모든 데스크탑 → 프로필 바인딩을 제거합니다. 하단 바의 '저장'으로 적용됩니다.",
   "native_spaces.current": "현재",
   "native_spaces.desktop": "데스크탑 %1$d",
-  "native_spaces.empty": "macOS 기본 데스크탑이 감지되지 않았습니다. 프로파일을 연결하려면 Mission Control에서 데스크탑을 추가하십시오.",
+  "native_spaces.empty": "macOS 기본 데스크탑이 감지되지 않았습니다. 프로필을 연결하려면 Mission Control에서 데스크탑을 추가하십시오.",
   "native_spaces.intro": "이것은 Mission Control에 있는 macOS 자체의 데스크탑이며, KiwiDesk의 공간이 아닙니다. 데스크탑이 활성화될 때 자동으로 불러올 프로필을 선택하십시오.",
   "native_spaces.none": "없음",
   "native_spaces.open_settings": "데스크탑 및 Dock 설정 열기",
