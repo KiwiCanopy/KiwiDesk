@@ -15,6 +15,11 @@ struct PaletteShelf: View {
     @State var saveName = ""
     @State var renaming: String?
     @State var renameDraft = ""
+    /// Where the keyboard lands after a saved palette's tile
+    /// stops existing (#816). `internal`, like the state around
+    /// it: the delete lives in `PaletteShelf+Actions.swift` (file
+    /// ceiling) and `@FocusState` cannot move to an extension.
+    @FocusState var returningTile: String?
 
     var store: PaletteStore { model.paletteStore }
 
@@ -120,6 +125,12 @@ struct PaletteShelf: View {
             ) {
                 ForEach(userPalettes, id: \.name) { palette in
                     chip(palette, builtin: false, live: live)
+                        // The tile IS the destination: it is a
+                        // `Button` that takes focus already, so a
+                        // deletion elsewhere in the grid can name
+                        // it without anything new being drawn
+                        // (#816).
+                        .focused($returningTile, equals: palette.name)
                         .contextMenu { userMenu(palette) }
                         // Same builder as named VoiceOver actions
                         // (#678 Phase 4 pass 10, turn 20a rule 1).

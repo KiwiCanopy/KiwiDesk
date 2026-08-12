@@ -14,6 +14,9 @@ struct AppRulesSection: View {
     /// (both facets still at their defaults) — they live only
     /// in the GUI until a facet is set.
     @State private var draftApps: [String] = []
+    /// Where the keyboard lands after a rule row stops existing
+    /// (#816), keyed by the row's app id.
+    @FocusState private var returningRow: String?
     @State private var newApp = ""
 
     /// The base rules while editing a stored profile — the
@@ -44,7 +47,8 @@ struct AppRulesSection: View {
                             overrideBase: overrideBase,
                             overrideFloatBase: overrideFloatBase,
                             isDraft: draftApps.contains(app),
-                            onDelete: { delete(app) }
+                            onDelete: { delete(app) },
+                            returningRow: $returningRow
                         )
                         Divider()
                     }
@@ -185,11 +189,31 @@ struct AppRulesSection: View {
     }
 
     private func delete(_ app: String) {
+        // Before the mutation (#816): afterwards `apps` no
+        // longer contains the deleted row, so its neighbour
+        // cannot be identified from it.
+        let neighbour = neighbourAfterDeleting(app)
         model.config.appRules[app] = nil
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
         draftApps.removeAll { $0 == app }
+        returningRow = neighbour
+    }
+
+    /// The row a deletion should leave focus on: the next one
+    /// down, else the previous, else nothing — read from `apps`,
+    /// which is the display order (sorted by the name the row
+    /// shows, #333), not from the rules dictionary.
+    private func neighbourAfterDeleting(
+        _ app: String
+    ) -> String? {
+        let rows = apps
+        guard let index = rows.firstIndex(of: app) else {
+            return nil
+        }
+        if index + 1 < rows.count { return rows[index + 1] }
+        return index > 0 ? rows[index - 1] : nil
     }
 }
 

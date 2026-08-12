@@ -35,6 +35,20 @@ extension ProfilesSection {
         }
     }
 
+    /// The broken row a deletion should leave focus on: the next
+    /// one down, else the previous, else nothing. A twin of the
+    /// healthy list's helper rather than a shared one — the two
+    /// read different lists, and folding them into one function
+    /// taking a list would hide which list a call site meant.
+    func neighbourBrokenAfter(_ name: String) -> String? {
+        let names = model.brokenProfiles.map(\.name)
+        guard let index = names.firstIndex(of: name) else {
+            return nil
+        }
+        if index + 1 < names.count { return names[index + 1] }
+        return index > 0 ? names[index - 1] : nil
+    }
+
     private func brokenRow(_ broken: BrokenProfile) -> some View {
         let name = broken.name
         return HStack(alignment: .firstTextBaseline) {
@@ -59,6 +73,13 @@ extension ProfilesSection {
             // file, and coining a twin is the defect this file's
             // docstring argues against, one level down from the
             // sentence (code review, 2026-08-11).
+            // This row's return destination (#816): Reveal is
+            // the always-drawn, non-destructive control here,
+            // exactly as Load is on a healthy row. A broken row
+            // has no Load — that is what makes it broken — so
+            // the two lists name different controls for the same
+            // reason rather than sharing one by symmetry.
+            .focused($returningRow, equals: name)
             .iconButtonAffordance(
                 L("config_issues.reveal", "Reveal in Finder")
             )
@@ -78,7 +99,15 @@ extension ProfilesSection {
                         "discard.delete_profile.confirm",
                         "Discard & delete"
                     )
-                ) { model.deleteProfile(named: name) }
+                ) {
+                    // Before the mutation, and within THIS list:
+                    // a broken row's neighbour is another broken
+                    // row, never a healthy one that renders
+                    // above under its own heading (#816).
+                    let neighbour = neighbourBrokenAfter(name)
+                    model.deleteProfile(named: name)
+                    returningRow = neighbour
+                }
             } label: {
                 Image(systemName: "trash")
             }

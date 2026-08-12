@@ -158,50 +158,74 @@ struct AppBarCard: View {
     /// caveat rides a persistent caption, never hover alone.
     private var copyAppearanceRow: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Button {
-                model.config.settings.appBarStyle
-                    .copyAppearance(
-                        from: model.config.settings
-                            .spaceBarStyle
+            VStack(alignment: .leading, spacing: 4) {
+                Button {
+                    model.config.settings.appBarStyle
+                        .copyAppearance(
+                            from: model.config.settings
+                                .spaceBarStyle
+                        )
+                } label: {
+                    Text(
+                        L(
+                            "app_bar.copy_appearance",
+                            "Copy sizes and style from Space Bar…"
+                        )
                     )
-            } label: {
+                }
+                .settingsActionButton()
+                .controlSize(.small)
+                .help(copyAppearanceHelp)
                 Text(
                     L(
-                        "app_bar.copy_appearance",
-                        "Copy sizes and style from Space Bar…"
+                        "app_bar.copy_appearance.caption",
+                        "Copies the Space Bar's current sizes "
+                            + "and style — not its colors — as a "
+                            + "one-time starting point, never a "
+                            + "live link."
                     )
                 )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            .settingsActionButton()
-            .controlSize(.small)
-            .help(
-                L(
-                    "app_bar.copy_appearance.help",
-                    "Takes the Space Bar's current sizes and "
-                        + "style once — thickness, background, "
-                        + "indicator and the rest. Colors are "
-                        + "not copied; edits afterwards stay "
-                        + "independent."
+            .modifier(
+                GreyOut(
+                    active: sourceBarOff,
+                    help: BarsGateHelp.sentence(for: .spaceBarOff)
                 )
             )
-            Text(
-                L(
-                    "app_bar.copy_appearance.caption",
-                    "Copies the Space Bar's current sizes and "
-                        + "style — not its colors — as a "
-                        + "one-time starting point, never a "
-                        + "live link."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            // The gate's reason, INLINE and OUTSIDE the dimmed
+            // subtree (#815): a dim says an answer exists, and
+            // this row's answer is on another card of this same
+            // page, so nothing beside the button connects the
+            // two. The caption above says what the verb does,
+            // never why it is dead — which is exactly the
+            // distinction that let this ship with the reason in
+            // a tooltip. `GateReasonPlacement` is what puts the
+            // row in this class; it is not a judgement made
+            // here.
+            if sourceBarOff {
+                Text(BarsGateHelp.sentence(for: .spaceBarOff))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
         }
-        .modifier(
-            GreyOut(
-                active: !model.config.settings
-                    .spaceBarStyle.enabled,
-                help: BarsGateHelp.sentence(for: .spaceBarOff)
-            )
+    }
+
+    /// The source bar being off is what kills the copy — read
+    /// once, so the dim and the sentence cannot disagree.
+    private var sourceBarOff: Bool {
+        !model.config.settings.spaceBarStyle.enabled
+    }
+
+    private var copyAppearanceHelp: String {
+        L(
+            "app_bar.copy_appearance.help",
+            "Takes the Space Bar's current sizes and "
+                + "style once — thickness, background, "
+                + "indicator and the rest. Colors are "
+                + "not copied; edits afterwards stay "
+                + "independent."
         )
     }
 

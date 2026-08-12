@@ -36,6 +36,12 @@ struct AppRuleRow: View {
     /// removes the draft itself.
     let isDraft: Bool
     let onDelete: () -> Void
+    /// The list's focus key, so a deletion elsewhere can land on
+    /// THIS row (#816). Bound to the space menu below — the
+    /// first control the sentence draws, always present, and
+    /// non-destructive, unlike the trash at the row's end which
+    /// also disables itself in override mode.
+    @FocusState.Binding var returningRow: String?
     /// Keeps the titled editor visible while it has no
     /// patterns yet (an empty pattern set stores nothing).
     @State private var editingTitles = false
@@ -110,7 +116,9 @@ struct AppRuleRow: View {
             Text(KeybindingCatalog.displayName(forBundleID: app))
                 .fontWeight(.medium)
         case .space:
-            spaceMenu.opacity(spaceInherited ? 0.55 : 1)
+            spaceMenu
+                .opacity(spaceInherited ? 0.55 : 1)
+                .focused($returningRow, equals: app)
         case .float:
             floatMenu.opacity(floatInherited ? 0.55 : 1)
         case nil:

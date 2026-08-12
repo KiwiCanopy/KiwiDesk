@@ -1460,6 +1460,124 @@ kiwi (the chrome KiwiDesk draws) and half whatever the user set
 (the native controls), which reads as unfinished rather than as
 respectful. (Owner rulings 2026-08-04, in chat.)
 
+### Usable without a mouse is a second claim, and a dim is not a sentence
+
+**[Principle]**
+
+**"Accessible with VoiceOver" and "usable without a mouse" are
+two claims, and this tree shipped the first for a long time
+believing it had both.** Two rules fall out, and they are the
+ones a Settings change keeps paying.
+
+*A shape change states where focus goes.* When the view holding
+focus stops existing — a deleted row, a pushed sub-view — nothing
+claims it and the next Tab starts from the top of the window, so
+a keyboard user re-walks the list after every deletion. The
+destination is read BEFORE the mutation (afterwards the list
+names whichever row slid into the gap, right by accident and
+wrong at the end of a list), and it must be a control that is
+always DRAWN and non-destructive: the first cut of this bound the
+spaces list to a mode-gated button, which on a fresh install is
+not drawn at all, so focus went to the top by a second road.
+
+*A dim is not a sentence.* Greying keeps a control visible
+because the dimming means *switch that on and I act* — so a
+greyed control that announces only "dimmed" tells the reader an
+answer exists and withholds it, which is worse than one that was
+never gated. The reason therefore travels by one of three
+channels, in the order a reader meets them:
+
+1. a **block** gate keeps a live `?` anchor outside the dimmed
+   subtree (#527);
+2. a row whose **cause is legible on its own surface** — the
+   gating control in the same container, or a standing caption
+   that already names it — needs nothing more, and the hover
+   string stays for the pointer user;
+3. a row gated from **another destination** takes the live `?`
+   whose sentence names where to go (Advanced Colours is
+   entirely this class);
+
+and what falls through all three — same page, no adjacency,
+nothing else to look at — draws the reason INLINE, outside the
+dim. Which rows those are is derived from the census rather than
+listed, because a hand-kept register of who owes a sentence is
+one more thing to forget: `GateReasonPlacement` answers it, and
+it reproduces every site that already drew one, which is what
+makes it checkable.
+
+The temptation to answer all of this with `.accessibilityHint`
+is why the ladder is written down. A hint on a **leaf** control
+is ordinary and two rows ship one. A hint on `GreyOut` is not:
+that modifier wraps whole blocks, so whether it reaches the
+controls inside — and whether its empty value in the un-gated
+state displaces a hint a descendant sets for itself — cannot be
+observed headlessly, and it was written and backed out for
+exactly that reason. Re-adding it needs a recorded Accessibility
+Inspector session, not an argument.
+
+What breaks if this is ignored: the window keeps passing every
+accessibility guard in the suite while being unusable from the
+keyboard, because both failures are silent — an unattached
+`@FocusState` compiles and moves focus nowhere, and a reason in
+a tooltip is invisible to everything except a pointer. Stated
+residue, so it is not mistaken for coverage: for the co-located
+class the VoiceOver reader hears the cause before the dimmed row
+but must infer the link, and macOS gates keyboard focus for
+non-text controls behind System Settings ▸ Keyboard ▸ Keyboard
+navigation, which no app may set for the user — so a focus
+destination is verified with that ON. (#678 turn 20a, #815,
+#816.)
+
+### A focus ring is the platform's; a chip that removes it draws its own
+
+**[Trade-off]**
+
+**The Settings window's text fields keep macOS's focus ring, in
+the user's system accent, while the header's search chip draws a
+kiwi outline of its own — and that difference is deliberate, not
+a surface someone forgot to convert.**
+
+It reads at first like the defect the entry above describes: one
+window, two focus colours, the green one on the chip and the
+system accent (blue on a default Mac) on every field. AppKit
+rings a standard `TextField` with
+`NSColor.keyboardFocusIndicatorColor`, which follows System
+Settings and is unaffected by `.tint` — the same class as
+`Color.accentColor`, which #678 turn 16b retired for exactly that
+reason.
+
+Three answers were weighed. **Convert the sixteen fields**: each
+takes `.textFieldStyle(.plain)` to lose the platform ring, then
+re-earns a focus indicator by hand, then needs its own contrast
+pairing against its own ground, and the pairing wants a seal plus
+a guard the way `settingsActionButton()` pairs a style with its
+ink — and every future field pays it again. **Give the chip the
+platform ring**: not free either, because the ring arrives with
+AppKit's bezel, so keeping the chip shape means macOS draws no
+ring at all, and the header loses the one thing that makes the
+search read as the same kind of object as the back chip and the
+profile chip. **Rule the difference deliberate**: nothing to
+build and nothing new to own.
+
+The third is the ruling, and the north star is why: *Apple-native
+binds behavior* while the window's look is KiwiDesk's own. A
+focus ring is behavior — it follows the user's accent AND their
+"Increase contrast" and focus-ring accessibility settings, none
+of which an app should answer for them. So the fields keep the
+platform's, and the chip is not an exception to that rule but a
+control that never had a platform ring to keep: `.plain` removed
+the bezel for the chip's shape, and a control that removes the
+platform's focus indicator owes one of its own.
+
+What breaks if this is ignored: someone "fixes" the inconsistency
+in the cheap direction and converts a field to `.plain` without
+replacing what it removed, which is a field that shows no focus
+at all — worse than either colour. And a custom indicator owes
+the contrast the platform's had: the search field's accent at
+0.55 measured 1.52:1 on `sunken` and had to go to full strength,
+which is the floor any second one starts from. (#833, owner
+ruling 2026-08-12.)
+
 ### The header search is a field, not a button that opens one
 
 **[Trade-off]**

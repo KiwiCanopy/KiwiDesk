@@ -175,6 +175,74 @@ struct KeyboardActionParityTests {
                 "returningRow = neighbour",
                 "a deletion lands on the next row, not the top"
             ),
+            // The four lists #816 brought up to the same shape.
+            // Each needs BOTH halves — the destination a row
+            // draws, and the assignment the deletion makes —
+            // because either alone moves focus nowhere: an
+            // unattached key is silent, and an attached key
+            // nothing ever sets is decoration.
+            Wiring(
+                "ProfilesSection.swift",
+                ".focused($returningRow, equals: summary.name)",
+                "a profile row's always-drawn Load is its "
+                    + "destination — the trash would put a "
+                    + "destructive action under the next keypress "
+                    + "and \"make default\" is conditional"
+            ),
+            Wiring(
+                "ProfilesSection.swift",
+                "returningRow = neighbour",
+                "and the deletion has to name it"
+            ),
+            Wiring(
+                "ProfilesSection+Broken.swift",
+                ".focused($returningRow, equals: name)",
+                "a broken row has no Load, so Reveal is its "
+                    + "always-drawn control"
+            ),
+            Wiring(
+                "ProfilesSection+Broken.swift",
+                "returningRow = neighbour",
+                "and its deletion names a neighbour inside the "
+                    + "broken list, never a healthy row under "
+                    + "another heading"
+            ),
+            Wiring(
+                "AppRuleRow.swift",
+                ".focused($returningRow, equals: app)",
+                "the rule sentence's space menu is the row's "
+                    + "always-drawn control; the trash disables "
+                    + "itself in override mode"
+            ),
+            Wiring(
+                "AppRulesSection.swift",
+                "returningRow = neighbour",
+                "and the list that owns the deletion names it"
+            ),
+            Wiring(
+                "LayerStripEditor.swift",
+                ".focused($focusedChip, equals: name)",
+                "every layer chip is a destination"
+            ),
+            Wiring(
+                "LayerStripEditor.swift",
+                "focusedChip = KeyLayer.defaultName",
+                "and deleting the selected layer moves focus "
+                    + "WITH the selection to the base chip, which "
+                    + "cannot itself be deleted"
+            ),
+            Wiring(
+                "PaletteShelf.swift",
+                ".focused($returningTile, equals: palette.name)",
+                "a saved palette's tile is already a Button, so "
+                    + "it is the destination"
+            ),
+            Wiring(
+                "PaletteShelf+Actions.swift",
+                "returningTile = neighbour",
+                "and the delete names the next tile in reading "
+                    + "order"
+            ),
         ]
         let files = try SourceScan.swiftSources(under: settingsDir)
         for wiring in wirings {

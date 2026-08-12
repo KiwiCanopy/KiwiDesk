@@ -27,6 +27,9 @@ struct LayerStripEditor: View {
     @State private var renamingLayer = false
     @State private var renameDraft = ""
     @State private var addLayerHovered = false
+    /// Where the keyboard lands after the selected layer's chip
+    /// stops existing (#816).
+    @FocusState private var focusedChip: String?
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
@@ -74,6 +77,9 @@ struct LayerStripEditor: View {
         ) {
             selected = name
         }
+        // Every chip is a focus destination, so a deletion can
+        // name one (#816).
+        .focused($focusedChip, equals: name)
     }
 
     /// Defining a layer is rare — the "+" chip's popover
@@ -268,11 +274,21 @@ struct LayerStripEditor: View {
         addingLayer = false
     }
 
+    /// Focus FOLLOWS the selection rather than stepping to the
+    /// neighbouring chip (#816). The strip is a selector, not a
+    /// list of independent rows: deleting the selected layer
+    /// already moves the selection to the default layer, and
+    /// every row below the strip is that layer's now, so landing
+    /// anywhere else would leave the keyboard on a chip that
+    /// does not match what is on screen. The default chip is
+    /// always drawn — the base layer cannot be deleted, which is
+    /// what the guard above says.
     private func deleteLayer() {
         guard selected != KeyLayer.defaultName else { return }
         model.config.layers.removeAll {
             $0.name == selected
         }
         selected = KeyLayer.defaultName
+        focusedChip = KeyLayer.defaultName
     }
 }
