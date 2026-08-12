@@ -65,11 +65,12 @@ struct BootAppBudgetTests {
         loop.applyAXMessagingTimeout = { _ in }
         loop.activationPolicy = { _ in .regular }
         loop.makeObserver = { _ in
-            // The observer install is itself AX work — this is
-            // where the measured outlier spends its whole cost —
-            // so the fake charges the clock for it.
+            // The install is where the measured outlier spends
+            // its whole cost. The CLOCK is charged by the budget's
+            // own reads bracketing it (`openAppBudget` then
+            // `isSpent`), not here — only `monotonicNow` advances
+            // it (guard-prover, 2026-08-12).
             box.observerInstalls += 1
-            _ = box.clock
             return FakeObserver()
         }
         loop.readEnhancedUI = { _ in false }
@@ -206,11 +207,15 @@ struct BootAppBudgetTests {
     func theObserverInstallIsBudgeted() {
         let (loop, box) = makeLoop()
         box.step = .milliseconds(600)
+        // Windowless per the prefilter, and set BEFORE the scan
+        // opens: `beginScan` reads `visiblePIDs` once to stamp
+        // `scanWindows:` onto every queued step, so a fixture
+        // assigning it afterwards queued eager attaches and the
+        // test passed under the pre-fix placement too
+        // (guard-prover, 2026-08-12).
+        loop.visiblePIDs = { [] }
         #expect(loop.beginScan())
         defer { loop.stop() }
-        // Windowless per the prefilter: nothing below the early
-        // return would ever run for these apps.
-        loop.visiblePIDs = { [] }
 
         loop.scanChunk(budget: nil)
 

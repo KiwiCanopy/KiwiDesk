@@ -97,13 +97,15 @@ struct BootScanState {
     /// sweep's deferrals join the chain rather than replacing it.
     ///
     /// Here rather than on `BootRun` because this is where the
-    /// resets already live: `stop()` replaces this struct and
-    /// `beginScan` clears what must not cross a boot. Held on the
-    /// run instead, it was the one boot-scoped ledger nothing
-    /// reset — and a `stop()` mid-drain then left it non-empty
-    /// forever, so every later launch read "a chain is already
-    /// running", scheduled none, and abandoned every deferred app
-    /// for the session (architect review, 2026-08-12).
+    /// reset already lives: `stop()` replaces this struct
+    /// wholesale, and `stop()` is the only path to the
+    /// `!isRunning` a later `beginScan` needs — so a boot cannot
+    /// begin carrying the last one's queue. Held on the run
+    /// instead, it was the one boot-scoped ledger nothing reset —
+    /// and a `stop()` mid-drain then left it non-empty forever,
+    /// so every later launch read "a chain is already running",
+    /// scheduled none, and abandoned every deferred app for the
+    /// session (architect review, 2026-08-12).
     var pendingDrain: [(pid_t, AppRef)] = []
     /// Apps a budget already cut short THIS boot. A pass skips
     /// them outright rather than paying the same blocking call
@@ -111,10 +113,12 @@ struct BootScanState {
     /// 5008 ms in the sweep, for one app that answers nothing
     /// (owner's device log, 2026-08-12).
     ///
-    /// Cleared by `beginScan()`, and deliberately NOT when the
-    /// drain takes the deferrals: the boot tail drains a second
-    /// before the sweep opens, so clearing there handed the sweep
-    /// an empty list and it paid the outlier all over again.
+    /// Cleared with the rest of this struct by `stop()` — the
+    /// only way to reach a state where a new `beginScan` can run,
+    /// so the list cannot cross a boot. Deliberately NOT cleared
+    /// when the drain takes the deferrals: the boot tail drains a
+    /// second before the sweep opens, so clearing there handed
+    /// the sweep an empty list and it paid the outlier again.
     var unresponsiveApps: Set<pid_t> = []
     /// Apps a budget cut short, with the ref their completing
     /// reconcile needs. Taken by the epilogue of whichever pass
@@ -156,12 +160,6 @@ extension EventLoop {
         }
         // A new boot has no history: an app that could not answer
         // last time deserves its chance again.
-        // A new boot has no history: an app that could not answer
-        // last time deserves its chance again, and a drain queue
-        // left by a launch that stopped mid-chain was that
-        // launch's to finish.
-        bootScan.unresponsiveApps = []
-        bootScan.pendingDrain = []
         let visible = visiblePIDs()
         let apps = runningApplications()
         open(

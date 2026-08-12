@@ -64,11 +64,11 @@ struct BootDeferralTests {
         loop.applyAXMessagingTimeout = { _ in }
         loop.activationPolicy = { _ in .regular }
         loop.makeObserver = { _ in
-            // The observer install is itself AX work — this is
-            // where the measured outlier spends its whole cost —
-            // so the fake charges the clock for it.
+            // The install is where the measured outlier spends
+            // its whole cost. The CLOCK is charged by the budget's
+            // own reads bracketing it, not here — only
+            // `monotonicNow` advances it.
             box.observerInstalls += 1
-            _ = box.clock
             return FakeObserver()
         }
         loop.readEnhancedUI = { _ in false }
@@ -123,16 +123,18 @@ struct BootDeferralTests {
         // mechanism exists for (code review, 2026-08-12).
         #expect(!loop.takeDeferredBootApps().isEmpty)
         let queriesAfterScan = box.windowQueries
-        let installsAfterScan = box.observerInstalls
 
         // The sweep queues both apps again …
         #expect(loop.beginSweep())
         loop.scanChunk(budget: nil)
 
-        // … and touches neither: no window snapshot, no AX at
-        // all, for an app already given up on.
+        // … and touches neither: no window snapshot for an app
+        // already given up on. The window count carries this
+        // alone — a sweep step is a reconcile, and
+        // `syncObservation` never re-installs an observer that
+        // exists, so the install count is 2 == 2 under every
+        // mutation (guard-prover, 2026-08-12).
         #expect(box.windowQueries == queriesAfterScan)
-        #expect(box.observerInstalls == installsAfterScan)
         // The sweep found nothing new to defer, the scan's
         // deferrals having already been taken by the tail.
         #expect(loop.takeDeferredBootApps().isEmpty)
@@ -140,6 +142,12 @@ struct BootDeferralTests {
     /// The skip list is a fact about ONE boot: a later launch
     /// must give the app its chance again, or an app that was
     /// merely busy once is written off for the session.
+    ///
+    /// The reset that delivers this is `stop()`'s — it replaces
+    /// the whole pass state, and it is the only path to the
+    /// `!isRunning` a second `beginScan` needs. This asserts the
+    /// invariant rather than the mechanism, so moving the clear
+    /// does not red it; deleting BOTH does.
     @Test("a new boot clears the skip list")
     func aNewBootClearsTheSkipList() {
         let (loop, box) = makeLoop()

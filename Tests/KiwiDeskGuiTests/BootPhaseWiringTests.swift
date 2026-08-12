@@ -210,7 +210,14 @@ struct BootPhaseWiringTests {
         let text = try source(
             "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
         )
-        let fold = #"func foldSweepChunk\(\)[\s\S]{0,400}?\}"#
+        // Matched to the function's OWN closing brace (a `}` at
+        // its declaration indent), not to the first one: the
+        // non-greedy `?\}` stopped inside any `if` or closure in
+        // the body, so an arm placed after one escaped the needle
+        // and the suite passed with the fold arming
+        // (guard-prover, 2026-08-12).
+        let fold =
+            #"func foldSweepChunk\(\)[\s\S]{0,600}?\n    \}"#
         let found = try #require(
             text.range(of: fold, options: .regularExpression)
         )
@@ -264,8 +271,17 @@ struct BootPhaseWiringTests {
     @Test("the boot tail latches that it reached ready")
     func theTailLatchesReady() throws {
         let text = try source(bootPath)
+        // Anchored on the tail's own neighbours: a bare
+        // `contains` was satisfied by the assignment written
+        // ANYWHERE in the file, including into `start()`, which
+        // inverts the behaviour it guards (guard-prover,
+        // 2026-08-12).
+        let latched =
+            #"logBootSummary\(\)[\s\S]{0,120}?"#
+            + #"boot\.reachedReady = true"#
         #expect(
-            text.contains("boot.reachedReady = true"),
+            text.range(of: latched, options: .regularExpression)
+                != nil,
             """
             The boot tail no longer latches that it finished, so
             every later stop() preserves the session — a quit
@@ -273,8 +289,12 @@ struct BootPhaseWiringTests {
             at all.
             """
         )
+        let cleared =
+            #"func start\(\)[\s\S]{0,200}?"#
+            + #"boot\.reachedReady = false"#
         #expect(
-            text.contains("boot.reachedReady = false"),
+            text.range(of: cleared, options: .regularExpression)
+                != nil,
             """
             start() no longer clears the latch, so a relaunch
             inherits the previous launch's verdict and a stop
