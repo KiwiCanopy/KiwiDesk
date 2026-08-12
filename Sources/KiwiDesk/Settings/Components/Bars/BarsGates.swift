@@ -127,9 +127,18 @@ enum BarsGateHelp {
     static func sentence(for reason: BarsGates.InertReason) -> String {
         switch reason {
         case .noBarShown:
+            // The near-twin of `colors.app_bar_off.help`, and
+            // reworded with it (#705): "turn one on below" left
+            // the reader to decide whether "one" was the bar or
+            // the layout. Names the block that holds the switch,
+            // through its own key rather than as quoted text
+            // (#818) — which also drops "below", the block being
+            // what the sentence now points at.
             return L(
                 "app_bar.no_layout.help",
-                "No layout shows an App Bar — turn one on below."
+                "No layout shows an App Bar — turn a layout's "
+                    + "App Bar on under “%1$@”.",
+                L("bars.show_in.title", "Show it in")
             )
         case .spaceBarOff:
             return L(

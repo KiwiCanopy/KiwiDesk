@@ -181,12 +181,29 @@ enum AdvancedColorsHelp {
         )
     }
 
+    /// "Turn one on" left the referent to the reader (#705):
+    /// "one" binds the App Bar, but the nearest noun is
+    /// "layout" — and turning a *layout* on is not a thing the
+    /// app does, so the sentence resolved only after the reader
+    /// ruled that out, and several locales bound the pronoun to
+    /// the layout outright. The switch has exactly one home, so
+    /// the sentence names it — through its own key, never as
+    /// quoted text (#818).
     static var appBarOff: String {
         L(
             "colors.app_bar_off.help",
+            // The block header is QUOTED and the destination is
+            // not, which is the catalog's own split: a control
+            // label is quoted (22 frames), a destination title
+            // reads as a place and stays bare
+            // (`colors.space_bar_off.help`). Unquoted, "under
+            // Show it in" reads as broken prose rather than as a
+            // pointer at a heading.
             "No layout shows an App Bar, so its colors aren't "
-                + "drawn. Turn one on in %1$@.",
-            SettingsDestination.bars.title
+                + "drawn. In %1$@, turn a layout's App Bar on "
+                + "under “%2$@”.",
+            SettingsDestination.bars.title,
+            L("bars.show_in.title", "Show it in")
         )
     }
 }

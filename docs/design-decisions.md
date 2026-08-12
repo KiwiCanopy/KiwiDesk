@@ -618,6 +618,18 @@ floating-ness, exactly as for the ring: a window the user floated
 through `float_rules` is an ordinary window and takes focus like
 one when it spawns.
 
+The **Space Bar draws none of them either** (#683), and for the
+ring's reason rather than a new one: a popup layer is not one of
+"the app's windows" in the user's model, and a right-click that
+adds a glyph — plus two more for a submenu — is describing a
+gesture rather than the space. The filter therefore sits where the
+bar's members are read, not in tracking or the ignore gate, and it
+runs **before** the same-app grouping and the glyph cap (#376), so
+an overlay can neither split a run nor reserve a capped slot the
+bar then draws nothing in. The App Bar needs no such filter: it
+builds from the tiled members, which a structural float has
+already left.
+
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — graduated
 from draw-time suppression to the **built-in ignore gate** (#448):

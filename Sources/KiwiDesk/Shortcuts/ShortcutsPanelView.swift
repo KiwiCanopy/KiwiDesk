@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The read-only shortcuts reference panel (#326): a live mirror
-/// of the active key layer's bindings, grouped into Controls / Apps
-/// / Custom bands. No editing — rebinding stays in Settings, which
+/// of the active key layer's bindings, grouped into Controls /
+/// Apps / Inactive / Custom bands, in that drawn order (#820).
+/// No editing — rebinding stays in Settings, which
 /// the single footer button bridges to. `reference` is nil when
 /// live shortcuts can't be read (config owned by init.lua, or the
 /// engine isn't running).
@@ -67,6 +68,7 @@ struct ShortcutsPanelView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     controls(reference.controls)
                     apps(reference.apps)
+                    inactive(reference.inactive)
                     custom(reference.custom)
                 }
                 .padding(20)
@@ -100,6 +102,54 @@ struct ShortcutsPanelView: View {
                 AppsBand(rows: rows)
             }
         }
+    }
+
+    /// The Inactive band (#820): shortcuts whose target Space has
+    /// left the current list. Dimmed as a block — like Settings'
+    /// own section (#92) — so they read as parked rather than as
+    /// part of the live list, and captioned, since a dimmed row
+    /// that says nothing is a dead end. Sits above Custom because
+    /// these are seeded defaults, not user-authored Lua.
+    @ViewBuilder private func inactive(
+        _ rows: [ShortcutRow]
+    ) -> some View {
+        if !rows.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                ShortcutsBandHeader(
+                    title: L(
+                        "shortcuts.section.inactive",
+                        "Inactive shortcuts"
+                    )
+                )
+                VStack(alignment: .leading, spacing: 8) {
+                    // Outside the dimmed subtree: the dim says an
+                    // answer exists, and withholding it there is
+                    // the dead end `GreyOut` was ruled against.
+                    Text(inactiveCaption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(rows) { ShortcutRowView(row: $0) }
+                    }
+                    .opacity(0.6)
+                }
+            }
+        }
+    }
+
+    /// Settings' own section says the same thing and then adds
+    /// "rebind or remove them here" — which this panel cannot
+    /// offer, so the two captions are deliberately different
+    /// strings rather than one shared key that would lie on one
+    /// of the surfaces.
+    private var inactiveCaption: String {
+        L(
+            "shortcuts.panel.inactive.caption",
+            "These target Spaces that are not in the current "
+                + "Space list. They still work — pressing one "
+                + "recreates its Space — and they come back "
+                + "when their Space returns."
+        )
     }
 
     @ViewBuilder private func custom(

@@ -213,8 +213,12 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // candidate preset rows* that are then intersected with the
         // actual bindings. A transient disagreement (space or step
         // edited but not yet re-applied) can only misfile a binding
-        // into Custom, never hide or invent one — safe for a
-        // read-only glance panel.
+        // — never hide or invent one — which stays safe for a
+        // read-only glance panel. Since #820 the misfile can land
+        // in Inactive as well as Custom, and that band's caption
+        // ASSERTS the Space has left the list; the window is the
+        // beat between a space edit and its apply, and it closes
+        // itself, exactly as the Custom misfile does.
         let reference = ShortcutsReferenceBuilder.build(
             layer: layer,
             spaces: config.spaces,

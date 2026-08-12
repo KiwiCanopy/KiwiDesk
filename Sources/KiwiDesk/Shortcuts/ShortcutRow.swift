@@ -37,15 +37,24 @@ struct ShortcutSubgroup: Identifiable {
     var id: String { title }
 }
 
-/// The whole read-only reference for one key mode: three bands
-/// (Controls grouped by subgroup, Apps, Custom). Empty bands are
-/// dropped by the builder, so an empty band never renders.
+/// The whole read-only reference for one key mode: four bands.
+/// The field order below is the order the BUILDER fills them
+/// (Inactive is consumed before Apps and Custom, so an orphan
+/// cannot fall through to the band that means "user-authored");
+/// the panel DRAWS them Controls, Apps, Inactive, Custom, which
+/// is `ShortcutsPanelView.body(for:)`'s to state and what
+/// `docs/user-guide.md` lists. Empty bands are dropped by the
+/// builder, so an empty band never renders.
 struct ShortcutsReference {
     // `var`, not `let`: post-processing (the #294 glyph pass)
     // mutates a copy instead of re-initializing memberwise,
     // which would be one more hand-mirrored field list.
     var layerName: String
     var controls: [ShortcutSubgroup]
+    /// Bindings whose target Space has left the current list
+    /// (#820) — surfaced under their real name, dimmed, never
+    /// pruned and never left to the Custom band.
+    var inactive: [ShortcutRow] = []
     var apps: [ShortcutRow]
     var custom: [ShortcutRow]
 
@@ -56,6 +65,7 @@ struct ShortcutsReference {
     /// row reads as empty here while the footer shows the combo
     /// (when live).
     var isEmpty: Bool {
-        controls.isEmpty && apps.isEmpty && custom.isEmpty
+        controls.isEmpty && inactive.isEmpty && apps.isEmpty
+            && custom.isEmpty
     }
 }

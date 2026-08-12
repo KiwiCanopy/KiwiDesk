@@ -142,7 +142,13 @@ struct InterpolatedLabelTests {
         // once, in the switch. Before the scan could resolve it
         // they had no floor at all, so a revert to literal text
         // would have passed unseen in every one of them.
-        "colors.app_bar_off.help": 1,
+        // Two, not one: #705 added the name of the block that
+        // holds the switch beside the destination, the vague
+        // "turn one on" having left the referent to the reader.
+        // Its Bars-page twin joins the register for the same
+        // change.
+        "colors.app_bar_off.help": 2,
+        "app_bar.no_layout.help": 1,
         "colors.border_off.help": 1,
         "colors.drag_border_off.help": 1,
         "colors.drag_fill_off.help": 1,
