@@ -30,28 +30,39 @@ extension ProfilesSection {
             cornerRadius: 11,
             padding: 0
         )
-        .popover(
-            isPresented: Binding(
-                get: { renaming == name },
-                set: { if !$0 { renaming = nil } }
-            )
-        ) {
-            HStack {
-                TextField(
-                    L("footer.profile_name", "Profile name"),
-                    text: $renameDraft
-                )
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 160)
-                .onSubmit { commitRename(of: name) }
-                Button(L("profiles.rename", "Rename")) {
-                    commitRename(of: name)
-                }
-                .disabled(!canRename(name))
-                .settingsActionButton()
+        .popover(item: renameBinding(name)) { request in
+            // Presented by ITEM so the seed reaches the builder
+            // instead of being read back out of `@State` written
+            // one tick earlier (#843). Latent here rather than
+            // live — this gate refuses the unchanged name, so a
+            // stale empty draft and a fresh seed both disable
+            // the button — but it is the same shape, and a
+            // relaxed gate would make it visible.
+            NameEditPopover(
+                seed: request.seed,
+                width: 160,
+                confirmLabel: { _ in
+                    L("profiles.rename", "Rename")
+                },
+                isValid: { canRename($0, of: name) }
+            ) { draft in
+                commitRename(draft, of: name)
             }
-            .padding(10)
         }
+    }
+
+    /// The request for THIS row, so only the renamed row
+    /// presents.
+    func renameBinding(
+        _ name: String
+    ) -> Binding<NameEditRequest?> {
+        Binding(
+            get: {
+                renameRequest?.subject == name
+                    ? renameRequest : nil
+            },
+            set: { if $0 == nil { renameRequest = nil } }
+        )
     }
 
     /// Mirrors the core's case-insensitive collision check
@@ -61,8 +72,8 @@ extension ProfilesSection {
     /// second GUI consumer of this rule gets a read-only
     /// availability query on the KiwiCore facade instead of
     /// a copy — core stays the only authority either way.
-    func canRename(_ old: String) -> Bool {
-        let new = renameDraft.trimmed
+    func canRename(_ typed: String, of old: String) -> Bool {
+        let new = typed.trimmed
         guard !new.isEmpty, new != old else { return false }
         return !model.profiles.contains {
             $0.caseInsensitiveCompare(new) == .orderedSame
@@ -72,19 +83,21 @@ extension ProfilesSection {
     }
 
     func beginRename(_ name: String) {
-        renameDraft = name
-        renaming = name
+        renameRequest = NameEditRequest(
+            seed: name,
+            subject: name
+        )
     }
 
-    func commitRename(of old: String) {
-        guard canRename(old) else { return }
+    func commitRename(_ typed: String, of old: String) {
+        guard canRename(typed, of: old) else { return }
         // Rename reloads too (the core chases the file, the
         // adopted name, and the binding lines), so it discards
         // staged edits like Load and Delete (#515). The row
         // leaves edit mode either way — a cancelled discard
         // must not strand it mid-rename.
-        let draft = renameDraft
-        renaming = nil
+        let draft = typed
+        renameRequest = nil
         // One turn later, deliberately. `renaming = nil`
         // dismisses an NSPopover; requesting the confirm sheet
         // in the same update can drop it while that dismissal

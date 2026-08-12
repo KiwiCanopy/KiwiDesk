@@ -1,24 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The palette shelf's two popovers, both built on
-/// `PaletteNamePopover` — which OWNS the name it edits (#843).
+/// The palette shelf's two name popovers, both built on the
+/// shared `NameEditPopover`, which OWNS the name it edits (#843).
 ///
-/// Split from `PaletteShelf.swift` when the card chrome pushed it
-/// past §2.1's size band. They belong together and apart from the
-/// grid: both are a text field plus a confirm button over the
-/// same name rules (`canSave` / `canRename` in
-/// `PaletteShelf+Actions.swift`), and neither draws a tile.
-///
-/// Each seeds from a value in SCOPE — a freshly computed unique
-/// name, the palette's own name — never from shelf `@State`
-/// written in the same tick as the presentation, which is what
-/// left Save disabled over a valid name on the first open of
-/// every visit.
+/// Each is presented by ITEM, so the seed travels to the builder
+/// instead of being read back out of shelf state written one tick
+/// earlier — which is what left Save disabled over a valid name
+/// on the first open of every visit.
 extension PaletteShelf {
-    var savePopover: some View {
-        PaletteNamePopover(
-            seed: nextUserName(),
+    func savePopover(_ request: NameEditRequest) -> some View {
+        NameEditPopover(
+            seed: request.seed,
             confirmLabel: saveLabel,
             isValid: canSave,
             notice: saveNotice
@@ -28,17 +21,18 @@ extension PaletteShelf {
     }
 
     func renamePopover(
-        _ palette: ColorPalette
+        _ request: NameEditRequest
     ) -> some View {
-        PaletteNamePopover(
-            seed: palette.name,
+        let old = request.subject ?? request.seed
+        return NameEditPopover(
+            seed: request.seed,
             width: 160,
             confirmLabel: { _ in
                 L("palettes.rename_confirm", "Rename")
             },
-            isValid: { canRename($0, from: palette.name) }
+            isValid: { canRename($0, from: old) }
         ) { name in
-            renamePalette(name, from: palette.name)
+            renamePalette(name, from: old)
         }
     }
 }

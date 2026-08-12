@@ -56,7 +56,7 @@ extension PaletteShelf {
             )
         )
         try? store.save(palette)
-        savingCurrent = false
+        saveRequest = nil
         reload()
     }
 
@@ -91,12 +91,20 @@ extension PaletteShelf {
         return name == oldName || !store.hasUserPalette(name)
     }
 
-    /// Drives a per-tile rename popover: on for the tile whose name
-    /// is `renaming`, dismiss clears it.
-    func renameBinding(_ name: String) -> Binding<Bool> {
+    /// Drives a per-tile rename popover: the request is handed
+    /// to the tile whose name it names, so only that tile
+    /// presents — the per-item shape `.popover(item:)` needs,
+    /// and the seed rides the request rather than a shared
+    /// draft (#843).
+    func renameBinding(
+        _ name: String
+    ) -> Binding<NameEditRequest?> {
         Binding(
-            get: { renaming == name },
-            set: { if !$0 { renaming = nil } }
+            get: {
+                renameRequest?.subject == name
+                    ? renameRequest : nil
+            },
+            set: { if $0 == nil { renameRequest = nil } }
         )
     }
 
@@ -104,7 +112,7 @@ extension PaletteShelf {
         let name = trimmed(typed)
         guard canRename(name, from: oldName) else { return }
         try? store.rename(from: oldName, to: name)
-        renaming = nil
+        renameRequest = nil
         reload()
     }
 

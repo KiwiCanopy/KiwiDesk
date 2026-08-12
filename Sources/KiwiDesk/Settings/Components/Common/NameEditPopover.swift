@@ -1,12 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Naming a palette — the one popover behind both Save and
-/// Rename (#375, #843).
+/// Naming a thing — the one popover behind every "type a name
+/// and confirm" in Settings (#375, #843): saving a palette,
+/// renaming a palette, a profile or a layer.
 ///
-/// **It owns the name it edits.** Both call sites used to seed a
-/// `@State` on the shelf in the same tick that presented the
-/// popover, and that is the bug #843 reports: the field renders
+/// In `Common/` because it is shared across component areas
+/// (Colours, Profiles, Shortcuts), which is what that directory
+/// admits.
+///
+/// **It owns the name it edits.** All four call sites used to
+/// seed a `@State` on the parent in the same tick that presented
+/// the popover, and that is the bug #843 reports: the field renders
 /// through a `Binding` so it showed the seeded name, while the
 /// confirm button's `.disabled(…)` was evaluated against the view
 /// value SwiftUI captured at presentation — the empty one. Save
@@ -15,17 +20,25 @@ import SwiftUI
 /// valid name in the field the whole time.
 ///
 /// Seeding here removes the ordering rather than sequencing it:
-/// `seed` is a plain parameter, read from a value the caller
-/// already holds (the palette's own name, or a freshly computed
-/// unique one), so there is no shelf state for a snapshot to be
-/// stale about. A re-seed inside `onAppear` would have fixed the
-/// symptom and kept the dependency alive in a second place.
+/// `seed` arrives as part of the presented ITEM, so the content
+/// is built from a value handed to the builder rather than read
+/// back out of parent state. A re-seed inside `onAppear` would
+/// have fixed the symptom and kept the dependency alive in a
+/// second place.
+///
+/// The item also carries a fresh id per presentation, which is
+/// what makes the `@State` below fresh: seeded in `init`, it
+/// would otherwise persist if SwiftUI reused the content view
+/// between presentations — and a reused name turns the save's
+/// confirm into "Overwrite" over a palette the user already
+/// saved, a silent clobber the write-then-present code could not
+/// produce (code review, 2026-08-12).
 ///
 /// The validity rule stays the CALLER's — `canSave` and
 /// `canRename` differ (a rename may keep its own name; a save may
 /// not take an existing one silently) — so this view takes it as
 /// a function of the typed name and never re-derives it.
-struct PaletteNamePopover: View {
+struct NameEditPopover: View {
     let seed: String
     let confirmLabel: (String) -> String
     let isValid: (String) -> Bool
@@ -71,8 +84,16 @@ struct PaletteNamePopover: View {
             }
             HStack {
                 Spacer()
+                // The SYSTEM prominent style, deliberately: its
+                // disabled state is flat grey, and this button's
+                // disabled state is the thing #843 was about —
+                // `kiwiProminentButton()` draws disabled and
+                // pressed alike (a dimmed accent fill), which
+                // reads as live. Adopting that seal here is its
+                // own change and its own eye-confirm (gui.md ▸
+                // Colour).
                 Button(confirmLabel(name), action: confirm)
-                    .kiwiProminentButton()
+                    .buttonStyle(.borderedProminent)
                     .disabled(!isValid(name))
             }
         }
@@ -82,5 +103,26 @@ struct PaletteNamePopover: View {
     private func confirm() {
         guard isValid(name) else { return }
         onConfirm(name)
+    }
+}
+
+/// One presentation of `NameEditPopover`, carrying its seed.
+///
+/// Presented through `.popover(item:)` rather than
+/// `isPresented:` — the builder is handed this value, so the
+/// content can never be built from parent state written in the
+/// same tick (#843), and the fresh `id` gives each presentation
+/// its own `@State`.
+struct NameEditRequest: Identifiable, Equatable {
+    let id: UUID
+    let seed: String
+    /// The name being replaced, for a rename — nil when the
+    /// popover is naming something new.
+    let subject: String?
+
+    init(seed: String, subject: String? = nil) {
+        self.id = UUID()
+        self.seed = seed
+        self.subject = subject
     }
 }

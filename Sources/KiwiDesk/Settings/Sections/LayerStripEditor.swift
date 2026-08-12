@@ -24,8 +24,7 @@ struct LayerStripEditor: View {
     @Binding var selected: String
     @State private var addingLayer = false
     @State private var newLayer = ""
-    @State private var renamingLayer = false
-    @State private var renameDraft = ""
+    @State private var renameRequest: NameEditRequest?
     @State private var addLayerHovered = false
     /// Where the keyboard lands after the selected layer's chip
     /// stops existing (#816).
@@ -193,45 +192,48 @@ struct LayerStripEditor: View {
     /// would desync them from an unsaved base).
     private var renameLayerButton: some View {
         Button(L("shortcuts.rename_ellipsis", "Rename…")) {
-            renameDraft = selected
-            renamingLayer = true
+            renameRequest = NameEditRequest(
+                seed: selected,
+                subject: selected
+            )
         }
         .settingsActionButton()
-        .popover(isPresented: $renamingLayer) {
-            HStack {
-                TextField(layerNamePlaceholder, text: $renameDraft)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 140)
-                    .onSubmit(renameLayer)
-                Button(
-                    L("shortcuts.rename", "Rename"),
-                    action: renameLayer
-                )
-                .buttonStyle(.borderedProminent)
-                .disabled(!canRenameLayer)
+        // By ITEM, so the seed reaches the builder rather than
+        // being read back out of `@State` written one tick
+        // earlier (#843) — the shape that left the palette
+        // shelf's Save dead over a valid name.
+        .popover(item: $renameRequest) { request in
+            NameEditPopover(
+                seed: request.seed,
+                width: 140,
+                confirmLabel: { _ in
+                    L("shortcuts.rename", "Rename")
+                },
+                isValid: { canRenameLayer($0) }
+            ) { draft in
+                renameLayer(draft)
             }
-            .padding(10)
         }
     }
 
-    private var canRenameLayer: Bool {
-        let name = renameDraft.trimmed
+    private func canRenameLayer(_ typed: String) -> Bool {
+        let name = typed.trimmed
         return !name.isEmpty && name != selected
             && !model.config.layers.contains {
                 $0.name == name
             }
     }
 
-    private func renameLayer() {
-        guard canRenameLayer else { return }
-        let new = renameDraft.trimmed
+    private func renameLayer(_ typed: String) {
+        guard canRenameLayer(typed) else { return }
+        let new = typed.trimmed
         model.config.layers = KeybindingCatalog.renameLayer(
             in: model.config.layers,
             from: selected,
             to: new
         )
         selected = new
-        renamingLayer = false
+        renameRequest = nil
     }
 
     // MARK: - Layer mutations

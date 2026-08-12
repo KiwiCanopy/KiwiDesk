@@ -11,8 +11,11 @@ import SwiftUI
 struct PaletteShelf: View {
     @ObservedObject var model: SettingsModel
     @State var userPalettes: [ColorPalette] = []
-    @State var savingCurrent = false
-    @State var renaming: String?
+    /// The two name popovers' presentations, each carrying its
+    /// own seed (#843) — never a Bool plus a separately-written
+    /// draft.
+    @State var saveRequest: NameEditRequest?
+    @State var renameRequest: NameEditRequest?
     /// Where the keyboard lands after a saved palette's tile
     /// stops existing (#816). `internal`, like the state around
     /// it: the delete lives in `PaletteShelf+Actions.swift` (file
@@ -25,8 +28,11 @@ struct PaletteShelf: View {
     /// handed to every tile. Extraction encodes the whole of
     /// `TilingSettings`, so asking each palette to extract for
     /// itself would pay that a dozen times per redraw — and this
-    /// shelf redraws on every keystroke in the rename and save
-    /// popovers.
+    /// shelf redraws on every settings edit, which is what the
+    /// applied mark is computed against. (It used to redraw on
+    /// every keystroke in the two name popovers as well; since
+    /// #843 those own their text, so that is no longer part of
+    /// the argument.)
     private var liveColors: [String: String] {
         ColorPaletteKeys.extract(from: model.config.settings)
     }
@@ -236,8 +242,8 @@ struct PaletteShelf: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(applied ? [.isSelected] : [])
-        .popover(isPresented: renameBinding(palette.name)) {
-            renamePopover(palette)
+        .popover(item: renameBinding(palette.name)) { request in
+            renamePopover(request)
         }
     }
 
@@ -263,7 +269,10 @@ struct PaletteShelf: View {
         switch key {
         case .colours(.paletteRename):
             Button(L("palettes.rename", "Rename…")) {
-                renaming = palette.name
+                renameRequest = NameEditRequest(
+                    seed: palette.name,
+                    subject: palette.name
+                )
             }
         case .colours(.paletteExport):
             Button(L("palettes.export", "Export…")) {
@@ -295,11 +304,10 @@ struct PaletteShelf: View {
     /// is no palette here yet to be on.
     private var addTile: some View {
         Button {
-            // The seed is computed by the popover itself
-            // (#843) — writing it here, one tick before the
-            // presentation, is what the confirm button read as
-            // empty.
-            savingCurrent = true
+            // The seed rides the REQUEST (#843): written into
+            // shelf state one tick before the presentation, it
+            // was read back as empty by the confirm button.
+            saveRequest = NameEditRequest(seed: nextUserName())
         } label: {
             // The label stays INSIDE the plate, where it can wrap:
             // the name line is one truncating line by design (a
@@ -327,7 +335,9 @@ struct PaletteShelf: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(saveCurrentLabel)
-        .popover(isPresented: $savingCurrent) { savePopover }
+        .popover(item: $saveRequest) { request in
+            savePopover(request)
+        }
     }
 
     private var saveCurrentLabel: String {
