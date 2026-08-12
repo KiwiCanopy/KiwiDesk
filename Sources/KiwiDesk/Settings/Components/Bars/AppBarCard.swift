@@ -201,10 +201,16 @@ struct AppBarCard: View {
             // two. The caption above says what the verb does,
             // never why it is dead — which is exactly the
             // distinction that let this ship with the reason in
-            // a tooltip. `GateReasonPlacement` is what puts the
-            // row in this class; it is not a judgement made
-            // here.
-            if sourceBarOff {
+            // a tooltip.
+            //
+            // The census is ASKED rather than quoted: a comment
+            // claiming `GateReasonPlacement` puts this row in
+            // that class, over an `if` that re-derives it, is
+            // the dead-resolver shape gui.md names — the type
+            // would then answer for nobody and a row whose
+            // adjacency changed would keep drawing this
+            // (architect review, 2026-08-12).
+            if sourceBarOff, owesInlineGateReason {
                 Text(BarsGateHelp.sentence(for: .spaceBarOff))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
@@ -216,6 +222,16 @@ struct AppBarCard: View {
     /// once, so the dim and the sentence cannot disagree.
     private var sourceBarOff: Bool {
         !model.config.settings.spaceBarStyle.enabled
+    }
+
+    /// Whether this row's reason travels inline, per the census.
+    /// Nothing here decides it: give the copy action a gating
+    /// control on this card and the derivation answers
+    /// `.adjacent`, and this sentence retires itself.
+    private var owesInlineGateReason: Bool {
+        GateReasonPlacement.owesInlineReason(
+            .spaceBar(.copyAppearance)
+        )
     }
 
     private var copyAppearanceHelp: String {

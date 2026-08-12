@@ -109,12 +109,10 @@ extension PaletteShelf {
     /// tiles wrap across rows, so "next" is the next tile in
     /// reading order, which is what a keyboard walk follows too.
     func neighbourAfterDeleting(_ name: String) -> String? {
-        let names = userPalettes.map(\.name)
-        guard let index = names.firstIndex(of: name) else {
-            return nil
-        }
-        if index + 1 < names.count { return names[index + 1] }
-        return index > 0 ? names[index - 1] : nil
+        DeletionFocus.neighbour(
+            after: name,
+            in: userPalettes.map(\.name)
+        )
     }
 
     // MARK: - Export / import

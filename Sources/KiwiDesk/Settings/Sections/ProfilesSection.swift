@@ -154,18 +154,14 @@ struct ProfilesSection: View {
         )
     }
 
-    /// The row a deletion should leave focus on: the next one
-    /// down, else the previous, else nothing — the shape
-    /// `SpacesSection+Remove` settled (#678 Phase 4 pass 10),
-    /// read from the ORDER the rows render in rather than from
-    /// the model's own list.
+    /// This list's display order, handed to the shared rule
+    /// (`DeletionFocus`) — which order it is IS this call site's
+    /// contribution; the stepping is not.
     func neighbourAfterDeleting(_ name: String) -> String? {
-        let names = orderedSummaries.map(\.name)
-        guard let index = names.firstIndex(of: name) else {
-            return nil
-        }
-        if index + 1 < names.count { return names[index + 1] }
-        return index > 0 ? names[index - 1] : nil
+        DeletionFocus.neighbour(
+            after: name,
+            in: orderedSummaries.map(\.name)
+        )
     }
 
     private func profileRow(

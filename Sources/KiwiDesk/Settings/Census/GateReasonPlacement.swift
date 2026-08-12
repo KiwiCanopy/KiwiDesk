@@ -56,9 +56,14 @@ enum GateReasonPlacement {
     /// Container gates are NOT this type's business — they have
     /// the `?` anchor — so a row is judged on its own `gate:`
     /// alone.
+    /// The `placement` seam defaults to the census itself, so
+    /// the wiring point is PRODUCTION's and a test overriding it
+    /// is the exception rather than the only caller.
     static func owesInlineReason(
         _ key: SettingKey,
-        placement: (SettingKey) -> SettingPlacement
+        placement: (SettingKey) -> SettingPlacement = {
+            $0.placement
+        }
     ) -> Bool {
         channel(key, placement: placement) == .inline
     }
@@ -67,7 +72,9 @@ enum GateReasonPlacement {
     /// row carries no gate of its own.
     static func channel(
         _ key: SettingKey,
-        placement: (SettingKey) -> SettingPlacement
+        placement: (SettingKey) -> SettingPlacement = {
+            $0.placement
+        }
     ) -> Channel? {
         let row = placement(key)
         guard let gate = row.gate, let area = row.area else {
@@ -93,12 +100,25 @@ enum GateReasonPlacement {
             }
             return .inline
         case .runtime(let condition):
+            // A SURFACING condition dims nothing — it decides
+            // whether the row is drawn — so it has no reason to
+            // carry and no channel. Answered by the condition's
+            // own declared flavour rather than by folding
+            // "surfaces" into "legible", which made one name
+            // answer two questions and would have inherited
+            // `.adjacent` for a condition that later became a
+            // grey (architect review, 2026-08-12).
+            guard condition.greys else { return nil }
             return condition.causeIsOnSurface ? .adjacent : .inline
         case .runtimeAnyOf(let conditions):
-            // Every arm has to be legible: a row dead for a
-            // reason the reader cannot see is not rescued by
+            guard conditions.contains(where: \.greys) else {
+                return nil
+            }
+            // Every GREYING arm has to be legible: a row dead for
+            // a reason the reader cannot see is not rescued by
             // another reason they can.
-            return conditions.allSatisfy(\.causeIsOnSurface)
+            return conditions.filter(\.greys)
+                .allSatisfy(\.causeIsOnSurface)
                 ? .adjacent : .inline
         }
     }
@@ -116,8 +136,14 @@ extension SettingTier {
     /// outcome this design refuses.
     var visibilityRank: Int {
         switch self {
-        case .atRest, .immediate: return 0
-        case .showMore: return 1
+        case .atRest: return 0
+        // NOT `atRest`'s peer, against the first cut: an
+        // `.immediate` row is the one whose gate says the thing
+        // already exists, and while that gate withholds it the
+        // row is not on screen at all — so a row gated BY one
+        // cannot claim its cause is beside it (architect
+        // review, 2026-08-12).
+        case .immediate, .showMore: return 1
         case .luaOnly, .internalOnly, .outsideSettings:
             // No surface at all, so it can never be the thing a
             // reader looks at.
@@ -127,8 +153,35 @@ extension SettingTier {
 }
 
 extension SettingRuntimeGate {
+    /// Whether this condition GREYS a row or decides whether it
+    /// is drawn at all. Two different questions, and folding
+    /// them into one predicate hid the second: five conditions
+    /// answered "the cause is on the surface" when what they
+    /// meant was "there is no dimmed control here", so a
+    /// condition that later became a grey would have inherited
+    /// "owes nothing" with nothing red.
+    ///
+    /// The flavour is already stated in prose on each case in
+    /// `SettingGate.swift`; this is the machine-readable half.
+    var greys: Bool {
+        switch self {
+        case .perEdgeValuesDiffer, .editingStoredProfile,
+            .displaysHaveSeparateSpaces, .screenCountMismatch,
+            .loginItemServiceStatus, .autoStartLoginOff,
+            .spaceHasNoOverrides, .reduceMotion:
+            return true
+        case .orphanPinsExist, .monitorsDisconnected,
+            .paletteGlowPairing, .luaImportAvailable,
+            .layersExist, .liquidGlassUnavailable:
+            // Presence, not greying: these decide whether a row
+            // or card is drawn.
+            return false
+        }
+    }
+
     /// Whether the thing this condition names is visible on the
-    /// surface the gated row is on.
+    /// surface the gated row is on. Only meaningful where
+    /// `greys` — a row that is not drawn has no reason to give.
     ///
     /// Exhaustive on purpose — no `default` — so a new condition
     /// has to answer rather than inherit a guess, and each arm
@@ -149,24 +202,23 @@ extension SettingRuntimeGate {
         case .reduceMotion, .loginItemServiceStatus,
             .autoStartLoginOff, .displaysHaveSeparateSpaces:
             // System state, with nothing in this window to look
-            // at. The rows gated on the last three already draw
+            // at. The rows gated on the middle two already draw
             // their reason inline today, which is what
             // `GateReasonPlacementTests` checks this answer
             // against.
             return false
-        case .editingStoredProfile, .screenCountMismatch,
-            .monitorsDisconnected:
+        case .editingStoredProfile, .screenCountMismatch:
             // Which profile is being edited, and which monitors
-            // it wants, are the page's own subject — the edit
-            // target rides the header chip and the preset cards
-            // name their screen count.
+            // a preset wants, are the page's own subject — the
+            // edit target rides the header chip and the preset
+            // cards name their screen count.
             return true
-        case .orphanPinsExist, .paletteGlowPairing,
-            .luaImportAvailable, .layersExist,
-            .liquidGlassUnavailable:
-            // Surfacing conditions rather than greys: they
-            // decide whether a row is drawn at all, so there is
-            // no dimmed control needing a sentence.
+        case .orphanPinsExist, .monitorsDisconnected,
+            .paletteGlowPairing, .luaImportAvailable,
+            .layersExist, .liquidGlassUnavailable:
+            // Presence conditions: `greys` is false, so this
+            // answer is never read. Stated rather than defaulted
+            // so the switch stays exhaustive by hand.
             return true
         }
     }

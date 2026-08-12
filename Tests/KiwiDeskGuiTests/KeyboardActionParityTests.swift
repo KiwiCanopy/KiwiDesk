@@ -226,10 +226,14 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "LayerStripEditor.swift",
-                "focusedChip = KeyLayer.defaultName",
+                "focusedChip = stripSurvivesDeletion",
                 "and deleting the selected layer moves focus "
-                    + "WITH the selection to the base chip, which "
-                    + "cannot itself be deleted"
+                    + "WITH the selection to the base chip — but "
+                    + "only where the card survives the "
+                    + "deletion, since in Simple mode losing the "
+                    + "last custom layer retires the strip and "
+                    + "naming a chip inside it lands at the top "
+                    + "of the window"
             ),
             Wiring(
                 "PaletteShelf.swift",

@@ -23,6 +23,15 @@ import Testing
 /// Stated limit: this counts the DIMMERS, not the reasons. A row
 /// listed below whose reason later stops being drawn stays green
 /// here; that half is the render guards' and the eye's.
+///
+/// Scope is `Settings/` rather than `ChromeScanRoots`, and the
+/// reason is the invariant's own subject: a dim owes a reason
+/// where a GATE withheld an answer, which is a settings-row
+/// idea — Onboarding and the bars fade for presentation (a step
+/// out of the flow, a bar at rest), not to say a control is
+/// inert. A gated control shipping outside this tree would be
+/// invisible here, so a new tree that GATES something joins
+/// these roots, not merely one that dims.
 @Suite("No silent dim (#815)")
 struct SilentDimTests {
     /// Every conditional dim outside `GreyOut`, and why each is

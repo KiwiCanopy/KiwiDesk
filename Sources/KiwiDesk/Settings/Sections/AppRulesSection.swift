@@ -188,32 +188,36 @@ struct AppRulesSection: View {
         }
     }
 
+    /// Deleting a rule row, and where the keyboard lands (#816).
+    ///
+    /// The focus move is conditional on the row actually LEAVING
+    /// the list, which in override mode it does not: `apps`
+    /// unions the base's pinned apps, so a tombstoned row stays
+    /// drawn as "Automatic" overriding the base pin (#109). Focus
+    /// belongs where the user left it there — moving it to the
+    /// next row would step off a row that is still on screen
+    /// (code review, 2026-08-12).
     private func delete(_ app: String) {
-        // Before the mutation (#816): afterwards `apps` no
-        // longer contains the deleted row, so its neighbour
-        // cannot be identified from it.
+        // Before the mutation (#816): afterwards the list cannot
+        // name the deleted row's neighbour, only whichever row
+        // slid into the gap.
         let neighbour = neighbourAfterDeleting(app)
         model.config.appRules[app] = nil
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
         draftApps.removeAll { $0 == app }
-        returningRow = neighbour
+        if !apps.contains(app) {
+            returningRow = neighbour
+        }
     }
 
-    /// The row a deletion should leave focus on: the next one
-    /// down, else the previous, else nothing — read from `apps`,
-    /// which is the display order (sorted by the name the row
-    /// shows, #333), not from the rules dictionary.
+    /// `apps` is the DISPLAY order (sorted by the name the row
+    /// shows, #333), not the rules dictionary's.
     private func neighbourAfterDeleting(
         _ app: String
     ) -> String? {
-        let rows = apps
-        guard let index = rows.firstIndex(of: app) else {
-            return nil
-        }
-        if index + 1 < rows.count { return rows[index + 1] }
-        return index > 0 ? rows[index - 1] : nil
+        DeletionFocus.neighbour(after: app, in: apps)
     }
 }
 

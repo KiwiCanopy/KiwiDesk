@@ -35,18 +35,13 @@ extension ProfilesSection {
         }
     }
 
-    /// The broken row a deletion should leave focus on: the next
-    /// one down, else the previous, else nothing. A twin of the
-    /// healthy list's helper rather than a shared one — the two
-    /// read different lists, and folding them into one function
-    /// taking a list would hide which list a call site meant.
+    /// The BROKEN list, which is its own list under its own
+    /// heading — a broken row's neighbour is never a healthy one.
     func neighbourBrokenAfter(_ name: String) -> String? {
-        let names = model.brokenProfiles.map(\.name)
-        guard let index = names.firstIndex(of: name) else {
-            return nil
-        }
-        if index + 1 < names.count { return names[index + 1] }
-        return index > 0 ? names[index - 1] : nil
+        DeletionFocus.neighbour(
+            after: name,
+            in: model.brokenProfiles.map(\.name)
+        )
     }
 
     private func brokenRow(_ broken: BrokenProfile) -> some View {
@@ -68,11 +63,6 @@ extension ProfilesSection {
                 Image(systemName: "magnifyingglass")
             }
             .buttonStyle(.borderless)
-            // The Config Issues panel's own key, not a second
-            // one: it labels this exact action on this exact
-            // file, and coining a twin is the defect this file's
-            // docstring argues against, one level down from the
-            // sentence (code review, 2026-08-11).
             // This row's return destination (#816): Reveal is
             // the always-drawn, non-destructive control here,
             // exactly as Load is on a healthy row. A broken row
@@ -80,6 +70,11 @@ extension ProfilesSection {
             // the two lists name different controls for the same
             // reason rather than sharing one by symmetry.
             .focused($returningRow, equals: name)
+            // The Config Issues panel's own key, not a second
+            // one: it labels this exact action on this exact
+            // file, and coining a twin is the defect this file's
+            // docstring argues against, one level down from the
+            // sentence (code review, 2026-08-11).
             .iconButtonAffordance(
                 L("config_issues.reveal", "Reveal in Finder")
             )

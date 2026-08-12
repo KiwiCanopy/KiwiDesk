@@ -78,18 +78,21 @@ struct GateReasonPlacementTests {
         #expect(channel(.appBar(.appBarThickness)) == nil)
     }
 
-    /// The per-space override editor is `remote` — its gating
-    /// control is declared in Layout Defaults — so by
-    /// `docs/ui-patterns.md` it wants a live `?` naming that
-    /// destination, and it has none: the reason reaches
-    /// `.help()` only (`SpaceOverrideRows+ModeRows.swift`).
+    /// `.remote` means "the `?` anchor on the other page names
+    /// where to go", which is a claim about a surface — so it is
+    /// CHECKED against the file that draws the anchor, not
+    /// assumed. Anything else lets the channel assert an
+    /// affordance nobody built.
     ///
-    /// Stated as a test rather than left as prose so the gap
-    /// cannot be mistaken for coverage, and so the day someone
-    /// adds the anchor this fails and asks them to move the
-    /// row's entry out of here.
+    /// The per-space override editor is the case in hand: its
+    /// gating control is declared in Layout Defaults, so the
+    /// derivation answers `.remote`, and the editor draws no
+    /// anchor — the reason reaches `.help()` only. Recorded here
+    /// rather than left as prose so the gap cannot be mistaken
+    /// for coverage, and so the day the anchor lands this fails
+    /// and asks for the entry to move out.
     @Test("the per-space overrides' remote gap is recorded")
-    func perSpaceOverridesAwaitTheirAnchor() {
+    func perSpaceOverridesAwaitTheirAnchor() throws {
         for key: SettingKey in [
             .layout(.gridOverrideColumns),
             .layout(.gridOverrideRows),
@@ -106,6 +109,28 @@ struct GateReasonPlacementTests {
                 )
             )
         }
+        // The gap itself: the rows' own file draws no `?`, so
+        // `.remote` currently points at nothing for them. When
+        // this stops being true, this suite is where the claim
+        // gets re-stated.
+        let path = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/"
+                    + "SpaceOverrides/SpaceOverrideRows"
+                    + "+ModeRows.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: path, encoding: .utf8)
+        )
+        #expect(
+            !source.contains("HelpButton"),
+            Comment(
+                rawValue:
+                    "the per-space rows gained an anchor — "
+                    + "#815's remote class is closed, so move "
+                    + "these keys out of this test"
+            )
+        )
     }
 
     /// The one row the derivation found is actually drawn, and
@@ -131,12 +156,37 @@ struct GateReasonPlacementTests {
         )
         let sentence = try #require(
             source.range(
-                of: "ifsourceBarOff{Text(BarsGateHelp.sentence("
+                of: "ifsourceBarOff,owesInlineGateReason{"
+                    + "Text(BarsGateHelp.sentence("
             )
         )
         #expect(
             dim.upperBound < sentence.lowerBound,
             "the reason must be a sibling of the dimmed stack"
         )
+        // And it is DRAWN off the derivation rather than off a
+        // hand-rolled copy of it: a comment claiming the census
+        // decides this, over an `if` that re-derives it, is the
+        // dead-resolver shape (`gui.md`), and it would leave
+        // this type answering for nobody.
+        #expect(
+            source.contains(
+                "GateReasonPlacement.owesInlineReason("
+                    + ".spaceBar(.copyAppearance))"
+            )
+        )
+    }
+
+    /// A surfacing condition dims nothing, so it carries no
+    /// channel at all — the distinction that keeps
+    /// `causeIsOnSurface` from answering two questions with one
+    /// name.
+    @Test("a presence condition has no reason to place")
+    func surfacingConditionsCarryNoChannel() {
+        #expect(SettingRuntimeGate.layersExist.greys == false)
+        #expect(SettingRuntimeGate.reduceMotion.greys)
+        // The Layers card surfaces on `layersExist`; nothing
+        // there is dimmed, so nothing owes a sentence.
+        #expect(channel(.shortcuts(.layers)) == nil)
     }
 }

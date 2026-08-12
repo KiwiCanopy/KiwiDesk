@@ -73,10 +73,14 @@ struct SegmentedPickerCoverageTests {
     /// reasons — a brand tweak — would red only after crossing
     /// the line, with every other lens still green.
     ///
-    /// Derived, not restated: the floor is computed by bisecting
-    /// on the luminance that puts `accentInk` at exactly 4.5:1,
-    /// so the number below is checked against the arithmetic
-    /// instead of being a second copy of it.
+    /// Derived, not restated: the boundary is SOLVED from the
+    /// shipped `accentInk` — WCAG's ratio is linear in the
+    /// lighter luminance, so the AA point is
+    /// `4.5 * (inkL + 0.05) - 0.05` — and the literal below is
+    /// checked against that, never used as the source. The
+    /// number also appears in #823's `ui-designer` ruling, which
+    /// is prose nothing can guard; this is what makes it
+    /// re-derivable.
     @Test("the accent keeps room above the AA boundary")
     func accentLuminanceFloor() throws {
         let ink = try resolved(SettingsTheme.accentInk)
@@ -92,8 +96,9 @@ struct SegmentedPickerCoverageTests {
                 rawValue: String(
                     format:
                         "the AA boundary moved to %.4f — "
-                        + "accentInk changed, so the 0.244 in "
-                        + "the docstring and in #823 is stale",
+                        + "accentInk changed, so the 0.244 this "
+                        + "test and #823's ruling both name is "
+                        + "stale",
                     boundary
                 )
             )

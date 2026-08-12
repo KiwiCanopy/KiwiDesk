@@ -788,10 +788,11 @@ Every surface, border and ink in the Settings tree comes from
   ring alone** — converting one to `.plain` to paint it kiwi
   removes the platform's indicator, and a control that does that
   owes an indicator of its own plus the contrast the platform's
-  had. The header's search chip is the one control in that
-  position, by way of the chip shape rather than by preference,
-  and the argument is in `docs/design-decisions.md` ▸ a focus
-  ring is the platform's.
+  had — the search chip is the worked example, which took
+  `.plain` for the chip shape and then owed itself an indicator
+  (its accent at 0.55 measured 1.52:1 on `sunken` and had to go
+  to full strength). The argument is in
+  `docs/design-decisions.md` ▸ a focus ring is the platform's.
 - **The accent marks control FILLS, never text naming a value.**
   A toggle track, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
