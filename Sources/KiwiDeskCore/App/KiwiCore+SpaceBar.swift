@@ -64,6 +64,26 @@ extension KiwiCore {
     /// focused window of the space this display currently
     /// shows. Nil while the toggle is off or nothing is
     /// focused — the segment then hides.
+    ///
+    /// Deliberately NOT filtered by `isTransientOverlay`, unlike
+    /// the glyph strip below (#683): the segment answers "which
+    /// app is in front", not "which windows does this Space
+    /// hold". A popup that surfaces as an AX window belongs to
+    /// the app the user is working in — the launcher class that
+    /// would name a *different* app is never tracked at all
+    /// (#448) — and the segment draws only that app's glyph and
+    /// name, no state badge and no slot, so it says "Front app:
+    /// Telegram" while a Telegram menu is open, which is true.
+    /// Filtering here would instead hide the whole segment for
+    /// as long as a menu is held open, re-laying the strip out
+    /// on every right-click.
+    ///
+    /// What DOES stand down while an overlay holds focus is the
+    /// focus TINT on the strip's glyphs — the overlay is not
+    /// drawn, so no group contains `lastFocused`. That matches
+    /// the focus ring, which #300 already suppresses for the
+    /// same window; `SpaceBarOverlayFilterTests` pins both
+    /// halves.
     func frontApp(
         display: DisplayID,
         style: SpaceBarStyle

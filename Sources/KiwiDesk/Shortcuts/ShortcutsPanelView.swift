@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The read-only shortcuts reference panel (#326): a live mirror
-/// of the active key layer's bindings, grouped into Controls / Apps
-/// / Custom bands. No editing — rebinding stays in Settings, which
+/// of the active key layer's bindings, grouped into Controls /
+/// Apps / Inactive / Custom bands, in that drawn order (#820).
+/// No editing — rebinding stays in Settings, which
 /// the single footer button bridges to. `reference` is nil when
 /// live shortcuts can't be read (config owned by init.lua, or the
 /// engine isn't running).

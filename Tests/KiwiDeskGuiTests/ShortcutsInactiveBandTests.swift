@@ -155,22 +155,65 @@ struct ShortcutsInactiveBandTests {
         }
     }
 
+    /// The band's membership, stated INDEPENDENTLY of the
+    /// predicate it consumes. Comparing the builder against a
+    /// second call to `OrphanedShortcuts.commands` would red only
+    /// on a wholesale replacement of the call — a hand-rolled
+    /// predicate agreeing on the fixture passes it — so the
+    /// expectation here is written out, over a fixture carrying
+    /// one of each way a space-targeting binding can fail to be
+    /// an orphan.
     @Test("the panel and Settings agree on what is inactive")
     func predicateIsSettings() {
         reset()
         let bindings = [
+            // Orphaned: their Space left the list.
             binding("ctrl+alt+6", "KiwiDesk.focus_space(\"6\")"),
+            binding("ctrl+shift+7", "KiwiDesk.move_to_space(\"7\")"),
+            // Live Space — a preset row, not an orphan.
             binding("ctrl+alt+1", "KiwiDesk.focus_space(\"1\")"),
+            // Orphaned Space, but never recorded: an unbound row
+            // is not a row on any surface.
+            binding("", "KiwiDesk.focus_space(\"8\")"),
+            // Orphaned Space reached through raw Lua the user
+            // authored: `.custom` is Settings' Lua drawer's, and
+            // the panel's Custom band's, never this band's.
+            KeyBinding(
+                combo: "ctrl+alt+9",
+                lua: "KiwiDesk.focus_space(\"9\")",
+                kind: .custom
+            ),
         ]
-        let spaces = [SpaceID("1")]
+        let panel = build(bindings, spaces: [SpaceID("1")])
+        #expect(
+            panel.inactive.map(\.id) == [
+                "KiwiDesk.focus_space(\"6\")",
+                "KiwiDesk.move_to_space(\"7\")",
+            ]
+        )
+        #expect(
+            panel.inactive.map(\.label) == [
+                "Go to Space 6", "Move to Space 7",
+            ]
+        )
+        // The custom-Lua one is still visible, in its own band.
+        #expect(panel.custom.count == 1)
+        // Settings, given the same input, names those two and
+        // ONE more — the unbound row. The two surfaces are meant
+        // to differ exactly there and nowhere else: Settings is
+        // the editor, where an unbound orphan is a row you can
+        // record a combo into; the panel answers "what can I
+        // press right now", and skips every empty combo in every
+        // band (`unrecordedSkipped`). Stated as the difference
+        // rather than hidden by a fixture that avoids it.
         let settings = OrphanedShortcuts.commands(
             bindings: bindings,
-            spaces: spaces,
+            spaces: [SpaceID("1")],
             icons: [:]
         )
-        let panel = build(bindings, spaces: spaces)
         #expect(
-            panel.inactive.map(\.id) == settings.map(\.lua)
+            settings.map(\.lua) == panel.inactive.map(\.id)
+                + ["KiwiDesk.focus_space(\"8\")"]
         )
     }
 }

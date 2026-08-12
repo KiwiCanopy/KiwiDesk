@@ -4,12 +4,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A transient overlay draws no Space Bar glyph (#683) — the same
-/// draw-time decision the focus ring makes (#300), one surface
-/// over. The filter runs BEFORE the same-app grouping and the
-/// glyph cap, so an overlay can neither split a run nor eat a
-/// capped slot. Split from `SpaceBarDriverTests` for the file
-/// ceiling; per-file helpers by convention.
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
@@ -35,6 +29,12 @@ private func window(
     )
 }
 
+/// A transient overlay draws no Space Bar glyph (#683) — the same
+/// draw-time decision the focus ring makes (#300), one surface
+/// over. The filter runs BEFORE the same-app grouping and the
+/// glyph cap, so an overlay can neither split a run nor eat a
+/// capped slot. Split from `SpaceBarDriverTests` for the file
+/// ceiling; per-file helpers by convention.
 @Suite("Space bar overlay filter", .serialized)
 @MainActor
 struct SpaceBarOverlayFilterTests {
@@ -50,12 +50,17 @@ struct SpaceBarOverlayFilterTests {
     @Test("A popup's transient windows draw no glyph")
     func overlaysAreNotDrawn() throws {
         let core = seededCore()
+        // The cap is pinned rather than inherited (#660): the
+        // `overflow == 0` below reasons from it, so a retuned
+        // default would silently re-derive this expectation.
+        var style = SpaceBarStyle()
+        style.glyphCap = 5
         core.state.apply(.windowCreated(window(1, app: "Chat")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))
         let before = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarStyle()
+                style: style
             ).first
         )
         #expect(before.apps.map(\.name) == ["Chat", "Mail"])
@@ -71,7 +76,7 @@ struct SpaceBarOverlayFilterTests {
         let item = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarStyle()
+                style: style
             ).first
         )
         #expect(item.apps.map(\.name) == ["Chat", "Mail"])
@@ -130,6 +135,41 @@ struct SpaceBarOverlayFilterTests {
         // Mail alone is hidden: the overlay is not a window the
         // "+n" promises the user can reach.
         #expect(item.overflow == 1)
+    }
+
+    /// The two sides of what the filter does to focus, ruled
+    /// together because they look inconsistent apart: the
+    /// segment names the popup's app (it IS in front) while no
+    /// glyph carries the focus tint (the focused window is not
+    /// drawn) — the same stand-down the ring makes for the same
+    /// window (#300).
+    @Test("An overlay is front-app, but tints no glyph")
+    func focusWhileAnOverlayHoldsIt() throws {
+        let core = seededCore()
+        var style = SpaceBarStyle()
+        style.showFrontApp = true
+        core.state.apply(.windowCreated(window(1, app: "Chat")))
+        core.state.apply(.windowFocused(WindowID(1)))
+        let lit = try #require(
+            core.spaceBarItems(display: display, style: style)
+                .first
+        )
+        #expect(lit.apps.map(\.focused) == [true])
+        core.state.apply(
+            .windowCreated(window(2, app: "Chat", overlay: true))
+        )
+        core.state.apply(.windowFocused(WindowID(2)))
+        let item = try #require(
+            core.spaceBarItems(display: display, style: style)
+                .first
+        )
+        // Drawn, but no longer the focus: the tint stands down
+        // rather than moving to a glyph the bar does not draw.
+        #expect(item.apps.map(\.name) == ["Chat"])
+        #expect(item.apps.map(\.focused) == [false])
+        // The segment still names the app the user is in.
+        let front = core.frontApp(display: display, style: style)
+        #expect(front?.name == "Chat")
     }
 
     @Test("A space holding only overlays reads as empty")

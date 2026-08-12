@@ -137,7 +137,7 @@ enum BarsGateHelp {
             return L(
                 "app_bar.no_layout.help",
                 "No layout shows an App Bar — turn a layout's "
-                    + "App Bar on under %1$@.",
+                    + "App Bar on under “%1$@”.",
                 L("bars.show_in.title", "Show it in")
             )
         case .spaceBarOff:

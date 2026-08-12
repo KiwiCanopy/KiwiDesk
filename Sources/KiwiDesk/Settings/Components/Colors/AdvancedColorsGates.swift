@@ -192,9 +192,16 @@ enum AdvancedColorsHelp {
     static var appBarOff: String {
         L(
             "colors.app_bar_off.help",
+            // The block header is QUOTED and the destination is
+            // not, which is the catalog's own split: a control
+            // label is quoted (22 frames), a destination title
+            // reads as a place and stays bare
+            // (`colors.space_bar_off.help`). Unquoted, "under
+            // Show it in" reads as broken prose rather than as a
+            // pointer at a heading.
             "No layout shows an App Bar, so its colors aren't "
                 + "drawn. In %1$@, turn a layout's App Bar on "
-                + "under %2$@.",
+                + "under “%2$@”.",
             SettingsDestination.bars.title,
             L("bars.show_in.title", "Show it in")
         )

@@ -30,6 +30,14 @@ enum ShortcutsReferenceBuilder {
         // kind or combo — from the working set before any band
         // builds, so the suppression holds across every band by
         // construction, not by each band's filter remembering.
+        //
+        // "By construction" is now scoped to callers entering
+        // HERE: the §2.1 split put the band builders in
+        // `+Bands.swift`, which cost them `private`, so a
+        // module-level caller invoking one directly would hand it
+        // an unfiltered layer and re-leak the seeded ⌃⌥K row
+        // `ShortcutsSelfRowTests` pins. Nothing scans for that —
+        // a band builder is `build`'s to call.
         var layer = layer
         layer.bindings.removeAll {
             $0.lua == ShortcutsOpenBinding.lua
