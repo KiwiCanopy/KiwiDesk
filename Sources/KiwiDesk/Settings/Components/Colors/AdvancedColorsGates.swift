@@ -112,12 +112,15 @@ struct AdvancedColorsGates {
 /// set** — because nothing here will red when it does not.
 @MainActor
 enum AdvancedColorsHelp {
-    private static var gapsAndBorders: String {
-        SettingsDestination.gapsAndBorders.title
-    }
-    private static var bars: String {
-        SettingsDestination.bars.title
-    }
+    // The two destination titles used to be aliased by private
+    // properties here. They are now named in full at each call
+    // site, which costs a line and buys revert protection: a
+    // frame reaching its label through a LOCAL alias is
+    // invisible to `SourceScan.interpolatingFrames`, so all
+    // seven of these got no floor in
+    // `InterpolatedLabelTests.converted` and a revert to
+    // literal text would have passed unseen. Nothing is
+    // duplicated — `.title` is where the English lives.
 
     static var borderOff: String {
         L(
@@ -127,7 +130,7 @@ enum AdvancedColorsHelp {
             // has to name the ring's own pair.
             "The focus border is off, so its two colors aren't "
                 + "drawn. Turn it on in %1$@.",
-            gapsAndBorders
+            SettingsDestination.gapsAndBorders.title
         )
     }
 
@@ -136,7 +139,7 @@ enum AdvancedColorsHelp {
             "colors.unfocused_off.help",
             "Unfocused windows get no border, so this color "
                 + "isn't drawn. Turn it on in %1$@.",
-            gapsAndBorders
+            SettingsDestination.gapsAndBorders.title
         )
     }
 
@@ -145,7 +148,7 @@ enum AdvancedColorsHelp {
             "colors.drag_off.help",
             "This drag visual is off, so its colors aren't "
                 + "drawn. Turn it on in %1$@.",
-            gapsAndBorders
+            SettingsDestination.gapsAndBorders.title
         )
     }
 
@@ -154,7 +157,7 @@ enum AdvancedColorsHelp {
             "colors.drag_border_off.help",
             "This visual draws no border. Turn Border on in "
                 + "%1$@.",
-            gapsAndBorders
+            SettingsDestination.gapsAndBorders.title
         )
     }
 
@@ -162,7 +165,7 @@ enum AdvancedColorsHelp {
         L(
             "colors.drag_fill_off.help",
             "This visual draws no fill. Turn Fill on in %1$@.",
-            gapsAndBorders
+            SettingsDestination.gapsAndBorders.title
         )
     }
 
@@ -174,7 +177,7 @@ enum AdvancedColorsHelp {
             "colors.space_bar_off.help",
             "The Space Bar is off, so its colors aren't drawn. "
                 + "Turn it on in %1$@.",
-            bars
+            SettingsDestination.bars.title
         )
     }
 
@@ -183,7 +186,7 @@ enum AdvancedColorsHelp {
             "colors.app_bar_off.help",
             "No layout shows an App Bar, so its colors aren't "
                 + "drawn. Turn one on in %1$@.",
-            bars
+            SettingsDestination.bars.title
         )
     }
 }

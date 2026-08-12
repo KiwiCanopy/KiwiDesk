@@ -288,21 +288,44 @@ whenever someone last edited this page.
 So what is written down is the **procedure**, which cannot go
 stale, rather than its output, which can.
 
-### Why no guard, and what is guarded instead
+### What is guarded, and what is not
 
-The natural guard is a banned-rival register — per locale, per
-concept, the winner plus the words that must not appear. It
-cannot be built, and the reason is worth stating so nobody
-budgets for it twice: **every ruling above produced a keep-list,
-and each entry is the rival word, correctly used, in the same
-file.** `es`'s «espacio», `it`'s «spazio» and `pt-BR`'s «espaço»
-name a Space in roughly a hundred keys each; `ko`'s 연결 means
-*connected* in eleven; `zh-Hans`'s 配置文件 is right in exactly
-the key the ruling exists to protect. A ban would fire on all of
-them. This page's own rule about single-word Family A members
-applies with more force here: *a guard failing on correct copy is
-the one failure that makes an exemption file look necessary*, and
+**No content-guard predicate can hold this family.** The natural
+one is a banned-rival register — per locale, per concept, the
+winner plus the words that must not appear — and the reason it
+cannot be built is worth stating so nobody budgets for it twice:
+**every ruling above produced a keep-list, and each entry is the
+rival word, correctly used, in the same file.** `es`'s «espacio»,
+`it`'s «spazio» and `pt-BR`'s «espaço» name a Space in roughly a
+hundred keys each; `ko`'s 연결 means *connected* in eleven;
+`zh-Hans`'s 配置文件 is right in exactly the key the ruling exists
+to protect. A ban would fire on all of them. This page's own rule
+about single-word Family A members applies with more force here:
+*a guard failing on correct copy is the one failure that makes an
+exemption file look necessary*, and
 `scripts/localization_guards.py` has no exemption file by policy.
+
+**One sub-class is exactly checkable, and is checked.** Where the
+collision is byte-identity rather than near-synonymy, no
+vocabulary is needed at all — you compare two strings the same
+catalog already ships, which is what `SidebarCrossReferenceTests`
+does for breadcrumbs. `DestinationNameCollisionTests` reds when a
+`destination.*` title equals some other key's value in any
+catalog and the two English strings differ. That is ladder rule 1
+in its sharpest form, and it is the shape that shipped
+`zh-Hans`'s Profile as the words for *configuration file*. It
+lives in `Tests/` rather than in the guards script for a reason
+that matters: a Swift suite may carry a reasoned `allowed` map,
+the standing idiom across a dozen AGENTS.md §5 rows, so the one
+legitimate pair (`Shortcuts` / `Your shortcuts`, which `ja` and
+`ko` rightly render alike) is excused in writing instead of
+forcing the guard off.
+
+It covers only exact equality against a destination. `es`
+labelling a bar gap "Espacio" against a Space of "Espacios" is
+the same defect and is invisible to it — near-equality cannot be
+judged without per-language morphology, which is the vocabulary
+the suite refuses to carry. Do not read a green run as more.
 
 The shape argument, stated once so the gap does not read as an
 oversight: Family A can demand the English name be **present**,

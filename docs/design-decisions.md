@@ -303,17 +303,29 @@ copy of the corpus, and a copy of the corpus rots against it on
 any commit, while the count rule makes each catalog its own
 register.
 
-**No guard enforces it, and none should be built.** The obvious
-one — a banned-rival register per locale — dies on a fact that
-only shows up once the sweep is done: every losing word is still
-*correct somewhere else in the same file*. Spanish «espacio»,
-Italian «spazio» and Portuguese «espaço» each name a Space in
-about a hundred keys; Korean 연결 means *connected*; Chinese
-配置文件 is right in the one key the ruling exists to protect.
-A ban would fire on roughly 250 good values across six locales
-on a corpus that is clean the day it lands — and
+**No *content guard* can enforce it, and one narrow guard can.**
+The obvious predicate — a banned-rival register per locale — dies
+on a fact that only shows up once the sweep is done: every losing
+word is still *correct somewhere else in the same file*. Spanish
+«espacio», Italian «spazio» and Portuguese «espaço» each name a
+Space in about a hundred keys; Korean 연결 means *connected*;
+Chinese 配置文件 is right in the one key the ruling exists to
+protect. A ban would fire on hundreds of good values, and
 `scripts/localization_guards.py` has no exemption file by policy,
-so the guard would be reverted or given a baseline within a week.
+so it would be reverted or given a baseline within a week.
+
+The mistake worth not repeating is generalising from that to
+*no guard at all*, which this ruling did on its first draft. The
+sub-class where the collision is **byte-identity** needs no
+vocabulary: compare two strings the same catalog ships, the way
+the breadcrumb guard already does. `DestinationNameCollisionTests`
+does exactly that for destination titles, and it fires on the
+`zh-Hans` Profile defect this work was chartered to fix. It lives
+in `Tests/` rather than in the guards script because a Swift
+suite may carry a reasoned exemption map — the standing idiom
+here — so the one legitimate pair is excused in writing rather
+than switching the guard off. Partial cover of the worst
+sub-class is not a consolation prize; it is the sub-class.
 
 What was done instead is worth more than the guard would have
 been: the two *adjacent* classes were made unwritable rather than

@@ -873,6 +873,26 @@ authoring rules apply here even though the catalogs live in Core:
   [localization.md](localization.md) ▸ a frame interpolating a
   COUNT; it is repeated here because that file never loads while
   you are authoring a call site in this tree.
+- **A sentence that names another control INTERPOLATES that
+  control's label key; it never spells the label out** (#818,
+  `InterpolatedLabelTests`). Repeated here for the same reason
+  as the bullet above — the obligation binds the English author,
+  and every call site in this class is in this tree. Quoting is
+  a hand-kept mirror across ten catalogs with nothing checking
+  it, and it had already drifted in five of them: `es` named the
+  boxed style "En casillas" against a picker reading "En caja",
+  `it` a colour row "Elemento sotto il puntatore" against a row
+  reading "Elemento al passaggio mouse". Interpolated, the
+  anchor is held by `placeholder_drift` in every locale. Two
+  authoring rules fall out. **Spend each specifier once** — the
+  drift guard compares a multiset, so a repeated `%1$@` makes a
+  stylistic second mention mandatory in every language and fails
+  a translation that pronominalises it; carry the second mention
+  with a common noun instead. And **do not name a place
+  deictically** ("below", "above") unless the thing is on this
+  page: `app_bar.icon_source.help` said its colour rows were
+  below while they render on Advanced Colours, two of them
+  Power-User-only.
 - **Never hand-edit `Resources/Locales/*.json`.** `en.json` is
   regenerated from real call sites; the other catalogs are
   translation-owned and edited only through `scripts/*-key(s)`.

@@ -90,15 +90,16 @@ extension SpaceBarCard {
                     .map { ($0.1, $0.0) },
                 // Option names INTERPOLATED from the picker's own
                 // keys, not re-typed (#818) — the App Bar twin
-                // carries the argument.
+                // carries the argument, including why each name
+                // appears exactly once.
                 help: L(
                     "space_bar.alignment.label.help",
                     "Where the Space items — and the front-app "
                         + "segment, when shown — sit along the "
                         + "bar. \u{201C}%1$@\u{201D} and "
-                        + "\u{201C}%2$@\u{201D} follow the edge — "
-                        + "a left bar's \u{201C}%1$@\u{201D} is "
-                        + "its top.",
+                        + "\u{201C}%2$@\u{201D} follow the edge, "
+                        + "so on a left bar the start of the bar "
+                        + "is its top.",
                     L("app_bar.alignment.start", "Start"),
                     L("app_bar.alignment.end", "End")
                 )
