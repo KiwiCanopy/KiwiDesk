@@ -94,11 +94,13 @@ struct SegmentedPicker<Value: Hashable>: View {
         .background { slidingPill }
         .padding(3)
         .background(
-            Capsule().fill(Color.primary.opacity(0.08))
+            Capsule().fill(
+                Color.primary.opacity(SegmentedPickerMetrics.trackAlpha)
+            )
         )
         .overlay(
             Capsule().strokeBorder(
-                Color.primary.opacity(0.08),
+                Color.primary.opacity(SegmentedPickerMetrics.trackAlpha),
                 lineWidth: 0.5
             )
         )
@@ -233,4 +235,20 @@ struct SegmentedPicker<Value: Hashable>: View {
         Capsule()
             .fill(SettingsTheme.accent)
     }
+}
+
+/// The segmented picker's own metrics, in a non-generic type so
+/// they can be named from outside (a `static` stored property is
+/// not allowed on a generic one).
+///
+/// `trackAlpha` is here rather than inline because
+/// `SegmentedPickerCoverageTests` MEASURES the unselected label
+/// against it: with the number restated in the test, washing the
+/// track to 0.6 — a near-white track under a near-white label in
+/// dark — passed green, the guard's input never having touched
+/// this file (guard-prover, 2026-08-12).
+enum SegmentedPickerMetrics {
+    /// The track's wash over its card, and the same value its
+    /// hairline takes.
+    static let trackAlpha = 0.08
 }

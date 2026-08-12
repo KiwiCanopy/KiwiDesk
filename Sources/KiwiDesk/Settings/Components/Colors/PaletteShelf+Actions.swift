@@ -93,9 +93,26 @@ extension PaletteShelf {
         reload()
     }
 
+    /// Deleting a saved palette lands the keyboard on the next
+    /// tile, else the previous, else nothing (#816). Read BEFORE
+    /// the delete: `reload()` re-reads the store, so afterwards
+    /// the neighbour can only be named by whichever tile slid
+    /// into the gap.
     func deletePalette(_ name: String) {
+        let neighbour = neighbourAfterDeleting(name)
         try? store.delete(name)
         reload()
+        returningTile = neighbour
+    }
+
+    /// Grid order is the order `userPalettes` renders in — the
+    /// tiles wrap across rows, so "next" is the next tile in
+    /// reading order, which is what a keyboard walk follows too.
+    func neighbourAfterDeleting(_ name: String) -> String? {
+        DeletionFocus.neighbour(
+            after: name,
+            in: userPalettes.map(\.name)
+        )
     }
 
     // MARK: - Export / import

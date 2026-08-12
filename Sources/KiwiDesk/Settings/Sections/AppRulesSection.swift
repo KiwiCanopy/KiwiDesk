@@ -14,6 +14,9 @@ struct AppRulesSection: View {
     /// (both facets still at their defaults) — they live only
     /// in the GUI until a facet is set.
     @State private var draftApps: [String] = []
+    /// Where the keyboard lands after a rule row stops existing
+    /// (#816), keyed by the row's app id.
+    @FocusState private var returningRow: String?
     @State private var newApp = ""
 
     /// The base rules while editing a stored profile — the
@@ -44,7 +47,8 @@ struct AppRulesSection: View {
                             overrideBase: overrideBase,
                             overrideFloatBase: overrideFloatBase,
                             isDraft: draftApps.contains(app),
-                            onDelete: { delete(app) }
+                            onDelete: { delete(app) },
+                            returningRow: $returningRow
                         )
                         Divider()
                     }
@@ -184,12 +188,36 @@ struct AppRulesSection: View {
         }
     }
 
+    /// Deleting a rule row, and where the keyboard lands (#816).
+    ///
+    /// The focus move is conditional on the row actually LEAVING
+    /// the list, which in override mode it does not: `apps`
+    /// unions the base's pinned apps, so a tombstoned row stays
+    /// drawn as "Automatic" overriding the base pin (#109). Focus
+    /// belongs where the user left it there — moving it to the
+    /// next row would step off a row that is still on screen
+    /// (code review, 2026-08-12).
     private func delete(_ app: String) {
+        // Before the mutation (#816): afterwards the list cannot
+        // name the deleted row's neighbour, only whichever row
+        // slid into the gap.
+        let neighbour = neighbourAfterDeleting(app)
         model.config.appRules[app] = nil
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
         draftApps.removeAll { $0 == app }
+        if !apps.contains(app) {
+            returningRow = neighbour
+        }
+    }
+
+    /// `apps` is the DISPLAY order (sorted by the name the row
+    /// shows, #333), not the rules dictionary's.
+    private func neighbourAfterDeleting(
+        _ app: String
+    ) -> String? {
+        DeletionFocus.neighbour(after: app, in: apps)
     }
 }
 

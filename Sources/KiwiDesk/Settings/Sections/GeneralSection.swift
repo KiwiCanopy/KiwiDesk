@@ -108,25 +108,20 @@ struct GeneralSection: View {
     /// mutually exclusive choices whose whole set fits on one
     /// line is the case `docs/ui-patterns.md` gives segmented,
     /// and unlike the locale list it can never grow.
+    /// A direct `SegmentedPicker`, not one inside a
+    /// `DropdownRow` (#823): the shared component draws its own
+    /// `SettingsRowShape` when it carries a label, and
+    /// `DropdownRow` forces `.pickerStyle(.menu)` onto whatever
+    /// it wraps. So the wrapper comes off rather than the picker
+    /// inside it changing.
     private var appearanceRow: some View {
-        DropdownRow(
-            label: L("general.appearance", "Appearance")
-        ) {
-            Picker(
-                L("general.appearance", "Appearance"),
-                selection: appearanceBinding
-            ) {
-                ForEach(
-                    AppearanceChoice.allCases,
-                    id: \.rawValue
-                ) { choice in
-                    Text(choice.label).tag(choice)
-                }
+        SegmentedPicker(
+            L("general.appearance", "Appearance"),
+            selection: appearanceBinding,
+            options: AppearanceChoice.allCases.map {
+                ($0.label, $0)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .fixedSize()
-        }
+        )
     }
 
     private var appearanceBinding: Binding<AppearanceChoice> {

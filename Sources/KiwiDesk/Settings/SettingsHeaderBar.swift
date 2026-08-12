@@ -245,9 +245,21 @@ struct SettingsHeaderBar: View {
         .chipSurface()
     }
 
+    /// The shared component, not `.pickerStyle(.segmented)`
+    /// (#823): a native `NSSegmentedControl` draws AppKit's own
+    /// track beside the window's capsules AND lets AppKit pick
+    /// the selected label's ink, which in dark mode put
+    /// near-white on the accent at ~2.4:1 — the pairing the dark
+    /// pass removed from this very control. Here the ink comes
+    /// from `accentInk` by construction.
+    ///
+    /// The label is applied by the CALLER because the unlabeled
+    /// path deliberately attaches none (an empty accessibility
+    /// label would override the group's inferred name), and this
+    /// instance is visually unlabeled — without this the mode
+    /// segment ships nameless to VoiceOver.
     private var modeSegment: some View {
-        Picker(
-            L("home.mode_ax", "Settings mode"),
+        SegmentedPicker(
             selection: Binding(
                 get: { model.settingsMode },
                 // The EXPLICIT flip — the one entry point that
@@ -258,18 +270,18 @@ struct SettingsHeaderBar: View {
                         reduceMotion: reduceMotion
                     )
                 }
-            )
-        ) {
-            Text(L("mode.simple", "Simple"))
-                .tag(SettingsMode.simple)
-            // The site's slider keeps its own "Nerd" flair —
-            // different surface, different register (owner
-            // 2026-08-04; docs/localization-naming.md).
-            Text(L("mode.power_user", "Power User"))
-                .tag(SettingsMode.powerUser)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
+            ),
+            options: [
+                (L("mode.simple", "Simple"), SettingsMode.simple),
+                // The site's slider keeps its own "Nerd" flair —
+                // different surface, different register (owner
+                // 2026-08-04; docs/localization-naming.md).
+                (
+                    L("mode.power_user", "Power User"),
+                    SettingsMode.powerUser
+                ),
+            ]
+        )
         .fixedSize()
         .accessibilityLabel(L("home.mode_ax", "Settings mode"))
     }

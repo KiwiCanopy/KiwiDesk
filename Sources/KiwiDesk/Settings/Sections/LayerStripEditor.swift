@@ -27,6 +27,9 @@ struct LayerStripEditor: View {
     @State private var renamingLayer = false
     @State private var renameDraft = ""
     @State private var addLayerHovered = false
+    /// Where the keyboard lands after the selected layer's chip
+    /// stops existing (#816).
+    @FocusState private var focusedChip: String?
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
@@ -74,6 +77,9 @@ struct LayerStripEditor: View {
         ) {
             selected = name
         }
+        // Every chip is a focus destination, so a deletion can
+        // name one (#816).
+        .focused($focusedChip, equals: name)
     }
 
     /// Defining a layer is rare — the "+" chip's popover
@@ -268,11 +274,45 @@ struct LayerStripEditor: View {
         addingLayer = false
     }
 
+    /// Focus FOLLOWS the selection rather than stepping to the
+    /// neighbouring chip (#816). The strip is a selector, not a
+    /// list of independent rows: deleting the selected layer
+    /// already moves the selection to the default layer, and
+    /// every row below the strip is that layer's now, so landing
+    /// anywhere else would leave the keyboard on a chip that
+    /// does not match what is on screen.
+    ///
+    /// But only WHERE THE STRIP SURVIVES. `LayersCard` withholds
+    /// itself entirely on `layersExist || mode == .powerUser`,
+    /// and `layersExist` is "more than the default layer" — so in
+    /// Simple mode, deleting the last custom layer retires the
+    /// whole card in the same mutation, the default chip
+    /// included. Naming it then sends focus to a view that left
+    /// the tree, which lands at the top of the window: the exact
+    /// outcome this rule exists to prevent, reached by the road
+    /// gui.md warns about (code review, 2026-08-12). Nil is the
+    /// honest answer there — the card the user was in is gone.
     private func deleteLayer() {
         guard selected != KeyLayer.defaultName else { return }
         model.config.layers.removeAll {
             $0.name == selected
         }
         selected = KeyLayer.defaultName
+        focusedChip =
+            stripSurvivesDeletion
+            ? KeyLayer.defaultName : nil
+    }
+
+    /// Whether the card still draws after the deletion — asked
+    /// of the card's OWN offer, never re-derived here: a second
+    /// copy of an offer predicate is the drift
+    /// `HomeCardOrder.isOffered` exists to prevent one level up,
+    /// and an inverted copy is how a Simple-mode user ends up
+    /// with focus on a card that left the tree.
+    private var stripSurvivesDeletion: Bool {
+        LayersCard.isOffered(
+            config: model.config,
+            mode: model.settingsMode
+        )
     }
 }

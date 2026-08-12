@@ -35,6 +35,15 @@ extension ProfilesSection {
         }
     }
 
+    /// The BROKEN list, which is its own list under its own
+    /// heading — a broken row's neighbour is never a healthy one.
+    func neighbourBrokenAfter(_ name: String) -> String? {
+        DeletionFocus.neighbour(
+            after: name,
+            in: model.brokenProfiles.map(\.name)
+        )
+    }
+
     private func brokenRow(_ broken: BrokenProfile) -> some View {
         let name = broken.name
         return HStack(alignment: .firstTextBaseline) {
@@ -54,6 +63,13 @@ extension ProfilesSection {
                 Image(systemName: "magnifyingglass")
             }
             .buttonStyle(.borderless)
+            // This row's return destination (#816): Reveal is
+            // the always-drawn, non-destructive control here,
+            // exactly as Load is on a healthy row. A broken row
+            // has no Load — that is what makes it broken — so
+            // the two lists name different controls for the same
+            // reason rather than sharing one by symmetry.
+            .focused($returningRow, equals: name)
             // The Config Issues panel's own key, not a second
             // one: it labels this exact action on this exact
             // file, and coining a twin is the defect this file's
@@ -78,7 +94,15 @@ extension ProfilesSection {
                         "discard.delete_profile.confirm",
                         "Discard & delete"
                     )
-                ) { model.deleteProfile(named: name) }
+                ) {
+                    // Before the mutation, and within THIS list:
+                    // a broken row's neighbour is another broken
+                    // row, never a healthy one that renders
+                    // above under its own heading (#816).
+                    let neighbour = neighbourBrokenAfter(name)
+                    model.deleteProfile(named: name)
+                    returningRow = neighbour
+                }
             } label: {
                 Image(systemName: "trash")
             }

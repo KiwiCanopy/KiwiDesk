@@ -26,6 +26,13 @@ struct ProfilesSection: View {
     /// (file ceiling), and `@State` cannot move to an extension.
     @State var renaming: String?
     @State var renameDraft = ""
+    /// Where the keyboard lands after a row stops existing
+    /// (#816). Keyed by profile NAME across both lists — a
+    /// profile is either loaded or broken, never in both, so one
+    /// key cannot be claimed by two rows. `internal` for the
+    /// same reason the rename state is: the rows that bind it
+    /// live in extensions, and `@FocusState` cannot move there.
+    @FocusState var returningRow: String?
 
     var body: some View {
         ScrollView {
@@ -147,6 +154,16 @@ struct ProfilesSection: View {
         )
     }
 
+    /// This list's display order, handed to the shared rule
+    /// (`DeletionFocus`) — which order it is IS this call site's
+    /// contribution; the stepping is not.
+    func neighbourAfterDeleting(_ name: String) -> String? {
+        DeletionFocus.neighbour(
+            after: name,
+            in: orderedSummaries.map(\.name)
+        )
+    }
+
     private func profileRow(
         _ summary: ProfileSummary
     ) -> some View {
@@ -238,6 +255,12 @@ struct ProfilesSection: View {
         }
         .settingsActionButton()
         .controlSize(.large)
+        // The row's return destination (#816). Load is the
+        // always-drawn, non-destructive one: "make default" is
+        // conditional on the row not already being default, the
+        // name opens a rename, and Delete would put a
+        // destructive action under the next keypress.
+        .focused($returningRow, equals: summary.name)
         .help(
             summary.matchesLive
                 ? ""
@@ -262,7 +285,15 @@ struct ProfilesSection: View {
                     "discard.delete_profile.confirm",
                     "Discard & delete"
                 )
-            ) { model.deleteProfile(named: name) }
+            ) {
+                // Read BEFORE the mutation (#816): afterwards
+                // the list names whichever row slid into the
+                // gap, which is right by accident and wrong at
+                // the end of a list.
+                let neighbour = neighbourAfterDeleting(name)
+                model.deleteProfile(named: name)
+                returningRow = neighbour
+            }
         } label: {
             Image(systemName: "trash")
         }

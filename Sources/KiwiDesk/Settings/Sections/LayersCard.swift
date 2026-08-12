@@ -60,8 +60,24 @@ struct LayersCard: View {
     /// someone's own setup from them, which is the failure this
     /// card's earlier draft actually shipped by reading the tier
     /// as `.showMore`.
+    /// Static, so the STRIP inside this card can ask the same
+    /// predicate rather than keep a second copy of it: deleting
+    /// the last custom layer retires this whole card in Simple
+    /// mode, and the strip has to know that to decide whether
+    /// naming a focus destination inside it means anything
+    /// (#816). One predicate, the `HomeCardOrder.isOffered`
+    /// shape one level down.
+    static func isOffered(
+        config: GuiConfig,
+        mode: SettingsMode
+    ) -> Bool {
+        ShortcutsGates(config: config)
+            .inertReason(for: .shortcuts(.switchToLayer)) == nil
+            || mode == .powerUser
+    }
+
     private func offered(in mode: SettingsMode) -> Bool {
-        layersExist || mode == .powerUser
+        Self.isOffered(config: model.config, mode: mode)
     }
 
     private var offered: Bool {

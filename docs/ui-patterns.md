@@ -1141,7 +1141,14 @@ was written down:
   adjacent (Background style over Background size, a toggle
   over its slider) — keeps just the `GreyOut` hover string: the
   adjacency answers "why", and a header `?` would gloss a
-  single self-explaining row. A **master** control higher up
+  single self-explaining row. **Adjacent is the operative word,
+  and it is derived** (#815): same area, same container, and the
+  gating row drawn whenever the gated one is — two rows inside
+  one disclosure qualify, a row on the same page but in another
+  card does not, and that last case draws its reason inline
+  instead (`GateReasonPlacement`, argued in
+  `docs/design-decisions.md` ▸ usable without a mouse is a
+  second claim). A **master** control higher up
   the *same* page, driving rows in later cards, is not a fourth
   case to reach for: Gaps & Borders shipped one for a commit
   (#754) and it was the wrong shape twice over — the followers

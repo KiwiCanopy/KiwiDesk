@@ -655,8 +655,8 @@ that fall on a change here:
 "Accessible with VoiceOver" and "usable without a mouse" are two
 claims, and this tree has historically shipped the first while
 believing it shipped both. The argument is in
-`docs/design-decisions.md`; the obligations a change here takes
-on:
+`docs/design-decisions.md` ▸ usable without a mouse is a second
+claim; the obligations a change here takes on:
 
 - **A `.contextMenu` is right-click and nothing else**, macOS
   having no default key that opens a focused control's
@@ -679,10 +679,19 @@ on:
   rather than leaving one value spoken as three elements.
 - **A dim is not a sentence.** A greyed row that announces only
   "dimmed" is a dead end: the dimming says an answer exists and
-  withholds it. The reachable form is the one `NativeSpacesGroup`
-  already uses and `GreyOutAnchorTests` records — the reason
-  drawn INLINE, outside the dimmed subtree, where it is read
-  without a click. **A hint is not a proven substitute**: an
+  withholds it. **Which channel carries the reason is derived,
+  not chosen** (#815): `GateReasonPlacement` reads the census —
+  a block gate keeps its `?` anchor, a row whose cause is in its
+  own container needs nothing, a row gated from another
+  destination takes the `?` that names where to go, and only
+  what falls through all three draws the reason INLINE, outside
+  the dimmed subtree, the way `NativeSpacesGroup` and
+  `GeneralRestartRow` already do. So do NOT caption every greyed
+  row — a `GreyOut` inside a `ForEach` stamps its sentence under
+  every child, and several of these greys are ordinary states.
+  `GateReasonPlacementTests` holds the derivation against the
+  sites that already draw one and records the one class still
+  waiting on its anchor. **A hint is not a proven substitute**: an
   `.accessibilityHint` on `GreyOut` was written and backed out
   because that modifier wraps whole blocks, so whether it
   reaches the controls inside — and whether its empty value
@@ -769,6 +778,21 @@ Every surface, border and ink in the Settings tree comes from
   not choose. Retired outright, along with the two `NSColor`
   window surfaces, by the lens in `SettingsThemeWiringTests` —
   which carries no exemption map on purpose.
+- **A focus RING is the exception, and stays the platform's**
+  (#833). `NSColor.keyboardFocusIndicatorColor` reads the user's
+  system accent and ignores `.tint` exactly as
+  `Color.accentColor` does, but here that is right: a focus ring
+  follows their accent AND their "Increase contrast" and
+  focus-ring settings, which is behavior, and the north star
+  binds behavior to the platform. So **leave a `TextField`'s
+  ring alone** — converting one to `.plain` to paint it kiwi
+  removes the platform's indicator, and a control that does that
+  owes an indicator of its own plus the contrast the platform's
+  had — the search chip is the worked example, which took
+  `.plain` for the chip shape and then owed itself an indicator
+  (its accent at 0.55 measured 1.52:1 on `sunken` and had to go
+  to full strength). The argument is in
+  `docs/design-decisions.md` ▸ a focus ring is the platform's.
 - **The accent marks control FILLS, never text naming a value.**
   A toggle track, a selected segment, a prominent Save.
   **A control style that colours its label from the tint owes a
