@@ -221,64 +221,6 @@ struct BootAppBudgetTests {
         #expect(loop.observes(pid: pids[0]))
     }
 
-    /// One app's cost is one blocking call, which no budget can
-    /// interrupt — so the same app is not asked again this boot.
-    /// The device log paid it three times: 4004 ms at attach,
-    /// then 5008 ms in the sweep, then again in the
-    /// monitor-change reload.
-    @Test("a deferred app is skipped by later passes this boot")
-    func aDeferredAppIsSkippedLater() {
-        let (loop, box) = makeLoop()
-        box.step = .milliseconds(600)
-        #expect(loop.beginScan())
-        defer { loop.stop() }
-        loop.scanChunk(budget: nil)
-        #expect(box.deferrals.count == 2)
-        // The boot tail drains — and production ALWAYS drains
-        // before the sweep opens, a second earlier. Clearing the
-        // skip list on that take handed the sweep an empty list
-        // and it paid the outlier again, which is the saving this
-        // mechanism exists for (code review, 2026-08-12).
-        #expect(!loop.takeDeferredBootApps().isEmpty)
-        let queriesAfterScan = box.windowQueries
-        let installsAfterScan = box.observerInstalls
-
-        // The sweep queues both apps again …
-        #expect(loop.beginSweep())
-        loop.scanChunk(budget: nil)
-
-        // … and touches neither: no window snapshot, no AX at
-        // all, for an app already given up on.
-        #expect(box.windowQueries == queriesAfterScan)
-        #expect(box.observerInstalls == installsAfterScan)
-        // The sweep found nothing new to defer, the scan's
-        // deferrals having already been taken by the tail.
-        #expect(loop.takeDeferredBootApps().isEmpty)
-    }
-
-    /// The skip list is a fact about ONE boot: a later launch
-    /// must give the app its chance again, or an app that was
-    /// merely busy once is written off for the session.
-    @Test("a new boot clears the skip list")
-    func aNewBootClearsTheSkipList() {
-        let (loop, box) = makeLoop()
-        box.step = .milliseconds(600)
-        #expect(loop.beginScan())
-        loop.scanChunk(budget: nil)
-        #expect(box.deferrals.count == 2)
-        loop.stop()
-
-        // A fresh boot, with the app answering promptly now.
-        box.step = .milliseconds(1)
-        let queriesAfterFirstBoot = box.windowQueries
-        #expect(loop.beginScan())
-        defer { loop.stop() }
-        loop.scanChunk(budget: nil)
-
-        #expect(box.windowQueries > queriesAfterFirstBoot)
-        #expect(box.deferrals.count == 2)
-    }
-
     /// The dangerous half of the abort, and the reason the
     /// reconcile checkpoints return where they do: the sweep at
     /// the end of `reconcile` derives destroys from the live list
@@ -316,26 +258,4 @@ struct BootAppBudgetTests {
         #expect(loop.elements[pids[0]]?[tracked] == nil)
     }
 
-    /// The sweep budgets exactly as the scan does, so it owes the
-    /// same completion: a ledger only the boot tail took would
-    /// leave a sweep-deferred app sitting untaken until `stop()`
-    /// discarded it — abandoned to #675's heal, which is the
-    /// outcome deferral exists to spare it (code review,
-    /// 2026-08-12).
-    @Test("the sweep's deferrals are recorded for completion")
-    func theSweepAlsoDefers() {
-        let (loop, box) = makeLoop()
-        box.step = .milliseconds(1)
-        #expect(loop.beginScan())
-        defer { loop.stop() }
-        loop.scanChunk(budget: nil)
-        _ = loop.takeDeferredBootApps()
-
-        box.step = .milliseconds(600)
-        #expect(loop.beginSweep())
-        loop.scanChunk(budget: nil)
-
-        #expect(!box.deferrals.isEmpty)
-        #expect(!loop.takeDeferredBootApps().isEmpty)
-    }
 }

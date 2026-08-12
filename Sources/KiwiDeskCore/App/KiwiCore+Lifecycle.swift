@@ -51,10 +51,20 @@ extension KiwiCore {
 
     /// One chunk's discoveries land as one retile, and the
     /// deferral is re-raised for the next chunk.
+    ///
+    /// The retile is per chunk; the z-order arm is NOT. A sweep
+    /// over a hundred apps would otherwise arm dozens of times
+    /// while almost every chunk discovers nothing, and in track
+    /// mode each arm drains a verified raise sequence on the
+    /// blocking ordered queue — holding the mouse warp for its
+    /// whole span, seconds after the mark went bright.
+    /// "Harmless, it re-raises the same order" is exactly the
+    /// argument state-and-layout.md ▸ "Arm narrowly" rejects, so
+    /// the single arm stays in the epilogue (architect review,
+    /// 2026-08-12).
     private func foldSweepChunk() {
         defersEventRetiles = false
         retile()
-        scheduleTrackZOrderRestoreIfOverflowing()
         defersEventRetiles = true
     }
 

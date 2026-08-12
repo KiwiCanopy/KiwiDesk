@@ -229,22 +229,30 @@ extension KiwiCore {
     /// 2026-08-12).
     func drainDeferredBootApps(_ queue: [(pid_t, AppRef)]) {
         guard !queue.isEmpty else { return }
-        let wasRunning = !boot.pendingDeferredApps.isEmpty
-        boot.pendingDeferredApps.append(contentsOf: queue)
+        // "Is a chain already running" is DERIVED from the queue
+        // rather than stored beside it — one fact, not two that
+        // can disagree. The precondition that makes the
+        // derivation safe: nothing between the `removeFirst()`
+        // below and its `scheduleNextDeferredApp()` suspends, so
+        // the queue is empty-with-a-live-chain only inside one
+        // synchronous body. An `await` added there would buy a
+        // second chain (architect review, 2026-08-12).
+        let wasRunning = !eventLoop.bootScan.pendingDrain.isEmpty
+        eventLoop.bootScan.pendingDrain.append(contentsOf: queue)
         guard !wasRunning else { return }
         scheduleNextDeferredApp()
     }
 
     private func scheduleNextDeferredApp() {
-        guard !boot.pendingDeferredApps.isEmpty else { return }
+        guard !eventLoop.bootScan.pendingDrain.isEmpty else { return }
         deferred.schedule(
             .deferredBootApps,
             after: Self.deferredAppPause
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning,
-                !self.boot.pendingDeferredApps.isEmpty
+                !self.eventLoop.bootScan.pendingDrain.isEmpty
             else { return }
-            let (pid, ref) = self.boot.pendingDeferredApps
+            let (pid, ref) = self.eventLoop.bootScan.pendingDrain
                 .removeFirst()
             let begin = ContinuousClock.now
             // `coalesceTabs: false`, exactly as the pass step

@@ -35,11 +35,15 @@ editing AX code:
   (`EventLoop+BootScan`) with the run loop handed back in
   between — that run loop is what serves the menu-bar item and
   the ⌃⌥K panel, and an accessory app the user can see must
-  answer. Two obligations fall on a change here. **A new pass
+  answer. Three obligations fall on a change here. **A new pass
   over every app takes the chunked path** rather than a bare loop:
   the startup sweep already did this to itself once, blocking
   5285 ms one second after boot and re-breaking the menu the scan
-  had just freed. And **any abort added inside `reconcile` returns
+  had just freed. **A pass that budgets drains the deferral
+  ledger in its own epilogue** — the sweep budgeted and did not,
+  so an app it cut short sat there until `stop()` discarded it,
+  abandoned to #675's heal, which is the outcome deferral exists
+  to spare it. And **any abort added inside `reconcile` returns
   before `reconcileTabsAndSweep`** — that sweep derives destroys
   from the live list, so a mid-read exit with the sweep still
   running untracks every window the abort never reached.

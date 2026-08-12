@@ -92,13 +92,29 @@ struct BootScanState {
     /// a pass and must never be cut short — only the boot work
     /// this pass queued trades completeness for latency.
     var stepBudget: Duration?
+    /// Apps a budget cut short, waiting for their completing
+    /// reconcile — one queue for BOTH passes' epilogues, so the
+    /// sweep's deferrals join the chain rather than replacing it.
+    ///
+    /// Here rather than on `BootRun` because this is where the
+    /// resets already live: `stop()` replaces this struct and
+    /// `beginScan` clears what must not cross a boot. Held on the
+    /// run instead, it was the one boot-scoped ledger nothing
+    /// reset — and a `stop()` mid-drain then left it non-empty
+    /// forever, so every later launch read "a chain is already
+    /// running", scheduled none, and abandoned every deferred app
+    /// for the session (architect review, 2026-08-12).
+    var pendingDrain: [(pid_t, AppRef)] = []
     /// Apps a budget already cut short THIS boot. A pass skips
     /// them outright rather than paying the same blocking call
     /// again: the measured outlier cost 4004 ms at attach, then
     /// 5008 ms in the sweep, for one app that answers nothing
-    /// (owner's device log, 2026-08-12). Cleared when the drain
-    /// takes them, so the completion still happens — once, off
-    /// the critical path.
+    /// (owner's device log, 2026-08-12).
+    ///
+    /// Cleared by `beginScan()`, and deliberately NOT when the
+    /// drain takes the deferrals: the boot tail drains a second
+    /// before the sweep opens, so clearing there handed the sweep
+    /// an empty list and it paid the outlier all over again.
     var unresponsiveApps: Set<pid_t> = []
     /// Apps a budget cut short, with the ref their completing
     /// reconcile needs. Taken by the epilogue of whichever pass
@@ -140,7 +156,12 @@ extension EventLoop {
         }
         // A new boot has no history: an app that could not answer
         // last time deserves its chance again.
+        // A new boot has no history: an app that could not answer
+        // last time deserves its chance again, and a drain queue
+        // left by a launch that stopped mid-chain was that
+        // launch's to finish.
         bootScan.unresponsiveApps = []
+        bootScan.pendingDrain = []
         let visible = visiblePIDs()
         let apps = runningApplications()
         open(

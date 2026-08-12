@@ -199,6 +199,36 @@ struct BootPhaseWiringTests {
         )
     }
 
+    /// The fold retiles per chunk and arms NOTHING: a sweep over
+    /// a hundred apps would otherwise arm the z-order restore
+    /// dozens of times, and in track mode each arm drains a
+    /// verified raise sequence holding the mouse warp — seconds
+    /// after the mark went bright (architect review,
+    /// 2026-08-12). The single arm belongs to the epilogue.
+    @Test("the sweep's fold retiles without arming")
+    func theFoldDoesNotArm() throws {
+        let text = try source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
+        )
+        let fold = #"func foldSweepChunk\(\)[\s\S]{0,400}?\}"#
+        let found = try #require(
+            text.range(of: fold, options: .regularExpression)
+        )
+        let foldBody = String(text[found])
+        #expect(foldBody.contains("retile()"))
+        #expect(
+            !foldBody.contains(
+                "scheduleTrackZOrderRestoreIfOverflowing"
+            ),
+            """
+            The sweep's per-chunk fold arms the z-order restore \
+            again — dozens of arms per sweep, each one a \
+            verified raise sequence that holds the mouse warp \
+            for its span. state-and-layout.md ▸ Arm narrowly.
+            """
+        )
+    }
+
     /// A stop mid-boot must not write the session file.
     @Test("stop preserves the session while starting")
     func stopPreservesTheSessionMidBoot() throws {

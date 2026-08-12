@@ -1,7 +1,8 @@
 import Foundation
 import os
 
-/// The in-flight boot's phase, spans and timestamps (#801).
+/// The in-flight boot's phase, its spans and timestamps, and
+/// the one latch that outlives the phase (#801).
 ///
 /// A holder type rather than four more stored properties on
 /// `KiwiCore`: the boot no longer runs inside one `start()` call,
@@ -31,11 +32,6 @@ final class BootRun {
     /// the session the first stop preserved (code review,
     /// 2026-08-12). Set by the boot tail, cleared by `start()`.
     var reachedReady = false
-
-    /// Apps a budget cut short, waiting for their completing
-    /// reconcile — one queue for BOTH passes' epilogues, so the
-    /// sweep's deferrals join the chain rather than replacing it.
-    var pendingDeferredApps: [(pid_t, AppRef)] = []
 
     /// The `boot` signpost interval, open from the prologue until
     /// the tail — one interval across the chunks, so Instruments
