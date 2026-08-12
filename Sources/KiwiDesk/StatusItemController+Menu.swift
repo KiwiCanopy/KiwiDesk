@@ -8,7 +8,16 @@ import KiwiDeskCore
 extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        // Every row below states its own `isEnabled` (#802): with
+        // AppKit's auto-enabling on, a row is enabled iff its
+        // action validates, so a row that WORKS cannot be greyed
+        // for a reason of ours — which is exactly what boot needs
+        // for Layout and Switch Profile. The cost is that a
+        // nil-action row is no longer disabled for free, so each
+        // one says so.
+        menu.autoenablesItems = false
         let profiles = profilesProvider()
+        let phase = bootPhaseProvider()
 
         // Problem zone (top): warning rows appear only when they
         // apply, so a healthy menu opens straight on Layout with
@@ -39,6 +48,26 @@ extension StatusItemController {
                     + "resume tiling."
             )
             warnings.append(paused)
+        }
+        if case .scanning(let scanned, let total) = phase {
+            // A determinate count, deliberately in words: menus
+            // carry no progress bars, and the honest number is
+            // apps LOOKED AT of apps running — `BootPhase` argues
+            // why the attach tally would read as a stalled bar.
+            // Disabled, monochrome, and gone the moment boot ends:
+            // it is the sentence that explains the greys below.
+            let status = NSMenuItem(
+                title: L(
+                    "menu.starting",
+                    "Starting up — apps scanned: %1$d of %2$d",
+                    scanned,
+                    total
+                ),
+                action: nil,
+                keyEquivalent: ""
+            )
+            status.isEnabled = false
+            warnings.append(status)
         }
         if configError {
             let issues = NSMenuItem(
@@ -92,9 +121,17 @@ extension StatusItemController {
             current.isEnabled = false
             menu.addItem(current)
         }
-        menu.addItem(layoutItem())
+        // Grey, don't hide (#171): both act on state the scan has
+        // not finished collecting, and both will work in a
+        // moment — which is the case dimming is for. The starting
+        // row above is the sentence that says why.
+        let layout = layoutItem()
+        layout.isEnabled = !phase.isStarting
+        menu.addItem(layout)
         if hasSwitchTarget {
-            menu.addItem(switchProfileItem(profiles))
+            let switcher = switchProfileItem(profiles)
+            switcher.isEnabled = !phase.isStarting
+            menu.addItem(switcher)
         }
 
         // App chrome: Settings sits low, next to Quit, as in

@@ -72,8 +72,17 @@ struct AdoptionHealScheduleTests {
             box.censusReads += 1
             return [:]
         }
-        loop.start()
+        runWholeScan(loop)
         return (core, box)
+    }
+
+    /// The whole scan in one turn. Production chunks it and
+    /// hands the run loop back between chunks (`KiwiCore+Boot`,
+    /// #801) — a suite has nothing to yield to, so it drains with
+    /// no budget.
+    private func runWholeScan(_ loop: EventLoop) {
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
     }
 
     @Test("the scheduled heal task sweeps and re-arms")

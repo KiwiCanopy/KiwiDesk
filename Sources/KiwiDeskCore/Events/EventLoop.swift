@@ -137,6 +137,11 @@ public final class EventLoop {
     var lastActivePid: pid_t?
     public internal(set) var isRunning = false
 
+    /// The chunked boot pass's queue, counters, per-app budget
+    /// and clock seam (#801/#803) — every field is argued on
+    /// `BootScanState`, in `EventLoop+BootScan.swift`.
+    var bootScan = BootScanState()
+
     /// Log line consumer — boot diagnostics only (the startup
     /// scan summary, slow attach/reconcile spans, #672). Wired
     /// to the core sink in `KiwiCore+Bootstrap`; defaults to the

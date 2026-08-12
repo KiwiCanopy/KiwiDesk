@@ -25,6 +25,15 @@ struct StartupSweepTests {
         var appSourceReads = 0
     }
 
+    /// The whole scan in one turn. Production chunks it and
+    /// hands the run loop back between chunks (`KiwiCore+Boot`,
+    /// #801) — a suite has nothing to yield to, so it drains with
+    /// no budget.
+    private func runWholeScan(_ loop: EventLoop) {
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
+    }
+
     @Test("the scheduled sweep task runs a reconcileAll")
     func sweepTaskReconciles() async {
         let core = makeTestCore(
@@ -48,7 +57,7 @@ struct StartupSweepTests {
             box.appSourceReads += 1
             return []
         }
-        loop.start()
+        runWholeScan(loop)
         defer { loop.stop() }
         let readsAfterStart = box.appSourceReads
 

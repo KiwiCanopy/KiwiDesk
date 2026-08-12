@@ -1,6 +1,9 @@
 ---
 paths:
   - "Sources/KiwiDeskCore/AX/**"
+  - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
 ---
 
 # Accessibility (AX) bridge
@@ -25,6 +28,29 @@ editing AX code:
   value. Red-prove the stall itself on-device (`kill -STOP` any
   GUI app, then boot), never with a real SIGSTOP in CI —
   tests.md's hang-guard rule.
+- **Boot may not hold the main actor, and one app may not spend
+  the whole budget (#801/#803).** The scan's AX calls are serial
+  and blocking, so it runs as a queue drained a chunk at a time
+  (`EventLoop+BootScan`) with the run loop handed back in
+  between — that run loop is what serves the menu-bar item and
+  the ⌃⌥K panel, and an accessory app the user can see must
+  answer. Two obligations fall on a change here. **A new pass
+  over every app takes the chunked path** rather than a bare loop:
+  the startup sweep already did this to itself once, blocking
+  5285 ms one second after boot and re-breaking the menu the scan
+  had just freed. And **any abort added inside `reconcile` returns
+  before `reconcileTabsAndSweep`** — that sweep derives destroys
+  from the live list, so a mid-read exit with the sweep still
+  running untracks every window the abort never reached.
+  `BootScanChunkTests` pins the queue and its once-only epilogue;
+  `BootAppBudgetTests` pins the per-app bound, its inertness
+  outside a pass, and the abort-before-sweep pair. The budget's
+  value is argued on `EventLoop.bootAppBudget` against the band
+  in this file's second bullet and the timeout in the one below;
+  read it there rather than quoting a number here. What the user
+  is told while this runs is `BootPhase`'s (#802), and the
+  publications no test can drive are needled by
+  `BootPhaseWiringTests`.
 - **Never assume an installed observer delivers (#675).**
   `AXObserverAddNotification` can refuse a fresh-launch app whose
   AX tree is not ready, and the refusal used to be discarded —

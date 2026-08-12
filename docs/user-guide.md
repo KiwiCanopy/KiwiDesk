@@ -312,6 +312,19 @@ the KiwiDesk icon opens the quick menu where you can:
 - **Window Management Paused…** (only when Accessibility permission
   is missing): appears at the top of the menu and reopens the
   permission wizard so tiling can resume.
+- **Starting up — apps scanned: N of M** (only while KiwiDesk is
+  coming up): a live count of how far the startup scan has got.
+  While it shows, the menu-bar mark is drawn dimmed and **Layout**
+  and **Switch Profile** are greyed — they act on windows the scan
+  has not collected yet and work as soon as it finishes. The mark
+  returning to full strength is the signal that KiwiDesk is ready;
+  the row and the greys disappear with it.
+
+  On a busy Mac (a hundred or more running apps) this takes a few
+  seconds, and the menu opens throughout — one slow app can no
+  longer keep the whole desk waiting. An app whose Accessibility
+  answers are unusually slow is finished off just after boot, so
+  its windows are tiled a beat later than everything else.
 
 ### The Shortcuts Reference
 

@@ -5171,6 +5171,79 @@ is baked at rasterization time rather than tinted at runtime.
 constraint both went in #479, which split the fused path.)
 
 
+### Boot: the wait is narrated, never hidden
+
+**[Principle]**
+
+**An accessory app that is present must answer.** The startup
+scan used to run as one synchronous block — ~10 s on a heavy
+session (109 running apps) — and it held the very run loop the
+menu-bar item and the ⌃⌥K panel are served from, so an icon the
+user could see answered nothing, and the silence ended with every
+window on the desk retiling at once. Both halves are the same
+root: work that long cannot own the main actor. The scan is a
+queue now, drained a chunk at a time with the run loop handed
+back in between ([#801](https://github.com/KiwiCanopy/KiwiDesk/issues/801)).
+
+**A readiness state is only honest if the surface behind it
+works.** A "starting" badge over a menu that still will not open
+is the same broken read with a costume on, which is why the
+chunking is the prerequisite and not the polish. With it in place
+the signal reuses conventions the app already has, and adds no
+surface: the menu-bar mark keeps its glyph and is drawn dimmed
+(lightness, because the bar tints template images itself — and
+because hue is the channel colour-vision deficiency takes away),
+the quick menu opens on a disabled row carrying a determinate
+count, and Layout / Switch Profile are greyed rather than hidden
+(#171 — they work in a moment, which is what dimming is for; the
+count row is the sentence that explains the grey). The mark
+returning to full strength IS the ready signal
+([#802](https://github.com/KiwiCanopy/KiwiDesk/issues/802)).
+
+**[Trade-off]**
+
+**The count is apps looked at, not apps adopted.** On the
+measured session 51 of 109 running apps ever attach — the rest
+own no window or are ignored — so an attach tally stops at 47%
+and reads as a progress bar that stalled. Apps *visited* reaches
+its total, which is the difference between accurate and honest.
+The same number is what the tour's grant screen shows while it is
+arranging, so a user who reads both surfaces never finds two.
+
+**A screen that claims a finished job must wait for it.** The
+tour's post-grant screen used to be reachable only after boot
+finished — because the Continue button was itself blocked by it —
+and it told the user their windows *have been* arranged.
+Chunked, the same screen is read mid-scan, so the claim now waits
+for readiness and the screen narrates until then. Rejected
+alternatives, all of which reintroduce something already ruled
+out: a **full-screen boot overlay or brand animation** (a
+takeover that fires uninvited at every login for a permanent
+accessory app, steals focus mid-keystroke, has no multi-monitor
+answer, puts brand chrome in a boot path — and, with the main
+thread starved, would freeze its own animation, exhibiting the
+hang it exists to excuse); a **transient HUD near the menu-bar
+item** (an uninvited window at every login, needing a dismissal
+policy and an anchor under a notch); and a **command queue**
+during boot (a retile queued at second 2 firing at second 9 is a
+worse surprise than the one being removed, and a new state
+machine paid on every boot to save seconds on heavy ones).
+
+**One slow app is deferred, never abandoned.** Chunking cannot
+divide a single app's AX work, and one app's reconcile measured
+5011 ms against 4826 ms for the other 108 together — so a
+per-app wall-clock budget (500 ms: clear of the 100–300 ms
+Electron/WebKit band, inside one AX messaging timeout) drops what
+is left of that app's boot work, names it in the log so the
+outlier stays diagnosable from a field syslog, and completes it
+unbudgeted after boot, one app per turn
+([#803](https://github.com/KiwiCanopy/KiwiDesk/issues/803)).
+Deferral *with completion* rather than a timeout that abandons
+stragglers: an unadopted app's windows must eventually be
+managed, which is what the census-gated heal
+([#675](https://github.com/KiwiCanopy/KiwiDesk/issues/675))
+exists to guarantee and what this spares it.
+
 ### Recovery escape hatches
 
 **[Principle]**

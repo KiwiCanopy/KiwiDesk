@@ -72,6 +72,10 @@ extension AppDelegate {
             return
         }
         onboardingModel.isTrusted = permissions.isTrusted
+        // Seeded, not only pushed: a replay opened mid-boot would
+        // otherwise inherit the model's `.ready` default and claim
+        // a finished arrangement (#802).
+        onboardingModel.bootPhase = core.bootPhase
         onboardingModel.onOpenSettings = {
             PermissionMonitor.openSystemSettings()
         }

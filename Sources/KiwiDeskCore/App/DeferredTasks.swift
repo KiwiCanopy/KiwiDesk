@@ -20,8 +20,19 @@ final class DeferredTasks {
         /// (`scheduleFocusFollow`).
         case focusFollow
         /// One-shot startup sweep re-tracking windows the cold
-        /// AX scan missed (`scheduleStartupSweep`).
+        /// AX scan missed (`scheduleStartupSweep`) — and, once it
+        /// has fired, each of its own chunks (#801): the pass is
+        /// one job, so re-using its slot is what makes
+        /// `cancelAll()` stop a sweep mid-flight.
         case startupSweep
+        /// The next chunk of the startup scan (`driveBootScan`,
+        /// #801). The scan hands the run loop back between
+        /// chunks; this is what brings it back.
+        case bootScan
+        /// The next app whose boot work a per-app budget cut
+        /// short (`drainDeferredBootApps`, #803) — one per turn,
+        /// so completing them cannot re-block the run loop.
+        case deferredBootApps
         /// One-shot layout re-assert after a virtual-space
         /// switch (`scheduleSpaceSettle`).
         case spaceSettle

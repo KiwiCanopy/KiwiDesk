@@ -17,21 +17,18 @@ extension OnboardingView {
     /// rather than as a paragraph about the permission.
     var grant: some View {
         OnboardingPage(
-            title: model.isTrusted
-                ? L(
-                    "onboarding.grant.done.title",
-                    "Your windows are arranged"
-                )
-                : L(
-                    "onboarding.grant.title",
-                    "KiwiDesk needs Accessibility"
-                ),
-            body1: model.isTrusted ? grantedBody : grantLead,
+            title: grantTitle,
+            body1: grantBody,
             hint: model.isTrusted ? nil : grantHint
         ) {
             wordmark
             if model.isTrusted {
                 grantedMark
+                if case .scanning(let scanned, let total) =
+                    model.bootPhase
+                {
+                    arrangingLine(scanned: scanned, total: total)
+                }
             } else {
                 grantSteps
             }
@@ -55,6 +52,79 @@ extension OnboardingView {
                 .keyboardShortcut(.defaultAction)
             }
         }
+    }
+
+    /// Three states, not two: waiting for the grant, arranging,
+    /// arranged. The middle one exists because the boot is chunked
+    /// now (#801) — the Continue button answers immediately, so
+    /// this screen is read while the scan is still running, and
+    /// the finished-job copy would be the only thing lying about
+    /// it.
+    /// Internal, not private: the three states are a surfacing
+    /// branch, and `OnboardingGrantPhaseTests` reads them — a
+    /// branch inside a `body` is exactly what every other guard
+    /// passes over (gui.md).
+    var grantTitle: String {
+        guard model.isTrusted else {
+            return L(
+                "onboarding.grant.title",
+                "KiwiDesk needs Accessibility"
+            )
+        }
+        return model.bootPhase.isStarting
+            ? L(
+                "onboarding.grant.arranging.title",
+                "Arranging your windows"
+            )
+            : L(
+                "onboarding.grant.done.title",
+                "Your windows are arranged"
+            )
+    }
+
+    var grantBody: String {
+        guard model.isTrusted else { return grantLead }
+        return model.bootPhase.isStarting
+            ? L(
+                "onboarding.grant.arranging.body",
+                """
+                Permission is on. KiwiDesk is going through your \
+                open windows now — on a busy Mac this takes a \
+                moment.
+
+                Setup windows like this one are left alone, \
+                because they go away.
+                """
+            )
+            : grantedBody
+    }
+
+    /// The same determinate count the quick menu shows, in the
+    /// same words: one fact, and a user who checks both must not
+    /// find two numbers. The dot is the tour's existing waiting
+    /// vocabulary, so the state reads as continuing rather than as
+    /// a new kind of progress.
+    private func arrangingLine(
+        scanned: Int,
+        total: Int
+    ) -> some View {
+        HStack(spacing: 9) {
+            WaitingDot()
+            Text(
+                L(
+                    "onboarding.grant.arranging.count",
+                    "Apps scanned: %1$d of %2$d",
+                    scanned,
+                    total
+                )
+            )
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.system(size: 12.5))
+        .foregroundStyle(SettingsTheme.ink3)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, 10)
+        .accessibilityElement(children: .combine)
     }
 
     private var wordmark: some View {

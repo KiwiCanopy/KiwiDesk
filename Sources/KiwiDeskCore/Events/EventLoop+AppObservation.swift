@@ -111,14 +111,38 @@ extension EventLoop {
         // re-warms (StartupWarmupSkipTests, #662).
         guard scanWindowsAtAttach else { return }
 
+        // Every call below can block for a whole AX messaging
+        // timeout on an unresponsive app, and boot pays them
+        // serially — so a chunked pass drops what is left of this
+        // app's work past its budget and completes it after boot
+        // (#803). Inert outside a chunked pass.
+        let budget = openAppBudget()
         let windows = axWindows(pid)
         if activationPolicy == .regular
             || windows.contains(where: Self.isStandardWindow)
         {
+            guard !budget.isSpent else {
+                deferBootWork(
+                    pid: pid,
+                    ref: ref,
+                    spentMs: begin.duration(to: .now)
+                        .wholeMilliseconds
+                )
+                return
+            }
             warmAccessibilityTree(pid: pid)
         }
         let displayBounds = FloatDetection.activeDisplayBounds()
         for element in windows {
+            guard !budget.isSpent else {
+                deferBootWork(
+                    pid: pid,
+                    ref: ref,
+                    spentMs: begin.duration(to: .now)
+                        .wholeMilliseconds
+                )
+                return
+            }
             track(
                 element,
                 pid: pid,

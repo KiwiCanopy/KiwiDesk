@@ -58,6 +58,17 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Active keybinding mode indicator (SF Symbol or emoji);
     /// nil restores the standard KiwiDesk icon.
     private var modeIcon: String?
+    /// Boot is still scanning (#802). Ranked below the permission
+    /// warning and above the config error: without Accessibility
+    /// nothing works regardless of how far a boot got, while a
+    /// config problem is a thing to fix once the app can be
+    /// clicked at all. `private(set)` for the same reason as
+    /// `warning` — every write goes through `setBootPhase`.
+    private(set) var starting = false
+    /// The live boot count the quick menu's status row reads,
+    /// pulled fresh on each open (the `profilesProvider` shape) —
+    /// a count pushed at render time would be stale by the chunk.
+    var bootPhaseProvider: () -> BootPhase = { .ready }
 
     /// `nil` means the live system slot. The optional-with-nil
     /// shape, rather than `= SystemStatusItem()`, is what lets
@@ -89,6 +100,17 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         render()
     }
 
+    /// Reflects how far the boot has got (#802). Only the
+    /// starting-vs-ready flip changes the icon, so the per-chunk
+    /// progress publications cost one comparison each — the
+    /// counts themselves are read on menu open.
+    func setBootPhase(_ phase: BootPhase) {
+        let wasStarting = starting
+        starting = phase.isStarting
+        guard starting != wasStarting else { return }
+        render()
+    }
+
     /// Reflects the active keybinding mode: a custom mode's
     /// icon replaces the standard menu bar glyph; the default
     /// mode (nil) restores it.
@@ -106,6 +128,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private func render() {
         guard let button = item.button else { return }
+        // Lightness is the whole starting signal: the menu bar
+        // tints template images itself, so a hue would not
+        // survive it — and would be the one channel colour-vision
+        // deficiency takes away. `appearsDisabled` is AppKit's own
+        // dimming, and the mark returning to full strength IS the
+        // ready signal (#802). Assigned unconditionally, so every
+        // other branch below clears it.
+        button.appearsDisabled = starting
         if warning {
             // Permission failure keeps the loud triangle; config
             // error uses a distinct, softer circle so the two are
@@ -121,6 +151,20 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                     "menu.status.warning.tooltip",
                     "KiwiDesk needs Accessibility permission. "
                         + "Window management is paused."
+                )
+            )
+            return
+        }
+        if starting {
+            button.toolTip = L(
+                "menu.status.starting.tooltip",
+                "KiwiDesk is starting up — scanning open windows."
+            )
+            applyBrandIcon(
+                to: button,
+                a11y: L(
+                    "menu.status.starting.a11y",
+                    "KiwiDesk (starting up)"
                 )
             )
             return
@@ -144,7 +188,27 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         button.toolTip = L("menu.status.tooltip", "KiwiDesk")
         if let modeIcon, !modeIcon.isEmpty {
             applyModeIcon(modeIcon, to: button)
-        } else if let icon = BrandAssets.menuBarIcon
+        } else {
+            applyBrandIcon(
+                to: button,
+                a11y: L("menu.status.a11y", "KiwiDesk")
+            )
+        }
+    }
+
+    /// The standard kiwi mark, named for VoiceOver by the caller
+    /// — the starting state and the ready one draw the SAME
+    /// glyph, so the name is the only thing that separates them
+    /// to a reader who cannot see the dimming. The label goes on
+    /// the BUTTON rather than the image: `BrandAssets.menuBarIcon`
+    /// is a shared cached `NSImage`, and re-describing it would
+    /// rename it for every other surface that draws it.
+    private func applyBrandIcon(
+        to button: NSStatusBarButton,
+        a11y: String
+    ) {
+        button.setAccessibilityLabel(a11y)
+        if let icon = BrandAssets.menuBarIcon
             ?? symbol("rectangle.3.group")
         {
             button.image = icon
@@ -152,7 +216,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         } else {
             // Last-ditch: never leave the slot blank.
             button.image = nil
-            button.title = L("menu.status.a11y", "KiwiDesk")
+            button.title = a11y
         }
     }
 
@@ -177,6 +241,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         button.image = image
         button.title = image == nil ? "⚠︎" : ""
         button.toolTip = tooltip
+        // Same reason as `applyBrandIcon`: name the button, not
+        // the image, so every state announces itself even when
+        // the text fallback is what rendered.
+        button.setAccessibilityLabel(a11y)
     }
 
     /// A mode icon is either an SF Symbol name or a flat

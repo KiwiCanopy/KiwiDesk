@@ -2,7 +2,7 @@ import Foundation
 import Testing
 
 /// Pins the #687 click-provenance DELIVERY path in
-/// `KiwiCore+Lifecycle.swift` — the one hunk no behavior test
+/// `KiwiCore+BootSeams.swift` — the one hunk no behavior test
 /// can red on. `RaiseEchoClickTests` and
 /// `ClickReachResolutionTests` all inject `stackingOrderProvider`
 /// or fabricate `lastLeftClick`, so deleting either wiring line
@@ -12,19 +12,20 @@ import Testing
 /// "helper watched, wiring untested" hole).
 ///
 /// Needles, all against comment-stripped source:
-/// 1. `start()` wires `stackingOrderProvider` to
+/// 1. `armMachineSeams()` wires `stackingOrderProvider`
+///    to
 ///    `AXHelper.onScreenStackingOrder`.
 /// 2. the left-press stamp resolves `reached` through
 ///    `clickReachedWindow(at:)` inside the `lastLeftClick`
 ///    assignment — press-time resolution is the fix's load
 ///    -bearing choice, so an echo-time refactor must trip this
 ///    and re-argue.
-/// 3. `start()` wires `pointerWarp` to the CoreGraphics
+/// 3. `armMachineSeams()` wires `pointerWarp` to the CoreGraphics
 ///    pointer move (#689 — the same seam class, one function
 ///    over).
 ///
 /// Known limits of the scan (shipped, not denied — the #635
-/// practice): a wire assigned in `start()` and nulled later
+/// practice): a wire assigned at boot and nulled later
 /// still matches; needle 2 is textual proximity, so a stamp
 /// rewritten to `reached: nil` with a dead
 /// `clickReachedWindow(at:)` call left within its 200-char
@@ -38,17 +39,17 @@ import Testing
 /// does — the `LogSeamWiringTests` trade.
 @Suite("Click-provenance wiring (#687)")
 struct ClickProvenanceWiringTests {
-    private var lifecycle: URL {
+    private var bootSeams: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDeskCore/App/"
-                    + "KiwiCore+Lifecycle.swift"
+                    + "KiwiCore+BootSeams.swift"
             )
     }
 
     private func strippedSource() throws -> String {
         let source = SourceScan.stripComments(
-            try String(contentsOf: lifecycle, encoding: .utf8)
+            try String(contentsOf: bootSeams, encoding: .utf8)
         )
         // Fail-shut on the scan itself: an empty read would
         // pass no needle, but say so rather than red twice
@@ -57,7 +58,7 @@ struct ClickProvenanceWiringTests {
         return source
     }
 
-    @Test("start() wires the stacking provider")
+    @Test("boot wires the stacking provider")
     func stackingProviderIsWired() throws {
         let source = try strippedSource()
         let pattern =
@@ -69,7 +70,7 @@ struct ClickProvenanceWiringTests {
                 options: .regularExpression
             ) != nil
         let message =
-            "KiwiCore+Lifecycle no longer wires "
+            "KiwiCore+BootSeams no longer wires "
             + "stackingOrderProvider to AXHelper."
             + "onScreenStackingOrder — every click "
             + "resolves no provenance and #687 re-ships "
@@ -79,10 +80,10 @@ struct ClickProvenanceWiringTests {
 
     /// The `pointerWarp` seam's wiring (#689) — same class as
     /// the needles beside it: every warp test injects the seam,
-    /// so deleting the `start()` assignment leaves the whole
+    /// so deleting the boot assignment leaves the whole
     /// suite green while `pointerWarp?` stays nil and
     /// mouse-follows-focus silently never moves the pointer.
-    @Test("start() wires the pointer warp")
+    @Test("boot wires the pointer warp")
     func pointerWarpIsWired() throws {
         let source = try strippedSource()
         let pattern =
@@ -94,7 +95,7 @@ struct ClickProvenanceWiringTests {
                 options: .regularExpression
             ) != nil
         let message =
-            "KiwiCore+Lifecycle no longer wires pointerWarp "
+            "KiwiCore+BootSeams no longer wires pointerWarp "
             + "to the CoreGraphics pointer move — "
             + "mouse.follows_focus silently never moves the "
             + "pointer while every warp test stays green "

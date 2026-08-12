@@ -84,7 +84,7 @@ struct AdoptionHealTests {
         loop.onTransientDrop = { box.drops += 1 }
         if started {
             loop.runningApplications = { [] }
-            loop.start()
+            runWholeScan(loop)
             loop.runningApplications = { [self.app] }
         }
         return (loop, box)
@@ -103,6 +103,15 @@ struct AdoptionHealTests {
     /// app element is never messaged by the sweep's gate.
     private var dummyElement: AXUIElement {
         AXUIElementCreateApplication(pid)
+    }
+
+    /// The whole scan in one turn. Production chunks it and
+    /// hands the run loop back between chunks (`KiwiCore+Boot`,
+    /// #801) — a suite has nothing to yield to, so it drains with
+    /// no budget.
+    private func runWholeScan(_ loop: EventLoop) {
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
     }
 
     @Test("an untracked census id fires a reconcile")

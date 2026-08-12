@@ -45,7 +45,7 @@ struct StartupAXTimeoutTests {
     func timeoutPrecedesTheScan() {
         var order: [String] = []
         let loop = makeLoop { order.append($0) }
-        loop.start()
+        #expect(loop.beginScan())
         defer { loop.stop() }
         // Pin the value, not just the call: the whole point is
         // the bound, and 1.0 is an argued number (EventLoop.
@@ -62,9 +62,13 @@ struct StartupAXTimeoutTests {
         let loop = makeLoop { line in
             if line.hasPrefix("timeout") { applications += 1 }
         }
-        loop.start()
+        #expect(loop.beginScan())
         defer { loop.stop() }
-        loop.start()
+        // The refusal is the RETURN, not merely a skipped
+        // timeout: the chunked boot drives the queue this call
+        // would have replaced, so a driver that read `true` here
+        // would restart a scan already in flight (#801).
+        #expect(!loop.beginScan())
         #expect(applications == 1)
     }
 }
