@@ -44,7 +44,7 @@ public struct AppRef: Sendable, Equatable {
     }
 }
 
-/// How widely a window sticks across virtual spaces (#414/#445).
+/// How widely a window sticks across Spaces (#414/#445).
 ///
 /// A sticky window is a real member of exactly one space (the
 /// flat-array invariant) — stickiness only DERIVES its presence
@@ -108,7 +108,7 @@ public struct ManagedWindow: Sendable, Equatable {
     public var isTransientOverlay: Bool
     /// Native (green-button) fullscreen: the window owns a
     /// dedicated macOS Space but stays a member of its home
-    /// virtual space (no `.windowDestroyed` fires). It fills the
+    /// Space (no `.windowDestroyed` fires). It fills the
     /// display, so a focus ring would show only at the rounded
     /// corners — never draw one (jankyborders skips fullscreen
     /// windows too). Snapshotted from `kAXFullScreenAttribute`

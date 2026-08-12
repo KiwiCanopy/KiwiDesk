@@ -1,10 +1,10 @@
 import AppKit
 import Foundation
 
-/// Virtual space commands: `focus_space` and
+/// Space commands: `focus_space` and
 /// `move_to_space(_and_follow)` (#42).
 extension KiwiCore {
-    /// Follows focus into a hidden window's virtual space —
+    /// Follows focus into a hidden window's Space —
     /// but only if that window is still the frontmost app's
     /// AX-focused window after a settle delay. Immediate
     /// following would act on the transient focus re-report
@@ -14,7 +14,7 @@ extension KiwiCore {
     func scheduleFocusFollow(_ id: WindowID) {
         // Focus reports during a native desktop transition
         // reference windows that are being re-tracked; they
-        // must not flip the virtual space mid-restore.
+        // must not flip the Space mid-restore.
         guard
             Date().timeIntervalSince(lastNativeSwitch)
                 > NativeSwitch.settle,
@@ -69,7 +69,7 @@ extension KiwiCore {
         }
     }
 
-    /// After a restart, land on the virtual space of the
+    /// After a restart, land on the Space of the
     /// window the user is focused on right now — the
     /// snapshot's active space is where they were at
     /// shutdown, not where they are. Apps currently showing

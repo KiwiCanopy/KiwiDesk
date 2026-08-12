@@ -59,7 +59,7 @@ extension KiwiCore {
     }
 
     /// Focuses the cycle's successor. A same-space target is a
-    /// plain focus; one on another virtual space switches the
+    /// plain focus; one on another Space switches the
     /// way a follow move does (`followSwitch`). A STICKY
     /// target never switches (#414): its membership names only
     /// its hidden home space while the window renders right

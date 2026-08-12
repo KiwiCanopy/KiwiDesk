@@ -10,7 +10,7 @@ import SwiftUI
 /// - **Dynamic** balances the window count into a square-ish
 ///   grid and stops at the ceiling — Columns first grows a
 ///   column before a row, Rows first mirrors it. The new window
-///   sits where the placement opens it, and fill-empty-space
+///   sits where the placement opens it, and fill-empty-cells
 ///   makes the last window span the leftover cell.
 /// - **Rigid** fills the ceiling outright, leaving empty cells
 ///   until the count catches up.

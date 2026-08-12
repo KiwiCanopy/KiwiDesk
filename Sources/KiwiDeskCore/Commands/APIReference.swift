@@ -13,7 +13,7 @@ public enum APIReference {
             ("swap", "swap"),
             // Bare `space` is canonical (#42): aligned with the
             // event namespace, which uses bare `space` for a
-            // virtual space and `native_space` for macOS desktops.
+            // Space and `native_space` for macOS desktops.
             ("focus_space", "focus_space"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),

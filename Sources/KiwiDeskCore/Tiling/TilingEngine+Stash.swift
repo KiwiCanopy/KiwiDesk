@@ -1,7 +1,7 @@
 import AppKit
 import CoreGraphics
 
-// MARK: - Hiding inactive virtual spaces
+// MARK: - Hiding inactive Spaces
 
 extension TilingEngine {
     /// Visible sliver of a stashed window — asymmetric on
@@ -90,7 +90,7 @@ extension TilingEngine {
         )
     }
 
-    /// Hides every inactive virtual space's windows — tiled
+    /// Hides every inactive Space's windows — tiled
     /// AND floating (#412): a floating window belongs to one
     /// space and hides with it, exactly like a tiled one.
     /// (Windows meant to be visible everywhere are the Sticky

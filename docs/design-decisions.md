@@ -302,18 +302,41 @@ Swift type, no event name — `focus_space`, `SpaceID`,
 already disambiguates it; the Space Bar keeps its name, being
 KiwiDesk's own bar showing KiwiDesk's own spaces.
 
-**Why the macOS sense is the one that moves.** Mission Control
-labels them "Desktop 1", "Desktop 2" — so this is the word
-already on the user's screen, not a coinage — and KiwiDesk's own
-copy already said it: `native_spaces.intro` read "Each Desktop is
-a native macOS Space from Mission Control." until this pass, one
-sentence carrying both the evidence for the ruling and the last
-use of the sense it retires. Cost settles the
-rest. 119 English strings name KiwiDesk's spaces and 6 name
-macOS's, each carried by ten non-English catalogs — so renaming
-macOS's side billed ~30 translated strings where renaming ours
-would have billed ~1,190 (measured for the ruling, 2026-08-07;
-#765 carries the count for the alternative).
+**Why the macOS sense is the one that moves — and what does NOT
+decide it.** It is tempting to say "Desktop is Apple's word", and
+that claim does not survive contact with Apple's own UI. **Apple
+uses both, for different things:** the FEATURE is Spaces — the
+System Settings checkbox reads "Displays have separate Spaces"
+and the Keyboard ▸ Shortcuts rows read "Move left a space" — while
+each INSTANCE is a Desktop, labelled "Desktop 1" / "Desktop 2" in
+Mission Control and settled in the "Desktop & Dock" pane. So
+deferring to Apple resolves to no single answer, and anyone
+re-opening this on the grounds that Apple says Spaces is half
+right; they should read the next paragraph rather than this one.
+
+What the instance label does buy is that "Desktop n" is the word
+on screen at the moment a user is *looking* at the things, which
+is what a binding row names. KiwiDesk's own copy had already
+reached for it: `native_spaces.intro` read "Each Desktop is a
+native macOS Space from Mission Control." until #768 — one
+sentence stating as an identity the very thing this ruling
+splits.
+
+**Cost is what actually decides it.** The conflict is
+irreducible: two systems, one word, and one of them has to move.
+119 English strings named KiwiDesk's spaces against 6 naming
+macOS's, each carried by ten non-English catalogs, so renaming
+ours would have billed ~1,190 translated values; renaming
+macOS's side billed the 3 of those 6 whose meaning actually
+changed, at 30 (measured for the ruling, 2026-08-07; #765 carries
+the count for the alternative and is closed). A forty-to-one cost
+ratio decides a question that terminology alone leaves open.
+
+This is also why the Apple-verbatim carve-out is not an
+inconsistency but the same rule applied: where copy NAMES one of
+Apple's controls it uses Apple's word for that control, "Spaces"
+included. `.claude/rules/config-vocabulary.md` carries the
+obligation.
 
 **It is reversible, and this pass makes the reversal cheaper.**
 If the ambiguity still bites later, renaming KiwiDesk's side
@@ -1101,7 +1124,8 @@ each profile is its own file, so removing a space from the
 active profile never touches another profile that still
 declares a space of the same name. (#77)
 
-**Shared display Spaces are recommended, not required.**
+**Sharing Desktops across displays is recommended, not
+required.**
 KiwiDesk resolves one active Desktop number and one active
 profile across the whole display setup. With macOS's "Displays have
 separate Spaces" option on, multiple displays can show independent
@@ -1110,7 +1134,8 @@ unambiguously. Sharing Desktops across displays therefore makes
 Desktop→profile bindings predictable, but it is not a prerequisite
 for basic tiling.
 
-Both surfaces share one gate — separate Spaces on *and* two or more
+Both surfaces share one gate — the separate-Desktops option on
+*and* two or more
 displays connected — so a single-display setup, which has no binding
 ambiguity, is never prompted. Onboarding recommends turning the option
 off only in that state and lets the user continue without changing it.

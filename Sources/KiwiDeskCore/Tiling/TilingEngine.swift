@@ -152,7 +152,7 @@ public final class TilingEngine {
 
     /// Recomputes and applies the active space's layout.
     /// `animated: false` snaps windows to their targets in
-    /// one frame-set each (virtual space switches).
+    /// one frame-set each (Space switches).
     ///
     /// `force` skips the "already there" tolerance check and
     /// (re)issues every frame. Space switches need it: the

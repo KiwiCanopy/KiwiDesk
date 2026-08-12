@@ -9,7 +9,7 @@ extension GridSchematic {
     /// Cell rects for the windows in `ids` (drawn in array order,
     /// mirroring `GridLayout`'s fill: columns-first row-major,
     /// rows-first column-major), plus any trailing empty cell. The
-    /// last window spans the leftover when fill-empty-space is on,
+    /// last window spans the leftover when fill-empty-cells is on,
     /// and windows past the grid's capacity — which BOTH types have,
     /// since a dynamic grid balances only up to the same ceiling —
     /// cascade in the last cell.

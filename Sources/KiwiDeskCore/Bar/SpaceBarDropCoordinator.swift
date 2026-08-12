@@ -39,7 +39,7 @@ final class SpaceBarDropCoordinator {
 
     /// Space whose item contains a Cocoa screen point, else nil.
     var hitTest: @MainActor (CGPoint) -> SpaceID? = { _ in nil }
-    /// The window's current virtual space.
+    /// The window's current Space.
     var currentSpace: @MainActor (WindowID) -> SpaceID? = {
         _ in nil
     }

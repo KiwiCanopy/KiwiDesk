@@ -1,13 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ Profiles ▸ **Profiles per macOS Space** (#7,
-/// rebuilt in #678 turn 13a): bind a saved profile to each native
-/// macOS Space, picked from the row's dropdown; the binding emits
-/// `bind_profile_to_native_space` and loads that profile when the
-/// Space activates. Rows are named "Desktop n" — the name Mission
-/// Control shows — never "Space n", which is how KiwiDesk's own
-/// virtual spaces read elsewhere in the app. Bindings mutate
+/// Whole App ▸ Profiles ▸ **Profiles per macOS Desktop** (#7,
+/// rebuilt in #678 turn 13a): bind a saved profile to each macOS
+/// Desktop, picked from the row's dropdown; the binding emits
+/// `bind_profile_to_native_space` — a wire name #768 deliberately
+/// froze — and loads that profile when the Desktop activates.
+/// Rows are named "Desktop n", the name Mission Control shows,
+/// never "Space n", which is how KiwiDesk's own Spaces read
+/// elsewhere in the app. Bindings mutate
 /// `model.config.profileBindings`; the footer's profile actions
 /// persist them.
 ///

@@ -105,7 +105,9 @@ struct SpacesGateWiringTests {
         // Every gate sentence is authored ONCE, in the help enum; a
         // row that re-authors one is the duplication that let
         // General describe one status two ways.
-        let help = try read(overrides + "SpacesGates.swift")
+        let help = SourceScan.stripComments(
+            try read(overrides + "SpacesGates.swift")
+        )
         let nonAuthors =
             Array(consults.keys) + [
                 overrides + "SpaceOverrideRows.swift",
@@ -124,7 +126,8 @@ struct SpacesGateWiringTests {
             )
             for name in nonAuthors {
                 #expect(
-                    !(try read(name)).contains(key),
+                    !SourceScan.stripComments(try read(name))
+                        .contains(key),
                     Comment(
                         rawValue:
                             "\(name) re-authors \(key) — it must "
