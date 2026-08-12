@@ -234,6 +234,12 @@ struct BootAppBudgetTests {
         defer { loop.stop() }
         loop.scanChunk(budget: nil)
         #expect(box.deferrals.count == 2)
+        // The boot tail drains — and production ALWAYS drains
+        // before the sweep opens, a second earlier. Clearing the
+        // skip list on that take handed the sweep an empty list
+        // and it paid the outlier again, which is the saving this
+        // mechanism exists for (code review, 2026-08-12).
+        #expect(!loop.takeDeferredBootApps().isEmpty)
         let queriesAfterScan = box.windowQueries
         let installsAfterScan = box.observerInstalls
 
@@ -245,27 +251,32 @@ struct BootAppBudgetTests {
         // all, for an app already given up on.
         #expect(box.windowQueries == queriesAfterScan)
         #expect(box.observerInstalls == installsAfterScan)
-        // Still owed a completion, and the drain still gets them.
-        #expect(Set(loop.takeDeferredBootApps().keys) == Set(pids))
+        // The sweep found nothing new to defer, the scan's
+        // deferrals having already been taken by the tail.
+        #expect(loop.takeDeferredBootApps().isEmpty)
     }
 
-    /// The ledger clears with the take, or the NEXT boot's passes
-    /// would skip apps this one gave up on.
-    @Test("taking the deferrals clears the skip list")
-    func takingClearsTheSkipList() {
+    /// The skip list is a fact about ONE boot: a later launch
+    /// must give the app its chance again, or an app that was
+    /// merely busy once is written off for the session.
+    @Test("a new boot clears the skip list")
+    func aNewBootClearsTheSkipList() {
         let (loop, box) = makeLoop()
         box.step = .milliseconds(600)
         #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
+        #expect(box.deferrals.count == 2)
+        loop.stop()
+
+        // A fresh boot, with the app answering promptly now.
+        box.step = .milliseconds(1)
+        let queriesAfterFirstBoot = box.windowQueries
+        #expect(loop.beginScan())
         defer { loop.stop() }
         loop.scanChunk(budget: nil)
-        _ = loop.takeDeferredBootApps()
-        let queriesAfterScan = box.windowQueries
 
-        box.step = .milliseconds(1)
-        #expect(loop.beginSweep())
-        loop.scanChunk(budget: nil)
-
-        #expect(box.windowQueries > queriesAfterScan)
+        #expect(box.windowQueries > queriesAfterFirstBoot)
+        #expect(box.deferrals.count == 2)
     }
 
     /// The dangerous half of the abort, and the reason the

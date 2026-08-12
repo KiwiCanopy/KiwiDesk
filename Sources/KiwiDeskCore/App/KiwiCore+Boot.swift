@@ -40,6 +40,18 @@ extension KiwiCore {
     /// to free. A sleep is a timer, so the run loop advances.
     static let bootChunkPause: Duration = .milliseconds(8)
 
+    /// The gap before each deferred app's completing reconcile.
+    ///
+    /// Deliberately far longer than a chunk pause: this is an
+    /// UNBUDGETED reconcile of an app that has already proven it
+    /// blocks for seconds, run on the main actor. At the chunk
+    /// pause it landed 8 ms after the mark went bright — the
+    /// exact moment the user first reaches for a menu that has
+    /// just started answering. 1.5 s puts it after that, and the
+    /// windows it adopts are late by construction anyway (their
+    /// app answered nothing in time).
+    static let deferredAppPause: Duration = .milliseconds(1500)
+
     /// Loads the config and starts window management.
     ///
     /// Returns once the first chunk is done — the rest of the
@@ -55,6 +67,7 @@ extension KiwiCore {
     /// leaves one on record.
     public func start() {
         let signposter = BootSignpost.signposter
+        boot.reachedReady = false
         boot.interval = signposter.beginInterval("boot")
         boot.began = ContinuousClock.now
         armMachineSeams()
@@ -177,6 +190,7 @@ extension KiwiCore {
         drainDeferredBootApps()
         closeBootInterval()
         logBootSummary()
+        boot.reachedReady = true
         boot.publish(.ready)
     }
 
@@ -203,16 +217,35 @@ extension KiwiCore {
         )
     }
 
+    /// APPENDS, then runs the chain if it is not already running.
+    ///
+    /// Both epilogues call this, and they overlap: with two
+    /// scan-deferred apps the boot tail's chain is still working
+    /// through them when the sweep ends (each link is an
+    /// unbudgeted multi-second reconcile by construction). A
+    /// second chain started on the same deferred key would cancel
+    /// the first mid-queue and abandon its remainder — the exact
+    /// thing "deferral WITH completion" rules out (code review,
+    /// 2026-08-12).
     func drainDeferredBootApps(_ queue: [(pid_t, AppRef)]) {
-        guard let (pid, ref) = queue.first else { return }
-        let rest = Array(queue.dropFirst())
+        guard !queue.isEmpty else { return }
+        let wasRunning = !boot.pendingDeferredApps.isEmpty
+        boot.pendingDeferredApps.append(contentsOf: queue)
+        guard !wasRunning else { return }
+        scheduleNextDeferredApp()
+    }
+
+    private func scheduleNextDeferredApp() {
+        guard !boot.pendingDeferredApps.isEmpty else { return }
         deferred.schedule(
             .deferredBootApps,
-            after: Self.bootChunkPause
+            after: Self.deferredAppPause
         ) { [weak self] in
-            guard let self, self.eventLoop.isRunning else {
-                return
-            }
+            guard let self, self.eventLoop.isRunning,
+                !self.boot.pendingDeferredApps.isEmpty
+            else { return }
+            let (pid, ref) = self.boot.pendingDeferredApps
+                .removeFirst()
             let begin = ContinuousClock.now
             // `coalesceTabs: false`, exactly as the pass step
             // this completes passed it: this is the same bulk
@@ -233,7 +266,7 @@ extension KiwiCore {
             // arrangement they belong in has to be recomputed —
             // the same reason the scan's own tail retiles once.
             self.retile()
-            self.drainDeferredBootApps(rest)
+            self.scheduleNextDeferredApp()
         }
     }
 

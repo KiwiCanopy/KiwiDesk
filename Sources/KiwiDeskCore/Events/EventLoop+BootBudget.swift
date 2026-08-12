@@ -85,7 +85,14 @@ extension EventLoop {
     func takeDeferredBootApps() -> [pid_t: AppRef] {
         let apps = bootScan.deferredApps
         bootScan.deferredApps = [:]
-        bootScan.unresponsiveApps = []
+        // `unresponsiveApps` is NOT cleared here. The boot tail
+        // drains a second before the sweep opens, so clearing on
+        // take handed the sweep an empty skip list and it paid
+        // the outlier's whole cost again — the saving this
+        // mechanism exists for, undone by its own bookkeeping
+        // (code review, 2026-08-12). The list is a fact about
+        // THIS boot and dies with the pass state in `stop()` or
+        // with the next `beginScan()`.
         return apps
     }
 }

@@ -138,6 +138,9 @@ extension EventLoop {
         if registersWorkspaceObservers {
             registerWorkspaceObservers()
         }
+        // A new boot has no history: an app that could not answer
+        // last time deserves its chance again.
+        bootScan.unresponsiveApps = []
         let visible = visiblePIDs()
         let apps = runningApplications()
         open(
@@ -182,6 +185,11 @@ extension EventLoop {
     }
 
     private func open(_ pass: BootScanPass, steps: [BootScanStep]) {
+        // A pass INHERITS the boot's skip list rather than
+        // resetting it — that inheritance is the whole mechanism:
+        // the scan gives up on an app, the sweep does not ask it
+        // again. `beginScan` clears it, since that is where a
+        // boot begins.
         bootScan.pass = pass
         bootScan.pending = steps
         bootScan.total = steps.count
@@ -233,8 +241,9 @@ extension EventLoop {
 
     /// A chunk at or above this held the main actor long enough
     /// for a click to feel late (~3 display frames is the felt
-    /// threshold; a chunk is budgeted at 25 ms, so anything here
-    /// is an app overrunning, not the cadence).
+    /// threshold). Sized above `KiwiCore.bootChunkBudget`, which
+    /// owns the cadence: anything reported here is an app
+    /// overrunning its chunk, never the chunking itself.
     static let slowChunkReport: Duration = .milliseconds(50)
 
     /// Runs one queued step under the per-app budget. The budget

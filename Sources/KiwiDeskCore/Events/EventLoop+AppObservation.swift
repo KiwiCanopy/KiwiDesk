@@ -116,6 +116,16 @@ extension EventLoop {
         // app's windows still arrive by event — but it stops
         // paying for boot work it has already proven it cannot
         // answer in time.
+        //
+        // This deliberately also defers an app the prefilter
+        // called windowless, which then earns a completing
+        // reconcile it would otherwise not have needed (review,
+        // 2026-08-12). Kept, because the alternative abandons it:
+        // the skip list means its SWEEP is skipped too, so #662's
+        // warm-on-reconcile promise is no longer the thing that
+        // covers it. The cost is bought off by when the drain
+        // runs, not by dropping the completion —
+        // `KiwiCore.deferredAppPause` carries that argument.
         guard !budget.isSpent else {
             deferBootWork(
                 pid: pid,

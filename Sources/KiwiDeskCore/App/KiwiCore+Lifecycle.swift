@@ -147,18 +147,24 @@ extension KiwiCore {
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()
-        // A stop DURING boot must not write the session file:
-        // `shutdownCleanly` captures live state over it, and
-        // mid-scan that state is a fraction of the desk — written
-        // there it would overwrite the arrangement this boot had
-        // not restored yet, and the next launch would accept it
-        // (its `capturedAt` is after `kern.boottime`). Unreachable
-        // while boot was synchronous; a quit or a permission
-        // revoke at second 3 of a chunked scan reaches it (code
-        // review, 2026-08-12).
-        if boot.phase.isStarting {
+        // A stop of a launch that never finished booting must not
+        // write the session file: `shutdownCleanly` captures live
+        // state over it, and a launch cut off mid-scan holds a
+        // fraction of the desk — written there it would overwrite
+        // the arrangement this launch had not restored yet, and
+        // the next launch would accept it (its `capturedAt` is
+        // after `kern.boottime`). Unreachable while boot was
+        // synchronous; a quit or a permission revoke at second 3
+        // of a chunked scan reaches it.
+        //
+        // Keyed on the LATCH, not on `phase`: this stop is about
+        // to publish `.idle`, so a second stop — quitting after a
+        // mid-boot revoke — would read as "not starting" and
+        // write the partial desk the first stop just protected
+        // (code review, 2026-08-12).
+        if !boot.reachedReady {
             crash.shutdownCleanly(preservingSession: true)
-            onLog("stopped mid-boot; previous session kept")
+            onLog("stopped before ready; previous session kept")
         } else {
             crash.shutdownCleanly()
         }

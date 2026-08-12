@@ -64,7 +64,7 @@ struct OnboardingGrantPhaseTests {
         // both states, from ONE key: a second copy would be
         // translated twice and could then be rewritten under the
         // reader's eyes at `.ready`.
-        #expect(arranging.grantBody.contains("left alone"))
+        #expect(arranging.grantBody.contains("never tiled"))
         #expect(arranging.isArranging)
     }
 
@@ -81,7 +81,7 @@ struct OnboardingGrantPhaseTests {
         // shared an object with the app's one success mark.
         #expect(
             arranging.grantHintForPhase
-                == "Still going through your open apps: 12 of 109"
+                == "Going through your open apps: 12 of 109"
         )
         // Not the menu's sentence: this reader is one minute into
         // owning the app. The NUMBER is what both surfaces share.

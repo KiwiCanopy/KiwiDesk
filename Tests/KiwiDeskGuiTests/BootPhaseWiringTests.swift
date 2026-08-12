@@ -206,16 +206,19 @@ struct BootPhaseWiringTests {
             "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
         )
         let pattern =
-            #"boot\.phase\.isStarting[\s\S]{0,160}?"#
+            #"!boot\.reachedReady[\s\S]{0,200}?"#
             + #"preservingSession: true"#
         #expect(
             text.range(of: pattern, options: .regularExpression)
                 != nil,
             """
-            stop() no longer preserves the session while boot
-            is starting — a quit or a permission revoke
-            mid-scan writes a fraction of the desk over the
-            arrangement this launch never restored.
+            stop() no longer preserves the session for a launch
+            that never reached ready — a quit or a permission
+            revoke mid-scan writes a fraction of the desk over
+            the arrangement this launch never restored. Keyed on
+            the LATCH: gating on the phase let a SECOND stop
+            (quit after a mid-boot revoke) read as "not
+            starting" and undo the first one's protection.
             """
         )
     }
@@ -224,6 +227,32 @@ struct BootPhaseWiringTests {
     /// the hint expression and the pulse can both be deleted with
     /// `OnboardingGrantPhaseTests` green, because that suite reads
     /// the properties rather than the page they are handed to.
+    /// The latch the gate above reads: set by the tail, cleared
+    /// by `start()`. Neither assignment is reachable from a test
+    /// — `start()` arms the real machine seams — so both are
+    /// needled here.
+    @Test("the boot tail latches that it reached ready")
+    func theTailLatchesReady() throws {
+        let text = try source(bootPath)
+        #expect(
+            text.contains("boot.reachedReady = true"),
+            """
+            The boot tail no longer latches that it finished, so
+            every later stop() preserves the session — a quit
+            after a normal session stops saving the arrangement
+            at all.
+            """
+        )
+        #expect(
+            text.contains("boot.reachedReady = false"),
+            """
+            start() no longer clears the latch, so a relaunch
+            inherits the previous launch's verdict and a stop
+            mid-boot writes over the session it should keep.
+            """
+        )
+    }
+
     @Test("the tour hands its count to the page")
     func tourHandsTheCountToThePage() throws {
         let text = try source(

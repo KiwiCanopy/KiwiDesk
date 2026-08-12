@@ -22,6 +22,21 @@ final class BootRun {
 
     private(set) var phase: BootPhase = .idle
 
+    /// Whether THIS launch ever finished its boot.
+    ///
+    /// A latch, not a reading of `phase`: `stop()` publishes
+    /// `.idle`, so a second stop — quitting after a mid-boot
+    /// permission revoke — would look "not starting" and write
+    /// the fraction of a desk the interrupted scan collected over
+    /// the session the first stop preserved (code review,
+    /// 2026-08-12). Set by the boot tail, cleared by `start()`.
+    var reachedReady = false
+
+    /// Apps a budget cut short, waiting for their completing
+    /// reconcile — one queue for BOTH passes' epilogues, so the
+    /// sweep's deferrals join the chain rather than replacing it.
+    var pendingDeferredApps: [(pid_t, AppRef)] = []
+
     /// The `boot` signpost interval, open from the prologue until
     /// the tail — one interval across the chunks, so Instruments
     /// still shows a single boot span (#672's contract).

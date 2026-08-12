@@ -126,7 +126,7 @@ extension OnboardingView {
         guard let count = grantHintCount else { return nil }
         return L(
             "onboarding.grant.arranging.count",
-            "Still going through your open apps: %1$d of %2$d",
+            "Going through your open apps: %1$d of %2$d",
             count.scanned,
             count.total
         )
@@ -150,8 +150,8 @@ extension OnboardingView {
     private var ownWindowNote: String {
         L(
             "onboarding.grant.own_window",
-            "Setup windows like this one are left alone, because "
-                + "they go away."
+            "Windows like this one are never tiled, because they "
+                + "go away."
         )
     }
 
