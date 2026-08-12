@@ -17,7 +17,7 @@
   "app_bar.background_fit.label": "背景尺寸",
   "app_bar.background_style.boxed": "方塊",
   "app_bar.background_style.label": "背景樣式",
-  "app_bar.background_style.plain": "純色",
+  "app_bar.background_style.plain": "無方塊",
   "app_bar.color.active_item": "作用中項目",
   "app_bar.color.badge_text": "徽章文字",
   "app_bar.color.fill": "填色",

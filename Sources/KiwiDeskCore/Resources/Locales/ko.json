@@ -953,7 +953,7 @@
   "space_bar.front_app.ax": "최전면 앱: %1$@",
   "space_bar.glyph_cap": "공간당 글리프 상한",
   "space_bar.glyph_cap.help": "한 공간이 나머지를 +n 배지로 접기 전에 표시할 앱 글리프의 개수입니다. 같은 앱의 인접한 윈도우는 하나의 글리프로 셉니다.",
-  "space_bar.glyph_cap.summary": "공간당 최대 %1$d 개의 앱 그룹을 표시합니다.",
+  "space_bar.glyph_cap.summary": "공간당 앱 그룹은 최대 %1$d개이며, 나머지는 +n 배지로 접힙니다.",
   "space_bar.hide_empty": "빈 공간 가리기",
   "space_bar.hide_empty.help": "윈도우가 없는 공간은 바에서 가려집니다. 다만 현재 있는 공간은 예외입니다. 가려진 공간으로 이동하려면 단축키를 사용하십시오.",
   "space_bar.icon_source.help": "앱 글리프를 그리는 방식입니다. ‘%1$@’은(는) 바의 항목 색상으로 착색된 단색 심볼을 표시하며, 심볼이 없는 앱은 원래 앱 아이콘을 유지합니다.",
