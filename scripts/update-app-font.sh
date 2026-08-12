@@ -9,10 +9,14 @@
 #   - icon_map.json             (app display name -> ligature map)
 # then rewrites UPSTREAM.md with the pinned tag and date.
 #
-# Manual developer tool — NEVER a build step (builds must not touch
-# the network). After running, `swift test` must pass: the
-# shipped-resource guard tests catch a bad drop (undecodable map,
-# unloadable font). Usage:
+# NEVER a build step (builds must not touch the network). Run by
+# hand, and weekly by .github/workflows/app-font.yml, which opens a
+# PR with the result — that workflow calls this script rather than
+# re-implementing it, and reads back the tag this file stamps into
+# UPSTREAM.md (AppFontWorkflowTests holds both couplings).
+#
+# After running, `swift test` must pass: the shipped-resource guard
+# tests catch a bad drop (undecodable map, unloadable font). Usage:
 #   ./scripts/update-app-font.sh          # latest release
 #   ./scripts/update-app-font.sh v2.0.62  # pin a specific tag
 set -euo pipefail

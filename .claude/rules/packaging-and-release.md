@@ -290,6 +290,19 @@ in its own doc comment what it cannot see. Read that before adding
 an entry; a deep multi-component path earns much weaker cover than
 a whole top-level directory.
 
+**A workflow that changes the tree opens a PR; it never writes to
+`main`.** `.github/workflows/app-font.yml` watches the vendored
+SketchyBar App Font weekly and is the shape to copy for any later
+watcher (a Sparkle appcast, a tap bump). Three obligations, all
+enforced by `AppFontWorkflowTests`: it **calls the developer
+script** rather than re-implementing the vendoring inline, because
+only the hand-run path is ever exercised outside the cron; it
+**gates the macOS job on a cheap `ubuntu-latest` check**, the same
+trade `ci.yml` makes; and it **runs the gate before the PR
+exists** — a PR opened with `GITHUB_TOKEN` does not fire
+`pull_request`, so `ci.yml` reports nothing on it and the workflow
+run log is the only proof the drop was ever built.
+
 **A path a rule file pins is a path the suite reads.**
 `InstructionPinTests` resolves every non-glob `paths:` entry in
 `.claude/rules/*.md`, so ignoring one makes its rename a

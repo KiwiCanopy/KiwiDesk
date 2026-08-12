@@ -1,0 +1,177 @@
+name: Update App Font
+
+# Weekly watch on the vendored SketchyBar App Font
+# (kvndrsslr/sketchybar-app-font, CC0-1.0). Upstream ships new app
+# glyphs continuously; the snapshot in
+# Sources/KiwiDeskCore/Resources/AppFont/ only moves when someone
+# runs scripts/update-app-font.sh, and nothing reminds anyone to.
+#
+# This workflow runs that same script — it is not a second copy of
+# the vendoring logic — and opens a PR. It never writes to main:
+# the drop is reviewed like any other change, because a new
+# upstream release can retire a ligature the App Bar draws.
+#
+# Why it runs the full suite before opening the PR: a PR created
+# with the default GITHUB_TOKEN does NOT fire `pull_request`, so
+# ci.yml stays silent on it. The gate therefore runs here, in the
+# job that produced the drop, and the run log is the proof. Pushing
+# any further commit to the branch by hand starts CI normally.
+on:
+  schedule:
+    # Mondays, 06:17 UTC. Off the hour so the run is not queued
+    # behind everyone else's :00 cron.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Upstream tag to vendor (default: latest)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# One vendoring run at a time; never cancel one mid-push.
+concurrency:
+  group: app-font
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check upstream
+    # ubuntu, not macOS: this exists to keep the 10x job below from
+    # starting on the ~51 weeks a year when nothing changed, so it
+    # has to be cheap enough that the trade is never in question.
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.upstream.outputs.tag }}
+      run: ${{ steps.upstream.outputs.run }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve the upstream tag
+        id: upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="$INPUT_TAG"
+          if [ -z "$tag" ]; then
+            tag="$(gh release view \
+              --repo kvndrsslr/sketchybar-app-font \
+              --json tagName --jq .tagName)"
+          fi
+          echo "upstream: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+          vendored="$(sed -n 's/^- Release: //p' \
+            Sources/KiwiDeskCore/Resources/AppFont/UPSTREAM.md)"
+          echo "vendored: $vendored"
+          if [ "$tag" = "$vendored" ]; then
+            echo "already vendored — nothing to do"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # A branch from an earlier run that is still open would
+          # make the push below a force-push over a PR under
+          # review. Leave it alone; the next run picks up whatever
+          # is newest once it merges.
+          branch="chore/app-font-$tag"
+          if git ls-remote --exit-code --heads origin "$branch" \
+            >/dev/null 2>&1; then
+            echo "$branch already exists — leaving it alone"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+
+  revendor:
+    needs: check
+    if: needs.check.outputs.run == 'true'
+    name: Re-vendor and open a PR
+    # Same runner and Xcode as ci.yml: the drop is validated by the
+    # real suite, on the SDK the tree is built against.
+    runs-on: macos-26
+    env:
+      TAG: ${{ needs.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app \
+            || sudo xcode-select -s /Applications/Xcode.app
+          swift --version
+
+      - name: Re-vendor the assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/update-app-font.sh "$TAG"
+
+      - name: Confirm the drop actually changed something
+        run: |
+          set -euo pipefail
+          # UPSTREAM.md always rewrites (it stamps today's date), so
+          # the question is whether an ASSET moved. A tag bump that
+          # ships byte-identical files is not worth a PR.
+          if git diff --quiet -- \
+            Sources/KiwiDeskCore/Resources/AppFont/icon_map.json \
+            Sources/KiwiDeskCore/Resources/AppFont/sketchybar-app-font.ttf
+          then
+            echo "::error::$TAG ships identical assets"
+            exit 1
+          fi
+
+      # The gate ci.yml would have run, minus the release build: no
+      # Swift source moves in this drop. AppFontResourceTests is the
+      # one that matters — it fails on an undecodable map, an
+      # unloadable font, and on a drop that lost the :kiwidesk:
+      # ligature — but the whole suite runs because a resource the
+      # App Bar draws is not the only thing that reads that map.
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test --skip ExecTests
+
+      - name: Open the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+          RUN_URL: >-
+            ${{ github.server_url }}/${{ github.repository
+            }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          branch="chore/app-font-$TAG"
+          git config user.name 'github-actions[bot]'
+          git config user.email \
+            '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add Sources/KiwiDeskCore/Resources/AppFont
+          git commit -m "chore(bar): re-vendor app font $TAG"
+          git push origin "$branch"
+          # A heredoc into a file, not an inline --body: the body is
+          # Markdown, and any indentation shell would keep turns a
+          # paragraph into a code block.
+          body="$RUNNER_TEMP/pr-body.md"
+          cat > "$body" <<EOF
+          Automated re-vendor of [sketchybar-app-font][upstream]
+          \`$TAG\` via \`scripts/update-app-font.sh\`, run by
+          \`.github/workflows/app-font.yml\`.
+
+          \`swift build\` and \`swift test --skip ExecTests\` passed
+          in [this run]($RUN_URL). A PR opened by \`GITHUB_TOKEN\`
+          does not fire \`pull_request\`, so CI reports nothing here
+          — push any commit to the branch to start it.
+
+          Before merging, check the App Bar with the new glyphs: an
+          upstream release can retire or restyle a ligature.
+
+          [upstream]: https://github.com/kvndrsslr/sketchybar-app-font
+          EOF
+          gh pr create --base "$BASE" --head "$branch" \
+            --title "chore(bar): re-vendor app font $TAG" \
+            --body-file "$body"
