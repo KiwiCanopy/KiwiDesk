@@ -340,13 +340,18 @@ the KiwiDesk icon opens the quick menu where you can:
 **View Shortcuts…** opens a floating, read-only panel that mirrors the
 shortcuts bound in the currently active layer — a fast "what can I press
 right now" lookup. It is not an editor: it only shows what is already
-bound, grouped into three sections:
+bound, grouped into four sections:
 
 - **Controls** — window and focus actions (Focus, Move windows, Size &
   float, Switch layers), laid out in two columns.
 - **Apps** — your app-launch shortcuts, each with the app's icon. A
   small window-plus badge marks a shortcut set to *Open New* (always
   a fresh instance).
+- **Inactive shortcuts** — shortcuts whose target Space has left the
+  current list, dimmed and under their own names. They still work
+  (pressing one recreates its Space) and come back on their own when
+  the Space returns; Settings ▸ Shortcuts shows the same set, where
+  you can also rebind or remove them.
 - **Custom** — any raw-Lua shortcuts, shown as their Lua source.
 
 The panel has its own **hotkey**: **⌃⌥K** by default (under Settings ▸
@@ -1451,6 +1456,12 @@ neighbors slightly dimmed — so the focused app reads even
 though native icons take no tint (App Font glyphs use the
 Focused item color instead). Click a Space to switch to it;
 glyphs are informational.
+
+A transient overlay gets **no glyph** — a context menu, a
+submenu or a launcher panel surfaces as a window of its app, and
+would otherwise add a glyph for as long as you hold the gesture
+open. They are left out of the count behind the `+n` badge too,
+the same way they never take a focus ring.
 
 A sticky window's glyph **travels with you**: it is listed
 under the Space you are currently on — joining that item when

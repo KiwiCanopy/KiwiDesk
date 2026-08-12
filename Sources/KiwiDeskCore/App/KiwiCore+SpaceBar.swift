@@ -150,8 +150,16 @@ extension KiwiCore {
             of: space,
             activeSpace: activeID
         )
+        // Transient overlays (a popup's AX windows, a launcher
+        // panel) are dropped HERE, before grouping and the cap,
+        // so no slot is reserved for a glyph nobody draws — the
+        // same draw-time decision the focus ring already makes
+        // (#300, #683), never a widening of tracking or of the
+        // ignore gate.
         let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
-            guard let window = state.windows[id] else { return nil }
+            guard let window = state.windows[id],
+                !window.isTransientOverlay
+            else { return nil }
             let isSpecial = window.isFloating || window.isSticky
             return (id, window.appName, isSpecial)
         }
