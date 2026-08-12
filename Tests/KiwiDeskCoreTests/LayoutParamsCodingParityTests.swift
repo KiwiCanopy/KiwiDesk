@@ -103,7 +103,7 @@ struct LayoutParamsCodingParityTests {
     private static func grid() -> GridParams {
         var params = GridParams()
         params.type = .rigid
-        params.fillEmptySpace = false
+        params.fillEmptyCells = false
         params.splitDirection = .vertical
         params.columns = 5
         params.rows = 4

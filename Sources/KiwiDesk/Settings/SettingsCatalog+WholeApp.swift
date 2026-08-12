@@ -26,7 +26,7 @@ struct ProfilesControls: Sendable {
     /// behind its container's disclosure.
     let nativeSpaces = SettingsDrawer(
         "native_spaces.title",
-        "Profiles per macOS Space"
+        "Profiles per macOS Desktop"
     )
     let presetsCard = SettingsControl(
         "presets.title",

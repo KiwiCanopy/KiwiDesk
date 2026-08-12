@@ -152,9 +152,9 @@ struct SpacesGateTests {
 
     /// Fill-empty asks the RESOLVED grid type: a rigid global is
     /// silenced, unless the space overrides back to dynamic.
-    @Test("fill empty space asks the resolved grid type")
-    func fillEmptySpace() {
-        let key = SettingKey.layout(.gridOverrideFillEmptySpace)
+    @Test("fill empty cells asks the resolved grid type")
+    func fillEmptyCells() {
+        let key = SettingKey.layout(.gridOverrideFillEmptyCells)
         #expect(
             gates { $0.grid.type = .dynamic }
                 .inertReason(for: key) == nil

@@ -187,7 +187,7 @@ struct SpacesSection: View {
                     .help(
                         L(
                             "spaces.fallback_badge.help",
-                            "Windows from a removed space "
+                            "Windows from a removed Space "
                                 + "land here when you switch "
                                 + "profiles."
                         )
@@ -287,7 +287,7 @@ struct SpacesSection: View {
     private var addRow: some View {
         HStack {
             TextField(
-                L("spaces.add.placeholder", "New space name"),
+                L("spaces.add.placeholder", "New Space name"),
                 text: $newSpace
             )
             .textFieldStyle(.roundedBorder)
@@ -299,7 +299,7 @@ struct SpacesSection: View {
             .disabled(!canAdd)
             .settingsActionButton()
             // Icon-only, like its sibling icon buttons (#94).
-            .help(L("spaces.add.help", "Add space"))
+            .help(L("spaces.add.help", "Add Space"))
         }
     }
 

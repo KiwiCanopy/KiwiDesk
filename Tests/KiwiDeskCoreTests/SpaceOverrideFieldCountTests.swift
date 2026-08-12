@@ -37,7 +37,7 @@ struct SpaceOverrideFieldCountTests {
 
         var grid = GridOverride()
         grid.type = .rigid
-        grid.fillEmptySpace = true
+        grid.fillEmptyCells = true
         grid.splitDirection = .vertical
         grid.columns = 3
         grid.rows = 2

@@ -120,15 +120,21 @@ struct ProfilesSection: View {
         guard !model.editingStoredProfile,
             let active = model.activeProfile
         else { return nil }
-        // The button's own label, verbatim (`footer.save_a_copy_as`)
-        // — a note that names a control by an approximation sends
-        // the reader looking for something that is not there.
+        // The button's own label, INTERPOLATED rather than
+        // re-typed (#818) — a note that names a control by an
+        // approximation sends the reader looking for something
+        // that is not there, and this one had already drifted:
+        // it said "Save a Copy As…" while the button says
+        // "Save a copy…". A literal quotation is a mirror every
+        // locale then has to keep in step with nothing checking
+        // that it does.
         return L(
             "profiles.current_setup_note",
             "Your current setup is saved into %1$@. To keep it "
-                + "separately, use \"Save a Copy As…\" in the bar "
-                + "below.",
-            active
+                + "separately, use \u{201C}%2$@\u{201D} in the "
+                + "bar below.",
+            active,
+            L("footer.save_a_copy_as", "Save a copy…")
         )
     }
 

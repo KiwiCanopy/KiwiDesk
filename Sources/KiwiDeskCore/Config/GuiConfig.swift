@@ -17,12 +17,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// drag visuals). Mirrors the running `tiler.settings`;
     /// profile-scoped.
     public var settings = TilingSettings()
-    /// The virtual spaces the user has defined, in display
+    /// The Spaces the user has defined, in display
     /// order. Drives the space lists across the GUI (layouts,
     /// navigation shortcuts, app assignment). A space can be
     /// listed with the default `bsp` mode and no other config.
     public var spaces: [SpaceID] = []
-    /// Layout mode per virtual space (`set_mode`);
+    /// Layout mode per Space (`set_mode`);
     /// profile-scoped.
     public var spaceModes: [SpaceID: LayoutMode] = [:]
     /// App -> space assignment (`app_rules`).

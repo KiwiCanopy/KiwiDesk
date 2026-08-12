@@ -269,7 +269,7 @@ extension KiwiCore {
             warpMouseToFocused(id)
         }
         // cmd+tab (or a click) can reach a window hidden
-        // in an inactive virtual space; pull that space
+        // in an inactive Space; pull that space
         // forward instead of typing into a stashed window.
         // Deferred: app activation transiently re-reports
         // the app's OLD focused window right before a new

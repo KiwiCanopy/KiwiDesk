@@ -102,7 +102,7 @@ struct LayoutSchematicPlacementTests {
                     columns: 2,
                     rows: 2,
                     type: .dynamic,
-                    fillEmptySpace: false,
+                    fillEmptyCells: false,
                     autoSize: false,
                     splitDirection: .horizontal,
                     placement: placement,

@@ -6,7 +6,7 @@ import Foundation
 ///
 /// The count is the SUM across every layout
 /// (`overrideFieldCount(for:)`) — the scannable "how much custom
-/// config does this space carry" signal, which the pushed editor
+/// config does this Space carry" signal, which the pushed editor
 /// then splits into active-layout rows and a dormant drawer.
 ///
 /// Floating carries no *active* overrides, but a Floating space

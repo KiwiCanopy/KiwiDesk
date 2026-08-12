@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// Identifier of a virtual workspace (space).
+/// Identifier of a Space (space).
 ///
 /// Spaces support arbitrary string identifiers ("mail", "α", "🎵").
 /// Identifiers are case-sensitive, but numeric strings and plain
@@ -145,7 +145,7 @@ public enum LayoutMode: String, Sendable, Codable, CaseIterable {
     }
 }
 
-/// A virtual workspace holding its windows as a flat 1D array.
+/// A Space holding its windows as a flat 1D array.
 ///
 /// This is the core KiwiDesk idea: no trees, no containers. Layout
 /// algorithms are pure functions over `windows`.

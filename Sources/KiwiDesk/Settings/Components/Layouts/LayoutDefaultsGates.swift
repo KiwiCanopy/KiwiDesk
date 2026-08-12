@@ -61,7 +61,7 @@ struct LayoutDefaultsGates {
         switch key {
         case .layout(.stackMasterOrientation):
             return masterOrientationIsInert ? .oneMaster : nil
-        case .layout(.gridFillEmptySpace):
+        case .layout(.gridFillEmptyCells):
             return fillEmptyIsInert ? .rigidGrid : nil
         case .layout(.gridColumns), .layout(.gridRows):
             return dimensionsAreInert ? .autoSizedGrid : nil
@@ -84,7 +84,7 @@ struct LayoutDefaultsGates {
     /// reds.
     static let resolved: Set<SettingKey> = [
         .layout(.stackMasterOrientation),
-        .layout(.gridFillEmptySpace),
+        .layout(.gridFillEmptyCells),
         .layout(.gridColumns),
         .layout(.gridRows),
         .layout(.trackLimit),
@@ -115,7 +115,7 @@ struct LayoutDefaultsGates {
     /// than off the raw override fields, because the per-space
     /// surface that draws the same condition and shows the same
     /// sentence resolves it that way — two surfaces answering
-    /// "is this space rigid" differently is the drift the
+    /// "is this Space rigid" differently is the drift the
     /// resolver exists to prevent.
     ///
     /// Deliberately ignores whether that space also overrides the
@@ -188,9 +188,9 @@ enum LayoutDefaultsGateHelp {
 
     static var rigidGrid: String {
         L(
-            "scroll_grid.fill_empty_space.rigid_only",
-            "A rigid grid keeps every cell, so there is no empty "
-                + "space to fill."
+            "scroll_grid.fill_empty_cells.rigid_only",
+            "A rigid grid keeps every cell, so an empty cell "
+                + "stays empty rather than being filled."
         )
     }
 

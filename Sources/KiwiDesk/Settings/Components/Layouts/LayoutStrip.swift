@@ -111,14 +111,14 @@ struct LayoutStrip: View {
             in: model.config
         ).count
         if count == 0 {
-            return L("layout_defaults.uses.none", "No spaces")
+            return L("layout_defaults.uses.none", "No Spaces")
         }
         if count == 1 {
-            return L("layout_defaults.uses.one", "1 space")
+            return L("layout_defaults.uses.one", "1 Space")
         }
         return L(
             "layout_defaults.uses.many",
-            "%1$d spaces",
+            "%1$d Spaces",
             count
         )
     }

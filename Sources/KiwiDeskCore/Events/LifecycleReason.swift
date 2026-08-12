@@ -3,7 +3,7 @@ import Foundation
 /// The shared settle window after a native desktop switch —
 /// the ONE home for the "1 second" (#40, AGENTS §5 mirror
 /// rule): destroys inside it classify as vanished, and focus
-/// events inside it must not flip virtual spaces
+/// events inside it must not flip Spaces
 /// (`KiwiCore+SpaceCommands`).
 public enum NativeSwitch {
     public static let settle: TimeInterval = 1

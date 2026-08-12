@@ -62,9 +62,33 @@ gh api graphql -F owner=':owner' -F name=':repo' -f query='
   query($owner:String!, $name:String!) {
     repository(owner:$owner, name:$name) {
       issueFields(first:20) { nodes {
-        ... on IssueFieldSingleSelect { id name
+        ... on IssueFieldSingleSelect { id
           options { id name } } } } } }'
 ```
+
+**Do not add `name` beside that `id`.** The field's own `name`
+needs the `read:project` scope, which the working token here has
+not had (observed 2026-08-12); asking for it fails the whole
+query with `INSUFFICIENT_SCOPES` and looks exactly like "this
+token cannot set these fields". It can — only the label is
+withheld. Identify which node is which from its **options**:
+Priority has four (Urgent/High/Medium/Low), Effort three
+(High/Medium/Low). The inline fragment is likewise required, not
+stylistic: `issueFields` is a union, so a bare `id` on `nodes` is
+a `selectionMismatch`.
+
+A read-only cross-check that needs no extra scope, and which also
+shows what an issue currently carries:
+
+```sh
+gh api repos/{owner}/{repo}/issues/<n> --jq '.issue_field_values'
+```
+
+It returns each field's name, its numeric `issue_field_id` and
+the selected option — useful for confirming the write landed, and
+for harvesting an option's name from an issue that already has
+the value you want. Its numeric ids are **not** the GraphQL node
+ids, so they cannot be pasted into the mutation.
 
 Then, with the issue's node id
 (`gh api repos/{owner}/{repo}/issues/<n> --jq .node_id`):
@@ -76,8 +100,18 @@ gh api graphql -f query='mutation($id:ID!){
      singleSelectOptionId:"<option-id>"},
     {fieldId:"<effort-field-id>",
      singleSelectOptionId:"<option-id>"}]})
-  { issue { number } } }' -f id=<node-id>
+  { issue { number } } }' -f id="<node-id>"
 ```
+
+The ids here are the `IFSS_…` (field) and `IFSSO_…` (option)
+node ids from the discovery query. A `NOT_FOUND` naming a global
+id means one of them is an `IFSSV_…` — a *field VALUE* node id,
+which is what the REST cross-check above returns and what a
+half-remembered copy tends to be. The three prefixes differ by
+one letter and the error does not say which kind it wanted.
+
+Read the issue back (step 5) rather than trusting a `null`
+response shape: the mutation returns the issue number on success.
 
 ### The Priority ladder
 

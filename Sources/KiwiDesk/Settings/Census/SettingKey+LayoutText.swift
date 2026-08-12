@@ -58,8 +58,8 @@ extension LayoutKey {
         case .gridSplitDirection, .trackAxis, .gridOverrideSplitDirection,
             .trackOverrideAxis:
             return .text("scroll_grid.arrange")
-        case .gridFillEmptySpace, .gridOverrideFillEmptySpace:
-            return .text("scroll_grid.fill_empty_space")
+        case .gridFillEmptyCells, .gridOverrideFillEmptyCells:
+            return .text("scroll_grid.fill_empty_cells")
         case .gridAutoSize:
             return .text("scroll_grid.auto_size")
         case .gridColumns, .gridOverrideColumns:

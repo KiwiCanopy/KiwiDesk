@@ -55,12 +55,12 @@ struct OrphanedShortcutsGroup: View {
     private var caption: String {
         L(
             "shortcuts.inactive.caption",
-            "These shortcuts target spaces that are not "
-                + "in the current space list. They still "
+            "These shortcuts target Spaces that are not "
+                + "in the current Space list. They still "
                 + "work — pressing one recreates its "
-                + "space — and they keep their key combo. "
+                + "Space — and they keep their key combo. "
                 + "Rebind or remove them here; they become "
-                + "active again when their space returns."
+                + "active again when their Space returns."
         )
     }
 }

@@ -146,7 +146,7 @@ struct AppRulesSection: View {
             L(
                 "app_rules.empty",
                 "Apps with no rule tile normally, in whichever "
-                    + "space you open them."
+                    + "Space you open them."
             )
         )
         .font(.caption)

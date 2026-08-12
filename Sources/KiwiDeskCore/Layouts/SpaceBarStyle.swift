@@ -24,7 +24,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public typealias Alignment = AppBarStyle.BarAlignment
 
     /// On by default (QA 2026-07-19): the bar is the only
-    /// surface where KiwiDesk's virtual spaces are visible at
+    /// surface where KiwiDesk's Spaces are visible at
     /// all — without it a new user may never discover the
     /// concept. macOS's own Spaces have Mission Control; ours
     /// have only this.

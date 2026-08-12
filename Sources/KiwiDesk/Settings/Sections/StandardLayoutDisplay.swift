@@ -50,19 +50,19 @@ extension StandardLayout {
             return L(
                 "presets.developer.summary",
                 "IDE stack, scrolling docs, and a fullscreen "
-                    + "preview space."
+                    + "preview Space."
             )
         case "Minimalist":
             return L(
                 "presets.minimalist.summary",
-                "Spacious gaps, a scrolling reading space, "
+                "Spacious gaps, a scrolling reading Space, "
                     + "and single-focus work."
             )
         case "Focus Stack":
             return L(
                 "presets.focus_stack.summary",
-                "Two stacked task spaces and a deep-work "
-                    + "monocle space."
+                "Two stacked task Spaces and a deep-work "
+                    + "monocle Space."
             )
         case "Dual Developer":
             return L(
@@ -79,7 +79,7 @@ extension StandardLayout {
         case "Command Center":
             return L(
                 "presets.command_center.summary",
-                "Workspace and docs center, communication "
+                "Work and docs center, communication "
                     + "left, logs and monitoring right."
             )
         case "Visual Creative & Developer":

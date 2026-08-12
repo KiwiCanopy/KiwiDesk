@@ -13,7 +13,7 @@ public enum APIReference {
             ("swap", "swap"),
             // Bare `space` is canonical (#42): aligned with the
             // event namespace, which uses bare `space` for a
-            // virtual space and `native_space` for macOS desktops.
+            // Space and `native_space` for macOS desktops.
             ("focus_space", "focus_space"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
@@ -185,12 +185,12 @@ public enum APIReference {
             "set_group_badge_text_color",
         ],
         "grid": [
-            "set_type", "set_fill_empty_space",
+            "set_type", "set_fill_empty_cells",
             "set_split_direction", "set_dimensions",
             "set_auto_size",
             "set_new_window_placement",
             "set_type_override",
-            "set_fill_empty_space_override",
+            "set_fill_empty_cells_override",
             "set_split_direction_override",
             "set_dimensions_override",
             "set_auto_size_override",

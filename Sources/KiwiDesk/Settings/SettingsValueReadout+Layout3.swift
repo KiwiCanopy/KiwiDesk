@@ -103,12 +103,12 @@ extension SettingsValueReadout {
                 { $0.splitDirection },
                 layoutGridArrange
             )
-        case .gridOverrideFillEmptySpace:
+        case .gridOverrideFillEmptyCells:
             return layoutOvr(
                 census,
                 old.grid.override,
                 new.grid.override,
-                { $0.fillEmptySpace },
+                { $0.fillEmptyCells },
                 onOff
             )
         case .gridOverrideColumns:
@@ -187,7 +187,7 @@ extension SettingsValueReadout {
             .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue,
             .scrollingNewWindowPlacement, .scrollingWrapFocus,
-            .gridType, .gridSplitDirection, .gridFillEmptySpace,
+            .gridType, .gridSplitDirection, .gridFillEmptyCells,
             .gridAutoSize, .gridColumns, .gridRows,
             .gridNewWindowPlacement, .monocleOrientation,
             .monocleWrapFocus, .monocleNewWindowPlacement,

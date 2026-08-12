@@ -43,7 +43,7 @@ extension GeneralSection {
                     explanation: L(
                         "general.advanced.discard_arrangement.help",
                         "If windows come back in the wrong "
-                            + "spaces or positions after a "
+                            + "Spaces or positions after a "
                             + "restart or wake, a stale saved "
                             + "arrangement is the usual cause. "
                             + "Discarding it makes the next "
@@ -103,7 +103,7 @@ extension GeneralSection {
             Text(
                 L(
                     "general.advanced.reset_all.caption",
-                    "Deletes your profiles, spaces, layouts, "
+                    "Deletes your profiles, Spaces, layouts, "
                         + "and keybindings, then starts fresh "
                         + "with KiwiDesk's defaults. Doesn't "
                         + "touch init.lua or your color "
@@ -149,7 +149,7 @@ extension GeneralSection {
                 L(
                     "general.advanced.reset_all.confirm.message",
                     "This deletes every saved profile, your "
-                        + "spaces, layouts, and keybindings, "
+                        + "Spaces, layouts, and keybindings, "
                         + "and forgets any window arrangement "
                         + "KiwiDesk remembered — then starts "
                         + "over with its starter defaults, the "

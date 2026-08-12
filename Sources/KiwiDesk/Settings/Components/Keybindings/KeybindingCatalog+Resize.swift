@@ -131,9 +131,9 @@ extension KeybindingCatalog {
         help: {
             L(
                 "keybinding.toggle_sticky.help",
-                "Keeps this window visible on every space. A "
+                "Keeps this window visible on every Space. A "
                     + "tiled sticky window can be rearranged only "
-                    + "on its home space — elsewhere, its position "
+                    + "on its home Space — elsewhere, its position "
                     + "follows automatically. A floating sticky "
                     + "window isn't affected — it moves freely "
                     + "everywhere."
@@ -157,8 +157,8 @@ extension KeybindingCatalog {
         help: {
             L(
                 "keybinding.toggle_display_sticky.help",
-                "Keeps this window visible on every space of the "
-                    + "monitor it lives on. Moving it to a space on "
+                "Keeps this window visible on every Space of the "
+                    + "monitor it lives on. Moving it to a Space on "
                     + "another monitor re-homes it there. Turn a "
                     + "sticky window fully global with Toggle sticky."
             )

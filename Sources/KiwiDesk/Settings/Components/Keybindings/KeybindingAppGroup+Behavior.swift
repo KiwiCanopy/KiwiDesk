@@ -79,7 +79,7 @@ extension ApplicationsGroup {
         L(
             "shortcuts.app_behavior.help",
             "**Open or Focus** brings the app's existing window to "
-                + "the current space, or launches it if the app "
+                + "the current Space, or launches it if the app "
                 + "isn't running. Pressing again while that window "
                 + "is focused cycles through the app's other "
                 + "windows. If the app has nothing on screen, "

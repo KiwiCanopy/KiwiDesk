@@ -58,11 +58,11 @@ any of them to keep sketchybar in sync:
 
 | Event | Lua arguments | Fires when |
 |---|---|---|
-| `space_change` | `space_id`, `mode` | Virtual space switches |
+| `space_change` | `space_id`, `mode` | A KiwiDesk space switches |
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
 | `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
-| `native_space_change` | `native_space` | The native macOS desktop switches |
+| `native_space_change` | `native_space` | The macOS Desktop switches |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`vanished`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
@@ -70,12 +70,12 @@ any of them to keep sketchybar in sync:
 **Caveats:**
 
 - `window_created` and `window_destroyed` track the *visible
-  window set*, not app lifecycle — deminiaturizing and native
-  Space switches also fire them. Filter on the `reason`
+  window set*, not app lifecycle — deminiaturizing and macOS
+  Desktop switches also fire them. Filter on the `reason`
   argument to ignore the artifacts (`vanished`/`returned`
   bursts on every Mission Control round-trip). If you do
   filter, keep a `native_space_change` handler that re-queries
-  state: a window closed while its desktop was off-screen was
+  state: a window closed while its Desktop was off-screen was
   already emitted as `vanished` and never gets a corrective
   `closed`.
 - `space` in Lua callbacks is always a string (the space id).
@@ -104,7 +104,7 @@ KiwiDesk.on("focus_change", function(window_id, app)
         .. app .. "'")
 end)
 
--- Native macOS desktop indicator (Mission Control number):
+-- macOS Desktop indicator (Mission Control number):
 KiwiDesk.on("native_space_change", function(desktop)
     KiwiDesk.exec(
         "sketchybar --trigger kiwi_desktop DESKTOP="
@@ -112,7 +112,7 @@ KiwiDesk.on("native_space_change", function(desktop)
 end)
 
 -- Window icons stay fresh even when focus doesn't change.
--- Reason-filtered: native-switch bursts (vanished/returned)
+-- Reason-filtered: Desktop-switch bursts (vanished/returned)
 -- spawn no processes; the native_space_change handler above
 -- already refreshes on the round-trip.
 for _, event in ipairs({
@@ -194,13 +194,13 @@ end
 local spaces_store = {}
 local space_item_list = {}
 local has_data = false
-local workspace_names = { "1", "2", "3", "4", "5", "6" }
-local current_focused_workspace = "1"
+local space_names = { "1", "2", "3", "4", "5", "6" }
+local current_focused_space = "1"
 
-for _, workspace_id in ipairs(workspace_names) do
-    local space = SBAR.add("item", "space." .. workspace_id, {
+for _, space_key in ipairs(space_names) do
+    local space = SBAR.add("item", "space." .. space_key, {
         position = "left",
-        icon = { string = workspace_id },
+        icon = { string = space_key },
         label = { drawing = false },
         drawing = true,
     })
@@ -208,7 +208,7 @@ for _, workspace_id in ipairs(workspace_names) do
     table.insert(space_item_list, space.name)
 
     local win_items = {}
-    spaces_store[workspace_id] = {
+    spaces_store[space_key] = {
         item = space,
         win_items = win_items,
     }
@@ -216,7 +216,7 @@ for _, workspace_id in ipairs(workspace_names) do
     local function on_click()
         os.execute(
             kiwidesk_cmd(
-              "focus_space " .. workspace_id)
+              "focus_space " .. space_key)
         )
     end
 
@@ -226,7 +226,7 @@ for _, workspace_id in ipairs(workspace_names) do
     for i = 1, 5 do
         local win_item = SBAR.add(
             "item",
-            "space." .. workspace_id .. ".win." .. i,
+            "space." .. space_key .. ".win." .. i,
             {
                 position = "left",
                 icon = { drawing = false },
@@ -320,13 +320,13 @@ local function update_spaces()
     end
     handle:close()
 
-    current_focused_workspace = active_space
+    current_focused_space = active_space
 
     -- Update each space and its window items
-    for _, ws_name in ipairs(workspace_names) do
-        local w = spaces[ws_name]
-        local is_focused = (ws_name == active_space)
-        local space_data = spaces_store[ws_name]
+    for _, space_key in ipairs(space_names) do
+        local w = spaces[space_key]
+        local is_focused = (space_key == active_space)
+        local space_data = spaces_store[space_key]
 
         if space_data then
             space_data.item:set({
@@ -415,7 +415,7 @@ Wire up the events to trigger sketchybar updates:
 ```lua
 -- Fire kiwidesk_update on all relevant events.
 -- native_space_change is not optional: a window closed while
--- its desktop was off-screen never gets a corrective event,
+-- its Desktop was off-screen never gets a corrective event,
 -- so the Mission Control round-trip must re-query (see the
 -- caveats above).
 for _, event in ipairs({

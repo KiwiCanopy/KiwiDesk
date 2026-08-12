@@ -26,7 +26,7 @@ extension SettingsValueReadout {
                     census,
                     label: L(
                         "diff.label.fallback_space",
-                        "Fallback space"
+                        "Fallback Space"
                     ),
                     old: old.fallbackSpace?.raw ?? unset,
                     new: new.fallbackSpace?.raw ?? unset

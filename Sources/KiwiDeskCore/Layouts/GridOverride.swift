@@ -15,7 +15,7 @@ import Foundation
 /// per-space override via `new_window_placement_override`).
 public struct GridOverride: Sendable, Equatable {
     public var type: GridParams.GridType?
-    public var fillEmptySpace: Bool?
+    public var fillEmptyCells: Bool?
     public var splitDirection: GridParams.SplitDirection?
     public var columns: Int?
     public var rows: Int?
@@ -28,8 +28,8 @@ public struct GridOverride: Sendable, Equatable {
     public func resolved(onto global: GridParams) -> GridParams {
         var out = global
         if let type { out.type = type }
-        if let fillEmptySpace {
-            out.fillEmptySpace = fillEmptySpace
+        if let fillEmptyCells {
+            out.fillEmptyCells = fillEmptyCells
         }
         if let splitDirection {
             out.splitDirection = splitDirection
@@ -45,7 +45,7 @@ public struct GridOverride: Sendable, Equatable {
     /// True when no field is set — a fully-inherited space needs
     /// no stored override (drives sparse encoding).
     public var isEmpty: Bool {
-        type == nil && fillEmptySpace == nil
+        type == nil && fillEmptyCells == nil
             && splitDirection == nil && columns == nil
             && rows == nil && autoSize == nil
     }
@@ -59,7 +59,7 @@ extension GridOverride: Codable {
     /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case type
-        case fillEmptySpace = "fill_empty_space"
+        case fillEmptyCells = "fill_empty_cells"
         case splitDirection = "split_direction"
         case columns
         case rows
@@ -74,9 +74,9 @@ extension GridOverride: Codable {
             GridParams.GridType.self,
             forKey: .type
         )
-        fillEmptySpace = try container.decodeIfPresent(
+        fillEmptyCells = try container.decodeIfPresent(
             Bool.self,
-            forKey: .fillEmptySpace
+            forKey: .fillEmptyCells
         )
         splitDirection = try container.decodeIfPresent(
             GridParams.SplitDirection.self,
@@ -100,8 +100,8 @@ extension GridOverride: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(type, forKey: .type)
         try container.encodeIfPresent(
-            fillEmptySpace,
-            forKey: .fillEmptySpace
+            fillEmptyCells,
+            forKey: .fillEmptyCells
         )
         try container.encodeIfPresent(
             splitDirection,

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Manages virtual workspaces and their display assignment.
+/// Manages Spaces and their display assignment.
 ///
 /// Pure state container: window-to-space membership lives here as
 /// flat arrays inside each `Space`. A window belongs to at most one

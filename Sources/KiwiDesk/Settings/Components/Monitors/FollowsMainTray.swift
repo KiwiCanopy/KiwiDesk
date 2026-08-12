@@ -96,7 +96,7 @@ struct FollowsMainTray: View {
     @ViewBuilder private var chips: some View {
         let spaces = rows.trayChips
         if spaces.isEmpty {
-            Text(L("monitor_card.drop_here", "Drop a space here"))
+            Text(L("monitor_card.drop_here", "Drop a Space here"))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
@@ -152,7 +152,7 @@ struct FollowsMainTray: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more spaces on this display",
+                "%1$d more Spaces on this display",
                 count
             )
         )

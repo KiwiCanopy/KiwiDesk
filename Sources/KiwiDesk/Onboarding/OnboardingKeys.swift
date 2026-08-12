@@ -71,7 +71,7 @@ enum OnboardingKeys {
                     id: "focus_space",
                     label: L(
                         "onboarding.keys.go_to_space",
-                        "Go to a space"
+                        "Go to a Space"
                     ),
                     glyphs: go
                 )
@@ -94,7 +94,7 @@ enum OnboardingKeys {
                         // differently, two producing labels
                         // indistinguishable from the row above
                         // (localization audit, 2026-08-11).
-                        "Move the window to a space"
+                        "Move the window to a Space"
                     ),
                     glyphs: move
                 )

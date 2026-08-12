@@ -160,11 +160,11 @@ KiwiDesk.swap("right")
 
 **Expects:** a space identifier (number or string).
 
-**Does:** switches to that virtual space, hiding the current
+**Does:** switches to that space, hiding the current
 space's tiled windows and revealing the target's. Keyboard
 focus follows: the target's focused window (or its first
 window when none is stamped) is raised and its app activated;
-switching to an **empty** space hands focus to the desktop
+switching to an **empty** space hands focus to Finder
 instead, so keystrokes never keep flowing into a now-hidden
 window. If macOS drops the activation, the post-switch settle
 (~300 ms) detects the unchanged frontmost app and re-raises
@@ -414,7 +414,7 @@ KiwiDesk.set_gap_override("editor", {
 **Expects:** a number (points).
 
 **Does:** windows below this width or height
-[cascade](#when-windows-run-out-of-space) instead of shrinking
+[cascade](#when-windows-no-longer-fit) instead of shrinking
 further.
 
 **Example:**
@@ -447,7 +447,7 @@ KiwiDesk.set_resize_step(75)
 
 **Does:** a power-user toggle for how a directional `swap`
 behaves when the focused window sits in an overflow
-[cascade](#when-windows-run-out-of-space). When `true` (the
+[cascade](#when-windows-no-longer-fit). When `true` (the
 default), the swap skips the other windows piled with it and
 trades with the tiled neighbor *outside* the pile in that
 direction — doing nothing when there is none — instead of
@@ -553,7 +553,7 @@ layout mode, app rules, monitor pins, and any keybindings.
 
 ### How inactive spaces hide their windows
 
-Switching virtual spaces hides the other spaces' tiled windows the
+Switching spaces hides the other spaces' tiled windows the
 same way [AeroSpace
 does](https://nikitabobko.github.io/AeroSpace/guide#emulation-of-virtual-workspaces):
 they are parked in the bottom-right corner of their screen with
@@ -565,7 +565,7 @@ coordinated slide, out to the corner and in from it (see
 Animations). Focusing a hidden window (cmd+tab) pulls its
 space forward automatically. Floating windows — including
 picture-in-picture — are never stashed and stay visible across all
-virtual spaces.
+spaces.
 
 Sending a window elsewhere with
 [`move_to_space`](#move_to_space) makes it that
@@ -575,7 +575,7 @@ the window you land on — even without `_and_follow`.
 **Minimizing** a window removes it from its space entirely.
 Restoring it — from the Dock, or via
 [`pull_or_spawn`](#pull_or_spawn) when the app has nothing left on
-screen — opens it in the virtual space you are
+screen — opens it in the space you are
 on at that moment (an `app_rules` entry for its app still wins),
 just like a new window — it does not pull you back to the space it
 was minimized from.
@@ -1044,7 +1044,7 @@ scroll.set_orientation_override("3", "vertical")
 grid.set_type("dynamic")
 ```
 
-### grid.set_fill_empty_space
+### grid.set_fill_empty_cells
 
 **Expects:** `true` or `false`.
 
@@ -1053,7 +1053,7 @@ grid.set_type("dynamic")
 **Example:**
 
 ```lua
-grid.set_fill_empty_space(true)
+grid.set_fill_empty_cells(true)
 ```
 
 ### grid.set_split_direction
@@ -1116,7 +1116,7 @@ grid.set_auto_size(true)
 grid.set_type_override("3", "rigid")
 ```
 
-### grid.set_fill_empty_space_override
+### grid.set_fill_empty_cells_override
 
 **Expects:**
 
@@ -1128,7 +1128,7 @@ grid.set_type_override("3", "rigid")
 **Example:**
 
 ```lua
-grid.set_fill_empty_space_override("3", false)
+grid.set_fill_empty_cells_override("3", false)
 ```
 
 ### grid.set_split_direction_override
@@ -1673,7 +1673,7 @@ app_bar.set_active_indicator("outline")
 **Does:** sets the width (horizontal) or height (vertical) of each
 item. Auto measures each item's rendered width (icon + name at the
 effective font) and sizes the uniform slot to fit the widest, so
-long names don't truncate and short ones don't waste space.
+long names don't truncate and short ones don't waste room.
 
 **Example:**
 
@@ -1685,7 +1685,7 @@ app_bar.set_item_size(0)
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the space between items.
+**Does:** sets the gap between items.
 
 **Example:**
 
@@ -1938,8 +1938,9 @@ The bar is **layout-independent** and reserves real screen area
 on its edge before any layout runs. It may share an edge with
 the App Bar: the Space Bar always sits at the screen edge, the
 App Bar next to the windows, and the insets add. All settings
-are global — there are no per-layout overrides. On a fullscreen
-macOS Space the bar hides; it returns with the desktop.
+are global — there are no per-layout overrides. While a
+native-fullscreen app holds the screen the bar hides; it
+returns with the Desktop.
 
 Two accents distinguish states: `item_color` paints inactive
 Spaces, `active_item_color` the active Space, and
@@ -2785,13 +2786,13 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
 
 Resizing a tiled window with the mouse adjusts the layout the same
 way the `resize` command does, applied when you release: neighbors
-give or take the space. What changes depends on the layout —
+give or take the difference. What changes depends on the layout —
 Master/Stack maps width changes to the master ratio, BSP steers its
 split ratio toward the dragged side, Scrolling adjusts the column
 width. Axes a layout has no parameter for (stack heights, grid,
 monocle) animate back into place. Floating windows resize freely.
 
-Only edges **shared with a neighbor** trade space — pulling a
+Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
@@ -2829,7 +2830,7 @@ the focused window. While KiwiDesk performs its own z-order
 maintenance raises the warp is held, and it fires once they
 settle — for the window focus finally landed on, so the
 maintenance churn never drags the pointer around but a focus
-change made during it still gets its warp. When focus lands on a window in an inactive virtual
+change made during it still gets its warp. When focus lands on a window in an inactive
 space (cmd+tab into a stashed window), the warp waits until
 KiwiDesk follows focus and pulls that space forward. Clicking
 an app-bar item warps too — the click targets the bar, not
@@ -2842,7 +2843,7 @@ under **Behavior ▸ Mouse**.
 mouse.set_follows_focus(true)
 ```
 
-## When Windows Run Out of Space
+## When Windows No Longer Fit
 
 No layout ever shrinks a window below `min_window_size`. When a
 zone gets too crowded, downsizing stops and the overflow
@@ -2935,7 +2936,7 @@ float_rules = {
 **Expects:** a Lua table of app bundle identifiers.
 
 **Does:** KiwiDesk never manages any window belonging to a matching
-app: no state entry, tiling or floating verdict, virtual-space
+app: no state entry, tiling or floating verdict, space
 assignment, or window events. Use this for HUDs, menu-bar utilities,
 or apps that misbehave when AX-tracked. Use `float_rules` when an app
 should remain tracked and visible but never tile.
@@ -3034,7 +3035,7 @@ unbundled helper process) cannot be targeted by a rule.
 **Expects:** nothing.
 
 **Does:** marks the focused window as floating. It is no longer
-tiled: it keeps whatever frame you give it, on the virtual
+tiled: it keeps whatever frame you give it, on the
 space it belongs to — like a tiled window, it hides with its
 space and reappears where you left it when you switch back. (A
 window that should stay visible on *every* space is a [sticky
@@ -3116,7 +3117,7 @@ end)
 
 ## Sticky Windows
 
-A **sticky** window stays present on every virtual space
+A **sticky** window stays present on every space
 instead of hiding with its home space when you switch — the
 macOS-native analog is Mission Control's "Assign To → All
 Desktops". Stickiness is a per-window flag, flipped on a
@@ -3176,7 +3177,7 @@ fully managed.
 **Expects:** nothing.
 
 **Does:** marks the focused window **globally** sticky — it stays
-visible on every virtual space of every monitor. No mode
+visible on every space of every monitor. No mode
 argument: the window keeps its existing floating or tiled state.
 Overrides display sticky if the window already had it.
 
@@ -3327,9 +3328,9 @@ created, the same order the Space Bar lists them), then slot
 order within a space, wrapping around — so repeat presses cycle
 through all of the app's windows. With a single window a repeat
 press changes nothing. The cycle covers the windows KiwiDesk
-currently tracks; the app's windows on another native macOS
-desktop are untracked while you are away and rejoin the cycle
-when you return to their desktop — see
+currently tracks; the app's windows on another macOS
+Desktop are untracked while you are away and rejoin the cycle
+when you return to that Desktop — see
 [Accepted limitations](accepted-limitations.md).
 
 If the app has **nothing on screen** — typically every one of its
@@ -3340,7 +3341,7 @@ were already parked before it launched, say) there is no such
 record and the app's own window order decides. While any window
 is still visible, minimized windows are left alone: the shortcut
 focuses and cycles the visible ones and never pulls a window back
-out of the Dock. A window on another native macOS desktop does
+out of the Dock. A window on another macOS Desktop does
 not count as on screen — see
 [Accepted limitations](accepted-limitations.md).
 
@@ -3550,7 +3551,7 @@ callers never hear it, they read the error JSON. What the
   focused window's *share within its track* — the same
   per-window weights as the stack's `"y"` path, with the same
   session-scoped lifetime and `min_window_size` cap. A single
-  track cannot trade cross-axis space, and a window alone in
+  track cannot trade cross-axis area, and a window alone in
   its track has no share to grow; both report an error.
 
 **Where the ratio write lands (#458):** a space with an authored
@@ -3630,7 +3631,7 @@ The override is **sparse and soft by design**:
   while GUI-managed.
 
 Profiles re-resolve their bindings whenever they apply: on
-`load_profile`, on a monitor change, and on a native-Space binding
+`load_profile`, on a monitor change, and on a Desktop binding
 switch. Switching profiles also returns you to the default
 layer.
 
@@ -3652,7 +3653,7 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `native_space_change` | `native_space` (desktop number) |
+| `native_space_change` | `native_space` (Desktop number) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
@@ -3681,17 +3682,17 @@ stay silent. JSON keys: `from_space_id` (null if unknown) and
 
 The lifecycle events track the *visible window set*, not app
 lifecycle — windows also *appear to* come and go: deminiaturizing
-surfaces as `window_created`, and switching native macOS Spaces
-makes every managed window on the old desktop vanish from the
+surfaces as `window_created`, and switching macOS Desktops
+makes every managed window on the old Desktop vanish from the
 accessibility tree and reappear on return. The `reason` argument
 says which kind of change fired:
 
 - `window_created` — `"new"` (a genuinely new window),
-  `"returned"` (back from another native desktop or a session
+  `"returned"` (back from another macOS Desktop or a session
   restore), `"restored"` (deminiaturized).
 - `window_destroyed` — `"closed"` (a real close), `"minimized"`
-  (it will come back as `"restored"`), `"vanished"` (its native
-  desktop was switched away; it comes back as `"returned"`).
+  (it will come back as `"restored"`), `"vanished"` (its macOS
+  Desktop was switched away; it comes back as `"returned"`).
 
 So a bar callback that only cares about real lifecycle filters in
 one line:
@@ -3706,7 +3707,7 @@ KiwiDesk.on("window_destroyed",
     end)
 ```
 
-One caveat: a window closed *while its native desktop is
+One caveat: a window closed *while its macOS Desktop is
 off-screen* already emitted `"vanished"` at switch time and never
 gets a corrective `"closed"`. If you filter on reasons, also
 refresh on `native_space_change` — the re-query pattern in the
@@ -3967,14 +3968,14 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 
 **Expects:**
 
-- A native space number (desktop number as Mission Control counts them,
-  1-based; fullscreen apps don't count).
+- A Desktop number, as Mission Control counts them (1-based;
+  fullscreen apps don't count).
 - A profile name.
 
-**Does:** when you switch to that desktop, KiwiDesk loads the bound
-profile — its virtual workspaces, layouts, and settings. Desktops
+**Does:** when you switch to that Desktop, KiwiDesk loads the bound
+profile — its spaces, layouts, and settings. Desktops
 without a binding keep whatever profile is active. A binding takes
-effect when that Space next activates. In a hand-written config the
+effect when that Desktop next activates. In a hand-written config the
 call lives in `init.lua`; when the config is GUI-managed, bindings
 are stored in `gui.json` (`profile_bindings`) and edited in the
 Profiles section instead.
@@ -3997,7 +3998,7 @@ is dropped, and any windows it held are forwarded to the profile's
 fallback space.
 
 This reconcile happens only on an explicit `load_profile`; automatic
-applies on a monitor change or a native-Space binding leave your
+applies on a monitor change or a Desktop binding leave your
 spaces untouched.
 
 ### Profile Monitor Sets
@@ -4089,7 +4090,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
         "strategy": "longest_side"
       },
       "grid": { "columns": 3, "rows": 2, "type": "dynamic",
-                "fill_empty_space": true,
+                "fill_empty_cells": true,
                 "split_direction": "horizontal",
                 "new_window_placement": "last" },
       "monocle": { "orientation": "horizontal",
@@ -4123,34 +4124,35 @@ stripped, grouped by namespace — `set_gap_override` becomes
 }
 ```
 
-### Native macOS Spaces (Mission Control)
+### macOS Desktops (Mission Control)
 
-KiwiDesk's spaces above are *virtual* workspaces, independent of
-Mission Control. On top of that, each native macOS Space (desktop)
+KiwiDesk's spaces above are its own, independent of
+Mission Control. On top of that, each macOS Desktop — what
+Mission Control labels "Desktop 1", "Desktop 2", … —
 can carry its own profile via `bind_profile_to_native_space` (see
 above).
 
-When you switch desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
-loads the bound profile — its virtual workspaces, layouts, and
+When you switch Desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
+loads the bound profile — its spaces, layouts, and
 settings. Unsure which number you're on? Check
 `kiwidesk get_state` (field `native_space`), or subscribe to the
 `native_space_change` event.
 
-KiwiDesk resolves one active native Desktop number and one active
+KiwiDesk resolves one active Desktop number and one active
 profile across the whole display setup. For predictable bindings on
 multiple displays, turn off macOS's "Displays have separate Spaces"
 option and log out and back in. Basic tiling still works when the
 option remains on, but independent Desktop choices on each display
 cannot map unambiguously to the single active profile.
 
-KiwiDesk never moves windows between native Spaces — windows stay on
-their desktop, and KiwiDesk manages the ones on the desktop you're
+KiwiDesk never moves windows between Desktops — windows stay on
+their Desktop, and KiwiDesk manages the ones on the Desktop you're
 looking at.
 
-Each desktop also remembers which *virtual* space it was showing:
-switch away and back, and you land on the same virtual space with the
-same windows hidden. A desktop you haven't visited yet starts on the
-first virtual space.
+Each Desktop also remembers which KiwiDesk space it was showing:
+switch away and back, and you land on the same space with the
+same windows hidden. A Desktop you haven't visited yet starts on the
+first space.
 
 ## Animations, Sleep & Wake
 
@@ -4250,7 +4252,7 @@ animations.set_size_rate(0)    -- back to per-tick default
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** enables or disables the coordinated animation when
-switching virtual spaces: the outgoing windows slide out to the
+switching spaces: the outgoing windows slide out to the
 hiding corner while the incoming ones slide in from it — one
 toggle drives both directions. Off (the default) is faster: a
 coordinated switch animates *both* spaces' windows at once, and
@@ -4258,8 +4260,8 @@ slow-responding apps (Electron/WebKit) can fall behind on the
 extra per-frame window moves and stutter. Opt in if you like
 the effect anyway.
 
-Native macOS Space switches are never animated in either
-direction — macOS stops reporting an inactive desktop's windows
+macOS Desktop switches are never animated in either
+direction — macOS stops reporting an inactive Desktop's windows
 to Accessibility, so there is nothing to fly around (see
 [Accepted limitations](accepted-limitations.md)).
 
@@ -4362,34 +4364,34 @@ KiwiDesk.set_wake_restore_delay(1500)
 
 **Profiles own all animation settings.** Like every other tiling
 setting, `animations.*` — including the duration knobs — is saved in a
-profile. When a profile is bound to a native macOS Space
-(`bind_profile_to_native_space`), switching to that Space loads the
+profile. When a profile is bound to a macOS Desktop
+(`bind_profile_to_native_space`), switching to that Desktop loads the
 profile and **replaces** the live settings — so `animations.*` calls in
 `init.lua` apply only until a bound profile activates. To make a value
-stick on a bound Space, set it and re-save that profile (or edit the
+stick on a bound Desktop, set it and re-save that profile (or edit the
 profile JSON).
 
 ### Quit & Restart
 
 Quitting KiwiDesk saves the current arrangement — window order per
-virtual space, focus, and the active space — and restores it on the
+space, focus, and the active space — and restores it on the
 next launch, so tiles do not shuffle across restarts. After the
-restore, KiwiDesk lands on the virtual space of the window that has
+restore, KiwiDesk lands on the space of the window that has
 focus *right now*, falling back to the space that was active at quit.
 This works within one login session (macOS window ids reset on
 logout/reboot; after that, windows are re-tiled fresh). Crashes
 restore from the last autosave (30 s interval) instead.
 
 On quit or restart, KiwiDesk moves each managed tiled window back onto
-the monitor its virtual space is assigned to and arranges them per
-`quit.layout` (see `quit.set_layout` below), so the desktop is usable
+the monitor its space is assigned to and arranges them per
+`quit.layout` (see `quit.set_layout` below), so your screen is usable
 the moment KiwiDesk exits. Floating windows are left wherever they are.
-Because KiwiDesk keeps all managed windows on the single visible native
-Space (inactive virtual spaces are parked off-screen at the peek
-corner — not on a different native macOS Space), every reachable window
-lands there together. Windows on a display's background native Spaces
+Because KiwiDesk keeps all managed windows on the single visible macOS
+Desktop (inactive spaces are parked off-screen at the peek
+corner — not on a different Desktop), every reachable window
+lands there together. Windows on a display's background Desktops
 cannot be repositioned without disabling SIP, which KiwiDesk never
-does — the visible Space per display is the arranged scope.
+does — the visible Desktop per display is the arranged scope.
 
 ### quit.set_layout
 

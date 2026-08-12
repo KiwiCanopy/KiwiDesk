@@ -1,7 +1,7 @@
 import KiwiDeskCore
 
 /// What one display currently holds, in a sentence (#678 Phase 3,
-/// turn 13b): "2 spaces here · space code is showing".
+/// turn 13b): "2 Spaces here · Space code is showing".
 ///
 /// Authored once and read twice — the line under the picture says
 /// it, and the card speaks it to VoiceOver and shows it on hover.
@@ -16,8 +16,8 @@ import KiwiDeskCore
 /// case below is a complete sentence a translator can read
 /// (localization audit, 2026-08-04).
 ///
-/// The space id is named — "space %1$@" — rather than dropped in
-/// bare: ids are commonly numeric, and "3 spaces here · 2 is
+/// The space id is named — "Space %1$@" — rather than dropped in
+/// bare: ids are commonly numeric, and "3 Spaces here · 2 is
 /// showing" is two numerals with no noun on either.
 ///
 /// **"is showing" is per display and stays that way.** It comes
@@ -32,7 +32,7 @@ enum MonitorReadout {
     /// display includes the spaces that follow main — they are on
     /// that screen right now, and counting only the pinned and
     /// auto-placed chips made a desk where everything follows
-    /// main read "0 spaces here · space code is showing" on every
+    /// main read "0 Spaces here · Space code is showing" on every
     /// card (localization audit, 2026-08-04).
     static func sentence(
         held: Int,
@@ -40,7 +40,7 @@ enum MonitorReadout {
     ) -> String {
         // Zero takes its own sentence whatever is showing: a
         // display our own accounting says holds nothing cannot
-        // also report "0 spaces here · space X is showing", and
+        // also report "0 Spaces here · Space X is showing", and
         // that pairing is reachable — a space can be up on a
         // display while no configured space resolves to it.
         guard let showing, held > 0 else { return silent(held) }
@@ -48,33 +48,33 @@ enum MonitorReadout {
         case 1:
             return L(
                 "monitors.selection.showing.one",
-                "1 space here · space %1$@ is showing",
+                "1 Space here · Space %1$@ is showing",
                 showing.raw
             )
         default:
             return L(
                 "monitors.selection.showing.many",
-                "%1$d spaces here · space %2$@ is showing",
+                "%1$d Spaces here · Space %2$@ is showing",
                 held,
                 showing.raw
             )
         }
     }
 
-    /// A localized PHRASE per count, never "%1$d space(s)": an
-    /// English plural glued to a number reads "1 spaces" in the
+    /// A localized PHRASE per count, never "%1$d Space(s)": an
+    /// English plural glued to a number reads "1 Spaces" in the
     /// language it was written for and cannot be declined in the
     /// ten it was not.
     private static func silent(_ held: Int) -> String {
         switch held {
         case 0:
-            return L("monitors.selection.none", "No spaces here")
+            return L("monitors.selection.none", "No Spaces here")
         case 1:
-            return L("monitors.selection.one", "1 space here")
+            return L("monitors.selection.one", "1 Space here")
         default:
             return L(
                 "monitors.selection.many",
-                "%1$d spaces here",
+                "%1$d Spaces here",
                 held
             )
         }

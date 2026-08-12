@@ -257,7 +257,7 @@ public final class KiwiCore {
     let moveLatch = MoveIntentLatch()
 
     /// Native desktop we are currently on (Mission Control
-    /// number), and the virtual space each desktop showed
+    /// number), and the Space each desktop showed
     /// last, restored when the user returns to it.
     var lastNativeSpace: Int?
     var virtualSpaceMemory: [Int: SpaceID] = [:]

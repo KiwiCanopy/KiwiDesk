@@ -37,9 +37,9 @@ extension KiwiCore {
 
     // MARK: - Space switch reaction
 
-    /// Native space switch: remember the virtual space the
+    /// Native space switch: remember the Space the
     /// desktop we left was showing, swap in the bound profile
-    /// (if any), restore the new desktop's virtual space, and
+    /// (if any), restore the new desktop's Space, and
     /// notify subscribers.
     func handleNativeSpaceChange() {
         let number = NativeSpaces.activeSpaceNumber()
@@ -73,7 +73,7 @@ extension KiwiCore {
         settleAfterNativeSwitch(number)
     }
 
-    /// The virtual space a native desktop should show: the
+    /// The Space a native desktop should show: the
     /// one it showed last, or the first space as default.
     func virtualSpaceTarget(for native: Int) -> SpaceID? {
         virtualSpaceMemory[native]

@@ -126,14 +126,22 @@ extension OnboardingView {
         .foregroundStyle(.secondary)
     }
 
+    /// Step 1 names the button below it, so that name is
+    /// INTERPOLATED from the button's own key rather than
+    /// re-typed (#818). Quoting a label as literal text makes
+    /// every locale hold two strings that must agree forever
+    /// with nothing checking that they do; #817 merged the
+    /// button's two keys into one and left this third copy of
+    /// the words behind.
     private var grantBody: String {
         L(
             "onboarding.grant.body",
             """
-            1. Click “Open System Settings” below.
+            1. Click “%1$@” below.
             2. Find KiwiDesk in the list and turn it on.
             3. Come back here — we detect it automatically.
-            """
+            """,
+            L("common.open_system_settings", "Open System Settings")
         )
     }
 

@@ -24,7 +24,7 @@ struct StickyMarkEditor: View {
             caption: L(
                 "sticky.caption",
                 "Sticky windows stay visible on every "
-                    + "space (Toggle sticky, in Shortcuts)."
+                    + "Space (Toggle sticky, in Shortcuts)."
             )
         ) {
             ToggleRow(

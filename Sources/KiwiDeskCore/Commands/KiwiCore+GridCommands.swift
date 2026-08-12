@@ -17,11 +17,11 @@ extension KiwiCore {
                 )
             else { return Self.typeError }
             tiler.settings.grid.type = type
-        case "grid.set_fill_empty_space":
+        case "grid.set_fill_empty_cells":
             guard let fill = args.first?.boolValue else {
                 return Self.fillError
             }
-            tiler.settings.grid.fillEmptySpace = fill
+            tiler.settings.grid.fillEmptyCells = fill
         case "grid.set_split_direction":
             guard
                 let direction = Self.parseSplitDirection(
@@ -86,11 +86,11 @@ extension KiwiCore {
                 let type = Self.parseGridType(rest.first?.stringValue)
             else { return Self.typeError }
             over.type = type
-        case "fill_empty_space":
+        case "fill_empty_cells":
             guard let fill = rest.first?.boolValue else {
                 return Self.fillError
             }
-            over.fillEmptySpace = fill
+            over.fillEmptyCells = fill
         case "split_direction":
             guard
                 let direction = Self.parseSplitDirection(

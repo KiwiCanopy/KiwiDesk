@@ -217,9 +217,9 @@ Follow the steps to enable it in System Settings › Privacy &
 Security › Accessibility. Once granted — and only if two or more
 displays are connected with "Displays have separate Spaces" on —
 you may also be asked to turn that option off. KiwiDesk uses one
-active profile across all displays, so shared display Spaces make
-native Desktop-to-profile bindings predictable. This is optional:
-basic tiling still works with separate display Spaces, and a single
+active profile across all displays, so Desktops shared across
+displays make Desktop-to-profile bindings predictable. This is
+optional: basic tiling still works with the option on, and a single
 display is never affected. Changing the macOS option requires
 logging out and back in.
 
@@ -498,7 +498,7 @@ hand, but it is documented here for backup and transparency.
 > sync, not a one-time copy, so a change on either Mac applies
 > everywhere the folder reaches. Machine-specific state doesn't
 > travel with it: grant Accessibility permission on each Mac
-> separately, and expect display layout and macOS Spaces to
+> separately, and expect display layout and macOS Desktops to
 > resolve against whatever is actually connected there.
 
 **Top-level structure:**
@@ -532,10 +532,10 @@ Each field:
 - **`ignore_rules`**: array of bundle identifiers. Matching apps
   are never tracked or managed. This power-user field has no
   Settings control, but Settings preserves it when saving.
-- **`profile_bindings`**: object mapping native macOS Space numbers
-  (Mission Control desktops) to profile names. When you switch
-  desktops, the bound profile loads. Updated in the Profiles
-  section.
+- **`profile_bindings`**: object mapping macOS Desktop numbers
+  (as Mission Control counts them) to profile names. When you
+  switch Desktops, the bound profile loads. Updated in the
+  Profiles section.
 - **`layers`**: array of keybinding layers — named alternate
   shortcut sets, only one of which fires at a time. Each layer is
   an object with:
@@ -591,7 +591,7 @@ changes it for **every** profile:
 - **App rules** (app → space assignment)
 - **Float rules** (apps that never tile)
 - **Ignore rules** (apps KiwiDesk never AX-tracks or manages)
-- **Native Space → profile bindings**
+- **Desktop → profile bindings**
 
 **Per-profile settings** live in the profile's own JSON; editing
 one touches **only that profile** — another profile that declares
@@ -624,8 +624,8 @@ override for the app instead.
 
 ## Spaces
 
-The **Spaces** section (in the **This Profile** group) lists every virtual
-workspace you manage. Each space is independent of monitors and can
+The **Spaces** section (in the **This Profile** group) lists every
+space you manage. Each space is independent of monitors and can
 span multiple displays or run on just one.
 
 To **add a space**, click the **+** button and enter a name
@@ -766,8 +766,8 @@ Adjust each mode's defaults:
   **Right** when horizontal and **Top**/**Bottom** when vertical;
   or **Follow**, the default, which holds the viewport and pans
   the minimum to keep the focus visible), slot size (a
-  percentage of the available space — 95% out of the box, so a
-  sliver of the next window stays visible to show the space
+  percentage of the available width or height — 95% out of the
+  box, so a sliver of the next window stays visible to show the space
   scrolls; the slider runs 5–100% in 1% steps — or
   an exact point count), and **Wrap focus** —
   off by default, so
@@ -786,7 +786,7 @@ Adjust each mode's defaults:
   window returns to the first. New window defaults to
   **first**, so a new window comes to the front of the cycle
   rather than the back.
-- **Grid**: type (dynamic or rigid), fill empty space (yes/no),
+- **Grid**: type (dynamic or rigid), fill empty cells (yes/no),
   **Arrange** (Columns first or Rows first — the order windows fill
   the grid: across a row then down, or down a column then across;
   it also sets which way a dynamic grid grows), and column and row
@@ -885,9 +885,9 @@ persists.
 (**Percent**, **Points**) and a value. It sets each window's
 size along the scroll direction — **Column width** when the
 space scrolls horizontally, **Row height** when vertical.
-Percent scales with the available space (95% out of the box);
-Points fixes an exact size. The single checkbox owns the whole
-setting.
+Percent scales with the available width or height (95% out of
+the box); Points fixes an exact size. The single checkbox owns
+the whole setting.
 
 **Overrides for other layouts.** Changing a space's layout never
 deletes overrides — each layout keeps its own. Switch from
@@ -972,7 +972,7 @@ place that pin can be seen or cleared.
 
 Each monitor shows its own space at once, and the **focused
 monitor** is simply the one you last clicked — clicking a window
-*or* the bare desktop on another display moves focus there. A new
+*or* the bare wallpaper on another display moves focus there. A new
 window, and a global sticky window, then appear on that monitor's
 space. Clicking the menu bar or the Dock does not move focus.
 
@@ -1097,7 +1097,8 @@ Windows in native (green-button) fullscreen get none either:
 they fill the display, so a border would peek out only at the
 corners. The border returns when the window leaves fullscreen.
 While a window is in native fullscreen, KiwiDesk stands down
-around it entirely: macOS gives it its own Space, so the App and
+around it entirely: macOS moves it off the Desktop and gives it
+a Mission Control slot of its own, so the App and
 Space Bars hide there, no layout pass or focus raise targets the
 fullscreened window, and the space it came from tiles as if it
 were away. It keeps its place in that space — leave fullscreen
@@ -1148,7 +1149,7 @@ swap, release outside every slot to snap into the opened gap).
 Pulling the cursor back before releasing moves the window home the
 same way. A fast flick across still commits the move at release —
 onto a window's slot it lands there (the windows below it shift
-down one), onto empty space (an empty monitor) it just moves
+down one), onto an empty area (an empty monitor) it just moves
 across. Releasing outside every slot **on your own display** snaps
 the window back.
 
@@ -1173,7 +1174,7 @@ laid out as the same two columns.
 
 ### Sticky Windows
 
-A **sticky** window stays visible on every virtual space
+A **sticky** window stays visible on every space
 instead of hiding with its home space when you switch — mark
 one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
 float; there is no app rule list, stickiness is per window).
@@ -1258,8 +1259,9 @@ space — it only renders in **Monocle** and **Scrolling**, the two
 layouts where a window can hide behind another or scroll off the
 edge, so you always see what's open. A window you take into
 native (green-button) fullscreen loses its item while it's away
-— macOS gives it its own Space — and the item returns when it
-exits. The card has no on/off row
+— macOS moves it off the Desktop and gives it a Mission Control
+slot of its own — and the item returns when it exits. The card
+has no on/off row
 because the bar doesn't have one: visibility is per layout, via
 the two **Show it in** switches at the card's foot. Everything
 else applies to every layout that shows a bar; per-layout
@@ -1393,9 +1395,10 @@ narrow-but-real need stays in the power layer.
 ### Space Bar
 
 The **Space Bar** is an overview of your Spaces, visible on
-every regular Space (on a fullscreen Space it stands down, like
-the App Bar) and **on by default** — it's the one place your
-virtual Spaces are visible at all: one bar per display, listing that display's
+every Desktop (it stands down while a native-fullscreen app
+holds the screen, like the App Bar) and **on by default** — it's
+the one place your Spaces are visible at all: one bar per
+display, listing that display's
 Spaces in profile order. Each item shows the Space's identifier
 (its configured icon, else its plain number or a two-letter
 monogram), a thin divider, then a compact glyph per window —
@@ -1606,11 +1609,11 @@ you apply one).
   system setting wins regardless of this one.
 - **Duration** (ms): how fast windows move and resize (50–1000, default
   150).
-- **On space change**: animate virtual space switches as a coordinated
+- **On space change**: animate space switches as a coordinated
   transition — windows slide out of the space you're leaving while the
   new space's windows slide in from the hiding corner (default off;
   both spaces animate at once, which can be slow on older machines).
-  Native macOS Space switches are never animated — see
+  macOS Desktop switches are never animated — see
   [Accepted limitations](accepted-limitations.md).
 - **On window resize**: animate when splits adjust (default on).
 - **On window swap**: animate when two tiles swap (default on).
@@ -1716,14 +1719,14 @@ so their title bars remain reachable.
   standard 5: 2×2 up to 20 windows · 3×3 up to 45 · 4×4 above 45).
 
 When you quit or restart KiwiDesk, it saves window order and focus
-per virtual space and restores on next launch. That restore only
+per space and restores on next launch. That restore only
 replays a snapshot taken since your Mac last booted — after a
 reboot every saved window id belongs to a window that no longer
 exists, so the snapshot is discarded and windows are rediscovered
 fresh. On the way out,
 each monitor's windows are spread into an evenly-filled grid —
 windows take turns claiming a cell, and windows sharing a cell
-cascade so their title bars stay clickable. The desktop is usable
+cascade so their title bars stay clickable. Your screen is usable
 the moment KiwiDesk exits, with no window pulled to another
 monitor. (Power users can also tune this via `quit.set_layout` and
 `quit.set_grid_target_depth` in the Lua reference; `grid` is the
@@ -1789,7 +1792,7 @@ your machine right now, naming which of the four ways it resolved:
 - a **Desktop binding**, which outranks everything below it. If you
   bound a profile to the Desktop you are on, that is what loads,
   whatever your displays are — see
-  [Native Spaces](#native-spaces-mission-control);
+  [macOS Desktops](#macos-desktops-mission-control);
 - an **exact monitor match** — these exact displays. It stops
   matching the moment you swap one of them out, unless you have
   saved a set for the new hardware too;
@@ -1832,7 +1835,7 @@ global config; every saved profile is listed below, one row each
 
 Saving a stored profile hot-reloads the running layout **only if
 that profile is the one on screen** (loaded, or bound to the
-active native Space); otherwise the change waits until the
+active Desktop); otherwise the change waits until the
 profile next loads. **Save a copy…** while editing a stored
 profile duplicates *that stored profile* — including your pending
 edits, its monitor sets (even for hardware that isn't connected),
@@ -1908,7 +1911,7 @@ you have both pending, the pill stays up, still counting them,
 until you grant access and save the profile too.
 
 After saving, if a global setting changed (keybindings, app/float/
-ignore rules, or native Space bindings), `gui.json` is rewritten.
+ignore rules, or Desktop bindings), `gui.json` is rewritten.
 Tiling-only edits touch only the profile JSON. `init.lua` is never
 written.
 
@@ -1964,7 +1967,7 @@ the workflow layouts alone.
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
-  dashboards and logs. More stack space.
+  dashboards and logs. More room for the stack.
 
 **3 Screens:**
 
@@ -1973,7 +1976,7 @@ the workflow layouts alone.
   plus the one Floating space, which goes to the largest screen
   rather than being chosen for it.
 - **Command Center** *(Standard)* — Left: communication (stack).
-  Center: workspace (IDE/docs/preview). Right: logs/monitoring.
+  Center: work (IDE/docs/preview). Right: logs/monitoring.
 - **Visual Creative & Developer** — Left: design canvas. Center:
   frontend IDE. Right: inspectors. Mixed layouts for creative
   workflows.
@@ -2063,7 +2066,7 @@ float-or-tile rules.
 ### Ignore Rules (Power Users)
 
 An ignore rule goes further than floating: KiwiDesk pretends every
-window of that app does not exist. The windows get no virtual-space
+window of that app does not exist. The windows get no space
 assignment and emit no KiwiDesk window events. This is intended for
 HUDs, menu-bar utilities, and apps that misbehave when AX-tracked;
 ordinary “never tile this app” cases should use Float rules.
@@ -2077,7 +2080,7 @@ remove entries through its JSON, as described below. See
 
 KiwiDesk already ignores transient macOS input-source menus and
 switcher overlays, so the Globe-key language picker receives no
-virtual-space assignment or KiwiDesk focus border.
+space assignment or KiwiDesk focus border.
 
 Apps that use **macOS native tabs** (Finder, Terminal, Ghostty) are
 handled automatically: a tabbed window is one tile that follows
@@ -2132,7 +2135,7 @@ therefore lets the app follow its effective Space and Float rules.
 Ignore has no GUI control yet. Hand-edit its profile object when
 needed; Settings preserves that hidden object across profile saves,
 copies, and renames. Overrides apply the moment a profile loads,
-including automatic loads from a native-Space binding or monitor
+including automatic loads from a Desktop binding or monitor
 change.
 
 ## Shortcuts
@@ -2151,7 +2154,7 @@ layout, and one word for two things is one too many.)
 
 ### Your first run
 
-A fresh install doesn't drop you onto an empty desktop. It seeds a
+A fresh install doesn't drop you onto an empty screen. It seeds a
 setup **chosen for the screens you actually have** — the layouts
 come from each screen's shape, and the number of spaces from how
 many screens there are.
@@ -2491,13 +2494,13 @@ Only the rows this profile changes are stored in its JSON. Every base
 binding the profile does not override stays active — your profile-switch
 shortcut can never be lost by omission.
 
-## Native Spaces (Mission Control)
+## macOS Desktops (Mission Control)
 
-The **Profiles** section has a **Profiles per macOS Space** card
-listing each macOS desktop (Mission Control number). Assign a profile
-to each desktop using the dropdown. The card is a disclosure — open by
+The **Profiles** section has a **Profiles per macOS Desktop** card
+listing each Desktop (by its Mission Control number). Assign a profile
+to each Desktop using the dropdown. The card is a disclosure — open by
 default, and one click from out of the way if you never bind a
-desktop.
+Desktop.
 
 KiwiDesk has one active profile across the whole display setup. When
 multiple displays are connected while "Displays have separate Spaces"
@@ -2519,13 +2522,13 @@ The rows are also greyed while you edit a *stored* profile from the
 banner picker: bindings are global, and a profile may never override
 what selects it. Switch back to Live to change them.
 
-When you switch desktops (Ctrl+arrow, Mission Control, …), the bound
+When you switch Desktops (Ctrl+arrow, Mission Control, …), the bound
 profile loads with its spaces, layouts, and settings. Desktops without
 a binding keep whatever profile is active.
 
 ```mermaid
 flowchart TD
-    S["You switch to a<br/>macOS desktop (Space)"] --> B{"A profile bound<br/>to this desktop?"}
+    S["You switch to a<br/>macOS Desktop"] --> B{"A profile bound<br/>to this Desktop?"}
     B -->|"Yes"| A["That profile activates —<br/>its layout, gaps, and rules"]
     B -->|"No binding"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
@@ -2534,7 +2537,7 @@ flowchart TD
 Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
 `init.lua` with `bind_profile_to_native_space` instead. Each
-desktop also remembers which virtual space it was on — return to
+Desktop also remembers which space it was on — return to
 it and you land on the same space.
 
 ## Getting Help

@@ -20,7 +20,7 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case scrollingWrapFocus = "settings.scrolling.wrapFocus"
     case gridType = "settings.grid.type"
     case gridSplitDirection = "settings.grid.splitDirection"
-    case gridFillEmptySpace = "settings.grid.fillEmptySpace"
+    case gridFillEmptyCells = "settings.grid.fillEmptyCells"
     case gridAutoSize = "settings.grid.autoSize"
     case gridColumns = "settings.grid.columns"
     case gridRows = "settings.grid.rows"
@@ -54,8 +54,8 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case scrollingOverrideSlotSize =
         "settings.scrolling.override[space].slotSize"
     case gridOverrideType = "settings.grid.override[space].type"
-    case gridOverrideFillEmptySpace =
-        "settings.grid.override[space].fillEmptySpace"
+    case gridOverrideFillEmptyCells =
+        "settings.grid.override[space].fillEmptyCells"
     case gridOverrideSplitDirection =
         "settings.grid.override[space].splitDirection"
     case gridOverrideColumns = "settings.grid.override[space].columns"
@@ -102,7 +102,7 @@ extension LayoutKey {
         case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:
             return .row(.layoutDefaults, .grid, .atRest)
-        case .gridFillEmptySpace:
+        case .gridFillEmptyCells:
             // Inert while the RESOLVED grid type is rigid —
             // global rigid with no dynamic override
             // (GridEditor.fillEmptyIsInert), so both owners.
@@ -161,7 +161,7 @@ extension LayoutKey {
                     .layout(.stackOverrideMasterCount),
                 ])
             )
-        case .gridOverrideFillEmptySpace:
+        case .gridOverrideFillEmptyCells:
             return .row(
                 .spacesAndLayouts,
                 .perSpaceOverrides,

@@ -132,7 +132,7 @@ item's only appearance in CLI output.
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
-| | `bind_profile_to_native_space` | desktop number, profile |
+| | `bind_profile_to_native_space` | Desktop number, profile |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
@@ -175,7 +175,7 @@ item's only appearance in CLI output.
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
 | | `scroll.set_wrap_focus` | true\|false (default false) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
-| | `grid.set_fill_empty_space` | true\|false |
+| | `grid.set_fill_empty_cells` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
 | | `grid.set_dimensions` | columns, rows (upper bound in dynamic) |
 | | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
@@ -322,22 +322,22 @@ These events track the *visible window set*, not app
 lifecycle; the `reason` field says why the set changed:
 
 - `window_created` — `new` (a genuinely new window),
-  `returned` (back from another native macOS desktop or a
+  `returned` (back from another macOS Desktop or a
   session restore), `restored` (deminiaturized).
 - `window_destroyed` — `closed` (a real close), `minimized`
   (only minimized; it will come back as `restored`),
-  `vanished` (its native desktop was switched away; it
+  `vanished` (its macOS Desktop was switched away; it
   returns as `returned`).
 
-A native macOS Space switch thus fires a burst of `vanished`
+A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
 `reason` to ignore them. Caveat: a window closed *while its
-desktop is off-screen* already emitted `vanished` and never
+Desktop is off-screen* already emitted `vanished` and never
 gets a corrective `closed`; consumers that filter `vanished`
 must also refresh their state on `native_space_change`.
 
 `window_moved_to_space` fires when a window is explicitly
-moved to another virtual space (`move_to_space`,
+moved to another space (`move_to_space`,
 with or without follow, or a drag onto another display — the
 live crossing emits as the membership moves, so a drag pulled
 back before release emits once per crossing); bulk
@@ -350,9 +350,9 @@ reassignments (profile load, session restore) stay silent:
           "bundle_id": "com.spotify.client"}}
 ```
 
-`native_space_change` fires when the user switches native
-macOS Spaces (Mission Control desktops); its data carries the
-1-based desktop number and the active profile:
+`native_space_change` fires when the user switches macOS
+Desktops (Mission Control); its data carries the
+1-based Desktop number and the active profile:
 
 ```json
 {"event": "native_space_change",

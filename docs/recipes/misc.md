@@ -1,7 +1,7 @@
 ---
 title: Miscellaneous Integrations
 description: Shell scripts, event streaming, Hammerspoon, and
-  per-desktop keybindings.
+  per-Desktop keybindings.
 ---
 
 # Miscellaneous Integrations
@@ -68,11 +68,11 @@ another daemon. If you are already running Hammerspoon for
 other reasons, the CLI bridge above lets you invoke KiwiDesk
 commands without duplicating logic.
 
-## Per-desktop keybindings (hand-written configs)
+## Per-Desktop keybindings (hand-written configs)
 
 > **Native support exists now:** A profile can carry a sparse
 > `"layers"` override that shadows individual base shortcuts.
-> Combined with `bind_profile_to_native_space`, each desktop
+> Combined with `bind_profile_to_native_space`, each Desktop
 > gets its own layouts and its own keybinds with no Lua code.
 > See *Config cascade* under
 > [Keybindings](../lua-reference.md). This recipe remains for
@@ -81,8 +81,8 @@ commands without duplicating logic.
 
 For a hand-written config, combine shortcut layers with the
 `native_space_change` event. Only the active layer's bindings
-fire, so build each desktop's layer by merging shared binds with
-per-desktop overrides:
+fire, so build each Desktop's layer by merging shared binds with
+per-Desktop overrides:
 
 ```lua
 -- Shared binds, active in every layer:
@@ -124,15 +124,15 @@ KiwiDesk.define_layer("desk2", layer({
     end,
 }))
 
--- Switch layer when the native macOS desktop changes.
+-- Switch layer when the macOS Desktop changes.
 KiwiDesk.on("native_space_change", function(n)
     KiwiDesk.switch_layer(n == 2 and "desk2" or "desk1")
 end)
 
--- Start on desktop 1.
+-- Start on Desktop 1.
 KiwiDesk.switch_layer("desk1")
 ```
 
 Pair this with `bind_profile_to_native_space` (see
-[configuration](../lua-reference.md)) and each desktop gets
+[configuration](../lua-reference.md)) and each Desktop gets
 its own layouts *and* its own keybinds.

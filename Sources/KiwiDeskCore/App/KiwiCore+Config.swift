@@ -249,9 +249,9 @@ extension KiwiCore {
             -- One value for all gaps (the built-in default):
             -- KiwiDesk.set_gap_global(10)
 
-            -- Every virtual space (workspace) has its own
-            -- layout; the first argument is the SPACE id
-            -- (number or name), never a monitor. All spaces
+            -- Every Space has its own layout; the first
+            -- argument is the SPACE id (number or name),
+            -- never a monitor. All Spaces
             -- default to "bsp". Modes: bsp | stack |
             -- scrolling | monocle | grid | floating
             -- KiwiDesk.set_mode(1, "stack")
@@ -263,13 +263,13 @@ extension KiwiCore {
             -- Apps KiwiDesk should never manage at all:
             -- ignore_rules = { "eu.exelban.Stats" }
 
-            -- Send apps to fixed spaces:
+            -- Send apps to fixed Spaces:
             -- app_rules = {
             --   ["com.spotify.client"] = "music"
             -- }
 
-            -- Load a saved profile per native macOS Space
-            -- (the Mission Control desktop number):
+            -- Load a saved profile per macOS Desktop
+            -- (the Mission Control number):
             -- KiwiDesk.bind_profile_to_native_space(
             --     2, "Creator Studio")
 

@@ -28,7 +28,7 @@ extension MotionCard {
             Toggle(
                 L(
                     "behavior.animations.space_change",
-                    "Animate virtual space switches"
+                    "Animate Space switches"
                 ),
                 isOn: animations.onSpaceChange
             )
@@ -37,7 +37,7 @@ extension MotionCard {
             Text(
                 L(
                     "behavior.animations.space_change.caption",
-                    "Windows slide out of the space you're "
+                    "Windows slide out of the Space you're "
                         + "leaving and into the one you're "
                         + "switching to."
                 )

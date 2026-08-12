@@ -115,7 +115,7 @@ extension ProfilesSection {
                     "profiles.which_loads.placement_only",
                     "Right now: %1$@ → your Lua config keeps the "
                         + "layout; the built-in %2$@ only places "
-                        + "spaces on screens.",
+                        + "Spaces on screens.",
                     screens,
                     standardDisplayName(name)
                 )
@@ -123,7 +123,7 @@ extension ProfilesSection {
             return L(
                 "profiles.which_loads.placement_only_profile",
                 "Right now: %1$@ → %2$@ keeps the layout; the "
-                    + "built-in %3$@ only places spaces on "
+                    + "built-in %3$@ only places Spaces on "
                     + "screens.",
                 screens,
                 active,

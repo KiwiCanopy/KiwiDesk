@@ -130,7 +130,7 @@ struct DisplayCard: View {
     @ViewBuilder private var chips: some View {
         let assignments = rows.chips(on: display.fingerprint)
         if assignments.isEmpty {
-            Text(L("monitor_card.drop_here", "Drop a space here"))
+            Text(L("monitor_card.drop_here", "Drop a Space here"))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
@@ -182,7 +182,7 @@ struct DisplayCard: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more spaces on this display",
+                "%1$d more Spaces on this display",
                 count
             )
         )
@@ -254,11 +254,11 @@ struct DisplayCard: View {
         isSelected
             ? L(
                 "monitors.deselect",
-                "Hide the spaces on this display"
+                "Hide the Spaces on this display"
             )
             : L(
                 "monitors.select",
-                "Show the spaces on this display"
+                "Show the Spaces on this display"
             )
     }
 

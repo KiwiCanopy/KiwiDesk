@@ -29,7 +29,7 @@ extension LayoutCard {
         case .scrollingWrapFocus: scrollWrapFocusRow
         case .gridType: gridTypeRow
         case .gridSplitDirection: gridArrangeRow
-        case .gridFillEmptySpace: gridFillEmptyRow
+        case .gridFillEmptyCells: gridFillEmptyRow
         case .gridAutoSize: gridDimensionsGroup
         case .monocleOrientation: monocleOrientationRow
         case .monocleWrapFocus: monocleWrapFocusRow
@@ -67,7 +67,7 @@ extension LayoutCard {
             .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
             .gridOverrideType, .gridOverrideSplitDirection,
-            .gridOverrideFillEmptySpace, .gridOverrideColumns,
+            .gridOverrideFillEmptyCells, .gridOverrideColumns,
             .gridOverrideRows, .gridOverrideAutoSize,
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideLimit, .trackOverrideOverflowStyle,

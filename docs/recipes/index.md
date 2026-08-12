@@ -51,4 +51,4 @@ timeout, and output capture.
 - [**JankyBorders**](jankyborders.md) — layout-aware border
   colors via the `layout_change` event.
 - [**Miscellaneous**](misc.md) — shell scripts, event stream
-  queries, Hammerspoon, per-desktop keybinds.
+  queries, Hammerspoon, per-Desktop keybinds.

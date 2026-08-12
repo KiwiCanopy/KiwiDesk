@@ -17,7 +17,7 @@ public struct GridParams: Sendable, Equatable, Codable {
     }
 
     public var type: GridType = .dynamic
-    public var fillEmptySpace = true
+    public var fillEmptyCells = true
     public var splitDirection: SplitDirection = .horizontal
     /// Rigid grid dimensions.
     public var columns: Int = 3
@@ -39,7 +39,7 @@ public struct GridParams: Sendable, Equatable, Codable {
     /// JSON keys follow the Lua setters (`grid.set_*`).
     private enum CodingKeys: String, CodingKey {
         case type
-        case fillEmptySpace = "fill_empty_space"
+        case fillEmptyCells = "fill_empty_cells"
         case splitDirection = "split_direction"
         case columns
         case rows
@@ -59,10 +59,10 @@ public struct GridParams: Sendable, Equatable, Codable {
                 GridType.self,
                 forKey: .type
             ) ?? .dynamic
-        fillEmptySpace =
+        fillEmptyCells =
             try container.decodeIfPresent(
                 Bool.self,
-                forKey: .fillEmptySpace
+                forKey: .fillEmptyCells
             ) ?? true
         splitDirection =
             try container.decodeIfPresent(
@@ -102,8 +102,8 @@ public struct GridParams: Sendable, Equatable, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .type)
         try container.encode(
-            fillEmptySpace,
-            forKey: .fillEmptySpace
+            fillEmptyCells,
+            forKey: .fillEmptyCells
         )
         try container.encode(
             splitDirection,

@@ -81,7 +81,7 @@ struct SpacesUsingLayout: View {
     private var emptyProse: String {
         L(
             "layout_defaults.spaces_using.none",
-            "No space uses this layout yet — set one to it in "
+            "No Space uses this layout yet — set one to it in "
                 + "%1$@.",
             SettingsDestination.spaces.title
         )

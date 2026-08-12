@@ -16,6 +16,21 @@ paths:
   - "Sources/KiwiDeskCore/Models/**"
   - "Sources/KiwiDeskCore/Animation/**"
   - "Sources/KiwiDesk/Settings/**"
+  # The space/Desktop rule below governs COPY, which is authored
+  # in none of the dirs above — #768 swept eleven catalogs, four
+  # Onboarding files, the site and ten docs pages, and an author
+  # editing any of them would otherwise be handed
+  # gui.md/localization.md/docs.md, none of which name the two
+  # senses. Same reasoning as the Layouts entry above: the rule
+  # has to load where the words are written.
+  - "Sources/KiwiDesk/Onboarding/**"
+  - "Sources/KiwiDeskCore/Resources/Locales/**"
+  - "site/src/i18n/**"
+  - "docs/**"
+  # README.md is deliberately absent: it is in
+  # .github/ci-ignore.txt, and CiPathFilterTests reds on a rule
+  # file pinning a path CI skips — a pin nothing builds is a
+  # promise nothing keeps.
 ---
 
 # Config / profile vocabulary
@@ -68,6 +83,47 @@ synonym:
   that word belongs to macOS **native tabs** (§5) and to the
   user guide's gesture prose alone — see
   [state-and-layout.md](state-and-layout.md).
+- **space** vs **Desktop** — a *space* is one of KiwiDesk's own
+  window lists (`SpaceID`, `focus_space`, `space_modes`, the
+  Space Bar). Name a macOS Mission Control desktop **Desktop**
+  and never a "space" — in a label, a doc sentence or a doc
+  comment — and where a sentence names both, write both words:
+  one readable either way is the whole defect the rename
+  removed. Retired as names for KiwiDesk's: *workspace*,
+  *virtual space*. The word also stops naming a generic screen
+  area ("empty space", "the available space") — say the width,
+  the height or the area that is meant. The **wire is exempt
+  and frozen**, so this rule governs copy only; the design
+  decision cited at the end of this bullet names which wire
+  names those are, and naming them here too would be one list
+  rotting in two files. **Quote Apple verbatim** where copy
+  names one of
+  Apple's own controls — the "Displays have separate Spaces"
+  checkbox, the Mission Control shortcut rows
+  (`system_shortcut.mission_control_space_*`) — because the
+  string's job there is to send the user to a row they can find
+  on screen, and a locale must reach for Apple's own translation
+  rather than coin a name for someone else's control.
+  **In the ENGLISH of a user-facing STRING, capitalise
+  KiwiDesk's own noun** (Space, Spaces): the capital is what
+  makes the Desktop/Space contrast visible in a sentence naming
+  both, and `Sources/KiwiDeskCore/Resources/Locales/en.json` and
+  `site/src/i18n/en.json` are the two corpora it binds. It does
+  **not** reach an identifier — a census row id, a search
+  keyword, a dictionary key — where a capitalisation sweep has
+  already once re-keyed `(action) spaces.delete`. Nor does it
+  reach `docs/` running prose, which is written about the app
+  rather than displayed by it. And it is **not** a claim that the
+  word survives translation: `scripts/localization_guards.py`'s
+  `PRODUCT_NAMES` is the one register of what must appear
+  verbatim in every catalog, "Space" is deliberately absent from
+  it, and every locale rightly translates the noun
+  (`スペース`, `공간`, `пространство`). A translator reading this
+  rule must not Latinise theirs. The
+  ruling, and the table of names already eliminated so none is
+  re-proposed, is `docs/design-decisions.md` ▸ Vocabulary: macOS
+  has Desktops, KiwiDesk has Spaces, which also owns the list of
+  wire names this rule exempts.
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).

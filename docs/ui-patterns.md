@@ -874,7 +874,7 @@ state, and a recognizable rest treatment or list context —
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides
 the Columns/Rows steppers (#171), Auto track limit overrides the
-Track limit stepper (#178), Fill empty space does nothing in a
+Track limit stepper (#178), Fill empty cells does nothing in a
 rigid grid, the scroll-speed row is dead when Animate focus
 shifts is off, the bars' Content picker is inert on a vertical
 edge and their Background color inert under Plain — the

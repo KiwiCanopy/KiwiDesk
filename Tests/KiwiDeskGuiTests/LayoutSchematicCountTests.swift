@@ -320,7 +320,7 @@ struct LayoutSchematicCountTests {
             columns: 4,
             rows: 4,
             type: .dynamic,
-            fillEmptySpace: false,
+            fillEmptyCells: false,
             autoSize: false,
             splitDirection: columnsFirst ? .horizontal : .vertical,
             placement: .last,

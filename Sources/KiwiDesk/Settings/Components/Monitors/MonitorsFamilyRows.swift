@@ -128,7 +128,7 @@ struct MonitorsFamilyRows {
     /// plus, on the main display, the ones that follow main. They
     /// are on that screen at this moment, which is what the
     /// readout claims to answer; counting only the carded chips
-    /// made a desk where every space follows main read "0 spaces
+    /// made a desk where every space follows main read "0 Spaces
     /// here" on every card.
     func held(on display: Display, isMain: Bool) -> Int {
         chips(on: display.fingerprint).count

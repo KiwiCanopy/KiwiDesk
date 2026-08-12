@@ -100,7 +100,7 @@ flowchart LR
     A["AX: a window disappears"] --> C{"same frame within the<br/>coalesce window, and an<br/>AXTabGroup on either side?"}
     B["AX: a window appears<br/>at the same frame"] --> C
     C -->|yes| R[".windowRekeyed<br/>slot kept, id swapped in place"]
-    C -->|no, or native-space reconcileAll| D["destroy + create<br/>two separate windows"]
+    C -->|no, or Desktop-switch reconcileAll| D["destroy + create<br/>two separate windows"]
 ```
 
 ## 2. Command dispatch (`set_*` verbs)

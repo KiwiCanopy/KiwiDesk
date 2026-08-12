@@ -71,7 +71,7 @@ struct SpacesGateWiringTests {
             ],
             overrides + "SpaceOverrideRows+ModeRows.swift": [
                 "gates.inertReason("
-                    + "for:.layout(.gridOverrideFillEmptySpace))",
+                    + "for:.layout(.gridOverrideFillEmptyCells))",
                 "gates.inertReason("
                     + "for:.layout(.gridOverrideColumns))",
                 "gates.inertReason("
@@ -105,7 +105,9 @@ struct SpacesGateWiringTests {
         // Every gate sentence is authored ONCE, in the help enum; a
         // row that re-authors one is the duplication that let
         // General describe one status two ways.
-        let help = try read(overrides + "SpacesGates.swift")
+        let help = SourceScan.stripComments(
+            try read(overrides + "SpacesGates.swift")
+        )
         let nonAuthors =
             Array(consults.keys) + [
                 overrides + "SpaceOverrideRows.swift",
@@ -114,7 +116,7 @@ struct SpacesGateWiringTests {
         for key in [
             "space_override.reset_active.none",
             "layout_params.master_orientation.one_master",
-            "scroll_grid.fill_empty_space.rigid_only",
+            "scroll_grid.fill_empty_cells.rigid_only",
             "scroll_grid.auto_size.gates",
             "track.auto_tracks.gates",
         ] {
@@ -124,7 +126,8 @@ struct SpacesGateWiringTests {
             )
             for name in nonAuthors {
                 #expect(
-                    !(try read(name)).contains(key),
+                    !SourceScan.stripComments(try read(name))
+                        .contains(key),
                     Comment(
                         rawValue:
                             "\(name) re-authors \(key) — it must "

@@ -112,7 +112,7 @@ struct HomeFirstRunBanner: View {
         if let profile = model.activeProfile {
             return L(
                 "home.firstrun.lede_profile",
-                "%1$d spaces, keys bound, saved as %2$@. "
+                "%1$d Spaces, keys bound, saved as %2$@. "
                     + "Nothing below needs your attention — "
                     + "this is where you come when you want "
                     + "something different.",
@@ -122,7 +122,7 @@ struct HomeFirstRunBanner: View {
         }
         return L(
             "home.firstrun.lede",
-            "%1$d spaces are set up and your keys are "
+            "%1$d Spaces are set up and your keys are "
                 + "bound. Nothing below needs your attention "
                 + "— this is where you come when you want "
                 + "something different.",

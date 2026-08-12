@@ -22,7 +22,7 @@ import SwiftUI
 /// live for a space that overrides it, so the per-space editor
 /// reads `resolvedStack(for:)`/`resolvedGrid(for:)`/
 /// `resolvedTrack(for:)`, the same values the Layout Defaults twin
-/// resolves — two surfaces answering "is this space rigid"
+/// resolves — two surfaces answering "is this Space rigid"
 /// differently is the drift the resolver exists to prevent.
 ///
 /// Returning the reason rather than a Bool keeps the grey and its
@@ -65,7 +65,7 @@ struct SpacesGates {
         case .layout(.stackOverrideMasterOrientation):
             return settings.resolvedStack(for: space).masterCount <= 1
                 ? .oneMaster : nil
-        case .layout(.gridOverrideFillEmptySpace):
+        case .layout(.gridOverrideFillEmptyCells):
             return settings.resolvedGrid(for: space).type == .rigid
                 ? .rigidGrid : nil
         case .layout(.gridOverrideColumns),
@@ -90,7 +90,7 @@ struct SpacesGates {
     static let resolved: Set<SettingKey> = [
         .spaces(.spaceOverrideResetActive),
         .layout(.stackOverrideMasterOrientation),
-        .layout(.gridOverrideFillEmptySpace),
+        .layout(.gridOverrideFillEmptyCells),
         .layout(.gridOverrideColumns),
         .layout(.gridOverrideRows),
         .layout(.trackOverrideLimit),
@@ -131,20 +131,20 @@ enum SpacesGateHelp {
             )
         case .rigidGrid:
             return L(
-                "scroll_grid.fill_empty_space.rigid_only",
-                "A rigid grid keeps every cell, so there is "
-                    + "no empty space to fill."
+                "scroll_grid.fill_empty_cells.rigid_only",
+                "A rigid grid keeps every cell, so an empty cell "
+                    + "stays empty rather than being filled."
             )
         case .autoSizedGrid:
             return L(
                 "scroll_grid.auto_size.gates",
-                "Auto-size grid is on for this space, so the "
+                "Auto-size grid is on for this Space, so the "
                     + "screen decides the columns and rows."
             )
         case .autoTracks:
             return L(
                 "track.auto_tracks.gates",
-                "Auto track limit is on for this space, so "
+                "Auto track limit is on for this Space, so "
                     + "the screen decides how many open."
             )
         }

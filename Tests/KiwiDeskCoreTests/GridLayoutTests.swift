@@ -156,7 +156,7 @@ struct GridLayoutTests {
     @Test("Without filling, the empty cell stays empty")
     func noFill() throws {
         let context = makeContext { grid in
-            grid.fillEmptySpace = false
+            grid.fillEmptyCells = false
         }
         let frames = layout.calculateGeometry(
             for: ids(3),
