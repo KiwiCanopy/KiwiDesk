@@ -32,6 +32,10 @@ struct SegmentedPickerCoverageTests {
     /// So the ban is a source scan, with the usual `allowed` map
     /// for a site that earns an exemption — empty today, and an
     /// entry must say what makes the native control right there.
+    /// Stated reach: the map is keyed on a file's NAME, so an
+    /// entry would exempt every same-named file in the tree, and
+    /// a style reached through a variable is invisible to any
+    /// scan.
     @Test("no view takes the native segmented style")
     func nativeSegmentedStyleIsBanned() throws {
         let allowed: [String: String] = [:]
@@ -49,8 +53,18 @@ struct SegmentedPickerCoverageTests {
             )
             .split(whereSeparator: \.isWhitespace)
             .joined()
+            // BOTH spellings: the shorthand and the legacy
+            // `SegmentedPickerStyle()` initialiser, which is the
+            // same control and passed the first cut green
+            // (guard-prover, 2026-08-12). What a scan still
+            // cannot see is `.pickerStyle(someVar)`.
+            let native =
+                source.contains(".pickerStyle(.segmented)")
+                || source.contains(
+                    ".pickerStyle(SegmentedPickerStyle())"
+                )
             #expect(
-                !source.contains(".pickerStyle(.segmented)"),
+                !native,
                 Comment(
                     rawValue:
                         "\(name) takes the native segmented "
@@ -131,7 +145,11 @@ struct SegmentedPickerCoverageTests {
             let ratio = try contrast(
                 SettingsTheme.ink,
                 over: SettingsTheme.card,
-                wash: (Color.primary, 0.08),
+                // READ from the control, never restated: the
+                // first cut carried its own 0.08 and measured
+                // two tokens while claiming to measure the
+                // track.
+                wash: (Color.primary, SegmentedPickerMetrics.trackAlpha),
                 dark: dark
             )
             #expect(

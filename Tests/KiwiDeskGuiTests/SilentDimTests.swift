@@ -20,6 +20,13 @@ import Testing
 /// `.opacity` — so a fourth would have arrived silent with
 /// nothing red.
 ///
+/// It is fail-CLOSED by construction: every conditional opacity
+/// of the dim shape is listed, colour alphas included. An
+/// earlier cut tried to be clever and excluded a call whose
+/// RECEIVER looked like a colour, which let a control's own
+/// accent fill fade on a gate with nothing red — the entry for
+/// a colour alpha costs one line and cannot do that.
+///
 /// Stated limit: this counts the DIMMERS, not the reasons. A row
 /// listed below whose reason later stops being drawn stays green
 /// here; that half is the render guards' and the eye's.
@@ -71,6 +78,14 @@ struct SilentDimTests {
             + "the row above it",
         "DragVisualPreview.swift":
             "the same, for the drag visuals preview",
+        "FollowsMainTray.swift":
+            "a COLOUR's alpha, not a view dim: the drop-target "
+            + "highlight's own fill fades in and out with the "
+            + "drag. Listed rather than excluded by its "
+            + "receiver — a receiver test let a real dim hide "
+            + "behind `.tint(SettingsTheme.accent.opacity(…))`, "
+            + "which is a control's fill saying \"inert\" with "
+            + "no reason anywhere (guard-prover, 2026-08-12)",
     ]
 
     @Test("a conditional dim is GreyOut's or is listed")
@@ -167,9 +182,7 @@ struct SilentDimTests {
                 argument.append(character)
                 index = after.index(after: index)
             }
-            if argument.contains("?"), isDimPair(argument),
-                !isColourAlpha(receiver)
-            {
+            if argument.contains("?"), isDimPair(argument) {
                 return true
             }
             consumed += scanned.distance(
@@ -181,35 +194,21 @@ struct SilentDimTests {
         return false
     }
 
-    /// One branch exactly `1`, the other a fade tier.
+    /// One branch fully drawn (`1`), the other ANY fade short of
+    /// it. The first cut bounded the fade to 0.2...0.6, which is
+    /// the tiers this tree happens to use — so a dim written at
+    /// 0.7 was not a dim to the guard, and escaped both halves
+    /// at once (guard-prover, 2026-08-12). The band bought
+    /// nothing: a hover wash moves between two fractions and an
+    /// appear/disappear touches 0, so neither reaches `1` and
+    /// neither is caught by widening this.
     private func isDimPair(_ argument: String) -> Bool {
         let numbers = argument.split {
             !$0.isNumber && $0 != "."
         }
         .compactMap { Double($0) }
         guard numbers.contains(1) else { return false }
-        return numbers.contains { $0 >= 0.2 && $0 <= 0.6 }
+        return numbers.contains { $0 > 0 && $0 < 1 }
     }
 
-    /// A colour's own alpha rather than a view's. Kept as a
-    /// short receiver list rather than a general parser: every
-    /// case in this tree is a `Color` or a `ShapeStyle` reached
-    /// by name, and a wrong answer here is fail-OPEN (an unseen
-    /// dim), so a new spelling joins this list rather than the
-    /// list being widened to a guess.
-    private func isColourAlpha(_ receiver: String) -> Bool {
-        // The receiver arrives with the dot that joins it to the
-        // call (`.tint.`), so trim it before comparing.
-        let receiver =
-            receiver.hasSuffix(".")
-            ? String(receiver.dropLast()) : receiver
-        for name in [
-            ".tint", "Color.primary", "Color.secondary",
-            "Color.white", "Color.black", "SettingsTheme",
-            ".accent", ".ink",
-        ] where receiver.hasSuffix(name) {
-            return true
-        }
-        return false
-    }
 }

@@ -35,6 +35,16 @@ struct GateReasonPlacementTests {
     /// the set is a real answer — draw its reason — and one
     /// leaving it means an adjacency changed, which is equally
     /// worth reading.
+    ///
+    /// Stated reach, since a green here is narrower than it
+    /// looks: `channel` reads a row's OWN `gate:`, so a
+    /// condition used only as a CONTAINER gate never reaches
+    /// `causeIsOnSurface` at all — flipping `.reduceMotion`'s
+    /// answer changes nothing here, proven by mutation
+    /// (guard-prover, 2026-08-12). Promoting a container-only
+    /// condition to a row gate therefore arrives carrying an
+    /// answer nothing has ever checked; that promotion owes a
+    /// case in this set.
     @Test("the derivation names the rows that owe a sentence")
     func owedRowsAreTheKnownSet() {
         let owed = SettingKey.allCases.filter {
@@ -112,7 +122,10 @@ struct GateReasonPlacementTests {
         // The gap itself: the rows' own file draws no `?`, so
         // `.remote` currently points at nothing for them. When
         // this stops being true, this suite is where the claim
-        // gets re-stated.
+        // gets re-stated. ONE file, deliberately — the editor's
+        // siblings could gain the anchor with this green, and
+        // the issue tracking it (#841) names the surface rather
+        // than this line.
         let path = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/"
@@ -150,7 +163,10 @@ struct GateReasonPlacementTests {
         .joined()
         // The GreyOut closes BEFORE the sentence opens: the
         // dimmed subtree is the inner stack, and the `if` is its
-        // sibling.
+        // sibling. Both ranges are FIRST occurrences, so a
+        // second dim block later in this file wrapping the
+        // sentence would compare against the first and pass —
+        // stated rather than chased, the file having one.
         let dim = try #require(
             source.range(of: "GreyOut(active:sourceBarOff")
         )

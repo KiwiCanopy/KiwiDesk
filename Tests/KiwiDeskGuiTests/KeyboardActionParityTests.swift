@@ -226,7 +226,12 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "LayerStripEditor.swift",
-                "focusedChip = stripSurvivesDeletion",
+                // The whole expression, both arms: stopping at
+                // the condition let the ternary be INVERTED —
+                // focus named INTO a card that just retired —
+                // and stay green (guard-prover, 2026-08-12).
+                "focusedChip = stripSurvivesDeletion "
+                    + "? KeyLayer.defaultName : nil",
                 "and deleting the selected layer moves focus "
                     + "WITH the selection to the base chip — but "
                     + "only where the card survives the "
@@ -256,11 +261,19 @@ struct KeyboardActionParityTests {
                 },
                 "\(wiring.file) is gone"
             )
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
+            // Squashed on BOTH sides: this suite matched raw
+            // source until `swift format` wrapped one of these
+            // ternaries across three lines and reddened a guard
+            // whose subject had not changed — a reflow owes
+            // nothing (tests.md), so the needle must survive one
+            // (guard-prover, 2026-08-12).
+            let source = squashed(
+                SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
             )
             #expect(
-                source.contains(wiring.needle),
+                source.contains(squashed(wiring.needle)),
                 Comment(
                     rawValue:
                         "\(wiring.file) lost `\(wiring.needle)` "
@@ -270,6 +283,12 @@ struct KeyboardActionParityTests {
                 )
             )
         }
+    }
+
+    /// Whitespace-free source, so a needle survives the
+    /// formatter wrapping a call — or a ternary — across lines.
+    private func squashed(_ source: String) -> String {
+        source.split(whereSeparator: \.isWhitespace).joined()
     }
 
     /// One focus wiring: the file it lives in, the use site that
