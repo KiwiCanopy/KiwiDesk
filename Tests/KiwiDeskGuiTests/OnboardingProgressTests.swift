@@ -45,7 +45,18 @@ struct OnboardingProgressTests {
 
             let planned = model.plannedSteps
             var walked: [OnboardingModel.Step] = [model.step]
-            while model.step != .done {
+            // BOUNDED, because a walk driven by the model's own
+            // transitions is a walk that can stop advancing: a
+            // `beginPresentation` that sets the step and forgets
+            // the plan leaves `advance()` correctly doing
+            // nothing, and this loop spun for seven minutes
+            // instead of failing (`guard-prover`, 2026-08-12).
+            // The cap is the longest tour there can be, so
+            // reaching it IS the failure rather than a timeout
+            // somebody has to interpret.
+            var guardRail = OnboardingModel.Step.allCases.count
+            while model.step != .done, guardRail > 0 {
+                guardRail -= 1
                 switch model.step {
                 case .grant: model.continueAfterAccessibility()
                 case .spaces: model.continueAfterSpaces()
@@ -56,6 +67,14 @@ struct OnboardingProgressTests {
                 }
                 walked.append(model.step)
             }
+            #expect(
+                guardRail > 0,
+                Comment(
+                    rawValue: "the walk never reached .done — "
+                        + "advance() stopped moving at "
+                        + "\(model.step)"
+                )
+            )
 
             #expect(
                 planned == walked,
@@ -241,7 +260,12 @@ struct OnboardingProgressTests {
         model.beginPresentation(at: .grant)
 
         var seen: [Int?] = [model.progressIndex]
-        while model.step != .done {
+        // Bounded for `planMatchesTheWalkedRoute`'s reason: a
+        // model that stops advancing must fail this test, not
+        // hang it.
+        var guardRail = OnboardingModel.Step.allCases.count
+        while model.step != .done, guardRail > 0 {
+            guardRail -= 1
             switch model.step {
             case .grant: model.continueAfterAccessibility()
             case .spaces: model.continueAfterSpaces()
@@ -252,6 +276,7 @@ struct OnboardingProgressTests {
             }
             seen.append(model.progressIndex)
         }
+        #expect(guardRail > 0, "the walk never reached .done")
 
         #expect(seen == (0..<seen.count).map { Int?($0) })
         #expect(
