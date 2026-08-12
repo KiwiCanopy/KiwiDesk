@@ -164,8 +164,10 @@ extension AdvancedColorRow {
             "space_bar.color.focused_item.help",
             "Tints the focused window — its glyph in the active "
                 + "Space and the front-app segment. Glyph tint "
-                + "needs the \u{201C}%1$@\u{201D} icon mode.",
-            L("app_bar.icon_source.app_font", "Glyphs")
+                + "needs \u{201C}%2$@\u{201D} set to "
+                + "\u{201C}%1$@\u{201D}.",
+            L("app_bar.icon_source.app_font", "Glyphs"),
+            L("space_bar.icon_source.label", "App symbol style")
         )
     }
 }

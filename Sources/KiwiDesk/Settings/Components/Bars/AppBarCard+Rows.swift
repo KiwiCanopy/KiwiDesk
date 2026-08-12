@@ -217,10 +217,18 @@ extension AppBarCard {
                 // greying it hid the only editor for a value in
                 // use.
                 active: gates.everyShownBarBoxed,
+                // Style name INTERPOLATED from the picker entry's
+                // own key, not re-typed (#818) — and it must move
+                // with its Space Bar twin, which carries the
+                // identical English: one anchored and one typed
+                // is worse than either end, since the two then
+                // disagree per locale with nothing checking.
                 help: L(
                     "app_bar.background_fit.boxed_only",
-                    "Boxed draws a box per item, not a shared "
-                        + "plate, so there is nothing to size."
+                    "\u{201C}%1$@\u{201D} draws a box per item, "
+                        + "not a shared plate, so there is "
+                        + "nothing to size.",
+                    L("app_bar.background_style.boxed", "Boxed")
                 )
             )
         )
@@ -255,15 +263,25 @@ extension AppBarCard {
     private var iconSourceRow: some View {
         DropdownRow(
             label: L("app_bar.icon_source.label", "App symbol style"),
+            // Four labels INTERPOLATED from their own keys, not
+            // re-typed (#818): the mode, and the three colour
+            // rows this sentence sends the reader to. Those three
+            // live on another page, which is exactly where a
+            // hand-typed label drifts unnoticed.
             help: L(
                 "app_bar.icon_source.help",
-                "How app icons are drawn. Glyphs shows a "
+                "How app icons are drawn. "
+                    + "\u{201C}%1$@\u{201D} shows a "
                     + "monochrome symbol from KiwiDesk's "
                     + "built-in icon set, colored by the bar's "
-                    + "item colors — Item, Active item, and "
-                    + "Hover item below — so those colors also "
+                    + "item colors — %2$@, %3$@ and %4$@ "
+                    + "below — so those colors also "
                     + "decide how the glyphs look. Apps "
-                    + "without a symbol keep their app icon."
+                    + "without a symbol keep their app icon.",
+                L("app_bar.icon_source.app_font", "Glyphs"),
+                L("app_bar.color.item", "Item"),
+                L("app_bar.color.active_item", "Active item"),
+                L("app_bar.color.hover_item", "Hover item")
             )
         ) {
             Picker(
@@ -284,9 +302,14 @@ extension AppBarCard {
                 // collapses Name to icon-only, so icons are on
                 // screen and this control must stay live.
                 active: gates.everyShownBarNameOnly,
+                // Both labels INTERPOLATED from their own keys,
+                // not re-typed (#818).
                 help: L(
                     "app_bar.icon_source.name_only",
-                    "Icons are hidden while Content is Name."
+                    "Icons are hidden while \u{201C}%1$@\u{201D} "
+                        + "is \u{201C}%2$@\u{201D}.",
+                    L("app_bar.content.label", "Content"),
+                    L("app_bar.content.name", "Name")
                 )
             )
         )
