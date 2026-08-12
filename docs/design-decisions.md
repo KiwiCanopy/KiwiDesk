@@ -273,6 +273,63 @@ what each requires, why script is irrelevant to one and decisive
 to the other, and what to do when adding a name.
 
 
+### One concept, one word — and why that one is not guarded
+
+**[Trade-off]**
+
+A feature name is decided once for all eleven languages. An
+**ordinary** word is not: *layout*, *gap*, *profile*, *shortcut*
+have no label key of their own, so nothing in a catalog declares
+which of a language's two candidates KiwiDesk means. Six catalogs
+were shipping two or three words apiece for one concept, and the
+split fell between adjacent surfaces — a tab bar and the help
+text under it, a destination label and the menu item that opens
+it — where a user meets both in one glance.
+
+The decision has two halves, and the second is the one a
+maintainer would otherwise undo.
+
+**The word is chosen by a ranked ladder, not by a table.** A
+candidate that already names another KiwiDesk concept in that
+catalog loses whatever its count — a label reusing another
+feature's noun does not read as inconsistent, it reads as true
+about the wrong thing, which is how a Simplified-Chinese profile
+search returned a result labelled *configuration file*.
+Otherwise the catalog's own occurrence count decides, and a near
+tie goes to the destination label, that being the name the user
+learns. Writing the *procedure* rather than its output is
+deliberate: an eleven-column table of winning words would be a
+copy of the corpus, and a copy of the corpus rots against it on
+any commit, while the count rule makes each catalog its own
+register.
+
+**No guard enforces it, and none should be built.** The obvious
+one — a banned-rival register per locale — dies on a fact that
+only shows up once the sweep is done: every losing word is still
+*correct somewhere else in the same file*. Spanish «espacio»,
+Italian «spazio» and Portuguese «espaço» each name a Space in
+about a hundred keys; Korean 연결 means *connected*; Chinese
+配置文件 is right in the one key the ruling exists to protect.
+A ban would fire on roughly 250 good values across six locales
+on a corpus that is clean the day it lands — and
+`scripts/localization_guards.py` has no exemption file by policy,
+so the guard would be reverted or given a baseline within a week.
+
+What was done instead is worth more than the guard would have
+been: the two *adjacent* classes were made unwritable rather than
+scanned for. A `▸` breadcrumb is held against what each segment's
+own key renders, and English prose that names a pane or a role
+now interpolates that label's key instead of quoting it (#818),
+which puts the anchor under `placeholder_drift` — an exact
+contract that already runs — in every locale forever. The
+residue, one language's two ordinary words for one idea, stays
+with review, and the ladder is what makes that review cheap: a
+reviewer who does not speak the language can still check a grep.
+
+The ladder and the counted legitimate uses are in
+[Feature name policy](localization-naming.md) ▸ Family C.
+
+
 ### Vocabulary: macOS has Desktops, KiwiDesk has Spaces
 
 **[Principle]**

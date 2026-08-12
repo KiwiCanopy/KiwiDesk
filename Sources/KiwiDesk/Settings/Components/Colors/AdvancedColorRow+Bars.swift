@@ -155,12 +155,17 @@ extension AdvancedColorRow {
         }
     }
 
+    /// The icon mode is INTERPOLATED from the picker entry's own
+    /// key rather than named as text (#818) — this help lives on
+    /// another page than the picker it names, which is exactly
+    /// where a hand-typed label drifts unnoticed.
     private var focusedItemHelp: String {
         L(
             "space_bar.color.focused_item.help",
             "Tints the focused window — its glyph in the active "
                 + "Space and the front-app segment. Glyph tint "
-                + "needs Glyphs icon mode."
+                + "needs the \u{201C}%1$@\u{201D} icon mode.",
+            L("app_bar.icon_source.app_font", "Glyphs")
         )
     }
 }

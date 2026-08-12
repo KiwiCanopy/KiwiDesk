@@ -63,10 +63,14 @@ extension SpaceBarCard {
                 // un-greys it.
                 active: style.wrappedValue.backgroundStyle
                     == .boxed,
+                // Style name INTERPOLATED from the picker entry's
+                // own key, not re-typed (#818).
                 help: L(
                     "space_bar.background_fit.boxed_only",
-                    "Boxed draws a box per item, not a shared "
-                        + "plate, so there is nothing to size."
+                    "\u{201C}%1$@\u{201D} draws a box per item, "
+                        + "not a shared plate, so there is "
+                        + "nothing to size.",
+                    L("app_bar.background_style.boxed", "Boxed")
                 )
             )
         )
@@ -78,12 +82,16 @@ extension SpaceBarCard {
                 "space_bar.icon_source.label",
                 "App symbol style"
             ),
+            // Mode name INTERPOLATED from the picker entry's own
+            // key, not re-typed (#818).
             help: L(
                 "space_bar.icon_source.help",
-                "How app glyphs are drawn. Glyphs shows a "
+                "How app glyphs are drawn. "
+                    + "\u{201C}%1$@\u{201D} shows a "
                     + "monochrome symbol colored by the bar's "
                     + "item colors; apps without a symbol keep "
-                    + "their app icon."
+                    + "their app icon.",
+                L("app_bar.icon_source.app_font", "Glyphs")
             )
         ) {
             Picker(

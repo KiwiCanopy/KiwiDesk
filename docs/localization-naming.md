@@ -7,9 +7,12 @@ description: Which KiwiDesk names stay English in every language, which each loc
 
 Some KiwiDesk names are the same in every language — "App Bar",
 "Space Bar". Others are different in almost all of them — the
-layout modes. This page is the one place that says which is which,
-what each family requires of a translation, and why the two are
-enforced by opposite-shaped guards.
+layout modes. A third group is not a name at all, but an ordinary
+word a language may have two of — *layout*, *gap*, *profile*.
+This page is the one place that says which is which, what each
+family requires of a translation, and why the first two are
+enforced by opposite-shaped guards while the third is enforced by
+nothing.
 
 It exists because getting this wrong is invisible: prose naming a
 feature the interface does not call that reads perfectly to
@@ -18,9 +21,9 @@ of them, and search made it worse — a destination name is now a
 breadcrumb segment, so an invented name appears on every hit
 inside that pane.
 
-If you are translating, the rules are the two **What it requires**
-sections. If you are changing the policy or adding a name, read
-the rest.
+If you are translating, the rules are the three **What it
+requires** sections. If you are changing the policy or adding a
+name, read the rest.
 
 ## The question that sorts a name
 
@@ -32,6 +35,12 @@ the rest.
 
 **No → Family B.** Each locale decides, and only consistency with
 its own picker is enforced.
+
+**No key to ask about → Family C.** A common noun — *layout*,
+*gap*, *profile*, *shortcut* — has no label key of its own, so
+the question has nothing to read. That absence is what defines
+the third family, and it is checkable the same way: if you cannot
+name the key whose value is the name, you are in Family C.
 
 The test is about the **catalogs**, not about the word. The
 tempting alternative — *does this name already have a
@@ -211,15 +220,130 @@ fine, but in a CJK sentence it is a foreign body.
 `LocalizationModeNamePolicyTests` pins which locales are on which
 side, against the shipped catalogs.
 
+## Family C — the common nouns
+
+*Layout*, *gap*, *profile*, *shortcut*, *preset*, *slot*. Words
+KiwiDesk did not coin and does not display as a name of their
+own — they only ever appear inside a sentence about something
+else.
+
+Families A and B are about what a *feature* is called. Family C
+is about what happens when one language has two ordinary words
+for the same idea and a translation reaches for both. The user
+learns the word on one page and does not recognise it on the
+next; search finds one surface and not the other. It falls
+between adjacent surfaces most of the time — a tab bar and the
+help text under it, a destination label and the menu item that
+opens it — which is exactly where it is noticed.
+
+### What it requires
+
+**One concept, one word, per catalog.** When you meet a concept
+this file does not name, decide it with the ladder below and
+apply your answer everywhere in your file, not only in the key
+you were editing.
+
+1. **A word that already names another KiwiDesk concept in your
+   catalog loses, whatever its count.** This outranks everything
+   else, because a label that reuses another feature's noun does
+   not read as inconsistent — it reads as *true about the wrong
+   thing*. `zh-Hans` labelled a Profile 配置文件, which is what
+   `general.advanced.config_file` renders, so searching for a
+   profile returned a result whose kind line said *configuration
+   file*. `es`, `it` and `pt-BR` each labelled a bar gap with
+   their word for a **Space**. `ko` labelled a bound key with its
+   word for *connected*, beside a card counting connected
+   displays. `ja` had no word of its own for a Space at all: the
+   majority reading was Apple's own 操作スペース, the term for
+   the macOS Desktop that KiwiDesk's Spaces are deliberately not.
+2. **Otherwise your catalog's own occurrence count decides.**
+   Grep your file for both candidates; the one already carrying
+   the concept wins and the other is swept to it.
+3. **Within about ten percent, the destination label or picker
+   entry decides.** That string is a card title, a back-chip
+   heading and a search kind-line at once, so it is the name the
+   user actually learns.
+4. **Your ear does not override 1–3.** Awkwardness is an argument
+   for a different winner under rule 2, never for keeping a second
+   word.
+
+A rival word is usually still *correct somewhere else in the same
+file* — `it`'s «disposizione» renders English *arrangement* in ten
+keys, `ru`'s «раскладка» is also a keyboard layout, `es`'s
+«espacio» is a Space in a hundred keys. So this is never a
+search-and-replace, and a sweep that changes a concept ships with
+the list of keys it deliberately left alone.
+
+### Why there is no per-locale word list here
+
+The obvious shape for this section is a table: eleven columns,
+one row per concept, the winning word in each cell. It is the
+wrong shape. That table would be a copy of facts the corpus
+already holds, and a copy of the corpus rots against it on any
+commit — while rule 2 makes the catalog **its own register**. A
+translator settling *layout* in `pt-BR` greps `pt-BR.json` and
+gets today's answer; a table would give them the answer as of
+whenever someone last edited this page.
+
+So what is written down is the **procedure**, which cannot go
+stale, rather than its output, which can.
+
+### Why no guard, and what is guarded instead
+
+The natural guard is a banned-rival register — per locale, per
+concept, the winner plus the words that must not appear. It
+cannot be built, and the reason is worth stating so nobody
+budgets for it twice: **every ruling above produced a keep-list,
+and each entry is the rival word, correctly used, in the same
+file.** `es`'s «espacio», `it`'s «spazio» and `pt-BR`'s «espaço»
+name a Space in roughly a hundred keys each; `ko`'s 연결 means
+*connected* in eleven; `zh-Hans`'s 配置文件 is right in exactly
+the key the ruling exists to protect. A ban would fire on all of
+them. This page's own rule about single-word Family A members
+applies with more force here: *a guard failing on correct copy is
+the one failure that makes an exemption file look necessary*, and
+`scripts/localization_guards.py` has no exemption file by policy.
+
+The shape argument, stated once so the gap does not read as an
+oversight: Family A can demand the English name be **present**,
+because it has no correct translation. Family B can demand the
+English name be **absent**, because the picker key is a
+per-locale declaration a predicate can read. A common noun
+supplies neither declaration — having no label key is what put it
+in Family C — so there is nothing in the file to compare against.
+
+Two of the three defect classes are nevertheless machine-held,
+by making them unwritable rather than by scanning for them:
+
+- **A `▸` breadcrumb** must equal what each segment's own key
+  renders to (`SidebarCrossReferenceTests`). No vocabulary list,
+  no false positives — both sides are strings the same catalog
+  ships.
+- **Prose that names a pane, a button or a role** interpolates
+  that label's key rather than quoting it as text (#818), so
+  `placeholder_drift` — an exact contract that already runs —
+  holds the anchor in every locale. `it` had drifted to «sezione
+  Abbreviazioni» while the pane read "Scorciatoie", and
+  `spaces.delete_confirm.message` quoted a "Main" role that had
+  no label key at all, so three locales invented one each.
+
+What is left — one language's two ordinary words for one idea —
+stays with review. The ladder above is what makes that review
+cheap: once the winner is named, auditing a catalog is one grep
+per concept, and a reviewer who does not speak the language can
+check it, because the keep-list names the English each rival is
+correctly rendering.
+
 ## Why the guards are opposite shapes
 
 It is forced, not stylistic:
 
-| | Family A | Family B |
-|---|---|---|
-| the name is | a coinage with no correct translation | a word with a different correct form per locale |
-| so the guard can demand | the English be **present** | only that the English be **absent** |
-| exemptions needed | none | none — locales keeping English skip themselves |
+| | Family A | Family B | Family C |
+|---|---|---|---|
+| the name is | a coinage with no correct translation | a word with a different correct form per locale | not a name — an ordinary word of the language |
+| it declares itself | by shipping untranslated everywhere | in its own picker key, per locale | nowhere; it has no key |
+| so the guard can demand | the English be **present** | only that the English be **absent** | nothing — see Family C |
+| exemptions needed | none | none — locales keeping English skip themselves | an exemption per correct use, which is why there is no guard |
 
 The symmetric form for Family B — demand the locale's *own*
 translation be present — genuinely cannot work: a correct Spanish
@@ -241,6 +365,13 @@ Apply the catalog question, then:
   the keys whose English already contains it.
 - **Family B** — add its `layout.<mode>.name` key to
   `MODE_NAME_KEYS`.
+- **Family C** — add nothing. There is no register to join and no
+  guard to arm; the ladder in that section is the whole policy,
+  and it reads the catalogs rather than a list. What a Family C
+  concept *does* owe is a sweep: settle its word per locale and
+  apply it across that whole file, in the change that introduces
+  the concept, rather than leaving a second word for the next
+  round to find.
 
 A **product-coinage decision may override a Family-B catalog
 reading** — the catalog question sorts what *already exists*, but a

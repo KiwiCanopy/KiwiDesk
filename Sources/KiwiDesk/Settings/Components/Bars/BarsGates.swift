@@ -137,10 +137,17 @@ enum BarsGateHelp {
                 "Turn on Show Space Bar to edit these settings."
             )
         case .gapOnly:
+            // The indicator style is INTERPOLATED from the picker
+            // entry's own key rather than named as text (#818):
+            // a sentence quoting a label is a hand-kept mirror
+            // every locale must keep in step with nothing
+            // checking that it does.
             return L(
                 "app_bar.color.gap_only",
-                "The Gap indicator hides the active item instead "
-                    + "of marking it, so these colors aren't drawn."
+                "The \u{201C}%1$@\u{201D} indicator hides the "
+                    + "active item instead of marking it, so "
+                    + "these colors aren't drawn.",
+                L("app_bar.active_indicator.gap", "Gap")
             )
         }
     }

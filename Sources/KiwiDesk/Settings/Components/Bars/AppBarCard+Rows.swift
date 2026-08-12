@@ -69,13 +69,23 @@ extension AppBarCard {
                 selection: style.alignment,
                 options: AppBarOptions.alignment
                     .map { ($0.1, $0.0) },
+                // The two option names are INTERPOLATED from the
+                // picker's own keys rather than re-typed (#818).
+                // `%1$@` repeats because the sentence names Start
+                // twice — the second is the mapping the sentence
+                // exists for — and `placeholder_drift` compares a
+                // multiset, so a translation must name it twice
+                // too, in whatever order its grammar wants.
                 help: L(
                     "app_bar.alignment.label.help",
                     "Where the item group sits along the bar "
-                        + "while it fits. Start and End follow "
-                        + "the edge (a left bar's Start is its "
-                        + "top); once items overflow and scroll, "
-                        + "all three behave the same."
+                        + "while it fits. \u{201C}%1$@\u{201D} and "
+                        + "\u{201C}%2$@\u{201D} follow the edge — "
+                        + "a left bar's \u{201C}%1$@\u{201D} is "
+                        + "its top; once items overflow and "
+                        + "scroll, all three behave the same.",
+                    L("app_bar.alignment.start", "Start"),
+                    L("app_bar.alignment.end", "End")
                 )
             )
         case .appBarActiveIndicator:

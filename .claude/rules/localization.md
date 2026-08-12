@@ -260,6 +260,26 @@ why they are here rather than beside the views:
   `layout.<mode>.name` for a tail naming a mode.
   `SidebarCrossReferenceTests` holds it, and four catalogs were
   already violating it when the guard landed.
+- **English prose that names a pane, a button or a role
+  INTERPOLATES that label's key; it never quotes the label as
+  text** (#818). A quotation is a hand-kept mirror every locale
+  then has to keep in step with, and nothing checks that it does:
+  `it` drifted to «sezione Abbreviazioni» while the pane read
+  "Scorciatoie", and `spaces.delete_confirm.message` quoted a
+  "Main" role with no label key anywhere, so three locales
+  invented a name each. Interpolated, `placeholder_drift` holds
+  the anchor in every catalog forever. This is an obligation on
+  the **English author**, not the translator, which is why it is
+  worth reading before adding a help string.
+- **One KiwiDesk concept gets one word per catalog**, and a
+  common noun — *layout*, *gap*, *profile*, *shortcut* — is
+  settled with `docs/localization-naming.md` ▸ Family C, whose
+  ladder is the one copy of how the winner is chosen. It is
+  deliberately guarded by nothing: every rival word is also
+  correct somewhere in the same file, so a banned-word predicate
+  would fire on ~250 good values across six locales, and this
+  script has no exemption file by policy. Read the argument there
+  before proposing the guard again.
 
 ## Registering a new locale
 
