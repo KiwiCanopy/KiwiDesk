@@ -87,8 +87,12 @@ struct AppFontWorkflowTests {
     @Test("The drop is tested before the PR is opened")
     func testsPrecedeThePullRequest() throws {
         let yaml = try workflow
+        // `run: swift test`, not `swift test`: the PR body the
+        // last step writes *names* the commands it ran, and that
+        // prose sits ahead of `gh pr create` in the same file — so
+        // the bare needle stayed green with the Test step deleted.
         let test = try #require(
-            yaml.range(of: "swift test"),
+            yaml.range(of: "run: swift test"),
             "app-font.yml no longer runs the suite"
         )
         let create = try #require(
