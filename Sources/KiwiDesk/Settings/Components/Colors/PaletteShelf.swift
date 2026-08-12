@@ -12,9 +12,7 @@ struct PaletteShelf: View {
     @ObservedObject var model: SettingsModel
     @State var userPalettes: [ColorPalette] = []
     @State var savingCurrent = false
-    @State var saveName = ""
     @State var renaming: String?
-    @State var renameDraft = ""
     /// Where the keyboard lands after a saved palette's tile
     /// stops existing (#816). `internal`, like the state around
     /// it: the delete lives in `PaletteShelf+Actions.swift` (file
@@ -265,7 +263,6 @@ struct PaletteShelf: View {
         switch key {
         case .colours(.paletteRename):
             Button(L("palettes.rename", "Rename…")) {
-                renameDraft = palette.name
                 renaming = palette.name
             }
         case .colours(.paletteExport):
@@ -298,7 +295,10 @@ struct PaletteShelf: View {
     /// is no palette here yet to be on.
     private var addTile: some View {
         Button {
-            saveName = nextUserName()
+            // The seed is computed by the popover itself
+            // (#843) — writing it here, one tick before the
+            // presentation, is what the confirm button read as
+            // empty.
             savingCurrent = true
         } label: {
             // The label stays INSIDE the plate, where it can wrap:
