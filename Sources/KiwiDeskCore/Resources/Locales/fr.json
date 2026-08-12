@@ -72,7 +72,7 @@
   "app_rules.empty": "Les apps sans règle se tuilent normalement, dans l'espace où vous les ouvrez.",
   "app_rules.float": "Flottement",
   "app_rules.float.all_windows": "flotte",
-  "app_rules.float.help": "Le flottement sort les fenêtres correspondantes de cette app du tuilage : chacune conserve sa dernière position et sa taille et reste au-dessus des fenêtres tuilées, au lieu de s'aligner sur la grille d'un espace.\n\nIl s'agit d'un flottement par app, et non du mode de disposition **Floating**, qui fait flotter toutes les fenêtres d'un espace.",
+  "app_rules.float.help": "Le flottement sort les fenêtres correspondantes de cette app de la mosaïque : chacune conserve sa dernière position et sa taille et reste au-dessus des fenêtres tuilées, au lieu de s'aligner sur la grille d'un espace.\n\nIl s'agit d'un flottement par app, et non du mode de disposition **Floating**, qui fait flotter toutes les fenêtres d'un espace.",
   "app_rules.float.never": "se tuile normalement",
   "app_rules.float.titled": "flotte si le titre correspond…",
   "app_rules.float.titled.resting": "flotte si le titre correspond",
