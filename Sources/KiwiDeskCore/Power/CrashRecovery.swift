@@ -74,10 +74,21 @@ public final class CrashRecovery {
     /// Clean shutdown: stop autosaving, save the arrangement
     /// for the next launch, and drop the crash marker so the
     /// next launch does not treat this as a crash.
-    public func shutdownCleanly() {
+    ///
+    /// `preservingSession: true` skips the save and leaves the
+    /// existing file untouched — for a shutdown whose live state
+    /// is not an arrangement worth keeping. Boot is the case
+    /// (#801): the scan takes several seconds now, and a quit or a
+    /// permission revoke mid-scan would write a fraction of the
+    /// desk over the arrangement this launch had not restored yet.
+    /// The crash marker still goes, because the shutdown itself
+    /// was clean.
+    public func shutdownCleanly(
+        preservingSession: Bool = false
+    ) {
         timer?.invalidate()
         timer = nil
-        if let snapshot = captureState(),
+        if !preservingSession, let snapshot = captureState(),
             let data = try? JSONEncoder().encode(snapshot)
         {
             try? data.write(to: sessionURL, options: .atomic)

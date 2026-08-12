@@ -58,17 +58,22 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Active keybinding mode indicator (SF Symbol or emoji);
     /// nil restores the standard KiwiDesk icon.
     private var modeIcon: String?
-    /// Boot is still scanning (#802). Ranked below the permission
-    /// warning and above the config error: without Accessibility
-    /// nothing works regardless of how far a boot got, while a
-    /// config problem is a thing to fix once the app can be
-    /// clicked at all. `private(set)` for the same reason as
-    /// `warning` — every write goes through `setBootPhase`.
-    private(set) var starting = false
-    /// The live boot count the quick menu's status row reads,
-    /// pulled fresh on each open (the `profilesProvider` shape) —
-    /// a count pushed at render time would be stale by the chunk.
-    var bootPhaseProvider: () -> BootPhase = { .ready }
+    /// The last published boot phase — the whole readiness signal
+    /// (#802), read by the icon AND by the menu builder.
+    ///
+    /// ONE stored value rather than a pushed flag beside a pulled
+    /// provider: `core.bootPhase` returns exactly what `publish`
+    /// just handed over, so a pull is never fresher, and two reads
+    /// of one fact let a surface wired to only one of them show
+    /// half the signal — a dimmed mark over an un-greyed menu
+    /// (architect review, 2026-08-12).
+    private(set) var bootPhase: BootPhase = .ready
+    /// The open menu's starting row, while one is open. Held so a
+    /// phase published mid-tracking can retitle it in place: the
+    /// row is built once per open, and on a heavy session the menu
+    /// is open for most of the boot it is reporting (owner, on
+    /// device, 2026-08-12).
+    weak var startingRow: NSMenuItem?
 
     /// `nil` means the live system slot. The optional-with-nil
     /// shape, rather than `= SystemStatusItem()`, is what lets
@@ -100,16 +105,30 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         render()
     }
 
-    /// Reflects how far the boot has got (#802). Only the
-    /// starting-vs-ready flip changes the icon, so the per-chunk
-    /// progress publications cost one comparison each — the
-    /// counts themselves are read on menu open.
+    /// Reflects how far the boot has got (#802).
+    ///
+    /// Two cheap consequences per chunk: the icon re-renders only
+    /// on the starting↔ready flip, and an open menu's count row is
+    /// retitled in place. Everything else the menu draws off the
+    /// phase (the greys) cannot change without that flip, so the
+    /// row is the only live piece.
     func setBootPhase(_ phase: BootPhase) {
-        let wasStarting = starting
-        starting = phase.isStarting
-        guard starting != wasStarting else { return }
+        let wasStarting = bootPhase.isStarting
+        bootPhase = phase
+        if let startingRow, case .scanning = phase {
+            startingRow.title = Self.startingTitle(for: phase)
+        }
+        guard phase.isStarting != wasStarting else { return }
         render()
     }
+
+    /// Whether the readiness signal is owed. Ranked below the
+    /// permission warning and above the config error: without
+    /// Accessibility nothing works regardless of how far a boot
+    /// got, while a config problem is a thing to fix once the app
+    /// can be clicked at all. Derived, never stored — one fact,
+    /// one place (architect review, 2026-08-12).
+    var starting: Bool { bootPhase.isStarting }
 
     /// Reflects the active keybinding mode: a custom mode's
     /// icon replaces the standard menu bar glyph; the default
@@ -158,7 +177,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         if starting {
             button.toolTip = L(
                 "menu.status.starting.tooltip",
-                "KiwiDesk is starting up — scanning open windows."
+                "KiwiDesk is starting up — going through your "
+                    + "open apps."
             )
             applyBrandIcon(
                 to: button,
@@ -250,10 +270,27 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// A mode icon is either an SF Symbol name or a flat
     /// emoji; emoji fall back to the button title when no
     /// symbol matches.
+    ///
+    /// It names the button like every other render path, and that
+    /// is load-bearing rather than tidy: an accessibility label on
+    /// an `NSView` PERSISTS until something replaces it, so the
+    /// one path that set none inherited whatever the last one said
+    /// — switch layers after boot and the mark still announced
+    /// "KiwiDesk (starting up)", on a healthy app, indefinitely
+    /// (localization audit, 2026-08-12). Once one path names the
+    /// button, every path owes a name.
+    ///
+    /// The name is the app's, not the layer's: the icon string is
+    /// an SF Symbol identifier or a bare emoji from the user's Lua
+    /// config, and announcing `star.fill` would be worse than
+    /// announcing nothing. Naming the active LAYER needs the
+    /// layer's name at this seam, which is #TBD rather than this
+    /// change set.
     private func applyModeIcon(
         _ icon: String,
         to button: NSStatusBarButton
     ) {
+        button.setAccessibilityLabel(L("menu.status.a11y", "KiwiDesk"))
         if let image = NSImage(
             systemSymbolName: icon,
             accessibilityDescription: icon

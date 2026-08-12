@@ -115,7 +115,7 @@ extension EventLoop {
         // timeout on an unresponsive app, and boot pays them
         // serially — so a chunked pass drops what is left of this
         // app's work past its budget and completes it after boot
-        // (#803). Inert outside a chunked pass.
+        // (#803). Inert outside a queued boot step.
         let budget = openAppBudget()
         let windows = axWindows(pid)
         if activationPolicy == .regular
@@ -125,8 +125,7 @@ extension EventLoop {
                 deferBootWork(
                     pid: pid,
                     ref: ref,
-                    spentMs: begin.duration(to: .now)
-                        .wholeMilliseconds
+                    spentMs: budget.spentMs
                 )
                 return
             }
@@ -138,8 +137,7 @@ extension EventLoop {
                 deferBootWork(
                     pid: pid,
                     ref: ref,
-                    spentMs: begin.duration(to: .now)
-                        .wholeMilliseconds
+                    spentMs: budget.spentMs
                 )
                 return
             }

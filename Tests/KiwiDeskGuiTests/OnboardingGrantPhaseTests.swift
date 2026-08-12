@@ -53,15 +53,51 @@ struct OnboardingGrantPhaseTests {
         )
 
         #expect(arranging.grantTitle == "Arranging your windows")
-        #expect(arranging.grantBody.hasPrefix("Permission is on."))
+        #expect(
+            arranging.grantBody.hasPrefix("KiwiDesk is going through")
+        )
         // The one sentence that must NOT appear yet — it tells the
         // user to look behind a window at an arrangement that is
         // still being computed.
         #expect(!arranging.grantBody.contains("have been arranged"))
         // The exception for the tour's own window is stated in
-        // both states: it is the answer to "why is this window
-        // special", and it is as true mid-scan as after.
+        // both states, from ONE key: a second copy would be
+        // translated twice and could then be rewritten under the
+        // reader's eyes at `.ready`.
         #expect(arranging.grantBody.contains("left alone"))
+        #expect(arranging.isArranging)
+    }
+
+    @Test("the count rides the footer hint, with the number last")
+    func countRidesTheHint() {
+        let arranging = view(
+            trusted: true,
+            phase: .scanning(scanned: 12, total: 109)
+        )
+
+        // The hint slot is the one built for a fact the user does
+        // not act on, and Continue is live throughout
+        // (ui-designer, 2026-08-12). Under the hero the tally
+        // shared an object with the app's one success mark.
+        #expect(
+            arranging.grantHintForPhase
+                == "Still going through your open apps: 12 of 109"
+        )
+        // Not the menu's sentence: this reader is one minute into
+        // owning the app. The NUMBER is what both surfaces share.
+        #expect(
+            arranging.grantHintForPhase?.contains("12 of 109") == true
+        )
+    }
+
+    @Test("neither trusted end-state carries a count")
+    func endStatesCarryNoCount() {
+        #expect(view(trusted: true, phase: .ready).grantHintForPhase == nil)
+        #expect(!view(trusted: true, phase: .ready).isArranging)
+        // Ungranted keeps the SIP/keystrokes promise in the slot —
+        // the sentence that earns the button beside it.
+        let waiting = view(trusted: false, phase: .idle)
+        #expect(waiting.grantHintForPhase?.contains("keystrokes") == true)
     }
 
     @Test("the arranged claim lands when boot is ready")
@@ -72,15 +108,20 @@ struct OnboardingGrantPhaseTests {
         #expect(done.grantBody.contains("have been arranged"))
     }
 
-    @Test("an idle phase reads as arranged, never as arranging")
-    func idleIsNotArranging() {
-        // `.idle` is a paused core (no permission, or a revoke),
-        // and this screen is only reached with the grant in hand —
-        // so the honest reading of "not scanning" here is the
-        // finished one. The predicate is `isStarting`, never
-        // "is not ready", which would put the tour into a
-        // permanent arranging state on any pause.
+    @Test("only ready claims the job is done")
+    func onlyReadyClaimsTheJob() {
+        // The claim is gated on `.ready`, not on "not scanning":
+        // `.idle` is a paused or not-yet-started core, and the gap
+        // before the first publication is reachable the moment
+        // anything shortens `loadConfig`'s synchronous block —
+        // which is the direction #801 travels (ui-designer,
+        // 2026-08-12). A screen that asserts a finished
+        // arrangement in either state is asserting something no
+        // phase said.
         let idle = view(trusted: true, phase: .idle)
-        #expect(idle.grantTitle == "Your windows are arranged")
+        #expect(idle.grantTitle == "Arranging your windows")
+        #expect(!idle.grantBody.contains("have been arranged"))
+        // …and it carries no count, there being no scan to report.
+        #expect(idle.grantHintForPhase == nil)
     }
 }

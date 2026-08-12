@@ -182,15 +182,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(core: self.core)
         }
-        // Boot readiness (#802), read two ways for two reasons:
-        // the menu's count row wants the live value at the moment
-        // it opens, and the icon wants to be told when the
-        // starting state begins and ends. The tour's grant step
-        // takes the pushed value too — it claims the windows are
-        // arranged, and must not say so mid-scan.
-        statusItem.bootPhaseProvider = { [weak self] in
-            self?.core.bootPhase ?? .ready
-        }
+        // Boot readiness (#802): ONE push, two consumers. The
+        // status item stores it (icon rank, the menu's count row
+        // and its greys), and the tour's grant step takes it
+        // because it claims the windows are arranged and must not
+        // say so mid-scan.
         core.onBootPhaseChange = { [weak self] phase in
             self?.statusItem?.setBootPhase(phase)
             self?.onboardingModel.bootPhase = phase

@@ -88,7 +88,7 @@ struct BootAppBudgetTests {
                 box.destroyed.append(id)
             }
         }
-        loop.bootScan.now = {
+        loop.monotonicNow = {
             box.clock = box.clock.advanced(by: box.step)
             return box.clock
         }
@@ -147,8 +147,15 @@ struct BootAppBudgetTests {
         #expect(box.windowQueries == pids.count)
     }
 
-    @Test("no budget is spent outside a chunked pass")
-    func noBudgetOutsideAPass() {
+    /// The budget is scoped to a queued STEP, not to a pass being
+    /// open — and chunking is exactly what made the difference
+    /// observable: the run loop is live between chunks, so an app
+    /// launching, an activation reconcile or a Desktop-switch
+    /// `reconcileAll` lands *inside* an open pass. Budgeting those
+    /// would cut short work no one asked to be fast (architect and
+    /// code review, 2026-08-12).
+    @Test("work the OS drove is unbudgeted, pass open or not")
+    func onlyQueuedStepsAreBudgeted() {
         let (loop, box) = makeLoop()
         box.step = .milliseconds(600)
         #expect(loop.beginScan())
@@ -157,16 +164,24 @@ struct BootAppBudgetTests {
         _ = loop.takeDeferredBootApps()
         box.lines = []
 
-        // An event-driven attach — an app launched while the user
-        // works — must never be cut short: only boot trades
-        // completeness for latency.
+        // After the pass closed …
         loop.attach(
             pid: 660_003,
             activationPolicy: .regular,
             ref: ref(3),
             scanWindowsAtAttach: true
         )
+        #expect(box.deferrals.isEmpty)
 
+        // … and, the case only chunking creates, BETWEEN two
+        // chunks of a pass that is still open.
+        #expect(loop.beginSweep())
+        loop.attach(
+            pid: 660_004,
+            activationPolicy: .regular,
+            ref: ref(4),
+            scanWindowsAtAttach: true
+        )
         #expect(box.deferrals.isEmpty)
         #expect(loop.takeDeferredBootApps().isEmpty)
     }
@@ -189,23 +204,45 @@ struct BootAppBudgetTests {
             tracked: AXUIElementCreateApplication(pids[0])
         ]
 
-        // Budgeted and spent: the reconcile drops out early.
-        loop.bootScan.appBudget = EventLoop.bootAppBudget
+        // A queued sweep step, with the clock spending the budget
+        // inside it: the reconcile drops out early.
         box.step = .milliseconds(600)
-        loop.reconcile(pid: pids[0], app: ref(1))
+        #expect(loop.beginSweep())
+        loop.scanChunk(budget: nil)
 
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pids[0]]?[tracked] != nil)
 
-        // The control arm — same reconcile, same empty window
-        // list, no budget — DOES sweep, which is what makes the
-        // assertion above a claim about the abort rather than
-        // about the fixture.
-        loop.bootScan.appBudget = nil
-        box.step = .milliseconds(1)
+        // The control arm — the same reconcile, the same empty
+        // window list, driven directly so no budget applies — DOES
+        // sweep. That is what makes the assertion above a claim
+        // about the abort rather than about the fixture.
         loop.reconcile(pid: pids[0], app: ref(1))
 
         #expect(box.destroyed == [tracked])
         #expect(loop.elements[pids[0]]?[tracked] == nil)
+    }
+
+    /// The sweep budgets exactly as the scan does, so it owes the
+    /// same completion: a ledger only the boot tail took would
+    /// leave a sweep-deferred app sitting untaken until `stop()`
+    /// discarded it — abandoned to #675's heal, which is the
+    /// outcome deferral exists to spare it (code review,
+    /// 2026-08-12).
+    @Test("the sweep's deferrals are recorded for completion")
+    func theSweepAlsoDefers() {
+        let (loop, box) = makeLoop()
+        box.step = .milliseconds(1)
+        #expect(loop.beginScan())
+        defer { loop.stop() }
+        loop.scanChunk(budget: nil)
+        _ = loop.takeDeferredBootApps()
+
+        box.step = .milliseconds(600)
+        #expect(loop.beginSweep())
+        loop.scanChunk(budget: nil)
+
+        #expect(!box.deferrals.isEmpty)
+        #expect(!loop.takeDeferredBootApps().isEmpty)
     }
 }

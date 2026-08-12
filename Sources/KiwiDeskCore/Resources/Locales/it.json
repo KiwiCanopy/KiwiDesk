@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "L'autorizzazione di Accessibilità è stata revocata. Riattivala in Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.",
   "notification.permission_lost.title": "KiwiDesk ha smesso di gestire le finestre",
   "onboarding.continue": "Continua",
-  "onboarding.grant.done.body": "Dai un'occhiata dietro questa finestra: le tue finestre aperte sono state organizzate.\n\nLe finestre di configurazione come questa non vengono toccate, poiché sono temporanee.",
   "onboarding.grant.done.title": "Le tue finestre sono organizzate",
   "onboarding.grant.granted": "Autorizzazione concessa",
   "onboarding.grant.lead": "macOS consente a un'app di spostare le finestre solo dopo che l'hai autorizzata. Finché non è attiva, qui non funziona nulla.",

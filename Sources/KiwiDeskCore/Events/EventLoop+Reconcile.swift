@@ -74,8 +74,10 @@ extension EventLoop {
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
-        // A chunked pass bounds this app's blocking AX work and
-        // completes it after boot (#803) — see `openAppBudget`.
+        // A queued boot step bounds this app's blocking AX work
+        // and completes it after the pass (#803) — see
+        // `openAppBudget`, which is inert for an OS-driven
+        // reconcile even while a pass is open.
         // Every exit below returns BEFORE the sweep at the end:
         // that sweep derives destroys from `live`, and a
         // partially read list would untrack every window the
@@ -89,8 +91,7 @@ extension EventLoop {
                 deferBootWork(
                     pid: pid,
                     ref: app,
-                    spentMs: begin.duration(to: .now)
-                        .wholeMilliseconds
+                    spentMs: budget.spentMs
                 )
                 return
             }
@@ -114,8 +115,7 @@ extension EventLoop {
                 deferBootWork(
                     pid: pid,
                     ref: app,
-                    spentMs: begin.duration(to: .now)
-                        .wholeMilliseconds
+                    spentMs: budget.spentMs
                 )
                 return
             }

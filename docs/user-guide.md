@@ -224,6 +224,14 @@ was already open — that first retile is the tour telling you it
 works. Setup windows like the tour itself are never arranged:
 they have an end, so the tiler leaves them alone.
 
+On a busy Mac that takes a few seconds, and the screen says so
+rather than claiming to be finished: while it works, the heading
+reads **Arranging your windows** and the footer counts the apps
+it has been through. **Continue** is live the whole time — the
+arranging finishes on its own, whether you wait for it or move
+on. When the heading changes to **Your windows are arranged**,
+it is done.
+
 The tour then shows the spaces it chose for your screens, and
 after that the shortcuts it bound — the chords themselves, laid
 out in the window, including the one that opens the shortcut
@@ -312,8 +320,9 @@ the KiwiDesk icon opens the quick menu where you can:
 - **Window Management Paused…** (only when Accessibility permission
   is missing): appears at the top of the menu and reopens the
   permission wizard so tiling can resume.
-- **Starting up — apps scanned: N of M** (only while KiwiDesk is
-  coming up): a live count of how far the startup scan has got.
+- **Starting up — apps: N of M** (only while KiwiDesk is coming
+  up): a live count of how far the startup scan has got, which
+  keeps counting while the menu stays open.
   While it shows, the menu-bar mark is drawn dimmed and **Layout**
   and **Switch Profile** are greyed — they act on windows the scan
   has not collected yet and work as soon as it finishes. The mark

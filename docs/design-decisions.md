@@ -1670,7 +1670,9 @@ tiling user arrives with.
 
 **The demonstration was already happening, unnarrated.** The
 moment the grant lands, management starts and every window behind
-the tour is arranged. That is a better demonstration than tiling
+the tour is arranged — over the following seconds, since #801,
+and the screen now narrates that wait rather than claiming a
+finished job (▸ *Boot: the wait is narrated, never hidden*). That is a better demonstration than tiling
 the tour could ever be — the user's own windows, at the moment it
 means something, at no cost — and the tour used to answer it with
 "Permission granted!". It now points at it, and says once that
@@ -5137,10 +5139,14 @@ Profile (`load_profile`'s quick path) — same topic, no
 separator between them — then **Settings… low, next to Quit**,
 where every native menu-bar extra keeps Preferences. Warning
 rows (**Window Management Paused…** when Accessibility is
-missing, **Config Issues…** when a config load failed) appear
+missing, the **starting count** while boot is still scanning,
+**Config Issues…** when a config load failed) appear
 **only when they apply**, at the top, fenced by a single
-separator that is itself present only when a warning fired;
-permission outranks config since without it nothing tiles.
+separator that is itself present only when a warning fired.
+They rank permission → starting → config: without permission
+nothing tiles however far a boot got, and a config problem is a
+thing to fix once the app can be clicked at all (▸ *Boot: the
+wait is narrated*, which argues the middle one).
 Menu entries stay monochrome template symbols; the colored
 tiles are a Settings-window device. (#68 §3.10, §6.2)
 
@@ -5230,8 +5236,8 @@ worse surprise than the one being removed, and a new state
 machine paid on every boot to save seconds on heavy ones).
 
 **One slow app is deferred, never abandoned.** Chunking cannot
-divide a single app's AX work, and one app's reconcile measured
-5011 ms against 4826 ms for the other 108 together — so a
+divide a single app's AX work: on the measured session one app's
+reconcile took 5011 ms of the startup sweep's 5285 ms total — so a
 per-app wall-clock budget (500 ms: clear of the 100–300 ms
 Electron/WebKit band, inside one AX messaging timeout) drops what
 is left of that app's boot work, names it in the log so the

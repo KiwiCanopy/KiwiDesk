@@ -137,10 +137,21 @@ public final class EventLoop {
     var lastActivePid: pid_t?
     public internal(set) var isRunning = false
 
-    /// The chunked boot pass's queue, counters, per-app budget
-    /// and clock seam (#801/#803) — every field is argued on
-    /// `BootScanState`, in `EventLoop+BootScan.swift`.
+    /// The chunked boot pass's queue, counters and per-app budget
+    /// (#801/#803) — every field is argued on `BootScanState`, in
+    /// `EventLoop+BootScan.swift`.
     var bootScan = BootScanState()
+
+    /// The monotonic clock every boot budget and chunk deadline
+    /// reads. A seam because a budget is otherwise unobservable
+    /// from a test — the injected AX fakes answer instantly, so
+    /// nothing can spend wall-clock, and a `Task.sleep` in a guard
+    /// is what tests.md forbids. It sits HERE, beside the other
+    /// injected seams, rather than inside `bootScan`: `stop()`
+    /// replaces that struct wholesale, so a seam living in it has
+    /// to be carried across the reset by hand (architect review,
+    /// 2026-08-12).
+    var monotonicNow: () -> ContinuousClock.Instant = { .now }
 
     /// Log line consumer — boot diagnostics only (the startup
     /// scan summary, slow attach/reconcile spans, #672). Wired

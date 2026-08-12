@@ -21,7 +21,20 @@ import SwiftUI
 /// `warningInk`, not a raw amber: it is the theme's attention
 /// token, and its light value is darkened for contrast, which a
 /// fixed `#E0A34A` would not be on this card.
+///
+/// **The ink is the caller's, because the attention token is not
+/// always right.** The same pulse marks the boot-arranging count
+/// in the footer, where there is nothing to attend to — amber
+/// there would put a warning under a success mark (ui-designer,
+/// 2026-08-12). The MOTION is the thing being reused: a mark that
+/// moves is what says "still working" to a reader who cannot see
+/// the count change, and dropping it would leave the sentence
+/// unmarked (owner, 2026-08-12).
 struct WaitingDot: View {
+    /// Defaults to the attention token, for the grant step's
+    /// "waiting for the switch" line it was built for.
+    var ink: Color = SettingsTheme.warningInk
+
     /// Reduce Motion is a system setting an app does not argue
     /// with. The dot still draws — losing the mark entirely would
     /// leave the sentence unmarked — it simply stops moving, and
@@ -34,7 +47,7 @@ struct WaitingDot: View {
 
     var body: some View {
         Circle()
-            .fill(SettingsTheme.warningInk)
+            .fill(ink)
             .frame(width: size, height: size)
             .opacity(opacity)
             .animation(pulse, value: breathing)

@@ -91,7 +91,7 @@ struct BootScanChunkTests {
                 box.displayPublishes += 1
             }
         }
-        loop.bootScan.now = {
+        loop.monotonicNow = {
             box.clock = box.clock.advanced(by: step)
             return box.clock
         }

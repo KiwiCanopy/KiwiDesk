@@ -41,7 +41,6 @@ struct QuickMenuBootRowTests {
         let controller = StatusItemController(
             item: FakeStatusItem()
         )
-        controller.bootPhaseProvider = { phase }
         controller.profilesProvider = {
             (active: "Work", all: ["Work", "Play"], broken: [])
         }
@@ -82,9 +81,38 @@ struct QuickMenuBootRowTests {
 
         // A determinate count in words — the count is what makes
         // the wait read as working rather than broken.
-        #expect(row?.title == "Starting up — apps scanned: 51 of 109")
+        #expect(row?.title == "Starting up — apps: 51 of 109")
         // Context only, never an action.
         #expect(row?.isEnabled == false)
+    }
+
+    @Test("an open menu's count is retitled per chunk")
+    func openMenuCountIsLive() {
+        let controller = controller(
+            phase: .scanning(scanned: 2, total: 109)
+        )
+        let menu = NSMenu()
+        controller.menuNeedsUpdate(menu)
+        #expect(
+            startingRow(menu)?.title
+                == "Starting up — apps: 2 of 109"
+        )
+
+        controller.setBootPhase(.scanning(scanned: 40, total: 109))
+
+        // The row is built once per open, and on a heavy session
+        // the menu is open for most of the boot it reports — a
+        // snapshot would sit at "2 of 109" for as long as the user
+        // held it (owner, on device, 2026-08-12).
+        #expect(
+            startingRow(menu)?.title
+                == "Starting up — apps: 40 of 109"
+        )
+
+        // Ready ends the row's life rather than retitling it: the
+        // rank changed, so the whole menu is rebuilt on next open.
+        controller.setBootPhase(.ready)
+        #expect(!controller.starting)
     }
 
     @Test("the row is gone once boot is ready")

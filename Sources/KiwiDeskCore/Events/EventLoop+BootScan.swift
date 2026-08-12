@@ -13,6 +13,12 @@ enum BootScanStep {
 
 /// Which pass is open, so the epilogue below knows whether the
 /// scan summary and `publishDisplays` are owed.
+///
+/// A pass owns its own identity end to end — the signpost name AND
+/// the deferred slot its chunks are scheduled in. Handing the slot
+/// in at the call site instead let two passes share one key, which
+/// cancels a continuation and stalls a pass with no epilogue and
+/// no readiness publication (architect review, 2026-08-12).
 enum BootScanPass {
     case scan
     case sweep
@@ -24,6 +30,16 @@ enum BootScanPass {
         switch self {
         case .scan: "startupScan"
         case .sweep: "startupSweep"
+        }
+    }
+
+    /// The deferred slot this pass's chunks ride. Distinct per
+    /// pass: sharing one would let the sweep cancel the scan's
+    /// next chunk.
+    var deferredKey: DeferredTasks.Key {
+        switch self {
+        case .scan: .bootScan
+        case .sweep: .startupSweep
         }
     }
 }
@@ -49,21 +65,26 @@ struct BootScanState {
     var scanned = 0
     var total = 0
     var pass: BootScanPass = .scan
-    /// The per-app bound while this pass runs (#803); nil outside
-    /// one, which is what keeps every event-driven attach and
-    /// reconcile unbudgeted.
-    var appBudget: Duration?
+    /// Whether a pass is open. An explicit flag rather than the
+    /// signpost interval's presence: `publishDisplays` and the
+    /// summary line are production behavior, and gating them on a
+    /// diagnostics handle means a change to signposting silently
+    /// changes what boot does (architect review, 2026-08-12).
+    var passOpen = false
+    /// The per-app bound, raised ONLY while a queued step runs
+    /// (#803). Not "while a pass is open": the run loop is live
+    /// between chunks, so an AX-driven attach, an activation
+    /// reconcile or a Desktop-switch `reconcileAll` lands *inside*
+    /// a pass and must never be cut short — only the boot work
+    /// this pass queued trades completeness for latency.
+    var stepBudget: Duration?
     /// Apps a budget cut short, with the ref their completing
-    /// reconcile needs. Drained after boot, unbudgeted.
+    /// reconcile needs. Taken by the epilogue of whichever pass
+    /// deferred them — both passes budget, so both drain.
     var deferredApps: [pid_t: AppRef] = [:]
-    /// The open `startupScan` interval and its start.
+    /// The open pass's interval and its start.
     var interval: OSSignpostIntervalState?
     var began: ContinuousClock.Instant?
-    /// The budgets' only time source. A seam because a budget is
-    /// otherwise unobservable from a test — every injected AX
-    /// fake answers instantly, so nothing can spend wall-clock
-    /// and `Task.sleep` in a guard is what tests.md forbids.
-    var now: () -> ContinuousClock.Instant = { .now }
 }
 
 /// The chunked boot pass (#801).
@@ -78,20 +99,10 @@ struct BootScanState {
 ///
 /// Chunking alone does not buy responsiveness: one app's blocking
 /// AX work is indivisible, and the measured outlier cost 5011 ms
-/// by itself. The per-app budget below is what bounds a chunk in
-/// practice, which is why #803 rides with #801 rather than after
-/// it.
+/// by itself. The per-app budget (`EventLoop+BootBudget`, #803)
+/// is what bounds a chunk in practice, which is why the two ship
+/// together rather than one after the other.
 extension EventLoop {
-    /// Per-app wall-clock bound for a chunked pass (#803).
-    ///
-    /// 500 ms sits clear of the healthy band — Electron/WebKit
-    /// answer lazily at 100–300 ms (accessibility.md) — and
-    /// inside one AX messaging timeout
-    /// (`axMessagingTimeoutSeconds`), so an app that spent a
-    /// whole timeout on its first call is deferred instead of
-    /// paying that price again for every window it lists.
-    static let bootAppBudget: Duration = .milliseconds(500)
-
     /// Opens the chunked startup scan. Returns false when the
     /// loop is already running — a second start is inert (#672),
     /// and the caller must not then drive chunks.
@@ -153,8 +164,8 @@ extension EventLoop {
         bootScan.pending = steps
         bootScan.total = steps.count
         bootScan.scanned = 0
-        bootScan.appBudget = Self.bootAppBudget
-        bootScan.began = bootScan.now()
+        bootScan.passOpen = true
+        bootScan.began = monotonicNow()
         bootScan.interval = BootSignpost.signposter
             .beginInterval(pass.signpostName)
     }
@@ -169,11 +180,26 @@ extension EventLoop {
     /// which is the whole reason the two ship together.
     @discardableResult
     func scanChunk(budget: Duration?) -> BootScanProgress {
-        let deadline = budget.map { bootScan.now().advanced(by: $0) }
+        let deadline = budget.map { monotonicNow().advanced(by: $0) }
         while !bootScan.pending.isEmpty {
-            perform(bootScan.pending.removeFirst())
+            let began = monotonicNow()
+            let step = bootScan.pending.removeFirst()
+            perform(step)
             bootScan.scanned += 1
-            if let deadline, bootScan.now() >= deadline { break }
+            let held = began.duration(to: monotonicNow())
+            if held >= Self.slowChunkReport {
+                // The one number a field report cannot otherwise
+                // supply: how long the main actor was held in one
+                // go, which is what a delayed menu open measures.
+                // The per-app spans log at 100 ms
+                // (`BootSignpost.slowSpanMs`); this logs the app
+                // that made a CHUNK long, budget aborts included.
+                onLog(
+                    "slow chunk: \(name(of: step)) held "
+                        + "\(held.wholeMilliseconds)ms"
+                )
+            }
+            if let deadline, monotonicNow() >= deadline { break }
         }
         if bootScan.pending.isEmpty { closePass() }
         return BootScanProgress(
@@ -183,7 +209,28 @@ extension EventLoop {
         )
     }
 
+    private func name(of step: BootScanStep) -> String {
+        switch step {
+        case .attach(let app, _): app.ref.bundleID ?? app.ref.name
+        case .reconcile(let app): app.ref.bundleID ?? app.ref.name
+        }
+    }
+
+    /// A chunk at or above this held the main actor long enough
+    /// for a click to feel late (~3 display frames is the felt
+    /// threshold; a chunk is budgeted at 25 ms, so anything here
+    /// is an app overrunning, not the cadence).
+    static let slowChunkReport: Duration = .milliseconds(50)
+
+    /// Runs one queued step under the per-app budget. The budget
+    /// is raised HERE rather than for the whole pass: nothing can
+    /// interleave inside a step (main actor, no suspension), so
+    /// this is exactly the boot work #803 may cut short, and every
+    /// event-driven attach or reconcile that lands between chunks
+    /// stays unbudgeted.
     private func perform(_ step: BootScanStep) {
+        bootScan.stepBudget = Self.bootAppBudget
+        defer { bootScan.stepBudget = nil }
         switch step {
         case .attach(let app, let scanWindows):
             attach(
@@ -214,16 +261,18 @@ extension EventLoop {
     /// on the interval, so a `scanChunk` called after the queue
     /// emptied neither double-ends the signpost nor logs twice.
     private func closePass() {
-        guard let interval = bootScan.interval else { return }
+        guard bootScan.passOpen else { return }
         let pass = bootScan.pass
-        BootSignpost.signposter.endInterval(
-            pass.signpostName,
-            interval
-        )
-        bootScan.interval = nil
-        bootScan.appBudget = nil
-        let began = bootScan.began ?? bootScan.now()
-        let ms = began.duration(to: bootScan.now())
+        bootScan.passOpen = false
+        if let interval = bootScan.interval {
+            BootSignpost.signposter.endInterval(
+                pass.signpostName,
+                interval
+            )
+            bootScan.interval = nil
+        }
+        let began = bootScan.began ?? monotonicNow()
+        let ms = began.duration(to: monotonicNow())
             .wholeMilliseconds
         switch pass {
         case .scan:
@@ -235,53 +284,5 @@ extension EventLoop {
         case .sweep:
             onLog("startup sweep: \(ms)ms")
         }
-    }
-
-    // MARK: - The per-app budget (#803)
-
-    /// A checkpoint an app's boot work consults between blocking
-    /// AX calls. Outside a chunked pass every call answers
-    /// `false`, so an event-driven attach or reconcile is never
-    /// cut short — only boot trades completeness for latency.
-    struct AppBudget {
-        let deadline: ContinuousClock.Instant?
-        let now: () -> ContinuousClock.Instant
-
-        var isSpent: Bool {
-            guard let deadline else { return false }
-            return now() >= deadline
-        }
-    }
-
-    /// The budget for one app, opened at the start of its work.
-    func openAppBudget() -> AppBudget {
-        AppBudget(
-            deadline: bootScan.appBudget.map {
-                bootScan.now().advanced(by: $0)
-            },
-            now: bootScan.now
-        )
-    }
-
-    /// Records an app whose remaining boot work was dropped. The
-    /// pass keeps going for everyone else; the driver reconciles
-    /// these unbudgeted once boot is over, on the
-    /// warm-on-reconcile precedent (#662/#672) — deferral with
-    /// completion rather than abandonment, which #675's heal
-    /// backstop exists to make unnecessary.
-    func deferBootWork(pid: pid_t, ref: AppRef, spentMs: Int64) {
-        bootScan.deferredApps[pid] = ref
-        onLog(
-            "boot budget: \(ref.bundleID ?? ref.name) deferred "
-                + "after \(spentMs)ms"
-        )
-    }
-
-    /// The deferred apps, and the pass's ledger cleared — the
-    /// driver takes them exactly once.
-    func takeDeferredBootApps() -> [pid_t: AppRef] {
-        let apps = bootScan.deferredApps
-        bootScan.deferredApps = [:]
-        return apps
     }
 }

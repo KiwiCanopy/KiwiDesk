@@ -56,11 +56,6 @@ extension EventLoop {
                 interval
             )
         }
-        // The clock seam outlives the pass: it is injected once
-        // per test, and a stop that restored the live default
-        // would silently un-fake the next pass's budgets.
-        let clock = bootScan.now
         bootScan = BootScanState()
-        bootScan.now = clock
     }
 }

@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "A permissão de Acessibilidade foi revogada. Reative-a em Ajustes do Sistema > Privacidade e Segurança > Acessibilidade.",
   "notification.permission_lost.title": "O KiwiDesk parou de gerenciar as janelas",
   "onboarding.continue": "Continuar",
-  "onboarding.grant.done.body": "Dê uma olhada atrás desta janela: suas janelas abertas foram organizadas.\n\nJanelas de configuração como esta permanecem intocadas, pois são temporárias.",
   "onboarding.grant.done.title": "Suas janelas estão organizadas",
   "onboarding.grant.granted": "Permissão concedida",
   "onboarding.grant.lead": "O macOS só deixa um app mover janelas depois que você permite. Nada aqui funciona enquanto isso não estiver ativado.",

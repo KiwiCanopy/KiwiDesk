@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "Se ha revocado el permiso de Accesibilidad. Vuelve a activarlo en Ajustes del Sistema > Privacidad y seguridad > Accesibilidad.",
   "notification.permission_lost.title": "KiwiDesk ha dejado de gestionar las ventanas",
   "onboarding.continue": "Continuar",
-  "onboarding.grant.done.body": "Echa un vistazo detrás de esta ventana: tus ventanas abiertas se han organizado.\n\nLas ventanas de configuración como esta no se tocan, ya que son temporales.",
   "onboarding.grant.done.title": "Tus ventanas están organizadas",
   "onboarding.grant.granted": "¡Permiso concedido",
   "onboarding.grant.lead": "macOS solo permite que una app mueva ventanas cuando tú lo autorizas. Sin este permiso, aquí no funciona nada.",

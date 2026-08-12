@@ -80,7 +80,7 @@ struct BootPhaseTests {
                 )
             }
         }
-        loop.bootScan.now = {
+        loop.monotonicNow = {
             box.clock = box.clock.advanced(by: box.step)
             return box.clock
         }
@@ -138,8 +138,7 @@ struct BootPhaseTests {
         var finished = false
 
         core.driveChunkedPass(
-            .bootScan,
-            onProgress: {
+            onChunk: {
                 core.boot.publish(
                     .scanning(
                         scanned: $0.scanned,
@@ -161,8 +160,11 @@ struct BootPhaseTests {
         }
         #expect(finished)
         #expect(turns > 0)
-        // Every chunk's count reached the seam, in order, ending
-        // at the total.
+        // Every chunk with work behind it reached the seam, in
+        // order and short of the total: the finishing chunk calls
+        // the epilogue INSTEAD of publishing, so the count never
+        // announces a completion the phase is about to announce
+        // itself.
         let counts = box.phases.compactMap { phase -> Int? in
             guard case .scanning(let scanned, _) = phase else {
                 return nil
@@ -170,7 +172,8 @@ struct BootPhaseTests {
             return scanned
         }
         #expect(counts == counts.sorted())
-        #expect(counts.last == 5)
+        #expect(!counts.isEmpty)
+        #expect(counts.allSatisfy { $0 < 5 })
     }
 
     @Test("a deferred app completes one per turn")

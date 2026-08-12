@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "손쉬운 사용 권한이 취소되었습니다. 시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 다시 활성화하십시오.",
   "notification.permission_lost.title": "KiwiDesk가 윈도우 관리를 중단했습니다",
   "onboarding.continue": "계속",
-  "onboarding.grant.done.body": "이 윈도우 뒤를 확인해 보십시오 — 열려 있던 윈도우들이 정돈되었습니다.\n\n이와 같은 설정 윈도우는 곧 사라지므로 변경되지 않고 유지됩니다.",
   "onboarding.grant.done.title": "윈도우가 정돈되었습니다",
   "onboarding.grant.granted": "권한이 부여되었습니다.",
   "onboarding.grant.lead": "macOS는 사용자가 허용한 뒤에야 앱이 윈도우를 옮기도록 합니다. 이 권한을 켜기 전까지는 여기서 아무것도 작동하지 않습니다.",

@@ -863,8 +863,9 @@ stopped at `Settings/`.
 - **An `NSMenu` that greys a row for a reason of its own turns
   auto-enabling off, and then every row states `isEnabled`.**
   AppKit re-enables at display time any item whose target
-  responds to its action, so a row that WORKS cannot be dimmed
-  while `autoenablesItems` is on — which is what the quick menu
+  responds to its action (observed on macOS 26.6.1,
+  2026-08-12), so a row that WORKS cannot be dimmed while
+  `autoenablesItems` is on — which is what the quick menu
   needs during boot (#802) and what the Layout submenu's save row
   needed before it (#68). The cost is the other half of the
   switch: a nil-action row is no longer disabled for free, so an

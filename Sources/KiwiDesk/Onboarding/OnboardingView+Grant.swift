@@ -19,16 +19,12 @@ extension OnboardingView {
         OnboardingPage(
             title: grantTitle,
             body1: grantBody,
-            hint: model.isTrusted ? nil : grantHint
+            hint: grantHintForPhase,
+            hintPulses: isArranging
         ) {
             wordmark
             if model.isTrusted {
                 grantedMark
-                if case .scanning(let scanned, let total) =
-                    model.bootPhase
-                {
-                    arrangingLine(scanned: scanned, total: total)
-                }
             } else {
                 grantSteps
             }
@@ -60,6 +56,14 @@ extension OnboardingView {
     /// this screen is read while the scan is still running, and
     /// the finished-job copy would be the only thing lying about
     /// it.
+    ///
+    /// **The finished claim is gated on `.ready`, not on "not
+    /// scanning".** Every other phase — `.idle` from a `stop()`, or
+    /// the gap before the first publication — must narrate rather
+    /// than assert a completed job (ui-designer, 2026-08-12). The
+    /// inverse predicate is right for the MARK and the greys,
+    /// which owe a readiness signal, and wrong for a claim.
+    ///
     /// Internal, not private: the three states are a surfacing
     /// branch, and `OnboardingGrantPhaseTests` reads them — a
     /// branch inside a `body` is exactly what every other guard
@@ -71,60 +75,84 @@ extension OnboardingView {
                 "KiwiDesk needs Accessibility"
             )
         }
-        return model.bootPhase.isStarting
+        return model.bootPhase == .ready
             ? L(
-                "onboarding.grant.arranging.title",
-                "Arranging your windows"
-            )
-            : L(
                 "onboarding.grant.done.title",
                 "Your windows are arranged"
+            )
+            : L(
+                "onboarding.grant.arranging.title",
+                "Arranging your windows"
             )
     }
 
     var grantBody: String {
         guard model.isTrusted else { return grantLead }
-        return model.bootPhase.isStarting
-            ? L(
+        guard model.bootPhase != .ready else { return grantedBody }
+        return [
+            L(
                 "onboarding.grant.arranging.body",
                 """
-                Permission is on. KiwiDesk is going through your \
-                open windows now — on a busy Mac this takes a \
-                moment.
-
-                Setup windows like this one are left alone, \
-                because they go away.
+                KiwiDesk is going through your open apps and \
+                putting their windows in place. On a busy Mac \
+                this takes a moment.
                 """
-            )
-            : grantedBody
+            ),
+            ownWindowNote,
+        ].joined(separator: "\n\n")
     }
 
-    /// The same determinate count the quick menu shows, in the
-    /// same words: one fact, and a user who checks both must not
-    /// find two numbers. The dot is the tour's existing waiting
-    /// vocabulary, so the state reads as continuing rather than as
-    /// a new kind of progress.
-    private func arrangingLine(
-        scanned: Int,
-        total: Int
-    ) -> some View {
-        HStack(spacing: 9) {
-            WaitingDot()
-            Text(
-                L(
-                    "onboarding.grant.arranging.count",
-                    "Apps scanned: %1$d of %2$d",
-                    scanned,
-                    total
-                )
-            )
-            .fixedSize(horizontal: false, vertical: true)
-        }
-        .font(.system(size: 12.5))
-        .foregroundStyle(SettingsTheme.ink3)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.top, 10)
-        .accessibilityElement(children: .combine)
+    /// The count, in the footer rather than under the hero
+    /// (ui-designer, 2026-08-12): the hint slot is documented for
+    /// what happens if the user does nothing, which is exactly
+    /// this — Continue is live throughout and the arranging
+    /// finishes on its own. Under the hero it welded a transient
+    /// tally to the app's one moment of good news, and its
+    /// disappearance at `.ready` moved the copy above it.
+    ///
+    /// It carries the same NUMBER as the quick menu's row, not the
+    /// same sentence: this reader is one minute into owning the
+    /// app, and "scanned" is antivirus vocabulary for a count of
+    /// everything running on their Mac.
+    /// Trusted, and the scan has not finished. One predicate, so
+    /// the pulse and the count cannot disagree about whether work
+    /// is in flight.
+    var isArranging: Bool {
+        model.isTrusted && grantHintCount != nil
+    }
+
+    var grantHintForPhase: String? {
+        guard model.isTrusted else { return grantHint }
+        guard let count = grantHintCount else { return nil }
+        return L(
+            "onboarding.grant.arranging.count",
+            "Still going through your open apps: %1$d of %2$d",
+            count.scanned,
+            count.total
+        )
+    }
+
+    private var grantHintCount: (scanned: Int, total: Int)? {
+        guard
+            case .scanning(let scanned, let total) =
+                model.bootPhase
+        else { return nil }
+        return (scanned, total)
+    }
+
+    /// Said in both trusted states, and authored once: the
+    /// arranging arm used to carry a byte-identical copy of it,
+    /// which every catalog would have translated twice and which
+    /// would then have been rewritten under the reader's eyes at
+    /// `.ready` if the two drifted (localization audit,
+    /// 2026-08-12). Paragraph joining, not sentence stitching — no
+    /// locale needs to reorder two paragraphs.
+    private var ownWindowNote: String {
+        L(
+            "onboarding.grant.own_window",
+            "Setup windows like this one are left alone, because "
+                + "they go away."
+        )
     }
 
     private var wordmark: some View {
@@ -300,15 +328,13 @@ extension OnboardingView {
     /// outright, once. Said once, the exception stops reading as
     /// an inconsistency and starts reading as a rule.
     private var grantedBody: String {
-        L(
-            "onboarding.grant.done.body",
-            """
-            Take a look behind this window — your open windows \
-            have been arranged.
-
-            Setup windows like this one are left alone, because \
-            they go away.
-            """
-        )
+        [
+            L(
+                "onboarding.grant.done.body",
+                "Take a look behind this window — your open "
+                    + "windows have been arranged."
+            ),
+            ownWindowNote,
+        ].joined(separator: "\n\n")
     }
 }

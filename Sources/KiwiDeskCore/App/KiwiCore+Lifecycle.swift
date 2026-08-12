@@ -29,20 +29,42 @@ extension KiwiCore {
             guard let self, self.eventLoop.isRunning,
                 self.eventLoop.beginSweep()
             else { return }
-            // Same batching as the boot scan: what the sweep
-            // discovers lands in one retile, and the #193 pile
-            // restore is re-armed once after it (#672).
+            // Batched PER CHUNK, not per pass. The batching is
+            // #672's (what a bulk pass discovers lands in one
+            // retile, not one per window), but the sweep is no
+            // longer one synchronous block: holding the deferral
+            // across the whole pass leaves a window created
+            // seconds after boot untiled while the mark already
+            // says ready (code review, 2026-08-12). A chunk is the
+            // shortest batch that still collapses the burst.
             self.defersEventRetiles = true
-            self.driveChunkedPass(.startupSweep) { [weak self] in
-                self?.finishStartupSweep(landed: landed)
-            }
+            self.driveChunkedPass(
+                onChunk: { [weak self] _ in
+                    self?.foldSweepChunk()
+                },
+                onFinish: { [weak self] in
+                    self?.finishStartupSweep(landed: landed)
+                }
+            )
         }
+    }
+
+    /// One chunk's discoveries land as one retile, and the
+    /// deferral is re-raised for the next chunk.
+    private func foldSweepChunk() {
+        defersEventRetiles = false
+        retile()
+        scheduleTrackZOrderRestoreIfOverflowing()
+        defersEventRetiles = true
     }
 
     private func finishStartupSweep(landed: SpaceID?) {
         defersEventRetiles = false
         retile()
         scheduleTrackZOrderRestoreIfOverflowing()
+        // The sweep budgets its apps exactly as the scan does, so
+        // it owes the same completion (#803).
+        drainDeferredBootApps()
         if state.workspaces.activeSpace == landed {
             activateSpaceOfFocusedWindow()
             if state.workspaces.activeSpace != landed {
@@ -125,13 +147,28 @@ extension KiwiCore {
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()
-        crash.shutdownCleanly()
+        // A stop DURING boot must not write the session file:
+        // `shutdownCleanly` captures live state over it, and
+        // mid-scan that state is a fraction of the desk — written
+        // there it would overwrite the arrangement this boot had
+        // not restored yet, and the next launch would accept it
+        // (its `capturedAt` is after `kern.boottime`). Unreachable
+        // while boot was synchronous; a quit or a permission
+        // revoke at second 3 of a chunked scan reaches it (code
+        // review, 2026-08-12).
+        if boot.phase.isStarting {
+            crash.shutdownCleanly(preservingSession: true)
+            onLog("stopped mid-boot; previous session kept")
+        } else {
+            crash.shutdownCleanly()
+        }
         // A stop mid-boot leaves the readiness signal up
         // otherwise: `deferred.cancelAll()` above killed the
         // chunk continuation, so nothing else would ever publish
         // again. A permission revoke is the live case (#802) —
         // paused management is not a boot in progress.
         defersEventRetiles = false
+        closeBootInterval()
         boot.publish(.idle)
     }
 }

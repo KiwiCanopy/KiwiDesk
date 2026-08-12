@@ -94,23 +94,11 @@ struct BootPhaseWiringTests {
         )
     }
 
-    @Test("the GUI reads the phase both ways")
-    func guiReadsThePhaseBothWays() throws {
+    @Test("the GUI takes the pushed phase, twice over")
+    func guiTakesThePushedPhase() throws {
         let text = try source("Sources/KiwiDesk/AppDelegate.swift")
-        // The pull, for the count the menu draws on open …
-        let provider =
-            #"bootPhaseProvider\s*=\s*\{[\s\S]{0,120}?"#
-            + #"core\.bootPhase"#
-        #expect(
-            text.range(of: provider, options: .regularExpression)
-                != nil,
-            """
-            AppDelegate no longer wires bootPhaseProvider to \
-            core.bootPhase — the quick menu's status row reads a \
-            hardcoded .ready and never appears.
-            """
-        )
-        // … and the push, for the icon and the tour.
+        // ONE push, two consumers: the status item (icon rank, the
+        // count row, the greys) and the tour.
         let change =
             #"onBootPhaseChange\s*=\s*\{[\s\S]{0,200}?"#
             + #"setBootPhase"#
@@ -129,6 +117,106 @@ struct BootPhaseWiringTests {
             AppDelegate no longer forwards the phase to the tour \
             — the grant screen claims a finished arrangement \
             mid-scan.
+            """
+        )
+    }
+
+    /// The link `ClickProvenanceWiringTests` lost when the seams
+    /// moved to their own file: every seam in `KiwiCore+BootSeams`
+    /// is injected by tests, so deleting the CALL leaves that
+    /// whole suite green while `stackingOrderProvider`,
+    /// `pointerWarp`, `frontmostPIDProvider` and the mouse and
+    /// border tees all stay nil in production (code review,
+    /// 2026-08-12).
+    @Test("start arms the machine seams")
+    func startArmsTheMachineSeams() throws {
+        let text = try source(bootPath)
+        #expect(
+            text.contains("armMachineSeams()"),
+            """
+            KiwiCore+Boot's start() no longer calls
+            armMachineSeams() — every machine seam stays nil
+            in production and every suite that injects one
+            stays green.
+            """
+        )
+    }
+
+    /// The sweep's per-chunk fold and its deferral drain: both are
+    /// one-line decisions inside a closure, and both are invisible
+    /// to every behavior suite (the sweep is driven through a real
+    /// pass, which no test builds).
+    @Test("the sweep folds per chunk and drains its deferrals")
+    func sweepFoldsAndDrains() throws {
+        let text = try source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
+        )
+        let folds =
+            #"driveChunkedPass\([\s\S]{0,200}?onChunk:"#
+        #expect(
+            text.range(of: folds, options: .regularExpression)
+                != nil,
+            """
+            The startup sweep no longer folds per chunk — it
+            holds defersEventRetiles for its whole span while
+            the mark already says ready, so a window created
+            seconds after boot stays untiled.
+            """
+        )
+        #expect(
+            text.contains("drainDeferredBootApps()"),
+            """
+            The sweep's epilogue no longer drains the deferred
+            apps — the sweep budgets too, so one it cut short
+            is abandoned rather than completed.
+            """
+        )
+    }
+
+    /// A stop mid-boot must not write the session file.
+    @Test("stop preserves the session while starting")
+    func stopPreservesTheSessionMidBoot() throws {
+        let text = try source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
+        )
+        let pattern =
+            #"boot\.phase\.isStarting[\s\S]{0,160}?"#
+            + #"preservingSession: true"#
+        #expect(
+            text.range(of: pattern, options: .regularExpression)
+                != nil,
+            """
+            stop() no longer preserves the session while boot
+            is starting — a quit or a permission revoke
+            mid-scan writes a fraction of the desk over the
+            arrangement this launch never restored.
+            """
+        )
+    }
+
+    /// The tour's count is a surfacing branch inside a `body`:
+    /// the hint expression and the pulse can both be deleted with
+    /// `OnboardingGrantPhaseTests` green, because that suite reads
+    /// the properties rather than the page they are handed to.
+    @Test("the tour hands its count to the page")
+    func tourHandsTheCountToThePage() throws {
+        let text = try source(
+            "Sources/KiwiDesk/Onboarding/OnboardingView+Grant.swift"
+        )
+        #expect(
+            text.contains("hint: grantHintForPhase"),
+            """
+            The grant page no longer takes grantHintForPhase —
+            the count is derived and never drawn, which every
+            other guard passes over.
+            """
+        )
+        #expect(
+            text.contains("hintPulses: isArranging"),
+            """
+            The grant page no longer pulses while arranging —
+            the footer count reads as a caption rather than as
+            work in flight (owner, 2026-08-12).
             """
         )
     }

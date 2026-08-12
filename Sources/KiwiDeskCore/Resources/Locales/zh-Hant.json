@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "「輔助使用」權限已被撤銷。請在「系統設定」>「隱私權與安全性」>「輔助使用」中重新啟用。",
   "notification.permission_lost.title": "KiwiDesk 已停止管理視窗",
   "onboarding.continue": "繼續",
-  "onboarding.grant.done.body": "看看這個視窗背後的畫面 — 你開啟的視窗均已排列整齊。\n\n類似本視窗的設定視窗會保持原樣，因為它們會在完成後自動消失。",
   "onboarding.grant.done.title": "你的視窗已排列整齊",
   "onboarding.grant.granted": "已授予權限",
   "onboarding.grant.lead": "macOS 只有在你允許後才會讓 App 移動視窗。在開啟它之前，這裡的一切都無法運作。",

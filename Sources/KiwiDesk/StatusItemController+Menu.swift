@@ -17,7 +17,7 @@ extension StatusItemController {
         // one says so.
         menu.autoenablesItems = false
         let profiles = profilesProvider()
-        let phase = bootPhaseProvider()
+        let phase = bootPhase
 
         // Problem zone (top): warning rows appear only when they
         // apply, so a healthy menu opens straight on Layout with
@@ -49,25 +49,27 @@ extension StatusItemController {
             )
             warnings.append(paused)
         }
-        if case .scanning(let scanned, let total) = phase {
+        if case .scanning = phase {
             // A determinate count, deliberately in words: menus
             // carry no progress bars, and the honest number is
             // apps LOOKED AT of apps running — `BootPhase` argues
             // why the attach tally would read as a stalled bar.
-            // Disabled, monochrome, and gone the moment boot ends:
-            // it is the sentence that explains the greys below.
+            // Disabled, monochrome, and gone the moment boot ends;
+            // the rows it explains are greyed below.
             let status = NSMenuItem(
-                title: L(
-                    "menu.starting",
-                    "Starting up — apps scanned: %1$d of %2$d",
-                    scanned,
-                    total
-                ),
+                title: Self.startingTitle(for: phase),
                 action: nil,
                 keyEquivalent: ""
             )
             status.isEnabled = false
             warnings.append(status)
+            // Retitled in place while the menu stays open
+            // (`setBootPhase`) — a menu opened at second 2 of a
+            // ten-second boot would otherwise report second 2 for
+            // as long as the user holds it.
+            startingRow = status
+        } else {
+            startingRow = nil
         }
         if configError {
             let issues = NSMenuItem(
@@ -176,6 +178,26 @@ extension StatusItemController {
         )
         quit.image = symbol("power")
         menu.addItem(quit)
+    }
+
+    /// The count row's title. One authoring site, because the
+    /// row is built on menu open and retitled per chunk while the
+    /// menu is up — two spellings of it would drift the moment
+    /// either changed.
+    ///
+    /// The number is last and behind a label
+    /// (localization.md ▸ a frame interpolating a COUNT), and the
+    /// unit is APPS, matching the tooltip one hover away.
+    static func startingTitle(for phase: BootPhase) -> String {
+        guard case .scanning(let scanned, let total) = phase else {
+            return ""
+        }
+        return L(
+            "menu.starting",
+            "Starting up — apps: %1$d of %2$d",
+            scanned,
+            total
+        )
     }
 
     /// `load_profile` had no quick path before (§3.10): one

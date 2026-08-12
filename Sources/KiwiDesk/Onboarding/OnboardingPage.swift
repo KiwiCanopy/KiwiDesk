@@ -44,6 +44,14 @@ struct OnboardingPage<Content: View, Action: View>: View {
     /// translator owns, rather than splitting it into two keys an
     /// `HStack` would then be unable to reorder.
     var hint: String?
+    /// A pulsing mark before the hint, for a hint that reports
+    /// work still in flight — the boot-arranging count (#802).
+    /// The MOTION is what it buys: an incrementing number is the
+    /// honest signal but reads static between increments, and a
+    /// footer sentence with no mark reads as a caption rather than
+    /// as a report (owner, 2026-08-12). Neutral ink, not the
+    /// attention token — there is nothing to attend to.
+    var hintPulses = false
     /// A control drawn INSIDE the hint, at its own positional
     /// specifier (#828, owner ruled the closing screen's "Open
     /// Settings" is a link in the sentence, not a button above
@@ -87,11 +95,16 @@ struct OnboardingPage<Content: View, Action: View>: View {
             }
             HStack(alignment: .center, spacing: 10) {
                 if let hint {
-                    hintView(hint)
-                        .frame(
-                            maxWidth: .infinity,
-                            alignment: .leading
-                        )
+                    HStack(alignment: .center, spacing: 9) {
+                        if hintPulses {
+                            WaitingDot(ink: SettingsTheme.ink3)
+                        }
+                        hintView(hint)
+                    }
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .leading
+                    )
                 } else {
                     Spacer(minLength: 0)
                 }

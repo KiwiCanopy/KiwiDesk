@@ -666,7 +666,6 @@
   "notification.permission_lost.body": "Die Erlaubnis für Bedienungshilfen wurde entzogen. Aktiviere sie wieder in Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen.",
   "notification.permission_lost.title": "KiwiDesk hat die Fensterverwaltung gestoppt",
   "onboarding.continue": "Weiter",
-  "onboarding.grant.done.body": "Wirf einen Blick hinter dieses Fenster — deine geöffneten Fenster wurden angeordnet.\n\nEinrichtungsfenster wie dieses bleiben unangetastet, da sie wieder verschwinden.",
   "onboarding.grant.done.title": "Deine Fenster sind angeordnet",
   "onboarding.grant.granted": "Erlaubnis erteilt",
   "onboarding.grant.lead": "macOS erlaubt einer App erst dann, Fenster zu bewegen, wenn du es zulässt. Ohne diese Freigabe funktioniert hier nichts.",
