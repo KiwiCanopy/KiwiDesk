@@ -9,6 +9,17 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     let label: String
     /// Native glyphs — `⌃⌥ ← ↓ ↑ →`, `⌃⌥ 1–5`.
     let glyphs: String
+    /// Whether this row is the WAY OUT of the list: the chord
+    /// that opens the shortcuts panel, where every other row is
+    /// one thing the user can do.
+    ///
+    /// The tour draws it in the accent (#828, the prototype's
+    /// filled chip) — it is the row that keeps mattering after
+    /// the tour closes, and a list of five identical rows gives
+    /// the reader nothing to take away. A FLAG rather than the
+    /// view testing `id == "shortcuts"`: the id is a lookup key
+    /// and a renamed one would silently un-mark the row.
+    var isGateway = false
 }
 
 /// The five chord families the tour teaches, read from the LIVE
@@ -100,7 +111,7 @@ enum OnboardingKeys {
                 )
             )
         }
-        if let panel = rendered(
+        if let panel = spaced(
             combo: layer.bindings.first {
                 $0.lua == ShortcutsOpenBinding.lua
             }?.combo
@@ -112,7 +123,8 @@ enum OnboardingKeys {
                         "onboarding.keys.all",
                         "See every shortcut"
                     ),
-                    glyphs: panel
+                    glyphs: panel,
+                    isGateway: true
                 )
             )
         }
@@ -248,6 +260,25 @@ enum OnboardingKeys {
         )
         guard full.hasPrefix(modifiers) else { return full }
         return String(full.dropFirst(modifiers.count))
+    }
+
+    /// One chord, written the way the multi-key families write
+    /// theirs: modifiers, a space, then the key.
+    ///
+    /// `ComboSymbols.render` packs them tight (`⌃⌥K`), which is
+    /// right in a recorder field and wrong in a list where every
+    /// other row reads `⌃⌥ 1–5` — the odd one out looked like a
+    /// different kind of chord (owner, on device, 2026-08-12).
+    private static func spaced(combo: String?) -> String? {
+        guard let combo,
+            let parsed = KeyCombo.parse(combo),
+            let key = keyOnly(combo: combo)
+        else { return rendered(combo: combo) }
+        let modifiers = ComboSymbols.modifierSymbols(
+            parsed.modifiers
+        )
+        guard !modifiers.isEmpty else { return key }
+        return modifiers + " " + key
     }
 
     /// The same `ComboSymbols` + layout path the editor and the

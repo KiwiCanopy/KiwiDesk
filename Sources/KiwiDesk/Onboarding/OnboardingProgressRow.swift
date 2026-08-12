@@ -15,39 +15,35 @@ import SwiftUI
 /// ignores the entry door — is the banned counter wearing this
 /// name, and the repair is to delete the row, not to patch it.
 ///
-/// **Two channels, never hue alone.** Done and current pips take
-/// the accent, upcoming ones `hairline`; the current pip is told
-/// from the done ones by WIDTH. So the row survives both colour
-/// vision deficiency and the appearance flip, and it coins no
-/// third token.
+/// **Two channels, never hue alone.** Reached pips take the
+/// accent, unreached ones `hairline` — a fill-versus-empty
+/// contrast that survives colour vision deficiency and the
+/// appearance flip alike, and coins no third token. The pip the
+/// user is ON is the last filled one, which is what the
+/// prototype draws: an extra width for the current step made the
+/// row read as a control with a selection in it.
 struct OnboardingProgressRow: View {
     let steps: [OnboardingModel.Step]
     let index: Int
 
-    /// A pip's height, and an upcoming pip's width — page dots at
-    /// the size AppKit draws them, not a control the user can aim
-    /// at. The row is decoration with a value: nothing here is
-    /// hittable, because a pip that looks clickable promises a
-    /// navigation this flow does not offer.
-    private let pip: CGFloat = 6
-    private let currentPip: CGFloat = 20
+    /// The prototype's bar: 18×5, 3 pt radius, 7 pt apart.
+    /// Nothing here is hittable — a pip that looks clickable
+    /// promises a navigation this flow does not offer.
+    private let pipWidth: CGFloat = 18
+    private let pipHeight: CGFloat = 5
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 7) {
             ForEach(Array(steps.enumerated()), id: \.offset) {
                 position,
                 _ in
-                Capsule()
+                RoundedRectangle(cornerRadius: 3)
                     .fill(
                         position <= index
                             ? SettingsTheme.accent
                             : SettingsTheme.hairline
                     )
-                    .frame(
-                        width: position == index
-                            ? currentPip : pip,
-                        height: pip
-                    )
+                    .frame(width: pipWidth, height: pipHeight)
             }
         }
         .animation(.default, value: index)

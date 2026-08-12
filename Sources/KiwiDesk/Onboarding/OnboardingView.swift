@@ -15,7 +15,8 @@ struct OnboardingView: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
+            progressRow
             switch model.step {
             case .grant:
                 grant
@@ -28,14 +29,26 @@ struct OnboardingView: View {
             case .done:
                 done
             }
-            progressRow
         }
-        .padding(32)
+        .padding(.horizontal, 30)
+        .padding(.vertical, 26)
         // One frame for every step, since the window is sized from
         // `fittingSize` once at creation and never resized on a
         // step change — a per-step frame would clip whichever step
         // is larger than the one that opened.
-        .frame(width: 520, height: 430)
+        //
+        // 560×620 (#828). The old 520×430 truncated the grant
+        // step's body in German and the closing card's menu-bar
+        // line in English — a fixed frame means every locale has
+        // to fit the tightest one, so the frame is what gives.
+        //
+        // The prototype's 700 was tried first and left every step
+        // but one standing in empty space (owner, on device,
+        // 2026-08-12). 620 is sized to the tallest step that
+        // CANNOT scroll; the spaces step, the one that grows with
+        // the user's monitors, has a scrolling list instead —
+        // which is why it is not what sets this number.
+        .frame(width: 560, height: 620)
         // The tour's own ground and ink, not the system's (#828).
         // The window is `.titled` with a transparent titlebar over
         // `.fullSizeContentView`, so this paints the title strip
@@ -52,10 +65,14 @@ struct OnboardingView: View {
         .tint(SettingsTheme.accent)
     }
 
+    /// At the TOP of the content column, above the heading, where
+    /// the prototype puts it (#828) — a reader answers "how long
+    /// is this?" before reading the screen, not after.
+    ///
     /// One draw site for every step, `.grant` and `.done`
-    /// included: the grant screen is where "how long is this?" is
-    /// worth the most, and a row that vanished on the last screen
-    /// would disappear exactly where it says "that was all".
+    /// included: the grant screen is where the question is worth
+    /// the most, and a row that vanished on the last screen would
+    /// disappear exactly where it says "that was all".
     ///
     /// Drawn from the model's plan, never from `Step.allCases` —
     /// see `OnboardingProgressRow`, which carries why that
@@ -70,7 +87,6 @@ struct OnboardingView: View {
                 steps: model.plannedSteps,
                 index: index
             )
-            .padding(.top, 4)
         }
     }
 }

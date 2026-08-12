@@ -9,11 +9,14 @@ import Testing
 /// a machine that shows three steps, and this suite is what keeps
 /// the row from becoming one again.
 ///
-/// Every test here pins `displayCount` to 1 unless it is testing
-/// the multi-display arm, because `recommendsSharedSpaces` reads a
-/// live system preference on its other half — at one display the
-/// predicate is false whatever that preference says
-/// (`OnboardingTests.singleDisplayNeverRecommends`).
+/// **Every fixture pins BOTH halves of the Displays gate** — the
+/// count and the "Displays have separate Spaces" preference. The
+/// preference is a live `CFPreferences` read in production, and a
+/// machine whose owner has already turned it off answers `false`
+/// at every display count: on such a host this suite's first cut
+/// passed with the step deleted from every plan and with the
+/// snapshot removed outright (`guard-prover`, 2026-08-12). A test
+/// whose verdict moves with the author's Mac is not a guard.
 @Suite("Onboarding progress row derivation (#828)")
 @MainActor
 struct OnboardingProgressTests {
@@ -29,7 +32,7 @@ struct OnboardingProgressTests {
     func planMatchesTheWalkedRoute() {
         for wantsKeys in [true, false] {
             let model = OnboardingModel()
-            model.wantsDiscovery = { wantsKeys }
+            model.hasSeparateSpaces = { false }
             model.displayCount = { 1 }
             model.beginPresentation(at: .grant)
 
@@ -60,24 +63,30 @@ struct OnboardingProgressTests {
     /// Vacuity, and the whole point: two machines get two plans.
     /// A row that returned `Step.allCases` — the fixed counter,
     /// wearing a derivation's name — passes every test above.
+    ///
+    /// The axis is the Displays recommendation, the flow's one
+    /// remaining conditional step (#828 made the keys step
+    /// unconditional). Both arms are driven from the injected
+    /// preference, so the verdict does not move with the machine
+    /// the suite runs on.
     @Test("the plan's length varies with the machine")
     func planLengthIsNotConstant() {
-        let withKeys = OnboardingModel()
-        withKeys.wantsDiscovery = { true }
-        withKeys.displayCount = { 1 }
-        withKeys.beginPresentation(at: .grant)
+        let recommended = OnboardingModel()
+        recommended.hasSeparateSpaces = { true }
+        recommended.displayCount = { 2 }
+        recommended.beginPresentation(at: .grant)
 
-        let withoutKeys = OnboardingModel()
-        withoutKeys.wantsDiscovery = { false }
-        withoutKeys.displayCount = { 1 }
-        withoutKeys.beginPresentation(at: .grant)
+        let plain = OnboardingModel()
+        plain.hasSeparateSpaces = { false }
+        plain.displayCount = { 1 }
+        plain.beginPresentation(at: .grant)
 
         #expect(
-            withKeys.plannedSteps.count
-                == withoutKeys.plannedSteps.count + 1
+            recommended.plannedSteps.count
+                == plain.plannedSteps.count + 1
         )
         #expect(
-            withoutKeys.plannedSteps.count
+            plain.plannedSteps.count
                 < OnboardingModel.Step.allCases.count
         )
     }
@@ -90,7 +99,7 @@ struct OnboardingProgressTests {
     func entryDoorTrimsThePlan() {
         let model = OnboardingModel()
         model.isTrusted = true
-        model.wantsDiscovery = { true }
+        model.hasSeparateSpaces = { false }
         model.displayCount = { 1 }
         model.beginPresentation(at: .spaces)
 
@@ -108,7 +117,7 @@ struct OnboardingProgressTests {
     @Test("a granted permission does not shorten the plan")
     func grantStaysCountedOnceEntered() {
         let model = OnboardingModel()
-        model.wantsDiscovery = { true }
+        model.hasSeparateSpaces = { false }
         model.displayCount = { 1 }
         model.beginPresentation(at: .grant)
         let before = model.plannedSteps
@@ -125,53 +134,73 @@ struct OnboardingProgressTests {
     /// The snapshot's promise, and its stated cost.
     ///
     /// The plan is resolved once, at `beginPresentation`, so a
-    /// display unplugged mid-tour does not re-number the row
-    /// under the reader — the row keeps its length and the
-    /// marker simply advances past the screen the flow now
-    /// skips. A recomputing plan would shorten while the user
-    /// watched, which is the counter pass 11 banned in motion
-    /// rather than at rest.
+    /// gate falsified mid-tour does not re-number the row under
+    /// the reader — the row keeps its length and the marker
+    /// advances past the screen the flow now skips. A recomputing
+    /// plan would shorten while the user watched, which is the
+    /// counter pass 11 banned in motion rather than at rest.
+    ///
+    /// Falsifies the INJECTED preference, never the host's: the
+    /// first cut moved `displayCount` on a machine where the live
+    /// pref already made the predicate false at both counts, so
+    /// it compared two identical lists and the whole snapshot
+    /// could be deleted with the suite green (`guard-prover`,
+    /// 2026-08-12).
     @Test("a gate falsified mid-tour does not re-plan the row")
     func theRowDoesNotRePlanUnderTheReader() {
         let model = OnboardingModel()
-        var displays = 2
-        model.wantsDiscovery = { false }
-        model.displayCount = { displays }
-        model.beginPresentation(at: .spaces)
+        var separate = true
+        model.hasSeparateSpaces = { separate }
+        model.displayCount = { 2 }
+        model.beginPresentation(at: .keys)
         let planned = model.plannedSteps
+        #expect(planned.contains(.separateSpaces))
 
-        // One display makes the predicate false whatever the
-        // live pref says (`recommendsSharedSpaces`), so the fall
-        // is guaranteed rather than dependent on the machine.
-        displays = 1
+        separate = false
         #expect(model.plannedSteps == planned)
 
-        // …and the flow, which does read it live, walks past the
-        // step. The row still ends on its last pip.
-        model.continueAfterSpaces()
+        // …and the flow, which does read the gate live, walks
+        // past the step. The row still ends on its last pip.
+        model.continueAfterKeys()
         #expect(model.step == .done)
         #expect(
             model.progressIndex == model.plannedSteps.count - 1
         )
     }
 
-    /// The multi-display arm, expected from the same predicate the
-    /// transition uses — the live half of it is a system
-    /// preference no unit test may set.
-    @Test("the Displays recommendation counts only when it fires")
+    /// The Displays recommendation, pinned in BOTH directions
+    /// from the injected preference rather than from the live
+    /// one.
+    ///
+    /// The first cut derived its expectation from the same call
+    /// the production code makes, so one side of the `==` was
+    /// always the other: it could only ever catch a plan that
+    /// stopped consulting the predicate, in whichever direction
+    /// the host is not. On the author's Mac — separate Spaces
+    /// off — deleting the step from every plan stayed green
+    /// (`guard-prover`, 2026-08-12).
+    @Test("the Displays recommendation counts when it fires")
     func displaysRecommendationCountsWhenItFires() {
-        let model = OnboardingModel()
-        model.wantsDiscovery = { false }
-        model.displayCount = { 2 }
-        model.beginPresentation(at: .grant)
-        let recommends =
-            DisplaySpacesSetting
-            .recommendsSharedSpaces(displayCount: 2)
+        for (separate, displays, wanted) in [
+            (true, 2, true),
+            (false, 2, false),
+            (true, 1, false),
+            (false, 1, false),
+        ] {
+            let model = OnboardingModel()
+            model.hasSeparateSpaces = { separate }
+            model.displayCount = { displays }
+            model.beginPresentation(at: .grant)
 
-        #expect(
-            model.plannedSteps.contains(.separateSpaces)
-                == recommends
-        )
+            #expect(
+                model.plannedSteps.contains(.separateSpaces)
+                    == wanted,
+                Comment(
+                    rawValue: "separate \(separate), displays "
+                        + "\(displays): \(model.plannedSteps)"
+                )
+            )
+        }
     }
 
     /// Progress reads as progress: each Continue moves the index
@@ -181,7 +210,7 @@ struct OnboardingProgressTests {
     @Test("the index advances one step at a time to the end")
     func indexAdvancesMonotonically() {
         let model = OnboardingModel()
-        model.wantsDiscovery = { true }
+        model.hasSeparateSpaces = { false }
         model.displayCount = { 1 }
         model.beginPresentation(at: .grant)
 

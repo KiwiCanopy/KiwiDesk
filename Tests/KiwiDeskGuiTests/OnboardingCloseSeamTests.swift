@@ -41,9 +41,16 @@ struct OnboardingCloseSeamTests {
             // …and the flag is CONSUMED, so it scopes to this
             // presentation rather than to a model that outlives
             // every window. Deleting the line reds nothing
-            // otherwise, and re-fires all three effects on the
+            // otherwise, and re-fires both effects on the
             // quick menu's reopen (code review, 2026-08-11).
             "onboardingModel.clearReachedEnd()",
+            // …and the seam is REACHED at all. Everything above
+            // sits inside `windowWillClose`, which never fires
+            // without this line — so deleting it leaves the
+            // needles green with the banner permanently dead and
+            // discovery never marked, one line earlier than the
+            // guard was looking (`guard-prover`, 2026-08-12).
+            "window.delegate=self",
         ],
         "AppDelegate.swift": [
             // "Show me around" reaches the real replay.

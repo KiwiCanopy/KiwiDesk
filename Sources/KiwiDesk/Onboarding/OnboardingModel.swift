@@ -101,14 +101,14 @@ final class OnboardingModel {
     /// same presentation, and the second one added at a new door
     /// would be the one that is forgotten. Called from
     /// `showOnboarding(at:)` AFTER the model's closures are wired
-    /// — the plan reads `wantsDiscovery` and `displayCount`, and
-    /// resolving it against their stubs would plan a tour for a
-    /// one-display machine with discovery already shown.
+    /// — the plan reads `hasSeparateSpaces` and `displayCount`,
+    /// and resolving it against their stubs would plan the tour
+    /// for a one-display machine.
     func beginPresentation(at step: Step) {
         self.step = step
         plannedSteps = OnboardingEntry.plannedSteps(
             from: step,
-            wantsDiscovery: wantsDiscovery(),
+            separateSpaces: hasSeparateSpaces(),
             displayCount: displayCount()
         )
     }
@@ -150,14 +150,23 @@ final class OnboardingModel {
     var onFinish: () -> Void = {}
     /// Closes onboarding and opens the dashboard (#331).
     var onExploreSettings: () -> Void = {}
-    /// Whether the one-time keys step should be shown now (false
-    /// once its persisted flag is set). Gated on that flag, NEVER
-    /// AX trust, so a later TCC reset never re-pitches (#331).
-    var wantsDiscovery: () -> Bool = { false }
     /// Live count of connected displays, so the Spaces
     /// recommendation fires only in the multi-display state that
     /// can actually suffer ambiguous Desktop→profile bindings (#8).
     var displayCount: () -> Int = { 1 }
+    /// The other half of that recommendation: the live "Displays
+    /// have separate Spaces" preference.
+    ///
+    /// A SEAM rather than a call inside the predicate, with the
+    /// production default live (`.claude/rules/tests.md`) — a
+    /// machine whose owner has already turned the setting off
+    /// answers `false` at every display count, so a test on that
+    /// machine cannot tell a working gate from a deleted one
+    /// (`guard-prover`, 2026-08-12). Both the plan and the
+    /// transition read THIS, so they cannot answer differently.
+    var hasSeparateSpaces: () -> Bool = {
+        DisplaySpacesSetting.hasSeparateSpaces()
+    }
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.
     var starterSpaces: () -> [OnboardingSpaceCard] = { [] }
@@ -175,12 +184,23 @@ final class OnboardingModel {
         step = .spaces
     }
 
+    /// The keys step is ALWAYS next (#828, owner 2026-08-12).
+    ///
+    /// It used to be gated on a `wantsDiscovery` seam reading the
+    /// persisted discovery flag, so a tour whose flag was already
+    /// set walked straight from the spaces to the closing card —
+    /// the shortcuts screen, the one screen a returning user most
+    /// likely reopened the tour for, was the screen they could
+    /// never see again. The seam had no other reader and went
+    /// with the gate.
+    ///
+    /// #331's ruling survives intact, because it was never about
+    /// this: the flag decides whether an unfinished tour RESUMES
+    /// on the keys step at launch (`OnboardingDiscovery`), which
+    /// is what must not re-pitch. Being part of a tour the user
+    /// opened is a different question, and the answer is yes.
     func continueAfterSpaces() {
-        if wantsDiscovery() {
-            step = .keys
-        } else {
-            continueAfterKeys()
-        }
+        step = .keys
     }
 
     /// Shared display Spaces match KiwiDesk's one-active-profile
@@ -191,6 +211,7 @@ final class OnboardingModel {
     /// a logout the second thing KiwiDesk ever said.
     func continueAfterKeys() {
         if DisplaySpacesSetting.recommendsSharedSpaces(
+            separateSpaces: hasSeparateSpaces(),
             displayCount: displayCount()
         ) {
             step = .separateSpaces

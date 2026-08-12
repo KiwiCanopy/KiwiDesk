@@ -12,6 +12,7 @@ import SwiftUI
 struct MonocleSchematic: View {
     let orientation: MonocleParams.Orientation
     @Environment(\.schematicFocusStroke) private var focusStroke
+    @Environment(\.schematicPalette) private var palette
     /// Windows on screen. Monocle's fill logic is that there
     /// isn't any — every window is full-screen — so the count
     /// changes the DEPTH of the fan and nothing else, which is
@@ -61,13 +62,27 @@ struct MonocleSchematic: View {
         }
     }
 
+    /// Hoisted out of the drawing: the pair of ternaries blew the
+    /// type-checker's budget inline, which gui.md's shallow-body
+    /// rule exists to prevent.
+    private func fill(front: Bool) -> Color {
+        if front { return palette?.fill ?? LayoutSchematic.fill }
+        return palette?.ghostFill
+            ?? SettingsTheme.ink2.opacity(0.10)
+    }
+
+    private func edge(front: Bool) -> Color {
+        if front {
+            return focusStroke ?? palette?.stroke
+                ?? LayoutSchematic.stroke
+        }
+        return palette?.ghostStroke
+            ?? SettingsTheme.ink2.opacity(0.4)
+    }
+
     private func card(front: Bool) -> some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-            .fill(
-                front
-                    ? LayoutSchematic.fill
-                    : SettingsTheme.ink2.opacity(0.10)
-            )
+            .fill(fill(front: front))
             .overlay(
                 RoundedRectangle(
                     cornerRadius: LayoutSchematic.corner
@@ -80,8 +95,10 @@ struct MonocleSchematic: View {
                     // what the colour means (code review
                     // 2026-08-10).
                     front
-                        ? focusStroke ?? LayoutSchematic.stroke
-                        : SettingsTheme.ink2.opacity(0.4),
+                        ? focusStroke ?? palette?.stroke
+                            ?? LayoutSchematic.stroke
+                        : (palette?.ghostStroke
+                            ?? SettingsTheme.ink2.opacity(0.4)),
                     lineWidth: front ? 1.5 : 1
                 )
             )

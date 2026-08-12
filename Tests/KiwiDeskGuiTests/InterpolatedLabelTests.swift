@@ -121,7 +121,6 @@ struct InterpolatedLabelTests {
         "search.result_mode_ax": 1,
         "track.new_window_position.help": 4,
         "space_override.slot_size.help": 4,
-        "onboarding.grant.body": 1,
         "profiles.current_setup_note": 1,
         "app_bar.alignment.label.help": 2,
         "app_bar.background_fit.boxed_only": 1,

@@ -79,12 +79,6 @@ extension AppDelegate {
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
         }
-        // The shortcuts discovery page fires once, gated on its
-        // own persisted flag — never AX trust, so a later TCC
-        // reset never re-pitches (#331).
-        onboardingModel.wantsDiscovery = {
-            !OnboardingDiscovery.hasShown()
-        }
         onboardingModel.onExploreSettings = { [weak self] in
             self?.openSettingsFromOnboarding()
         }
@@ -100,8 +94,8 @@ extension AppDelegate {
             self?.onboardingKeyFamilies() ?? []
         }
         // LAST of the wiring, and deliberately so: the plan reads
-        // `wantsDiscovery` and `displayCount`, so resolving it any
-        // earlier would plan the tour against their stubs (#828).
+        // `hasSeparateSpaces` and `displayCount`, so resolving it
+        // any earlier would plan against their stubs (#828).
         onboardingModel.beginPresentation(at: entry)
 
         let window = NSWindow(
@@ -124,6 +118,17 @@ extension AppDelegate {
         window.contentView = host
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // The window's OWN ground, not just the view's. With a
+        // transparent titlebar over `.fullSizeContentView` the
+        // system window colour shows through the title strip and
+        // in every gap the hosting view has not painted, which is
+        // the "still looks greyish" the tint pass left behind
+        // (owner, on device, 2026-08-12). Cleared rather than
+        // painted: the SwiftUI `page` behind the content is the
+        // one copy of the ground, and an `NSColor` here would be
+        // a second one to keep in step.
+        window.backgroundColor = .clear
+        window.isOpaque = false
         // Size BEFORE centering. `center()` on a still-zero-sized
         // window puts its bottom-left corner at the screen centre;
         // the SwiftUI frame then grows the window upward from
@@ -153,11 +158,12 @@ extension AppDelegate {
     /// step opens (#331).
     ///
     /// One level ABOVE `.floating`, which is where the App Bar and
-    /// Space Bar panels sit (`BarPanel`): as peers the two settled
-    /// in raise order, so a bar could cover the tour, and the tour
-    /// is the window the user is being asked to read (#828, owner
-    /// ruled the raise over suppressing the bars — they are the
-    /// honest state, tiling really is running by then).
+    /// Space Bar panels sit (`BarPanel`): as peers the two settle
+    /// in raise order. The bars reserve their strip and the tour
+    /// is centred, so on the reported setup they never actually
+    /// met — the raise is what keeps that true on a setup where
+    /// they would (owner confirmed the behaviour on device,
+    /// 2026-08-12).
     func floatOnboardingAboveManagedWindows() {
         onboardingWindow?.level = .aboveBarPanels
     }

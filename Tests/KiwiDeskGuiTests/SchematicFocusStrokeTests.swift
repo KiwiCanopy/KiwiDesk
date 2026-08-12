@@ -37,7 +37,19 @@ struct SchematicFocusStrokeTests {
             // not show two focus colours (code review
             // 2026-08-10, which caught it drawing brand green
             // beside honest siblings).
-            "front?focusStroke??LayoutSchematic.stroke"
+            //
+            // Keyed on the `edge` helper the colour moved into
+            // when the plate palette landed (#828): the pair of
+            // ternaries inline blew the type-checker's budget,
+            // and the needle follows the expression rather than
+            // the line it used to sit on.
+            "iffront{returnfocusStroke??palette?.stroke"
+        ],
+        "Components/Layouts/FloatingSchematic.swift": [
+            // Floating draws the same card fan and takes the
+            // same wire — it was an `EmptyView` until #828, so
+            // it is new to this list rather than newly correct.
+            "iffront{returnfocusStroke??palette?.stroke"
         ],
     ]
 

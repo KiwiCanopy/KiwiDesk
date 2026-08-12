@@ -35,19 +35,41 @@ enum OnboardingEntry {
     /// **This is not the counter #678 Phase 4 pass 11 banned.**
     /// That one was fixed: five screens asserted on a machine that
     /// shows three. This is the list the flow will actually walk,
-    /// which is why it takes the same two answers the transitions
-    /// take — `wantsDiscovery` gates `.keys`
-    /// (`OnboardingModel.continueAfterSpaces`) and the display
-    /// count gates `.separateSpaces`
-    /// (`OnboardingModel.continueAfterKeys`) — and why
-    /// `OnboardingProgressTests` proves it by walking the model's
-    /// own transitions rather than by re-listing the steps.
+    /// which is why it reads the same answer the one conditional
+    /// transition reads — the display count gates
+    /// `.separateSpaces` (`OnboardingModel.continueAfterKeys`) —
+    /// and why `OnboardingProgressTests` proves it by walking the
+    /// model's own transitions rather than by re-listing the
+    /// steps.
     ///
-    /// The display count goes through Core's one predicate rather
+    /// `.keys` was gated here too, on `wantsDiscovery`, for as
+    /// long as the flow gated it. When the flow stopped
+    /// (`continueAfterSpaces`), this filter kept going for one
+    /// build — so the tour SHOWED the shortcuts screen while the
+    /// plan denied it existed, and the row, which draws nothing
+    /// when the current step is not in the plan, vanished on
+    /// exactly that screen (owner, on device, 2026-08-12). The
+    /// pair is the point: a plan and a flow reading different
+    /// predicates is the failure this whole derivation exists to
+    /// prevent, and it is what `planMatchesTheWalkedRoute`
+    /// catches.
+    ///
+    /// The display half goes through Core's one predicate rather
     /// than a copy of it: `recommendsSharedSpaces` has a second
-    /// half (the live "Displays have separate Spaces" preference)
-    /// and a row that read only the count would promise a screen
-    /// on every multi-display Mac.
+    /// half — the "Displays have separate Spaces" preference — and
+    /// a row that read only the count would promise a screen on
+    /// every multi-display Mac.
+    ///
+    /// That preference arrives as a PARAMETER rather than being
+    /// read here, and the reason is a guard rather than a
+    /// preference for purity. It is a live `CFPreferences` read,
+    /// so on any machine whose owner has already turned the
+    /// setting off the predicate answers `false` at every display
+    /// count — and a test that falsifies the count then compares
+    /// two identical lists. `guard-prover` shipped exactly that:
+    /// deleting `.separateSpaces` from every plan, and removing
+    /// the snapshot outright, both stayed green on the author's
+    /// Mac. Injected, both arms are pinned on every host.
     ///
     /// Steps before `entry` are not members. A door that opens
     /// past a screen never shows it, so counting from `.grant` on
@@ -55,7 +77,7 @@ enum OnboardingEntry {
     /// reading "2 of 4" on the tour's first screen.
     static func plannedSteps(
         from entry: OnboardingModel.Step,
-        wantsDiscovery: Bool,
+        separateSpaces: Bool,
         displayCount: Int
     ) -> [OnboardingModel.Step] {
         let all = OnboardingModel.Step.allCases
@@ -64,10 +86,10 @@ enum OnboardingEntry {
         }
         return all[start...].filter { step in
             switch step {
-            case .grant, .spaces, .done: true
-            case .keys: wantsDiscovery
+            case .grant, .spaces, .keys, .done: true
             case .separateSpaces:
                 DisplaySpacesSetting.recommendsSharedSpaces(
+                    separateSpaces: separateSpaces,
                     displayCount: displayCount
                 )
             }

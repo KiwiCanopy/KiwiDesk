@@ -10,8 +10,11 @@ import Testing
 /// Buttons inside `Menu`, `.contextMenu`, `.confirmationDialog`
 /// and `.alert` closures are styled by their containers and are
 /// exempt. `settingsActionButton()` names a style too — it IS
-/// `.bordered`, sealed to its neutralisation (#771) — so the
-/// count below reads both spellings.
+/// `.bordered`, sealed to its neutralisation (#771) — and
+/// `kiwiProminentButton()` names one the same way: it IS
+/// `KiwiProminentButtonStyle`, sealed to the `accentInk` label
+/// white-on-kiwi cannot carry (#828). The count reads all three
+/// spellings.
 @Suite("Settings button style convention")
 struct SettingsButtonStyleConventionTests {
     /// The trees this guard covers.
@@ -53,7 +56,15 @@ struct SettingsButtonStyleConventionTests {
                 )
             )
         }
-        #expect(scanRoots.count > 1)
+        // Derived from what the scan READ, never from the
+        // literal list: deleting the Onboarding entry leaves the
+        // loop above green, having faithfully checked whatever
+        // roots remain.
+        #expect(
+            try scannedSources().contains {
+                $0.path.contains("/Onboarding/")
+            }
+        )
     }
 
     /// Allowed unstyled action buttons that cannot take a style
@@ -231,12 +242,15 @@ struct SettingsButtonStyleConventionTests {
                 cursor += 1
             }
 
-            // The seal counts as naming a style: it applies
-            // `.bordered` (plus the neutralisation) inside
-            // `settingsActionButton()` (#771).
+            // Both seals count as naming a style: each applies
+            // one inside itself — `.bordered` plus its
+            // neutralisation in `settingsActionButton()` (#771),
+            // `KiwiProminentButtonStyle` plus its `accentInk`
+            // label in `kiwiProminentButton()` (#828).
             let styles =
                 source.occurrences(of: ".buttonStyle(")
                 + source.occurrences(of: ".settingsActionButton()")
+                + source.occurrences(of: ".kiwiProminentButton()")
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 

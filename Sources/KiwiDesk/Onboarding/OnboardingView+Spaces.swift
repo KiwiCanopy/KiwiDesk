@@ -15,84 +15,158 @@ extension OnboardingView {
     /// under the user's Desktops — the one place the tour answers
     /// the question #768's vocabulary split exists to raise. The
     /// lighter ink is what keeps it reading as reassurance rather
-    /// than as a second instruction.
-    ///
-    /// **10 pt gaps, not the 14 every other step uses.** The
-    /// window is one fixed 520×430 for all five steps and this is
-    /// the only one carrying a schematic strip AND two copy tiers,
-    /// so it is the step a locale that expands overflows first.
-    /// What gives, in order, if it ever grows again: the `Spacer`,
-    /// then this spacing, then the per-tile screen line — never
-    /// `SchematicScale.tile`, which is a shared budget with
-    /// Settings' own strip, and never the footnote.
+    /// than as a second instruction. `OnboardingPage` owns both
+    /// tiers, so every step draws them the same size.
     var spaces: some View {
-        VStack(spacing: 10) {
-            Text(spacesTitle)
-                .font(.title.bold())
-                .multilineTextAlignment(.center)
-            Text(spacesBody)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(SettingsTheme.ink2)
+        OnboardingPage(
+            title: spacesTitle,
+            body1: spacesBody,
+            footnote: spacesFooter,
+            // The pictures are what this screen is FOR, so the
+            // Desktop↔Space nesting waits below them rather than
+            // standing between the reader and the grid.
+            footnoteAtBottom: true,
+            hint: L(
+                "onboarding.starter_spaces.hint",
+                "More spaces or other layouts? Settings, "
+                    + "whenever you want them."
+            )
+        ) {
             spaceStrip
-            Spacer()
-            Text(spacesFooter)
-                .font(.caption)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(SettingsTheme.ink3)
+        } action: {
             Button(L("onboarding.continue", "Continue")) {
                 model.continueAfterSpaces()
             }
-            .buttonStyle(.borderedProminent)
+            .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)
-            .controlSize(.large)
         }
     }
 
-    /// A horizontal strip, like Settings' own "Choose a layout" —
-    /// it scrolls rather than wrapping, so a setup with more
-    /// spaces than fit stays one readable row instead of
-    /// reflowing into a grid the window has no height for.
+    /// One space per ROW, as the prototype draws them (owner
+    /// ruled 2026-08-12, revising the three-per-row grid after
+    /// seeing it): picture on the left, the space's name and what
+    /// it is beside it. A grid of pictures compares layouts; this
+    /// screen is not asking the user to choose one, it is telling
+    /// them what they already have — and a row can carry the name
+    /// and the screen the tile had nowhere to put.
+    ///
+    /// Scrolls past what fits, which is what makes it safe on the
+    /// setup that stresses it: three monitors seed eight spaces or
+    /// more.
     private var spaceStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 10) {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 8) {
                 ForEach(model.starterSpaces()) { card in
-                    tile(card)
+                    row(card)
                 }
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, 2)
         }
+        // Tall enough for three rows and a hint of the fourth —
+        // an edge cut mid-row is what says "there is more" on a
+        // list with no scrollbar showing. A bare `ScrollView` in
+        // a `VStack` takes all the space there is, which would
+        // push the footer off a screen holding two.
+        .frame(maxHeight: 232)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(spacesTitle)
     }
 
-    private func tile(_ card: OnboardingSpaceCard) -> some View {
-        VStack(spacing: 4) {
-            LayoutSchematicView(
-                mode: card.mode,
-                settings: model.tilingSettings(),
-                // Three windows: enough for a layout to show what
-                // it does with more than a split, and the same
-                // count for every tile, so the strip compares
-                // layouts rather than arbitrary window counts.
-                windows: 3,
-                scale: .tile
-            )
-            Text(card.mode.displayName)
-                .font(.caption.weight(.medium))
-            // No screen line when the space is on no connected
-            // display: the line said "Main screen" in exactly the
-            // case the code had failed to determine one.
-            if let screen = card.screen {
-                Text(screen)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+    /// The row's thumbnail height, and with it the factor the
+    /// schematic is drawn at.
+    ///
+    /// A scale FACTOR, never a third `SchematicScale` case — the
+    /// shape `HomeCardSchematicBand` already uses to put a `.tile`
+    /// schematic in a plate band. The geometry, the captions and
+    /// the what-a-thumbnail-omits rulings stay one definition.
+    private var thumbHeight: CGFloat { 46 }
+    private var thumbFactor: CGFloat {
+        thumbHeight / SchematicScale.tile.height
+    }
+
+    private func row(_ card: OnboardingSpaceCard) -> some View {
+        HStack(spacing: 12) {
+            thumbnail(card)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(
+                    L(
+                        "onboarding.starter_spaces.row.name",
+                        "Space %1$@",
+                        card.id
+                    )
+                )
+                .font(.system(size: 13.5, weight: .semibold))
+                Text(rowDetail(card))
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(SettingsTheme.ink3)
             }
+            Spacer(minLength: 0)
         }
-        .frame(width: SchematicScale.tile.width)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 11)
+                .fill(SettingsTheme.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 11)
+                .stroke(SettingsTheme.hairline, lineWidth: 1)
+        )
         // One element, one sentence: three separate labels would
         // be read as three items with no relation between them.
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(axLabel(card))
+    }
+
+    /// The picture rides the desktop plate, in the user's own
+    /// palette — the same construction Home's profile cards use
+    /// (#786), through `HomeCardPlate.palette` rather than a
+    /// second fold beside it: a user colour that sinks into the
+    /// fixed dark ground swaps for a theme fallback there, and a
+    /// copy here would be a second place for that floor to drift.
+    private func thumbnail(_ card: OnboardingSpaceCard) -> some View {
+        LayoutSchematicView(
+            mode: card.mode,
+            settings: model.tilingSettings(),
+            // Three windows: enough for a layout to show what it
+            // does with more than a split, and the same count for
+            // every row, so the strip compares layouts rather than
+            // arbitrary window counts.
+            windows: 3,
+            scale: .tile
+        )
+        .scaleEffect(thumbFactor)
+        .frame(
+            width: (SchematicScale.tile.width ?? 132)
+                * thumbFactor,
+            height: thumbHeight
+        )
+        .padding(5)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(SettingsTheme.previewPlate)
+        )
+        .environment(
+            \.schematicPalette,
+            HomeCardPlate.palette(model.tilingSettings())
+        )
+    }
+
+    /// The layout and the screen, in ONE frame — never joined in
+    /// Swift. A separator written here is one no catalog could
+    /// change, and `、` is what ja and zh-Hant need where English
+    /// writes `·`.
+    private func rowDetail(_ card: OnboardingSpaceCard) -> String {
+        guard let screen = card.screen else {
+            return card.mode.displayName
+        }
+        return L(
+            "onboarding.starter_spaces.row.detail",
+            "%1$@ · %2$@",
+            card.mode.displayName,
+            screen
+        )
     }
 
     /// Two frames rather than one with a withheld argument: a
@@ -117,8 +191,19 @@ extension OnboardingView {
         )
     }
 
+    /// A sentence, not a label.
+    ///
+    /// "Spaces, ready to use" is an English noun phrase that only
+    /// works in English — German renders it "Spaces,
+    /// einsatzbereit", which reads like a status line on a piece
+    /// of equipment (owner, 2026-08-12). A subject-verb heading
+    /// translates into every locale this app ships, and it says
+    /// the same thing: the setup is done and it is theirs.
     private var spacesTitle: String {
-        L("onboarding.starter_spaces.title", "Spaces, ready to use")
+        L(
+            "onboarding.starter_spaces.title",
+            "Your Spaces are ready"
+        )
     }
 
     /// One sentence, no interpolation, and no per-screen claim.

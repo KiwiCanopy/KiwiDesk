@@ -276,7 +276,14 @@ struct LayoutSchematicCountTests {
         // retired the Scrolling follow pair, which was the only
         // file here drawing a second frame of a layout already
         // counted.
-        #expect(checked == LayoutMode.placementTabs.count)
+        //
+        // Plus Floating, which is a schematic and NOT a placement
+        // tab — it has no tuning to place, which is why it sits
+        // outside `placementTabs` and why it drew nothing at all
+        // until #828. Stated as the sum rather than folded into
+        // the tab count, so a layout that gains a tab still moves
+        // this number.
+        #expect(checked == LayoutMode.placementTabs.count + 1)
     }
 
     // MARK: - Fixtures

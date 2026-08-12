@@ -76,7 +76,15 @@ struct SettingsBorderedSealTests {
                 )
             )
         }
-        #expect(scanRoots.count > 1)
+        // Derived from what the scan READ, never from the
+        // literal list: deleting the Onboarding entry leaves the
+        // loop above green, having faithfully checked whatever
+        // roots remain.
+        #expect(
+            try scannedSources().contains {
+                $0.path.contains("/Onboarding/")
+            }
+        )
     }
 
     /// The seal's own file, where the one legitimate

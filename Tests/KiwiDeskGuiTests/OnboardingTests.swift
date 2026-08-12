@@ -6,9 +6,10 @@ import Testing
 @Suite("Onboarding display Spaces recommendation (#8)")
 @MainActor
 struct OnboardingTests {
-    /// The flow after #678 Phase 4 pass 11: grant → spaces →
-    /// keys (gated) → Displays (gated) → done. The two gated
-    /// steps are why no screen draws a step counter.
+    /// The flow after #828: grant → spaces → keys → Displays
+    /// (gated) → done. The one gated step is why no screen draws
+    /// a FIXED counter, and why the progress row derives its
+    /// length instead (`OnboardingProgressTests`).
     @Test("the grant step hands off to the spaces step")
     func grantLeadsToSpaces() {
         let model = OnboardingModel()
@@ -19,21 +20,18 @@ struct OnboardingTests {
         #expect(!model.reachedEnd)
     }
 
-    @Test("a pending discovery routes the spaces step to keys")
-    func spacesLeadToKeysWhenPending() {
+    /// The keys step is unconditional since #828: it was gated on
+    /// the persisted discovery flag, which meant everyone who had
+    /// finished the tour once could never see the shortcuts screen
+    /// again — including from Home's "Show me around", where they
+    /// had just asked for it. #331's ruling is untouched, being
+    /// about whether an unfinished tour RESUMES there at launch.
+    @Test("the spaces step always leads to the keys step")
+    func spacesAlwaysLeadToKeys() {
         let model = OnboardingModel()
-        model.wantsDiscovery = { true }
-        model.continueAfterSpaces()
-        #expect(model.step == .keys)
-    }
-
-    @Test("an already-shown discovery skips the keys step")
-    func spacesSkipKeysWhenShown() {
-        let model = OnboardingModel()
-        model.wantsDiscovery = { false }
         model.displayCount = { 1 }
         model.continueAfterSpaces()
-        #expect(model.step == .done)
+        #expect(model.step == .keys)
     }
 
     @Test("multi-display separate Spaces show the recommendation")
@@ -113,26 +111,16 @@ struct OnboardingTests {
     /// here even though the sweep above cannot see it.
     @Test("every terminal route arrives having reached the end")
     func everyTerminalRouteReachesTheEnd() {
-        // Route 1 — discovery already shown, one display: the
-        // spaces step goes straight to the closing card.
+        // Route 1 — one display: grant, spaces, keys, done. The
+        // keys step is on every route since #828.
         let direct = OnboardingModel()
-        direct.wantsDiscovery = { false }
         direct.displayCount = { 1 }
         direct.continueAfterAccessibility()
         direct.continueAfterSpaces()
+        #expect(direct.step == .keys)
+        direct.continueAfterKeys()
         #expect(direct.step == .done)
         #expect(direct.reachedEnd, "the direct route did not count")
-
-        // Route 2 — through the keys step.
-        let viaKeys = OnboardingModel()
-        viaKeys.wantsDiscovery = { true }
-        viaKeys.displayCount = { 1 }
-        viaKeys.continueAfterAccessibility()
-        viaKeys.continueAfterSpaces()
-        #expect(viaKeys.step == .keys)
-        viaKeys.continueAfterKeys()
-        #expect(viaKeys.step == .done)
-        #expect(viaKeys.reachedEnd, "the keys route did not count")
 
         // Route 3 — through the Displays recommendation, which is
         // the last substantive step when it appears at all.
@@ -148,7 +136,7 @@ struct OnboardingTests {
         // continuing. `shouldResume` puts a returning user there
         // directly, so this is a real ending, not an abandonment.
         let closedOnKeys = OnboardingModel()
-        closedOnKeys.wantsDiscovery = { true }
+        closedOnKeys.displayCount = { 1 }
         closedOnKeys.continueAfterAccessibility()
         closedOnKeys.continueAfterSpaces()
         #expect(closedOnKeys.step == .keys)
