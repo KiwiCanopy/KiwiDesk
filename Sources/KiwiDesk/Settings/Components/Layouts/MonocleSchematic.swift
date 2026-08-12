@@ -12,6 +12,7 @@ import SwiftUI
 struct MonocleSchematic: View {
     let orientation: MonocleParams.Orientation
     @Environment(\.schematicFocusStroke) private var focusStroke
+    @Environment(\.schematicPalette) private var palette
     /// Windows on screen. Monocle's fill logic is that there
     /// isn't any — every window is full-screen — so the count
     /// changes the DEPTH of the fan and nothing else, which is
@@ -61,13 +62,25 @@ struct MonocleSchematic: View {
         }
     }
 
+    /// The family's fallback ladder, stated once in
+    /// `SchematicCardColors` — the two card-fan schematics drew
+    /// byte-identical copies of it for a day, and what they were
+    /// copying was the rule rather than a value.
+    private func fill(front: Bool) -> Color {
+        SchematicCardColors.fill(front: front, palette: palette)
+    }
+
+    private func edge(front: Bool) -> Color {
+        SchematicCardColors.edge(
+            front: front,
+            focusStroke: focusStroke,
+            palette: palette
+        )
+    }
+
     private func card(front: Bool) -> some View {
         RoundedRectangle(cornerRadius: LayoutSchematic.corner)
-            .fill(
-                front
-                    ? LayoutSchematic.fill
-                    : SettingsTheme.ink2.opacity(0.10)
-            )
+            .fill(fill(front: front))
             .overlay(
                 RoundedRectangle(
                     cornerRadius: LayoutSchematic.corner
@@ -79,9 +92,7 @@ struct MonocleSchematic: View {
                     // show two focus colours disagreeing about
                     // what the colour means (code review
                     // 2026-08-10).
-                    front
-                        ? focusStroke ?? LayoutSchematic.stroke
-                        : SettingsTheme.ink2.opacity(0.4),
+                    edge(front: front),
                     lineWidth: front ? 1.5 : 1
                 )
             )

@@ -38,7 +38,17 @@ struct SchematicPalette: Equatable {
     var newFill: Color { ink.opacity(0.08) }
     var gapStroke: Color { ink.opacity(0.4) }
     var ghostFill: Color { ink.opacity(0.08) }
-    var ghostStroke: Color { ink.opacity(0.3) }
+    /// The un-focused window's edge, and the one value on the
+    /// plate that is NOT a hair quieter than its off-plate twin.
+    ///
+    /// 0.3 of a light ink is legible on a Home card's band and
+    /// gone at thumbnail size in the tour, where the same picture
+    /// is drawn at 55% (owner, on device, 2026-08-12): the
+    /// windows behind the focused one read as an empty plate. The
+    /// interiors stay at the neutral wash the 2026-08-09 ruling
+    /// set — this raises the EDGE, which is the channel that says
+    /// "another window" without adding a second colour.
+    var ghostStroke: Color { ink.opacity(0.5) }
     /// The mini-screen's own outline on the plate.
     var frame: Color { ink.opacity(0.3) }
 }

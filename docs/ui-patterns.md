@@ -428,11 +428,13 @@ beneath it and turned blue. Accessibility is delegated to a
 native `Slider` representation, so assistive tech sees
 exactly the control it replaces.
 
-**Buttons stay native; semantic role chooses their class.** No
-gradients, borders, or shadows on buttons — the crisp shadow
+**Buttons take a native style, and semantic role chooses the
+class.** No gradients or shadows on buttons — the crisp shadow
 is the slider thumb's alone, now that the segment pill is a
-solid accent fill that needs no lift.
-Class is expressed through native style + control size:
+solid accent fill that needs no lift. The single custom style
+is the accent fill described below, whose edge is a darker
+shade of its own fill rather than a border in a new colour.
+Class is otherwise expressed through native style + control size:
 `.borderedProminent` regular for the one surface commit
 (the save pill's Save, popover confirms); `.bordered` large for row
 actions (Load, Apply, Customize, Set Gap Values), level with
@@ -445,6 +447,36 @@ or popover utilities (Shortcuts import, override resets), never
 a normal row action. Native macOS shape differences between
 these classes are intentional — choose by semantic role, not
 by a desired silhouette.
+
+**The exception is a button filled with the app's own accent,
+and it is about ink rather than silhouette.**
+`.borderedProminent` picks its own label colour, and on macOS
+that colour is white — which on KiwiDesk's kiwi green measures
+**2.41:1**, under every legibility floor this app holds itself
+to, in both appearances (the accent is deliberately the same
+hue in each). `accentInk` is the ink the theme declares for
+text drawn *on* the accent, and that pairing is one the
+theme's contrast lens measures. Setting it beside each fill by
+hand is two decisions a call site can get half right, so it is
+sealed into one style — `KiwiProminentButtonStyle`, applied as
+`kiwiProminentButton()`, which is what the first-launch tour's
+primary action wears on every screen.
+
+Reach for it only where a button carries an accent fill; a
+custom style is a cost, not a free recolour. It is the mild
+form of what the cross-reference link above pays: a
+`ButtonStyle` keeps the `Button`, so focus, keyboard
+activation, VoiceOver and `isEnabled` all survive, where a
+bridged `NSTextView` gives away all four and re-earns them by
+hand. What a custom style does take over is what the system
+style *drew* — the pressed and disabled appearances have to be
+redrawn, which this one does through the fill rather than the
+label, so a click never dims the ink it has to keep readable.
+
+This convention is written for the next prominent button, not
+as the record of a finished sweep: Settings' own prominent
+buttons still take the system style, and moving one onto the
+seal is its own change and its own eye-confirm.
 
 **A recording shortcut field wears an accent halo.** The
 armed recorder among dozens of identical rows gets an accent

@@ -10,13 +10,47 @@ import Testing
 /// Buttons inside `Menu`, `.contextMenu`, `.confirmationDialog`
 /// and `.alert` closures are styled by their containers and are
 /// exempt. `settingsActionButton()` names a style too — it IS
-/// `.bordered`, sealed to its neutralisation (#771) — so the
-/// count below reads both spellings.
+/// `.bordered`, sealed to its neutralisation (#771) — and
+/// `kiwiProminentButton()` names one the same way: it IS
+/// `KiwiProminentButtonStyle`, sealed to the `accentInk` label
+/// white-on-kiwi cannot carry (#828). The count reads all three
+/// spellings.
 @Suite("Settings button style convention")
 struct SettingsButtonStyleConventionTests {
-    private var settingsDir: URL {
-        SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// The trees this guard covers — `ChromeScanRoots`, which
+    /// is the ONE list of "which GUI trees draw chrome". It was
+    /// hand-copied into five suites when the Onboarding tree
+    /// joined (#828), which is five registers a sixth tree has
+    /// to be added to and four places for it to be forgotten.
+    private var scanRoots: [URL] {
+        ChromeScanRoots.urls(from: #filePath)
+    }
+
+    private func scannedSources() throws -> [URL] {
+        try ChromeScanRoots.sources(from: #filePath)
+    }
+
+    @Test("every scan root is actually read")
+    func everyScanRootIsRead() throws {
+        for root in scanRoots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue: "\(root.lastPathComponent) yielded "
+                        + "no Swift files — this guard no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        // Derived from what the scan READ, never from the
+        // literal list: deleting a root leaves the loop above
+        // green, having faithfully checked whatever remains.
+        #expect(
+            try scannedSources().contains {
+                $0.path.contains("/Onboarding/")
+            }
+        )
     }
 
     /// Allowed unstyled action buttons that cannot take a style
@@ -70,7 +104,7 @@ struct SettingsButtonStyleConventionTests {
         var scannedFiles = 0
         var totalUnexcludedButtons = 0
 
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        for file in try scannedSources() {
             scannedFiles += 1
             let name = file.lastPathComponent
             let source = SourceScan.stripComments(
@@ -194,12 +228,15 @@ struct SettingsButtonStyleConventionTests {
                 cursor += 1
             }
 
-            // The seal counts as naming a style: it applies
-            // `.bordered` (plus the neutralisation) inside
-            // `settingsActionButton()` (#771).
+            // Both seals count as naming a style: each applies
+            // one inside itself — `.bordered` plus its
+            // neutralisation in `settingsActionButton()` (#771),
+            // `KiwiProminentButtonStyle` plus its `accentInk`
+            // label in `kiwiProminentButton()` (#828).
             let styles =
                 source.occurrences(of: ".buttonStyle(")
                 + source.occurrences(of: ".settingsActionButton()")
+                + source.occurrences(of: ".kiwiProminentButton()")
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 

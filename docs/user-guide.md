@@ -214,31 +214,48 @@ Use the right-click menu, or VoiceOver's actions rotor.
 On first launch, a wizard prompts you to grant Accessibility
 permission — KiwiDesk needs it to move and resize windows.
 Follow the steps to enable it in System Settings › Privacy &
-Security › Accessibility. Once granted — and only if two or more
-displays are connected with "Displays have separate Spaces" on —
-you may also be asked to turn that option off. KiwiDesk uses one
-active profile across all displays, so Desktops shared across
-displays make Desktop-to-profile bindings predictable. This is
-optional: basic tiling still works with the option on, and a single
-display is never affected. Changing the macOS option requires
-logging out and back in.
+Security › Accessibility. A row of markers across the top of
+every screen shows how far along you are. It counts only the
+screens this particular run will show, so it never promises one
+you will not see.
 
 When the permission lands, KiwiDesk arranges every window that
 was already open — that first retile is the tour telling you it
-works. The tour then shows the spaces it chose for your screens
-and the keys it bound, and ends by saying where the app lives.
-Setup windows like the tour itself are never arranged: they have
-an end, so the tiler leaves them alone.
+works. Setup windows like the tour itself are never arranged:
+they have an end, so the tiler leaves them alone.
 
-A shortcuts page lets you open the live shortcut panel before
-continuing. It stays in the wizard rather
-than pointing at the menu bar, so it also works when the menu bar
-is auto-hidden. The final card then confirms KiwiDesk is arranging
-your windows and offers to **Open Settings** (landing on Layout)
-— or **Not Now** to jump straight in; neither is required. If you
-grant Accessibility but close before reaching discovery, KiwiDesk
-resumes at that page on the next launch. Once shown or dismissed,
-losing and regranting Accessibility later never repeats it.
+The tour then shows the spaces it chose for your screens, and
+after that the shortcuts it bound — the chords themselves, laid
+out in the window, including the one that opens the shortcut
+panel. Teaching them here rather than pointing at the menu bar
+is deliberate: it works when the menu bar is auto-hidden, and
+nothing opens on top of the tour while you are reading it.
+
+One more screen follows only when two or more displays are
+connected with "Displays have separate Spaces" still on: it asks
+you to turn that option off. KiwiDesk uses one active profile across
+all displays, so Desktops shared across displays make
+Desktop-to-profile bindings predictable. This is optional: basic
+tiling still works with the option on, and a single display is
+never affected. Changing the macOS option requires logging out
+and back in.
+
+The closing card confirms KiwiDesk is managing your windows and
+shows you where it lives: a small picture of a menu bar with the
+KiwiDesk mark in it, so you can find the app once the window
+closes. **Open KiwiDesk when I log in** is there, ticked, to
+untick if you would rather start it yourself. **Start using it**
+is the only button, and that is the point — Settings is a link
+in the quiet line beside it, landing on Layout, and a first-time
+tiler does not need it today.
+
+If you grant Accessibility but close the tour before those last
+screens, KiwiDesk reopens on the shortcuts screen at the next
+launch; once you have reached them, no ordinary launch reopens
+it again. Losing Accessibility later is not an ordinary launch:
+the tour comes back at its grant step, and continuing from there
+walks the same screens again rather than suppressing them on the
+grounds that you have seen them once.
 
 If Accessibility permission is ever missing — you dismissed the
 wizard, or the permission was revoked later — window management

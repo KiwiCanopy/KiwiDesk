@@ -10,32 +10,38 @@ extension OnboardingView {
     /// happens once. It is a mark-plus-name-plus-tagline lockup,
     /// so the kiwi mark is already inside it and adding a separate
     /// one would put both on a single surface.
+    ///
+    /// The numbered instructions sit in a card, as the prototype
+    /// draws them (#828): they are a procedure the user carries
+    /// out in another app, so they read as a list of things to do
+    /// rather than as a paragraph about the permission.
     var grant: some View {
-        VStack(spacing: 14) {
+        OnboardingPage(
+            title: model.isTrusted
+                ? L(
+                    "onboarding.grant.done.title",
+                    "Your windows are arranged"
+                )
+                : L(
+                    "onboarding.grant.title",
+                    "KiwiDesk needs Accessibility"
+                ),
+            body1: model.isTrusted ? grantedBody : grantLead,
+            hint: model.isTrusted ? nil : grantHint
+        ) {
             wordmark
-            Text(
-                model.isTrusted
-                    ? L(
-                        "onboarding.grant.done.title",
-                        "Your windows are arranged"
-                    )
-                    : L(
-                        "onboarding.grant.title",
-                        "KiwiDesk needs Accessibility"
-                    )
-            )
-            .font(.title.bold())
-            .multilineTextAlignment(.center)
-            Text(model.isTrusted ? grantedBody : grantBody)
-                .multilineTextAlignment(.leading)
-                .foregroundStyle(.secondary)
-            Spacer()
+            if model.isTrusted {
+                grantedMark
+            } else {
+                grantSteps
+            }
+        } action: {
             if model.isTrusted {
                 Button(L("onboarding.continue", "Continue")) {
                     model.continueAfterAccessibility()
                 }
+                .kiwiProminentButton()
                 .keyboardShortcut(.defaultAction)
-                .controlSize(.large)
             } else {
                 Button(
                     L(
@@ -45,11 +51,9 @@ extension OnboardingView {
                 ) {
                     model.onOpenSettings()
                 }
+                .kiwiProminentButton()
                 .keyboardShortcut(.defaultAction)
-                .controlSize(.large)
             }
-            waitingLine
-            trustLine
         }
     }
 
@@ -60,14 +64,15 @@ extension OnboardingView {
                     .resizable()
                     .scaledToFit()
                     // Sized by WIDTH: a lockup has no point size,
-                    // and 180 pt in the 456 pt content column
-                    // reads as a logo rather than as a splash.
+                    // and 180 pt in the content column reads as a
+                    // logo rather than as a splash.
                     .frame(width: 180)
             } else {
                 Image(systemName: "rectangle.3.group")
                     .font(.system(size: 40))
             }
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .accessibilityLabel(L("brand.menu_bar_icon.a11y", "KiwiDesk"))
     }
 
@@ -77,71 +82,141 @@ extension OnboardingView {
             : BrandAssets.wordmark
     }
 
+    /// The two things to do, numbered, plus the line saying the
+    /// page continues by itself.
+    private var grantSteps: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            grantStep(
+                1,
+                L(
+                    "onboarding.grant.step.open",
+                    "Open Privacy & Security ▸ Accessibility"
+                )
+            )
+            grantStep(
+                2,
+                L(
+                    "onboarding.grant.step.enable",
+                    "Switch KiwiDesk on"
+                )
+            )
+            waitingLine
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 4)
+        }
+        .onboardingCard()
+    }
+
+    /// The granted state is the tour's one moment of good news,
+    /// so it is drawn as one — centred, at hero size, standing off
+    /// the copy above it (owner, 2026-08-12). Before this it was
+    /// the same 12.5 pt status line that had been saying
+    /// "waiting", which made the app's first success read like a
+    /// log entry.
+    ///
+    /// **The check takes the accent, and that does not reopen the
+    /// hue ruling.** What `waitingLine` forbids is hue as the ONLY
+    /// channel telling two states apart — which is what a green
+    /// check beside an orange lock, at the same size in the same
+    /// slot, would be. These two share nothing: the lock is a
+    /// 12.5 pt line inside the instruction card, this is a 34 pt
+    /// mark in the middle of the screen with its own sentence
+    /// under it. Shape, size, position and words all differ before
+    /// colour is asked to say anything.
+    private var grantedMark: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 38))
+                .foregroundStyle(SettingsTheme.accent)
+            Text(
+                L("onboarding.grant.granted", "Permission granted")
+            )
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(SettingsTheme.ink2)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, 18)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func grantStep(
+        _ number: Int,
+        _ text: String
+    ) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text("\(number)")
+                .font(.system(size: 12))
+                .foregroundStyle(SettingsTheme.groupHeading)
+                .frame(width: 26, height: 26)
+                .background(
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(SettingsTheme.sunken)
+                )
+            Text(text)
+                .font(.system(size: 13.5))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        // One element: the number and the instruction are one
+        // step, and read apart the number is an unnamed digit.
+        .accessibilityElement(children: .combine)
+    }
+
     /// The status glyph, at TEXT height rather than as a 56 pt
     /// hero: the wordmark owns the hero slot on this screen, and
     /// two marks in one slot is one too many. It is never deleted
     /// — lock-versus-check is the only feedback the auto-detect
     /// gives, and it is the channel that separates the two states
     /// now that neither is coloured.
+    ///
+    /// **Uncoloured is a ruling, not an omission**, and it
+    /// survived the tint (#828): accent on the checkmark would put
+    /// hue back as the channel telling the two states apart, on
+    /// the app's own green, which is the exact defect this tree
+    /// shipped as a raw `.green`/`.orange` hero.
     private var waitingLine: some View {
-        Label {
+        HStack(spacing: 9) {
+            WaitingDot()
             Text(
-                model.isTrusted
-                    ? L(
-                        "onboarding.grant.granted",
-                        "Permission granted"
-                    )
-                    : L(
-                        "onboarding.grant.waiting",
-                        "Waiting for permission…"
-                    )
+                L(
+                    "onboarding.grant.waiting",
+                    "Waiting — this page continues by itself"
+                )
             )
-        } icon: {
-            Image(
-                systemName: model.isTrusted
-                    ? "checkmark.circle.fill"
-                    : "lock.shield"
-            )
+            .fixedSize(horizontal: false, vertical: true)
         }
-        .font(.callout)
-        .foregroundStyle(.secondary)
-        .animation(.default, value: model.isTrusted)
+        .font(.system(size: 12.5))
+        .foregroundStyle(SettingsTheme.ink3)
+        // The dot is decoration; the sentence carries the state,
+        // so VoiceOver reads one thing rather than an unnamed
+        // shape followed by a line of text.
+        .accessibilityElement(children: .combine)
     }
 
     /// SIP and keylogging are the two objections a macOS user
     /// actually has to an Accessibility prompt, so this is the
-    /// line that earns the grant. It survived the welcome step's
-    /// deletion as a caption rather than a paragraph.
-    private var trustLine: some View {
-        Text(
-            L(
-                "onboarding.grant.trust",
-                "KiwiDesk never reads your keystrokes, and never "
-                    + "asks you to disable System Integrity "
-                    + "Protection."
-            )
+    /// line that earns the grant. It sits in the footer, opposite
+    /// the button it earns.
+    private var grantHint: String {
+        L(
+            "onboarding.grant.trust",
+            "KiwiDesk never reads your keystrokes, and never "
+                + "asks you to disable System Integrity "
+                + "Protection."
         )
-        .font(.caption)
-        .multilineTextAlignment(.center)
-        .foregroundStyle(.secondary)
     }
 
-    /// Step 1 names the button below it, so that name is
-    /// INTERPOLATED from the button's own key rather than
-    /// re-typed (#818). Quoting a label as literal text makes
-    /// every locale hold two strings that must agree forever
-    /// with nothing checking that they do; #817 merged the
-    /// button's two keys into one and left this third copy of
-    /// the words behind.
-    private var grantBody: String {
+    /// What the permission is FOR, in one sentence.
+    ///
+    /// The numbered procedure moved into `grantSteps`, so this no
+    /// longer interpolates the button's label — the list below it
+    /// is the instruction now, and step 1 named a button the user
+    /// can see (#818's obligation is on a sentence NAMING a
+    /// control; this one names none).
+    private var grantLead: String {
         L(
-            "onboarding.grant.body",
-            """
-            1. Click “%1$@” below.
-            2. Find KiwiDesk in the list and turn it on.
-            3. Come back here — we detect it automatically.
-            """,
-            L("common.open_system_settings", "Open System Settings")
+            "onboarding.grant.lead",
+            "macOS only lets an app move windows once you allow "
+                + "it. Nothing here works until this is on."
         )
     }
 

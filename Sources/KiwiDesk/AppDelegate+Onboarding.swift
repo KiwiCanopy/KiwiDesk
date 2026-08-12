@@ -18,8 +18,7 @@ extension AppDelegate {
     /// `setResolvePermission` wiring carries that argument.
     /// Changing this function therefore changes ONE surface.
     func showAccessibilityHelp() {
-        onboardingModel.step = .grant
-        showOnboarding()
+        showOnboarding(at: .grant)
     }
 
     /// Shows a profile's file in the Finder — the ONE
@@ -43,14 +42,32 @@ extension AppDelegate {
     /// with the top being whichever screen still has something to
     /// say (`replayEntryStep`).
     func replayOnboardingTour() {
-        onboardingModel.step = OnboardingEntry.replayStep(
-            isTrusted: permissions.isTrusted
+        showOnboarding(
+            at: OnboardingEntry.replayStep(
+                isTrusted: permissions.isTrusted
+            )
         )
-        showOnboarding()
     }
 
-    func showOnboarding() {
+    /// Opens the tour on `entry`.
+    ///
+    /// The step is a PARAMETER rather than something a caller
+    /// assigns first, because the progress row's length is
+    /// resolved from it — and resolved after the closures below
+    /// are wired, which a caller setting `model.step` itself
+    /// cannot arrange (#828).
+    func showOnboarding(at entry: OnboardingModel.Step) {
         if let window = onboardingWindow {
+            // A REOPEN navigates, it does not merely raise. Every
+            // caller used to assign `model.step` before this
+            // early return, so the revoke path and the quick
+            // menu's "fix Accessibility" both landed on the grant
+            // screen even with the tour already up; taking the
+            // step as a parameter silently dropped that until the
+            // review caught it. Re-planning here is also what
+            // keeps the row honest — the plan starts at the step
+            // the presentation is now on.
+            onboardingModel.beginPresentation(at: entry)
             NSApp.forceFront(window)
             return
         }
@@ -72,12 +89,6 @@ extension AppDelegate {
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
         }
-        // The shortcuts discovery page fires once, gated on its
-        // own persisted flag — never AX trust, so a later TCC
-        // reset never re-pitches (#331).
-        onboardingModel.wantsDiscovery = {
-            !OnboardingDiscovery.hasShown()
-        }
         onboardingModel.onExploreSettings = { [weak self] in
             self?.openSettingsFromOnboarding()
         }
@@ -92,6 +103,10 @@ extension AppDelegate {
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
+        // LAST of the wiring, and deliberately so: the plan reads
+        // `hasSeparateSpaces` and `displayCount`, so resolving it
+        // any earlier would plan against their stubs (#828).
+        onboardingModel.beginPresentation(at: entry)
 
         let window = NSWindow(
             contentRect: .zero,
@@ -113,6 +128,17 @@ extension AppDelegate {
         window.contentView = host
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // The window's OWN ground, not just the view's. With a
+        // transparent titlebar over `.fullSizeContentView` the
+        // system window colour shows through the title strip and
+        // in every gap the hosting view has not painted, which is
+        // the "still looks greyish" the tint pass left behind
+        // (owner, on device, 2026-08-12). Cleared rather than
+        // painted: the SwiftUI `page` behind the content is the
+        // one copy of the ground, and an `NSColor` here would be
+        // a second one to keep in step.
+        window.backgroundColor = .clear
+        window.isOpaque = false
         // Size BEFORE centering. `center()` on a still-zero-sized
         // window puts its bottom-left corner at the screen centre;
         // the SwiftUI frame then grows the window upward from
@@ -140,8 +166,17 @@ extension AppDelegate {
     /// so a `.normal` wizard can't be buried — and floating it
     /// early would cover the System Settings window the grant
     /// step opens (#331).
+    ///
+    /// `BarPanel.aboveLevel`, derived from where the bars render
+    /// rather than written as `.floating` + 1 here: as peers the
+    /// two settle in raise order, so a bar could cover the window
+    /// the user is being asked to read. The bars reserve their
+    /// strip and the tour is centred, so on the reported setup
+    /// they never actually met — the raise is what keeps that
+    /// true on a setup where they would (owner confirmed the
+    /// behaviour on device, 2026-08-12).
     func floatOnboardingAboveManagedWindows() {
-        onboardingWindow?.level = .floating
+        onboardingWindow?.level = BarPanel.aboveLevel
     }
 
     func closeOnboarding() {
@@ -197,25 +232,17 @@ extension AppDelegate {
             // Home's 14c banner goes pending — the next Settings
             // visit opens oriented, not empty (turn 14c).
             HomeFirstRunState.seed(.standard)
-            showMenuBarCoachMark()
         }
         // Consumed, so the flag means "THIS presentation reached
         // the end" and not "this model ever did". The model is a
         // stored `let` on the delegate and outlives every window,
         // so without this a later reopen at the grant step — the
         // quick menu's "fix Accessibility" route — would close
-        // having fired all three effects again. They are each
+        // having fired both effects again. They are each
         // idempotent behind their own persisted flag today; the
-        // fourth effect added inside that `if` would not be
+        // third effect added inside that `if` would not be
         // (code review, 2026-08-11).
         onboardingModel.clearReachedEnd()
-    }
-
-    /// Points the one-time coach mark at the real menu-bar item.
-    /// Skips itself when it cannot be honest — see
-    /// `MenuBarCoachMark`, which owns both conditions.
-    private func showMenuBarCoachMark() {
-        coachMark.show(under: statusItem?.anchorButton)
     }
 
     /// The live default layer's chord families, for the keys step.

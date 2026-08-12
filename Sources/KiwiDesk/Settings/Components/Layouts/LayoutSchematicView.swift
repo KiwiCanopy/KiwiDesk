@@ -114,7 +114,7 @@ struct LayoutSchematicView: View {
                 scale: scale
             )
         case .floating:
-            EmptyView()
+            FloatingSchematic(windows: windows, scale: scale)
         }
     }
 }

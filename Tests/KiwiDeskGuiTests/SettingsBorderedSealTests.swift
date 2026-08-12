@@ -37,9 +37,40 @@ import Testing
 /// by any needle here.
 @Suite("Settings bordered seal")
 struct SettingsBorderedSealTests {
-    private var settingsDir: URL {
-        SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// The trees this guard covers — `ChromeScanRoots`, which
+    /// is the ONE list of "which GUI trees draw chrome". It was
+    /// hand-copied into five suites when the Onboarding tree
+    /// joined (#828), which is five registers a sixth tree has
+    /// to be added to and four places for it to be forgotten.
+    private var scanRoots: [URL] {
+        ChromeScanRoots.urls(from: #filePath)
+    }
+
+    private func scannedSources() throws -> [URL] {
+        try ChromeScanRoots.sources(from: #filePath)
+    }
+
+    @Test("every scan root is actually read")
+    func everyScanRootIsRead() throws {
+        for root in scanRoots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue: "\(root.lastPathComponent) yielded "
+                        + "no Swift files — this guard no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        // Derived from what the scan READ, never from the
+        // literal list: deleting a root leaves the loop above
+        // green, having faithfully checked whatever remains.
+        #expect(
+            try scannedSources().contains {
+                $0.path.contains("/Onboarding/")
+            }
+        )
     }
 
     /// The seal's own file, where the one legitimate
@@ -105,7 +136,7 @@ struct SettingsBorderedSealTests {
     func rawBorderedStylesAreExempt() throws {
         var rawFound = 0
         var sealedFound = 0
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        for file in try scannedSources() {
             let name = file.lastPathComponent
             guard name != Self.sealFile else { continue }
             let source = SourceScan.stripComments(
@@ -157,7 +188,7 @@ struct SettingsBorderedSealTests {
     /// neutralisation directly beneath it.
     @Test("the seal pairs style and neutralisation")
     func sealPairsStyleAndNeutralisation() throws {
-        let sources = try SourceScan.swiftSources(under: settingsDir)
+        let sources = try scannedSources()
         // Exactly one: `rawBorderedStylesAreExempt` skips the
         // seal by NAME, so a second file with this name anywhere
         // under Settings/ would inherit the skip unwatched.
@@ -202,7 +233,7 @@ struct SettingsBorderedSealTests {
     /// in the direction that ships an accent label.
     @Test("every bordered-button exemption is still used")
     func borderedExemptionsAreLive() throws {
-        let sources = try SourceScan.swiftSources(under: settingsDir)
+        let sources = try scannedSources()
         for (name, entry) in borderedExempt {
             let file = try #require(
                 sources.first { $0.lastPathComponent == name },

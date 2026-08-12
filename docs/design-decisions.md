@@ -1661,8 +1661,9 @@ user's browser, their terminal and the System Settings window
 they just granted from, so the tour would become one slot among
 them at whatever width the layout hands it, with copy authored
 for its own fitting size. It would also have to give up the
-floating *level* it takes at exactly that moment, which is the
-only thing stopping the retile burying it. And the lesson it
+raised *level* it takes at exactly that moment
+(`BarPanel.aboveLevel`), which is the only thing stopping the
+retile burying it. And the lesson it
 would teach is not "KiwiDesk tiles" — it is "KiwiDesk grabbed
 and resized the window I was reading", which is the fear a new
 tiling user arrives with.
@@ -1728,43 +1729,68 @@ Settings" — and it is a different word from its sibling
 `show_shortcuts` on purpose, one toggling a panel and the other
 opening a window.
 
-### The coach mark is built, and skips itself when hidden
+### Where the app lives is taught inside the tour's own window
 
-**[Rationale]**
+**[Principle]**
 
-**A one-time mark points at the real menu-bar item after the tour
-closes** — the window vanishing is the moment someone wonders
-where the app went, and a picture inside a closed window cannot
-answer that.
+**The tour says where KiwiDesk lives with a picture on a surface
+KiwiDesk owns — never with an overlay drawn on the desktop
+beside the real menu-bar item.** The closing card carries a small
+drawing of a menu bar with the app's own mark in it, and the
+sentence under it says what clicking that mark opens.
 
-#331 retired a *timed* menu-bar popover because it fails when the
-menu bar auto-hides, which is common among the keyboard-driven
-users this app attracts, and a coach mark inherits that defect
-exactly: it would point at a strip that is not on screen. The
-repair is the skip, not a redesign — with the menu bar hidden,
-the closing card's sentence is what teaches where the app lives,
-and words survive a hidden menu bar where any picture does not.
-It also skips when the item has no on-screen button at all, which
-is what a menu-bar manager parking it off the visible strip looks
-like from the app's side.
+Pointing at the real item is the obvious answer, and it was built
+that way once: the window vanishing is exactly the moment someone
+wonders where the app went, so point at the thing itself. What
+that costs is a promise the app cannot keep. Outside its own
+windows KiwiDesk is drawing against a strip it does not control —
+a menu bar set to auto-hide is not on screen at all (common among
+the keyboard-driven users this app attracts, and the same defect
+that retired #331's timed popover), and a menu-bar manager may
+have parked the item off the visible strip or somewhere else
+entirely. An honest overlay therefore has to skip itself, and it
+skips for precisely the user who most needs telling; a dishonest
+one points at empty screen.
 
-So the rule is stated over *facts* rather than over AppKit
-(`MenuBarCoachMark.canPoint(menuBarAutoHides:button:screen:)`),
-which is what makes "it is built, and honest" assertable rather
-than a claim about a window nobody can see in a test.
+So the ruling is about the *surface*, not the artwork: what the
+tour promises, it promises inside a window it drew. Two things
+follow for anyone redrawing this card. The picture uses the real
+menu-bar image rather than a stand-in symbol, because what the
+user has to recognise is that artwork among other icons — a
+symbol that merely resembles it teaches the wrong shape. And the
+picture is a picture: it is not a control, it points at nothing
+off-window, and it needs no permission, no screen geometry and no
+guess about where the item ended up.
 
-### The tour draws no step counter
+### The tour's progress row is derived, never a fixed counter
 
-**[Rationale]**
+**[Principle]**
 
-**No screen of the tour says "step 3 of 5".** Three of its steps
-are conditional — the keys step behind the one-time discovery
-flag, the Displays recommendation behind the display count, and
-the coach mark behind the menu bar being visible — so any total
-is a lie on some machine, and the machine it lies on is the one
-whose user is most likely to be confused by it. A counter that
-cannot be right is worse than no counter: it turns a tour that
-adapts into one that looks broken.
+**No screen of the tour asserts a total it cannot know.** "Step 3
+of 5" is false on any machine that shows four, and the machine it
+lies to is the one whose user is least able to tell a skipped
+screen from a broken one. The tour's length genuinely varies: the
+Displays recommendation appears only where it can bite (two or
+more displays with "Displays have separate Spaces" on), and a
+tour reopened from Settings starts past the screens that have
+nothing left to say.
+
+The row of pips at the top of each screen is not that counter
+re-admitted. The banned thing is a **fixed** total; a
+plan derived from the screens this presentation will actually
+show is a different claim, and it is true on every path. What
+makes it true is that the plan is the itinerary rather than a
+description of one — the flow walks the same list the row draws
+(`OnboardingModel.plannedSteps`), resolved once when the window
+opens, so the two cannot answer differently and nothing the user
+does mid-tour re-numbers the pips they are reading.
+
+The obligation on a future author is therefore narrow and
+absolute: a progress indicator here is drawn from that plan or it
+is not drawn. One sourced from every step the flow can have, from
+a constant, or from a count that ignores which screen the tour
+opened on is the banned counter wearing a new name, and the
+repair is to delete it rather than patch it.
 
 ### Open at login
 
@@ -5184,19 +5210,32 @@ of it, rather than separate rulings:
 
 - **Post-setup discovery** (#331) closes the first-run
   discovery gap with the smallest durable surface that works: a
-  shortcuts page immediately before the closing wizard card. It
-  offers the real **View Shortcuts…** action and remains usable
-  when the menu bar is auto-hidden; the closing card keeps
-  **Open Settings** on Layout and an equal-weight **Not Now**. Not a
-  guided tour of every tab — that fights the contextual-help
-  convention (#94) and is the classic skipped-onboarding trap.
-  It fires exactly once, gated on a dedicated `UserDefaults`
-  flag (`onboarding.discoveryShown`), never the Accessibility
-  trust state. If permission is granted but the wizard closes
-  before discovery, the next launch resumes at that page; after
-  the page is shown, closing it or the final card records the
-  one-time dismissal. A later TCC reset therefore does not
-  re-pitch an existing user. Copy is jargon-free for a first-run
+  shortcuts page among the tour's own steps, listing the chord
+  families that are bound — including the one that opens the
+  shortcuts panel. It teaches the chords in the window rather
+  than pointing at the menu bar, so it works with the menu bar
+  auto-hidden, and it offers no button that opens the panel: the
+  panel is an overlay and would land on top of the tour it was
+  summoned from. Not a guided tour of every tab — that fights
+  the contextual-help convention (#94) and is the classic
+  skipped-onboarding trap. What the dedicated `UserDefaults`
+  flag (`onboarding.discoveryShown`) decides is whether the app
+  **opens the tour by itself** on a launch where nothing is
+  wrong: permission granted but the tour closed before its
+  closing beats, and the next launch reopens on that page;
+  closing a tour that reached them records the dismissal, so no
+  later quiet launch pitches it again. The flag is never the
+  Accessibility trust state, which is the part that must not be
+  undone — a TCC reset months later must not read as the app
+  having forgotten the user. It does **not** gate the page
+  inside a tour that is up for its own reason; gating it there
+  was tried and undone, because it hid the shortcuts from
+  everyone who had already finished once, which is the reader
+  most likely to have reopened the tour for exactly that
+  screen. So a revoked permission reopens the tour at its grant
+  step and walks its screens again from there — a user whose
+  window management has stopped is being helped, not pitched to.
+  Copy is jargon-free for a first-run
   non-power user. (Supersedes #68 §5.9's "separate follow-up
   pass" note.)
 - **Configurable resize step** (#58): the `resize.step` setting

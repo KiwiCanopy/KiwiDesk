@@ -44,9 +44,40 @@ import Testing
 /// counts `settingsActionButton()` as naming one.
 @Suite("Settings label neutrality")
 struct SettingsLabelNeutralityTests {
-    private var settingsDir: URL {
-        SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// The trees this guard covers — `ChromeScanRoots`, which
+    /// is the ONE list of "which GUI trees draw chrome". It was
+    /// hand-copied into five suites when the Onboarding tree
+    /// joined (#828), which is five registers a sixth tree has
+    /// to be added to and four places for it to be forgotten.
+    private var scanRoots: [URL] {
+        ChromeScanRoots.urls(from: #filePath)
+    }
+
+    private func scannedSources() throws -> [URL] {
+        try ChromeScanRoots.sources(from: #filePath)
+    }
+
+    @Test("every scan root is actually read")
+    func everyScanRootIsRead() throws {
+        for root in scanRoots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue: "\(root.lastPathComponent) yielded "
+                        + "no Swift files — this guard no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        // Derived from what the scan READ, never from the
+        // literal list: deleting a root leaves the loop above
+        // green, having faithfully checked whatever remains.
+        #expect(
+            try scannedSources().contains {
+                $0.path.contains("/Onboarding/")
+            }
+        )
     }
 
     /// Every borderless menu neutralises its label.
@@ -64,7 +95,7 @@ struct SettingsLabelNeutralityTests {
     @Test("every borderless menu neutralises its label")
     func borderlessMenusAreNeutral() throws {
         var menus = 0
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        for file in try scannedSources() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -119,7 +150,7 @@ struct SettingsLabelNeutralityTests {
     /// it by hand belongs on the seal instead.
     @Test("direct neutralisations are enumerated")
     func directNeutralisationsAreEnumerated() throws {
-        let sources = try SourceScan.swiftSources(under: settingsDir)
+        let sources = try scannedSources()
         // An entry for a file the scan cannot find is dead-green:
         // the loop below only visits files that exist, so a
         // renamed file would keep its declaration while the

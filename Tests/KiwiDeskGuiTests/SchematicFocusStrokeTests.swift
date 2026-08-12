@@ -37,7 +37,30 @@ struct SchematicFocusStrokeTests {
             // not show two focus colours (code review
             // 2026-08-10, which caught it drawing brand green
             // beside honest siblings).
-            "front?focusStroke??LayoutSchematic.stroke"
+            //
+            // The DRAWING, not the helper: the colour lives in
+            // `SchematicCardColors` now, and a needle on the
+            // ladder alone would stay green with the consult
+            // deleted from the frame — which is the shape the
+            // first cut of this repair shipped (code review,
+            // 2026-08-12).
+            "SchematicCardColors.edge(front:front,"
+                + "focusStroke:focusStroke,",
+            ".strokeBorder(edge(front:front)",
+        ],
+        "Components/Layouts/FloatingSchematic.swift": [
+            // Floating draws the same card fan and takes the
+            // same wire — it was an `EmptyView` until #828, so
+            // it is new to this list rather than newly correct.
+            "SchematicCardColors.edge(front:front,"
+                + "focusStroke:focusStroke,",
+            ".strokeBorder(edge(front:front)",
+        ],
+        "Components/Layouts/SchematicCardColors.swift": [
+            // …and the ladder itself still consults the wire it
+            // was handed, rather than resolving a colour of its
+            // own.
+            "iffront{returnfocusStroke??palette?.stroke"
         ],
     ]
 
