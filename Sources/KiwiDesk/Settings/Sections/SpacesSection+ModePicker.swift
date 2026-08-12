@@ -10,7 +10,7 @@ extension SpacesSection {
         // the visible label is hidden.
         let modeHint = L(
             "spaces.mode.help",
-            "Layout mode for this space"
+            "Layout mode for this Space"
         )
         return VStack(alignment: .trailing, spacing: 4) {
             Picker("", selection: modeBinding(space)) {

@@ -46,7 +46,7 @@ extension KiwiCore {
             id,
             format: L(
                 "sticky.home.pill",
-                "Can only be moved in its home space %1$@"
+                "Can only be moved in its home Space %1$@"
             ),
             mark: homeSpaceMark(home),
             delay: snapBackSettleDelay
@@ -179,7 +179,7 @@ extension KiwiCore {
             )
             : L(
                 "sticky.everywhere.pill",
-                "Sticky windows can't be moved to another space"
+                "Sticky windows can't be moved to another Space"
             )
         stickyMarks.flash(
             id,

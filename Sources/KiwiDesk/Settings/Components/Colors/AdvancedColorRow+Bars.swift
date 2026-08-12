@@ -82,14 +82,14 @@ extension AdvancedColorRow {
             HexColorField(
                 label: L(
                     "space_bar.color.active_space",
-                    "Active space"
+                    "Active Space"
                 ),
                 hex: style.activeItemColor
             )
             .help(
                 L(
                     "space_bar.color.active_space.help",
-                    "Tints the active space's identifier and "
+                    "Tints the active Space's identifier and "
                         + "its app glyphs."
                 )
             )
@@ -136,7 +136,7 @@ extension AdvancedColorRow {
                 L(
                     "space_bar.color.group_badge.help",
                     "Count and overflow badges on the active "
-                        + "space; inactive spaces mute them "
+                        + "Space; inactive Spaces mute them "
                         + "from the item color. Grouping is "
                         + "always on."
                 )

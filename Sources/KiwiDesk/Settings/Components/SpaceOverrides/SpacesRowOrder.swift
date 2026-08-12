@@ -44,7 +44,7 @@ enum SpacesRowOrder {
         .layout(.scrollingOverrideAnchor),
         .layout(.scrollingOverrideSlotSize),
         .layout(.gridOverrideType),
-        .layout(.gridOverrideFillEmptySpace),
+        .layout(.gridOverrideFillEmptyCells),
         .layout(.gridOverrideSplitDirection),
         .layout(.gridOverrideColumns),
         .layout(.gridOverrideRows),

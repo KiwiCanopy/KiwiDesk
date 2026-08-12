@@ -156,10 +156,10 @@ extension LayoutCard {
     var gridFillEmptyRow: some View {
         ToggleRow(
             label: L(
-                "scroll_grid.fill_empty_space",
-                "Fill empty space"
+                "scroll_grid.fill_empty_cells",
+                "Fill empty cells"
             ),
-            isOn: grid.fillEmptySpace
+            isOn: grid.fillEmptyCells
         )
     }
 
@@ -172,7 +172,7 @@ extension LayoutCard {
 
     /// The Auto-size toggle gating the Columns/Rows steppers, via
     /// the shared `AutoGatedGroup` (#233). A behaviour modifier
-    /// like Fill empty space — not a mode switch — so it reads as
+    /// like Fill empty cells — not a mode switch — so it reads as
     /// a plain toggle; on, it greys the steppers (visible but
     /// disabled, #171), the screen supplying the dimensions.
     ///

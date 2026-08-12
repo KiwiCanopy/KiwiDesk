@@ -34,7 +34,7 @@ extension SpacesSection {
         }
         .buttonStyle(.borderless)
         .iconButtonAffordance(
-            L("spaces.delete.help", "Delete space")
+            L("spaces.delete.help", "Delete Space")
         )
     }
 
@@ -44,7 +44,7 @@ extension SpacesSection {
     ///
     /// The label is the SUM across every layout
     /// (`overrideFieldCount(for:)`), the scannable "how much custom
-    /// config does this space carry" signal; the editor breaks it
+    /// config does this Space carry" signal; the editor breaks it
     /// into active-layout rows and a dormant drawer. Wording turns
     /// on the space's mode (owner ruling 2026-08-04):
     /// - tiled, N>0 → "N custom"; N==0 → "Customize…";
@@ -153,13 +153,13 @@ extension SpacesSection {
         case .saved:
             return L(
                 "spaces.overrides.saved.help",
-                "Saved for other layouts — switch this space "
+                "Saved for other layouts — switch this Space "
                     + "to a tiling layout to use them."
             )
         case .customize, .custom:
             return L(
                 "spaces.customize.help",
-                "Layout overrides for this space"
+                "Layout overrides for this Space"
             )
         }
     }
@@ -188,16 +188,16 @@ extension SpacesSection {
     }
 
     var deleteConfirmTitle: String {
-        L("spaces.delete_confirm.title", "Delete this space?")
+        L("spaces.delete_confirm.title", "Delete this Space?")
     }
 
     var deleteConfirmMessage: String {
         L(
             "spaces.delete_confirm.message",
-            "This space has customized settings — its "
+            "This Space has customized settings — its "
                 + "layout overrides, monitor pin, and any "
                 + "Main or Fallback role are removed too. You "
-                + "can add the space back, but not its "
+                + "can add the Space back, but not its "
                 + "settings."
         )
     }
@@ -243,7 +243,7 @@ extension SpacesSection {
         L(
             "space_override.reset_all_confirm.message",
             "This clears every layout's saved overrides for "
-                + "this space, not just the current one. This "
+                + "this Space, not just the current one. This "
                 + "can't be undone."
         )
     }

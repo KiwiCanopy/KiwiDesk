@@ -6,14 +6,14 @@ description: A tiling window manager for macOS — docs home.
 # KiwiDesk Documentation
 
 KiwiDesk is a tiling window manager for macOS. Windows live in
-a flat list per virtual space, layouts are pure functions over
+a flat list per space, layouts are pure functions over
 that list, and everything is configurable twice over: visually
 in the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
 
 Seven layouts ship out of the box — **bsp**, **stack**,
 **scrolling** (PaperWM-style), **monocle**, **grid**, **track**,
 and **floating** — with per-space overrides, profiles that follow
-your monitor setup, and native macOS Spaces integration.
+your monitor setup, and integration with macOS Desktops.
 
 ## Where to go
 

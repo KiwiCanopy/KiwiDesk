@@ -11,7 +11,7 @@ import Testing
 /// unreachable and the follows-main term could be dropped from
 /// `held(on:isMain:)` with the whole 2819-test suite green — and
 /// that term is itself the fix for a defect this turn shipped and
-/// caught in review ("0 spaces here" on every card of a desk
+/// caught in review ("0 Spaces here" on every card of a desk
 /// where every space follows main). A source scan held the keys;
 /// nothing held the arithmetic that chooses between them.
 ///
@@ -46,12 +46,12 @@ struct MonitorReadoutTests {
     }
 
     /// A display holding nothing says so, rather than reaching the
-    /// plural arm and reading "0 spaces here".
+    /// plural arm and reading "0 Spaces here".
     @Test("zero takes its own sentence")
     func zeroHasItsOwnPhrase() {
         pinEnglish()
         let empty = MonitorReadout.sentence(held: 0, showing: nil)
-        #expect(empty == "No spaces here")
+        #expect(empty == "No Spaces here")
         #expect(!empty.contains("0"))
     }
 
@@ -65,38 +65,38 @@ struct MonitorReadoutTests {
             held: 0,
             showing: SpaceID("code")
         )
-        #expect(sentence == "No spaces here")
+        #expect(sentence == "No Spaces here")
     }
 
     /// One and many are separate PHRASES, not a number glued to an
     /// English plural — the reason the count never appears as
-    /// "%1$d space(s)".
+    /// "%1$d Space(s)".
     @Test("one and many are different sentences")
     func countPhrasesDiffer() {
         pinEnglish()
         let one = MonitorReadout.sentence(held: 1, showing: nil)
         let many = MonitorReadout.sentence(held: 4, showing: nil)
-        #expect(one == "1 space here")
-        #expect(many == "4 spaces here")
+        #expect(one == "1 Space here")
+        #expect(many == "4 Spaces here")
         #expect(one != many)
     }
 
     /// The showing clause NAMES the space rather than dropping the
-    /// id in bare: ids are commonly numeric, and "3 spaces here ·
+    /// id in bare: ids are commonly numeric, and "3 Spaces here ·
     /// 2 is showing" is two numerals with no noun on either.
-    @Test("the showing clause names its space")
+    @Test("the showing clause names its Space")
     func showingNamesTheSpace() {
         pinEnglish()
         let sentence = MonitorReadout.sentence(
             held: 3,
             showing: SpaceID("code")
         )
-        #expect(sentence.contains("3 spaces here"))
-        #expect(sentence.contains("space code is showing"))
+        #expect(sentence.contains("3 Spaces here"))
+        #expect(sentence.contains("Space code is showing"))
         // One sentence, not a phrase composed into a frame: the
         // count arm and the showing arm are one key each.
         #expect(
-            sentence == "3 spaces here · space code is showing"
+            sentence == "3 Spaces here · Space code is showing"
         )
     }
 
@@ -107,7 +107,7 @@ struct MonitorReadoutTests {
             MonitorReadout.sentence(
                 held: 1,
                 showing: SpaceID("web")
-            ) == "1 space here · space web is showing"
+            ) == "1 Space here · Space web is showing"
         )
     }
 
@@ -120,8 +120,8 @@ struct MonitorReadoutTests {
     /// This is the term guard-prover could delete with the whole
     /// suite green, and deleting it returns the exact defect this
     /// turn fixed: a desk where every space follows main reads
-    /// "No spaces here" on the display they are all sitting on.
-    @Test("the main display counts the tray's spaces")
+    /// "No Spaces here" on the display they are all sitting on.
+    @Test("the main display counts the tray's Spaces")
     func mainCountsTheTray() {
         pinEnglish()
         let desk = display(1)
@@ -147,7 +147,7 @@ struct MonitorReadoutTests {
     }
 
     /// The everything-follows-main desk, end to end: without the
-    /// tray term this renders "No spaces here" while three spaces
+    /// tray term this renders "No Spaces here" while three spaces
     /// sit on that screen.
     @Test("a follows-main desk does not read as empty")
     func followsMainDeskIsNotEmpty() {
@@ -169,7 +169,7 @@ struct MonitorReadoutTests {
             held: rows.held(on: desk, isMain: true),
             showing: SpaceID("code")
         )
-        #expect(sentence.hasPrefix("3 spaces here"))
-        #expect(!sentence.contains("No spaces here"))
+        #expect(sentence.hasPrefix("3 Spaces here"))
+        #expect(!sentence.contains("No Spaces here"))
     }
 }

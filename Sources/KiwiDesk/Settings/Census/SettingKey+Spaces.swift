@@ -9,7 +9,7 @@ enum SpacesKey: String, CaseIterable, Hashable {
     case fallbackSpace = "config.fallbackSpace"
     case spaceOverrideResetActive = "(action) space_override.reset_active"
     case spaceOverrideResetAll = "(action) space_override.reset_all"
-    case spacesDelete = "(action) spaces.delete"
+    case spacesDelete = "(action) Spaces.delete"
 }
 
 extension SpacesKey {

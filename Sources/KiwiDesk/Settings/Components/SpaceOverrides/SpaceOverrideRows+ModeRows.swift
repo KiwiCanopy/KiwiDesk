@@ -22,23 +22,23 @@ extension SpaceOverrideRows {
         // a rigid grid, and the per-space row was not.
         OverrideToggleRow(
             label: L(
-                "scroll_grid.fill_empty_space",
-                "Fill empty space"
+                "scroll_grid.fill_empty_cells",
+                "Fill empty cells"
             ),
             value: binding(
                 \.grid.override,
                 space,
-                \.fillEmptySpace
+                \.fillEmptyCells
             ),
-            global: g.grid.fillEmptySpace
+            global: g.grid.fillEmptyCells
         )
         .modifier(
             GreyOut(
                 active: gates.inertReason(
-                    for: .layout(.gridOverrideFillEmptySpace)
+                    for: .layout(.gridOverrideFillEmptyCells)
                 ) != nil,
                 help: gates.inertReason(
-                    for: .layout(.gridOverrideFillEmptySpace)
+                    for: .layout(.gridOverrideFillEmptyCells)
                 ).map(SpacesGateHelp.sentence) ?? ""
             )
         )

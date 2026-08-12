@@ -6,7 +6,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case layers = "config.layers"
     case layersIcon = "config.layers[].icon"
     case focusDir = "keybinding.focus_dir (x4)"
-    case goToSpace = "keybinding.go_to_space (x N spaces)"
+    case goToSpace = "keybinding.go_to_space (x N Spaces)"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack = "keybinding.move_window_to_track (x2)"
     case swapWithTrack = "keybinding.swap_with_track (x2)"

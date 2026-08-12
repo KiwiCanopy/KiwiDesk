@@ -74,8 +74,8 @@ extension ProfilesSection {
     /// sibling view could call.
     private func spacesPhrase(_ count: Int) -> String {
         count == 1
-            ? L("profiles.spaces.one", "1 space")
-            : L("profiles.spaces.many", "%1$d spaces", count)
+            ? L("profiles.spaces.one", "1 Space")
+            : L("profiles.spaces.many", "%1$d Spaces", count)
     }
 
     private func overridesPhrase(_ count: Int) -> String {

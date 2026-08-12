@@ -175,7 +175,7 @@ struct AppRuleRow: View {
             )
             : L(
                 "app_rules.remove_override.help",
-                "Remove this profile's effective space "
+                "Remove this profile's effective Space "
                     + "and float rules for this app"
             )
     }

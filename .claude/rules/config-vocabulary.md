@@ -68,6 +68,32 @@ synonym:
   that word belongs to macOS **native tabs** (§5) and to the
   user guide's gesture prose alone — see
   [state-and-layout.md](state-and-layout.md).
+- **space** vs **Desktop** — a *space* is one of KiwiDesk's own
+  window lists (`SpaceID`, `focus_space`, `space_modes`, the
+  Space Bar). Name a macOS Mission Control desktop **Desktop**
+  and never a "space" — in a label, a doc sentence or a doc
+  comment — and where a sentence names both, write both words:
+  one readable either way is the whole defect the rename
+  removed. Retired as names for KiwiDesk's: *workspace*,
+  *virtual space*. The word also stops naming a generic screen
+  area ("empty space", "the available space") — say the width,
+  the height or the area that is meant. The **wire is exempt
+  and frozen**: `bind_profile_to_native_space`, `native_space`
+  and `space_*` keep their names, so this rule governs copy
+  only. **Quote Apple verbatim** where copy names one of
+  Apple's own controls — the "Displays have separate Spaces"
+  checkbox, the Mission Control shortcut rows
+  (`system_shortcut.mission_control_space_*`) — because the
+  string's job there is to send the user to a row they can find
+  on screen, and a locale must reach for Apple's own translation
+  rather than coin a name for someone else's control. Capitalise
+  KiwiDesk's own noun (**Space**, **Spaces**): it is a product
+  name like the Space Bar, a translator reads the capital as
+  *keep this verbatim*, and the capital is what makes the
+  Desktop/Space contrast visible in a sentence naming both. The
+  ruling, and the table of names already eliminated so none is
+  re-proposed, is `docs/design-decisions.md` ▸ Vocabulary: macOS
+  has Desktops, KiwiDesk has Spaces.
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).

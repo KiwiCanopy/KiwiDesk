@@ -89,7 +89,7 @@ struct LayoutSchematicView: View {
                 columns: settings.grid.columns,
                 rows: settings.grid.rows,
                 type: settings.grid.type,
-                fillEmptySpace: settings.grid.fillEmptySpace,
+                fillEmptyCells: settings.grid.fillEmptyCells,
                 autoSize: settings.grid.autoSize,
                 splitDirection: settings.grid.splitDirection,
                 placement: settings.grid.newWindowPlacement,

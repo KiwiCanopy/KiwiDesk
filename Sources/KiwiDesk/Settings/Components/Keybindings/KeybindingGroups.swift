@@ -68,11 +68,11 @@ enum ShortcutsFamilyHeading {
     static func title(for key: SettingKey) -> String? {
         switch key {
         case .shortcuts(.goToSpace):
-            return L("shortcuts.go_to_space", "Go to space")
+            return L("shortcuts.go_to_space", "Go to Space")
         case .shortcuts(.moveWindowToTrack):
             return L("shortcuts.move_to_track", "Move to track")
         case .shortcuts(.moveToSpace):
-            return L("shortcuts.move_to_space", "Move to space")
+            return L("shortcuts.move_to_space", "Move to Space")
         default:
             return nil
         }

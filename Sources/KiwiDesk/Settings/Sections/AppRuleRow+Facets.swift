@@ -62,7 +62,7 @@ extension AppRuleRow {
         model.config.appRules[app]?.raw
             ?? L(
                 "app_rules.space.anywhere",
-                "whichever space you open it in"
+                "whichever Space you open it in"
             )
     }
 
@@ -164,9 +164,9 @@ extension AppRuleRow {
             "Floating takes this app's matching windows out of "
                 + "tiling: each keeps its last position and size "
                 + "and stays above the tiled windows, instead of "
-                + "snapping into one space's grid.\n\nThis is "
+                + "snapping into one Space's grid.\n\nThis is "
                 + "per-app floating — not the **Floating** layout "
-                + "mode, which floats every window in a space."
+                + "mode, which floats every window in a Space."
         )
     }
 

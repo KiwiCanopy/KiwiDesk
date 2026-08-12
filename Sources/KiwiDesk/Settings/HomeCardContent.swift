@@ -19,7 +19,7 @@ enum HomeCardContent {
         case .spaces:
             return L(
                 "home.card.spaces.subtitle",
-                "%1$d spaces · %2$d layouts in use",
+                "%1$d Spaces · %2$d layouts in use",
                 model.config.spaces.count,
                 layoutsInUse(model)
             )
@@ -82,7 +82,7 @@ enum HomeCardContent {
         case .monitors:
             return L(
                 "home.card.monitors.subtitle",
-                "%1$d connected · %2$d spaces pinned",
+                "%1$d connected · %2$d Spaces pinned",
                 model.displays.count,
                 model.config.spacePins.count
             )

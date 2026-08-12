@@ -90,9 +90,9 @@ planned escape hatch; it is not a wontfix dumping ground.
 **[Trade-off]**
 
 A separate class: capabilities macOS forbids without disabling
-**System Integrity Protection**. KiwiDesk drives native Spaces
+**System Integrity Protection**. KiwiDesk drives macOS Desktops
 through private SkyLight/CGS symbols resolved at runtime, and the
-few operations that *write* the native-Space arrangement are
+few operations that *write* the Desktop arrangement are
 gated by SIP. KiwiDesk **never disables SIP or asks a user to** —
 a disabled-SIP requirement is a non-starter for a window manager
 (`AGENTS.md` §5), so these stay unimplemented rather than shipping
@@ -102,11 +102,11 @@ the root is the OS, not our architecture, and there is no in-app
 escape hatch — only Apple exposing a supported API. They are
 tracked, not abandoned:
 
-- **Move the focused window to another native Space**
+- **Move the focused window to another Desktop**
   ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25)).
-- **Switch the visible native Space programmatically**
+- **Switch the visible Desktop programmatically**
   ([#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
-- **Restore windows across all native Spaces on quit**
+- **Restore windows across all Desktops on quit**
   ([#70](https://github.com/KiwiCanopy/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the
   WindowServer silently rejects any frame above the visible
@@ -161,7 +161,7 @@ second reason below is a sandbox constraint, unrelated to SIP.
 Two independent reasons, either alone sufficient:
 
 - **Private API.** The SkyLight/CGS symbols the section above
-  discusses — dozens of them, and native-Space management does
+  discusses — dozens of them, and Desktop management does
   not work without them — put this squarely against review
   guideline 2.5.1, which permits public API only.
   Resolving them through `dlsym` is a robustness measure
@@ -181,7 +181,7 @@ exactly that on the App Store. Anyone re-opening this should
 argue about the sandbox, not about AX.
 
 A cut-down App Store build is conceivable and pointless: it
-would drop native-Space management, the CLI, Lua config and the
+would drop Desktop management, the CLI, Lua config and the
 service — nearly everything the README advertises. Every
 comparable tool (yabai, Amethyst, AeroSpace, Rectangle) is
 distributed directly for the same reasons.
@@ -273,6 +273,83 @@ what each requires, why script is irrelevant to one and decisive
 to the other, and what to do when adding a name.
 
 
+### Vocabulary: macOS has Desktops, KiwiDesk has Spaces
+
+**[Principle]**
+
+One word named three things. macOS's Mission Control desktops,
+KiwiDesk's own workspaces, and any generic screen area were all
+"space" — and the first two turn up in the same sentences, so
+every explanation of a feature touching both had to disambiguate
+before it could say anything. The README reached for "Virtual
+Spaces … on top of native macOS Spaces" to do it.
+
+The ruling: **macOS's are Desktops, KiwiDesk's are Spaces.** The
+qualifier "virtual" goes with the ambiguity it existed to hold
+off. The generic screen-area sense and the kernel/user-space
+sense are reworded away entirely — neither may use the word at
+all. Every remaining bare "space" therefore means KiwiDesk's; a
+sentence that names macOS's says Desktop, and one that names
+both says both words. "It is clear from context" is not a
+defence: a sentence readable either way is the defect this rule
+exists to remove.
+
+**Nothing on the wire moves.** No Lua verb, no JSON key, no
+Swift type, no event name — `focus_space`, `SpaceID`,
+`space_modes` and `space_bar.*` all stay, so no user's
+`init.lua` breaks and there is no migration to write.
+`bind_profile_to_native_space` keeps its name, since "native"
+already disambiguates it; the Space Bar keeps its name, being
+KiwiDesk's own bar showing KiwiDesk's own spaces.
+
+**Why the macOS sense is the one that moves.** Mission Control
+labels them "Desktop 1", "Desktop 2" — so this is the word
+already on the user's screen, not a coinage — and KiwiDesk's own
+copy already said it: `native_spaces.intro` read "Each Desktop is
+a native macOS Space from Mission Control." until this pass, one
+sentence carrying both the evidence for the ruling and the last
+use of the sense it retires. Cost settles the
+rest. 119 English strings name KiwiDesk's spaces and 6 name
+macOS's, each carried by ten non-English catalogs — so renaming
+macOS's side billed ~30 translated strings where renaming ours
+would have billed ~1,190 (measured for the ruling, 2026-08-07;
+#765 carries the count for the alternative).
+
+**It is reversible, and this pass makes the reversal cheaper.**
+If the ambiguity still bites later, renaming KiwiDesk's side
+stays available: a tree where every sentence already states
+which sense it means turns that rename from a page of judgment
+calls into a mechanical one.
+
+**Residual risk, stated rather than hidden.** The tiling-WM
+community says "space" for the macOS concept — yabai's whole API
+does — so a bug report reading "my space broke" stays ambiguous,
+and a reader arriving from another tool carries the other
+meaning in. This rule manages that; it does not eliminate it.
+Eliminating it is precisely what renaming KiwiDesk's side would
+buy, at the bill above.
+
+**Names already eliminated**, so that none is proposed again.
+The counts are as measured when the ruling was taken
+(2026-08-07):
+
+| Candidate | Killed by |
+|---|---|
+| `zone` | Stack's master/stack zones (~88 sites) **and** `drag.drop_zone.*` (~172 sites, user-typed Lua) — two prerequisite renames to free one word |
+| `desk` | Substring of "KiwiDesk" (44 hits) and "desktop" (11) — a presence guard on it passes vacuously, and it collides with the word being separated from |
+| `board` | Substring of "onboarding" (18 key hits) |
+| `pane` | Substring of "panel" |
+| `tile` | "tiling" / "tiled" (15 hits) |
+| `shelf` | `PaletteShelf` in source |
+| `area` | `SettingsArea` is the #678 redesign's central noun (271 hits in `Sources/`) |
+| `workspace` | Every competing tool's word for the same thing |
+| `room` | Also means available area — "no room in the room"; substring-satisfiable in any presence guard |
+| `deck` | Nothing. Zero hits across all 971 English strings — the pick had the answer been "rename ours" |
+
+(#768; the declined alternative — renaming KiwiDesk's side — is
+#765.)
+
+
 ### Layout navigation & overflow models
 
 **[Map]**
@@ -357,7 +434,7 @@ put — or the window buried under the space's own local window.
 `StateCoordinator.focusAnchor` closes the gap: while the traveler
 is the frontmost window it surfaces instead of `space.focused`.
 `lastFocused` is global, so the anchor tracks the last-focused
-window across the workspace and yields the traveler until any real
+window across every space and yields the traveler until any real
 member is next focused — a bare space switch does not revert it on
 its own (it fires no focus event). Directional focus/swap and the
 other implicit-focused verbs (`toggle_floating`/`make_*`,
@@ -499,8 +576,8 @@ Default OFF is native-first — a fresh install reads as a crisp
 flat ring, glow is opt-in flourish.
 
 A **native-fullscreen** (green-button) window is suppressed by the
-same draw-time mechanism: it stays a member of its home virtual
-space (macOS moves it to its own Space without a destroy), but it
+same draw-time mechanism: it stays a member of its home
+space (macOS moves it off the Desktop without a destroy), but it
 fills the display, so a ring would peek out only at the rounded
 corners — jankyborders skips fullscreen windows for the same
 reason. The verdict (`ManagedWindow.isFullscreen`) is snapshotted
@@ -514,20 +591,22 @@ while it is away (#670): it keeps its slot in `space.windows`
 drop it, so no layout pass computes a frame for it, no navigation
 step lands on it, no z-order raise targets it, and the
 inactive-space stash never parks it — an AX poke at a window
-macOS moved to its own Space either fights the fullscreen app or
-raises it under the user without intent. Exiting fullscreen is a
+macOS moved off the Desktop into a Mission Control slot of its
+own either fights the fullscreen app or raises it under the user
+without intent. Exiting fullscreen is a
 membership change like a float flip, so it retiles and the window
-re-enters its kept slot. On a **fullscreen space itself** KiwiDesk
-stands down: the bar panels join every Space by construction
-(`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so both bars gate
-per display on the space-type verdict, and the native-switch
-settle skips its retile and refocus — the raise
-would yank the desktop's focused window up behind the fullscreen
+re-enters its kept slot. **While a fullscreen app holds the
+screen** KiwiDesk stands down: the bar panels follow the user
+everywhere by construction (`.canJoinAllSpaces` +
+`.fullScreenAuxiliary`), so both bars gate
+per display on whether a Desktop is showing, and the
+Desktop-switch settle skips its retile and refocus — the raise
+would yank the Desktop's focused window up behind the fullscreen
 app. That verdict is `NativeSpaces.isUser`,
 never the nil Mission Control number, which is
 indistinguishable from "SkyLight unavailable" — and unavailable
-must keep the single-space fallback fully alive, so a lookup miss
-always counts as a user space.
+must keep the single-Desktop fallback fully alive, so a lookup
+miss always counts as a Desktop.
 
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
@@ -785,7 +864,7 @@ the session shadow so it always visibly applies (the #383
 explicit apply — `load_profile`, a preset, a GUI save — clears
 the whole layer, riding the same `forceRetile` classification
 those applies already carry (§5); event-driven applies (monitor
-change, native-space binding) keep it, so a display reconnect
+change, Desktop binding) keep it, so a display reconnect
 never eats an interactive resize. Covers the BSP split ratios,
 stack master ratio, and scrolling slot size — the same shape
 for all three, per the #458 scope note. Accepted edge: removing
@@ -1008,7 +1087,7 @@ reappeared. The sidecar's `spaces` list is kept a faithful
 copy of live *as of the last authoritative reconcile*: every
 explicit prune — a `load_profile` (including a scripted
 Lua/CLI one) or an in-place edit — writes the live set back.
-Hardware-driven applies (monitor change, native-Space
+Hardware-driven applies (monitor change, Desktop
 binding) deliberately don't prune or mirror (the
 no-shuffle-on-reconnect rule), so between such an event and
 the next reconcile the list may lag; the cold-boot seed and
@@ -1023,13 +1102,13 @@ active profile never touches another profile that still
 declares a space of the same name. (#77)
 
 **Shared display Spaces are recommended, not required.**
-KiwiDesk resolves one active native Desktop number and one active
+KiwiDesk resolves one active Desktop number and one active
 profile across the whole display setup. With macOS's "Displays have
 separate Spaces" option on, multiple displays can show independent
 Desktop combinations that this one-profile model cannot represent
-unambiguously. Shared display Spaces therefore make Desktop→profile
-bindings predictable, but they are not a prerequisite for basic
-tiling.
+unambiguously. Sharing Desktops across displays therefore makes
+Desktop→profile bindings predictable, but it is not a prerequisite
+for basic tiling.
 
 Both surfaces share one gate — separate Spaces on *and* two or more
 displays connected — so a single-display setup, which has no binding
@@ -1047,7 +1126,7 @@ warning](#profiles). (#8)
 
 **Profiles may override *behavior* settings, never *routing*
 ones.** A profile owns tiling, and may also carry a sparse
-override of a global setting that shapes how the workspace
+override of a global setting that shapes how KiwiDesk
 *behaves while the profile is active* — keybindings
 (`Profile.layers`) and the three window-rule families:
 app→space (`Profile.appRules`), float (`Profile.floatRules`),
@@ -1058,7 +1137,7 @@ families resolve independently, then effective ignore remains
 the hard management gate. Thus an ignore tombstone exposes an
 app to its independently resolved app/float rules. It may never
 override a setting that *selects or routes* the profile
-itself: the native-Space→profile bindings decide *which*
+itself: the Desktop→profile bindings decide *which*
 profile loads, so a profile owning part of that map would be
 a self-reference (load A → A rebinds Desktop 2 → B → …). The
 GUI language is a second hard exclusion for a different
@@ -1073,7 +1152,7 @@ tests, mutation through the `KiwiCore` facade — live in
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** Historically a floating window
 was exempt from the inactive-space stash and followed you
-across virtual spaces — the stash comment even blessed it as
+across spaces — the stash comment even blessed it as
 intended "for PIP". #412 reclassified it as a bug: state
 always scoped the window to one space, only rendering
 disagreed, and a user who floats a scratchpad on space A does
@@ -2254,7 +2333,7 @@ where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
 pattern), never live-apply. Sweep verdicts: Spaces, Behavior,
 App Rules, Shortcuts (minus the recorder), and the
-native-Space profile bindings are plainly staged. Monitors'
+Desktop→profile bindings are plainly staged. Monitors'
 drag-cards and the icon pickers are **self-previewing** (the
 control is its own preview — a third category needing neither
 live-apply nor a bolted-on preview). Profiles-section
@@ -2520,14 +2599,16 @@ profile, so wandering must stay legal. All of it is
 state-driven on "no saved profiles" (no persisted
 seen-flag) and vanishes with the first profile.
 
-**Native macOS Spaces read as "Desktop n", never "Space n".**
-"Space n" is how KiwiDesk's own virtual spaces read, so
-reusing it for Mission Control desktops made the two systems
-blur; "Desktop n" is the name Mission Control itself shows.
-Binding a profile to a Desktop is dropdown-only: the earlier
-draggable profile chips duplicated the dropdown while adding
-a chip palette row and drop-target styling — a second
-interaction model with zero extra capability. (#7)
+**A binding row reads "Desktop n", and binding is
+dropdown-only.** The naming is the product-wide rule —
+[macOS has Desktops, KiwiDesk has Spaces](#vocabulary-macos-has-desktops-kiwidesk-has-spaces)
+— and this page is where it first shipped, because a row per
+Mission Control Desktop sitting beside a list of KiwiDesk's
+own spaces is where the two systems blurred hardest. The
+interaction is settled separately: the earlier draggable
+profile chips duplicated the dropdown while adding a chip
+palette row and drop-target styling — a second interaction
+model with zero extra capability. (#7)
 
 ### Icons
 
@@ -2657,7 +2738,7 @@ pre-release gap Delete has (the edit is a draft until Save,
 so stored files can't be chased at click time). Saved
 profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
-native-Space bindings follow, like Delete and make default.
+Desktop bindings follow, like Delete and make default.
 
 **Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
@@ -2860,7 +2941,7 @@ spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go (#270). But a
 shortcut never needs a pre-created space — `focus_space` already
 `ensureSpace`s on first press — so the nine existed only to back
 the digits, and every new user stared at nine identical `bsp`
-desktops.
+spaces.
 
 *What the seed CONTAINS is now ruled above, under "the starter
 setup is chosen from the screens" (#678 Phase 4 pass 11), which
@@ -3753,7 +3834,7 @@ promise a target the drop won't act on.
 Releasing on **another display MOVES** the window into that
 display's active space. Onto a window's slot it takes the
 target's array index, the target and the rest shift up one; over
-empty space (an empty monitor, or a gap) it appends. A **track**
+an empty area (an empty monitor, or a gap) it appends. A **track**
 destination is the exception: the arriving window follows the
 space's `new_window` rule (e.g. open in a new track), like a
 freshly spawned window, rather than the positional slot — routed
@@ -3809,7 +3890,7 @@ display **under the cursor**, so a tiled-sticky traveler injected
 onto a foreign display can't teleport the window to wherever its
 home space happens to show: a drop whose target isn't a real
 member of the cursor display's space (a foreign-display traveler,
-or empty space) is treated as an empty drop and *moves* the
+or an empty area) is treated as an empty drop and *moves* the
 window to that display rather than snapping back with the #435
 refusal pill — you were dragging there anyway. The same-display
 traveler drop still shows the pill.
@@ -4236,8 +4317,8 @@ a symbol slot in a plain list row has no boxed wrapper, so
 the rationale doesn't apply there.
 
 **The Space Bar ships enabled.** (QA 2026-07-19.) It is the
-only surface where KiwiDesk's virtual Spaces are visible at
-all — macOS's own Spaces have Mission Control and gestures;
+only surface where KiwiDesk's Spaces are visible at
+all — macOS's Desktops have Mission Control and gestures;
 ours have nothing else. "Approachable by default" is better
 served by a new user seeing the core organizing concept on
 first launch than by a cleaner-but-mute one. The App Bar
@@ -4700,7 +4781,7 @@ tell which of the two they are relying on.
 
 **A card that explains a rule states the WHOLE rule.** The first
 cut asked `ProfileManager.match` and stopped there — which is
-only the display half, because a native-Space binding outranks
+only the display half, because a Desktop binding outranks
 matching — so on any machine with a bound Desktop the card named
 one profile while another was on screen, with the card that
 creates those bindings sitting directly below it. Half a rule

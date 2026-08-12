@@ -49,7 +49,7 @@ struct MonitorsSection: View {
     private var areaCaption: String {
         L(
             "monitors.area.caption",
-            "Drag a space onto the display it belongs to."
+            "Drag a Space onto the display it belongs to."
         )
     }
 
@@ -96,8 +96,8 @@ struct MonitorsSection: View {
                 L(
                     "monitors.none_detected",
                     "No monitors detected, so there's nothing to "
-                        + "place spaces on. Windows still tile, "
-                        + "all in a single space."
+                        + "place Spaces on. Windows still tile, "
+                        + "all in a single Space."
                 )
             )
             .foregroundStyle(.secondary)
@@ -156,7 +156,7 @@ struct MonitorsSection: View {
         L(
             "monitors.picture.ambiguous",
             "Some of these displays look identical to KiwiDesk, "
-                + "so a space pinned to one may open on another."
+                + "so a Space pinned to one may open on another."
         )
     }
 
@@ -212,9 +212,9 @@ struct MonitorsSection: View {
         L(
             "monitors.not_connected.caption",
             "This profile's monitors aren't attached "
-                + "right now, so its space placement "
+                + "right now, so its Space placement "
                 + "can't be edited here. Connect its "
-                + "monitor setup to arrange spaces — "
+                + "monitor setup to arrange Spaces — "
                 + "the other sections still edit this "
                 + "profile."
         )

@@ -62,7 +62,7 @@ enum LayoutDefaultsRowOrder {
     static let grid: [SettingKey] = [
         .layout(.gridType),
         .layout(.gridSplitDirection),
-        .layout(.gridFillEmptySpace),
+        .layout(.gridFillEmptyCells),
         .layout(.gridAutoSize),
         .layout(.gridColumns),
         .layout(.gridRows),

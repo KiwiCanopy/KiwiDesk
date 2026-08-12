@@ -163,8 +163,8 @@ enum KeybindingCatalog {
     /// and the old flat group both read.
     ///
     /// Composed from the two half-builders below rather than
-    /// repeating their commands: "Move to space" and "Move to
-    /// space & follow" are two census families (#678 Phase 3),
+    /// repeating their commands: "Move to Space" and "Move to
+    /// Space & follow" are two census families (#678 Phase 3),
     /// so the Shortcuts area renders each half on its own, and a
     /// second copy of either Lua here would be the byte-for-byte
     /// drift that silently demotes an import to Custom (#4).

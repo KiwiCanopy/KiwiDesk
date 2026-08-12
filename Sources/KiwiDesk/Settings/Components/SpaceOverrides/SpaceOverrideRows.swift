@@ -95,7 +95,7 @@ struct SpaceOverrideRows: View {
     /// The census-resolved greying for this space's override rows
     /// and reset action (#678 Phase 3). One per-instance resolver,
     /// keyed on the space and its active layout, so a row never
-    /// re-derives "is this space rigid / auto-sized" beside the
+    /// re-derives "is this Space rigid / auto-sized" beside the
     /// gate that declares it. Internal so the mode-row and footer
     /// extensions consult the same instance.
     var gates: SpacesGates {
@@ -123,7 +123,7 @@ struct SpaceOverrideRows: View {
             placeholder(
                 L(
                     "space_override.floating.none",
-                    "Floating has no per-space overrides."
+                    "Floating has no per-Space overrides."
                 )
             )
         }

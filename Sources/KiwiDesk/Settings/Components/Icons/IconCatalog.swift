@@ -167,7 +167,7 @@ enum IconCatalog {
         .init("square.grid.2x2", "grid apps layout tiles"),
         .init("square.grid.3x3", "grid layout tiles many"),
         .init("rectangle.3.group", "layout windows tiling kiwidesk"),
-        .init("rectangle.split.3x1", "layout columns split spaces"),
+        .init("rectangle.split.3x1", "layout columns split Spaces"),
         .init("square.stack.3d.up", "stack layers profiles"),
         .init("macwindow", "window app screen"),
         .init("circle.grid.3x3", "dots grid layout"),

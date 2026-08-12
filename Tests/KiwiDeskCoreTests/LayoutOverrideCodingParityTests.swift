@@ -121,7 +121,7 @@ struct LayoutOverrideCodingParityTests {
     private static func grid() -> GridOverride {
         var over = GridOverride()
         over.type = .rigid
-        over.fillEmptySpace = false
+        over.fillEmptyCells = false
         over.splitDirection = .vertical
         over.columns = 7
         over.rows = 5

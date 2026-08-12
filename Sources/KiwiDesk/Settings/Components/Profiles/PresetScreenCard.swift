@@ -63,8 +63,8 @@ struct PresetScreenCard: View {
 
     private func spaceCountPhrase(_ count: Int) -> String {
         count == 1
-            ? L("profiles.spaces.one", "1 space")
-            : L("profiles.spaces.many", "%1$d spaces", count)
+            ? L("profiles.spaces.one", "1 Space")
+            : L("profiles.spaces.many", "%1$d Spaces", count)
     }
 
     /// An empty screen draws its outline with NO glyph: a layout
@@ -134,7 +134,7 @@ struct PresetScreenCard: View {
         guard let mode = openingMode(screen) else {
             return L(
                 "presets.screen_help.empty",
-                "Screen %1$d: no spaces",
+                "Screen %1$d: no Spaces",
                 screen + 1
             )
         }

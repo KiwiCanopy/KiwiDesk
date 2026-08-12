@@ -122,14 +122,23 @@ enum LayoutHelp {
     /// orientation-driven meaning (column width vs row height) and
     /// what each unit does, so the checkbox's inherited value
     /// reads clearly.
+    ///
+    /// All four option names are INTERPOLATED from the controls'
+    /// own keys (#818) — see `trackPosition` for why a help
+    /// string never re-types a label it quotes.
     @MainActor static var slotSize: String {
         L(
             "space_override.slot_size.help",
             "Sets each scrolling window's size along the scroll "
-                + "direction. Horizontal uses column width; "
-                + "vertical uses row height. Percent scales with "
-                + "the available space (95% out of the box); "
-                + "Points fixes an exact size."
+                + "direction — the column width when the "
+                + "orientation is %1$@, the row height when it "
+                + "is %2$@. As a unit, %3$@ scales with that "
+                + "width or height (95%% out of the box) and "
+                + "%4$@ fixes an exact size.",
+            L("scroll_grid.horizontal", "Horizontal"),
+            L("scroll_grid.vertical", "Vertical"),
+            L("slot_size.percent", "Percent"),
+            L("slot_size.points", "Points")
         )
     }
 
@@ -140,7 +149,7 @@ enum LayoutHelp {
         L(
             "scroll_grid.animate_focus_shifts.help",
             "Moves windows smoothly when focus changes in a "
-                + "Scrolling space. Turn this off to move the "
+                + "Scrolling Space. Turn this off to move the "
                 + "layout immediately. Scroll speed sets how long "
                 + "the movement takes and has no effect while "
                 + "animation is off."
@@ -164,15 +173,29 @@ enum LayoutHelp {
     /// Track's Position picker shares `PlacementPicker` but
     /// places a whole track in own-track mode, so the
     /// window-centric default above would be wrong there.
+    ///
+    /// The two option names are INTERPOLATED from the picker's
+    /// own keys rather than re-typed (#818): a help string that
+    /// quotes a label is a hand-kept mirror, and every locale
+    /// holds the two as independent strings that must agree
+    /// forever with nothing checking that they do — `de` had
+    /// already drifted to a name not on screen, and `ja` had
+    /// dropped the mapping the sentence exists for.
     @MainActor static var trackPosition: String {
         L(
             "track.new_window_position.help",
-            "With \u{201C}Opens its own track\u{201D}, where the "
-                + "new track lands among the tracks; with "
-                + "\u{201C}Fills the focused track\u{201D}, "
-                + "where the window lands inside it: First, "
-                + "Last, or right before or after the focused "
-                + "one."
+            "With \u{201C}%1$@\u{201D}, where the new track "
+                + "lands among the tracks; with "
+                + "\u{201C}%2$@\u{201D}, where the window lands "
+                + "inside that track: %3$@, %4$@, or right "
+                + "before or after the focused window.",
+            L("track.new_window.own", "Opens its own track"),
+            L(
+                "track.new_window.focused",
+                "Fills the focused track"
+            ),
+            L("placement.first", "First"),
+            L("placement.last", "Last")
         )
     }
 }

@@ -51,7 +51,7 @@ struct ApplicationsGroup: View {
                         "shortcuts.apps.empty",
                         "No app has a key of its own yet. Add one "
                             + "and its key brings that app's "
-                            + "window to the space you're on, or "
+                            + "window to the Space you're on, or "
                             + "launches the app if it isn't "
                             + "running."
                     )

@@ -68,10 +68,10 @@ struct NativeSpacesGroup: View {
     private var intro: String {
         L(
             "native_spaces.intro",
-            "Each Desktop is a native macOS Space from "
-                + "Mission Control. Pick a profile to load "
-                + "it automatically when that Desktop "
-                + "activates."
+            "These are your Mac's own Desktops, from Mission "
+                + "Control — not KiwiDesk's Spaces. Pick a "
+                + "profile to load automatically when a "
+                + "Desktop activates."
         )
     }
 
@@ -177,7 +177,7 @@ struct NativeSpacesGroup: View {
             L(
                 "native_spaces.empty",
                 "No native macOS Desktops detected. Add "
-                    + "desktops in Mission Control to bind "
+                    + "Desktops in Mission Control to bind "
                     + "profiles."
             )
         )

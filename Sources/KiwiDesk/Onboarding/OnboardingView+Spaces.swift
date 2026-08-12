@@ -151,7 +151,7 @@ extension OnboardingView {
             // which Settings cannot rename — and pt-BR's
             // translator produced a pronoun agreeing with it.
             "Your Mac's own Desktops still exist underneath. "
-                + "Rename or change any of these spaces in "
+                + "Rename or change any of these Spaces in "
                 + "Settings, whenever you want to."
         )
     }

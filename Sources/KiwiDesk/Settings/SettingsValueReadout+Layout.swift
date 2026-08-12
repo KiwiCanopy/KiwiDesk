@@ -159,11 +159,11 @@ extension SettingsValueReadout {
                 n.grid.splitDirection,
                 layoutGridArrange
             )
-        case .gridFillEmptySpace:
+        case .gridFillEmptyCells:
             return layoutRow(
                 census,
-                o.grid.fillEmptySpace,
-                n.grid.fillEmptySpace,
+                o.grid.fillEmptyCells,
+                n.grid.fillEmptyCells,
                 onOff
             )
         case .gridAutoSize:
@@ -272,7 +272,7 @@ extension SettingsValueReadout {
             .scrollingOverrideOrientation,
             .scrollingOverrideAnchor, .scrollingOverrideSlotSize,
             .gridOverrideType, .gridOverrideSplitDirection,
-            .gridOverrideFillEmptySpace, .gridOverrideColumns,
+            .gridOverrideFillEmptyCells, .gridOverrideColumns,
             .gridOverrideRows, .gridOverrideAutoSize,
             .monocleOverrideOrientation, .trackOverrideAxis,
             .trackOverrideLimit, .trackOverrideOverflowStyle,

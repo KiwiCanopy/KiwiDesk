@@ -40,7 +40,7 @@ extension SpacesSection {
                 L(
                     "spaces.pin_offline_badge.help",
                     "Pinned to a display that isn't attached, so "
-                        + "this space opens on the main display "
+                        + "this Space opens on the main display "
                         + "for now."
                 )
             )

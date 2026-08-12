@@ -91,6 +91,18 @@ extension SystemShortcut {
             return L("system_shortcut.hide_app", "Hide App")
         case .forceQuit:
             return L("system_shortcut.force_quit", "Force Quit")
+        // These two name APPLE's shortcut rows, not KiwiDesk's
+        // concepts, so they keep "Space" while the rest of the
+        // app calls a Mission Control desktop a Desktop (#768,
+        // owner ruling 2026-08-12). The string exists so a user
+        // with a conflict can find that row in System Settings ▸
+        // Keyboard ▸ Shortcuts ▸ Mission Control, where macOS
+        // says "space" — renaming it would point at a label that
+        // is not on screen, and oblige ten translators to coin a
+        // name for a control Apple has already named for them.
+        // The same carve-out covers the "Displays have separate
+        // Spaces" checkbox quoted in `native_spaces` copy; it is
+        // written down in `.claude/rules/config-vocabulary.md`.
         case .missionControlSpaceLeft:
             return L(
                 "system_shortcut.mission_control_space_left",

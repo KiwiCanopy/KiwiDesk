@@ -71,7 +71,7 @@ struct SpacesGateWiringTests {
             ],
             overrides + "SpaceOverrideRows+ModeRows.swift": [
                 "gates.inertReason("
-                    + "for:.layout(.gridOverrideFillEmptySpace))",
+                    + "for:.layout(.gridOverrideFillEmptyCells))",
                 "gates.inertReason("
                     + "for:.layout(.gridOverrideColumns))",
                 "gates.inertReason("
@@ -114,7 +114,7 @@ struct SpacesGateWiringTests {
         for key in [
             "space_override.reset_active.none",
             "layout_params.master_orientation.one_master",
-            "scroll_grid.fill_empty_space.rigid_only",
+            "scroll_grid.fill_empty_cells.rigid_only",
             "scroll_grid.auto_size.gates",
             "track.auto_tracks.gates",
         ] {

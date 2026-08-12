@@ -7,16 +7,16 @@ extension SpacesSection {
     var emptyCaption: String {
         L(
             "spaces.empty",
-            "No spaces yet — add one below. Until you do, "
+            "No Spaces yet — add one below. Until you do, "
                 + "every window tiles in a single default "
-                + "space."
+                + "Space."
         )
     }
 
     var spacesCaption: String {
         L(
             "spaces.caption",
-            "Each space has its own layout. Add spaces "
+            "Each Space has its own layout. Add Spaces "
                 + "here; they appear in the shortcut and "
                 + "app-rule lists too. Drag rows to "
                 + "reorder."
@@ -27,9 +27,9 @@ extension SpacesSection {
         L(
             "spaces.fallback_caption",
             "When you switch profiles, windows from a "
-                + "space the new profile doesn't have "
-                + "land in its fallback space (the first "
-                + "space when none is chosen)."
+                + "Space the new profile doesn't have "
+                + "land in its fallback Space (the first "
+                + "Space when none is chosen)."
         )
     }
 }

@@ -29,7 +29,7 @@ struct GridSchematic: View {
     let columns: Int
     let rows: Int
     let type: GridParams.GridType
-    let fillEmptySpace: Bool
+    let fillEmptyCells: Bool
     let autoSize: Bool
     let splitDirection: GridParams.SplitDirection
     let placement: SpawnPlacement
@@ -203,7 +203,7 @@ struct GridSchematic: View {
                 }
             }
         }
-        .animation(LayoutSchematic.damping, value: fillEmptySpace)
+        .animation(LayoutSchematic.damping, value: fillEmptyCells)
         .animation(LayoutSchematic.damping, value: splitDirection)
         .animation(LayoutSchematic.damping, value: placement)
     }
@@ -215,7 +215,7 @@ struct GridSchematic: View {
     /// so the rigid arm draws its empty cells whatever the toggle
     /// says, which is the behaviour the toggle's grey describes.
     var spansLeftover: Bool {
-        fillEmptySpace && type == .dynamic
+        fillEmptyCells && type == .dynamic
     }
 
     func kind(_ id: Int) -> TileKind {

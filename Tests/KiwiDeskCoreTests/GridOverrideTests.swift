@@ -33,14 +33,14 @@ struct GridOverrideTests {
     func resolveAppliesAll() {
         var over = GridOverride()
         over.type = .rigid
-        over.fillEmptySpace = false
+        over.fillEmptyCells = false
         over.splitDirection = .vertical
         over.columns = 5
         over.rows = 4
         over.autoSize = true
         let resolved = over.resolved(onto: GridParams())
         #expect(resolved.type == .rigid)
-        #expect(resolved.fillEmptySpace == false)
+        #expect(resolved.fillEmptyCells == false)
         #expect(resolved.splitDirection == .vertical)
         #expect(resolved.columns == 5)
         #expect(resolved.rows == 4)
@@ -69,7 +69,7 @@ struct GridOverrideTests {
         let json =
             try #require(String(data: data, encoding: .utf8))
         #expect(json.contains("split_direction"))
-        #expect(!json.contains("fill_empty_space"))
+        #expect(!json.contains("fill_empty_cells"))
         #expect(!json.contains("columns"))
         let back = try JSONDecoder().decode(
             GridOverride.self,

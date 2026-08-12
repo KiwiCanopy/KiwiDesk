@@ -38,8 +38,8 @@ Powerful when you reach for it, never in your way.
 <!-- Add a short demo video here once one is recorded. -->
 
 > **Status: public beta, on Homebrew.** The core (layouts, Lua
-> config, CLI, profiles, per-native-space profiles, virtual
-> workspace hiding) and the SwiftUI Settings app are functional.
+> config, CLI, profiles, per-Desktop profiles, per-space window
+> hiding) and the SwiftUI Settings app are functional.
 > Install it with the Homebrew cask below, which keeps itself
 > current via `brew upgrade`; a signed, notarized `.dmg` follows
 > once the app can update itself, so that a direct download is
@@ -52,9 +52,9 @@ Powerful when you reach for it, never in your way.
 
 KiwiDesk is a modular, high-performance tiling window manager for
 macOS, written in Swift and configured in Lua. It combines robust
-window tracking with smooth, spring-based animations, runs
-entirely in user-space, and **never requires disabling System
-Integrity Protection**.
+window tracking with smooth, spring-based animations, runs as an
+ordinary app with no kernel extension, and **never requires
+disabling System Integrity Protection**.
 
 ## Why KiwiDesk?
 
@@ -79,13 +79,13 @@ different formula — no tree surgery, no lost state.
 
 ## Key Features
 
-- **Virtual Spaces**: Instant per-space window hiding on top of native
-  macOS Spaces.
+- **Spaces**: Instant per-space window hiding on top of macOS's own
+  Desktops.
 - **GUI, CLI & Lua**: SwiftUI Settings app for simple tweaks; CLI &
   sandboxed Lua 5.5 VM for advanced workflows.
 - **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`) and
   smart app switching (`pull_or_spawn`) via Carbon — zero Input Monitoring needed.
-- **Cascading Profiles**: Display- or space-bound profiles with inherited
+- **Cascading Profiles**: Display- or Desktop-bound profiles with inherited
   defaults and sparse overrides.
 - **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
@@ -94,13 +94,14 @@ different formula — no tree surgery, no lost state.
 
 ## Solving macOS Papercuts
 
-- **No Green-Button Space Isolation**: The `monocle` layout maximizes
-  windows on the *current space* without kicking you to a far-right desktop.
+- **No Green-Button Desktop Isolation**: The `monocle` layout maximizes
+  windows on the *current space* without kicking you to a far-right Desktop.
 - **No `⌘Tab` Black Holes**: `pull_or_spawn` opens the app, pulls its windows front-and-center, or cycles through all open windows of that app on repeated presses.
 - **Zero Layout Amnesia**: Moving windows between spaces automatically tiles
   them into the target layout grid instead of forcing manual micro-resizing.
-- **Predictable Spatial Memory**: Virtual Spaces stay in fixed, predictable
-  slots rather than macOS automatically shuffling your desktops around.
+- **Predictable Spatial Memory**: KiwiDesk's spaces stay in fixed,
+  predictable slots rather than macOS automatically shuffling your
+  Desktops around.
 
 ## Installation
 

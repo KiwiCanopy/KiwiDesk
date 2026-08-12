@@ -13,7 +13,7 @@ extension OnboardingView {
             Text(
                 L(
                     "onboarding.spaces.title",
-                    "Use shared Spaces across displays"
+                    "Use shared Desktops across displays"
                 )
             )
             .font(.title.bold())

@@ -61,12 +61,12 @@ extension SpaceOverrideRows {
             ? L(
                 "space_override.dormant.summary_one",
                 "Saved for 1 other layout — it applies if you "
-                    + "switch this space back."
+                    + "switch this Space back."
             )
             : L(
                 "space_override.dormant.summary_many",
                 "Saved for %1$d other layouts — they apply if "
-                    + "you switch this space back.",
+                    + "you switch this Space back.",
                 count
             )
     }

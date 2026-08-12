@@ -107,7 +107,7 @@ public struct GridLayout: LayoutSystem {
         }
 
         let fillLast =
-            params.type == .dynamic && params.fillEmptySpace
+            params.type == .dynamic && params.fillEmptyCells
         // Both grid types honour the arrange order (#217): columns
         // first fills row-major (across a row, then down), rows
         // first column-major (down a column, then across). It is a
