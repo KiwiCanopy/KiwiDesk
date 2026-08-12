@@ -99,14 +99,20 @@ struct ShortcutsHeader: View {
         .help(importHelp)
     }
 
+    /// The destination group is INTERPOLATED from the key that
+    /// labels it rather than named as text (#818): this sentence
+    /// said "lands in Advanced" while the drawer had read "Lua
+    /// bindings" since #68, so every locale had faithfully
+    /// translated a group name no locale draws.
     private var importHelp: String {
         L(
             "shortcuts.import.help",
             "Reads the shortcuts active in init.lua and adds "
                 + "them here, matching each combo. Known "
                 + "actions sort into the groups below; "
-                + "anything else lands in Advanced. Review, "
-                + "then Save."
+                + "anything else lands in \u{201C}%1$@\u{201D}. "
+                + "Review, then Save.",
+            L("shortcuts.advanced.title", "Lua bindings")
         )
     }
 

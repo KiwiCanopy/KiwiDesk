@@ -47,6 +47,21 @@ import Testing
 /// is how a guard becomes noise, so that half is prevented by
 /// interpolating on sight and this suite holds the frames that
 /// already do.
+///
+/// Second blind spot, and the sharper one: **the floor counts
+/// labels, not identities.** Swap one nested `L(` for a
+/// different key and the count is unchanged, the scan re-derives
+/// the new key, and every assertion passes — `guard-prover` ran
+/// exactly that mutation and it went green. So a sentence can
+/// still come to name a control it does not mean, which is the
+/// #519 class surviving conversion in a new form. The retired
+/// `BarHelpLabelReferenceTests` half could not have caught it
+/// post-conversion either: by then the English is a specifier,
+/// not the label. Closing it wants a derivation from the
+/// settings census — a frame's nested keys against the label
+/// keys of the `SettingKey` cases it claims to name — never a
+/// hand-listed pair, which is the defect that killed this
+/// suite's first cut.
 @Suite("Interpolated control labels (#818)")
 struct InterpolatedLabelTests {
     /// Frames already converted, and how many control labels
@@ -63,14 +78,16 @@ struct InterpolatedLabelTests {
     /// still passes, and the revert has erased its own evidence.
     /// A floor is the only thing that survives that, because it
     /// is the one number the call site cannot restate.
-    /// `colors.unfocused_off.help` is the family's precedent and
-    /// is deliberately ABSENT: it interpolates a destination
-    /// title through a computed property
-    /// (`AdvancedColorsGates.gapsAndBorders`), not an inline
-    /// `L(`, so the scan below cannot see it — and that is the
-    /// scan's stated blind spot, not an oversight. A frame that
-    /// reaches its label through any accessor is invisible here;
-    /// only an inline `L("key", …)` argument is discovered.
+    /// The `colors.*_off.help` family USED to be absent here,
+    /// on the ground that a frame reaching its label through a
+    /// property was beyond a source scan. That is no longer true
+    /// and the exemption is gone: `SourceScan
+    /// .destinationTitleKeys` resolves
+    /// `SettingsDestination.<case>.title` out of the switch, so
+    /// those seven frames and `layout_defaults.spaces_using.none`
+    /// are discovered and floored like any other. What remains
+    /// invisible is a label reached through a LOCAL alias — which
+    /// is why `AdvancedColorsHelp` no longer has one.
     /// The four below `track.…` were never #818 conversions —
     /// they already interpolated a label, and the scan found
     /// them. They are listed anyway, because the floor's job is
@@ -81,6 +98,22 @@ struct InterpolatedLabelTests {
     /// ONE slot with a ternary (so 2), and `home.card.ax_value`
     /// has two call sites of which only one interpolates a key
     /// (the count is the larger).
+    /// The twelve below `profiles.current_setup_note` are the
+    /// `i18n/terminology-round` batch. Five of them had ALREADY
+    /// drifted in a shipped catalog before the conversion —
+    /// `es` named the boxed style "En casillas" against a picker
+    /// reading "En caja", `it` a colour row "Elemento sotto il
+    /// puntatore" against a row reading "Elemento al passaggio
+    /// mouse" — which is the strongest evidence this suite's
+    /// premise is right rather than tidy. The count here is
+    /// LABELS, which is what the scan derives — not the
+    /// specifier count, which a ternary can make smaller. The
+    /// two `*.alignment.label.help` frames briefly spent `%1$@`
+    /// twice, and that was backed out: `placeholder_drift`
+    /// compares a multiset, so a repeat makes a stylistic second
+    /// mention mandatory in every language and fails a
+    /// translation that pronominalises it. `gui.md` ▸ Strings
+    /// now bans it outright.
     static let converted: [String: Int] = [
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
@@ -90,6 +123,34 @@ struct InterpolatedLabelTests {
         "space_override.slot_size.help": 4,
         "onboarding.grant.body": 1,
         "profiles.current_setup_note": 1,
+        "app_bar.alignment.label.help": 2,
+        "app_bar.background_fit.boxed_only": 1,
+        "app_bar.color.gap_only": 1,
+        "app_bar.icon_source.help": 5,
+        "app_bar.icon_source.name_only": 2,
+        "lua_editor.adopt_help.body": 1,
+        "shortcuts.import.help": 1,
+        "space_bar.alignment.label.help": 2,
+        "space_bar.background_fit.boxed_only": 1,
+        "space_bar.color.focused_item.help": 2,
+        "space_bar.icon_source.help": 1,
+        "spaces.delete_confirm.message": 2,
+        // The eight below were ALWAYS interpolating and were
+        // invisible until the scan learned
+        // `SettingsDestination.<case>.title` — they reach a
+        // destination title through that property rather than an
+        // inline `L(`, which is right: the English is authored
+        // once, in the switch. Before the scan could resolve it
+        // they had no floor at all, so a revert to literal text
+        // would have passed unseen in every one of them.
+        "colors.app_bar_off.help": 1,
+        "colors.border_off.help": 1,
+        "colors.drag_border_off.help": 1,
+        "colors.drag_fill_off.help": 1,
+        "colors.drag_off.help": 1,
+        "colors.space_bar_off.help": 1,
+        "colors.unfocused_off.help": 1,
+        "layout_defaults.spaces_using.none": 1,
     ]
 
     private static func english() throws -> [String: String] {
@@ -240,12 +301,24 @@ struct InterpolatedLabelTests {
                 """
             )
             let labels = found.map(\.labels.count).max() ?? 0
+            // EQUALITY, not `>=`. `guard-prover` mutated an entry
+            // from 4 to 1 with no call site touched and the suite
+            // stayed green: a `>=` floor cannot see a
+            // mis-transcribed LOW number, so a typo silently
+            // re-rates that frame's protection down to whatever
+            // was written and the guard then watches a quarter of
+            // what it should. Equality costs an entry bump when a
+            // frame gains a label — which is an author-visible
+            // cost, on screen beside the register, and the whole
+            // point of keeping the number by hand.
             #expect(
-                labels >= floor,
+                labels == floor,
                 """
-                \(key) interpolates \(labels) control label(s), \
-                down from \(floor) — a label went back to \
-                literal text, which no locale can keep in step.
+                \(key) interpolates \(labels) control label(s) \
+                against a registered \(floor). Fewer means a \
+                label went back to literal text, which no locale \
+                can keep in step; more means the frame gained one \
+                and this entry needs bumping.
                 """
             )
         }

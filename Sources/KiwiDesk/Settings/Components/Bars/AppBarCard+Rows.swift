@@ -69,13 +69,25 @@ extension AppBarCard {
                 selection: style.alignment,
                 options: AppBarOptions.alignment
                     .map { ($0.1, $0.0) },
+                // The two option names are INTERPOLATED from the
+                // picker's own keys rather than re-typed (#818).
+                // Each appears ONCE: `placeholder_drift` compares
+                // a multiset, so a repeated specifier would make
+                // a stylistic second mention mandatory in every
+                // language and fail a translation that
+                // pronominalises it — correct copy, hard failure.
+                // The mapping is carried by the common noun
+                // instead, which no locale has to match.
                 help: L(
                     "app_bar.alignment.label.help",
                     "Where the item group sits along the bar "
-                        + "while it fits. Start and End follow "
-                        + "the edge (a left bar's Start is its "
-                        + "top); once items overflow and scroll, "
-                        + "all three behave the same."
+                        + "while it fits. \u{201C}%1$@\u{201D} and "
+                        + "\u{201C}%2$@\u{201D} follow the edge, "
+                        + "so on a left bar the start of the bar "
+                        + "is its top; once items overflow and "
+                        + "scroll, all three behave the same.",
+                    L("app_bar.alignment.start", "Start"),
+                    L("app_bar.alignment.end", "End")
                 )
             )
         case .appBarActiveIndicator:
@@ -207,10 +219,18 @@ extension AppBarCard {
                 // greying it hid the only editor for a value in
                 // use.
                 active: gates.everyShownBarBoxed,
+                // Style name INTERPOLATED from the picker entry's
+                // own key, not re-typed (#818) — and it must move
+                // with its Space Bar twin, which carries the
+                // identical English: one anchored and one typed
+                // is worse than either end, since the two then
+                // disagree per locale with nothing checking.
                 help: L(
                     "app_bar.background_fit.boxed_only",
-                    "Boxed draws a box per item, not a shared "
-                        + "plate, so there is nothing to size."
+                    "\u{201C}%1$@\u{201D} draws a box per item, "
+                        + "not a shared plate, so there is "
+                        + "nothing to size.",
+                    L("app_bar.background_style.boxed", "Boxed")
                 )
             )
         )
@@ -245,15 +265,29 @@ extension AppBarCard {
     private var iconSourceRow: some View {
         DropdownRow(
             label: L("app_bar.icon_source.label", "App symbol style"),
+            // Five labels INTERPOLATED from their own keys, not
+            // re-typed (#818): the mode, the three colour rows
+            // this sentence sends the reader to, and the page
+            // they are on. The rows are NOT below — they render
+            // at `.row(.advancedColours, .appBar, .showMore)`,
+            // all three Power-User-only — so the sentence
+            // names the destination instead of saying "below",
+            // which sent the reader looking down this card.
             help: L(
                 "app_bar.icon_source.help",
-                "How app icons are drawn. Glyphs shows a "
+                "How app icons are drawn. "
+                    + "\u{201C}%1$@\u{201D} shows a "
                     + "monochrome symbol from KiwiDesk's "
                     + "built-in icon set, colored by the bar's "
-                    + "item colors — Item, Active item, and "
-                    + "Hover item below — so those colors also "
+                    + "item colors — %2$@, %3$@ and %4$@, in "
+                    + "%5$@ — so those colors also "
                     + "decide how the glyphs look. Apps "
-                    + "without a symbol keep their app icon."
+                    + "without a symbol keep their app icon.",
+                L("app_bar.icon_source.app_font", "Glyphs"),
+                L("app_bar.color.item", "Item"),
+                L("app_bar.color.active_item", "Active item"),
+                L("app_bar.color.hover_item", "Hover item"),
+                SettingsDestination.advancedColors.title
             )
         ) {
             Picker(
@@ -274,9 +308,14 @@ extension AppBarCard {
                 // collapses Name to icon-only, so icons are on
                 // screen and this control must stay live.
                 active: gates.everyShownBarNameOnly,
+                // Both labels INTERPOLATED from their own keys,
+                // not re-typed (#818).
                 help: L(
                     "app_bar.icon_source.name_only",
-                    "Icons are hidden while Content is Name."
+                    "Icons are hidden while \u{201C}%1$@\u{201D} "
+                        + "is \u{201C}%2$@\u{201D}.",
+                    L("app_bar.content.label", "Content"),
+                    L("app_bar.content.name", "Name")
                 )
             )
         )

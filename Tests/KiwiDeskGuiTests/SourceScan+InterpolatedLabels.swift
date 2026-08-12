@@ -34,6 +34,7 @@ extension SourceScan {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
             .appendingPathComponent("KiwiDesk")
+        let destinations = try destinationTitleKeys()
         var frames: [Frame] = []
         for file in try SourceScan.swiftSources(under: root) {
             let source = SourceScan.stripComments(
@@ -74,7 +75,10 @@ extension SourceScan {
                     index += 1
                     continue
                 }
-                let keys = keyLiterals(in: body)
+                let keys = keyLiterals(
+                    in: body,
+                    destinations: destinations
+                )
                 // keys[0] is the frame's own key; the rest are
                 // the nested L() arguments it interpolates.
                 if keys.count > 1 {
@@ -111,10 +115,87 @@ extension SourceScan {
             || previous == "_" || previous == ".")
     }
 
+    /// `SettingsDestination.<case>.title` → the key that case
+    /// returns, parsed from the one file that owns the switch.
+    ///
+    /// A destination title is the label five-plus frames name,
+    /// and it is reached through a property rather than an
+    /// inline `L(` precisely so the English is authored once.
+    /// Without this, every one of those frames is invisible to
+    /// the scan and gets no floor — and the alternative,
+    /// reshaping the call sites to inline `L(`, would paste the
+    /// same English at five sites to please a test. So the scan
+    /// learns the one accessor shape it can resolve from source.
+    ///
+    /// The case name is NOT derivable from the key
+    /// (`.layoutDefaults` returns `destination.layout`), so the
+    /// pairing is read out of the switch rather than guessed.
+    static func destinationTitleKeys() throws
+        -> [String: String]
+    {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent("Sources")
+                    .appendingPathComponent("KiwiDesk")
+                    .appendingPathComponent("Settings")
+                    .appendingPathComponent(
+                        "SettingsDestination.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        // Scanned over the WHOLE source, not line by line: a
+        // case's `L(` and its key literal need not share a line,
+        // and `.advancedColors` is exactly that shape. The
+        // line-scoped first cut missed it, silently — the frame
+        // naming that destination simply went undiscovered and
+        // lost its floor, which is how a fail-open parser hurts.
+        var pairs: [String: String] = [:]
+        var pending: String?
+        var index = source.startIndex
+        while index < source.endIndex {
+            let rest = source[index...]
+            if rest.hasPrefix("case ."),
+                let colon = rest.firstIndex(of: ":")
+            {
+                let name = rest[
+                    rest.index(rest.startIndex, offsetBy: 6)..<colon
+                ]
+                if name.allSatisfy({ $0.isLetter || $0.isNumber }) {
+                    pending = String(name)
+                }
+            }
+            if let name = pending, rest.hasPrefix("L(") {
+                if let open = rest.firstIndex(of: "\""),
+                    let close = rest[
+                        rest.index(after: open)...
+                    ].firstIndex(of: "\"")
+                {
+                    let key = String(
+                        rest[rest.index(after: open)..<close]
+                    )
+                    if key.hasPrefix("destination.") {
+                        pairs[name] = key
+                        pending = nil
+                    }
+                }
+            }
+            index = source.index(after: index)
+        }
+        return pairs
+    }
+
     /// The `L(` key literal of the body and of each nested `L(`,
     /// in source order. A key is the FIRST string literal after
     /// an `L(`, which is what `scripts/extract-keys` parses too.
-    private static func keyLiterals(in body: String) -> [String] {
+    ///
+    /// A `SettingsDestination.<case>.title` argument counts as a
+    /// nested label too — see `destinationTitleKeys`.
+    private static func keyLiterals(
+        in body: String,
+        destinations: [String: String]
+    ) -> [String] {
         var found: [String] = []
         let text = Array(body)
         var index = 0
@@ -136,9 +217,47 @@ extension SourceScan {
                 index += 2
                 continue
             }
+            if let hit = destinationTitle(
+                text,
+                at: index,
+                destinations: destinations
+            ) {
+                found.append(hit.key)
+                index = hit.end
+                continue
+            }
             index += 1
         }
         return found
+    }
+
+    /// A `SettingsDestination.<case>.title` occurrence at
+    /// `index`, and where it ends. Matched on the whole spelling
+    /// so a bare `.title` on some other type cannot register.
+    private static func destinationTitle(
+        _ text: [Character],
+        at index: Int,
+        destinations: [String: String]
+    ) -> (key: String, end: Int)? {
+        let prefix = Array("SettingsDestination.")
+        guard index + prefix.count < text.count,
+            Array(text[index..<index + prefix.count]) == prefix,
+            isCallStart(text, at: index)
+        else { return nil }
+        var cursor = index + prefix.count
+        var name = ""
+        while cursor < text.count,
+            text[cursor].isLetter || text[cursor].isNumber
+        {
+            name.append(text[cursor])
+            cursor += 1
+        }
+        let suffix = Array(".title")
+        guard cursor + suffix.count <= text.count,
+            Array(text[cursor..<cursor + suffix.count]) == suffix,
+            let key = destinations[name]
+        else { return nil }
+        return (key, cursor + suffix.count)
     }
 
     /// Arguments after the key and the English literal, counted

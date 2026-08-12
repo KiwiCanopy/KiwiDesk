@@ -428,6 +428,35 @@ those out over time is exactly what "fixing an existing
 translation" above is for, and improvements toward more natural
 phrasing are always welcome.
 
+### One concept, one word
+
+The failure that reads worst is not a stiff sentence — it is your
+language's two perfectly good words for the same idea, used on
+two pages. The user learns the word once and does not recognise
+it on the next screen, and search finds one surface and not the
+other. It shows up between *adjacent* surfaces most of the time:
+a tab bar and the help text under it, a card title and the menu
+item that opens it.
+
+So before you settle on a word for an ordinary noun — layout,
+gap, profile, shortcut, preset — grep your own catalog for the
+candidates and take the one already carrying the concept. Two
+rules on top of that count, both in the [feature name
+policy](localization-naming.md) ▸ Family C, which is where this
+is decided:
+
+- A word that already names **another** KiwiDesk thing in your
+  file loses, however common it is. That is the worst version of
+  this defect: the label is not merely inconsistent, it is true
+  about the wrong feature.
+- The rival is usually still correct *somewhere* in your file, so
+  never search-and-replace. Change the keys that name the
+  concept, and leave the ones where the word means something
+  else.
+
+Nothing checks any of this — it cannot be checked, for reasons
+that page argues — so it is yours to hold.
+
 ## Tone & voice
 
 Keep translations concise and match the register of the
