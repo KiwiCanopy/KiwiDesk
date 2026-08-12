@@ -245,6 +245,9 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
+    /// The in-flight boot's phase, spans and timestamps (#801).
+    let boot = BootRun()
+
     /// Adoption-heal timings (#675); tests assign milliseconds.
     /// 5 s: a healthy tick is one ~1 ms census, so the cadence
     /// only bounds worst-case adoption latency. 750 ms: outlasts

@@ -71,7 +71,7 @@ struct StartupWarmupSkipTests {
         }
         loop.activationPolicy = { _ in .regular }
         if started {
-            loop.start()
+            runWholeScan(loop)
         }
         return (
             loop,
@@ -91,6 +91,15 @@ struct StartupWarmupSkipTests {
     private let pid: pid_t = 424_242
     private var ref: AppRef {
         AppRef(bundleID: "test.kiwi.cold", name: "Cold")
+    }
+
+    /// The whole scan in one turn. Production chunks it and
+    /// hands the run loop back between chunks (`KiwiCore+Boot`,
+    /// #801) — a suite has nothing to yield to, so it drains with
+    /// no budget.
+    private func runWholeScan(_ loop: EventLoop) {
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
     }
 
     @Test("a skipped app is warmed by the following reconcile")

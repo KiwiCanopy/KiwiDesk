@@ -74,10 +74,27 @@ extension EventLoop {
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
+        // A queued boot step bounds this app's blocking AX work
+        // and completes it after the pass (#803) — see
+        // `openAppBudget`, which is inert for an OS-driven
+        // reconcile even while a pass is open.
+        // Every exit below returns BEFORE the sweep at the end:
+        // that sweep derives destroys from `live`, and a
+        // partially read list would untrack every window the
+        // abort never reached.
+        let budget = openAppBudget()
         let liveElements = axWindows(pid)
         if activationPolicy == .regular
             || liveElements.contains(where: Self.isStandardWindow)
         {
+            guard !budget.isSpent else {
+                deferBootWork(
+                    pid: pid,
+                    ref: app,
+                    spentMs: budget.spentMs
+                )
+                return
+            }
             // A cold app may not answer the baseline EUI read at
             // attach time. Retry on later reconciles until one
             // succeeds, without taking another window snapshot.
@@ -94,6 +111,14 @@ extension EventLoop {
         // create or a destroy is emitted (#308).
         var appeared: [(element: AXUIElement, id: WindowID)] = []
         for element in liveElements {
+            guard !budget.isSpent else {
+                deferBootWork(
+                    pid: pid,
+                    ref: app,
+                    spentMs: budget.spentMs
+                )
+                return
+            }
             guard let id = AXHelper.windowID(of: element)
             else { continue }
             // Minimized windows count as gone. Unlike windows

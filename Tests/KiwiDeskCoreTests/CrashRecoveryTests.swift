@@ -97,6 +97,44 @@ struct CrashRecoveryTests {
         #expect(recovery.consumeSession() != nil)
     }
 
+    /// A shutdown DURING boot must not write the session file.
+    ///
+    /// `shutdownCleanly` captures live state over it, and mid-scan
+    /// that state is a fraction of the desk — written there it
+    /// would overwrite the arrangement this launch had not
+    /// restored yet, and the next launch would accept it (its
+    /// `capturedAt` is after `kern.boottime`). Unreachable while
+    /// boot was one synchronous block; a quit or a permission
+    /// revoke at second 3 of a chunked scan reaches it (#801, code
+    /// review 2026-08-12).
+    @Test("A shutdown mid-boot keeps the previous session")
+    func preservedSessionSurvivesShutdown() throws {
+        let (recovery, dir) = try makeRecovery()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let previous = snapshot(
+            at: Date(timeIntervalSince1970: 1000)
+        )
+        recovery.captureState = { previous }
+        recovery.shutdownCleanly()
+
+        // A second launch that stops mid-boot: live state is a
+        // partial desk, and it must not land in the file.
+        let second = CrashRecovery(directory: dir)
+        second.onLog = { _ in }
+        second.bootTime = { .distantPast }
+        second.captureState = {
+            self.snapshot(at: Date(timeIntervalSince1970: 2000))
+        }
+        second.shutdownCleanly(preservingSession: true)
+
+        // The arrangement the interrupted launch never restored is
+        // still the one waiting for the next.
+        let third = CrashRecovery(directory: dir)
+        third.onLog = { _ in }
+        third.bootTime = { .distantPast }
+        #expect(third.consumeSession() == previous)
+    }
+
     @Test("Unclean shutdown restores the autosaved state")
     func uncleanRestore() throws {
         let (recovery, dir) = try makeRecovery()

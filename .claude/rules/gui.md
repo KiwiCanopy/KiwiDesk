@@ -860,6 +860,18 @@ stopped at `Settings/`.
   it blocks selection but won't grey. Never make it the sole gate
   on a side effect; guard the setter too, and grey the picker
   rather than the row so a `?` affordance stays live.
+- **An `NSMenu` that greys a row for a reason of its own turns
+  auto-enabling off, and then every row states `isEnabled`.**
+  AppKit re-enables at display time any item whose target
+  responds to its action (observed on macOS 26.6.1,
+  2026-08-12), so a row that WORKS cannot be dimmed while
+  `autoenablesItems` is on — which is what the quick menu
+  needs during boot (#802) and what the Layout submenu's save row
+  needed before it (#68). The cost is the other half of the
+  switch: a nil-action row is no longer disabled for free, so an
+  unstated `isEnabled` ships an enabled-looking context line.
+  `QuickMenuBootRowTests` and `QuickMenuProfileRowTests` hold the
+  two menus' rows.
 - **Modifiers on a bare `ForEach` apply PER CHILD, never to the
   run.** A container that hands a `ForEach` straight to its
   chrome (a background well, padding, a border) stamps that

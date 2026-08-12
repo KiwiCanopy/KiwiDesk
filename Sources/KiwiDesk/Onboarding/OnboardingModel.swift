@@ -68,6 +68,13 @@ final class OnboardingModel {
         }
     }
     var isTrusted = false
+    /// How far the boot has got (#802). The granted screen tells
+    /// the user their windows ARE arranged, which is false while
+    /// the scan is still walking apps — on a heavy session that
+    /// was ~10 s of a screen claiming a finished job. So the claim
+    /// waits for `.ready` and the screen narrates the count until
+    /// then; seeded and kept current by `AppDelegate`.
+    var bootPhase: BootPhase = .ready
     /// The closing card's "open at login" checkbox (#342).
     /// Pre-checked: the app's off-state after a reboot is a desktop
     /// of unmanaged windows, not a neutral absence, so the good

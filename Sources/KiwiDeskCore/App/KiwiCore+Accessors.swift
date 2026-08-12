@@ -6,6 +6,18 @@ import Foundation
 /// paths (`configURL`, `defaultSocketPath`) the same ceiling
 /// pushed out.
 extension KiwiCore {
+    /// How far the boot has got (#802) — read by the status
+    /// mark, the quick menu's count row and the tour's grant
+    /// step. `onBootPhaseChange` is the push half; both answer
+    /// off the one `BootRun`, so a surface reading late and one
+    /// listening cannot disagree.
+    public var bootPhase: BootPhase { boot.phase }
+
+    public var onBootPhaseChange: @MainActor (BootPhase) -> Void {
+        get { boot.onPhaseChange }
+        set { boot.onPhaseChange = newValue }
+    }
+
     public var activeSpace: Space? {
         state.workspaces.activeSpace.flatMap {
             state.workspaces[$0]

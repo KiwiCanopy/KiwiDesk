@@ -330,7 +330,7 @@ from animation-keyed suites, repo-script children drained by
 mid-run — `GeometryUtils.menuBarAutoHides`, a read-only
 global-defaults lookup that only reaches fixtures which didn't
 pin their bounds, and one read-only `NSScreen.screens` read per
-lifecycle suite that drives `EventLoop.start()` with faked
+lifecycle suite that drives `EventLoop.beginScan()` with faked
 seams (`publishDisplays`; the suites set
 `registersWorkspaceObservers = false`, so no live workspace
 observer outlives the test). (The host text-metric read —

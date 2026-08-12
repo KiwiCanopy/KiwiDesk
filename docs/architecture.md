@@ -187,6 +187,55 @@ flowchart LR
     AN --> OSP["OS placement path<br/>position-only frames, per app"]
 ```
 
+## 5. Boot (launch → the first arrangement)
+
+Everything above assumes KiwiDesk already knows the desk. Learning it
+is its own pipeline, and the only one that is **chunked**: the scan
+would otherwise hold the main actor — the run loop the menu-bar item
+and the ⌃⌥K panel are served from — for as long as the AX calls take
+(~10 s on a session with 109 running apps).
+
+```mermaid
+flowchart TD
+    S["start(): arm machine seams · loadConfig"] --> Q["Events: queue one step per running app<br/>(WindowServer prefilter decides who is scanned)"]
+    Q --> C{"chunk: attach apps until<br/>the chunk budget is spent"}
+    C -->|"queue not empty"| Y["yield the run loop<br/>publish scanning(scanned, total)"]
+    Y --> C
+    C -->|"an app exceeds its own budget"| D["drop its remaining work,<br/>record the pid"]
+    D --> C
+    C -->|"queue empty"| T["tail: one retile · session restore ·<br/>services · sweeps · publish ready"]
+    T --> DR["drain deferred apps,<br/>one per turn, unbudgeted"]
+```
+
+1. **`App`** — `start()` arms the machine seams (frontmost app, click
+   provenance, pointer warp) and loads the config. Nothing is
+   attached before this: an attach that ran earlier would make the
+   prefilter below test nothing.
+2. **`Events`** — one `CGWindowListCopyWindowInfo` snapshot decides
+   which apps get the expensive AX window query and warmup at attach;
+   the rest keep their observer and are warmed by a later reconcile
+   (§5, the #662 promise). The apps become a queue.
+3. **chunks** — each chunk attaches apps until its budget is spent and
+   then hands the run loop back, so the menu answers at any point
+   after launch. Every chunk publishes how far the scan has got, which
+   is what the menu-bar mark, the quick menu's count row and the
+   tour's grant screen read.
+4. **the per-app budget** — one app's AX work is indivisible, so a
+   chunk overruns by whatever that app costs. Past its own budget an
+   app's remaining boot work is dropped and completed after the tail
+   (see [Accepted limitations](accepted-limitations.md)).
+5. **the tail** — the whole desk is known, so one `retile` lands the
+   first arrangement, the previous session's layout is restored, and
+   the long-running services and the repair sweeps start. The
+   readiness phase becomes `ready`, which is the signal the dimmed
+   menu-bar mark was withholding.
+
+The startup sweep one second later takes the same chunked, budgeted
+path — it re-tracks what cold AX trees under-reported, and unchunked
+it re-broke the menu right after the scan freed it. Why the wait is
+narrated rather than hidden, and what was rejected, is
+`design-decisions.md` ▸ Boot.
+
 ---
 
 ## Where to go next

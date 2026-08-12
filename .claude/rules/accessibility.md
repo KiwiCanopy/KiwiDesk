@@ -1,6 +1,10 @@
 ---
 paths:
   - "Sources/KiwiDeskCore/AX/**"
+  - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
 ---
 
 # Accessibility (AX) bridge
@@ -16,7 +20,7 @@ editing AX code:
 - `AXObserver` callbacks arrive on the run loop of the thread that
   registered them; keep observer registration on the main thread.
 - **Keep the boot's process-global AX messaging timeout.**
-  `EventLoop.start()` bounds every AX message at ~1 s
+  `EventLoop.beginScan()` bounds every AX message at ~1 s
   (`AXHelper.setGlobalMessagingTimeout`) before its first
   per-app call — without the bound, an unresponsive app costs
   the ~6 s system default per call, and the scan's serial
@@ -25,6 +29,37 @@ editing AX code:
   value. Red-prove the stall itself on-device (`kill -STOP` any
   GUI app, then boot), never with a real SIGSTOP in CI —
   tests.md's hang-guard rule.
+- **Boot may not hold the main actor, and one app may not spend
+  the whole budget (#801/#803).** The scan's AX calls are serial
+  and blocking, so it runs as a queue drained a chunk at a time
+  (`EventLoop+BootScan`) with the run loop handed back in
+  between — that run loop is what serves the menu-bar item and
+  the ⌃⌥K panel, and an accessory app the user can see must
+  answer. Three obligations fall on a change here. **A new pass
+  over every app takes the chunked path** rather than a bare loop:
+  the startup sweep already did this to itself once, blocking
+  5285 ms one second after boot and re-breaking the menu the scan
+  had just freed. **A pass that budgets drains the deferral
+  ledger in its own epilogue** — the sweep budgeted and did not,
+  so an app it cut short sat there until `stop()` discarded it,
+  abandoned to #675's heal, which is the outcome deferral exists
+  to spare it. And **any abort added inside `reconcile` returns
+  before `reconcileTabsAndSweep`** — that sweep derives destroys
+  from the live list, so a mid-read exit with the sweep still
+  running untracks every window the abort never reached.
+  `BootScanChunkTests` pins the queue and its once-only epilogue;
+  `BootAppBudgetTests` pins the per-app bound, the abort-before
+  -sweep pair, and the scoping that matters most: the budget is
+  raised for a queued STEP, never for the pass, because the run
+  loop is live between chunks and an activation reconcile or a
+  Desktop-switch `reconcileAll` landing inside a pass must never
+  be cut short. The budget's value is argued on
+  `EventLoop.bootAppBudget` against the band in this file's
+  second bullet and `EventLoop.axMessagingTimeoutSeconds`; read
+  it there rather than quoting a number here. What the user
+  is told while this runs is `BootPhase`'s (#802), and the
+  publications no test can drive are needled by
+  `BootPhaseWiringTests`.
 - **Never assume an installed observer delivers (#675).**
   `AXObserverAddNotification` can refuse a fresh-launch app whose
   AX tree is not ready, and the refusal used to be discarded —
@@ -38,9 +73,10 @@ editing AX code:
   census-gated so a healthy tick costs one WindowServer snapshot
   and no AX. `AdoptionHealTests` pins the gate and both repair
   funnels; `AdoptionHealScheduleTests` pins the scheduled tasks.
-  Nothing machine-checks that `KiwiCore.start()` still calls
-  `scheduleAdoptionHeal()` — the same unpinnable link as the
-  `scheduleStartupSweep()` bullet below — so do not drop or
+  Nothing machine-checks that the boot tail (`finishBoot`, in
+  `KiwiCore+Boot`) still calls `scheduleAdoptionHeal()` — the
+  same unpinnable link as the `scheduleStartupSweep()` bullet
+  below — so do not drop or
   re-time that call without adding the pin and re-deriving the
   `docs/accepted-limitations.md` heal-latency row.
 - **The startup scan may skip the AX warmup only for an app the
@@ -49,9 +85,12 @@ editing AX code:
   carry that promise, guarded two-and-a-half ways: the skip
   gate and the reconcile-warms retry are pinned by
   `StartupWarmupSkipTests`, and the scheduled sweep's task
-  actually running a `reconcileAll` is pinned by
-  `StartupSweepTests` — but nothing machine-checks that
-  `start()` still *calls* `scheduleStartupSweep()`, so do not
-  drop or re-time that call without adding the pin and
-  re-deriving the ceiling `docs/accepted-limitations.md`
-  accepts for the user-visible residue.
+  actually opening its pass and reconciling is pinned by
+  `StartupSweepTests` — but nothing machine-checks that the boot
+  tail still *calls* `scheduleStartupSweep()`, so do not drop or
+  re-time that call without adding the pin and re-deriving the
+  ceiling `docs/accepted-limitations.md` accepts for the
+  user-visible residue. **Re-timing includes making the sweep
+  take longer**: it is chunked now (#801), so the last app in
+  its queue is warmed at 1 s plus the sweep's own duration
+  rather than at 1 s — and a sweep-budgeted app later still.
