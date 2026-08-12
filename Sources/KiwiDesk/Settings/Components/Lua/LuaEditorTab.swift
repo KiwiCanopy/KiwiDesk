@@ -172,7 +172,14 @@ struct LuaEditorTab: View {
                 + "shortcut that can't be read back "
                 + "stays in the backup — re-add it in "
                 + "\u{201C}%1$@\u{201D}.",
-            SettingsDestination.shortcuts.title
+            // Inline rather than `SettingsDestination.shortcuts
+            // .title`: a frame reaching its label through an
+            // accessor is invisible to `SourceScan
+            // .interpolatingFrames`, so it gets no floor in
+            // `InterpolatedLabelTests.converted` and a revert to
+            // literal text would pass unseen. Same reason
+            // `profiles.current_setup_note` inlines its own.
+            L("destination.shortcuts", "Shortcuts")
         )
     }
 }

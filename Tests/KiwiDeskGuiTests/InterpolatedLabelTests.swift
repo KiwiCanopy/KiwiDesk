@@ -81,6 +81,18 @@ struct InterpolatedLabelTests {
     /// ONE slot with a ternary (so 2), and `home.card.ax_value`
     /// has two call sites of which only one interpolates a key
     /// (the count is the larger).
+    /// The twelve below `profiles.current_setup_note` are the
+    /// `i18n/terminology-round` batch. Five of them had ALREADY
+    /// drifted in a shipped catalog before the conversion —
+    /// `es` named the boxed style "En casillas" against a picker
+    /// reading "En caja", `it` a colour row "Elemento sotto il
+    /// puntatore" against a row reading "Elemento al passaggio
+    /// mouse" — which is the strongest evidence this suite's
+    /// premise is right rather than tidy. Note the two
+    /// `*.alignment.label.help` frames interpolate TWO labels
+    /// but spend three specifiers: they name Start twice, the
+    /// second being the mapping the sentence exists for. The
+    /// count here is labels, which is what the scan derives.
     static let converted: [String: Int] = [
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
@@ -90,6 +102,18 @@ struct InterpolatedLabelTests {
         "space_override.slot_size.help": 4,
         "onboarding.grant.body": 1,
         "profiles.current_setup_note": 1,
+        "app_bar.alignment.label.help": 2,
+        "app_bar.background_fit.boxed_only": 1,
+        "app_bar.color.gap_only": 1,
+        "app_bar.icon_source.help": 4,
+        "app_bar.icon_source.name_only": 2,
+        "lua_editor.adopt_help.body": 1,
+        "shortcuts.import.help": 1,
+        "space_bar.alignment.label.help": 2,
+        "space_bar.background_fit.boxed_only": 1,
+        "space_bar.color.focused_item.help": 2,
+        "space_bar.icon_source.help": 1,
+        "spaces.delete_confirm.message": 2,
     ]
 
     private static func english() throws -> [String: String] {

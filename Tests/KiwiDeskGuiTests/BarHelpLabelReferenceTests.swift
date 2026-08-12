@@ -37,44 +37,22 @@ struct BarHelpLabelReferenceTests {
         }
     }
 
-    /// `helpKey`'s English must contain the English of every
-    /// label key it claims to point at.
-    private func expectReferences(
-        _ helpKey: String,
-        _ labelKeys: [String]
-    ) throws {
-        let catalog = try english
-        let help = try #require(
-            catalog[helpKey],
-            "missing help key: \(helpKey)"
-        )
-        for labelKey in labelKeys {
-            let label = try #require(
-                catalog[labelKey],
-                "missing label key: \(labelKey)"
-            )
-            #expect(
-                help.contains(label),
-                Comment(
-                    rawValue:
-                        "\(helpKey) does not name \"\(label)\" "
-                        + "(\(labelKey))"
-                )
-            )
-        }
-    }
-
-    @Test("App Bar symbol-style help names its colour rows")
-    func appBarIconSourceHelpNamesRows() throws {
-        try expectReferences(
-            "app_bar.icon_source.help",
-            [
-                "app_bar.color.item",
-                "app_bar.color.active_item",
-                "app_bar.color.hover_item",
-            ]
-        )
-    }
+    // `app_bar.icon_source.help` was this suite's founding case
+    // and no longer belongs to it. It now INTERPOLATES its four
+    // labels rather than spelling them (#818), so the property
+    // this suite checks by matching text is true of it by
+    // construction, in every locale rather than only in English
+    // — and the matching test had to be retired rather than
+    // adapted, because it demanded the literal labels be present
+    // and would now fail on the fix. Its floor lives in
+    // `InterpolatedLabelTests.converted`, which reds if the
+    // frame goes back to literal text.
+    //
+    // The check below stays because it is a genuinely different
+    // obligation: the Space Bar twin names its colours by the
+    // shared NOUN rather than by listing the rows, so there is
+    // no label to interpolate and text-matching is the only
+    // thing that can hold it.
 
     /// The Space Bar twin names its colours generically rather
     /// than listing them, so only the shared noun is pinned —
