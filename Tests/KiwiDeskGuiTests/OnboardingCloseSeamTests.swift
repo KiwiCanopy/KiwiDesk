@@ -37,8 +37,7 @@ struct OnboardingCloseSeamTests {
             // needle reads the question.
             "ifonboardingModel.reachedEnd{"
                 + "OnboardingDiscovery.markShown()"
-                + "HomeFirstRunState.seed(.standard)"
-                + "showMenuBarCoachMark()}",
+                + "HomeFirstRunState.seed(.standard)}",
             // …and the flag is CONSUMED, so it scopes to this
             // presentation rather than to a model that outlives
             // every window. Deleting the line reds nothing

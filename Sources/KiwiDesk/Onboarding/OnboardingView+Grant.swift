@@ -28,12 +28,13 @@ extension OnboardingView {
             .multilineTextAlignment(.center)
             Text(model.isTrusted ? grantedBody : grantBody)
                 .multilineTextAlignment(.leading)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
             Spacer()
             if model.isTrusted {
                 Button(L("onboarding.continue", "Continue")) {
                     model.continueAfterAccessibility()
                 }
+                .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
                 .controlSize(.large)
             } else {
@@ -45,6 +46,7 @@ extension OnboardingView {
                 ) {
                     model.onOpenSettings()
                 }
+                .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
                 .controlSize(.large)
             }
@@ -83,6 +85,12 @@ extension OnboardingView {
     /// — lock-versus-check is the only feedback the auto-detect
     /// gives, and it is the channel that separates the two states
     /// now that neither is coloured.
+    ///
+    /// **Uncoloured is a ruling, not an omission**, and it
+    /// survived the tint (#828): accent on the checkmark would put
+    /// hue back as the channel telling the two states apart, on
+    /// the app's own green, which is the exact defect this tree
+    /// shipped as a raw `.green`/`.orange` hero.
     private var waitingLine: some View {
         Label {
             Text(
@@ -104,7 +112,7 @@ extension OnboardingView {
             )
         }
         .font(.callout)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(SettingsTheme.ink2)
         .animation(.default, value: model.isTrusted)
     }
 
@@ -123,7 +131,7 @@ extension OnboardingView {
         )
         .font(.caption)
         .multilineTextAlignment(.center)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(SettingsTheme.ink3)
     }
 
     /// Step 1 names the button below it, so that name is

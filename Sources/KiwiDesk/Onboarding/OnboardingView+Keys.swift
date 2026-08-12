@@ -30,6 +30,7 @@ extension OnboardingView {
             Button(L("onboarding.continue", "Continue")) {
                 model.continueAfterKeys()
             }
+            .buttonStyle(.borderedProminent)
             .keyboardShortcut(.defaultAction)
             .controlSize(.large)
         }
@@ -57,7 +58,7 @@ extension OnboardingView {
             )
             .font(.callout)
             .multilineTextAlignment(.center)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink2)
         } else {
             // The reassurance lives HERE, not above the branch:
             // drawn unconditionally it stood two lines above the
@@ -82,7 +83,7 @@ extension OnboardingView {
                 )
             )
             .multilineTextAlignment(.center)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink2)
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(rows) { row(for: $0) }
             }

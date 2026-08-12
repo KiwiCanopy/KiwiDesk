@@ -10,23 +10,39 @@ extension OnboardingView {
     /// The copy says the setup was chosen, not that each screen
     /// chose its own tile — see `spacesBody`, which carries why
     /// the stronger claim is false.
+    /// **Two ink tiers, and the second is not decoration** (#828):
+    /// the body is what a Space IS, the footnote is how it sits
+    /// under the user's Desktops — the one place the tour answers
+    /// the question #768's vocabulary split exists to raise. The
+    /// lighter ink is what keeps it reading as reassurance rather
+    /// than as a second instruction.
+    ///
+    /// **10 pt gaps, not the 14 every other step uses.** The
+    /// window is one fixed 520×430 for all five steps and this is
+    /// the only one carrying a schematic strip AND two copy tiers,
+    /// so it is the step a locale that expands overflows first.
+    /// What gives, in order, if it ever grows again: the `Spacer`,
+    /// then this spacing, then the per-tile screen line — never
+    /// `SchematicScale.tile`, which is a shared budget with
+    /// Settings' own strip, and never the footnote.
     var spaces: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             Text(spacesTitle)
                 .font(.title.bold())
                 .multilineTextAlignment(.center)
             Text(spacesBody)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
             spaceStrip
             Spacer()
             Text(spacesFooter)
                 .font(.caption)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink3)
             Button(L("onboarding.continue", "Continue")) {
                 model.continueAfterSpaces()
             }
+            .buttonStyle(.borderedProminent)
             .keyboardShortcut(.defaultAction)
             .controlSize(.large)
         }
@@ -136,13 +152,37 @@ extension OnboardingView {
     /// What survives all three: the SETUP was chosen, each space
     /// has its own layout. The tiles carry the per-space facts,
     /// which a sentence about every screen at once cannot.
+    ///
+    /// #828 added the first sentence — what a Space is FOR, by
+    /// analogy to the thing the user already has — and kept the
+    /// second unchanged, defects and all still avoided. It
+    /// deliberately did NOT re-add the prototype's list of screen
+    /// names: that is defect 2 above, and re-adding it needs a
+    /// locale-aware list format rather than a Swift `joined`, so
+    /// it is a decision of its own rather than a side effect of
+    /// this one. The per-tile screen lines below carry the fact
+    /// meanwhile.
+    ///
+    /// And no count, in any tier: the prototype's "Five spaces to
+    /// start" cannot survive a screen-derived seed, and a frame
+    /// interpolating a count must put the number last
+    /// (`.claude/rules/localization.md`), which no heading can
+    /// do. The strip below IS the count.
     private var spacesBody: String {
         L(
             "onboarding.starter_spaces.body",
-            "Each one has its own layout, chosen for your setup."
+            "Use these the way you used your Mac's Desktops — "
+                + "one keystroke away, but each one arranges its "
+                + "windows for you. Each has its own layout, "
+                + "chosen for your setup."
         )
     }
 
+    /// The quieter tier, and the load-bearing one: it is the only
+    /// place the tour says how the two systems NEST, which is the
+    /// question a user who has just been given five Spaces on top
+    /// of their Desktops actually has. If this step ever has to
+    /// shed a line, it is not this one (#828).
     private var spacesFooter: String {
         L(
             "onboarding.starter_spaces.footer",
@@ -150,9 +190,11 @@ extension OnboardingView {
             // plural noun in the preceding sentence is Desktops,
             // which Settings cannot rename — and pt-BR's
             // translator produced a pronoun agreeing with it.
-            "Your Mac's own Desktops still exist underneath. "
-                + "Rename or change any of these Spaces in "
-                + "Settings, whenever you want to."
+            "Rename or change any of these Spaces in Settings, "
+                + "whenever you want to. Your Mac's own Desktops "
+                + "still exist underneath — one of them can hold "
+                + "a whole set of these, though you will not "
+                + "need that for a long time."
         )
     }
 }

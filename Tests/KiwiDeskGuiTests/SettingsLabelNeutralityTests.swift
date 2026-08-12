@@ -44,9 +44,46 @@ import Testing
 /// counts `settingsActionButton()` as naming one.
 @Suite("Settings label neutrality")
 struct SettingsLabelNeutralityTests {
-    private var settingsDir: URL {
-        SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+    /// The trees this guard covers.
+    ///
+    /// The Onboarding tree joined when #828 tinted it: the tour
+    /// had no `.tint` at all, so every unstyled button there
+    /// rendered a system-blue default and nothing was wrong with
+    /// it. The moment the root took `SettingsTheme.accent` those
+    /// same buttons started painting their labels from it, which
+    /// is #759 arriving in the first window every user sees — so
+    /// label neutrality follows the tint rather than the
+    /// directory it was written for. `everyScanRootIsRead` is
+    /// what keeps a renamed tree from retiring it in silence.
+    private var scanRoots: [URL] {
+        let repo = SourceScan.repoRoot(from: #filePath)
+        return [
+            "Sources/KiwiDesk/Settings",
+            "Sources/KiwiDesk/Onboarding",
+        ].map { repo.appendingPathComponent($0) }
+    }
+
+    /// Every Swift file under every scan root.
+    private func scannedSources() throws -> [URL] {
+        try scanRoots.flatMap {
+            try SourceScan.swiftSources(under: $0)
+        }
+    }
+
+    @Test("every scan root is actually read")
+    func everyScanRootIsRead() throws {
+        for root in scanRoots {
+            #expect(
+                !(try SourceScan.swiftSources(under: root))
+                    .isEmpty,
+                Comment(
+                    rawValue: "\(root.lastPathComponent) yielded "
+                        + "no Swift files — this guard no longer "
+                        + "covers that tree"
+                )
+            )
+        }
+        #expect(scanRoots.count > 1)
     }
 
     /// Every borderless menu neutralises its label.
@@ -64,7 +101,7 @@ struct SettingsLabelNeutralityTests {
     @Test("every borderless menu neutralises its label")
     func borderlessMenusAreNeutral() throws {
         var menus = 0
-        for file in try SourceScan.swiftSources(under: settingsDir) {
+        for file in try scannedSources() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -119,7 +156,7 @@ struct SettingsLabelNeutralityTests {
     /// it by hand belongs on the seal instead.
     @Test("direct neutralisations are enumerated")
     func directNeutralisationsAreEnumerated() throws {
-        let sources = try SourceScan.swiftSources(under: settingsDir)
+        let sources = try scannedSources()
         // An entry for a file the scan cannot find is dead-green:
         // the loop below only visits files that exist, so a
         // renamed file would keep its declaration while the

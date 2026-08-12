@@ -5,7 +5,12 @@ import AppKit
 /// into. Extracted from `AppBarOverlay.makePanel` when the Space
 /// Bar became its second real consumer — each overlay still owns
 /// its subview tree and layout.
-enum BarPanel {
+public enum BarPanel {
+    /// The level both bars render at, named once so a window that
+    /// must sit above them derives its own from it rather than
+    /// restating `.floating` (`NSWindow.Level.aboveBarPanels`).
+    public static let level: NSWindow.Level = .floating
+
     /// Like the drag visuals' panels, but clickable. The
     /// `.nonactivatingPanel` mask keeps KiwiDesk out of the key
     /// window order.
@@ -21,7 +26,7 @@ enum BarPanel {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = false
-        panel.level = .floating
+        panel.level = level
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
         // `.transient` hides the bars in Exposé/Mission Control at
@@ -36,4 +41,15 @@ enum BarPanel {
         ]
         return panel
     }
+}
+
+extension NSWindow.Level {
+    /// One step above the bars, DERIVED from `BarPanel.level`
+    /// rather than written as `.floating` a second time — a
+    /// window that must not be covered by a bar and a bar that
+    /// moved level would otherwise be two facts that can
+    /// disagree. The onboarding tour is the one consumer (#828).
+    public static let aboveBarPanels = NSWindow.Level(
+        rawValue: BarPanel.level.rawValue + 1
+    )
 }

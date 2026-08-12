@@ -18,8 +18,7 @@ extension AppDelegate {
     /// `setResolvePermission` wiring carries that argument.
     /// Changing this function therefore changes ONE surface.
     func showAccessibilityHelp() {
-        onboardingModel.step = .grant
-        showOnboarding()
+        showOnboarding(at: .grant)
     }
 
     /// Shows a profile's file in the Finder — the ONE
@@ -43,13 +42,21 @@ extension AppDelegate {
     /// with the top being whichever screen still has something to
     /// say (`replayEntryStep`).
     func replayOnboardingTour() {
-        onboardingModel.step = OnboardingEntry.replayStep(
-            isTrusted: permissions.isTrusted
+        showOnboarding(
+            at: OnboardingEntry.replayStep(
+                isTrusted: permissions.isTrusted
+            )
         )
-        showOnboarding()
     }
 
-    func showOnboarding() {
+    /// Opens the tour on `entry`.
+    ///
+    /// The step is a PARAMETER rather than something a caller
+    /// assigns first, because the progress row's length is
+    /// resolved from it — and resolved after the closures below
+    /// are wired, which a caller setting `model.step` itself
+    /// cannot arrange (#828).
+    func showOnboarding(at entry: OnboardingModel.Step) {
         if let window = onboardingWindow {
             NSApp.forceFront(window)
             return
@@ -92,6 +99,10 @@ extension AppDelegate {
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
+        // LAST of the wiring, and deliberately so: the plan reads
+        // `wantsDiscovery` and `displayCount`, so resolving it any
+        // earlier would plan the tour against their stubs (#828).
+        onboardingModel.beginPresentation(at: entry)
 
         let window = NSWindow(
             contentRect: .zero,
@@ -140,8 +151,15 @@ extension AppDelegate {
     /// so a `.normal` wizard can't be buried — and floating it
     /// early would cover the System Settings window the grant
     /// step opens (#331).
+    ///
+    /// One level ABOVE `.floating`, which is where the App Bar and
+    /// Space Bar panels sit (`BarPanel`): as peers the two settled
+    /// in raise order, so a bar could cover the tour, and the tour
+    /// is the window the user is being asked to read (#828, owner
+    /// ruled the raise over suppressing the bars — they are the
+    /// honest state, tiling really is running by then).
     func floatOnboardingAboveManagedWindows() {
-        onboardingWindow?.level = .floating
+        onboardingWindow?.level = .aboveBarPanels
     }
 
     func closeOnboarding() {
@@ -197,25 +215,17 @@ extension AppDelegate {
             // Home's 14c banner goes pending — the next Settings
             // visit opens oriented, not empty (turn 14c).
             HomeFirstRunState.seed(.standard)
-            showMenuBarCoachMark()
         }
         // Consumed, so the flag means "THIS presentation reached
         // the end" and not "this model ever did". The model is a
         // stored `let` on the delegate and outlives every window,
         // so without this a later reopen at the grant step — the
         // quick menu's "fix Accessibility" route — would close
-        // having fired all three effects again. They are each
+        // having fired both effects again. They are each
         // idempotent behind their own persisted flag today; the
-        // fourth effect added inside that `if` would not be
+        // third effect added inside that `if` would not be
         // (code review, 2026-08-11).
         onboardingModel.clearReachedEnd()
-    }
-
-    /// Points the one-time coach mark at the real menu-bar item.
-    /// Skips itself when it cannot be honest — see
-    /// `MenuBarCoachMark`, which owns both conditions.
-    private func showMenuBarCoachMark() {
-        coachMark.show(under: statusItem?.anchorButton)
     }
 
     /// The live default layer's chord families, for the keys step.
