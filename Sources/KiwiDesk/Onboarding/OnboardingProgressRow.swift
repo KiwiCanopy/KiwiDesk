@@ -61,7 +61,17 @@ struct OnboardingProgressRow: View {
         .accessibilityValue(
             L(
                 "onboarding.progress.axvalue",
-                "Screen %1$d of %2$d",
+                // "Step", not "Screen": this corpus spends
+                // `screen` on a physical display ("chosen for
+                // your screens", the bar's screen edge), so read
+                // aloud on a one-monitor Mac the first draft
+                // announced a monitor count. `Step` is what the
+                // model calls them, and naming them does not
+                // reopen pass 11's ruling — that banned a FIXED
+                // total, not the word (translation round,
+                // 2026-08-12, where all ten locales had already
+                // rendered it by meaning).
+                "Step %1$d of %2$d",
                 index + 1,
                 steps.count
             )

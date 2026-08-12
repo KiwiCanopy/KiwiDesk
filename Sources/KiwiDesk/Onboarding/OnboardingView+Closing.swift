@@ -271,7 +271,12 @@ extension OnboardingView {
     private var menuBarBody: String {
         L(
             "onboarding.ready.menu_bar",
-            "Click the KiwiDesk mark up in your menu bar to open "
+            // "icon", not "mark": `config-vocabulary.md` rules
+            // `mark` as the on-window state glyph, and this
+            // corpus already calls the menu-bar one an icon
+            // (`shortcuts.menu_bar_icon`,
+            // `brand.menu_bar_icon.a11y`).
+            "Click the KiwiDesk icon up in your menu bar to open "
                 + "Settings, where you change your layouts, "
                 + "shortcuts and everything else."
         )

@@ -53,8 +53,11 @@ extension OnboardingView {
     private var keysLead: String {
         L(
             "onboarding.keys.body",
-            "These are ready to use, on the keyboard you have "
-                + "now."
+            // The PHYSICAL keyboard, said so: "the keyboard you
+            // have now" also reads as the app's keyboard-layout
+            // model, which this sentence says nothing about.
+            "These are ready to use, on the keyboard you are "
+                + "typing on."
         )
     }
 

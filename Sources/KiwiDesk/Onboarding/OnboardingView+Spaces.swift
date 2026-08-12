@@ -159,9 +159,11 @@ extension OnboardingView {
     }
 
     /// The layout and the screen, in ONE frame — never joined in
-    /// Swift. A separator written here is one no catalog could
-    /// change, and `、` is what ja and zh-Hant need where English
-    /// writes `·`.
+    /// Swift. The separator is the CATALOG's: a `·` written in
+    /// Swift is one no locale could change, and which locales
+    /// want `、` instead is theirs to decide rather than a list
+    /// kept here (the two Chinese catalogs already answer it
+    /// differently, which is allowed).
     private func rowDetail(_ card: OnboardingSpaceCard) -> String {
         guard let screen = card.screen else {
             return card.mode.displayName
