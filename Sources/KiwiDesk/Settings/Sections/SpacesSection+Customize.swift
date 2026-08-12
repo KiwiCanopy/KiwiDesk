@@ -191,14 +191,23 @@ extension SpacesSection {
         L("spaces.delete_confirm.title", "Delete this Space?")
     }
 
+    /// The two roles are INTERPOLATED from the keys that label
+    /// them on screen rather than re-typed (#818). "Main" was
+    /// never a label at all — the tray header reads "Follows main
+    /// display" — so no locale had an anchor for it, and three
+    /// invented one each. Quoting the label keys means a
+    /// translation of either one moves this sentence with it.
     var deleteConfirmMessage: String {
         L(
             "spaces.delete_confirm.message",
             "This Space has customized settings — its "
                 + "layout overrides, monitor pin, and any "
-                + "Main or Fallback role are removed too. You "
+                + "\u{201C}%1$@\u{201D} or \u{201C}%2$@\u{201D} "
+                + "role are removed too. You "
                 + "can add the Space back, but not its "
-                + "settings."
+                + "settings.",
+            L("monitor_card.follows_main", "Follows main display"),
+            L("spaces.fallback_badge", "Fallback")
         )
     }
 

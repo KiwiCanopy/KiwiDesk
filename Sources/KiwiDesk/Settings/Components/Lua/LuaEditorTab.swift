@@ -151,6 +151,13 @@ struct LuaEditorTab: View {
         .tint(adoptGreen)
     }
 
+    /// The destination is INTERPOLATED from its own title rather
+    /// than re-typed (#818): a sentence that names a pane as
+    /// literal text is a hand-kept mirror, and every locale holds
+    /// the two as independent strings that must agree forever
+    /// with nothing checking that they do — `it` had already
+    /// drifted to «sezione Abbreviazioni» while the pane reads
+    /// "Scorciatoie".
     private var adoptHelpBody: String {
         L(
             "lua_editor.adopt_help.body",
@@ -164,7 +171,8 @@ struct LuaEditorTab: View {
                 + "keybindings are imported; a "
                 + "shortcut that can't be read back "
                 + "stays in the backup — re-add it in "
-                + "the Shortcuts section."
+                + "\u{201C}%1$@\u{201D}.",
+            SettingsDestination.shortcuts.title
         )
     }
 }
