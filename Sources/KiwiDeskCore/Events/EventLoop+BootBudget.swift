@@ -68,6 +68,7 @@ extension EventLoop {
     /// backstop exists to make unnecessary.
     func deferBootWork(pid: pid_t, ref: AppRef, spentMs: Int64) {
         bootScan.deferredApps[pid] = ref
+        bootScan.unresponsiveApps.insert(pid)
         onLog(
             "boot budget: \(ref.bundleID ?? ref.name) deferred "
                 + "after \(spentMs)ms"
@@ -84,6 +85,7 @@ extension EventLoop {
     func takeDeferredBootApps() -> [pid_t: AppRef] {
         let apps = bootScan.deferredApps
         bootScan.deferredApps = [:]
+        bootScan.unresponsiveApps = []
         return apps
     }
 }

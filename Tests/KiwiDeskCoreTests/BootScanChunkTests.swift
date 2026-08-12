@@ -42,6 +42,9 @@ struct BootScanChunkTests {
         var displayPublishes = 0
         /// The fake clock's cursor, advanced on every read.
         var clock = ContinuousClock.now
+        /// Pids whose observer creation fails — the fixture's way
+        /// of making "visited" and "attached" different numbers.
+        var refuses: Set<pid_t> = []
 
         var summaries: Int {
             lines.filter { $0.hasPrefix("startup scan:") }.count
@@ -71,6 +74,10 @@ struct BootScanChunkTests {
         // only clock reads are the chunk's own.
         loop.visiblePIDs = { [] }
         loop.makeObserver = { pid in
+            // A pid the caller marked unattachable answers nil,
+            // exactly as `AXObserverCreate` does for a process
+            // that will not have one.
+            guard !box.refuses.contains(pid) else { return nil }
             box.attached.append(pid)
             return FakeObserver()
         }
@@ -121,6 +128,37 @@ struct BootScanChunkTests {
         #expect(box.attached.count == 5)
         #expect(progress.scanned == 5)
         #expect(progress.total == 5)
+    }
+
+    /// The honest count is apps VISITED of apps running, never
+    /// attached-of-running: on the measured session 51 of 109 ever
+    /// attach, so an attach tally stops at 47% and reads as a
+    /// progress bar that stalled (`BootPhase` carries the
+    /// ruling). Nothing separated the two readings until this
+    /// fixture let an app refuse its observer — every fake
+    /// attached, so both numbers were the same and the ruling was
+    /// unguarded (guard-prover, 2026-08-12).
+    @Test("the count is apps visited, not apps attached")
+    func countsVisitedNotAttached() {
+        let (loop, box) = makeLoop(apps: 4, step: .milliseconds(10))
+        box.refuses = [500_002, 500_003]
+        #expect(loop.beginScan())
+        defer { loop.stop() }
+
+        let progress = loop.scanChunk(budget: nil)
+
+        // Two of the four attached; all four were visited, and
+        // the count the menu row reads reaches its total.
+        #expect(box.attached.count == 2)
+        #expect(progress.scanned == 4)
+        #expect(progress.total == 4)
+        // The summary line keeps BOTH numbers — attaches of
+        // running — which is what a field report is read against.
+        #expect(
+            box.lines.contains {
+                $0.hasPrefix("startup scan: 2 apps attached of 4 ")
+            }
+        )
     }
 
     @Test("progress counts the apps visited so far")

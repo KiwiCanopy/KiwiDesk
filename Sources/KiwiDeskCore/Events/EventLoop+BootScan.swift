@@ -9,6 +9,20 @@ import os
 enum BootScanStep {
     case attach(RunningApp, scanWindows: Bool)
     case reconcile(RunningApp)
+
+    var pid: pid_t {
+        switch self {
+        case .attach(let app, _): app.pid
+        case .reconcile(let app): app.pid
+        }
+    }
+
+    var name: String {
+        switch self {
+        case .attach(let app, _): app.ref.bundleID ?? app.ref.name
+        case .reconcile(let app): app.ref.bundleID ?? app.ref.name
+        }
+    }
 }
 
 /// Which pass is open, so the epilogue below knows whether the
@@ -78,6 +92,14 @@ struct BootScanState {
     /// a pass and must never be cut short — only the boot work
     /// this pass queued trades completeness for latency.
     var stepBudget: Duration?
+    /// Apps a budget already cut short THIS boot. A pass skips
+    /// them outright rather than paying the same blocking call
+    /// again: the measured outlier cost 4004 ms at attach, then
+    /// 5008 ms in the sweep, for one app that answers nothing
+    /// (owner's device log, 2026-08-12). Cleared when the drain
+    /// takes them, so the completion still happens — once, off
+    /// the critical path.
+    var unresponsiveApps: Set<pid_t> = []
     /// Apps a budget cut short, with the ref their completing
     /// reconcile needs. Taken by the epilogue of whichever pass
     /// deferred them — both passes budget, so both drain.
@@ -195,7 +217,7 @@ extension EventLoop {
                 // (`BootSignpost.slowSpanMs`); this logs the app
                 // that made a CHUNK long, budget aborts included.
                 onLog(
-                    "slow chunk: \(name(of: step)) held "
+                    "slow chunk: \(step.name) held "
                         + "\(held.wholeMilliseconds)ms"
                 )
             }
@@ -207,13 +229,6 @@ extension EventLoop {
             total: bootScan.total,
             finished: bootScan.pending.isEmpty
         )
-    }
-
-    private func name(of step: BootScanStep) -> String {
-        switch step {
-        case .attach(let app, _): app.ref.bundleID ?? app.ref.name
-        case .reconcile(let app): app.ref.bundleID ?? app.ref.name
-        }
     }
 
     /// A chunk at or above this held the main actor long enough
@@ -229,6 +244,13 @@ extension EventLoop {
     /// event-driven attach or reconcile that lands between chunks
     /// stays unbudgeted.
     private func perform(_ step: BootScanStep) {
+        // An app this boot already gave up on is not asked again:
+        // its cost is one blocking AX call, which no budget can
+        // interrupt and every later pass would pay in full. The
+        // drain completes it once, unbudgeted.
+        guard !bootScan.unresponsiveApps.contains(step.pid) else {
+            return
+        }
         bootScan.stepBudget = Self.bootAppBudget
         defer { bootScan.stepBudget = nil }
         switch step {

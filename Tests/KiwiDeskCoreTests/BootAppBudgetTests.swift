@@ -41,6 +41,8 @@ struct BootAppBudgetTests {
         /// so one fixture covers a slow app and a fast one.
         var step: Duration = .milliseconds(1)
 
+        var observerInstalls = 0
+
         var deferrals: [String] {
             lines.filter { $0.hasPrefix("boot budget:") }
         }
@@ -62,7 +64,14 @@ struct BootAppBudgetTests {
         loop.registersWorkspaceObservers = false
         loop.applyAXMessagingTimeout = { _ in }
         loop.activationPolicy = { _ in .regular }
-        loop.makeObserver = { _ in FakeObserver() }
+        loop.makeObserver = { _ in
+            // The observer install is itself AX work — this is
+            // where the measured outlier spends its whole cost —
+            // so the fake charges the clock for it.
+            box.observerInstalls += 1
+            _ = box.clock
+            return FakeObserver()
+        }
         loop.readEnhancedUI = { _ in false }
         loop.writeEnhancedUI = { _, _ in }
         loop.writeManualAX = { _, _ in }
@@ -184,6 +193,79 @@ struct BootAppBudgetTests {
         )
         #expect(box.deferrals.isEmpty)
         #expect(loop.takeDeferredBootApps().isEmpty)
+    }
+
+    /// The app that opened #803 owns no normal window, so the
+    /// prefilter says "windowless" and `attach` used to return
+    /// before any budget existed — its 4004 ms was spent
+    /// installing the observer, four AX calls each hitting the
+    /// ~1 s messaging timeout, and NO `boot budget:` line was
+    /// logged for it on the owner's device (2026-08-12). The
+    /// budget therefore opens before the install.
+    @Test("an observer install that blows the budget defers")
+    func theObserverInstallIsBudgeted() {
+        let (loop, box) = makeLoop()
+        box.step = .milliseconds(600)
+        #expect(loop.beginScan())
+        defer { loop.stop() }
+        // Windowless per the prefilter: nothing below the early
+        // return would ever run for these apps.
+        loop.visiblePIDs = { [] }
+
+        loop.scanChunk(budget: nil)
+
+        #expect(box.deferrals.count == 2)
+        // Attached even so — the observer is installed, so the
+        // app's windows still arrive by event. Deferral drops the
+        // WORK, never the event stream.
+        #expect(loop.observes(pid: pids[0]))
+    }
+
+    /// One app's cost is one blocking call, which no budget can
+    /// interrupt — so the same app is not asked again this boot.
+    /// The device log paid it three times: 4004 ms at attach,
+    /// then 5008 ms in the sweep, then again in the
+    /// monitor-change reload.
+    @Test("a deferred app is skipped by later passes this boot")
+    func aDeferredAppIsSkippedLater() {
+        let (loop, box) = makeLoop()
+        box.step = .milliseconds(600)
+        #expect(loop.beginScan())
+        defer { loop.stop() }
+        loop.scanChunk(budget: nil)
+        #expect(box.deferrals.count == 2)
+        let queriesAfterScan = box.windowQueries
+        let installsAfterScan = box.observerInstalls
+
+        // The sweep queues both apps again …
+        #expect(loop.beginSweep())
+        loop.scanChunk(budget: nil)
+
+        // … and touches neither: no window snapshot, no AX at
+        // all, for an app already given up on.
+        #expect(box.windowQueries == queriesAfterScan)
+        #expect(box.observerInstalls == installsAfterScan)
+        // Still owed a completion, and the drain still gets them.
+        #expect(Set(loop.takeDeferredBootApps().keys) == Set(pids))
+    }
+
+    /// The ledger clears with the take, or the NEXT boot's passes
+    /// would skip apps this one gave up on.
+    @Test("taking the deferrals clears the skip list")
+    func takingClearsTheSkipList() {
+        let (loop, box) = makeLoop()
+        box.step = .milliseconds(600)
+        #expect(loop.beginScan())
+        defer { loop.stop() }
+        loop.scanChunk(budget: nil)
+        _ = loop.takeDeferredBootApps()
+        let queriesAfterScan = box.windowQueries
+
+        box.step = .milliseconds(1)
+        #expect(loop.beginSweep())
+        loop.scanChunk(budget: nil)
+
+        #expect(box.windowQueries > queriesAfterScan)
     }
 
     /// The dangerous half of the abort, and the reason the

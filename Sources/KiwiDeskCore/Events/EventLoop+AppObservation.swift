@@ -96,6 +96,15 @@ extension EventLoop {
                 onLog("slow attach: \(name) took \(ms)ms")
             }
         }
+        // Opened BEFORE the observer install, not after: an app
+        // the prefilter calls windowless returns below without
+        // ever reaching the window query, so a budget opened
+        // there sees none of its cost — and the measured outlier
+        // spends all 4004 ms of it right here, in
+        // `AXObserverCreate` plus the notification adds, four
+        // calls each hitting the ~1 s messaging timeout (owner's
+        // device log, 2026-08-12).
+        let budget = openAppBudget()
         guard let observer = makeObserver(pid)
         else { return }
 
@@ -103,6 +112,18 @@ extension EventLoop {
             self?.handle(note, element, pid: pid, app: ref)
         }
         observers[pid] = observer
+        // Attached either way — the observer is installed, so the
+        // app's windows still arrive by event — but it stops
+        // paying for boot work it has already proven it cannot
+        // answer in time.
+        guard !budget.isSpent else {
+            deferBootWork(
+                pid: pid,
+                ref: ref,
+                spentMs: budget.spentMs
+            )
+            return
+        }
 
         // Skip the slow AX window query and warmup when asked
         // (windowless per the prefilter, or a same-turn
@@ -116,7 +137,6 @@ extension EventLoop {
         // serially — so a chunked pass drops what is left of this
         // app's work past its budget and completes it after boot
         // (#803). Inert outside a queued boot step.
-        let budget = openAppBudget()
         let windows = axWindows(pid)
         if activationPolicy == .regular
             || windows.contains(where: Self.isStandardWindow)

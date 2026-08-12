@@ -49,18 +49,44 @@ struct BootPhaseWiringTests {
         "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
     }
 
-    @Test("the scan publishes its first count")
-    func scanPublishesItsFirstCount() throws {
+    /// TWO publications, needled apart (guard-prover,
+    /// 2026-08-12): one regex over the file matched either site,
+    /// so deleting the per-chunk publish alone passed — and that
+    /// is the deletion that matters, since it leaves the phase at
+    /// `scanning(0, N)` until `.ready` with the menu's count row
+    /// and the tour's footer frozen at zero, which is the whole
+    /// of #802's live half.
+    @Test("start publishes the first count")
+    func startPublishesTheFirstCount() throws {
         let text = try source(bootPath)
         let pattern =
-            #"boot\.publish\([\s\S]{0,80}?\.scanning"#
+            #"beginScan\(\)[\s\S]{0,400}?boot\.publish\("#
+            + #"[\s\S]{0,60}?\.scanning"#
         #expect(
             text.range(of: pattern, options: .regularExpression)
                 != nil,
             """
-            KiwiCore+Boot no longer publishes a scanning phase — \
-            the quick menu opens with no status row and the mark \
-            never dims, for the whole boot.
+            start() no longer publishes the opening count — the \
+            quick menu opens with no status row and the mark \
+            never dims until the first chunk lands.
+            """
+        )
+    }
+
+    @Test("each chunk publishes its own count")
+    func eachChunkPublishesItsCount() throws {
+        let text = try source(bootPath)
+        let pattern =
+            #"onChunk:\s*\{[\s\S]{0,200}?boot\.publish\("#
+            + #"[\s\S]{0,120}?progress\.scanned"#
+        #expect(
+            text.range(of: pattern, options: .regularExpression)
+                != nil,
+            """
+            driveBootScan's onChunk no longer publishes the \
+            progress — the count freezes at 0 for the whole boot \
+            while every phase suite stays green (they inject \
+            their own onChunk).
             """
         )
     }

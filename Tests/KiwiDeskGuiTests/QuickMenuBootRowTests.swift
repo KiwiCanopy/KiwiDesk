@@ -124,6 +124,19 @@ struct QuickMenuBootRowTests {
         #expect(ready.items.first?.isSeparatorItem == false)
     }
 
+    /// The stored `isEnabled` is only half the rule: with
+    /// AppKit's auto-enabling on, a row whose action validates is
+    /// re-enabled at DISPLAY time, and no test displays a menu —
+    /// so the greying passes in here and fails on screen
+    /// (guard-prover, 2026-08-12).
+    @Test("the menu stops auto-enabling its rows")
+    func menuDoesNotAutoEnable() {
+        let menu = menu(
+            controller(phase: .scanning(scanned: 2, total: 9))
+        )
+        #expect(!menu.autoenablesItems)
+    }
+
     @Test("Layout and Switch Profile grey while starting")
     func actionsGreyWhileStarting() {
         let starting = menu(
