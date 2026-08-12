@@ -18,22 +18,37 @@ extension PaletteShelf {
 
     // MARK: - Save current
 
-    var canSave: Bool {
-        let name = trimmed(saveName)
+    /// Functions of the TYPED name, not of shelf state (#843):
+    /// the popover owns what it edits, so the rule has to be
+    /// askable about a name the shelf has never seen.
+    func canSave(_ typed: String) -> Bool {
+        let name = trimmed(typed)
         return !name.isEmpty && !store.isBuiltinName(name)
     }
 
     /// "Overwrite" when the name is an existing user palette, else
     /// "Save" — the Finder duplicate-file idiom.
-    var saveLabel: String {
-        store.hasUserPalette(trimmed(saveName))
+    func saveLabel(_ typed: String) -> String {
+        store.hasUserPalette(trimmed(typed))
             ? L("palettes.overwrite", "Overwrite")
             : L("palettes.save", "Save")
     }
 
-    func saveCurrent() {
-        let name = trimmed(saveName)
-        guard canSave else { return }
+    /// The caption under the field, or nil while there is
+    /// nothing to say.
+    func saveNotice(_ typed: String) -> String? {
+        guard store.isBuiltinName(trimmed(typed)) else {
+            return nil
+        }
+        return L(
+            "palettes.reserved",
+            "That name is a built-in palette — choose another."
+        )
+    }
+
+    func saveCurrent(_ typed: String) {
+        let name = trimmed(typed)
+        guard canSave(name) else { return }
         let palette = ColorPalette(
             name: name,
             colors: ColorPaletteKeys.extract(
@@ -41,7 +56,7 @@ extension PaletteShelf {
             )
         )
         try? store.save(palette)
-        savingCurrent = false
+        saveRequest = nil
         reload()
     }
 
@@ -68,28 +83,36 @@ extension PaletteShelf {
     /// A rename is allowed to a non-empty name that isn't a
     /// built-in's and isn't already another user palette's (a
     /// no-op rename to the same name is fine).
-    func canRename(from oldName: String) -> Bool {
-        let name = trimmed(renameDraft)
+    func canRename(_ typed: String, from oldName: String) -> Bool {
+        let name = trimmed(typed)
         guard !name.isEmpty, !store.isBuiltinName(name) else {
             return false
         }
         return name == oldName || !store.hasUserPalette(name)
     }
 
-    /// Drives a per-tile rename popover: on for the tile whose name
-    /// is `renaming`, dismiss clears it.
-    func renameBinding(_ name: String) -> Binding<Bool> {
+    /// Drives a per-tile rename popover: the request is handed
+    /// to the tile whose name it names, so only that tile
+    /// presents — the per-item shape `.popover(item:)` needs,
+    /// and the seed rides the request rather than a shared
+    /// draft (#843).
+    func renameBinding(
+        _ name: String
+    ) -> Binding<NameEditRequest?> {
         Binding(
-            get: { renaming == name },
-            set: { if !$0 { renaming = nil } }
+            get: {
+                renameRequest?.subject == name
+                    ? renameRequest : nil
+            },
+            set: { if $0 == nil { renameRequest = nil } }
         )
     }
 
-    func renamePalette(from oldName: String) {
-        let name = trimmed(renameDraft)
-        guard canRename(from: oldName) else { return }
+    func renamePalette(_ typed: String, from oldName: String) {
+        let name = trimmed(typed)
+        guard canRename(name, from: oldName) else { return }
         try? store.rename(from: oldName, to: name)
-        renaming = nil
+        renameRequest = nil
         reload()
     }
 

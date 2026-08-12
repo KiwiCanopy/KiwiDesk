@@ -24,8 +24,10 @@ struct ProfilesSection: View {
     /// `internal`, not `private`: the rename affordance that
     /// owns this state lives in `ProfilesSection+Rename.swift`
     /// (file ceiling), and `@State` cannot move to an extension.
-    @State var renaming: String?
-    @State var renameDraft = ""
+    /// The rename popover's presentation, carrying the seed it
+    /// opens with (#843) — never a flag plus a separately
+    /// written draft, which the confirm button read as empty.
+    @State var renameRequest: NameEditRequest?
     /// Where the keyboard lands after a row stops existing
     /// (#816). Keyed by profile NAME across both lists — a
     /// profile is either loaded or broken, never in both, so one

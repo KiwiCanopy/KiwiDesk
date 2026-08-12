@@ -1,62 +1,38 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The palette shelf's two popovers: naming a palette on save and
-/// renaming one afterwards (#375).
+/// The palette shelf's two name popovers, both built on the
+/// shared `NameEditPopover`, which OWNS the name it edits (#843).
 ///
-/// Split from `PaletteShelf.swift` when the card chrome pushed it
-/// past §2.1's size band. They belong together and apart from the
-/// grid: both are a text field plus a confirm button over the
-/// same name rules (`canSave` / `canRename` in
-/// `PaletteShelf+Actions.swift`), and neither draws a tile.
+/// Each is presented by ITEM, so the seed travels to the builder
+/// instead of being read back out of shelf state written one tick
+/// earlier — which is what left Save disabled over a valid name
+/// on the first open of every visit.
 extension PaletteShelf {
-    var savePopover: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            TextField(
-                L("palettes.name_placeholder", "Palette name"),
-                text: $saveName
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 220)
-            .onSubmit(saveCurrent)
-            if store.isBuiltinName(trimmed(saveName)) {
-                Text(
-                    L(
-                        "palettes.reserved",
-                        "That name is a built-in palette — "
-                            + "choose another."
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink3)
-            }
-            HStack {
-                Spacer()
-                Button(saveLabel, action: saveCurrent)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canSave)
-            }
+    func savePopover(_ request: NameEditRequest) -> some View {
+        NameEditPopover(
+            seed: request.seed,
+            confirmLabel: saveLabel,
+            isValid: canSave,
+            notice: saveNotice
+        ) { name in
+            saveCurrent(name)
         }
-        .padding(12)
     }
 
     func renamePopover(
-        _ palette: ColorPalette
+        _ request: NameEditRequest
     ) -> some View {
-        HStack {
-            TextField(
-                L("palettes.name_placeholder", "Palette name"),
-                text: $renameDraft
-            )
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 160)
-            .onSubmit { renamePalette(from: palette.name) }
-            Button(L("palettes.rename_confirm", "Rename")) {
-                renamePalette(from: palette.name)
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(!canRename(from: palette.name))
+        let old = request.subject ?? request.seed
+        return NameEditPopover(
+            seed: request.seed,
+            width: 160,
+            confirmLabel: { _ in
+                L("palettes.rename_confirm", "Rename")
+            },
+            isValid: { canRename($0, from: old) }
+        ) { name in
+            renamePalette(name, from: old)
         }
-        .padding(10)
     }
 }
