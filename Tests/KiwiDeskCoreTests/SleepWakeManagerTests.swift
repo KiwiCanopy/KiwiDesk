@@ -166,19 +166,35 @@ struct WakeFingerprintWiringTests {
 /// log says the seam was never connected, so the next captured
 /// cycle would be decided by a fact nobody measured.
 ///
-/// Asserts the seam is no longer the inert default rather than
-/// asserting a host value: a runner with no console session is
-/// entitled to answer either way, and pinning what macOS says
-/// would make this suite depend on where it runs.
+/// Two things it deliberately does NOT do.
+///
+/// It does not assert a host value: what macOS reports depends on
+/// where the suite runs, and a runner with no console session is
+/// entitled to answer `nil` on every axis — which is the inert
+/// default, making the seam unobservable there. So the runtime
+/// half only runs where the host distinguishes the two, and is
+/// skipped rather than guessed elsewhere (`ci-host-screen`
+/// class).
+///
+/// And it cannot see a seam FROZEN at bootstrap — a captured
+/// `.live()` reads identically here and reports the session as it
+/// was before any lock. `BootDeferralWiringTests` needles the
+/// closure body for that; this suite proves the seam is connected
+/// at all, which a source needle cannot.
 @Suite("WakeSessionPresenceWiringTests")
 @MainActor
 struct WakeSessionPresenceWiringTests {
     @Test("Bootstrap wires the seam to the live session read")
-    func seamIsNotTheInertDefault() {
-        let core = makeTestCore()
-        let wired = core.sleepWake.sessionPresence()
+    func seamIsNotTheInertDefault() throws {
         let inert = SessionPresence(session: nil)
-        #expect(wired != inert)
-        #expect(wired == SessionPresence.live())
+        try #require(
+            SessionPresence.live() != inert,
+            """
+            This host reports no session at all, so a wired seam \
+            and an unwired one are indistinguishable here.
+            """
+        )
+        let core = makeTestCore()
+        #expect(core.sleepWake.sessionPresence() != inert)
     }
 }
