@@ -26,11 +26,13 @@ import Testing
 ///   line.
 /// - **Await `pendingReplay`, never poll.** The green above was
 ///   bought at the full 30 s hang guard, which is the same
-///   starvation #791 turned out to be.
+///   starvation #791 turned out to be — argued on that accessor.
 ///
-/// The session read is faked throughout (tests.md — a production
-/// default that grabs live host state gets an injected fake), so
-/// no run here touches `CGSessionCopyCurrentDictionary`.
+/// The session seam is assigned here because these tests assert
+/// on its VALUE, not to avoid a host read — it is inert until
+/// `KiwiCore+Bootstrap` wires it, and
+/// `WakeSessionPresenceWiringTests` is what keeps that wiring
+/// honest.
 @Suite("Wake restore diagnostics (#835)")
 @MainActor
 struct SleepWakeDiagnosticsTests {

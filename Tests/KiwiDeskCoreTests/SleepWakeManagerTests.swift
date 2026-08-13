@@ -15,17 +15,16 @@ private final class DisplayFingerprintState {
 
 /// The wake/unlock preserve-and-replay cycle, and its display
 /// topology gate (#633). The rest/return pair is driven directly
-/// — never through the real workspace notification centers — and
-/// the session read is faked, so no test here touches the host.
+/// — never through the real workspace notification centers.
 ///
 /// The replay is AWAITED through `pendingReplay`, never polled
-/// for its effect (#791). The 30 s hang-guard poll this replaces
-/// was not generous enough to be a hang guard: under a full
-/// concurrent run one 10 ms `Task.sleep` resumption measured
-/// 65 s, after which the loop exited on a stale deadline and the
-/// result came down to which continuation drained first. That is
-/// what "the suite fails while KiwiDesk is running" actually was
-/// — CPU contention, never shared state.
+/// for its effect — that accessor's doc carries why (#791), and
+/// the short of it is that the 30 s poll this replaces measured
+/// wall clock, which starvation outlives.
+///
+/// The session seam is left at its inert default here: none of
+/// these tests asserts on it, and unassigned it reports
+/// "unknown" rather than reaching the host.
 @Suite("SleepWakeManager")
 @MainActor
 struct SleepWakeManagerTests {
@@ -47,27 +46,18 @@ struct SleepWakeManagerTests {
         )
     }
 
-    /// No live session read in a suite (tests.md): the presence
-    /// seam defaults to the host dictionary.
-    private func quietSession(_ manager: SleepWakeManager) {
-        manager.sessionPresence = {
-            SessionPresence(onConsole: true, screenLocked: false)
-        }
-    }
-
     @Test("Wake replays the snapshot when displays are stable")
     func stableTopologyRestores() async {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
-        quietSession(manager)
         let saved = sample()
         manager.captureState = { saved }
         manager.displayFingerprints = { ["main", "side"] }
         var restored: StateSnapshot?
         manager.restoreState = { restored = $0 }
-        manager.systemWillRest()
-        manager.systemDidReturn()
+        manager.systemWillRest(.direct)
+        manager.systemDidReturn(.direct)
         await manager.pendingReplay?.value
         #expect(restored == saved)
     }
@@ -76,7 +66,6 @@ struct SleepWakeManagerTests {
     func changedTopologySkips() async {
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
-        quietSession(manager)
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
@@ -84,10 +73,10 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         // The side monitor was unplugged while asleep.
         displays.values = ["main"]
-        manager.systemDidReturn()
+        manager.systemDidReturn(.direct)
         await manager.pendingReplay?.value
         #expect(!restored)
         #expect(
@@ -102,15 +91,14 @@ struct SleepWakeManagerTests {
         let manager = SleepWakeManager()
         manager.onLog = { _ in }
         manager.restoreDelayMS = 0
-        quietSession(manager)
         manager.captureState = { self.sample() }
         let displays = DisplayFingerprintState(["main", "side"])
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         displays.values = ["side", "main"]
-        manager.systemDidReturn()
+        manager.systemDidReturn(.direct)
         await manager.pendingReplay?.value
         #expect(restored)
     }
@@ -122,7 +110,6 @@ struct SleepWakeManagerTests {
         // the loss of one; the multiset must not.
         let manager = SleepWakeManager()
         manager.restoreDelayMS = 0
-        quietSession(manager)
         var logged: [String] = []
         manager.onLog = { logged.append($0) }
         manager.captureState = { self.sample() }
@@ -130,9 +117,9 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         displays.values = ["twin"]
-        manager.systemDidReturn()
+        manager.systemDidReturn(.direct)
         await manager.pendingReplay?.value
         #expect(!restored)
         // The explicit skip line, so a return leg that regresses
@@ -170,5 +157,28 @@ struct WakeFingerprintWiringTests {
         #expect(
             core.sleepWake.displayFingerprints() == expected
         )
+    }
+}
+
+/// The same probe for the session seam (#835). Unwired it reports
+/// "unknown" on every axis forever, which reads as a plausible
+/// diagnostic line rather than as a broken one — nothing in the
+/// log says the seam was never connected, so the next captured
+/// cycle would be decided by a fact nobody measured.
+///
+/// Asserts the seam is no longer the inert default rather than
+/// asserting a host value: a runner with no console session is
+/// entitled to answer either way, and pinning what macOS says
+/// would make this suite depend on where it runs.
+@Suite("WakeSessionPresenceWiringTests")
+@MainActor
+struct WakeSessionPresenceWiringTests {
+    @Test("Bootstrap wires the seam to the live session read")
+    func seamIsNotTheInertDefault() {
+        let core = makeTestCore()
+        let wired = core.sleepWake.sessionPresence()
+        let inert = SessionPresence(session: nil)
+        #expect(wired != inert)
+        #expect(wired == SessionPresence.live())
     }
 }

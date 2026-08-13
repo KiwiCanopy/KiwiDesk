@@ -48,22 +48,23 @@ public final class SleepWakeManager {
     /// What macOS says about the login session, read where the
     /// replay decides.
     ///
-    /// **Diagnostic only — nothing branches on it (#835.)** A
-    /// lock → lid → unlock cycle produces two rest events and two
-    /// return events, and the open question is whether the replay
-    /// fires while the screen is still locked, leaving the unlock
-    /// leg with nothing to replay. No failing cycle has been
-    /// captured with logging on, so this ships the observation
-    /// and not the fix: a predicate chosen before that capture is
-    /// a guess with tests around it. It records BOTH facts
-    /// because the fix's obvious predicate is the wrong one —
-    /// `kCGSessionOnConsoleKey` reports fast user switching, not
-    /// the lock, and `SessionPresence` carries the measurement.
+    /// **Diagnostic only — nothing branches on it (#835).** The
+    /// mechanism it exists to settle, and why BOTH of its facts
+    /// are recorded rather than the one the issue proposed, are
+    /// argued once on `SessionPresence`.
     ///
-    /// Live by default, like every other host read here; a suite
-    /// that wants a quiet, deterministic session assigns its own.
+    /// Inert by default and wired in `KiwiCore+Bootstrap`, like
+    /// the three seams above it — never live-by-default. An
+    /// unwired live read would reach the host from every suite
+    /// that drives a return leg, which is a residue `tests.md`
+    /// does not carry; the inert default reports "unknown" on
+    /// every axis, which is an honest thing for a diagnostic to
+    /// say and a useless thing to ship, so the wiring is probed
+    /// on a live core by `WakeSessionPresenceWiringTests` — the
+    /// `displayFingerprints` precedent, and the same shipped-
+    /// inert-seam class the log-seam guards exist for.
     public var sessionPresence: @MainActor () -> SessionPresence =
-        { .live() }
+        { SessionPresence(session: nil) }
 
     private var snapshot: StateSnapshot?
     /// Sorted at capture; see `displayFingerprints`.
@@ -82,8 +83,12 @@ public final class SleepWakeManager {
     /// could not say.
     enum Leg: String {
         case sleep, wake, lock, unlock
-        /// Driven with no notification behind it: the tests, and
-        /// the one value production never logs.
+        /// Driven with no notification behind it — the tests.
+        /// A production trigger added later takes a case of its
+        /// own rather than this one: an anonymous leg in the log
+        /// is the exact evidence gap `Leg` exists to close, and
+        /// the parameter carries no default so the choice cannot
+        /// be made by omission.
         case direct
 
         /// Whether this leg captures (a rest) or replays (a
@@ -148,20 +153,31 @@ public final class SleepWakeManager {
     /// snapshot's one consumer is the return leg above.
     var holdsSnapshot: Bool { snapshot != nil }
 
-    /// The in-flight replay, for a test to await instead of
-    /// polling for its effect (#791).
+    /// The most recently ARMED replay, for a test to await
+    /// instead of polling for its effect.
     ///
-    /// The poll this replaces bounded a 30 s WALL-CLOCK deadline,
-    /// and wall clock is the wrong instrument: swift-testing runs
-    /// suites concurrently, so under a full run the shared main
-    /// actor is starved and one 10 ms `Task.sleep` resumption was
-    /// measured at 65 s. Past the deadline the loop exits without
-    /// giving the replay's continuation a turn, so whether the
-    /// suite passed came down to which continuation drained
-    /// first — which is why the reported failure hit three tests
-    /// of four rather than all of them. Awaiting the task itself
-    /// has no deadline to outlive; it is also the pattern the
-    /// deferred-task suites already use (`task(for:)?.value`).
+    /// This is the one authority for why polling was wrong here;
+    /// `tests.md` ▸ "Async tests" and the two wake suites cite it
+    /// rather than restating the measurement. The poll it
+    /// replaces bounded a 30 s WALL-CLOCK deadline, and wall
+    /// clock is the wrong instrument: swift-testing runs suites
+    /// concurrently, so under a full run the shared main actor is
+    /// starved and one 10 ms `Task.sleep` resumption measured
+    /// 65 s. Past the deadline the loop exits without giving the
+    /// replay's continuation a turn, so the result came down to
+    /// which continuation drained first — which is why the
+    /// reported failure hit three tests of four rather than all
+    /// four, and why it looked like shared state with the running
+    /// app when it was CPU contention (#791).
+    ///
+    /// **Not an in-flight predicate.** The task is not cleared
+    /// when its body finishes, so a non-nil value means "one was
+    /// armed since the last `stop()` / `dropHeldSnapshot()`", and
+    /// awaiting after a return leg that early-returned awaits the
+    /// PREVIOUS cycle's finished task — vacuously. `holdsSnapshot`
+    /// is the in-flight question. It is left uncleared
+    /// deliberately: clearing from inside the task would race a
+    /// newer arm into dropping it.
     ///
     /// Production must not read it: the replay's one consumer is
     /// the return leg that armed it.
@@ -193,7 +209,7 @@ public final class SleepWakeManager {
     /// Internal, not private: the notification observers above
     /// are the production trigger, and tests drive the pair
     /// directly instead of posting to the shared centers.
-    func systemWillRest(_ leg: Leg = .direct) {
+    func systemWillRest(_ leg: Leg) {
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil
@@ -207,7 +223,7 @@ public final class SleepWakeManager {
         )
     }
 
-    func systemDidReturn(_ leg: Leg = .direct) {
+    func systemDidReturn(_ leg: Leg) {
         guard isEnabled else { return }
         // The silent arm the #835 log could not distinguish from
         // a healthy cycle: if the wake leg's replay has already

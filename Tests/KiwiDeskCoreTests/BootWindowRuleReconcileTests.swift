@@ -98,12 +98,24 @@ struct BootWindowRuleReconcileTests {
     /// GUI-managed here (the scratch directory holds no
     /// `gui.json`), so it goes straight to the window-rule write
     /// under test rather than returning early on the sidecar.
-    private func reapplyRules(_ core: KiwiCore) {
+    ///
+    /// `float` names a float rule the profile adds, and every
+    /// caller that wants the reconcile passes a DIFFERENT one:
+    /// the write returns before the gate when the rules resolve
+    /// to what is already installed, so a fixture re-applying the
+    /// same rules exercises the equality skip and never reaches
+    /// the deferral it meant to test.
+    private func reapplyRules(
+        _ core: KiwiCore,
+        float: String? = nil
+    ) {
         #expect(!core.isGuiManaged)
         core.reapplyStructuredOverrides(
             profileModes: nil,
             profileAppRules: nil,
-            profileFloatRules: nil,
+            profileFloatRules: float.map {
+                RuleListOverride(rules: [$0: true])
+            },
             profileIgnoreRules: nil
         )
     }
@@ -112,9 +124,8 @@ struct BootWindowRuleReconcileTests {
     func rulesReconcileWhenBootHasFinished() {
         let (core, box) = makeScannedCore()
         defer { core.eventLoop.stop() }
-        core.boot.publish(.ready)
         let before = box.windowQueries
-        reapplyRules(core)
+        reapplyRules(core, float: "com.test.floater")
         // The window snapshot is the reconcile's own AX call, and
         // nothing else on this path takes one.
         #expect(box.windowQueries > before)
@@ -124,9 +135,35 @@ struct BootWindowRuleReconcileTests {
     func rulesDoNotReconcileDuringTheBootScan() {
         let (core, box) = makeScannedCore()
         defer { core.eventLoop.stop() }
-        core.boot.publish(.scanning(scanned: 0, total: 1))
+        core.defersWindowRuleReconcileToSweep = true
         let before = box.windowQueries
-        reapplyRules(core)
+        reapplyRules(core, float: "com.test.floater")
+        #expect(box.windowQueries == before)
+    }
+
+    /// The PRIMARY mechanism, and the reason the deferral above
+    /// is rarely reached: `reconcileAll` here exists to
+    /// re-classify windows against rules that CHANGED, so an
+    /// apply resolving to the rules already installed has nothing
+    /// to do. The boot case #836 measured is mostly this one — a
+    /// profile re-applied over the families `loadConfig` just
+    /// installed — and it now costs nothing rather than being
+    /// postponed, which is what keeps the deferral's re-
+    /// classification residue off the ordinary boot.
+    ///
+    /// Asserted with boot FINISHED, so a green cannot be bought
+    /// by the deferral: the only thing standing between this
+    /// fixture and a reconcile is the equality check.
+    @Test("re-applying the same rules reconciles nothing")
+    func unchangedRulesReconcileNothing() {
+        let (core, box) = makeScannedCore()
+        defer { core.eventLoop.stop() }
+        // Install the rule once, so the second apply is the
+        // no-change case rather than the first-write case.
+        reapplyRules(core, float: "com.test.floater")
+        let before = box.windowQueries
+        #expect(before > 0)
+        reapplyRules(core, float: "com.test.floater")
         #expect(box.windowQueries == before)
     }
 
@@ -138,10 +175,9 @@ struct BootWindowRuleReconcileTests {
     func configDeferralStillSuppresses() {
         let (core, box) = makeScannedCore()
         defer { core.eventLoop.stop() }
-        core.boot.publish(.ready)
         core.defersWindowRuleReconcile = true
         let before = box.windowQueries
-        reapplyRules(core)
+        reapplyRules(core, float: "com.test.floater")
         #expect(box.windowQueries == before)
     }
 }

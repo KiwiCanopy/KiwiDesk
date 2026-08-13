@@ -58,6 +58,15 @@ public final class KiwiCore {
     /// reconciles and run one pass after the final profile wins.
     var defersWindowRuleReconcile = false
 
+    /// Boot's half of the same suppression (#836). **Raised in
+    /// `start()`, lowered where the startup sweep is armed** —
+    /// one pair, because the skip is valid exactly while nothing
+    /// has yet armed the pass that heals it. Every exit from
+    /// `start()` lowers it, `stop()` included. What it buys, what
+    /// it costs, and why it is not keyed on `BootPhase` are
+    /// argued at its one reader, `mayReconcileWindowRulesNow`.
+    var defersWindowRuleReconcileToSweep = false
+
     /// The boot scan and the startup sweep surface N windows in
     /// one burst, and each `.windowCreated` would run a full
     /// retile + bars + borders + clamp — N passes for one
@@ -325,26 +334,16 @@ public final class KiwiCore {
         configDirectory: URL? = nil,
         hotkeyRegistrar: HotkeyRegistrar = CarbonHotkeyCenter()
     ) {
-        let directory =
+        // The helpers live in `KiwiCore+Init`; a designated
+        // initializer cannot.
+        let directory = Self.resolveConfigDirectory(
             configDirectory
-            ?? FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".config/KiwiDesk")
+        )
         self.configDirectory = directory
-        self.keys = KeybindingManager(
-            registrar: hotkeyRegistrar
-        )
-        self.socket = SocketServer(
-            path:
-                directory
-                .appendingPathComponent("KiwiDesk.sock").path
-        )
-        self.profiles = ProfileManager(
-            directory: directory.appendingPathComponent(
-                "profiles"
-            )
-        )
+        self.keys = KeybindingManager(registrar: hotkeyRegistrar)
+        self.socket = Self.makeSocketServer(in: directory)
+        self.profiles = Self.makeProfileManager(in: directory)
         self.crash = CrashRecovery(directory: directory)
-
         bootstrapCoreServices()
     }
 }

@@ -80,6 +80,7 @@ extension KiwiCore {
         // discovered window (#672): windows fold into state as
         // the events arrive, geometry lands once in the tail.
         defersEventRetiles = true
+        defersWindowRuleReconcileToSweep = true
         guard eventLoop.beginScan() else {
             // Unreachable today — `startManaging()` runs at launch
             // or on a false→true permission transition, and a
@@ -87,6 +88,7 @@ extension KiwiCore {
             // count if it ever is reached: no tail, no phase, and
             // an open `boot` span. Say so and close the span.
             defersEventRetiles = false
+            defersWindowRuleReconcileToSweep = false
             onLog("boot: refused — the event loop is running")
             closeBootInterval()
             return
@@ -186,6 +188,10 @@ extension KiwiCore {
             onLog("socket server failed: \(error)")
         }
         scheduleStartupSweep()
+        // Paired with the arm above, never with a phase: the
+        // window-rule skip is valid exactly while nothing has
+        // armed the pass that heals it (#836).
+        defersWindowRuleReconcileToSweep = false
         scheduleAdoptionHeal()
         drainDeferredBootApps()
         closeBootInterval()

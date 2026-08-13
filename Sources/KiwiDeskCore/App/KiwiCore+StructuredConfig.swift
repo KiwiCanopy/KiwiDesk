@@ -146,6 +146,9 @@ extension KiwiCore {
         floatRules: RuleListOverride?,
         ignoreRules: RuleListOverride?
     ) {
+        let previousAppRules = state.appRules
+        let previousFloat = eventLoop.floatRules
+        let previousIgnore = eventLoop.ignoreRules
         setResolvedAppRules(
             base: globalAppRuleBase,
             override: appRules
@@ -162,60 +165,92 @@ extension KiwiCore {
             ) ?? globalIgnoreRuleBase
         eventLoop.floatRules = FloatRules(resolvedFloat)
         eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)
+        // Nothing to re-check when nothing moved. `reconcileAll`
+        // exists here to re-classify every window against rules
+        // that CHANGED — a float verdict is stored per window at
+        // reconcile time (`recheckFloat`), not read live at
+        // retile — so an apply that resolves to the rules already
+        // installed has no work to do, boot or not.
+        //
+        // This is what makes the deferral below cheap in
+        // practice: the boot case that #836 measured re-applies a
+        // profile whose rule families usually resolve identically
+        // to the ones `loadConfig` just installed, and that path
+        // now costs nothing rather than being postponed.
+        let unchanged =
+            state.appRules == previousAppRules
+            && eventLoop.floatRules == previousFloat
+            && eventLoop.ignoreRules == previousIgnore
+        guard !unchanged else { return }
         if mayReconcileWindowRulesNow {
             eventLoop.reconcileAll()
         }
     }
 
-    /// Whether a window-rule write may re-check every app from
+    /// Whether a window-rule change may re-check every app from
     /// this call site, or must leave that to a pass that already
-    /// will.
+    /// will. Only reached when the rules actually changed — the
+    /// caller returns first otherwise.
     ///
     /// `reconcileAll` is unchunked and unbudgeted on purpose —
     /// the per-app budget is raised for a queued STEP and never
     /// for a pass, so an OS- or config-driven reconcile is never
     /// cut short (accessibility.md). That makes it the wrong
-    /// thing to run twice, and boot ran it twice: the chunked
-    /// scan's epilogue publishes displays from inside
-    /// `scanChunk`, the monitor-change handler loads the matching
-    /// profile, and that profile's window rules land here — a
-    /// second full pass over every app, still inside the boot
-    /// phase and billed to the boot summary's `scan` figure. One
-    /// AX-unresponsive helper was therefore paid for twice: a
-    /// 10.3 s `scan` figure against a 4.9 s scan (#836).
-    ///
-    /// Two callers skip it, and neither loses the re-check:
+    /// thing to run twice, and boot ran it twice (#836); the two
+    /// flags below are each a caller saying "not from here".
     ///
     /// - `defersWindowRuleReconcile` — `loadConfig` writes the
     ///   rules several times over and runs one pass itself
     ///   afterwards.
-    /// - **the boot scan is still open** — `finishBoot` schedules
-    ///   the startup sweep, which mirrors `reconcileAll`'s two
-    ///   loops per app, chunked and budgeted
-    ///   (`EventLoop.beginSweep`), against these very rules, one
-    ///   second later. That is the dependency this skip rests on,
-    ///   so it is pinned rather than promised here:
-    ///   `StartupSweepTests` pins the sweep doing the work and
-    ///   `StartupSweepWiringTests` pins the boot tail still
-    ///   scheduling it.
+    /// - `defersWindowRuleReconcileToSweep` — boot. It is a flag
+    ///   raised in `start()` and lowered beside the sweep's arm,
+    ///   NOT a read of `BootPhase`: the phase is a readiness
+    ///   signal for the menu and the tour, under the opposite
+    ///   pressure (narration wants `.ready` as early as honest,
+    ///   this wants it no earlier than the tail), so keying on it
+    ///   would let a later "brighten the mark once the first
+    ///   arrangement lands" change silently re-open the defect
+    ///   (architect review, 2026-08-13). What heals it is TWO
+    ///   passes, not one. The startup sweep mirrors
+    ///   `reconcileAll`'s two loops per app chunked and budgeted
+    ///   (`EventLoop.beginSweep`), and `drainDeferredBootApps`
+    ///   covers what the sweep cannot: `perform` skips an app on
+    ///   `bootScan.unresponsiveApps` outright, which is exactly
+    ///   the AX-unresponsive helper #836 measured. Naming only
+    ///   the sweep would leave that app's re-check promised by
+    ///   nothing. `StartupSweepTests` and `StartupSweepWiringTests`
+    ///   pin the sweep and its arming; `BootPhaseTests` drives the
+    ///   drain.
     ///
-    /// What the delay costs, stated because it is not obvious
-    /// from here: the skipped pass would have run BEFORE
-    /// `finishBoot`'s session restore, so a window it alone would
-    /// have discovered is now absent when `restore` runs. That is
-    /// already safe rather than newly safe — `StateCoordinator`'s
-    /// `adopt` files a snapshot window it cannot see yet through
-    /// `remember(_:in:)`, so the window returns to its space when
-    /// the sweep surfaces it. The residue is the same one
-    /// `docs/accepted-limitations.md` already accepts for the
-    /// windowless-app warmup skip, and it lands in the same band.
+    /// **What the deferral costs.** Not only late discovery — the
+    /// skipped pass also re-CLASSIFIES windows already tracked,
+    /// since `recheckFloat` stores a float verdict per window at
+    /// reconcile time rather than reading the rules at retile. So
+    /// where a boot-time profile load genuinely changes a rule
+    /// family, `finishBoot`'s retile and session restore run
+    /// under the previous verdicts and the desk re-settles when
+    /// the healing pass lands, after the mark says ready. Late
+    /// discovery is the milder half but not free either: `adopt`
+    /// files an unseen snapshot window through `remember(_:in:)`,
+    /// which returns it to its SPACE and not to its slot — and
+    /// the array order is the layout order, which is what
+    /// `restore` exists for. Both are the residue
+    /// `docs/accepted-limitations.md` carries a row for.
+    ///
+    /// That cost is why the caller's equality check is the
+    /// primary mechanism rather than a micro-optimisation: it
+    /// keeps this path untaken in the ordinary boot, where the
+    /// re-applied profile resolves to the rules already
+    /// installed, leaving the deferral to the case that genuinely
+    /// changes them.
     ///
     /// Deliberately NOT widened to "any open pass". The startup
     /// sweep publishes no displays, so a monitor change arriving
     /// during one is a change the user just made, with no later
     /// pass behind it to heal a skip.
     private var mayReconcileWindowRulesNow: Bool {
-        !defersWindowRuleReconcile && !boot.phase.isStarting
+        !defersWindowRuleReconcile
+            && !defersWindowRuleReconcileToSweep
     }
 
     /// The one write of the resolved app-rule tier — shared by

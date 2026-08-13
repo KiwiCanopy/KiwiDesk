@@ -77,11 +77,16 @@ public struct SessionPresence: Sendable, Equatable {
 
     /// One log-ready clause, e.g. `screen locked, on console`.
     ///
+    /// Internal: a pre-rendered English clause on a public Core
+    /// type is what a GUI would reach for, and rendering a Core
+    /// sentence in the GUI is the one thing core-boundaries.md
+    /// ▸ #96 bans. Its only consumer is `onLog`.
+    ///
     /// Says "lock not reported" rather than "unlocked" on the
     /// `nil` case on purpose: on this machine the two are the
     /// same observation, and writing "unlocked" would hand the
     /// next reader a conclusion the read did not make.
-    public var summary: String {
+    var summary: String {
         let lock: String
         switch screenLocked {
         case .some(true): lock = "screen locked"

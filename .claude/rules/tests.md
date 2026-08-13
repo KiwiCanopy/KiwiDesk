@@ -307,16 +307,21 @@ only when there is nothing to await — a real subprocess
 (`ExecTests`), a `DisplayLink` callback (`DragCoordinatorTests`).
 When a `Task` or a `DeferredTasks` slot exists, take it:
 `await core.deferred.task(for: .startupSweep)?.value`,
-`await manager.pendingReplay?.value`. Exposing one for a test is
-cheap and needs saying so — both of those carry a doc comment
-barring production from reading them.
+`await manager.pendingReplay?.value`. **Expose such a handle with
+a doc comment barring production from reading it, and say what it
+does NOT mean.** `pendingReplay` is not an in-flight predicate —
+the task is never cleared — so awaiting it after a leg that
+early-returned awaits the *previous* cycle's finished task and
+asserts nothing. A handle whose staleness goes undocumented is a
+vacuous await waiting to be written.
 
 The tell that a suite is on the wrong side of this: a green that
 takes the *whole* hang guard. `SleepWakeManagerTests` was
 reported as failing only while KiwiDesk itself ran, which read as
 shared state and was not — it was CPU contention against that
 deadline, and no amount of injection-seam hardening would have
-touched it.
+touched it. The measurement behind that is argued once, on
+`SleepWakeManager.pendingReplay`; do not copy it here.
 
 ## Running the suite
 
