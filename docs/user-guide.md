@@ -933,6 +933,13 @@ many of that layout's fields the space overrides, and a
 none). The editor edits the layout the space currently uses; to
 tune a different layout, switch the space to it in the list first.
 
+Where a field is greyed because a switch on **another** page
+turned it off — Grid's auto-size, Track's auto limit — the reason
+appears under the dimmed rows as a sentence you can follow, with
+**Layout Defaults** linked. Those two switches have no per-Space
+row, so the sentence names where to go rather than leaving you to
+find it.
+
 Each field row carries an **Override** checkbox in the trailing
 column. Unchecked (the default) inherits the Layout Defaults value,
 and the row collapses to a quiet **follows `<Layout>` defaults ·

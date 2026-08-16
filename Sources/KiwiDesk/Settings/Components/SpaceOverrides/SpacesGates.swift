@@ -138,15 +138,65 @@ enum SpacesGateHelp {
         case .autoSizedGrid:
             return L(
                 "scroll_grid.auto_size.gates",
-                "Auto-size grid is on for this Space, so the "
-                    + "screen decides the columns and rows."
+                "Auto-size grid is on, so the screen decides the "
+                    + "columns and rows."
             )
         case .autoTracks:
             return L(
                 "track.auto_tracks.gates",
-                "Auto track limit is on for this Space, so "
-                    + "the screen decides how many open."
+                "Auto track limit is on, so the screen decides "
+                    + "how many tracks open."
             )
+        }
+    }
+
+    /// The REMOTE reasons — the ones whose switch lives on
+    /// another destination (#841).
+    ///
+    /// `GateReasonPlacement` classifies these three rows
+    /// `.remote`: their gating field has no row in the per-space
+    /// editor, so unlike every inline grey here the reader
+    /// cannot look up and find the switch. Both `.help()` and a
+    /// dim are then dead ends — a keyboard or VoiceOver user got
+    /// "dimmed" and nothing else, which is #815's complaint in
+    /// the one class #815 did not close.
+    ///
+    /// Data rather than a condition at the call site, so the
+    /// classification and the anchor cannot disagree:
+    /// `GateReasonPlacementTests` reads this set.
+    static let remote: Set<SpacesGates.InertReason> = [
+        .autoSizedGrid, .autoTracks,
+    ]
+
+    /// The sentence a `CrossReferenceRow` renders for a remote
+    /// reason, carrying the link slot where the destination's
+    /// name belongs.
+    ///
+    /// It names WHERE TO GO, which is the whole of the remote
+    /// rule — a sentence that only restates the state leaves the
+    /// reader knowing why and not knowing where. And it is a
+    /// live link rather than `Text`, or the pointer is dead
+    /// (`docs/ui-patterns.md`).
+    static func crossReference(
+        for reason: SpacesGates.InertReason
+    ) -> String? {
+        switch reason {
+        case .autoSizedGrid:
+            return L(
+                "scroll_grid.auto_size.xref",
+                "Auto-size grid is on, so the screen decides the "
+                    + "columns and rows — change it in %1$@.",
+                CrossReferenceRow.linkSlot
+            )
+        case .autoTracks:
+            return L(
+                "track.auto_tracks.xref",
+                "Auto track limit is on, so the screen decides "
+                    + "how many tracks open — change it in %1$@.",
+                CrossReferenceRow.linkSlot
+            )
+        default:
+            return nil
         }
     }
 }

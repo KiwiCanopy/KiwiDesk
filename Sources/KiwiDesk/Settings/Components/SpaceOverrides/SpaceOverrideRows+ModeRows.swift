@@ -104,6 +104,14 @@ extension SpaceOverrideRows {
                 ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
+        // The remote gate's live anchor (#841). OUTSIDE the
+        // `GreyOut` on purpose: it is the one thing on this
+        // surface that must stay clickable while the rows above
+        // it are inert, and a pointer inside the dimmed subtree
+        // is exactly the dead end the rule names.
+        remoteGateReference(
+            for: .layout(.gridOverrideColumns)
+        )
     }
 
     @ViewBuilder
@@ -173,6 +181,9 @@ extension SpaceOverrideRows {
                 ).map(SpacesGateHelp.sentence) ?? ""
             )
         )
+        // The remote gate's live anchor (#841) — see the twin on
+        // the grid rows for why it sits outside the `GreyOut`.
+        remoteGateReference(for: .layout(.trackOverrideLimit))
         OverridePickerRow(
             label: L("layout_params.overflow", "Overflow"),
             value: binding(
@@ -198,5 +209,50 @@ extension SpaceOverrideRows {
                 ),
             ]
         )
+    }
+}
+
+extension SpaceOverrideRows {
+    /// The live pointer a REMOTE gate owes (#841).
+    ///
+    /// `GateReasonPlacement` classifies three rows here `.remote`
+    /// — their gating switch has no row in this editor, so the
+    /// reader cannot look up and find it. `docs/ui-patterns.md`
+    /// rules that such a gate takes a live anchor whose sentence
+    /// **names the destination to go to**, and that if the
+    /// sentence names one it must be a `CrossReferenceRow`
+    /// rather than a `Text`, or the pointer is dead.
+    ///
+    /// Drawn only while the gate is actually closed: a permanent
+    /// "you could change this elsewhere" line under live rows is
+    /// noise, and the rule is about answering a dim.
+    ///
+    /// `LayoutCard`'s app-bar reference is the model this
+    /// follows — name the current STATE in the sentence and link
+    /// where to change it, so the row is never a dead pointer.
+    @ViewBuilder
+    func remoteGateReference(for key: SettingKey) -> some View {
+        if let reason = gates.inertReason(for: key),
+            SpacesGateHelp.remote.contains(reason),
+            let prose = SpacesGateHelp.crossReference(for: reason)
+        {
+            CrossReferenceRow(
+                prose: prose,
+                // The destination's OWN title, not a new
+                // breadcrumb key. `LayoutCard` needs a `▸` head
+                // because "App Bar" names no row any sidebar
+                // shows; "Layout Defaults" is exactly what the
+                // sidebar reads, so the bare title lands the
+                // reader on a row they can see. It also carries
+                // its own translations already — a fresh
+                // breadcrumb key would ship English into ten
+                // catalogs and red `SidebarCrossReferenceTests`,
+                // which requires each locale to name the
+                // destination as that locale renders it.
+                linkTitle: SettingsDestination.layoutDefaults
+                    .title,
+                destination: .layoutDefaults
+            )
+        }
     }
 }
