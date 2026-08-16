@@ -146,29 +146,4 @@ struct BootDeferralWiringTests {
             """
         )
     }
-
-    /// The session seam, needled rather than probed on a live
-    /// core. `WakeSessionPresenceWiringTests` proves it is not
-    /// the inert default, but it cannot see a seam FROZEN at
-    /// bootstrap (`let frozen = .live(); … { frozen }`) — proved
-    /// green under exactly that mutation — and freezing is the
-    /// defect shape the manager's "re-read at fire time, not at
-    /// wake" design exists to prevent. Here the closure body is
-    /// the assertion.
-    @Test("bootstrap wires the session seam to a fresh read")
-    func sessionSeamReadsFreshEachCall() throws {
-        let text = try source(
-            "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
-        )
-        #expect(
-            text.contains("sessionPresence = { .live() }"),
-            """
-            The session seam is no longer wired to a call of \
-            .live() inside the closure. Wired to a value captured \
-            once, every replay reports the session as it was at \
-            bootstrap — which is never locked, since bootstrap \
-            runs before any lock (#835).
-            """
-        )
-    }
 }

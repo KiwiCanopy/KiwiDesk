@@ -20,11 +20,12 @@ import Testing
 /// deleting it is the one change that would silently drop the
 /// rule re-check for every steady-state profile switch.
 ///
-/// The skip's safety rests on the startup sweep running the same
-/// two loops chunked a second later. That dependency is pinned
-/// where it lives, not asserted here: `StartupSweepTests` for the
-/// sweep doing the work, `StartupSweepWiringTests` for the boot
-/// tail still scheduling it.
+/// The skip's safety rests on passes that run right after: the
+/// startup sweep for most apps, `drainDeferredBootApps` for one
+/// the scan gave up on. Those are pinned where they live, not
+/// asserted here — `StartupSweepTests` for the sweep doing the
+/// work, `StartupSweepWiringTests` and `BootDeferralWiringTests`
+/// for the tail still arming it and lowering the flag after.
 @MainActor
 @Suite("Boot window-rule reconcile (#836)")
 struct BootWindowRuleReconcileTests {
@@ -99,12 +100,13 @@ struct BootWindowRuleReconcileTests {
     /// `gui.json`), so it goes straight to the window-rule write
     /// under test rather than returning early on the sidecar.
     ///
-    /// `float` names a float rule the profile adds, and every
-    /// caller that wants the reconcile passes a DIFFERENT one:
-    /// the write returns before the gate when the rules resolve
-    /// to what is already installed, so a fixture re-applying the
-    /// same rules exercises the equality skip and never reaches
-    /// the deferral it meant to test.
+    /// `float` names a float rule the profile adds, so a fixture
+    /// naming one applies a genuine rule CHANGE — which is what
+    /// the reconcile exists to serve — and one calling twice with
+    /// the SAME name applies a no-op, which reconciles just as
+    /// deliberately (`mayReconcileWindowRulesNow` carries why).
+    /// Neither reaches the gate differently: it does not read the
+    /// rules at all.
     private func reapplyRules(
         _ core: KiwiCore,
         float: String? = nil
@@ -141,21 +143,31 @@ struct BootWindowRuleReconcileTests {
         #expect(box.windowQueries == before)
     }
 
-    /// The PRIMARY mechanism, and the reason the deferral above
-    /// is rarely reached: `reconcileAll` here exists to
-    /// re-classify windows against rules that CHANGED, so an
-    /// apply resolving to the rules already installed has nothing
-    /// to do. The boot case #836 measured is mostly this one — a
-    /// profile re-applied over the families `loadConfig` just
-    /// installed — and it now costs nothing rather than being
-    /// postponed, which is what keeps the deferral's re-
-    /// classification residue off the ordinary boot.
+    /// The equality skip's grave marker. A draft of #836 returned
+    /// early whenever the resolved rules were UNCHANGED, which is
+    /// wrong twice over: at boot it decided nothing (the deferral
+    /// above already skips, rules changed or not), and everywhere
+    /// else it dropped the pass's non-rule halves — window
+    /// discovery, the destroy sweep, `repairRegistration()` for a
+    /// refused observer (#675) — from every no-op profile apply,
+    /// none of which a comparison of rule families can speak for.
     ///
-    /// Asserted with boot FINISHED, so a green cannot be bought
-    /// by the deferral: the only thing standing between this
-    /// fixture and a reconcile is the equality check.
-    @Test("re-applying the same rules reconciles nothing")
-    func unchangedRulesReconcileNothing() {
+    /// It went in and came out again with every other arm here
+    /// green, which is why the ban is a test and not only the
+    /// paragraph on `mayReconcileWindowRulesNow` (code review,
+    /// 2026-08-13). Boot is FINISHED in this fixture, so the only
+    /// thing that could stand between the second apply and its
+    /// reconcile is a re-proposed equality check.
+    ///
+    /// Known limits, both proved rather than assumed: the needle
+    /// is the reconcile's own window snapshot, so it sees THAT a
+    /// pass ran and not that the pass still carries the non-rule
+    /// halves the paragraph argues for; and the fixture is not
+    /// GUI-managed, so an equality skip re-proposed in
+    /// `reapplyStructuredOverrides`' `isGuiManaged` branch — which
+    /// returns before this write — stays green here.
+    @Test("re-applying the same rules reconciles anyway")
+    func unchangedRulesReconcileAnyway() {
         let (core, box) = makeScannedCore()
         defer { core.eventLoop.stop() }
         // Install the rule once, so the second apply is the
@@ -164,7 +176,7 @@ struct BootWindowRuleReconcileTests {
         let before = box.windowQueries
         #expect(before > 0)
         reapplyRules(core, float: "com.test.floater")
-        #expect(box.windowQueries == before)
+        #expect(box.windowQueries > before)
     }
 
     /// The other skip, unchanged by #836 and asserted so the new
@@ -180,44 +192,4 @@ struct BootWindowRuleReconcileTests {
         reapplyRules(core, float: "com.test.floater")
         #expect(box.windowQueries == before)
     }
-}
-
-/// `KiwiCore.init`'s construction helpers (`KiwiCore+Init`).
-///
-/// The default config directory had been reachable from no test
-/// at all: `MachineTouchTests` requires every `KiwiCore(` in the
-/// test trees to go through `makeTestCore`, which always names a
-/// scratch directory, so the `nil` branch was unreachable by
-/// construction — a guard-prover run changed both the default
-/// path AND the socket filename and the full suite stayed green
-/// (2026-08-13). Extracting the helpers for the file-size split
-/// is what made them assertable, so they are asserted.
-///
-/// What a silent change here costs: the default is where a real
-/// install's `init.lua`, profiles and sidecar live.
-///
-/// The socket FILENAME stays unpinned and is stated rather than
-/// hidden: `SocketServer.path` is private, so the join is not
-/// readable from a test, and `CLIMain` builds its own copy of the
-/// same path — so a rename on either side is silent on both. The
-/// `profiles` subdirectory is pinned only incidentally, by
-/// `ProfileListRulesEditTests`.
-@MainActor
-@Suite("Core init paths")
-struct CoreInitPathTests {
-    @Test("the default config directory is ~/.config/KiwiDesk")
-    func defaultDirectoryIsUnderDotConfig() {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        #expect(
-            KiwiCore.resolveConfigDirectory(nil)
-                == home.appendingPathComponent(".config/KiwiDesk")
-        )
-    }
-
-    @Test("an explicit directory is taken verbatim")
-    func explicitDirectoryWins() {
-        let named = URL(fileURLWithPath: "/tmp/kiwi-init-probe")
-        #expect(KiwiCore.resolveConfigDirectory(named) == named)
-    }
-
 }

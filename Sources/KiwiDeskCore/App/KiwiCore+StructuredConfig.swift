@@ -146,9 +146,6 @@ extension KiwiCore {
         floatRules: RuleListOverride?,
         ignoreRules: RuleListOverride?
     ) {
-        let previousAppRules = state.appRules
-        let previousFloat = eventLoop.floatRules
-        let previousIgnore = eventLoop.ignoreRules
         setResolvedAppRules(
             base: globalAppRuleBase,
             override: appRules
@@ -165,32 +162,14 @@ extension KiwiCore {
             ) ?? globalIgnoreRuleBase
         eventLoop.floatRules = FloatRules(resolvedFloat)
         eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)
-        // Nothing to re-check when nothing moved. `reconcileAll`
-        // exists here to re-classify every window against rules
-        // that CHANGED — a float verdict is stored per window at
-        // reconcile time (`recheckFloat`), not read live at
-        // retile — so an apply that resolves to the rules already
-        // installed has no work to do, boot or not.
-        //
-        // This is what makes the deferral below cheap in
-        // practice: the boot case that #836 measured re-applies a
-        // profile whose rule families usually resolve identically
-        // to the ones `loadConfig` just installed, and that path
-        // now costs nothing rather than being postponed.
-        let unchanged =
-            state.appRules == previousAppRules
-            && eventLoop.floatRules == previousFloat
-            && eventLoop.ignoreRules == previousIgnore
-        guard !unchanged else { return }
         if mayReconcileWindowRulesNow {
             eventLoop.reconcileAll()
         }
     }
 
-    /// Whether a window-rule change may re-check every app from
+    /// Whether a window-rule write may re-check every app from
     /// this call site, or must leave that to a pass that already
-    /// will. Only reached when the rules actually changed — the
-    /// caller returns first otherwise.
+    /// will.
     ///
     /// `reconcileAll` is unchunked and unbudgeted on purpose —
     /// the per-app budget is raised for a queued STEP and never
@@ -234,15 +213,29 @@ extension KiwiCore {
     /// files an unseen snapshot window through `remember(_:in:)`,
     /// which returns it to its SPACE and not to its slot — and
     /// the array order is the layout order, which is what
-    /// `restore` exists for. Both are the residue
-    /// `docs/accepted-limitations.md` carries a row for.
+    /// `restore` exists for.
     ///
-    /// That cost is why the caller's equality check is the
-    /// primary mechanism rather than a micro-optimisation: it
-    /// keeps this path untaken in the ordinary boot, where the
-    /// re-applied profile resolves to the rules already
-    /// installed, leaving the deferral to the case that genuinely
-    /// changes them.
+    /// And `reconcileAll` is not only rule work at all: it also
+    /// runs `syncObservation` per running app and a full
+    /// `reconcile` per observed pid, so this defers window
+    /// discovery, the destroy sweep and `repairRegistration()`
+    /// for a refused-observer app (#675) along with the rules.
+    /// All three are backstopped — the sweep and the drain cover
+    /// the first two, `healSweep` the third — which is why the
+    /// deferral is bounded to boot, where those passes are about
+    /// to run anyway, and is NOT extended to a steady-state apply
+    /// where nothing is queued behind it. Everything visible from
+    /// this is the residue `docs/accepted-limitations.md` carries
+    /// a row for.
+    ///
+    /// An earlier draft skipped the pass whenever the resolved
+    /// rules were UNCHANGED. It is gone, and it is worth saying
+    /// why so it is not re-proposed: at boot it changed nothing
+    /// (the deferral already skips, rules changed or not), and
+    /// everywhere else it silently dropped the three non-rule
+    /// halves above from every no-op profile apply — a
+    /// steady-state change with none of #836's evidence behind
+    /// it (code review, 2026-08-13).
     ///
     /// Deliberately NOT widened to "any open pass". The startup
     /// sweep publishes no displays, so a monitor change arriving

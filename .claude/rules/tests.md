@@ -345,7 +345,7 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-08-03 — a change adding a residue class extends and
+2026-08-16 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -360,7 +360,15 @@ pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.beginScan()` with faked
 seams (`publishDisplays`; the suites set
 `registersWorkspaceObservers = false`, so no live workspace
-observer outlives the test). (The host text-metric read —
+observer outlives the test), and two read-only console-session
+reads (`CGSessionCopyCurrentDictionary`) per
+`WakeSessionPresenceWiringTests` run — one in the suite's
+`.enabled(if:)` trait and one through the seam it asserts on
+(#835). That suite is also the reason to read a CI green here
+carefully: a runner with no console session cannot tell a wired
+seam from an unwired one, so the trait SKIPs the suite rather
+than guessing, and the skip is not coverage. (The host
+text-metric read —
 `NSFont.systemFont` via `NSString.size` in the retired sidebar
 label-width suite — went away with the sidebar's fixed label
 column, #678 turn 9.) The service tests only parse
