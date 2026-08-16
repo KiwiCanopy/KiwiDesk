@@ -65,6 +65,32 @@ fi
 TAG="v$VERSION"
 cd "$ROOT"
 
+# A milestone says which release must not ship without those issues, so
+# a version whose milestone is not clear must not be cut. Checked here,
+# before anything is stamped or tagged, because failing at this point
+# costs nothing to undo — release.yml's copy runs after the tag already
+# exists and can only withhold the artifacts.
+#
+# Best effort: without gh the check cannot run, and release.yml is then
+# the authority. Missing local tooling must not block a release by itself.
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+    MILESTONE_OPEN=$(gh issue list --milestone "$VERSION" --state open \
+        --json number --jq 'length' 2>/dev/null || echo "")
+    if [ -n "$MILESTONE_OPEN" ] && [ "$MILESTONE_OPEN" -gt 0 ]; then
+        echo "✗ milestone $VERSION still has $MILESTONE_OPEN open issue(s):" >&2
+        gh issue list --milestone "$VERSION" --state open \
+            --json number,title --jq '.[] | "    #\(.number) \(.title)"' >&2
+        echo "" >&2
+        echo "  The release waits for these. Close them, or move each one" >&2
+        echo "  deliberately — moving it records that we shipped without it:" >&2
+        echo "    gh issue edit <n> --milestone \"<next>\"" >&2
+        echo "    gh issue edit <n> --remove-milestone" >&2
+        exit 1
+    fi
+else
+    echo "! gh unavailable — skipping the milestone check (release.yml still enforces it)" >&2
+fi
+
 # ---------------------------------------------------------------
 # 1. Preconditions — all read-only
 

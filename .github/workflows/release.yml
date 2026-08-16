@@ -71,6 +71,8 @@ jobs:
     runs-on: macos-26
     permissions:
       contents: read
+      # Read-only, for the milestone gate below.
+      issues: read
     # The commit this job vetted, for the release job to build.
     # A tag NAME is re-resolved against the remote at each job's
     # own checkout, so it cannot carry this assertion — see the
@@ -84,6 +86,30 @@ jobs:
           # Needed for the "tag is on main" assertion below,
           # which resolves origin/main.
           fetch-depth: 0
+
+      # Backstop for scripts/release.sh's copy of this check. The
+      # script refuses to cut the tag at all; this catches a tag cut
+      # by hand, or on a machine without gh. Placed before Xcode is
+      # selected, so a release the milestone forbids costs seconds
+      # rather than a whole build — and withholds the artifacts,
+      # which is all CI can still do once the tag exists.
+      - name: Milestone must be clear
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG_NAME#v}"
+          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" \
+                   --milestone "$VERSION" --state open --json number \
+                   --jq 'length' 2>/dev/null || echo 0)
+          if [ "$OPEN" -gt 0 ]; then
+            echo "::error::Milestone $VERSION still has $OPEN open issue(s) — the release waits for them."
+            gh issue list --repo "$GITHUB_REPOSITORY" --milestone "$VERSION" \
+              --state open --json number,title --jq '.[] | "  #\(.number) \(.title)"' || true
+            exit 1
+          fi
+          echo "Milestone $VERSION is clear, or does not exist."
 
       # Not `github.sha`: on a workflow_dispatch run that is the
       # DEFAULT branch's tip, not the tag's commit — only the
