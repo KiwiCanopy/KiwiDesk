@@ -774,8 +774,6 @@
   "presets.needs_screens": "Requer %1$d tela(s) conectada(s).",
   "presets.none_for_count": "Nenhum plano de layout integrado para esta quantidade de telas — os abaixo ainda se aplicam assim que você conectar as telas correspondentes.",
   "presets.other_setups": "Para outras configurações",
-  "presets.screen_help": "Tela %1$d: %2$@, abre em %3$@",
-  "presets.screen_help.empty": "Tela %1$d: nenhum espaço",
   "presets.standard_badge": "padrão",
   "presets.start_here": "Comece por aqui — aplique uma predefinição para a sua configuração e depois ajuste o que quiser em qualquer aba.",
   "presets.starter.summary": "Espaços escolhidos para suas telas, cada um com seu próprio layout.",

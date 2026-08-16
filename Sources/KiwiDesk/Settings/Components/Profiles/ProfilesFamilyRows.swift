@@ -52,17 +52,38 @@ struct ProfilesFamilyRows {
     let boundDesktops: [Int]
     /// The presets the area offers, in catalog order.
     let presets: [StandardLayout]
+    /// How many screens are connected right now — the second sort
+    /// key's input. Read from `ProfileResolution.screens` rather
+    /// than from a fresh `displays.count`, so this and
+    /// `matchesLive` are answers about the same moment.
+    let connectedScreens: Int
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
         guard case .profiles(let family) = key else { return nil }
         return rows(for: family)
     }
 
-    /// The saved profiles the list draws, in display order:
-    /// the ones matching the connected displays first — the
-    /// card's caption promises one of them loads — then by
-    /// screen count, then by name, so the order is stable while
-    /// nothing is plugged or unplugged.
+    /// The saved profiles the list draws, in display order: the
+    /// ones matching the connected displays first — the card's
+    /// caption promises one of them loads — then the ones whose
+    /// screen COUNT matches, then by screen count, then by name,
+    /// so the order is stable while nothing is plugged or
+    /// unplugged.
+    ///
+    /// The count key exists because the first key is a
+    /// FINGERPRINT match and the third is a bare number, and a
+    /// profile can be neither: on a two-screen desk a saved
+    /// two-screen profile for different monitors sorted behind
+    /// every one-screen profile, since 1 < 2 — under a caption
+    /// promising one of them loads. It sits SECOND rather than
+    /// first because a fingerprint match is a stronger claim than
+    /// an equal count, and `matchesLive` already implies the
+    /// count matches, so the two keys never disagree on one row.
+    ///
+    /// `connectedScreens: 0` — no display read yet — makes the
+    /// key inert rather than wrong: no saved profile declares
+    /// zero screens, so nothing matches and the order falls back
+    /// to what it was before this key existed.
     ///
     /// The ORDER lives here, with the expansion, rather than in
     /// the view, so the rule is stated once and is reachable
@@ -71,17 +92,24 @@ struct ProfilesFamilyRows {
     /// `ProfilesGateWiringTests.viewsConsultTheFamilySeam`.
     /// Note which guard holds which: `rows(for:)` and its census
     /// parity are held over fixtures, and it is this static half
-    /// the screen consumes.
+    /// the screen consumes — including
+    /// `ProfilesSection.neighbourAfterDeleting`, whose focus
+    /// destination IS this order.
     static func orderedProfiles(
-        _ summaries: [ProfileSummary]
+        _ summaries: [ProfileSummary],
+        connectedScreens: Int
     ) -> [ProfileSummary] {
-        summaries.sorted {
+        func key(
+            _ summary: ProfileSummary
+        ) -> (Int, Int, Int, String) {
             (
-                $0.matchesLive ? 0 : 1, $0.count, $0.name
-            ) < (
-                $1.matchesLive ? 0 : 1, $1.count, $1.name
+                summary.matchesLive ? 0 : 1,
+                summary.count == connectedScreens ? 0 : 1,
+                summary.count,
+                summary.name
             )
         }
+        return summaries.sorted { key($0) < key($1) }
     }
 
     /// The Desktops the bindings card lists: every present
@@ -139,8 +167,11 @@ struct ProfilesFamilyRows {
         switch family {
         case .profilesLoad, .profilesDelete, .profilesRename,
             .isDefault:
-            return Self.orderedProfiles(profiles)
-                .map { ProfilesRowInstance.profile($0.name) }
+            return Self.orderedProfiles(
+                profiles,
+                connectedScreens: connectedScreens
+            )
+            .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:
             return Self.desktops(
                 present: presentDesktops,

@@ -774,8 +774,6 @@
   "presets.needs_screens": "接続された画面が%1$d台必要です。",
   "presets.none_for_count": "この画面数に対応する組み込みレイアウトプランはありません — 以下のプランは対象の画面を接続したときに適用されます。",
   "presets.other_setups": "その他の構成向け",
-  "presets.screen_help": "画面%1$d: %2$@、%3$@で開く",
-  "presets.screen_help.empty": "画面%1$d: スペースなし",
   "presets.standard_badge": "標準",
   "presets.start_here": "ここから始めましょう。お使いの環境に合ったプリセットを適用し、あとはどのタブからでも調整できます。",
   "presets.starter.summary": "お使いの画面に合わせて選ばれたスペース。それぞれにレイアウトが設定されます。",

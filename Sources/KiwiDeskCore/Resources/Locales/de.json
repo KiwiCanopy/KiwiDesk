@@ -774,8 +774,6 @@
   "presets.needs_screens": "Benötigt %1$d verbundene(n) Bildschirm(e).",
   "presets.none_for_count": "Keine integrierten Layout-Pläne für so viele Bildschirme — die folgenden gelten, sobald du die entsprechenden Bildschirme anschließt.",
   "presets.other_setups": "Für andere Setups",
-  "presets.screen_help": "Bildschirm %1$d: %2$@, öffnet in %3$@",
-  "presets.screen_help.empty": "Bildschirm %1$d: keine Spaces",
   "presets.standard_badge": "Standard",
   "presets.start_here": "Hier starten — wende eine Voreinstellung für dein Setup an und passe dann alles in jedem Tab an.",
   "presets.starter.summary": "Ausgewählte Spaces für deine Bildschirme, jeder mit seinem eigenen Layout.",

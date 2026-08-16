@@ -22,6 +22,10 @@ struct ProfilesCensusRenderTests {
     /// #678 Phase 4 pass 11. One 27" — a single `.desktop`
     /// screen, so the catalog this suite reasons over is the
     /// one-screen one.
+    /// One display — and every `connectedScreens:` below is
+    /// derived from THIS rather than written as a literal 1
+    /// (#660), so a fixture that grows a second display cannot
+    /// leave the sort's count key answering about the old one.
     private let censusSizes = [CGSize(width: 2560, height: 1440)]
 
     /// A summary carrying only what the expansion reads (the
@@ -166,7 +170,8 @@ struct ProfilesCensusRenderTests {
             profiles: [summary("Desk"), summary("Laptop")],
             presentDesktops: 3,
             boundDesktops: [],
-            presets: StandardProfiles.all(sizes: censusSizes)
+            presets: StandardProfiles.all(sizes: censusSizes),
+            connectedScreens: censusSizes.count
         )
         let placed = SettingKey.allCases.filter {
             if case .profiles = $0 { return true }
@@ -218,7 +223,8 @@ struct ProfilesCensusRenderTests {
             presets: StandardProfiles.layouts(
                 for: 1,
                 sizes: censusSizes
-            )
+            ),
+            connectedScreens: censusSizes.count
         )
         #expect(
             expander.rows(for: .profiles(.profilesLoad))
@@ -268,7 +274,8 @@ struct ProfilesCensusRenderTests {
             profiles: [summary("Desk")],
             presentDesktops: 1,
             boundDesktops: [],
-            presets: []
+            presets: [],
+            connectedScreens: censusSizes.count
         )
         #expect(
             expander.rows(for: .spaces(.spaceList)) == nil

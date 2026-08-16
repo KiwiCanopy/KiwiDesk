@@ -40,26 +40,81 @@ struct ProfilesFamilyRowsTests {
     /// One count throughout, so the match state is the only
     /// thing that can decide the order — a fixture that varied
     /// the count too would pass on the count rule alone.
+    ///
+    /// The connected count is PINNED to that same count (#660),
+    /// never inherited: every row then ties on the match-count
+    /// key and `matchesLive` is the only thing left to decide,
+    /// which is what this test claims to observe.
     @Test("profiles matching the live displays lead")
     func orderPutsMatchingFirst() {
-        let ordered = ProfilesFamilyRows.orderedProfiles([
-            summary("Alpha", count: 3, matchesLive: false),
-            summary("Beta", count: 3, matchesLive: false),
-            summary("Zed", count: 3, matchesLive: true),
-        ])
+        let ordered = ProfilesFamilyRows.orderedProfiles(
+            [
+                summary("Alpha", count: 3, matchesLive: false),
+                summary("Beta", count: 3, matchesLive: false),
+                summary("Zed", count: 3, matchesLive: true),
+            ],
+            connectedScreens: 3
+        )
         #expect(ordered.map(\.name) == ["Zed", "Alpha", "Beta"])
     }
 
     /// Within one match state, the count orders before the name
     /// — two profiles for the same hardware sit together.
+    ///
+    /// Pinned to a count NO fixture profile declares, so the
+    /// match-count key is inert here and the ordinal count rule
+    /// is what the assertion observes. Pinning it to 3 would
+    /// make this test pass on the match-count key instead, which
+    /// is the other rule's job.
     @Test("count outranks name among non-matching profiles")
     func orderIsCountThenName() {
-        let ordered = ProfilesFamilyRows.orderedProfiles([
-            summary("Beta", count: 3, matchesLive: false),
-            summary("Alpha", count: 3, matchesLive: false),
-            summary("Solo", count: 1, matchesLive: false),
-        ])
+        let ordered = ProfilesFamilyRows.orderedProfiles(
+            [
+                summary("Beta", count: 3, matchesLive: false),
+                summary("Alpha", count: 3, matchesLive: false),
+                summary("Solo", count: 1, matchesLive: false),
+            ],
+            connectedScreens: 2
+        )
         #expect(ordered.map(\.name) == ["Solo", "Alpha", "Beta"])
+    }
+
+    /// The key #789 added, and the defect it removes: a profile
+    /// saved for THIS many screens — but for different monitors,
+    /// so no fingerprint matches — sorted behind every profile
+    /// with fewer screens, because 1 < 2. The card's caption
+    /// promises one of these loads, and the one it means was
+    /// last.
+    ///
+    /// Reds the moment the match-count key is removed: without
+    /// it the bare count rules and `Solo` leads.
+    @Test("a count-matching profile leads a smaller one")
+    func countMatchOutranksSmallerCount() {
+        let ordered = ProfilesFamilyRows.orderedProfiles(
+            [
+                summary("Solo", count: 1, matchesLive: false),
+                summary("Desk", count: 2, matchesLive: false),
+            ],
+            connectedScreens: 2
+        )
+        #expect(ordered.map(\.name) == ["Desk", "Solo"])
+    }
+
+    /// No display read yet: the key is inert rather than wrong.
+    /// No saved profile declares zero screens, so nothing
+    /// matches and the order is what it was before the key
+    /// existed — which is the honest answer while the count is
+    /// unknown, rather than an arbitrary one.
+    @Test("a zero connected count leaves the order alone")
+    func zeroConnectedCountIsInert() {
+        let ordered = ProfilesFamilyRows.orderedProfiles(
+            [
+                summary("Desk", count: 2, matchesLive: false),
+                summary("Solo", count: 1, matchesLive: false),
+            ],
+            connectedScreens: 0
+        )
+        #expect(ordered.map(\.name) == ["Solo", "Desk"])
     }
 
     /// Every present desktop, plus any number already bound —

@@ -31,7 +31,20 @@ struct PresetScreenCard: View {
     /// Apply never produces (code review, 2026-08-11).
     var liveSizes: [CGSize]?
 
-    private static let outline = CGSize(width: 34, height: 22)
+    /// #789 grew these from 34×22. The consult that ruled on it
+    /// REFUSED drawing a `LayoutSchematicView` in here instead:
+    /// the card draws one mode per screen — the first space's
+    /// opening mode — which is exactly what the glyph already
+    /// encodes, so a schematic would be ~9× the pixels for no
+    /// extra discrimination between catalog entries, at a scale
+    /// (≈0.43 of `.tile`, half the shipped floor
+    /// `HomeCardSchematicBand` uses) where the family's 1 pt and
+    /// 2 pt strokes stop rendering. The pixels the bigger card
+    /// buys go to the glyph instead.
+    private static let outline = CGSize(width: 48, height: 30)
+    /// Grown with the outline, so the glyph keeps its share of
+    /// the frame rather than shrinking inside a larger one.
+    private static let glyphSize: CGFloat = 14
 
     /// Clamped at zero: a hand-edited layout claiming a negative
     /// screen count must not trap on the range.
@@ -71,10 +84,10 @@ struct PresetScreenCard: View {
     /// mode drawn on a screen the preset plans nothing for is a
     /// claim about behavior that applying it would not produce.
     private func outlineView(_ screen: Int) -> some View {
-        RoundedRectangle(cornerRadius: 3)
+        RoundedRectangle(cornerRadius: 4)
             .fill(SettingsTheme.accent.opacity(0.12))
             .overlay {
-                RoundedRectangle(cornerRadius: 3)
+                RoundedRectangle(cornerRadius: 4)
                     .strokeBorder(
                         SettingsTheme.hairline
                     )
@@ -82,7 +95,7 @@ struct PresetScreenCard: View {
             .overlay {
                 if let mode = openingMode(screen) {
                     Image(systemName: mode.glyph)
-                        .font(.system(size: 10))
+                        .font(.system(size: Self.glyphSize))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -134,8 +147,8 @@ struct PresetScreenCard: View {
         guard let mode = openingMode(screen) else {
             return L(
                 "presets.screen_help.empty",
-                "Screen %1$d: no Spaces",
-                screen + 1
+                "%1$@: no Spaces",
+                screenName(screen)
             )
         }
         // The count phrase, not a `space(s)` parenthetical: the
@@ -143,10 +156,39 @@ struct PresetScreenCard: View {
         // it fourteen lines up.
         return L(
             "presets.screen_help",
-            "Screen %1$d: %2$@, opens in %3$@",
-            screen + 1,
+            "%1$@: %2$@, opens in %3$@",
+            screenName(screen),
             spaceCountPhrase(spaces(on: screen).count),
             mode.displayName
         )
+    }
+
+    /// Screen 0 is the main display and the rest are numbered
+    /// (#789).
+    ///
+    /// The card denotes "main" by POSITION — leftmost — which is
+    /// a claim a reader who cannot see the row has no way to
+    /// recover: every screen announced itself as "Screen N" and
+    /// nothing said which one the Mac treats as main. The
+    /// alternatives were both refused by the consult that ruled
+    /// this: a heavier stroke, because `SettingsTheme+Metrics`
+    /// records that weight alone on a hairline was invisible on
+    /// device and because stroke weight already carries two
+    /// meanings in this window; and a micro-label, which at this
+    /// outline size is ~7 pt type. Saying it in words costs no
+    /// pixels and removes the inference rather than decorating
+    /// it.
+    ///
+    /// A NAME rather than a branched sentence, so the two frames
+    /// above stay one frame each and a locale reorders them
+    /// freely.
+    private func screenName(_ screen: Int) -> String {
+        screen == 0
+            ? L("presets.screen_name.main", "Main display")
+            : L(
+                "presets.screen_name.numbered",
+                "Screen %1$d",
+                screen + 1
+            )
     }
 }

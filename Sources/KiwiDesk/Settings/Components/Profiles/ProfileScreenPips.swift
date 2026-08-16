@@ -1,0 +1,98 @@
+import SwiftUI
+
+/// A saved profile's screen count, as a row of mini-screens
+/// (#789) — the leading slot that used to hold one generic
+/// `square.stack.3d.up` glyph identical on every row.
+///
+/// **Not a plate, deliberately.** `HomeCardPlate.plate(for:)`
+/// returns `nil` for `.profiles` because a whole-app card's
+/// picture there is a data row rather than a desktop, and taking
+/// the fixed-dark `previewPlate` into a list row for a 73 pt
+/// ornament would import its whole contract: the `planeRing`
+/// seam, a new ink/surface pairing in
+/// `SettingsThemeContrastTests`, and concrete inks in place of
+/// the hierarchical greys `SettingsFixedGroundTests` bans on the
+/// fixed-dark families. So the pips sit on the row's own
+/// surface, in the theme's ordinary inks.
+///
+/// **No accent, either.** The accent marks control FILLS, so
+/// accent-filled pips would read as "these ones are selected".
+/// The active profile is marked by its `BadgeChip`, which is a
+/// text channel rather than a hue — and that badge is also why
+/// this row grew no accent FRAME: a framed row inside a framed
+/// card is a card-in-card, and the badge already answers.
+///
+/// **Silent to VoiceOver.** The count it draws is already spoken
+/// by the row's subtitle (`profiles.screens.*`), so announcing
+/// the picture too would read the same fact twice — and a `.help`
+/// hung here instead of on that subtitle would be hover-only,
+/// reachable by no keyboard and no screen reader.
+struct ProfileScreenPips: View {
+    /// The profile's screen count.
+    let count: Int
+
+    /// How many slots the row draws — pips, or pips plus the
+    /// "+N" chip. The chip takes a slot of its own
+    /// (`docs/ui-patterns.md` ▸ "+N"), which is what makes
+    /// `hidden` never equal 1: at exactly this many screens the
+    /// last slot draws the screen itself rather than a chip
+    /// claiming to hide one.
+    static let slots = 4
+    static let pip = CGSize(width: 18, height: 12)
+    static let gap: CGFloat = 3
+
+    /// The fixed leading slot, DERIVED from the grammar above so
+    /// the two cannot disagree — a hand-written width is how a
+    /// cap change silently starts clipping. Fixed rather than
+    /// fluid so the names below align down the list; it compares
+    /// no width, so it adds no second derivation beside
+    /// `SettingsWidthClass`.
+    static var slotWidth: CGFloat {
+        CGFloat(slots) * pip.width
+            + CGFloat(slots - 1) * gap
+    }
+
+    /// Internal rather than private, and asserted directly: a
+    /// view that takes a count and draws a constant satisfies
+    /// every substring a source scan can look for while
+    /// answering nothing (`LayoutSchematicCountTests`' lesson).
+    var shown: Int {
+        count <= Self.slots ? max(count, 0) : Self.slots - 1
+    }
+
+    var hidden: Int { max(count - shown, 0) }
+
+    var body: some View {
+        HStack(spacing: Self.gap) {
+            ForEach(0..<shown, id: \.self) { _ in screenPip }
+            if hidden > 0 { moreChip }
+        }
+        .frame(width: Self.slotWidth, alignment: .leading)
+        .accessibilityHidden(true)
+    }
+
+    private var screenPip: some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(SettingsTheme.ink3.opacity(0.18))
+            .overlay {
+                RoundedRectangle(cornerRadius: 2)
+                    .strokeBorder(SettingsTheme.hairline)
+            }
+            .frame(
+                width: Self.pip.width,
+                height: Self.pip.height
+            )
+    }
+
+    /// Counts the screens NOT drawn, never the total.
+    private var moreChip: some View {
+        Text(verbatim: "+\(hidden)")
+            .font(.system(size: 9, weight: .semibold))
+            .monospacedDigit()
+            .foregroundStyle(SettingsTheme.ink3)
+            .frame(
+                width: Self.pip.width,
+                height: Self.pip.height
+            )
+    }
+}
