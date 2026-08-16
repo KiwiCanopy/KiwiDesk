@@ -23,7 +23,9 @@ import Testing
 /// FAILED, so a screenless or session-less runner would go red
 /// with the wiring perfectly correct. The trait reports a SKIP,
 /// which is the honest answer (the `ZOrderFocusJumpTests`
-/// precedent).
+/// precedent) — and read that skip as what it is: on such a
+/// runner a green run is not coverage of this seam, so a CI pass
+/// alone never proves the wiring survived.
 ///
 /// And it cannot see a seam FROZEN at bootstrap — a captured
 /// `.live()` reads identically here and reports the session as it

@@ -364,11 +364,8 @@ observer outlives the test), and two read-only console-session
 reads (`CGSessionCopyCurrentDictionary`) per
 `WakeSessionPresenceWiringTests` run — one in the suite's
 `.enabled(if:)` trait and one through the seam it asserts on
-(#835). That suite is also the reason to read a CI green here
-carefully: a runner with no console session cannot tell a wired
-seam from an unwired one, so the trait SKIPs the suite rather
-than guessing, and the skip is not coverage. (The host
-text-metric read —
+(#835), whose docstring owns why a session-less host SKIPs that
+suite rather than reds it. (The host text-metric read —
 `NSFont.systemFont` via `NSString.size` in the retired sidebar
 label-width suite — went away with the sidebar's fixed label
 column, #678 turn 9.) The service tests only parse
