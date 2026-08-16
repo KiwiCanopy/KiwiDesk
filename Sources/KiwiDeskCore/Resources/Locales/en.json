@@ -156,6 +156,7 @@
   "border.glow_size.auto": "Auto glow size",
   "border.glow_size.disabled": "Turn on Glow effect to adjust its size.",
   "border.preview.ax": "Border preview: a focused window with its ring, beside an unfocused one.",
+  "border.preview.ax_sticky": "Border preview: a focused window with its ring and its sticky mark, beside an unfocused one.",
   "border.shared.caption": "The focus ring, the drag ghost and the drop zone are strokes KiwiDesk draws around a window.",
   "border.shared.differ.help": "The three strokes are set differently right now; choosing here sets all three.",
   "border.shared.title": "Shared by all borders",

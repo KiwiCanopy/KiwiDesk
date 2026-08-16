@@ -36,12 +36,18 @@ extension PaletteSceneThumbnail {
                 windowTile(
                     ring: color("border.focused_color"),
                     ringWidth: 2.5 * scale,
-                    mark: color("sticky.color")
+                    mark: color("sticky.color"),
+                    // The ENGINE's own glyph, not a stand-in
+                    // shape: `StickyStyle` owns which symbol a
+                    // scope draws, and a capsule here would
+                    // preview a mark the app never renders.
+                    symbol: StickyStyle.symbolName(for: .global)
                 )
                 windowTile(
                     ring: color("border.unfocused_color"),
                     ringWidth: 1.5 * scale,
-                    mark: color("floating.color")
+                    mark: color("floating.color"),
+                    symbol: FloatingStyle.symbolName
                 )
             }
             HStack(spacing: 7 * scale) {
@@ -160,7 +166,8 @@ extension PaletteSceneThumbnail {
     private func windowTile(
         ring: Color,
         ringWidth: CGFloat,
-        mark: Color
+        mark: Color,
+        symbol: String?
     ) -> some View {
         RoundedRectangle(cornerRadius: 4 * scale)
             .fill(SettingsTheme.hairline)
@@ -169,10 +176,14 @@ extension PaletteSceneThumbnail {
                     .stroke(ring, lineWidth: ringWidth)
             )
             .overlay(alignment: .topLeading) {
-                Capsule()
-                    .fill(mark)
-                    .frame(width: 10 * scale, height: 5 * scale)
-                    .padding(4 * scale)
+                if let symbol {
+                    Image(systemName: symbol)
+                        .font(
+                            .system(size: 9 * scale, weight: .bold)
+                        )
+                        .foregroundStyle(mark)
+                        .padding(4 * scale)
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 30 * scale)

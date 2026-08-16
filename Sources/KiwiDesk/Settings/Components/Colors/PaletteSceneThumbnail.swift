@@ -46,11 +46,20 @@ struct PaletteSceneThumbnail: View {
     /// Internal, not private: `PaletteSceneThumbnail+Panel` draws
     /// the full scene from the same lookup, so a sparse palette
     /// falls back identically at both scales.
+    ///
+    /// A path whose empty value means **Automatic** rather than
+    /// unset resolves through `Color.kiwiMark` — derived from
+    /// `ColorPaletteKeys.allowsAutomatic` rather than a list of
+    /// the two paths here, so a third adaptive mark joins by
+    /// existing. Without it the sticky and floating marks drew
+    /// as holes at their shipped defaults, both being empty.
     func color(_ path: String) -> Color {
-        Color(
-            kiwiHex: palette.colors[path]
-                ?? Self.fallback[path] ?? "#00000000"
-        )
+        let hex =
+            palette.colors[path] ?? Self.fallback[path] ?? ""
+        guard ColorPaletteKeys.allowsAutomatic(path) else {
+            return Color(kiwiHex: hex.isEmpty ? "#00000000" : hex)
+        }
+        return .kiwiMark(hex)
     }
 
     /// Everything inside is expressed against the shelf tile's
