@@ -62,6 +62,8 @@ struct LayoutSchematicCountTests {
     /// the stack run, and the one incoming window. The masters
     /// are clamped so a big master count over few windows still
     /// leaves a stack zone — the two-zone split is the point.
+    /// Sizes only: WHICH windows land in each zone is
+    /// `LayoutSchematicZoneTests`' (#707).
     @Test("Stack partitions the count into its two zones")
     func stackPartition() {
         // Across master counts as well as window counts: at

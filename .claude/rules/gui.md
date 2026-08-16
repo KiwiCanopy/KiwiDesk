@@ -86,6 +86,13 @@ to invert the dim ladder).
   `LayoutSchematicPlacementTests` holds each schematic to what
   its frame promises and
   `LayoutSchematicPlacementScanTests` reds on the next copy.
+  **Where a frame sorts the array into ZONES, guard the
+  membership and not only the sizes**: Stack's two zone reads
+  could be swapped end for end with the sizes still adding up
+  and the whole suite green (#707), so the partition is asserted
+  against `StackLayout.partition` — the boundary rule itself —
+  in `LayoutSchematicZoneTests`, which also holds #313's mirror
+  to `StackLayout.mirrorsMasterZone`.
   Check *which* engine owns the rule before calling one: track
   spawn is `Space.insertIntoTrack`'s, not
   `Space.insert(_:placement:)`'s, and the two agree on position
