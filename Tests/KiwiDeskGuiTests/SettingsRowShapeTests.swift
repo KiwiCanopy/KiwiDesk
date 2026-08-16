@@ -132,7 +132,7 @@ struct SettingsRowShapeTests {
             // and so matched none of the first cut's needles,
             // drawing the wide arrangement inside a list whose
             // live rows stacked (code review, 2026-08-11).
-            "Components/Bars/AppBarOverrideControls.swift",
+            "Components/SpaceOverrides/OverrideControls.swift",
         ]
         for file in files {
             let source = try squashed(

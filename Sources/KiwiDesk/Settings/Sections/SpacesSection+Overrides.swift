@@ -43,7 +43,7 @@ extension SpacesSection {
                         // travel past what the value needs. The
                         // number is the ~520 pt the `.menu` picker
                         // exception argues from
-                        // (`AppBarOverrideControls`,
+                        // (`OverrideControls`,
                         // `docs/ui-patterns.md`), so a preview that
                         // wants more width buys it inside its own
                         // frame — #753 widened the Scrolling

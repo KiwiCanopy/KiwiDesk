@@ -52,7 +52,7 @@ struct SilentDimTests {
             "not a gate: the whole window fades while it is not "
             + "the key window, so nothing is being withheld and "
             + "there is no per-control reason to give",
-        "AppBarOverrideControls.swift":
+        "OverrideControls.swift":
             "override mode's no-value branch, which cannot use "
             + "GreyOut because it must not compound inside a "
             + "gated block; it carries its own accessibilityHint "
