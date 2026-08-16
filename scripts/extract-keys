@@ -879,6 +879,19 @@ def read_drafts(
         source = entry.get("source")
         text = entry.get("translation")
         if text is None:
+            # No `translation` field at all. If the entry still
+            # holds prose under some OTHER field, a mistyped key
+            # ("translaton") is the likeliest cause and that
+            # prose is somebody's draft — report the whole entry
+            # rather than letting the rewrite eat it. `source`
+            # is excluded because it is the English this tool
+            # wrote there itself.
+            if any(
+                isinstance(value, str) and value.strip()
+                for field, value in entry.items()
+                if field != "source"
+            ):
+                unusable.append((key, repr(entry)))
             continue
         if not isinstance(text, str):
             unusable.append((key, repr(text)))
@@ -952,8 +965,8 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
     Never weaken that to a silent drop —
     `.claude/rules/localization.md` ▸ "A re-mint must never
     silently discard drafted work" argues why, and
-    `LocaleWorksheetCarryTests` / `LocaleWorksheetDiscardTests`
-    hold it.
+    `LocaleWorksheetCarryTests`, `LocaleWorksheetDiscardTests`
+    and `LocaleWorksheetRefusalTests` hold it.
 
     A draft is carried only while its stored `source` still
     equals the current English, which is the rule `merge-keys`

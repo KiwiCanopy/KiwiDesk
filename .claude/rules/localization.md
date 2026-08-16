@@ -81,10 +81,11 @@ already on disk and carries across every non-empty `translation`
 whose English still matches; a draft it cannot carry — for any
 reason, a malformed entry included — is echoed with its text,
 and a worksheet that will not parse is refused rather than
-overwritten. `LocaleWorksheetCarryTests` holds the carry and
-`LocaleWorksheetDiscardTests` the other two; `read_drafts` and
-`write_missing` in `scripts/extract-keys` carry the reasoning
-per function.
+overwritten. `LocaleWorksheetCarryTests` holds the carry,
+`LocaleWorksheetDiscardTests` what is dropped and said aloud,
+and `LocaleWorksheetRefusalTests` the three ways a worksheet
+stops being readable; `read_drafts` and `write_missing` in
+`scripts/extract-keys` carry the reasoning per function.
 
 That is a property to preserve, not a convenience: between
 minting and merging, the worksheet is the ONLY copy of the work
@@ -98,12 +99,15 @@ reason to re-run the extractor, so the destructive path was also
 the intuitive one.
 
 **A silent drop is the failure mode, not an unusual one** — the
-fix's own first draft reintroduced it twice, by reading a
-malformed entry as "nothing to save" when a bare-string entry IS
-the draft, and by classifying a non-UTF-8 read as a crash rather
-than a refusal. A new discard path states its banner and gets a
-case in `LocaleWorksheetDiscardTests`; nothing here may end in a
-bare `continue`.
+fix's own first draft reintroduced it three times over, reading
+a malformed entry as "nothing to save" when a bare-string entry
+IS the draft, missing the field-name typo that leaves an entry
+with no `translation` at all, and classifying a non-UTF-8 read
+as a crash rather than a refusal. So: **a branch that drops text
+a human typed names it on stderr and earns a case in
+`LocaleWorksheetDiscardTests`.** Silence is reserved for a
+branch that provably discards nothing — an empty slot, a null
+entry — and a `continue` is where this keeps going wrong.
 
 **A draft is carried only while its stored `source` still equals
 the current English** — the same rule `merge-keys` merges by.
@@ -356,7 +360,7 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
 `LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`,
-`LocaleWorksheetDiscardTests`
+`LocaleWorksheetDiscardTests`, `LocaleWorksheetRefusalTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.

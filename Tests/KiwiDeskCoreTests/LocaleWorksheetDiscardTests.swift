@@ -10,13 +10,18 @@ import Testing
 /// silence (`.claude/rules/localization.md` ▸ "A re-mint must
 /// never silently discard drafted work").
 ///
-/// The first draft of the carry-over shipped three such paths
-/// unguarded, all of them found in review: an entry whose shape
-/// `read_drafts` could not use was dropped with nothing printed;
-/// a worksheet saved in a non-UTF-8 encoding raised past the
-/// refusal instead of hitting it; and the "no keys missing"
-/// branch unlinked a worksheet holding drafts. A green suite is
-/// exactly what each of them had.
+/// The first draft of the carry-over shipped several such paths
+/// unguarded, every one found in review: an entry whose shape
+/// `read_drafts` could not use was dropped with nothing printed,
+/// a draft under a mistyped field name likewise, and the "no
+/// keys missing" branch unlinked a worksheet holding drafts. A
+/// green suite is exactly what each of them had.
+///
+/// A worksheet that cannot be READ at all is the neighbouring
+/// case, and `LocaleWorksheetRefusalTests` owns it — split off
+/// on the 350-line ceiling. The two fail apart: nothing there
+/// reads a discard banner, and nothing here feeds an unreadable
+/// file.
 @Suite("locale worksheet discards")
 struct LocaleWorksheetDiscardTests {
     private var repoRoot: URL { scriptFixtureRepoRoot() }
@@ -107,69 +112,24 @@ struct LocaleWorksheetDiscardTests {
         )
     }
 
-    /// The worksheet is the one file in this pipeline a
-    /// non-developer edits, so a Latin-1 save is the likeliest
-    /// way it ever stops parsing. `UnicodeDecodeError` is a
-    /// `ValueError`, not a `JSONDecodeError`, so the first draft
-    /// raised straight past the refusal — and the refusal test
-    /// that only asserted a non-zero exit counted the traceback
-    /// as a pass.
-    @Test("a non-UTF-8 worksheet is refused, not crashed through")
-    func latin1WorksheetHitsTheRefusal() throws {
+    /// An entry that keeps its draft under a mistyped field name
+    /// has no `translation` at all, so both text-bearing arms
+    /// miss it — the last input whose prose the rewrite could
+    /// eat in silence.
+    @Test("a draft under a mistyped field name is still echoed")
+    func mistypedFieldNameIsReported() throws {
         let fx = try makeRepoShapedFixture(
-            prefix: "kiwi-worksheet-latin1",
-            locales: ["de.json": #"{}"#]
-        )
-        defer { fx.cleanup() }
-        try fx.writeSources([
-            "A.swift": sources([("gap.hint", "Gap between windows")])
-        ])
-        let worksheet = fx.worksheets
-            .appendingPathComponent("missing_de.json")
-        try FileManager.default.createDirectory(
-            at: fx.worksheets,
-            withIntermediateDirectories: true
-        )
-        let damaged = try #require(
-            #"{"gap.hint": {"source": "x", "translation": "Größe"}}"#
-                .data(using: .isoLatin1)
-        )
-        try damaged.write(to: worksheet)
-
-        let run = try runRepoScript(
-            "extract-keys",
-            arguments: ["de"],
-            in: fx,
-            repoRoot: repoRoot
-        )
-        #expect(run.status != 0)
-        // The message, not just the exit code: a traceback also
-        // exits non-zero, and that is precisely what shipped.
-        #expect(
-            run.stderr.contains("will not parse"),
-            "no refusal message — did it raise instead?"
-        )
-        #expect(
-            !run.stderr.contains("Traceback"),
-            "the run crashed rather than refusing"
-        )
-        #expect(
-            try Data(contentsOf: worksheet) == damaged,
-            "the unreadable worksheet was overwritten"
-        )
-    }
-
-    /// The second refusal arm, which no test reached: a
-    /// worksheet that parses as JSON but is not an object.
-    /// Deleting the `raise` left the whole carry suite green.
-    @Test("a worksheet that is not an object is refused too")
-    func nonObjectWorksheetIsRefused() throws {
-        let damaged = #"["not", "a", "worksheet"]"#
-        let fx = try makeRepoShapedFixture(
-            prefix: "kiwi-worksheet-nonobject",
+            prefix: "kiwi-worksheet-typo",
             locales: [
                 "de.json": #"{}"#,
-                "missing_de.json": damaged,
+                "missing_de.json": #"""
+                {
+                  "gap.hint": {
+                    "source": "Gap between windows",
+                    "translaton": "Vertippter Feldname"
+                  }
+                }
+                """#,
             ]
         )
         defer { fx.cleanup() }
@@ -183,13 +143,14 @@ struct LocaleWorksheetDiscardTests {
             in: fx,
             repoRoot: repoRoot
         )
-        #expect(run.status != 0)
-        #expect(run.stderr.contains("will not parse"))
-        let after = try String(
-            data: fx.rawWorksheet("missing_de.json"),
-            encoding: .utf8
+        #expect(run.status == 0)
+        let lines = try #require(
+            echoed(run, under: "malformed"),
+            "a mistyped field name ate the draft: \(run.stderr)"
         )
-        #expect(after == damaged, "a non-object worksheet was lost")
+        #expect(
+            lines.contains { $0.contains("Vertippter Feldname") }
+        )
     }
 
     /// Two causes, two banners. Telling a translator their key is
