@@ -119,6 +119,12 @@ struct InterpolatedLabelTests {
         // control label each — the second specifier is
         // `CrossReferenceRow.linkSlot`, a destination link
         // rather than a control name, so it is not counted here.
+        // The Spaces panel's default-arm caption: it names the
+        // Layout Defaults pane, which it used to spell as text
+        // — every locale then hand-mirrored the pane's name, and
+        // the drafting round did exactly that (localization
+        // audit, 2026-08-16).
+        "spaces.preview.caption_default": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
         // The `.gates` twins of the two above. They quoted the

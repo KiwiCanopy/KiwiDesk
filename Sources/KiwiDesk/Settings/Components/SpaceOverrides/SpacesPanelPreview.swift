@@ -197,6 +197,14 @@ struct SpacesPanelPreview: View {
     /// frame interpolating a COUNT) — which is also why the
     /// two arms are separate keys rather than one frame with an
     /// argument that may render empty.
+    ///
+    /// The default arm INTERPOLATES the pane it names (#818)
+    /// rather than spelling "the layout defaults" as text. It
+    /// read as descriptive lower-case prose, but every locale
+    /// then hand-mirrors that pane's name with nothing checking
+    /// it — and the drafting round did exactly that, reaching
+    /// for the very string `destination.layout` ships
+    /// (localization audit, 2026-08-16).
     private func caption(for space: SpaceID) -> some View {
         let mode = mode(of: space)
         let n = overrideCount(for: space)
@@ -204,8 +212,9 @@ struct SpacesPanelPreview: View {
             n == 0
                 ? L(
                     "spaces.preview.caption_default",
-                    "%1$@ — follows the layout defaults.",
-                    mode.displayName
+                    "%1$@ — follows %2$@.",
+                    mode.displayName,
+                    SettingsDestination.layoutDefaults.title
                 )
                 : L(
                     "spaces.preview.caption_overridden",

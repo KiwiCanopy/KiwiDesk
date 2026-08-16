@@ -1047,7 +1047,7 @@
   "spaces.pin_badge.help": "Pinned to %1$@ for this profile.",
   "spaces.pin_offline_badge": "Pin offline",
   "spaces.pin_offline_badge.help": "Pinned to a display that isn't attached, so this Space opens on the main display for now.",
-  "spaces.preview.caption_default": "%1$@ — follows the layout defaults.",
+  "spaces.preview.caption_default": "%1$@ — follows %2$@.",
   "spaces.preview.caption_overridden": "%1$@ — settings overridden for this Space: %2$d",
   "spaces.preview.count_hint": "Changes this preview only; it is not saved.",
   "spaces.preview.floating": "Floating places no windows, so there is nothing to draw.",
