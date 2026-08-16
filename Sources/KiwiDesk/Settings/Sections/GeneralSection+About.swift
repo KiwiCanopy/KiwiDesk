@@ -19,6 +19,13 @@ extension GeneralSection {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
+                // What this install holds (#795, re-scoped): the
+                // one fact from that issue that is nowhere else
+                // on the page. Here rather than in a panel,
+                // because About is already the block about the
+                // install rather than about a setting in it.
+                InstallInventory(model: model)
+                    .padding(.top, 2)
                 Link(destination: SupportLinks.koFi) {
                     HStack(spacing: 4) {
                         Image(systemName: "heart")

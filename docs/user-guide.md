@@ -467,6 +467,19 @@ service` command installs, so the two stay in sync — `kiwidesk
 service status` reports the same state, and switching the Advanced
 row on is equivalent to running that command.
 
+## What This Install Holds
+
+**General ▸ About** states four counts under the version: how
+many **profiles**, **Spaces**, **shortcuts** and **app rules**
+this install carries. Shortcuts are counted across every
+keybinding layer, not just the active one — a chord bound only in
+an alternate layer still exists.
+
+They are stated about the install, not about **Reset All
+Settings…**: what a reset deletes is spelled out under that
+button and again in its confirmation, which is where you are when
+you need it.
+
 ## GUI Language
 
 Go to **General** (in the **Applies immediately** group) and pick
