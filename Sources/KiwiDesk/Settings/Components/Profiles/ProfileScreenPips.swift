@@ -64,12 +64,26 @@ struct ProfileScreenPips: View {
     /// `hidden` never equal 1.
     static let slots = 4
     /// The small mount of the shared outline. `PresetScreenCard`
-    /// draws the large one; the RATIO is what keeps them reading
-    /// as one picture, so a change to either is a change to both.
-    static let screen = CGSize(width: 20, height: 13)
+    /// draws the large one (48×30, glyph 14); the RATIO is what
+    /// keeps them reading as one picture, so a change to either
+    /// is a change to both.
+    ///
+    /// This is ~71% of the card, and it was 42% for one build:
+    /// at 20×13 with a 7 pt glyph the row read as a DIFFERENT
+    /// thing rather than the same thing smaller, which is the
+    /// one job this picture has (owner eye-confirm,
+    /// 2026-08-16). 34×22 is what the card itself drew before
+    /// #789 grew it, so the pair is now "the card, and the card
+    /// one size down" rather than two unrelated sizes.
+    ///
+    /// The ceiling on growing it further is the ROW, not taste:
+    /// the text block beside it is a headline over a caption,
+    /// about 32 pt, and a picture taller than that sets the
+    /// list's row height instead of fitting inside it.
+    static let screen = CGSize(width: 34, height: 22)
     static let gap: CGFloat = 3
     static let corner: CGFloat = 3
-    static let glyph: CGFloat = 7
+    static let glyph: CGFloat = 12
 
     /// The grammar, as a function of its inputs rather than of
     /// the shipped constants — with `slots` a `static let`, no
