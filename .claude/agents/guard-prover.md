@@ -74,9 +74,23 @@ Read two files before you start:
 
 ## Callers
 
-Prefer spawning this agent with `isolation: "worktree"` so a
-mutation can never reach the working tree. When that is not
-available, step 5 is the whole safety net — do not skip it.
+**Spawn this agent with `isolation: "worktree"`.** It breaks
+working source on purpose, so without one the proof runs in the
+tree everything else is reading, and a run that is cancelled,
+crashes, or dies on a timeout leaves the sabotage behind with
+nothing left to restore it. A preference would be honoured on the
+runs that did not need it and skipped on the one that did.
+
+Where the harness offers no worktree isolation, two things bind
+in its place and neither is optional:
+
+- **Run it alone.** Nothing else may read or write the tree while
+  a mutation is live — a reviewer spawned beside it reviews
+  sabotaged source and reports the sabotage as its own finding.
+  Inside a review round `review-change` owns that sequencing;
+  outside one it is the caller's to enforce.
+- **Step 5 is the whole safety net**, not hygiene. Read its
+  verdict line before believing anything else in the report.
 
 Hand over **every** guard in the change set in one spawn. The
 procedure above is already per-guard and the output contract is
