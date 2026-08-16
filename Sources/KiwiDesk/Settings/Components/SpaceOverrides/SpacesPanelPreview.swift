@@ -176,11 +176,18 @@ struct SpacesPanelPreview: View {
             // Floating has no schematic anywhere in the tree, and
             // an empty plate would read as a drawing that failed
             // rather than as a layout that places nothing.
+            //
+            // The EDITOR's own sentence, not a second one: the
+            // per-space rows already answer this case with
+            // `space_override.floating.none`, and one concept
+            // gets one wording per catalog. A panel inventing
+            // its own phrasing for the same fact is two strings
+            // to keep in step across ten locales (owner, on
+            // device, 2026-08-16).
             Text(
                 L(
-                    "spaces.preview.floating",
-                    "Floating places no windows, so there is "
-                        + "nothing to draw."
+                    "space_override.floating.none",
+                    "Floating has no per-Space overrides."
                 )
             )
             .font(.callout)

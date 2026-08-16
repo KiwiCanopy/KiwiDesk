@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — folgt „%2$@“.",
   "spaces.preview.caption_overridden": "%1$@ — Einstellungen für diesen Space überschrieben: %2$d",
   "spaces.preview.count_hint": "Ändert nur diese Vorschau; sie wird nicht gespeichert.",
-  "spaces.preview.floating": "Floating platziert keine Fenster, daher gibt es nichts zu zeichnen.",
   "spaces.preview.none": "Noch keine Spaces in diesem Entwurf.",
   "spaces.preview.title": "Layout dieses Spaces",
   "spaces.title": "Spaces",

@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — segue “%2$@”.",
   "spaces.preview.caption_overridden": "%1$@ — configurações substituídas para este espaço: %2$d",
   "spaces.preview.count_hint": "Muda apenas esta pré-visualização; não é salvo.",
-  "spaces.preview.floating": "Floating não posiciona janelas, então não há nada a desenhar.",
   "spaces.preview.none": "Ainda não há espaços neste rascunho.",
   "spaces.preview.title": "Layout deste espaço",
   "spaces.title": "Espaços",

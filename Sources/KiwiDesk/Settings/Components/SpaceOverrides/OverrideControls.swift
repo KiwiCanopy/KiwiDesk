@@ -97,7 +97,18 @@ struct OverrideChrome<Content: View>: View {
         } else if let inherited {
             inheritedReadout(inherited)
         } else {
-            HStack(spacing: SettingsMetrics.overrideRowInset) {
+            // `alignment`, not the default `.center`: this branch
+            // is the multi-row group (the slot-size pair), and a
+            // centred `?` floats between its two rows with
+            // nothing to sit beside — it read as a stray control
+            // hanging in the middle of the card (owner, on
+            // device, 2026-08-16). Aligned to the group's own
+            // anchor it lands beside the FIRST row, which is
+            // where every single-row override puts it.
+            HStack(
+                alignment: alignment,
+                spacing: SettingsMetrics.overrideRowInset
+            ) {
                 liveControl
                     .disabled(true)
                     // Same single-dim rule as `GreyOut` (#520): an

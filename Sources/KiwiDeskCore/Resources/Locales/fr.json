@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — suit « %2$@ ».",
   "spaces.preview.caption_overridden": "%1$@ — paramètres surchargés pour cet espace : %2$d",
   "spaces.preview.count_hint": "Modifie uniquement cet aperçu ; rien n'est enregistré.",
-  "spaces.preview.floating": "Floating ne place aucune fenêtre, il n'y a donc rien à dessiner.",
   "spaces.preview.none": "Aucun espace dans ce brouillon pour l'instant.",
   "spaces.preview.title": "Disposition de cet espace",
   "spaces.title": "Espaces",

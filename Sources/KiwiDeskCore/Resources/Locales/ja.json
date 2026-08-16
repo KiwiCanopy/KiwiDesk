@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — 「%2$@」に従います。",
   "spaces.preview.caption_overridden": "%1$@ — このスペースでオーバーライドした設定：%2$d",
   "spaces.preview.count_hint": "このプレビューだけが変わります。保存はされません。",
-  "spaces.preview.floating": "フローティングはウインドウを配置しないため、描画するものがありません。",
   "spaces.preview.none": "この下書きにはまだスペースがありません。",
   "spaces.preview.title": "このスペースのレイアウト",
   "spaces.title": "スペース",

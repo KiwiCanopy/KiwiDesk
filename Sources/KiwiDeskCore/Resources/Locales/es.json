@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — sigue «%2$@».",
   "spaces.preview.caption_overridden": "%1$@ — ajustes anulados para este espacio: %2$d",
   "spaces.preview.count_hint": "Solo cambia esta vista previa; no se guarda.",
-  "spaces.preview.floating": "Floating no coloca ventanas, así que no hay nada que dibujar.",
   "spaces.preview.none": "Aún no hay espacios en este borrador.",
   "spaces.preview.title": "Diseño de este espacio",
   "spaces.title": "Espacios",

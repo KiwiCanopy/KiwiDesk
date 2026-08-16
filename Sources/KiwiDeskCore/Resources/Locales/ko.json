@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — ‘%2$@’ 설정을 따릅니다.",
   "spaces.preview.caption_overridden": "%1$@ — 이 공간에서 오버라이드된 설정: %2$d",
   "spaces.preview.count_hint": "이 미리보기만 바뀌며 저장되지 않습니다.",
-  "spaces.preview.floating": "플로팅은 윈도우를 배치하지 않으므로 그릴 것이 없습니다.",
   "spaces.preview.none": "이 초안에는 아직 공간이 없습니다.",
   "spaces.preview.title": "이 공간의 레이아웃",
   "spaces.title": "공간",

@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — segue «%2$@».",
   "spaces.preview.caption_overridden": "%1$@ — impostazioni personalizzate per questo spazio: %2$d",
   "spaces.preview.count_hint": "Cambia solo questa anteprima; non viene salvata.",
-  "spaces.preview.floating": "Floating non dispone finestre, quindi non c'è nulla da disegnare.",
   "spaces.preview.none": "Ancora nessuno spazio in questa bozza.",
   "spaces.preview.title": "Layout di questo spazio",
   "spaces.title": "Spazi",

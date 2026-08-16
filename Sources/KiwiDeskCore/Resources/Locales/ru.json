@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — следует разделу «%2$@».",
   "spaces.preview.caption_overridden": "%1$@ — настройки переопределены для этого пространства: %2$d",
   "spaces.preview.count_hint": "Меняет только этот предпросмотр; он не сохраняется.",
-  "spaces.preview.floating": "Floating не размещает окна, поэтому рисовать нечего.",
   "spaces.preview.none": "В этом черновике пока нет пространств.",
   "spaces.preview.title": "Раскладка этого пространства",
   "spaces.title": "Пространства",

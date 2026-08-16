@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — 遵循“%2$@”。",
   "spaces.preview.caption_overridden": "%1$@ — 此空间覆盖的设置：%2$d",
   "spaces.preview.count_hint": "仅改变此预览，不会保存。",
-  "spaces.preview.floating": "浮动不放置窗口，因此没有可绘制的内容。",
   "spaces.preview.none": "此草稿中尚无空间。",
   "spaces.preview.title": "此空间的布局",
   "spaces.title": "空间",

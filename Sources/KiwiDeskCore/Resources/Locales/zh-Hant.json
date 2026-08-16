@@ -1051,7 +1051,6 @@
   "spaces.preview.caption_default": "%1$@ — 遵循「%2$@」。",
   "spaces.preview.caption_overridden": "%1$@ — 這個空間覆寫的設定：%2$d",
   "spaces.preview.count_hint": "只會變更這個預覽，不會儲存。",
-  "spaces.preview.floating": "Floating 不會放置視窗，因此沒有可繪製的內容。",
   "spaces.preview.none": "這份草稿中尚無空間。",
   "spaces.preview.title": "這個空間的佈局",
   "spaces.title": "空間",
