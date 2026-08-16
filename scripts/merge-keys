@@ -13,9 +13,11 @@ other rule below is identical for both.
 
 Run after `scripts/extract-keys <locale>` produced
 `locale-worksheets/missing_<locale>.json` — a `{key: {"source":
-<English>, "translation": ""}}` map — and a translator has filled
-each entry's "translation" field in place (do not change the keys
-or the "source" field). The worksheet lives outside the catalog
+<English>, "translation": …}}` map, each slot empty on a first
+mint and possibly already filled on a re-mint, which carries
+drafts over — and a translator has filled each entry's
+"translation" field in place (do not change the keys or the
+"source" field). The worksheet lives outside the catalog
 directory on purpose; `<locale>.json` is written back into it.
 
 Only entries whose "translation" is non-empty (after trimming

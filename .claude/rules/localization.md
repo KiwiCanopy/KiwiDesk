@@ -74,6 +74,36 @@ hand-edit **any** `Resources/Locales/*.json`. Use the scripts:
 | One locale's translation is bad | `scripts/drop-key --locale <locale> <key>` |
 | Remove orphans | `scripts/extract-keys --prune` |
 
+**A re-mint must never silently discard drafted work.**
+`extract-keys <locale>` rewrites `missing_<locale>.json` from
+`en.json` against `<locale>.json`, so it reads the worksheet
+already on disk and carries every non-empty `translation` into
+the file it writes; a draft it cannot carry is echoed with its
+text, and a worksheet that will not parse is refused rather than
+overwritten. `LocaleWorksheetCarryTests` holds all three, and
+`write_missing` in `scripts/extract-keys` argues them.
+
+That is a property to preserve, not a convenience: between
+minting and merging, the worksheet is the ONLY copy of the work
+in it — `locale-worksheets/` is gitignored, and `merge-keys` is
+the one thing that moves a translation somewhere a re-mint
+cannot reach. The re-mint used to ignore that file and write
+every slot empty, which cost a translator everything drafted
+since the last merge and reported "N missing key(s) written"
+exactly as a first extract does. Picking up newly-added English
+mid-draft is the ordinary reason to re-run the extractor, so the
+destructive path was also the intuitive one.
+
+**A draft is carried only while its stored `source` still equals
+the current English** — the same rule `merge-keys` merges by.
+Once the English moves the draft translates text the app no
+longer shows, so the slot is cleared and the loss reported;
+carrying it would hand the translator a worksheet that looks
+finished and a `merge-keys` run that silently refuses it. Keep
+the two scripts agreeing on that predicate: they are one
+round-trip, and a carry rule looser than the merge rule strands
+work in the gap between them.
+
 `drop-key` in the same change set makes every locale fall back to
 the new English and puts the key back on the to-translate list.
 Cosmetic English edits (typo, punctuation) **keep** translations.
@@ -314,7 +344,7 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
 `LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
-`LocaleWorksheetRejectionTests`
+`LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.

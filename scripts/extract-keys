@@ -12,7 +12,11 @@ Usage:
                                        missing (or has empty),
                                        sourced with the English
                                        text for a translator to
-                                       fill in place.
+                                       fill in place. Safe to
+                                       re-run mid-translation:
+                                       drafts already in the
+                                       worksheet are carried
+                                       over.
 
     --site                            Operate on the marketing site
                                        (`site/src/i18n/`) instead of
@@ -814,7 +818,67 @@ def prune(mapping: dict[str, str], regen: bool = True) -> int:
     return 0
 
 
-def write_missing(locale: str, mapping: dict[str, str]) -> None:
+class WorksheetUnreadable(Exception):
+    """A worksheet exists but cannot be parsed, so the drafts in
+    it can neither be carried forward nor knowingly discarded."""
+
+
+def read_drafts(out: Path) -> dict[str, tuple[str, str]]:
+    """Every usable `(source, translation)` pair in the worksheet
+    at `out`, keyed by key; `{}` when there is no worksheet.
+
+    Only non-empty translations are returned — an empty slot is
+    the "still to do" signal and carries nothing.
+
+    An entry whose SHAPE is wrong (not an object, a non-string
+    `source` or `translation`) is skipped rather than raising:
+    there is no draft in it to save, and `merge-keys` would
+    refuse the same entry as unverifiable. A file that will not
+    parse as JSON at all is different in kind and raises, because
+    then the drafts cannot be read OR knowingly discarded, and
+    overwriting is the one thing this function must never do
+    blind.
+    """
+    if not out.exists():
+        return {}
+    try:
+        entries = json.loads(out.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as error:
+        raise WorksheetUnreadable(str(error)) from error
+    if not isinstance(entries, dict):
+        raise WorksheetUnreadable("not a JSON object")
+    drafts: dict[str, tuple[str, str]] = {}
+    for key, entry in entries.items():
+        if not isinstance(entry, dict):
+            continue
+        source = entry.get("source")
+        text = entry.get("translation")
+        if not isinstance(source, str):
+            continue
+        if not isinstance(text, str) or not text.strip():
+            continue
+        drafts[key] = (source, text)
+    return drafts
+
+
+def _report_discarded(
+    label: str, dropped: list[tuple[str, str]]
+) -> None:
+    """Echoes each discarded draft with its text, the way
+    `merge-keys` echoes what it refuses to merge — the terminal
+    is the only remaining copy once the worksheet is rewritten."""
+    if not dropped:
+        return
+    print(
+        f"extract-keys: {len(dropped)} drafted translation(s) "
+        f"{label}:",
+        file=sys.stderr,
+    )
+    for key, text in dropped:
+        print(f"    - {key}: {text!r}", file=sys.stderr)
+
+
+def write_missing(locale: str, mapping: dict[str, str]) -> int:
     """Writes `missing_<locale>.json` as `{key: {"source":
     <English>, "translation": ""}}` for every key `<locale>.json`
     doesn't have yet. The empty `translation` slot (not a
@@ -826,7 +890,27 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
 
     The worksheet lands in `WORKSHEETS_DIR`, never beside the
     catalogs it was computed from — `scripts/locale_paths.py`
-    owns that path."""
+    owns that path.
+
+    **A worksheet already on disk is read first, and any
+    non-empty `translation` in it is carried into the one this
+    writes.** The drafting window runs to days (see
+    `scripts/merge-keys`' header) and the directory is
+    gitignored, so between minting and merging that file is
+    usually the only copy of the work in it — a re-mint that
+    ignored it destroyed the lot, silently, and re-running the
+    extractor to pick up new English is the natural thing to do
+    mid-draft. Whatever replaces this function keeps that
+    property.
+
+    A draft is carried only while its stored `source` still
+    equals the current English, which is the rule `merge-keys`
+    already merges by: once the English moves, the draft
+    translates text the app no longer shows, so the slot is
+    cleared and the loss is reported with its text rather than
+    carried into a worksheet that would look finished. Drafts
+    whose key is no longer missing at all are reported the same
+    way."""
     locale_file = LOCALES_DIR / f"{locale}.json"
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -836,20 +920,59 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
             )
         except json.JSONDecodeError:
             existing = {}
-    missing = {
-        key: {"source": english, "translation": ""}
-        for key, english in mapping.items()
-        if not existing.get(key)
-    }
     out = WORKSHEETS_DIR / worksheet_name(locale)
+    try:
+        drafted = read_drafts(out)
+    except WorksheetUnreadable as error:
+        print(
+            f"extract-keys: {out} exists but will not parse "
+            f"({error}). Overwriting it would destroy whatever "
+            "is in it, so nothing was written — fix the JSON, or "
+            "move the file aside, then run this again.",
+            file=sys.stderr,
+        )
+        return 1
+
+    missing: dict[str, dict[str, str]] = {}
+    stale: list[tuple[str, str]] = []
+    for key, english in mapping.items():
+        if existing.get(key):
+            continue
+        source, text = drafted.pop(key, ("", ""))
+        if text and source != english:
+            # The English moved while the draft was out, so the
+            # draft translates text the app no longer shows.
+            # `merge-keys` would refuse it for the same reason;
+            # clearing the slot here says so a round earlier,
+            # while the translator can still see the new source.
+            stale.append((key, text))
+            text = ""
+        missing[key] = {"source": english, "translation": text}
+    # Whatever is left held a draft this run cannot place: the
+    # key is translated in the catalog already, or has left
+    # en.json. Either way the worksheet is about to stop carrying
+    # it, so echo it rather than dropping it silently.
+    orphaned = sorted(
+        (key, text) for key, (_, text) in drafted.items()
+    )
+
     if not missing:
+        _report_discarded("dropped as no longer missing", orphaned)
         if out.exists():
             out.unlink()
         print(
             f"extract-keys: {locale} has no missing keys "
             f"(nothing written)."
         )
-        return
+        return 0
+
+    carried = sum(
+        1 for entry in missing.values() if entry["translation"]
+    )
+    _report_discarded(
+        "cleared — their English has changed since", stale
+    )
+    _report_discarded("dropped as no longer missing", orphaned)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(
@@ -862,11 +985,18 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         f"extract-keys: {len(missing)} missing key(s) for "
         f"'{locale}' written to {out}"
     )
+    if carried:
+        print(
+            f"extract-keys: {carried} translation(s) already "
+            "drafted in the previous worksheet were carried "
+            "over — merge when you are ready."
+        )
     flag = "--site " if LOCALES_DIR == SITE_LOCALES_DIR else ""
     print(
         'Fill each entry\'s "translation" field, then run: '
         f"scripts/merge-keys {flag}{locale}"
     )
+    return 0
 
 
 def _site_mapping() -> dict[str, str]:
@@ -931,7 +1061,7 @@ def main(argv: list[str]) -> int:
     if not site:
         write_en_json(mapping)
     if mode:
-        write_missing(mode, mapping)
+        return write_missing(mode, mapping)
     elif site:
         print(
             "extract-keys --site: no locale given. Run "

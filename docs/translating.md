@@ -233,6 +233,23 @@ translate for language names.
    above). Leave `"translation"` empty (`""`) for any key you
    want to skip for now — it will simply reappear next time you
    run `extract-keys fr`.
+
+   > **Re-running `extract-keys fr` mid-translation is safe.**
+   > It rebuilds the worksheet, but reads the one already there
+   > first and carries every filled-in `"translation"` across —
+   > so picking up English that landed while you were working
+   > costs you nothing. It says how many it carried.
+   >
+   > One kind of entry it cannot carry: one whose English has
+   > **changed** since you started. Your text translates a
+   > sentence the app no longer shows, so that slot is emptied
+   > and refilled with the new `"source"`, and the translation
+   > you had is printed to the terminal so you can copy it back
+   > if it still fits. `merge-keys` would refuse the same entry
+   > for the same reason — this just tells you a round earlier.
+   > A worksheet that has been damaged into invalid JSON is
+   > refused outright rather than overwritten; fix or move it,
+   > then run again.
 4. Fold the finished translations back in:
 
    ```
@@ -290,6 +307,11 @@ scripts/extract-keys de      # writes locale-worksheets/
 # fill in each entry's "translation" field in the worksheet
 scripts/merge-keys de        # folds the non-empty ones into de.json
 ```
+
+The delta is computed against `de.json`, so the worksheet only
+ever lists what the catalog still lacks. Running that first line
+on top of a part-filled worksheet is fine — anything you have
+already typed is carried over (see step 3 above).
 
 To fix a wrong, awkward, or overly literal existing
 translation, edit the value directly in `<locale>.json` — that
