@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
   <title id="title">KiwiDesk social preview</title>
-  <desc id="desc">The KiwiDesk logo, product name, tagline, endorsement, and canonical domain.</desc>
+  <desc id="desc">Das KiwiDesk-Logo, der Produktname, der Slogan, der Hinweis auf KiwiCanopy und die Domain.</desc>
   <rect width="1200" height="630" fill="#ffffff"/>
   <circle cx="1110" cy="72" r="260" fill="#dbeeee" opacity=".72"/>
   <circle cx="1060" cy="610" r="340" fill="#cce0a2" opacity=".58"/>
   <image href="logo.svg" x="92" y="105" width="420" height="420" preserveAspectRatio="xMidYMid meet"/>
   <text x="548" y="262" fill="#1c373d" font-family="Inter, Arial, sans-serif" font-size="110" font-weight="700" letter-spacing="-4">KiwiDesk</text>
-  <text x="552" y="322" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="600">Your windows, tidy — all on their own</text>
-  <text x="552" y="386" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">by KiwiCanopy</text>
+  <text x="552" y="322" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="600">Fenster, aufgeräumt — ganz von allein</text>
+  <text x="552" y="386" fill="#587271" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="500">von KiwiCanopy</text>
   <text x="554" y="446" fill="#1c373d" font-family="Inter, Arial, sans-serif" font-size="30">kiwidesk.kiwicanopy.com</text>
 </svg>

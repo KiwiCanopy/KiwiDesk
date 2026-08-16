@@ -33,7 +33,9 @@ import ThemeHead from "./ThemeHead.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
-import ogImage from "../assets/brand/og-banner.jpg";
+import ogBannerEn from "../assets/brand/og-banner.jpg";
+import ogBannerDe from "../assets/brand/og-banner.de.jpg";
+import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import { layoutDiagram } from "../lib/layoutDiagram";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
@@ -44,6 +46,11 @@ interface Props {
   lang: "en" | "de" | "ja";
 }
 const { t, lang } = Astro.props;
+
+// One banner per locale — the card carries the tagline, so it has to speak
+// the same language as the title and description beside it.
+const ogImage = lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
+
 // Per-key English fallback: untranslated keys degrade to English.
 const s = { ...en, ...t } as Record<string, string>;
 

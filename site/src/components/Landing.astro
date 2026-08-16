@@ -21,7 +21,9 @@ import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
-import ogImage from "../assets/brand/og-banner.jpg";
+import ogBannerEn from "../assets/brand/og-banner.jpg";
+import ogBannerDe from "../assets/brand/og-banner.de.jpg";
+import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
 import en from "../i18n/en.json";
@@ -32,6 +34,11 @@ interface Props {
   lang: "en" | "de" | "ja";
 }
 const { t: locale, lang } = Astro.props;
+
+// One banner per locale — the card carries the tagline, so it has to speak
+// the same language as the title and description beside it.
+const ogImage = lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
+
 // Per-key English fallback: an untranslated locale key degrades to
 // English rather than rendering blank (mirrors Guide.astro).
 const t = { ...en, ...locale } as Record<string, string>;
