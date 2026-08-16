@@ -996,7 +996,6 @@
   "space_override.off.help": "전역 값을 상속하는 중",
   "space_override.on.help": "전역 값을 재정의하는 중",
   "space_override.override_column": "오버라이드",
-  "space_override.preview": "미리보기",
   "space_override.reset_active": "%1$@ 의 오버라이드 리셋",
   "space_override.reset_active.none": "재설정할 오버라이드가 없습니다.",
   "space_override.reset_all": "모든 레이아웃 오버라이드 리셋",

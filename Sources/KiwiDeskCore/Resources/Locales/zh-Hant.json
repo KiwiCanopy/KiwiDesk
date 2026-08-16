@@ -996,7 +996,6 @@
   "space_override.off.help": "沿用全域數值",
   "space_override.on.help": "覆寫全域數值",
   "space_override.override_column": "覆寫",
-  "space_override.preview": "預覽",
   "space_override.reset_active": "重設 %1$@ 覆寫項目",
   "space_override.reset_active.none": "沒有需要重置的覆寫項。",
   "space_override.reset_all": "重設所有佈局覆寫項目",

@@ -996,7 +996,6 @@
   "space_override.off.help": "Erbt den globalen Wert",
   "space_override.on.help": "Überschreibt den globalen Wert",
   "space_override.override_column": "Überschreibung",
-  "space_override.preview": "Vorschau",
   "space_override.reset_active": "Überschreibungen für %1$@ zurücksetzen",
   "space_override.reset_active.none": "Es gibt keine Überschreibungen zum Zurücksetzen.",
   "space_override.reset_all": "Alle Layout-Überschreibungen zurücksetzen",

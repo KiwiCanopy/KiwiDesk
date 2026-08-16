@@ -27,7 +27,7 @@ enum SettingsDetailPanelOffer {
     /// own rule working — absence is a stated verdict.
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .colors, .layoutDefaults,
-        .shortcuts, .advancedColors,
+        .shortcuts, .advancedColors, .spaces,
     ]
 
     static func offers(
@@ -102,6 +102,8 @@ struct SettingsDetailPanel: View {
             PaletteScenePanel(model: model)
         case .advancedColors:
             AdvancedColorsPanel(model: model)
+        case .spaces:
+            SpacesPanelPreview(model: model)
         case .shortcuts:
             KeyboardPreviewPanel(model: model)
         case .layoutDefaults:

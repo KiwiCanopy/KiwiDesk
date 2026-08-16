@@ -996,7 +996,6 @@
   "space_override.off.help": "Наследует общее значение",
   "space_override.on.help": "Переопределяет общее значение",
   "space_override.override_column": "Переопределение",
-  "space_override.preview": "Предпросмотр",
   "space_override.reset_active": "Сбросить переопределения %1$@",
   "space_override.reset_active.none": "Нет переопределений для сброса.",
   "space_override.reset_all": "Сбросить все переопределения раскладок",

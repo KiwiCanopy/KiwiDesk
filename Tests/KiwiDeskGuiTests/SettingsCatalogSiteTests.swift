@@ -39,7 +39,8 @@ struct SettingsCatalogSiteTests {
         // loads" card and the "For other setups" preset drawer.
         // 59 since #754: the Borders card.
         // 60 since #793: Advanced Colours' panel scene.
-        #expect(names.count == 60)
+        // 61 since #794: the Spaces panel's per-Space preview.
+        #expect(names.count == 61)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

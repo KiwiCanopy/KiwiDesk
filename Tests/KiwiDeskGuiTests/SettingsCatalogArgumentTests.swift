@@ -141,7 +141,9 @@ struct SettingsCatalogArgumentTests {
         // 49 since #754: the Borders card, mounted once.
         // 50 since #793: Advanced Colours' panel scene, mounted
         // once — in the panel rather than in the section body.
-        #expect(direct.values.reduce(0, +) == 50)
+        // 51 since #794: the Spaces panel's preview, likewise
+        // mounted in the panel and not in the section.
+        #expect(direct.values.reduce(0, +) == 51)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

@@ -996,7 +996,6 @@
   "space_override.off.help": "グローバル値を継承中",
   "space_override.on.help": "グローバル値をオーバーライド中",
   "space_override.override_column": "オーバーライド",
-  "space_override.preview": "プレビュー",
   "space_override.reset_active": "%1$@ のオーバーライドをリセット",
   "space_override.reset_active.none": "リセットするオーバーライドはありません。",
   "space_override.reset_all": "すべてのレイアウトオーバーライドをリセット",

@@ -20,12 +20,13 @@ struct DetailPanelTests {
     /// extension motion #793-#795 each repeat — so a member
     /// arriving here without a branch in the map below is the
     /// failure this pair exists to catch.
-    @Test("the offer set is the scoped six")
+    @Test("the offer set is the scoped seven")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .colors,
                 .layoutDefaults, .shortcuts, .advancedColors,
+                .spaces,
             ]
         )
         // General's absence is a RULING, not a gap (#795, owner
@@ -59,6 +60,8 @@ struct DetailPanelTests {
             .advancedColors:
                 "case.advancedColors:"
                 + "AdvancedColorsPanel(model:model)",
+            .spaces:
+                "case.spaces:SpacesPanelPreview(model:model)",
         ]
         #expect(
             Set(branches.keys)
@@ -231,6 +234,14 @@ struct DetailPanelTests {
             (
                 "Components/Colors/StructureColorCards.swift",
                 "DragVisualPreview("
+            ),
+            // #794: the per-space editor gave up its own copy,
+            // which is what let the panel take it — the renderer
+            // was deleted with the mount, so the needle names the
+            // SECTION that must not grow a replacement.
+            (
+                "Sections/SpacesSection+Overrides.swift",
+                "SpaceOverridePreview("
             ),
             (
                 "Sections/ColorsMotionSection.swift",

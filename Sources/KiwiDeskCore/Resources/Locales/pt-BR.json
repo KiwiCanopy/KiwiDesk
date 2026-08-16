@@ -996,7 +996,6 @@
   "space_override.off.help": "Herdando o valor global",
   "space_override.on.help": "Substituindo o valor global",
   "space_override.override_column": "Substituição",
-  "space_override.preview": "Pré-visualização",
   "space_override.reset_active": "Redefinir substituições de %1$@",
   "space_override.reset_active.none": "Não há substituições para redefinir.",
   "space_override.reset_all": "Redefinir todas as substituições de layout",

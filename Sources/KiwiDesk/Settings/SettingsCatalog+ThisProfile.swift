@@ -14,6 +14,15 @@ import KiwiDeskCore
 
 struct SpacesControls: Sendable {
     let spacesCard = SettingsControl("spaces.title", "Spaces")
+    /// The detail panel's per-Space preview (#794). Its own
+    /// title rather than Layout Defaults' "Live preview": that
+    /// one draws a LAYOUT's defaults and this one draws a
+    /// SPACE's resolved reality, which is the whole distinction
+    /// the panel exists to make.
+    let spacePreview = SettingsControl(
+        "spaces.preview.title",
+        "This Space's layout"
+    )
 }
 
 struct LayoutDefaultsControls: Sendable {

@@ -996,7 +996,6 @@
   "space_override.off.help": "Hérite de la valeur globale",
   "space_override.on.help": "Remplace la valeur globale",
   "space_override.override_column": "Surcharge",
-  "space_override.preview": "Aperçu",
   "space_override.reset_active": "Réinitialiser les surcharges de %1$@",
   "space_override.reset_active.none": "Il n'y a aucune surcharge à réinitialiser.",
   "space_override.reset_all": "Réinitialiser toutes les surcharges de disposition",

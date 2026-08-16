@@ -996,7 +996,6 @@
   "space_override.off.help": "Eredita il valore globale",
   "space_override.on.help": "Sostituisce il valore globale",
   "space_override.override_column": "Personalizzazione",
-  "space_override.preview": "Anteprima",
   "space_override.reset_active": "Ripristina personalizzazioni di %1$@",
   "space_override.reset_active.none": "Non ci sono personalizzazioni da ripristinare.",
   "space_override.reset_all": "Ripristina tutte le personalizzazioni dei layout",

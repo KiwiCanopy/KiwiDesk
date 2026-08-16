@@ -898,6 +898,14 @@ Adjust each mode's defaults:
 
 ### Per-Space Overrides
 
+The **Live preview** panel beside the Spaces list draws any one
+space's layout as that space resolves it — defaults plus its own
+overrides — with a chip per space to click through them, and a
+caption naming the layout and how many settings that space
+overrides. That is the question Layout Defaults cannot answer: its
+preview draws a layout's defaults, and the overrides are exactly
+what you came to check.
+
 To tune the *same layout type differently in different spaces*, use
 the per-space override editor. For example, make space "3" scroll
 vertically while every other scrolling space goes horizontal. Open
@@ -919,8 +927,10 @@ and the row collapses to a quiet **follows `<Layout>` defaults ·
 space — the control appears, seeded with the current value so
 nothing jumps.
 
-A **live preview** beside the rows draws the space's layout with its
-overrides applied, so a ratio or count you change shows at once. A
+The **Live preview** panel draws the space's layout with its
+overrides applied, so a ratio or count you change shows at once —
+and while an override editor is open the panel follows that space,
+so it is always answering about the rows in front of you. A
 **Window count** slider drives how many windows it simulates — a
 question you ask of the preview, not a setting, so it never
 persists.
@@ -1597,11 +1607,15 @@ is a **one-time paint**, not a live link: it overwrites the current
 colors (you can still tweak any individual color afterward), and the
 change is staged until you Save the profile like any other edit.
 In the preview panel beside the shelf, **Current colors** shows
-the same scene painted in the colors you are editing — the bar
-plate and its active item, the focus ring, and the drag ghost —
-with the changed-list under it. It is the shelf's own
+the same scene painted in the colors you are editing — both bars
+with their active and focused items, the focused and unfocused
+rings with their state marks, and the drag ghost beside its drop
+zone — with the changed-list under it. It is the shelf's own
 tile at a larger size, so what a palette promises and what you have
-can never be drawn two different ways. Edit any individual color in
+can never be drawn two different ways. The four **hover** colors
+are not in the scene: a still picture can only draw a pointer
+state as though it were the resting one, which would show you a
+behavior KiwiDesk does not have. Edit any individual color in
 Advanced Colors and this scene follows.
 
 The palette you are on is **checkmarked**. The mark is worked out
@@ -1681,9 +1695,23 @@ The **Advanced Colors** section holds every colour KiwiDesk has —
 You arrive here having noticed that something on screen is the
 wrong colour, so the four groups match the four things that can
 be: **Border colors**, **Drag colors**, **Space Bar colors**,
-**App Bar colors**. Each group leads with the same live preview
-its own editor uses, so you are always looking at the thing you
-are tinting.
+**App Bar colors**.
+
+The **Live preview** panel beside them draws **one scene holding
+every colour at once** — both bars with their active and focused
+items and their count badges, the focused and unfocused rings
+with their state marks, and the drag ghost beside its drop zone —
+in the colours you are editing, pinned while the rows scroll.
+That is the question the groups cannot answer on their own: a
+colour is easy to judge alone and only readable in company, and
+the ladder on each bar, the two rings and the marks beside the
+accent are all judged against each other.
+
+The four **hover** colours are the one thing the scene leaves
+out. A still picture can only draw a pointer state as though it
+were the resting one, which would teach you a behavior KiwiDesk
+does not have — so they are edited by swatch and seen on the real
+bar.
 
 Each colour renders in **exactly one place**: no colour on this
 page is also editable somewhere else in Settings, and no colour

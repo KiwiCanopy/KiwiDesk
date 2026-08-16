@@ -996,7 +996,6 @@
   "space_override.off.help": "正在继承全局值",
   "space_override.on.help": "正在覆盖全局值",
   "space_override.override_column": "覆盖",
-  "space_override.preview": "预览",
   "space_override.reset_active": "重置 %1$@ 覆盖",
   "space_override.reset_active.none": "没有需要重置的覆盖项。",
   "space_override.reset_all": "重置所有布局覆盖",

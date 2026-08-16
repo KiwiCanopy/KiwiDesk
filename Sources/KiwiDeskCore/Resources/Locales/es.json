@@ -996,7 +996,6 @@
   "space_override.off.help": "Heredando el valor global",
   "space_override.on.help": "Reemplazando el valor global",
   "space_override.override_column": "Anulación",
-  "space_override.preview": "Vista previa",
   "space_override.reset_active": "Restablecer anulaciones de %1$@",
   "space_override.reset_active.none": "No hay anulaciones que restablecer.",
   "space_override.reset_all": "Restablecer todas las anulaciones de diseño",

@@ -56,30 +56,13 @@ extension SpacesSection {
                         // silently swallowed clicks on a scrolling
                         // space until any re-render settled the layout.
                         .layoutPriority(1)
-                        // A live preview beside the rows: the space's
-                        // active layout with ITS overrides applied,
-                        // updating as the user edits. Deliberately
-                        // trailing rather than leading for this wide
-                        // side-by-side editor (owner call 2026-08-04,
-                        // this panel being reworked in a later step).
-                        // It fills the rest of the capped column so it
-                        // shares the header's right edge; Floating has
-                        // no schematic, so it draws none.
-                        if LayoutMode.placementTabs.contains(mode) {
-                            SpaceOverridePreview(
-                                model: model,
-                                space: space,
-                                mode: mode
-                            )
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .leading
-                            )
-                            // Clip so the schematic can neither draw
-                            // nor hit-test past the preview's own
-                            // frame onto the rows column beside it.
-                            .clipped()
-                        }
+                        // The live preview LEFT in #794: the
+                        // detail panel now draws the Space whose
+                        // editor is open (`SpacesPanelPreview`
+                        // reads `nav.spaceOverridesFocus`), and
+                        // one screen must not state one fact
+                        // twice — the migration rule every other
+                        // panel area already follows.
                     }
                 }
                 // Cap the editing column and left-align it: on a wide
