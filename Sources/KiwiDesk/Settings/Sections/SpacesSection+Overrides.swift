@@ -61,19 +61,28 @@ extension SpacesSection {
                     space: space,
                     pendingResetAll: $pendingResetAll
                 )
-                // Bounded, not full-bleed: the override rows
-                // carry their own label/control columns, so
-                // stretching them only lengthens slider
-                // travel past what the value needs. The
-                // number is the ~520 pt the `.menu` picker
-                // exception argues from
-                // (`OverrideControls`,
-                // `docs/ui-patterns.md`), so a preview that
-                // wants more width buys it inside its own
-                // frame — #753 widened the Scrolling
-                // schematic by giving up its ghost margin,
-                // not by narrowing this column.
-                .frame(maxWidth: 520, alignment: .leading)
+                // The 520 pt cap is GONE, and with it the
+                // reason it existed: it reserved the rest of
+                // the pane for the live preview that used to
+                // sit beside these rows, and #794 moved that
+                // preview into the detail panel. What was left
+                // was a card squeezed to 520 in a pane three
+                // times as wide, truncating its own inherited
+                // readouts — "folgt Scrolling-Standards ·
+                // Hor…" — with the space to finish the sentence
+                // sitting empty beside it (owner, on device,
+                // 2026-08-16). Widening the OVERRIDE column to
+                // fit German took another 24 pt off the same
+                // text.
+                //
+                // Still BOUNDED, at 700 rather than 520: the
+                // `.menu` picker exception (#291) is argued in
+                // `docs/ui-patterns.md` from these rows sitting
+                // in a bounded column, and a width fix has no
+                // business retiring a settled control ruling as
+                // a side effect. 700 finishes the readout and
+                // leaves that argument standing.
+                .frame(maxWidth: 700, alignment: .leading)
                 // Win the width negotiation, so no preview can
                 // overconstrain the HStack and spill its frame
                 // over these rows' trailing checkboxes — which
@@ -92,7 +101,6 @@ extension SpacesSection {
             // rather than pinned to the pane's far edge.
             resetActiveButton(space, mode: mode, gates: gates)
         }
-        .frame(maxWidth: 520, alignment: .leading)
     }
 
     /// `‹ Spaces › <space> › Overrides` — the first crumb is a

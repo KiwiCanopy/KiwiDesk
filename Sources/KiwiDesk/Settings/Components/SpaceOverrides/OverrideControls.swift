@@ -298,7 +298,7 @@ struct OverrideFractionRow: View {
 /// one override surface left since the per-layout bar overrides
 /// went Lua-only (GUI_REMOVED_2026-08) — is the documented
 /// compact-surface exception to the #291 segmented norm. Its rows
-/// sit in a bounded ~520 pt column with a trailing OVERRIDE
+/// sit in a bounded ~700 pt column with a trailing OVERRIDE
 /// checkbox column, so a segmented row would be cramped and the
 /// `.menu` holds (see `docs/ui-patterns.md`).
 struct OverridePickerRow<Value: Hashable & Sendable>: View {

@@ -194,7 +194,7 @@ room left.
 **The per-Space override rows keep menus, not segmented
 controls (#291).** The override editor is now a full pushed
 pane (#678 8b, no longer the #205 popover), but its rows still
-sit in a **bounded ~520 pt column** with a trailing OVERRIDE
+sit in a **bounded ~700 pt column** with a trailing OVERRIDE
 checkbox column (`overrideStateColumn`, 64 pt) and the
 `OverrideChrome` accent bar eating horizontal width, so a
 2–4-peer field has no room for a segmented render.
