@@ -42,6 +42,7 @@ extension SettingsModel {
                 // `displays.count` from being read there.
                 matchesConnectedCount: profile.monitorCount
                     == live.count,
+                openingModes: profile.openingModes(),
                 spaceCount: profile.declaredSpaces.count,
                 shortcutOverrideCount:
                     profile.layers?.overrideCount ?? 0

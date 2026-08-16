@@ -125,7 +125,7 @@ struct ProfileScreenPipsTests {
         #expect(
             ProfileScreenPips.slotWidth(
                 slots: 1,
-                pip: pip,
+                screen: pip,
                 gap: 3
             ) == 18
         )
@@ -133,7 +133,7 @@ struct ProfileScreenPipsTests {
         #expect(
             ProfileScreenPips.slotWidth(
                 slots: 2,
-                pip: pip,
+                screen: pip,
                 gap: 3
             ) == 39
         )
@@ -142,7 +142,7 @@ struct ProfileScreenPipsTests {
         #expect(
             ProfileScreenPips.slotWidth(
                 slots: 5,
-                pip: pip,
+                screen: pip,
                 gap: 3
             ) == 102
         )
@@ -150,7 +150,7 @@ struct ProfileScreenPipsTests {
         #expect(
             ProfileScreenPips.slotWidth(
                 slots: 3,
-                pip: CGSize(width: 10, height: 8),
+                screen: CGSize(width: 10, height: 8),
                 gap: 5
             ) == 40
         )
@@ -166,7 +166,7 @@ struct ProfileScreenPipsTests {
             ProfileScreenPips.slotWidth
                 == ProfileScreenPips.slotWidth(
                     slots: ProfileScreenPips.slots,
-                    pip: ProfileScreenPips.pip,
+                    screen: ProfileScreenPips.screen,
                     gap: ProfileScreenPips.gap
                 )
         )

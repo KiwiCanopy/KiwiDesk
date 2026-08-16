@@ -270,6 +270,17 @@ struct ProfileSummary: Identifiable {
     /// one read of the live displays, so the two cannot answer
     /// about different moments.
     let matchesConnectedCount: Bool
+    /// What each of this profile's screens opens in, in the
+    /// stored set's canonical monitor order — `nil` where the
+    /// profile does not say (#789).
+    ///
+    /// Carried on the summary rather than derived in the view so
+    /// the row and the preset card read ONE accessor
+    /// (`Profile.openingModes()`), which is also what keeps the
+    /// two surfaces' pictures in one grammar. `count` and this
+    /// array agree by construction — the accessor returns one
+    /// entry per covered screen.
+    let openingModes: [LayoutMode?]
     /// Spaces the profile declares (#678 turn 13a). Part of the
     /// row's subtitle, which counts only what the profile OWNS.
     let spaceCount: Int

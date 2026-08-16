@@ -176,20 +176,17 @@ struct ProfilesSection: View {
             // the subtitle below rather than moving here: `.help`
             // on a decorative image is hover-only, and this one
             // is `.accessibilityHidden`.
-            ProfileScreenPips(count: summary.count)
-                // Pins the picture against the "+N" chip's
-                // baseline, NOT against nothing: a pip row with
-                // no chip donates no text baseline and already
-                // resolves to its own bottom edge, so this is an
-                // identity there. The case it changes is a row
-                // WITH a chip, whose `Text` would otherwise give
-                // the stack a real first-text baseline and seat
-                // that row differently from its neighbours.
-                // Stating the guide makes every row align the
-                // same way whatever its screen count.
-                .alignmentGuide(.firstTextBaseline) {
-                    $0[.bottom]
-                }
+            // The guide pins the picture against the "+N" chip's
+            // baseline, NOT against nothing: a screen row with no
+            // chip donates no text baseline and already resolves
+            // to its own bottom edge, so it is an identity there.
+            // The case it changes is a row WITH a chip, whose
+            // `Text` would otherwise give the stack a real
+            // first-text baseline and seat that row differently
+            // from its neighbours. Stating it makes every row
+            // align the same way whatever its screen count.
+            screenPicture(summary)
+                .alignmentGuide(.firstTextBaseline) { $0[.bottom] }
             VStack(alignment: .leading, spacing: 3) {
                 rowTitle(summary)
                 Text(subtitle(summary))
@@ -204,6 +201,18 @@ struct ProfilesSection: View {
             loadButton(summary)
             deleteButton(summary.name)
         }
+    }
+
+    /// The row's leading picture — one outline per screen in the
+    /// same grammar the preset cards draw, so the two surfaces
+    /// answer "what shape is this profile" one way (#789).
+    private func screenPicture(
+        _ summary: ProfileSummary
+    ) -> some View {
+        ProfileScreenPips(
+            count: summary.count,
+            openingModes: summary.openingModes
+        )
     }
 
     private func rowTitle(

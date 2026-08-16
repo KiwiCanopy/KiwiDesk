@@ -120,8 +120,8 @@ struct ProfilesGateWiringTests {
                 // types passes because both sides are then handed
                 // the same shape by the test (code review,
                 // 2026-08-11).
-                "presetRow($0,sizes:liveSizes)",
-                "presetRow($0,sizes:nil)",
+                "presetCard($0,sizes:liveSizes)",
+                "presetCard($0,sizes:nil)",
             ],
             "Components/Profiles/PresetScreenCard.swift": [
                 // …and the card must actually spend it.

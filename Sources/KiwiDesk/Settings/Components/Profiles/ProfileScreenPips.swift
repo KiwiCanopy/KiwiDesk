@@ -1,80 +1,81 @@
+import KiwiDeskCore
 import SwiftUI
 
-/// A saved profile's screen count, as a row of mini-screens
-/// (#789) — the leading slot that used to hold one generic
-/// `square.stack.3d.up` glyph identical on every row.
+/// A saved profile's screens, drawn in the SAME grammar as
+/// `PresetScreenCard` (#789) — one outline per screen, each
+/// carrying the glyph of what that screen opens in.
 ///
-/// **Not a plate, deliberately.** `HomeCardPlate.plate(for:)`
-/// returns `nil` for `.profiles` because a whole-app card's
-/// picture there is a data row rather than a desktop, and taking
-/// the fixed-dark `previewPlate` into a list row for a 73 pt
-/// ornament would import its whole contract: the `planeRing`
-/// seam, a new ink/surface pairing in
-/// `SettingsThemeContrastTests`, and concrete inks in place of
-/// the hierarchical greys `SettingsFixedGroundTests` bans on the
-/// fixed-dark families. So the pips sit on the row's own
-/// surface, in the theme's ordinary inks.
+/// **The grammar is the point.** The saved list and the preset
+/// grid answer one question — "what shape is this profile?" — and
+/// before this they answered it two ways in one scroll: featureless
+/// grey rectangles up top, outlined screens with layout glyphs
+/// below. They are the same object at different ages (the design
+/// digest's own phrase), so they draw the same picture at two
+/// sizes. `PresetScreenCard.outline` is the large mount; this is
+/// the small one, and both take their fill, stroke and radius from
+/// the shared constants below.
 ///
-/// **No accent, either.** The accent marks control FILLS, so
-/// accent-filled pips would read as "these ones are selected".
-/// The active profile is marked by its `BadgeChip`, which is a
-/// text channel rather than a hue — and that badge is also why
-/// this row grew no accent FRAME: a framed row inside a framed
-/// card is a card-in-card, and the badge already answers.
+/// **A screen with no answer draws its outline and no glyph**, the
+/// rule the preset card already draws by. A stored profile can say
+/// less than a preset: it pins spaces to fingerprints rather than
+/// to positions, and which monitor is Main is resolved live, so a
+/// multi-screen profile whose spaces were never pinned genuinely
+/// does not say. `Profile.openingModes()` owns that reasoning and
+/// returns `nil` there rather than guessing.
 ///
-/// **Silent to VoiceOver**, because the count it draws is
-/// already spoken by the row's subtitle (`profiles.screens.*`)
-/// and announcing the picture too would read one fact twice.
+/// **Not a plate, and no accent.** `HomeCardPlate.plate(for:)`
+/// returns `nil` for `.profiles` — a whole-app card's picture here
+/// is a data row, not a desktop — and the accent marks control
+/// FILLS, so accent-filled screens would read as "these ones are
+/// selected". The active profile is marked by its `BadgeChip`,
+/// which is a text channel. A consult proposed an accent-tinted
+/// tile for the active row (2026-08-16) and it was refused twice
+/// over: it separated active from inactive by hue at one weight,
+/// which is what `paletteCardStroke`'s 1→2 step exists to prevent,
+/// and its two ground tints measured ~3% apart in luminance —
+/// invisible to everyone, CVD or not.
 ///
-/// That is the reason, and it is worth separating from a
-/// neighbouring one it was once conflated with: a `.help` on a
-/// bare `Shape` is hover-only because a `Shape` is not an
-/// accessibility element, which is a fact about `.help`, not an
-/// argument for silence. Where such a picture DOES carry a fact
-/// of its own, the fix is to make it an element and label it —
-/// `PresetScreenCard.outlineView` is the worked case. Here the
-/// fact is not its own, so this stays hidden.
+/// **Silent to VoiceOver**: the count is already in the row's
+/// subtitle and each screen's mode is not a fact the row claims,
+/// so announcing the picture would read one fact twice.
 struct ProfileScreenPips: View {
     /// The profile's screen count.
     let count: Int
+    /// What each screen opens in, in the stored set's own order —
+    /// `nil` per screen where the profile does not say. Short or
+    /// empty is legal and draws bare outlines.
+    var openingModes: [LayoutMode?] = []
 
-    /// How many slots the row draws — pips, or pips plus the
-    /// "+N" chip. The chip takes a slot of its own
+    /// How many slots the row draws — screens, or screens plus
+    /// the "+N" chip. The chip takes a slot of its own
     /// (`docs/ui-patterns.md` ▸ "+N"), which is what makes
-    /// `hidden` never equal 1: at exactly this many screens the
-    /// last slot draws the screen itself rather than a chip
-    /// claiming to hide one.
+    /// `hidden` never equal 1.
     static let slots = 4
-    static let pip = CGSize(width: 18, height: 12)
+    /// The small mount of the shared outline. `PresetScreenCard`
+    /// draws the large one; the RATIO is what keeps them reading
+    /// as one picture, so a change to either is a change to both.
+    static let screen = CGSize(width: 20, height: 13)
     static let gap: CGFloat = 3
+    static let corner: CGFloat = 3
+    static let glyph: CGFloat = 7
 
-    /// The grammar itself, as a function of its inputs rather
-    /// than of the shipped constants.
-    ///
-    /// Parameterized deliberately: with `slots` a `static let`,
-    /// no assertion over the shipped values can tell a
-    /// derivation from a literal that happens to agree with it
-    /// today — `slotWidth` was `{ 81 }` for a guard-prover run
-    /// and all seven tests stayed green, because the test
-    /// restated the same formula and so could only ever mirror
-    /// it. Taking the inputs lets the suite assert known widths
-    /// at slot counts this app does not ship, which a literal
-    /// cannot satisfy.
+    /// The grammar, as a function of its inputs rather than of
+    /// the shipped constants — with `slots` a `static let`, no
+    /// assertion over the shipped values can tell a derivation
+    /// from a literal that agrees with it today.
     static func slotWidth(
         slots: Int,
-        pip: CGSize,
+        screen: CGSize,
         gap: CGFloat
     ) -> CGFloat {
-        CGFloat(slots) * pip.width + CGFloat(slots - 1) * gap
+        CGFloat(slots) * screen.width + CGFloat(slots - 1) * gap
     }
 
-    /// The fixed leading slot at the shipped grammar — a
-    /// hand-written width is how a cap change silently starts
-    /// clipping. Fixed rather than fluid so the names beside it
-    /// align down the list; it compares no width, so it adds no
-    /// second derivation beside `SettingsWidthClass`.
+    /// The fixed leading slot at the shipped grammar, so the
+    /// names beside it align down the list. It compares no width,
+    /// so it adds no second derivation beside `SettingsWidthClass`.
     static var slotWidth: CGFloat {
-        slotWidth(slots: slots, pip: pip, gap: gap)
+        slotWidth(slots: slots, screen: screen, gap: gap)
     }
 
     /// Internal rather than private, and asserted directly: a
@@ -93,23 +94,41 @@ struct ProfileScreenPips: View {
 
     var body: some View {
         HStack(spacing: Self.gap) {
-            ForEach(0..<shown, id: \.self) { _ in screenPip }
+            ForEach(0..<shown, id: \.self) { index in
+                screenOutline(mode(at: index))
+            }
             if hidden > 0 { moreChip }
         }
         .frame(width: Self.slotWidth, alignment: .leading)
         .accessibilityHidden(true)
     }
 
-    private var screenPip: some View {
-        RoundedRectangle(cornerRadius: 2)
-            .fill(SettingsTheme.ink3.opacity(0.18))
+    /// Bounds-checked rather than assumed: `openingModes` comes
+    /// from a stored file, and a hand-edited profile whose set
+    /// disagrees with its monitor count must draw a bare outline,
+    /// not trap.
+    private func mode(at index: Int) -> LayoutMode? {
+        guard index < openingModes.count else { return nil }
+        return openingModes[index]
+    }
+
+    private func screenOutline(_ mode: LayoutMode?) -> some View {
+        RoundedRectangle(cornerRadius: Self.corner)
+            .fill(SettingsTheme.accent.opacity(0.12))
             .overlay {
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: Self.corner)
                     .strokeBorder(SettingsTheme.hairline)
             }
+            .overlay {
+                if let mode {
+                    Image(systemName: mode.glyph)
+                        .font(.system(size: Self.glyph))
+                        .foregroundStyle(SettingsTheme.ink3)
+                }
+            }
             .frame(
-                width: Self.pip.width,
-                height: Self.pip.height
+                width: Self.screen.width,
+                height: Self.screen.height
             )
     }
 
@@ -120,8 +139,8 @@ struct ProfileScreenPips: View {
             .monospacedDigit()
             .foregroundStyle(SettingsTheme.ink3)
             .frame(
-                width: Self.pip.width,
-                height: Self.pip.height
+                width: Self.screen.width,
+                height: Self.screen.height
             )
     }
 }

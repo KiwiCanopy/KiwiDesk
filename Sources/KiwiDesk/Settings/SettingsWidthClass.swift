@@ -104,6 +104,26 @@ enum SettingsWidthClass: String, CaseIterable, Sendable {
         case .compact, .tight: return 2
         }
     }
+
+    /// The preset grid's cap — one column fewer than Home's at
+    /// every band, DERIVED rather than re-tabulated (#789).
+    ///
+    /// Derived because the two share a threshold and this file's
+    /// own rule is that properties which do are derived from each
+    /// other, never re-tested against the number. One fewer
+    /// because Home spans the whole shell while the preset grid
+    /// sits in the CONTENT column, which gives up its width to
+    /// the detail panel wherever one is offered; a cap copied
+    /// from Home would put four preset cards in the room three
+    /// Home cards were eye-confirmed at.
+    ///
+    /// At `.tight` this is 1, and that is the honest answer
+    /// rather than a degenerate one: a grid whose cards cannot
+    /// hold a picture, a title, two lines of prose and a button
+    /// side by side is a list, and reflowing to one is the grid
+    /// working. Reflow is not a control leaving, so the ruled
+    /// narrowing order is untouched.
+    var presetColumnCap: Int { max(1, homeColumnCap - 1) }
 }
 
 private struct SettingsWidthClassKey: EnvironmentKey {

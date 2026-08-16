@@ -37,6 +37,31 @@ struct DetailPanelTests {
         #expect(
             !SettingsDetailPanelOffer.offers(.general)
         )
+        // Profiles' absence is a RULING too (#789, ui-designer
+        // + owner 2026-08-16), and it took three grounds
+        // because the prototype DOES draw a panel here — so
+        // this line is what a future reader meets instead of
+        // that picture. One: the area has exactly one
+        // model-path census key, so the diff half is a
+        // structural near-zero, which is General's argument
+        // again. Two: the panel's object is the DRAFT, and the
+        // picture a Profiles panel would draw is of the ACTIVE
+        // profile — the two differ exactly while a draft is
+        // being edited with another profile selected, so a
+        // column headed "Live preview" would be lying at the
+        // one moment it mattered. Three: the panel is dropped
+        // by WIDTH below 900, which is sound for a preview
+        // that is redundant with the controls beside it and
+        // unsound for a fact stated nowhere else.
+        //
+        // The good idea the panel route was reaching for — a
+        // per-preset inspector — belongs in the CONTENT column
+        // under the preset grid, where Monitors already puts
+        // per-selection depth and where no width gate can take
+        // it away.
+        #expect(
+            !SettingsDetailPanelOffer.offers(.profiles)
+        )
     }
 
     /// Every offering destination has a preview branch that

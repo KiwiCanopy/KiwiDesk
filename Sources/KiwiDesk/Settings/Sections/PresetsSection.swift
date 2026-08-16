@@ -15,6 +15,9 @@ import SwiftUI
 /// not repeat it.
 struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
+    /// The shell's measured band — the ONE width
+    /// derivation this grid is allowed to read.
+    @Environment(\.settingsWidth) private var band
     @State private var otherSetupsExpanded = false
 
     var body: some View {
@@ -91,8 +94,10 @@ struct PresetsSection: View {
         } else {
             SettingsGroupHeader(liveHeading)
                 .padding(.top, 4)
-            ForEach(presets, id: \.name) {
-                presetRow($0, sizes: liveSizes)
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(presets, id: \.name) {
+                    presetCard($0, sizes: liveSizes)
+                }
             }
         }
     }
@@ -167,10 +172,12 @@ struct PresetsSection: View {
         .fontWeight(.semibold)
         .foregroundStyle(.secondary)
         .padding(.top, 4)
-        ForEach(
-            others.filter { $0.screenCount == count },
-            id: \.name
-        ) { presetRow($0, sizes: nil) }
+        LazyVGrid(columns: columns, spacing: 12) {
+            ForEach(
+                others.filter { $0.screenCount == count },
+                id: \.name
+            ) { presetCard($0, sizes: nil) }
+        }
     }
 
     // MARK: - Rows
@@ -178,33 +185,71 @@ struct PresetsSection: View {
     /// `sizes` is the live screen list for an APPLIABLE card and
     /// nil for the drawer — the card resolves its glyph against
     /// the same hardware the apply path will.
-    private func presetRow(
+    /// One preset, as a CARD rather than a settings row (#789).
+    ///
+    /// Picture first, then the name, the summary, the space
+    /// count, and Apply — the order a comparison set wants,
+    /// because the picture is what the eye scans across and the
+    /// prose is what it reads once it has stopped. The old shape
+    /// (title first, picture third, Apply off to the right) read
+    /// as a list of settings rows; presets are offers.
+    ///
+    /// `Apply` is a SIBLING of the text block, never a button
+    /// inside a tappable card: nesting one control in another is
+    /// broken on macOS whatever the design intent, and keeping
+    /// Apply an explicit per-card button is what lets it carry
+    /// its own greyed reason and the zero-profile spotlight.
+    private func presetCard(
         _ layout: StandardLayout,
         sizes: [CGSize]?
     ) -> some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(layout.displayName).font(.headline)
-                    if layout.isStandard {
-                        BadgeChip(
-                            label: L(
-                                "presets.standard_badge",
-                                "standard"
-                            )
+        VStack(alignment: .leading, spacing: 8) {
+            PresetScreenCard(layout: layout, liveSizes: sizes)
+            HStack(spacing: 6) {
+                Text(layout.displayName).font(.headline)
+                if layout.isStandard {
+                    BadgeChip(
+                        label: L(
+                            "presets.standard_badge",
+                            "standard"
                         )
-                    }
+                    )
                 }
-                Text(layout.displaySummary)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                PresetScreenCard(layout: layout, liveSizes: sizes)
             }
-            Spacer()
+            Text(layout.displaySummary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
             applyButton(layout)
         }
-        .padding(.vertical, 2)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(SettingsTheme.sunken)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(SettingsTheme.hairline)
+        }
+    }
+
+    /// The grid's columns — the BAND's cap, never a width this
+    /// view measures for itself (`SettingsWidthClass` is the one
+    /// derivation). `.flexible` rather than `.adaptive` so the
+    /// cap is honoured: `.adaptive` cannot express "at most N".
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(
+                .flexible(minimum: 200),
+                spacing: 12
+            ),
+            count: band.presetColumnCap
+        )
     }
 
     /// Zero-profile spotlight (ui-designer 2026-07-19): ONE
