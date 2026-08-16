@@ -169,9 +169,29 @@ struct ProfilesSection: View {
     private func profileRow(
         _ summary: ProfileSummary
     ) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Image(systemName: "square.stack.3d.up")
-                .foregroundStyle(.secondary)
+        // CENTRED, not first-text-baseline: the picture belongs
+        // to the whole row — the name AND the subtitle counting
+        // the screens it draws — so pinning it to the title's
+        // baseline sat it high against a two-line block and read
+        // as belonging to the first line only (owner eye-confirm,
+        // 2026-08-16). It is also what the design prototype's own
+        // row does (`align-items:center`), and it carries the
+        // buttons with it, which is the same arrangement there.
+        //
+        // Centring is what RETIRED an `.alignmentGuide` here: a
+        // picture with no text baseline resolves to its own bottom
+        // edge, so under baseline alignment a row whose picture
+        // carried a "+N" chip seated differently from one whose
+        // did not. With no baseline in the alignment there is
+        // nothing to correct.
+        HStack(alignment: .center) {
+            // The screen count as a picture (#789), replacing a
+            // glyph that was identical on every row and so
+            // distinguished none of them. The tooltip stays on
+            // the subtitle below rather than moving here: `.help`
+            // on a decorative image is hover-only, and this one
+            // is `.accessibilityHidden`.
+            screenPicture(summary)
             VStack(alignment: .leading, spacing: 3) {
                 rowTitle(summary)
                 Text(subtitle(summary))
@@ -186,6 +206,28 @@ struct ProfilesSection: View {
             loadButton(summary)
             deleteButton(summary.name)
         }
+    }
+
+    /// The row's leading picture — one outline per screen in the
+    /// same grammar the preset cards draw, so the two surfaces
+    /// answer "what shape is this profile" one way (#789).
+    private func screenPicture(
+        _ summary: ProfileSummary
+    ) -> some View {
+        ProfileScreenPips(
+            count: summary.count,
+            openingModes: summary.openingModes,
+            reservedSlots: reservedScreenSlots
+        )
+    }
+
+    /// The width every row's picture reserves — the widest
+    /// profile in THIS list, so the names align without a
+    /// one-screen list paying for four screens' worth of gap.
+    private var reservedScreenSlots: Int {
+        ProfileScreenPips.reservedSlots(
+            forScreenCounts: orderedSummaries.map(\.count)
+        )
     }
 
     private func rowTitle(
@@ -234,91 +276,5 @@ struct ProfilesSection: View {
                     )
                 )
         }
-    }
-
-    // Load / Delete both end in `reload()`, which re-seeds from
-    // disk and clears the dirty flag, so both drop staged edits —
-    // gated like the edit-target menu (#515).
-    private func loadButton(
-        _ summary: ProfileSummary
-    ) -> some View {
-        Button(L("profiles.load", "Load")) {
-            model.discardingEdits(
-                message: L(
-                    "discard.load_profile.message",
-                    "Loading a profile replaces the edits "
-                        + "you haven't saved."
-                ),
-                confirmLabel: L(
-                    "discard.load_profile.confirm",
-                    "Discard & load"
-                )
-            ) { model.loadProfile(named: summary.name) }
-        }
-        .settingsActionButton()
-        .controlSize(.large)
-        // The row's return destination (#816). Load is the
-        // always-drawn, non-destructive one: "make default" is
-        // conditional on the row not already being default, the
-        // name opens a rename, and Delete would put a
-        // destructive action under the next keypress.
-        .focused($returningRow, equals: summary.name)
-        .help(
-            summary.matchesLive
-                ? ""
-                : L(
-                    "profiles.other_monitors.help",
-                    "Saved for other monitors — loads "
-                        + "with unsaved-changes state."
-                )
-        )
-    }
-
-    private func deleteButton(_ name: String) -> some View {
-        Button {
-            model.discardingEdits(
-                message: L(
-                    "discard.delete_profile.message",
-                    "Deleting reloads the dashboard, "
-                        + "dropping the edits you haven't "
-                        + "saved."
-                ),
-                confirmLabel: L(
-                    "discard.delete_profile.confirm",
-                    "Discard & delete"
-                )
-            ) {
-                // Read BEFORE the mutation (#816): afterwards
-                // the list names whichever row slid into the
-                // gap, which is right by accident and wrong at
-                // the end of a list.
-                let neighbour = neighbourAfterDeleting(name)
-                model.deleteProfile(named: name)
-                returningRow = neighbour
-            }
-        } label: {
-            Image(systemName: "trash")
-        }
-        .buttonStyle(.borderless)
-        .iconButtonAffordance(
-            L("profiles.delete.help", "Delete profile")
-        )
-    }
-
-    /// "make default" is a quiet inline link — underlined
-    /// lowercase text rather than a button; hover lifts the
-    /// color and shows the pointing-hand cursor.
-    private func makeDefaultLink(
-        _ name: String
-    ) -> some View {
-        Button {
-            model.makeDefault(named: name)
-        } label: {
-            Text(L("profiles.make_default", "make default"))
-                .underline()
-        }
-        .buttonStyle(.plain)
-        .font(.caption)
-        .linkHover()
     }
 }

@@ -19,10 +19,16 @@ import Testing
 /// testing itself.
 @Suite("Profiles family rows")
 struct ProfilesFamilyRowsTests {
+    /// `matchesCount` defaults to false so a fixture states it
+    /// only where the count key is what it is testing — the two
+    /// flags are separate claims (a fingerprint match is the
+    /// stronger one), and defaulting them together would let a
+    /// test pass on whichever key happened to fire.
     private func summary(
         _ name: String,
         count: Int,
-        matchesLive: Bool
+        matchesLive: Bool,
+        matchesCount: Bool = false
     ) -> ProfileSummary {
         ProfileSummary(
             name: name,
@@ -30,6 +36,8 @@ struct ProfilesFamilyRowsTests {
             sets: [],
             isDefault: false,
             matchesLive: matchesLive,
+            matchesConnectedCount: matchesCount,
+            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )
@@ -40,18 +48,44 @@ struct ProfilesFamilyRowsTests {
     /// One count throughout, so the match state is the only
     /// thing that can decide the order — a fixture that varied
     /// the count too would pass on the count rule alone.
+    ///
+    /// Every row also carries the SAME `matchesCount`, so they
+    /// tie on that key too and `matchesLive` is the only thing
+    /// left to decide — which is what this test claims to
+    /// observe.
     @Test("profiles matching the live displays lead")
     func orderPutsMatchingFirst() {
         let ordered = ProfilesFamilyRows.orderedProfiles([
-            summary("Alpha", count: 3, matchesLive: false),
-            summary("Beta", count: 3, matchesLive: false),
-            summary("Zed", count: 3, matchesLive: true),
+            summary(
+                "Alpha",
+                count: 3,
+                matchesLive: false,
+                matchesCount: true
+            ),
+            summary(
+                "Beta",
+                count: 3,
+                matchesLive: false,
+                matchesCount: true
+            ),
+            summary(
+                "Zed",
+                count: 3,
+                matchesLive: true,
+                matchesCount: true
+            ),
         ])
         #expect(ordered.map(\.name) == ["Zed", "Alpha", "Beta"])
     }
 
     /// Within one match state, the count orders before the name
     /// — two profiles for the same hardware sit together.
+    ///
+    /// NO fixture matches the connected count, so that key is
+    /// inert here and the ordinal count rule is what the
+    /// assertion observes. Marking any of them would make this
+    /// test pass on the match-count key instead, which is the
+    /// other rule's job.
     @Test("count outranks name among non-matching profiles")
     func orderIsCountThenName() {
         let ordered = ProfilesFamilyRows.orderedProfiles([
@@ -60,6 +94,43 @@ struct ProfilesFamilyRowsTests {
             summary("Solo", count: 1, matchesLive: false),
         ])
         #expect(ordered.map(\.name) == ["Solo", "Alpha", "Beta"])
+    }
+
+    /// The key #789 added, and the defect it removes: a profile
+    /// saved for THIS many screens — but for different monitors,
+    /// so no fingerprint matches — sorted behind every profile
+    /// with fewer screens, because 1 < 2. The card's caption
+    /// promises one of these loads, and the one it means was
+    /// last.
+    ///
+    /// Reds the moment the match-count key is removed: without
+    /// it the bare count rules and `Solo` leads.
+    @Test("a count-matching profile leads a smaller one")
+    func countMatchOutranksSmallerCount() {
+        let ordered = ProfilesFamilyRows.orderedProfiles([
+            summary("Solo", count: 1, matchesLive: false),
+            summary(
+                "Desk",
+                count: 2,
+                matchesLive: false,
+                matchesCount: true
+            ),
+        ])
+        #expect(ordered.map(\.name) == ["Desk", "Solo"])
+    }
+
+    /// No display read yet, so `refreshProfiles` marks nothing
+    /// as count-matching: the key is inert rather than wrong and
+    /// the order is what it was before the key existed — the
+    /// honest answer while the count is unknown, rather than an
+    /// arbitrary one.
+    @Test("no count match leaves the order alone")
+    func noCountMatchIsInert() {
+        let ordered = ProfilesFamilyRows.orderedProfiles([
+            summary("Desk", count: 2, matchesLive: false),
+            summary("Solo", count: 1, matchesLive: false),
+        ])
+        #expect(ordered.map(\.name) == ["Solo", "Desk"])
     }
 
     /// Every present desktop, plus any number already bound —

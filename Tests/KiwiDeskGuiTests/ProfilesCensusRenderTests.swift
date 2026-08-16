@@ -34,6 +34,12 @@ struct ProfilesCensusRenderTests {
             sets: [],
             isDefault: false,
             matchesLive: false,
+            // One screen against this suite's one census screen,
+            // so every fixture profile ties on the count key and
+            // it cannot decide this suite's answers — the order
+            // rules are `ProfilesFamilyRowsTests`' to hold.
+            matchesConnectedCount: true,
+            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )

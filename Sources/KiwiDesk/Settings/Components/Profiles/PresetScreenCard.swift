@@ -31,7 +31,20 @@ struct PresetScreenCard: View {
     /// Apply never produces (code review, 2026-08-11).
     var liveSizes: [CGSize]?
 
-    private static let outline = CGSize(width: 34, height: 22)
+    /// #789 grew these from 34×22. The consult that ruled on it
+    /// REFUSED drawing a `LayoutSchematicView` in here instead:
+    /// the card draws one mode per screen — the first space's
+    /// opening mode — which is exactly what the glyph already
+    /// encodes, so a schematic would be ~9× the pixels for no
+    /// extra discrimination between catalog entries, at a scale
+    /// (≈0.43 of `.tile`, half the shipped floor
+    /// `HomeCardSchematicBand` uses) where the family's 1 pt and
+    /// 2 pt strokes stop rendering. The pixels the bigger card
+    /// buys go to the glyph instead.
+    private static let outline = CGSize(width: 48, height: 30)
+    /// Grown with the outline, so the glyph keeps its share of
+    /// the frame rather than shrinking inside a larger one.
+    private static let glyphSize: CGFloat = 14
 
     /// Clamped at zero: a hand-edited layout claiming a negative
     /// screen count must not trap on the range.
@@ -71,10 +84,10 @@ struct PresetScreenCard: View {
     /// mode drawn on a screen the preset plans nothing for is a
     /// claim about behavior that applying it would not produce.
     private func outlineView(_ screen: Int) -> some View {
-        RoundedRectangle(cornerRadius: 3)
+        RoundedRectangle(cornerRadius: 4)
             .fill(SettingsTheme.accent.opacity(0.12))
             .overlay {
-                RoundedRectangle(cornerRadius: 3)
+                RoundedRectangle(cornerRadius: 4)
                     .strokeBorder(
                         SettingsTheme.hairline
                     )
@@ -82,7 +95,7 @@ struct PresetScreenCard: View {
             .overlay {
                 if let mode = openingMode(screen) {
                     Image(systemName: mode.glyph)
-                        .font(.system(size: 10))
+                        .font(.system(size: Self.glyphSize))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -91,6 +104,16 @@ struct PresetScreenCard: View {
                 height: Self.outline.height
             )
             .help(screenHelp(screen))
+            // `.help` alone does NOT discharge `screenHelp`'s
+            // promise to the reader who cannot see the row: a
+            // `Shape` is not an accessibility element, so the
+            // hint has nothing to attach to and the sentence is
+            // hover-only. Making the outline an element gives
+            // VoiceOver the same sentence the pointer gets —
+            // which is the whole reason the main display is
+            // named in words rather than by position.
+            .accessibilityElement()
+            .accessibilityLabel(screenHelp(screen))
     }
 
     /// Screen 0 is the main display, 1 the next secondary, … —
@@ -134,8 +157,8 @@ struct PresetScreenCard: View {
         guard let mode = openingMode(screen) else {
             return L(
                 "presets.screen_help.empty",
-                "Screen %1$d: no Spaces",
-                screen + 1
+                "%1$@: no Spaces",
+                screenName(screen)
             )
         }
         // The count phrase, not a `space(s)` parenthetical: the
@@ -143,10 +166,69 @@ struct PresetScreenCard: View {
         // it fourteen lines up.
         return L(
             "presets.screen_help",
-            "Screen %1$d: %2$@, opens in %3$@",
-            screen + 1,
+            "%1$@: %2$@, opens in %3$@",
+            screenName(screen),
             spaceCountPhrase(spaces(on: screen).count),
             mode.displayName
         )
+    }
+
+    /// Screen 0 is the main display and the rest are numbered
+    /// (#789).
+    ///
+    /// The card denotes "main" by POSITION — leftmost — which is
+    /// a claim a reader who cannot see the row has no way to
+    /// recover: every screen announced itself as "Screen N" and
+    /// nothing said which one the Mac treats as main. The
+    /// alternatives were both refused by the consult that ruled
+    /// this: a heavier stroke, because `SettingsTheme+Metrics`
+    /// records that weight alone on a hairline was invisible on
+    /// device and because stroke weight already carries two
+    /// meanings in this window; and a micro-label, which at this
+    /// outline size is ~7 pt type. Saying it in words costs no
+    /// pixels and removes the inference rather than decorating
+    /// it.
+    ///
+    /// A NAME rather than a branched sentence, so the two frames
+    /// above stay one frame each and a locale reorders them
+    /// freely.
+    ///
+    /// **Both arms say "screen", and that is load-bearing.** They
+    /// are two alternatives for ONE specifier slot of one frame,
+    /// so a pair reading "Main display" / "Screen %1$d" puts two
+    /// nouns for one concept in one slot and makes every catalog
+    /// reconcile it alone — which all ten duly did, each picking
+    /// a different side, while English was the only catalog whose
+    /// own pair disagreed (translation audit, 2026-08-16). The
+    /// noun is "screen" because most of this card's neighbours
+    /// are: the group heading counts screens
+    /// (`presets.for_your.*`), as do `presets.needs_screens`,
+    /// `presets.none_for_count`, `presets.starter.summary` and
+    /// `profiles.screens.*`.
+    ///
+    /// **Not all of them, and the exception is the nearest.**
+    /// `PresetsSection` draws `layout.displaySummary` directly
+    /// above these outlines, and for the two two-screen presets
+    /// that line reads "on the main **display**"
+    /// (`presets.dual_developer.summary`,
+    /// `presets.coder_and_monitor.summary`) — so on exactly
+    /// those two cards the summary and the outline below it now
+    /// name one screen two ways. Five keys to two decided it,
+    /// and the residue is named here rather than left for a
+    /// reader to trip over.
+    ///
+    /// This does NOT settle screen vs display vs monitor for the
+    /// repo — `config-vocabulary.md`'s glossary and
+    /// `docs/localization-naming.md` are both silent on it while
+    /// `en.json` uses all three, which is an owner ruling and a
+    /// catalog-wide sweep. It settles this card.
+    private func screenName(_ screen: Int) -> String {
+        screen == 0
+            ? L("presets.screen_name.main", "Main screen")
+            : L(
+                "presets.screen_name.numbered",
+                "Screen %1$d",
+                screen + 1
+            )
     }
 }

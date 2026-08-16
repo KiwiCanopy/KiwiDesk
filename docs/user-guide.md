@@ -1862,8 +1862,16 @@ act on.
 ### Your Profiles
 
 One row per saved profile, the ones matching your connected
-displays first — one of them is what loads — then by screen count,
-then by name. Each row carries the name (double-click or use the
+displays first — one of them is what loads — then the ones saved
+for as many screens as you have connected, then by screen count,
+then by name. That second group is worth knowing about: a profile
+saved for two screens but for *different* monitors does not match
+your displays, and without that step it would sort behind every
+one-screen profile, since one comes before two.
+
+Each row opens with a small picture of how many screens the
+profile is for — one mini-screen each, and a **+N** once there are
+more than the row draws. Then the name (double-click or use the
 pencil to rename), an **active** badge on the loaded one, a
 **default** badge, a **make default** link on every profile that
 isn't already its screen count's default, **Load**, and a delete
@@ -2108,6 +2116,10 @@ Each card draws **screens, not spaces**: one outline per display, each
 showing the layout its first space opens in, with the total space
 count underneath. A row of identical tiles cannot say *which screen
 gets what*, which is the whole point of a two- or three-screen preset.
+
+Hover an outline for what that screen gets — how many Spaces, and the
+layout it opens in. The leftmost is your **main display** and says so,
+rather than leaving you to read it off the position.
 
 Apply switches your **live** layout, so it is greyed while you are
 editing a saved profile from the banner picker — that mode never

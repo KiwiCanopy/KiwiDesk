@@ -58,11 +58,32 @@ struct ProfilesFamilyRows {
         return rows(for: family)
     }
 
-    /// The saved profiles the list draws, in display order:
-    /// the ones matching the connected displays first — the
-    /// card's caption promises one of them loads — then by
-    /// screen count, then by name, so the order is stable while
-    /// nothing is plugged or unplugged.
+    /// The saved profiles the list draws, in display order: the
+    /// ones matching the connected displays first — the card's
+    /// caption promises one of them loads — then the ones whose
+    /// screen COUNT matches, then by screen count, then by name,
+    /// so the order is stable while nothing is plugged or
+    /// unplugged.
+    ///
+    /// The count key exists because the first key is a
+    /// FINGERPRINT match and the third is a bare number, and a
+    /// profile can be neither: on a two-screen desk a saved
+    /// two-screen profile for different monitors sorted behind
+    /// every one-screen profile, since 1 < 2 — under a caption
+    /// promising one of them loads. It sits SECOND rather than
+    /// first because a fingerprint match is the stronger claim.
+    ///
+    /// Where the two keys could disagree — a hand-edited file
+    /// whose sets are of different sizes, `monitorCount` being
+    /// the FIRST set's — it does not matter: key one dominates,
+    /// so a fingerprint match leads whatever the count says.
+    ///
+    /// Both flags are derived in `refreshProfiles` from one read
+    /// of the live displays, which is why this stayed a pure
+    /// function of its summaries: passing the connected count in
+    /// made "the two answer about one moment" a comment at the
+    /// call site rather than a property of the data, and left a
+    /// second `displays.count` read one edit away.
     ///
     /// The ORDER lives here, with the expansion, rather than in
     /// the view, so the rule is stated once and is reachable
@@ -71,17 +92,23 @@ struct ProfilesFamilyRows {
     /// `ProfilesGateWiringTests.viewsConsultTheFamilySeam`.
     /// Note which guard holds which: `rows(for:)` and its census
     /// parity are held over fixtures, and it is this static half
-    /// the screen consumes.
+    /// the screen consumes — including
+    /// `ProfilesSection.neighbourAfterDeleting`, whose focus
+    /// destination IS this order.
     static func orderedProfiles(
         _ summaries: [ProfileSummary]
     ) -> [ProfileSummary] {
-        summaries.sorted {
+        func key(
+            _ summary: ProfileSummary
+        ) -> (Int, Int, Int, String) {
             (
-                $0.matchesLive ? 0 : 1, $0.count, $0.name
-            ) < (
-                $1.matchesLive ? 0 : 1, $1.count, $1.name
+                summary.matchesLive ? 0 : 1,
+                summary.matchesConnectedCount ? 0 : 1,
+                summary.count,
+                summary.name
             )
         }
+        return summaries.sorted { key($0) < key($1) }
     }
 
     /// The Desktops the bindings card lists: every present

@@ -181,8 +181,14 @@ struct KeyboardActionParityTests {
             // because either alone moves focus nowhere: an
             // unattached key is silent, and an attached key
             // nothing ever sets is decoration.
+            // Both halves moved to `+RowActions.swift` with the
+            // three controls when #789 split the file under the
+            // §2.1 ceiling. The move is why this guard names a
+            // FILE: the scan went red on the split rather than
+            // going quiet, which is the whole point of keying a
+            // needle on its use site.
             Wiring(
-                "ProfilesSection.swift",
+                "ProfilesSection+RowActions.swift",
                 ".focused($returningRow, equals: summary.name)",
                 "a profile row's always-drawn Load is its "
                     + "destination — the trash would put a "
@@ -190,7 +196,7 @@ struct KeyboardActionParityTests {
                     + "and \"make default\" is conditional"
             ),
             Wiring(
-                "ProfilesSection.swift",
+                "ProfilesSection+RowActions.swift",
                 "returningRow = neighbour",
                 "and the deletion has to name it"
             ),

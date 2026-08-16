@@ -33,6 +33,16 @@ extension SettingsModel {
                 sets: profile.monitorSets.map(\.monitors),
                 isDefault: profile.isDefault,
                 matchesLive: profile.set(matching: live) != nil,
+                // Derived from the SAME `live` read as
+                // `matchesLive`, one line up (#789). The two are
+                // answers about one moment by construction here;
+                // threaded into the sort as a parameter instead,
+                // "one moment" was a comment at the call site
+                // and nothing stopped a second, later
+                // `displays.count` from being read there.
+                matchesConnectedCount: profile.monitorCount
+                    == live.count,
+                openingModes: profile.openingModes(),
                 spaceCount: profile.declaredSpaces.count,
                 shortcutOverrideCount:
                     profile.layers?.overrideCount ?? 0
