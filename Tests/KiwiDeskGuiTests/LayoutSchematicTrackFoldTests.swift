@@ -132,10 +132,21 @@ struct LayoutSchematicTrackFoldTests {
     /// must not.
     @Test("the drawn normal tracks honour the typed limit")
     func normalTracksHonourTheLimit() {
-        for limit in 1...4 {
+        // The control's REAL range (`LayoutCard+Track`: 1...10),
+        // not a sample stopping below it. The first cut looped
+        // 1...4 and the stand-in bound at 5, so the failure sat
+        // exactly one step past the last assertion (architect
+        // review, 2026-08-16).
+        for limit in 1...10 {
+            let drawn = track(limit: limit, windows: 12)
+                .trackCount
             #expect(
-                track(limit: limit, windows: 12).trackCount
-                    == limit
+                drawn == limit,
+                Comment(
+                    rawValue:
+                        "a typed limit of \(limit) drew "
+                        + "\(drawn) normal tracks"
+                )
             )
         }
         // Tracks never outnumber the windows that open them.
@@ -198,11 +209,68 @@ struct LayoutSchematicTrackFoldTests {
         }
     }
 
+    /// The run the strip DRAWS is the run the fold computed for
+    /// that slot.
+    ///
+    /// The gap this closes: every other assertion here reads the
+    /// fold's quantities and none reads where they land, so the
+    /// focused run and the focused SLOT could be — and were —
+    /// two different tracks. `markerTracks.focus` marches to the
+    /// newest track under fill-then-spill while the strip drew
+    /// the focus at a fixed middle slot, so at auto-tracks with
+    /// 12 windows the middle track was drawn holding 2 windows
+    /// that the engine said held 3 (code review, 2026-08-16).
+    /// `gui.md` records exactly this residue — a correct
+    /// derivation feeding a wrong frame — as the thing arithmetic
+    /// guards do not see.
+    @Test("the drawn focus slot carries the fold's own run")
+    func drawnFocusMatchesTheFold() {
+        for rule in [
+            TrackParams.NewWindowTrack.ownTrack, .focusedTrack,
+        ] {
+            for auto in [true, false] {
+                for count in LayoutSchematic.windowCountRange {
+                    let s = track(
+                        limit: 3,
+                        windows: count,
+                        auto: auto,
+                        rule: rule
+                    )
+                    let counts = s.markerTracks.counts
+                    let slot = s.focusIdx
+                    #expect(
+                        slot >= 0 && slot < s.trackCount,
+                        Comment(
+                            rawValue:
+                                "focus slot \(slot) is outside "
+                                + "the \(s.trackCount) drawn "
+                                + "tracks"
+                        )
+                    )
+                    guard slot < counts.count else { continue }
+                    #expect(
+                        s.focusedRun == min(4, counts[slot]),
+                        Comment(
+                            rawValue:
+                                "\(rule)/auto=\(auto)/\(count): "
+                                + "slot \(slot) draws a run of "
+                                + "\(s.focusedRun) over a track "
+                                + "of \(counts[slot])"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     /// The property that makes a stand-in legitimate rather than
     /// a clamp: one configuration folds identically at every
-    /// scale. #712 shipped the opposite — a rigid 8 × 1 drew a
-    /// two-window pile on the thumbnail and none in the panel,
-    /// inventing an overflow the engine does not have.
+    /// scale. #712's first cut did the opposite — a rigid 8 × 1
+    /// drawing a two-window pile on the thumbnail and none in
+    /// the panel, inventing an overflow the engine does not
+    /// have — and review caught it before it shipped, which is
+    /// why the property is worth holding rather than merely
+    /// remembering.
     @Test("the fold does not vary with the drawing scale")
     func foldIsScaleIndependent() {
         for rule in [

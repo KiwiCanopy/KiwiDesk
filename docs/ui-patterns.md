@@ -632,34 +632,46 @@ tab.** (ui-designer consult 2026-07-14.) A settings preview is
 aligned one of two ways, and which one is decided by whether
 controls sit right next to it — never by which tab it's on:
 
-- **Standalone illustration** (a Layout schematic, the App Bar
-  mock strip) — centered in its card with a caption below.
+- **Standalone illustration** (a Layout schematic, a bar or
+  palette scene) — centered in its card with a caption below.
   Nothing is edited *on* it and no control column shares its
   row, so there is no leading edge to line up against; it reads
   as a figure, the way macOS System Settings centers a
   wallpaper thumbnail or screen-saver preview over its label.
 - **Preview paired with the exact controls in the same card**
-  (the Gaps diagram + its outer/inner legend, the Drag Ghost /
-  Drop-zone columns) — left-aligned, flush with the control
-  rows it drives, so preview and controls read as one stack
-  (the accent-swatch / Displays-arrangement pattern).
+  (as the Gaps diagram + its outer/inner legend and the Drag
+  Ghost / Drop-zone columns were before they moved into the
+  panel) — left-aligned, flush with the control rows it drives,
+  so preview and controls read as one stack (the accent-swatch /
+  Displays-arrangement pattern).
 
-So Layout schematics and the App Bar strip are *both* centered
-(they are the same kind of thing); Gaps and Drag are left —
+So a Layout schematic and a bar scene are *both* centered (they
+are the same kind of thing); Gaps and Drag are left —
 an inconsistency that looks like one between two *pages* is
-really this one correct rule. The colour pages show both in one
-change: Colours & Motion's "Current colors" scene is centered
-with its caption below (nothing is edited on it), while each
-Advanced Colours group's preview leads the swatches it drives
-and sits flush with them. A new preview picks its bucket by
+really this one correct rule. A new preview picks its bucket by
 asking "are its controls right here beside it," not by copying
 its page.
 
+What has narrowed since this was written is the *supply of
+paired previews*, not the rule: every area in
+`SettingsDetailPanelOffer` draws its preview in the panel
+column, where no control shares its row, so it lands in the
+standalone bucket by construction. Both of this section's
+worked examples of the paired bucket went that way — Gaps &
+Borders' diagram and drag columns with the #678 Phase 4
+migration, and each Advanced Colours group's preview with #793.
+Keep the rule for the next preview that does sit in a card
+beside the rows it drives; do not read the examples as a census
+of where previews are today.
+
 ## Previews & schematics
 
-**Five areas watch their draft in a fixed detail panel; the
-rest keep full width.** Gaps & Borders, Bars, Colours & Motion,
-Layout Defaults and Shortcuts (its keyboard board, pass 5)
+**The areas that watch their draft do it in a fixed detail
+panel; the rest keep full width.** Which ones is
+`SettingsDetailPanelOffer.offering` and nothing else — Gaps &
+Borders, Bars, Colours & Motion, Layout Defaults, Shortcuts (its
+keyboard board, pass 5), Advanced Colours and Spaces (#793,
+#794) as this is written. They
 open as two columns: the controls, then a
 fixed 392 pt right panel headed "Live preview · <area>" that
 redraws the area's preview from the *staged* draft, with a
@@ -1172,17 +1184,27 @@ was written down:
   A *remote* control-scoped gate
   (the gating field lives on another **destination**) has no
   adjacency to answer "why", so hover text alone is not enough:
-  it takes a live `?` on the nearest live label above the dimmed
-  rows, and **its sentence names the destination to go to**, not
-  just the switch. Advanced Colours is the case that forced
-  this — every gate on the page is remote — and it is why its
-  Borders card and each Drag column carry a header `?` even
-  though neither has a block gate at all
-  (`AdvancedColorsHelp`). Where a live state-dependent cue
-  exists in the flow, use that too — `LayoutCard`'s app-bar
-  `CrossReferenceRow` is the model, naming the bar's current
-  state in the sentence and linking where to change it
-  ("The monocle App Bar (currently on) is configured in …").
+  it takes a **live pointer, whose sentence names the
+  destination to go to**, not just the switch. Two shapes carry
+  that, and which one a row takes follows from whether the block
+  has a live label to hang an anchor on. Where it does, the
+  pointer is a `?` on the nearest live label above the dimmed
+  rows: Advanced Colours is the case that forced this — every
+  gate on the page is remote — and it is why its Borders card
+  and each Drag column carry a header `?` even though neither
+  has a block gate at all (`AdvancedColorsHelp`). Where it does
+  not, the pointer is a `CrossReferenceRow` drawn under the
+  dimmed rows and outside the dimmed subtree, so it stays
+  clickable while they are inert — the per-space override
+  editor's Grid auto-size and Track auto-limit rows, whose
+  switches have no row in that editor at all
+  (`SpacesGateHelp.remote`, held to being a live link rather
+  than a `Text` by `GateReasonPlacementTests`). Both shapes
+  state the live fact as well as the destination —
+  `LayoutCard`'s app-bar `CrossReferenceRow` is the model,
+  naming the bar's current state in the sentence and linking
+  where to change it ("The monocle App Bar (currently on) is
+  configured in …").
   Per-control `?`s inside a gated block stay
   visible-but-dimmed like every other row member; their fine
   print matters once the block is live again, and the anchor

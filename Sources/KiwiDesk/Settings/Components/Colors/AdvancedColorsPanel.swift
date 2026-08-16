@@ -39,20 +39,6 @@ struct AdvancedColorsPanel: View {
         }
     }
 
-    /// Labels what IS drawn, and does not disclaim what is not.
-    /// The four hover roles are absent because a still frame can
-    /// draw a pointer state only as the resting one
-    /// (`PaletteSceneRoles.withheld`); a caption saying so would
-    /// teach the reader that a rule exists without teaching the
-    /// rule, which is the trade `gui.md` settles in favour of
-    /// labelling the picture.
-    private var caption: String {
-        L(
-            "colors.advanced.scene.caption",
-            "Both bars with their active and focused items, the "
-                + "focused and unfocused rings with their state "
-                + "marks, and the drag ghost beside its drop "
-                + "zone."
-        )
-    }
+    /// The shared caption — see `PaletteSceneCaption`.
+    private var caption: String { PaletteSceneCaption.panel }
 }

@@ -108,10 +108,20 @@ struct SpacesGates {
 /// the main actor; the reason and its sentence are one decision,
 /// never two that can disagree (#678, gui.md).
 ///
-/// Every key here is reused verbatim from the hand-wired gate this
-/// conversion replaced (or, for the reset action that greyed with
-/// no sentence, from the Layout Defaults twin's), so the English
-/// is unchanged and no translation is dropped.
+/// The keys began as verbatim reuses of the hand-wired gates this
+/// conversion replaced, which is why the conversion itself
+/// dropped no translation.
+///
+/// **That is history, not a standing property — editing an
+/// English sentence here runs `scripts/drop-key` in the same
+/// change set.** It shipped as a claim ("the English is unchanged
+/// and no translation is dropped"), and two sentences below were
+/// then reworded to remove a scope claim while the comment went
+/// on asserting the opposite — so ten catalogs kept saying "for
+/// this Space" about rows that no longer say it (localization
+/// audit, 2026-08-16). A state claim about a file is true only on
+/// the day it is written; this one had a reader, and the reader
+/// was the author of the very edit that falsified it.
 @MainActor
 enum SpacesGateHelp {
     static func sentence(
@@ -162,8 +172,17 @@ enum SpacesGateHelp {
     /// the one class #815 did not close.
     ///
     /// Data rather than a condition at the call site, so the
-    /// classification and the anchor cannot disagree:
-    /// `GateReasonPlacementTests` reads this set.
+    /// classification and the anchor cannot disagree.
+    ///
+    /// Stated residue, because the honest version is not yet
+    /// available: `GateReasonPlacement.channel` already DERIVES
+    /// `.remote` from the census, and this set is a second,
+    /// hand-kept copy of that answer keyed on the reason rather
+    /// than on the `SettingKey` (architect review, 2026-08-16).
+    /// They are bound only by `remoteMatchesTheCensus` in
+    /// `GateReasonPlacementTests`, which reds if a key's channel
+    /// and this set ever disagree — a guard rather than a
+    /// derivation, and the derivation is owed.
     static let remote: Set<SpacesGates.InertReason> = [
         .autoSizedGrid, .autoTracks,
     ]
@@ -177,6 +196,18 @@ enum SpacesGateHelp {
     /// reader knowing why and not knowing where. And it is a
     /// live link rather than `Text`, or the pointer is dead
     /// (`docs/ui-patterns.md`).
+    ///
+    /// The gating control's name is **interpolated from its own
+    /// key**, never re-typed (#818). This is the sharpest case
+    /// for that rule: a cross-reference whose only job is to send
+    /// the reader to a row points at nothing once the quoted name
+    /// drifts from it — and the sibling `.gates` sentences these
+    /// were derived from had already drifted in two catalogs
+    /// (`de`'s row reads "Raster automatisch dimensionieren"
+    /// against a sentence saying "Automatisches Raster";
+    /// `ru`'s row and its sentence likewise). Each specifier is
+    /// spent once, so a translation may pronominalise neither
+    /// into the other.
     static func crossReference(
         for reason: SpacesGates.InertReason
     ) -> String? {
@@ -184,15 +215,17 @@ enum SpacesGateHelp {
         case .autoSizedGrid:
             return L(
                 "scroll_grid.auto_size.xref",
-                "Auto-size grid is on, so the screen decides the "
-                    + "columns and rows — change it in %1$@.",
+                "%1$@ is on, so the screen decides the columns "
+                    + "and rows — change it in %2$@.",
+                L("scroll_grid.auto_size", "Auto-size grid"),
                 CrossReferenceRow.linkSlot
             )
         case .autoTracks:
             return L(
                 "track.auto_tracks.xref",
-                "Auto track limit is on, so the screen decides "
-                    + "how many tracks open — change it in %1$@.",
+                "%1$@ is on, so the screen decides how many "
+                    + "tracks open — change it in %2$@.",
+                L("track.auto_tracks", "Auto track limit"),
                 CrossReferenceRow.linkSlot
             )
         default:

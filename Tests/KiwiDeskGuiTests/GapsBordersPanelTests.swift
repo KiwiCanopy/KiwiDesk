@@ -133,11 +133,28 @@ struct GapsBordersPanelTests {
         #expect(Color.kiwiMark("") == Color.primary)
         #expect(Color.kiwiMark("#FF0000") != Color.primary)
         #expect(Color.kiwiMark("") != Color.clear)
-        // The paths that carry the sentinel are DERIVED, so a
-        // third adaptive mark is covered by existing.
+        // WHICH paths carry the sentinel, as resolved membership
+        // rather than as a restatement of the predicate. The
+        // first cut asserted `path.hasSuffix(".color")` over
+        // paths already filtered by `allowsAutomatic`, whose
+        // definition IS that suffix — true by construction and
+        // unable to fail (code review, 2026-08-16).
+        let automatic = ColorPaletteKeys.all
+            .filter(ColorPaletteKeys.allowsAutomatic)
+        #expect(
+            Set(automatic) == ["sticky.color", "floating.color"],
+            Comment(
+                rawValue:
+                    "the adaptive set changed: "
+                    + automatic.sorted().joined(separator: ", ")
+            )
+        )
+        // And no ordinary `_color` path was admitted — the other
+        // direction, which membership alone would not catch if a
+        // third mark ever joined legitimately.
         for path in ColorPaletteKeys.all
-        where ColorPaletteKeys.allowsAutomatic(path) {
-            #expect(path.hasSuffix(".color"))
+        where path.hasSuffix("_color") {
+            #expect(!ColorPaletteKeys.allowsAutomatic(path))
         }
     }
 }

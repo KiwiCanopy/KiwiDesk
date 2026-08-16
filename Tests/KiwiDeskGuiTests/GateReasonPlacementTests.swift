@@ -88,6 +88,45 @@ struct GateReasonPlacementTests {
         #expect(channel(.appBar(.appBarThickness)) == nil)
     }
 
+    /// `SpacesGateHelp.remote` agrees with the census.
+    ///
+    /// The set is a second, hand-kept copy of an answer
+    /// `GateReasonPlacement.channel` already derives — keyed on
+    /// the REASON where the census is keyed on the `SettingKey`
+    /// — so nothing stopped the two drifting: a gate retargeted
+    /// to an on-page owner would leave the anchor drawing, and a
+    /// new `.remote` row would get none (architect review,
+    /// 2026-08-16). This binds them until the derivation
+    /// replaces the copy.
+    @Test("the remote reason set agrees with the census")
+    func remoteMatchesTheCensus() {
+        // Every key the census calls `.remote` on this surface
+        // resolves to a reason the set contains…
+        let remoteKeys: [SettingKey] = [
+            .layout(.gridOverrideColumns),
+            .layout(.gridOverrideRows),
+            .layout(.trackOverrideLimit),
+        ]
+        for key in remoteKeys {
+            #expect(channel(key) == .remote)
+        }
+        // …and the set names only reasons those keys produce, so
+        // it cannot grow an entry the census does not back.
+        #expect(
+            SpacesGateHelp.remote == [.autoSizedGrid, .autoTracks]
+        )
+        // The co-located sibling stays OUT, by the census's own
+        // answer rather than by assertion: its owner renders as
+        // the row directly above it.
+        #expect(
+            channel(.layout(.gridOverrideFillEmptyCells))
+                != .remote
+        )
+        #expect(
+            !SpacesGateHelp.remote.contains(.rigidGrid)
+        )
+    }
+
     /// The per-space overrides' remote anchor, now that it
     /// exists (#841, closed 2026-08-16).
     ///

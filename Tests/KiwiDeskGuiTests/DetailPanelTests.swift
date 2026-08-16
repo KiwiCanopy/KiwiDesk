@@ -236,12 +236,16 @@ struct DetailPanelTests {
                 "DragVisualPreview("
             ),
             // #794: the per-space editor gave up its own copy,
-            // which is what let the panel take it — the renderer
-            // was deleted with the mount, so the needle names the
-            // SECTION that must not grow a replacement.
+            // which is what let the panel take it. The needle
+            // names a LIVE renderer the section must not re-grow
+            // — `SpaceOverridePreview` was deleted in the same
+            // branch, so a needle for it could never fail and
+            // read as coverage, which is the argument this suite
+            // already makes above about the two bar strips (code
+            // review, 2026-08-16).
             (
                 "Sections/SpacesSection+Overrides.swift",
-                "SpaceOverridePreview("
+                "LayoutSchematicView("
             ),
             (
                 "Sections/ColorsMotionSection.swift",

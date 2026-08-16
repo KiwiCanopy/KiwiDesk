@@ -82,7 +82,16 @@ extension TrackSchematic {
         TrackLayout.overflowCap(
             markerCount: markerTracks.counts.count,
             normalCap: params.normalCap,
-            geoCap: LayoutSchematic.trackGeoCap
+            // The stand-in fills in ONLY where the user gave no
+            // number — the `gridAutoSizeCap` precedent, whose
+            // doc says it in as many words: "with auto-size off
+            // no stand-in is needed, the ceiling is the user's
+            // own typed columns × rows". With a fixed limit the
+            // typed value IS the ceiling, so passing the
+            // stand-in here answered a typed 6 with four tracks
+            // (architect review, 2026-08-16).
+            geoCap: autoTracks
+                ? LayoutSchematic.trackGeoCap : .max
         )
     }
 
@@ -118,11 +127,21 @@ extension TrackSchematic {
     /// can legibly stack. The CLAMP is the drawing's; the run
     /// itself is the engine's fold above — the two are separate
     /// on purpose (`LayoutSchematicStandIns`).
+    /// Windows in the focused track — the run of the track the
+    /// strip actually draws as focused (`focusIdx`), clamped to
+    /// what the canvas can legibly stack.
+    ///
+    /// Reading `counts[markerTracks.focus]` while the strip drew
+    /// some other slot is what made the two disagree; the run
+    /// and the slot now come from one index.
+    ///
+    /// The CLAMP is the drawing's; the run itself is the
+    /// engine's fold — the two are separate on purpose
+    /// (`LayoutSchematicStandIns`).
     var focusedRun: Int {
-        let marker = markerTracks
-        let run =
-            marker.focus < trackCount
-            ? marker.counts[marker.focus] : 1
+        let counts = markerTracks.counts
+        let index = focusIdx
+        let run = index < counts.count ? counts[index] : 1
         return min(4, max(1, run))
     }
 }

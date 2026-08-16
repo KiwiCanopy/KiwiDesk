@@ -17,13 +17,19 @@ import Testing
 /// requires the same answer, rather than leaving the agreement to
 /// arithmetic somebody re-derives (architect review, 2026-08-03).
 ///
-/// **Scope.** Position only. `insertIntoTrack`'s fill-then-spill
-/// arm (#437) opens a new track once the focused one is full, and
-/// the preview models neither `spillCapacity` nor `trackCap` — see
-/// #708. The fixtures below disable the spill (`spillCapacity`
-/// nil) so this suite compares the arms that do correspond; a
-/// change teaching the preview to spill retires that argument and
-/// this suite with it.
+/// **Scope.** Position only, still — but for a narrower reason
+/// than when this was written. #708 taught the preview
+/// fill-then-spill, so the old caveat ("the preview models
+/// neither `spillCapacity` nor `trackCap`") is retired: it now
+/// models both, through `TrackLayout.spillsToNewTrack`, which is
+/// the engine's own predicate rather than a copy.
+///
+/// The fixtures below still disable the spill (`spillCapacity`
+/// nil) because this suite's subject is the POSITIONING arms —
+/// where among tracks, and where among a track's windows. The
+/// fold's agreement with the engine is
+/// `LayoutSchematicTrackFoldTests`'; keeping the two apart is
+/// what lets each fail for one reason.
 @Suite("Track preview vs the track spawn engine")
 @MainActor
 struct LayoutSchematicTrackEngineTests {
@@ -42,7 +48,15 @@ struct LayoutSchematicTrackEngineTests {
                 let engine = engineSlots(
                     tracks: schematic.trackCount,
                     perTrack: 1,
-                    focusTrack: schematic.trackCount / 2,
+                    // The schematic's OWN focus index, not a
+                    // re-derived `trackCount / 2`. That literal
+                    // was the drawing convention this preview
+                    // used before it modelled fill-then-spill;
+                    // once the fold decided the focus, a fixture
+                    // repeating the old rule pinned the
+                    // convention instead of the parity it claims
+                    // (#708 follow-up, 2026-08-16).
+                    focusTrack: schematic.focusIdx,
                     rule: .ownTrack,
                     placement: placement
                 )

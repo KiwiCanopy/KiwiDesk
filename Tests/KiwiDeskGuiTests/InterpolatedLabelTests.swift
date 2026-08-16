@@ -115,6 +115,12 @@ struct InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The two per-space remote-gate pointers (#841). One
+        // control label each — the second specifier is
+        // `CrossReferenceRow.linkSlot`, a destination link
+        // rather than a control name, so it is not counted here.
+        "scroll_grid.auto_size.xref": 1,
+        "track.auto_tracks.xref": 1,
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
         "layout.schematic.grid.ax": 2,

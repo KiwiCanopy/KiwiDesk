@@ -182,19 +182,31 @@ struct LayoutSchematicZoneTests {
                             + what
                     )
                 )
-                // The consequence, in the docstring's own terms:
-                // mirrored, the master at the stack seam is the
-                // LAST one in array order rather than the first.
+                // An INDEPENDENT fact, not a restatement. The
+                // first cut asserted `masterDisplay.first`
+                // against `masterWins.last`, which the equality
+                // above already implies — it branched on the
+                // same `mirrors` and could never fail while the
+                // first passed (code review, 2026-08-16).
+                //
+                // What is genuinely separate: mirroring is a
+                // PERMUTATION, so whatever the order, the drawn
+                // zone holds exactly the master zone's windows.
+                // A reversal that also dropped or duplicated one
+                // satisfies neither this nor the engine check
+                // for the same reason a real defect would.
                 #expect(
-                    schematic.masterDisplay.first
-                        == (mirrors
-                            ? schematic.masterWins.last
-                            : schematic.masterWins.first),
+                    Set(schematic.masterDisplay)
+                        == Set(schematic.masterWins),
                     Comment(
                         rawValue:
-                            "the boundary master is not at the "
-                            + "seam — \(what)"
+                            "render order is not a permutation "
+                            + "of the master zone — \(what)"
                     )
+                )
+                #expect(
+                    schematic.masterDisplay.count
+                        == schematic.masterWins.count
                 )
             }
         }

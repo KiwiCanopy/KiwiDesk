@@ -42,7 +42,26 @@ struct TrackSchematic: View {
 
     private var vertical: Bool { axis == .vertical }
 
-    private var focusIdx: Int { trackCount / 2 }
+    /// Which drawn track wears the focus — **the one the fold
+    /// put it on**, not a fixed middle slot.
+    ///
+    /// It used to be `trackCount / 2`, which was a drawing
+    /// convention from before the preview modelled fill-then-
+    /// spill. Once the fold became real the two disagreed: the
+    /// fold's focus marches to the newest track (a spill opens a
+    /// track and focus follows it), so at auto-tracks with 12
+    /// windows the fold is `[3, 3, 3, 2]` with focus at index 3
+    /// while the strip drew the focus on index 1 and gave it the
+    /// LAST track's run — a middle track drawn holding 2 windows
+    /// that the engine says holds 3 (code review, 2026-08-16).
+    ///
+    /// Clamped into the drawn range: the fold counts marker
+    /// tracks and the strip draws the normal ones, so a focus
+    /// that folded into the overflow pile rides the last normal
+    /// track rather than indexing past the end.
+    var focusIdx: Int {
+        min(max(0, markerTracks.focus), max(0, trackCount - 1))
+    }
 
     private struct TrackSpec {
         var focused = false
@@ -112,8 +131,10 @@ struct TrackSchematic: View {
     /// arm positions among tracks by the same splice rule this
     /// asks for; `LayoutSchematicTrackEngineTests` pins the two
     /// together rather than leaving it to arithmetic. Its
-    /// fill-then-spill arm (#437) is *not* modelled here — see
-    /// #708.
+    /// fill-then-spill arm (#437) IS modelled now, in
+    /// `TrackSchematic+Fold` — this property is the POSITION
+    /// half alone, which is why the two are guarded by separate
+    /// suites.
     private var newTrackIndex: Int {
         SchematicPlacement.splice(
             placement,

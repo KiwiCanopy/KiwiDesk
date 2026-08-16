@@ -690,15 +690,24 @@ claim; the obligations a change here takes on:
   not chosen** (#815): `GateReasonPlacement` reads the census —
   a block gate keeps its `?` anchor, a row whose cause is in its
   own container needs nothing, a row gated from another
-  destination takes the `?` that names where to go, and only
-  what falls through all three draws the reason INLINE, outside
-  the dimmed subtree, the way `NativeSpacesGroup` and
-  `GeneralRestartRow` already do. So do NOT caption every greyed
+  destination owes a LIVE pointer naming that destination, and
+  only what falls through all three draws the reason INLINE,
+  outside the dimmed subtree, the way `NativeSpacesGroup` and
+  `GeneralRestartRow` already do. What SHAPE the remote
+  pointer takes follows from the block: a `?` where there is a
+  live label above the dimmed rows to hang one on (Advanced
+  Colours), a `CrossReferenceRow` under them where there is not
+  (the per-space override editor, #841) — either way it must be
+  reachable while the rows it explains are inert, so it is drawn
+  outside the `GreyOut`, and hover text alone never discharges
+  it. So do NOT caption every greyed
   row — a `GreyOut` inside a `ForEach` stamps its sentence under
   every child, and several of these greys are ordinary states.
   `GateReasonPlacementTests` holds the derivation against the
-  sites that already draw one and records the one class still
-  waiting on its anchor. **A hint is not a proven substitute**: an
+  sites that draw one and reds when the per-space editor's
+  pointer falls back to hover text; `GreyOutAnchorTests` counts
+  the `?` anchors, exactly, so losing one is a conscious edit.
+  **A hint is not a proven substitute**: an
   `.accessibilityHint` on `GreyOut` was written and backed out
   because that modifier wraps whole blocks, so whether it
   reaches the controls inside — and whether its empty value

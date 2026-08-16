@@ -911,13 +911,19 @@ Adjust each mode's defaults:
 
 ### Per-Space Overrides
 
-The **Live preview** panel beside the Spaces list draws any one
-space's layout as that space resolves it — defaults plus its own
-overrides — with a chip per space to click through them, and a
-caption naming the layout and how many settings that space
-overrides. That is the question Layout Defaults cannot answer: its
-preview draws a layout's defaults, and the overrides are exactly
-what you came to check.
+The **Live preview** panel beside the Spaces list is headed
+**This Space's layout**, and that is exactly what it draws: one
+space's layout as *that space* resolves it — the defaults plus
+its own overrides — with a chip per space to click through them
+and a caption naming the layout and how many settings the space
+overrides ("follows the layout defaults" when it overrides
+none). A space set to Floating says so instead of drawing, that
+layout placing no windows. A **Window count** slider drives how
+many windows the drawing simulates: a question you ask of the
+preview, not a setting, so it never persists. That is the
+question Layout Defaults cannot answer — its preview draws a
+*layout's* defaults, and the overrides are exactly what you came
+to check.
 
 To tune the *same layout type differently in different spaces*, use
 the per-space override editor. For example, make space "3" scroll
@@ -947,13 +953,10 @@ and the row collapses to a quiet **follows `<Layout>` defaults ·
 space — the control appears, seeded with the current value so
 nothing jumps.
 
-The **Live preview** panel draws the space's layout with its
-overrides applied, so a ratio or count you change shows at once —
-and while an override editor is open the panel follows that space,
-so it is always answering about the rows in front of you. A
-**Window count** slider drives how many windows it simulates — a
-question you ask of the preview, not a setting, so it never
-persists.
+While an override editor is open the panel follows *that* space,
+whichever chip was last picked, so it is always answering about
+the rows in front of you — and a ratio or count you change shows
+in it at once. The editor itself carries no second preview.
 
 **Scrolling slot size** is one override with a size unit
 (**Percent**, **Points**) and a value. It sets each window's
@@ -1127,11 +1130,16 @@ mouse drags. Every private symbol is resolved at runtime; if that
 surface is missing or an operation fails, the same border is redrawn with
 the AppKit overlay automatically. Neither path requires disabling SIP.
 
-The **Live preview** panel beside the controls shows the border
+The **Live preview** panel beside the controls answers for the
+whole page, not just this card: the gap diagram, then the border
 on a live two-window mock — at your staged color, width, and
-corner style, before anything touches real windows — stacked
-with the area's gap diagram and drag ghost, all drawn from your
-draft, and the changed-list below them. The controls:
+corner style, before anything touches real windows, and wearing
+the sticky mark while **Show mark on sticky windows** is on —
+then the drag ghost and the drop zone, stacked one above the
+other so the pair can be compared at panel width. Each picture
+carries the heading of the card it answers for. All of it is
+drawn from your draft, with the changed-list below. The
+controls:
 
 - **Show focus border**: the master on/off switch.
 - **Show border on unfocused windows**: off by default — when on,
@@ -1380,8 +1388,9 @@ rest; the rest behind **Style**):
   same control.
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default bottom, beside the Dock, with the
-  Space Bar on top). Absolute for every layout; the
-  preview strip rotates vertical for left/right. When the Space
+  Space Bar on top). Absolute for every layout; the panel's
+  desktop scene is edge-aware and draws a left- or right-edge
+  bar vertical. When the Space
   Bar shares the edge, an inline note under this control
   explains the stacking order (Space Bar at the screen edge,
   App Bar next to the windows).
@@ -1628,14 +1637,16 @@ colors (you can still tweak any individual color afterward), and the
 change is staged until you Save the profile like any other edit.
 In the preview panel beside the shelf, **Current colors** shows
 the same scene painted in the colors you are editing — both bars
-with their active and focused items, the focused and unfocused
-rings with their state marks, and the drag ghost beside its drop
-zone — with the changed-list under it. It is the shelf's own
-tile at a larger size, so what a palette promises and what you have
-can never be drawn two different ways. The four **hover** colors
-are not in the scene: a still picture can only draw a pointer
-state as though it were the resting one, which would show you a
-behavior KiwiDesk does not have. Edit any individual color in
+with their accent ladders and count badges, a focused and an
+unfocused window wearing their rings and the sticky and floating
+marks, and the drag ghost beside its drop zone — with the
+changed-list under it. It is the shelf tile's own renderer at
+panel size, where there is room for roles a 72 pt tile has to
+leave out, so what a palette promises and what you have can never
+be drawn two different ways. The four **hover** colors are in
+neither drawing: a still picture can only draw a pointer state as
+though it were the resting one, which would show you a behavior
+KiwiDesk does not have. Edit any individual color in
 Advanced Colors and this scene follows.
 
 The palette you are on is **checkmarked**. The mark is worked out
@@ -1718,10 +1729,14 @@ be: **Border colors**, **Drag colors**, **Space Bar colors**,
 **App Bar colors**.
 
 The **Live preview** panel beside them draws **one scene holding
-every colour at once** — both bars with their active and focused
-items and their count badges, the focused and unfocused rings
-with their state marks, and the drag ghost beside its drop zone —
-in the colours you are editing, pinned while the rows scroll.
+every colour at once** — headed *Every color at once* — with both
+bars carrying their accent ladders and count badges, a focused
+and an unfocused window wearing their rings and the sticky and
+floating marks, and the drag ghost beside its drop zone, all in
+the colours you are editing and pinned while the rows scroll.
+(The Space Bar's ladder has one more step than the App Bar's,
+which has no **Focused window** colour — the scene draws what is
+there rather than leaving a gap.)
 That is the question the groups cannot answer on their own: a
 colour is easy to judge alone and only readable in company, and
 the ladder on each bar, the two rings and the marks beside the
@@ -1751,7 +1766,7 @@ the bar's eight colours and have no GUI control at all.)
   behind **More colors**. The **Floating** badge tint rides that
   cluster: the Space Bar badge is its only surface.
 - **App Bar colors** — **Fill** and **Highlight** at rest (the two
-  the preview strip reflects most), the rest behind **More
+  a drawing of the bar reflects most), the rest behind **More
   colors**.
 
 **A colour whose thing is switched off is dimmed, not removed**,

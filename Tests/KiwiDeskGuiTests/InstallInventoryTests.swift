@@ -82,31 +82,58 @@ struct InstallInventoryTests {
         #expect(view.rows.allSatisfy { $0.count == 0 })
     }
 
-    /// Every label puts its number LAST behind a label, so no
+    /// Every frame puts its number LAST behind a label, so no
     /// locale has to agree with a count mid-sentence
-    /// (`localization.md`). Derived from the rendered frames
-    /// rather than asserted per key, so a fifth row is covered
-    /// by existing — and this is the clause that forced the
-    /// counts to be ROWS rather than the issue's one-sentence
-    /// "3 profiles, 6 Spaces, 18 shortcuts, 3 app rules", which
-    /// no language can write.
-    @Test("every count sits last in its frame")
-    func countsComeLast() {
-        for row in inventory().rows {
-            let specifier = "%1$d"
+    /// (`localization.md`).
+    ///
+    /// Read from the shipped `en.json` rather than from a
+    /// rendered row: the `L(key, english, args…)` overload
+    /// substitutes the count at render time, so the drawn string
+    /// no longer contains a specifier to inspect. The English in
+    /// the catalog is what translators mirror, which makes it
+    /// the thing worth holding.
+    ///
+    /// This clause is also WHY the counts are rows rather than
+    /// the issue's one-sentence "3 profiles, 6 Spaces, 18
+    /// shortcuts, 3 app rules" — four counts cannot each be
+    /// last, so the localization rule forced the shape.
+    @Test("every count sits last in its English frame")
+    func countsComeLast() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Resources/Locales/en.json"
+            )
+        let data = try Data(contentsOf: root)
+        let catalog =
+            try JSONSerialization.jsonObject(with: data)
+            as? [String: String]
+        let english = try #require(catalog)
+        let keys = [
+            "general.inventory.profiles",
+            "general.inventory.spaces",
+            "general.inventory.shortcuts",
+            "general.inventory.app_rules",
+        ]
+        for key in keys {
+            let frame = try #require(
+                english[key],
+                Comment(rawValue: "\(key) is not in en.json")
+            )
             #expect(
-                row.label.hasSuffix(specifier),
+                frame.hasSuffix("%1$d"),
                 Comment(
                     rawValue:
-                        "\(row.label) does not end in its count"
+                        "\(key) — \"\(frame)\" does not end in "
+                        + "its count"
                 )
             )
-            let pieces = row.label.components(
-                separatedBy: specifier
-            )
             #expect(
-                pieces.count == 2,
-                "one count per frame, spent once"
+                frame.components(separatedBy: "%1$d").count == 2,
+                Comment(
+                    rawValue:
+                        "\(key) spends its specifier more than "
+                        + "once"
+                )
             )
         }
     }

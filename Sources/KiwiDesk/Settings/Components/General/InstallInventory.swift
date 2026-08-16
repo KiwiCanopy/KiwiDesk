@@ -36,29 +36,54 @@ struct InstallInventory: View {
     /// sidebar so the block reads as a walk through the app
     /// rather than an arbitrary list.
     ///
+    /// Rendered through the `L(key, english, args…)` overload
+    /// rather than `L(key, english)` plus a hand `String(format:)`
+    /// — the interpolation is then visible to everything that
+    /// watches call-site arguments, which a manual format is not
+    /// (`gui.md` ▸ Strings; architect review, 2026-08-16). The
+    /// raw `count` rides alongside the rendered text so the
+    /// guards can assert the arithmetic without parsing prose.
+    ///
     /// Internal so `InstallInventoryTests` reads the numbers: a
     /// row that renders a plausible constant satisfies every
     /// source needle, which is the failure this lane has already
     /// paid for once (`LayoutSchematicCountTests`).
-    var rows: [(label: String, count: Int)] {
+    var rows: [(id: String, text: String, count: Int)] {
         [
             (
-                L("general.inventory.profiles", "Profiles: %1$d"),
+                "profiles",
+                L(
+                    "general.inventory.profiles",
+                    "Profiles: %1$d",
+                    model.profiles.count
+                ),
                 model.profiles.count
             ),
             (
-                L("general.inventory.spaces", "Spaces: %1$d"),
+                "spaces",
+                L(
+                    "general.inventory.spaces",
+                    "Spaces: %1$d",
+                    model.config.spaces.count
+                ),
                 model.config.spaces.count
             ),
             (
+                "shortcuts",
                 L(
                     "general.inventory.shortcuts",
-                    "Shortcuts: %1$d"
+                    "Shortcuts: %1$d",
+                    shortcutCount
                 ),
                 shortcutCount
             ),
             (
-                L("general.inventory.app_rules", "App rules: %1$d"),
+                "app_rules",
+                L(
+                    "general.inventory.app_rules",
+                    "App rules: %1$d",
+                    model.config.appRules.count
+                ),
                 model.config.appRules.count
             ),
         ]
@@ -76,17 +101,11 @@ struct InstallInventory: View {
 
     var body: some View {
         VStack(spacing: 3) {
-            ForEach(rows, id: \.label) { row in
-                Text(
-                    String(
-                        format: row.label,
-                        locale: .current,
-                        row.count
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .monospacedDigit()
+            ForEach(rows, id: \.id) { row in
+                Text(row.text)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
             }
         }
         // One element, one sentence: read as four siblings the

@@ -19,9 +19,16 @@ import CoreGraphics
 /// engine does not have. So every constant here is a stand-in for
 /// a DISPLAY quantity and is the same at every
 /// `SchematicScale` — clamp the drawing if you must; never the
-/// rule. `LayoutSchematicStandInTests` holds that scale
-/// independence, which is the property no reviewer can see by
-/// reading one schematic.
+/// rule.
+///
+/// `LayoutSchematicTrackFoldTests.foldIsScaleIndependent` holds
+/// that property for the two Track constants — the one thing no
+/// reviewer can see by reading a single schematic. Stated
+/// residue: `gridAutoSizeCap` has no scale-independence guard of
+/// its own, so a Grid schematic that came to fold differently at
+/// `.tile` would not red. A guard over it is owed
+/// (`rule-authoring.md` — name the suite that exists, and say
+/// which half is uncovered).
 extension LayoutSchematic {
     /// The Grid preview's stand-in for the one ceiling it cannot
     /// compute: `auto_size`, where `GridLayout.capDimensions`
@@ -58,20 +65,29 @@ extension LayoutSchematic {
     /// track. For a preview the canvas IS the display, so this is
     /// a genuine fit count rather than a clamp bolted onto a
     /// rule: five is what the strip shows without the tracks
-    /// becoming slivers. It must not bind below the user's own
-    /// `limit` at the shapes the limit control can reach, or the
-    /// preview would answer a typed 4 with three tracks.
+    /// becoming slivers.
+    ///
+    /// **Applies only under `auto_tracks`**, which is the whole
+    /// of `gridAutoSizeCap`'s rule restated for this axis: a
+    /// stand-in fills in where the user gave NO number, and a
+    /// typed `limit` is a number. Passed unconditionally it
+    /// bound below the limit stepper's own range (1…10) and the
+    /// preview answered a typed 6 with four normal tracks —
+    /// the stand-in overruling the setting it illustrates
+    /// (architect review, 2026-08-16). `TrackSchematic+Fold`
+    /// passes `.max` for a fixed limit, so the typed value is
+    /// the ceiling and the drawing may go thin.
     ///
     /// Fixed across `SchematicScale`, which is the property that
     /// keeps this on the right side of #712: the thumbnail and
     /// the panel fold identically, so one configuration never
     /// draws two different capacities.
     ///
-    /// Without a stand-in the preview would have to pass `.max`,
-    /// and `auto_tracks` — where `normalCap` is `.max` too —
-    /// would then never fold at all: an unbounded row of
-    /// ever-thinner tracks and no overflow track, on the very
-    /// setting whose whole story is that tracks open until the
-    /// display runs out.
+    /// Without a stand-in the auto arm would have to pass
+    /// `.max`, and `normalCap` is `.max` there too — so it would
+    /// never fold at all: an unbounded row of ever-thinner
+    /// tracks and no overflow track, on the very setting whose
+    /// whole story is that tracks open until the display runs
+    /// out.
     static let trackGeoCap = 5
 }

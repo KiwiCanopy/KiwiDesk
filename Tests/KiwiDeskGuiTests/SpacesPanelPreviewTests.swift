@@ -118,22 +118,133 @@ struct SpacesPanelPreviewTests {
         #expect(view.overrideCount(for: "1") == 0)
     }
 
-    /// The diff helper itself, on the property the panel relies
-    /// on but never exercises: a key present on ONE side is a
-    /// change. A sparse override that adds a field the defaults
-    /// omit is still a departure.
-    @Test("a one-sided leaf counts as a change")
-    func oneSidedLeafCounts() {
+    /// **Every layout**, not just the convenient ones.
+    ///
+    /// The suite originally sampled Stack and Track, and the one
+    /// case where the Swift name and the wire key diverge —
+    /// Scrolling, which encodes as `scroll` — was the one it did
+    /// not reach. So a Scrolling Space with overrides captioned
+    /// "follows the layout defaults" and every test passed
+    /// (architect review, 2026-08-16). Sweeping `allCases` is
+    /// what makes a name divergence in a seventh layout this
+    /// suite's problem rather than the next reviewer's.
+    @Test("every layout's overrides are counted")
+    func everyLayoutCounts() {
+        for mode in LayoutMode.allCases where mode != .floating {
+            var settings = TilingSettings()
+            let before = settings
+            apply(anOverrideFor: mode, to: &settings)
+            #expect(
+                settings != before,
+                Comment(
+                    rawValue: "\(mode) fixture set nothing"
+                )
+            )
+            let view = panel(
+                spaces: ["1"],
+                modes: ["1": mode],
+                settings: settings
+            )
+            #expect(
+                view.overrideCount(for: "1") >= 1,
+                Comment(
+                    rawValue:
+                        "\(mode) overrides went uncounted — its "
+                        + "encoded subtree is not being found"
+                )
+            )
+        }
+    }
+
+    /// One sparse override per layout, set through each layout's
+    /// own override struct.
+    private func apply(
+        anOverrideFor mode: LayoutMode,
+        to settings: inout TilingSettings
+    ) {
+        switch mode {
+        case .bsp:
+            var o = BspOverride()
+            o.splitRatioH = settings.bsp.splitRatioH / 2
+            settings.bsp.override["1"] = o
+        case .stack:
+            var o = StackOverride()
+            o.masterCount = settings.stack.masterCount + 1
+            settings.stack.override["1"] = o
+        case .scrolling:
+            var o = ScrollingOverride()
+            o.anchor =
+                settings.scrolling.anchor == .center
+                ? .start : .center
+            settings.scrolling.override["1"] = o
+        case .monocle:
+            var o = MonocleOverride()
+            o.orientation =
+                settings.monocle.orientation == .horizontal
+                ? .vertical : .horizontal
+            settings.monocle.override["1"] = o
+        case .grid:
+            var o = GridOverride()
+            o.columns = settings.grid.columns + 1
+            settings.grid.override["1"] = o
+        case .track:
+            var o = TrackOverride()
+            o.limit = settings.track.limit + 1
+            settings.track.override["1"] = o
+        case .floating:
+            break
+        }
+    }
+
+    /// The caption and the editor's header count the SAME thing.
+    ///
+    /// They are two numbers about one Space on one screen, and
+    /// they disagreed: the header renders
+    /// `overrideFieldCount` (fields SET) while the caption's
+    /// first cut counted leaves that DIFFER. `overrideToggle`
+    /// seeds a newly ticked override with the global value, so
+    /// the first click on any checkbox made the header say
+    /// "1 of 6 set" beside "follows the layout defaults" (code
+    /// review, 2026-08-16). Asserted against the seam the header
+    /// itself reads, so the two cannot drift apart again.
+    @Test("the caption counts what the header counts")
+    func captionAgreesWithTheHeader() {
+        for mode in LayoutMode.allCases where mode != .floating {
+            var settings = TilingSettings()
+            apply(anOverrideFor: mode, to: &settings)
+            let view = panel(
+                spaces: ["1"],
+                modes: ["1": mode],
+                settings: settings
+            )
+            #expect(
+                view.overrideCount(for: "1")
+                    == settings.overrideFieldCount(mode, for: "1"),
+                Comment(
+                    rawValue:
+                        "\(mode): the caption and the header "
+                        + "count differently"
+                )
+            )
+        }
+    }
+
+    /// A ticked-but-unchanged override still counts. This is the
+    /// exact shape that made the two numbers disagree — the
+    /// checkbox seeds the global value, so the field is SET and
+    /// nothing DIFFERS.
+    @Test("a ticked override counts before it is changed")
+    func seededOverrideCounts() {
         var settings = TilingSettings()
-        var override = TrackOverride()
-        override.limit = settings.track.limit + 4
-        override.autoTracks = !settings.track.autoTracks
-        settings.track.override["1"] = override
+        var override = StackOverride()
+        // Seeded with the global, the way `overrideToggle` does.
+        override.masterCount = settings.stack.masterCount
+        settings.stack.override["1"] = override
         let view = panel(
             spaces: ["1"],
-            modes: ["1": .track],
+            modes: ["1": .stack],
             settings: settings
         )
-        #expect(view.overrideCount(for: "1") == 2)
+        #expect(view.overrideCount(for: "1") == 1)
     }
 }

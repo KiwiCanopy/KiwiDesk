@@ -144,7 +144,17 @@ enum OnboardingKeys {
                         // "& follow" rather than a synonym: one
                         // concept, one word per catalog
                         // (`docs/localization-naming.md`).
-                        "Move the window and follow it"
+                        // Names the Space, like its sibling and
+                        // for the sibling's reason: each tour
+                        // row is ONE accessibility element read
+                        // alone, and two locales had already
+                        // produced labels indistinguishable
+                        // from the row above when the
+                        // destination was left implicit
+                        // (localization audits 2026-08-11 and
+                        // 2026-08-16). Dropping it here revived
+                        // the milder form of that.
+                        "Move the window to a Space and follow it"
                     ),
                     glyphs: follow
                 )

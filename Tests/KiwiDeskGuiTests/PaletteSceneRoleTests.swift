@@ -127,7 +127,15 @@ struct PaletteSceneRoleTests {
                 "Sources/KiwiDesk/Settings/Components/Colors/"
                     + name
             )
-            source += try String(contentsOf: url, encoding: .utf8)
+            // Comments STRIPPED, like every sibling scan: a
+            // commented-out `color("…")` would satisfy the drawn
+            // check, and a withheld path merely named in a
+            // comment would red the negative one (code review,
+            // 2026-08-16; `gui.md` states the rule the same lane
+            // already paid for once).
+            source += SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
         }
         #expect(source.count > 1000, "the scan read the scenes")
         for path in PaletteSceneRoles.panel {

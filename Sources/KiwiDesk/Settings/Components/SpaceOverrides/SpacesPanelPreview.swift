@@ -100,6 +100,21 @@ struct SpacesPanelPreview: View {
     private func chip(_ candidate: SpaceID) -> some View {
         let isOn = candidate == space
         return Button {
+            // While the override editor is open it OWNS which
+            // Space is shown (`space` gives it precedence), so a
+            // chip that only set `selected` moved nothing and
+            // gave no feedback — a fully live control that does
+            // nothing, which "grey, don't hide" exists to
+            // prevent (code review, 2026-08-16).
+            //
+            // Driving the editor instead of dimming the chip:
+            // the panel and the editor show ONE Space, and
+            // either may say which. Clicking a chip with the
+            // editor open moves both, which is what a reader
+            // clicking it means.
+            if model.nav.spaceOverridesFocus != nil {
+                model.nav.spaceOverridesFocus = candidate
+            }
             selected = candidate
         } label: {
             Text(candidate.raw)
@@ -197,31 +212,33 @@ struct SpacesPanelPreview: View {
     }
 
     /// How many of the active layout's settings this Space
-    /// overrides — **derived, never a hand-listed field list.**
+    /// overrides — **the header's own number**.
     ///
-    /// Encodes the global settings and this Space's resolved
-    /// settings and counts the leaves that differ under the
-    /// active mode's own key. A hand-mirrored list of overridable
-    /// fields would be a third copy of a field list the engine
-    /// and the editor already carry, and past two mirrors
-    /// `parity-tests.md` asks for a forget-proof derivation
-    /// instead — this is that derivation, so a new overridable
-    /// field counts here the day it exists.
+    /// `TilingSettings.overrideFieldCount(_:for:)` is what the
+    /// editor's "N of M set" already renders, so the caption and
+    /// the header cannot disagree. They did: this shipped its
+    /// first cut counting leaves that DIFFER (a JSON diff of the
+    /// resolved settings against the globals) while the header
+    /// counts fields SET — and `overrideToggle` seeds a newly
+    /// ticked override with the global value, so the first click
+    /// on any Override checkbox made the header say "1 of 6 set"
+    /// beside a caption reading "follows the layout defaults"
+    /// (code review, 2026-08-16).
     ///
-    /// Internal so `SpacesPanelPreviewTests` reads the number: a
-    /// caption that says "2" while the resolver disagrees is
-    /// exactly the drift a source scan cannot see.
+    /// That cut also carried a trap worth recording, since the
+    /// replacement is what removes it: it addressed the encoded
+    /// settings by `"layout.\(mode.rawValue)"`, and scrolling
+    /// encodes as `scroll` — so a Scrolling Space resolved no
+    /// subtree and reported a confident zero. Asking the type
+    /// that owns the overrides needs no wire path at all.
+    ///
+    /// Internal so `SpacesPanelPreviewTests` reads the number.
     func overrideCount(for space: SpaceID) -> Int {
         let mode = mode(of: space)
         guard mode != .floating else { return 0 }
-        let resolved = model.config.settings.resolved(
-            for: space,
-            activeMode: mode
-        )
-        return TilingSettingsDiff.changedLeaves(
-            from: model.config.settings,
-            to: resolved,
-            under: "layout.\(mode.rawValue)"
+        return model.config.settings.overrideFieldCount(
+            mode,
+            for: space
         )
     }
 

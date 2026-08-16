@@ -20,20 +20,12 @@ struct PaletteScenePanel: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.colors.currentScene,
-            // The caption labels what is shown, and since #793
-            // that is the full scene rather than a sample of
-            // it: this mount takes `.panel` like Advanced
-            // Colours' own, so the two pages cannot disagree
-            // about what a palette paints. What it still does
-            // NOT show is the four pointer states, which is
-            // `PaletteSceneRoles.withheld`'s argument and not a
-            // caption's to make.
-            caption: L(
-                "colors.scene.caption",
-                "Both bars, the focused and unfocused rings "
-                    + "with their state marks, and the drag "
-                    + "ghost beside its drop zone."
-            )
+            // ONE caption for one picture. Both mounts draw
+            // `PaletteSceneThumbnail` at `.panel`, so shipping
+            // two English descriptions of it into ten catalogs
+            // was two chances to describe the same drawing
+            // differently (localization audit, 2026-08-16).
+            caption: PaletteSceneCaption.panel
         ) {
             PaletteSceneThumbnail(
                 palette: ColorPalette(

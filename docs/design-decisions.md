@@ -2165,10 +2165,12 @@ asks — and only the number is local. Two obligations make the
 substitution honest rather than a clamp by another name. The
 stand-in must be **the same at every drawing scale**, or one
 configuration draws two different capacities and the thumbnail
-contradicts the panel (#712 shipped that: a rigid 8 × 1 piled two
-windows on the strip and none in the panel, inventing an overflow
-the engine does not have). And it must **not bind below a value
-the user typed** — a preview answering a typed limit of 4 with
+contradicts the panel (#712's first cut did exactly that, and
+review caught it before it shipped: a rigid 8 × 1 at five windows
+piled two windows on the strip thumbnail and none in the panel,
+inventing an overflow the engine does not have). And it must
+**not bind below a value the user typed** — a preview
+answering a typed limit of 4 with
 three tracks is a stand-in overruling the setting it illustrates.
 Clamp the drawing if you must; never the rule. The family lives
 in `LayoutSchematicStandIns` and
@@ -4077,8 +4079,10 @@ colors left the Bars page entirely for Advanced Colors, and
 their "Advanced colors" disclosure became "More colors"
 there — see "Colour is its own destination" below. The
 at-rest/behind-a-drawer SPLIT survives verbatim: Fill and
-Highlight are still the two the preview strip most visibly
-reflects, and are still the two at rest.)
+Highlight are still the two a drawing of the bar most visibly
+reflects, and are still the two at rest. The per-group preview
+strip that made that point went with #793's composite scene;
+the split never rested on it.)
 
 **[Principle] Colour is its own destination, and a colour
 renders in exactly one of them.** (#678 Phase 3, 2026-08-02.)
@@ -4274,14 +4278,17 @@ last of them left this editor in #754, so it no longer pushes
 the narrow axis in through `settingsLabelColumn` at all — what
 remains there is toggles, which draw their own labels. The pair
 lives on in Advanced Colours' twin drag columns, which take the
-width as `AdvancedColorRow`'s `labelWidth:`. Each
-column's preview still draws the alignment, radius and width
-actually stored, because all three are still settable from
-Lua: schematic, not pixel-exact, and it remaps the full value
-range instead of hard-capping halfway (the `AppBarPreviewStrip`
-fix). The alignment preview earns its keep twice over, the
-control having been dead before it — SwiftUI `.strokeBorder`
-always draws inside.
+width as `AdvancedColorRow`'s `labelWidth:`. The drawing beside
+those columns went with #793's composite scene, but the
+obligation it carried did not: wherever the ghost and drop zone
+are drawn — the Gaps & Borders panel, since #793 — the drawing
+shows the alignment, radius and width actually stored, because
+all three are still settable from Lua. Schematic, not
+pixel-exact, and it remaps the full value range instead of
+hard-capping halfway (the fix the retired App Bar preview strip
+asked for). The alignment drawing earns its keep twice over,
+the control having been dead before it — SwiftUI
+`.strokeBorder` always draws inside.
 
 **[Trade-off]**
 
@@ -4535,8 +4542,8 @@ bar renders exactly there in every layout — the earlier
 orientation are gone. Axis-relativity existed to prevent an
 edge/axis mismatch when the edge was derived per layout; with the
 Space Bar requiring free four-edge placement for both bars, the
-derivation (and its rationale) fell away. The GUI preview strip
-is edge-aware and rotates vertical for left/right.
+derivation (and its rationale) fell away. The Settings preview
+is edge-aware and draws a left- or right-edge bar vertical.
 
 **The Space Bar reserves space-first.** (#293.) The Space
 Bar's strip is carved from the display's original visible frame,
