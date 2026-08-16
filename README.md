@@ -209,6 +209,6 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 <div align="center">
 <br>
-<sub>A <a href="https://kiwicanopy.com"><strong>KiwiCanopy</strong></a> project — Planting Kiwis for a
-more conscious life 🥝</sub>
+<sub>A <a href="https://kiwicanopy.com"><strong>KiwiCanopy</strong></a> project — Because our time
+is precious 🥝</sub>
 </div>
