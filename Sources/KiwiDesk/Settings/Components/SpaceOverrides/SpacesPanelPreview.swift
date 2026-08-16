@@ -87,8 +87,21 @@ struct SpacesPanelPreview: View {
             if let space {
                 chips
                 scene(for: space)
-                caption(for: space)
-                countRow
+                // A Floating Space draws no schematic, so the
+                // caption and the count slider have nothing to
+                // describe or to drive. The chip stays LIVE —
+                // clicking a Floating Space to find out whether
+                // it overrides anything is a real question and
+                // the sentence is its answer — but a slider that
+                // moves nothing is a control with no effect,
+                // which is what "grey, don't hide" is about, and
+                // a caption reading "Floating — follows Layout
+                // Defaults" names settings Floating does not
+                // have (owner, on device, 2026-08-16).
+                if drawsSchematic(for: space) {
+                    caption(for: space)
+                    countRow
+                }
             } else {
                 Text(
                     L(
@@ -159,10 +172,23 @@ struct SpacesPanelPreview: View {
 
     // MARK: - The scene
 
+    /// Whether this Space's layout has a schematic at all —
+    /// the one predicate the scene, the caption and the count
+    /// row all read, so they cannot disagree about whether
+    /// there is a picture to describe.
+    ///
+    /// Internal so `SpacesPanelSelectionTests` can read it: what
+    /// a panel WITHHOLDS is a surfacing branch, and a branch
+    /// that stops being written leaves every other assertion
+    /// green (`gui.md`).
+    func drawsSchematic(for space: SpaceID) -> Bool {
+        LayoutMode.placementTabs.contains(mode(of: space))
+    }
+
     @ViewBuilder
     private func scene(for space: SpaceID) -> some View {
         let mode = mode(of: space)
-        if LayoutMode.placementTabs.contains(mode) {
+        if drawsSchematic(for: space) {
             LayoutSchematicView(
                 mode: mode,
                 settings: model.config.settings.resolved(

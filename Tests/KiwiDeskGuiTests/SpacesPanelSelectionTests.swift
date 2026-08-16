@@ -59,6 +59,47 @@ struct SpacesPanelSelectionTests {
         #expect(model.nav.spaceOverridesFocus == nil)
     }
 
+    /// A Floating Space is reachable but describes nothing.
+    ///
+    /// The chip stays live — clicking a Floating Space to find
+    /// out whether it overrides anything is a real question, and
+    /// the panel answers it. What must NOT be there is the
+    /// caption and the window-count slider: no schematic is
+    /// drawn, so the caption would name settings Floating does
+    /// not have and the slider would be a fully live control
+    /// that moves nothing (owner, on device, 2026-08-16).
+    ///
+    /// A withholding branch leaves nothing behind to find, which
+    /// is why this reads the predicate the three sites share
+    /// rather than trusting the body.
+    @Test("Floating is selectable and describes nothing")
+    func floatingDrawsNoSchematic() {
+        let model = makeTestModel()
+        model.config.spaces = ["1", "2"]
+        model.config.spaceModes = ["1": .floating, "2": .bsp]
+        let view = SpacesPanelPreview(model: model)
+        #expect(!view.drawsSchematic(for: "1"))
+        #expect(view.drawsSchematic(for: "2"))
+        // Still selectable: withholding the picture is not
+        // withholding the Space.
+        view.pick("1")
+        #expect(view.shownSpace == "1")
+        // Every placement layout keeps its picture — the
+        // predicate is `placementTabs`, so a seventh layout
+        // joins by existing rather than by editing a list.
+        for mode in LayoutMode.allCases {
+            let m = makeTestModel()
+            m.config.spaces = ["1"]
+            m.config.spaceModes = ["1": mode]
+            #expect(
+                SpacesPanelPreview(model: m)
+                    .drawsSchematic(for: "1")
+                    == LayoutMode.placementTabs.contains(mode),
+                Comment(rawValue: "\(mode) disagrees")
+            )
+        }
+    }
+
     /// Stated limit of the test above: it cannot see the chip's
     /// OTHER half. `selected` is `@State`, whose storage is only
     /// live once the view is installed in a hierarchy, so a
