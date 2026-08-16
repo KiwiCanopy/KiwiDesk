@@ -63,10 +63,20 @@ struct TrackSchematic: View {
         min(max(0, markerTracks.focus), max(0, trackCount - 1))
     }
 
-    private struct TrackSpec {
+    struct TrackSpec {
         var focused = false
         var isNew = false
         var nestedNew = false
+        /// How many windows this track holds, from the fold.
+        ///
+        /// Every non-focused track used to draw as ONE tile
+        /// whatever the fold said, which was true while a track
+        /// conceptually held one window and stopped being true
+        /// the moment #708 taught the preview fill-then-spill:
+        /// at 12 windows the fold said `[3, 3, 3, 2]` and the
+        /// strip drew `[1, 1, 1, 3]` — six windows on a slider
+        /// set to twelve (owner, on device, 2026-08-16).
+        var run = 1
     }
 
     var body: some View {
@@ -107,9 +117,13 @@ struct TrackSchematic: View {
     /// Normal tracks with the new *track* spliced in (for
     /// `own_track`) at its placement slot; `focused_track` instead
     /// nests the new window inside the focused track.
-    private var specs: [TrackSpec] {
-        var s = (0..<trackCount).map {
-            TrackSpec(focused: $0 == focusIdx)
+    var specs: [TrackSpec] {
+        let counts = markerTracks.counts
+        var s = (0..<trackCount).map { index in
+            TrackSpec(
+                focused: index == focusIdx,
+                run: index < counts.count ? counts[index] : 1
+            )
         }
         switch newWindow {
         case .focusedTrack:
@@ -168,6 +182,12 @@ struct TrackSchematic: View {
 
     enum TrackWindow { case plain, focus, new }
 
+    /// A track's run as the canvas can legibly stack it. The
+    /// CLAMP is the drawing's — the run itself is the engine's
+    /// fold, and the two stay separate exactly as `focusedRun`
+    /// keeps them separate.
+    func drawnRun(_ run: Int) -> Int { min(4, max(1, run)) }
+
     @ViewBuilder
     private func trackView(_ spec: TrackSpec) -> some View {
         if spec.isNew {
@@ -175,7 +195,14 @@ struct TrackSchematic: View {
         } else if spec.focused {
             focusedTrack(nested: spec.nestedNew)
         } else {
-            SchematicTile()
+            // The track's OWN run, stacked along its axis — not
+            // one tile standing in for however many windows the
+            // fold put here.
+            axisStack {
+                ForEach(0..<drawnRun(spec.run), id: \.self) { _ in
+                    SchematicTile()
+                }
+            }
         }
     }
 

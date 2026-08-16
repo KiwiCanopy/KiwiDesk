@@ -110,18 +110,39 @@ struct GapsBordersPanelTests {
     /// mark and the Space Bar badge are "one glyph everywhere"
     /// (#414), and a preview drawing a different one teaches a
     /// mark the app never renders.
-    @Test("the drawn glyph is the engine's own")
+    @Test("the drawn glyphs are the engine's own, both scopes")
     func glyphComesFromTheEngine() {
         var style = StickyStyle()
         style.mark = true
-        let drawn = FocusBorderPreview(
+        let view = FocusBorderPreview(
             style: BorderStyle(),
             sticky: style
-        ).stickyMark
+        )
         #expect(
-            drawn?.symbol
+            view.stickyMark?.symbol
                 == StickyStyle.symbolName(for: .global)
         )
+        // The second scope, on the other window (owner, on
+        // device, 2026-08-16): one window showed one scope and
+        // taught half the family.
+        #expect(
+            view.displayStickyMark?.symbol
+                == StickyStyle.symbolName(for: .display)
+        )
+        // Distinct glyphs — the pair exists to be told apart.
+        #expect(
+            view.stickyMark?.symbol
+                != view.displayStickyMark?.symbol
+        )
+        // ONE tint and ONE toggle across both (#414).
+        #expect(view.stickyMark?.tint == view.displayStickyMark?.tint)
+        style.mark = false
+        let off = FocusBorderPreview(
+            style: BorderStyle(),
+            sticky: style
+        )
+        #expect(off.stickyMark == nil)
+        #expect(off.displayStickyMark == nil)
     }
 
     /// The Automatic sentinel. An EMPTY mark colour means the

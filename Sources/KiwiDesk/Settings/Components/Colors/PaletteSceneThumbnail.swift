@@ -67,7 +67,37 @@ struct PaletteSceneThumbnail: View {
     /// stretching a fixed drawing inside a taller box.
     /// Internal for the same reason `color` is — the panel scene
     /// expresses its own metrics against it.
-    var scale: CGFloat { height / Self.baseHeight }
+    ///
+    /// **Only the tile derives it from `height`.** That
+    /// "one number scales the whole picture" trick works while
+    /// the picture is three rows tall; the panel scene stacks
+    /// seven, so deriving 300/72 = 4.17 asked for a 538 pt
+    /// drawing inside a 300 pt frame and it spilled over the
+    /// diff list beneath it (owner, on device, 2026-08-16). The
+    /// panel therefore fixes its own unit and lets its HEIGHT
+    /// follow, which is the opposite dependency.
+    var scale: CGFloat {
+        switch scene {
+        case .tile: return height / Self.baseHeight
+        case .panel: return Self.panelScale
+        }
+    }
+
+    /// The panel scene's unit. Chosen so the whole composition
+    /// fits the panel column's width at a legible size — the
+    /// badges are the floor, at 8 × this.
+    static let panelScale: CGFloat = 1.9
+
+    /// What the panel scene actually needs, in points: the sum
+    /// of its rows and their gaps at `panelScale`, so the frame
+    /// is derived from the drawing rather than asserted over it.
+    /// `PaletteSceneRoleTests` holds it against the panel
+    /// column's own budget.
+    static var panelHeight: CGFloat {
+        // strip + gap + windows + gap + drag + gap + strip,
+        // then the plate's padding top and bottom.
+        (20 + 7 + 30 + 7 + 22 + 7 + 20 + 16) * panelScale
+    }
 
     var body: some View {
         ZStack {
@@ -78,7 +108,9 @@ struct PaletteSceneThumbnail: View {
             content
                 .padding(8 * scale)
         }
-        .frame(height: height)
+        .frame(
+            height: scene == .panel ? Self.panelHeight : height
+        )
         .frame(maxWidth: .infinity)
     }
 

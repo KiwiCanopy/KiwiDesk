@@ -104,6 +104,47 @@ struct PaletteSceneRoleTests {
         )
     }
 
+    /// The panel scene fits the column it is drawn in.
+    ///
+    /// This is the defect that shipped (owner, on device,
+    /// 2026-08-16): every metric in the tile is `× scale` where
+    /// `scale = height / 72`, so mounting the seven-row panel
+    /// composition at `height: 300` asked for a 538 pt drawing
+    /// inside a 300 pt frame and it spilled over the diff list
+    /// below it. Nothing caught it — a SwiftUI body's overflow
+    /// is invisible to every assertion in this tree.
+    ///
+    /// The arithmetic is now the other way round: the panel
+    /// fixes its unit and derives its height. What is pinned
+    /// here is that the derived height is a real fit — inside
+    /// the panel column's own width budget, and not the
+    /// runaway the tile's multiplier produced.
+    @Test("the panel scene fits the panel column")
+    func panelSceneFitsItsColumn() {
+        let height = PaletteSceneThumbnail.panelHeight
+        // A real drawing, not a collapsed one.
+        #expect(height > 120)
+        // And it fits the column: the panel is 392 pt wide less
+        // its 22 pt insets, and a scene taller than it is wide
+        // stops reading as a desktop.
+        let contentWidth = SettingsTheme.panelWidth - 44
+        #expect(
+            height < contentWidth,
+            Comment(
+                rawValue:
+                    "the scene wants \(height) pt in a "
+                    + "\(contentWidth) pt column"
+            )
+        )
+        // The tile is untouched by the panel's unit — the two
+        // scales are independent, which is the whole fix.
+        let tile = PaletteSceneThumbnail(
+            palette: ColorPalette(name: "", colors: [:]),
+            scene: .tile
+        )
+        #expect(tile.scale == 1)
+    }
+
     /// A role declared drawn is actually rendered. The census
     /// could otherwise claim coverage the body never delivers —
     /// the failure mode `LayoutSchematicCountTests` records for

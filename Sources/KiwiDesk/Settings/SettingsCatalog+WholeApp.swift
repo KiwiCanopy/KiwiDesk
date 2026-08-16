@@ -128,6 +128,16 @@ struct GeneralControls: Sendable {
         "general.about.title",
         "About"
     )
+    /// The install inventory (#795, re-scoped). Its OWN card
+    /// rather than four lines under the version: loose counts
+    /// beneath the wordmark read as debug output, and this page
+    /// has no detail panel to put them in — General's empty
+    /// right side is a ruling, not a vacancy (owner, on device,
+    /// 2026-08-16).
+    let installInventory = SettingsControl(
+        "general.inventory.title",
+        "This install"
+    )
     let generalAdvanced = SettingsDrawer(
         "general.advanced.title",
         "Advanced"

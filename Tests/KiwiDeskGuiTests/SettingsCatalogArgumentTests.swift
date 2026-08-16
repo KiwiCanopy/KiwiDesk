@@ -143,7 +143,9 @@ struct SettingsCatalogArgumentTests {
         // once — in the panel rather than in the section body.
         // 51 since #794: the Spaces panel's preview, likewise
         // mounted in the panel and not in the section.
-        #expect(direct.values.reduce(0, +) == 51)
+        // 52 since #795's device round: the install inventory
+        // card, mounted once in the General section.
+        #expect(direct.values.reduce(0, +) == 52)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

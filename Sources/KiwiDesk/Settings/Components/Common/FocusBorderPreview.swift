@@ -45,7 +45,8 @@ struct FocusBorderPreview: View {
     /// #708 made explicit: a spoken label may no more assert a
     /// mark the frame omits than a written caption may. The
     /// mark arm is reached only where a mount passes `sticky`
-    /// AND the toggle is on.
+    /// AND the toggle is on. Both scopes are drawn together, so
+    /// one sentence covers the pair.
     private var axLabel: String {
         stickyMark == nil
             ? L(
@@ -61,8 +62,8 @@ struct FocusBorderPreview: View {
             : L(
                 "border.preview.ax_sticky",
                 "Border preview: a focused window with its ring "
-                    + "and its sticky mark, beside an unfocused "
-                    + "one."
+                    + "and the everywhere-sticky mark, beside an "
+                    + "unfocused one with the one-display mark."
             )
     }
 
@@ -82,7 +83,16 @@ struct FocusBorderPreview: View {
                     color: style.unfocusedColor,
                     ringed: style.unfocusedEnabled,
                     glow: false,
-                    mark: nil
+                    // The DISPLAY-sticky scope on the second
+                    // window (owner, on device, 2026-08-16).
+                    // One window showing one scope taught only
+                    // half the family: `StickyStyle` draws two
+                    // glyphs — `infinity` for a window on every
+                    // Space of every monitor, `pin.fill` for one
+                    // tacked to a single display (#445) — they
+                    // share one tint, and the pair is the thing
+                    // a reader needs to tell apart.
+                    mark: displayStickyMark
                 )
             }
             .padding(14)
@@ -101,8 +111,23 @@ struct FocusBorderPreview: View {
     /// branch that stops being written passes every source
     /// needle above it (the Monitors lesson, `gui.md`).
     var stickyMark: (symbol: String, tint: Color)? {
+        mark(for: .global)
+    }
+
+    /// The display-sticky twin, drawn on the unfocused window so
+    /// the two scopes sit side by side.
+    var displayStickyMark: (symbol: String, tint: Color)? {
+        mark(for: .display)
+    }
+
+    /// Both scopes read ONE toggle and ONE tint — that is the
+    /// "one glyph everywhere" family (#414), and the preview
+    /// would be lying if it let them diverge.
+    private func mark(
+        for scope: StickyScope
+    ) -> (symbol: String, tint: Color)? {
         guard let sticky, sticky.mark,
-            let symbol = StickyStyle.symbolName(for: .global)
+            let symbol = StickyStyle.symbolName(for: scope)
         else { return nil }
         return (symbol, .kiwiMark(sticky.color))
     }

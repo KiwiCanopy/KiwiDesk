@@ -34,7 +34,9 @@ struct PaletteScenePanel: View {
                         from: model.config.settings
                     )
                 ),
-                height: 300,
+                // No height: the panel scene derives its own
+                // from its rows (`panelHeight`). Passing one
+                // here is what let the drawing exceed its frame.
                 scene: .panel
             )
             .frame(maxWidth: .infinity)

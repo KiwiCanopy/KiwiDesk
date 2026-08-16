@@ -33,6 +33,72 @@ struct LayoutSchematicTrackFrameTests {
         )
     }
 
+    /// **The strip draws as many windows as the slider says.**
+    ///
+    /// The defect this closes, found on device: at 12 windows
+    /// the fold computed `[3, 3, 3, 2]` and the strip drew
+    /// `[1, 1, 1, 3]` — six windows for a slider set to twelve.
+    /// Every non-focused track rendered as ONE tile whatever the
+    /// fold said, which was true before #708 taught the preview
+    /// fill-then-spill and silently false afterwards.
+    ///
+    /// **This half pins the DATA the body draws from** — that
+    /// `specs` carries each track's real run — and cannot see
+    /// the rendering: reverting `trackView` to a bare
+    /// `SchematicTile()` leaves it green, which I confirmed
+    /// before trusting it. The rendering itself is a source
+    /// needle in `stripDrawsWhatTheFoldDecides`, because a
+    /// SwiftUI body cannot be counted. The pair is the guard;
+    /// neither half is.
+    @Test("the strip draws every window the fold placed")
+    func stripDrawsEveryWindow() {
+        for rule in [
+            TrackParams.NewWindowTrack.ownTrack, .focusedTrack,
+        ] {
+            for auto in [true, false] {
+                for count in LayoutSchematic.windowCountRange {
+                    let s = track(
+                        limit: 3,
+                        windows: count,
+                        auto: auto,
+                        rule: rule
+                    )
+                    let drawn = s.specs.reduce(0) {
+                        total,
+                        spec in
+                        total
+                            + (spec.isNew
+                                ? 1 : s.drawnRun(spec.run))
+                    }
+                    let folded = s.markerTracks.counts
+                        .prefix(s.trackCount)
+                    let placed = folded.reduce(0) {
+                        $0 + s.drawnRun($1)
+                    }
+                    let incoming = rule == .ownTrack ? 1 : 0
+                    let expected = placed + incoming
+                    #expect(
+                        drawn == expected,
+                        Comment(
+                            rawValue:
+                                "\(rule)/auto=\(auto)/\(count): "
+                                + "strip draws \(drawn) windows "
+                                + "over a fold of "
+                                + "\(s.markerTracks.counts)"
+                        )
+                    )
+                    // And no track collapses a real run to one
+                    // — the shape of the shipped defect.
+                    for spec in s.specs where !spec.isNew {
+                        #expect(
+                            s.drawnRun(spec.run) == min(4, spec.run)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     /// The STRIP draws the overflow track only when something
     /// overflows, and rings the fold's own focused track.
     ///
@@ -95,6 +161,19 @@ struct LayoutSchematicTrackFrameTests {
         // the needle could not fail — an inert canary inside the
         // suite added to close inert guards (re-review,
         // 2026-08-16).
+        // Every track draws its OWN run, not one tile standing
+        // in for however many windows the fold put there — the
+        // defect that drew six windows for a slider set to
+        // twelve (owner, on device, 2026-08-16).
+        #expect(
+            source.contains("ForEach(0..<drawnRun(spec.run)"),
+            Comment(
+                rawValue:
+                    "a non-focused track renders as a single "
+                    + "tile again — its run is on the fold and "
+                    + "not on the frame"
+            )
+        )
         #expect(
             !source.contains("trackCount/2"),
             Comment(

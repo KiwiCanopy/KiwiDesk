@@ -7,6 +7,20 @@ import SwiftUI
 /// the one part of General that is presentation with no
 /// settings in it at all.
 extension GeneralSection {
+    /// What this install holds (#795, re-scoped) — its OWN card.
+    ///
+    /// It shipped as four lines under the wordmark and read as
+    /// debug output rather than as content (owner, on device,
+    /// 2026-08-16). General has no detail panel to move it to —
+    /// that absence is a ruling, not a vacancy — so the answer
+    /// is a card of its own, which is also what every other
+    /// group on this page is.
+    var installInventorySection: some View {
+        SettingsSection(SettingsCatalog.general.installInventory) {
+            InstallInventory(model: model)
+        }
+    }
+
     /// About (#68 §3.9): the wordmark as the canonical logo +
     /// name placement, version and the discreet support link
     /// beneath. Falls back to the pre-logo glyph row when the
@@ -19,13 +33,6 @@ extension GeneralSection {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
-                // What this install holds (#795, re-scoped): the
-                // one fact from that issue that is nowhere else
-                // on the page. Here rather than in a panel,
-                // because About is already the block about the
-                // install rather than about a setting in it.
-                InstallInventory(model: model)
-                    .padding(.top, 2)
                 Link(destination: SupportLinks.koFi) {
                     HStack(spacing: 4) {
                         Image(systemName: "heart")
