@@ -45,6 +45,18 @@ struct ProfileScreenPips: View {
     /// `nil` per screen where the profile does not say. Short or
     /// empty is legal and draws bare outlines.
     var openingModes: [LayoutMode?] = []
+    /// How many slots the row RESERVES — the widest profile in
+    /// the list, capped at `slots`.
+    ///
+    /// Passed in because alignment is a property of the LIST, not
+    /// of a row: the names line up only if every row reserves the
+    /// same width, and reserving the CAP instead stranded a
+    /// one-screen profile's single outline ~69 pt from its own
+    /// name on a list where nothing had four screens (owner
+    /// eye-confirm, 2026-08-16). Reserving the widest row keeps
+    /// the alignment and spends nothing on screens no profile
+    /// has.
+    var reservedSlots: Int = slots
 
     /// How many slots the row draws — screens, or screens plus
     /// the "+N" chip. The chip takes a slot of its own
@@ -71,11 +83,25 @@ struct ProfileScreenPips: View {
         CGFloat(slots) * screen.width + CGFloat(slots - 1) * gap
     }
 
-    /// The fixed leading slot at the shipped grammar, so the
-    /// names beside it align down the list. It compares no width,
-    /// so it adds no second derivation beside `SettingsWidthClass`.
-    static var slotWidth: CGFloat {
-        slotWidth(slots: slots, screen: screen, gap: gap)
+    /// This row's reserved width — the grammar at whatever the
+    /// LIST reserved. It compares no width, so it adds no second
+    /// derivation beside `SettingsWidthClass`.
+    var slotWidth: CGFloat {
+        Self.slotWidth(
+            slots: max(1, min(reservedSlots, Self.slots)),
+            screen: Self.screen,
+            gap: Self.gap
+        )
+    }
+
+    /// What a list reserves for a set of profiles: the widest
+    /// one, capped, and never less than one slot — a list whose
+    /// profiles all claim zero screens still reserves a column so
+    /// the names do not jump when one is added.
+    static func reservedSlots(
+        forScreenCounts counts: some Collection<Int>
+    ) -> Int {
+        max(1, min(counts.max() ?? 1, slots))
     }
 
     /// Internal rather than private, and asserted directly: a
@@ -99,7 +125,7 @@ struct ProfileScreenPips: View {
             }
             if hidden > 0 { moreChip }
         }
-        .frame(width: Self.slotWidth, alignment: .leading)
+        .frame(width: slotWidth, alignment: .leading)
         .accessibilityHidden(true)
     }
 

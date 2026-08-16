@@ -211,7 +211,17 @@ struct ProfilesSection: View {
     ) -> some View {
         ProfileScreenPips(
             count: summary.count,
-            openingModes: summary.openingModes
+            openingModes: summary.openingModes,
+            reservedSlots: reservedScreenSlots
+        )
+    }
+
+    /// The width every row's picture reserves — the widest
+    /// profile in THIS list, so the names align without a
+    /// one-screen list paying for four screens' worth of gap.
+    private var reservedScreenSlots: Int {
+        ProfileScreenPips.reservedSlots(
+            forScreenCounts: orderedSummaries.map(\.count)
         )
     }
 

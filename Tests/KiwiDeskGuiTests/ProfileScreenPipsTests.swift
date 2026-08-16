@@ -156,19 +156,82 @@ struct ProfileScreenPipsTests {
         )
     }
 
-    /// And the shipped width IS that grammar at the shipped
-    /// constants — the join, without which the parameterized
+    /// And a row's width IS that grammar at whatever the LIST
+    /// reserved — the join, without which the parameterized
     /// function above could be correct while the view drew
     /// something else.
-    @Test("the shipped width is the grammar at its constants")
-    func shippedWidthUsesTheGrammar() {
+    @Test("a row's width is the grammar at its reservation")
+    func rowWidthUsesTheGrammar() {
+        for reserved in 1...ProfileScreenPips.slots {
+            let view = ProfileScreenPips(
+                count: 1,
+                reservedSlots: reserved
+            )
+            #expect(
+                view.slotWidth
+                    == ProfileScreenPips.slotWidth(
+                        slots: reserved,
+                        screen: ProfileScreenPips.screen,
+                        gap: ProfileScreenPips.gap
+                    )
+            )
+        }
+    }
+
+    /// The defect this reservation exists to fix, pinned by its
+    /// arithmetic: a list where nothing has more than one screen
+    /// reserves ONE slot, not the cap.
+    ///
+    /// Reserving the cap put a single 20 pt outline at the left
+    /// of an 89 pt column and stranded it ~69 pt from its own
+    /// profile name — invisible to every test in this suite,
+    /// caught on sight (owner, 2026-08-16).
+    @Test("a one-screen list reserves one slot, not the cap")
+    func oneScreenListReservesOneSlot() {
+        let reserved = ProfileScreenPips.reservedSlots(
+            forScreenCounts: [1, 1, 1]
+        )
+        #expect(reserved == 1)
+        let view = ProfileScreenPips(count: 1, reservedSlots: reserved)
+        #expect(view.slotWidth == ProfileScreenPips.screen.width)
+    }
+
+    /// The alignment property the reservation exists FOR: every
+    /// row in one list reserves the same width whatever its own
+    /// screen count, so the names line up.
+    @Test("every row in a list reserves the same width")
+    func rowsInAListAgreeOnWidth() {
+        let counts = [1, 3, 2]
+        let reserved = ProfileScreenPips.reservedSlots(
+            forScreenCounts: counts
+        )
+        #expect(reserved == 3)
+        let widths = counts.map {
+            ProfileScreenPips(count: $0, reservedSlots: reserved)
+                .slotWidth
+        }
+        #expect(Set(widths).count == 1)
+    }
+
+    /// A list wider than the cap still reserves only the cap —
+    /// the "+N" chip is what carries the rest.
+    @Test("a list past the cap reserves the cap")
+    func listPastTheCapReservesTheCap() {
         #expect(
-            ProfileScreenPips.slotWidth
-                == ProfileScreenPips.slotWidth(
-                    slots: ProfileScreenPips.slots,
-                    screen: ProfileScreenPips.screen,
-                    gap: ProfileScreenPips.gap
-                )
+            ProfileScreenPips.reservedSlots(
+                forScreenCounts: [9, 2]
+            ) == ProfileScreenPips.slots
+        )
+    }
+
+    /// An empty list still reserves a column, so the names do
+    /// not jump sideways when the first profile is saved.
+    @Test("an empty list still reserves one slot")
+    func emptyListReservesOne() {
+        #expect(
+            ProfileScreenPips.reservedSlots(
+                forScreenCounts: [Int]()
+            ) == 1
         )
     }
 }
