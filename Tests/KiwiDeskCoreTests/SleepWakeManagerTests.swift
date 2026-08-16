@@ -14,10 +14,17 @@ private final class DisplayFingerprintState {
 }
 
 /// The wake/unlock preserve-and-replay cycle, and its display
-/// topology gate (#633). The rest/return pair is driven
-/// directly — never through the real workspace notification
-/// centers — and the restore wait uses a generous hang-guard
-/// poll, never a tight deadline (#344).
+/// topology gate (#633). The rest/return pair is driven directly
+/// — never through the real workspace notification centers.
+///
+/// The replay is AWAITED through `pendingReplay`, never polled
+/// for its effect — that accessor's doc carries why (#791), and
+/// the short of it is that the 30 s poll this replaces measured
+/// wall clock, which starvation outlives.
+///
+/// The session seam is left at its inert default here: none of
+/// these tests asserts on it, and unassigned it reports
+/// "unknown" rather than reaching the host.
 @Suite("SleepWakeManager")
 @MainActor
 struct SleepWakeManagerTests {
@@ -39,18 +46,6 @@ struct SleepWakeManagerTests {
         )
     }
 
-    /// The shared generous hang-guard (#344): polls until
-    /// `done` holds; 30 s bounds a genuine hang only — a
-    /// passing run exits on the first true.
-    private func pollUntil(
-        _ done: @MainActor () -> Bool
-    ) async {
-        let deadline = Date().addingTimeInterval(30)
-        while !done() && Date() < deadline {
-            try? await Task.sleep(nanoseconds: 10_000_000)
-        }
-    }
-
     @Test("Wake replays the snapshot when displays are stable")
     func stableTopologyRestores() async {
         let manager = SleepWakeManager()
@@ -61,9 +56,9 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { ["main", "side"] }
         var restored: StateSnapshot?
         manager.restoreState = { restored = $0 }
-        manager.systemWillRest()
-        manager.systemDidReturn()
-        await pollUntil { restored != nil }
+        manager.systemWillRest(.direct)
+        manager.systemDidReturn(.direct)
+        await manager.pendingReplay?.value
         #expect(restored == saved)
     }
 
@@ -78,13 +73,11 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         // The side monitor was unplugged while asleep.
         displays.values = ["main"]
-        manager.systemDidReturn()
-        await pollUntil {
-            logged.contains { $0.contains("topology") }
-        }
+        manager.systemDidReturn(.direct)
+        await manager.pendingReplay?.value
         #expect(!restored)
         #expect(
             logged.contains {
@@ -103,10 +96,10 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         displays.values = ["side", "main"]
-        manager.systemDidReturn()
-        await pollUntil { restored }
+        manager.systemDidReturn(.direct)
+        await manager.pendingReplay?.value
         #expect(restored)
     }
 
@@ -124,16 +117,13 @@ struct SleepWakeManagerTests {
         manager.displayFingerprints = { displays.values }
         var restored = false
         manager.restoreState = { _ in restored = true }
-        manager.systemWillRest()
+        manager.systemWillRest(.direct)
         displays.values = ["twin"]
-        manager.systemDidReturn()
-        await pollUntil {
-            logged.contains { $0.contains("topology") }
-        }
+        manager.systemDidReturn(.direct)
+        await manager.pendingReplay?.value
         #expect(!restored)
-        // The explicit skip line, so a return leg that
-        // regresses to a no-op fails here instead of passing
-        // vacuously after the poll's 30 s guard burns out.
+        // The explicit skip line, so a return leg that regresses
+        // to a no-op fails here instead of passing vacuously.
         #expect(
             logged.contains {
                 $0.contains("wake restore skipped")

@@ -296,6 +296,33 @@ the instant the condition holds, so a passing run is never slowed
 the gap (a short watchdog against a much longer sleep), never by a
 tight wait. New async tests here follow suit.
 
+**Where the thing waited on IS an awaitable handle, await it
+rather than polling for its effect.** A wall-clock deadline
+bounds a hang the test caused *and* starvation it did not: under
+a full concurrent run one 10 ms `Task.sleep` resumption measured
+65 s (#791), after which the poll exits on a stale deadline
+without giving the pending continuation a turn, and the result
+comes down to which continuation drains first. Reach for a poll
+only when there is nothing to await — a real subprocess
+(`ExecTests`), a `DisplayLink` callback (`DragCoordinatorTests`).
+When a `Task` or a `DeferredTasks` slot exists, take it:
+`await core.deferred.task(for: .startupSweep)?.value`,
+`await manager.pendingReplay?.value`. **Expose such a handle with
+a doc comment barring production from reading it, and say what it
+does NOT mean.** `pendingReplay` is not an in-flight predicate —
+the task is never cleared — so awaiting it after a leg that
+early-returned awaits the *previous* cycle's finished task and
+asserts nothing. A handle whose staleness goes undocumented is a
+vacuous await waiting to be written.
+
+The tell that a suite is on the wrong side of this: a green that
+takes the *whole* hang guard. `SleepWakeManagerTests` was
+reported as failing only while KiwiDesk itself ran, which read as
+shared state and was not — it was CPU contention against that
+deadline, and no amount of injection-seam hardening would have
+touched it. The measurement behind that is argued once, on
+`SleepWakeManager.pendingReplay`; do not copy it here.
+
 ## Running the suite
 
 **A test reaches the machine only through a seam it injects,
@@ -318,7 +345,7 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-08-03 — a change adding a residue class extends and
+2026-08-16 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -333,7 +360,12 @@ pin their bounds, and one read-only `NSScreen.screens` read per
 lifecycle suite that drives `EventLoop.beginScan()` with faked
 seams (`publishDisplays`; the suites set
 `registersWorkspaceObservers = false`, so no live workspace
-observer outlives the test). (The host text-metric read —
+observer outlives the test), and two read-only console-session
+reads (`CGSessionCopyCurrentDictionary`) per
+`WakeSessionPresenceWiringTests` run — one in the suite's
+`.enabled(if:)` trait and one through the seam it asserts on
+(#835), whose docstring owns why a session-less host SKIPs that
+suite rather than reds it. (The host text-metric read —
 `NSFont.systemFont` via `NSString.size` in the retired sidebar
 label-width suite — went away with the sidebar's fixed label
 column, #678 turn 9.) The service tests only parse

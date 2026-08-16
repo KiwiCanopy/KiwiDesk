@@ -133,5 +133,6 @@ extension KiwiCore {
             self?.state.workspaces.allDisplays
                 .map(\.fingerprint) ?? []
         }
+        sleepWake.sessionPresence = { .live() }
     }
 }

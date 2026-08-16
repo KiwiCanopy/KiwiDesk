@@ -11,10 +11,10 @@ import Testing
 /// *guaranteed* to come. This suite pins the scheduled task
 /// actually running a `reconcileAll` (and lowering the retile
 /// batch flag) — `StartupWarmupSkipTests` pins the funnel the
-/// reconcile then drives. The remaining unpinned link —
-/// `start()` calling `scheduleStartupSweep()` — is carried as
-/// an obligation in accessibility.md, because `start()` itself
-/// is not test-drivable.
+/// reconcile then drives. The third link — the boot tail
+/// calling `scheduleStartupSweep()` at all — is not drivable
+/// from here, since `start()` arms the real machine seams; it is
+/// needled in `StartupSweepWiringTests` instead.
 ///
 /// The await rides the sweep's real 1 s schedule; that cost is
 /// the assertion's subject, not incidental sleep (tests.md).

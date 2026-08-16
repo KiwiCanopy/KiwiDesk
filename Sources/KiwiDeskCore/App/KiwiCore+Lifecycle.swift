@@ -184,6 +184,11 @@ extension KiwiCore {
         // again. A permission revoke is the live case (#802) —
         // paused management is not a boot in progress.
         defersEventRetiles = false
+        // A stop mid-scan never reaches the tail that arms the
+        // startup sweep, so nothing would heal a deferred rule
+        // reconcile — lower it here or the rest of the session
+        // silently skips them (#836).
+        defersWindowRuleReconcileToSweep = false
         closeBootInterval()
         boot.publish(.idle)
     }

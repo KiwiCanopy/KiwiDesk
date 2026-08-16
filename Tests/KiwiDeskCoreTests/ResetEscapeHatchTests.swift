@@ -40,7 +40,7 @@ struct ResetEscapeHatchTests {
         // association and a wake snapshot held for replay.
         core.state.remember(WindowID(9), in: SpaceID("gone"))
         core.sleepWake.restoreDelayMS = 0
-        core.sleepWake.systemWillRest()
+        core.sleepWake.systemWillRest(.direct)
         #expect(core.sleepWake.holdsSnapshot)
 
         core.discardSavedArrangement()
