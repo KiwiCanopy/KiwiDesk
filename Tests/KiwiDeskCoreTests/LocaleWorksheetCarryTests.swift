@@ -6,20 +6,22 @@ import Testing
 ///
 /// `scripts/extract-keys <locale>` rewrites
 /// `missing_<locale>.json` from `en.json` against
-/// `<locale>.json`. It used to compute that file without ever
-/// reading the one already on disk, so every `translation` it
-/// wrote was empty — and picking up newly-added English
-/// mid-translation is the natural reason to re-run it. The
-/// directory is gitignored and `merge-keys` is the only thing
-/// that moves a translation out of it, so between minting and
-/// merging the worksheet is the sole copy of the work: a re-mint
-/// silently discarded days of it and reported "N missing key(s)
-/// written" exactly as a first extract does.
+/// `<locale>.json`, and used to compute that file without ever
+/// reading the one already on disk — so every `translation` it
+/// wrote came out empty. Why that costs a translator everything
+/// drafted since their last merge is argued once, in
+/// `.claude/rules/localization.md` ▸ "A re-mint must never
+/// silently discard drafted work".
 ///
-/// This suite owns *what a re-mint preserves*. Where a worksheet
-/// is written is `LocaleWorksheetLocationTests`, and that one
-/// found among the catalogs is rejected is
-/// `LocaleWorksheetRejectionTests`; all three fail apart.
+/// This suite owns *what a re-mint preserves* — the carry, the
+/// clear, and the round trip that proves a carried draft is
+/// still one `merge-keys` will take. What a re-mint *discards*,
+/// and the refusals, are `LocaleWorksheetDiscardTests`: the two
+/// split on the 350-line ceiling, and they fail apart, since
+/// nothing here reads a discard banner other than the stale one.
+/// Where a worksheet is written is `LocaleWorksheetLocationTests`,
+/// and that one found among the catalogs is rejected is
+/// `LocaleWorksheetRejectionTests`.
 @Suite("locale worksheet carry-over")
 struct LocaleWorksheetCarryTests {
     private var repoRoot: URL { scriptFixtureRepoRoot() }
@@ -167,44 +169,23 @@ struct LocaleWorksheetCarryTests {
             sheet["gap.hint"]?["source"]
                 == "Spacing around each window"
         )
-        // Echoed with its text: the worksheet has just been
-        // rewritten, so the terminal is the only copy left.
-        #expect(
-            rerun.stderr.contains("Abstand zwischen Fenstern"),
-            "the discarded draft was dropped without a word"
+        // Echoed with its text, under the banner that names WHY.
+        // A bare substring search over stderr passes when the
+        // same draft is echoed under the "no longer missing"
+        // banner instead — a different claim about the
+        // translator's work, so pin the reason and the key.
+        let echo = try #require(
+            rerun.stderr
+                .components(separatedBy: "\n")
+                .drop(while: { !$0.contains("English has changed") })
+                .dropFirst().first,
+            """
+            no draft was echoed under the changed-English \
+            banner: \(rerun.stderr)
+            """
         )
-    }
-
-    /// A worksheet that will not parse holds drafts that can
-    /// neither be read nor knowingly discarded, so the run
-    /// refuses rather than overwriting it.
-    @Test("an unreadable worksheet is refused, not clobbered")
-    func unreadableWorksheetIsNotOverwritten() throws {
-        let damaged = #"{ "gap.hint": NOT JSON"#
-        let fx = try makeRepoShapedFixture(
-            prefix: "kiwi-worksheet-carry-damaged",
-            locales: [
-                "de.json": #"{}"#,
-                "missing_de.json": damaged,
-            ]
-        )
-        defer { fx.cleanup() }
-        try fx.writeSources([
-            "A.swift": sources([("gap.hint", "Gap between windows")])
-        ])
-
-        let run = try runRepoScript(
-            "extract-keys",
-            arguments: ["de"],
-            in: fx,
-            repoRoot: repoRoot
-        )
-        #expect(run.status != 0, "a damaged worksheet ran clean")
-        let after = try String(
-            data: fx.rawWorksheet("missing_de.json"),
-            encoding: .utf8
-        )
-        #expect(after == damaged, "the damaged worksheet was lost")
+        #expect(echo.contains("gap.hint"))
+        #expect(echo.contains("Abstand zwischen Fenstern"))
     }
 
     /// The carry-over has to survive the trip it exists to

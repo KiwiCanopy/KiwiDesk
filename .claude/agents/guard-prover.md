@@ -84,11 +84,11 @@ runs that did not need it and skipped on the one that did.
 Where the harness offers no worktree isolation, two things bind
 in its place and neither is optional:
 
-- **Run it alone.** Nothing else may read or write the tree while
-  a mutation is live — a reviewer spawned beside it reviews
-  sabotaged source and reports the sabotage as its own finding.
-  Inside a review round `review-change` owns that sequencing;
-  outside one it is the caller's to enforce.
+- **Run it alone.** Nothing else may read or write the tree
+  while a mutation is live. Inside a review round the
+  `review-change` skill owns that sequencing and argues it;
+  outside one, `.claude/rules/tests.md` ▸ "Owed" carries the
+  same obligation for the caller.
 - **Step 5 is the whole safety net**, not hygiene. Read its
   verdict line before believing anything else in the report.
 

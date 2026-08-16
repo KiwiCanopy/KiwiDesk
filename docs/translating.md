@@ -240,16 +240,29 @@ translate for language names.
    > so picking up English that landed while you were working
    > costs you nothing. It says how many it carried.
    >
-   > One kind of entry it cannot carry: one whose English has
-   > **changed** since you started. Your text translates a
-   > sentence the app no longer shows, so that slot is emptied
-   > and refilled with the new `"source"`, and the translation
-   > you had is printed to the terminal so you can copy it back
-   > if it still fits. `merge-keys` would refuse the same entry
-   > for the same reason — this just tells you a round earlier.
-   > A worksheet that has been damaged into invalid JSON is
-   > refused outright rather than overwritten; fix or move it,
-   > then run again.
+   > Some entries it cannot carry. **Every one of them is
+   > printed to the terminal with the text you had**, so you can
+   > copy it back if it still fits — watch that output, because
+   > once the worksheet is rewritten it is the only copy. There
+   > are three:
+   >
+   > - **The English changed** since you started. Your text
+   >   translates a sentence the app no longer shows, so the
+   >   slot is emptied and refilled with the new `"source"`.
+   >   `merge-keys` would refuse the same entry for the same
+   >   reason — this just tells you a round earlier.
+   > - **The key is no longer missing** — either this locale
+   >   already translates it, or it has left the app entirely.
+   >   The two are reported under different messages, because
+   >   only the first means your work is safe in `<locale>.json`.
+   > - **The entry is malformed** — most often a hand-written
+   >   `"key": "text"` instead of the `{"source", "translation"}`
+   >   shape. It cannot be verified, so it is not carried; the
+   >   text is printed.
+   >
+   > A worksheet that has been damaged into invalid JSON, or
+   > saved in an encoding other than UTF-8, is refused outright
+   > rather than overwritten; fix or move it, then run again.
 4. Fold the finished translations back in:
 
    ```
@@ -271,8 +284,12 @@ translate for language names.
    Those keys are listed on stderr **with the discarded text**,
    and the summary line reports how many were dropped. This is
    the guard that keeps a worksheet from silently resurrecting
-   exactly what `scripts/drop-key` retired. `--site` behaves
-   identically against the site's own `en.json`.
+   what `scripts/drop-key <key>` retired — the meaning-changed
+   form, which moves the English. It cannot see a
+   `drop-key --locale <locale> <key>`, which retires one
+   locale's text while the English stays put; neither can the
+   carry-over in step 3. `--site` behaves identically against
+   the site's own `en.json`.
 
    Two caveats worth knowing before relying on it:
 
@@ -311,7 +328,9 @@ scripts/merge-keys de        # folds the non-empty ones into de.json
 The delta is computed against `de.json`, so the worksheet only
 ever lists what the catalog still lacks. Running that first line
 on top of a part-filled worksheet is fine — anything you have
-already typed is carried over (see step 3 above).
+already typed is carried over, unless its English changed while
+you were working, and anything that cannot be carried is printed
+with its text (see step 3 above).
 
 To fix a wrong, awkward, or overly literal existing
 translation, edit the value directly in `<locale>.json` — that
@@ -676,7 +695,8 @@ word is judged. If you add a term that must stay English, add it
 to `GLOSSARY` in the same change set — the guard will tell you, by
 rejecting an otherwise-correct translation.
 
-`scripts/merge-keys` runs the first three of these per worksheet
+`scripts/merge-keys` runs all but the two corpus-level checks
+(collapsed translation, cross-language overlap) per worksheet
 entry, so a bad translation is **skipped rather than written**.
 The clean entries in the same worksheet still merge, and each
 skipped one is echoed to stderr with the reason — the worksheet

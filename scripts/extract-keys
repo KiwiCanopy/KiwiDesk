@@ -823,42 +823,75 @@ class WorksheetUnreadable(Exception):
     it can neither be carried forward nor knowingly discarded."""
 
 
-def read_drafts(out: Path) -> dict[str, tuple[str, str]]:
-    """Every usable `(source, translation)` pair in the worksheet
-    at `out`, keyed by key; `{}` when there is no worksheet.
+def read_drafts(
+    out: Path,
+) -> tuple[dict[str, tuple[str, str]], list[tuple[str, str]]]:
+    """What the worksheet at `out` still holds, split in two:
+    `({key: (source, translation)}, [(key, text)])` — the drafts
+    that can be carried, then every entry holding text this
+    cannot place. `({}, [])` when there is no worksheet.
 
-    Only non-empty translations are returned — an empty slot is
-    the "still to do" signal and carries nothing.
+    An empty `translation` is the "still to do" signal, carries
+    nothing, and appears in neither list.
 
-    An entry whose SHAPE is wrong (not an object, a non-string
-    `source` or `translation`) is skipped rather than raising:
-    there is no draft in it to save, and `merge-keys` would
-    refuse the same entry as unverifiable. A file that will not
-    parse as JSON at all is different in kind and raises, because
-    then the drafts cannot be read OR knowingly discarded, and
-    overwriting is the one thing this function must never do
-    blind.
+    **A wrong SHAPE does not mean there is nothing to save**, and
+    reading it that way is how the first draft of this function
+    reintroduced the defect it exists to close: a bare-string
+    entry (`{"a.key": "Ein Text"}`) IS the draft, and
+    `merge-keys` names that as the likeliest hand-written form
+    and echoes its text rather than dropping it. So every entry
+    whose shape this cannot use comes back in the second list,
+    to be reported with its text before the rewrite.
+
+    A file that will not parse at all is different in kind and
+    raises: its drafts can be neither read nor knowingly
+    discarded, so the caller must refuse rather than overwrite.
+    `UnicodeDecodeError` counts — the worksheet is the one file
+    in this pipeline a non-developer edits, so an editor saving
+    it as Latin-1 is the likeliest way it ever goes unreadable,
+    and `merge-keys._load_map` catches it by name for the same
+    reason.
     """
     if not out.exists():
-        return {}
+        return {}, []
     try:
         entries = json.loads(out.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError) as error:
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+        OSError,
+    ) as error:
         raise WorksheetUnreadable(str(error)) from error
     if not isinstance(entries, dict):
         raise WorksheetUnreadable("not a JSON object")
     drafts: dict[str, tuple[str, str]] = {}
+    unusable: list[tuple[str, str]] = []
     for key, entry in entries.items():
+        if isinstance(entry, str):
+            # The hand-written shape: the value IS the text.
+            if entry.strip():
+                unusable.append((key, entry))
+            continue
         if not isinstance(entry, dict):
+            if entry is not None:
+                unusable.append((key, repr(entry)))
             continue
         source = entry.get("source")
         text = entry.get("translation")
-        if not isinstance(source, str):
+        if text is None:
             continue
-        if not isinstance(text, str) or not text.strip():
+        if not isinstance(text, str):
+            unusable.append((key, repr(text)))
             continue
-        drafts[key] = (source, text)
-    return drafts
+        if not text.strip():
+            continue
+        if isinstance(source, str):
+            drafts[key] = (source, text)
+        else:
+            # Real text, but nothing to verify it against — the
+            # same call `merge-keys` makes, reported not dropped.
+            unusable.append((key, text))
+    return drafts, unusable
 
 
 def _report_discarded(
@@ -878,6 +911,27 @@ def _report_discarded(
         print(f"    - {key}: {text!r}", file=sys.stderr)
 
 
+def _prune_worksheet_dirs(removed: Path) -> None:
+    """Leaves no empty worksheet tree behind after an unlink —
+    `locale-worksheets/` existing but empty reads as "a pass is
+    open" to anyone who looks. `merge-keys` does the same after
+    its own unlink and states the argument; this path reaches
+    the state routinely now that a re-mint can find every key
+    translated and delete the file.
+
+    Deepest first, deduped, and never above the base: `rmdir`
+    refuses a non-empty directory, so a second locale still
+    mid-translation keeps the tree.
+    """
+    for directory in dict.fromkeys(
+        (removed.parent, worksheets_dir(ROOT))
+    ):
+        try:
+            directory.rmdir()
+        except OSError:
+            pass
+
+
 def write_missing(locale: str, mapping: dict[str, str]) -> int:
     """Writes `missing_<locale>.json` as `{key: {"source":
     <English>, "translation": ""}}` for every key `<locale>.json`
@@ -892,25 +946,29 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
     catalogs it was computed from — `scripts/locale_paths.py`
     owns that path.
 
-    **A worksheet already on disk is read first, and any
-    non-empty `translation` in it is carried into the one this
-    writes.** The drafting window runs to days (see
-    `scripts/merge-keys`' header) and the directory is
-    gitignored, so between minting and merging that file is
-    usually the only copy of the work in it — a re-mint that
-    ignored it destroyed the lot, silently, and re-running the
-    extractor to pick up new English is the natural thing to do
-    mid-draft. Whatever replaces this function keeps that
-    property.
+    **A worksheet already on disk is read first, any non-empty
+    `translation` in it is carried into the one this writes, and
+    a draft that cannot be carried is echoed with its text.**
+    Never weaken that to a silent drop —
+    `.claude/rules/localization.md` ▸ "A re-mint must never
+    silently discard drafted work" argues why, and
+    `LocaleWorksheetCarryTests` / `LocaleWorksheetDiscardTests`
+    hold it.
 
     A draft is carried only while its stored `source` still
     equals the current English, which is the rule `merge-keys`
     already merges by: once the English moves, the draft
     translates text the app no longer shows, so the slot is
-    cleared and the loss is reported with its text rather than
-    carried into a worksheet that would look finished. Drafts
-    whose key is no longer missing at all are reported the same
-    way."""
+    cleared rather than carried into a worksheet that would look
+    finished.
+
+    Note what that predicate asks: *did the English move*, not
+    *is this translation still wanted*. A
+    `scripts/drop-key --locale <locale> <key>` retirement leaves
+    the English untouched and so passes it — `merge-keys` has
+    the identical blind spot, so nothing new reaches a catalog,
+    but a worksheet that outlives its merge will carry retired
+    text forward where a blanking re-mint used to sanitize it."""
     locale_file = LOCALES_DIR / f"{locale}.json"
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -922,13 +980,18 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
             existing = {}
     out = WORKSHEETS_DIR / worksheet_name(locale)
     try:
-        drafted = read_drafts(out)
+        drafted, unusable = read_drafts(out)
     except WorksheetUnreadable as error:
+        # "the worksheet", not "nothing": `main` regenerates
+        # en.json before calling this, so that half of the run
+        # has already happened and saying otherwise sends the
+        # reader looking for a rollback that never occurred.
         print(
             f"extract-keys: {out} exists but will not parse "
             f"({error}). Overwriting it would destroy whatever "
-            "is in it, so nothing was written — fix the JSON, or "
-            "move the file aside, then run this again.",
+            "is in it, so the worksheet was left untouched — fix "
+            "the JSON, or move the file aside, then run this "
+            "again. (en.json was still rebuilt.)",
             file=sys.stderr,
         )
         return 1
@@ -948,18 +1011,43 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
             stale.append((key, text))
             text = ""
         missing[key] = {"source": english, "translation": text}
-    # Whatever is left held a draft this run cannot place: the
-    # key is translated in the catalog already, or has left
-    # en.json. Either way the worksheet is about to stop carrying
-    # it, so echo it rather than dropping it silently.
-    orphaned = sorted(
-        (key, text) for key, (_, text) in drafted.items()
+    # Whatever is left held a draft this run cannot place. Two
+    # causes, reported apart the way `merge-keys` reports its
+    # own: telling a translator their key is "already
+    # translated" when it was deleted from the app sends them
+    # looking in <locale>.json for something that is simply
+    # gone. `key in mapping` is what separates them.
+    already = sorted(
+        (key, text)
+        for key, (_, text) in drafted.items()
+        if key in mapping
+    )
+    departed = sorted(
+        (key, text)
+        for key, (_, text) in drafted.items()
+        if key not in mapping
+    )
+
+    # Reported before either branch below writes or unlinks:
+    # once the worksheet is gone the terminal is the only copy.
+    _report_discarded(
+        "cleared — their English has changed since", stale
+    )
+    _report_discarded(
+        "dropped — this locale already translates them", already
+    )
+    _report_discarded(
+        "dropped — their key has left en.json", departed
+    )
+    _report_discarded(
+        "NOT carried — the worksheet entry was malformed",
+        unusable,
     )
 
     if not missing:
-        _report_discarded("dropped as no longer missing", orphaned)
         if out.exists():
             out.unlink()
+            _prune_worksheet_dirs(out)
         print(
             f"extract-keys: {locale} has no missing keys "
             f"(nothing written)."
@@ -969,10 +1057,6 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
     carried = sum(
         1 for entry in missing.values() if entry["translation"]
     )
-    _report_discarded(
-        "cleared — their English has changed since", stale
-    )
-    _report_discarded("dropped as no longer missing", orphaned)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(

@@ -208,6 +208,17 @@ bite large test PRs:
   behavior suite over a fake reds on a reverted change whatever
   its assertions do, so a revert-red proves the test **reads**
   the feature, not that it discriminates the behavior it names.
+
+  **Spawn it with `isolation: "worktree"`, or run it alone.** It
+  breaks working source on purpose, so unisolated it is mutating
+  the tree every other agent is reading, and a run that is
+  cancelled or dies on a timeout leaves the sabotage behind. The
+  obligation is stated here because this row is where a caller
+  outside a review round meets it; inside one,
+  [the `review-change` skill](../skills/review-change/SKILL.md)
+  owns the sequencing, and `.claude/agents/guard-prover.md` owns
+  what the agent itself does about it.
+
   What has slipped through that gap here was always a sub-diff
   mutation — the smallest edit that violates the invariant, which
   is what the agent designs for and a revert never is.

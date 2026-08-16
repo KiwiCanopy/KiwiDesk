@@ -77,22 +77,33 @@ hand-edit **any** `Resources/Locales/*.json`. Use the scripts:
 **A re-mint must never silently discard drafted work.**
 `extract-keys <locale>` rewrites `missing_<locale>.json` from
 `en.json` against `<locale>.json`, so it reads the worksheet
-already on disk and carries every non-empty `translation` into
-the file it writes; a draft it cannot carry is echoed with its
-text, and a worksheet that will not parse is refused rather than
-overwritten. `LocaleWorksheetCarryTests` holds all three, and
-`write_missing` in `scripts/extract-keys` argues them.
+already on disk and carries across every non-empty `translation`
+whose English still matches; a draft it cannot carry — for any
+reason, a malformed entry included — is echoed with its text,
+and a worksheet that will not parse is refused rather than
+overwritten. `LocaleWorksheetCarryTests` holds the carry and
+`LocaleWorksheetDiscardTests` the other two; `read_drafts` and
+`write_missing` in `scripts/extract-keys` carry the reasoning
+per function.
 
 That is a property to preserve, not a convenience: between
 minting and merging, the worksheet is the ONLY copy of the work
 in it — `locale-worksheets/` is gitignored, and `merge-keys` is
-the one thing that moves a translation somewhere a re-mint
-cannot reach. The re-mint used to ignore that file and write
-every slot empty, which cost a translator everything drafted
-since the last merge and reported "N missing key(s) written"
-exactly as a first extract does. Picking up newly-added English
-mid-draft is the ordinary reason to re-run the extractor, so the
-destructive path was also the intuitive one.
+the one thing that moves a translation OUT of it. The re-mint
+used to ignore that file and write every slot empty, which cost
+a translator everything drafted since the last merge and
+reported "N missing key(s) written" exactly as a first extract
+does. Picking up newly-added English mid-draft is the ordinary
+reason to re-run the extractor, so the destructive path was also
+the intuitive one.
+
+**A silent drop is the failure mode, not an unusual one** — the
+fix's own first draft reintroduced it twice, by reading a
+malformed entry as "nothing to save" when a bare-string entry IS
+the draft, and by classifying a non-UTF-8 read as a crash rather
+than a refusal. A new discard path states its banner and gets a
+case in `LocaleWorksheetDiscardTests`; nothing here may end in a
+bare `continue`.
 
 **A draft is carried only while its stored `source` still equals
 the current English** — the same rule `merge-keys` merges by.
@@ -344,7 +355,8 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
 `LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
-`LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`
+`LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`,
+`LocaleWorksheetDiscardTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.
