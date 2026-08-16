@@ -127,6 +127,17 @@ struct ProfilesGateWiringTests {
                 // …and the card must actually spend it.
                 "on:shape(of:screen)",
                 "ScreenClass.of(liveSizes[screen])",
+                // The outline is a Shape, so `.help` alone
+                // reaches no screen reader — the sentence that
+                // names the main display only exists for a
+                // non-visual reader through this pair, and
+                // deleting both modifiers is silent in every
+                // other guard. Headless can prove the
+                // construction is present, never that VoiceOver
+                // reaches it; that half is an Accessibility
+                // Inspector pass (gui.md ▸ the keyboard path).
+                ".accessibilityElement()",
+                ".accessibilityLabel(screenHelp(screen))",
             ],
         ]
         for (name, needles) in consults {
@@ -227,6 +238,16 @@ struct ProfilesGateWiringTests {
                 "Sections/ProfilesSection.swift",
                 "Sections/ProfilesSection+WhichLoads.swift",
                 "Sections/ProfilesSection+RowActions.swift",
+                // The rest of the extension family, added when
+                // +RowActions exposed the list as half-swept
+                // (review, 2026-08-16): the docstring above says
+                // a new file in this area joins the list, and
+                // three that predate it never had. A gate
+                // sentence re-authored in any of them was
+                // invisible to this guard.
+                "Sections/ProfilesSection+Broken.swift",
+                "Sections/ProfilesSection+Rename.swift",
+                "Sections/ProfilesSection+Subtitle.swift",
             ]
         for key in [
             "profiles.native_spaces.live_only",

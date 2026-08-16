@@ -60,7 +60,14 @@ struct OverflowSplitTests {
     @Test("the marker never claims to hide exactly one")
     func neverHidesExactlyOne() {
         for capacity in 1...12 {
-            for marker in 0...capacity {
+            // Past `capacity` too: the function CLAMPS a marker
+            // capacity larger than the plain one rather than
+            // documenting a precondition, so the sweep has to
+            // reach the values the clamp exists for. Swept only
+            // to `capacity`, a caller passing more would get
+            // `shown > count` and hand its own caller a negative
+            // overflow, with this suite green.
+            for marker in 0...(capacity + 3) {
                 for count in 0...40 {
                     let drawn = shown(count, capacity, marker)
                     #expect(
@@ -104,10 +111,20 @@ struct OverflowSplitTests {
     /// A card at its floor has room for the marker or one item,
     /// not both — zero drawn is a real answer, and it must not
     /// go negative.
+    ///
+    /// `shown(1, 0, 0)` is the ONLY input that reaches the
+    /// floor: it needs the correction to fire (`count ==
+    /// markerCapacity + 1`) with `markerCapacity == 0`, which
+    /// forces `capacity < 1` for the guard to have fallen
+    /// through. Without it the first two fixtures here return 0
+    /// with or without `max(0,)` — guard-prover deleted the
+    /// floor and this test stayed green, which is why the third
+    /// line exists.
     @Test("a zero marker capacity draws nothing, never less")
     func zeroMarkerCapacityIsFloored() {
         #expect(shown(5, 1, 0) == 0)
         #expect(shown(2, 1, 0) == 0)
+        #expect(shown(1, 0, 0) == 0)
     }
 
     /// A nonsense count from a hand-edited file must not produce
@@ -116,5 +133,35 @@ struct OverflowSplitTests {
     func negativeCountDrawsNothing() {
         #expect(shown(-1, 4, 3) == 0)
         #expect(shown(-99, 4, 3) == 0)
+    }
+
+    /// The function is TOTAL over its inputs: it never draws
+    /// more than exist, so no caller can be handed a negative
+    /// overflow from `count - shown`.
+    ///
+    /// This is what the clamp on `markerCapacity` buys, and it
+    /// is asserted rather than documented because a stated
+    /// precondition is invisible to every guard — the shape
+    /// `rule-authoring.md` calls a claim that can only be
+    /// violated silently.
+    @Test("the run never exceeds what exists")
+    func neverDrawsMoreThanExist() {
+        for capacity in 0...8 {
+            for marker in 0...(capacity + 4) {
+                for count in 0...20 {
+                    let drawn = shown(count, capacity, marker)
+                    #expect(
+                        drawn <= count,
+                        Comment(
+                            rawValue:
+                                "capacity \(capacity), marker "
+                                + "\(marker), count \(count) "
+                                + "drew \(drawn)"
+                        )
+                    )
+                    #expect(drawn >= 0)
+                }
+            }
+        }
     }
 }

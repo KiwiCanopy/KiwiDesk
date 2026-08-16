@@ -751,9 +751,10 @@ statement of it, and a surface that caps a run routes through it
 instead of restating the sum beside its own drawing. Each caller
 still measures its own capacity — a Monitors card from its
 geometry, a Profiles row from a fixed slot count — and only the
-rule is shared. Two Home surfaces do not route through it yet
-and can still render "+1"; `OverflowSplit`'s own doc comment
-names them and says why moving them is a separate change.
+rule is shared. Surfaces predating it still compute `total - cap`
+and so can render "+1"; adopting one is its own change, since
+routing it shows one item fewer rather than preserving what it
+draws.
 
 **One frame per layout, and the conditional facts ride a shared
 ghost vocabulary (#125, #753).** Every schematic is a **single

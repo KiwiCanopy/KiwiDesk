@@ -200,9 +200,22 @@ struct PresetScreenCard: View {
     /// reconcile it alone — which all ten duly did, each picking
     /// a different side, while English was the only catalog whose
     /// own pair disagreed (translation audit, 2026-08-16). The
-    /// noun is "screen" because this card's own neighbours are:
-    /// the group heading counts screens (`presets.for_your.*`),
-    /// as do `presets.needs_screens` and `profiles.screens.*`.
+    /// noun is "screen" because most of this card's neighbours
+    /// are: the group heading counts screens
+    /// (`presets.for_your.*`), as do `presets.needs_screens`,
+    /// `presets.none_for_count`, `presets.starter.summary` and
+    /// `profiles.screens.*`.
+    ///
+    /// **Not all of them, and the exception is the nearest.**
+    /// `PresetsSection` draws `layout.displaySummary` directly
+    /// above these outlines, and for the two two-screen presets
+    /// that line reads "on the main **display**"
+    /// (`presets.dual_developer.summary`,
+    /// `presets.coder_and_monitor.summary`) — so on exactly
+    /// those two cards the summary and the outline below it now
+    /// name one screen two ways. Five keys to two decided it,
+    /// and the residue is named here rather than left for a
+    /// reader to trip over.
     ///
     /// This does NOT settle screen vs display vs monitor for the
     /// repo — `config-vocabulary.md`'s glossary and

@@ -13,22 +13,30 @@
 /// `MonitorCardChips.split` derived it from a card's measured
 /// capacity, and the Profiles row pips restated it against a
 /// fixed slot count (#789). Both copies were pinned by their own
-/// guard, which is exactly the case `.claude/rules/tests.md`
-/// admits sharing for: the copies were **of the rule under
-/// guard**, so retuning one leaves the other green on the retired
-/// rule while both read as covering the same promise.
+/// guard. Extracting production duplication is AGENTS.md §2.4's
+/// call, and here it goes past "a small readable duplication"
+/// for a specific reason: the copies were of the rule UNDER
+/// GUARD, so retuning one would leave the other green on the
+/// retired rule while both read as covering the same promise.
 ///
 /// A shared *rule*, not a shared *look*: what each caller draws
 /// and how it measures its own capacity stay local. Callers pass
 /// their capacities in, which is also what lets the guard assert
 /// the grammar at capacities no surface ships.
 ///
-/// Deliberately NOT swept into two further sites yet:
-/// `HomeCardPreview.profileChips` and `HomeCardSpacesTile` both
-/// compute overflow as `total - cap`, so both can render "+1" —
-/// a real violation of the middle clause, but routing them
-/// CHANGES what Home draws rather than preserving it, so it is
-/// its own change with its own eye-confirm.
+/// **A surface that caps a run routes through this**, rather
+/// than computing `total - cap` beside its own drawing. Stated
+/// as an obligation and not as a census on purpose: the first
+/// draft of this comment named the two unrouted sites it knew
+/// about, was wrong the day it was written — there are more, in
+/// Home and in the schematics — and had a second copy of the
+/// same wrong number in `docs/ui-patterns.md`. A list of who has
+/// not adopted a rule yet rots; the rule does not.
+///
+/// Adopting an existing site is its own change, because routing
+/// it CHANGES what that surface draws (a "+1" becomes a "+2"
+/// showing one fewer item) rather than preserving it, so each
+/// owes an eye-confirm.
 enum OverflowSplit {
     /// How many items to draw.
     ///
@@ -37,7 +45,11 @@ enum OverflowSplit {
     ///   run for a caller to trap on.
     /// - `capacity`: how many fit when NO marker is drawn.
     /// - `markerCapacity`: how many fit once the marker has
-    ///   taken its slot. Never greater than `capacity`.
+    ///   taken its slot. CLAMPED to `capacity` rather than
+    ///   documented as a precondition — a caller passing a
+    ///   larger one would otherwise get `shown > count` and hand
+    ///   its own caller a negative overflow, and a stated
+    ///   obligation no guard can see is how that ships.
     ///
     /// Everything fits → draw everything and the marker never
     /// appears. Otherwise the marker takes its slot, and if that
@@ -50,7 +62,7 @@ enum OverflowSplit {
         withMarker markerCapacity: Int
     ) -> Int {
         guard count > capacity else { return max(count, 0) }
-        var shown = markerCapacity
+        var shown = min(markerCapacity, capacity)
         if count - shown == 1 { shown -= 1 }
         return max(0, shown)
     }

@@ -150,10 +150,10 @@ enum MonitorCardChips {
     ) -> (shown: [Chip], overflow: Int) {
         // The never-exactly-one rule is `OverflowSplit`'s, not
         // this file's — it was stated here and again in the
-        // Profiles row pips, and a copy of the rule under guard
-        // is the one thing tests.md admits sharing for. What
-        // stays local is the measurement: only this card knows
-        // how many chips its own geometry fits.
+        // Profiles row pips, and two copies of a rule that each
+        // have their own guard drift silently (§2.4). What stays
+        // local is the measurement: only this card knows how
+        // many chips its own geometry fits.
         let shown = OverflowSplit.shown(
             of: chips.count,
             fitting: capacity(in: size, header: header),
