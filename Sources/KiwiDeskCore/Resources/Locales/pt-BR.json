@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "Zona principal e zona de pilha; quando a pilha enche, toda a zona se empilha e só as bordas superiores ficam visíveis.",
   "layout.schematic.stack.caption_overflow": "Zona principal e zona de pilha; quando a pilha enche, o excedente se empilha.",
   "layout.schematic.track.ax": "Pré-visualização das trilhas: trilhas ao longo de um eixo, a mais distante empilhando o excedente; o sinal de mais é a próxima janela.",
-  "layout.schematic.track.caption_focused": "As novas janelas entram na trilha em foco; a trilha mais distante empilha o excedente.",
   "layout.schematic.track.caption_own": "As novas janelas abrem a própria trilha; a trilha mais distante empilha o excedente.",
   "layout.scrolling.blurb": "Uma fileira infinita de janelas de largura fixa; a tela desliza por ela até a que está em foco.",
   "layout.scrolling.name": "Scrolling",

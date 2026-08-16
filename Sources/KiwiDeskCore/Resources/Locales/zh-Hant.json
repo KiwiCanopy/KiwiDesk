@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "主區與堆疊區；堆疊區填滿時，整個區域會層疊起來，只露出各視窗的上緣。",
   "layout.schematic.stack.caption_overflow": "主區與堆疊區；堆疊區填滿時，多出的視窗會層疊起來。",
   "layout.schematic.track.ax": "Track 預覽：軌道沿著一個軸向排列，最遠的那道收納溢出的視窗；加號就是下一個視窗。",
-  "layout.schematic.track.caption_focused": "新視窗會加入焦點所在的軌道；最遠的軌道收納溢出的視窗。",
   "layout.schematic.track.caption_own": "新視窗會開啟自己的軌道；最遠的軌道收納溢出的視窗。",
   "layout.scrolling.blurb": "一列沒有盡頭的等寬視窗；螢幕沿著它平移到目前有焦點的視窗。",
   "layout.scrolling.name": "Scrolling",

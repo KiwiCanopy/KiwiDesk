@@ -180,6 +180,32 @@ extension TrackLayout {
         return breaks
     }
 
+    /// Whether the next window into the focused track opens a NEW
+    /// track beside it instead of joining — fill-then-spill
+    /// (#437). True when the focused track already holds as many
+    /// windows as fit at `min_window_size` (`spillCapacity`) AND
+    /// another track fits under `trackCap` (0 = unlimited, the
+    /// `auto_tracks` case). A nil `spillCapacity` disables the
+    /// spill entirely: the explicit-placement path, which must
+    /// join-and-pile rather than relocate a traveler.
+    ///
+    /// Single authority, for the same reason `overflowCap` is one
+    /// (#198): `insertIntoTrack` decides a real spawn with it and
+    /// the Layout Defaults preview draws its Track schematic from
+    /// it (#708). A preview that re-spelled this condition beside
+    /// its drawing would be right the day it was written and drift
+    /// the day the rule moved — which is the whole of #702.
+    public static func spillsToNewTrack(
+        focusedTrackCount: Int,
+        trackCount: Int,
+        spillCapacity: Int?,
+        trackCap: Int
+    ) -> Bool {
+        guard let capacity = spillCapacity else { return false }
+        return focusedTrackCount >= capacity
+            && (trackCap == 0 || trackCount < trackCap)
+    }
+
     /// Resolves the marker-track count against the two caps the
     /// layout applies — `normalCap` (the fixed `count`, or
     /// `.max` when `auto_tracks` is on) and `geoCap` (how many

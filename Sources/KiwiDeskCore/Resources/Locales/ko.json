@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "마스터 영역과 스택 영역입니다. 스택이 가득 차면 영역 전체가 겹쳐 쌓여 위쪽 가장자리만 보입니다.",
   "layout.schematic.stack.caption_overflow": "마스터 영역과 스택 영역입니다. 스택이 가득 차면 넘치는 만큼 겹쳐 쌓입니다.",
   "layout.schematic.track.ax": "트랙 미리보기: 하나의 축을 따라 트랙이 늘어서고, 가장 먼 트랙이 넘치는 윈도우를 쌓습니다. 더하기 표시가 다음 윈도우입니다.",
-  "layout.schematic.track.caption_focused": "새로운 윈도우가 포커스된 트랙에 합류합니다. 가장 먼 트랙이 넘치는 윈도우를 쌓습니다.",
   "layout.schematic.track.caption_own": "새로운 윈도우가 각자의 트랙을 엽니다. 가장 먼 트랙이 넘치는 윈도우를 쌓습니다.",
   "layout.scrolling.blurb": "너비가 고정된 윈도우가 끝없이 한 줄로 이어지고, 화면이 그 위를 움직여 포커스된 윈도우를 보여줍니다.",
   "layout.scrolling.name": "스크롤",

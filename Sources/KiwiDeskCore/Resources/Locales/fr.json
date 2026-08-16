@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "Zone principale et zone de pile ; quand la pile est pleine, toute la zone s'empile et seuls les bords supérieurs restent visibles.",
   "layout.schematic.stack.caption_overflow": "Zone principale et zone de pile ; quand la pile est pleine, le surplus s'empile.",
   "layout.schematic.track.ax": "Aperçu des pistes : des pistes le long d'un axe, la plus éloignée empilant le débordement ; le signe plus est la prochaine fenêtre.",
-  "layout.schematic.track.caption_focused": "Les nouvelles fenêtres rejoignent la piste active ; la piste la plus éloignée empile le débordement.",
   "layout.schematic.track.caption_own": "Les nouvelles fenêtres ouvrent leur propre piste ; la piste la plus éloignée empile le débordement.",
   "layout.scrolling.blurb": "Une rangée sans fin de fenêtres de largeur fixe ; l'écran se déplace le long de celle-ci jusqu'à la fenêtre qui a le focus.",
   "layout.scrolling.name": "Scrolling",

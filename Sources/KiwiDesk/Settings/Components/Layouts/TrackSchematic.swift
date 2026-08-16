@@ -10,16 +10,25 @@ import SwiftUI
 /// windows open their own) or a **nested `+`** inside the focused
 /// track (they join it), placed where `newWindowPosition` opens it.
 ///
-/// A limit shows that many normal tracks; auto-tracks shows three
-/// (the count is a magnitude, bounded by the minimum window size —
-/// stated in the row caption, not counted out here).
+/// A limit shows that many normal tracks; auto-tracks opens them
+/// until the display runs out, which on a canvas is the stand-in
+/// `LayoutSchematic.trackGeoCap`.
 ///
 /// The **window count** (turn 10) is what opens and collapses
-/// tracks: windows fill the normal tracks up to the limit and
-/// the surplus falls into the overflow track, so dragging the
-/// count past the limit is the moment the overflow track earns
-/// its name — and the moment `cascade_all` and
-/// `cascade_overflow` stop drawing the same picture.
+/// tracks, and since #708 it does so by the ENGINE's rules rather
+/// than by arithmetic invented here — `TrackSchematic+Fold` owns
+/// the loop and cites them. Two consequences a reader of the
+/// drawing should know:
+///
+/// - `focused_track` is **fill-then-spill** (#437), so windows
+///   join the focused track only until it is full and then open
+///   one beside it. The preview modelled neither half before, and
+///   taught a rule the app does not follow.
+/// - The far-edge overflow track therefore appears when something
+///   overflows and **not at the shipped defaults**, where nothing
+///   does. The caption is conditioned on the same answer
+///   (`drawsOverflowTrack`), because it used to name that track
+///   whether or not the strip drew one.
 struct TrackSchematic: View {
     let axis: TrackParams.Axis
     let overflowStyle: StackParams.OverflowStyle
@@ -32,33 +41,6 @@ struct TrackSchematic: View {
     var scale: SchematicScale = .tile
 
     private var vertical: Bool { axis == .vertical }
-
-    /// Normal tracks, never more than there are established
-    /// windows to put in them: a limit of four over two windows
-    /// draws two tracks, because the fourth track does not exist
-    /// until a window opens it.
-    var trackCount: Int {
-        let ceiling = autoTracks ? 3 : min(max(limit, 1), 4)
-        return min(ceiling, max(1, established))
-    }
-
-    /// Windows already open — the count less the incoming one.
-    private var established: Int { max(1, windows - 1) }
-
-    /// Windows past the normal tracks' capacity. One window per
-    /// normal track plus the focused track's own run is the
-    /// capacity; anything beyond falls to the overflow track,
-    /// which is empty until it does.
-    var overflowWindows: Int {
-        max(0, established - trackCount - focusedRun + 1)
-    }
-
-    /// Windows in the focused track. It holds several so that
-    /// multi-window tracks read, but never more than the count
-    /// can pay for.
-    var focusedRun: Int {
-        min(4, max(1, established - trackCount + 1))
-    }
 
     private var focusIdx: Int { trackCount / 2 }
 
@@ -257,28 +239,4 @@ struct TrackSchematic: View {
         }
     }
 
-    private var caption: String {
-        switch newWindow {
-        case .ownTrack:
-            return L(
-                "layout.schematic.track.caption_own",
-                "New windows open their own track; the far track "
-                    + "piles the overflow."
-            )
-        case .focusedTrack:
-            return L(
-                "layout.schematic.track.caption_focused",
-                "New windows join the focused track; the far track "
-                    + "piles the overflow."
-            )
-        }
-    }
-
-    private var axLabel: String {
-        L(
-            "layout.schematic.track.ax",
-            "Track preview: tracks along one axis, the far one "
-                + "piling overflow; the plus is the next window."
-        )
-    }
 }

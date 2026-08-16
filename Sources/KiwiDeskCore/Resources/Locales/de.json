@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "Hauptbereich und Stapelbereich; wenn der Stapel voll ist, wird der gesamte Bereich gestapelt, sodass nur die oberen Kanten sichtbar sind.",
   "layout.schematic.stack.caption_overflow": "Hauptbereich und Stapelbereich; wenn der Stapel voll ist, stapeln sich die überschüssigen Fenster.",
   "layout.schematic.track.ax": "Track-Vorschau: Tracks entlang einer Achse, der äußere stapelt den Überlauf; das Plus ist das nächste Fenster.",
-  "layout.schematic.track.caption_focused": "Neue Fenster kommen in den fokussierten Track; der äußere Track stapelt den Überlauf.",
   "layout.schematic.track.caption_own": "Neue Fenster öffnen einen eigenen Track; der äußere Track stapelt den Überlauf.",
   "layout.scrolling.blurb": "Eine endlose Reihe von Fenstern fester Breite; der Bildschirm fährt daran entlang bis zum fokussierten Fenster.",
   "layout.scrolling.name": "Scrolling",

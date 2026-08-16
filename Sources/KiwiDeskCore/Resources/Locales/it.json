@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "Zona principale e zona pila; quando la pila si riempie, l'intera zona si accatasta e restano visibili solo i bordi superiori.",
   "layout.schematic.stack.caption_overflow": "Zona principale e zona pila; quando la pila si riempie, l'eccedenza si accatasta.",
   "layout.schematic.track.ax": "Anteprima delle tracce: tracce lungo un asse, quella più lontana accatasta l'eccedenza; il segno più è la finestra successiva.",
-  "layout.schematic.track.caption_focused": "Le nuove finestre si uniscono alla traccia attiva; la traccia più lontana accatasta l'eccedenza.",
   "layout.schematic.track.caption_own": "Le nuove finestre aprono una traccia propria; la traccia più lontana accatasta l'eccedenza.",
   "layout.scrolling.blurb": "Un'unica fila infinita di finestre a larghezza fissa; lo schermo scorre lungo di essa fino a quella che ha il fuoco.",
   "layout.scrolling.name": "Scrolling",

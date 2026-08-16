@@ -2138,6 +2138,42 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
+**Where the engine's rule needs a display, the preview stands a
+number in for the display — never a simpler rule.** (#708,
+extending the paragraph above; the pattern was first ruled for
+Grid in #712.) Some engine rules are not merely unexported, they
+are unanswerable on a mini-canvas: how many minimum-size cells a
+grid fits, how many windows fit in one track before a new one
+opens, how many tracks fit across a screen. Each is a function of
+`min_window_size` against real geometry, and the canvas has
+neither.
+
+The tempting escapes are both worse than the problem. Dropping
+the rule ships a preview that teaches a behaviour the app does
+not have — the Track schematic did exactly this, growing the
+focused track to a drawn ceiling and piling the surplus, while
+the app has filled-then-spilled into a new track since #437.
+Disclaiming it in the caption ("this preview shows position
+only") leaves the reader knowing a rule exists without knowing
+what it is, and a caption's job is to label what is shown.
+
+So: **keep the engine's rule, substitute the display quantity**,
+as a named constant that says it is a stand-in and argues its
+value. The rule then still comes from the engine — `Track` asks
+`TrackLayout.spillsToNewTrack`, the same predicate a real spawn
+asks — and only the number is local. Two obligations make the
+substitution honest rather than a clamp by another name. The
+stand-in must be **the same at every drawing scale**, or one
+configuration draws two different capacities and the thumbnail
+contradicts the panel (#712 shipped that: a rigid 8 × 1 piled two
+windows on the strip and none in the panel, inventing an overflow
+the engine does not have). And it must **not bind below a value
+the user typed** — a preview answering a typed limit of 4 with
+three tracks is a stand-in overruling the setting it illustrates.
+Clamp the drawing if you must; never the rule. The family lives
+in `LayoutSchematicStandIns` and
+`LayoutSchematicTrackFoldTests` holds the scale independence.
+
 **A layout gets one frame, whatever it has to teach** (#753,
 superseding the #125/#239 two-frame bar, which stood in
 [UI patterns](ui-patterns.md) ▸ Previews & schematics). That

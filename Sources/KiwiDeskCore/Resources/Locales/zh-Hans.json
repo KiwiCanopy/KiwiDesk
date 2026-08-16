@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "主区与堆叠区；堆叠区填满后，整个区域会层叠起来，只露出上边缘。",
   "layout.schematic.stack.caption_overflow": "主区与堆叠区；堆叠区填满后，多出的窗口会层叠起来。",
   "layout.schematic.track.ax": "轨道预览：沿一个轴排列的轨道，最远的一条层叠溢出的窗口；加号是下一个窗口。",
-  "layout.schematic.track.caption_focused": "新窗口加入焦点所在的轨道；最远的轨道层叠溢出的窗口。",
   "layout.schematic.track.caption_own": "新窗口各自打开一条轨道；最远的轨道层叠溢出的窗口。",
   "layout.scrolling.blurb": "一行没有尽头的等宽窗口；屏幕沿着这一行平移到当前焦点窗口。",
   "layout.scrolling.name": "滚动",

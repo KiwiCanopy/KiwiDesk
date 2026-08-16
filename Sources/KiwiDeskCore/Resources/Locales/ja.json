@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "マスター領域とスタック領域です。スタックがいっぱいになると領域全体が重なり、上端だけが見えるようになります。",
   "layout.schematic.stack.caption_overflow": "マスター領域とスタック領域です。スタックがいっぱいになると、あふれた分が重なります。",
   "layout.schematic.track.ax": "トラックのプレビュー: 1つの軸に沿ったトラックが並び、いちばん奥のトラックがあふれた分を重ねます。プラス記号が次のウインドウです。",
-  "layout.schematic.track.caption_focused": "新しいウインドウはフォーカス中のトラックに加わります。いちばん奥のトラックがあふれた分を重ねます。",
   "layout.schematic.track.caption_own": "新しいウインドウは専用のトラックを開きます。いちばん奥のトラックがあふれた分を重ねます。",
   "layout.scrolling.blurb": "幅が固定されたウインドウが果てしなく1列に並び、画面がその上を移動してフォーカス中のウインドウを映します。",
   "layout.scrolling.name": "スクロール",

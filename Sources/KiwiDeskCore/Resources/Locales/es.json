@@ -525,7 +525,6 @@
   "layout.schematic.stack.caption_all": "Zona principal y zona de pila; cuando la pila se llena, toda la zona se amontona y solo se ven los bordes superiores.",
   "layout.schematic.stack.caption_overflow": "Zona principal y zona de pila; cuando la pila se llena, el excedente se amontona.",
   "layout.schematic.track.ax": "Vista previa de pistas: pistas a lo largo de un eje; la más alejada amontona el excedente; el signo más es la siguiente ventana.",
-  "layout.schematic.track.caption_focused": "Las ventanas nuevas se unen a la pista enfocada; la pista más alejada amontona el excedente.",
   "layout.schematic.track.caption_own": "Las ventanas nuevas abren su propia pista; la pista más alejada amontona el excedente.",
   "layout.scrolling.blurb": "Una fila interminable de ventanas de ancho fijo; la pantalla se desplaza por ella hasta la que tiene el foco.",
   "layout.scrolling.name": "Scrolling",
