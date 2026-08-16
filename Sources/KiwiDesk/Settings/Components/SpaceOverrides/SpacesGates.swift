@@ -148,14 +148,16 @@ enum SpacesGateHelp {
         case .autoSizedGrid:
             return L(
                 "scroll_grid.auto_size.gates",
-                "Auto-size grid is on, so the screen decides the "
-                    + "columns and rows."
+                "%1$@ is on, so the screen decides the columns "
+                    + "and rows.",
+                L("scroll_grid.auto_size", "Auto-size grid")
             )
         case .autoTracks:
             return L(
                 "track.auto_tracks.gates",
-                "Auto track limit is on, so the screen decides "
-                    + "how many tracks open."
+                "%1$@ is on, so the screen decides how many "
+                    + "tracks open.",
+                L("track.auto_tracks", "Auto track limit")
             )
         }
     }

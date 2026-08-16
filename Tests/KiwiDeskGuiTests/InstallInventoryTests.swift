@@ -108,12 +108,14 @@ struct InstallInventoryTests {
             try JSONSerialization.jsonObject(with: data)
             as? [String: String]
         let english = try #require(catalog)
-        let keys = [
-            "general.inventory.profiles",
-            "general.inventory.spaces",
-            "general.inventory.shortcuts",
-            "general.inventory.app_rules",
-        ]
+        // DERIVED from the rows, not hand-listed: a fifth
+        // inventory row is then covered by existing, which a
+        // four-key literal is not (`parity-tests.md` — prefer a
+        // discovered list; re-review, 2026-08-16).
+        let keys = inventory().rows.map {
+            "general.inventory.\($0.id)"
+        }
+        #expect(!keys.isEmpty)
         for key in keys {
             let frame = try #require(
                 english[key],

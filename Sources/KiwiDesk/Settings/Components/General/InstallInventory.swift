@@ -44,6 +44,17 @@ struct InstallInventory: View {
     /// raw `count` rides alongside the rendered text so the
     /// guards can assert the arithmetic without parsing prose.
     ///
+    /// Unremarked consequence, stated here rather than left to
+    /// be rediscovered: `L()` substitutes through
+    /// `String(format:arguments:)` with no locale, where the
+    /// retired hand-format passed `locale: .current`. So these
+    /// counts are no longer locale-grouped (no thin space, no
+    /// separator). That matches every other `L()` site in the
+    /// tree and is the reason the overload is preferred, but it
+    /// IS a behaviour change — a locale-aware `L()` overload
+    /// would be the fix if grouped digits are ever wanted, and
+    /// it would want to be wanted everywhere at once.
+    ///
     /// Internal so `InstallInventoryTests` reads the numbers: a
     /// row that renders a plausible constant satisfies every
     /// source needle, which is the failure this lane has already

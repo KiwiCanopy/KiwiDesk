@@ -4,21 +4,24 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Spaces panel's caption arithmetic (#794).
+/// The Spaces panel's caption count (#794).
 ///
 /// The panel says how many settings a Space overrides, and the
-/// number is DERIVED — `TilingSettingsDiff` counts the leaves that
-/// differ between the global settings and
-/// `TilingSettings.resolved(for:activeMode:)`. A hand-listed set
-/// of overridable fields would be a third mirror of one the engine
-/// and the per-space editor already carry, which
-/// `parity-tests.md` rules against past two.
+/// number is the EDITOR HEADER's own:
+/// `TilingSettings.overrideFieldCount(_:for:)`. It began as a
+/// second derivation — a JSON leaf-diff of the resolved settings
+/// against the globals — which disagreed with the header the
+/// moment a checkbox was ticked, and addressed the encoded tree
+/// by a Swift case name that scrolling does not use. Both were
+/// removed with the mechanism (review round, 2026-08-16).
 ///
-/// **Asserted as arithmetic, never as a source needle.** The
-/// caption could call the resolver and render a constant and every
-/// scan would pass — the failure `LayoutSchematicCountTests`
-/// records for its own lane. So the count is read directly, over
-/// settings built here.
+/// **Mostly arithmetic, with one needle that says so.** A
+/// caption calling the seam and rendering a constant would pass
+/// any scan, so the counts are read directly over settings built
+/// here. The exception is `captionAgreesWithTheHeader`: the
+/// value half of it is a delegation tautology, so the binding
+/// claim rests on a source needle over the header's render
+/// site.
 @Suite("Spaces panel preview")
 @MainActor
 struct SpacesPanelPreviewTests {
@@ -82,10 +85,9 @@ struct SpacesPanelPreviewTests {
         #expect(onBsp.overrideCount(for: "1") == 0)
     }
 
-    /// Two changed fields count two. Guards the LEAF walk rather
-    /// than a top-level key compare — a diff that collapsed a
-    /// layout's whole sub-object into one change would report 1
-    /// here and read plausibly.
+    /// Two set fields count two — the count is per FIELD, not
+    /// per layout, so an override struct carrying two values is
+    /// two settings rather than one changed subtree.
     @Test("two overridden fields count two")
     func leavesAreCountedIndividually() {
         var settings = TilingSettings()
@@ -234,11 +236,12 @@ struct SpacesPanelPreviewTests {
         )
         .filter { !$0.isWhitespace }
         #expect(header.count > 1000, "the scan read the header")
+        // The stripped call site is exactly this. An earlier
+        // draft also offered a bare `overrideFieldCount(`
+        // disjunct, which any mention anywhere in the file
+        // satisfied (re-review, 2026-08-16).
         #expect(
-            header.contains(
-                "overrideFieldCount(mode,forspace:space)"
-            )
-                || header.contains("overrideFieldCount("),
+            header.contains("overrideFieldCount(mode,for:space)"),
             Comment(
                 rawValue:
                     "the editor's header stopped reading "
@@ -249,10 +252,21 @@ struct SpacesPanelPreviewTests {
         // The header must not do arithmetic ON that seam either:
         // a scaled or offset render disagrees with the caption
         // while still 'reading' it.
-        #expect(
-            !header.contains("overrideFieldCount(mode,for:space)*"),
-            "the header scales the count it shares"
-        )
+        // …and nothing does arithmetic ON it. Any operator, not
+        // just `*`: a `+ 1` or `/ 2` disagrees with the caption
+        // exactly as loudly.
+        let call = "overrideFieldCount(mode,for:space)"
+        if let after = header.range(of: call) {
+            let next = header[after.upperBound...].first
+            #expect(
+                next == nil || !"*+-/".contains(next!),
+                Comment(
+                    rawValue:
+                        "the header does arithmetic on the count "
+                        + "it shares with the caption"
+                )
+            )
+        }
 
         for mode in LayoutMode.allCases where mode != .floating {
             var settings = TilingSettings()

@@ -146,13 +146,9 @@ struct LayoutSchematicZoneTests {
     /// ("never lies about where the boundary master sits when the
     /// stack leads") and which nothing held it to.
     ///
-    /// Asserted two ways on purpose. The first is the engine's
-    /// own verdict, so a schematic that stops consulting
-    /// `mirrorsMasterZone` — or that swaps the ternary's arms —
-    /// reds. The second is what a reader takes off the frame: the
-    /// master drawn nearest the seam. The engine agreement alone
-    /// would pass on a reversal applied in the wrong direction if
-    /// the rule and the reversal were ever inverted together.
+    /// ONE assertion, deliberately — see the comment in the body
+    /// for why two successive attempts at a "second, independent"
+    /// check were both entailed by it and removed.
     @Test("the master zone mirrors exactly when the engine does")
     func masterZoneMirrorsWithTheEngine() {
         for position in positions {

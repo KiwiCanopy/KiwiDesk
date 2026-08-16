@@ -45,6 +45,29 @@ struct SpacesPanelPreview: View {
     ///
     /// Every arm re-checks membership, so deleting a Space in the
     /// draft can never leave the panel drawing one that is gone.
+    /// Internal alias of `space` for the guards — a panel that
+    /// draws the wrong Space is invisible to every arithmetic
+    /// assertion here.
+    var shownSpace: SpaceID? { space }
+
+    /// What a chip click does, as a function a test can call:
+    /// the `Button` closure itself is unreachable from a suite,
+    /// and the branch inside it is a behaviour change that owes
+    /// a revert-red test (`tests.md`).
+    func pick(_ candidate: SpaceID) {
+        // While the override editor is open it OWNS which Space
+        // is shown (`space` gives it precedence), so a chip that
+        // only set `selected` moved nothing and gave no feedback
+        // — a fully live control that does nothing (review
+        // round, 2026-08-16). Driving the editor instead of
+        // dimming the chip: the panel and the editor show ONE
+        // Space, and either may say which.
+        if model.nav.spaceOverridesFocus != nil {
+            model.nav.spaceOverridesFocus = candidate
+        }
+        selected = candidate
+    }
+
     private var space: SpaceID? {
         if let focus = model.nav.spaceOverridesFocus,
             spaces.contains(focus)
@@ -100,22 +123,7 @@ struct SpacesPanelPreview: View {
     private func chip(_ candidate: SpaceID) -> some View {
         let isOn = candidate == space
         return Button {
-            // While the override editor is open it OWNS which
-            // Space is shown (`space` gives it precedence), so a
-            // chip that only set `selected` moved nothing and
-            // gave no feedback — a fully live control that does
-            // nothing, which "grey, don't hide" exists to
-            // prevent (code review, 2026-08-16).
-            //
-            // Driving the editor instead of dimming the chip:
-            // the panel and the editor show ONE Space, and
-            // either may say which. Clicking a chip with the
-            // editor open moves both, which is what a reader
-            // clicking it means.
-            if model.nav.spaceOverridesFocus != nil {
-                model.nav.spaceOverridesFocus = candidate
-            }
-            selected = candidate
+            pick(candidate)
         } label: {
             Text(candidate.raw)
                 .font(.caption)

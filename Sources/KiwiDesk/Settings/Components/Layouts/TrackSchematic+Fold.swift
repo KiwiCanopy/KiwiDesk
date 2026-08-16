@@ -123,10 +123,6 @@ extension TrackSchematic {
         return marker[trackCount...].reduce(0, +)
     }
 
-    /// Windows in the focused track, clamped to what the canvas
-    /// can legibly stack. The CLAMP is the drawing's; the run
-    /// itself is the engine's fold above — the two are separate
-    /// on purpose (`LayoutSchematicStandIns`).
     /// Windows in the focused track — the run of the track the
     /// strip actually draws as focused (`focusIdx`), clamped to
     /// what the canvas can legibly stack.

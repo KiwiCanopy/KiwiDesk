@@ -89,8 +89,14 @@ struct LayoutSchematicTrackFrameTests {
                     + "focus"
             )
         )
+        // `trackCount/2`, not `mintrackCount/2`: whitespace
+        // stripping leaves the paren in place
+        // (`min(trackCount/2`), so the latter never occurs and
+        // the needle could not fail — an inert canary inside the
+        // suite added to close inert guards (re-review,
+        // 2026-08-16).
         #expect(
-            !source.contains("mintrackCount/2"),
+            !source.contains("trackCount/2"),
             Comment(
                 rawValue:
                     "the pre-#708 middle-slot convention is back"

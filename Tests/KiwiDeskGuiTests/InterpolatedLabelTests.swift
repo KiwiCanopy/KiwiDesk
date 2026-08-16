@@ -121,6 +121,13 @@ struct InterpolatedLabelTests {
         // rather than a control name, so it is not counted here.
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
+        // The `.gates` twins of the two above. They quoted the
+        // same labels as literal text and were invisible to the
+        // scan — a fully-quoting frame has no nested `L(` to
+        // discover, the blind spot this suite's own header
+        // records (re-review, 2026-08-16).
+        "scroll_grid.auto_size.gates": 1,
+        "track.auto_tracks.gates": 1,
         "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
         "layout.schematic.grid.ax": 2,
