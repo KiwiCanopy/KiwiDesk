@@ -925,16 +925,13 @@ def _report_discarded(
 
 
 def _prune_worksheet_dirs(removed: Path) -> None:
-    """Leaves no empty worksheet tree behind after an unlink —
-    `locale-worksheets/` existing but empty reads as "a pass is
-    open" to anyone who looks. `merge-keys` does the same after
-    its own unlink and states the argument; this path reaches
-    the state routinely now that a re-mint can find every key
+    """Leaves no empty worksheet tree behind after an unlink.
+    `scripts/merge-keys` does this after its own unlink and owns
+    the argument — why an empty `locale-worksheets/` is worse
+    than none, and why the walk is deepest-first, deduped and
+    never above the base. Read it there; this is the same rule,
+    reached routinely now that a re-mint can find every key
     translated and delete the file.
-
-    Deepest first, deduped, and never above the base: `rmdir`
-    refuses a non-empty directory, so a second locale still
-    mid-translation keeps the tree.
     """
     for directory in dict.fromkeys(
         (removed.parent, worksheets_dir(ROOT))
@@ -1057,14 +1054,31 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
         unusable,
     )
 
+    # The count rides the SUMMARY line, not only the stderr
+    # echo above — that is the line a human skims and a wrapper
+    # captures, and on this branch a bare "nothing written"
+    # reads as a clean success while a worksheet holding drafts
+    # is deleted. `merge-keys` pays the same cost for the same
+    # reason and argues it at its own summary.
+    discarded = (
+        len(stale) + len(already) + len(departed) + len(unusable)
+    )
+
     if not missing:
         if out.exists():
             out.unlink()
             _prune_worksheet_dirs(out)
-        print(
-            f"extract-keys: {locale} has no missing keys "
-            f"(nothing written)."
-        )
+        if discarded:
+            print(
+                f"extract-keys: {locale} has no missing keys — "
+                f"deleted a worksheet still holding {discarded} "
+                "drafted translation(s), listed above."
+            )
+        else:
+            print(
+                f"extract-keys: {locale} has no missing keys "
+                f"(nothing written)."
+            )
         return 0
 
     carried = sum(
@@ -1087,6 +1101,12 @@ def write_missing(locale: str, mapping: dict[str, str]) -> int:
             f"extract-keys: {carried} translation(s) already "
             "drafted in the previous worksheet were carried "
             "over — merge when you are ready."
+        )
+    if discarded:
+        print(
+            f"extract-keys: {discarded} drafted translation(s) "
+            "could NOT be carried — each is listed above with "
+            "its text, which is now the only copy."
         )
     flag = "--site " if LOCALES_DIR == SITE_LOCALES_DIR else ""
     print(

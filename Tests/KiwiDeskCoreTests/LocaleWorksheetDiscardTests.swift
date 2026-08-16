@@ -265,6 +265,17 @@ struct LocaleWorksheetDiscardTests {
             """
         )
         #expect(lines.contains { $0.contains("Handarbeit") })
+        // And the summary line says so too. The echo is on
+        // stderr; this is the line a human skims and a wrapper
+        // captures, and "nothing written" alone reads as a
+        // clean success on the one path that deletes a file.
+        #expect(
+            run.stdout.contains("deleted a worksheet"),
+            """
+            the summary line read as a clean success while \
+            deleting drafted work: \(run.stdout)
+            """
+        )
         #expect(!fx.worksheetExists("missing_de.json"))
         // And no empty tree left behind reading as "a pass is
         // open" — `merge-keys` prunes after its own unlink.

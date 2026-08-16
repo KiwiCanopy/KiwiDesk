@@ -76,10 +76,9 @@ Read two files before you start:
 
 **Spawn this agent with `isolation: "worktree"`.** It breaks
 working source on purpose, so without one the proof runs in the
-tree everything else is reading, and a run that is cancelled,
-crashes, or dies on a timeout leaves the sabotage behind with
-nothing left to restore it. A preference would be honoured on the
-runs that did not need it and skipped on the one that did.
+tree everything else is reading. `.claude/rules/tests.md` ▸
+"Owed" states the same obligation for a caller who arrives from
+outside a review round, and the `review-change` skill argues it.
 
 Where the harness offers no worktree isolation, two things bind
 in its place and neither is optional:

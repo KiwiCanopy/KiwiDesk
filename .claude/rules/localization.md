@@ -71,7 +71,7 @@ hand-edit **any** `Resources/Locales/*.json`. Use the scripts:
 | Translate a locale | `scripts/extract-keys <locale>` → `scripts/merge-keys <locale>` |
 | Rename a key, keep translations | `scripts/rename-key <old> <new>` |
 | English **meaning** changed | `scripts/drop-key <key>` (same change set) |
-| One locale's translation is bad | `scripts/drop-key --locale <locale> <key>` |
+| One locale's translation is bad | `scripts/drop-key --locale <locale> <key>` (a live worksheet can carry the retired text back — see the carry predicate below) |
 | Remove orphans | `scripts/extract-keys --prune` |
 
 **A re-mint must never silently discard drafted work.**
@@ -114,10 +114,22 @@ the current English** — the same rule `merge-keys` merges by.
 Once the English moves the draft translates text the app no
 longer shows, so the slot is cleared and the loss reported;
 carrying it would hand the translator a worksheet that looks
-finished and a `merge-keys` run that silently refuses it. Keep
-the two scripts agreeing on that predicate: they are one
-round-trip, and a carry rule looser than the merge rule strands
-work in the gap between them.
+finished and a `merge-keys` run that silently refuses it.
+
+**Keep the two scripts agreeing, and keep that agreement
+guarded — the prose alone has already failed.** Each script
+decodes the worksheet itself, and `read_drafts` was written with
+`merge-keys._load_map` open beside it and still omitted
+`UnicodeDecodeError`, so one refused where the other dumped a
+traceback while both suites stayed green. Two guards hold the
+two halves: `LocaleWorksheetDecodeParityTests` feeds one damaged
+worksheet to BOTH scripts and demands the same verdict, and
+`LocaleWorksheetCarryTests` ▸ the round trip proves a carried
+draft is still one `merge-keys` will take. A new way of being
+unreadable joins the parity suite's case list, which is what
+demands it of both at once — the two are one round-trip, and a
+carry rule looser than the merge rule strands work in the gap
+between them.
 
 `drop-key` in the same change set makes every locale fall back to
 the new English and puts the key back on the to-translate list.
@@ -360,7 +372,8 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
 `LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`,
-`LocaleWorksheetDiscardTests`, `LocaleWorksheetRefusalTests`
+`LocaleWorksheetDiscardTests`, `LocaleWorksheetRefusalTests`,
+`LocaleWorksheetDecodeParityTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.
