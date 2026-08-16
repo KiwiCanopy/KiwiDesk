@@ -20,15 +20,19 @@ struct PaletteScenePanel: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.colors.currentScene,
-            // Not "everything a palette paints" — the scene
-            // draws six of the twenty-five paths a palette
-            // carries, and this phase is what grew it to
-            // twenty-five. A caption labels what is shown.
+            // The caption labels what is shown, and since #793
+            // that is the full scene rather than a sample of
+            // it: this mount takes `.panel` like Advanced
+            // Colours' own, so the two pages cannot disagree
+            // about what a palette paints. What it still does
+            // NOT show is the four pointer states, which is
+            // `PaletteSceneRoles.withheld`'s argument and not a
+            // caption's to make.
             caption: L(
                 "colors.scene.caption",
-                "A sample of what a palette paints: the bar "
-                    + "plate and its active item, the focus "
-                    + "ring, and the drag ghost."
+                "Both bars, the focused and unfocused rings "
+                    + "with their state marks, and the drag "
+                    + "ghost beside its drop zone."
             )
         ) {
             PaletteSceneThumbnail(
@@ -38,7 +42,8 @@ struct PaletteScenePanel: View {
                         from: model.config.settings
                     )
                 ),
-                height: 190
+                height: 300,
+                scene: .panel
             )
             .frame(maxWidth: .infinity)
         }

@@ -137,6 +137,15 @@ struct AdvancedColorsControls: Sendable {
         "More colors",
         instance: "app_bar"
     )
+    /// The detail panel's scene (#793). Its own key rather than
+    /// `colors.scene.title`: that one names Colours & Motion's
+    /// "Current colors", a sample of a palette, while this names
+    /// the whole set drawn at once — one concept, one word, and
+    /// two different concepts here.
+    let everyColorScene = SettingsControl(
+        "colors.advanced.scene.title",
+        "Every color at once"
+    )
 }
 
 /// Gaps & Borders — the structure half of the old Appearance

@@ -32,12 +32,6 @@ struct SpaceBarColorCard: View {
             SettingsCatalog.advancedColors.spaceBarGroup,
             help: allows ? nil : AdvancedColorsHelp.spaceBarOff
         ) {
-            SpaceBarPreviewStrip(
-                style: model.config.settings.spaceBarStyle,
-                appBar: model.config.settings.appBarStyle,
-                sameEdge: model.config.settings
-                    .spaceBarSharesEdgeWithAppBar
-            )
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
@@ -95,9 +89,6 @@ struct AppBarColorCard: View {
             SettingsCatalog.advancedColors.appBarGroup,
             help: allows ? nil : AdvancedColorsHelp.appBarOff
         ) {
-            AppBarPreviewStrip(
-                style: model.config.settings.appBarStyle
-            )
             ColorGrid {
                 AdvancedColorRows(
                     model: model,

@@ -13,11 +13,21 @@ import SwiftUI
 enum SettingsDetailPanelOffer {
     /// v1 (owner-scoped 2026-08-09): the four areas whose
     /// preview renderers exist this pass. Shortcuts joined in
-    /// pass 5 (the keyboard board), which is the extension motion
-    /// #793-#795 each repeat.
+    /// pass 5 (the keyboard board), and Advanced Colours in #793
+    /// — the extension motion is the same each time: a case
+    /// here, a branch below, and the area's cards give up any
+    /// preview the panel now owns.
+    ///
+    /// General is deliberately NOT here and #795 is where that
+    /// was argued rather than assumed (owner, 2026-08-16): every
+    /// fact an inventory panel would list is already in the
+    /// content column, and every `GeneralKey` is a
+    /// `UserDefaults`/readonly/action row, so its diff list would
+    /// be a structural zero. Its empty right side is this set's
+    /// own rule working — absence is a stated verdict.
     static let offering: Set<SettingsDestination> = [
         .gapsAndBorders, .bars, .colors, .layoutDefaults,
-        .shortcuts,
+        .shortcuts, .advancedColors,
     ]
 
     static func offers(
@@ -90,6 +100,8 @@ struct SettingsDetailPanel: View {
             BarsPanelPreview(model: model)
         case .colors:
             PaletteScenePanel(model: model)
+        case .advancedColors:
+            AdvancedColorsPanel(model: model)
         case .shortcuts:
             KeyboardPreviewPanel(model: model)
         case .layoutDefaults:

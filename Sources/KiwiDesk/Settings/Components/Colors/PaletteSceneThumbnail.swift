@@ -32,11 +32,21 @@ struct PaletteSceneThumbnail: View {
     /// the frame, so one number scales the whole picture.
     var height: CGFloat = baseHeight
 
+    /// Which roles this drawing shows (#793). A **scale**, not a
+    /// height threshold: what changes between the two is which
+    /// colours are on the frame, and `PaletteSceneRoles` is the
+    /// one census of that. The default keeps every existing call
+    /// site — the shelf's tiles — exactly as it was.
+    var scene: PaletteSceneScale = .tile
+
     private static let fallback = ColorPaletteKeys.extract(
         from: TilingSettings()
     )
 
-    private func color(_ path: String) -> Color {
+    /// Internal, not private: `PaletteSceneThumbnail+Panel` draws
+    /// the full scene from the same lookup, so a sparse palette
+    /// falls back identically at both scales.
+    func color(_ path: String) -> Color {
         Color(
             kiwiHex: palette.colors[path]
                 ?? Self.fallback[path] ?? "#00000000"
@@ -46,7 +56,9 @@ struct PaletteSceneThumbnail: View {
     /// Everything inside is expressed against the shelf tile's
     /// 72 pt, so one `height` scales the whole scene rather than
     /// stretching a fixed drawing inside a taller box.
-    private var scale: CGFloat { height / Self.baseHeight }
+    /// Internal for the same reason `color` is — the panel scene
+    /// expresses its own metrics against it.
+    var scale: CGFloat { height / Self.baseHeight }
 
     var body: some View {
         ZStack {
@@ -54,17 +66,28 @@ struct PaletteSceneThumbnail: View {
                 cornerRadius: Self.plateRadius * scale
             )
             .fill(SettingsTheme.sunken)
-            VStack(spacing: 6 * scale) {
-                barStrip
-                HStack(spacing: 6 * scale) {
-                    window
-                    ghost
-                }
-            }
-            .padding(8 * scale)
+            content
+                .padding(8 * scale)
         }
         .frame(height: height)
         .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder private var content: some View {
+        switch scene {
+        case .tile: tileScene
+        case .panel: panelScene
+        }
+    }
+
+    private var tileScene: some View {
+        VStack(spacing: 6 * scale) {
+            barStrip
+            HStack(spacing: 6 * scale) {
+                window
+                ghost
+            }
+        }
     }
 
     /// A mock bar: three pills on the box plate — inactive,

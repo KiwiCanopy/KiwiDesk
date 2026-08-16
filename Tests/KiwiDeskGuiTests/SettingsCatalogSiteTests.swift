@@ -38,7 +38,8 @@ struct SettingsCatalogSiteTests {
         // 58 since turn 13a: Profiles adds the "Which profile
         // loads" card and the "For other setups" preset drawer.
         // 59 since #754: the Borders card.
-        #expect(names.count == 59)
+        // 60 since #793: Advanced Colours' panel scene.
+        #expect(names.count == 60)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -29,9 +29,6 @@ struct BorderColorCard: View {
             caption: caption,
             help: gates.bordersHeaderHelp
         ) {
-            FocusBorderPreview(
-                style: model.config.settings.borderStyle
-            )
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
@@ -112,11 +109,6 @@ struct DragColorCard: View {
                     HelpButton(explanation: help, subject: title)
                 }
             }
-            DragVisualPreview(
-                visual: gates.dragVisual(ghost),
-                cornerRadius: model.config.settings
-                    .dragCornerRadius
-            )
             AdvancedColorRows(model: model, keys: keys)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

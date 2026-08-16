@@ -59,10 +59,6 @@ struct SettingsRawColorTests {
             + "retune is an eyeball item of the responsive "
             + "pass, and until it lands these are the shipped "
             + "design",
-        "AppBarPreviewStrip+Mock.swift":
-            "the mock desktop's app windows carry varied "
-            + "native hues on purpose — a PICTURE of "
-            + "third-party content, not app chrome",
         "Color+KiwiHex.swift":
             "RGBA tuple member accessors (c.red, c.green) in "
             + "the hex parser — the token scan cannot tell a "

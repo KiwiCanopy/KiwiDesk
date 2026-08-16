@@ -2492,11 +2492,41 @@ twin to retire — the rule bans duplicates, not first
 previews. The in-card mounts are REMOVED in
 the same change — one screen must not state one fact twice —
 which NARROWS the old "live preview leads its editor"
-convention to areas without a panel: Advanced Colours' group
-previews still lead their rows because that area offers no
-panel, while in the panel areas no migrated preview
-survives in its card (`DetailPanelTests` holds the offer set
-and the removals both).
+convention to areas without a panel: in the panel areas no
+migrated preview survives in its card (`DetailPanelTests`
+holds the offer set and the removals both). Advanced Colours
+was the worked exception while it had no panel of its own;
+#793 gave it one, and its four group previews left under this
+same rule rather than by a new decision — the condition
+changed, not the convention.
+
+**A composite question needs a composite picture, in the
+colours the user actually set.** (#793, owner 2026-08-16.)
+Advanced Colours edits twenty-five colours in four groups, and
+four group previews can answer "is this row right?" while
+leaving "do these work *together*?" unanswerable without
+saving and looking at the real desktop. The accent ladders,
+the two rings, the state marks and the drag pair are judged
+against each other. So the panel draws one scene holding every
+role at once — which reverses that page's own earlier
+reasoning, recorded here because it was argued rather than
+merely outgrown: grouping by *where you see it* decides the
+ROWS, and never settled whether the PICTURE should be
+per-group.
+
+Two constraints the scene is built under. It draws from **raw
+palette paths, never the Home plate's accent/ink/base fold** —
+a fold is right on a card and exactly wrong on the one page
+whose subject is per-role tinting, where a focus ring the user
+has made illegible must read as illegible. And it **omits the
+four hover roles**: a still frame can only draw a pointer
+state as the resting one, which would teach a behaviour the
+app does not have (#708's defect wearing another hat). That
+omission is data with a reason attached
+(`PaletteSceneRoles.withheld`) rather than a caption
+disclaiming itself, and `PaletteSceneRoleTests` holds every
+palette path to being drawn or argued away — so a new colour
+cannot quietly miss the page that exists to show them all.
 
 **Wide windows cap the content, not the panel.** (#678
 Phase 4; owner 2026-08-10.) The prototype was drawn at 1440

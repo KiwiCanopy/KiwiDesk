@@ -20,13 +20,21 @@ struct DetailPanelTests {
     /// extension motion #793-#795 each repeat — so a member
     /// arriving here without a branch in the map below is the
     /// failure this pair exists to catch.
-    @Test("the offer set is the scoped five")
+    @Test("the offer set is the scoped six")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .colors,
-                .layoutDefaults, .shortcuts,
+                .layoutDefaults, .shortcuts, .advancedColors,
             ]
+        )
+        // General's absence is a RULING, not a gap (#795, owner
+        // 2026-08-16): its rows are all UserDefaults/readonly/
+        // action, so a panel there could only restate the
+        // content column and count a structural zero. Pinned
+        // here so re-adding it has to argue with this line.
+        #expect(
+            !SettingsDetailPanelOffer.offers(.general)
         )
     }
 
@@ -48,6 +56,9 @@ struct DetailPanelTests {
                 "case.layoutDefaults:LayoutPreviewPanel(",
             .shortcuts:
                 "case.shortcuts:KeyboardPreviewPanel(model:model)",
+            .advancedColors:
+                "case.advancedColors:"
+                + "AdvancedColorsPanel(model:model)",
         ]
         #expect(
             Set(branches.keys)
@@ -208,13 +219,18 @@ struct DetailPanelTests {
                     + "DragVisualsEditor.swift",
                 "DragVisualPreview("
             ),
+            // The two bar strips are not listed: #793 took their
+            // last mount (Advanced Colours' cards) and the
+            // renderers were deleted outright, so a needle for
+            // them would assert against a type that no longer
+            // exists — permanently true, and read as coverage.
             (
-                "Components/Bars/SpaceBarCard.swift",
-                "SpaceBarPreviewStrip("
+                "Components/Colors/StructureColorCards.swift",
+                "FocusBorderPreview("
             ),
             (
-                "Components/Bars/AppBarCard.swift",
-                "AppBarPreviewStrip("
+                "Components/Colors/StructureColorCards.swift",
+                "DragVisualPreview("
             ),
             (
                 "Sections/ColorsMotionSection.swift",
