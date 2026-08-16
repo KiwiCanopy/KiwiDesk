@@ -54,8 +54,6 @@ const homeHref =
 
 // Locale-aware quotation marks for the footer aside (German opens
 // low „…“, English high “…”), mirroring Landing.astro.
-const oq = lang === "de" ? "„" : lang === "ja" ? "「" : "“";
-const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
@@ -781,10 +779,6 @@ const jsonLd = [
             sizes="110px" />
           <p class="footer__name">{s.footer_org}</p>
           <p class="footer__tag">{s.footer_tag}</p>
-          <blockquote class="quote-aside quote-aside--center
-            quote-aside--footer">
-            <p>{oq}{s.quote_footer}{cq}</p>
-          </blockquote>
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
           rel="noopener">

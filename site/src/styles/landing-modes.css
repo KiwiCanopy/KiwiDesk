@@ -841,8 +841,7 @@
    byline from the line above it, so give it its own gap. Scoped
    rather than folded into the rule above, which sits inside a card
    that already provides one. */
-.quote-band__mark .quote-card__byline,
-.quote-aside--footer .quote-card__byline {
+.quote-band__mark .quote-card__byline {
   margin-top: 0.75rem;
 }
 .quote-card--dev p {
@@ -904,13 +903,6 @@ a.quote-card__byline-main:hover {
 .quote-aside--left {
   margin-top: 1.4rem;
 }
-/* Footer variant sits centered under the tagline, slightly tighter
-   line length so it doesn't stretch the narrow footer column. */
-.quote-aside--footer {
-  max-width: 38ch;
-  margin-top: 0.9rem;
-}
-
 /* Demo variant sits directly under the video's caption, centered
    and constrained to the SAME column width as the video frame
    itself (.demo__frame's 900px) so it visibly belongs to it rather

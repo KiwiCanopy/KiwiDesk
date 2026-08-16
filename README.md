@@ -210,5 +210,5 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 <div align="center">
 <br>
 <sub>A <a href="https://kiwicanopy.com"><strong>KiwiCanopy</strong></a> project — Planting Kiwis for a
-richer world 🥝🥝🥝</sub>
+more conscious life 🥝</sub>
 </div>
