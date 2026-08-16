@@ -13,8 +13,18 @@ import Testing
 /// does, and every direct assertion on it landed in the GUI test
 /// target (architect review, 2026-08-16). This is the Core-side
 /// half: the predicate is pinned against the SPAWN's own
-/// behaviour, so a change to either that leaves them disagreeing
-/// reds here rather than in a preview.
+/// behaviour.
+///
+/// **What that does and does not cover.** `insertIntoTrack`
+/// CALLS `spillsToNewTrack`, so `predicatePredictsTheSpawn`
+/// compares the rule with itself — retuning the predicate
+/// (`>=` to `>`, dropping the `trackCap` clause) leaves it green
+/// (guard-prover, 2026-08-16). What it genuinely guards is the
+/// spawn's DISPATCH: point the spill arm at `joinTrack` and it
+/// reds hard. The predicate's own arms are held by
+/// `nilCapacityNeverSpills` and `cappedSpacePiles`, which assert
+/// it directly. Stated because the first draft of this docstring
+/// claimed both directions.
 @Suite("Track spill predicate (#437, #708)")
 struct TrackSpillPredicateTests {
     private let allTiled: @Sendable (WindowID) -> Bool = { _ in

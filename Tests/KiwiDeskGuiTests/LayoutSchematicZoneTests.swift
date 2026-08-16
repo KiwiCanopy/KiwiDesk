@@ -182,32 +182,25 @@ struct LayoutSchematicZoneTests {
                             + what
                     )
                 )
-                // An INDEPENDENT fact, not a restatement. The
-                // first cut asserted `masterDisplay.first`
-                // against `masterWins.last`, which the equality
-                // above already implies — it branched on the
-                // same `mirrors` and could never fail while the
-                // first passed (code review, 2026-08-16).
+                // NOTHING further is asserted here, and that is
+                // deliberate. Two earlier drafts added a second
+                // expectation claiming independence — first
+                // `masterDisplay.first == masterWins.last`, then
+                // a `Set`/count permutation check — and both are
+                // entailed by the equality above: they branch on
+                // the same `mirrors` and can never fire alone
+                // (guard-prover, 2026-08-16, which showed a
+                // dropped window reds line 173 and the extras
+                // together, never the extras by themselves).
                 //
-                // What is genuinely separate: mirroring is a
-                // PERMUTATION, so whatever the order, the drawn
-                // zone holds exactly the master zone's windows.
-                // A reversal that also dropped or duplicated one
-                // satisfies neither this nor the engine check
-                // for the same reason a real defect would.
-                #expect(
-                    Set(schematic.masterDisplay)
-                        == Set(schematic.masterWins),
-                    Comment(
-                        rawValue:
-                            "render order is not a permutation "
-                            + "of the master zone — \(what)"
-                    )
-                )
-                #expect(
-                    schematic.masterDisplay.count
-                        == schematic.masterWins.count
-                )
+                // An implied assertion is worse than no
+                // assertion: it reads as a second net and is
+                // one restatement. The engine comparison IS the
+                // guard; what it does not cover — that the drawn
+                // seam is where a reader sees it — needs a
+                // frame-side observation this suite has no
+                // access to, and is stated here rather than
+                // faked.
             }
         }
     }

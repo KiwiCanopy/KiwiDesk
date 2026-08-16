@@ -104,6 +104,14 @@ struct SpacesPanelPreviewTests {
     /// Floating resolves to nothing and draws nothing, so it can
     /// never report an override — the arm that would otherwise
     /// caption a picture the panel does not draw.
+    ///
+    /// Double-defended, and inert to either half alone: the view
+    /// guards `mode != .floating` and Core's `layoutOverride`
+    /// returns nil for it, so this reds only on the compound
+    /// mutation (guard-prover, 2026-08-16). Kept rather than
+    /// narrowed — the belt and the braces are in different
+    /// targets, and the honest reading is that this pins the
+    /// OUTCOME while neither half is individually guarded here.
     @Test("Floating never reports an override")
     func floatingCountsZero() {
         var settings = TilingSettings()
@@ -205,10 +213,47 @@ struct SpacesPanelPreviewTests {
     /// seeds a newly ticked override with the global value, so
     /// the first click on any checkbox made the header say
     /// "1 of 6 set" beside "follows the layout defaults" (code
-    /// review, 2026-08-16). Asserted against the seam the header
-    /// itself reads, so the two cannot drift apart again.
+    /// review, 2026-08-16).
+    ///
+    /// **Two halves, because the value comparison alone is a
+    /// tautology** — `overrideCount` IS
+    /// `settings.overrideFieldCount`, so comparing them proves
+    /// only that a delegation still delegates, and doubling the
+    /// header's own render left it green (guard-prover,
+    /// 2026-08-16). The needle below is what actually binds the
+    /// two surfaces: the header must render the SAME seam.
     @Test("the caption counts what the header counts")
-    func captionAgreesWithTheHeader() {
+    func captionAgreesWithTheHeader() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "SpacesSection+Overrides.swift"
+            )
+        let header = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .filter { !$0.isWhitespace }
+        #expect(header.count > 1000, "the scan read the header")
+        #expect(
+            header.contains(
+                "overrideFieldCount(mode,forspace:space)"
+            )
+                || header.contains("overrideFieldCount("),
+            Comment(
+                rawValue:
+                    "the editor's header stopped reading "
+                    + "overrideFieldCount — its N and the "
+                    + "panel's caption can now disagree"
+            )
+        )
+        // The header must not do arithmetic ON that seam either:
+        // a scaled or offset render disagrees with the caption
+        // while still 'reading' it.
+        #expect(
+            !header.contains("overrideFieldCount(mode,for:space)*"),
+            "the header scales the count it shares"
+        )
+
         for mode in LayoutMode.allCases where mode != .floating {
             var settings = TilingSettings()
             apply(anOverrideFor: mode, to: &settings)

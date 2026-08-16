@@ -142,6 +142,15 @@ struct GateReasonPlacementTests {
     /// sentence NAMES A DESTINATION, and it is a live link
     /// rather than a `Text`, or the pointer is dead
     /// (`docs/ui-patterns.md`).
+    ///
+    /// Stated limit: these needles see the CALL, not the
+    /// sentence behind it — a `crossReference(for:)` returning
+    /// nil leaves every needle satisfied and nothing drawn
+    /// (guard-prover, 2026-08-16). That state is caught by
+    /// `CrossReferenceRowSlotTests.theRemoteGateProsePlacesItsLink`,
+    /// which requires a sentence for every reason in
+    /// `SpacesGateHelp.remote`. The pair is the net; neither
+    /// half is.
     @Test("the per-space remote gates carry a live anchor")
     func perSpaceOverridesCarryTheirAnchor() throws {
         for key: SettingKey in [
