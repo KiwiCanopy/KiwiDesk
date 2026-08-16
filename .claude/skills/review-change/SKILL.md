@@ -38,8 +38,9 @@ and the perspectives are independent, so serializing only costs
 time. Brief each with the review range.
 
 Open the additional lanes the diff earns — in the **same**
-message, since they are independent too. The gate is a property of
-the diff, not a judgement call:
+message, since they are independent too (`guard-prover` is the one
+exception; see below). The gate is a property of the diff, not a
+judgement call:
 
 | The diff… | also spawn |
 |---|---|
@@ -48,9 +49,20 @@ the diff, not a judgement call:
 | adds or alters an `L()` string, or touches a catalog | `localization-auditor` |
 | touches `site/` | `site-engineer` |
 
-`guard-prover` mutates code, so spawn it the way its own file asks
-to be spawned; the other lanes are read-only or edit only their own
-tree.
+`guard-prover` is the one lane that **mutates the source every
+other lane is reading**. Spawn it with `isolation: "worktree"`, as
+its own file requires — isolated, its mutations never reach the
+tree, it is as independent as the rest, and it belongs in the same
+parallel message.
+
+**Without worktree isolation that lane runs alone.** Not in the
+parallel message: before it or after it, with nothing else in
+flight. A `code-reviewer` reading while a mutation is live reviews
+deliberately broken source, and the round comes back arguing about
+sabotage the prover was about to restore. Serializing costs one
+lane's wall-clock; getting it wrong costs the whole round. The
+other lanes are read-only, or edit only their own output, so they
+always share the message.
 
 The gate above is a property of the diff — it is this skill's to
 own. What each agent *is*, and when to reach for one outside a

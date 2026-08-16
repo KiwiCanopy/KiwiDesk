@@ -71,8 +71,65 @@ hand-edit **any** `Resources/Locales/*.json`. Use the scripts:
 | Translate a locale | `scripts/extract-keys <locale>` → `scripts/merge-keys <locale>` |
 | Rename a key, keep translations | `scripts/rename-key <old> <new>` |
 | English **meaning** changed | `scripts/drop-key <key>` (same change set) |
-| One locale's translation is bad | `scripts/drop-key --locale <locale> <key>` |
+| One locale's translation is bad | `scripts/drop-key --locale <locale> <key>` (a live worksheet can carry the retired text back — see the carry predicate below) |
 | Remove orphans | `scripts/extract-keys --prune` |
+
+**A re-mint must never silently discard drafted work.**
+`extract-keys <locale>` rewrites `missing_<locale>.json` from
+`en.json` against `<locale>.json`, so it reads the worksheet
+already on disk and carries across every non-empty `translation`
+whose English still matches; a draft it cannot carry — for any
+reason, a malformed entry included — is echoed with its text,
+and a worksheet that will not parse is refused rather than
+overwritten. `LocaleWorksheetCarryTests` holds the carry,
+`LocaleWorksheetDiscardTests` what is dropped and said aloud,
+and `LocaleWorksheetRefusalTests` the three ways a worksheet
+stops being readable; `read_drafts` and `write_missing` in
+`scripts/extract-keys` carry the reasoning per function.
+
+That is a property to preserve, not a convenience: between
+minting and merging, the worksheet is the ONLY copy of the work
+in it — `locale-worksheets/` is gitignored, and `merge-keys` is
+the one thing that moves a translation OUT of it. The re-mint
+used to ignore that file and write every slot empty, which cost
+a translator everything drafted since the last merge and
+reported "N missing key(s) written" exactly as a first extract
+does. Picking up newly-added English mid-draft is the ordinary
+reason to re-run the extractor, so the destructive path was also
+the intuitive one.
+
+**A silent drop is the failure mode, not an unusual one** — the
+fix's own first draft reintroduced it three times over, reading
+a malformed entry as "nothing to save" when a bare-string entry
+IS the draft, missing the field-name typo that leaves an entry
+with no `translation` at all, and classifying a non-UTF-8 read
+as a crash rather than a refusal. So: **a branch that drops text
+a human typed names it on stderr and earns a case in
+`LocaleWorksheetDiscardTests`.** Silence is reserved for a
+branch that provably discards nothing — an empty slot, a null
+entry — and a `continue` is where this keeps going wrong.
+
+**A draft is carried only while its stored `source` still equals
+the current English** — the same rule `merge-keys` merges by.
+Once the English moves the draft translates text the app no
+longer shows, so the slot is cleared and the loss reported;
+carrying it would hand the translator a worksheet that looks
+finished and a `merge-keys` run that silently refuses it.
+
+**Keep the two scripts agreeing, and keep that agreement
+guarded — the prose alone has already failed.** Each script
+decodes the worksheet itself, and `read_drafts` was written with
+`merge-keys._load_map` open beside it and still omitted
+`UnicodeDecodeError`, so one refused where the other dumped a
+traceback while both suites stayed green. Two guards hold the
+two halves: `LocaleWorksheetDecodeParityTests` feeds one damaged
+worksheet to BOTH scripts and demands the same verdict, and
+`LocaleWorksheetCarryTests` ▸ the round trip proves a carried
+draft is still one `merge-keys` will take. A new way of being
+unreadable joins the parity suite's case list, which is what
+demands it of both at once — the two are one round-trip, and a
+carry rule looser than the merge rule strands work in the gap
+between them.
 
 `drop-key` in the same change set makes every locale fall back to
 the new English and puts the key back on the to-translate list.
@@ -314,7 +371,9 @@ the feature-name guard holds Latin-script locales to keeping
 `LocalizationCollapseGuardTests`, `LocalizationRegistryTests`,
 `LocalizationWithheldArgumentTests`,
 `MergeKeysContentGuardTests`, `LocaleWorksheetLocationTests`,
-`LocaleWorksheetRejectionTests`
+`LocaleWorksheetRejectionTests`, `LocaleWorksheetCarryTests`,
+`LocaleWorksheetDiscardTests`, `LocaleWorksheetRefusalTests`,
+`LocaleWorksheetDecodeParityTests`
 — future scripts follow suit, so a
 regression in the tooling is covered by `swift test`, not only by
 running the script.

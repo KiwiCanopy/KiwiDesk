@@ -74,9 +74,22 @@ Read two files before you start:
 
 ## Callers
 
-Prefer spawning this agent with `isolation: "worktree"` so a
-mutation can never reach the working tree. When that is not
-available, step 5 is the whole safety net — do not skip it.
+**Spawn this agent with `isolation: "worktree"`.** It breaks
+working source on purpose, so without one the proof runs in the
+tree everything else is reading. `.claude/rules/tests.md` ▸
+"Owed" states the same obligation for a caller who arrives from
+outside a review round, and the `review-change` skill argues it.
+
+Where the harness offers no worktree isolation, two things bind
+in its place and neither is optional:
+
+- **Run it alone.** Nothing else may read or write the tree
+  while a mutation is live. Inside a review round the
+  `review-change` skill owns that sequencing and argues it;
+  outside one, `.claude/rules/tests.md` ▸ "Owed" carries the
+  same obligation for the caller.
+- **Step 5 is the whole safety net**, not hygiene. Read its
+  verdict line before believing anything else in the report.
 
 Hand over **every** guard in the change set in one spawn. The
 procedure above is already per-guard and the output contract is
