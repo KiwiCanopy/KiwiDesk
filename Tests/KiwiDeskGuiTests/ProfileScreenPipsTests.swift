@@ -63,12 +63,35 @@ struct ProfileScreenPipsTests {
     }
 
     /// Nothing is lost or invented: what is drawn plus what is
-    /// counted is the profile's own screen count.
-    @Test("shown plus hidden is the count")
-    func shownPlusHiddenIsTheCount() {
-        for count in 1...40 {
+    /// counted is the profile's own screen count — asserted as
+    /// hand-written pairs, not as `shown + hidden == count`.
+    ///
+    /// That identity is ENTAILED by `hidden`'s own definition
+    /// (`max(count - shown, 0)`) for every `shown <= count`, so
+    /// it could only red on a mutation making `shown > count`,
+    /// which `drawsEveryScreenWhileItFits` already catches. The
+    /// pairs below are independent of the production arithmetic.
+    @Test("the split is the expected pair at each count")
+    func splitIsTheExpectedPair() {
+        let expected: [Int: (shown: Int, hidden: Int)] = [
+            0: (0, 0),
+            1: (1, 0),
+            3: (3, 0),
+            4: (4, 0),
+            5: (3, 2),
+            6: (3, 3),
+            12: (3, 9),
+        ]
+        for (count, want) in expected {
             let view = pips(count)
-            #expect(view.shown + view.hidden == count)
+            #expect(
+                view.shown == want.shown,
+                Comment(rawValue: "\(count) screens: shown")
+            )
+            #expect(
+                view.hidden == want.hidden,
+                Comment(rawValue: "\(count) screens: hidden")
+            )
         }
     }
 

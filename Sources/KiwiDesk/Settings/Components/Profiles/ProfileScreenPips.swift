@@ -22,11 +22,18 @@ import SwiftUI
 /// this row grew no accent FRAME: a framed row inside a framed
 /// card is a card-in-card, and the badge already answers.
 ///
-/// **Silent to VoiceOver.** The count it draws is already spoken
-/// by the row's subtitle (`profiles.screens.*`), so announcing
-/// the picture too would read the same fact twice — and a `.help`
-/// hung here instead of on that subtitle would be hover-only,
-/// reachable by no keyboard and no screen reader.
+/// **Silent to VoiceOver**, because the count it draws is
+/// already spoken by the row's subtitle (`profiles.screens.*`)
+/// and announcing the picture too would read one fact twice.
+///
+/// That is the reason, and it is worth separating from a
+/// neighbouring one it was once conflated with: a `.help` on a
+/// bare `Shape` is hover-only because a `Shape` is not an
+/// accessibility element, which is a fact about `.help`, not an
+/// argument for silence. Where such a picture DOES carry a fact
+/// of its own, the fix is to make it an element and label it —
+/// `PresetScreenCard.outlineView` is the worked case. Here the
+/// fact is not its own, so this stays hidden.
 struct ProfileScreenPips: View {
     /// The profile's screen count.
     let count: Int
@@ -75,7 +82,11 @@ struct ProfileScreenPips: View {
     /// every substring a source scan can look for while
     /// answering nothing (`LayoutSchematicCountTests`' lesson).
     var shown: Int {
-        count <= Self.slots ? max(count, 0) : Self.slots - 1
+        OverflowSplit.shown(
+            of: count,
+            fitting: Self.slots,
+            withMarker: Self.slots - 1
+        )
     }
 
     var hidden: Int { max(count - shown, 0) }

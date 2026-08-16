@@ -104,6 +104,16 @@ struct PresetScreenCard: View {
                 height: Self.outline.height
             )
             .help(screenHelp(screen))
+            // `.help` alone does NOT discharge `screenHelp`'s
+            // promise to the reader who cannot see the row: a
+            // `Shape` is not an accessibility element, so the
+            // hint has nothing to attach to and the sentence is
+            // hover-only. Making the outline an element gives
+            // VoiceOver the same sentence the pointer gets —
+            // which is the whole reason the main display is
+            // named in words rather than by position.
+            .accessibilityElement()
+            .accessibilityLabel(screenHelp(screen))
     }
 
     /// Screen 0 is the main display, 1 the next secondary, … —
@@ -182,9 +192,26 @@ struct PresetScreenCard: View {
     /// A NAME rather than a branched sentence, so the two frames
     /// above stay one frame each and a locale reorders them
     /// freely.
+    ///
+    /// **Both arms say "screen", and that is load-bearing.** They
+    /// are two alternatives for ONE specifier slot of one frame,
+    /// so a pair reading "Main display" / "Screen %1$d" puts two
+    /// nouns for one concept in one slot and makes every catalog
+    /// reconcile it alone — which all ten duly did, each picking
+    /// a different side, while English was the only catalog whose
+    /// own pair disagreed (translation audit, 2026-08-16). The
+    /// noun is "screen" because this card's own neighbours are:
+    /// the group heading counts screens (`presets.for_your.*`),
+    /// as do `presets.needs_screens` and `profiles.screens.*`.
+    ///
+    /// This does NOT settle screen vs display vs monitor for the
+    /// repo — `config-vocabulary.md`'s glossary and
+    /// `docs/localization-naming.md` are both silent on it while
+    /// `en.json` uses all three, which is an owner ruling and a
+    /// catalog-wide sweep. It settles this card.
     private func screenName(_ screen: Int) -> String {
         screen == 0
-            ? L("presets.screen_name.main", "Main display")
+            ? L("presets.screen_name.main", "Main screen")
             : L(
                 "presets.screen_name.numbered",
                 "Screen %1$d",

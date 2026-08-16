@@ -1864,7 +1864,7 @@ act on.
 One row per saved profile, the ones matching your connected
 displays first — one of them is what loads — then the ones saved
 for as many screens as you have connected, then by screen count,
-then by name. That third group is worth knowing about: a profile
+then by name. That second group is worth knowing about: a profile
 saved for two screens but for *different* monitors does not match
 your displays, and without that step it would sort behind every
 one-screen profile, since one comes before two.

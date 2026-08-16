@@ -52,11 +52,6 @@ struct ProfilesFamilyRows {
     let boundDesktops: [Int]
     /// The presets the area offers, in catalog order.
     let presets: [StandardLayout]
-    /// How many screens are connected right now — the second sort
-    /// key's input. Read from `ProfileResolution.screens` rather
-    /// than from a fresh `displays.count`, so this and
-    /// `matchesLive` are answers about the same moment.
-    let connectedScreens: Int
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
         guard case .profiles(let family) = key else { return nil }
@@ -76,14 +71,19 @@ struct ProfilesFamilyRows {
     /// two-screen profile for different monitors sorted behind
     /// every one-screen profile, since 1 < 2 — under a caption
     /// promising one of them loads. It sits SECOND rather than
-    /// first because a fingerprint match is a stronger claim than
-    /// an equal count, and `matchesLive` already implies the
-    /// count matches, so the two keys never disagree on one row.
+    /// first because a fingerprint match is the stronger claim.
     ///
-    /// `connectedScreens: 0` — no display read yet — makes the
-    /// key inert rather than wrong: no saved profile declares
-    /// zero screens, so nothing matches and the order falls back
-    /// to what it was before this key existed.
+    /// Where the two keys could disagree — a hand-edited file
+    /// whose sets are of different sizes, `monitorCount` being
+    /// the FIRST set's — it does not matter: key one dominates,
+    /// so a fingerprint match leads whatever the count says.
+    ///
+    /// Both flags are derived in `refreshProfiles` from one read
+    /// of the live displays, which is why this stayed a pure
+    /// function of its summaries: passing the connected count in
+    /// made "the two answer about one moment" a comment at the
+    /// call site rather than a property of the data, and left a
+    /// second `displays.count` read one edit away.
     ///
     /// The ORDER lives here, with the expansion, rather than in
     /// the view, so the rule is stated once and is reachable
@@ -96,15 +96,14 @@ struct ProfilesFamilyRows {
     /// `ProfilesSection.neighbourAfterDeleting`, whose focus
     /// destination IS this order.
     static func orderedProfiles(
-        _ summaries: [ProfileSummary],
-        connectedScreens: Int
+        _ summaries: [ProfileSummary]
     ) -> [ProfileSummary] {
         func key(
             _ summary: ProfileSummary
         ) -> (Int, Int, Int, String) {
             (
                 summary.matchesLive ? 0 : 1,
-                summary.count == connectedScreens ? 0 : 1,
+                summary.matchesConnectedCount ? 0 : 1,
                 summary.count,
                 summary.name
             )
@@ -167,11 +166,8 @@ struct ProfilesFamilyRows {
         switch family {
         case .profilesLoad, .profilesDelete, .profilesRename,
             .isDefault:
-            return Self.orderedProfiles(
-                profiles,
-                connectedScreens: connectedScreens
-            )
-            .map { ProfilesRowInstance.profile($0.name) }
+            return Self.orderedProfiles(profiles)
+                .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:
             return Self.desktops(
                 present: presentDesktops,

@@ -776,7 +776,7 @@
   "presets.other_setups": "For other setups",
   "presets.screen_help": "%1$@: %2$@, opens in %3$@",
   "presets.screen_help.empty": "%1$@: no Spaces",
-  "presets.screen_name.main": "Main display",
+  "presets.screen_name.main": "Main screen",
   "presets.screen_name.numbered": "Screen %1$d",
   "presets.standard_badge": "standard",
   "presets.start_here": "Start here — apply a preset for your setup, then adjust anything from any tab.",

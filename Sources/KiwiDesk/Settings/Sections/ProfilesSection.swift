@@ -152,12 +152,7 @@ struct ProfilesSection: View {
     /// guards read too.
     private var orderedSummaries: [ProfileSummary] {
         ProfilesFamilyRows.orderedProfiles(
-            model.profileSummaries,
-            // The count Core resolved the verdict over, not a
-            // fresh `displays.count` — `matchesLive` and the
-            // count key must answer about one moment, which is
-            // the whole reason `ProfileResolution` is one value.
-            connectedScreens: model.profileResolution.screens
+            model.profileSummaries
         )
     }
 
@@ -182,12 +177,16 @@ struct ProfilesSection: View {
             // on a decorative image is hover-only, and this one
             // is `.accessibilityHidden`.
             ProfileScreenPips(count: summary.count)
-                // The stack aligns on the first text baseline
-                // and a picture has none, so it would otherwise
-                // hang from its own bottom edge and sit low
-                // beside the name. State the guide rather than
-                // nudging it with padding, which would drift the
-                // moment the title's font changes.
+                // Pins the picture against the "+N" chip's
+                // baseline, NOT against nothing: a pip row with
+                // no chip donates no text baseline and already
+                // resolves to its own bottom edge, so this is an
+                // identity there. The case it changes is a row
+                // WITH a chip, whose `Text` would otherwise give
+                // the stack a real first-text baseline and seat
+                // that row differently from its neighbours.
+                // Stating the guide makes every row align the
+                // same way whatever its screen count.
                 .alignmentGuide(.firstTextBaseline) {
                     $0[.bottom]
                 }

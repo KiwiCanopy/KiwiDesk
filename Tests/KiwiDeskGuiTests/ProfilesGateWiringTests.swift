@@ -226,6 +226,7 @@ struct ProfilesGateWiringTests {
             consulting + [
                 "Sections/ProfilesSection.swift",
                 "Sections/ProfilesSection+WhichLoads.swift",
+                "Sections/ProfilesSection+RowActions.swift",
             ]
         for key in [
             "profiles.native_spaces.live_only",

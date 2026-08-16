@@ -148,15 +148,21 @@ enum MonitorCardChips {
         in size: CGSize,
         header: CGFloat = headerHeight
     ) -> (shown: [Chip], overflow: Int) {
-        guard chips.count > capacity(in: size, header: header)
-        else { return (chips, 0) }
-        var shown = capacity(
-            in: size,
-            header: header,
-            reservingMarker: true
+        // The never-exactly-one rule is `OverflowSplit`'s, not
+        // this file's — it was stated here and again in the
+        // Profiles row pips, and a copy of the rule under guard
+        // is the one thing tests.md admits sharing for. What
+        // stays local is the measurement: only this card knows
+        // how many chips its own geometry fits.
+        let shown = OverflowSplit.shown(
+            of: chips.count,
+            fitting: capacity(in: size, header: header),
+            withMarker: capacity(
+                in: size,
+                header: header,
+                reservingMarker: true
+            )
         )
-        if chips.count - shown == 1 { shown -= 1 }
-        shown = max(0, shown)
         return (Array(chips.prefix(shown)), chips.count - shown)
     }
 }

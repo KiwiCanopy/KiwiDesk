@@ -775,7 +775,7 @@
   "presets.none_for_count": "No hay planes de diseño integrados para tantas pantallas — los siguientes se aplicarán cuando conectes las pantallas correspondientes.",
   "presets.other_setups": "Para otras configuraciones",
   "presets.screen_help": "%1$@: %2$@, se abre en %3$@",
-  "presets.screen_help.empty": "%1$@: ningún espacio",
+  "presets.screen_help.empty": "%1$@: sin espacios",
   "presets.screen_name.main": "Pantalla principal",
   "presets.screen_name.numbered": "Pantalla %1$d",
   "presets.standard_badge": "estándar",

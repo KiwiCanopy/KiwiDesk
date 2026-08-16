@@ -255,6 +255,21 @@ struct ProfileSummary: Identifiable {
     let isDefault: Bool
     /// One of the sets equals the live monitors.
     let matchesLive: Bool
+    /// The profile is saved for as many screens as are connected
+    /// right now — a WEAKER claim than `matchesLive`, which is a
+    /// fingerprint match (#789).
+    ///
+    /// Its own sort key, because the two are not the same
+    /// question and the gap between them is where a profile got
+    /// lost: a two-screen profile for different monitors matches
+    /// no fingerprint, so without this it sorted behind every
+    /// one-screen profile on the bare count, since 1 < 2 — under
+    /// a card caption promising one of them loads.
+    ///
+    /// Derived beside `matchesLive` in `refreshProfiles` from
+    /// one read of the live displays, so the two cannot answer
+    /// about different moments.
+    let matchesConnectedCount: Bool
     /// Spaces the profile declares (#678 turn 13a). Part of the
     /// row's subtitle, which counts only what the profile OWNS.
     let spaceCount: Int
