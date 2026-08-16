@@ -31,7 +31,9 @@ extension PaletteSceneThumbnail {
     /// list.
     var panelScene: some View {
         VStack(spacing: 7 * scale) {
-            spaceBarStrip
+            named(SettingsCatalog.bars.spaceBarCard) {
+                spaceBarStrip
+            }
             HStack(spacing: 7 * scale) {
                 windowTile(
                     ring: color("border.focused_color"),
@@ -62,7 +64,46 @@ extension PaletteSceneThumbnail {
                     dashed: true
                 )
             }
-            appBarStrip
+            named(SettingsCatalog.bars.appBarCard) {
+                appBarStrip
+            }
+        }
+    }
+
+    /// A bar strip under its own name.
+    ///
+    /// The two bars are the only elements here drawn with no
+    /// edge, no content and no context — everywhere else in the
+    /// app they are told apart by WHERE they sit and what they
+    /// hold, and this scene has neither. So on the one page
+    /// whose subject is their colours, the reader could not say
+    /// which strip was which without guessing from their own
+    /// screen (owner, on device, 2026-08-16).
+    ///
+    /// The names come from the Bars page's own catalog
+    /// declarations, so they are already translated and cannot
+    /// drift from the cards that own those settings — no new
+    /// keys for a labelling job.
+    @ViewBuilder
+    private func named<C: View>(
+        _ control: SettingsControl,
+        @ViewBuilder strip: () -> C
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 3 * scale) {
+            Text(control.text)
+                .font(
+                    .system(size: 7 * scale, weight: .semibold)
+                )
+                .textCase(.uppercase)
+                .kerning(0.6)
+                .foregroundStyle(SettingsTheme.ink3)
+                .lineLimit(1)
+                // Drawn, not spoken: the scene is one
+                // accessibility element with its own summary,
+                // and a legend read aloud as two stray nouns is
+                // noise.
+                .accessibilityHidden(true)
+            strip()
         }
     }
 

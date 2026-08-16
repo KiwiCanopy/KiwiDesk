@@ -94,9 +94,11 @@ struct PaletteSceneThumbnail: View {
     /// `PaletteSceneRoleTests` holds it against the panel
     /// column's own budget.
     static var panelHeight: CGFloat {
-        // strip + gap + windows + gap + drag + gap + strip,
-        // then the plate's padding top and bottom.
-        (20 + 7 + 30 + 7 + 22 + 7 + 20 + 16) * panelScale
+        // Each bar carries a name above it (7 pt + a 3 pt gap),
+        // then: strip + gap + windows + gap + drag + gap +
+        // strip, then the plate's padding top and bottom.
+        (10 + 20 + 7 + 30 + 7 + 22 + 7 + 10 + 20 + 16)
+            * panelScale
     }
 
     var body: some View {
