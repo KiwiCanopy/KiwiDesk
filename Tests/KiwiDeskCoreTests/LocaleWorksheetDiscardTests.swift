@@ -64,13 +64,24 @@ struct LocaleWorksheetDiscardTests {
             prefix: "kiwi-worksheet-malformed",
             locales: [
                 "de.json": #"{}"#,
+                // One entry per arm `read_drafts` can classify
+                // as unusable. Silencing an arm no fixture
+                // reaches costs nothing, so all four are here:
+                // a bare string, a non-string `source` beside
+                // real text, a non-string `translation`, and a
+                // value that is neither object nor string.
                 "missing_de.json": #"""
                 {
                   "gap.hint": "Abstand von Hand",
                   "bar.hint": {
                     "source": 123,
                     "translation": "Balkendicke"
-                  }
+                  },
+                  "edge.hint": {
+                    "source": "Screen edge",
+                    "translation": 42
+                  },
+                  "pile.hint": ["Stapel", "Fenster"]
                 }
                 """#,
             ]
@@ -94,22 +105,25 @@ struct LocaleWorksheetDiscardTests {
             echoed(run, under: "malformed"),
             "malformed drafts vanished silently: \(run.stderr)"
         )
-        // Both shapes, each with the text a human typed — the
-        // bare string, and the translation beside a source that
-        // is not a string.
-        #expect(lines.count == 2)
-        #expect(
-            lines.contains {
-                $0.contains("gap.hint")
-                    && $0.contains("Abstand von Hand")
-            }
-        )
-        #expect(
-            lines.contains {
-                $0.contains("bar.hint")
-                    && $0.contains("Balkendicke")
-            }
-        )
+        // One line per arm, each carrying what was typed. The
+        // count is what catches a partial silencing: three
+        // `contains` checks all pass while a fourth arm has gone
+        // quiet, and an unreached arm is one a later edit can
+        // delete for free.
+        #expect(lines.count == 4)
+        for (key, text) in [
+            ("gap.hint", "Abstand von Hand"),
+            ("bar.hint", "Balkendicke"),
+            ("edge.hint", "42"),
+            ("pile.hint", "Stapel"),
+        ] {
+            #expect(
+                lines.contains {
+                    $0.contains(key) && $0.contains(text)
+                },
+                "\(key) was not echoed with its text"
+            )
+        }
     }
 
     /// An entry that keeps its draft under a mistyped field name
