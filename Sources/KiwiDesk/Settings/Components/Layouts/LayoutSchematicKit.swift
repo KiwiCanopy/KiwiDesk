@@ -44,26 +44,6 @@ enum LayoutSchematic {
     /// telling two stories (#712).
     static let cascadeOffset: CGFloat = 9
 
-    /// The Grid preview's stand-in for the one ceiling it cannot
-    /// compute: `auto_size`, where `GridLayout.capDimensions`
-    /// fits as many minimum-size cells as the *display* allows.
-    /// The canvas is not a display and has no minimum window
-    /// size, so it draws a plausible grid and the caption states
-    /// these numbers rather than prose (#712).
-    ///
-    /// With auto-size **off** no stand-in is needed: the ceiling
-    /// is the user's own typed columns × rows.
-    ///
-    /// **A schematic's ceiling is the engine's rule, never the
-    /// canvas's.** An earlier cut of #712 also clamped the
-    /// ceiling to what the canvas could legibly draw, which made
-    /// the drawn *capacity* scale-dependent: rigid 8 × 1 with
-    /// five windows drew a two-window pile on the strip
-    /// thumbnail and none in the panel, inventing an overflow
-    /// the engine does not have. Clamp the drawing if you must;
-    /// never the rule.
-    static let gridAutoSizeCap = (columns: 3, rows: 3)
-
 }
 
 /// How large a schematic draws — and therefore what it is *for*

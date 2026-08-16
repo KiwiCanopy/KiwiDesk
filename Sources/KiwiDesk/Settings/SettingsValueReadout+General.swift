@@ -16,7 +16,8 @@ extension SettingsValueReadout {
             .advancedConfigFile, .advancedRestartOnCrash,
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,
-            .iconPickerRecents, .onboardingOpenAtLogin:
+            .iconPickerRecents, .onboardingOpenAtLogin,
+            .installInventory:
             // no model path — never booked by the diff
             return []
         }

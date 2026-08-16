@@ -65,7 +65,14 @@ struct SettingsCatalogTests {
         // apply.
         // 65 since #754: Gaps & Borders gains the Borders card
         // that holds the decisions all three strokes share.
-        #expect(allEntries.count == 65)
+        // 66 since #793: Advanced Colours gains the detail
+        // panel's "Every color at once" scene.
+        // 67 since #794: Spaces & Layouts gains its panel's
+        // per-Space preview.
+        // 68 since #795's device round: the install inventory
+        // becomes a card of its own instead of four loose lines
+        // under the wordmark.
+        #expect(allEntries.count == 68)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

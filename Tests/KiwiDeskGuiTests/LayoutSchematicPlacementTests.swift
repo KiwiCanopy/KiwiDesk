@@ -65,7 +65,11 @@ struct LayoutSchematicPlacementTests {
     /// window counts: at `masterCount: 1` the masters clamp is
     /// inert. This is the flat array only — *which* zone each
     /// window is drawn in is `masterWins` / `stackWins`'
-    /// partition of it, which is #707's.
+    /// partition of it, held by `LayoutSchematicZoneTests`
+    /// against `StackLayout.partition` (#707). Neither suite
+    /// subsumes the other: this one can be green on an array
+    /// split down the wrong side, and that one on an array whose
+    /// `+` landed in the wrong slot.
     @Test("Stack opens the window where the engine does")
     func stackPlacement() {
         for placement in placements {

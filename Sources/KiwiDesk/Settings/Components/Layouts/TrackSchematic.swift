@@ -10,16 +10,25 @@ import SwiftUI
 /// windows open their own) or a **nested `+`** inside the focused
 /// track (they join it), placed where `newWindowPosition` opens it.
 ///
-/// A limit shows that many normal tracks; auto-tracks shows three
-/// (the count is a magnitude, bounded by the minimum window size —
-/// stated in the row caption, not counted out here).
+/// A limit shows that many normal tracks; auto-tracks opens them
+/// until the display runs out, which on a canvas is the stand-in
+/// `LayoutSchematic.trackGeoCap`.
 ///
 /// The **window count** (turn 10) is what opens and collapses
-/// tracks: windows fill the normal tracks up to the limit and
-/// the surplus falls into the overflow track, so dragging the
-/// count past the limit is the moment the overflow track earns
-/// its name — and the moment `cascade_all` and
-/// `cascade_overflow` stop drawing the same picture.
+/// tracks, and since #708 it does so by the ENGINE's rules rather
+/// than by arithmetic invented here — `TrackSchematic+Fold` owns
+/// the loop and cites them. Two consequences a reader of the
+/// drawing should know:
+///
+/// - `focused_track` is **fill-then-spill** (#437), so windows
+///   join the focused track only until it is full and then open
+///   one beside it. The preview modelled neither half before, and
+///   taught a rule the app does not follow.
+/// - The far-edge overflow track therefore appears when something
+///   overflows and **not at the shipped defaults**, where nothing
+///   does. The caption is conditioned on the same answer
+///   (`drawsOverflowTrack`), because it used to name that track
+///   whether or not the strip drew one.
 struct TrackSchematic: View {
     let axis: TrackParams.Axis
     let overflowStyle: StackParams.OverflowStyle
@@ -33,39 +42,41 @@ struct TrackSchematic: View {
 
     private var vertical: Bool { axis == .vertical }
 
-    /// Normal tracks, never more than there are established
-    /// windows to put in them: a limit of four over two windows
-    /// draws two tracks, because the fourth track does not exist
-    /// until a window opens it.
-    var trackCount: Int {
-        let ceiling = autoTracks ? 3 : min(max(limit, 1), 4)
-        return min(ceiling, max(1, established))
+    /// Which drawn track wears the focus — **the one the fold
+    /// put it on**, not a fixed middle slot.
+    ///
+    /// It used to be `trackCount / 2`, which was a drawing
+    /// convention from before the preview modelled fill-then-
+    /// spill. Once the fold became real the two disagreed: the
+    /// fold's focus marches to the newest track (a spill opens a
+    /// track and focus follows it), so at auto-tracks with 12
+    /// windows the fold is `[3, 3, 3, 2]` with focus at index 3
+    /// while the strip drew the focus on index 1 and gave it the
+    /// LAST track's run — a middle track drawn holding 2 windows
+    /// that the engine says holds 3 (code review, 2026-08-16).
+    ///
+    /// Clamped into the drawn range: the fold counts marker
+    /// tracks and the strip draws the normal ones, so a focus
+    /// that folded into the overflow pile rides the last normal
+    /// track rather than indexing past the end.
+    var focusIdx: Int {
+        min(max(0, markerTracks.focus), max(0, trackCount - 1))
     }
 
-    /// Windows already open — the count less the incoming one.
-    private var established: Int { max(1, windows - 1) }
-
-    /// Windows past the normal tracks' capacity. One window per
-    /// normal track plus the focused track's own run is the
-    /// capacity; anything beyond falls to the overflow track,
-    /// which is empty until it does.
-    var overflowWindows: Int {
-        max(0, established - trackCount - focusedRun + 1)
-    }
-
-    /// Windows in the focused track. It holds several so that
-    /// multi-window tracks read, but never more than the count
-    /// can pay for.
-    var focusedRun: Int {
-        min(4, max(1, established - trackCount + 1))
-    }
-
-    private var focusIdx: Int { trackCount / 2 }
-
-    private struct TrackSpec {
+    struct TrackSpec {
         var focused = false
         var isNew = false
         var nestedNew = false
+        /// How many windows this track holds, from the fold.
+        ///
+        /// Every non-focused track used to draw as ONE tile
+        /// whatever the fold said, which was true while a track
+        /// conceptually held one window and stopped being true
+        /// the moment #708 taught the preview fill-then-spill:
+        /// at 12 windows the fold said `[3, 3, 3, 2]` and the
+        /// strip drew `[1, 1, 1, 3]` — six windows on a slider
+        /// set to twelve (owner, on device, 2026-08-16).
+        var run = 1
     }
 
     var body: some View {
@@ -106,9 +117,13 @@ struct TrackSchematic: View {
     /// Normal tracks with the new *track* spliced in (for
     /// `own_track`) at its placement slot; `focused_track` instead
     /// nests the new window inside the focused track.
-    private var specs: [TrackSpec] {
-        var s = (0..<trackCount).map {
-            TrackSpec(focused: $0 == focusIdx)
+    var specs: [TrackSpec] {
+        let counts = markerTracks.counts
+        var s = (0..<trackCount).map { index in
+            TrackSpec(
+                focused: index == focusIdx,
+                run: index < counts.count ? counts[index] : 1
+            )
         }
         switch newWindow {
         case .focusedTrack:
@@ -130,8 +145,10 @@ struct TrackSchematic: View {
     /// arm positions among tracks by the same splice rule this
     /// asks for; `LayoutSchematicTrackEngineTests` pins the two
     /// together rather than leaving it to arithmetic. Its
-    /// fill-then-spill arm (#437) is *not* modelled here — see
-    /// #708.
+    /// fill-then-spill arm (#437) IS modelled now, in
+    /// `TrackSchematic+Fold` — this property is the POSITION
+    /// half alone, which is why the two are guarded by separate
+    /// suites.
     private var newTrackIndex: Int {
         SchematicPlacement.splice(
             placement,
@@ -165,6 +182,12 @@ struct TrackSchematic: View {
 
     enum TrackWindow { case plain, focus, new }
 
+    /// A track's run as the canvas can legibly stack it. The
+    /// CLAMP is the drawing's — the run itself is the engine's
+    /// fold, and the two stay separate exactly as `focusedRun`
+    /// keeps them separate.
+    func drawnRun(_ run: Int) -> Int { min(4, max(1, run)) }
+
     @ViewBuilder
     private func trackView(_ spec: TrackSpec) -> some View {
         if spec.isNew {
@@ -172,7 +195,14 @@ struct TrackSchematic: View {
         } else if spec.focused {
             focusedTrack(nested: spec.nestedNew)
         } else {
-            SchematicTile()
+            // The track's OWN run, stacked along its axis — not
+            // one tile standing in for however many windows the
+            // fold put here.
+            axisStack {
+                ForEach(0..<drawnRun(spec.run), id: \.self) { _ in
+                    SchematicTile()
+                }
+            }
         }
     }
 
@@ -257,28 +287,4 @@ struct TrackSchematic: View {
         }
     }
 
-    private var caption: String {
-        switch newWindow {
-        case .ownTrack:
-            return L(
-                "layout.schematic.track.caption_own",
-                "New windows open their own track; the far track "
-                    + "piles the overflow."
-            )
-        case .focusedTrack:
-            return L(
-                "layout.schematic.track.caption_focused",
-                "New windows join the focused track; the far track "
-                    + "piles the overflow."
-            )
-        }
-    }
-
-    private var axLabel: String {
-        L(
-            "layout.schematic.track.ax",
-            "Track preview: tracks along one axis, the far one "
-                + "piling overflow; the plus is the next window."
-        )
-    }
 }

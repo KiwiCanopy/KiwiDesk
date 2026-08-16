@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The trailing OVERRIDE column's checkbox, split from
-/// `AppBarOverrideControls` at the §2.1 ceiling. One control and
+/// `OverrideControls` at the §2.1 ceiling. One control and
 /// the one sentence explaining it — the sentence being shared
 /// between the hover string and the spoken hint is the reason it
 /// is a property rather than two inline literals.
@@ -38,7 +38,7 @@ extension OverrideChrome {
             // noun the header doesn't show (localization audit,
             // 2026-08-11). What makes the reuse legal is that
             // this chrome has ONE consumer, argued on
-            // `OverridePickerRow` in `AppBarOverrideControls` —
+            // `OverridePickerRow` in `OverrideControls` —
             // so the header above it is always the one this key
             // names.
             .accessibilityLabel(

@@ -14,6 +14,15 @@ import KiwiDeskCore
 
 struct SpacesControls: Sendable {
     let spacesCard = SettingsControl("spaces.title", "Spaces")
+    /// The detail panel's per-Space preview (#794). Its own
+    /// title rather than Layout Defaults' "Live preview": that
+    /// one draws a LAYOUT's defaults and this one draws a
+    /// SPACE's resolved reality, which is the whole distinction
+    /// the panel exists to make.
+    let spacePreview = SettingsControl(
+        "spaces.preview.title",
+        "This Space's layout"
+    )
 }
 
 struct LayoutDefaultsControls: Sendable {
@@ -136,6 +145,15 @@ struct AdvancedColorsControls: Sendable {
         "colors.more",
         "More colors",
         instance: "app_bar"
+    )
+    /// The detail panel's scene (#793). Its own key rather than
+    /// `colors.scene.title`: that one names Colours & Motion's
+    /// "Current colors", a sample of a palette, while this names
+    /// the whole set drawn at once — one concept, one word, and
+    /// two different concepts here.
+    let everyColorScene = SettingsControl(
+        "colors.advanced.scene.title",
+        "Every color at once"
     )
 }
 

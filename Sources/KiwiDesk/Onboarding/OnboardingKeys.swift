@@ -22,8 +22,15 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     var isGateway = false
 }
 
-/// The five chord families the tour teaches, read from the LIVE
-/// key layer (#678 Phase 4 pass 11, turn 15a).
+/// The chord families the tour teaches, read from the LIVE key
+/// layer (#678 Phase 4 pass 11, turn 15a).
+///
+/// The move/follow PAIR ships together (owner, 2026-08-16): the
+/// tour taught "move the window to a Space" while the seeded
+/// keymap also binds move-and-follow on its own tier (`⌃⌥⇧`
+/// against `⌃⌥⌘`), so a reader learned one of two chords that
+/// differ by where they leave you — and the one they were not
+/// shown is the one most people want most of the time.
 ///
 /// **Every glyph here is looked up, never written.** Turn 15's own
 /// mock-up closed by teaching `⌥1–5`, which is wrong twice over —
@@ -108,6 +115,48 @@ enum OnboardingKeys {
                         "Move the window to a Space"
                     ),
                     glyphs: move
+                )
+            )
+        }
+        if let follow = digits(
+            layer: layer,
+            command: "move_to_space_and_follow",
+            spaces: spaces
+        ) {
+            families.append(
+                OnboardingKeyFamily(
+                    id: "move_to_space_and_follow",
+                    label: L(
+                        "onboarding.keys.move_and_follow",
+                        // The DIFFERENCE is carried by the two
+                        // labels, not by a `?` beside them
+                        // (owner asked, ruled 2026-08-16). The
+                        // tour has no per-control help anywhere
+                        // and adding the affordance for one row
+                        // would put a new mechanism on the app's
+                        // most minimal surface; "and follow it"
+                        // against "to a Space" says the whole
+                        // difference in the words, and says it to
+                        // VoiceOver for free, which a popover
+                        // does not.
+                        //
+                        // Worded off the Shortcuts page's own
+                        // "& follow" rather than a synonym: one
+                        // concept, one word per catalog
+                        // (`docs/localization-naming.md`).
+                        // Names the Space, like its sibling and
+                        // for the sibling's reason: each tour
+                        // row is ONE accessibility element read
+                        // alone, and two locales had already
+                        // produced labels indistinguishable
+                        // from the row above when the
+                        // destination was left implicit
+                        // (localization audits 2026-08-11 and
+                        // 2026-08-16). Dropping it here revived
+                        // the milder form of that.
+                        "Move the window to a Space and follow it"
+                    ),
+                    glyphs: follow
                 )
             )
         }

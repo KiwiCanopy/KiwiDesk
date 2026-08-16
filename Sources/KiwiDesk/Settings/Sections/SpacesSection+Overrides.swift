@@ -31,70 +31,75 @@ extension SpacesSection {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     overridesHeader(space, mode: mode, gates: gates)
-                    HStack(alignment: .top, spacing: 16) {
-                        SpaceOverrideRows(
-                            model: model,
-                            space: space,
-                            pendingResetAll: $pendingResetAll
-                        )
-                        // Bounded, not full-bleed: the override rows
-                        // carry their own label/control columns, so
-                        // stretching them only lengthens slider
-                        // travel past what the value needs. The
-                        // number is the ~520 pt the `.menu` picker
-                        // exception argues from
-                        // (`AppBarOverrideControls`,
-                        // `docs/ui-patterns.md`), so a preview that
-                        // wants more width buys it inside its own
-                        // frame — #753 widened the Scrolling
-                        // schematic by giving up its ghost margin,
-                        // not by narrowing this column.
-                        .frame(maxWidth: 520, alignment: .leading)
-                        // Win the width negotiation, so no preview can
-                        // overconstrain the HStack and spill its frame
-                        // over these rows' trailing checkboxes — which
-                        // silently swallowed clicks on a scrolling
-                        // space until any re-render settled the layout.
-                        .layoutPriority(1)
-                        // A live preview beside the rows: the space's
-                        // active layout with ITS overrides applied,
-                        // updating as the user edits. Deliberately
-                        // trailing rather than leading for this wide
-                        // side-by-side editor (owner call 2026-08-04,
-                        // this panel being reworked in a later step).
-                        // It fills the rest of the capped column so it
-                        // shares the header's right edge; Floating has
-                        // no schematic, so it draws none.
-                        if LayoutMode.placementTabs.contains(mode) {
-                            SpaceOverridePreview(
-                                model: model,
-                                space: space,
-                                mode: mode
-                            )
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .leading
-                            )
-                            // Clip so the schematic can neither draw
-                            // nor hit-test past the preview's own
-                            // frame onto the rows column beside it.
-                            .clipped()
-                        }
-                    }
+                    overridesBody(space, mode: mode, gates: gates)
                 }
-                // Cap the editing column and left-align it: on a wide
-                // pane the header (with its trailing Reset) and the
-                // cards then share ONE right edge, instead of the
-                // reset floating to the far edge while the cards sit
-                // left of a large void.
                 .frame(maxWidth: 900, alignment: .leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(
-                    [.horizontal, .bottom],
-                    SettingsMetrics.paneInset
-                )
-                .padding(.top, SettingsMetrics.paneInset)
+                .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
             }
+        }
+    }
+
+    /// The rows and, BENEATH them, the reset that acts on them.
+    ///
+    /// The button used to ride the header's trailing edge, which
+    /// put it at the far side of the PANE while the rows cap at
+    /// 520 — a lone control floating in a void with the card
+    /// squeezed to the left of it (owner, on device,
+    /// 2026-08-16). Under the column it reads as that column's
+    /// action, which is what it is, and the header goes back to
+    /// being a title.
+    @ViewBuilder
+    private func overridesBody(
+        _ space: SpaceID,
+        mode: LayoutMode,
+        gates: SpacesGates
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 16) {
+                SpaceOverrideRows(
+                    model: model,
+                    space: space,
+                    pendingResetAll: $pendingResetAll
+                )
+                // The 520 pt cap is GONE, and with it the
+                // reason it existed: it reserved the rest of
+                // the pane for the live preview that used to
+                // sit beside these rows, and #794 moved that
+                // preview into the detail panel. What was left
+                // was a card squeezed to 520 in a pane three
+                // times as wide, truncating its own inherited
+                // readouts — "folgt Scrolling-Standards ·
+                // Hor…" — with the space to finish the sentence
+                // sitting empty beside it (owner, on device,
+                // 2026-08-16). Widening the OVERRIDE column to
+                // fit German took another 24 pt off the same
+                // text.
+                //
+                // Still BOUNDED, at 700 rather than 520: the
+                // `.menu` picker exception (#291) is argued in
+                // `docs/ui-patterns.md` from these rows sitting
+                // in a bounded column, and a width fix has no
+                // business retiring a settled control ruling as
+                // a side effect. 700 finishes the readout and
+                // leaves that argument standing.
+                .frame(maxWidth: 700, alignment: .leading)
+                // Win the width negotiation, so no preview can
+                // overconstrain the HStack and spill its frame
+                // over these rows' trailing checkboxes — which
+                // silently swallowed clicks on a scrolling
+                // space until any re-render settled the layout.
+                .layoutPriority(1)
+                // The live preview LEFT in #794: the
+                // detail panel now draws the Space whose
+                // editor is open (`SpacesPanelPreview`
+                // reads `nav.spaceOverridesFocus`), and
+                // one screen must not state one fact
+                // twice — the migration rule every other
+                // panel area already follows.
+            }
+            // Under the rows it acts on, left-aligned with them
+            // rather than pinned to the pane's far edge.
+            resetActiveButton(space, mode: mode, gates: gates)
         }
     }
 
@@ -194,7 +199,6 @@ extension SpacesSection {
                 .foregroundStyle(.secondary)
             }
             Spacer()
-            resetActiveButton(space, mode: mode, gates: gates)
         }
     }
 

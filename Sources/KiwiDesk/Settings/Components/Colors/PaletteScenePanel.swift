@@ -20,16 +20,12 @@ struct PaletteScenePanel: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.colors.currentScene,
-            // Not "everything a palette paints" — the scene
-            // draws six of the twenty-five paths a palette
-            // carries, and this phase is what grew it to
-            // twenty-five. A caption labels what is shown.
-            caption: L(
-                "colors.scene.caption",
-                "A sample of what a palette paints: the bar "
-                    + "plate and its active item, the focus "
-                    + "ring, and the drag ghost."
-            )
+            // ONE caption for one picture. Both mounts draw
+            // `PaletteSceneThumbnail` at `.panel`, so shipping
+            // two English descriptions of it into ten catalogs
+            // was two chances to describe the same drawing
+            // differently (localization audit, 2026-08-16).
+            caption: PaletteSceneCaption.panel
         ) {
             PaletteSceneThumbnail(
                 palette: ColorPalette(
@@ -38,7 +34,10 @@ struct PaletteScenePanel: View {
                         from: model.config.settings
                     )
                 ),
-                height: 190
+                // No height: the panel scene derives its own
+                // from its rows (`panelHeight`). Passing one
+                // here is what let the drawing exceed its frame.
+                scene: .panel
             )
             .frame(maxWidth: .infinity)
         }

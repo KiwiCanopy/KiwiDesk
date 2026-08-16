@@ -215,6 +215,53 @@ struct OnboardingKeysTests {
         #expect(families.contains { $0.id == "shortcuts" })
     }
 
+    /// The move/follow PAIR ships together (owner, 2026-08-16).
+    ///
+    /// The tour taught `move_to_space` alone while the seeded
+    /// keymap binds move-and-follow on its own tier — so a reader
+    /// learned one of two chords that differ only by where they
+    /// leave you, and not the one most people reach for. Nothing
+    /// noticed, because every other assertion here is about a
+    /// family being looked up rather than about the SET being
+    /// complete.
+    @Test("the move and follow families ship together")
+    func moveAndFollowAreBothTaught() {
+        let bindings =
+            (1...3).map { digit in
+                (
+                    "control+option+shift+\(digit)",
+                    "KiwiDesk.move_to_space(\"\(digit)\")"
+                )
+            }
+            + (1...3).map { digit in
+                (
+                    "control+option+command+\(digit)",
+                    "KiwiDesk.move_to_space_and_follow"
+                        + "(\"\(digit)\")"
+                )
+            }
+        let families = OnboardingKeys.families(
+            layer: layer(bindings),
+            spaces: spaces(3)
+        )
+        let ids = Set(families.map(\.id))
+        #expect(ids.contains("move_to_space"))
+        #expect(ids.contains("move_to_space_and_follow"))
+        // They must read as DIFFERENT actions: one label for two
+        // chords teaches that the chords are interchangeable,
+        // which is exactly what they are not.
+        let moves = families.filter {
+            $0.id.hasPrefix("move_to_space")
+        }
+        let labels = moves.map(\.label)
+        #expect(Set(labels).count == labels.count)
+        // And they carry different chords — the seeded tiers are
+        // ⌃⌥⇧ against ⌃⌥⌘, so identical glyphs here would mean
+        // one family had swallowed the other's lookup.
+        let glyphs = moves.map(\.glyphs)
+        #expect(Set(glyphs).count == glyphs.count)
+    }
+
     @Test("nothing here writes a bare-Option chord")
     func neverTeachesBareOption() {
         // Bare Option is the macOS special-character modifier, so

@@ -3,8 +3,12 @@ import KiwiDeskCore
 /// The shared App Bar option lists so the global editor and the
 /// per-layout override pickers stay in sync — one source of the
 /// value/label pairs both surfaces render (as segments now, #291).
-/// Split out of `AppBarOverrideControls.swift` to keep that file
-/// under the line ceiling.
+/// Split out of the per-space override chrome
+/// (`SpaceOverrides/OverrideControls.swift`) to keep that file
+/// under the line ceiling. It stays here because these ARE bar
+/// data — the edges and alignments the App Bar editor renders —
+/// while the chrome that once wrapped them moved to the one
+/// surface that still draws it (#819).
 enum AppBarOptions {
     /// Built from `allCases` through an exhaustive switch, so a
     /// new edge case can't silently vanish from the pickers.

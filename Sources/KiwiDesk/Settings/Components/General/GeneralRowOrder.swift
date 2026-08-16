@@ -26,7 +26,10 @@ enum GeneralRowOrder {
     ]
 
     static let about: [SettingKey] = [
-        .general(.about)
+        // The inventory card leads: it answers "what is in this
+        // install", which the identity block below then signs.
+        .general(.installInventory),
+        .general(.about),
     ]
 
     /// Advanced's five, restart first, exactly as the digest

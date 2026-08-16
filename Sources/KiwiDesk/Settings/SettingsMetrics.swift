@@ -170,7 +170,7 @@ enum SettingsMetrics {
     /// The trailing "OVERRIDE" column in the per-space override
     /// editor (#678 8b): wide enough to seat the small-caps header
     /// over the checkbox below it, so the two align down the card.
-    static let overrideStateColumn: CGFloat = 64
+    static let overrideStateColumn: CGFloat = 88
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {

@@ -115,6 +115,7 @@ struct CrossReferenceRowSlotTests {
         "MotionCard.swift:Self.scrollingXrefProse",
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
+        "SpaceOverrideRows+ModeRows.swift:prose",
     ]
 
     // MARK: - The values
@@ -168,6 +169,42 @@ struct CrossReferenceRowSlotTests {
                     "\(mode) on=\(on) never places its link"
                 )
             }
+        }
+    }
+
+    /// The per-space editor's remote-gate pointers (#841).
+    ///
+    /// Driven off `SpacesGateHelp.remote` rather than a list of
+    /// two, so a third remote reason is covered by existing —
+    /// and the two halves are asserted together on purpose: a
+    /// reason in `remote` with no sentence draws no pointer at
+    /// all, which is the state #841 was filed about, and a
+    /// sentence without the slot puts the link at the end where
+    /// no translation can move it.
+    @Test func theRemoteGateProsePlacesItsLink() throws {
+        #expect(!SpacesGateHelp.remote.isEmpty)
+        for reason in SpacesGateHelp.remote {
+            let prose = try #require(
+                SpacesGateHelp.crossReference(for: reason),
+                "\(reason) is remote with no pointer sentence"
+            )
+            #expect(
+                prose.contains(Self.slot),
+                "\(reason) never places its link"
+            )
+        }
+        // And a reason that is NOT remote draws none: an inline
+        // grey answers from its own container, so a pointer
+        // there would send the reader away from the switch that
+        // is already beside them.
+        for reason in [
+            SpacesGates.InertReason.noOverrides, .oneMaster,
+            .rigidGrid,
+        ] {
+            #expect(
+                SpacesGateHelp.crossReference(for: reason) == nil
+            )
+            #expect(!SpacesGateHelp.remote.contains(reason))
         }
     }
 

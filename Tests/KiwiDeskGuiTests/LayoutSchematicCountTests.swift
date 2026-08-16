@@ -62,6 +62,8 @@ struct LayoutSchematicCountTests {
     /// the stack run, and the one incoming window. The masters
     /// are clamped so a big master count over few windows still
     /// leaves a stack zone — the two-zone split is the point.
+    /// Sizes only: WHICH windows land in each zone is
+    /// `LayoutSchematicZoneTests`' (#707).
     @Test("Stack partitions the count into its two zones")
     func stackPartition() {
         // Across master counts as well as window counts: at
@@ -101,37 +103,11 @@ struct LayoutSchematicCountTests {
         }
     }
 
-    /// Track opens tracks up to the limit and spills the rest
-    /// into the overflow track — which does not exist until
-    /// something overflows, and does once the count passes what
-    /// the tracks hold.
-    @Test("Track fills its tracks before it overflows")
-    func trackOverflow() {
-        #expect(track(limit: 3, windows: 2).overflowWindows == 0)
-        #expect(track(limit: 3, windows: 12).overflowWindows > 0)
-        // Tracks never outnumber the windows that open them.
-        #expect(track(limit: 4, windows: 2).trackCount == 1)
-        #expect(track(limit: 4, windows: 12).trackCount == 4)
-        // Auto-tracks is its own ceiling, and the count still
-        // bounds it from below.
-        #expect(
-            track(limit: 9, windows: 12, auto: true).trackCount
-                == 3
-        )
-        // The focused track's own run, read DIRECTLY. Reading it
-        // only through `overflowWindows` left it satisfiable by
-        // the constant 4 — a focused track drawing four windows
-        // over one established one, invisible because the
-        // arithmetic happens to land at the sampled shapes
-        // (guard-prover, 2026-08-03).
-        #expect(track(limit: 3, windows: 2).focusedRun == 1)
-        #expect(track(limit: 3, windows: 12).focusedRun == 4)
-        for count in LayoutSchematic.windowCountRange {
-            let schematic = track(limit: 3, windows: count)
-            #expect(schematic.focusedRun >= 1)
-            #expect(schematic.focusedRun <= max(1, count - 1))
-        }
-    }
+    /// Track's fold moved to `LayoutSchematicTrackFoldTests`
+    /// when the preview learned fill-then-spill (#708): its
+    /// quantities stopped being local arithmetic and became reads
+    /// off the engine's own rules, which needs more room to
+    /// assert than this file has left.
 
     /// A dynamic grid balances through the ENGINE's own rule, so
     /// the preview rebalances exactly when KiwiDesk does. Asserted

@@ -96,7 +96,14 @@ struct StackSchematic: View {
         return w
     }
 
-    private var masterWins: [WindowID] {
+    /// The master zone: the first `masters` windows of the array,
+    /// which is `StackLayout`'s own boundary rule. Internal with
+    /// `stackWins` and `masterDisplay` so
+    /// `LayoutSchematicZoneTests` can read the partition against
+    /// `StackLayout.partition` — the SIZES were guarded and the
+    /// membership was not, so both zone reads could be swapped
+    /// with the whole suite green (#707).
+    var masterWins: [WindowID] {
         Array(order.prefix(masters))
     }
 
@@ -104,7 +111,7 @@ struct StackSchematic: View {
     /// the engine (#313, `StackLayout.mirrorsMasterZone`), so
     /// the preview never lies about where the boundary master
     /// sits when the stack leads.
-    private var masterDisplay: [WindowID] {
+    var masterDisplay: [WindowID] {
         var params = StackParams()
         params.masterOrientation = masterOrientation
         params.stackPosition = stackPosition

@@ -33,7 +33,7 @@ struct DragVisualPreview: View {
 
     private var mock: some View {
         // Remap the full slider ranges onto the preview's
-        // smaller span (the AppBarPreviewStrip / GapPreviewScale
+        // smaller span (the GapPreviewScale
         // fix, #231): a hard cap made both sliders visibly stop
         // responding halfway up, reading as "the setting broke."
         let radius = scale(cornerRadius, from: 0...40, to: 0...20)
@@ -84,7 +84,7 @@ struct DragVisualPreview: View {
 
     /// Linear map of `value` from one closed range onto another,
     /// clamped to the target range at the ends (mirrors
-    /// `AppBarPreviewStrip.scale`).
+    /// `GapPreviewScale`).
     private func scale(
         _ value: CGFloat,
         from src: ClosedRange<CGFloat>,

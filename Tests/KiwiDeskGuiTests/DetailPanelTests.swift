@@ -20,13 +20,22 @@ struct DetailPanelTests {
     /// extension motion #793-#795 each repeat — so a member
     /// arriving here without a branch in the map below is the
     /// failure this pair exists to catch.
-    @Test("the offer set is the scoped five")
+    @Test("the offer set is the scoped seven")
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
                 .gapsAndBorders, .bars, .colors,
-                .layoutDefaults, .shortcuts,
+                .layoutDefaults, .shortcuts, .advancedColors,
+                .spaces,
             ]
+        )
+        // General's absence is a RULING, not a gap (#795, owner
+        // 2026-08-16): its rows are all UserDefaults/readonly/
+        // action, so a panel there could only restate the
+        // content column and count a structural zero. Pinned
+        // here so re-adding it has to argue with this line.
+        #expect(
+            !SettingsDetailPanelOffer.offers(.general)
         )
     }
 
@@ -48,6 +57,11 @@ struct DetailPanelTests {
                 "case.layoutDefaults:LayoutPreviewPanel(",
             .shortcuts:
                 "case.shortcuts:KeyboardPreviewPanel(model:model)",
+            .advancedColors:
+                "case.advancedColors:"
+                + "AdvancedColorsPanel(model:model)",
+            .spaces:
+                "case.spaces:SpacesPanelPreview(model:model)",
         ]
         #expect(
             Set(branches.keys)
@@ -208,13 +222,30 @@ struct DetailPanelTests {
                     + "DragVisualsEditor.swift",
                 "DragVisualPreview("
             ),
+            // The two bar strips are not listed: #793 took their
+            // last mount (Advanced Colours' cards) and the
+            // renderers were deleted outright, so a needle for
+            // them would assert against a type that no longer
+            // exists — permanently true, and read as coverage.
             (
-                "Components/Bars/SpaceBarCard.swift",
-                "SpaceBarPreviewStrip("
+                "Components/Colors/StructureColorCards.swift",
+                "FocusBorderPreview("
             ),
             (
-                "Components/Bars/AppBarCard.swift",
-                "AppBarPreviewStrip("
+                "Components/Colors/StructureColorCards.swift",
+                "DragVisualPreview("
+            ),
+            // #794: the per-space editor gave up its own copy,
+            // which is what let the panel take it. The needle
+            // names a LIVE renderer the section must not re-grow
+            // — `SpaceOverridePreview` was deleted in the same
+            // branch, so a needle for it could never fail and
+            // read as coverage, which is the argument this suite
+            // already makes above about the two bar strips (code
+            // review, 2026-08-16).
+            (
+                "Sections/SpacesSection+Overrides.swift",
+                "LayoutSchematicView("
             ),
             (
                 "Sections/ColorsMotionSection.swift",

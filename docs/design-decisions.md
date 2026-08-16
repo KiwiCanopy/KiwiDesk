@@ -2138,6 +2138,44 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
+**Where the engine's rule needs a display, the preview stands a
+number in for the display — never a simpler rule.** (#708,
+extending the paragraph above; the pattern was first ruled for
+Grid in #712.) Some engine rules are not merely unexported, they
+are unanswerable on a mini-canvas: how many minimum-size cells a
+grid fits, how many windows fit in one track before a new one
+opens, how many tracks fit across a screen. Each is a function of
+`min_window_size` against real geometry, and the canvas has
+neither.
+
+The tempting escapes are both worse than the problem. Dropping
+the rule ships a preview that teaches a behaviour the app does
+not have — the Track schematic did exactly this, growing the
+focused track to a drawn ceiling and piling the surplus, while
+the app has filled-then-spilled into a new track since #437.
+Disclaiming it in the caption ("this preview shows position
+only") leaves the reader knowing a rule exists without knowing
+what it is, and a caption's job is to label what is shown.
+
+So: **keep the engine's rule, substitute the display quantity**,
+as a named constant that says it is a stand-in and argues its
+value. The rule then still comes from the engine — `Track` asks
+`TrackLayout.spillsToNewTrack`, the same predicate a real spawn
+asks — and only the number is local. Two obligations make the
+substitution honest rather than a clamp by another name. The
+stand-in must be **the same at every drawing scale**, or one
+configuration draws two different capacities and the thumbnail
+contradicts the panel (#712's first cut did exactly that, and
+review caught it before it shipped: a rigid 8 × 1 at five windows
+piled two windows on the strip thumbnail and none in the panel,
+inventing an overflow the engine does not have). And it must
+**not bind below a value the user typed** — a preview
+answering a typed limit of 4 with
+three tracks is a stand-in overruling the setting it illustrates.
+Clamp the drawing if you must; never the rule. The family lives
+in `LayoutSchematicStandIns` and
+`LayoutSchematicTrackFoldTests` holds the scale independence.
+
 **A layout gets one frame, whatever it has to teach** (#753,
 superseding the #125/#239 two-frame bar, which stood in
 [UI patterns](ui-patterns.md) ▸ Previews & schematics). That
@@ -2456,11 +2494,41 @@ twin to retire — the rule bans duplicates, not first
 previews. The in-card mounts are REMOVED in
 the same change — one screen must not state one fact twice —
 which NARROWS the old "live preview leads its editor"
-convention to areas without a panel: Advanced Colours' group
-previews still lead their rows because that area offers no
-panel, while in the panel areas no migrated preview
-survives in its card (`DetailPanelTests` holds the offer set
-and the removals both).
+convention to areas without a panel: in the panel areas no
+migrated preview survives in its card (`DetailPanelTests`
+holds the offer set and the removals both). Advanced Colours
+was the worked exception while it had no panel of its own;
+#793 gave it one, and its four group previews left under this
+same rule rather than by a new decision — the condition
+changed, not the convention.
+
+**A composite question needs a composite picture, in the
+colours the user actually set.** (#793, owner 2026-08-16.)
+Advanced Colours edits twenty-five colours in four groups, and
+four group previews can answer "is this row right?" while
+leaving "do these work *together*?" unanswerable without
+saving and looking at the real desktop. The accent ladders,
+the two rings, the state marks and the drag pair are judged
+against each other. So the panel draws one scene holding every
+role at once — which reverses that page's own earlier
+reasoning, recorded here because it was argued rather than
+merely outgrown: grouping by *where you see it* decides the
+ROWS, and never settled whether the PICTURE should be
+per-group.
+
+Two constraints the scene is built under. It draws from **raw
+palette paths, never the Home plate's accent/ink/base fold** —
+a fold is right on a card and exactly wrong on the one page
+whose subject is per-role tinting, where a focus ring the user
+has made illegible must read as illegible. And it **omits the
+four hover roles**: a still frame can only draw a pointer
+state as the resting one, which would teach a behaviour the
+app does not have (#708's defect wearing another hat). That
+omission is data with a reason attached
+(`PaletteSceneRoles.withheld`) rather than a caption
+disclaiming itself, and `PaletteSceneRoleTests` holds every
+palette path to being drawn or argued away — so a new colour
+cannot quietly miss the page that exists to show them all.
 
 **Wide windows cap the content, not the panel.** (#678
 Phase 4; owner 2026-08-10.) The prototype was drawn at 1440
@@ -4011,8 +4079,10 @@ colors left the Bars page entirely for Advanced Colors, and
 their "Advanced colors" disclosure became "More colors"
 there — see "Colour is its own destination" below. The
 at-rest/behind-a-drawer SPLIT survives verbatim: Fill and
-Highlight are still the two the preview strip most visibly
-reflects, and are still the two at rest.)
+Highlight are still the two a drawing of the bar most visibly
+reflects, and are still the two at rest. The per-group preview
+strip that made that point went with #793's composite scene;
+the split never rested on it.)
 
 **[Principle] Colour is its own destination, and a colour
 renders in exactly one of them.** (#678 Phase 3, 2026-08-02.)
@@ -4208,14 +4278,17 @@ last of them left this editor in #754, so it no longer pushes
 the narrow axis in through `settingsLabelColumn` at all — what
 remains there is toggles, which draw their own labels. The pair
 lives on in Advanced Colours' twin drag columns, which take the
-width as `AdvancedColorRow`'s `labelWidth:`. Each
-column's preview still draws the alignment, radius and width
-actually stored, because all three are still settable from
-Lua: schematic, not pixel-exact, and it remaps the full value
-range instead of hard-capping halfway (the `AppBarPreviewStrip`
-fix). The alignment preview earns its keep twice over, the
-control having been dead before it — SwiftUI `.strokeBorder`
-always draws inside.
+width as `AdvancedColorRow`'s `labelWidth:`. The drawing beside
+those columns went with #793's composite scene, but the
+obligation it carried did not: wherever the ghost and drop zone
+are drawn — the Gaps & Borders panel, since #793 — the drawing
+shows the alignment, radius and width actually stored, because
+all three are still settable from Lua. Schematic, not
+pixel-exact, and it remaps the full value range instead of
+hard-capping halfway (the fix the retired App Bar preview strip
+asked for). The alignment drawing earns its keep twice over,
+the control having been dead before it — SwiftUI
+`.strokeBorder` always draws inside.
 
 **[Trade-off]**
 
@@ -4469,8 +4542,8 @@ bar renders exactly there in every layout — the earlier
 orientation are gone. Axis-relativity existed to prevent an
 edge/axis mismatch when the edge was derived per layout; with the
 Space Bar requiring free four-edge placement for both bars, the
-derivation (and its rationale) fell away. The GUI preview strip
-is edge-aware and rotates vertical for left/right.
+derivation (and its rationale) fell away. The Settings preview
+is edge-aware and draws a left- or right-edge bar vertical.
 
 **The Space Bar reserves space-first.** (#293.) The Space
 Bar's strip is carved from the display's original visible frame,

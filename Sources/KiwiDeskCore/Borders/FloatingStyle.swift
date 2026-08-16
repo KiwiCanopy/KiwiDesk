@@ -13,6 +13,16 @@ import Foundation
 /// Set from Lua via `floating.set_*`; the setter applies
 /// unconditionally (Lua is open — the `dim_factor` precedent).
 public struct FloatingStyle: Sendable, Equatable {
+    /// The floating mark's glyph — ONE symbol everywhere, the
+    /// same rule `StickyStyle.symbolName` states for its own:
+    /// the Space Bar's floating badge draws it, and since #793
+    /// so does Advanced Colours' palette scene, which must show
+    /// the mark the app actually renders rather than a stand-in
+    /// shape. It lives on the style rather than inside the bar's
+    /// view so a second surface needs no lateral reach into
+    /// `Bar/` — and so the two cannot drift.
+    public static let symbolName = "macwindow.on.rectangle"
+
     /// The floating mark's tint (#429): the Space Bar floating
     /// badge glyph reads it. Empty = "Automatic": the adaptive
     /// `.labelColor`, resolved via `NSColor.mark(hex:fallback:)` —

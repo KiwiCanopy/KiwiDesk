@@ -97,7 +97,18 @@ struct OverrideChrome<Content: View>: View {
         } else if let inherited {
             inheritedReadout(inherited)
         } else {
-            HStack(spacing: SettingsMetrics.overrideRowInset) {
+            // `alignment`, not the default `.center`: this branch
+            // is the multi-row group (the slot-size pair), and a
+            // centred `?` floats between its two rows with
+            // nothing to sit beside — it read as a stray control
+            // hanging in the middle of the card (owner, on
+            // device, 2026-08-16). Aligned to the group's own
+            // anchor it lands beside the FIRST row, which is
+            // where every single-row override puts it.
+            HStack(
+                alignment: alignment,
+                spacing: SettingsMetrics.overrideRowInset
+            ) {
                 liveControl
                     .disabled(true)
                     // Same single-dim rule as `GreyOut` (#520): an
@@ -287,7 +298,7 @@ struct OverrideFractionRow: View {
 /// one override surface left since the per-layout bar overrides
 /// went Lua-only (GUI_REMOVED_2026-08) — is the documented
 /// compact-surface exception to the #291 segmented norm. Its rows
-/// sit in a bounded ~520 pt column with a trailing OVERRIDE
+/// sit in a bounded ~700 pt column with a trailing OVERRIDE
 /// checkbox column, so a segmented row would be cramped and the
 /// `.menu` holds (see `docs/ui-patterns.md`).
 struct OverridePickerRow<Value: Hashable & Sendable>: View {

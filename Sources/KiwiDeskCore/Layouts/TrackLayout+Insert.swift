@@ -71,10 +71,12 @@ extension Space {
                 tiled: tiled,
                 ranges: ranges
             )
-        } else if let capacity = spillCapacity,
-            counts[track] >= capacity,
-            trackCap == 0 || counts.count < trackCap
-        {
+        } else if TrackLayout.spillsToNewTrack(
+            focusedTrackCount: counts[track],
+            trackCount: counts.count,
+            spillCapacity: spillCapacity,
+            trackCap: trackCap
+        ) {
             // Fill-then-spill (#437): the focused track can't fit
             // another window at min size and another track fits, so
             // open a NEW track immediately after the focused one.

@@ -56,11 +56,29 @@ struct SpaceOverrideRows: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: SettingsMetrics.overrideRowInset)
+            // ONE line, always. The column was sized for the
+            // English "OVERRIDE" and every longer noun stacked:
+            // German's "ÜBERSCHREIBUNG" hyphenated into three
+            // lines above the checkboxes (owner, on device,
+            // 2026-08-16). Italian's "PERSONALIZZAZIONE" is 17
+            // characters and sizing the column to it would give
+            // a checkbox a 110 pt column in every locale — so
+            // the width fits the middle of the range and the
+            // two longest shrink slightly rather than wrap.
+            //
+            // Stated residue: a column that MEASURED its header
+            // would need neither the constant nor the scale
+            // factor, but the header and the checkboxes live in
+            // different views, so sharing an intrinsic width
+            // needs a preference key. Worth it if a third
+            // surface ever grows this column.
             Text(L("space_override.override_column", "Override"))
                 .font(.caption2)
                 .fontWeight(.semibold)
                 .textCase(.uppercase)
                 .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
                 .frame(
                     width: SettingsMetrics.overrideStateColumn,
                     alignment: .center

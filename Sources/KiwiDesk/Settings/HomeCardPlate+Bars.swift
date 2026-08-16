@@ -5,8 +5,10 @@ import SwiftUI
 /// The Bars picture: each bar the desktop actually shows, as a
 /// plate on its own edge in its own fill, the desktop well
 /// between them. The edge-most bar on a shared edge is the
-/// Space Bar, matching `SpaceBarPreviewStrip`'s coexistence
-/// order. The scene keeps a screen's shape (16:10, centred)
+/// Space Bar, matching the real bars' own coexistence order
+/// (`SpaceBarOverlay`); the Settings strip once named here as
+/// the precedent was retired in #793, when the panels took
+/// its last mount. The scene keeps a screen's shape (16:10, centred)
 /// rather than stretching to its container, and the bars
 /// answer their own Style rows: alignment seats the item run,
 /// `background_fit` decides hug vs span, corner roundness and

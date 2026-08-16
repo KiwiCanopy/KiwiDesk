@@ -236,8 +236,8 @@ struct GreyOutParityTests {
         // inheriting row inside a gated block cannot compound.
         let chrome = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Bars/"
-                    + "AppBarOverrideControls.swift"
+                "Sources/KiwiDesk/Settings/Components/"
+                    + "SpaceOverrides/OverrideControls.swift"
             )
         let chromeSource = SourceScan.stripComments(
             try String(contentsOf: chrome, encoding: .utf8)

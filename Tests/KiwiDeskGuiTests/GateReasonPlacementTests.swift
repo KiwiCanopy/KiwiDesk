@@ -88,21 +88,71 @@ struct GateReasonPlacementTests {
         #expect(channel(.appBar(.appBarThickness)) == nil)
     }
 
-    /// `.remote` means "the `?` anchor on the other page names
-    /// where to go", which is a claim about a surface — so it is
-    /// CHECKED against the file that draws the anchor, not
-    /// assumed. Anything else lets the channel assert an
-    /// affordance nobody built.
+    /// `SpacesGateHelp.remote` agrees with the census.
     ///
-    /// The per-space override editor is the case in hand: its
-    /// gating control is declared in Layout Defaults, so the
-    /// derivation answers `.remote`, and the editor draws no
-    /// anchor — the reason reaches `.help()` only. Recorded here
-    /// rather than left as prose so the gap cannot be mistaken
-    /// for coverage, and so the day the anchor lands this fails
-    /// and asks for the entry to move out.
-    @Test("the per-space overrides' remote gap is recorded")
-    func perSpaceOverridesAwaitTheirAnchor() throws {
+    /// The set is a second, hand-kept copy of an answer
+    /// `GateReasonPlacement.channel` already derives — keyed on
+    /// the REASON where the census is keyed on the `SettingKey`
+    /// — so nothing stopped the two drifting: a gate retargeted
+    /// to an on-page owner would leave the anchor drawing, and a
+    /// new `.remote` row would get none (architect review,
+    /// 2026-08-16). This binds them until the derivation
+    /// replaces the copy.
+    @Test("the remote reason set agrees with the census")
+    func remoteMatchesTheCensus() {
+        // Every key the census calls `.remote` on this surface
+        // resolves to a reason the set contains…
+        let remoteKeys: [SettingKey] = [
+            .layout(.gridOverrideColumns),
+            .layout(.gridOverrideRows),
+            .layout(.trackOverrideLimit),
+        ]
+        for key in remoteKeys {
+            #expect(channel(key) == .remote)
+        }
+        // …and the set names only reasons those keys produce, so
+        // it cannot grow an entry the census does not back.
+        #expect(
+            SpacesGateHelp.remote == [.autoSizedGrid, .autoTracks]
+        )
+        // The co-located sibling stays OUT, by the census's own
+        // answer rather than by assertion: its owner renders as
+        // the row directly above it.
+        #expect(
+            channel(.layout(.gridOverrideFillEmptyCells))
+                != .remote
+        )
+        #expect(
+            !SpacesGateHelp.remote.contains(.rigidGrid)
+        )
+    }
+
+    /// The per-space overrides' remote anchor, now that it
+    /// exists (#841, closed 2026-08-16).
+    ///
+    /// This test used to RECORD the gap — the three rows were
+    /// classified `.remote` and drew no anchor at all, so their
+    /// reason reached `.help()` only and a keyboard or VoiceOver
+    /// user got "dimmed" and nothing else. It was written to
+    /// fail the day an anchor landed, which is what asked for
+    /// this rewrite.
+    ///
+    /// It now asserts the anchor rather than its absence, and
+    /// asserts the two halves the rule actually requires: the
+    /// sentence NAMES A DESTINATION, and it is a live link
+    /// rather than a `Text`, or the pointer is dead
+    /// (`docs/ui-patterns.md`).
+    ///
+    /// Stated limit: these needles see the CALL, not the
+    /// sentence behind it — a `crossReference(for:)` returning
+    /// nil leaves every needle satisfied and nothing drawn
+    /// (guard-prover, 2026-08-16). That state is caught by
+    /// `CrossReferenceRowSlotTests.theRemoteGateProsePlacesItsLink`,
+    /// which requires a sentence for every reason in
+    /// `SpacesGateHelp.remote`. The pair is the net; neither
+    /// half is.
+    @Test("the per-space remote gates carry a live anchor")
+    func perSpaceOverridesCarryTheirAnchor() throws {
         for key: SettingKey in [
             .layout(.gridOverrideColumns),
             .layout(.gridOverrideRows),
@@ -114,18 +164,11 @@ struct GateReasonPlacementTests {
                     rawValue:
                         "\(key.id) changed channel — if its "
                         + "gating control now has a row on the "
-                        + "per-space surface, this class is no "
-                        + "longer waiting on a `?` anchor"
+                        + "per-space surface, it no longer needs "
+                        + "the remote anchor below"
                 )
             )
         }
-        // The gap itself: the rows' own file draws no `?`, so
-        // `.remote` currently points at nothing for them. When
-        // this stops being true, this suite is where the claim
-        // gets re-stated. ONE file, deliberately — the editor's
-        // siblings could gain the anchor with this green, and
-        // the issue tracking it (#841) names the surface rather
-        // than this line.
         let path = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/"
@@ -135,15 +178,31 @@ struct GateReasonPlacementTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: path, encoding: .utf8)
         )
+        .filter { !$0.isWhitespace }
+        // A LIVE pointer, not hover text.
         #expect(
-            !source.contains("HelpButton"),
+            source.contains("CrossReferenceRow("),
             Comment(
                 rawValue:
-                    "the per-space rows gained an anchor — "
-                    + "#815's remote class is closed, so move "
-                    + "these keys out of this test"
+                    "the remote rows lost their anchor — a dim "
+                    + "with only `.help()` is the dead end #841 "
+                    + "closed"
             )
         )
+        // Both gated classes reach it, not just whichever one
+        // was fixed first.
+        for key in [
+            "gridOverrideColumns", "trackOverrideLimit",
+        ] {
+            #expect(
+                source.contains(
+                    "remoteGateReference(for:.layout(.\(key))"
+                ),
+                Comment(
+                    rawValue: "\(key) draws no remote anchor"
+                )
+            )
+        }
     }
 
     /// The one row the derivation found is actually drawn, and

@@ -295,9 +295,11 @@ final class AppBarItemView: NSView {
         return style.hasBox
     }
 
-    // The settings App Bar preview (`AppBarPreviewStrip`, GUI
+    // The Settings palette scene (`PaletteSceneThumbnail`, GUI
     // target) is a schematic twin of this box/accent logic —
     // keep the two in step when the box or accent rules change.
+    // It replaced `AppBarPreviewStrip`, which drew the same
+    // twin and was retired in #793.
     private var boxColorHex: String {
         if isHovered { return style.hoverFillColor }
         // One fill for every box (active marked by the indicator,
