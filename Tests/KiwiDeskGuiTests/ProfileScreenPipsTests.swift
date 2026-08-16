@@ -83,16 +83,69 @@ struct ProfileScreenPipsTests {
         #expect(pips(-3).hidden == 0)
     }
 
-    /// The reserved width is DERIVED from the slot count, the pip
-    /// and the gap. A literal would let a cap change start
-    /// clipping with every test still green.
-    @Test("the slot width derives from the grammar")
-    func slotWidthDerives() {
-        let expected =
-            CGFloat(ProfileScreenPips.slots)
-            * ProfileScreenPips.pip.width
-            + CGFloat(ProfileScreenPips.slots - 1)
-            * ProfileScreenPips.gap
-        #expect(ProfileScreenPips.slotWidth == expected)
+    /// The reserved width is DERIVED, asserted against
+    /// hand-computed widths at slot counts this app does NOT
+    /// ship.
+    ///
+    /// The first cut of this test recomputed the production
+    /// formula and compared the two, which is a mirror: a
+    /// guard-prover run replaced the whole derivation with the
+    /// literal `81` — today's value — and all seven tests stayed
+    /// green. Only the composite (literal PLUS a cap change)
+    /// reddened, so the guard saw the harm and not the latent
+    /// state that makes it possible. These numbers are computed
+    /// by hand, not by the formula under test.
+    @Test("the slot width is the grammar, not a literal")
+    func slotWidthIsTheGrammar() {
+        let pip = CGSize(width: 18, height: 12)
+        // 1 slot: one pip, no gap.
+        #expect(
+            ProfileScreenPips.slotWidth(
+                slots: 1,
+                pip: pip,
+                gap: 3
+            ) == 18
+        )
+        // 2 slots: 36 + one 3 pt gap.
+        #expect(
+            ProfileScreenPips.slotWidth(
+                slots: 2,
+                pip: pip,
+                gap: 3
+            ) == 39
+        )
+        // 5 slots: 90 + four gaps — past the shipped count, so a
+        // literal agreeing with today's 4 cannot pass this.
+        #expect(
+            ProfileScreenPips.slotWidth(
+                slots: 5,
+                pip: pip,
+                gap: 3
+            ) == 102
+        )
+        // A different pip and gap entirely: 3 × 10 + 2 × 5.
+        #expect(
+            ProfileScreenPips.slotWidth(
+                slots: 3,
+                pip: CGSize(width: 10, height: 8),
+                gap: 5
+            ) == 40
+        )
+    }
+
+    /// And the shipped width IS that grammar at the shipped
+    /// constants — the join, without which the parameterized
+    /// function above could be correct while the view drew
+    /// something else.
+    @Test("the shipped width is the grammar at its constants")
+    func shippedWidthUsesTheGrammar() {
+        #expect(
+            ProfileScreenPips.slotWidth
+                == ProfileScreenPips.slotWidth(
+                    slots: ProfileScreenPips.slots,
+                    pip: ProfileScreenPips.pip,
+                    gap: ProfileScreenPips.gap
+                )
+        )
     }
 }

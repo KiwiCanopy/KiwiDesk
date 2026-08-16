@@ -41,15 +41,33 @@ struct ProfileScreenPips: View {
     static let pip = CGSize(width: 18, height: 12)
     static let gap: CGFloat = 3
 
-    /// The fixed leading slot, DERIVED from the grammar above so
-    /// the two cannot disagree — a hand-written width is how a
-    /// cap change silently starts clipping. Fixed rather than
-    /// fluid so the names below align down the list; it compares
-    /// no width, so it adds no second derivation beside
-    /// `SettingsWidthClass`.
+    /// The grammar itself, as a function of its inputs rather
+    /// than of the shipped constants.
+    ///
+    /// Parameterized deliberately: with `slots` a `static let`,
+    /// no assertion over the shipped values can tell a
+    /// derivation from a literal that happens to agree with it
+    /// today — `slotWidth` was `{ 81 }` for a guard-prover run
+    /// and all seven tests stayed green, because the test
+    /// restated the same formula and so could only ever mirror
+    /// it. Taking the inputs lets the suite assert known widths
+    /// at slot counts this app does not ship, which a literal
+    /// cannot satisfy.
+    static func slotWidth(
+        slots: Int,
+        pip: CGSize,
+        gap: CGFloat
+    ) -> CGFloat {
+        CGFloat(slots) * pip.width + CGFloat(slots - 1) * gap
+    }
+
+    /// The fixed leading slot at the shipped grammar — a
+    /// hand-written width is how a cap change silently starts
+    /// clipping. Fixed rather than fluid so the names beside it
+    /// align down the list; it compares no width, so it adds no
+    /// second derivation beside `SettingsWidthClass`.
     static var slotWidth: CGFloat {
-        CGFloat(slots) * pip.width
-            + CGFloat(slots - 1) * gap
+        slotWidth(slots: slots, pip: pip, gap: gap)
     }
 
     /// Internal rather than private, and asserted directly: a
