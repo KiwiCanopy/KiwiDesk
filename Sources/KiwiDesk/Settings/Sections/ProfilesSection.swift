@@ -169,24 +169,29 @@ struct ProfilesSection: View {
     private func profileRow(
         _ summary: ProfileSummary
     ) -> some View {
-        HStack(alignment: .firstTextBaseline) {
+        // CENTRED, not first-text-baseline: the picture belongs
+        // to the whole row — the name AND the subtitle counting
+        // the screens it draws — so pinning it to the title's
+        // baseline sat it high against a two-line block and read
+        // as belonging to the first line only (owner eye-confirm,
+        // 2026-08-16). It is also what the design prototype's own
+        // row does (`align-items:center`), and it carries the
+        // buttons with it, which is the same arrangement there.
+        //
+        // Centring is what RETIRED an `.alignmentGuide` here: a
+        // picture with no text baseline resolves to its own bottom
+        // edge, so under baseline alignment a row whose picture
+        // carried a "+N" chip seated differently from one whose
+        // did not. With no baseline in the alignment there is
+        // nothing to correct.
+        HStack(alignment: .center) {
             // The screen count as a picture (#789), replacing a
             // glyph that was identical on every row and so
             // distinguished none of them. The tooltip stays on
             // the subtitle below rather than moving here: `.help`
             // on a decorative image is hover-only, and this one
             // is `.accessibilityHidden`.
-            // The guide pins the picture against the "+N" chip's
-            // baseline, NOT against nothing: a screen row with no
-            // chip donates no text baseline and already resolves
-            // to its own bottom edge, so it is an identity there.
-            // The case it changes is a row WITH a chip, whose
-            // `Text` would otherwise give the stack a real
-            // first-text baseline and seat that row differently
-            // from its neighbours. Stating it makes every row
-            // align the same way whatever its screen count.
             screenPicture(summary)
-                .alignmentGuide(.firstTextBaseline) { $0[.bottom] }
             VStack(alignment: .leading, spacing: 3) {
                 rowTitle(summary)
                 Text(subtitle(summary))
