@@ -140,6 +140,66 @@ struct PresetGridFloorTests {
             widest.width > 0,
             "no catalog produced a measurable pair"
         )
+        // Proof that the TRANSLATIONS were measured and not just
+        // English eleven times. `guard-prover` collapsed the
+        // fallback onto `english[$0]` — ten catalogs went
+        // unmeasured — and every assertion above stayed green,
+        // because `widest.width > 0` is satisfied by English
+        // alone. English is comfortably the shorter language
+        // here; if it ever becomes the widest, that is worth
+        // failing over rather than passing quietly.
+        #expect(
+            widest.locale != "en",
+            """
+            English measured widest (\
+            \(String(format: "%.1f", widest.width)) pt), which \
+            either means a translation was lost from the corpus \
+            or the measuring path collapsed onto en.json.
+            """
+        )
+    }
+
+    /// The card DRAWS the constants it declares.
+    ///
+    /// Found by `guard-prover` rather than reasoned about: with
+    /// `padding` and `buttonRowSpacing` left at 12 and 8 while
+    /// `body` drew `.padding(24)` and `HStack(spacing: 20)`, the
+    /// card needed 265 pt of row inside 232 pt of interior — #862
+    /// live — and every assertion above passed. They read the
+    /// DECLARATIONS, so a `body` that ignores them makes the
+    /// floor honest about a card that does not exist.
+    ///
+    /// A needle, at the same altitude as the grid's, because the
+    /// alternative is rendering the card and measuring it, which
+    /// needs a hosted view for two numbers that are right there
+    /// in the source.
+    @Test("the card draws the constants the floor is built on")
+    func cardDrawsItsDeclaredMetrics() throws {
+        let source = try String(
+            contentsOf: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources")
+                .appendingPathComponent("KiwiDesk")
+                .appendingPathComponent("Settings")
+                .appendingPathComponent("Components")
+                .appendingPathComponent("Profiles")
+                .appendingPathComponent("PresetCard.swift"),
+            encoding: .utf8
+        )
+        let stripped = SourceScan.stripComments(source)
+        for needle in [
+            ".padding(Self.padding)",
+            "HStack(spacing: Self.buttonRowSpacing)",
+        ] {
+            #expect(
+                stripped.contains(needle),
+                """
+                PresetCard no longer draws with `\(needle)` — the \
+                floor is computed from constants the card's own \
+                body has stopped using, so it describes a card \
+                that is not on screen.
+                """
+            )
+        }
     }
 
     /// The grid asks the card for its floor rather than declaring
