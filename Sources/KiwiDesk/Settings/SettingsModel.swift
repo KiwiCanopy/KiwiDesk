@@ -325,9 +325,9 @@ final class SettingsModel: ObservableObject {
     /// file-backed, keyed off the config directory — built once
     /// since the directory never changes for a session. Apply is
     /// in `SettingsModel+Palette`.
-    lazy var paletteStore = PaletteStore(
-        directory: core.configDirectory
-    )
+    /// Core's one palette store, never a second over the same
+    /// path — `KiwiCore.paletteLibrary` carries the argument.
+    var paletteStore: PaletteStore { core.paletteLibrary }
 
     /// Whether the raw Lua editor is currently shown.
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }

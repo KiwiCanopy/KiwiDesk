@@ -23,7 +23,9 @@ extension StatusItemController {
         submenu.autoenablesItems = false
         let info = layoutInfoProvider()
         if info.nestsPerScreen {
-            submenu.addItem(everyScreenItem())
+            submenu.addItem(
+                everyScreenItem(info.orderedScreens)
+            )
             submenu.addItem(.separator())
             for screen in info.orderedScreens {
                 submenu.addItem(screenItem(screen))
@@ -81,7 +83,9 @@ extension StatusItemController {
     /// is a different claim from any one screen's mode and would
     /// read as the current state of a thing that has no single
     /// state. The per-screen rows below are where the answer is.
-    private func everyScreenItem() -> NSMenuItem {
+    private func everyScreenItem(
+        _ screens: [LayoutMenuInfo.Screen]
+    ) -> NSMenuItem {
         let item = NSMenuItem(
             title: L("menu.layout.all_screens", "All Screens"),
             action: nil,
@@ -94,7 +98,7 @@ extension StatusItemController {
             to: modes,
             live: nil,
             drifted: false,
-            scope: .everyScreen
+            scope: .everyScreen(asBuilt: screens.map(\.space))
         )
         item.submenu = modes
         return item
@@ -177,14 +181,19 @@ extension StatusItemController {
             onSetLayoutMode(target.mode, nil)
         case .space(let id):
             onSetLayoutMode(target.mode, id)
-        case .everyScreen:
-            // Re-read rather than closing over the screens the
-            // menu was BUILT with: a screen can be unplugged
-            // between opening the menu and picking a row, and
-            // setting a mode on a space whose display just went
-            // away is a write nobody asked for.
-            for screen in layoutInfoProvider().screens {
-                onSetLayoutMode(target.mode, screen.space)
+        case .everyScreen(let asBuilt):
+            // The INTERSECTION of what the menu offered and what
+            // is connected now. Re-reading alone was wrong in one
+            // direction and closing over the build alone in the
+            // other: a screen unplugged between opening the menu
+            // and picking a row must not be written to, and a
+            // screen that appeared since must not be silently
+            // included in an action the user took against a menu
+            // that never listed it. The row carries what it
+            // promised; the provider says what still exists.
+            let live = Set(layoutInfoProvider().screens.map(\.space))
+            for space in asBuilt where live.contains(space) {
+                onSetLayoutMode(target.mode, space)
             }
         }
     }

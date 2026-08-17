@@ -65,17 +65,14 @@ extension KiwiCore {
         // back to the starter set, all persisted. A restore that
         // supplied no settings would have silently destroyed the
         // ones already there (`code-reviewer`, 2026-08-17).
-        var artifacts: [URL] = [profiles.directory]
-        if bundle.config != nil {
-            artifacts.insert(guiConfigStore.url, at: 0)
-        }
-        if !bundle.palettes.isEmpty {
-            artifacts.append(paletteLibrary.url)
-        }
-        for url in artifacts
-        where FileManager.default.fileExists(atPath: url.path) {
-            _ = discard(url, trash: trash)
-        }
+        var artifacts: [ConfigArtifact] = [.profiles]
+        if bundle.config != nil { artifacts.insert(.guiConfig, at: 0) }
+        if !bundle.palettes.isEmpty { artifacts.append(.palettes) }
+        discardArtifacts(
+            artifacts,
+            reason: "restore",
+            trash: trash
+        )
 
         // Write the incoming setup before the reload reads it.
         do {
@@ -168,37 +165,5 @@ extension KiwiCore {
         // moves a settings change makes.
         retile(force: true)
         onLog("setup restored from backup")
-    }
-
-    /// Trash a path, falling back to a hard delete.
-    ///
-    /// Same argument as reset's: a surviving `gui.json` would flip
-    /// the reload back onto the OLD sidecar and turn a confirmed
-    /// replace into a silent no-op, which is strictly worse than
-    /// skipping the Trash courtesy.
-    private func discard(
-        _ url: URL,
-        trash: (URL) throws -> Void
-    ) -> Bool {
-        do {
-            try trash(url)
-            return true
-        } catch {
-            onLog(
-                "restore: could not trash "
-                    + "\(url.lastPathComponent) (\(error)); "
-                    + "deleting instead"
-            )
-            do {
-                try FileManager.default.removeItem(at: url)
-                return true
-            } catch {
-                onLog(
-                    "restore: could not delete "
-                        + "\(url.lastPathComponent): \(error)"
-                )
-                return false
-            }
-        }
     }
 }

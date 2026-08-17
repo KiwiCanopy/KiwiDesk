@@ -274,11 +274,17 @@ extension KiwiCore {
     /// would fake drift; an absent entry (a readable profile
     /// without the space) is the genuine `.bsp` default.
     public func savedModeForActiveSpace() -> LayoutMode? {
-        guard let name = profiles.currentName,
-            let space = activeSpace,
-            let profile = try? profiles.read(name: name)
-        else { return nil }
-        return profile.spaceModes[space.id] ?? .bsp
+        guard let space = activeSpace else { return nil }
+        // Expressed through the batch rather than beside it: the
+        // two carried the same `?? .bsp` default and the same
+        // unknown-vs-default distinction, kept in agreement by
+        // prose alone. `profiles.md` already rules that an
+        // unlisted mode should follow the screen rather than a
+        // fixed bsp (`SparseModeFallbackTests`), and that change
+        // would otherwise have to be made twice — with the menu
+        // showing phantom drift on whichever path was missed
+        // (`architect-reviewer`, 2026-08-17).
+        return savedModes(for: [space.id])[space.id]
     }
 
     /// Saved layout modes for `spaces` under the active profile,

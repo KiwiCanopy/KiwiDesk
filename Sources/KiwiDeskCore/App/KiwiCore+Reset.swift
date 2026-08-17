@@ -65,30 +65,16 @@ extension KiwiCore {
     public func resetAllSettings(
         trash: (URL) throws -> Void
     ) -> Bool {
-        let files = FileManager.default
-        var cleared = true
-        for url in [guiConfigStore.url, profiles.directory]
-        where files.fileExists(atPath: url.path) {
-            do {
-                try trash(url)
-            } catch {
-                onLog(
-                    "reset: could not trash "
-                        + "\(url.lastPathComponent) (\(error)); "
-                        + "deleting instead"
-                )
-                do {
-                    try files.removeItem(at: url)
-                } catch {
-                    onLog(
-                        "reset: could not delete "
-                            + "\(url.lastPathComponent): "
-                            + "\(error)"
-                    )
-                    cleared = false
-                }
-            }
-        }
+        // The palettes are deliberately NOT in this list — this
+        // action's whole name rests on their surviving it, which
+        // is why it is "Reset All Settings" rather than a total
+        // reset. `restoreSetup` passes a different set to the
+        // same policy.
+        let cleared = discardArtifacts(
+            [.guiConfig, .profiles],
+            reason: "reset",
+            trash: trash
+        )
         discardSavedArrangement()
         profiles.resetAdoption()
         spacePins = [:]

@@ -57,9 +57,20 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// looking at a file they were mailed. Nothing branches on it;
     /// `format` is the only compatibility question.
     public let writtenBy: String
-    /// The GUI-managed settings. Absent when the user's config is
-    /// Lua-owned and no sidecar exists, which is a legitimate
-    /// backup — their profiles and palettes still travel.
+    /// The GUI-managed settings, or nil.
+    ///
+    /// Nil has **two** causes and only one of them is benign:
+    /// there is no sidecar (a Lua-owned config, a legitimate
+    /// backup whose profiles and palettes still travel), or there
+    /// is one and it would not decode. `GuiConfigStore.load`
+    /// answers nil to both, so an export from a Mac with a corrupt
+    /// `gui.json` silently produces a settings-less backup and
+    /// reports success (`code-reviewer`, 2026-08-17).
+    ///
+    /// `exportSetup` therefore checks `guiConfigStore.exists`
+    /// rather than trusting the nil, and refuses the second case:
+    /// a backup is the one artifact a user makes precisely because
+    /// they are about to need it.
     public let config: GuiConfig?
     public let profiles: [Profile]
     public let palettes: [ColorPalette]
@@ -114,6 +125,14 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case empty
     /// Writing failed, naming the file that did not land.
     case couldNotWrite(name: String)
+    /// This Mac has a `gui.json` that will not decode, so an
+    /// export would silently omit every setting.
+    ///
+    /// Distinguished from "no sidecar at all" by
+    /// `GuiConfigStore.exists`, because the two look identical
+    /// through `load()` and only one of them is a backup worth
+    /// making.
+    case unreadableSettings
     /// The backup carries settings, but this Mac's `init.lua`
     /// owns the configuration, so the settings half could not be
     /// applied.

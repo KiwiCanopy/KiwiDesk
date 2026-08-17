@@ -348,6 +348,7 @@
   "general.advanced.backup.error.not_a_backup": "That file isn't a KiwiDesk backup.",
   "general.advanced.backup.error.restore_title": "Couldn't Restore",
   "general.advanced.backup.error.unreadable": "That file couldn't be opened. It may have been moved, renamed, or deleted.",
+  "general.advanced.backup.error.unreadable_settings": "KiwiDesk can't read this Mac's settings file, so a backup would leave your settings out. Fix or reset the configuration first.",
   "general.advanced.backup.error.write_failed": "KiwiDesk couldn't write “%1$@”. Try somewhere else, like your Desktop.",
   "general.advanced.backup.export": "Export KiwiDesk Backup…",
   "general.advanced.backup.export.caption": "Saves your settings, profiles, and color palettes to a file you choose. Doesn't include init.lua.",

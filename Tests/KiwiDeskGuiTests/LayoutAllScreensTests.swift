@@ -259,6 +259,37 @@ struct LayoutAllScreensTests {
         }
     }
 
+    @Test("A screen unplugged after the menu opened is skipped")
+    func unpluggedScreenIsNotWrittenTo() throws {
+        LocalizationManager.shared.select("en")
+        let core = makeCore()
+        twoScreens(core)
+        let controller = makeController(core)
+        var applied: [SpaceID?] = []
+        controller.onSetLayoutMode = { _, space in
+            applied.append(space)
+        }
+        let all = try allScreensMenu(controller)
+        let monocle = try #require(
+            modeRows(all).first {
+                ($0.representedObject as? LayoutMenuTarget)?.mode
+                    == .monocle
+            }
+        )
+
+        // Unplug "Right" AFTER the menu was built, before the pick
+        // lands — the window a real user hits by leaving a menu
+        // open on a laptop that then undocks.
+        core.state.workspaces.removeDisplay(DisplayID(2))
+
+        controller.setLayoutMode(monocle)
+
+        // Only the surviving screen is written to. Setting a mode
+        // on a space whose display just went away is a write
+        // nobody asked for.
+        #expect(applied.compactMap { $0 } == [SpaceID("1")])
+    }
+
     @Test("Picking All Screens sets every screen's own space")
     func allScreensAppliesToEach() throws {
         LocalizationManager.shared.select("en")

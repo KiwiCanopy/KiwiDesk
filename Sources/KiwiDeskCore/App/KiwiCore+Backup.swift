@@ -12,11 +12,15 @@ extension KiwiCore {
     /// The palette library, built on demand.
     ///
     /// Not a stored property: `PaletteStore` is stateless — every
-    /// read hits the file and every write rewrites it — so a
-    /// second instance over the same path costs nothing and cannot
-    /// disagree with the GUI's. The one live instance otherwise
-    /// belongs to `SettingsModel`, which Core cannot see.
-    var paletteLibrary: PaletteStore {
+    /// read hits the file and every write rewrites it — so
+    /// building one per use costs nothing.
+    ///
+    /// `public` so there is ONE owner rather than two. It was
+    /// internal at first, which left `SettingsModel` constructing
+    /// its own store over the same path — a second construction
+    /// that existed because of an access modifier rather than a
+    /// design decision (`architect-reviewer`, 2026-08-17).
+    public var paletteLibrary: PaletteStore {
         PaletteStore(directory: configDirectory)
     }
 
@@ -87,6 +91,12 @@ extension KiwiCore {
     public func writeBackup(
         to url: URL
     ) throws(SetupBundleError) {
+        // A sidecar that exists but will not decode is the one
+        // case where a silent omission is worst: the user is
+        // making a backup because they are about to need it.
+        if guiConfigStore.exists, guiConfigStore.load() == nil {
+            throw .unreadableSettings
+        }
         guard let data = encodedBackup() else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }

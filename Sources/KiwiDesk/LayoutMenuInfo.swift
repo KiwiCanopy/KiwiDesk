@@ -148,7 +148,10 @@ struct LayoutMenuTarget {
         case activeSpace
         /// The space showing on one screen.
         case space(SpaceID)
-        /// Every screen's shown space, in one action.
-        case everyScreen
+        /// Every screen's shown space, in one action — carrying
+        /// the spaces the menu was BUILT from, so the apply can
+        /// intersect them with what is still connected rather
+        /// than trusting either list alone.
+        case everyScreen(asBuilt: [SpaceID])
     }
 }
