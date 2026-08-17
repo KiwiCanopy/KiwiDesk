@@ -245,10 +245,16 @@ struct PresetsSection: View {
     /// view measures for itself (`SettingsWidthClass` is the one
     /// derivation). `.flexible` rather than `.adaptive` so the
     /// cap is honoured: `.adaptive` cannot express "at most N".
+    ///
+    /// The minimum is `PresetCard`'s own floor rather than a
+    /// number stated here (#862): the card knows what it has to
+    /// hold, and the grid stating a second, smaller opinion is
+    /// how the declared floor came to be a width no locale's
+    /// button row fits in.
     private var columns: [GridItem] {
         Array(
             repeating: GridItem(
-                .flexible(minimum: 200),
+                .flexible(minimum: PresetCard.minimumWidth),
                 spacing: 12
             ),
             count: band.presetColumnCap
