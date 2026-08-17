@@ -123,6 +123,7 @@ struct LayoutAllScreensTests {
         LayoutMenuInfo.Screen(
             space: SpaceID(name),
             name: name,
+            id: DisplayID(UInt32(abs(Int(x)) % 1000 + 1)),
             origin: CGPoint(x: x, y: 0),
             mode: .bsp,
             savedMode: nil
@@ -155,19 +156,27 @@ struct LayoutAllScreensTests {
 
     /// The vertical half of the key, which the two-screen desk
     /// fixtures cannot reach — they all sit at y=0.
+    ///
+    /// **The coordinates are AppKit's, where y grows UP**, so the
+    /// screen physically ABOVE has the LARGER `minY`. An earlier
+    /// cut of this test named y=900 "Lower" and so pinned the
+    /// inverted convention it was written to guard — a fixture
+    /// agreeing with the bug (`code-reviewer`, 2026-08-17).
     @Test("Screens at one x sort top to bottom")
     func orderedScreensBreaksTiesVertically() {
         let lower = LayoutMenuInfo.Screen(
             space: SpaceID("lower"),
             name: "Lower",
-            origin: CGPoint(x: 0, y: 900),
+            id: DisplayID(2),
+            origin: CGPoint(x: 0, y: 0),
             mode: .bsp,
             savedMode: nil
         )
         let upper = LayoutMenuInfo.Screen(
             space: SpaceID("upper"),
             name: "Upper",
-            origin: CGPoint(x: 0, y: 0),
+            id: DisplayID(1),
+            origin: CGPoint(x: 0, y: 900),
             mode: .bsp,
             savedMode: nil
         )

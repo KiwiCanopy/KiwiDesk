@@ -25,6 +25,10 @@ struct LayoutMenuInfo {
         let space: SpaceID
         /// The screen's own name (`Display.name`) — the row label.
         let name: String
+        /// The screen's identity. Carried as the ordering rule's
+        /// final key: two mirrored displays tie on x AND y, and
+        /// without it their rows swap between opens.
+        let id: DisplayID
         /// The screen's frame origin, carried for ONE reason: it
         /// is the ordering key. See `orderedScreens`.
         let origin: CGPoint
@@ -82,10 +86,8 @@ struct LayoutMenuInfo {
         )
     }
 
-    /// Screens left to right, then top to bottom — the order the
-    /// desk reads in, and the same principle the Monitors picture
-    /// works on (a screen's place in the list is where it is on
-    /// the desk).
+    /// Screens in desk reading order, through the one rule that
+    /// owns it (`DeskOrder`).
     ///
     /// **Sorting is not cosmetic here.**
     /// `WorkspaceManager.allDisplays` is `Array(displays.values)`
@@ -93,10 +95,18 @@ struct LayoutMenuInfo {
     /// changes as the dictionary rehashes. Drawn unsorted, the
     /// rows would shuffle between two opens of the same menu with
     /// nothing about the machine having changed.
+    ///
+    /// An earlier cut sorted `(x, y)` here and claimed to work on
+    /// "the same principle the Monitors picture works on". It did
+    /// not: `NSScreen` y grows UP, so it listed stacked screens
+    /// bottom-to-top — the reverse of Settings ▸ Monitors — and
+    /// it carried no identity key, so mirrored displays shuffled
+    /// anyway. Routing to `DeskOrder` is what makes the claim
+    /// true rather than aspirational.
     var orderedScreens: [Screen] {
         screens.sorted {
-            ($0.origin.x, $0.origin.y)
-                < ($1.origin.x, $1.origin.y)
+            DeskOrder.key(origin: $0.origin, id: $0.id)
+                < DeskOrder.key(origin: $1.origin, id: $1.id)
         }
     }
 

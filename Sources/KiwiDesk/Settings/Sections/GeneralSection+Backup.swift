@@ -149,15 +149,16 @@ extension GeneralSection {
                 ),
                 role: .destructive
             ) {
-                model.restoreBackup(bundle)
+                backupError = model.restoreBackup(bundle)
                 pendingRestore = nil
             }
             Button(
                 // `spaces.delete_confirm.cancel`, not
-                // `discard.cancel`: the latter translates as
-                // "Continue editing" in six locales — right for
-                // the staged-edit gate, nonsense here. The same
-                // accepted coupling `resetAllRow` documents.
+                // `discard.cancel`, for the reason and with the
+                // accepted coupling `resetAllRow` documents —
+                // stated there once rather than paraphrased
+                // here, a paraphrase of it having already
+                // shipped a wrong locale count.
                 L("spaces.delete_confirm.cancel", "Cancel"),
                 role: .cancel
             ) { pendingRestore = nil }

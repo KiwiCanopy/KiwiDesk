@@ -43,6 +43,14 @@ enum SetupBackupText {
                 "That backup is empty — there's nothing in it to "
                     + "restore."
             )
+        case .luaOwnsThisMac:
+            return L(
+                "general.advanced.backup.error.lua_owned",
+                "This Mac's settings come from your init.lua, so "
+                    + "a backup's settings can't be applied here. "
+                    + "Switch to the visual editor first, or "
+                    + "restore onto a Mac that uses it."
+            )
         case .couldNotWrite(let name):
             return L(
                 "general.advanced.backup.error.write_failed",

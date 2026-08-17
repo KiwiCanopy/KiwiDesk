@@ -105,6 +105,25 @@ change here:
 - Pre-release, single user: profile JSON needs no migration
   scripts — re-saving is the migration.
 
+## A new file in the config directory answers the backup question
+
+`SetupBundle` (#606) is what a backup carries, and its contents
+are an **allow-list, never a directory sweep** — that type's doc
+comment is the one register of what travels and what is left
+behind, with the reason per entry. So **adding a file to
+`~/.config/KiwiDesk` owes an explicit answer to "does this
+travel?" in the same change set**, recorded there.
+
+`SetupBundleTests` guards one direction only: it asserts the
+encoded bundle's top-level keys, so a field ADDED to the bundle
+has to argue for itself. Nothing can see the other direction — a
+new store whose file never joined is invisible to every guard,
+and its symptom is a user moving Macs and silently losing
+whatever it held. `palettes.json` is the worked case, and it
+nearly was that symptom: applying a palette writes its colours
+into `gui.json`, so the current *look* travelled while the saved
+*library* would have been left behind.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by

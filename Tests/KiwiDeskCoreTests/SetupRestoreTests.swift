@@ -17,6 +17,22 @@ struct SetupRestoreTests {
         try FileManager.default.removeItem(at: $0)
     }
 
+    /// Make this core Lua-owned: an `init.lua` declaring managed
+    /// settings, and no sidecar. The directory has to exist first
+    /// — `makeTestCore` names a scratch path, it does not create
+    /// it.
+    private func makeLuaOwned(_ core: KiwiCore) throws {
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try "KiwiDesk.set_gap(8)".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
     private func palette(
         _ name: String,
         hex: String = "#112233"
@@ -58,7 +74,7 @@ struct SetupRestoreTests {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
 
-        core.restoreSetup(from: incomingBundle(), trash: hardDelete)
+        try core.restoreSetup(from: incomingBundle(), trash: hardDelete)
 
         #expect(
             core.guiConfigStore.load()?.spaces
@@ -80,7 +96,7 @@ struct SetupRestoreTests {
         try core.profiles.save(profile("Local"))
         try core.paletteLibrary.save(palette("Local"))
 
-        core.restoreSetup(from: incomingBundle(), trash: hardDelete)
+        try core.restoreSetup(from: incomingBundle(), trash: hardDelete)
 
         // Merging would have kept these and made the result depend
         // on what happened to be on the destination Mac. The
@@ -101,7 +117,7 @@ struct SetupRestoreTests {
         try core.guiConfigStore.save(GuiConfig())
         core.state.workspaces.ensureSpace(SpaceID("leftover"))
 
-        core.restoreSetup(from: incomingBundle(), trash: hardDelete)
+        try core.restoreSetup(from: incomingBundle(), trash: hardDelete)
 
         // The trap `KiwiCore+Reset` documents, one door over:
         // `loadConfig` SEEDS the sidecar's spaces but never removes
@@ -125,7 +141,7 @@ struct SetupRestoreTests {
             palettes: []
         )
 
-        core.restoreSetup(from: bundle, trash: hardDelete)
+        try core.restoreSetup(from: bundle, trash: hardDelete)
 
         // Nothing declared the space list, so nothing may prune it
         // — a Lua-owned backup must not silently delete the spaces
@@ -139,6 +155,10 @@ struct SetupRestoreTests {
     @Test("A palette shadowing a built-in is dropped, not restored")
     func shadowingPaletteIsDropped() throws {
         let core = makeTestCore()
+        // A sidecar, so this core is GUI-managed: without one the
+        // restore now refuses as `.luaOwnsThisMac` and this test
+        // would be asserting about a refusal instead of a filter.
+        try core.guiConfigStore.save(GuiConfig())
         let builtin = try #require(
             core.paletteLibrary.builtins().first?.name
         )
@@ -149,7 +169,7 @@ struct SetupRestoreTests {
             palettes: [palette(builtin), palette("Fine")]
         )
 
-        core.restoreSetup(from: bundle, trash: hardDelete)
+        try core.restoreSetup(from: bundle, trash: hardDelete)
 
         // The bundle is JSON on the user's disk, so a hand-edited
         // one can carry a name `save` would refuse one at a time.
@@ -169,10 +189,19 @@ struct SetupRestoreTests {
     /// app had no net at all. That is the defect a user meets
     /// immediately: files replaced, app unchanged until relaunch.
     ///
-    /// The gap is the probe because it can only arrive one way.
-    /// `restoreSetup` resets `tiler.settings` to defaults BEFORE
-    /// the reload, so a non-default gap in the live tiler proves
-    /// `loadConfig` ran and read the incoming sidecar.
+    /// The gap probes the **apply**, and only the apply — a
+    /// later prover round measured the difference and this
+    /// docstring had it wrong. Deleting `applyProfileScopedState`
+    /// reds this; deleting `loadConfig()` leaves the whole suite
+    /// green, because the gap arrives off the in-memory bundle
+    /// and never off disk.
+    ///
+    /// So the reload's own work — the sidecar's rules and
+    /// keybindings, and running `init.lua` — is watched by
+    /// nothing here, and is stated as a gap rather than implied
+    /// to be covered. Closing it needs a fixture asserting a
+    /// restored app RULE reaches the live rule base, which is a
+    /// different suite's shape.
     @Test("The restore lands on the running app, not just on disk")
     func theRestoreIsApplied() throws {
         let core = makeTestCore()
@@ -182,7 +211,7 @@ struct SetupRestoreTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("work")]
         config.settings.gapsGlobal.outer.top = 42
-        core.restoreSetup(
+        try core.restoreSetup(
             from: SetupBundle(
                 writtenBy: "0.9.6",
                 config: config,
@@ -206,7 +235,7 @@ struct SetupRestoreTests {
             SpaceID("work"): .monocle, SpaceID("play"): .grid,
         ]
         config.mainSpaces = [SpaceID("work")]
-        core.restoreSetup(
+        try core.restoreSetup(
             from: SetupBundle(
                 writtenBy: "0.9.6",
                 config: config,
@@ -242,7 +271,7 @@ struct SetupRestoreTests {
         // absent from the running app.
         config.spaces = [SpaceID("work")]
         config.spaceModes = [SpaceID("solo"): .floating]
-        core.restoreSetup(
+        try core.restoreSetup(
             from: SetupBundle(
                 writtenBy: "0.9.6",
                 config: config,
@@ -257,17 +286,19 @@ struct SetupRestoreTests {
         #expect(live.contains(SpaceID("work")))
     }
 
-    @Test("Restore reports success when every file was removed")
-    func reportsWhetherItCleared() throws {
+    @Test("A restore that lands throws nothing")
+    func aCleanRestoreThrowsNothing() throws {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
         try core.profiles.save(profile("Local"))
 
-        #expect(
-            core.restoreSetup(
-                from: incomingBundle(),
-                trash: hardDelete
-            )
+        // The success arm of the throwing signature. A write that
+        // fails AFTER the originals are in the Trash is the one
+        // failure the pre-flight read cannot catch, so the happy
+        // path has to be distinguishable from it.
+        try core.restoreSetup(
+            from: incomingBundle(),
+            trash: hardDelete
         )
     }
 
@@ -278,7 +309,7 @@ struct SetupRestoreTests {
         try core.profiles.save(profile("Local"))
         struct Nope: Error {}
 
-        core.restoreSetup(from: incomingBundle()) { _ in
+        try core.restoreSetup(from: incomingBundle()) { _ in
             throw Nope()
         }
 

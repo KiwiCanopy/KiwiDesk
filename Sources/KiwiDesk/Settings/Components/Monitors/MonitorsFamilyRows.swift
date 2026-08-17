@@ -77,13 +77,7 @@ struct MonitorsFamilyRows {
     /// reordered itself between renders would move the menu item
     /// under the pointer.
     var orderedDisplays: [Display] {
-        displays.sorted {
-            (
-                $0.frame.minX, -$0.frame.minY, $0.id.raw
-            ) < (
-                $1.frame.minX, -$1.frame.minY, $1.id.raw
-            )
-        }
+        DeskOrder.reading(displays)
     }
 
     /// Whether two connected displays are indistinguishable to

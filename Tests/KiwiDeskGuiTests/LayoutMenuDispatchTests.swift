@@ -188,6 +188,7 @@ struct LayoutMenuDispatchTests {
         let screen = LayoutMenuInfo.Screen(
             space: SpaceID("1"),
             name: "Left",
+            id: DisplayID(1),
             origin: .zero,
             mode: .monocle,
             savedMode: nil
@@ -197,6 +198,7 @@ struct LayoutMenuDispatchTests {
             LayoutMenuInfo.Screen(
                 space: SpaceID("1"),
                 name: "Left",
+                id: DisplayID(1),
                 origin: .zero,
                 mode: .monocle,
                 savedMode: .bsp

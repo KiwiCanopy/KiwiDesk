@@ -152,12 +152,18 @@ extension GeneralSection {
                 model.resetAllSettings()
             }
             // `spaces.delete_confirm.cancel`, not
-            // `discard.cancel`: the latter translates as
-            // "Continue editing" in six locales — right for
-            // the staged-edit gate, nonsense here. Accepted
-            // coupling: rewording the Spaces dialog's Cancel
-            // rewords this one too — fine while both mean a
-            // plain "Cancel"; mint a key if either drifts.
+            // `discard.cancel`: most catalogs translate the
+            // latter as "Continue editing" rather than
+            // "Cancel" — right for the staged-edit gate it was
+            // minted for, nonsense on a dialog with nothing
+            // being edited. Read the value, do not trust a
+            // count: this comment carried "six locales" and it
+            // was seven (`grep discard.cancel
+            // Sources/KiwiDeskCore/Resources/Locales/*.json`).
+            // Accepted coupling: rewording the Spaces dialog's
+            // Cancel rewords this one too — fine while both
+            // mean a plain "Cancel"; mint a key if either
+            // drifts.
             Button(
                 L("spaces.delete_confirm.cancel", "Cancel"),
                 role: .cancel

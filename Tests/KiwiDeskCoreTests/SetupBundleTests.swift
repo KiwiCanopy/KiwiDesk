@@ -96,7 +96,14 @@ struct SetupBundleTests {
             encoding: .utf8
         )
 
-        let data = try JSONEncoder().encode(core.exportSetup())
+        // The WRITTEN file, not a fresh encode: the writer composes
+        // the outer document by hand so the header leads, so this
+        // is what must be pinned — a field missing from the
+        // composer is invisible to an encode of the struct.
+        let url = core.configDirectory
+            .appendingPathComponent("pinned.json")
+        try core.writeBackup(to: url)
+        let data = try Data(contentsOf: url)
         let top = try #require(
             try JSONSerialization.jsonObject(with: data)
                 as? [String: Any]
@@ -119,6 +126,57 @@ struct SetupBundleTests {
         let text = String(decoding: data, as: UTF8.self)
         #expect(!text.contains("set_gap"))
         #expect(!text.contains("init.lua"))
+    }
+
+    @Test("The header leads: format and writtenBy come first")
+    func headerComesFirst() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.save(profile("Desk"))
+        let url = core.configDirectory
+            .appendingPathComponent("ordered.json")
+
+        try core.writeBackup(to: url)
+        let lines = try String(contentsOf: url, encoding: .utf8)
+            .split(separator: "\n")
+
+        // `writtenBy` exists for a human opening the file, and
+        // `.sortedKeys` had put it on the last line of 263 (owner,
+        // 2026-08-17). Both now sit above the payload.
+        let format = try #require(
+            lines.firstIndex { $0.contains("\"format\"") }
+        )
+        let writtenBy = try #require(
+            lines.firstIndex { $0.contains("\"writtenBy\"") }
+        )
+        let config = try #require(
+            lines.firstIndex { $0.contains("\"config\"") }
+        )
+        #expect(format < writtenBy)
+        #expect(writtenBy < config)
+        #expect(format <= 1)
+    }
+
+    @Test("Subtrees stay sorted, so two exports diff cleanly")
+    func subtreesStaySorted() throws {
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("b"), SpaceID("a")]
+        config.spaceModes = [
+            SpaceID("b"): .grid, SpaceID("a"): .monocle,
+        ]
+        try core.guiConfigStore.save(config)
+
+        // The property the sorting buys and the hand-composed
+        // header must not cost: identical input, identical bytes.
+        let first = try #require(core.encodedBackup())
+        let second = try #require(core.encodedBackup())
+        #expect(first == second)
+        // And the subtree really is sorted, not merely stable.
+        let text = String(decoding: first, as: UTF8.self)
+        let appRules = try #require(text.range(of: "\"app_rules\""))
+        let spaces = try #require(text.range(of: "\"spaces\""))
+        #expect(appRules.lowerBound < spaces.lowerBound)
     }
 
     @Test("A bundle round-trips through JSON unchanged")
@@ -190,13 +248,14 @@ struct SetupBundleTests {
     /// `<=` to `==` and watched all 18 tests stay green
     /// (2026-08-17).
     ///
-    /// It reds nothing today, `currentFormat` being 1 — and that
-    /// is exactly why it is written now rather than later. The day
-    /// the format becomes 2, that one-character regression would
-    /// otherwise ship silently and refuse every 1.0-era backup
-    /// with `newerFormat(found: 1, supported: 2)`, a message that
-    /// is nonsense on its face. The relation is what is asserted,
-    /// so the test starts working the moment it can.
+    /// It reds **today** on exactly that narrowing — a prover
+    /// round confirmed it, against an earlier draft of this
+    /// comment that claimed it could not yet fire. What it buys
+    /// beyond today is the day the format becomes 2: the same
+    /// one-character regression would otherwise refuse every
+    /// 1.0-era backup with `newerFormat(found: 1, supported: 2)`,
+    /// a message that is nonsense on its face. The relation is
+    /// what is asserted, so it keeps working as the number moves.
     @Test("An OLDER format still reads — upgrading keeps backups")
     func olderFormatIsAccepted() throws {
         let core = makeTestCore()

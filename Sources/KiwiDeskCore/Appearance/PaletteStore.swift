@@ -88,19 +88,45 @@ public final class PaletteStore {
     /// Replaces the whole user library — the restore half of a
     /// backup (#606).
     ///
-    /// **Filters out any name a built-in already owns**, which
-    /// `save` refuses one at a time and this must refuse in bulk:
-    /// the bundle is JSON on the user's disk, so a hand-edited one
-    /// can carry a palette shadowing a built-in, and the shadow
-    /// would be invisible until the built-in stopped resolving.
-    /// Dropping it is the same answer `save` gives, without
-    /// failing the whole restore over one bad entry.
+    /// **This is the type's one bulk entry point, and the only one
+    /// whose input is untrusted**, so it enforces every invariant
+    /// the single-item paths enforce rather than only the first
+    /// one a reviewer thought of. A backup is JSON on the user's
+    /// disk; a hand-edited one can carry anything.
+    ///
+    /// - a name a **built-in** owns is dropped, which `save`
+    ///   refuses one at a time (`reservedName`) — a shadow would
+    ///   be invisible until the built-in stopped resolving;
+    /// - a **duplicate** name is dropped, keeping the first, which
+    ///   `rename` refuses (`duplicateName`) — the shelf keys tiles
+    ///   by name, so twins are a collision rather than a
+    ///   preference;
+    /// - an **unknown colour key** is filtered out, exactly as
+    ///   `importPalette` filters a hand-supplied file, so a typo
+    ///   or a retired key cannot ride into the library.
+    ///
+    /// Dropping rather than throwing is deliberate: one bad entry
+    /// must not fail a whole restore the user has already
+    /// confirmed. The count says how many were refused.
     @discardableResult
     public func replaceUserPalettes(
         with palettes: [ColorPalette]
     ) throws -> Int {
-        let admissible = palettes.filter {
-            !isBuiltinName($0.name)
+        let known = Set(ColorPaletteKeys.all)
+        var seen: Set<String> = []
+        var admissible: [ColorPalette] = []
+        for palette in palettes {
+            guard !isBuiltinName(palette.name),
+                seen.insert(palette.name).inserted
+            else { continue }
+            admissible.append(
+                ColorPalette(
+                    name: palette.name,
+                    colors: palette.colors.filter {
+                        known.contains($0.key)
+                    }
+                )
+            )
         }
         try write(admissible)
         return palettes.count - admissible.count

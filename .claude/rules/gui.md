@@ -940,9 +940,19 @@ stopped at `Settings/`.
   needs during boot (#802) and what the Layout submenu's save row
   needed before it (#68). The cost is the other half of the
   switch: a nil-action row is no longer disabled for free, so an
-  unstated `isEnabled` ships an enabled-looking context line.
-  `QuickMenuBootRowTests` and `QuickMenuProfileRowTests` hold the
-  two menus' rows.
+  unstated `isEnabled` ships an enabled-looking context line —
+  and a **submenu parent** is one of those rows, its nil action
+  being what opens the child.
+  **The flag is per `NSMenu` and does not inherit**, so a builder
+  that nests menus turns it off on every one it constructs, not
+  only the outermost: a nested menu left on auto-enabling
+  re-enables at display time exactly the rows the switch was
+  thrown to keep dim. `QuickMenuBootRowTests` and
+  `QuickMenuProfileRowTests` hold the two menus' rows;
+  `LayoutMenuEnablementScanTests` pairs each constructed row to
+  its own `isEnabled` statement (never a per-file total, which a
+  `guard-prover` round forged) and derives the flag count from
+  the `NSMenu()` count, so a nested menu that skipped it reds.
 - **Modifiers on a bare `ForEach` apply PER CHILD, never to the
   run.** A container that hands a `ForEach` straight to its
   chrome (a background well, padding, a border) stamps that

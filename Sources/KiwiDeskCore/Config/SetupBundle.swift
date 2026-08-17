@@ -9,11 +9,12 @@ import Foundation
 /// the destination Mac is touched.
 ///
 /// **The contents are an allow-list, never a directory sweep.**
-/// `~/.config/KiwiDesk` also holds a socket, a lock file, the
-/// remembered window arrangement (`.state_snapshot`) and whatever
-/// `.bak-*` directories a past reset left behind. None of that
-/// describes how the user likes their desk, and the snapshot is
-/// actively machine-specific. What travels:
+/// `~/.config/KiwiDesk` also holds the IPC socket, the instance
+/// lock (`SingleInstanceLock`) and the remembered window
+/// arrangement (`CrashRecovery`'s `.state_snapshot` and its
+/// session file). None of that describes how the user likes their
+/// desk, and the snapshots are actively machine-specific. What
+/// travels:
 ///
 /// **Carried:** `gui.json`'s contents, every profile, and the
 /// saved palette library.
@@ -21,10 +22,15 @@ import Foundation
 /// **Left behind, each for its own reason:** `init.lua`, because
 /// it is user-authored code and a backup that quietly restored it
 /// would claim ownership of a file KiwiDesk deliberately does not
-/// manage; `.state_snapshot`, because the remembered arrangement
-/// is this Mac's session rather than a setting; and the socket,
-/// the lock file and any `*.bak-*` left by a past reset, which are
-/// runtime and rubble.
+/// manage; the arrangement snapshots, because a remembered
+/// arrangement is this Mac's session rather than a setting; and
+/// the socket and the lock file, which are runtime.
+///
+/// An earlier draft of this list also named `.bak-*` directories
+/// "a past reset left behind". Nothing in the tree writes one —
+/// `resetAllSettings` trashes, it does not copy aside — so the
+/// entry described a file that has never existed. Add an entry
+/// here only for a path something actually creates.
 ///
 /// Palettes are here because they do **not** ride inside
 /// `gui.json`: applying a palette writes its colours into the
@@ -108,4 +114,16 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case empty
     /// Writing failed, naming the file that did not land.
     case couldNotWrite(name: String)
+    /// The backup carries settings, but this Mac's `init.lua`
+    /// owns the configuration, so the settings half could not be
+    /// applied.
+    ///
+    /// `isGuiManaged` is the one ownership predicate
+    /// (`profiles.md`), and on a Lua-owned destination
+    /// `loadConfig` takes the `applyConfigGlobals` branch: the
+    /// restored rules and keybindings in the written `gui.json`
+    /// are never read, while the profile-scoped half applies
+    /// anyway. That is a half-landed restore, and reporting
+    /// success for it is the failure this case exists to prevent.
+    case luaOwnsThisMac
 }

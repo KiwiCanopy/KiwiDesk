@@ -343,6 +343,7 @@
   "general.about.title": "About",
   "general.advanced.backup.error.empty": "That backup is empty — there's nothing in it to restore.",
   "general.advanced.backup.error.export_title": "Couldn't Save the Backup",
+  "general.advanced.backup.error.lua_owned": "This Mac's settings come from your init.lua, so a backup's settings can't be applied here. Switch to the visual editor first, or restore onto a Mac that uses it.",
   "general.advanced.backup.error.newer": "That backup was made by a newer version of KiwiDesk. Update KiwiDesk, then try again.",
   "general.advanced.backup.error.not_a_backup": "That file isn't a KiwiDesk backup.",
   "general.advanced.backup.error.restore_title": "Couldn't Restore",

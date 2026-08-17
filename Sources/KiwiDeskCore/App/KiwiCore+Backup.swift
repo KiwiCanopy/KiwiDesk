@@ -64,13 +64,30 @@ extension KiwiCore {
         return bundle
     }
 
-    /// Writes this install's backup to `url`.
+    /// Writes this install's backup to `url`, **header first**.
+    ///
+    /// `.sortedKeys` is the house style for every JSON this app
+    /// writes (`GuiConfigStore`, `PaletteStore`) and it buys the
+    /// property that makes backups comparable: two exports of one
+    /// setup are byte-identical, so a diff shows real change. Its
+    /// cost is that it sorts the TOP level too, which put
+    /// `writtenBy` — the field that exists for a human opening the
+    /// file — on the last line of 263 (owner, 2026-08-17).
+    ///
+    /// `outputFormatting` is global to an encoder, so the two
+    /// cannot be had at once from one encode. Encoding the
+    /// subtrees and composing the outer document by hand gets
+    /// both: sorted, deterministic subtrees under a header a
+    /// reader meets first.
+    ///
+    /// The drift this would normally invite — a sixth field the
+    /// hand-composer forgets — is already guarded:
+    /// `SetupBundleTests.theAllowListIsPinned` asserts the written
+    /// file's top-level keys, so a field missing from here reds.
     public func writeBackup(
         to url: URL
     ) throws(SetupBundleError) {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        guard let data = try? encoder.encode(exportSetup()) else {
+        guard let data = encodedBackup() else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }
         do {
@@ -81,116 +98,65 @@ extension KiwiCore {
         }
     }
 
-    /// Replaces this install's settings, profiles and palettes
-    /// with `bundle`'s, then reloads.
-    ///
-    /// **Replace, not merge.** The issue's model and the confirm
-    /// the user just answered: merging would need a name-collision
-    /// policy per profile and per palette, which is real
-    /// complexity for a benefit nobody has asked for, and it would
-    /// make the result depend on what happened to be on the
-    /// destination Mac. What is replaced goes to the Trash first,
-    /// so recovery is one drag away — the courtesy
-    /// `resetAllSettings` already extends, for the same reason.
-    ///
-    /// `trash` has no default, exactly as reset's does not: a
-    /// defaulted parameter let a bare test call fill the real
-    /// Trash with zero red, and that lesson is one file over.
-    @discardableResult
-    public func restoreSetup(
-        from bundle: SetupBundle,
-        trash: (URL) throws -> Void
-    ) -> Bool {
-        var cleared = true
-        for url in [
-            guiConfigStore.url, profiles.directory,
-            paletteLibrary.url,
-        ] where FileManager.default.fileExists(atPath: url.path) {
-            if !discard(url, trash: trash) { cleared = false }
+    /// The bundle as it is written: header, then payload.
+    func encodedBackup() -> Data? {
+        /// Just the two scalars, so their JSON literals — and the
+        /// string's escaping — come from the encoder rather than
+        /// from hand-written quoting.
+        struct Header: Encodable {
+            let format: Int
+            let writtenBy: String
         }
+        let bundle = exportSetup()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard
+            let head = try? encoder.encode(
+                Header(
+                    format: bundle.format,
+                    writtenBy: bundle.writtenBy
+                )
+            ),
+            let config = try? encoder.encode(bundle.config),
+            let profiles = try? encoder.encode(bundle.profiles),
+            let palettes = try? encoder.encode(bundle.palettes)
+        else { return nil }
 
-        // Write the incoming setup before the reload reads it.
-        if let config = bundle.config {
-            try? guiConfigStore.save(config)
+        // The header's own braces come off; its two lines lead.
+        let headLines = String(decoding: head, as: UTF8.self)
+            .split(separator: "\n")
+            .dropFirst()
+            .dropLast()
+            .joined(separator: "\n")
+        let body = [
+            ("config", config),
+            ("profiles", profiles),
+            ("palettes", palettes),
+        ]
+        .map { name, data in
+            "  \"\(name)\" : \(reindented(data))"
         }
-        for profile in bundle.profiles {
-            try? profiles.write(profile)
-        }
-        try? paletteLibrary.replaceUserPalettes(
-            with: bundle.palettes
+        .joined(separator: ",\n")
+        return Data(
+            ("{\n" + headLines + ",\n" + body + "\n}\n").utf8
         )
-
-        // Adoption is the one piece of live profile state the
-        // incoming config cannot speak for: it records which
-        // profile this Mac matched, which the backup's profiles
-        // have just replaced.
-        profiles.resetAdoption()
-
-        // Reload first, THEN apply — the order the adopt path
-        // already uses, and for the same stated reason: the reload
-        // resets the sparse tiling state, so the config's tiling
-        // has to go back on top of it rather than under it.
-        //
-        // `loadConfig` alone is NOT enough, which is the whole
-        // reason this call is here. It registers rules and
-        // keybindings from the sidecar and runs `init.lua`, but
-        // nothing in it pushes the sidecar's `settings`, space
-        // modes, pins or Main role into the running core —
-        // `applyProfileScopedState` is the function whose job that
-        // is, and the GUI's own save path calls it separately for
-        // exactly this reason. An earlier cut of this file
-        // hand-rolled a prune instead and shipped four defects at
-        // once: gaps and layout params never applied, space modes
-        // never set, pins and Main dropped, and a space living
-        // only in `spaceModes` pruned away. Every one was
-        // invisible to a test that read files, and a
-        // `guard-prover` round is what asked the question
-        // (2026-08-17).
-        loadConfig()
-        if let config = bundle.config {
-            // Ensures and reorders the incoming spaces, prunes the
-            // ones the backup never mentions, sets every mode, pin
-            // and Main role, re-resolves placement and forces the
-            // retile.
-            applyProfileScopedState(from: config)
-        }
-        onLog(
-            cleared
-                ? "setup restored from backup"
-                : "setup restored, but a file could not be removed"
-        )
-        return cleared
     }
 
-    /// Trash a path, falling back to a hard delete.
-    ///
-    /// Same argument as reset's: a surviving `gui.json` would flip
-    /// the reload back onto the OLD sidecar and turn a confirmed
-    /// replace into a silent no-op, which is strictly worse than
-    /// skipping the Trash courtesy.
-    private func discard(
-        _ url: URL,
-        trash: (URL) throws -> Void
-    ) -> Bool {
-        do {
-            try trash(url)
-            return true
-        } catch {
-            onLog(
-                "restore: could not trash "
-                    + "\(url.lastPathComponent) (\(error)); "
-                    + "deleting instead"
-            )
-            do {
-                try FileManager.default.removeItem(at: url)
-                return true
-            } catch {
-                onLog(
-                    "restore: could not delete "
-                        + "\(url.lastPathComponent): \(error)"
-                )
-                return false
+    /// A pretty-printed subtree, shifted one level in so it sits
+    /// correctly under the outer object.
+    private func reindented(_ data: Data) -> String {
+        String(decoding: data, as: UTF8.self)
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .enumerated()
+            .map { line in
+                // A blank line stays blank: the encoder writes one
+                // inside an empty container, and padding it leaves
+                // trailing whitespace in the shipped file.
+                guard line.offset > 0, !line.element.isEmpty else {
+                    return String(line.element)
+                }
+                return "  " + line.element
             }
-        }
+            .joined(separator: "\n")
     }
 }

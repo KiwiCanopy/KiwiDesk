@@ -33,6 +33,7 @@ extension LayoutMenuInfo {
                 Screen(
                     space: entry.space,
                     name: entry.display.name,
+                    id: entry.display.id,
                     origin: entry.display.frame.origin,
                     mode: workspaces[entry.space]?.mode,
                     savedMode: saved[entry.space]

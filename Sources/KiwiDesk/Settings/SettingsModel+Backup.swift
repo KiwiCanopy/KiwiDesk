@@ -73,11 +73,25 @@ extension SettingsModel {
     /// staged draft edited the state that just went to the Trash,
     /// so keeping it would leave the editor describing files that
     /// no longer exist.
-    func restoreBackup(_ bundle: SetupBundle) {
-        core.restoreSetup(
-            from: bundle,
-            trash: KiwiCore.moveToTrash
-        )
-        reload()
+    /// Returns the failure, or nil on success — the caller shows
+    /// the alert.
+    ///
+    /// A write that fails AFTER the originals are in the Trash is
+    /// the one failure class the pre-flight read cannot catch, so
+    /// it is the one that must not be swallowed. `reload()` runs
+    /// either way: the files on disk changed even on the failing
+    /// path, so an editor still describing the old ones would be
+    /// lying about what is there.
+    func restoreBackup(_ bundle: SetupBundle) -> SetupBundleError? {
+        defer { reload() }
+        do {
+            try core.restoreSetup(
+                from: bundle,
+                trash: KiwiCore.moveToTrash
+            )
+            return nil
+        } catch {
+            return error
+        }
     }
 }

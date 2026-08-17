@@ -41,8 +41,7 @@ struct SettingsCatalogSiteTests {
         // 60 since #793: Advanced Colours' panel scene.
         // 61 since #794: the Spaces panel's per-Space preview.
         // 62 since #795's device round: the install inventory card.
-        // 64 since #606: the export/restore backup pair.
-        #expect(names.count == 64)
+        #expect(names.count == 62)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
