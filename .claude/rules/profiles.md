@@ -114,12 +114,20 @@ behind, with the reason per entry. So **adding a file to
 `~/.config/KiwiDesk` owes an explicit answer to "does this
 travel?" in the same change set**, recorded there.
 
-`SetupBundleTests` guards one direction only: it asserts the
-encoded bundle's top-level keys, so a field ADDED to the bundle
-has to argue for itself. Nothing can see the other direction — a
-new store whose file never joined is invisible to every guard,
-and its symptom is a user moving Macs and silently losing
-whatever it held. `palettes.json` is the worked case, and it
+`SetupBundleTests.theAllowListIsPinned` guards the bundle's own
+shape in both directions, by reflection over its stored
+properties: a property ADDED has to argue for itself, and one the
+hand-written composer OMITS reds too. Weaker forms of that guard
+were tried and proven blind — asserting the written file's keys
+alone misses the omission, and re-encoding the struct misses it as
+well, `JSONEncoder` omitting a nil Optional.
+
+What no guard can see is the step before: a **new store** whose
+file never became a `ConfigArtifact` at all. `SetupBundleArtifactTests`
+narrows it — the register is checked against what an export
+carries, and against a live config directory — but nothing can
+enumerate the files a future store will write, and the symptom is
+a user moving Macs and silently losing whatever it held. `palettes.json` is the worked case, and it
 nearly was that symptom: applying a palette writes its colours
 into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.

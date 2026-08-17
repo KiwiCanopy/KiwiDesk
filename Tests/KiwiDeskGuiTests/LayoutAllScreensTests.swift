@@ -19,15 +19,12 @@ private final class FakeStatusItem: StatusItemHandle {
 /// The collective **All Screens** row, and the ordering the
 /// per-screen rows are drawn in (#752).
 ///
-/// Split from `LayoutScreensQuickMenuTests` at the §2.1 ceiling
-/// rather than for a conceptual reason, but the seam is a real
-/// one: that suite asks what one screen's row does, and this asks
-/// about the list as a whole.
+/// Split from `LayoutScreensQuickMenuTests` at the §2.1 ceiling,
+/// on a real seam: that suite asks what one screen's row does,
+/// this asks about the list as a whole.
 ///
 /// `@MainActor` because `NSMenu` is, and that is all it spends
-/// there — menus built, items read, no scan and no filesystem
-/// walk. The main actor is a budget shared with the heavy
-/// synchronous scanning suites, so a new one says what it costs.
+/// there — menus built, items read, no scan, no filesystem walk.
 ///
 /// `.serialized` because titles are matched in English and
 /// `LocalizationManager` is a process-wide singleton.
@@ -116,52 +113,79 @@ struct LayoutAllScreensTests {
     }
 
     /// A screen at `x`, with no core and no Dictionary involved.
+    ///
+    /// `id` is a parameter, not derived from `x`: an earlier cut
+    /// computed `abs(Int(x)) % 1000 + 1`, and both x values this
+    /// suite uses mapped to `DisplayID(1)` — so the suite whose
+    /// subject is the id tiebreak could not express a tie
+    /// (`code-reviewer`, 2026-08-17).
     private func screen(
         _ name: String,
-        x: CGFloat
+        x: CGFloat,
+        y: CGFloat = 0,
+        id: UInt32
     ) -> LayoutMenuInfo.Screen {
         LayoutMenuInfo.Screen(
             space: SpaceID(name),
             name: name,
-            id: DisplayID(UInt32(abs(Int(x)) % 1000 + 1)),
-            origin: CGPoint(x: x, y: 0),
+            id: DisplayID(id),
+            origin: CGPoint(x: x, y: y),
             mode: .bsp,
             savedMode: nil
         )
     }
 
+    /// The third key, which nothing covered: two MIRRORED screens
+    /// tie on x AND y, so without the id the order is `sorted`'s —
+    /// unstable, free to swap between opens. Deleting `id.raw` left
+    /// the whole tree green before this.
+    @Test("Mirrored screens order by id, the stable third key")
+    func mirroredScreensBreakTiesById() {
+        let info = LayoutMenuInfo(
+            activeMode: nil,
+            activeProfileName: nil,
+            savedModeForActiveSpace: nil,
+            screens: [
+                screen("Second", x: 0, id: 7),
+                screen("First", x: 0, id: 3),
+            ]
+        )
+        #expect(
+            info.orderedScreens.map(\.name) == ["First", "Second"]
+        )
+    }
+
     /// The sort itself, on a hand-built value.
     ///
-    /// **This is the deterministic half, and it exists because the
-    /// derivation-level test below is not.** `allDisplays` is
+    /// **The deterministic half.** `allDisplays` is
     /// `Array(displays.values)` and Swift seeds Dictionary hashing
     /// per process, so a fixture cannot force the wrong source
-    /// order: `guard-prover` measured a dropped sort going red on
-    /// only 6 of 10 isolated runs (2026-08-17), i.e. shipping green
-    /// about 40% of the time with CI as the coin flip. Building the
-    /// value directly takes the Dictionary out of it — the input
-    /// order is now stated by the test, so a lost sort always reds.
+    /// order: a prover round measured a dropped sort red on only 6
+    /// of 10 isolated runs. Building the value directly states the
+    /// input order, so a lost sort always reds.
     @Test("orderedScreens sorts by position, deterministically")
     func orderedScreensSorts() {
         let info = LayoutMenuInfo(
             activeMode: nil,
             activeProfileName: nil,
             savedModeForActiveSpace: nil,
-            screens: [screen("Right", x: 1000), screen("Left", x: 0)]
+            screens: [
+                screen("Right", x: 1000, id: 2),
+                screen("Left", x: 0, id: 1),
+            ]
         )
         #expect(
             info.orderedScreens.map(\.name) == ["Left", "Right"]
         )
     }
 
-    /// The vertical half of the key, which the two-screen desk
-    /// fixtures cannot reach — they all sit at y=0.
+    /// The vertical half of the key, which the desk fixtures
+    /// cannot reach — they sit at y=0.
     ///
     /// **The coordinates are AppKit's, where y grows UP**, so the
     /// screen physically ABOVE has the LARGER `minY`. An earlier
-    /// cut of this test named y=900 "Lower" and so pinned the
-    /// inverted convention it was written to guard — a fixture
-    /// agreeing with the bug (`code-reviewer`, 2026-08-17).
+    /// cut named y=900 "Lower" and so pinned the inverted
+    /// convention it guarded (`code-reviewer`, 2026-08-17).
     @Test("Screens at one x sort top to bottom")
     func orderedScreensBreaksTiesVertically() {
         let lower = LayoutMenuInfo.Screen(

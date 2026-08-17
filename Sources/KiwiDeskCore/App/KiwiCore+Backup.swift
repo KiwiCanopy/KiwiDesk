@@ -84,10 +84,15 @@ extension KiwiCore {
     /// both: sorted, deterministic subtrees under a header a
     /// reader meets first.
     ///
-    /// The drift this would normally invite — a sixth field the
-    /// hand-composer forgets — is already guarded:
-    /// `SetupBundleTests.theAllowListIsPinned` asserts the written
-    /// file's top-level keys, so a field missing from here reds.
+    /// The drift this invites — a sixth property the composer
+    /// forgets — is guarded by
+    /// `SetupBundleTests.theAllowListIsPinned`, which compares the
+    /// written file against the type's stored properties by
+    /// reflection. It has to be reflection: asserting the file's
+    /// keys alone catches only what the composer ADDS, and
+    /// re-encoding the struct does not help either, because
+    /// `JSONEncoder` omits a nil Optional. Both weaker versions
+    /// were written and both were proven blind before this one.
     public func writeBackup(
         to url: URL
     ) throws(SetupBundleError) {

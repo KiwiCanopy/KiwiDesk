@@ -28,6 +28,18 @@ extension SettingsModel {
     /// one that says so, because the user walks away believing
     /// they have it.
     func exportBackup() -> SetupBundleError? {
+        // Refuse BEFORE the panel, not after. This feature's own
+        // read/restore split exists on exactly this principle —
+        // "a dialog for a restore that will fail on the first read
+        // is a dialog that should never have opened" — and the
+        // check needs no file panel to answer, so asking the user
+        // to pick a folder and type a filename first was the same
+        // mistake one surface over (`code-reviewer`, 2026-08-17).
+        if core.guiConfigStore.exists,
+            core.guiConfigStore.load() == nil
+        {
+            return .unreadableSettings
+        }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = suggestedBackupName

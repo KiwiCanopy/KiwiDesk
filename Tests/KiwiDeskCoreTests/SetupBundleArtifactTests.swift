@@ -70,6 +70,15 @@ struct SetupBundleArtifactTests {
         )
 
         let bundle = core.exportSetup()
+        // Assert the loop has something to walk: every artifact
+        // travels today, so a `where` that matched nothing would
+        // be a green having checked nothing — the vacuity a
+        // prover round already caught two suites over.
+        #expect(
+            ConfigArtifact.allCases.contains {
+                $0.travelsInABackup
+            }
+        )
         for artifact in ConfigArtifact.allCases
         where artifact.travelsInABackup {
             let carried: Bool =
@@ -95,6 +104,16 @@ struct SetupBundleArtifactTests {
         }
     }
 
+    /// Vacuous today, deliberately and statedly: nothing answers
+    /// `travelsInABackup == false`, so the loop walks nothing. It
+    /// is kept as the standing check on a future exclusion rather
+    /// than deleted, and says so instead of implying coverage.
+    ///
+    /// Also stated, since it is the direction this cannot see: an
+    /// artifact flipped to `false` **with** a reason passes here
+    /// while `exportSetup` still carries it —
+    /// `travellingArtifactsAreInTheBundle` is what would have to
+    /// grow the inverse arm if an exclusion ever lands.
     @Test("An artifact left behind says why")
     func exclusionsCarryTheirReason() {
         for artifact in ConfigArtifact.allCases

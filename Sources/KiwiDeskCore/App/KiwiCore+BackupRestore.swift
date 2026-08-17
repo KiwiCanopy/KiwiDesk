@@ -65,33 +65,75 @@ extension KiwiCore {
         // back to the starter set, all persisted. A restore that
         // supplied no settings would have silently destroyed the
         // ones already there (`code-reviewer`, 2026-08-17).
-        var artifacts: [ConfigArtifact] = [.profiles]
-        if bundle.config != nil { artifacts.insert(.guiConfig, at: 0) }
-        if !bundle.palettes.isEmpty { artifacts.append(.palettes) }
         discardArtifacts(
-            artifacts,
+            ConfigArtifact.allCases.filter {
+                $0.isCarried(by: bundle)
+            },
             reason: "restore",
             trash: trash
         )
 
         // Write the incoming setup before the reload reads it.
-        do {
-            if let config = bundle.config {
+        //
+        // **Each write names its own file when it fails.** An
+        // earlier cut reported `gui.json` for all three, so a
+        // failed profile write told the user about a file that had
+        // written fine (`code-reviewer`, 2026-08-17).
+        //
+        // **And a single bad profile must not abort the restore.**
+        // A hand-edited bundle can carry a name `ProfileManager`
+        // rejects — empty, containing `/`, leading `.` — which is
+        // the same threat model `replaceUserPalettes` is hardened
+        // against. Aborting there left the destination with its
+        // config in the Trash and nothing loaded, which is the
+        // worst outcome available: strictly worse than either
+        // finishing or refusing up front. So a profile that will
+        // not write is skipped and logged, exactly as a palette
+        // that cannot be admitted is dropped, and the restore
+        // continues to the reload.
+        if let config = bundle.config {
+            do {
                 try guiConfigStore.save(config)
+            } catch {
+                onLog("restore: gui.json write failed: \(error)")
+                throw .couldNotWrite(
+                    name: guiConfigStore.url.lastPathComponent
+                )
             }
-            for profile in bundle.profiles {
+        }
+        var skippedProfiles: [String] = []
+        for profile in bundle.profiles {
+            do {
                 try profiles.write(profile)
+            } catch {
+                skippedProfiles.append(profile.name)
+                onLog(
+                    "restore: skipped profile "
+                        + "'\(profile.name)': \(error)"
+                )
             }
-            if !bundle.palettes.isEmpty {
+        }
+        // Every profile failing is not a skip, it is a failed
+        // restore — and it is distinguishable from a bundle that
+        // carried none, which is legal.
+        if !bundle.profiles.isEmpty,
+            skippedProfiles.count == bundle.profiles.count
+        {
+            throw .couldNotWrite(
+                name: profiles.directory.lastPathComponent
+            )
+        }
+        if !bundle.palettes.isEmpty {
+            do {
                 try paletteLibrary.replaceUserPalettes(
                     with: bundle.palettes
                 )
+            } catch {
+                onLog("restore: palettes write failed: \(error)")
+                throw .couldNotWrite(
+                    name: paletteLibrary.url.lastPathComponent
+                )
             }
-        } catch {
-            onLog("restore: write failed: \(error)")
-            throw .couldNotWrite(
-                name: guiConfigStore.url.lastPathComponent
-            )
         }
 
         // Adoption is the one piece of live profile state the

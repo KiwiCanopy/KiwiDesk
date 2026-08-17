@@ -109,13 +109,45 @@ struct SetupBundleTests {
                 as? [String: Any]
         )
 
-        // The allow-list, pinned at the ONE altitude that can see
-        // it. `init.lua` not travelling is the bundle's loudest
-        // promise and is otherwise guarded by nothing but the
-        // absence of a field — which is invisible until someone
-        // adds one. A sixth key reds here and has to argue for
-        // itself, which is the point: the question "should this
-        // travel?" gets asked rather than answered by default.
+        // **Both directions, and the second is why this is not
+        // just a literal list.** Reading only the written file
+        // catches a key the hand-composer ADDS and is blind to a
+        // field it OMITS — which is the one drift hand-composition
+        // introduces, and an earlier cut of this test had exactly
+        // that hole: adding an optional field to `SetupBundle`
+        // that `encodedBackup` skipped left the written file at
+        // five keys and the whole suite green, with the field
+        // silently never travelling (`code-reviewer`, 2026-08-17).
+        //
+        // So the file is compared against the type's **stored
+        // properties**, by reflection — which `parity-tests.md`
+        // prefers over any hand-listed mirror, and which is the
+        // only thing that sees this particular omission.
+        //
+        // Re-encoding the struct is NOT enough and was the first
+        // attempt at this fix: `JSONEncoder` omits a nil Optional,
+        // so a new `String?` field is absent from the struct's own
+        // encoding too and the two key sets still agree. Proven by
+        // running that mutation against it.
+        let properties = Set(
+            Mirror(reflecting: core.exportSetup()).children
+                .compactMap(\.label)
+        )
+        #expect(
+            Set(top.keys) == properties,
+            Comment(
+                rawValue:
+                    "the written file and the type disagree: "
+                    + "written \(Set(top.keys).sorted()), stored "
+                    + "\(properties.sorted()). A property added to "
+                    + "`SetupBundle` owes a line in "
+                    + "`encodedBackup`, or it never travels — and "
+                    + "if it deliberately should not, it does not "
+                    + "belong on the type."
+            )
+        )
+        // And the list itself, so a field added to BOTH still has
+        // to argue that it belongs in a backup at all.
         #expect(
             Set(top.keys)
                 == [

@@ -80,10 +80,19 @@ struct LayoutMenuEnablementScanTests {
             omittingEmptySubsequences: false
         ) {
             let text = String(line)
-            if text.hasPrefix("    func ")
-                || text.hasPrefix("    private func ")
-                || text.hasPrefix("    @objc func ")
-            {
+            // `var` counts: a row built inside a computed
+            // `private var somethingItem: NSMenuItem` would
+            // otherwise merge into the preceding function's scope
+            // and re-open the cross-payment hole this split
+            // closed — and the sibling menu builders in this tree
+            // already build items in `var`s
+            // (`code-reviewer`, 2026-08-17).
+            let boundary = ["func ", "var "].contains { keyword in
+                ["    ", "    private ", "    @objc "].contains {
+                    text.hasPrefix($0 + keyword)
+                }
+            }
+            if boundary {
                 scopes.append(current)
                 current = text
             } else {

@@ -152,6 +152,32 @@ struct SetupRestoreTests {
         )
     }
 
+    @Test("A settings-only backup keeps the profiles it cannot replace")
+    func settingsOnlyBackupKeepsProfiles() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.save(profile("Local"))
+        var config = GuiConfig()
+        config.spaces = [SpaceID("work")]
+
+        try core.restoreSetup(
+            from: SetupBundle(
+                writtenBy: "0.9.6",
+                config: config,
+                profiles: [],
+                palettes: []
+            ),
+            trash: hardDelete
+        )
+
+        // The discard used to be unconditional for profiles, so a
+        // settings-only bundle trashed every profile and wrote none
+        // back. `ConfigArtifact.isCarried` is the one rule now.
+        #expect(
+            core.profiles.allProfiles().map(\.name) == ["Local"]
+        )
+    }
+
     @Test("A palette shadowing a built-in is dropped, not restored")
     func shadowingPaletteIsDropped() throws {
         let core = makeTestCore()
@@ -189,19 +215,13 @@ struct SetupRestoreTests {
     /// app had no net at all. That is the defect a user meets
     /// immediately: files replaced, app unchanged until relaunch.
     ///
-    /// The gap probes the **apply**, and only the apply — a
-    /// later prover round measured the difference and this
-    /// docstring had it wrong. Deleting `applyProfileScopedState`
-    /// reds this; deleting `loadConfig()` leaves the whole suite
-    /// green, because the gap arrives off the in-memory bundle
-    /// and never off disk.
-    ///
-    /// So the reload's own work — the sidecar's rules and
-    /// keybindings, and running `init.lua` — is watched by
-    /// nothing here, and is stated as a gap rather than implied
-    /// to be covered. Closing it needs a fixture asserting a
-    /// restored app RULE reaches the live rule base, which is a
-    /// different suite's shape.
+    /// The gap probes the **apply**, and only the apply: deleting
+    /// `applyProfileScopedState` reds this, while deleting
+    /// `loadConfig()` leaves the suite green, the gap arriving off
+    /// the in-memory bundle rather than off disk. So the reload's
+    /// own work — the sidecar's rules and keybindings, and running
+    /// `init.lua` — is watched by nothing here. Stated as a gap
+    /// rather than implied covered.
     @Test("The restore lands on the running app, not just on disk")
     func theRestoreIsApplied() throws {
         let core = makeTestCore()
