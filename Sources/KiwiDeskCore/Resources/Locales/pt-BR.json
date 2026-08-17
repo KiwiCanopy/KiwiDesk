@@ -754,7 +754,7 @@
   "placement.last": "Última",
   "placement.new_window": "Nova janela disposta lado a lado",
   "placement.new_window.help": "Onde uma nova janela é colocada em relação às outras: primeira ou última na ordem do layout, ou logo antes ou depois da janela que estiver em foco no momento em que ela abre.",
-  "presets.apply": "Aplicar predefinição",
+  "presets.apply": "Aplicar",
   "presets.caption": "Aplicar uma predefinição a salva como um perfil real que você pode editar depois.",
   "presets.coder_and_monitor.name": "Desenvolvimento e monitoramento",
   "presets.coder_and_monitor.summary": "Editor e terminais na tela principal; métricas e logs na segunda.",

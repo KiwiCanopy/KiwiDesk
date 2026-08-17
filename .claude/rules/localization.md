@@ -281,6 +281,31 @@ why they are here rather than beside the views:
   the whole meaning intact — the trimmed label is the only name
   the user ever reads. Ordinary *row* labels take the OPPOSITE
   line: the control is fixed and the label flexes and wraps.
+- **An ACTION label must fit its control, and shortens to the
+  bare verb where the surrounding copy carries the object.** A
+  button's title is neither of the two cases above — the control
+  is not fixed with a flexing label, and there is no card to
+  flex — so it truncates, and it truncates *harder* when a
+  second button joins the row beside it. Author the English as
+  the shortest true verb ("Apply", not "Apply the preset"),
+  because a translator handed a phrase writes a phrase, and check
+  a shortened one still reads as an action rather than an
+  adjective — the same string is often a census label a search
+  row displays.
+
+  #859 is the argument. `presets.apply` shipped as a bare verb in
+  English and as "apply the preset" in six catalogs, which was
+  harmless for as long as Apply was the card's only button. The
+  moment a `Layouts` button joined it, `fr` measured 327 pt of
+  pair inside a 266 pt card interior and clipped to "Appliquer le
+  préré…" on the owner's screen; `es` was 2 pt over. **Nothing
+  guarded it and nothing can cheaply**: the pair's fit depends on
+  two keys, a control size, a card width and a band, and every one
+  of those is legitimately variable. What is guardable is the
+  English, so that is where the obligation sits — and a round that
+  adds a control beside an existing one re-measures the pair
+  rather than assuming the old label still fits. The width half
+  is #862.
 - **A diff row's label follows the destination line, not the
   ordinary-row one** — shorten it to fit. It is drawn
   single-line (`SettingsDiffRowsView` owns the `lineLimit`)

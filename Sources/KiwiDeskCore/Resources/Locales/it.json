@@ -754,7 +754,7 @@
   "placement.last": "Per ultima",
   "placement.new_window": "Nuova finestra affiancata",
   "placement.new_window.help": "Dove si colloca una nuova finestra rispetto alle altre: per prima o per ultima nell'ordine del layout, oppure subito prima o dopo la finestra attiva nel momento in cui si apre.",
-  "presets.apply": "Applica preimpostazione",
+  "presets.apply": "Applica",
   "presets.caption": "Applicandone uno lo salverai come un vero profilo che potrai poi modificare.",
   "presets.coder_and_monitor.name": "Sviluppo e monitoraggio",
   "presets.coder_and_monitor.summary": "Editor e terminali sullo schermo principale; metriche e log sul secondo.",

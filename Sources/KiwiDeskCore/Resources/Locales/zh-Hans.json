@@ -754,7 +754,7 @@
   "placement.last": "末尾",
   "placement.new_window": "新建平铺窗口",
   "placement.new_window.help": "新窗口相对于其他窗口的落位：在布局顺序中排最前或最后，或紧邻打开时处于焦点的那个窗口之前或之后。",
-  "presets.apply": "应用预设",
+  "presets.apply": "套用",
   "presets.caption": "应用预设会将其保存为可供后续编辑的真实描述文件。",
   "presets.coder_and_monitor.name": "编码与监控",
   "presets.coder_and_monitor.summary": "主显示器放编辑器和终端，第二台放指标和日志。",

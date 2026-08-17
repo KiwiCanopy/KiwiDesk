@@ -754,7 +754,7 @@
   "placement.last": "À la fin",
   "placement.new_window": "Nouvelle fenêtre tuilée",
   "placement.new_window.help": "Où s'insère une nouvelle fenêtre par rapport aux autres : Au début ou À la fin dans l'ordre de la disposition, ou juste avant ou après la fenêtre ayant le focus au moment où elle s'ouvre.",
-  "presets.apply": "Appliquer le préréglage",
+  "presets.apply": "Appliquer",
   "presets.caption": "L'appliquer l'enregistre comme un vrai profil que vous pouvez ensuite modifier.",
   "presets.coder_and_monitor.name": "Développeur & Moniteur",
   "presets.coder_and_monitor.summary": "Éditeur et terminaux sur l'écran principal ; métriques et journaux sur le second.",

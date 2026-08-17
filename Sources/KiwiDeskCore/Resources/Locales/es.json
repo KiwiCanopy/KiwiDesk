@@ -754,7 +754,7 @@
   "placement.last": "Al final",
   "placement.new_window": "Nueva ventana en mosaico",
   "placement.new_window.help": "Dónde se ubica una nueva ventana con respecto a las demás: Al principio o Al final en el orden del diseño, o justo antes o después de la ventana enfocada al momento de abrirse.",
-  "presets.apply": "Aplicar ajuste predefinido",
+  "presets.apply": "Aplicar",
   "presets.caption": "Al aplicar uno se guarda como un perfil real que puedes editar después.",
   "presets.coder_and_monitor.name": "Programador y monitor",
   "presets.coder_and_monitor.summary": "Editor y terminales en la pantalla principal; métricas y registros en la segunda.",

@@ -754,7 +754,7 @@
   "placement.last": "末尾",
   "placement.new_window": "新規タイルウインドウ",
   "placement.new_window.help": "新しいウインドウがほかのウインドウに対してどこに配置されるかです。レイアウトの順序で最初か最後に置くか、開いた時点でフォーカスされているウインドウの直前または直後に置きます。",
-  "presets.apply": "プリセットを適用",
+  "presets.apply": "適用",
   "presets.caption": "プリセットを適用すると実際のプロファイルとして保存され、後から編集できるようになります。",
   "presets.coder_and_monitor.name": "コーディングとモニタリング",
   "presets.coder_and_monitor.summary": "メイン画面にエディタとターミナル、2台目の画面にメトリクスとログ。",
