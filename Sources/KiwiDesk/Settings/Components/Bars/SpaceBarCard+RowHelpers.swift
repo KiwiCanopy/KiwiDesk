@@ -82,16 +82,21 @@ extension SpaceBarCard {
                 "space_bar.icon_source.label",
                 "App symbol style"
             ),
-            // Mode name INTERPOLATED from the picker entry's own
-            // key, not re-typed (#818).
+            // Two labels INTERPOLATED from their own keys, not
+            // re-typed (#818): the picker entry, and the page
+            // the item colours this sentence names are edited
+            // on. The App Bar twin already named that page; this
+            // one said "the bar's item colors" and pointed
+            // nowhere, so the reader had no way to reach them.
             help: L(
                 "space_bar.icon_source.help",
                 "How app glyphs are drawn. "
                     + "\u{201C}%1$@\u{201D} shows a "
                     + "monochrome symbol colored by the bar's "
-                    + "item colors; apps without a symbol keep "
-                    + "their app icon.",
-                L("app_bar.icon_source.app_font", "Glyphs")
+                    + "item colors, set in %2$@; apps without a "
+                    + "symbol keep their app icon.",
+                L("app_bar.icon_source.app_font", "Glyphs"),
+                SettingsDestination.advancedColors.title
             )
         ) {
             Picker(

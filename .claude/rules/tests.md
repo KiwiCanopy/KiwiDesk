@@ -357,7 +357,7 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-08-16 — a change adding a residue class extends and
+2026-08-17 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -377,10 +377,18 @@ reads (`CGSessionCopyCurrentDictionary`) per
 `WakeSessionPresenceWiringTests` run — one in the suite's
 `.enabled(if:)` trait and one through the seam it asserts on
 (#835), whose docstring owns why a session-less host SKIPs that
-suite rather than reds it. (The host text-metric read —
-`NSFont.systemFont` via `NSString.size` in the retired sidebar
-label-width suite — went away with the sidebar's fixed label
-column, #678 turn 9.) The service tests only parse
+suite rather than reds it. **The host text-metric read is
+back** — `PresetGridFloorTests` lays out an `NSButton` per
+shipped catalog and calls `sizeToFit()`, so a run takes host
+font metrics once per catalog per measured key (#862, 2026-08-17).
+It replaces the one that had gone away with the sidebar's fixed
+label column (#678 turn 9), and it is a deliberate re-admission
+rather than a regression: the thing under test IS whether real
+translated labels fit a real control, which no fixture can
+answer. What it inherits is what #523's fixtures inherited from
+`NSScreen` — the host's metrics — so a runner with different
+system font metrics measures different widths, and the suite
+pins no font of its own. The service tests only parse
 `launchctl` strings; nothing spawns it. **Unit tests never need
 the running app**; its run state is irrelevant to them.
 

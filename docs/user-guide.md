@@ -251,7 +251,7 @@ and back in.
 The closing card confirms KiwiDesk is managing your windows and
 shows you where it lives: a small picture of a menu bar with the
 KiwiDesk mark in it, so you can find the app once the window
-closes. **Open KiwiDesk when I log in** is there, ticked, to
+closes. **Start KiwiDesk at login** is there, ticked, to
 untick if you would rather start it yourself. **Start using it**
 is the only button, and that is the point — Settings is a link
 in the quiet line beside it, landing on Layout, and a first-time
@@ -417,13 +417,13 @@ path is offered instead.
 
 Whether KiwiDesk launches itself is **two switches**, not one
 control, because the two halves live in two places. The main one,
-**Start KiwiDesk when I log in**, sits in **General**'s **Applies
-immediately** group (below the language and appearance picks); the
-supervision half, **Restart if it stops unexpectedly**, sits first
-among **General ▸ Advanced**.
+**Start at login**, sits in **General**'s **Applies immediately**
+group (below the language and appearance picks); the supervision
+half, **Restart if it stops unexpectedly**, sits first among
+**General ▸ Advanced**.
 
-- **Start KiwiDesk when I log in** — off, KiwiDesk never starts on
-  its own; on, it launches when you sign in, so your windows are
+- **Start at login** — off, KiwiDesk never starts on its own; on,
+  it launches when you sign in, so your windows are
   arranged from the start rather than floating loose until you
   open it by hand. Turning it on also switches on crash-restart,
   because that is the obvious setup for someone who just wants
@@ -1423,7 +1423,8 @@ rest; the rest behind **Style**):
   monochrome symbol from the bundled [SketchyBar App
   Font](https://github.com/kvndrsslr/sketchybar-app-font)
   instead, colored by the bar's item colors (Item, Active
-  item, Hover item — so those colors also style the glyphs);
+  item, Hover item, set in Advanced Colors — so those colors
+  also style the glyphs);
   apps without a symbol keep their icon. With Glyphs active,
   the shortcuts panel's Apps band shows the same symbols
   (following the global style — the panel spans all layouts).

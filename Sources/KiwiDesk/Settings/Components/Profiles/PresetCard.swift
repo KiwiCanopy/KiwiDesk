@@ -32,6 +32,44 @@ import SwiftUI
 /// card is for: Apply materializes a profile and discards unsaved
 /// edits behind a confirm, so the cheap reversible thing leads.
 struct PresetCard: View {
+    /// The card's own inset, on every edge.
+    static let padding: CGFloat = 12
+    /// The gap between the two action buttons.
+    static let buttonRowSpacing: CGFloat = 8
+
+    /// The narrowest width this card can actually be LAID OUT
+    /// at — which is what makes a declared grid `minimum:` a
+    /// floor rather than a wish (#862). `PresetsSection.columns`
+    /// is its one reader.
+    ///
+    /// It has to hold the action row, because since #859 that row
+    /// is two `.large` buttons rather than one, and the pair's
+    /// width is eleven catalogs' business rather than this
+    /// file's. The number is a LITERAL on purpose: deriving it
+    /// from a live text measurement would put an AppKit metric
+    /// read in a `body`, and — the sharper reason — it would make
+    /// the guard vacuous, since a test comparing a derived floor
+    /// against the derivation it came from asserts nothing — an
+    /// assertion that recomputes both sides from the same
+    /// constants cannot model anything those constants do not
+    /// already say (`rule-authoring.md` ▸ a number-pin must
+    /// derive the number).
+    ///
+    /// So the floor is declared here and `PresetGridFloorTests`
+    /// measures the SHIPPED catalogs against it, reading these
+    /// same three constants rather than restating them. Neither
+    /// side of that comparison is the test's own invention, which
+    /// is the whole point. The slack is deliberately small: this
+    /// says "the narrowest the card works at", and a catalog that
+    /// grows past it should red rather than quietly fit.
+    ///
+    /// The 200 pt it replaces predates the second button. #789
+    /// ruled 200 "honest" about the PICTURE staying an outline
+    /// plus glyph, which is a ruling about what the card draws
+    /// and not about what it can hold, so raising it reopens
+    /// nothing.
+    static let minimumWidth: CGFloat = 280
+
     let layout: StandardLayout
     /// The live screen list for an APPLIABLE card and nil for the
     /// drawer — the card resolves its glyph against the same
@@ -54,12 +92,12 @@ struct PresetCard: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            HStack(spacing: 8) {
+            HStack(spacing: Self.buttonRowSpacing) {
                 layoutsButton
                 applyButton
             }
         }
-        .padding(12)
+        .padding(Self.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 10)

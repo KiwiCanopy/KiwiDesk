@@ -46,7 +46,7 @@ private func trampoline(_ state: OpaquePointer?) -> Int32 {
     return 1
 }
 
-/// Embedded Lua 5.4 VM hosting the user's init.lua.
+/// Embedded Lua 5.5 VM hosting the user's init.lua.
 ///
 /// Runs on the main actor; runaway scripts are stopped by an
 /// instruction-count hook that enforces `timeout` (default

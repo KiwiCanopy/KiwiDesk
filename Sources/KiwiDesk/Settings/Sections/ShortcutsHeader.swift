@@ -119,7 +119,8 @@ struct ShortcutsHeader: View {
     private var importedNoteText: String {
         L(
             "shortcuts.imported_note",
-            "Shortcuts imported — review below, then Save."
+            "Shortcuts imported — review below, then %1$@.",
+            L("footer.save", "Save")
         )
     }
 }

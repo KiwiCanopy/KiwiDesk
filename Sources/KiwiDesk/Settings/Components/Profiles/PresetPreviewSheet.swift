@@ -52,8 +52,11 @@ struct PresetPreviewRequest: Identifiable {
 /// factor over `.tile` is the settled expression for a smaller
 /// mount (`HomeCardSchematicBand` at 70/84, the tour at 46/84);
 /// this sheet is the case that needs no factor at all, which is
-/// precisely #859's argument — a 200 pt card cannot hold a legible
-/// schematic and a sheet can. Captions stay suppressed at `.tile`
+/// precisely #859's argument — a card at `PresetCard.minimumWidth`
+/// cannot hold a legible schematic and a sheet can. (That floor
+/// was 200 when #859 argued it and is not a number this comment
+/// carries a second copy of; #862 moved it.) Captions stay
+/// suppressed at `.tile`
 /// by #753's ruling, so the mode's name is the tile's own label.
 struct PresetPreviewSheet: View {
     let layout: StandardLayout

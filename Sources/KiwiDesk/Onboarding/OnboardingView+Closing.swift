@@ -114,7 +114,7 @@ extension OnboardingView {
             Toggle(
                 L(
                     "onboarding.ready.open_at_login",
-                    "Open KiwiDesk when I log in"
+                    "Start KiwiDesk at login"
                 ),
                 isOn: $model.openAtLogin
             )

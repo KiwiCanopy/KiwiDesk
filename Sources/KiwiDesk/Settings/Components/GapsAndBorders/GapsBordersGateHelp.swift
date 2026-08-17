@@ -20,18 +20,20 @@ enum GapsBordersGateHelp {
         case .borderOff:
             return L(
                 "border.controls.disabled",
-                "Turn on Show focus border to edit "
-                    + "these settings."
+                "Turn on %1$@ to edit these settings.",
+                L("border.enabled", "Show focus border")
             )
         case .glowOff:
             return L(
                 "border.glow_size.disabled",
-                "Turn on Glow effect to adjust its size."
+                "Turn on %1$@ to adjust its size.",
+                L("border.glow", "Glow effect")
             )
         case .visualOff:
             return L(
                 "drag.disabled.help",
-                "Turn on Enabled to edit this visual."
+                "Turn on %1$@ to edit this visual.",
+                L("drag.enabled", "Enabled")
             )
         case .gapsDiffer:
             return L(

@@ -95,8 +95,10 @@ extension SettingsModel {
                 profileWarning = L(
                     "key_recorder.live_apply_failed",
                     "The shortcut change was recorded but "
-                        + "couldn't be applied live. Save or "
-                        + "Revert to retry."
+                        + "couldn't be applied live. %1$@ or "
+                        + "%2$@ to retry.",
+                    L("footer.save", "Save"),
+                    L("footer.revert", "Revert")
                 )
             }
             return feedback(
@@ -121,8 +123,9 @@ extension SettingsModel {
             liveKeySession = nil
             profileWarning = L(
                 "key_recorder.revert_used_snapshot",
-                "Saved shortcuts couldn't be read, so Revert "
-                    + "restored the previous running shortcuts."
+                "Saved shortcuts couldn't be read, so %1$@ "
+                    + "restored the previous running shortcuts.",
+                L("footer.revert", "Revert")
             )
         case .failure(.superseded):
             // A newer load already replaced the VM/hotkeys;
@@ -132,8 +135,9 @@ extension SettingsModel {
         case .failure:
             profileWarning = L(
                 "key_recorder.revert_failed",
-                "Revert couldn't restore the running shortcuts. "
-                    + "Fix the configuration, then try again."
+                "%1$@ couldn't restore the running shortcuts. "
+                    + "Fix the configuration, then try again.",
+                L("footer.revert", "Revert")
             )
         }
     }

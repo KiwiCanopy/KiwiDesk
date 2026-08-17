@@ -136,8 +136,12 @@ enum SpacesGateHelp {
         case .oneMaster:
             return L(
                 "layout_params.master_orientation.one_master",
-                "Orientation only changes anything with more than "
-                    + "one master window."
+                "%1$@ only changes anything with more than "
+                    + "one master window.",
+                L(
+                    "layout_params.master_orientation",
+                    "Master orientation"
+                )
             )
         case .rigidGrid:
             return L(

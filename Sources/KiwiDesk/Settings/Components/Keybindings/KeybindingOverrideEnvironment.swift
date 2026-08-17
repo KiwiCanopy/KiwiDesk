@@ -73,6 +73,25 @@ extension View {
     /// displace. `GreyOut` was backed out because there the worse
     /// case was DELETING hints that ship today. Confirm both in
     /// one Accessibility Inspector pass.
+    /// **This hint names no control, deliberately, against #830's
+    /// table.** That issue listed it as quoting `key_recorder
+    /// .record` ("Record") and the conversion interpolated it —
+    /// which was wrong twice. Grammatically, the label sat in the
+    /// sentence's VERB slot, which only works in English: `es`,
+    /// `it`, `pt-BR` and `ru` repaired it by supplying a verb of
+    /// their own, and `de` and `fr` shipped verbless clauses
+    /// (localization audit, 2026-08-17). Referentially — the
+    /// sharper half — `KeyRecorderField.label` renders "Record"
+    /// only while `combo.isEmpty`, and an INHERITED row shows the
+    /// combo it inherited. So the sentence named a word that is
+    /// not on screen for the one row it describes, and a
+    /// VoiceOver user, who has no visual context at all, would
+    /// have been sent to look for it.
+    ///
+    /// Interpolation is the right answer when prose names a
+    /// control the reader can see (#818). When the control's
+    /// label is not on screen, the fix is not a better
+    /// interpolation — it is to stop naming it.
     func keybindingRowStyle(inherited: Bool) -> some View {
         opacity(inherited ? 0.55 : 1)
             .accessibilityHint(
@@ -80,7 +99,7 @@ extension View {
                     ? L(
                         "shortcuts.row.inherited.axhint",
                         "Inherited from the base shortcuts. "
-                            + "Record a key here to override it."
+                            + "Set a key here to override it."
                     )
                     : ""
             )

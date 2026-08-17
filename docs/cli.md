@@ -67,12 +67,13 @@ the pid.
 A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
 
-This service is also the top level of the **Start KiwiDesk**
-control in Settings ▸ General: *At Login + Restart on Crash* loads
-exactly this LaunchAgent, so running `service start` and choosing
-that level are equivalent, and `service status` reports the same
-state — one live source of truth, no second store. The middle
-level, *At Login*, is instead the `SMAppService` login item
+This service is also the supervision half of Settings ▸ General's
+auto-start pair: **Restart if it stops unexpectedly**, first among
+General ▸ Advanced, loads exactly this LaunchAgent, so running
+`service start` and switching that row on are equivalent, and
+`service status` reports the same state — one live source of
+truth, no second store. Its partner, **Start at login**, is
+instead the `SMAppService` login item
 (visible in System Settings ▸ Login Items), a separate path that
 launches KiwiDesk at login without crash supervision. Both launch
 at login; the single-instance lock keeps that to one process, so

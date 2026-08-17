@@ -2,8 +2,14 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The "Start KiwiDesk when I log in" row (#576, resplit for
-/// #678 item 16).
+/// The login-item row — `general.login_item.start` (#576,
+/// resplit for #678 item 16).
+///
+/// Named by its KEY rather than by its text: this header quoted
+/// the label verbatim until #864 shortened it, at which point
+/// the comment described a string no catalog carried. Quoting a
+/// label in prose is the defect this branch closed one altitude
+/// down (#818); it is the same defect in a doc comment.
 ///
 /// #576 folded #342's login toggle and the `kiwidesk service`
 /// LaunchAgent into ONE 3-level picker, because the two-toggle
@@ -73,16 +79,25 @@ struct LoginItemCard: View {
         ) { _ in model.refreshAutoStart() }
     }
 
-    /// The design's own words. It deliberately does NOT say
-    /// "and keep it running": that becomes false the moment the
-    /// Advanced row is switched off, and item 16 rules that "a
-    /// label that rewrites itself is worse than one that is
-    /// simply always true".
+    /// It deliberately does NOT say "and keep it running": that
+    /// becomes false the moment the Advanced row is switched
+    /// off, and item 16 rules that "a label that rewrites itself
+    /// is worse than one that is simply always true".
+    ///
+    /// Shortened from "Start KiwiDesk when I log in" for #864,
+    /// which is the ROW-label sibling of `localization.md`'s
+    /// action-label rule: the English is the guardable half, and
+    /// a clause here hands every translator a clause. The old
+    /// one left 8 pt of headroom in this row's label column, so
+    /// five locales overflowed by construction and French lost
+    /// the object of its phrase. The app's own name is carried
+    /// by the window this row is in; the help beside it still
+    /// spells it out. Nothing guards the fit — `SettingsMetrics
+    /// .labelColumn`'s docstring rules that a label past its
+    /// width is SHORTENED rather than accommodated, the column
+    /// being the shared alignment axis for every section.
     private var startLabel: String {
-        L(
-            "general.login_item.start",
-            "Start KiwiDesk when I log in"
-        )
+        L("general.login_item.start", "Start at login")
     }
 
     /// The one field-level `?` (#94). It names the supervision
@@ -94,7 +109,8 @@ struct LoginItemCard: View {
             "KiwiDesk opens when you sign in, so your windows are "
                 + "arranged from the start. It also keeps itself "
                 + "running if it ever stops — switch that off "
-                + "under Advanced if you would rather it did not."
+                + "under %1$@ if you would rather it did not.",
+            L("general.advanced.title", "Advanced")
         )
     }
 

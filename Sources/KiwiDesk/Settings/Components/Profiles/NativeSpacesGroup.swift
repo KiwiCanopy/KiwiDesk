@@ -146,8 +146,9 @@ struct NativeSpacesGroup: View {
                     L(
                         "native_spaces.clear_all.help",
                         "Removes every Desktop → profile "
-                            + "binding. The footer's Save writes "
-                            + "it."
+                            + "binding. The footer's %1$@ writes "
+                            + "it.",
+                        L("footer.save", "Save")
                     )
                 )
             }
