@@ -153,6 +153,39 @@ bite large test PRs:
   (2026-08-03). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
   own, which is the state it passes in.
+- **A test asserting localized output pins the locale first.**
+  `L()` routes through `LocalizationManager.shared`, whose
+  "System default" resolves the *host's* preferred languages, so
+  a suite comparing against English asserts whatever the
+  developer's Mac happens to be set to — #740's failures were a
+  German machine rather than a defect, and they blocked
+  `scripts/release.sh` on it. Pin with
+  `LocalizationManager.shared.select("en")` as the first line of
+  each test **body**, never `init`: suites interleave on the main
+  actor at the init→body hop and another suite's `select()` lands
+  in that window. `MonitorReadoutTests` owns that argument and is
+  the worked example.
+
+  **It is not only English literals.** An assertion on argument
+  *order* reads a localized frame just as much, and positional
+  specifiers exist so that a locale may reorder them
+  ([localization.md](localization.md)) — `HomeCardContentTests`'
+  gaps case asserts outer-before-inner and passed on a German
+  host for no better reason than `de` keeping English's order.
+  Ask what the assertion *reads*, not whether it looks like
+  prose.
+
+  **Nothing enforces this, and that is a ruling rather than an
+  omission.** The one candidate signal — a test literal that is
+  verbatim an `en.json` value — cannot discriminate in either
+  direction: the localization guard suites read catalog values as
+  data because that is their job, ordinary identifiers collide
+  with catalog values by coincidence, and substring or
+  interpolated assertions never match at all. The exemption map
+  would be larger than the thing guarded, which is not the
+  `allowed`-map idiom. So this row is the enforcement and review
+  is where it bites. Re-opening it needs a *new* signal, not a
+  re-run of that one.
 - **A production default that grabs live host state gets an
   injection seam, a fake in tests, and a guard.** An `init`
   that seizes a real resource drags that seizure into every

@@ -9,9 +9,18 @@
 # suites stop running while CI stays green. Excluding fails closed.
 #
 # An entry belongs here only when NO test, NO build step and NO lint
-# step reads the path — and a path a rule file pins in its `paths:`
-# block counts as read. packaging-and-release.md ("CI") carries the
-# argument and the cases that have already caught someone out.
+# step reads the path — and a LITERAL (non-glob) path a rule file
+# pins in its `paths:` block counts as read.
+#
+# "Literal" is load-bearing, not hedging: site.md pins `site/**`,
+# which is this list's own first entry, so a criterion counting
+# globs as reads would rule out the entry directly below (#661).
+# CiPathFilterTests.ignoredPathsArentRulePins is the authority on
+# this clause — it filters globs out of the pin set — so read the
+# test, not this sentence, when the two seem to disagree.
+#
+# packaging-and-release.md ("CI") carries the argument and the
+# cases that have already caught someone out.
 #
 # One entry per line. An entry must be an exact repo-relative path
 # or `dir/**`; any other glob shape is rejected, because everything

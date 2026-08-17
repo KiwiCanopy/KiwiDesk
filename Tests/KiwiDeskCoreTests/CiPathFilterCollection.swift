@@ -4,9 +4,21 @@ import Testing
 /// Collection and parsing for `CiPathFilterTests`.
 ///
 /// Split out under the §2.1 ceiling, not because the halves are
-/// independent: the assertions live next door and these exist only
-/// to feed them. Nothing here asserts, so a change to a walk shows
-/// up as a changed verdict there rather than as a green no-op.
+/// independent: most of the assertions live next door and these
+/// exist to feed them.
+///
+/// **It is not assertion-free**, and the sentence here used to say
+/// it was (#661) — a reader trusting that would move code
+/// carrying a live check. Three things assert in this file:
+/// `buildInputsStayWatched` is a whole `@Test`; `ruleFiles()`
+/// refuses an empty directory; `entries()` refuses an empty parse.
+///
+/// The last two are deliberate *floors* rather than strays. A walk
+/// that half-failed still returns a list, and every check next
+/// door is a search for violations in that list — so an empty or
+/// truncated walk reports a clean verdict instead of an error.
+/// Failing at the source is what makes the silence next door mean
+/// something.
 extension CiPathFilterTests {
     /// Every `.claude/rules/*.md`, as (name, text).
     func ruleFiles() throws -> [(String, String)] {
