@@ -31,6 +31,10 @@ struct ScrollingBlockedEdgeTests {
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(400)
         context.gaps.inner.horizontal = 0
+        // Pin the floor the slot resolution reasons from (#660):
+        // every expected coordinate depends on the 400pt slot
+        // surviving `max(resolved, minWindowSize)`.
+        context.minWindowSize = 300
         return context
     }
 
@@ -141,6 +145,36 @@ struct ScrollingBlockedEdgeTests {
         }
     }
 
+    @Test("A slot wider than the axis cannot beat the walls")
+    func oversizedSlotStaysInsideTheWalls() throws {
+        // The wall's algebra rests on `size <= along` (metrics'
+        // `min(along, …)` cap): if that cap were relaxed,
+        // `along − size` would go negative and the leading
+        // `max(lead, 0)` would override the trailing wall, so
+        // every slot would overhang the seam again — the exact
+        // #878 defect, silently. Pin the dependency with a test,
+        // not the comment alone (#662): an oversized slot
+        // resolves to exactly the axis and stays flush inside
+        // both walls.
+        var context = pinContext(focused: w1)
+        context.scrolling.slotSize = .points(2000)
+        context.scrollOffset = 0
+        context.screenNeighbors = ScreenNeighbors(
+            left: true,
+            right: true
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        for id in [w1, w2, w3] {
+            let frame = try #require(frames[id])
+            #expect(frame.minX == context.usable.minX)
+            #expect(frame.maxX == context.usable.maxX)
+            #expect(frame.width == context.usable.width)
+        }
+    }
+
     @Test("A screen below walls vertical scrolling's bottom")
     func bottomWallVertical() throws {
         var context = LayoutContext(
@@ -154,6 +188,8 @@ struct ScrollingBlockedEdgeTests {
         context.scrolling.appBar.edge = .left
         context.scrolling.orientation = .vertical
         context.scrolling.slotSize = .points(400)
+        // Pin the floor the slot resolution reasons from (#660).
+        context.minWindowSize = 300
         context.scrollOffset = 0
         context.screenNeighbors = ScreenNeighbors(bottom: true)
         let frames = layout.calculateGeometry(

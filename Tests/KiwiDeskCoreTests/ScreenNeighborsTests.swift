@@ -117,6 +117,29 @@ struct ScreenNeighborsTests {
         )
     }
 
+    @Test("A rect reaching just inside an edge is no neighbor")
+    func insideRectIsNoNeighbor() {
+        // Closes the slack's one undiscriminated direction
+        // (guard-prover, 2026-08-18): every other fixture sits
+        // at or past an edge, so WIDENING the 1 pt slack (say
+        // `maxX - 100`) passed the suite while an overlapping
+        // rect would have started counting. A rect overlapping
+        // the screen and reaching to just inside its right edge
+        // is not "wholly at or past" it — no side may count.
+        let inside = CGRect(
+            x: 1900,
+            y: 0,
+            width: 1920,
+            height: 1080
+        )
+        #expect(
+            ScreenNeighbors.detect(
+                around: screenA,
+                among: [inside]
+            ) == ScreenNeighbors()
+        )
+    }
+
     @Test("The screen itself never counts as its own neighbor")
     func selfIsFiltered() {
         // The engine passes the FULL screen list, own screen
@@ -203,6 +226,13 @@ struct ScreenNeighborsPlumbingTests {
         // so engine fixtures can't inherit the host's
         // arrangement (#523's leak, one hook over) — a suite
         // that wants adjacency injects its own list.
+        //
+        // Scope of the discrimination: emptiness tells the pin
+        // from the live default only on a host with >= 1 screen
+        // (any Mac that can run the suite interactively; a
+        // headless screenless runner would pass this vacuously).
+        // Proven red by guard-prover with the pin deleted on a
+        // two-screen host, 2026-08-18.
         let core = makeTestCore()
         #expect(core.tiler.allScreenBounds().isEmpty)
     }

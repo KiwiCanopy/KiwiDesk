@@ -84,10 +84,12 @@ struct VisibleBoundsRoutingTests {
         "Tiling/TilingEngine.swift": 2,
         // `screen(containing:)` is static — no instance in hand.
         "Tiling/TilingEngine+Layout.swift": 1,
-        // Parking *enumerates* `NSScreen.screens` to pick a
-        // corner; a one-rect hook would collapse every display
-        // onto the same bounds.
-        "Tiling/TilingEngine+Stash.swift": 3,
+        // Parking picks each window's OWN screen from
+        // `NSScreen.screens` (it needs screen objects); a
+        // one-rect hook would collapse every display onto the
+        // same bounds. Its corner scan's rect list reads the
+        // `allScreenBounds` topology seam instead (#878).
+        "Tiling/TilingEngine+Stash.swift": 2,
         "Tiling/TilingEngine+StashRestore.swift": 2,
         // The bar strips are drawn ON a screen; a fabricated rect
         // would place real chrome nowhere.

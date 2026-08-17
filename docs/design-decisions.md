@@ -1120,15 +1120,19 @@ overhang — a scrolled-out slot hangs into the void with its
 `edgePeek` sliver visible. An edge with another screen beyond
 it is a wall: the slot stops flush at the border, fully on its
 own screen, and stacks behind the viewport — the same clamp
-form the top edge has always used against the menu bar (#139).
+form the top edge has always used against the top screen
+border (#139).
 Nothing is ever resized; a slot that cannot fully fit underlaps
 its viewport neighbor. The reason is that frames are global:
 past an open edge, "offscreen" is empty void, but past a seam
 it is the neighbor screen, and macOS cannot clip or hide
-another app's window (no alpha, order-out, or level on foreign
-windows — see the SIP list above), so an overhang there renders
-on top of whatever the neighbor shows. Wayland scrollers (niri,
-PaperWM) never meet this because the compositor clips per
+another app's window (no alpha or order-out on a foreign
+window, and window-server level only for the connection that
+owns it — the `SLSSetWindowLevel` entry on the SIP list
+above), so an overhang there renders
+on top of whatever the neighbor shows. Scrolling managers on
+Wayland (niri; PaperWM under GNOME's Wayland session) never
+meet this because the compositor clips per
 output; on macOS the honest options are moving the body where
 nothing renders or stopping it at the border. The wall won over
 the rejected corner-park alternative (routing scrolled-out

@@ -80,13 +80,16 @@ public final class TilingEngine {
     /// production never writes it — only tests do, through
     /// `@testable`.
     ///
-    /// **It pins size, not topology.** Which screen a space
-    /// lands on still comes from `NSScreen` via the three static
-    /// `screen(…)` resolvers, so a fixture can shrink the
-    /// display it lays out against but cannot fabricate a second
-    /// one. Injecting topology would want a display-resolver
-    /// value subsuming this hook and those statics — a larger
-    /// change, and pre-release nothing blocks it later (§5).
+    /// **It pins size, not topology.** The screen-list facts —
+    /// which screens exist and where — enter through the
+    /// `allScreenBounds` hook below (#878), and screen
+    /// *resolution* (which `NSScreen` a space lands on) still
+    /// comes from the three static `screen(…)` resolvers, so a
+    /// fixture can shrink the display it lays out against and
+    /// fabricate an arrangement, but cannot redirect which
+    /// screen object is picked. Subsuming all three under one
+    /// display-resolver value is a larger change, and
+    /// pre-release nothing blocks it later (§5).
     ///
     /// **What stays outside it lives in one executable place** —
     /// `VisibleBoundsRoutingTests.allowed`, which names every
@@ -94,14 +97,15 @@ public final class TilingEngine {
     /// Prose copies of that list drifted apart on their first
     /// outing, so this comment does not keep one. The shape of
     /// the exemptions: `static` sites with no instance in hand,
-    /// and sites that resolve *several* screens (parking picks a
-    /// corner across all of them, re-anchor compares two) where
+    /// and sites that resolve *several* screens (parking picks
+    /// each window's own screen, re-anchor compares two) where
     /// one rect would collapse the distinction.
     ///
     /// So a fixture that pins bounds and calls `calculatedFrames`,
     /// `trackCapacity` or a resize is fully pinned; one that
-    /// drives a whole `retile` is not — parking and bar geometry
-    /// still run against the real display.
+    /// drives a whole `retile` is not — the per-window screen
+    /// pick and bar geometry still run against the real display
+    /// (the parking corner's CHOICE follows `allScreenBounds`).
     var visibleBounds: @MainActor (NSScreen) -> CGRect = {
         GeometryUtils.axVisibleFrame(of: $0)
     }

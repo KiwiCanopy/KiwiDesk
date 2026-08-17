@@ -939,9 +939,10 @@ left/right. Vertical: rows scroll up/down.
 Vertical rows overflow only at the bottom: macOS refuses to place
 any window above the top screen border, so a row scrolled past the
 top stays pinned at the border with its upper strip peeking behind
-the focused row, instead of tucking above the screen. See the
-[accepted limitations](accepted-limitations.md)
-table. On an edge with no screen beyond it, a slot scrolled far
+the focused row, instead of tucking above the screen. See
+[Blocked by macOS (SIP)](design-decisions.md#blocked-by-macos-sip)
+in the design decisions. On an edge with no screen beyond it, a
+slot scrolled far
 offscreen keeps a small fixed sliver visible — macOS refuses
 fully offscreen placement, so KiwiDesk pins at a deterministic
 sliver instead of letting the OS clamp unpredictably. An edge

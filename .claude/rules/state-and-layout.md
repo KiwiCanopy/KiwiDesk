@@ -158,6 +158,22 @@ editing here:
   (`floatFloorExcludesTheFocusedWindow`), and
   `ZOrderSequenceWiringTests` pins that the teardown call site
   still drops it.
+- A context site that **materializes scrolled-out scrolling
+  frames threads `screenNeighbors`** (#878):
+  `TilingSettings.context` defaults the flags to all-open (the
+  single-screen verdict), and nothing scans for the omitted
+  parameter, so a new site that computes real scrolling frames
+  without threading the engine's per-retile detection
+  (`ScreenNeighbors.detect` over the `allScreenBounds` topology
+  seam) silently reverts every edge to open — the #878 defect
+  returning without a red. `layoutInput` is the threading site;
+  capacity probes, bar-strip carves and schematic previews
+  rightly omit it and get every edge open. The wall verdicts
+  are an input detected fresh each retile, never a cache —
+  which is also why a stash or corner consumer reads the same
+  seam rather than enumerating screens itself.
+  `ScreenNeighborsPlumbingTests` pins the threading and the
+  default; `ScrollingBlockedEdgeTests` the clamp forms.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
