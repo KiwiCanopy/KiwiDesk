@@ -43,6 +43,20 @@ private func makeScrollingSpace(
     return space
 }
 
+/// Walls the leading (left) edge (#878), so backward focus
+/// moves defer their raise — the suite's deferring regime.
+@MainActor
+private func wallLeftEdge(_ core: KiwiCore) {
+    let bounds = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+    core.tiler.visibleBounds = { _ in bounds }
+    core.tiler.allScreenBounds = {
+        [
+            bounds,
+            CGRect(x: -1920, y: 0, width: 1920, height: 1080),
+        ]
+    }
+}
+
 /// Puts the animation engine mid-flight deterministically: a
 /// dummy animation on an unmanaged window (its frames apply to
 /// no element). Returns false when no display is available —
@@ -59,10 +73,10 @@ private func startDummyPan(_ core: KiwiCore) -> Bool {
     return core.tiler.animation.activeCount > 0
 }
 
-/// Deferred scrolling focus raise (#143): only the raise
-/// defers to the pan settle; state focus is immediate, rapid
-/// commands supersede, real echoes cancel, and non-animated
-/// paths raise immediately.
+/// The deferred-raise MACHINERY (#143/#878): state focus is
+/// immediate, rapid commands supersede, real echoes cancel,
+/// and pan-free paths raise at once. Which topology arms the
+/// deferral at all is `ScrollingWallRaiseTests`.
 @Suite("Scrolling deferred raise", .serialized)
 @MainActor
 struct ScrollingDeferredRaiseTests {
@@ -70,9 +84,11 @@ struct ScrollingDeferredRaiseTests {
     func keyRepeatSupersedes() {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        wallLeftEdge(core)
         guard startDummyPan(core) else { return }
-        // Backward (left) is the deferring direction: each step
-        // toward an earlier slot arms a raise.
+        // Backward (left) toward the walled leading edge is a
+        // deferring direction: each step toward an earlier slot
+        // arms a raise.
         for _ in 1...3 {
             #expect(
                 core.execute("focus", args: [.string("left")])
@@ -92,6 +108,7 @@ struct ScrollingDeferredRaiseTests {
     func echoCancelsPendingRaise() {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        wallLeftEdge(core)
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
         #expect(core.pendingFocusRaise == WindowID(4))
@@ -182,28 +199,12 @@ struct ScrollingDeferredRaiseTests {
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
-    @Test("A forward (down/right) focus raises immediately")
-    func forwardFocusRaisesImmediately() {
-        let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
-        guard startDummyPan(core) else { return }
-        // Stepping toward a later slot lays the target on top at
-        // once (#158): only backward (up/left) toward the pinned
-        // row defers. Nothing stays pending even mid-pan.
-        #expect(
-            core.execute("focus", args: [.string("right")])
-                .isSuccess
-        )
-        #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
-        core.tiler.animation.cancelAll(snapToTargets: false)
-    }
-
     @Test("A non-animated focus move raises immediately")
     func nonAnimatedRaisesImmediately() {
         let core = makeCore()
         core.tiler.settings.animations.onScrolling = false
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        wallLeftEdge(core)
         #expect(
             core.execute("focus", args: [.string("left")])
                 .isSuccess
@@ -218,6 +219,7 @@ struct ScrollingDeferredRaiseTests {
     func ownEchoIsInert() {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        wallLeftEdge(core)
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -247,6 +249,7 @@ struct ScrollingDeferredRaiseTests {
     func visibleTargetRaisesImmediately() {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        wallLeftEdge(core)
         guard NSScreen.main != nil else { return }
         // Narrow slots so the neighbor is fully visible (the
         // 95%-width auto column would force a pan on any screen).
@@ -260,9 +263,10 @@ struct ScrollingDeferredRaiseTests {
         ) {
             core.state.apply(.windowMoved(id, frame))
         }
-        // Backward (left) is the deferring direction, but the
-        // target is already visible — no pan, so the raise must
-        // fire immediately rather than stay pending.
+        // Backward (left) toward the wall is a deferring
+        // direction, but the target is already visible — no
+        // pan, so the raise must fire immediately rather than
+        // stay pending.
         #expect(
             core.execute("focus", args: [.string("left")])
                 .isSuccess

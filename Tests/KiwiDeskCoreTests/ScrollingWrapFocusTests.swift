@@ -134,10 +134,33 @@ struct ScrollingWrapFocusTests {
         let core = makeCore()
         _ = makeScrollingSpace(core, windows: 3, focus: WindowID(3))
         core.execute("scroll.set_wrap_focus", args: [.bool(true)])
+        // Wall the leading edge: since #878 the wall, not the
+        // direction, is what defers — toward an OPEN leading
+        // edge the wrapped-to window slides in from the void
+        // and raises at once.
+        let bounds = CGRect(
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1080
+        )
+        core.tiler.visibleBounds = { _ in bounds }
+        core.tiler.allScreenBounds = {
+            [
+                bounds,
+                CGRect(
+                    x: -1920,
+                    y: 0,
+                    width: 1920,
+                    height: 1080
+                ),
+            ]
+        }
         guard startDummyPan(core) else { return }
-        // Wrap-forward to index 0 is a lower-index move — a
-        // backward pan (#143), so the raise stays pending behind
-        // the pan even though the key pressed was "right".
+        // Wrap-forward to index 0 is a lower-index move — a pan
+        // toward the walled leading edge (#143/#878), so the
+        // raise stays pending behind the pan even though the
+        // key pressed was "right".
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess
