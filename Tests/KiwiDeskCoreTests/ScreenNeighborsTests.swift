@@ -119,23 +119,45 @@ struct ScreenNeighborsTests {
 
     @Test("A rect reaching just inside an edge is no neighbor")
     func insideRectIsNoNeighbor() {
-        // Closes the slack's one undiscriminated direction
-        // (guard-prover, 2026-08-18): every other fixture sits
-        // at or past an edge, so WIDENING the 1 pt slack (say
+        // Closes the slack's undiscriminated direction on every
+        // edge (guard-prover, 2026-08-18): the other fixtures
+        // sit at or past an edge, so WIDENING a 1 pt slack (say
         // `maxX - 100`) passed the suite while an overlapping
         // rect would have started counting. A rect overlapping
-        // the screen and reaching to just inside its right edge
-        // is not "wholly at or past" it — no side may count.
-        let inside = CGRect(
+        // the screen and reaching to just inside an edge is not
+        // "wholly at or past" it — no side may count, on any of
+        // the four.
+        let insideRight = CGRect(
             x: 1900,
             y: 0,
+            width: 1920,
+            height: 1080
+        )
+        let insideLeft = CGRect(
+            x: -1900,
+            y: 0,
+            width: 1920,
+            height: 1080
+        )
+        let insideBottom = CGRect(
+            x: 0,
+            y: 1060,
+            width: 1920,
+            height: 1080
+        )
+        let insideTop = CGRect(
+            x: 0,
+            y: -1060,
             width: 1920,
             height: 1080
         )
         #expect(
             ScreenNeighbors.detect(
                 around: screenA,
-                among: [inside]
+                among: [
+                    insideRight, insideLeft, insideBottom,
+                    insideTop,
+                ]
             ) == ScreenNeighbors()
         )
     }

@@ -153,11 +153,15 @@ struct ScrollingBlockedEdgeTests {
         // `max(lead, 0)` would override the trailing wall, so
         // every slot would overhang the seam again — the exact
         // #878 defect, silently. Pin the dependency with a test,
-        // not the comment alone (#662): an oversized slot
-        // resolves to exactly the axis and stays flush inside
-        // both walls.
+        // not the comment alone (#662). The oversize MUST
+        // arrive through `minWindowSize`: a requested slot size
+        // is already clamped to the axis upstream
+        // (`ScrollSize.resolved`), so the floor is the cap's
+        // one live client — a `.points(2000)` fixture never
+        // reached the cap and passed with it deleted
+        // (guard-prover, 2026-08-18).
         var context = pinContext(focused: w1)
-        context.scrolling.slotSize = .points(2000)
+        context.minWindowSize = 2000
         context.scrollOffset = 0
         context.screenNeighbors = ScreenNeighbors(
             left: true,
