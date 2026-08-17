@@ -234,7 +234,7 @@ extension KiwiCore {
     /// tiled slot — the case a lone target raise cannot restack
     /// (#674). False for a ±1 step and for a re-focus of the same
     /// window. Compares tiled array indices, like
-    /// `scrollFocusStepsBackward`: array order is scroll order.
+    /// `scrollFocusApproachesWall`: array order is scroll order.
     ///
     /// Also false when EITHER end is missing from the tiled row —
     /// a first focus, or one arriving from a focused float, which

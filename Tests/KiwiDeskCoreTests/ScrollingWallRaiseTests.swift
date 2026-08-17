@@ -167,6 +167,29 @@ struct ScrollingWallRaiseTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
+    @Test("Vertical: upward defers even with no screen above")
+    func verticalUpwardAlwaysDefers() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
+        core.execute(
+            "scroll.set_orientation",
+            args: [.string("vertical")]
+        )
+        // The vertical top is macOS's OWN wall (#139): nothing
+        // may sit above the top screen border, so the upward
+        // pile is always on screen and upward focus always
+        // defers — the factory's single-screen pin (no neighbor
+        // above) must not open that edge.
+        guard startDummyPan(core) else { return }
+        #expect(
+            core.execute("focus", args: [.string("up")])
+                .isSuccess
+        )
+        #expect(core.pendingFocusRaise == WindowID(4))
+        #expect(core.activeSpace?.focused == WindowID(4))
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     @Test("Vertical: a screen below defers the downward raise")
     func verticalForwardIntoBottomWallDefers() {
         let core = makeCore()
