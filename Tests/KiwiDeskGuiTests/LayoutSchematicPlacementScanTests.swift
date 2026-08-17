@@ -26,10 +26,16 @@ struct LayoutSchematicPlacementScanTests {
     /// alongside it, which is precisely the "a schematic written
     /// tomorrow" case this suite exists for. A tree that imports
     /// the family joins this list in the same change.
+    ///
+    /// `Components/Profiles` joined in #859, when the preset
+    /// preview sheet began mounting `LayoutSchematicView` — the
+    /// same trigger, one tree over, and the obligation above
+    /// discharged rather than reasoned about.
     private static var roots: [URL] {
         let repo = SourceScan.repoRoot(from: #filePath)
         return [
             "Sources/KiwiDesk/Settings/Components/Layouts",
+            "Sources/KiwiDesk/Settings/Components/Profiles",
             "Sources/KiwiDesk/Onboarding",
         ].map { repo.appendingPathComponent($0) }
     }

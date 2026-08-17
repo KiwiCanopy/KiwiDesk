@@ -41,16 +41,53 @@ enum HomeCardPreview {
 
     // MARK: - Pieces
 
+    /// How many chips the row draws before the "+N" takes a slot.
+    static let chipCap = 4
+
     /// Capsule chips of the real profile names, the default one
     /// inverted — the answer "which one wins" read without the
     /// subtitle — capped with a "+N" chip that is a label, not
     /// an affordance.
+    ///
+    /// **In the LIST's order, and capped by the shared grammar.**
+    /// Two defects lived here until #859, and both were #789's own
+    /// arguments surviving on a second surface:
+    ///
+    /// - It sliced raw `profileSummaries`, which is
+    ///   `allProfiles()`'s **unordered** read
+    ///   (`ProfilesFamilyRows.profiles` says so itself), while
+    ///   every other consumer takes `orderedProfiles` — the
+    ///   match-first sort. So the card could hide the
+    ///   live-matching profile behind a "+N" and show three that
+    ///   match nothing, under a comment claiming it answered
+    ///   "which one wins".
+    /// - It computed `count - cap` by hand, so five profiles drew
+    ///   four chips and "+1" — the one thing the shared grammar
+    ///   forbids (`docs/ui-patterns.md` ▸ "+N"): the marker takes
+    ///   a slot of its own precisely so it never claims to hide
+    ///   exactly one. Routing it through `OverflowSplit` CHANGES
+    ///   what this draws rather than preserving it, which is why
+    ///   it waited for a branch that books an eye-confirm.
+    ///
+    /// The two sibling non-adopters in this tree — `ruleIcons`
+    /// below and `HomeCardSpacesTile` — are deliberately NOT swept
+    /// here: each is a different card owing its own eye-confirm,
+    /// and neither carries the ordering half. `OverflowSplit`'s own
+    /// doc comment states the obligation rather than a census of
+    /// who has not met it yet, and that is the form it stays in.
     private static func profileChips(
         _ model: SettingsModel
     ) -> some View {
-        let summaries = model.profileSummaries
-        let shown = Array(summaries.prefix(4))
-        let overflow = summaries.count - shown.count
+        let summaries = ProfilesFamilyRows.orderedProfiles(
+            model.profileSummaries
+        )
+        let visible = OverflowSplit.shown(
+            of: summaries.count,
+            fitting: chipCap,
+            withMarker: chipCap - 1
+        )
+        let shown = Array(summaries.prefix(visible))
+        let overflow = max(summaries.count - shown.count, 0)
         return HStack(spacing: 4) {
             ForEach(shown, id: \.name) { summary in
                 Text(summary.name)

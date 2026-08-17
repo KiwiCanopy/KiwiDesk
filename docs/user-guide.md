@@ -2116,10 +2116,32 @@ Each card draws **screens, not spaces**: one outline per display, each
 showing the layout its first space opens in, with the total space
 count underneath. A row of identical tiles cannot say *which screen
 gets what*, which is the whole point of a two- or three-screen preset.
+Past four screens the row folds and a **+N** says how many are not
+drawn, the same way a saved profile's row does.
 
 Hover an outline for what that screen gets — how many Spaces, and the
-layout it opens in. The leftmost is your **main display** and says so,
+layout it opens in. The leftmost is your **main screen** and says so,
 rather than leaving you to read it off the position.
+
+### Seeing what a preset contains
+
+A card can identify a preset; it cannot describe one. **Layouts**,
+beside Apply, opens a sheet drawing the preset's real layouts — one
+picture per Space, grouped under the screen it belongs to and
+labelled with the layout it opens in. They are the same drawings
+Layout Defaults uses, at a size where they read, so what you see is
+what applying it would lay down.
+
+Two things follow from that being a look rather than a change.
+**Layouts is never greyed** — including for a preset whose screen
+count you are not running, which is exactly when you most want to
+see inside one — and it changes nothing, so there is no confirm and
+nothing to undo. Apply is still the consequential half: it switches
+your live layout and discards edits you have not saved.
+
+The pictures are drawn from the **preset's** own gap and layout
+tuning, not from whatever you are editing right now, so a preset
+looks the same in the sheet whatever state your draft is in.
 
 Apply switches your **live** layout, so it is greyed while you are
 editing a saved profile from the banner picker — that mode never

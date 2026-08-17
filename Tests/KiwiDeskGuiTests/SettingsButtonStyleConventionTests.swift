@@ -94,8 +94,20 @@ struct SettingsButtonStyleConventionTests {
             "GeneralSection+About.swift": (
                 1, ".buttonStyle(.plain)", "Link taking plain style"
             ),
-            "PresetsSection.swift": (
-                1, ".buttonStyle(.plain)", "Picker taking plain style"
+            // Moved from `PresetsSection.swift` with the card
+            // itself in #859. The reason is also CORRECTED: the
+            // entry said "Picker taking plain style" and this file
+            // has never held a picker or a `.plain`. The real
+            // extra is Apply's zero-profile spotlight — ONE button
+            // naming two styles across the two arms
+            // (`.borderedProminent` when it is the lone primary,
+            // `.settingsActionButton()` otherwise) — so the count
+            // was right for a reason nobody could check against
+            // the prose beside it.
+            "PresetCard.swift": (
+                1,
+                ".buttonStyle(.borderedProminent)",
+                "Apply's spotlight arm — one button, two styles"
             ),
         ]
 

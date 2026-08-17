@@ -194,7 +194,13 @@ struct SettingsSearchIndexTests {
                 .colors: 12,
                 .advancedColors: 25,
                 .behavior: 3,
-                .profiles: 5,
+                // 6: `(action) presets.layouts` joined anchor-less
+                // in #859 — the preset card's preview opener. This
+                // count RISING is the unusual direction the
+                // docstring above warns about, and the reason is
+                // that a new census row landed rather than a
+                // catalog anchor going missing.
+                .profiles: 6,
                 // 12: `keybinding.open_settings` joined
                 // anchor-less (#678 item 18 — the bindable
                 // "Open Settings" row has no #277 catalog

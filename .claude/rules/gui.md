@@ -71,6 +71,23 @@ to invert the dim ladder).
   carry no duplicate preview (`DetailPanelTests` holds the
   migration and the offer set; the argument is in
   `docs/design-decisions.md` ▸ two columns).
+- **A picture whose object is NOT the draft goes in a sheet, and
+  writes nothing** (#859). The panel redraws the staged draft and
+  is dropped by width; both are wrong for a catalog entry, whose
+  picture states a fact no control beside it repeats. So choose
+  the container by whose object the picture is — draft → the
+  panel, anything the user is not editing → a sheet off the thing
+  that names it — and keep the sheet read-only, a sheet that
+  grows a commit being a dialog wearing the wrong chrome. Two
+  mechanics come with it, both lessons paid for elsewhere in this
+  window: present by `item:` over an `Identifiable` request, never
+  `isPresented:` (#843), and host it where its identity outlives
+  its opener, never inside a `LazyVGrid`'s cards.
+  `PresetPreviewSheetTests` holds those two plus the structural
+  half that matters most — the sheet takes no `SettingsModel`, so
+  reaching the draft is a new stored property rather than a
+  one-token edit. The argument is in `docs/design-decisions.md` ▸
+  the panel's object is the DRAFT.
 - **A preview that claims to show engine behavior asks the
   engine.** Never re-implement a rule the engine owns beside the
   drawing of it — call it, and where the shape does not fit, wrap

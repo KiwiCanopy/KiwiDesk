@@ -53,7 +53,15 @@ struct ProfilesGateWiringTests {
             "Components/Profiles/NativeSpacesGroup.swift": [
                 "inertReason(for:.profiles(.profileBindings))"
             ],
-            "Sections/PresetsSection.swift": [
+            // Apply's gate moved to the card widget in #859,
+            // when the section outgrew the 350-line ceiling and
+            // the drawing went to `Components/Profiles/` where
+            // gui.md puts a widget. Re-keyed on the USE site
+            // rather than left pointing at the section, which
+            // still draws the card and would satisfy a
+            // file-level "touches the resolver" check while the
+            // gate itself went hand-rolled one file over.
+            "Components/Profiles/PresetCard.swift": [
                 "inertReason(for:.profiles(.presetsApply))"
             ],
         ]

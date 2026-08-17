@@ -17,8 +17,11 @@ struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
     /// The shell's measured band — the ONE width
     /// derivation this grid is allowed to read.
+    ///
     @Environment(\.settingsWidth) private var band
     @State private var otherSetupsExpanded = false
+    /// The open preview sheet, or nil (#859).
+    @State private var previewRequest: PresetPreviewRequest?
 
     var body: some View {
         SettingsSection(
@@ -36,6 +39,19 @@ struct PresetsSection: View {
             }
             liveGroup
             otherSetups
+        }
+        // Hosted on the SECTION, not on a card. The cards are in
+        // a `LazyVGrid`, which tears down rows it scrolls past,
+        // and a sheet hosted inside a subtree its own presenter
+        // can destroy dies with it — the lesson `SettingsView`
+        // records for the one discard dialog, which sits above
+        // the `editingLua` branch for exactly this reason. This
+        // view's identity is stable for as long as the area is.
+        .sheet(item: $previewRequest) { request in
+            PresetPreviewSheet(
+                layout: request.layout,
+                liveSizes: request.liveSizes
+            ) { previewRequest = nil }
         }
     }
 
@@ -182,60 +198,28 @@ struct PresetsSection: View {
 
     // MARK: - Rows
 
-    /// `sizes` is the live screen list for an APPLIABLE card and
-    /// nil for the drawer — the card resolves its glyph against
-    /// the same hardware the apply path will.
-    /// One preset, as a CARD rather than a settings row (#789).
+    /// The card, with this section's own inputs supplied once
+    /// rather than at both call sites.
     ///
-    /// Picture first, then the name, the summary, the space
-    /// count, and Apply — the order a comparison set wants,
-    /// because the picture is what the eye scans across and the
-    /// prose is what it reads once it has stopped. The old shape
-    /// (title first, picture third, Apply off to the right) read
-    /// as a list of settings rows; presets are offers.
-    ///
-    /// `Apply` is a SIBLING of the text block, never a button
-    /// inside a tappable card: nesting one control in another is
-    /// broken on macOS whatever the design intent, and keeping
-    /// Apply an explicit per-card button is what lets it carry
-    /// its own greyed reason and the zero-profile spotlight.
+    /// A wrapper rather than two direct `PresetCard(...)` calls,
+    /// and deliberately: `ProfilesGateWiringTests` keys two needles
+    /// on this file's `presetCard($0,sizes:liveSizes)` and
+    /// `presetCard($0,sizes:nil)` spellings — the pin on which
+    /// cards resolve against live hardware and which are drawn as
+    /// plans. Keeping the wrapper means #859 moved the drawing
+    /// without repointing that guard, which is a split "changing
+    /// what a test claims with its bytes untouched"
+    /// (tests.md ▸ Owed).
     private func presetCard(
         _ layout: StandardLayout,
         sizes: [CGSize]?
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            PresetScreenCard(layout: layout, liveSizes: sizes)
-            HStack(spacing: 6) {
-                Text(layout.displayName).font(.headline)
-                if layout.isStandard {
-                    BadgeChip(
-                        label: L(
-                            "presets.standard_badge",
-                            "standard"
-                        )
-                    )
-                }
-            }
-            Text(layout.displaySummary)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(
-                    maxWidth: .infinity,
-                    alignment: .leading
-                )
-            applyButton(layout)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(SettingsTheme.sunken)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 10)
-                .strokeBorder(SettingsTheme.hairline)
-        }
+        PresetCard(
+            layout: layout,
+            sizes: sizes,
+            model: model,
+            connectedScreens: liveCount
+        ) { previewRequest = $0 }
     }
 
     /// The grid's columns — the BAND's cap, never a width this
@@ -249,69 +233,6 @@ struct PresetsSection: View {
                 spacing: 12
             ),
             count: band.presetColumnCap
-        )
-    }
-
-    /// Zero-profile spotlight (ui-designer 2026-07-19): ONE
-    /// Apply goes accent-prominent until the first profile
-    /// exists — the appliable count's Standard preset, so the
-    /// spotlight stays a single primary (review 2026-07-19:
-    /// prominence on every appliable preset put three accent
-    /// buttons in one field, four with the footer's).
-    @ViewBuilder private func applyButton(
-        _ layout: StandardLayout
-    ) -> some View {
-        // Greyed, never hidden (#171) — with the reason, because
-        // "why is Apply dead" has two different answers and the
-        // stored-profile one contradicts what the user just read
-        // in the header (#518). Both answers are the resolver's:
-        // a predicate re-derived here could grey a row the census
-        // says is live.
-        let reason = gates(layout).inertReason(
-            for: .profiles(.presetsApply)
-        )
-        // Apply materializes a profile and reloads, so it
-        // drops staged edits like the profile actions (#515).
-        let button = Button(L("presets.apply", "Apply")) {
-            model.discardingEdits(
-                message: L(
-                    "discard.apply_preset.message",
-                    "Applying a preset replaces the edits you "
-                        + "haven't saved."
-                ),
-                confirmLabel: L(
-                    "discard.apply_preset.confirm",
-                    "Discard & apply"
-                )
-            ) { model.applyStandardPreset(layout) }
-        }
-        .controlSize(.large)
-        .disabled(reason != nil)
-        .help(reason.map(ProfilesGateHelp.sentence) ?? "")
-        if reason == nil, layout.isStandard,
-            model.profileSummaries.isEmpty
-        {
-            button.buttonStyle(.borderedProminent)
-        } else {
-            button.settingsActionButton()
-        }
-    }
-
-    private func gates(
-        _ layout: StandardLayout
-    ) -> ProfilesGates {
-        // `separateDisplaySpaces` reaches no arm this row can
-        // hit, and it is passed anyway: the resolver takes no
-        // default for it, so a call site that would rather not
-        // think about it is made to. One snapshot on the model
-        // means this costs nothing and cannot disagree with
-        // what the bindings card resolves from.
-        ProfilesGates(
-            editingStoredProfile: model.editingStoredProfile,
-            separateDisplaySpaces:
-                model.displaysHaveSeparateSpaces,
-            connectedScreens: liveCount,
-            presetScreens: layout.screenCount
         )
     }
 }

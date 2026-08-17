@@ -30,9 +30,11 @@ enum ProfilesRowOrder {
         .profiles(.profileBindings)
     ]
 
-    /// Each preset card's Apply.
+    /// Each preset card's two actions, in the order the card draws
+    /// them: look, then apply (#859).
     static let presets: [SettingKey] = [
-        .profiles(.presetsApply)
+        .profiles(.presetsLayouts),
+        .profiles(.presetsApply),
     ]
 
     /// Every row this area draws, by container.

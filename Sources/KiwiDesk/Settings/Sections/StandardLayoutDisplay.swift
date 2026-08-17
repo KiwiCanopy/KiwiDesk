@@ -46,34 +46,61 @@ extension StandardLayout {
 
     @MainActor var displaySummary: String {
         switch name {
+        // The first three used to name LAYOUT MODES in prose
+        // ("IDE stack", "scrolling docs", "a deep-work monocle
+        // Space") and ten catalogs then translated those words
+        // inconsistently — `de` shipped "IDE-Stapel" and
+        // "scrollende Dokumentation" beside a picker reading
+        // "Stack" and "Scrolling", while keeping "Monocle" in the
+        // next key along. No content guard can see it:
+        // `untranslated_mode_names` fires on the OPPOSITE polarity
+        // (a translated picker with English prose), and `de` has
+        // English pickers with translated prose.
+        //
+        // So the card stops naming layouts at all (#859). A
+        // summary says what you DO on those Spaces; the layouts
+        // are named where they are drawn — the preview sheet's
+        // tiles, through `LayoutMode.displayName`, which every
+        // catalog already renders under a policy
+        // `LocalizationModeNamePolicyTests` pins. Re-authoring
+        // rather than guarding removes the class instead of
+        // watching it.
         case "Developer":
             return L(
                 "presets.developer.summary",
-                "IDE stack, scrolling docs, and a fullscreen "
+                "An IDE, reference docs, and a full-screen "
                     + "preview Space."
             )
         case "Minimalist":
             return L(
                 "presets.minimalist.summary",
-                "Spacious gaps, a scrolling reading Space, "
-                    + "and single-focus work."
+                "Generous gaps, a Space for reading, and "
+                    + "single-focus work."
             )
         case "Focus Stack":
             return L(
                 "presets.focus_stack.summary",
-                "Two stacked task Spaces and a deep-work "
-                    + "monocle Space."
+                "Two task Spaces, and one kept clear for deep "
+                    + "work."
             )
+        // "main screen", not "main display": these two lines draw
+        // DIRECTLY above `PresetScreenCard`'s outlines, whose own
+        // label says "Main screen" (#789's `presets.screen_name.*`
+        // pair), so the card named one screen two ways. Fixed
+        // here because #859 re-authors this family anyway — the
+        // repo-wide screen/display/monitor split is a separate
+        // owner ruling plus a catalog-wide sweep, and it is
+        // deliberately NOT in this change set.
         case "Dual Developer":
             return L(
                 "presets.dual_developer.summary",
-                "Code and docs on the main display; mail, "
+                "Code and docs on the main screen; mail, "
                     + "chat, and media on the second."
             )
         case "Coder & Monitor":
             return L(
                 "presets.coder_and_monitor.summary",
-                "Editor and terminals on the main display; "
+                "Editor and terminals on the main screen; "
                     + "dashboards and logs on the second."
             )
         case "Command Center":
@@ -141,4 +168,57 @@ extension StandardLayout {
     // produce it (architect review, 2026-08-11).
     StandardProfiles.workflows.first { $0.name == name }?
         .displayName ?? name
+}
+
+/// A positional screen's name: 0 is the main display and the rest
+/// are numbered (#789).
+///
+/// The preset card denotes "main" by POSITION — leftmost — which
+/// is a claim a reader who cannot see the row has no way to
+/// recover: every screen announced itself as "Screen N" and
+/// nothing said which one the Mac treats as main. The
+/// alternatives were both refused by the consult that ruled this:
+/// a heavier stroke, because `SettingsTheme+Metrics` records that
+/// weight alone on a hairline was invisible on device and because
+/// stroke weight already carries two meanings in this window; and
+/// a micro-label, which at that outline size is ~7 pt type.
+/// Saying it in words costs no pixels and removes the inference
+/// rather than decorating it.
+///
+/// A NAME rather than a branched sentence, so the frames that
+/// interpolate it stay one frame each and a locale reorders them
+/// freely. It feeds `PresetScreenCard`'s two help frames and the
+/// preview sheet's screen headings (#859) — **authored once here**
+/// rather than at each call site, because a pair of keys feeding
+/// one specifier slot is one naming decision and duplicating the
+/// `L()` calls is how the two arms come to disagree.
+///
+/// **Both arms say "screen", and that is load-bearing.** They are
+/// two alternatives for ONE specifier slot, so a pair reading
+/// "Main display" / "Screen %1$d" puts two nouns for one concept
+/// in one slot and makes every catalog reconcile it alone — which
+/// all ten duly did, each picking a different side, while English
+/// was the only catalog whose own pair disagreed (translation
+/// audit, 2026-08-16). The noun is "screen" because this card's
+/// neighbours are: the group heading counts screens
+/// (`presets.for_your.*`), as do `presets.needs_screens`,
+/// `presets.none_for_count`, `presets.starter.summary`,
+/// `profiles.screens.*` — and, since #859, the two preset
+/// summaries that used to read "on the main display"
+/// (`presets.dual_developer.summary`,
+/// `presets.coder_and_monitor.summary`).
+///
+/// This does NOT settle screen vs display vs monitor for the repo
+/// — `config-vocabulary.md`'s glossary and
+/// `docs/localization-naming.md` are both silent on it while
+/// `en.json` uses all three, which is an owner ruling and a
+/// catalog-wide sweep. It settles the Presets surface.
+@MainActor func presetScreenName(_ screen: Int) -> String {
+    screen == 0
+        ? L("presets.screen_name.main", "Main screen")
+        : L(
+            "presets.screen_name.numbered",
+            "Screen %1$d",
+            screen + 1
+        )
 }

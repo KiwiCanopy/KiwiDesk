@@ -701,6 +701,37 @@ alone. The card's close is per-mount, never a stored
 preference: navigating clears the answer, and above 1200 the
 panel takes its column back whatever the answer was.
 
+**A picture of something that is not the draft goes in a
+SHEET, not the panel** (#859). The panel's object is the staged
+draft, and its column is dropped by width — both are right for
+a preview sitting beside the controls that feed it, and both
+are wrong for a picture of a *catalog entry*: it would be
+headed "Live preview" while showing something the draft has no
+say in, and a fact stated nowhere else must not vanish at
+900 pt. So the preset preview is a sheet off the card, and
+Profiles stays out of `SettingsDetailPanelOffer.offering`
+(`DetailPanelTests` pins the refusal with its three grounds).
+
+The sheet is this window's **third** transient surface and the
+three are chosen by what they hold, not by size. A **popover**
+is a glance or a small edit anchored to the control that opened
+it (a `?`, a rename field, a chip overflow). An **alert** or
+`confirmationDialog` is a question with consequences. A
+**sheet** is a body of content too big for an anchored popover
+and not a question at all — it has one dismissal and writes
+nothing. A sheet that grew a commit button would be a dialog
+wearing the wrong chrome; give the commit back to the surface
+that owns it.
+
+Two mechanics a sheet here owes, both of them lessons the
+window already paid for elsewhere. It is presented by
+`item:` over an `Identifiable` request, never `isPresented:` —
+so its content cannot be built from parent state written in the
+same tick (#843). And it is hosted where its identity is stable
+for as long as the area is, never inside a `LazyVGrid`'s cards
+or any other subtree its own presenter can tear down (the rule
+`SettingsView` follows for the one discard dialog).
+
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
 (`LayoutSchematicKit` / `LayoutSchematicCanvas` hold the shared

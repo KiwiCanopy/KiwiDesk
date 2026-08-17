@@ -8,6 +8,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case isDefault = "profile.isDefault"
     case isStarterSetup = "profile.isStarterSetup"
     case presetsApply = "(action) presets.apply"
+    case presetsLayouts = "(action) presets.layouts"
 }
 
 extension ProfilesKey {
@@ -61,6 +62,27 @@ extension ProfilesKey {
                     .editingStoredProfile,
                 ])
             )
+        case .presetsLayouts:
+            // The preview sheet's opener (#859). **No gate**, and
+            // it is the only row on this card without one: the
+            // sheet writes nothing, and a user whose screen count
+            // does not match — the state that greys Apply — is the
+            // one who most needs to see what a preset contains.
+            //
+            // A census row even though it mutates nothing, which
+            // no other `(action)` case can say. The precedent is
+            // `(action) general.advanced.edit_lua`, whose
+            // immediate effect is also opening a surface: the
+            // census's unit is what a Settings surface OFFERS, not
+            // what writes. Being in it is what gives the button a
+            // search anchor and a label key every catalog must
+            // carry (`SettingKeyLocaleTests`).
+            //
+            // `.atRest` for the same reason `presetsApply` is, and
+            // it inherits that key's straddle: the instances in
+            // the "For other setups" drawer sit behind a
+            // disclosure while these describe the appliable group.
+            return .row(.profiles, .presets, .atRest)
         }
     }
 }
@@ -83,6 +105,8 @@ extension ProfilesKey {
             return .none
         case .presetsApply:
             return .text("presets.apply")
+        case .presetsLayouts:
+            return .text("presets.layouts")
         }
     }
 }

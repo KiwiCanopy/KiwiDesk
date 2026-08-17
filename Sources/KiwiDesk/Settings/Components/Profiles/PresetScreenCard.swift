@@ -45,24 +45,87 @@ struct PresetScreenCard: View {
     /// Grown with the outline, so the glyph keeps its share of
     /// the frame rather than shrinking inside a larger one.
     private static let glyphSize: CGFloat = 14
+    private static let gap: CGFloat = 4
+
+    /// How many slots the row draws before the "+N" chip takes
+    /// one — the SAME cap the small mount uses, because the two
+    /// draw one grammar at two sizes and a cap that differed would
+    /// make a five-screen profile hide a different number of
+    /// screens in the list than on its card.
+    private static var slots: Int { ProfileScreenPips.slots }
+
+    /// The pips' chip size scaled by the step the glyph takes
+    /// between the mounts, so the chip keeps its share of the
+    /// outline exactly as `glyphSize` does.
+    private static var moreSize: CGFloat {
+        ProfileScreenPips.moreSize
+            * (glyphSize / ProfileScreenPips.glyph)
+    }
 
     /// Clamped at zero: a hand-edited layout claiming a negative
     /// screen count must not trap on the range.
-    private var screens: Range<Int> {
-        0..<max(layout.screenCount, 0)
+    private var screenCount: Int { max(layout.screenCount, 0) }
+
+    /// Outlines drawn, and screens hidden behind the chip.
+    ///
+    /// **The row was uncapped until #859**, while the small mount
+    /// has always capped: `screenCount` fed the `ForEach`
+    /// directly, so a `Starter` derived from five connected
+    /// displays drew five 48 pt outlines — 256 pt of them — inside
+    /// a card whose grid minimum is 200. Only `Starter` can reach
+    /// it (the seven declared presets are capped by hand at three
+    /// screens) but `StarterAllocation`'s own docstring is explicit
+    /// that eleven displays gets eleven spaces, so the ceiling is
+    /// the desk's, not the catalog's.
+    ///
+    /// Internal rather than private, and asserted directly: a view
+    /// that takes a count and draws a constant satisfies every
+    /// substring a source scan can look for while answering
+    /// nothing (`LayoutSchematicCountTests`' lesson, which
+    /// `ProfileScreenPips` took first).
+    var shown: Int {
+        OverflowSplit.shown(
+            of: screenCount,
+            fitting: Self.slots,
+            withMarker: Self.slots - 1
+        )
     }
+
+    var hidden: Int { max(screenCount - shown, 0) }
+
+    private var screens: Range<Int> { 0..<shown }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
+            HStack(spacing: Self.gap) {
                 ForEach(screens, id: \.self) { screen in
                     outlineView(screen)
                 }
+                if hidden > 0 { moreChip }
             }
             Text(spaceCountText)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// Counts the screens NOT drawn, never the total — and stays
+    /// silent to VoiceOver, because the screen count is already
+    /// stated in words directly above every card that draws one
+    /// (`presets.for_your.*` for the live group,
+    /// `profiles.screens.*` per group in the drawer). Announcing
+    /// "+2" beside those would read one fact twice, and "+2" alone
+    /// says nothing a reader could act on.
+    private var moreChip: some View {
+        Text(verbatim: "+\(hidden)")
+            .font(.system(size: Self.moreSize, weight: .semibold))
+            .monospacedDigit()
+            .foregroundStyle(SettingsTheme.ink3)
+            .frame(
+                width: Self.outline.width,
+                height: Self.outline.height
+            )
+            .accessibilityHidden(true)
     }
 
     /// One noun, one pair of keys: the profile row counts spaces
@@ -158,77 +221,18 @@ struct PresetScreenCard: View {
             return L(
                 "presets.screen_help.empty",
                 "%1$@: no Spaces",
-                screenName(screen)
+                presetScreenName(screen)
             )
         }
         // The count phrase, not a `space(s)` parenthetical: the
-        // pair already exists for this noun, and the file uses
-        // it fourteen lines up.
+        // pair already exists for this noun and `spaceCountPhrase`
+        // above is this file's own use of it.
         return L(
             "presets.screen_help",
             "%1$@: %2$@, opens in %3$@",
-            screenName(screen),
+            presetScreenName(screen),
             spaceCountPhrase(spaces(on: screen).count),
             mode.displayName
         )
-    }
-
-    /// Screen 0 is the main display and the rest are numbered
-    /// (#789).
-    ///
-    /// The card denotes "main" by POSITION — leftmost — which is
-    /// a claim a reader who cannot see the row has no way to
-    /// recover: every screen announced itself as "Screen N" and
-    /// nothing said which one the Mac treats as main. The
-    /// alternatives were both refused by the consult that ruled
-    /// this: a heavier stroke, because `SettingsTheme+Metrics`
-    /// records that weight alone on a hairline was invisible on
-    /// device and because stroke weight already carries two
-    /// meanings in this window; and a micro-label, which at this
-    /// outline size is ~7 pt type. Saying it in words costs no
-    /// pixels and removes the inference rather than decorating
-    /// it.
-    ///
-    /// A NAME rather than a branched sentence, so the two frames
-    /// above stay one frame each and a locale reorders them
-    /// freely.
-    ///
-    /// **Both arms say "screen", and that is load-bearing.** They
-    /// are two alternatives for ONE specifier slot of one frame,
-    /// so a pair reading "Main display" / "Screen %1$d" puts two
-    /// nouns for one concept in one slot and makes every catalog
-    /// reconcile it alone — which all ten duly did, each picking
-    /// a different side, while English was the only catalog whose
-    /// own pair disagreed (translation audit, 2026-08-16). The
-    /// noun is "screen" because most of this card's neighbours
-    /// are: the group heading counts screens
-    /// (`presets.for_your.*`), as do `presets.needs_screens`,
-    /// `presets.none_for_count`, `presets.starter.summary` and
-    /// `profiles.screens.*`.
-    ///
-    /// **Not all of them, and the exception is the nearest.**
-    /// `PresetsSection` draws `layout.displaySummary` directly
-    /// above these outlines, and for the two two-screen presets
-    /// that line reads "on the main **display**"
-    /// (`presets.dual_developer.summary`,
-    /// `presets.coder_and_monitor.summary`) — so on exactly
-    /// those two cards the summary and the outline below it now
-    /// name one screen two ways. Five keys to two decided it,
-    /// and the residue is named here rather than left for a
-    /// reader to trip over.
-    ///
-    /// This does NOT settle screen vs display vs monitor for the
-    /// repo — `config-vocabulary.md`'s glossary and
-    /// `docs/localization-naming.md` are both silent on it while
-    /// `en.json` uses all three, which is an owner ruling and a
-    /// catalog-wide sweep. It settles this card.
-    private func screenName(_ screen: Int) -> String {
-        screen == 0
-            ? L("presets.screen_name.main", "Main screen")
-            : L(
-                "presets.screen_name.numbered",
-                "Screen %1$d",
-                screen + 1
-            )
     }
 }
