@@ -338,7 +338,30 @@ residue, one language's two ordinary words for one idea, stays
 with review, and the ladder is what makes that review cheap: a
 reviewer who does not speak the language can still check a grep.
 
-The ladder and the counted legitimate uses are in
+**Rule 1 takes a word away and has to say what replaces it.**
+Left unanswered, the obvious move is a second ordinary noun,
+which is the defect the family exists to stop — so the escape is
+ranked as well, and its first step is the one that keeps
+surprising people: **check the destination label is faithful
+before working around it.** English qualifies a generic
+destination noun ("Layout **Defaults**"), and a catalog that
+rendered it bare has not discovered a shortage — it has
+mistranslated the destination, and taken the ordinary word out of
+circulation as a side effect. Restoring the qualifier gives the
+word back.
+
+Where the shortage is genuine, **the ordinary site qualifies and
+the destination never moves**, which is rule 3 read in the other
+direction: the destination label is the one string that is a card
+title, a back chip and a search row at once, so it is the last
+thing that should absorb a collision it did not cause. And the
+qualifier is a noun, not a verb: a verb phrase can only grow,
+while a qualified noun collapses back to the bare noun the moment
+the first step frees it. That difference is measured in points on
+a button, which is why the width half of it is an obligation in
+`.claude/rules/localization.md` rather than advice here.
+
+The ladder, the escape and the counted legitimate uses are in
 [Feature name policy](localization-naming.md) ▸ Family C.
 
 
@@ -440,6 +463,72 @@ The counts are as measured when the ruling was taken
 
 (#768; the declined alternative — renaming KiwiDesk's side — is
 #765.)
+
+
+### Vocabulary: a screen is a screen, and *display* is Apple's word
+
+**[Principle]**
+
+The same shape as the ruling above, one noun over, and it went
+unruled for longer because no single word was obviously wrong.
+English shipped three for one thing — *screen*, *display*,
+*monitor* — interleaved across adjacent surfaces rather than
+separated by area, so a preset outline said "Main screen" while
+the caption above it said "the main display" and the card that
+opened the picture was called "Monitors".
+
+**The ruling: a physical screen is a *screen*. *Display* is
+reserved for quoting Apple's own controls. *Monitor* is
+retired.**
+
+**Why *display* is the one that cannot stay**, and this is what
+makes the ruling more than a coin toss between three synonyms:
+*display* is already spoken for twice. It is Apple's noun — the
+Displays pane, the "Displays have separate Spaces" checkbox that
+copy must quote verbatim — and it is KiwiDesk's own verb in
+"Display language". A word doing three jobs cannot be the one
+that names a screen, by ladder rule 1, before any count is taken.
+That leaves *screen* against *monitor*, and there the count is
+decisive rather than close: measured for this ruling
+(2026-08-17, against `en.json` at `fcd52b6d`), values said
+*screen* 44 times against *monitor*'s 25.
+
+**Reserving Apple's word is the same move the Desktop ruling
+made, and for the same reason.** Where copy sends a user to a
+control someone else named, it must use that control's name or
+the sentence fails at its one job. Keeping *display* free for
+that is what lets the rest of the corpus have a word of its own —
+exactly as reserving *Desktop* for Mission Control is what lets
+every bare "Space" mean KiwiDesk's.
+
+**The destination label loses, which is worth stating because it
+feels backwards.** Family C's rule 3 hands a near-tie to the
+destination label, on the grounds that it is the name the user
+learns first. This is not a near tie, so rule 2 settles it and
+"Monitors" is a losing word in the most-read position — the same
+shape as `ko`'s gap destination losing to the word thirteen other
+keys use. A pane whose every sentence says *screen* while its
+card says *Monitors* is the split, not a mitigation of it.
+
+**The ruling and the sweep are two decisions, and only the first
+was taken here.** Deciding the winner costs a paragraph and makes
+every string authored afterwards correct; sweeping the existing
+ones reaches the settings census, a component directory, the site
+corpus and `docs/`, and it touches the wire in two places
+(`toggle_display_sticky`, `float_scale_on_display_change`) that
+are their own ruling. Taking the ruling without the sweep leaves
+the corpus knowingly inconsistent rather than accidentally so,
+which is the cheaper of the two states and the only one that
+converges. The sweep is #865, off 1.0; the English-side
+obligation is `.claude/rules/config-vocabulary.md` ▸ noun
+glossary.
+
+**What this does NOT decide: any catalog's own word.** Ruling the
+English winner tells `zh-Hans` nothing about 屏幕 versus 显示器 —
+each catalog runs Family C's ladder over its own file, and its
+answer can legitimately be the cognate of a word English retired.
+Reading an English ruling as a translation instruction is how a
+sweep breaks correct copy.
 
 
 ### Layout navigation & overflow models

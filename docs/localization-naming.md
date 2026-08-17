@@ -303,6 +303,53 @@ keys, `ru`'s «раскладка» is also a keyboard layout, `es`'s
 search-and-replace, and a sweep that changes a concept ships with
 the list of keys it deliberately left alone.
 
+### When rule 1 takes the word you needed
+
+Rule 1 says a word naming another KiwiDesk concept loses. That
+leaves a real question it does not answer: what does the *losing*
+site call the thing now? The tempting answer — reach for a second
+ordinary noun — is the exact defect this family exists to stop,
+so the escape is ranked too. Take the first that fits.
+
+1. **Check the destination label is faithful before working
+   around it.** Where the English destination carries a
+   qualifier and your catalog rendered it bare, the collision is
+   the *destination's* defect, not a shortage at the ordinary
+   site. Restore the qualifier and the bare noun is free again.
+   `destination.layout` is the worked case: English is "Layout
+   **Defaults**", and the catalogs that kept the qualifier are
+   exactly the ones with the bare noun still available for
+   ordinary use.
+2. **Where English's own destination IS the bare noun** —
+   Profiles, Spaces, Bars, Shortcuts — the shortage is real.
+   Then **the ordinary site qualifies and the destination never
+   moves.** The destination label is the name the user learns,
+   which is rule 3's whole reason; moving it to make room for a
+   body string spends the one string that has to stay stable.
+3. **Prefer the shortest qualified NOUN phrase to a verb
+   phrase** wherever the site is a control whose width is
+   measured. A verb phrase can only grow; a qualified noun
+   collapses back to the bare noun the moment step 1 frees it.
+   `.claude/rules/localization.md` ▸ *an ACTION label must fit
+   its control* owns the width half, including the obligation to
+   re-measure a pair when a control joins a row.
+4. **Never coin a second bare noun for the concept.** That is
+   the defect the ladder exists to stop, and step 2 is where it
+   is tempting.
+
+`DestinationNameCollisionTests` holds only the byte-identical
+case — it is what makes the collision *visible*, not what
+resolves it. Steps 1–4 are review's, like the rest of this
+family.
+
+**One concept is ruled and deliberately unswept**: the physical
+screen, where English carries three words. The winner is
+`screen`, `display` is reserved for quoting Apple's own controls,
+and the argument plus the English-side obligation is
+`.claude/rules/config-vocabulary.md` ▸ noun glossary. The sweep —
+including each catalog's own rule-2 run, which the English ruling
+does **not** decide — is #865.
+
 ### Why there is no per-locale word list here
 
 The obvious shape for this section is a table: eleven columns,

@@ -135,6 +135,29 @@ synonym:
   re-proposed, is `docs/design-decisions.md` ▸ Vocabulary: macOS
   has Desktops, KiwiDesk has Spaces, which also owns the list of
   wire names this rule exempts.
+- **screen** vs **display** vs **monitor** — a physical screen is
+  a **screen**, in a label, a caption or a doc comment. *Display*
+  is reserved for **quoting Apple**: System Settings ▸ Displays,
+  the "Displays have separate Spaces" checkbox, anywhere copy
+  sends the user to a control Apple named — the same reservation
+  the space/Desktop bullet above makes, one noun over, and for
+  the same reason. A sentence naming both writes both words.
+  Retired as names for a screen: *monitor*, *display*. The
+  **wire is exempt**, as it is above: `toggle_display_sticky`
+  and `float_scale_on_display_change` keep their names until
+  someone rules the wire, and this bullet governs copy alone.
+  A **proper name** is not the common noun and is not bound
+  here — the `Coder & Monitor` preset keeps its name.
+
+  Two obligations, and no claim about what the corpus currently
+  says: **author every new string to this**, and **do not sweep
+  the existing ones as a rider on some other branch** — the
+  sweep reaches the census, a component directory, the site
+  corpus and `docs/`, and it is #865, ruled off 1.0. A locale
+  applies the ladder to its OWN file: this settles the English,
+  never which of a catalog's two candidates wins there
+  (`docs/localization-naming.md` ▸ Family C, whose rule 2 is
+  the one copy of how that is decided).
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).
