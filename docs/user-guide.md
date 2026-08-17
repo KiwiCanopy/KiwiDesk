@@ -548,9 +548,40 @@ preferences only. Choosing **System** removes the stored value
 entirely, so "follow macOS" is the true default with nothing left
 behind.
 
+## Moving to Another Mac: Backups
+
+**General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
+holding your settings, every profile, and your saved color
+palettes. Carry it to another Mac, open Settings there, and
+**Restore from Backup…** puts the setup back.
+
+Your `init.lua` is **not** included, deliberately: it is code you
+wrote, and a backup that quietly replaced it would be claiming a
+file KiwiDesk does not manage. Nor is the remembered window
+arrangement, which describes one Mac's session rather than
+anything you chose. On a Lua-owned setup the export still carries
+your profiles and palettes, so it is worth taking either way.
+
+It is a **one-time snapshot, not a service** — KiwiDesk keeps no
+backups of its own, so export again whenever you want a current
+copy. Keeping two Macs continuously in step is a different job
+and needs no feature: symlink `~/.config/KiwiDesk` into iCloud
+Drive or Dropbox and both machines read the same files.
+
+Restoring **replaces** — it does not merge. Your current
+settings, profiles and palettes are replaced by the backup's, and
+anything you have not saved yet is discarded, which is why it
+asks first. What it replaces goes to the **Trash**, so one drag
+undoes it.
+
+It sits at the very end of **General ▸ Advanced**, after Reset
+All Settings, because it is the most far-reaching action there:
+Reset All leaves your palettes alone, and a restore replaces
+those too.
+
 ## When Things Act Up: Discard & Reset
 
-The tail of **General ▸ Advanced** holds two escape hatches, in
+The middle of **General ▸ Advanced** holds two escape hatches, in
 ascending severity:
 
 - **Discard Saved Window Arrangement** — clears the arrangement

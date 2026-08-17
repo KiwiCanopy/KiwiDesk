@@ -299,6 +299,46 @@ in the update in front of me", and this answers "what changed
 across every version, whenever I ask" — including for a user who
 skipped four of them.
 
+### A restore replaces; it never merges
+
+**[Principle]**
+
+Restoring a backup replaces the settings, the profiles and the
+palette library outright. It does not reconcile them with what is
+already on the machine, and it must not grow the ability to.
+
+Merging sounds kinder and is worse. It needs a collision policy
+per profile name and per palette name, then a rule for a setting
+that differs, then a way to show the user what it decided — and
+at the end of all that the result depends on **what happened to
+be on the destination Mac**, which is precisely the variable the
+user was trying to eliminate by carrying a backup over. "The
+setup I exported" is a thing a person can picture; "the setup I
+exported, reconciled with whatever was here" is not.
+
+Replacement also makes the promise checkable. After a restore the
+destination holds exactly what the source held, so a user can
+confirm it by looking, and a test can assert it without modelling
+a merge. What is replaced goes to the Trash, so the cost of being
+wrong is one drag rather than a reconstruction.
+
+The same reasoning puts the restore at the end of the Advanced
+drawer's severity ladder rather than beside its export. Reset All
+Settings is *named* for what it spares — `init.lua` and the
+colour palettes visibly survive it — so an action that replaces
+the palettes too is strictly the wider one. Ordering it before
+Reset All would put the harsher action above the milder and break
+the only thing that ladder communicates. The price is that the
+two halves of one feature sit apart, which is accepted: a user
+who has just exported is not in danger, and a user reaching for
+the bottom of that drawer should meet the most severe thing last.
+
+Trade-off: someone who wants one profile from an old machine has
+to restore everything and delete the rest. Accepted for now —
+per-profile export is a smaller, separate feature, and
+`ProfileManager` already has the primitives whenever it is
+wanted.
+
 ### Feature names: which stay English, which translate
 
 **[Principle]**
