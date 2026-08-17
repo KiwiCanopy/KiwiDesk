@@ -100,7 +100,7 @@ extension InterpolatedLabelTests {
         "space_bar.alignment.label.help": 2,
         "space_bar.background_fit.boxed_only": 1,
         "space_bar.color.focused_item.help": 2,
-        "space_bar.icon_source.help": 1,
+        "space_bar.icon_source.help": 2,
         "spaces.delete_confirm.message": 2,
         // The eight below were ALWAYS interpolating and were
         // invisible until the scan learned
