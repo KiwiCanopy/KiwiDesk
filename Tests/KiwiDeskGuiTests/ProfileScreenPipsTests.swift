@@ -20,6 +20,12 @@ struct ProfileScreenPipsTests {
 
     /// Under the slot count every screen draws itself, so the
     /// picture IS the count and nothing is elided.
+    /// Stated limit, shared with the preset card's suite: the
+    /// never-exactly-one correction inside `OverflowSplit` is
+    /// UNREACHABLE at the marker capacity this row passes
+    /// (`slots - 1`), so any property here holds by the early
+    /// return. Deleting the correction leaves this suite green and
+    /// reds `OverflowSplitTests` (guard-prover, 2026-08-17).
     @Test("counts at or under the slot count draw in full")
     func drawsEveryScreenWhileItFits() {
         for count in 1...ProfileScreenPips.slots {

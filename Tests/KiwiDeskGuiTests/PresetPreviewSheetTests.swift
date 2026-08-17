@@ -133,6 +133,52 @@ struct PresetPreviewSheetTests {
         #expect(oneMore > SettingsWidthClass.minimum)
     }
 
+    /// The height bounds, and the one of them that is a RELATION.
+    ///
+    /// `minHeight` has to stay under the shell's own minimum
+    /// content height, or the sheet cannot be shown whole in the
+    /// narrowest window the app allows — asserted against
+    /// `SettingsWidthClass.minimumHeight` rather than against 400,
+    /// which is the half the width bound already got right and the
+    /// height bound did not. The comment there claimed the max
+    /// "stops it short of filling the window"; the shell floor is
+    /// 540 and the window OPENS at 620, so it was false at both
+    /// (code review, 2026-08-17).
+    @Test("the sheet's floor fits the narrowest window")
+    func heightBoundsAreOrderedAndFit() {
+        let sheet = PresetPreviewSheet.self
+        #expect(sheet.minHeight < SettingsWidthClass.minimumHeight)
+        #expect(sheet.minHeight < sheet.idealHeight)
+        #expect(sheet.idealHeight < sheet.maxHeight)
+    }
+
+    /// The grid STATES its columns rather than adapting to them.
+    ///
+    /// `.adaptive` seated four with exactly 0 pt of slack, so any
+    /// content inset — a legacy scroller once the `ScrollView`
+    /// overflows — silently re-wrapped to three, which is the
+    /// cross-preset comparison the fixed width exists for
+    /// (architect + code review, 2026-08-17). Asserted on the
+    /// arithmetic AND on the spelling, because the two fail apart:
+    /// the slack could return without `.adaptive` coming back.
+    @Test("the grid states four columns, with no reliance on slack")
+    func gridStatesItsColumns() throws {
+        let source = try squashed(Self.sheet)
+        #expect(source.occurrences(of: ".fixed(Self.tileWidth)") == 1)
+        #expect(source.occurrences(of: ".adaptive(") == 0)
+        #expect(source.occurrences(of: "count:Self.columns") == 1)
+        // The arithmetic the old `.adaptive` had no room for: the
+        // tiles and their gutters exactly fill the content box, so
+        // nothing may be subtracted from it without a re-wrap.
+        let sheet = PresetPreviewSheet.self
+        let content =
+            sheet.width(forColumns: sheet.columns) - 2 * sheet.pad
+        let tiles =
+            CGFloat(sheet.columns) * sheet.tileWidth
+            + CGFloat(sheet.columns - 1) * sheet.gutter
+        #expect(content == tiles)
+    }
+
     /// `.panel` is 240 pt tall and pane-filling; Command Center
     /// draws ten models, so a sheet of panels would be metres
     /// long. `.tile` at its own size is 1.8× the factor the card

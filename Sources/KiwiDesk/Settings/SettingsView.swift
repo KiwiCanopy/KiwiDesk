@@ -76,7 +76,7 @@ struct SettingsView: View {
         // 840 paid for the floating sidebar card, which is gone.
         .frame(
             minWidth: SettingsWidthClass.minimum,
-            minHeight: 540
+            minHeight: SettingsWidthClass.minimumHeight
         )
         // The window's accent, set ONCE at the root (owner ruled
         // full kiwi over the system accent, 2026-08-04): every

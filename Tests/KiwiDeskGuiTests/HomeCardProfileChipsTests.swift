@@ -75,12 +75,21 @@ struct HomeCardProfileChipsTests {
     func theWinnerIsAlwaysShown() {
         var folded = 0
         for total in 1...9 {
+            // The winner takes the WORST count, so only
+            // `matchesLive` can lift it.
+            //
+            // It was the other way round — winner `count: 1`,
+            // others `count: 9` — and that made this test INERT:
+            // the third sort key reproduced the same order, so
+            // neutralising `matchesLive` at the seam left the whole
+            // suite green (guard-prover, 2026-08-17). A test named
+            // for the winning profile that could not see the key
+            // that makes one win.
             var raw = (1..<total).map {
-                summary("other\($0)", count: 9)
+                summary("other\($0)", count: 1)
             }
-            // Last in the raw read, first once ordered.
             raw.append(
-                summary("winner", count: 1, matchesLive: true)
+                summary("winner", count: 99, matchesLive: true)
             )
             let drawn = chips(raw)
             #expect(
@@ -109,6 +118,14 @@ struct HomeCardProfileChipsTests {
         #expect(chips(Array(raw.prefix(1))).count == 1)
     }
 
+    /// The property at THIS surface's shape. Like the preset
+    /// card's, it holds by `OverflowSplit`'s early return rather
+    /// than by the never-exactly-one correction, which is
+    /// unreachable at `markerCapacity == capacity - 1` — deleting
+    /// that correction leaves this green and reds
+    /// `OverflowSplitTests` instead (guard-prover confirmed both).
+    /// Read it as pinning what Home draws, not as coverage of the
+    /// shared clause.
     @Test("no count leaves exactly one profile hidden")
     func neverHidesExactlyOne() {
         for total in 0...20 {

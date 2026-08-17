@@ -2513,11 +2513,16 @@ and it is the wrong place twice over. Its column is headed "Live
 preview · <area>" and redraws from the staged draft, while a
 preset is a *catalog entry* the draft has no say in; the two
 differ exactly while a draft is open, which is when the heading
-would be lying. And the column is dropped by width — sound for a
-preview redundant with the controls beside it, unsound for a fact
-stated nowhere else, since below the threshold the answer would
-simply be unavailable. A sheet inverts both: its object is
-whatever it was handed, and its size is its own.
+would be lying. And the column is not always a column: by
+"Narrow windows drop the preview before they drop a control"
+below — which owns the bands, and whose promise that the preview
+loses its column and never its existence still holds — a narrower
+window hands the same content over as a card the reader summons
+and then drags out of the way. That is the right trade for a
+preview redundant with the controls beside it, and the wrong one
+for a picture that IS the answer, whose delivery should not turn
+on how wide the window happens to be. A sheet inverts both:
+its object is whatever it was handed, and its size is its own.
 
 The general rule this settles, so the next surface does not
 re-argue it: **choose the container by whose object the picture
@@ -5123,8 +5128,13 @@ exists to answer: *which screen gets what*. Screens are the one
 thing that stays legible from one display to three, so the card
 draws an outline per display carrying the layout that display's
 first space opens in, and the space total goes underneath as
-text. What is given up is per-space detail in the thumbnail,
-which the Spaces page owns properly once the preset is applied.
+text. What is given up is per-space detail in the thumbnail —
+which #859 gave back *before* applying, in the preview sheet the
+card's own **Layouts** button opens (see "the panel's object is
+the DRAFT" above); the Spaces page still owns it once the preset
+is applied. Read the thumbnail's job as identifying a preset
+rather than describing one: the moment a card is asked to
+describe, the answer is a surface of its own.
 
 **[Principle]**
 

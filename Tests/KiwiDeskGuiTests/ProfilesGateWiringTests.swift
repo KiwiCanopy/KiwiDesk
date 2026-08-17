@@ -130,11 +130,26 @@ struct ProfilesGateWiringTests {
                 // 2026-08-11).
                 "presetCard($0,sizes:liveSizes)",
                 "presetCard($0,sizes:nil)",
+                // …and the wrapper must SPEND what those two hand
+                // it. Both #859 reviewers found that keeping the
+                // wrapper — done so the two needles above would
+                // not repoint — left every forwarding hop
+                // unpinned: hardcoding `sizes: nil` inside it kept
+                // the whole suite green while the sheet named a
+                // layout Apply will not produce. The needle that
+                // avoided a repoint is worthless without these.
+                "sizes:sizes",
+                "liveSizes:request.liveSizes",
             ],
             "Components/Profiles/PresetScreenCard.swift": [
-                // …and the card must actually spend it.
-                "on:shape(of:screen)",
-                "ScreenClass.of(liveSizes[screen])",
+                // …and the card must actually spend it. Since
+                // #859's review round the card does not resolve
+                // the shape itself — it consumes the ONE
+                // derivation, which is where the four lines it
+                // used to keep now live. So the needle moved with
+                // them: the card's obligation is to build the plan
+                // FROM `liveSizes`, and the plan's is below.
+                "PresetPreviewPlan(layout:layout,liveSizes:liveSizes)",
                 // The outline is a Shape, so `.help` alone
                 // reaches no screen reader — the sentence that
                 // names the main display only exists for a
@@ -146,6 +161,24 @@ struct ProfilesGateWiringTests {
                 // Inspector pass (gui.md ▸ the keyboard path).
                 ".accessibilityElement()",
                 ".accessibilityLabel(screenHelp(screen))",
+            ],
+            // The one derivation both the card and the preview
+            // sheet read. This is the needle that used to sit on
+            // the card: a plan that stopped resolving against the
+            // live displays would re-ship the 2026-08-11 defect
+            // for BOTH surfaces at once, which is the cost of
+            // sharing and the reason the needle followed rather
+            // than being dropped.
+            // The card is the last hop before both drawings, so it
+            // must spend `sizes` on each of them — the picture it
+            // draws itself, and the request it hands the sheet.
+            "Components/Profiles/PresetCard.swift": [
+                "PresetScreenCard(layout:layout,liveSizes:sizes)",
+                "liveSizes:sizes",
+            ],
+            "Components/Profiles/PresetPreviewPlan.swift": [
+                "ScreenClass.of(liveSizes[screen])",
+                "on:shape",
             ],
         ]
         for (name, needles) in consults {

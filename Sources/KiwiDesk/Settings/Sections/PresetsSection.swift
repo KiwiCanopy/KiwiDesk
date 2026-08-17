@@ -17,7 +17,6 @@ struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
     /// The shell's measured band — the ONE width
     /// derivation this grid is allowed to read.
-    ///
     @Environment(\.settingsWidth) private var band
     @State private var otherSetupsExpanded = false
     /// The open preview sheet, or nil (#859).

@@ -271,6 +271,20 @@ Three boundaries, because System Settings itself draws them:
   System Settings names its panes. So do **action labels**
   ("Open New", "Set Gap Values") — a verb-phrase command follows
   the menu-item convention, not this one.
+- **An action may be a bare noun where the verb would collide**,
+  and "Layouts" on a preset card is the one that exists (#859).
+  The verb-phrase form of it is "Show layouts", and *show* is
+  spoken for in this window by the detail panel's own chip ("Show
+  preview") — a label reusing another feature's word does not read
+  as inconsistent, it reads as true about the wrong thing
+  (`docs/localization-naming.md` ▸ Family C, rule 1, which binds
+  the English author before any translator). The noun is what the
+  sheet holds, so it is what the button is called. Note this is a
+  clash of *verbs*, not of nouns: `fr` and `ru` both took the
+  verb-phrase form, because in those catalogs the bare noun would
+  have been byte-identical to the Layout Defaults destination and
+  `DestinationNameCollisionTests` would have reddened. Where both
+  forms are free, take the verb.
 - **`&` does not start a new sentence**: "Size & float", "Drag &
   drop". The word after the ampersand is the one a sweep will
   miss, and did (#406 review).
@@ -702,43 +716,47 @@ preference: navigating clears the answer, and above 1200 the
 panel takes its column back whatever the answer was.
 
 **A picture of something that is not the draft goes in a
-SHEET, not the panel** (#859). The panel's object is the staged
-draft, and its column is dropped by width — both are right for
-a preview sitting beside the controls that feed it, and both
-are wrong for a picture of a *catalog entry*: it would be
-headed "Live preview" while showing something the draft has no
-say in, and a fact stated nowhere else must not vanish at
-900 pt. So the preset preview is a sheet off the card, and
-Profiles stays out of `SettingsDetailPanelOffer.offering`
-(`DetailPanelTests` pins the refusal with its three grounds).
+SHEET, not the panel** (#859) — so the preset preview is a sheet
+off the card, and Profiles stays out of
+`SettingsDetailPanelOffer.offering` (`DetailPanelTests` pins the
+refusal). *Why* is
+[Design decisions](design-decisions.md) ▸ the panel's object is
+the DRAFT, and is not restated here.
 
-The sheet is this window's **third** transient surface and the
-three are chosen by what they hold, not by size. A **popover**
-is a glance or a small edit anchored to the control that opened
-it (a `?`, a rename field, a chip overflow). An **alert** or
-`confirmationDialog` is a question with consequences. A
-**sheet** is a body of content too big for an anchored popover
-and not a question at all — it has one dismissal and writes
-nothing. A sheet that grew a commit button would be a dialog
-wearing the wrong chrome; give the commit back to the surface
-that owns it.
+**Transient surfaces are chosen by what they hold, not by
+size** — this is the part that belongs to this page. A
+**popover** is a glance or a small edit anchored to the control
+that opened it (a `?`, a rename field, a chip overflow). An
+**alert** or `confirmationDialog` is a question with
+consequences. A **sheet** is a body of content too big for an
+anchored popover and not a question at all: one dismissal, and
+it writes nothing. A sheet that grew a commit button would be a
+dialog wearing the wrong chrome; give the commit back to the
+surface that owns it.
 
-Two mechanics a sheet here owes, both of them lessons the
-window already paid for elsewhere. It is presented by
-`item:` over an `Identifiable` request, never `isPresented:` —
-so its content cannot be built from parent state written in the
-same tick (#843). And it is hosted where its identity is stable
-for as long as the area is, never inside a `LazyVGrid`'s cards
-or any other subtree its own presenter can tear down (the rule
-`SettingsView` follows for the one discard dialog).
+Two mechanics a sheet owes, both of them lessons the window
+already paid for elsewhere. **It is hosted where its identity
+is stable for as long as the area is**, never inside a
+`LazyVGrid`'s cards or any other subtree its own presenter can
+tear down (the rule `SettingsView` follows for the one discard
+dialog). And it is presented by `item:` over an `Identifiable`
+request — which is not a sheet rule at all but the rule for
+any presentation whose content is built from one row, and is
+stated as that in `.claude/rules/gui.md`. Its **one
+dismissal answers Return and Escape both**: a `Button` carries
+only one shortcut, so `.defaultAction` rides the button and the
+content view takes `.onExitCommand`.
+`SheetPresentationSeamTests` is the register of which files may
+host a sheet, and holds all three.
 
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
 (`LayoutSchematicKit` / `LayoutSchematicCanvas` hold the shared
-canvas, tile, and ghost language) that redraws from the *staged*
-config as the user edits — never from live window state, no AX
-calls. This is the one non-negotiable: it upholds the #123
-never-live-apply principle (a preview answers "what would this
+canvas, tile, and ghost language) that redraws from a *settings
+value* — the staged config as the user edits it, or the settings
+of whatever object the picture is of — never from live window
+state, no AX calls. This is the one non-negotiable: it upholds
+the #123 never-live-apply principle (a preview answers "what would this
 look like" without mutating the session). No hover, no
 tap-to-inspect, no drag-to-preview, and **no animation** — a
 looping animation would be architecturally legal (canned,
@@ -750,14 +768,20 @@ draws the **navigation model** (a fan of full-screen cards +
 its one real knob and removes the "why is this the one blank
 layout" inconsistency.
 
-One schematic serves two surfaces at two scales
-(`SchematicScale`): a thumbnail in the "Choose a layout" strip
-and the full-width drawing in the Live preview card, which is
-the one that carries the caption. Both take a **window count**
+One schematic serves several surfaces at two scales
+(`SchematicScale`, whose own doc comment is the authority on what
+each scale is *for*): a thumbnail in the "Choose a layout" strip,
+the full-width drawing in the Live preview card — the one that
+carries the caption, `showsCaption` answering true for `panel`
+alone — and, since #859, the thumbnails in the preset preview
+sheet. Inside Layout Defaults both mounts take a **window count**
 the reader drives from that card's slider, so the drawing
 simulates the layout at a count rather than illustrating it at a
-baked-in one. Why the count is an input, and why it is view
-state rather than a setting, is ruled in
+baked-in one; a mount with no slider beside it passes
+`LayoutSchematic.defaultWindowCount` instead, which is a
+stand-in and not the reader's own windows either way. Why the
+count is an input, and why it is view state rather than a
+setting, is ruled in
 `docs/design-decisions.md`; what it still does *not* buy — a
 render of the reader's real windows — is in
 [accepted limitations](accepted-limitations.md). Tile counts

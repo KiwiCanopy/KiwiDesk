@@ -46,6 +46,17 @@ enum SettingsWidthClass: String, CaseIterable, Sendable {
     static let rowBreakpoint: CGFloat = 900
     static let chromeBreakpoint: CGFloat = 820
     static let minimum: CGFloat = 720
+    /// The shell's minimum content HEIGHT — the other half of the
+    /// floor, named here beside its partner so a surface sized
+    /// against the window derives from it rather than restating it
+    /// (#859: a sheet's own bounds were literals whose comment
+    /// claimed a relation to this number that did not hold).
+    ///
+    /// This type is about width BANDS and this is not one; it lives
+    /// here because the pair is one fact — the smallest content
+    /// rectangle the window may present — and splitting it across
+    /// two files is how one half moves without the other.
+    static let minimumHeight: CGFloat = 540
 
     static func of(width: CGFloat) -> SettingsWidthClass {
         if width >= panelBreakpoint { return .wide }

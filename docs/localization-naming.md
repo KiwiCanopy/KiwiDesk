@@ -195,6 +195,35 @@ German caption reading "Schwebend" beside a picker reading
 "Floating" passes. Those locales are held by review, and by
 `LocalizationModeNamePolicyTests` only at the label level.
 
+**And that blind spot shipped, which is what added the rule
+below.** `de` carried "IDE-Stapel" and "scrollende
+Dokumentation" in three preset summaries beside pickers reading
+"Stack" and "Scrolling" — while keeping "Monocle" in the very
+next key, so one file translated one mode word and not the next.
+Ten catalogs each reconciled it alone. Review had not caught it
+in the time it existed.
+
+**So English prose does not name a layout mode either.** The
+remedy is not a better predicate over the translations — the
+polarity above is why none can exist — it is that the source
+stops handing translators a mode word to decide about. A
+sentence that needs to name a layout interpolates
+`layout.<mode>.name`, which every catalog already renders under
+the policy this section pins; prose that merely describes what a
+Space is *for* names no mode at all.
+
+This is a Family B sub-rule rather than a section of its own,
+because it is the same fact from the authoring end: mode names
+are values, and a value belongs in a slot rather than in a
+sentence. It binds the **English** author first, which is the
+general form of it — one concept, one word, decided in `en`
+before any catalog can disagree.
+`PresetSummaryVocabularyTests` holds the one corpus where it has
+bitten (`presets.*.summary`), deriving its ban list from
+`layout.*.name` so a renamed or added mode cannot slip past it;
+a second family of prose that names layouts owes its own guard,
+that one being scoped to preset summaries.
+
 ### Why the Latin-script locales keep English
 
 A mode name is not an ordinary label. It is a value the user types

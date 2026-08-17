@@ -252,6 +252,33 @@ struct SettingsButtonStyleConventionTests {
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 
+            // **The entry's stated STYLE is read, not just its
+            // count.** guard-prover found the reason fields inert
+            // (2026-08-17): the arithmetic uses `count` alone, so
+            // swapping a file's extra style for a different one
+            // keeps this suite green while the entry's prose names
+            // a modifier the file no longer holds. That is exactly
+            // the defect #859 hand-corrected one commit earlier —
+            // an entry reading "Picker taking plain style" in a
+            // file with neither a picker nor a `.plain`, right for
+            // years because only the number was ever checked.
+            // `SettingsBorderedSealTests`' entries name a token
+            // that IS the reason; these now do too.
+            if let entry = stylesOnNonButtons[name] {
+                #expect(
+                    source.occurrences(of: entry.style)
+                        == entry.count,
+                    Comment(
+                        rawValue:
+                            "\(name)'s exemption says \(entry.count)"
+                            + " × `\(entry.style)` (\(entry.why)), "
+                            + "which the file no longer matches — "
+                            + "the count may still balance while "
+                            + "the reason has gone stale"
+                    )
+                )
+            }
+
             totalUnexcludedButtons += unexcludedButtons
 
             #expect(

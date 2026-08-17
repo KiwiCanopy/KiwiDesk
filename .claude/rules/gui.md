@@ -72,22 +72,32 @@ to invert the dim ladder).
   migration and the offer set; the argument is in
   `docs/design-decisions.md` ▸ two columns).
 - **A picture whose object is NOT the draft goes in a sheet, and
-  writes nothing** (#859). The panel redraws the staged draft and
-  is dropped by width; both are wrong for a catalog entry, whose
-  picture states a fact no control beside it repeats. So choose
-  the container by whose object the picture is — draft → the
-  panel, anything the user is not editing → a sheet off the thing
-  that names it — and keep the sheet read-only, a sheet that
-  grows a commit being a dialog wearing the wrong chrome. Two
-  mechanics come with it, both lessons paid for elsewhere in this
-  window: present by `item:` over an `Identifiable` request, never
-  `isPresented:` (#843), and host it where its identity outlives
-  its opener, never inside a `LazyVGrid`'s cards.
-  `PresetPreviewSheetTests` holds those two plus the structural
-  half that matters most — the sheet takes no `SettingsModel`, so
+  writes nothing** (#859). Choose the container by whose object the
+  picture is — draft → the panel, anything the user is not editing
+  → a sheet off the thing that names it — and keep the sheet
+  read-only, a sheet that grows a commit being a dialog wearing
+  the wrong chrome. A read-only sheet also answers the keyboard
+  both ways: Return on its one dismissal, and Escape, which a
+  `Button` cannot carry beside `.defaultAction` so the content
+  view takes `.onExitCommand`. `SheetPresentationSeamTests` is the
+  register of which files may host one and holds the dismissal
+  contract; `PresetPreviewSheetTests` adds the structural half
+  that matters most — the sheet takes no `SettingsModel`, so
   reaching the draft is a new stored property rather than a
-  one-token edit. The argument is in `docs/design-decisions.md` ▸
-  the panel's object is the DRAFT.
+  one-token edit. **Why**, in full, is
+  `docs/design-decisions.md` ▸ the panel's object is the DRAFT;
+  the popover/alert/sheet split is `docs/ui-patterns.md`'s. Do not
+  re-argue either here.
+- **A presentation whose content is built from ONE row is handed
+  that row** — `.sheet(item:)` / `.popover(item:)` over an
+  `Identifiable` request, never `isPresented:` (#843). Drawn at
+  the presentation rather than at the sheet on purpose: the reason
+  is that `isPresented:` builds content from parent state written
+  in the same tick, which has nothing to do with which chrome is
+  used, and the defect was found on a popover. Sheets are simply
+  where the tree has no legacy call sites, so
+  `SheetPresentationSeamTests` can hold it absolutely there while
+  the three `.popover(isPresented:)` sites stay as they are.
 - **A preview that claims to show engine behavior asks the
   engine.** Never re-implement a rule the engine owns beside the
   drawing of it — call it, and where the shape does not fit, wrap

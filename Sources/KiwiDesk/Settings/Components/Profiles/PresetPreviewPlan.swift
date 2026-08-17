@@ -17,11 +17,20 @@ import SwiftUI
 /// **`liveSizes` threads through unchanged**, for the reason
 /// `mode(of:on:)` states in its own docstring: a caller that CAN
 /// know the hardware and passes nil makes the preview and the
-/// apply disagree. The sheet opens from the "For other setups"
-/// drawer too, where there genuinely is no hardware to resolve
-/// against — there nil is correct and the historic `bsp` stands,
-/// which is also what Apply would lay down on screens the user
-/// does not have.
+/// apply disagree.
+///
+/// From the "For other setups" drawer there genuinely is no
+/// hardware to resolve against, so nil is correct and the historic
+/// `bsp` stands for an unlisted space. **That is NOT what Apply
+/// would draw** — `ProfileComposition.compose` clamps those spaces
+/// onto the live displays and resolves each mode from the live
+/// `ScreenClass`, so the two answers differ for six of the seven
+/// workflow presets. What makes the divergence unreachable is that
+/// Apply is GATED on the screen-count match
+/// (`ProfilesGates`/`.screenCountMismatch`), not that the drawer's
+/// answer is right. An earlier draft of this comment claimed the
+/// latter (architect review, 2026-08-17); `docs/user-guide.md` ▸
+/// Seeing what a preset contains carries the user-facing caveat.
 ///
 /// A value type rather than a view property so the whole
 /// derivation is assertable off the main actor
@@ -35,44 +44,62 @@ struct PresetPreviewPlan: Equatable {
         var id: SpaceID { space }
     }
 
-    /// One screen's spaces, in plan order.
+    /// One screen's spaces, in plan order — **including a screen
+    /// the preset plans nothing for**, which carries an empty
+    /// `slots`.
     ///
-    /// **A screen the preset plans nothing for is not in this
-    /// list.** The sheet's subject is the layouts a preset opens,
-    /// and a screen with no spaces opens none — so it would draw
-    /// a heading over an empty row. No shipped preset has one and
-    /// none may acquire one silently: `PresetPreviewPlanTests`
-    /// requires every preset in the catalog to yield exactly one
-    /// group per screen, so a future preset leaving a screen empty
-    /// reds and the decision gets made then rather than rendering
-    /// as a gap.
+    /// Empty groups are kept in the value type and dropped at the
+    /// DRAWING site (`drawnGroups`), which is what lets
+    /// `PresetScreenCard` consume this plan too: the card draws one
+    /// outline per screen whether or not that screen has spaces, so
+    /// a plan that filtered here could not serve it and the card
+    /// kept its own second copy of the same three accessors
+    /// (architect + code review, 2026-08-17). The copy is gone; a
+    /// filter belongs to whoever is drawing, not to the derivation.
     struct Group: Equatable, Identifiable {
         let screen: Int
         let slots: [Slot]
         var id: Int { screen }
+
+        /// The mode this screen OPENS in — its first space's — or
+        /// nil where it plans nothing. What the card's glyph draws.
+        var openingMode: LayoutMode? { slots.first?.mode }
     }
 
     let groups: [Group]
 
+    /// The groups a sheet draws: the ones with something on them.
+    ///
+    /// A screen with no spaces opens no layouts, so it would be a
+    /// heading over an empty row. No shipped preset has one and
+    /// none may acquire one silently — `PresetPreviewPlanTests`
+    /// requires every preset in the catalog to fill every screen it
+    /// plans for, so a future preset leaving one empty reds and the
+    /// decision gets made then rather than rendering as a gap.
+    var drawnGroups: [Group] { groups.filter { !$0.slots.isEmpty } }
+
     /// Every schematic the sheet draws, flattened — the count the
     /// sheet's own arithmetic is asserted against.
-    var slots: [Slot] { groups.flatMap(\.slots) }
+    var slots: [Slot] { drawnGroups.flatMap(\.slots) }
+
+    /// One screen's group, or nil outside the plan's screens.
+    func group(screen: Int) -> Group? {
+        groups.first { $0.screen == screen }
+    }
 
     init(layout: StandardLayout, liveSizes: [CGSize]?) {
         // Clamped at zero for the same reason `PresetScreenCard`
         // clamps: a hand-edited layout claiming a negative screen
         // count must not trap on the range.
         let screens = max(layout.screenCount, 0)
-        groups = (0..<screens).compactMap { screen in
-            let spaces = layout.spaces(
-                onScreen: screen,
-                screens: screens
-            )
-            guard !spaces.isEmpty else { return nil }
+        groups = (0..<screens).map { screen in
             let shape = Self.shape(of: screen, in: liveSizes)
             return Group(
                 screen: screen,
-                slots: spaces.map {
+                slots: layout.spaces(
+                    onScreen: screen,
+                    screens: screens
+                ).map {
                     Slot(
                         space: $0,
                         mode: layout.mode(of: $0, on: shape)
@@ -83,18 +110,17 @@ struct PresetPreviewPlan: Equatable {
     }
 
     /// The shape of the display this positional screen resolves
-    /// to, or nil where the sheet is not drawn against hardware.
+    /// to, or nil where the plan is not drawn against hardware.
     ///
-    /// `PresetScreenCard` reads the same thing four lines of its
-    /// own, which is a deliberate small duplication (§2.4) rather
-    /// than a shared helper: the card's copy is needled by
-    /// `ProfilesGateWiringTests` at its own use site, and moving
-    /// the expression would repoint that needle for no behavioural
-    /// gain. What guards the pair is not the sharing but
-    /// `PresetPreviewPlanTests` ▸ the card agreement, which
-    /// requires this plan's first mode on every screen of every
-    /// shipped preset to equal the card's `openingMode` — so a
-    /// drift between the two is loud rather than structural.
+    /// **The one copy.** `PresetScreenCard` had its own four lines
+    /// of this until #859's review round, held to the plan by an
+    /// agreement test that could not see the card's half at all —
+    /// the card's `shape(of:)` was `private` and the test recomputed
+    /// `ScreenClass.of(...)` itself, so a drift in the card's bound
+    /// or its index passed green. The docstring here claimed such a
+    /// drift would be "loud rather than structural"; it was neither
+    /// (code review, 2026-08-17). Both consumers now read this, and
+    /// the promise is structural instead of asserted.
     static func shape(
         of screen: Int,
         in liveSizes: [CGSize]?

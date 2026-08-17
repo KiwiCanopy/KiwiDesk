@@ -45,8 +45,8 @@ struct PresetPreviewRequest: Identifiable {
 /// draft.** That one line is what keeps Profiles a CATALOG surface
 /// rather than a draft-preview one, and drawing it from
 /// `model.config.settings` would flip the panel refusal above
-/// without anything noticing. `PresetPreviewSettingsTests` is what
-/// notices.
+/// without anything noticing. `PresetPreviewSheetTests` ▸ the sheet
+/// draws the preset's own settings is what notices.
 ///
 /// **`.tile` at its own size, never a third `SchematicScale`.** A
 /// factor over `.tile` is the settled expression for a smaller
@@ -96,6 +96,30 @@ struct PresetPreviewSheet: View {
     /// at four columns each screen group is exactly one row.
     static let columns = 4
 
+    /// The sheet's height bounds.
+    ///
+    /// **`minHeight` is a RELATION, not a taste**: it has to stay
+    /// under the shell's own minimum content height or the sheet
+    /// cannot be shown whole in the narrowest window the app
+    /// allows. `PresetPreviewSheetTests` asserts it against
+    /// `SettingsWidthClass.minimumHeight` rather than against 400.
+    ///
+    /// The ideal is the tall shipped case — one row per screen plus
+    /// header and footer — so no catalog preset scrolls on an
+    /// ordinary window. Past the max the sheet stops growing and
+    /// the `ScrollView` takes over, which is also what happens on a
+    /// window shorter than the ideal: macOS clamps a sheet to its
+    /// parent, so the `ScrollView` is not optional.
+    ///
+    /// An earlier comment here claimed the max "stops it short of
+    /// filling the window". That was false at both of the repo's
+    /// own pinned heights — the shell floor is 540 and the window
+    /// OPENS at 620 (code review, 2026-08-17). The bound is a
+    /// growth stop, not a promise about the window.
+    static let minHeight: CGFloat = 400
+    static let idealHeight: CGFloat = 600
+    static let maxHeight: CGFloat = 780
+
     private var plan: PresetPreviewPlan {
         PresetPreviewPlan(layout: layout, liveSizes: liveSizes)
     }
@@ -118,28 +142,24 @@ struct PresetPreviewSheet: View {
         // narrowest window can host (see `columns`), and it makes
         // every shipped preset's screen group exactly one row.
         //
-        // **Height grows, bounded.** The tall case is one row per
-        // screen plus the header and footer, which lands near the
-        // ideal below — so a preset fits without scrolling on any
-        // ordinary window, and the `ScrollView` above is left for
-        // a `Starter` derived from more screens than the catalog
-        // plans for. The max stops it short of filling the window,
-        // which is the full-page treatment #859 refused: a sheet
-        // that covers everything loses the grid you were comparing
-        // against.
+        // **Height grows, bounded** — see the three constants,
+        // which carry what each bound is for and which of them is a
+        // relation to the shell rather than a choice.
         //
-        // It reads no window size to do this. A percentage of the
-        // window would be a second measurement site — the drift
-        // `SettingsWidthClass` exists to end — and a bounded ideal
-        // gets the same picture without one.
+        // It reads no window size to do any of this. A percentage
+        // of the window would be a second measurement site — the
+        // drift `SettingsWidthClass` exists to end — and a bounded
+        // ideal gets the same picture without one.
         .frame(
             minWidth: Self.width(forColumns: Self.columns),
             maxWidth: Self.width(forColumns: Self.columns),
-            minHeight: 420,
-            idealHeight: 600,
-            maxHeight: 780
+            minHeight: Self.minHeight,
+            idealHeight: Self.idealHeight,
+            maxHeight: Self.maxHeight
         )
         .background(SettingsTheme.card)
+        // Escape. See `footer` for why the button cannot carry it.
+        .onExitCommand(perform: onDone)
     }
 
     // MARK: - Pieces
@@ -173,7 +193,7 @@ struct PresetPreviewSheet: View {
 
     private var screenGroups: some View {
         VStack(alignment: .leading, spacing: 16) {
-            ForEach(plan.groups) { group in
+            ForEach(plan.drawnGroups) { group in
                 screenGroup(group)
             }
         }
@@ -211,16 +231,32 @@ struct PresetPreviewSheet: View {
         }
     }
 
+    /// `Self.columns` STATED, never adapted.
+    ///
+    /// It was `.adaptive(minimum: tileWidth)`, which seated four
+    /// columns with exactly **0 pt** of slack: the content width is
+    /// `588 - 2*pad = 564` and four tiles plus three gutters is
+    /// 564. So any content inset at all — a legacy scroller once
+    /// the `ScrollView` overflows, a `pad` change — silently
+    /// re-wrapped to three columns, which is the "one preset drawn
+    /// differently on two desks" the width comment forbids, arriving
+    /// by the route the comment did not consider (architect + code
+    /// review, 2026-08-17). `.fixed` cannot re-wrap, and it is the
+    /// same reasoning `PresetsSection` records for taking
+    /// `.flexible` over `.adaptive`: `.adaptive` cannot express "at
+    /// most N".
+    ///
     /// `.top` rather than `.topLeading`: the cells centre their
     /// pictures, for the reason `tile(_:)` states.
     private var tileColumns: [GridItem] {
-        [
-            GridItem(
-                .adaptive(minimum: Self.tileWidth),
+        Array(
+            repeating: GridItem(
+                .fixed(Self.tileWidth),
                 spacing: Self.gutter,
                 alignment: .top
-            )
-        ]
+            ),
+            count: Self.columns
+        )
     }
 
     /// One space: its schematic, then the layout's name under it —
@@ -265,6 +301,16 @@ struct PresetPreviewSheet: View {
         }
     }
 
+    /// One dismissal, reachable three ways.
+    ///
+    /// A read-only sheet has no second answer, so Return and Escape
+    /// must both mean the same thing as the button. `.defaultAction`
+    /// alone left Escape dead (architect review, 2026-08-17), and a
+    /// modal surface a keyboard user cannot back out of is the
+    /// "usable without a mouse" claim failing in its plainest form.
+    /// `.onExitCommand` rather than a second `.keyboardShortcut`,
+    /// because a `Button` may carry only one and Return is the one
+    /// worth having on the button itself.
     private var footer: some View {
         HStack {
             Spacer()
@@ -278,6 +324,6 @@ struct PresetPreviewSheet: View {
     }
 
     private var doneLabel: String {
-        L("presets.preview.done", "Done")
+        L("presets.layouts.done", "Done")
     }
 }

@@ -62,8 +62,18 @@ struct PresetScreenCard: View {
             * (glyphSize / ProfileScreenPips.glyph)
     }
 
-    /// Clamped at zero: a hand-edited layout claiming a negative
-    /// screen count must not trap on the range.
+    /// Clamped at zero for readability, not for safety.
+    ///
+    /// A hand-edited layout claiming a negative screen count must
+    /// not trap, and this is NOT what prevents that: deleting this
+    /// clamp leaves `PresetScreenCardOverflowTests` fully green,
+    /// because `OverflowSplit.shown`'s own `max(count, 0)` and
+    /// `hidden`'s clamp already cover it (guard-prover,
+    /// 2026-08-17). The load-bearing twin is
+    /// `PresetPreviewPlan`'s, which reads identically and whose
+    /// removal traps the runner on `0..<(-3)`. The two look alike
+    /// and are not alike; said here so the next reader does not
+    /// reason from this one as if it were the net.
     private var screenCount: Int { max(layout.screenCount, 0) }
 
     /// Outlines drawn, and screens hidden behind the chip.
@@ -179,37 +189,33 @@ struct PresetScreenCard: View {
             .accessibilityLabel(screenHelp(screen))
     }
 
-    /// Screen 0 is the main display, 1 the next secondary, … —
-    /// and both the plan and its sparse fallbacks are the
-    /// LAYOUT's to answer (`StandardLayout+Screens`), the same
-    /// accessors `ProfileComposition.compose` builds a real
-    /// profile from. `screens:` is the preset's own screen count,
-    /// which is what this card draws: the composer clamps into
-    /// the LIVE display list instead, so the two agree exactly
-    /// when the preset is appliable — the state its Apply button
-    /// requires.
-    private func spaces(on screen: Int) -> [SpaceID] {
-        layout.spaces(
-            onScreen: screen,
-            screens: layout.screenCount
-        )
+    /// **The card and the sheet read ONE derivation.**
+    ///
+    /// This card had its own `spaces(on:)`, `openingMode(_:)` and
+    /// `shape(of:)` against the plan's until #859's review round.
+    /// Both reviewers found the pair independently: the copies were
+    /// held together only by an agreement test that recomputed the
+    /// shape itself and could not see the card's `private` half, so
+    /// a drift in the card's bound or its index passed green. The
+    /// plan keeps EMPTY groups precisely so it can serve this card
+    /// too — the card draws an outline per screen whether or not
+    /// that screen has spaces, and a derivation that filtered could
+    /// not answer it.
+    ///
+    /// Screen 0 is the main display, 1 the next secondary, … — and
+    /// both the plan and its sparse fallbacks are the LAYOUT's to
+    /// answer (`StandardLayout+Screens`), the same accessors
+    /// `ProfileComposition.compose` builds a real profile from.
+    private var plan: PresetPreviewPlan {
+        PresetPreviewPlan(layout: layout, liveSizes: liveSizes)
+    }
+
+    private func spaceCount(on screen: Int) -> Int {
+        plan.group(screen: screen)?.slots.count ?? 0
     }
 
     private func openingMode(_ screen: Int) -> LayoutMode? {
-        layout.openingMode(
-            onScreen: screen,
-            screens: layout.screenCount,
-            on: shape(of: screen)
-        )
-    }
-
-    /// The shape of the display this positional screen resolves
-    /// to, or nil where the card is not appliable.
-    private func shape(of screen: Int) -> ScreenClass? {
-        guard let liveSizes, screen < liveSizes.count else {
-            return nil
-        }
-        return ScreenClass.of(liveSizes[screen])
+        plan.group(screen: screen)?.openingMode
     }
 
     /// Named for the reader who cannot see the glyph — the count
@@ -231,7 +237,7 @@ struct PresetScreenCard: View {
             "presets.screen_help",
             "%1$@: %2$@, opens in %3$@",
             presetScreenName(screen),
-            spaceCountPhrase(spaces(on: screen).count),
+            spaceCountPhrase(spaceCount(on: screen)),
             mode.displayName
         )
     }

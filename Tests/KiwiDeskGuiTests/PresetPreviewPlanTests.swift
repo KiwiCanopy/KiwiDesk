@@ -159,15 +159,42 @@ struct PresetPreviewPlanTests {
 
     // MARK: - Screens with nothing on them
 
-    @Test("a screen the preset plans nothing for is not drawn")
-    func emptyScreensAreOmitted() {
+    /// The plan KEEPS an empty screen and the drawing drops it —
+    /// the split that lets `PresetScreenCard` consume this plan
+    /// (it draws an outline per screen, empty or not) while the
+    /// sheet draws no heading over an empty row.
+    @Test("an empty screen is kept in the plan, not in the drawing")
+    func emptyScreensAreKeptButNotDrawn() {
         // Three screens, both spaces on the first: screens 1 and 2
-        // plan nothing, so they draw no heading over no tiles.
+        // plan nothing.
         let plan = PresetPreviewPlan(
             layout: layout(screens: 3, spaces: 2),
             liveSizes: nil
         )
-        #expect(plan.groups.map(\.screen) == [0])
+        #expect(plan.groups.map(\.screen) == [0, 1, 2])
+        #expect(plan.groups[1].slots.isEmpty)
+        #expect(plan.groups[1].openingMode == nil)
+        #expect(plan.drawnGroups.map(\.screen) == [0])
+        #expect(plan.slots.count == 2)
+    }
+
+    /// `openingMode` is the FIRST slot's, which is what the card's
+    /// glyph draws — asserted on a screen whose first space is not
+    /// its lowest-numbered one, so a `min`/`sorted` slip shows.
+    @Test("a group opens in its first space's mode")
+    func openingModeIsTheFirstSlot() {
+        let plan = PresetPreviewPlan(
+            layout: layout(
+                screens: 2,
+                spaces: 4,
+                screensBySpace: ["2": 1, "3": 1],
+                modes: ["2": .monocle, "3": .track]
+            ),
+            liveSizes: nil
+        )
+        #expect(plan.groups[1].slots.map(\.space) == ["2", "3"])
+        #expect(plan.groups[1].openingMode == .monocle)
+        #expect(plan.groups[0].openingMode == .bsp)
     }
 
     /// The omission above is only safe while no shipped preset has
@@ -182,7 +209,7 @@ struct PresetPreviewPlanTests {
                 liveSizes: nil
             )
             #expect(
-                plan.groups.map(\.screen)
+                plan.drawnGroups.map(\.screen)
                     == Array(0..<layout.screenCount),
                 Comment(
                     rawValue:
@@ -208,44 +235,44 @@ struct PresetPreviewPlanTests {
         #expect(plan.slots.isEmpty)
     }
 
-    // MARK: - The card and the sheet answer alike
+    // MARK: - One derivation, not two
 
-    /// The pair `PresetPreviewPlan`'s docstring promises instead of
-    /// sharing a helper: the sheet's first mode on each screen is
-    /// the mode the card draws a glyph for.
+    /// `PresetScreenCard` used to hold its own `spaces(on:)`,
+    /// `openingMode(_:)` and `shape(of:)`, and an agreement test
+    /// lived here requiring the two to answer alike on every
+    /// shipped preset. Both #859 reviewers found that test could
+    /// not see the card's half — the card's `shape(of:)` was
+    /// `private` and the test recomputed `ScreenClass.of(...)`
+    /// itself — so it is GONE rather than repaired: the card now
+    /// consumes this plan, and a structural single derivation
+    /// needs no agreement assertion.
     ///
-    /// It is not a tautology — the plan derives its own
-    /// `ScreenClass` from `liveSizes` while this drives
-    /// `openingMode` with the shape stated here, so the sub-diff
-    /// mutation that matters (the plan passing `nil` and drawing a
-    /// plan where the card draws hardware) reds it.
-    @Test("the sheet's first mode is the card's glyph")
-    func theCardAndTheSheetAgree() throws {
+    /// What replaces it is a needle, because the thing worth
+    /// pinning is now "the card consumes the plan" and that is a
+    /// wiring claim: `ProfilesGateWiringTests` holds it, keyed on
+    /// the card's own use site.
+    @Test("the plan resolves each screen's shape once")
+    func shapeIsResolvedPerScreen() throws {
         let laptop = try #require(Self.sizes[.laptop])
-        let desktop = try #require(Self.sizes[.desktop])
-        var compared = 0
-        for layout in StandardProfiles.workflows {
-            let live = Array(
-                repeating: [laptop, desktop],
-                count: layout.screenCount
-            )
-            .flatMap { $0 }
-            .prefix(layout.screenCount)
-            let sizes = Array(live)
-            let plan = PresetPreviewPlan(
-                layout: layout,
-                liveSizes: sizes
-            )
-            for group in plan.groups {
-                let card = layout.openingMode(
-                    onScreen: group.screen,
-                    screens: layout.screenCount,
-                    on: ScreenClass.of(sizes[group.screen])
-                )
-                #expect(group.slots.first?.mode == card)
-                compared += 1
-            }
-        }
-        #expect(compared > StandardProfiles.workflows.count)
+        let ultrawide = try #require(Self.sizes[.ultrawide])
+        // The one copy answers per POSITION, so two screens of
+        // different shapes resolve apart — the property a shared
+        // helper has to have and a duplicated one can lose.
+        #expect(
+            PresetPreviewPlan.shape(
+                of: 0,
+                in: [laptop, ultrawide]
+            ) == .laptop
+        )
+        #expect(
+            PresetPreviewPlan.shape(
+                of: 1,
+                in: [laptop, ultrawide]
+            ) == .ultrawide
+        )
+        // Past the end, and with no hardware at all.
+        #expect(PresetPreviewPlan.shape(of: 2, in: [laptop]) == nil)
+        #expect(PresetPreviewPlan.shape(of: 0, in: nil) == nil)
+        #expect(PresetPreviewPlan.shape(of: 0, in: []) == nil)
     }
 }
