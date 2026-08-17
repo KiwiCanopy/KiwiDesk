@@ -870,7 +870,12 @@ section {
   display: block;
 }
 
-.hero h1 {
+/* Keyed on the class, not the element: the two hero titles are one
+   heading in two voices, so only the Simple one is the page's <h1>
+   and the Nerd one is an <h2> (#868). The look is identical either
+   way because everything that draws it lives here — font-weight is
+   the browser's `bold` for both element names. */
+.hero .hero__title {
   /* Slightly smaller + a wider line allowance so the longer German
      titles land in two balanced lines like the English ones (15ch
      forced German onto three). */
@@ -884,7 +889,7 @@ section {
 }
 /* The Nerd title is shorter, so at the Simple title's wide measure it
    collapses to one line — give it a tighter measure to keep two. */
-.hero__mode--dev h1 {
+.hero__mode--dev .hero__title {
   max-width: 19ch;
 }
 
