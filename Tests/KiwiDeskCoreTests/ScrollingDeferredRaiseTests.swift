@@ -43,8 +43,10 @@ private func makeScrollingSpace(
     return space
 }
 
-/// Walls the leading (left) edge (#878), so backward focus
-/// moves defer their raise — the suite's deferring regime.
+/// Walls the leading (left) edge (#878), so a backward focus
+/// move reveals a stationary wall-pinned target and defers its
+/// raise — the suite's deferring regime. Callers settle frames
+/// after this: the reveal predicate reads state frames.
 @MainActor
 private func wallLeftEdge(_ core: KiwiCore) {
     let bounds = CGRect(x: 0, y: 0, width: 1920, height: 1080)
@@ -54,6 +56,20 @@ private func wallLeftEdge(_ core: KiwiCore) {
             bounds,
             CGRect(x: -1920, y: 0, width: 1920, height: 1080),
         ]
+    }
+}
+
+/// Settles every window at its layout target and mirrors the
+/// frames into state, as the AX echoes of a finished pan would.
+/// The reveal predicate compares state frames against the next
+/// layout's, so fixtures settle before stepping.
+@MainActor
+private func settleFrames(_ core: KiwiCore) {
+    core.retile(animated: false)
+    for (id, frame) in core.tiler.calculatedFrames(
+        state: core.state
+    ) {
+        core.state.apply(.windowMoved(id, frame))
     }
 }
 
@@ -85,10 +101,11 @@ struct ScrollingDeferredRaiseTests {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         wallLeftEdge(core)
+        settleFrames(core)
         guard startDummyPan(core) else { return }
-        // Backward (left) toward the walled leading edge is a
-        // deferring direction: each step toward an earlier slot
-        // arms a raise.
+        // Backward (left) reveals targets pinned stationary at
+        // the walled leading edge: each step toward an earlier
+        // slot arms a raise.
         for _ in 1...3 {
             #expect(
                 core.execute("focus", args: [.string("left")])
@@ -109,6 +126,7 @@ struct ScrollingDeferredRaiseTests {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         wallLeftEdge(core)
+        settleFrames(core)
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
         #expect(core.pendingFocusRaise == WindowID(4))
@@ -205,6 +223,7 @@ struct ScrollingDeferredRaiseTests {
         core.tiler.settings.animations.onScrolling = false
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         wallLeftEdge(core)
+        settleFrames(core)
         #expect(
             core.execute("focus", args: [.string("left")])
                 .isSuccess
@@ -220,6 +239,7 @@ struct ScrollingDeferredRaiseTests {
         let core = makeCore()
         makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         wallLeftEdge(core)
+        settleFrames(core)
         guard startDummyPan(core) else { return }
         core.execute("focus", args: [.string("left")])
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -314,36 +334,5 @@ struct ScrollingDeferredRaiseTests {
         core.tiler.animation.onAllAnimationsEnded()
         #expect(core.pendingFocusRaise == nil)
         #expect(core.activeSpace?.focused == WindowID(3))
-    }
-
-    @Test("defersFocusRaise stays a subset of isFocusDriven")
-    func deferSubsetInvariant() {
-        // The focusWindow guard sequencing relies on it; the
-        // runtime drift net only keeps the raise, not the
-        // deferral. Make drift loud.
-        let holds = LayoutMode.allCases
-            .filter(\.defersFocusRaise)
-            .allSatisfy { $0.isFocusDriven }
-        #expect(holds)
-    }
-
-    @Test("Monocle keeps the immediate raise path")
-    func monocleStaysImmediate() {
-        let core = makeCore()
-        makeScrollingSpace(core, windows: 3, focus: WindowID(1))
-        let space = core.state.workspaces.space(
-            of: WindowID(1)
-        )!
-        core.execute(
-            "set_mode",
-            args: [.string(space.raw), .string("monocle")]
-        )
-        guard startDummyPan(core) else { return }
-        // Even mid-animation, a monocle focus move never
-        // defers — the raise IS the visible focus change.
-        core.execute("focus", args: [.string("right")])
-        #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
-        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 }

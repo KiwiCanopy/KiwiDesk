@@ -4,16 +4,21 @@ import Foundation
 /// The deferred scrolling focus raise (#143/#878).
 ///
 /// In scrolling mode a focus move pans the viewport, and the
-/// raise must never hide the motion. A target the pan REVEALS
-/// — one sitting stationary on screen at a walled edge, behind
-/// the viewport — is raised only when the pan settles: raising
-/// it first pops it over the whole screen before the slide
-/// starts. A target past an OPEN edge slides in from the void
-/// itself, so it is raised first and rides in on top (#158),
-/// with keystrokes transferring instantly. The vertical top is
-/// always a wall (#66/#139, where #143 was born); every other
-/// edge is one exactly when a neighboring screen lies beyond
-/// it (#878).
+/// raise must never hide the motion: whatever MOVES owns the
+/// foreground while the pan runs, and the focused window is
+/// front when it ends. A target the pan merely REVEALS — one
+/// already sitting at its final frame, pinned at the vertical
+/// top (#66/#139, where #143 was born) or at an edge walled by
+/// a neighboring screen (#878) — is raised only at the settle:
+/// raising it first pops it over the whole screen while the
+/// others are still sliding off it. A target whose own frame
+/// moves — sliding in from an open edge's void (#158), or
+/// traveling to its seat under a re-seating anchor — is raised
+/// first and rides in on top, keystrokes transferring
+/// instantly. The frame comparison, not direction or topology,
+/// is the predicate: direction proxies broke on re-seating
+/// anchors, where a step toward a wall makes the target travel
+/// and deferring hid that travel behind the previous focus.
 ///
 /// Timing rides the same settle signal as the z-order restore
 /// (`AnimationEngine.onAllAnimationsEnded`, dispatched by
@@ -97,26 +102,26 @@ extension KiwiCore {
             state.workspaces.focus(id, in: space)
         }
         // Scrolling defers the raise until the pan settles when
-        // the focus moves TOWARD A WALL (#143/#878): there the
-        // target sits stationary on screen at the border,
-        // behind the viewport, and the pan REVEALS it — raising
-        // it first would pop it over the whole screen and hide
-        // the very motion the scroll is. Toward an OPEN edge
-        // the target itself slides in from the void, so
-        // raise-first keeps the visible motion on top and
-        // transfers keystrokes instantly — as does the neighbor
-        // handoff after a close. State focus stays immediate
-        // either way: the layout needs it to compute the pan.
-        // Every other path (monocle, static layouts, space
-        // switches, cross-space focus) keeps raise-first: there
-        // the raise IS the visible focus change.
+        // this focus change leaves the target's own frame where
+        // it already is (#143/#878): a stationary target is
+        // being REVEALED — the others slide off it — and
+        // raising it first would pop it over the whole screen
+        // and hide the very motion the scroll is. A target
+        // whose frame moves is its own show: raise-first keeps
+        // the visible motion on top and transfers keystrokes
+        // instantly — as does the neighbor handoff after a
+        // close. State focus stays immediate either way: the
+        // layout needs it to compute the pan. Every other path
+        // (monocle, static layouts, space switches, cross-space
+        // focus) keeps raise-first: there the raise IS the
+        // visible focus change.
         let defersRaise =
             refocusRetile
             && activeSpace?.mode.defersFocusRaise == true
             && space == state.workspaces.activeSpace
-            && scrollFocusApproachesWall(
-                to: id,
-                from: previousFocused
+            && scrollTargetIsRevealed(
+                id,
+                previous: previousFocused
             )
         if !defersRaise {
             raiseWindow(id)
@@ -263,40 +268,35 @@ extension KiwiCore {
         return abs(targetIndex - previousIndex) > 1
     }
 
-    /// Whether a scrolling focus move steps toward a WALL — an
-    /// edge whose pinned pile sits on screen behind the
-    /// viewport. The step's direction picks the edge (a lower
-    /// index is up/left along the axis: array order is scroll
-    /// order), and the edge's form decides: the vertical top is
-    /// always a wall (macOS refuses frames above it,
-    /// #139/#143), every other edge is one exactly when a
-    /// neighboring screen lies beyond it (#878). A first focus
-    /// and the close-handoff (`previous == target`) never
-    /// qualify. Reads the SAME `layoutInput` the retile reads,
-    /// so the verdict can never disagree with the frames the
-    /// pan is about to apply (state-and-layout.md's threading
-    /// rule).
-    private func scrollFocusApproachesWall(
-        to target: WindowID,
-        from previous: WindowID?
+    /// Whether this focus change leaves the target's own frame
+    /// where it already is — the STATIONARY REVEAL: the target
+    /// sits pinned at a wall (the vertical top, #139, or a
+    /// screen seam, #878) while the pan slides the others away
+    /// to uncover it. Only then does the raise defer. The frame
+    /// comparison subsumes direction, edge topology AND the
+    /// anchor: `follow` reveals wall-pinned targets in place,
+    /// while a re-seating anchor (`start`/`center`/`end`) makes
+    /// the same target TRAVEL to its seat — a moving target
+    /// raises first so its motion stays on top, which a
+    /// direction proxy got wrong. Compared against the SAME
+    /// frames the retile is about to apply
+    /// (`calculatedFrames`), within the engine's already-there
+    /// tolerance; a window with no known frame yet reads as
+    /// moving, so a raise is never lost. Distance is
+    /// irrelevant, so an App Bar jump across several slots
+    /// classifies exactly like a step. A first focus and the
+    /// close-handoff (`previous == target`) never defer.
+    private func scrollTargetIsRevealed(
+        _ target: WindowID,
+        previous: WindowID?
     ) -> Bool {
         guard let previous, previous != target,
-            let space = activeSpace,
-            let input = tiler.layoutInput(state: state)
+            let window = state.windows[target],
+            let frame = tiler.calculatedFrames(
+                state: state
+            )[target]
         else { return false }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
-        guard let targetIndex = tiled.firstIndex(of: target),
-            let previousIndex = tiled.firstIndex(of: previous)
-        else { return false }
-        let neighbors = input.context.screenNeighbors
-        let horizontal = input.context.scrolling.axisIsHorizontal
-        if targetIndex < previousIndex {
-            return horizontal ? neighbors.left : true
-        }
-        return horizontal ? neighbors.right : neighbors.bottom
+        return TilingEngine.close(window.frame, to: frame)
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's

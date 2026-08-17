@@ -4285,20 +4285,18 @@ animations.set_on_space_change(false)
 **Does:** enables or disables the layout slide as focus moves within a
 Scrolling space.
 
-While the slide runs, a window that currently sits pinned on
-screen *behind* the viewport is brought to the front only when
-the pan settles — raising it first would pop it over the whole
-screen and hide the very motion the scroll is. That covers an
-*upward* move always (nothing may sit above the top screen
-border, so that pile is always on screen) and any move toward
-an edge walled by a neighboring screen, where the pile stacks
-behind instead of hanging into the void. Moves toward an open
-edge — where the target itself slides in from the void — and
-the focus handoff after closing a window raise immediately,
-laying the target on top as it slides in. The trade: during a
-deferred slide (one animation length, 50–1000 ms) keystrokes
-still reach the previously focused app, as in other
-scroll-style window managers. Global
+While the slide runs, a window the pan merely *reveals* — one
+already sitting at its final frame, pinned at the top screen
+border or at an edge walled by a neighboring screen — is
+brought to the front only when the pan settles: raising it
+first would pop it over the whole screen and hide the very
+motion the scroll is. A window whose own frame moves — sliding
+in from an open edge's void, or traveling to its resting
+position under a `start`/`center`/`end` anchor — and the focus
+handoff after closing a window raise immediately, riding in on
+top. The trade: during a stationary reveal (one animation
+length, 50–1000 ms) keystrokes still reach the previously
+focused app, as in other scroll-style window managers. Global
 hotkeys are unaffected (they reach KiwiDesk regardless of the
 key app), and with the slide disabled focus transfers
 instantly. See the

@@ -156,11 +156,20 @@ struct ScrollingWrapFocusTests {
                 ),
             ]
         }
+        // Settle so the wrapped-to window's wall-pinned frame
+        // is in state: the reveal predicate reads it.
+        core.retile(animated: false)
+        for (id, frame) in core.tiler.calculatedFrames(
+            state: core.state
+        ) {
+            core.state.apply(.windowMoved(id, frame))
+        }
         guard startDummyPan(core) else { return }
-        // Wrap-forward to index 0 is a lower-index move — a pan
-        // toward the walled leading edge (#143/#878), so the
-        // raise stays pending behind the pan even though the
-        // key pressed was "right".
+        // Wrap-forward to index 0 is a lower-index move — the
+        // wrapped-to window sits pinned stationary at the
+        // walled leading edge (#143/#878), so the raise stays
+        // pending behind the pan even though the key pressed
+        // was "right".
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess
