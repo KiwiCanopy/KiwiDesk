@@ -18,15 +18,21 @@ import CoreGraphics
 ///
 /// macOS constrains what frames it will apply, so materialized
 /// frames pin while the viewport *offset* stays the ideal,
-/// unpinned value (keeping the up/down scroll math symmetric):
-/// a vertical row scrolled past the top pins at the border —
-/// its upper strip peeks — because nothing may go above the top
-/// screen edge (an accepted OS-blocked limitation, see
-/// docs/design-decisions.md); and a slot scrolled far past any
-/// other edge pins with an `edgePeek` sliver still visible,
-/// because macOS clamps fully offscreen frames to its own
-/// undocumented minimum anyway (#142) — pinning above that
-/// minimum keeps every target achievable.
+/// unpinned value (keeping the up/down scroll math symmetric).
+/// The clamp form is chosen **per edge** (#878): a *blocked*
+/// edge — one with another screen beyond it
+/// (`LayoutContext.screenNeighbors`), or the vertical top,
+/// which macOS walls off itself (#139, an accepted OS-blocked
+/// limitation, see docs/design-decisions.md) — is a hard stop,
+/// where a scrolled-out slot stops flush at the border, fully
+/// on its own screen, and stacks behind the viewport; frames
+/// are global and macOS cannot clip another app's window, so
+/// an overhang there would render on the neighbor screen. An
+/// *open* edge lets the slot overhang into the void with an
+/// `edgePeek` sliver still visible, because macOS clamps fully
+/// offscreen frames to its own undocumented minimum anyway
+/// (#142) — pinning above that minimum keeps every target
+/// achievable. Neither form ever resizes a slot.
 public struct ScrollingLayout: LayoutSystem {
     /// Visible sliver of a slot scrolled far past a screen edge
     /// (#142): the WindowServer's clamp floor plus this
@@ -80,7 +86,8 @@ public struct ScrollingLayout: LayoutSystem {
             horizontal: horizontal,
             offset: offset,
             stride: metrics.stride,
-            size: metrics.size
+            size: metrics.size,
+            neighbors: context.screenNeighbors
         )
     }
 
@@ -216,32 +223,46 @@ public struct ScrollingLayout: LayoutSystem {
         horizontal: Bool,
         offset: CGFloat,
         stride: CGFloat,
-        size: CGFloat
+        size: CGFloat,
+        neighbors: ScreenNeighbors
     ) -> [WindowID: CGRect] {
         let along = horizontal ? area.width : area.height
+        // A blocked edge — another screen beyond it, or the
+        // vertical top, which macOS itself walls off (#139) — is
+        // a hard stop (#878): the scrolled-out slot stops flush
+        // at the border, fully on its own screen, and stacks
+        // behind the viewport (the #150 pile, relocated). An
+        // open edge keeps the overhang-with-sliver pin below.
+        let leadingBlocked =
+            horizontal ? neighbors.left : true
+        let trailingBlocked =
+            horizontal ? neighbors.right : neighbors.bottom
         var result: [WindowID: CGRect] = [:]
         for (index, window) in windows.enumerated() {
             var lead = offset + CGFloat(index) * stride
-            // Pin what macOS would refuse anyway (#139/#142):
-            // above the top border it applies nothing at all,
-            // and (almost) fully offscreen frames clamp to its
-            // own title-bar minimum. An unreachable target makes
-            // every retile re-issue the frame past the ±2pt
-            // tolerance, so far slots keep `edgePeek` visible at
-            // the trailing edge and (horizontal only) at the
-            // leading edge; the vertical top stays a hard wall
-            // at 0. The peek caps at the slot size: a slot
-            // smaller than `edgePeek` (possible via `.fraction`,
-            // whose 5% floor has no point minimum) pins fully
-            // visible instead of displacing already-visible
-            // slots — with the cap, the focused slot is provably
-            // never touched (its lead stays in [0, along-size]).
+            // On an open edge, pin what macOS would refuse
+            // anyway (#142): (almost) fully offscreen frames
+            // clamp to its own title-bar minimum. An unreachable
+            // target makes every retile re-issue the frame past
+            // the ±2pt tolerance, so far slots keep `edgePeek`
+            // visible at the edge. The peek caps at the slot
+            // size: a slot smaller than `edgePeek` (possible via
+            // `.fraction`, whose 5% floor has no point minimum)
+            // pins fully visible instead of displacing
+            // already-visible slots — with the cap, the focused
+            // slot is provably never touched (its lead stays in
+            // [0, along-size], which both clamp forms keep
+            // reachable: `size` never exceeds `along`, so the
+            // hard stop's bound is never tighter than it).
             let peek = min(Self.edgePeek, size)
-            lead = min(lead, along - peek)
-            lead =
-                horizontal
-                ? max(lead, peek - size)
-                : max(lead, 0)
+            lead = min(
+                lead,
+                trailingBlocked ? along - size : along - peek
+            )
+            lead = max(
+                lead,
+                leadingBlocked ? 0 : peek - size
+            )
             result[window] =
                 horizontal
                 ? CGRect(

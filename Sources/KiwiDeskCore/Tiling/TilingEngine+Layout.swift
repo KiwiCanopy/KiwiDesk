@@ -84,6 +84,14 @@ extension TilingEngine {
             focusedOverride: state.focusAnchor(
                 of: space,
                 tiled: tiled
+            ),
+            // Freshly detected on every layout pass (#878):
+            // adjacency is an input, never a cache, so a screen
+            // plugged in or out is correct from the retile the
+            // display change already triggers.
+            screenNeighbors: ScreenNeighbors.detect(
+                around: visibleBounds(screen),
+                among: allScreenBounds()
             )
         )
         return (space, tiled, context)

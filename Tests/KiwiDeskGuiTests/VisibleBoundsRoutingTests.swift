@@ -76,14 +76,20 @@ struct VisibleBoundsRoutingTests {
     private let allowed: [String: Int] = [
         // The declaration itself.
         "Tiling/GeometryUtils.swift": 1,
-        // The hook's own default.
-        "Tiling/TilingEngine.swift": 1,
+        // The hook's own default, and the `allScreenBounds`
+        // topology hook's default (#878) — that one enumerates
+        // `NSScreen.screens` for the neighbor scan, the same
+        // several-screens shape as parking below, and is itself
+        // an injectable seam the test factories pin.
+        "Tiling/TilingEngine.swift": 2,
         // `screen(containing:)` is static — no instance in hand.
         "Tiling/TilingEngine+Layout.swift": 1,
-        // Parking *enumerates* `NSScreen.screens` to pick a
-        // corner; a one-rect hook would collapse every display
-        // onto the same bounds.
-        "Tiling/TilingEngine+Stash.swift": 3,
+        // Parking picks each window's OWN screen from
+        // `NSScreen.screens` (it needs screen objects); a
+        // one-rect hook would collapse every display onto the
+        // same bounds. Its corner scan's rect list reads the
+        // `allScreenBounds` topology seam instead (#878).
+        "Tiling/TilingEngine+Stash.swift": 2,
         "Tiling/TilingEngine+StashRestore.swift": 2,
         // The bar strips are drawn ON a screen; a fabricated rect
         // would place real chrome nowhere.

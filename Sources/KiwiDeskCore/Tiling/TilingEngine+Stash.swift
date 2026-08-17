@@ -42,26 +42,20 @@ extension TilingEngine {
     /// parked side; parking toward a neighbor monitor would show
     /// that body on the neighbor. Prefer the side with no
     /// adjacent display; default bottom-right when both or
-    /// neither side has one. All frames are AX visible frames;
-    /// x is shared with Cocoa, so left/right adjacency is exact.
+    /// neither side has one. The scan itself is
+    /// `ScreenNeighbors.detect` (#878 generalized it to all
+    /// four edges; this consumes the left/right pair) — one
+    /// adjacency predicate, not two drifting copies.
     nonisolated static func optimalHideCorner(
         for screen: CGRect,
         among others: [CGRect]
     ) -> HideCorner {
-        func hasNeighbor(onRight: Bool) -> Bool {
-            others.contains { other in
-                let touchesX =
-                    onRight
-                    ? other.minX >= screen.maxX - 1
-                    : other.maxX <= screen.minX + 1
-                let overlapsY =
-                    other.minY < screen.maxY
-                    && other.maxY > screen.minY
-                return touchesX && overlapsY
-            }
-        }
-        if !hasNeighbor(onRight: true) { return .bottomRight }
-        if !hasNeighbor(onRight: false) { return .bottomLeft }
+        let neighbors = ScreenNeighbors.detect(
+            around: screen,
+            among: others
+        )
+        if !neighbors.right { return .bottomRight }
+        if !neighbors.left { return .bottomLeft }
         return .bottomRight
     }
 
@@ -118,9 +112,14 @@ extension TilingEngine {
         // each display keeps its own shown space (#multi-monitor).
         let visible = state.workspaces.visibleSpaces
         guard !visible.isEmpty else { return }
-        let allVisible = NSScreen.screens.map {
-            GeometryUtils.axVisibleFrame(of: $0)
-        }
+        // The corner scan's screen list comes from the SAME
+        // topology seam the scrolling walls read (#878), so the
+        // two consumers of `ScreenNeighbors.detect` can never
+        // disagree about the arrangement, and a pinned fixture
+        // pins them together. The per-window screen PICK below
+        // legitimately stays on `NSScreen.screens` — it needs
+        // screen objects, not rects.
+        let allVisible = allScreenBounds()
         for space in state.workspaces.allSpaces
         where !visible.contains(space.id) {
             for id in space.windows {
@@ -147,9 +146,13 @@ extension TilingEngine {
                 let bounds = GeometryUtils.axVisibleFrame(
                     of: screen
                 )
+                // No self-filter: `detect` excludes the screen
+                // geometrically (a rect cannot lie past its own
+                // edge), and a rect *equal* to `bounds` overlaps
+                // it entirely, so it can qualify on no side.
                 let corner = Self.optimalHideCorner(
                     for: bounds,
-                    among: allVisible.filter { $0 != bounds }
+                    among: allVisible
                 )
                 stash(
                     window,

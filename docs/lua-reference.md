@@ -939,12 +939,19 @@ left/right. Vertical: rows scroll up/down.
 Vertical rows overflow only at the bottom: macOS refuses to place
 any window above the top screen border, so a row scrolled past the
 top stays pinned at the border with its upper strip peeking behind
-the focused row, instead of tucking above the screen. See the
-[accepted limitations](accepted-limitations.md)
-table. On the other edges, a slot scrolled far offscreen keeps a
-small fixed sliver visible — macOS refuses fully offscreen
-placement, so KiwiDesk pins at a deterministic sliver instead of
-letting the OS clamp unpredictably.
+the focused row, instead of tucking above the screen. See
+[Blocked by macOS (SIP)](design-decisions.md#blocked-by-macos-sip)
+in the design decisions. On an edge with no screen beyond it, a
+slot scrolled far
+offscreen keeps a small fixed sliver visible — macOS refuses
+fully offscreen placement, so KiwiDesk pins at a deterministic
+sliver instead of letting the OS clamp unpredictably. An edge
+with another screen beyond it is a wall instead: a scrolled-out
+slot stops flush at the border, fully on its own screen, stacked
+behind the visible ones — never resized, and never rendered on
+the neighbor screen. Which edges are walls follows your screen
+arrangement, and a screen plugged in or out updates it
+immediately.
 
 **Example:**
 
@@ -4278,13 +4285,16 @@ animations.set_on_space_change(false)
 **Does:** enables or disables the layout slide as focus moves within a
 Scrolling space.
 
-While the slide runs, a window focused *backward* (up/left)
-toward the row pinned behind the leading edge is brought to the
-front only when the pan settles — raising it first would pop
-that pinned row over the whole screen before the slide starts.
-Forward (down/right) focus moves and the focus handoff after
-closing a window raise immediately, laying the target on top as
-it slides in. The trade: during a backward slide (one animation
+While the slide runs, a window the pan merely *reveals* — one
+already sitting at its final frame, pinned at the top screen
+border or at an edge walled by a neighboring screen — is
+brought to the front only when the pan settles: raising it
+first would pop it over the whole screen and hide the very
+motion the scroll is. A window whose own frame moves — sliding
+in from an open edge's void, or traveling to its resting
+position under a `start`/`center`/`end` anchor — and the focus
+handoff after closing a window raise immediately, riding in on
+top. The trade: during a stationary reveal (one animation
 length, 50–1000 ms) keystrokes still reach the previously
 focused app, as in other scroll-style window managers. Global
 hotkeys are unaffected (they reach KiwiDesk regardless of the

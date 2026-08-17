@@ -117,6 +117,13 @@ public struct LayoutContext: Sendable {
     /// layouts only ever test membership against the ids they
     /// were handed, so the over-approximation is harmless.
     public var sticky: Set<WindowID>
+    /// Which screen edges have another screen beyond them
+    /// (#878). Scrolling picks its per-edge clamp form from
+    /// this; every other layout ignores it. Defaults to no
+    /// neighbors — the single-screen verdict, under which every
+    /// edge is open and the clamps behave as they did before
+    /// the flags existed.
+    public var screenNeighbors: ScreenNeighbors
 
     public var bsp: BspParams
     public var stack: StackParams
@@ -138,6 +145,7 @@ public struct LayoutContext: Sendable {
         trackBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sticky: Set<WindowID> = [],
+        screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
@@ -155,6 +163,7 @@ public struct LayoutContext: Sendable {
         self.trackBreaks = trackBreaks
         self.trackWeights = trackWeights
         self.sticky = sticky
+        self.screenNeighbors = screenNeighbors
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling
