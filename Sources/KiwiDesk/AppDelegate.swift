@@ -126,18 +126,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             )
         }
         statusItem.layoutInfoProvider = { [weak self] in
-            guard let self else { return (nil, nil, nil) }
-            return (
-                self.core.activeSpace?.mode,
-                self.core.profiles.currentName,
-                self.core.savedModeForActiveSpace()
-            )
+            guard let self else { return LayoutMenuInfo.empty }
+            return LayoutMenuInfo.current(from: self.core)
         }
-        statusItem.onSetLayoutMode = { [weak self] mode in
-            _ = self?.core.execute(
-                "set_mode",
-                args: [.string(mode.rawValue)]
-            )
+        statusItem.onSetLayoutMode = { [weak self] mode, space in
+            // `set_mode` already takes `[space,] mode`, so a
+            // per-screen apply needs no new verb — the space is
+            // simply named instead of defaulted.
+            let args: [JSONValue] =
+                space.map { [.string($0.raw), .string(mode.rawValue)] }
+                ?? [.string(mode.rawValue)]
+            _ = self?.core.execute("set_mode", args: args)
             // Drift-only refresh: a full `reload()` would
             // discard staged Settings edits mid-session.
             self?.dashboardIfCreated?.refreshLayoutDrift()

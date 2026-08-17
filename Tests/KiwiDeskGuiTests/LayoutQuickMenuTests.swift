@@ -33,12 +33,7 @@ struct LayoutQuickMenuTests {
             item: FakeStatusItem()
         )
         controller.layoutInfoProvider = {
-            (
-                activeMode: core.activeSpace?.mode,
-                activeProfileName: core.profiles.currentName,
-                savedModeForActiveSpace:
-                    core.savedModeForActiveSpace()
-            )
+            LayoutMenuInfo.current(from: core)
         }
         return controller
     }
@@ -99,14 +94,26 @@ struct LayoutQuickMenuTests {
 
         let modeEntries = submenu.items.compactMap {
             entry -> (NSMenuItem, LayoutMode)? in
-            guard let raw = entry.representedObject as? String,
-                let mode = LayoutMode(rawValue: raw)
+            guard
+                let target = entry.representedObject
+                    as? LayoutMenuTarget
             else { return nil }
-            return (entry, mode)
+            return (entry, target.mode)
         }
         // Every case present, every entry carrying its mode in
         // representedObject (titles are localized — guardrail).
         #expect(modeEntries.count == LayoutMode.allCases.count)
+        // #752's promise, stated rather than inferred: with one
+        // screen or none the list stays FLAT. Read off the tree —
+        // a nested menu would put the mode rows one level down,
+        // where the `compactMap` above cannot see them, so the
+        // count alone would go to zero and this says which
+        // failure it was.
+        #expect(!LayoutMenuInfo.current(from: core).nestsPerScreen)
+        #expect(submenu.items.allSatisfy { $0.submenu == nil })
+        // Every row states its own enablement once auto-enable is
+        // off (#802) — a mode row that works must not ship dimmed.
+        #expect(modeEntries.allSatisfy { $0.0.isEnabled })
 
         for (entry, mode) in modeEntries {
             #expect(

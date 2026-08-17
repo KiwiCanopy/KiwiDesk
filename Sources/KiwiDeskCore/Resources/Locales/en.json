@@ -603,6 +603,7 @@
   "menu.edit.title": "Edit",
   "menu.edit.undo": "Undo",
   "menu.layout": "Layout",
+  "menu.layout.all_screens": "All Screens",
   "menu.layout.save": "Save Current Layout to Profile",
   "menu.layout.save_failed.title": "Couldn't Save Layout",
   "menu.layout.unsaved": "not saved to profile",

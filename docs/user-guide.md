@@ -309,6 +309,26 @@ the KiwiDesk icon opens the quick menu where you can:
     "not saved to profile" subtitle.
   - Click **Save Current Layout to Profile** below the separator to persist
     the new layout (adopts the whole live state into the active profile).
+  - **With more than one screen connected, the list nests one level
+    deeper**: **All Screens** first, then a row per screen named
+    after that screen. Each screen's row carries a checkmark on the
+    layout the space showing there is running, so the menu also
+    answers "what is each screen on right now" — which previously
+    meant clicking into each screen to find out. **All Screens**
+    applies your pick everywhere at once, which is what plugging
+    into a dock usually wants.
+
+    A layout belongs to a **Space**, not to a screen; each screen
+    simply has one Space showing on it, so a screen's row sets the
+    layout of whatever is showing there. Drift is per Space too, so
+    the "not saved to profile" subtitle is answered on each screen's
+    row rather than once at the top.
+
+    With a single screen the list stays flat, exactly as before —
+    the extra level would only add a click to the control you reach
+    for most. **Save Current Layout to Profile** stays a single
+    action on the active Space and the profile as a whole; it is not
+    per screen.
 - **Switch Profile**: Load any saved profile into the current layout.
   A non-clickable **Profile: ‹name›** line appears above the actions
   naming the profile you are currently on — shown only when there is
