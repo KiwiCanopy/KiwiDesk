@@ -88,9 +88,9 @@ different formula — no tree surgery, no lost state.
 - **Cascading Profiles**: Display- or Desktop-bound profiles with inherited
   defaults and sparse overrides.
 - **Sticky Windows**: Pin a window so it stays with you across spaces, or
-  just across one display. It keeps a real tile — overflow piles the
-  others around it — and carries an on-window mark plus a Space Bar badge
-  so you can see what is pinned without hunting.
+  just across one screen. It carries an on-window mark and a Space Bar
+  badge, and where a layout tiles some windows and piles the rest, a
+  sticky one keeps a real tile.
 - **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
 - **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations, zero
@@ -129,10 +129,9 @@ Later builds arrive the same way:
 brew upgrade --cask kiwidesk
 ```
 
-> Releases are signed with a stable Developer ID and notarized, so
-> macOS keeps the Accessibility grant across an upgrade. If windows
-> do stop being managed after one, re-approve KiwiDesk in **System
-> Settings › Privacy & Security › Accessibility**.
+> Releases are signed with a stable Developer ID and notarized. If
+> windows stop being managed after an upgrade, re-approve KiwiDesk
+> in **System Settings › Privacy & Security › Accessibility**.
 
 On first launch, an onboarding wizard walks you through granting
 the Accessibility permission KiwiDesk needs to manage windows.

@@ -13,8 +13,8 @@
 # pins in its `paths:` block counts as read.
 #
 # "Literal" is load-bearing, not hedging: site.md pins `site/**`,
-# which is this list's own first entry, so a criterion counting
-# globs as reads would rule out the entry directly below (#661).
+# which is an entry on this list, so a criterion counting globs as
+# reads would rule that entry out (#661).
 # CiPathFilterTests.ignoredPathsArentRulePins is the authority on
 # this clause — it filters globs out of the pin set — so read the
 # test, not this sentence, when the two seem to disagree.

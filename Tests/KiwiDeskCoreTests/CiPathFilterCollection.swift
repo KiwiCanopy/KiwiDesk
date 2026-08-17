@@ -11,7 +11,8 @@ import Testing
 /// it was (#661) — a reader trusting that would move code
 /// carrying a live check. Three things assert in this file:
 /// `buildInputsStayWatched` is a whole `@Test`; `ruleFiles()`
-/// refuses an empty directory; `entries()` refuses an empty parse.
+/// reports an empty directory; `entries()` refuses an empty parse
+/// outright, with `try #require`.
 ///
 /// The last two are deliberate *floors* rather than strays. A walk
 /// that half-failed still returns a list, and every check next

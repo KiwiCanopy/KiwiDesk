@@ -28,14 +28,13 @@ struct HomeCardContentTests {
     /// would fail it for a translation reason wearing a layout
     /// bug's clothes.
     ///
-    /// Inside the body, not `init`: suites interleave on the main
-    /// actor at the init→body hop, and `LocalizationManagerTests`'
-    /// own `select()` calls land in that window — a synchronous
-    /// body has no suspension point for them to land in.
-    /// `MonitorReadoutTests` owns the full argument.
+    /// Inside the body, not `init` — `MonitorReadoutTests` owns
+    /// why.
     ///
     /// Main-actor cost, since this is a `@MainActor` suite sharing
-    /// one budget: a pin is a single catalog decode, and that is
+    /// one budget: a pin to English decodes no catalog at all —
+    /// no `en.json` ships, so `effectiveLocale` answers nil and
+    /// the reload assigns an empty map — and that assignment is
     /// all the main-actor work these tests add. Nothing here scans
     /// source or lays out a view.
     private func pinEnglish() {

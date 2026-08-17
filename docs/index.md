@@ -52,11 +52,10 @@ That installs the app and puts the `kiwidesk` CLI on your
 start`. The [User Guide](user-guide.md) covers the Accessibility
 permission and first-run setup.
 
-Later builds arrive with `brew upgrade --cask kiwidesk`. Until
-KiwiDesk ships a signed `.app`, an upgrade changes the binary and
-macOS drops its Accessibility grant — re-approve it in **System
-Settings › Privacy & Security › Accessibility** if windows stop
-being managed.
+Later builds arrive with `brew upgrade --cask kiwidesk`. Releases
+are signed with a stable Developer ID and notarized. If windows
+stop being managed after an upgrade, re-approve KiwiDesk in
+**System Settings › Privacy & Security › Accessibility**.
 
 Prefer to build it yourself? `swift build -c release` produces
 `.build/release/KiwiDesk`, which takes the same commands.
