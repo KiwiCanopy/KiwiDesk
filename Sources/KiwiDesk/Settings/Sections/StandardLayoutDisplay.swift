@@ -57,6 +57,17 @@ extension StandardLayout {
         // (a translated picker with English prose), and `de` has
         // English pickers with translated prose.
         //
+        // Two words moved again after the round's separate audit
+        // (2026-08-17), both by the SAME rule that refused
+        // "Preview" for the button — Family C rule 1, a word
+        // already naming another KiwiDesk concept loses. "a
+        // fullscreen preview Space" spent the detail panel's word
+        // (`panel.*_preview`, four keys) on the card whose button
+        // is deliberately not called Preview; "dashboards" spent
+        // the one `discard.*` uses for KiwiDesk's own Settings
+        // dashboard. Both were faithfully carried into most
+        // catalogs, so the reuse was ten-fold rather than one.
+        //
         // So the card stops naming layouts at all (#859). A
         // summary says what you DO on those Spaces; the layouts
         // are named where they are drawn — the preview sheet's
@@ -69,7 +80,7 @@ extension StandardLayout {
             return L(
                 "presets.developer.summary",
                 "An IDE, reference docs, and a full-screen "
-                    + "preview Space."
+                    + "Space for the running app."
             )
         case "Minimalist":
             return L(
@@ -101,7 +112,7 @@ extension StandardLayout {
             return L(
                 "presets.coder_and_monitor.summary",
                 "Editor and terminals on the main screen; "
-                    + "dashboards and logs on the second."
+                    + "metrics and logs on the second."
             )
         case "Command Center":
             return L(

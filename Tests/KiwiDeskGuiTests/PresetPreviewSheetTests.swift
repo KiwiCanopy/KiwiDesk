@@ -149,11 +149,29 @@ struct PresetPreviewSheetTests {
     /// 540 and the window OPENS at 620, so it was false at both
     /// (code review, 2026-08-17).
     @Test("the sheet's floor fits the narrowest window")
-    func heightBoundsAreOrderedAndFit() {
+    func heightBoundsAreOrderedAndFit() throws {
         let sheet = PresetPreviewSheet.self
         #expect(sheet.minHeight < SettingsWidthClass.minimumHeight)
         #expect(sheet.minHeight < sheet.idealHeight)
         #expect(sheet.idealHeight < sheet.maxHeight)
+
+        // …and the frame SPENDS them. The relation above was
+        // pinned while the render site was not: replacing the
+        // `.frame`'s three arguments with a hardcoded 900 — taller
+        // than `maxHeight`, over the shell floor, all three
+        // constants left correct and unread — passed all 3399
+        // tests (guard-prover round 2, 2026-08-17). A constant
+        // nothing reads is a constant that agrees with nothing.
+        let source = try squashed(Self.sheet)
+        #expect(
+            source.occurrences(
+                of: "minWidth:Self.width(forColumns:Self.columns),"
+                    + "maxWidth:Self.width(forColumns:Self.columns),"
+                    + "minHeight:Self.minHeight,"
+                    + "idealHeight:Self.idealHeight,"
+                    + "maxHeight:Self.maxHeight"
+            ) == 1
+        )
     }
 
     /// The grid STATES its columns rather than adapting to them.
@@ -171,25 +189,30 @@ struct PresetPreviewSheetTests {
         #expect(source.occurrences(of: ".fixed(Self.tileWidth)") == 1)
         #expect(source.occurrences(of: ".adaptive(") == 0)
         #expect(source.occurrences(of: "count:Self.columns") == 1)
-        // **There is width to LOSE.** The first cut spent the
-        // whole content box on tiles and pinned that equality, so
-        // a legacy scroll bar clipped the fourth tile instead of
-        // re-wrapping it — `.fixed` had removed the re-wrap and
-        // not its cause (re-review, 2026-08-17). The slack is the
-        // scroller's, and it is asserted as an INEQUALITY plus its
-        // size, so shrinking the reserve reds rather than merely
-        // moving which symptom appears.
+        // **The arithmetic here was VACUOUS, twice.**
+        //
+        // `content == tiles` is an algebraic identity —
+        // `width(columns) - 2*pad` expands to exactly `tiles`, for
+        // any `tileWidth`, `gutter` or `pad` — so `gutter` 12 → 20
+        // stayed green, and so did handing the grid
+        // `spacing: gutter + 24` (a 636 pt row in a 564 pt box),
+        // which is the precise class the docstring claimed to
+        // watch. Reserving the scroller and asserting
+        // `content - tiles == scroller` reproduced the identity one
+        // term over (guard-prover round 2, 2026-08-17).
+        //
+        // The lesson generalises past this suite: an assertion that
+        // recomputes both sides from the same constants cannot
+        // model anything those constants do not already say. So
+        // what is asserted is the RESERVE's size — the one fact not
+        // implied by the algebra — and the rest is needled at the
+        // sites that spend it.
         let sheet = PresetPreviewSheet.self
-        let content =
-            sheet.width(forColumns: sheet.columns) - 2 * sheet.pad
-        let tiles =
-            CGFloat(sheet.columns) * sheet.tileWidth
-            + CGFloat(sheet.columns - 1) * sheet.gutter
-        #expect(content >= tiles)
-        #expect(content - tiles == sheet.scroller)
-        // A legacy scroll bar on macOS is ~15 pt, so the reserve
-        // has to cover one with nothing left owing.
         #expect(sheet.scroller >= 15)
+
+        // The grid is handed the gutter, not some other spacing:
+        // once as the column spacing, once as the row spacing.
+        #expect(source.occurrences(of: "spacing:Self.gutter") == 2)
     }
 
     /// `.panel` is 240 pt tall and pane-filling; Command Center

@@ -53,80 +53,16 @@ struct SettingsButtonStyleConventionTests {
         )
     }
 
-    /// Allowed unstyled action buttons that cannot take a style
-    /// for a documented reason.
-    private let unstyledExempt:
-        [String: (count: Int, needle: String, why: String)] = [
-            "SpacesSection+Customize.swift": (
-                9, "deleteConfirmActions",
-                "Returned to a confirmationDialog / contextMenu, "
-                    + "plus one icon affordance"
-            ),
-            "SpaceAssignmentChip.swift": (
-                3, "contextMenu", "Returned to a menu/contextMenu builder"
-            ),
-            "PaletteShelf.swift": (
-                3, "menuItem", "Returned to a contextMenu builder"
-            ),
-            // Moved out of `ColorField.swift` with the §2.1
-            // split (#678 Phase 4 pass 10). The needle changed
-            // with it and is the reason: the item is no longer
-            // written INSIDE the `contextMenu` builder — it is
-            // built once by `automaticItem` and handed to both
-            // that builder and `.accessibilityActions`, which is
-            // what stops the two routes from drifting. A button
-            // in a shared menu-item builder is as unstyleable as
-            // one written inline in the menu.
-            "ColorField+AutomaticMenu.swift": (
-                1, "automaticItem",
-                "Menu item from the builder shared by contextMenu "
-                    + "and accessibilityActions"
-            ),
-            "HeaderSearch.swift": (
-                1, "focusShortcut", "Invisible zero-size shortcut sink"
-            ),
-            // The same shape one surface over: a sheet's Escape
-            // needs a carrier that does not depend on focus, and an
-            // invisible one draws nothing to style (#859).
-            "PresetPreviewSheet.swift": (
-                1, "escapeRoute",
-                "Invisible zero-size shortcut sink — Escape, "
-                    + "focus-independently"
-            ),
-        ]
-
-    /// Styles applied to non-Button views (e.g. Link) that inflate
-    /// the style count.
-    private let stylesOnNonButtons:
-        [String: (count: Int, style: String, why: String)] = [
-            "GeneralSection+About.swift": (
-                1, ".buttonStyle(.plain)", "Link taking plain style"
-            ),
-            // Moved from `PresetsSection.swift` with the card
-            // itself in #859. The reason is also CORRECTED: the
-            // entry said "Picker taking plain style" and this file
-            // has never held a picker or a `.plain`. The real
-            // extra is Apply's zero-profile spotlight — ONE button
-            // naming two styles across the two arms
-            // (`.borderedProminent` when it is the lone primary,
-            // `.settingsActionButton()` otherwise) — so the count
-            // was right for a reason nobody could check against
-            // the prose beside it.
-            "PresetCard.swift": (
-                1,
-                ".buttonStyle(.borderedProminent)",
-                "Apply's spotlight arm — one button, two styles"
-            ),
-        ]
-
     @Test("every action button names its style")
     func actionButtonsNameTheirStyle() throws {
         var scannedFiles = 0
         var totalUnexcludedButtons = 0
+        var seenNames: Set<String> = []
 
         for file in try scannedSources() {
             scannedFiles += 1
             let name = file.lastPathComponent
+            seenNames.insert(name)
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -327,5 +263,26 @@ struct SettingsButtonStyleConventionTests {
 
         #expect(scannedFiles > 50, "Scan must look at Settings files")
         #expect(totalUnexcludedButtons > 0, "Scan must find action buttons")
+
+        // An exemption for a DELETED file leaves dead prose: both
+        // maps are read as `map[name]` per scanned file, so a
+        // rename reds through the arithmetic while an outright
+        // deletion is never looked up (guard-prover, 2026-08-17).
+        // Only the keys' side can see that.
+        let exemptedFiles =
+            Set(unstyledExempt.keys)
+            .union(Set(stylesOnNonButtons.keys))
+        for name in exemptedFiles {
+            #expect(
+                seenNames.contains(name),
+                Comment(
+                    rawValue:
+                        "\(name) is exempted here and was not "
+                        + "scanned — the file is gone or moved out "
+                        + "of the roots, and its exemption now "
+                        + "argues about nothing"
+                )
+            )
+        }
     }
 }

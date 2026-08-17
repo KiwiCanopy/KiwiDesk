@@ -117,9 +117,20 @@ synonym:
   word survives translation: `scripts/localization_guards.py`'s
   `PRODUCT_NAMES` is the one register of what must appear
   verbatim in every catalog, "Space" is deliberately absent from
-  it, and every locale rightly translates the noun
-  (`スペース`, `공간`, `пространство`). A translator reading this
-  rule must not Latinise theirs. The
+  it. **A translator matches whatever noun their own catalog has
+  settled on and never introduces a second** — that is the
+  obligation. What the catalogs actually DO is an observation, and
+  it was stated wrongly here: as measured 2026-08-17, nine of the
+  ten translate it (`スペース`, `공간`, `пространство`, `Espacios`,
+  `Espaces`, `Spazi`, `Espaços`, `空间`, `空間`) and **`de`
+  keeps the Latin "Spaces"** — its `destination.spaces` IS
+  "Spaces" and ~135 of its values use it, so that is `de`'s
+  settled answer rather than a lapse. This row previously read
+  "every locale rightly translates the noun", which was false for
+  one catalog in ten and was then handed to a translation round as
+  a constraint, where the drafter refused it against the file
+  (#859). Whether `de` should join the nine is a catalog-wide
+  sweep and its own ruling. The
   ruling, and the table of names already eliminated so none is
   re-proposed, is `docs/design-decisions.md` ▸ Vocabulary: macOS
   has Desktops, KiwiDesk has Spaces, which also owns the list of
