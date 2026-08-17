@@ -83,6 +83,44 @@ struct SetupBundleTests {
         #expect(!bundle.isEmpty)
     }
 
+    @Test("The bundle carries these five keys and nothing else")
+    func theAllowListIsPinned() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        // A real init.lua sitting right there, to make the
+        // omission a fact about this run rather than about the
+        // type in the abstract.
+        try "KiwiDesk.set_gap(8)".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let data = try JSONEncoder().encode(core.exportSetup())
+        let top = try #require(
+            try JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        )
+
+        // The allow-list, pinned at the ONE altitude that can see
+        // it. `init.lua` not travelling is the bundle's loudest
+        // promise and is otherwise guarded by nothing but the
+        // absence of a field — which is invisible until someone
+        // adds one. A sixth key reds here and has to argue for
+        // itself, which is the point: the question "should this
+        // travel?" gets asked rather than answered by default.
+        #expect(
+            Set(top.keys)
+                == [
+                    "format", "writtenBy", "config", "profiles",
+                    "palettes",
+                ]
+        )
+        let text = String(decoding: data, as: UTF8.self)
+        #expect(!text.contains("set_gap"))
+        #expect(!text.contains("init.lua"))
+    }
+
     @Test("A bundle round-trips through JSON unchanged")
     func roundTrips() throws {
         let core = makeTestCore()
@@ -145,6 +183,36 @@ struct SetupBundleTests {
         ) {
             try core.readBackup(at: url)
         }
+    }
+
+    /// The **other** side of the comparison, which had no fixture
+    /// until a `guard-prover` round narrowed `isReadable` from
+    /// `<=` to `==` and watched all 18 tests stay green
+    /// (2026-08-17).
+    ///
+    /// It reds nothing today, `currentFormat` being 1 — and that
+    /// is exactly why it is written now rather than later. The day
+    /// the format becomes 2, that one-character regression would
+    /// otherwise ship silently and refuse every 1.0-era backup
+    /// with `newerFormat(found: 1, supported: 2)`, a message that
+    /// is nonsense on its face. The relation is what is asserted,
+    /// so the test starts working the moment it can.
+    @Test("An OLDER format still reads — upgrading keeps backups")
+    func olderFormatIsAccepted() throws {
+        let core = makeTestCore()
+        let older = SetupBundle.currentFormat - 1
+        let url = try write(
+            """
+            {"format":\(older),"writtenBy":"0.0.1",
+             "profiles":[],
+             "palettes":[{"name":"Mine","colors":{}}]}
+            """,
+            in: core
+        )
+
+        let bundle = try core.readBackup(at: url)
+        #expect(bundle.format == older)
+        #expect(bundle.palettes.count == 1)
     }
 
     @Test("A backup that would restore nothing is refused")

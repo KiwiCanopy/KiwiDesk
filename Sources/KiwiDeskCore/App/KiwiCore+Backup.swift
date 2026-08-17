@@ -120,34 +120,40 @@ extension KiwiCore {
             with: bundle.palettes
         )
 
-        // The live overlay, down to what the incoming config will
-        // put back. Mirrors `resetAllSettings` — a stale pin or a
-        // sparse override that the backup never mentions would
-        // otherwise survive a "replace everything".
+        // Adoption is the one piece of live profile state the
+        // incoming config cannot speak for: it records which
+        // profile this Mac matched, which the backup's profiles
+        // have just replaced.
         profiles.resetAdoption()
-        spacePins = [:]
-        mainSpaces = []
-        tiler.settings = TilingSettings()
 
-        // Prune live spaces to the ones the backup declares, BEFORE
-        // the reload. `loadConfig` seeds GUI spaces from the
-        // sidecar but never removes a live space the sidecar has
-        // stopped mentioning, so without this the destination
-        // Mac's old spaces outlive the restore and the user gets
-        // both setups at once.
-        let incoming = bundle.config?.spaces ?? []
-        if !incoming.isEmpty {
-            for space in incoming {
-                state.workspaces.ensureSpace(space)
-            }
-            state.workspaces.reorder(matching: incoming)
-            pruneSpaces(keeping: Set(incoming), orderedBy: incoming)
-        }
-
+        // Reload first, THEN apply — the order the adopt path
+        // already uses, and for the same stated reason: the reload
+        // resets the sparse tiling state, so the config's tiling
+        // has to go back on top of it rather than under it.
+        //
+        // `loadConfig` alone is NOT enough, which is the whole
+        // reason this call is here. It registers rules and
+        // keybindings from the sidecar and runs `init.lua`, but
+        // nothing in it pushes the sidecar's `settings`, space
+        // modes, pins or Main role into the running core —
+        // `applyProfileScopedState` is the function whose job that
+        // is, and the GUI's own save path calls it separately for
+        // exactly this reason. An earlier cut of this file
+        // hand-rolled a prune instead and shipped four defects at
+        // once: gaps and layout params never applied, space modes
+        // never set, pins and Main dropped, and a space living
+        // only in `spaceModes` pruned away. Every one was
+        // invisible to a test that read files, and a
+        // `guard-prover` round is what asked the question
+        // (2026-08-17).
         loadConfig()
-        resolveSpaceDisplays()
-        retile(force: true)
-        emitSpaceChange()
+        if let config = bundle.config {
+            // Ensures and reorders the incoming spaces, prunes the
+            // ones the backup never mentions, sets every mode, pin
+            // and Main role, re-resolves placement and forces the
+            // retile.
+            applyProfileScopedState(from: config)
+        }
         onLog(
             cleared
                 ? "setup restored from backup"

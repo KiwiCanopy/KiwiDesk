@@ -159,6 +159,104 @@ struct SetupRestoreTests {
         #expect(names == ["Fine"])
     }
 
+    /// The restore reaches the RUNNING app, not only the disk.
+    ///
+    /// A `guard-prover` round deleted `loadConfig()` and the three
+    /// calls after it and left all 18 tests green (2026-08-17):
+    /// both suites read files and `state.workspaces`, and the
+    /// workspaces half is mutated by the prune block *above* the
+    /// reload — so the invariant that a restore lands on the live
+    /// app had no net at all. That is the defect a user meets
+    /// immediately: files replaced, app unchanged until relaunch.
+    ///
+    /// The gap is the probe because it can only arrive one way.
+    /// `restoreSetup` resets `tiler.settings` to defaults BEFORE
+    /// the reload, so a non-default gap in the live tiler proves
+    /// `loadConfig` ran and read the incoming sidecar.
+    @Test("The restore lands on the running app, not just on disk")
+    func theRestoreIsApplied() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+
+        var config = GuiConfig()
+        config.spaces = [SpaceID("work")]
+        config.settings.gapsGlobal.outer.top = 42
+        core.restoreSetup(
+            from: SetupBundle(
+                writtenBy: "0.9.6",
+                config: config,
+                profiles: [],
+                palettes: []
+            ),
+            trash: hardDelete
+        )
+
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 42)
+    }
+
+    @Test("Space modes and pins come back, not just the space list")
+    func perSpaceStateIsApplied() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+
+        var config = GuiConfig()
+        config.spaces = [SpaceID("work"), SpaceID("play")]
+        config.spaceModes = [
+            SpaceID("work"): .monocle, SpaceID("play"): .grid,
+        ]
+        config.mainSpaces = [SpaceID("work")]
+        core.restoreSetup(
+            from: SetupBundle(
+                writtenBy: "0.9.6",
+                config: config,
+                profiles: [],
+                palettes: []
+            ),
+            trash: hardDelete
+        )
+
+        // The hand-rolled prune this replaced set none of these:
+        // it ensured the spaces and stopped, so a restored setup
+        // came back with every space on the default layout and no
+        // Main role — right list, wrong everything else.
+        #expect(
+            core.state.workspaces[SpaceID("work")]?.mode == .monocle
+        )
+        #expect(
+            core.state.workspaces[SpaceID("play")]?.mode == .grid
+        )
+        #expect(core.mainSpaces == [SpaceID("work")])
+    }
+
+    @Test("A space named only by its mode is kept, not pruned")
+    func spacesReachableOnlyByModeSurvive() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+
+        var config = GuiConfig()
+        // Deliberately NOT in `spaces` — only `spaceModes` names
+        // it. The replaced prune took `config.spaces` as the whole
+        // survivor set, so this space was written to disk and then
+        // immediately pruned out of live: present in the backup,
+        // absent from the running app.
+        config.spaces = [SpaceID("work")]
+        config.spaceModes = [SpaceID("solo"): .floating]
+        core.restoreSetup(
+            from: SetupBundle(
+                writtenBy: "0.9.6",
+                config: config,
+                profiles: [],
+                palettes: []
+            ),
+            trash: hardDelete
+        )
+
+        let live = Set(core.state.workspaces.allSpaces.map(\.id))
+        #expect(live.contains(SpaceID("solo")))
+        #expect(live.contains(SpaceID("work")))
+    }
+
     @Test("Restore reports success when every file was removed")
     func reportsWhetherItCleared() throws {
         let core = makeTestCore()
