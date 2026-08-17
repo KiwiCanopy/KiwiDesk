@@ -13,7 +13,7 @@ let package = Package(
     // the CI toolchain ("a prebuild command cannot use executables
     // built from source"), and its rules were advisory only.
     targets: [
-        // Vendored Lua 5.4 (unmodified upstream C sources).
+        // Vendored Lua 5.5 (unmodified upstream C sources).
         .target(
             name: "CLua",
             path: "Vendor/CLua",
