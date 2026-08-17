@@ -93,6 +93,46 @@ struct PresetPreviewSheetTests {
         )
     }
 
+    /// The width arithmetic, asserted at column counts the sheet
+    /// does NOT ship — with `tileWidth`, `gutter` and `pad` all
+    /// `static let`s, no assertion over the shipped four could tell
+    /// a derivation from a literal that agrees with it today
+    /// (4b's `slotWidth` lesson).
+    @Test("the sheet's width is the grid's arithmetic")
+    func widthIsDerivedFromTheGrid() {
+        let sheet = PresetPreviewSheet.self
+        // Each extra column adds one tile plus one gutter, at
+        // every count — the property, not the shipped value.
+        for columns in 1...7 {
+            #expect(
+                sheet.width(forColumns: columns + 1)
+                    - sheet.width(forColumns: columns)
+                    == sheet.tileWidth + sheet.gutter
+            )
+        }
+        // One column is a tile between two paddings, no gutter.
+        #expect(
+            sheet.width(forColumns: 1)
+                == sheet.tileWidth + 2 * sheet.pad
+        )
+        #expect(sheet.width(forColumns: 0) == 2 * sheet.pad)
+    }
+
+    /// Four columns is a claim about the narrowest window, so it is
+    /// asserted against that window rather than restated.
+    @Test("the column count is the most the window can host")
+    func columnCountFitsTheNarrowestWindow() {
+        let fits = PresetPreviewSheet.width(
+            forColumns: PresetPreviewSheet.columns
+        )
+        #expect(fits <= SettingsWidthClass.minimum)
+        // …and it is the MOST that fits: one more would not.
+        let oneMore = PresetPreviewSheet.width(
+            forColumns: PresetPreviewSheet.columns + 1
+        )
+        #expect(oneMore > SettingsWidthClass.minimum)
+    }
+
     /// `.panel` is 240 pt tall and pane-filling; Command Center
     /// draws ten models, so a sheet of panels would be metres
     /// long. `.tile` at its own size is 1.8× the factor the card

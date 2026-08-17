@@ -72,6 +72,29 @@ struct PresetPreviewSheet: View {
     /// `PresetPreviewSheetTests` asserts the two are equal, so the
     /// fallback cannot start standing in for a moved constant.
     static let tileWidth = SchematicScale.tile.width ?? 132
+    static let gutter: CGFloat = 12
+    static let pad: CGFloat = 12
+
+    /// The content width that fits exactly `columns` tiles.
+    ///
+    /// The sheet's width is DERIVED from this rather than picked:
+    /// the grid's job is comparison, and a sheet whose column
+    /// count changes as the window resizes makes two presets look
+    /// different for a reason that is not about them.
+    static func width(forColumns columns: Int) -> CGFloat {
+        CGFloat(columns) * tileWidth
+            + CGFloat(max(columns - 1, 0)) * gutter
+            + 2 * pad
+    }
+
+    /// Four, which is what the arithmetic allows at the narrowest
+    /// window this app has. `SettingsWidthClass.minimum` is 720,
+    /// and five columns need 732 — so five would be a width the
+    /// sheet could not always have, and the column count would
+    /// drop on a narrow desk. Four fits everywhere, and every
+    /// shipped preset puts at most four Spaces on one screen, so
+    /// at four columns each screen group is exactly one row.
+    static let columns = 4
 
     private var plan: PresetPreviewPlan {
         PresetPreviewPlan(layout: layout, liveSizes: liveSizes)
@@ -85,15 +108,36 @@ struct PresetPreviewSheet: View {
             Divider()
             footer
         }
-        // The sheet states its own size. It compares no window
-        // width, so it adds no second derivation beside
-        // `SettingsWidthClass`, and the ruled narrowing order
-        // does not reach it: a sheet is not the settings form.
+        // The sheet states its own size, and states it as
+        // arithmetic over the grid it holds.
+        //
+        // **Width is FIXED at four columns.** Not a range: the
+        // grid exists to be compared across presets, and a column
+        // count that follows the window would redraw the same
+        // preset differently on two desks. Four is the most the
+        // narrowest window can host (see `columns`), and it makes
+        // every shipped preset's screen group exactly one row.
+        //
+        // **Height grows, bounded.** The tall case is one row per
+        // screen plus the header and footer, which lands near the
+        // ideal below — so a preset fits without scrolling on any
+        // ordinary window, and the `ScrollView` above is left for
+        // a `Starter` derived from more screens than the catalog
+        // plans for. The max stops it short of filling the window,
+        // which is the full-page treatment #859 refused: a sheet
+        // that covers everything loses the grid you were comparing
+        // against.
+        //
+        // It reads no window size to do this. A percentage of the
+        // window would be a second measurement site — the drift
+        // `SettingsWidthClass` exists to end — and a bounded ideal
+        // gets the same picture without one.
         .frame(
-            minWidth: 520,
-            idealWidth: 640,
-            minHeight: 380,
-            idealHeight: 520
+            minWidth: Self.width(forColumns: Self.columns),
+            maxWidth: Self.width(forColumns: Self.columns),
+            minHeight: 420,
+            idealHeight: 600,
+            maxHeight: 780
         )
         .background(SettingsTheme.card)
     }
@@ -116,7 +160,7 @@ struct PresetPreviewSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(Self.pad)
     }
 
     /// The same key the card's badge is authored with — one badge,
@@ -134,7 +178,7 @@ struct PresetPreviewSheet: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(Self.pad)
     }
 
     /// One screen's heading over its spaces.
@@ -160,19 +204,21 @@ struct PresetPreviewSheet: View {
             LazyVGrid(
                 columns: tileColumns,
                 alignment: .leading,
-                spacing: 12
+                spacing: Self.gutter
             ) {
                 ForEach(group.slots) { tile($0) }
             }
         }
     }
 
+    /// `.top` rather than `.topLeading`: the cells centre their
+    /// pictures, for the reason `tile(_:)` states.
     private var tileColumns: [GridItem] {
         [
             GridItem(
                 .adaptive(minimum: Self.tileWidth),
-                spacing: 12,
-                alignment: .topLeading
+                spacing: Self.gutter,
+                alignment: .top
             )
         ]
     }
@@ -180,6 +226,19 @@ struct PresetPreviewSheet: View {
     /// One space: its schematic, then the layout's name under it —
     /// the pairing `LayoutStrip` already draws, so a mode named
     /// beside a schematic reads the same in both places.
+    ///
+    /// **CENTRED, and that is not a preference.** `SchematicCanvas`
+    /// ends in `.frame(maxWidth: .infinity)` with no alignment
+    /// because a schematic is a standalone illustration — its own
+    /// docstring rules that, against the left-aligned treatment a
+    /// preview beside its controls gets. So the canvas centres the
+    /// mini-screen inside whatever cell it is given, and a
+    /// leading-aligned label under it lands at the CELL's edge
+    /// rather than the picture's: the glyph hung ~14 pt left of
+    /// the frame it was labelling (owner eye-confirm, 2026-08-17).
+    /// Centring the stack is what `LayoutStrip` does with the same
+    /// pair, and it is the only arrangement that survives the
+    /// canvas being greedy.
     ///
     /// Nothing here overrides accessibility. `SchematicCanvas`
     /// gives the drawing its own label, and naming this stack
@@ -189,7 +248,7 @@ struct PresetPreviewSheet: View {
     private func tile(
         _ slot: PresetPreviewPlan.Slot
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(spacing: 4) {
             LayoutSchematicView(
                 mode: slot.mode,
                 settings: layout.settings,
@@ -215,7 +274,7 @@ struct PresetPreviewSheet: View {
                 .kiwiProminentButton()
         }
         .frame(maxWidth: .infinity)
-        .padding(12)
+        .padding(Self.pad)
     }
 
     private var doneLabel: String {
