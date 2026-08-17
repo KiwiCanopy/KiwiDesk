@@ -49,10 +49,15 @@ struct DetailPanelTests {
         // profile — the two differ exactly while a draft is
         // being edited with another profile selected, so a
         // column headed "Live preview" would be lying at the
-        // one moment it mattered. Three: the panel is dropped
-        // by WIDTH below 900, which is sound for a preview
-        // that is redundant with the controls beside it and
-        // unsound for a fact stated nowhere else.
+        // one moment it mattered. Three: the panel LOSES ITS
+        // COLUMN by width — docked above 1200, a floating card
+        // below that, an offer chip below 900 — sound for a
+        // preview redundant with the controls beside it and
+        // progressively worse for a fact stated nowhere else.
+        // This read "dropped by WIDTH below 900" until #859 cited
+        // it as authority; `SettingsPreviewForm` is total
+        // precisely so nothing is ever dropped (docs-steward,
+        // 2026-08-17).
         //
         // The good idea the panel route was reaching for — a
         // per-preset inspector — belongs in the CONTENT column

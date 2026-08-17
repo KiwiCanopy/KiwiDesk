@@ -84,6 +84,14 @@ struct ProfileScreenPips: View {
     static let gap: CGFloat = 3
     static let corner: CGFloat = 3
     static let glyph: CGFloat = 12
+    /// The "+N" chip's type size at THIS mount.
+    ///
+    /// Named rather than inlined because `PresetScreenCard` scales
+    /// it for the large mount (#859), and the two must move
+    /// together for the same reason the outline and the glyph do —
+    /// a chip that keeps 9 pt beside a 14 pt glyph stops being the
+    /// same picture one size up.
+    static let moreSize: CGFloat = 9
 
     /// The grammar, as a function of its inputs rather than of
     /// the shipped constants — with `slots` a `static let`, no
@@ -175,7 +183,7 @@ struct ProfileScreenPips: View {
     /// Counts the screens NOT drawn, never the total.
     private var moreChip: some View {
         Text(verbatim: "+\(hidden)")
-            .font(.system(size: 9, weight: .semibold))
+            .font(.system(size: Self.moreSize, weight: .semibold))
             .monospacedDigit()
             .foregroundStyle(SettingsTheme.ink3)
             .frame(

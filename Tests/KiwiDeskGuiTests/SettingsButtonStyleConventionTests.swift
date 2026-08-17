@@ -53,60 +53,16 @@ struct SettingsButtonStyleConventionTests {
         )
     }
 
-    /// Allowed unstyled action buttons that cannot take a style
-    /// for a documented reason.
-    private let unstyledExempt:
-        [String: (count: Int, needle: String, why: String)] = [
-            "SpacesSection+Customize.swift": (
-                9, "deleteConfirmActions",
-                "Returned to a confirmationDialog / contextMenu, "
-                    + "plus one icon affordance"
-            ),
-            "SpaceAssignmentChip.swift": (
-                3, "contextMenu", "Returned to a menu/contextMenu builder"
-            ),
-            "PaletteShelf.swift": (
-                3, "menuItem", "Returned to a contextMenu builder"
-            ),
-            // Moved out of `ColorField.swift` with the §2.1
-            // split (#678 Phase 4 pass 10). The needle changed
-            // with it and is the reason: the item is no longer
-            // written INSIDE the `contextMenu` builder — it is
-            // built once by `automaticItem` and handed to both
-            // that builder and `.accessibilityActions`, which is
-            // what stops the two routes from drifting. A button
-            // in a shared menu-item builder is as unstyleable as
-            // one written inline in the menu.
-            "ColorField+AutomaticMenu.swift": (
-                1, "automaticItem",
-                "Menu item from the builder shared by contextMenu "
-                    + "and accessibilityActions"
-            ),
-            "HeaderSearch.swift": (
-                1, "focusShortcut", "Invisible zero-size shortcut sink"
-            ),
-        ]
-
-    /// Styles applied to non-Button views (e.g. Link) that inflate
-    /// the style count.
-    private let stylesOnNonButtons:
-        [String: (count: Int, style: String, why: String)] = [
-            "GeneralSection+About.swift": (
-                1, ".buttonStyle(.plain)", "Link taking plain style"
-            ),
-            "PresetsSection.swift": (
-                1, ".buttonStyle(.plain)", "Picker taking plain style"
-            ),
-        ]
-
     @Test("every action button names its style")
     func actionButtonsNameTheirStyle() throws {
         var scannedFiles = 0
         var totalUnexcludedButtons = 0
+        var seenNames: Set<String> = []
 
         for file in try scannedSources() {
             scannedFiles += 1
             let name = file.lastPathComponent
+            seenNames.insert(name)
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
@@ -240,6 +196,54 @@ struct SettingsButtonStyleConventionTests {
             let exempt = unstyledExempt[name]?.count ?? 0
             let extraStyles = stylesOnNonButtons[name]?.count ?? 0
 
+            // **The entry's stated STYLE is read, not just its
+            // count.** guard-prover found the reason fields inert
+            // (2026-08-17): the arithmetic uses `count` alone, so
+            // swapping a file's extra style for a different one
+            // keeps this suite green while the entry's prose names
+            // a modifier the file no longer holds. That is exactly
+            // the defect #859 hand-corrected one commit earlier —
+            // an entry reading "Picker taking plain style" in a
+            // file with neither a picker nor a `.plain`, right for
+            // years because only the number was ever checked.
+            // `SettingsBorderedSealTests`' entries name a token
+            // that IS the reason; these now do too.
+            // The exemption's own NEEDLE has to still be findable,
+            // for the reason below: guard-prover found this map's
+            // third field read by nothing (2026-08-17), so an
+            // entry could argue at length about a symbol the file
+            // no longer contains. Presence rather than a count —
+            // a needle is a symbol name and appears at both its
+            // declaration and its use, unlike a style spelling.
+            if let entry = unstyledExempt[name] {
+                #expect(
+                    source.occurrences(of: entry.needle) > 0,
+                    Comment(
+                        rawValue:
+                            "\(name)'s exemption rests on "
+                            + "`\(entry.needle)` (\(entry.why)), "
+                            + "which the file no longer contains — "
+                            + "the count may still balance while "
+                            + "the reason has gone"
+                    )
+                )
+            }
+
+            if let entry = stylesOnNonButtons[name] {
+                #expect(
+                    source.occurrences(of: entry.style)
+                        == entry.count,
+                    Comment(
+                        rawValue:
+                            "\(name)'s exemption says \(entry.count)"
+                            + " × `\(entry.style)` (\(entry.why)), "
+                            + "which the file no longer matches — "
+                            + "the count may still balance while "
+                            + "the reason has gone stale"
+                    )
+                )
+            }
+
             totalUnexcludedButtons += unexcludedButtons
 
             #expect(
@@ -259,5 +263,26 @@ struct SettingsButtonStyleConventionTests {
 
         #expect(scannedFiles > 50, "Scan must look at Settings files")
         #expect(totalUnexcludedButtons > 0, "Scan must find action buttons")
+
+        // An exemption for a DELETED file leaves dead prose: both
+        // maps are read as `map[name]` per scanned file, so a
+        // rename reds through the arithmetic while an outright
+        // deletion is never looked up (guard-prover, 2026-08-17).
+        // Only the keys' side can see that.
+        let exemptedFiles =
+            Set(unstyledExempt.keys)
+            .union(Set(stylesOnNonButtons.keys))
+        for name in exemptedFiles {
+            #expect(
+                seenNames.contains(name),
+                Comment(
+                    rawValue:
+                        "\(name) is exempted here and was not "
+                        + "scanned — the file is gone or moved out "
+                        + "of the roots, and its exemption now "
+                        + "argues about nothing"
+                )
+            )
+        }
     }
 }

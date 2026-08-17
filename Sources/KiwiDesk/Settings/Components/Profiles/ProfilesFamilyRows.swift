@@ -174,7 +174,10 @@ struct ProfilesFamilyRows {
                 bound: boundDesktops
             )
             .map(ProfilesRowInstance.desktop)
-        case .presetsApply:
+        case .presetsApply, .presetsLayouts:
+            // Both of the card's actions expand per preset, so
+            // they share one arm — the instance set is the card,
+            // not the button.
             return presets.map {
                 ProfilesRowInstance.preset($0.name)
             }
