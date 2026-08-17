@@ -429,7 +429,14 @@ const jsonLd = [
         {/* Simple-mode hero copy */}
         <div class="hero__mode hero__mode--simple">
           <span class="hero__kicker">{t.hero_kicker}</span>
-          <h1>{t.hero_title}</h1>
+          {/* The page's ONE <h1>. Both modes' heroes ship in the
+               DOM and CSS hides the inactive one, so a second <h1>
+               here would be a second top-level heading on every
+               crawl — the Nerd hero below is an <h2> for exactly
+               that reason (#868). Both take .hero__title, which
+               carries the whole look, so the demotion is
+               semantic only. */}
+          <h1 class="hero__title">{t.hero_title}</h1>
           <p class="hero__sub">{t.hero_sub}</p>
           <div class="hero__cta">
             <a class="btn btn--primary" href={`${homeHref}guide/#getting-started`}>
@@ -452,7 +459,8 @@ const jsonLd = [
         {/* Nerd-mode hero copy */}
         <div class="hero__mode hero__mode--dev">
           <span class="hero__kicker">{t.hero_dev_kicker}</span>
-          <h1>{t.hero_dev_title}</h1>
+          {/* <h2>, not <h1> — see the Simple hero above (#868). */}
+          <h2 class="hero__title">{t.hero_dev_title}</h2>
           <p class="hero__sub" set:html={t.hero_dev_sub}></p>
           <div class="hero__cta">
             <a class="btn btn--primary" href="#start" data-install-bridge>
@@ -674,21 +682,6 @@ const jsonLd = [
       </div>
     </section>
 
-    {/* ============ Maker quote (Nerd only) ============ */}
-    <section class="dev-only dev-reveal" id="maker-quote-dev">
-      <div class="wrap">
-        <blockquote class="quote-card quote-card--dev">
-          <p>{oq}{t.quote_dev}{cq}</p>
-          <footer class="quote-card__byline">
-            <a class="quote-card__byline-main" href={makerProfile}
-              target="_blank" rel="noopener">
-              {t.quote_byline_dev_main}
-            </a>
-          </footer>
-        </blockquote>
-      </div>
-    </section>
-
     {/* ============ Layouts (Nerd only) ============ */}
     <section class="tint dev-only dev-reveal" id="layouts">
       <div class="wrap">
@@ -763,6 +756,27 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
 <span class="cmt">{t.cli_cmt}</span>
 <span class="prompt">$</span> kiwidesk subscribe space_change</code></pre>
         </div>
+      </div>
+    </section>
+
+    {/* ============ Maker quote (Nerd only) ==============
+         Sits AFTER the Lua and CLI sections rather than between
+         the overview and them: a Nerd reader came for
+         "Script it in Lua" and "Drive it from the terminal", and
+         a personal note is what lands once they have seen the
+         thing itself, not what should interrupt the run up to
+         it. */}
+    <section class="dev-only dev-reveal" id="maker-quote-dev">
+      <div class="wrap">
+        <blockquote class="quote-card quote-card--dev">
+          <p>{oq}{t.quote_dev}{cq}</p>
+          <footer class="quote-card__byline">
+            <a class="quote-card__byline-main" href={makerProfile}
+              target="_blank" rel="noopener">
+              {t.quote_byline_dev_main}
+            </a>
+          </footer>
+        </blockquote>
       </div>
     </section>
 
