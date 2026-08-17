@@ -14,6 +14,10 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case advancedDiscardArrangement =
         "(action) general.advanced.discard_arrangement"
     case advancedResetAll = "(action) general.advanced.reset_all"
+    case advancedExportBackup =
+        "(action) general.advanced.backup.export"
+    case advancedRestoreBackup =
+        "(action) general.advanced.backup.restore"
     case onboardingDiscoveryShown = "UserDefaults.onboarding.discoveryShown"
     case iconPickerRecents = "UserDefaults.IconPicker.recents"
     case onboardingOpenAtLogin = "onboarding.openAtLogin"
@@ -45,7 +49,8 @@ extension GeneralKey {
                 gate: .runtime(.autoStartLoginOff)
             )
         case .advancedConfigFile, .advancedEditLua,
-            .advancedDiscardArrangement, .advancedResetAll:
+            .advancedDiscardArrangement, .advancedResetAll,
+            .advancedExportBackup, .advancedRestoreBackup:
             return .row(.general, .advanced, .showMore)
         case .onboardingDiscoveryShown:
             // The table writes lua-only, but a UserDefaults
@@ -98,6 +103,18 @@ extension GeneralKey {
                 "general.advanced.reset_all",
                 caption: "general.advanced.reset_all.caption",
                 help: "general.advanced.reset_all.help"
+            )
+        case .advancedExportBackup:
+            return .text(
+                "general.advanced.backup.export",
+                caption: "general.advanced.backup.export.caption",
+                help: "general.advanced.backup.export.help"
+            )
+        case .advancedRestoreBackup:
+            return .text(
+                "general.advanced.backup.restore",
+                caption: "general.advanced.backup.restore.caption",
+                help: "general.advanced.backup.restore.help"
             )
         case .onboardingDiscoveryShown, .iconPickerRecents,
             .onboardingOpenAtLogin:

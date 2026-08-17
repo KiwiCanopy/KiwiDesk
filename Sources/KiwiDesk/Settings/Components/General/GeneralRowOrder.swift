@@ -32,14 +32,20 @@ enum GeneralRowOrder {
         .general(.about),
     ]
 
-    /// Advanced's five, restart first, exactly as the digest
-    /// enumerates them behind "Show 5 more ▾".
+    /// Advanced's rows, restart first — the digest's five plus
+    /// #606's two. Drawn in ascending severity, which is the
+    /// drawer's stated invariant (`GeneralSection+Reset`): the
+    /// read-only export sits with the tools, and the restore is
+    /// the last rung because it replaces the palettes even Reset
+    /// All leaves standing.
     static let advanced: [SettingKey] = [
         .general(.advancedRestartOnCrash),
         .general(.advancedConfigFile),
         .general(.advancedEditLua),
+        .general(.advancedExportBackup),
         .general(.advancedDiscardArrangement),
         .general(.advancedResetAll),
+        .general(.advancedRestoreBackup),
     ]
 
     /// Every row this area draws, by container.

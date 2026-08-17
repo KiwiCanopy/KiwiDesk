@@ -67,8 +67,19 @@ extension SettingsButtonStyleConventionTests {
 
     var stylesOnNonButtons: [String: StyleNote] {
         [
+            // Two now, since #570 put the Release Notes link beside
+            // the support ask. Both are `Link`s, which is why they
+            // are exempt at all rather than owing
+            // `settingsActionButton()`: a `Link` is not a `Button`
+            // and cannot take the seal. They are deliberately NOT
+            // styled alike beyond this — the support link keeps the
+            // heart and `.callout`, the notes link takes the plainer
+            // caption treatment, so the card's one ask stays
+            // distinguishable from an informational pointer.
             "GeneralSection+About.swift": (
-                1, ".buttonStyle(.plain)", "Link taking plain style"
+                2, ".buttonStyle(.plain)",
+                "Two Links taking plain style — the Release Notes "
+                    + "pointer and the support ask"
             ),
             // Moved from `PresetsSection.swift` with the card
             // itself in #859. The reason is also CORRECTED: the

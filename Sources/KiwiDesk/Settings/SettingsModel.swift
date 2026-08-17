@@ -325,9 +325,9 @@ final class SettingsModel: ObservableObject {
     /// file-backed, keyed off the config directory — built once
     /// since the directory never changes for a session. Apply is
     /// in `SettingsModel+Palette`.
-    lazy var paletteStore = PaletteStore(
-        directory: core.configDirectory
-    )
+    /// What the last restore could not take, nil when it took
+    /// everything (#606).
+    @Published var lastRestoreOutcome: RestoreOutcome?
 
     /// Whether the raw Lua editor is currently shown.
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }

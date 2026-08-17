@@ -56,6 +56,49 @@ struct ResetEscapeHatchTests {
         #expect(!core.sleepWake.holdsSnapshot)
     }
 
+    /// The palettes survive a reset, which is the whole reason
+    /// the action is named "Reset All **Settings**" rather than a
+    /// total reset — `GeneralSection+Reset`'s doc comment and
+    /// `docs/design-decisions.md` both rest the naming on it.
+    ///
+    /// It needs its own assertion since #606: the exemption used
+    /// to be structural, a hard-coded two-element list, and is now
+    /// an argument the caller passes. `[.guiConfig, .profiles]` →
+    /// `ConfigArtifact.allCases` is a one-token edit that deletes
+    /// a user's whole palette library, and nothing in this suite
+    /// mentioned palettes at all (`code-reviewer`, 2026-08-17).
+    @Test("Reset keeps the palette library, which names the action")
+    func resetKeepsPalettes() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-reset-pal-\(UUID().uuidString)"
+            )
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let core = makeTestCore(configDirectory: dir)
+        core.onLog = { _ in }
+        try core.guiConfigStore.save(GuiConfig())
+        try core.paletteLibrary.save(
+            ColorPalette(
+                name: "Mine",
+                colors: [ColorPaletteKeys.all[0]: "#112233"]
+            )
+        )
+
+        core.resetAllSettings(trash: {
+            try FileManager.default.removeItem(at: $0)
+        })
+
+        #expect(
+            core.paletteLibrary.userPalettes().map(\.name)
+                == ["Mine"]
+        )
+        #expect(
+            FileManager.default.fileExists(
+                atPath: core.paletteLibrary.url.path
+            )
+        )
+    }
+
     @Test("Reset reseeds first-launch state and keeps init.lua")
     func resetReseedsFirstLaunch() throws {
         let dir = FileManager.default.temporaryDirectory

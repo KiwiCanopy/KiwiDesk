@@ -309,6 +309,32 @@ the KiwiDesk icon opens the quick menu where you can:
     "not saved to profile" subtitle.
   - Click **Save Current Layout to Profile** below the separator to persist
     the new layout (adopts the whole live state into the active profile).
+  - **With more than one screen connected, the list nests one level
+    deeper**: **All Screens** first, then a row per screen named
+    after that screen, in the order the screens sit on your desk
+    (left to right, then top to bottom). Open a screen's row and
+    the checkmark inside marks the layout the Space showing there
+    is running, so the menu also answers "what is each screen on
+    right now" — which previously meant focusing a window on each
+    screen in turn and reopening the menu. **All Screens** applies
+    your pick everywhere at once, which is what plugging into a
+    dock usually wants; it carries no checkmark of its own, because
+    "every screen is already running this" is a different claim
+    from any one screen's layout — the per-screen rows below it are
+    where you read the current state.
+
+    A layout belongs to a **Space**, not to a screen; each screen
+    simply has one Space showing on it, so a screen's row sets the
+    layout of whatever is showing there. Drift is per Space too, so
+    the "not saved to profile" subtitle appears inside each screen's
+    own list, on that screen's current layout, rather than once at
+    the top.
+
+    With a single screen the list stays flat, exactly as before —
+    the extra level would only add a click to the control you reach
+    for most. **Save Current Layout to Profile** stays a single
+    action on the active Space and the profile as a whole; it is not
+    per screen.
 - **Switch Profile**: Load any saved profile into the current layout.
   A non-clickable **Profile: ‹name›** line appears above the actions
   naming the profile you are currently on — shown only when there is
@@ -469,7 +495,8 @@ row on is equivalent to running that command.
 
 ## What This Install Holds
 
-**General ▸ About** states four counts under the version: how
+**General ▸ About** states four counts, in their own card above
+the version: how
 many **profiles**, **Spaces**, **shortcuts** and **app rules**
 this install carries. Shortcuts are counted across every
 keybinding layer, not just the active one — a chord bound only in
@@ -479,6 +506,18 @@ They are stated about the install, not about **Reset All
 Settings…**: what a reset deletes is spelled out under that
 button and again in its confirmation, which is where you are when
 you need it.
+
+## What Changed in This Version
+
+**General ▸ About** shows the version you are running, and
+**Release Notes** beneath it opens the release history in your
+browser — every version's notes, not just the current one, so you
+can read back through what changed while you were on an older
+build.
+
+It opens in a browser rather than in a window of KiwiDesk's own
+because the notes live on GitHub, which renders them with
+formatting and pictures that an in-app reader would only flatten.
 
 ## GUI Language
 
@@ -516,10 +555,76 @@ preferences only. Choosing **System** removes the stored value
 entirely, so "follow macOS" is the true default with nothing left
 behind.
 
+## Moving to Another Mac: Backups
+
+**General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
+holding your settings, every profile, and your saved color
+palettes. Carry it to another Mac, open Settings there, and
+**Restore from Backup…** puts the setup back.
+
+Your `init.lua` is **not** included, deliberately: it is code you
+wrote, and a backup that quietly replaced it would be claiming a
+file KiwiDesk does not manage. Nor is the remembered window
+arrangement, which describes one Mac's session rather than
+anything you chose. On a Lua-owned setup the export still carries
+your profiles and palettes, so it is worth taking either way.
+
+It is a **one-time snapshot, not a service** — KiwiDesk keeps no
+backups of its own, so export again whenever you want a current
+copy. Keeping two Macs continuously in step is a different job
+and needs no feature; see
+[The gui.json File](#the-guijson-file) for the folder-sync
+approach that does it.
+
+Restoring **replaces** — it does not merge. Your current
+settings, profiles and palettes are replaced by the backup's, and
+anything you have not saved yet is discarded, which is why it
+asks first. What it replaces goes to the **Trash**, so one drag
+undoes it.
+
+The restored setup takes effect straight away — no relaunch. Two
+things happen on the way that are worth knowing about on a Mac
+you are moving *into*:
+
+- The **remembered window arrangement on that Mac is forgotten**,
+  the same way [Discard Saved Window
+  Arrangement](#when-things-act-up-discard--reset) forgets it. It
+  named Spaces the restore has just replaced, so keeping it would
+  file new windows into Spaces that no longer exist.
+- KiwiDesk then picks the profile matching the **screens actually
+  connected here**, not the one the other Mac happened to be on —
+  which is the point of carrying a setup between two different
+  desks. A macOS Desktop bound to a profile still wins over
+  screen matching, as it always does.
+
+Some files are refused before you are asked anything at all: one
+that is not a KiwiDesk backup, one written by a **newer**
+KiwiDesk than the copy you are restoring into (update that copy
+first), one that would restore nothing — so an empty backup can
+never be mistaken for a wipe you asked for — and one carrying
+settings when *this* Mac's settings come from your `init.lua`,
+since a backup's settings cannot be applied where Lua owns them.
+A backup with only profiles and palettes restores onto such a Mac
+normally.
+
+**Exporting** refuses in one case too: if KiwiDesk cannot read
+this Mac's own settings file, it says so rather than writing a
+backup with every setting missing.
+
+If a restore takes almost everything, it tells you what it left:
+a profile whose file cannot be read, or a colour palette that
+would shadow a built-in one, is skipped and counted rather than
+silently dropped. Everything else still lands.
+
+It sits at the very end of **General ▸ Advanced**, after Reset
+All Settings, because it is the most far-reaching action there:
+Reset All leaves your palettes alone, and a restore replaces
+those too.
+
 ## When Things Act Up: Discard & Reset
 
-The tail of **General ▸ Advanced** holds two escape hatches, in
-ascending severity:
+Below the export and above the restore, **General ▸ Advanced**
+holds two escape hatches, in ascending severity:
 
 - **Discard Saved Window Arrangement** — clears the arrangement
   KiwiDesk remembered from your last session or wake (the hidden
@@ -556,7 +661,9 @@ hand, but it is documented here for backup and transparency.
 > everywhere the folder reaches. Machine-specific state doesn't
 > travel with it: grant Accessibility permission on each Mac
 > separately, and expect display layout and macOS Desktops to
-> resolve against whatever is actually connected there.
+> resolve against whatever is actually connected there. If a
+> one-time copy is what you want instead, that is
+> [Moving to Another Mac: Backups](#moving-to-another-mac-backups).
 
 **Top-level structure:**
 

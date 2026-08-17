@@ -30,14 +30,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         () -> (
             active: String?, all: [String], broken: Set<String>
         ) = { (nil, [], []) }
-    /// Provider for active layout mode and active profile status.
-    var layoutInfoProvider:
-        () -> (
-            activeMode: LayoutMode?,
-            activeProfileName: String?,
-            savedModeForActiveSpace: LayoutMode?
-        ) = { (nil, nil, nil) }
-    var onSetLayoutMode: (LayoutMode) -> Void = { _ in }
+    /// What the Layout submenu draws from, fresh per open (#752).
+    var layoutInfoProvider: () -> LayoutMenuInfo = {
+        LayoutMenuInfo.empty
+    }
+    /// Applies `mode` to a space, or to the active space when the
+    /// id is nil — the one-argument `set_mode`.
+    var onSetLayoutMode: (LayoutMode, SpaceID?) -> Void = { _, _ in
+    }
     var onSaveLayoutToProfile: () -> Void = {}
 
     /// The menu-bar slot — injected so tests can build the

@@ -274,10 +274,45 @@ extension KiwiCore {
     /// would fake drift; an absent entry (a readable profile
     /// without the space) is the genuine `.bsp` default.
     public func savedModeForActiveSpace() -> LayoutMode? {
+        guard let space = activeSpace else { return nil }
+        // Expressed through the batch rather than beside it: the
+        // two carried the same `?? .bsp` default and the same
+        // unknown-vs-default distinction, kept in agreement by
+        // prose alone. `profiles.md` already rules that an
+        // unlisted mode should follow the screen rather than a
+        // fixed bsp (`SparseModeFallbackTests`), and that change
+        // would otherwise have to be made twice — with the menu
+        // showing phantom drift on whichever path was missed
+        // (`architect-reviewer`, 2026-08-17).
+        return savedModes(for: [space.id])[space.id]
+    }
+
+    /// Saved layout modes for `spaces` under the active profile,
+    /// read in **one** pass (#752).
+    ///
+    /// The quick menu asks about every connected screen's shown
+    /// space at once, and the single-space call above re-reads the
+    /// profile JSON per question — three screens would be three
+    /// file reads on every menu open. One read answers all of
+    /// them.
+    ///
+    /// A space **absent** from the returned dictionary is
+    /// "unknown", exactly as a nil from the call above is: no
+    /// active profile, or JSON that would not decode. A space
+    /// absent from a *readable* profile is the genuine `.bsp`
+    /// default and comes back as `.bsp` — so the two conditions
+    /// stay distinguishable, which is what keeps a phantom drift
+    /// off the menu.
+    public func savedModes(
+        for spaces: [SpaceID]
+    ) -> [SpaceID: LayoutMode] {
         guard let name = profiles.currentName,
-            let space = activeSpace,
             let profile = try? profiles.read(name: name)
-        else { return nil }
-        return profile.spaceModes[space.id] ?? .bsp
+        else { return [:] }
+        var modes: [SpaceID: LayoutMode] = [:]
+        for space in spaces {
+            modes[space] = profile.spaceModes[space] ?? .bsp
+        }
+        return modes
     }
 }

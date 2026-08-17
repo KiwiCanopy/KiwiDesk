@@ -105,6 +105,49 @@ change here:
 - Pre-release, single user: profile JSON needs no migration
   scripts — re-saving is the migration.
 
+## A new file in the config directory answers the backup question
+
+A backup carries an **allow-list, never a directory sweep**, and
+the register is `ConfigArtifact` — one case per file, answering
+where it lives, whether it travels, and why not when it does not.
+`SetupBundle`'s doc comment argues the reasoning; the enum is what
+the code reads. So **adding a file to `~/.config/KiwiDesk` owes a
+case there and an answer to "does this travel?" in the same change
+set** — a prose line alone leaves the code unchanged, and a case
+alone leaves the reason unrecorded.
+
+`travelsInABackup` is load-bearing rather than documentation:
+`exportSetup` and the restore's discard both read it, so flipping
+a case to `false` changes behaviour rather than only a test.
+
+**A change that breaks the decoded shape of anything the bundle
+carries bumps `SetupBundle.currentFormat` in the same change set.**
+Nothing can guard this, and it is the obligation the format
+integer rests on: `<=` is decoder tolerance rather than a
+compatibility shim, so an older backup is accepted — which is
+right, and which silently becomes a lie the first time a
+`GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
+actively encourages that rename, so the bump is the reader's
+responsibility here.
+
+`SetupBundleTests.theAllowListIsPinned` guards the bundle's own
+shape in both directions, by reflection over its stored
+properties: a property ADDED has to argue for itself, and one the
+hand-written composer OMITS reds too. Weaker forms of that guard
+were tried and proven blind — asserting the written file's keys
+alone misses the omission, and re-encoding the struct misses it as
+well, `JSONEncoder` omitting a nil Optional.
+
+What no guard can see is the step before: a **new store** whose
+file never became a `ConfigArtifact` at all. `SetupBundleArtifactTests`
+narrows it — the register is checked against what an export
+carries, and against a live config directory — but nothing can
+enumerate the files a future store will write, and the symptom is
+a user moving Macs and silently losing whatever it held. `palettes.json` is the worked case, and it
+nearly was that symptom: applying a palette writes its colours
+into `gui.json`, so the current *look* travelled while the saved
+*library* would have been left behind.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
