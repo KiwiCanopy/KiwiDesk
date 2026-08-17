@@ -33,10 +33,17 @@ struct LayoutMenuEnablementScanTests {
     /// exemption whose grounds have gone reds rather than
     /// balancing the count quietly — the idiom
     /// `SettingsBorderedSealTests` uses for `borderedExempt`.
+    /// `row` is the BINDING NAME in the builder, not prose — the
+    /// pairing above keys on it, so an exemption has to name the
+    /// thing it exempts.
     private static let statedByTheCaller:
         [(row: String, statedIn: String, needle: String)] = [
             (
-                row: "the Layout parent row",
+                // The Layout submenu's own parent row, which is
+                // added to the OUTER menu; that builder decides
+                // its enablement from the boot phase (#802), so
+                // stating it here would fight the caller.
+                row: "parent",
                 statedIn:
                     "Sources/KiwiDesk/StatusItemController+Menu.swift",
                 needle: "layout.isEnabled"
@@ -53,30 +60,89 @@ struct LayoutMenuEnablementScanTests {
         )
     }
 
-    @Test("Every constructed row states isEnabled, or names who does")
+    /// `let foo = NSMenuItem(` → "foo", once per construction.
+    private func constructedRows(_ source: String) -> [String] {
+        source.split(separator: "\n").compactMap { line in
+            guard line.contains("= NSMenuItem(") else { return nil }
+            return
+                line
+                .split(separator: "=")
+                .first?
+                .split(whereSeparator: \.isWhitespace)
+                .last
+                .map(String.init)
+        }
+    }
+
+    /// `foo.isEnabled =` → "foo", once per statement.
+    private func statedRows(_ source: String) -> [String] {
+        source.split(separator: "\n").compactMap { line in
+            guard let head = line.range(of: ".isEnabled") else {
+                return nil
+            }
+            return line[..<head.lowerBound]
+                .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+                .last
+                .map(String.init)
+        }
+    }
+
+    /// **Counted per ROW, never per file.**
+    ///
+    /// A file-level total is forgeable, and a `guard-prover` run
+    /// forged it (2026-08-17): adding `parent.isEnabled = true`
+    /// while deleting `entry.isEnabled = true` keeps a file total
+    /// balanced — 5 built, 4 stated + 1 exempt — while stripping
+    /// enablement from every clickable mode row in the menu. It
+    /// shipped 3429 tests green. Pairing each statement to the
+    /// binding it names is what stops one row paying for another.
+    @Test("Every constructed row states its OWN isEnabled")
     func everyRowStatesEnablement() throws {
         let source = try source(Self.builder)
-        // `.separator()` is not an `NSMenuItem(` construction and
-        // has no enablement to state, so it never enters the count.
-        let built = source.occurrences(of: "NSMenuItem(")
-        let stated = source.occurrences(of: ".isEnabled =")
+        // `.separator()` constructs no `NSMenuItem` and has no
+        // enablement to state, so it never enters the counts.
+        let built = constructedRows(source)
+        let stated = statedRows(source)
         #expect(
-            built > 0,
+            built.count > 0,
             "the scan found no rows at all — has the builder moved?"
         )
-        #expect(
-            stated + Self.statedByTheCaller.count == built,
-            Comment(
-                rawValue:
-                    "\(Self.builder) builds \(built) row(s) and "
-                    + "states isEnabled \(stated) time(s), with "
-                    + "\(Self.statedByTheCaller.count) exempted. "
-                    + "A row that states nothing is enabled by "
-                    + "default, which is what #802 costs once "
-                    + "autoenablesItems is off — state it, or add "
-                    + "an entry naming who states it."
+        let exempt = Set(Self.statedByTheCaller.map(\.row))
+        for name in Set(built) where !exempt.contains(name) {
+            let constructions = built.filter { $0 == name }.count
+            let statements = stated.filter { $0 == name }.count
+            #expect(
+                statements >= constructions,
+                Comment(
+                    rawValue:
+                        "`\(name)` is constructed \(constructions) "
+                        + "time(s) in \(Self.builder) and states "
+                        + "isEnabled \(statements) time(s). A row "
+                        + "that states nothing is enabled by "
+                        + "default, which is what #802 costs once "
+                        + "autoenablesItems is off — state it on "
+                        + "that row, or add an entry naming who "
+                        + "states it."
+                )
             )
-        )
+        }
+    }
+
+    @Test("The exempt row really is constructed here")
+    func exemptRowsExist() throws {
+        let built = Set(constructedRows(try source(Self.builder)))
+        for entry in Self.statedByTheCaller {
+            // An exemption for a row the builder no longer makes is
+            // a licence sitting open for whoever reuses the name.
+            #expect(
+                built.contains(entry.row),
+                Comment(
+                    rawValue:
+                        "`\(entry.row)` is exempted but no longer "
+                        + "constructed in \(Self.builder)"
+                )
+            )
+        }
     }
 
     @Test("Each exemption's own statement still exists")
