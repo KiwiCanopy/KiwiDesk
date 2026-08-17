@@ -348,6 +348,7 @@
   "general.advanced.backup.error.not_a_backup": "Esse arquivo não é um backup do KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Não foi possível restaurar",
   "general.advanced.backup.error.unreadable": "Não foi possível abrir esse arquivo. Ele pode ter sido movido, renomeado ou apagado.",
+  "general.advanced.backup.error.unreadable_settings": "O KiwiDesk não consegue ler o arquivo de ajustes deste Mac, então um backup ficaria sem os seus ajustes. Conserte o arquivo ou redefina os ajustes primeiro.",
   "general.advanced.backup.error.write_failed": "O KiwiDesk não conseguiu gravar “%1$@”. Tente outro lugar, como a sua Mesa.",
   "general.advanced.backup.export": "Exportar Backup do KiwiDesk…",
   "general.advanced.backup.export.caption": "Salva seus ajustes, perfis e paletas de cores em um arquivo à sua escolha. Não inclui o init.lua.",

@@ -348,6 +348,7 @@
   "general.advanced.backup.error.not_a_backup": "Diese Datei ist keine KiwiDesk-Sicherung.",
   "general.advanced.backup.error.restore_title": "Wiederherstellen nicht möglich",
   "general.advanced.backup.error.unreadable": "Diese Datei konnte nicht geöffnet werden. Vielleicht wurde sie verschoben, umbenannt oder gelöscht.",
+  "general.advanced.backup.error.unreadable_settings": "KiwiDesk kann die Einstellungsdatei dieses Macs nicht lesen, eine Sicherung würde deine Einstellungen also auslassen. Repariere die Datei oder setze die Einstellungen zuerst zurück.",
   "general.advanced.backup.error.write_failed": "KiwiDesk konnte „%1$@“ nicht schreiben. Versuche einen anderen Ort, zum Beispiel deinen Schreibtisch.",
   "general.advanced.backup.export": "KiwiDesk-Sicherung exportieren…",
   "general.advanced.backup.export.caption": "Speichert deine Einstellungen, Profile und Farbpaletten in eine Datei deiner Wahl. init.lua ist nicht enthalten.",

@@ -348,6 +348,7 @@
   "general.advanced.backup.error.not_a_backup": "Этот файл не является резервной копией KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Не удалось восстановить",
   "general.advanced.backup.error.unreadable": "Не удалось открыть этот файл. Возможно, он был перемещён, переименован или удалён.",
+  "general.advanced.backup.error.unreadable_settings": "KiwiDesk не может прочитать файл настроек этого компьютера, поэтому в резервную копию не попадут твои настройки. Сначала исправь файл или сбрось настройки.",
   "general.advanced.backup.error.write_failed": "KiwiDesk не смог записать «%1$@». Попробуй другое место, например Рабочий стол.",
   "general.advanced.backup.export": "Экспортировать резервную копию KiwiDesk…",
   "general.advanced.backup.export.caption": "Сохраняет твои настройки, профили и цветовые палитры в выбранный файл. init.lua не включается.",
