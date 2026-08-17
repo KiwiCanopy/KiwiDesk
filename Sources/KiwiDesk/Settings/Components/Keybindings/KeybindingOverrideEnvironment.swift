@@ -80,7 +80,8 @@ extension View {
                     ? L(
                         "shortcuts.row.inherited.axhint",
                         "Inherited from the base shortcuts. "
-                            + "Record a key here to override it."
+                            + "%1$@ a key here to override it.",
+                        L("key_recorder.record", "Record")
                     )
                     : ""
             )

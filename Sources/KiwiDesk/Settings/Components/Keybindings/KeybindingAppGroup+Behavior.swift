@@ -78,7 +78,7 @@ extension ApplicationsGroup {
     private var behaviorHelp: String {
         L(
             "shortcuts.app_behavior.help",
-            "**Open or Focus** brings the app's existing window to "
+            "**%1$@** brings the app's existing window to "
                 + "the current Space, or launches it if the app "
                 + "isn't running. Pressing again while that window "
                 + "is focused cycles through the app's other "
@@ -86,9 +86,14 @@ extension ApplicationsGroup {
                 + "pressing the shortcut restores its most "
                 + "recently minimized window; otherwise "
                 + "minimized windows stay in the Dock."
-                + "\n\n**Open New** always launches a "
+                + "\n\n**%2$@** always launches a "
                 + "fresh instance, even when the app is already "
-                + "open."
+                + "open.",
+            L(
+                "shortcuts.app_behavior.open_or_focus",
+                "Open or Focus"
+            ),
+            L("shortcuts.app_behavior.open_new", "Open New")
         )
     }
 

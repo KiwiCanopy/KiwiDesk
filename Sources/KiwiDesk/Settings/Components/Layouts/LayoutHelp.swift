@@ -10,11 +10,13 @@ enum LayoutHelp {
     @MainActor static var splitStrategy: String {
         L(
             "layout_params.split_strategy.help",
-            "**Longest side** — Cuts whichever side of the "
+            "**%1$@** — Cuts whichever side of the "
                 + "region is longer, keeping new windows close "
-                + "to square.\n**Alternating** — Alternates "
+                + "to square.\n**%2$@** — Alternates "
                 + "left/right and top/bottom cuts as the layout "
-                + "gets deeper, regardless of shape."
+                + "gets deeper, regardless of shape.",
+            L("layout_params.longest_side", "Longest side"),
+            L("layout_params.alternating", "Alternating")
         )
     }
 
@@ -45,11 +47,13 @@ enum LayoutHelp {
     @MainActor static var stackOverflow: String {
         L(
             "layout_params.overflow.stack.help",
-            "**Cascade overflow** — Keeps as many windows "
+            "**%1$@** — Keeps as many windows "
                 + "fully tiled as fit, then cascades only the "
-                + "extra ones at the bottom.\n**Cascade all** — "
+                + "extra ones at the bottom.\n**%2$@** — "
                 + "Cascades the whole stack, showing a sliver "
-                + "of every window."
+                + "of every window.",
+            L("layout_params.cascade_overflow", "Cascade overflow"),
+            L("layout_params.cascade_all", "Cascade all")
         )
     }
 
@@ -108,13 +112,15 @@ enum LayoutHelp {
             "layout_params.overflow.track.help",
             "How the far-edge **overflow track** — which "
                 + "collects the tracks that don't fit side by "
-                + "side — packs its windows.\n**Cascade all** "
+                + "side — packs its windows.\n**%1$@** "
                 + "(the default) — piles every window from the "
-                + "top.\n**Cascade overflow** — tiles what fits, "
+                + "top.\n**%2$@** — tiles what fits, "
                 + "piles the rest.\nAn ordinary track that holds "
                 + "more windows than fit always overflows this "
                 + "second way; only the far-edge track is "
-                + "configurable."
+                + "configurable.",
+            L("layout_params.cascade_all", "Cascade all"),
+            L("layout_params.cascade_overflow", "Cascade overflow")
         )
     }
 
@@ -150,9 +156,10 @@ enum LayoutHelp {
             "scroll_grid.animate_focus_shifts.help",
             "Moves windows smoothly when focus changes in a "
                 + "Scrolling Space. Turn this off to move the "
-                + "layout immediately. Scroll speed sets how long "
+                + "layout immediately. %1$@ sets how long "
                 + "the movement takes and has no effect while "
-                + "animation is off."
+                + "animation is off.",
+            L("scroll_grid.scroll_speed", "Scroll speed")
         )
     }
 

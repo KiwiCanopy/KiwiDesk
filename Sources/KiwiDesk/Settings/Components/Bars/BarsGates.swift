@@ -143,7 +143,8 @@ enum BarsGateHelp {
         case .spaceBarOff:
             return L(
                 "space_bar.disabled.help",
-                "Turn on Show Space Bar to edit these settings."
+                "Turn on %1$@ to edit these settings.",
+                L("space_bar.enabled", "Show Space Bar")
             )
         case .gapOnly:
             // The indicator style is INTERPOLATED from the picker

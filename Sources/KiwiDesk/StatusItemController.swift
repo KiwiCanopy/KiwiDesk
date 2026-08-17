@@ -200,7 +200,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 tooltip: L(
                     "menu.status.config_error.tooltip",
                     "Parts of the configuration could not be "
-                        + "loaded — open Config Issues for details."
+                        + "loaded — open %1$@ for details.",
+                    L("config_issues.title", "Config Issues")
                 )
             )
             return

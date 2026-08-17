@@ -212,11 +212,12 @@ struct MonitorsSection: View {
         L(
             "monitors.not_connected.caption",
             "This profile's monitors aren't attached "
-                + "right now, so its Space placement "
+                + "right now, so its %1$@ "
                 + "can't be edited here. Connect its "
                 + "monitor setup to arrange Spaces — "
                 + "the other sections still edit this "
-                + "profile."
+                + "profile.",
+            L("monitors.space_placement", "Space placement")
         )
     }
 }

@@ -94,7 +94,8 @@ struct LoginItemCard: View {
             "KiwiDesk opens when you sign in, so your windows are "
                 + "arranged from the start. It also keeps itself "
                 + "running if it ever stops — switch that off "
-                + "under Advanced if you would rather it did not."
+                + "under %1$@ if you would rather it did not.",
+            L("general.advanced.title", "Advanced")
         )
     }
 

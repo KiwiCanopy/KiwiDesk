@@ -39,8 +39,9 @@ extension SettingsFooter {
     var pausedScopeCaption: String {
         L(
             "footer.save.globals_only",
-            "Layout and monitors stay paused; Save covers "
-                + "everything else."
+            "Layout and monitors stay paused; %1$@ covers "
+                + "everything else.",
+            L("footer.save", "Save")
         )
     }
 

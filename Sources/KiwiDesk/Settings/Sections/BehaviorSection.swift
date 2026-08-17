@@ -48,12 +48,20 @@ struct BehaviorSection: View {
                 ],
                 help: L(
                     "behavior.mouse.resize_action.help",
-                    "**Resize adjacent windows** — Dragging a "
+                    "**%1$@** — Dragging a "
                         + "window's edge resizes it and reflows "
-                        + "its neighbours in the layout.\n**Snap "
-                        + "back to slot** — The window resizes "
+                        + "its neighbours in the layout.\n**%2$@**"
+                        + " — The window resizes "
                         + "freely while you drag, then snaps back "
-                        + "to its tiled size when you release."
+                        + "to its tiled size when you release.",
+                    L(
+                        "behavior.mouse.resize_layout",
+                        "Resize adjacent windows"
+                    ),
+                    L(
+                        "behavior.mouse.resize_snap_back",
+                        "Snap back to slot"
+                    )
                 )
             )
             Toggle(

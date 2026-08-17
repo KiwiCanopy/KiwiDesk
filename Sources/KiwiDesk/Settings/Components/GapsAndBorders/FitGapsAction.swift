@@ -138,8 +138,9 @@ struct FitGapsAction: View {
             )
             : L(
                 "border.fit_gaps.action_hint",
-                "Updates the draft gap values. Save is still "
-                    + "required."
+                "Updates the draft gap values. %1$@ is still "
+                    + "required.",
+                L("footer.save", "Save")
             )
     }
 
@@ -151,14 +152,18 @@ struct FitGapsAction: View {
         case .updateStoredProfile:
             return L(
                 "border.fit_gaps.updated_inactive",
-                "Draft updated — Save (⌘S) to persist; it "
-                    + "applies when this profile is loaded."
+                "Draft updated — %1$@ (⌘S) to persist; it "
+                    + "applies when this profile is loaded.",
+                L("footer.save", "Save")
             )
         case .saveAsNewProfile:
             return L(
                 "border.fit_gaps.updated_new",
-                "Draft updated — Save as New Profile… to "
-                    + "apply and persist."
+                "Draft updated — %1$@ to apply and persist.",
+                L(
+                    "footer.save_as_new_profile",
+                    "Save as New Profile…"
+                )
             )
         case .saveGlobalsOnly:
             // Paused: Save writes gui.json only, and gaps are
@@ -174,7 +179,8 @@ struct FitGapsAction: View {
         case .updateActiveProfile, .saveLua:
             return L(
                 "border.fit_gaps.updated",
-                "Draft updated — Save (⌘S) to apply and persist."
+                "Draft updated — %1$@ (⌘S) to apply and persist.",
+                L("footer.save", "Save")
             )
         }
     }

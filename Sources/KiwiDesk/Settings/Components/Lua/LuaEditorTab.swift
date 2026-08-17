@@ -29,7 +29,8 @@ struct LuaEditorTab: View {
         .confirmationDialog(
             L(
                 "lua_editor.adopt.title",
-                "Adopt this config into the visual editor?"
+                "%1$@ this config into the visual editor?",
+                L("lua_editor.adopt", "Adopt")
             ),
             isPresented: $confirmingAdopt,
             titleVisibility: .visible
@@ -62,8 +63,9 @@ struct LuaEditorTab: View {
         return L(
             "lua_editor.adopt.message_dirty",
             "Your current init.lua is kept as a commented-out "
-                + "backup — but Adopt reads that file from disk, "
-                + "so the edits you haven't saved are dropped."
+                + "backup — but %1$@ reads that file from disk, "
+                + "so the edits you haven't saved are dropped.",
+            L("lua_editor.adopt", "Adopt")
         )
     }
 

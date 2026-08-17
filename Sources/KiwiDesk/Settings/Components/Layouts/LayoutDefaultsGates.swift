@@ -181,8 +181,9 @@ enum LayoutDefaultsGateHelp {
     static var oneMaster: String {
         L(
             "layout_params.master_orientation.one_master",
-            "Orientation only changes anything with more than "
-                + "one master window."
+            "%1$@ only changes anything with more than "
+                + "one master window.",
+            L("scroll_grid.orientation", "Orientation")
         )
     }
 
@@ -205,8 +206,8 @@ enum LayoutDefaultsGateHelp {
     static var autoTracks: String {
         L(
             "track.auto_tracks.limit_inert",
-            "The track limit follows the screen while Auto track "
-                + "limit is on."
+            "The track limit follows the screen while %1$@ is on.",
+            L("track.auto_tracks", "Auto track limit")
         )
     }
 
@@ -214,7 +215,11 @@ enum LayoutDefaultsGateHelp {
         L(
             "scroll_grid.scroll_speed.animation_off",
             "Focus shifts jump straight to the slot while "
-                + "Animate focus shifts is off."
+                + "%1$@ is off.",
+            L(
+                "scroll_grid.animate_focus_shifts",
+                "Animate focus shifts"
+            )
         )
     }
 }
