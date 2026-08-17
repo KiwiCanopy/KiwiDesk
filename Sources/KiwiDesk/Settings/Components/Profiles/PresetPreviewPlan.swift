@@ -24,8 +24,10 @@ import SwiftUI
 /// `bsp` stands for an unlisted space. **That is NOT what Apply
 /// would draw** — `ProfileComposition.compose` clamps those spaces
 /// onto the live displays and resolves each mode from the live
-/// `ScreenClass`, so the two answers differ for six of the seven
-/// workflow presets. What makes the divergence unreachable is that
+/// `ScreenClass`, so the two answers differ for every SPARSE preset
+/// — `SparseModeFallbackTests` holds both arms of that fallback,
+/// and a count here would rot the day a preset is added or fully
+/// declared. What makes the divergence unreachable is that
 /// Apply is GATED on the screen-count match
 /// (`ProfilesGates`/`.screenCountMismatch`), not that the drawer's
 /// answer is right. An earlier draft of this comment claimed the

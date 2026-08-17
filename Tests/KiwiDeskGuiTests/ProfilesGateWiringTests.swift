@@ -138,7 +138,13 @@ struct ProfilesGateWiringTests {
                 // the whole suite green while the sheet named a
                 // layout Apply will not produce. The needle that
                 // avoided a repoint is worthless without these.
-                "sizes:sizes",
+                //
+                // Spelled WHOLE rather than as a bare
+                // `sizes:sizes`: that label is also
+                // `presets(forScreens:sizes:)`'s in this same file,
+                // so the short form sat one edit away from matching
+                // something incidental (re-review, 2026-08-17).
+                "PresetCard(layout:layout,sizes:sizes",
                 "liveSizes:request.liveSizes",
             ],
             "Components/Profiles/PresetScreenCard.swift": [
@@ -174,7 +180,14 @@ struct ProfilesGateWiringTests {
             // draws itself, and the request it hands the sheet.
             "Components/Profiles/PresetCard.swift": [
                 "PresetScreenCard(layout:layout,liveSizes:sizes)",
-                "liveSizes:sizes",
+                // The request hop, spelled WHOLE. It was
+                // `"liveSizes:sizes"`, which is a substring of the
+                // needle above and so could not fail on its own —
+                // the hop could go to `nil` with the suite green,
+                // while the commit that added it claimed every hop
+                // was needled (re-review, 2026-08-17). A needle
+                // contained in a sibling needle is not a needle.
+                "PresetPreviewRequest(layout:layout,liveSizes:sizes)",
             ],
             "Components/Profiles/PresetPreviewPlan.swift": [
                 "ScreenClass.of(liveSizes[screen])",

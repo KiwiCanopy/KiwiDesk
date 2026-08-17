@@ -53,9 +53,18 @@ enum SettingsWidthClass: String, CaseIterable, Sendable {
     /// claimed a relation to this number that did not hold).
     ///
     /// This type is about width BANDS and this is not one; it lives
-    /// here because the pair is one fact — the smallest content
-    /// rectangle the window may present — and splitting it across
-    /// two files is how one half moves without the other.
+    /// here because the MINIMUM is one fact with two axes — the
+    /// smallest content rectangle the window may present — and
+    /// splitting that across two files is how one half moves
+    /// without the other.
+    ///
+    /// Scoped to the minimum deliberately. The window's opening
+    /// WIDTH derives from a band
+    /// (`SettingsWindowController.firstRunWidth`) while its opening
+    /// HEIGHT is still a bare literal there — the very number
+    /// #859's false claim was measured against. Naming that one too
+    /// is a separate change; this docstring does not claim to have
+    /// done it (re-review, 2026-08-17).
     static let minimumHeight: CGFloat = 540
 
     static func of(width: CGFloat) -> SettingsWidthClass {

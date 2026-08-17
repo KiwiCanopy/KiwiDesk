@@ -179,8 +179,16 @@ struct PresetPreviewPlanTests {
     }
 
     /// `openingMode` is the FIRST slot's, which is what the card's
-    /// glyph draws — asserted on a screen whose first space is not
-    /// its lowest-numbered one, so a `min`/`sorted` slip shows.
+    /// glyph draws.
+    ///
+    /// Stated limit: this cannot discriminate a `min`/`sorted`
+    /// slip, and an earlier docstring claimed it could.
+    /// `spaces(onScreen:)` filters `plannedSpaces`, so a group's
+    /// slots are ALWAYS in ascending plan order and no fixture can
+    /// express the case (re-review, 2026-08-17). What it does
+    /// discriminate is `first` vs a fixed space id, and vs the
+    /// LAYOUT's first space rather than the screen's — screen 1's
+    /// opener here is space 2, not space 1.
     @Test("a group opens in its first space's mode")
     func openingModeIsTheFirstSlot() {
         let plan = PresetPreviewPlan(

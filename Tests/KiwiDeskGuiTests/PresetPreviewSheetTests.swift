@@ -110,12 +110,16 @@ struct PresetPreviewSheetTests {
                     == sheet.tileWidth + sheet.gutter
             )
         }
-        // One column is a tile between two paddings, no gutter.
+        // One column is a tile between two paddings and the
+        // scroller allowance, no gutter.
         #expect(
             sheet.width(forColumns: 1)
-                == sheet.tileWidth + 2 * sheet.pad
+                == sheet.tileWidth + 2 * sheet.pad + sheet.scroller
         )
-        #expect(sheet.width(forColumns: 0) == 2 * sheet.pad)
+        #expect(
+            sheet.width(forColumns: 0)
+                == 2 * sheet.pad + sheet.scroller
+        )
     }
 
     /// Four columns is a claim about the narrowest window, so it is
@@ -167,16 +171,25 @@ struct PresetPreviewSheetTests {
         #expect(source.occurrences(of: ".fixed(Self.tileWidth)") == 1)
         #expect(source.occurrences(of: ".adaptive(") == 0)
         #expect(source.occurrences(of: "count:Self.columns") == 1)
-        // The arithmetic the old `.adaptive` had no room for: the
-        // tiles and their gutters exactly fill the content box, so
-        // nothing may be subtracted from it without a re-wrap.
+        // **There is width to LOSE.** The first cut spent the
+        // whole content box on tiles and pinned that equality, so
+        // a legacy scroll bar clipped the fourth tile instead of
+        // re-wrapping it — `.fixed` had removed the re-wrap and
+        // not its cause (re-review, 2026-08-17). The slack is the
+        // scroller's, and it is asserted as an INEQUALITY plus its
+        // size, so shrinking the reserve reds rather than merely
+        // moving which symptom appears.
         let sheet = PresetPreviewSheet.self
         let content =
             sheet.width(forColumns: sheet.columns) - 2 * sheet.pad
         let tiles =
             CGFloat(sheet.columns) * sheet.tileWidth
             + CGFloat(sheet.columns - 1) * sheet.gutter
-        #expect(content == tiles)
+        #expect(content >= tiles)
+        #expect(content - tiles == sheet.scroller)
+        // A legacy scroll bar on macOS is ~15 pt, so the reserve
+        // has to cover one with nothing left owing.
+        #expect(sheet.scroller >= 15)
     }
 
     /// `.panel` is 240 pt tall and pane-filling; Command Center

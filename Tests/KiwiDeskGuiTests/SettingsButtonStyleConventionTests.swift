@@ -85,6 +85,14 @@ struct SettingsButtonStyleConventionTests {
             "HeaderSearch.swift": (
                 1, "focusShortcut", "Invisible zero-size shortcut sink"
             ),
+            // The same shape one surface over: a sheet's Escape
+            // needs a carrier that does not depend on focus, and an
+            // invisible one draws nothing to style (#859).
+            "PresetPreviewSheet.swift": (
+                1, "escapeRoute",
+                "Invisible zero-size shortcut sink — Escape, "
+                    + "focus-independently"
+            ),
         ]
 
     /// Styles applied to non-Button views (e.g. Link) that inflate
@@ -264,6 +272,27 @@ struct SettingsButtonStyleConventionTests {
             // years because only the number was ever checked.
             // `SettingsBorderedSealTests`' entries name a token
             // that IS the reason; these now do too.
+            // The exemption's own NEEDLE has to still be findable,
+            // for the reason below: guard-prover found this map's
+            // third field read by nothing (2026-08-17), so an
+            // entry could argue at length about a symbol the file
+            // no longer contains. Presence rather than a count —
+            // a needle is a symbol name and appears at both its
+            // declaration and its use, unlike a style spelling.
+            if let entry = unstyledExempt[name] {
+                #expect(
+                    source.occurrences(of: entry.needle) > 0,
+                    Comment(
+                        rawValue:
+                            "\(name)'s exemption rests on "
+                            + "`\(entry.needle)` (\(entry.why)), "
+                            + "which the file no longer contains — "
+                            + "the count may still balance while "
+                            + "the reason has gone"
+                    )
+                )
+            }
+
             if let entry = stylesOnNonButtons[name] {
                 #expect(
                     source.occurrences(of: entry.style)

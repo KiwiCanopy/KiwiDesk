@@ -97,7 +97,11 @@ to invert the dim ladder).
   used, and the defect was found on a popover. Sheets are simply
   where the tree has no legacy call sites, so
   `SheetPresentationSeamTests` can hold it absolutely there while
-  the three `.popover(isPresented:)` sites stay as they are.
+  the existing `.popover(isPresented:)` sites are grandfathered.
+  (An earlier draft of this bullet said how many those are, and was
+  wrong — in the commit whose subject was three other false
+  counts. A count in a rule file derives or cites a guard; this one
+  can do neither, so it is gone rather than corrected.)
 - **A preview that claims to show engine behavior asks the
   engine.** Never re-implement a rule the engine owns beside the
   drawing of it — call it, and where the shape does not fit, wrap
