@@ -46,6 +46,26 @@ struct PresetsSection: View {
         // records for the one discard dialog, which sits above
         // the `editingLua` branch for exactly this reason. This
         // view's identity is stable for as long as the area is.
+        //
+        // **It states no focus destination, and that is correct
+        // here.** gui.md requires one of every shape change, and
+        // the shell states two itself — but those are NAVIGATIONS,
+        // which replace the subtree that held the focus. A sheet
+        // does not: the presenting tree survives, so AppKit
+        // restores the previous first responder on dismissal.
+        // Eye-confirmed on macOS 26.6.1, 2026-08-17 — with focus on
+        // a control beforehand, Tab after closing resumes there;
+        // the "first Tab lands on the search field" reading came
+        // from opening the sheet with focus nowhere at all, which
+        // is AppKit choosing the window's first responder and not
+        // this sheet losing anything.
+        //
+        // A `@FocusState` restore was written here and BACKED OUT:
+        // it would force focus onto the card that opened the sheet
+        // even when the keyboard had been on a different card, so
+        // it replaced a correct answer with a worse one. A future
+        // sheet needs no destination for the same reason; a future
+        // NAVIGATION still does.
         .sheet(item: $previewRequest) { request in
             PresetPreviewSheet(
                 layout: request.layout,

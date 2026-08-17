@@ -113,6 +113,16 @@ struct PresetPreviewSheet: View {
         // `.cancelAction` is the platform's own route and needs no
         // focus. `Button` carries one shortcut, which rules out a
         // second modifier on the SAME button, not a second button.
+        //
+        // **Eye-confirmed, and this is the half no test reaches**:
+        // Escape closes the sheet with System Settings ▸ Keyboard ▸
+        // Keyboard navigation both ON and OFF (owner, macOS 26.6.1,
+        // 2026-08-17). Recorded as an observation with its date
+        // because that is all it can be — `SheetPresentationSeamTests`
+        // proves the modifier is present and gui.md's keyboard
+        // section is explicit that a green needle says only that
+        // much. A future sheet reaching for `.onExitCommand` should
+        // read this rather than re-derive it.
         .background(escapeRoute)
     }
 

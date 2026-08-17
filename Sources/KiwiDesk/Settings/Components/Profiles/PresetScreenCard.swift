@@ -17,6 +17,30 @@ import SwiftUI
 /// the preset's plan rather than a sample: `spaceScreens` orders
 /// the spaces per screen, and the first one is what a user lands
 /// in when the preset applies.
+///
+/// **The count stays UNDER the picture, and the picture stays above
+/// the text** (owner, 2026-08-17, on the shipped German cards). Two
+/// alternatives were looked at and both lose:
+///
+/// - *The whole block left of the text.* Ruled out by the widest
+///   case rather than by taste — the picture is one outline per
+///   screen, 48 pt each, so it runs 48 pt at one screen to 204 pt at
+///   the four-slot cap, inside a ~276 pt card interior. Three
+///   screens already needs 152 pt, leaving ~120 pt for a title like
+///   "Visual Creative & Developer" to wrap to three lines beside a
+///   picture one line tall — so the card would be a different shape
+///   per preset, in a grid whose whole job is comparing presets.
+///   (`ProfileScreenPips` DOES sit left of its text, and that is why
+///   one grammar takes two axes: a full-width list row has the room
+///   a card does not.)
+/// - *The count beside the picture, filling the one-screen case's
+///   empty row.* Tried and refused on sight — the owner's read, and
+///   the reason to record it is that the empty row is real and the
+///   obvious fix for it is this one.
+///
+/// So the one-screen card carries some air to the right of its
+/// outline, deliberately, as the price of every card being the same
+/// shape.
 struct PresetScreenCard: View {
     let layout: StandardLayout
     /// The live screens, when this card is one the user can
