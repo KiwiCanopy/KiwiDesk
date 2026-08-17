@@ -12,6 +12,7 @@ different behavior.
 
 | File | Owns |
 |---|---|
+| `docs/index.md` | The docs landing map — and, because it also carries install and upgrade prose, it is a **second home for claims `README.md` makes**. Change one, check the other in the same change set: an upgrade claim was corrected in the README and left standing here (#661's branch), which is what an unowned page does |
 | `docs/lua-reference.md` | Lua config & behavior, in *expects → does → example* form |
 | `docs/user-guide.md` | The Settings app & GUI flows |
 | `docs/cli.md` | Commands, events, IPC |

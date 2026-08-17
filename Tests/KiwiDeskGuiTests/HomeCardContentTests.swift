@@ -11,12 +11,43 @@ import Testing
 @MainActor
 @Suite("Home card content")
 struct HomeCardContentTests {
+    /// Every subtitle here comes back through `L()`, so each test
+    /// pins the shared manager as its FIRST line — "System
+    /// default" resolves the HOST's language (#740).
+    ///
+    /// The suite was reachable-but-passing rather than failing,
+    /// which is why it outlived the round that fixed
+    /// `MonitorReadoutTests`: most assertions here are on digits,
+    /// and a digit survives translation. `gapsAnswer` is the one
+    /// that does not — it asserts that the outer value renders
+    /// BEFORE the inner one, reasoning in its own comment from
+    /// the English frame, while the frame's arguments are
+    /// positional precisely so a locale may reorder them
+    /// (localization.md). It passes on a German host because
+    /// `de` happens to keep that order; a locale that did not
+    /// would fail it for a translation reason wearing a layout
+    /// bug's clothes.
+    ///
+    /// Inside the body, not `init` — `MonitorReadoutTests` owns
+    /// why.
+    ///
+    /// Main-actor cost, since this is a `@MainActor` suite sharing
+    /// one budget: a pin to English decodes no catalog at all —
+    /// no `en.json` ships, so `effectiveLocale` answers nil and
+    /// the reload assigns an empty map — and that assignment is
+    /// all the main-actor work these tests add. Nothing here scans
+    /// source or lays out a view.
+    private func pinEnglish() {
+        LocalizationManager.shared.select("en")
+    }
+
     private func model() -> SettingsModel {
         makeTestModel()
     }
 
     @Test("the spaces answer counts spaces and distinct modes")
     func spacesAnswer() {
+        pinEnglish()
         let model = model()
         model.config.spaces = ["a", "b", "c"]
         model.config.spaceModes = [
@@ -41,6 +72,7 @@ struct HomeCardContentTests {
 
     @Test("the gaps answer reads the draft's own numbers")
     func gapsAnswer() {
+        pinEnglish()
         let model = model()
         model.config.settings.gapsGlobal.outer.top = 14
         model.config.settings.gapsGlobal.inner.horizontal = 7
@@ -79,6 +111,7 @@ struct HomeCardContentTests {
 
     @Test("the shortcuts answer counts default-layer bindings")
     func shortcutsAnswer() {
+        pinEnglish()
         let model = model()
         var layer = KeyLayer.defaultLayer
         layer.bindings = [
@@ -120,6 +153,7 @@ struct HomeCardContentTests {
 
     @Test("the conflict shout appears only with conflicts")
     func conflictShout() {
+        pinEnglish()
         let model = model()
         var layer = KeyLayer.defaultLayer
         layer.bindings = [
@@ -168,6 +202,7 @@ struct HomeCardContentTests {
     /// forcing the layout frame left the full suite green).
     @Test("the behaviour answer follows the mouse-resize mode")
     func behaviorAnswer() {
+        pinEnglish()
         let model = model()
         model.config.settings.mouseResize = .layout
         let layout = HomeCardContent.subtitle(
@@ -184,6 +219,7 @@ struct HomeCardContentTests {
 
     @Test("the app-rules answer covers pins and floats")
     func appRulesAnswer() {
+        pinEnglish()
         let model = model()
         model.config.appRules = ["Safari": "web"]
         model.config.floatRules = ["Info", "Copy"]
@@ -205,6 +241,7 @@ struct HomeCardContentTests {
     /// can never disagree with the area it opens.
     @Test("the colour count is the census's own")
     func advancedColourCount() {
+        pinEnglish()
         let expected = SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
                 && [.atRest, .showMore].contains(

@@ -119,9 +119,32 @@ struct CiPathFilterTests {
         // run unconditionally — or worse, the filter moves back to
         // a trigger-level `paths-ignore`, whose skipped workflow
         // reports no check run and deadlocks a required check.
+        //
+        // The key, not the word — the advice the sibling check
+        // below took and this one did not (#661). A whole-file
+        // `contains` was satisfied by the comment above the
+        // triggers, which NAMES this path in order to explain
+        // where the list lives, so deleting the line that
+        // actually reads it left this assertion green.
+        //
+        // Two narrowings, because either alone comes back:
+        // scoping to the `changes` job (the only job that reads
+        // the list) would go inert the day someone writes an
+        // explanatory comment inside it — which is how the
+        // original defect was born — and stripping comments
+        // alone would accept the read landing in some other job,
+        // where it gates nothing.
+        let readsTheList =
+            (Self.jobBlock("changes", in: yaml) ?? "")
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .contains {
+                !$0.hasPrefix("#")
+                    && $0.contains(".github/ci-ignore.txt")
+            }
         #expect(
-            yaml.contains(".github/ci-ignore.txt"),
-            "ci.yml no longer reads the ignore list"
+            readsTheList,
+            "the changes job no longer reads the ignore list"
         )
         // The key, not the word: the comment above the triggers
         // explains why this shape was abandoned, and naming it
