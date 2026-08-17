@@ -73,16 +73,25 @@ struct LoginItemCard: View {
         ) { _ in model.refreshAutoStart() }
     }
 
-    /// The design's own words. It deliberately does NOT say
-    /// "and keep it running": that becomes false the moment the
-    /// Advanced row is switched off, and item 16 rules that "a
-    /// label that rewrites itself is worse than one that is
-    /// simply always true".
+    /// It deliberately does NOT say "and keep it running": that
+    /// becomes false the moment the Advanced row is switched
+    /// off, and item 16 rules that "a label that rewrites itself
+    /// is worse than one that is simply always true".
+    ///
+    /// Shortened from "Start KiwiDesk when I log in" for #864,
+    /// which is the ROW-label sibling of `localization.md`'s
+    /// action-label rule: the English is the guardable half, and
+    /// a clause here hands every translator a clause. The old
+    /// one left 8 pt of headroom in this row's label column, so
+    /// five locales overflowed by construction and French lost
+    /// the object of its phrase. The app's own name is carried
+    /// by the window this row is in; the help beside it still
+    /// spells it out. Nothing guards the fit — `SettingsMetrics
+    /// .labelColumn`'s docstring rules that a label past its
+    /// width is SHORTENED rather than accommodated, the column
+    /// being the shared alignment axis for every section.
     private var startLabel: String {
-        L(
-            "general.login_item.start",
-            "Start KiwiDesk when I log in"
-        )
+        L("general.login_item.start", "Start at login")
     }
 
     /// The one field-level `?` (#94). It names the supervision

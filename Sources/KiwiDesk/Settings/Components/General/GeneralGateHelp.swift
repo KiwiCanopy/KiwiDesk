@@ -34,10 +34,7 @@ enum GeneralGateHelp {
                 "general.advanced.restart_on_crash.needs_login",
                 "Needs “%1$@”, because "
                     + "the two are one setting to macOS.",
-                L(
-                    "general.login_item.start",
-                    "Start KiwiDesk when I log in"
-                )
+                L("general.login_item.start", "Start at login")
             )
         }
     }
