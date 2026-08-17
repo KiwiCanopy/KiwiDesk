@@ -370,11 +370,18 @@
 :root[data-mode="dev"] .dev-reveal {
   animation: dev-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-:root[data-mode="dev"] #features.dev-reveal { animation-delay: 0.02s; }
-:root[data-mode="dev"] #layouts.dev-reveal  { animation-delay: 0.10s; }
-:root[data-mode="dev"] #config.dev-reveal   { animation-delay: 0.18s; }
-:root[data-mode="dev"] #cli.dev-reveal      { animation-delay: 0.26s; }
-:root[data-mode="dev"] #start.dev-reveal    { animation-delay: 0.34s; }
+/* The stagger is keyed by id, NOT by source order — a .dev-reveal
+   section with no entry here falls back to a 0s delay and rises
+   ahead of everything, wherever it sits in the document. So
+   reordering or adding a dev section must re-sort this list to
+   match the new running order in Landing.astro; the cadence is one
+   step of 0.08s per section. */
+:root[data-mode="dev"] #features.dev-reveal         { animation-delay: 0.02s; }
+:root[data-mode="dev"] #layouts.dev-reveal          { animation-delay: 0.10s; }
+:root[data-mode="dev"] #config.dev-reveal           { animation-delay: 0.18s; }
+:root[data-mode="dev"] #cli.dev-reveal              { animation-delay: 0.26s; }
+:root[data-mode="dev"] #maker-quote-dev.dev-reveal  { animation-delay: 0.34s; }
+:root[data-mode="dev"] #start.dev-reveal            { animation-delay: 0.42s; }
 
 @keyframes dev-rise {
   from {
