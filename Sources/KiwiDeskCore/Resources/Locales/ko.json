@@ -343,6 +343,7 @@
   "general.about.title": "정보",
   "general.advanced.backup.error.empty": "이 백업은 비어 있습니다. 복원할 내용이 없습니다.",
   "general.advanced.backup.error.export_title": "백업을 저장하지 못했습니다",
+  "general.advanced.backup.error.lua_owned": "이 컴퓨터의 설정은 init.lua에서 가져오므로 백업의 설정을 여기에 적용할 수 없습니다. 먼저 비주얼 편집기로 전환하거나, 비주얼 편집기를 사용하는 컴퓨터에서 복원하십시오.",
   "general.advanced.backup.error.newer": "이 백업은 더 새로운 버전의 KiwiDesk에서 만들어졌습니다. KiwiDesk를 업데이트한 다음 다시 시도하십시오.",
   "general.advanced.backup.error.not_a_backup": "이 파일은 KiwiDesk 백업이 아닙니다.",
   "general.advanced.backup.error.restore_title": "복원하지 못했습니다",

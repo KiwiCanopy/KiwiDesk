@@ -343,6 +343,7 @@
   "general.about.title": "Über",
   "general.advanced.backup.error.empty": "Diese Sicherung ist leer — es gibt darin nichts wiederherzustellen.",
   "general.advanced.backup.error.export_title": "Sicherung konnte nicht gespeichert werden",
+  "general.advanced.backup.error.lua_owned": "Die Einstellungen dieses Macs stammen aus deiner init.lua, daher lassen sich die Einstellungen einer Sicherung hier nicht anwenden. Wechsle zuerst zum visuellen Editor, oder stelle auf einem Mac wieder her, der ihn verwendet.",
   "general.advanced.backup.error.newer": "Diese Sicherung stammt aus einer neueren Version von KiwiDesk. Aktualisiere KiwiDesk und versuche es dann erneut.",
   "general.advanced.backup.error.not_a_backup": "Diese Datei ist keine KiwiDesk-Sicherung.",
   "general.advanced.backup.error.restore_title": "Wiederherstellen nicht möglich",

@@ -343,6 +343,7 @@
   "general.about.title": "Acerca de",
   "general.advanced.backup.error.empty": "Esa copia de seguridad está vacía: no hay nada que restaurar.",
   "general.advanced.backup.error.export_title": "No se pudo guardar la copia de seguridad",
+  "general.advanced.backup.error.lua_owned": "Los ajustes de este Mac provienen de tu init.lua, así que los ajustes de una copia de seguridad no se pueden aplicar aquí. Cambia primero al editor visual, o restaura en un Mac que lo use.",
   "general.advanced.backup.error.newer": "Esa copia de seguridad se creó con una versión más reciente de KiwiDesk. Actualiza KiwiDesk y vuelve a intentarlo.",
   "general.advanced.backup.error.not_a_backup": "Ese archivo no es una copia de seguridad de KiwiDesk.",
   "general.advanced.backup.error.restore_title": "No se pudo restaurar",

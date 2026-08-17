@@ -343,6 +343,7 @@
   "general.about.title": "Informazioni",
   "general.advanced.backup.error.empty": "Quel backup è vuoto: non contiene nulla da recuperare.",
   "general.advanced.backup.error.export_title": "Impossibile salvare il backup",
+  "general.advanced.backup.error.lua_owned": "Le impostazioni di questo Mac provengono dal tuo init.lua, quindi quelle di un backup non possono essere applicate qui. Passa prima all'editor visuale, oppure recupera su un Mac che lo usa.",
   "general.advanced.backup.error.newer": "Quel backup è stato creato da una versione più recente di KiwiDesk. Aggiorna KiwiDesk, poi riprova.",
   "general.advanced.backup.error.not_a_backup": "Quel file non è un backup di KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Impossibile recuperare",

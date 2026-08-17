@@ -343,6 +343,7 @@
   "general.about.title": "Sobre",
   "general.advanced.backup.error.empty": "Esse backup está vazio — não há nada nele para restaurar.",
   "general.advanced.backup.error.export_title": "Não foi possível salvar o backup",
+  "general.advanced.backup.error.lua_owned": "Os ajustes deste Mac vêm do seu init.lua, então os ajustes de um backup não podem ser aplicados aqui. Mude primeiro para o editor visual, ou restaure em um Mac que o use.",
   "general.advanced.backup.error.newer": "Esse backup foi feito por uma versão mais recente do KiwiDesk. Atualize o KiwiDesk e tente novamente.",
   "general.advanced.backup.error.not_a_backup": "Esse arquivo não é um backup do KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Não foi possível restaurar",

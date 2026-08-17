@@ -343,6 +343,7 @@
   "general.about.title": "关于",
   "general.advanced.backup.error.empty": "该备份是空的 — 其中没有可恢复的内容。",
   "general.advanced.backup.error.export_title": "无法存储备份",
+  "general.advanced.backup.error.lua_owned": "这台电脑的设置来自你的 init.lua，因此无法在这里应用备份中的设置。请先切换到可视化编辑器，或在使用它的电脑上恢复。",
   "general.advanced.backup.error.newer": "该备份由更新版本的 KiwiDesk 创建。请先更新 KiwiDesk，然后重试。",
   "general.advanced.backup.error.not_a_backup": "该文件不是 KiwiDesk 备份。",
   "general.advanced.backup.error.restore_title": "无法恢复",

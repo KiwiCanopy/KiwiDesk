@@ -343,6 +343,7 @@
   "general.about.title": "О программе",
   "general.advanced.backup.error.empty": "Эта резервная копия пуста — восстанавливать нечего.",
   "general.advanced.backup.error.export_title": "Не удалось сохранить резервную копию",
+  "general.advanced.backup.error.lua_owned": "Настройки этого компьютера берутся из твоего init.lua, поэтому настройки из резервной копии здесь применить нельзя. Сначала переключись на визуальный редактор или восстанови на компьютере, который его использует.",
   "general.advanced.backup.error.newer": "Эта резервная копия создана более новой версией KiwiDesk. Обнови KiwiDesk и попробуй ещё раз.",
   "general.advanced.backup.error.not_a_backup": "Этот файл не является резервной копией KiwiDesk.",
   "general.advanced.backup.error.restore_title": "Не удалось восстановить",

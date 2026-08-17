@@ -343,6 +343,7 @@
   "general.about.title": "情報",
   "general.advanced.backup.error.empty": "このバックアップは空です。復元できる内容がありません。",
   "general.advanced.backup.error.export_title": "バックアップを保存できませんでした",
+  "general.advanced.backup.error.lua_owned": "このコンピュータの設定はinit.luaから読み込まれているため、バックアップの設定をここに適用することはできません。先にビジュアルエディタに切り替えるか、それを使っているコンピュータで復元してください。",
   "general.advanced.backup.error.newer": "このバックアップは、より新しいバージョンのKiwiDeskで作成されています。KiwiDeskをアップデートしてから、もう一度お試しください。",
   "general.advanced.backup.error.not_a_backup": "このファイルはKiwiDeskのバックアップではありません。",
   "general.advanced.backup.error.restore_title": "復元できませんでした",
