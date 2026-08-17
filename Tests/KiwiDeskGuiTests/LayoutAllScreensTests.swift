@@ -115,16 +115,83 @@ struct LayoutAllScreensTests {
         )
     }
 
-    @Test("Screens draw left to right, not in Dictionary order")
+    /// A screen at `x`, with no core and no Dictionary involved.
+    private func screen(
+        _ name: String,
+        x: CGFloat
+    ) -> LayoutMenuInfo.Screen {
+        LayoutMenuInfo.Screen(
+            space: SpaceID(name),
+            name: name,
+            origin: CGPoint(x: x, y: 0),
+            mode: .bsp,
+            savedMode: nil
+        )
+    }
+
+    /// The sort itself, on a hand-built value.
+    ///
+    /// **This is the deterministic half, and it exists because the
+    /// derivation-level test below is not.** `allDisplays` is
+    /// `Array(displays.values)` and Swift seeds Dictionary hashing
+    /// per process, so a fixture cannot force the wrong source
+    /// order: `guard-prover` measured a dropped sort going red on
+    /// only 6 of 10 isolated runs (2026-08-17), i.e. shipping green
+    /// about 40% of the time with CI as the coin flip. Building the
+    /// value directly takes the Dictionary out of it — the input
+    /// order is now stated by the test, so a lost sort always reds.
+    @Test("orderedScreens sorts by position, deterministically")
+    func orderedScreensSorts() {
+        let info = LayoutMenuInfo(
+            activeMode: nil,
+            activeProfileName: nil,
+            savedModeForActiveSpace: nil,
+            screens: [screen("Right", x: 1000), screen("Left", x: 0)]
+        )
+        #expect(
+            info.orderedScreens.map(\.name) == ["Left", "Right"]
+        )
+    }
+
+    /// The vertical half of the key, which the two-screen desk
+    /// fixtures cannot reach — they all sit at y=0.
+    @Test("Screens at one x sort top to bottom")
+    func orderedScreensBreaksTiesVertically() {
+        let lower = LayoutMenuInfo.Screen(
+            space: SpaceID("lower"),
+            name: "Lower",
+            origin: CGPoint(x: 0, y: 900),
+            mode: .bsp,
+            savedMode: nil
+        )
+        let upper = LayoutMenuInfo.Screen(
+            space: SpaceID("upper"),
+            name: "Upper",
+            origin: CGPoint(x: 0, y: 0),
+            mode: .bsp,
+            savedMode: nil
+        )
+        let info = LayoutMenuInfo(
+            activeMode: nil,
+            activeProfileName: nil,
+            savedModeForActiveSpace: nil,
+            screens: [lower, upper]
+        )
+        #expect(
+            info.orderedScreens.map(\.name) == ["Upper", "Lower"]
+        )
+    }
+
+    @Test("The sort is applied to what the core hands over")
     func screensSortByPosition() {
         LocalizationManager.shared.select("en")
         let core = makeCore()
         twoScreens(core)
-        // `allDisplays` is `Array(displays.values)` — a
-        // Dictionary's values, whose order is unspecified — so
-        // nothing but the sort puts these right, and drawn
-        // unsorted the rows shuffle between two opens with nothing
-        // about the machine having changed.
+        // The other half: that `current(from:)` routes through the
+        // sort at all. It cannot prove the sort WORKS — the source
+        // order here is a Dictionary's and may already be right —
+        // so `orderedScreensSorts` above owns that, and this owns
+        // the wiring.
         let info = LayoutMenuInfo.current(from: core)
         #expect(
             info.orderedScreens.map(\.name) == ["Left", "Right"]

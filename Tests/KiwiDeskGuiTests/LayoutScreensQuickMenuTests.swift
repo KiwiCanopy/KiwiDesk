@@ -259,6 +259,13 @@ struct LayoutScreensQuickMenuTests {
         let controller = makeController(core)
         let submenu = try #require(controller.layoutItem().submenu)
         #expect(!submenu.autoenablesItems)
+        // Assert the loop below has something to walk BEFORE
+        // walking it. `guard-prover` broke the nesting (2026-08-17)
+        // and this test passed on `!autoenablesItems` alone, its
+        // `where` clause matching nothing — green having checked
+        // nothing about a nested menu.
+        let nestedRows = submenu.items.filter { $0.submenu != nil }
+        #expect(nestedRows.count == 3)
         for parent in submenu.items where parent.submenu != nil {
             let nested = try #require(parent.submenu)
             // Each new NSMenu turns it off for itself — the flag

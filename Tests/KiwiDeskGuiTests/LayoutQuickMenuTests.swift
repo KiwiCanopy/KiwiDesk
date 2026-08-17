@@ -103,16 +103,25 @@ struct LayoutQuickMenuTests {
         // Every case present, every entry carrying its mode in
         // representedObject (titles are localized — guardrail).
         #expect(modeEntries.count == LayoutMode.allCases.count)
-        // #752's promise, stated rather than inferred: with one
-        // screen or none the list stays FLAT. Read off the tree —
-        // a nested menu would put the mode rows one level down,
-        // where the `compactMap` above cannot see them, so the
-        // count alone would go to zero and this says which
-        // failure it was.
+        // #752's flat-menu promise — for the **zero**-screen arm
+        // specifically, which is what this fixture is: it upserts
+        // no `Display`, so `screens == []`. That arm is real and
+        // worth holding (`allDisplays` is briefly empty while a
+        // display change settles, and the menu must still answer
+        // for the active space), but it is NOT the one-screen
+        // boundary — `LayoutScreensQuickMenuTests.oneScreenStaysFlat`
+        // owns that. `guard-prover` caught this comment claiming
+        // otherwise: mutating the threshold to `>= 1` left this
+        // test green (2026-08-17).
+        #expect(LayoutMenuInfo.current(from: core).screens.isEmpty)
         #expect(!LayoutMenuInfo.current(from: core).nestsPerScreen)
         #expect(submenu.items.allSatisfy { $0.submenu == nil })
-        // Every row states its own enablement once auto-enable is
-        // off (#802) — a mode row that works must not ship dimmed.
+        // Enablement is stated, so a row cannot ship explicitly
+        // dimmed. Read as the explicit-disable direction ONLY:
+        // `NSMenuItem.isEnabled` defaults to true, so this cannot
+        // see a row that forgot to state it, which is what #802
+        // actually costs — `LayoutMenuEnablementScanTests` guards
+        // the omission in the source, where it is visible.
         #expect(modeEntries.allSatisfy { $0.0.isEnabled })
 
         for (entry, mode) in modeEntries {
