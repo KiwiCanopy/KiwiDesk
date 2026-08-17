@@ -102,7 +102,7 @@ extension InterpolatedLabelTests {
         "space_bar.color.focused_item.help": 2,
         "space_bar.icon_source.help": 2,
         "spaces.delete_confirm.message": 2,
-        // The eight below were ALWAYS interpolating and were
+        // The entries below were ALWAYS interpolating and were
         // invisible until the scan learned
         // `SettingsDestination.<case>.title` — they reach a
         // destination title through that property rather than an
@@ -124,15 +124,22 @@ extension InterpolatedLabelTests {
         "colors.space_bar_off.help": 1,
         "colors.unfocused_off.help": 1,
         "layout_defaults.spaces_using.none": 1,
-        // The `i18n/residue-round` batch (#830). Three groups,
-        // and the second and third are why the count is not the
-        // 22 that issue names.
+        // The `i18n/residue-round` batch (#830), in three
+        // groups. No count is stated here on purpose: an earlier
+        // draft of this comment claimed an arithmetic that did
+        // not reconcile with the entries under it (code review,
+        // 2026-08-17), which is the branch's own subject arriving
+        // in the branch's own test. The entries are the register;
+        // `conversionsHold` is what checks them.
         //
-        // 1. #830's own table, which was produced by a detector
-        //    and confirmed by hand. Two of its rows had already
-        //    been converted by the re-review that filed it, so
-        //    the table is read as a starting set rather than a
-        //    register.
+        // 1. #830's own table, produced by a detector and
+        //    hand-confirmed months earlier. Some of its rows were
+        //    already converted by the re-review that filed it, so
+        //    it is read as a starting set rather than a register.
+        //    One entry here is NOT from that table
+        //    (`general.advanced.restart_on_crash.needs_login`) —
+        //    it quotes the label #864 renamed and was found while
+        //    fixing it.
         "border.controls.disabled": 1,
         "space_bar.disabled.help": 1,
         "scroll_grid.scroll_speed.animation_off": 1,
@@ -152,16 +159,15 @@ extension InterpolatedLabelTests {
         "lua_editor.adopt.message_dirty": 1,
         "layout_params.master_orientation.one_master": 1,
         "shortcuts.app_behavior.help": 2,
-        "shortcuts.row.inherited.axhint": 1,
         "general.advanced.restart_on_crash.needs_login": 1,
-        // 2. The two `**`-marker glossaries #830 asked be
-        //    CHECKED rather than swept, plus the two more the
-        //    check turned up. A bold marker wrapping a specifier
-        //    is the frame's punctuation and the label is the
-        //    argument, so the shape converts unchanged. All five
-        //    of this family are here; converting three would
-        //    leave a picker whose entries are named as text
-        //    beside one whose are not.
+        // 2. The `**`-marker glossaries. #830 asked that two be
+        //    CHECKED rather than swept; the check converted them
+        //    and found more of the same family. A bold marker
+        //    wrapping a specifier is the frame's punctuation and
+        //    the label is the argument, so the shape converts
+        //    unchanged. Every `**%n$@**` frame in `en.json` is in
+        //    this register — converting some would leave a picker
+        //    naming its entries as text beside one that does not.
         "layout_params.overflow.stack.help": 2,
         "layout_params.split_strategy.help": 2,
         "layout_params.overflow.track.help": 2,
@@ -174,6 +180,12 @@ extension InterpolatedLabelTests {
         //    fourth `border.fit_gaps.*` sibling, left while its
         //    three twins converted. The rest name a control the
         //    sentence sends the reader to find.
+        //
+        // `shortcuts.row.inherited.axhint` was in group 1 and is
+        // deliberately NOT here: its label is not on screen for
+        // the row it describes, so the frame stopped naming a
+        // control at all. `KeybindingOverrideEnvironment` carries
+        // the argument.
         "border.glow_size.disabled": 1,
         "drag.disabled.help": 1,
         "border.fit_gaps.updated_new": 1,

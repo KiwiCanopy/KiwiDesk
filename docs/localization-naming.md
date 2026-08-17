@@ -317,9 +317,11 @@ so the escape is ranked too. Take the first that fits.
    the *destination's* defect, not a shortage at the ordinary
    site. Restore the qualifier and the bare noun is free again.
    `destination.layout` is the worked case: English is "Layout
-   **Defaults**", and the catalogs that kept the qualifier are
-   exactly the ones with the bare noun still available for
-   ordinary use.
+   **Defaults**", and `fr` and `ru` had rendered it bare
+   ("Dispositions", "Раскладки"), which left the preset card's
+   own button reaching past the word it wanted — "Voir les
+   dispositions", "Раскладки набора". Restoring the qualifier
+   in both let each button collapse to the bare noun.
 2. **Where English's own destination IS the bare noun** —
    Profiles, Spaces, Bars, Shortcuts — the shortage is real.
    Then **the ordinary site qualifies and the destination never
@@ -345,8 +347,10 @@ family.
 **One concept is ruled and deliberately unswept**: the physical
 screen, where English carries three words. The winner is
 `screen`, `display` is reserved for quoting Apple's own controls,
-and the argument plus the English-side obligation is
-`.claude/rules/config-vocabulary.md` ▸ noun glossary. The sweep —
+the English-side obligation is
+`.claude/rules/config-vocabulary.md` ▸ noun glossary, and the
+argument is `docs/design-decisions.md` ▸ Vocabulary: a screen is
+a screen. The sweep —
 including each catalog's own rule-2 run, which the English ruling
 does **not** decide — is #865.
 

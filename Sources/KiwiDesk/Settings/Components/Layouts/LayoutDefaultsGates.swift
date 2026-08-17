@@ -183,7 +183,10 @@ enum LayoutDefaultsGateHelp {
             "layout_params.master_orientation.one_master",
             "%1$@ only changes anything with more than "
                 + "one master window.",
-            L("scroll_grid.orientation", "Orientation")
+            L(
+                "layout_params.master_orientation",
+                "Master orientation"
+            )
         )
     }
 

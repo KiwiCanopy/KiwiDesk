@@ -31,13 +31,19 @@ enum SettingsMetrics {
     /// delay)", was carrying a translator's English gloss in
     /// parentheses at 273 pt.
     ///
-    /// **Nothing in any shipped locale truncates here today.**
-    /// That is the state to keep, and the rule that keeps it:
-    /// measure a new label, and past ~210 pt shorten the label
-    /// rather than moving this number again — it is the shared
+    /// **Measure a new label, and past ~210 pt shorten the label
+    /// rather than moving this number again** — it is the shared
     /// alignment axis for every section, so it trades control
     /// width app-wide. A Settings label wants to be short in
     /// every language regardless.
+    ///
+    /// This used to open by claiming nothing in any shipped
+    /// locale truncated here. Nothing guarded that, and #864
+    /// falsified it: `general.login_item.start` overflowed in
+    /// five catalogs — `fr` by 66 pt, losing the object of its
+    /// phrase — and had since it shipped. The obligation is what
+    /// survives; the state is not something this comment can
+    /// know.
     static let labelColumn: CGFloat = 210
 
     /// The gutter around a destination pane's scrolling content.

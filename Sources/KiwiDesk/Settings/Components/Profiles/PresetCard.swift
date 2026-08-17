@@ -49,10 +49,11 @@ struct PresetCard: View {
     /// from a live text measurement would put an AppKit metric
     /// read in a `body`, and — the sharper reason — it would make
     /// the guard vacuous, since a test comparing a derived floor
-    /// against the derivation it came from asserts nothing
-    /// (`plan/` 4c's finding, generalised: an assertion that
-    /// recomputes both sides from the same constants cannot model
-    /// anything those constants do not already say).
+    /// against the derivation it came from asserts nothing — an
+    /// assertion that recomputes both sides from the same
+    /// constants cannot model anything those constants do not
+    /// already say (`rule-authoring.md` ▸ a number-pin must
+    /// derive the number).
     ///
     /// So the floor is declared here and `PresetGridFloorTests`
     /// measures the SHIPPED catalogs against it, reading these

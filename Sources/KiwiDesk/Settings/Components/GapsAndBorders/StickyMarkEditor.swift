@@ -26,7 +26,7 @@ struct StickyMarkEditor: View {
                 "Sticky windows stay visible on every "
                     + "Space (%1$@, in %2$@).",
                 L("keybinding.toggle_sticky", "Toggle sticky"),
-                L("destination.shortcuts", "Shortcuts")
+                SettingsDestination.shortcuts.title
             )
         ) {
             ToggleRow(

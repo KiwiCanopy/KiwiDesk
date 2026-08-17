@@ -37,6 +37,16 @@ import Testing
 /// only occur at `.wide`. Nor does it measure the card's other
 /// content: the title, the summary and the picture flex, and only
 /// the button row cannot.
+///
+/// **And it cannot see ADDITIVE drift**, which `guard-prover`
+/// demonstrated: keep `.padding(Self.padding)` and add a second
+/// `.padding(6)` under it, put 6 pt on one button, and the card
+/// really draws 244 pt of interior against a row this floor sizes
+/// for 256 — #862's own defect at a smaller magnitude, with every
+/// test here green. The needles below prove the constants are
+/// USED, never that they are the whole inset. Closing that would
+/// mean measuring a rendered card rather than reading its source,
+/// which is a different kind of test than this one.
 @MainActor
 @Suite("Preset grid floor (#862)")
 struct PresetGridFloorTests {
@@ -66,8 +76,17 @@ struct PresetGridFloorTests {
         return out
     }
 
-    /// AppKit's own intrinsic width for the button the card
-    /// draws, at the bezel and control size it draws it at.
+    /// AppKit's own intrinsic width at the control size the
+    /// card draws its buttons at.
+    ///
+    /// The card draws SwiftUI `.bordered` through
+    /// `settingsActionButton()`; this measures an `NSButton`
+    /// with the matching bezel. The pairing is UNGUARDED — a
+    /// change to `.controlSize` in `PresetCard` silently
+    /// re-rates every width the floor rests on, and
+    /// `cardDrawsItsDeclaredMetrics` needles the two spacing
+    /// constants, not the size. Stated rather than asserted
+    /// because pinning it would mean rendering the real card.
     private static func buttonWidth(_ title: String) -> CGFloat {
         let button = NSButton(title: title, target: nil, action: nil)
         button.bezelStyle = .rounded
@@ -80,7 +99,7 @@ struct PresetGridFloorTests {
     /// assertion below pass for having measured nothing —
     /// `rule-authoring.md`'s "assert its input is non-empty
     /// before asserting anything about it".
-    @Test("the catalogs are readable, and there are eleven")
+    @Test("the catalogs are readable, and there are enough")
     func corpusIsPresent() throws {
         let all = try Self.catalogs()
         #expect(
@@ -108,11 +127,17 @@ struct PresetGridFloorTests {
             PresetCard.minimumWidth - 2 * PresetCard.padding
 
         var widest: (locale: String, width: CGFloat) = ("", 0)
+        var measuredOwn = 0
         for (locale, catalog) in all.sorted(by: { $0.key < $1.key }) {
             // A locale that has not translated the key falls back
             // to English at runtime, so measure what would DRAW.
             let titles = Self.actionKeys.map {
                 catalog[$0] ?? english[$0] ?? ""
+            }
+            if locale != "en",
+                Self.actionKeys.allSatisfy({ catalog[$0] != nil })
+            {
+                measuredOwn += 1
             }
             let pair =
                 titles.map(Self.buttonWidth).reduce(0, +)
@@ -140,21 +165,34 @@ struct PresetGridFloorTests {
             widest.width > 0,
             "no catalog produced a measurable pair"
         )
-        // Proof that the TRANSLATIONS were measured and not just
-        // English eleven times. `guard-prover` collapsed the
-        // fallback onto `english[$0]` — ten catalogs went
-        // unmeasured — and every assertion above stayed green,
-        // because `widest.width > 0` is satisfied by English
-        // alone. English is comfortably the shorter language
-        // here; if it ever becomes the widest, that is worth
-        // failing over rather than passing quietly.
+        // Proof that the TRANSLATIONS were measured, not English
+        // eleven times.
+        //
+        // The first attempt at this was `widest.locale != "en"`,
+        // and `guard-prover` proved it INERT: the comparison is
+        // strictly greater and the loop walks sorted order, so
+        // when every locale falls back to the same English string
+        // the winner is `de`, never `en`. It could not fire for
+        // the mutation it was written to catch, and it would have
+        // misfired if it could — an English relabel that
+        // legitimately became the longest string would have been
+        // reported as a lost translation.
+        //
+        // So count what the collapse actually destroys: how many
+        // catalogs answered BOTH keys out of their own map. A
+        // fallback pointed the wrong way drops this to zero; one
+        // missing translation drops it by one, which the old
+        // shape could not see at all.
         #expect(
-            widest.locale != "en",
+            measuredOwn == all.count - 1,
             """
-            English measured widest (\
-            \(String(format: "%.1f", widest.width)) pt), which \
-            either means a translation was lost from the corpus \
-            or the measuring path collapsed onto en.json.
+            \(measuredOwn) of \(all.count - 1) translated \
+            catalogs supplied both \
+            \(Self.actionKeys.joined(separator: " / ")) from \
+            their own map. Either a translation is missing from \
+            the corpus, or the measuring path is falling back to \
+            English and this guard is measuring one string \
+            \(all.count) times.
             """
         )
     }
@@ -193,10 +231,15 @@ struct PresetGridFloorTests {
             #expect(
                 stripped.contains(needle),
                 """
-                PresetCard no longer draws with `\(needle)` — the \
-                floor is computed from constants the card's own \
-                body has stopped using, so it describes a card \
-                that is not on screen.
+                PresetCard's body no longer contains \
+                `\(needle)`. The floor is computed from those \
+                constants, so a body that lays out some other \
+                way describes a card that is not on screen. \
+                NOTE: this needle matches one SPELLING — if you \
+                rewrote it to still read the constant (a local \
+                alias, an EdgeInsets built from it) the code may \
+                be correct and this message wrong; widen the \
+                needle rather than silencing it.
                 """
             )
         }

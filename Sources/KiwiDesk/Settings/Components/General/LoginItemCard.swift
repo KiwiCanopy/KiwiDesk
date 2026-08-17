@@ -2,8 +2,14 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The "Start KiwiDesk when I log in" row (#576, resplit for
-/// #678 item 16).
+/// The login-item row — `general.login_item.start` (#576,
+/// resplit for #678 item 16).
+///
+/// Named by its KEY rather than by its text: this header quoted
+/// the label verbatim until #864 shortened it, at which point
+/// the comment described a string no catalog carried. Quoting a
+/// label in prose is the defect this branch closed one altitude
+/// down (#818); it is the same defect in a doc comment.
 ///
 /// #576 folded #342's login toggle and the `kiwidesk service`
 /// LaunchAgent into ONE 3-level picker, because the two-toggle

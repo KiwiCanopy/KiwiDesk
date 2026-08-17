@@ -143,11 +143,13 @@ synonym:
   the space/Desktop bullet above makes, one noun over, and for
   the same reason. A sentence naming both writes both words.
   Retired as names for a screen: *monitor*, *display*. The
-  **wire is exempt**, as it is above: `toggle_display_sticky`
-  and `float_scale_on_display_change` keep their names until
-  someone rules the wire, and this bullet governs copy alone.
-  A **proper name** is not the common noun and is not bound
-  here — the `Coder & Monitor` preset keeps its name.
+  **wire is exempt**, as it is above: a Lua verb, an event name
+  or a profile key spelling either word keeps it until someone
+  rules the wire, and this bullet governs copy alone — naming
+  those here would be one list rotting in two files, the same
+  reason the bullet above names none. A **proper name** is not
+  the common noun and is not bound here — the `Coder & Monitor`
+  preset keeps its name.
 
   Two obligations, and no claim about what the corpus currently
   says: **author every new string to this**, and **do not sweep
@@ -157,7 +159,9 @@ synonym:
   applies the ladder to its OWN file: this settles the English,
   never which of a catalog's two candidates wins there
   (`docs/localization-naming.md` ▸ Family C, whose rule 2 is
-  the one copy of how that is decided).
+  the one copy of how that is decided). The argument, and the
+  counts it was decided on, are `docs/design-decisions.md` ▸
+  Vocabulary: a screen is a screen.
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).

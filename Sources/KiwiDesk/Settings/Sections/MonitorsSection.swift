@@ -211,10 +211,10 @@ struct MonitorsSection: View {
     private var placementUnavailableCaption: String {
         L(
             "monitors.not_connected.caption",
-            "This profile's monitors aren't attached "
+            "This profile's screens aren't attached "
                 + "right now, so its %1$@ "
                 + "can't be edited here. Connect its "
-                + "monitor setup to arrange Spaces — "
+                + "screen setup to arrange Spaces — "
                 + "the other sections still edit this "
                 + "profile.",
             L("monitors.space_placement", "Space placement")

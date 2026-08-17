@@ -355,10 +355,10 @@ the destination never moves**, which is rule 3 read in the other
 direction: the destination label is the one string that is a card
 title, a back chip and a search row at once, so it is the last
 thing that should absorb a collision it did not cause. And the
-qualifier is a noun, not a verb: a verb phrase can only grow,
-while a qualified noun collapses back to the bare noun the moment
-the first step frees it. That difference is measured in points on
-a button, which is why the width half of it is an obligation in
+qualifier is a noun rather than a verb, for the reason the
+ladder's own step 3 gives and this entry does not re-argue. That
+difference is measured in points on a button, which is why the
+width half of it is an obligation in
 `.claude/rules/localization.md` rather than advice here.
 
 The ladder, the escape and the counted legitimate uses are in
@@ -473,9 +473,12 @@ The same shape as the ruling above, one noun over, and it went
 unruled for longer because no single word was obviously wrong.
 English shipped three for one thing — *screen*, *display*,
 *monitor* — interleaved across adjacent surfaces rather than
-separated by area, so a preset outline said "Main screen" while
-the caption above it said "the main display" and the card that
-opened the picture was called "Monitors".
+separated by area. Profiles is the whole defect in one pane: its
+caption says a profile is "remembered per **display**
+arrangement", the preset outline below it labels a screen "Main
+**screen**", and the Home card that opens the placement picture
+is called "**Monitors**" — three words for one thing, in one
+glance.
 
 **The ruling: a physical screen is a *screen*. *Display* is
 reserved for quoting Apple's own controls. *Monitor* is
@@ -490,8 +493,10 @@ copy must quote verbatim — and it is KiwiDesk's own verb in
 that names a screen, by ladder rule 1, before any count is taken.
 That leaves *screen* against *monitor*, and there the count is
 decisive rather than close: measured for this ruling
-(2026-08-17, against `en.json` at `fcd52b6d`), values said
-*screen* 44 times against *monitor*'s 25.
+(2026-08-17, against `en.json` at `fcd52b6d`, word-bounded over
+values and plurals included, so *screenshot* and *monitoring* are
+not in it), values said *screen* 44 times against *monitor*'s 25.
+#865 carries the measurement it was taken from.
 
 **Reserving Apple's word is the same move the Desktop ruling
 made, and for the same reason.** Where copy sends a user to a
@@ -506,17 +511,22 @@ feels backwards.** Family C's rule 3 hands a near-tie to the
 destination label, on the grounds that it is the name the user
 learns first. This is not a near tie, so rule 2 settles it and
 "Monitors" is a losing word in the most-read position — the same
-shape as `ko`'s gap destination losing to the word thirteen other
-keys use. A pane whose every sentence says *screen* while its
-card says *Monitors* is the split, not a mitigation of it.
+shape as `ko`'s gap destination, which shipped a transliteration
+while the rest of that catalog already carried the ordinary word,
+and was swept to it rather than the other way round. A pane whose
+every sentence says *screen* while its card says *Monitors* is
+the split, not a mitigation of it.
 
 **The ruling and the sweep are two decisions, and only the first
 was taken here.** Deciding the winner costs a paragraph and makes
 every string authored afterwards correct; sweeping the existing
 ones reaches the settings census, a component directory, the site
-corpus and `docs/`, and it touches the wire in two places
-(`toggle_display_sticky`, `float_scale_on_display_change`) that
-are their own ruling. Taking the ruling without the sweep leaves
+corpus and `docs/`, and it touches the wire wherever a Lua verb,
+an event name or a profile key spells one of the two words —
+which is its own ruling, and a set this entry derives rather than
+lists (`grep -E 'display|monitor' docs/lua-reference.md
+docs/cli.md` answers it, and answers it again after the next verb
+lands). Taking the ruling without the sweep leaves
 the corpus knowingly inconsistent rather than accidentally so,
 which is the cheaper of the two states and the only one that
 converges. The sweep is #865, off 1.0; the English-side
@@ -2019,14 +2029,15 @@ repair is to delete it rather than patch it.
 
 **Auto-start is one folded level shown as two switches, never a
 per-launch prompt — and never two *independent* toggles.** (#342,
-#576, #678 item 16) General shows a login switch — "Start KiwiDesk
-when I log in" — in the "Applies immediately" group, and a
+#576, #678 item 16) General shows a login switch — "Start at
+login" — in the "Applies immediately" group, and a
 crash-restart switch — "Restart if it stops unexpectedly" — first
 among Advanced's five. Both write through one `AutoStartLevel`, so
 the two-switch *presentation* never re-opens the contradiction the
 fold closes (the honesty argument below). Onboarding's closing
-card keeps the simpler pre-checked "open at login" box (the plain
-login level); auto-restart is advanced, not first-run material.
+card keeps its own pre-checked box, "Start KiwiDesk at login"
+(the plain login level); auto-restart is advanced, not first-run
+material.
 Rulings a contributor might otherwise undo:
 
 - **Default At Login, auto-restart opt-in.** Most apps default
