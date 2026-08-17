@@ -793,6 +793,12 @@
         ]
     },
     {
+        "iconName": ":delta:",
+        "appNames": [
+            "Delta"
+        ]
+    },
+    {
         "iconName": ":deluge:",
         "appNames": [
             "Deluge"
@@ -3115,6 +3121,12 @@
         ]
     },
     {
+        "iconName": ":sourcegit:",
+        "appNames": [
+            "SourceGit"
+        ]
+    },
+    {
         "iconName": ":sourcetree:",
         "appNames": [
             "Sourcetree"
@@ -3229,6 +3241,13 @@
         "appNames": [
             "System Information",
             "System Profiler"
+        ]
+    },
+    {
+        "iconName": ":t3_code:",
+        "appNames": [
+            "T3 Code",
+            "T3 Code (Alpha)"
         ]
     },
     {
@@ -3756,7 +3775,8 @@
     {
         "iconName": ":zed:",
         "appNames": [
-            "Zed"
+            "Zed",
+            "Zed Preview"
         ]
     },
     {
