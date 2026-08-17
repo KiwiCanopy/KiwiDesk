@@ -122,11 +122,16 @@ tracked, not abandoned:
   ([#139](https://github.com/KiwiCanopy/KiwiDesk/issues/139);
   the pin shipped with
   [#66](https://github.com/KiwiCanopy/KiwiDesk/issues/66)).
-  On the other edges KiwiDesk pins far-offscreen slots at its
-  own fixed sliver, safely above the OS minimum, for the same
-  achievable-target reason
+  On the other edges — when no screen lies beyond them —
+  KiwiDesk pins far-offscreen slots at its own fixed sliver,
+  safely above the OS minimum, for the same achievable-target
+  reason
   ([#142](https://github.com/KiwiCanopy/KiwiDesk/issues/142));
-  stashed inactive-space windows park at the same
+  an edge with a screen beyond it is a hard stop instead — a
+  product decision, not an OS limit: see *Scrolling at a screen
+  seam* under Layout and resize behavior
+  ([#878](https://github.com/KiwiCanopy/KiwiDesk/issues/878)).
+  Stashed inactive-space windows park at the same
   floor-derived sliver
   ([#148](https://github.com/KiwiCanopy/KiwiDesk/issues/148)).
 - **Pin a foreign floating window above the tiled plane by its
@@ -659,7 +664,7 @@ detail:
 | **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
 | **Stack** | geometric | `Navigation.neighbor` over slots | yes — a zone overflow cascade / `cascade_all` (`StackLayout`); piles always cascade downward, whatever the arrangement (#222) |
 | **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
-| **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142) is a viewport pin, not an `OverlapStack` fallback |
+| **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
 | **Track** | array-order | steps both axes (`trackStep`) | yes — surplus tracks merge into one far-edge **overflow track** (`OverlapStack`) shaped by `overflow_style` (#192, default `cascade_all`); normal tracks always `cascade_overflow` |
 | **Floating** | geometric (live frames) | `Navigation.neighbor` with no slots: every member navigates by its live frame (the slot→frame fallback), flagged floats via the #488 float tier | n/a |
@@ -1107,6 +1112,39 @@ overflow-pile classification live in the table above; how a
 two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
+
+**Scrolling at a screen seam: a blocked edge is a hard stop
+(#878).** A scrolling edge is *open* or *blocked*, decided per
+edge from the screen arrangement. Open edges keep the #142
+overhang — a scrolled-out slot hangs into the void with its
+`edgePeek` sliver visible. An edge with another screen beyond
+it is a wall: the slot stops flush at the border, fully on its
+own screen, and stacks behind the viewport — the same clamp
+form the top edge has always used against the menu bar (#139).
+Nothing is ever resized; a slot that cannot fully fit underlaps
+its viewport neighbor. The reason is that frames are global:
+past an open edge, "offscreen" is empty void, but past a seam
+it is the neighbor screen, and macOS cannot clip or hide
+another app's window (no alpha, order-out, or level on foreign
+windows — see the SIP list above), so an overhang there renders
+on top of whatever the neighbor shows. Wayland scrollers (niri,
+PaperWM) never meet this because the compositor clips per
+output; on macOS the honest options are moving the body where
+nothing renders or stopping it at the border. The wall won over
+the rejected corner-park alternative (routing scrolled-out
+slots through the stash's #410 corner) because it keeps the
+window where the scroll was taking it, needs no sliver at all —
+a fully on-screen frame is always achievable, so the #142
+concern vanishes on blocked edges — and reuses the stacking and
+z-order machinery the edge pile already has (#150). The traded
+cost: on a blocked edge the resting peek disappears (a covered
+pile shows only through the inter-tile gaps, exactly as the top
+edge always has), and mid-scroll you watch the real window
+being covered or revealed instead of a sliver. Adjacency is
+recomputed from the connected screens on every retile
+(`ScreenNeighbors.detect`) — an input, never a cache — so a
+screen plugged in or out is correct from the retile the display
+change already triggers.
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or

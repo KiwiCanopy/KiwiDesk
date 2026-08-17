@@ -106,6 +106,21 @@ public final class TilingEngine {
         GeometryUtils.axVisibleFrame(of: $0)
     }
 
+    /// The AX visible frames of every connected screen, for the
+    /// per-retile neighbor scan (#878). Separate from
+    /// `visibleBounds` because that hook pins the SIZE of one
+    /// screen while this one pins TOPOLOGY — which screens
+    /// exist and where. The `makeTestCore` factories pin it to
+    /// `[]` (no neighbors: the single-screen verdict) so engine
+    /// fixtures don't inherit the host's arrangement — the
+    /// #523 leak, one hook over — and adjacency suites inject a
+    /// fabricated list instead. Production never writes it.
+    var allScreenBounds: @MainActor () -> [CGRect] = {
+        NSScreen.screens.map {
+            GeometryUtils.axVisibleFrame(of: $0)
+        }
+    }
+
     public init() {
         applier.elementProvider = { [weak self] id in
             self?.elementProvider(id)

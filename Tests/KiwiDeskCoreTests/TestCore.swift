@@ -91,5 +91,14 @@ func makeTestCore(
     // pid itself.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
+    // Same class, fourth time (#878): the per-retile neighbor
+    // scan defaults to the real screen list, so on a
+    // multi-screen dev Mac an engine fixture would inherit the
+    // host's arrangement and wall a scrolling edge that a
+    // single-screen CI runner leaves open — the #523 leak, one
+    // hook over. Pin the single-screen verdict (no neighbors:
+    // every edge open); an adjacency suite injects a fabricated
+    // list itself.
+    core.tiler.allScreenBounds = { [] }
     return core
 }

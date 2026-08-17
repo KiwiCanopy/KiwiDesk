@@ -941,10 +941,16 @@ any window above the top screen border, so a row scrolled past the
 top stays pinned at the border with its upper strip peeking behind
 the focused row, instead of tucking above the screen. See the
 [accepted limitations](accepted-limitations.md)
-table. On the other edges, a slot scrolled far offscreen keeps a
-small fixed sliver visible — macOS refuses fully offscreen
-placement, so KiwiDesk pins at a deterministic sliver instead of
-letting the OS clamp unpredictably.
+table. On an edge with no screen beyond it, a slot scrolled far
+offscreen keeps a small fixed sliver visible — macOS refuses
+fully offscreen placement, so KiwiDesk pins at a deterministic
+sliver instead of letting the OS clamp unpredictably. An edge
+with another screen beyond it is a wall instead: a scrolled-out
+slot stops flush at the border, fully on its own screen, stacked
+behind the visible ones — never resized, and never rendered on
+the neighbor screen. Which edges are walls follows your screen
+arrangement, and a screen plugged in or out updates it
+immediately.
 
 **Example:**
 

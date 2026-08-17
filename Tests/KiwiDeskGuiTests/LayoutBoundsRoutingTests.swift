@@ -75,8 +75,13 @@ struct LayoutBoundsRoutingTests {
         // The hook's own declaration.
         "Tiling/TilingEngine.swift": 1,
         // The `layoutBounds(on:)` seam — the one legitimate
-        // consumer, and what every span reads through.
-        "Tiling/TilingEngine+Layout.swift": 1,
+        // consumer, and what every span reads through — plus the
+        // neighbor scan's own-screen rect (#878): adjacency
+        // compares whole screens, so it measures NO span and
+        // classifies NO midpoint, and reserving the bar strip
+        // would falsely open an edge whose neighbor abuts the
+        // strip's side.
+        "Tiling/TilingEngine+Layout.swift": 2,
         // A float nudge measures NO span: it is a capped 24 pt
         // direction vector plus a `confine`, with no
         // delta-over-span and no midpoint classification, so the

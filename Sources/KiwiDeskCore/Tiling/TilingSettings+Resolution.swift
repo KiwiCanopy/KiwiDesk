@@ -248,11 +248,18 @@ extension TilingSettings {
     /// membership guard keeps `space.focused` off it (#431).
     /// Callers that carve only the bar strip omit it and fall back
     /// to `space.focused`.
+    /// `screenNeighbors` carries the per-retile neighbor
+    /// verdicts (#878) for the screen `bounds` describes;
+    /// Scrolling reads them to wall its blocked edges. Callers
+    /// that never materialize scrolled-out frames (capacity
+    /// probes, bar-strip carving, previews) omit it and get the
+    /// single-screen verdict — every edge open.
     public func context(
         bounds: CGRect,
         space: Space,
         sticky: Set<WindowID>,
-        focusedOverride: WindowID? = nil
+        focusedOverride: WindowID? = nil,
+        screenNeighbors: ScreenNeighbors = ScreenNeighbors()
     ) -> LayoutContext {
         LayoutContext(
             bounds: bounds,
@@ -264,6 +271,7 @@ extension TilingSettings {
             trackBreaks: space.trackBreaks,
             trackWeights: space.trackWeights,
             sticky: sticky,
+            screenNeighbors: screenNeighbors,
             bsp: resolvedBsp(for: space),
             stack: resolvedStack(for: space),
             scrolling: resolvedScrolling(for: space),

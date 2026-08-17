@@ -76,8 +76,12 @@ struct VisibleBoundsRoutingTests {
     private let allowed: [String: Int] = [
         // The declaration itself.
         "Tiling/GeometryUtils.swift": 1,
-        // The hook's own default.
-        "Tiling/TilingEngine.swift": 1,
+        // The hook's own default, and the `allScreenBounds`
+        // topology hook's default (#878) — that one enumerates
+        // `NSScreen.screens` for the neighbor scan, the same
+        // several-screens shape as parking below, and is itself
+        // an injectable seam the test factories pin.
+        "Tiling/TilingEngine.swift": 2,
         // `screen(containing:)` is static — no instance in hand.
         "Tiling/TilingEngine+Layout.swift": 1,
         // Parking *enumerates* `NSScreen.screens` to pick a
