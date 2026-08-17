@@ -68,7 +68,7 @@ that list:
 |---|---|
 | `bsp` | Binary space partitioning (square-ish splits) |
 | `stack` | Master zone + stack column (`master_count`) |
-| `scrolling` | Niri/PaperWM-style horizontal columns |
+| `scrolling` | Niri/PaperWM-style scrolling columns or rows |
 | `monocle` | Focused window maximized, rest behind it |
 | `grid` | Dynamic (auto-balanced) or rigid rows × columns |
 | `track` | Resizable columns (or rows) with per-track control |
@@ -87,10 +87,14 @@ different formula — no tree surgery, no lost state.
   smart app switching (`pull_or_spawn`) via Carbon — zero Input Monitoring needed.
 - **Cascading Profiles**: Display- or Desktop-bound profiles with inherited
   defaults and sparse overrides.
+- **Sticky Windows**: Pin a window so it stays with you across spaces, or
+  just across one display. It keeps a real tile — overflow piles the
+  others around it — and carries an on-window mark plus a Space Bar badge
+  so you can see what is pinned without hunting.
 - **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
 - **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations, zero
-  SIP modifications, and localized in 15 languages out of the box.
+  SIP modifications, and localized out of the box.
 
 ## Solving macOS Papercuts
 
@@ -125,10 +129,10 @@ Later builds arrive the same way:
 brew upgrade --cask kiwidesk
 ```
 
-> Until KiwiDesk ships a signed `.app` (#89), each upgrade changes
-> the binary and macOS drops its Accessibility grant — re-approve
-> it in **System Settings › Privacy & Security › Accessibility**
-> if windows stop being managed after an upgrade.
+> Releases are signed with a stable Developer ID and notarized, so
+> macOS keeps the Accessibility grant across an upgrade. If windows
+> do stop being managed after one, re-approve KiwiDesk in **System
+> Settings › Privacy & Security › Accessibility**.
 
 On first launch, an onboarding wizard walks you through granting
 the Accessibility permission KiwiDesk needs to manage windows.
@@ -194,7 +198,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
 
 ```sh
 ./scripts/install-hooks.sh   # once after cloning
-swift test                   # 700+ tests and counting
+swift test                   # the full suite
 ```
 
 ## Security
