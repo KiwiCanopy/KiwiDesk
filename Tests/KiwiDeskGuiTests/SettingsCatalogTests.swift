@@ -72,7 +72,10 @@ struct SettingsCatalogTests {
         // 68 since #795's device round: the install inventory
         // becomes a card of its own instead of four loose lines
         // under the wordmark.
-        #expect(allEntries.count == 68)
+        // 70 since #606: General ▸ Advanced gains the backup
+        // pair, which take catalog controls so search can scroll
+        // to them rather than only landing on the page.
+        #expect(allEntries.count == 70)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

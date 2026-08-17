@@ -142,4 +142,15 @@ struct GeneralControls: Sendable {
         "general.advanced.title",
         "Advanced"
     )
+    /// #606's pair. They carry catalog controls so search can
+    /// scroll to them rather than only landing on the page — the
+    /// #277 lane's rule, filling what a branch touches anyway.
+    let exportBackup = SettingsControl(
+        "general.advanced.backup.export",
+        "Export KiwiDesk Backup…"
+    )
+    let restoreBackup = SettingsControl(
+        "general.advanced.backup.restore",
+        "Restore from Backup…"
+    )
 }

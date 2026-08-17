@@ -15,6 +15,16 @@ struct GeneralSection: View {
     /// the row and dialog live in `GeneralSection+Reset`, and
     /// an extension in another file cannot reach `private`.
     @State var confirmingReset = false
+    /// The backup waiting on its confirm (#606) — nil while none
+    /// is. The dialog's presentation derives from this rather than
+    /// from a second Bool, so the two cannot disagree. Internal
+    /// for the same reason as `confirmingReset`: the rows live in
+    /// `GeneralSection+Backup`.
+    @State var pendingRestore: SetupBundle?
+    /// The last export or restore failure, rendered as an alert.
+    /// Core names the condition, `SetupBackupText` writes the
+    /// sentence (#96).
+    @State var backupError: SetupBundleError?
     /// Drives the light/dark wordmark swap (see `aboutBrand`).
     /// Internal, not private: the About block lives in
     /// `GeneralSection+About`, and an extension in another file
@@ -237,11 +247,39 @@ struct GeneralSection: View {
                 Text(editLuaCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Divider()
+                // Read-only, so it sits ABOVE the ladder; its
+                // destructive twin is the ladder's last rung. The
+                // argument is in `GeneralSection+Backup`.
+                exportBackupRow
                 resetLadder
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .alert(
+            backupError.map(SetupBackupText.title) ?? "",
+            isPresented: backupErrorBinding,
+            presenting: backupError
+        ) { _ in
+            // No button of our own: an empty actions builder makes
+            // SwiftUI supply the standard dismissal, localized by
+            // the SYSTEM — so it reads correctly even in a
+            // language KiwiDesk does not ship a catalog for, which
+            // an `L("alert.ok", "OK")` of ours could not. The
+            // binding clears the error on dismissal.
+        } message: { error in
+            Text(SetupBackupText.sentence(for: error))
+        }
+    }
+
+    /// Presented exactly while an error is held — one source of
+    /// truth rather than a Bool beside an Optional.
+    private var backupErrorBinding: Binding<Bool> {
+        Binding(
+            get: { backupError != nil },
+            set: { if !$0 { backupError = nil } }
+        )
     }
 
     private var editLuaCaption: String {

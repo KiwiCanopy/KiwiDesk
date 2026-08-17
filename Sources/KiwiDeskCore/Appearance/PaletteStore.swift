@@ -24,6 +24,13 @@ public final class PaletteStore {
 
     private let fileURL: URL
 
+    /// Where the library lives. Public so a backup can name the
+    /// file it replaces (#606) — this type is stateless, every
+    /// read hitting the file, so a second instance over the same
+    /// path is safe and is how Core reaches the library the GUI
+    /// otherwise owns.
+    public var url: URL { fileURL }
+
     /// `directory` is the config dir (`~/.config/KiwiDesk`); the
     /// library lives in `palettes.json` inside it.
     public init(directory: URL) {
@@ -76,6 +83,27 @@ public final class PaletteStore {
             palettes.append(palette)
         }
         try write(palettes)
+    }
+
+    /// Replaces the whole user library — the restore half of a
+    /// backup (#606).
+    ///
+    /// **Filters out any name a built-in already owns**, which
+    /// `save` refuses one at a time and this must refuse in bulk:
+    /// the bundle is JSON on the user's disk, so a hand-edited one
+    /// can carry a palette shadowing a built-in, and the shadow
+    /// would be invisible until the built-in stopped resolving.
+    /// Dropping it is the same answer `save` gives, without
+    /// failing the whole restore over one bad entry.
+    @discardableResult
+    public func replaceUserPalettes(
+        with palettes: [ColorPalette]
+    ) throws -> Int {
+        let admissible = palettes.filter {
+            !isBuiltinName($0.name)
+        }
+        try write(admissible)
+        return palettes.count - admissible.count
     }
 
     /// Deletes the user palette named `name`.
