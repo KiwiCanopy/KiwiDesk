@@ -38,6 +38,18 @@ import Testing
 /// content: the title, the summary and the picture flex, and only
 /// the button row cannot.
 ///
+/// **Main-actor load is deliberately minimal here.** Only the
+/// AppKit measurement is `@MainActor`, and it memoizes by title;
+/// the catalog reads and the two source scans run off it. That is
+/// not tidiness — `SettingsModeRevealTests`' hang guard is sized
+/// against heavy synchronous `@MainActor` suites backing the main
+/// actor up "past 30 s in a full run", and the first cut of this
+/// suite was one of them: it went `@MainActor` wholesale, and CI
+/// timed that suite out against its 120 s guard while the whole
+/// thing passes in 1.3 s locally (2026-08-17). A guard sized for
+/// a starved main actor is a shared budget, and a new suite
+/// spends it.
+///
 /// **And it cannot see ADDITIVE drift**, which `guard-prover`
 /// demonstrated: keep `.padding(Self.padding)` and add a second
 /// `.padding(6)` under it, put 6 pt on one button, and the card
@@ -47,7 +59,6 @@ import Testing
 /// USED, never that they are the whole inset. Closing that would
 /// mean measuring a rendered card rather than reading its source,
 /// which is a different kind of test than this one.
-@MainActor
 @Suite("Preset grid floor (#862)")
 struct PresetGridFloorTests {
     /// The two keys the action row draws, in the order it draws
@@ -87,12 +98,25 @@ struct PresetGridFloorTests {
     /// `cardDrawsItsDeclaredMetrics` needles the two spacing
     /// constants, not the size. Stated rather than asserted
     /// because pinning it would mean rendering the real card.
+    /// Memoized, and the memo is not a micro-optimisation.
+    /// `SettingsModeRevealTests`' hang guard is sized against
+    /// "heavy synchronous `@MainActor` suites back the main actor
+    /// up past 30 s in a full run" — its own docstring — and this
+    /// suite is one. Distinct titles are far fewer than catalogs
+    /// times keys, so measuring each once is most of the load
+    /// gone for free.
+    @MainActor private static var widths: [String: CGFloat] = [:]
+
+    @MainActor
     private static func buttonWidth(_ title: String) -> CGFloat {
+        if let cached = widths[title] { return cached }
         let button = NSButton(title: title, target: nil, action: nil)
         button.bezelStyle = .rounded
         button.controlSize = .large
         button.sizeToFit()
-        return button.frame.width
+        let width = button.frame.width
+        widths[title] = width
+        return width
     }
 
     /// The scan found catalogs. An empty corpus would make every
@@ -119,6 +143,7 @@ struct PresetGridFloorTests {
     }
 
     /// The floor holds the widest shipped button pair.
+    @MainActor
     @Test("every catalog's action row fits the declared floor")
     func actionRowFitsTheFloor() throws {
         let all = try Self.catalogs()
