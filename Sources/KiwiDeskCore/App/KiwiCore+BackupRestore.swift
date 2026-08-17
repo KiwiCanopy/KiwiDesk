@@ -35,10 +35,11 @@ extension KiwiCore {
     /// earlier cut swallowed all three writes with `try?` while
     /// the caller discarded the Bool — the user would have been
     /// told nothing at all.
+    @discardableResult
     public func restoreSetup(
         from bundle: SetupBundle,
         trash: (URL) throws -> Void
-    ) throws(SetupBundleError) {
+    ) throws(SetupBundleError) -> RestoreOutcome {
         // **Refuse before touching anything** when this Mac's
         // config is Lua-owned and the backup carries settings.
         // `loadConfig` would take the `applyConfigGlobals` branch,
@@ -65,76 +66,36 @@ extension KiwiCore {
         // back to the starter set, all persisted. A restore that
         // supplied no settings would have silently destroyed the
         // ones already there (`code-reviewer`, 2026-08-17).
-        discardArtifacts(
-            ConfigArtifact.allCases.filter {
-                $0.isCarried(by: bundle)
-            },
-            reason: "restore",
-            trash: trash
-        )
-
-        // Write the incoming setup before the reload reads it.
-        //
-        // **Each write names its own file when it fails.** An
-        // earlier cut reported `gui.json` for all three, so a
-        // failed profile write told the user about a file that had
-        // written fine (`code-reviewer`, 2026-08-17).
-        //
-        // **And a single bad profile must not abort the restore.**
-        // A hand-edited bundle can carry a name `ProfileManager`
-        // rejects — empty, containing `/`, leading `.` — which is
-        // the same threat model `replaceUserPalettes` is hardened
-        // against. Aborting there left the destination with its
-        // config in the Trash and nothing loaded, which is the
-        // worst outcome available: strictly worse than either
-        // finishing or refusing up front. So a profile that will
-        // not write is skipped and logged, exactly as a palette
-        // that cannot be admitted is dropped, and the restore
-        // continues to the reload.
-        if let config = bundle.config {
-            do {
-                try guiConfigStore.save(config)
-            } catch {
-                onLog("restore: gui.json write failed: \(error)")
-                throw .couldNotWrite(
-                    name: guiConfigStore.url.lastPathComponent
-                )
-            }
+        // **A removal that failed is a failed restore, not a
+        // footnote.** If the profiles directory survives both the
+        // trash and the hard delete, the bundle's profiles are
+        // written ALONGSIDE the destination's and a documented
+        // replace becomes a silent merge — nothing thrown, nothing
+        // logged. Converting this function to throwing dropped the
+        // Bool that used to carry that outcome, so the answer is
+        // now to refuse before anything is written rather than to
+        // report it afterwards (`architect-reviewer`, 2026-08-17).
+        // Reads `travelsInABackup` as well as the payload, which
+        // is what makes that property load-bearing rather than
+        // documentation with a test attached: a case flipped to
+        // `false` stops being discarded and stops being written,
+        // which is the whole meaning of not travelling.
+        let replacing = ConfigArtifact.allCases.filter {
+            $0.travelsInABackup && bundle.replaces($0)
         }
-        var skippedProfiles: [String] = []
-        for profile in bundle.profiles {
-            do {
-                try profiles.write(profile)
-            } catch {
-                skippedProfiles.append(profile.name)
-                onLog(
-                    "restore: skipped profile "
-                        + "'\(profile.name)': \(error)"
-                )
-            }
-        }
-        // Every profile failing is not a skip, it is a failed
-        // restore — and it is distinguishable from a bundle that
-        // carried none, which is legal.
-        if !bundle.profiles.isEmpty,
-            skippedProfiles.count == bundle.profiles.count
-        {
+        guard
+            discardArtifacts(
+                replacing,
+                reason: "restore",
+                trash: trash
+            )
+        else {
             throw .couldNotWrite(
                 name: profiles.directory.lastPathComponent
             )
         }
-        if !bundle.palettes.isEmpty {
-            do {
-                try paletteLibrary.replaceUserPalettes(
-                    with: bundle.palettes
-                )
-            } catch {
-                onLog("restore: palettes write failed: \(error)")
-                throw .couldNotWrite(
-                    name: paletteLibrary.url.lastPathComponent
-                )
-            }
-        }
+
+        let outcome = try writeIncoming(bundle)
 
         // Adoption is the one piece of live profile state the
         // incoming config cannot speak for: it records which
@@ -206,6 +167,89 @@ extension KiwiCore {
         // engine's ±2 pt "already there" tolerance for the small
         // moves a settings change makes.
         retile(force: true)
-        onLog("setup restored from backup")
+        onLog(
+            outcome.isClean
+                ? "setup restored from backup"
+                : "setup restored, skipping "
+                    + "\(outcome.skippedProfiles.count) profile(s) "
+                    + "and \(outcome.refusedPalettes) palette(s)"
+        )
+        return outcome
+    }
+
+    /// Writes the bundle's three payloads, reporting what it could
+    /// not take.
+    ///
+    /// The one phase worth extracting from the sequence above: its
+    /// internal order does not matter relative to the rest, it
+    /// either lands or throws, and pulling it out is what gives
+    /// the skipped-profile information somewhere to live
+    /// (`architect-reviewer`, 2026-08-17). The rest of
+    /// `restoreSetup` stays one ordered transaction on purpose —
+    /// five private phases would make calling them out of order
+    /// expressible, which is the hazard three separate defects
+    /// have already come from.
+    ///
+    /// **Each write names its own file when it fails**; an earlier
+    /// cut reported `gui.json` for all three.
+    ///
+    /// **And a single bad profile is skipped, not fatal.** A
+    /// hand-edited bundle can carry a name `ProfileManager`
+    /// rejects, and aborting there left the destination with its
+    /// config in the Trash and nothing loaded — the worst outcome
+    /// available, strictly worse than finishing or refusing up
+    /// front.
+    private func writeIncoming(
+        _ bundle: SetupBundle
+    ) throws(SetupBundleError) -> RestoreOutcome {
+        if let config = bundle.config {
+            do {
+                try guiConfigStore.save(config)
+            } catch {
+                onLog("restore: gui.json write failed: \(error)")
+                throw .couldNotWrite(
+                    name: guiConfigStore.url.lastPathComponent
+                )
+            }
+        }
+        var skipped: [String] = []
+        for profile in bundle.profiles {
+            do {
+                try profiles.write(profile)
+            } catch {
+                skipped.append(profile.name)
+                onLog(
+                    "restore: skipped profile "
+                        + "'\(profile.name)': \(error)"
+                )
+            }
+        }
+        // Every profile failing is not a skip, it is a failed
+        // restore — and it is distinguishable from a bundle that
+        // carried none, which is legal.
+        if !bundle.profiles.isEmpty,
+            skipped.count == bundle.profiles.count
+        {
+            throw .couldNotWrite(
+                name: profiles.directory.lastPathComponent
+            )
+        }
+        var refused = 0
+        if !bundle.palettes.isEmpty {
+            do {
+                refused = try paletteLibrary.replaceUserPalettes(
+                    with: bundle.palettes
+                )
+            } catch {
+                onLog("restore: palettes write failed: \(error)")
+                throw .couldNotWrite(
+                    name: paletteLibrary.url.lastPathComponent
+                )
+            }
+        }
+        return RestoreOutcome(
+            skippedProfiles: skipped,
+            refusedPalettes: refused
+        )
     }
 }

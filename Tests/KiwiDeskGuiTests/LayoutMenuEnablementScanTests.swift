@@ -23,9 +23,6 @@ import Testing
 /// precedent).
 @Suite("Layout menu rows state their enablement (#802)")
 struct LayoutMenuEnablementScanTests {
-    private static let builder =
-        "Sources/KiwiDesk/StatusItemController+Layout.swift"
-
     /// Rows constructed in the builder that state their enablement
     /// somewhere ELSE, and where. One entry today.
     ///
@@ -162,7 +159,13 @@ struct LayoutMenuEnablementScanTests {
     /// binding it names is what stops one row paying for another.
     @Test("Every constructed row states its OWN isEnabled")
     func everyRowStatesEnablement() throws {
-        let whole = try source(Self.builder)
+        for builder in QuickMenuBuilders.checked {
+            try checkRows(in: builder)
+        }
+    }
+
+    private func checkRows(in builder: String) throws {
+        let whole = try source(builder)
         // `.separator()` constructs no `NSMenuItem` and has no
         // enablement to state, so it never enters the counts.
         let exempt = Set(Self.statedByTheCaller.map(\.row))
@@ -177,7 +180,7 @@ struct LayoutMenuEnablementScanTests {
                 !built.contains(where: { $0 == nil }),
                 Comment(
                     rawValue:
-                        "\(Self.builder) constructs an NSMenuItem "
+                        "\(builder) constructs an NSMenuItem "
                         + "bound to no name, so nothing can state "
                         + "its isEnabled — bind it to a `let` and "
                         + "state it (#802)."
@@ -194,7 +197,7 @@ struct LayoutMenuEnablementScanTests {
                         rawValue:
                             "`\(name)` is constructed "
                             + "\(constructions) time(s) in this "
-                            + "scope of \(Self.builder) and states "
+                            + "scope of \(builder) and states "
                             + "isEnabled \(statements) time(s). A "
                             + "row that states nothing is enabled "
                             + "by default, which is what #802 "
@@ -205,18 +208,17 @@ struct LayoutMenuEnablementScanTests {
                 )
             }
         }
-        #expect(
-            total > 0,
-            "the scan found no rows at all — has the builder moved?"
-        )
+        #expect(total > 0)
     }
 
     @Test("The exempt row really is constructed here")
     func exemptRowsExist() throws {
-        let whole = try source(Self.builder)
         let built = Set(
-            scopes(whole).flatMap { constructedRows($0) }
-                .compactMap { $0 }
+            try QuickMenuBuilders.checked.flatMap { builder in
+                scopes(try source(builder))
+                    .flatMap { constructedRows($0) }
+                    .compactMap { $0 }
+            }
         )
         for entry in Self.statedByTheCaller {
             // An exemption for a row the builder no longer makes is
@@ -226,7 +228,7 @@ struct LayoutMenuEnablementScanTests {
                 Comment(
                     rawValue:
                         "`\(entry.row)` is exempted but no longer "
-                        + "constructed in \(Self.builder)"
+                        + "constructed in any listed builder"
                 )
             )
         }
@@ -257,9 +259,11 @@ struct LayoutMenuEnablementScanTests {
     /// the flag does not inherit, so each `NSMenu()` needs its own.
     @Test("Every menu the builder creates turns auto-enabling off")
     func everyMenuDisablesAutoEnable() throws {
-        let source = try source(Self.builder)
-        let menus = source.occurrences(of: "NSMenu()")
-        let disabled = source.occurrences(
+        let joined = try QuickMenuBuilders.checked
+            .map { try source($0) }
+            .joined(separator: "\n")
+        let menus = joined.occurrences(of: "NSMenu()")
+        let disabled = joined.occurrences(
             of: "autoenablesItems = false"
         )
         #expect(menus > 0)
@@ -267,10 +271,10 @@ struct LayoutMenuEnablementScanTests {
             disabled == menus,
             Comment(
                 rawValue:
-                    "\(Self.builder) creates \(menus) NSMenu(s) "
-                    + "and turns auto-enabling off \(disabled) "
-                    + "time(s). The flag is per menu and does not "
-                    + "inherit from a parent."
+                    "the quick-menu builders create \(menus) "
+                    + "NSMenu(s) and turn auto-enabling off "
+                    + "\(disabled) time(s). The flag is per menu "
+                    + "and does not inherit from a parent."
             )
         )
     }

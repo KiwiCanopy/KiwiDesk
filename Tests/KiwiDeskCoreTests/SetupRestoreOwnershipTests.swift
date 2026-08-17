@@ -67,6 +67,42 @@ struct SetupRestoreOwnershipTests {
         )
     }
 
+    @Test("A clean restore reports nothing skipped")
+    func cleanRestoreIsClean() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+
+        let outcome = try core.restoreSetup(
+            from: incomingBundle(),
+            trash: hardDelete
+        )
+        #expect(outcome.isClean)
+    }
+
+    @Test("A refused palette is reported, not only logged")
+    func refusedPaletteIsReported() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let builtin = try #require(
+            core.paletteLibrary.builtins().first?.name
+        )
+
+        let outcome = try core.restoreSetup(
+            from: SetupBundle(
+                writtenBy: "0.9.6",
+                config: GuiConfig(),
+                profiles: [],
+                palettes: [palette(builtin), palette("Fine")]
+            ),
+            trash: hardDelete
+        )
+
+        // Dropping it is right; dropping it SILENTLY is what this
+        // feature's own export path argues against for itself.
+        #expect(outcome.refusedPalettes == 1)
+        #expect(!outcome.isClean)
+    }
+
     @Test("A Lua-owned Mac refuses a settings backup untouched")
     func luaOwnedDestinationRefuses() throws {
         let core = makeTestCore()

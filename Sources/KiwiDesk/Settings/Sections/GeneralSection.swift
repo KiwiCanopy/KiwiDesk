@@ -271,6 +271,26 @@ struct GeneralSection: View {
         } message: { error in
             Text(SetupBackupText.sentence(for: error))
         }
+        // A restore that happened but could not take everything.
+        // Its own alert rather than a branch inside the error one:
+        // it is not a failure, and a title claiming otherwise
+        // would send the user hunting for a problem that is not
+        // there.
+        .alert(
+            SetupBackupText.partialTitle,
+            isPresented: partialRestoreBinding,
+            presenting: model.lastRestoreOutcome
+        ) { _ in
+        } message: { outcome in
+            Text(SetupBackupText.sentence(for: outcome))
+        }
+    }
+
+    private var partialRestoreBinding: Binding<Bool> {
+        Binding(
+            get: { model.lastRestoreOutcome != nil },
+            set: { if !$0 { model.lastRestoreOutcome = nil } }
+        )
     }
 
     /// Presented exactly while an error is held — one source of

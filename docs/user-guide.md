@@ -600,8 +600,21 @@ you are moving *into*:
 Some files are refused before you are asked anything at all: one
 that is not a KiwiDesk backup, one written by a **newer**
 KiwiDesk than the copy you are restoring into (update that copy
-first), and one that would restore nothing — so an empty backup
-can never be mistaken for a wipe you asked for.
+first), one that would restore nothing — so an empty backup can
+never be mistaken for a wipe you asked for — and one carrying
+settings when *this* Mac's settings come from your `init.lua`,
+since a backup's settings cannot be applied where Lua owns them.
+A backup with only profiles and palettes restores onto such a Mac
+normally.
+
+**Exporting** refuses in one case too: if KiwiDesk cannot read
+this Mac's own settings file, it says so rather than writing a
+backup with every setting missing.
+
+If a restore takes almost everything, it tells you what it left:
+a profile whose file cannot be read, or a colour palette that
+would shadow a built-in one, is skipped and counted rather than
+silently dropped. Everything else still lands.
 
 It sits at the very end of **General ▸ Advanced**, after Reset
 All Settings, because it is the most far-reaching action there:

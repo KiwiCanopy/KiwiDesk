@@ -29,11 +29,20 @@ extension KiwiCore {
     /// Reads the stores rather than the directory — the
     /// allow-list argument is `SetupBundle`'s.
     public func exportSetup() -> SetupBundle {
+        // Each field asks the register whether it travels, so
+        // `travelsInABackup` is the switch rather than a comment
+        // beside one: flip a case to `false` and it stops being
+        // exported, stops being discarded and stops being written,
+        // which is what "does not travel" has to mean to be worth
+        // recording (`architect-reviewer`, 2026-08-17).
         SetupBundle(
             writtenBy: KiwiDeskVersion.semantic,
-            config: guiConfigStore.load(),
-            profiles: profiles.allProfiles(),
-            palettes: paletteLibrary.userPalettes()
+            config: ConfigArtifact.guiConfig.travelsInABackup
+                ? guiConfigStore.load() : nil,
+            profiles: ConfigArtifact.profiles.travelsInABackup
+                ? profiles.allProfiles() : [],
+            palettes: ConfigArtifact.palettes.travelsInABackup
+                ? paletteLibrary.userPalettes() : []
         )
     }
 
@@ -50,8 +59,18 @@ extension KiwiCore {
         guard let data = try? Data(contentsOf: url) else {
             throw .unreadable
         }
+        let decoder = JSONDecoder()
+        // `.iso8601` both ways, matching `ProfileManager` and every
+        // other JSON this app writes. The default strategy would
+        // put `saved_at` in a backup as a raw epoch number while
+        // the same field in every profile file reads
+        // "2026-08-16T20:45:13Z" — self-consistent, and wrong for
+        // the one artifact whose whole justification is a human
+        // opening it. Found by hand-writing a backup and watching
+        // the app refuse it.
+        decoder.dateDecodingStrategy = .iso8601
         guard
-            let bundle = try? JSONDecoder().decode(
+            let bundle = try? decoder.decode(
                 SetupBundle.self,
                 from: data
             )
@@ -125,6 +144,10 @@ extension KiwiCore {
         let bundle = exportSetup()
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        // Paired with the decoder's strategy above; the two must
+        // not drift, which `SetupBundleTests.datesAreReadable`
+        // pins from the written file.
+        encoder.dateEncodingStrategy = .iso8601
         guard
             let head = try? encoder.encode(
                 Header(

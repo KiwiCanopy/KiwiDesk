@@ -107,12 +107,28 @@ change here:
 
 ## A new file in the config directory answers the backup question
 
-`SetupBundle` (#606) is what a backup carries, and its contents
-are an **allow-list, never a directory sweep** — that type's doc
-comment is the one register of what travels and what is left
-behind, with the reason per entry. So **adding a file to
-`~/.config/KiwiDesk` owes an explicit answer to "does this
-travel?" in the same change set**, recorded there.
+A backup carries an **allow-list, never a directory sweep**, and
+the register is `ConfigArtifact` — one case per file, answering
+where it lives, whether it travels, and why not when it does not.
+`SetupBundle`'s doc comment argues the reasoning; the enum is what
+the code reads. So **adding a file to `~/.config/KiwiDesk` owes a
+case there and an answer to "does this travel?" in the same change
+set** — a prose line alone leaves the code unchanged, and a case
+alone leaves the reason unrecorded.
+
+`travelsInABackup` is load-bearing rather than documentation:
+`exportSetup` and the restore's discard both read it, so flipping
+a case to `false` changes behaviour rather than only a test.
+
+**A change that breaks the decoded shape of anything the bundle
+carries bumps `SetupBundle.currentFormat` in the same change set.**
+Nothing can guard this, and it is the obligation the format
+integer rests on: `<=` is decoder tolerance rather than a
+compatibility shim, so an older backup is accepted — which is
+right, and which silently becomes a lie the first time a
+`GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
+actively encourages that rename, so the bump is the reader's
+responsibility here.
 
 `SetupBundleTests.theAllowListIsPinned` guards the bundle's own
 shape in both directions, by reflection over its stored

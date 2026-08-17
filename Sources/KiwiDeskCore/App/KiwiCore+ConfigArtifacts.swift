@@ -10,7 +10,7 @@ import Foundation
 /// duplication §2.4 protects, but a **failure-mode policy** whose
 /// copies can diverge, and they already had (different log
 /// prefixes, one inlined and one extracted, only one callable).
-enum ConfigArtifact: CaseIterable {
+public enum ConfigArtifact: CaseIterable {
     /// The GUI's settings sidecar.
     case guiConfig
     /// Every saved profile.
@@ -31,30 +31,9 @@ enum ConfigArtifact: CaseIterable {
     /// So a new file under `~/.config/KiwiDesk` adds a case here
     /// and answers this property in the same change set.
     /// `SetupBundleArtifactTests` holds the two together.
-    var travelsInABackup: Bool {
+    public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes: return true
-        }
-    }
-
-    /// Whether `bundle` carries anything for this artifact.
-    ///
-    /// **One rule for all three, and it is the register's to
-    /// state.** A restore discards an artifact exactly when the
-    /// bundle can replace it. The three conditions were written
-    /// separately at first and one was the opposite of its
-    /// neighbours — `.profiles` was discarded unconditionally, so
-    /// a settings-only bundle (which `isEmpty` legitimately
-    /// admits, refusing only all three at once) trashed every
-    /// profile on the destination and wrote none back. That lands
-    /// the user on the exact all-`.bsp` symptom the restore's
-    /// adoption comment describes, by a different road
-    /// (`code-reviewer`, 2026-08-17).
-    func isCarried(by bundle: SetupBundle) -> Bool {
-        switch self {
-        case .guiConfig: return bundle.config != nil
-        case .profiles: return !bundle.profiles.isEmpty
-        case .palettes: return !bundle.palettes.isEmpty
         }
     }
 
@@ -62,7 +41,7 @@ enum ConfigArtifact: CaseIterable {
     /// behind. Empty today, and kept as a declared slot rather
     /// than dropped: its absence is what would make a future
     /// exclusion look like an omission instead of a decision.
-    var leftBehindBecause: String? {
+    public var leftBehindBecause: String? {
         switch self {
         case .guiConfig, .profiles, .palettes: return nil
         }

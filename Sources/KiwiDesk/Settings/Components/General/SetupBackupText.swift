@@ -68,6 +68,47 @@ enum SetupBackupText {
         }
     }
 
+    /// What a restore could not take, in one sentence.
+    ///
+    /// Counts sit **last behind a label** so no locale has to
+    /// agree with a number mid-sentence (`localization.md`), which
+    /// is also why this is two sentences rather than one frame
+    /// carrying both numbers.
+    static func sentence(for outcome: RestoreOutcome) -> String {
+        var parts: [String] = []
+        if !outcome.skippedProfiles.isEmpty {
+            parts.append(
+                L(
+                    "general.advanced.backup.restore.skipped"
+                        + ".profiles",
+                    "Profiles that couldn't be read: %1$d",
+                    outcome.skippedProfiles.count
+                )
+            )
+        }
+        if outcome.refusedPalettes > 0 {
+            parts.append(
+                L(
+                    "general.advanced.backup.restore.skipped"
+                        + ".palettes",
+                    "Color palettes skipped: %1$d",
+                    outcome.refusedPalettes
+                )
+            )
+        }
+        return parts.joined(separator: "\n")
+    }
+
+    /// The partial-restore alert's title. Not an error title: the
+    /// restore happened, and saying otherwise would send a user
+    /// looking for a failure that is not there.
+    static var partialTitle: String {
+        L(
+            "general.advanced.backup.restore.partial_title",
+            "Restored, with Some Items Skipped"
+        )
+    }
+
     /// The alert's title — one for every case, because a title
     /// that changes per cause reads as five different failures of
     /// five different features.

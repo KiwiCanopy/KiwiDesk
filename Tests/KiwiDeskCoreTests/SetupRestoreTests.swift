@@ -152,8 +152,8 @@ struct SetupRestoreTests {
         )
     }
 
-    @Test("A settings-only backup keeps the profiles it cannot replace")
-    func settingsOnlyBackupKeepsProfiles() throws {
+    @Test("A backup with no profiles clears them — replace means replace")
+    func emptyProfilesArrayStillReplaces() throws {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
         try core.profiles.save(profile("Local"))
@@ -170,12 +170,15 @@ struct SetupRestoreTests {
             trash: hardDelete
         )
 
-        // The discard used to be unconditional for profiles, so a
-        // settings-only bundle trashed every profile and wrote none
-        // back. `ConfigArtifact.isCarried` is the one rule now.
-        #expect(
-            core.profiles.allProfiles().map(\.name) == ["Local"]
-        )
+        // **Absent, not empty.** The export always writes the
+        // `profiles` key, so `[]` means the source Mac had none —
+        // and replacing with none is what the ruling promises: the
+        // destination holds exactly what the source held. An
+        // earlier cut read `[]` as "nothing to replace" and left
+        // the local profile standing, turning a documented replace
+        // into a merge and pinning it with this very test
+        // (`architect-reviewer`, 2026-08-17).
+        #expect(core.profiles.allProfiles().isEmpty)
     }
 
     @Test("A palette shadowing a built-in is dropped, not restored")

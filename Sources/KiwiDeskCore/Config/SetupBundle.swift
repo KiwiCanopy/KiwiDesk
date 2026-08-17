@@ -94,6 +94,33 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         format <= SetupBundle.currentFormat
     }
 
+    /// Whether this bundle replaces `artifact` — and the
+    /// distinction is **absent, not empty**.
+    ///
+    /// An empty `profiles` or `palettes` array is not an absence:
+    /// the export always writes both keys, so `[]` means *the
+    /// source Mac had none*, and replacing with none is exactly
+    /// what `docs/design-decisions.md` ▸ "A restore replaces; it
+    /// never merges" promises — "the destination holds exactly
+    /// what the source held, so a user can confirm it by looking".
+    /// Only `config == nil` is a true absence, and only because a
+    /// Lua-owned source has no sidecar to carry.
+    ///
+    /// An earlier cut put this on `ConfigArtifact` and answered
+    /// `!isEmpty` for all three, which turned a documented replace
+    /// into a merge in two dimensions and pinned it with a test:
+    /// restoring a backup from a Mac with no palettes left the
+    /// destination's library standing, against both the ruling and
+    /// the confirm dialog's own copy. Writing it from the FILE's
+    /// point of view is what got it wrong; the truth is entirely a
+    /// property of the payload (`architect-reviewer`, 2026-08-17).
+    public func replaces(_ artifact: ConfigArtifact) -> Bool {
+        switch artifact {
+        case .guiConfig: return config != nil
+        case .profiles, .palettes: return true
+        }
+    }
+
     /// True when the bundle would restore nothing at all — no
     /// settings, no profiles, no palettes.
     ///
@@ -103,6 +130,31 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// for.
     public var isEmpty: Bool {
         config == nil && profiles.isEmpty && palettes.isEmpty
+    }
+}
+
+/// What a restore did that the user did not ask for.
+///
+/// Structure rather than a log line, for the same reason every
+/// other condition in this feature is (#96): a restore that wrote
+/// three of five profiles and dropped two palettes used to report
+/// unqualified success, while this feature's own export path
+/// argues that a backup which silently did not happen is worse
+/// than one that says so (`architect-reviewer`, 2026-08-17).
+///
+/// Empty means a clean restore, which is the overwhelmingly common
+/// case — every value here needs a hand-edited bundle to reach.
+public struct RestoreOutcome: Equatable, Sendable {
+    /// Profiles the bundle carried that could not be written —
+    /// a name `ProfileManager` rejects, reachable from a
+    /// hand-edited file.
+    public let skippedProfiles: [String]
+    /// Palettes dropped for shadowing a built-in, duplicating
+    /// another, or carrying no admissible colours.
+    public let refusedPalettes: Int
+
+    public var isClean: Bool {
+        skippedProfiles.isEmpty && refusedPalettes == 0
     }
 }
 

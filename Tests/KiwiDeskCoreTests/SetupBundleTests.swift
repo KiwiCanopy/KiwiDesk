@@ -211,6 +211,34 @@ struct SetupBundleTests {
         #expect(appRules.lowerBound < spaces.lowerBound)
     }
 
+    /// Dates in a backup read as dates, not as epoch numbers.
+    ///
+    /// The encoder and decoder must agree, and a round-trip test
+    /// cannot see it: two DEFAULT strategies round-trip perfectly
+    /// while writing `saved_at` as `776...` — self-consistent, and
+    /// the only wrong thing about it is invisible to every
+    /// assertion that does not read the file. Found by
+    /// hand-writing a backup with the on-disk ISO form and
+    /// watching the app refuse it as `.notABackup`.
+    @Test("Dates are written the way every other file writes them")
+    func datesAreReadable() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.save(profile("Desk"))
+        let url = core.configDirectory
+            .appendingPathComponent("dated.json")
+
+        try core.writeBackup(to: url)
+        let text = try String(contentsOf: url, encoding: .utf8)
+
+        // ISO8601, as `ProfileManager` writes it — a `T` and a `Z`
+        // inside the quoted value, never a bare number.
+        #expect(text.contains("\"saved_at\" : \""))
+        #expect(text.contains("T"))
+        // And it still reads back, so the pair agrees.
+        #expect(try core.readBackup(at: url).profiles.count == 1)
+    }
+
     @Test("A bundle round-trips through JSON unchanged")
     func roundTrips() throws {
         let core = makeTestCore()
