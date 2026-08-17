@@ -251,6 +251,54 @@ it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
 debugged on the release everyone downloads.
 
+### Linking the notes is not opening a channel
+
+**[Rationale]**
+
+The rule above governs **acquisition** — where a person who does
+not yet have KiwiDesk, or whose copy has gone stale, goes to get
+one. That is why it is phrased about publication and promotion
+rather than about links: what strands a user is arriving at an
+installable artifact by a route that cannot update itself.
+
+A link labelled for the release **notes** serves the opposite
+reader: someone who already has the app, opening it from inside
+their own copy, to find out what changed in the version they are
+running. It recruits nobody into an unmanaged update path. So the
+rule does not reach it, and the **label is what decides which of
+the two a link is** — not the destination's file listing, which
+GitHub composes for every project alike.
+
+Both halves matter, because two different mistakes follow from
+dropping either:
+
+- Read the rule as reaching any link at all, and the app can
+  never tell a user what changed — not until Sparkle ships, which
+  is indefinite. The alternative someone reaches for next is an
+  in-app notes reader, which is a new surface duplicating
+  rendering GitHub already does better, built to satisfy a rule
+  that was never about reading.
+- Read "the label decides" as licence, and the row drifts toward
+  the download it must not become. So the obligation is on the
+  words: a surface pointing at the releases page stays named for
+  the notes. Never retitle it to *Download*, *Get*, *Latest* or
+  *New Version*, and never point it at a release asset rather
+  than the page. Those four words are the line, and crossing it
+  is what turns an informational pointer into the promoted
+  standalone download the rule above forbids.
+
+Trade-off: a reader who follows the link does meet the ZIP, one
+scroll below the notes. Accepted — they are already installed, so
+the asset is at worst redundant to them, and the alternative
+costs every user the ability to see what changed in order to hide
+an artifact from the people least likely to need it.
+
+When Sparkle lands it will show the current version's notes on
+update. That does not retire this link: Sparkle answers "what is
+in the update in front of me", and this answers "what changed
+across every version, whenever I ask" — including for a user who
+skipped four of them.
+
 ### Feature names: which stay English, which translate
 
 **[Principle]**

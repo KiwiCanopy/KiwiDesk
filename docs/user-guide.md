@@ -480,6 +480,18 @@ Settings…**: what a reset deletes is spelled out under that
 button and again in its confirmation, which is where you are when
 you need it.
 
+## What Changed in This Version
+
+**General ▸ About** shows the version you are running, and
+**Release Notes** beneath it opens the release history in your
+browser — every version's notes, not just the current one, so you
+can read back through what changed while you were on an older
+build.
+
+It opens in a browser rather than in a window of KiwiDesk's own
+because the notes live on GitHub, which renders them with
+formatting and pictures that an in-app reader would only flatten.
+
 ## GUI Language
 
 Go to **General** (in the **Applies immediately** group) and pick

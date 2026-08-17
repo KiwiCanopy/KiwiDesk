@@ -29,28 +29,79 @@ extension GeneralSection {
         SettingsSection(SettingsCatalog.general.aboutCard) {
             VStack(spacing: 10) {
                 aboutBrand
-                Text(KiwiDeskVersion.displayString)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-                Link(destination: SupportLinks.koFi) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart")
-                        Text(
-                            L(
-                                "general.about.support",
-                                "Support KiwiDesk"
-                            )
-                        )
-                        .underline()
-                    }
+                // The version and what changed in it are ONE
+                // topic — "what you have" and "what arrived" —
+                // so they sit closer to each other than either
+                // does to the support ask below, which is an
+                // unrelated request and reads best as the card's
+                // last word (ui-designer, 2026-08-17). Uniform
+                // spacing made all three equidistant and said
+                // none of that.
+                VStack(spacing: 4) {
+                    Text(KiwiDeskVersion.displayString)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                    releaseNotesLink
                 }
-                .buttonStyle(.plain)
-                .font(.callout)
-                .linkHover()
+                supportLink
             }
             .frame(maxWidth: .infinity)
         }
+    }
+
+    /// What changed in the version above it (#570).
+    ///
+    /// Deliberately NOT the support link's shape: that link's
+    /// heart and `.callout` are this card's one ask, and a second
+    /// link drawn to match turns a personal plea into a links
+    /// row, after which nothing on screen says which one the
+    /// maker actually wants. So this one takes the plainer
+    /// informational treatment — the caption's size, no symbol —
+    /// and the asymmetry is the point rather than an oversight
+    /// (ui-designer, 2026-08-17).
+    ///
+    /// No `.foregroundStyle` here on purpose: `linkHover()`
+    /// already renders secondary at rest and lifts to primary on
+    /// hover, so a foreground of our own would either fight it or
+    /// be overwritten.
+    ///
+    /// A plain outbound `Link` rather than an in-app notes
+    /// reader. `gui.md`'s "a picture whose object is not the
+    /// draft goes in a sheet" does **not** reach this: its scope
+    /// is content this app renders from data it owns, and release
+    /// notes are neither — GitHub already renders them, with
+    /// formatting and images a native sheet would not reproduce.
+    @ViewBuilder var releaseNotesLink: some View {
+        Link(destination: SupportLinks.releases) {
+            Text(
+                L("general.about.release_notes", "Release Notes")
+            )
+            .underline()
+        }
+        .buttonStyle(.plain)
+        .font(.caption)
+        .linkHover()
+    }
+
+    /// The card's last word: the one ask, and the only link here
+    /// carrying a symbol.
+    @ViewBuilder var supportLink: some View {
+        Link(destination: SupportLinks.koFi) {
+            HStack(spacing: 4) {
+                Image(systemName: "heart")
+                Text(
+                    L(
+                        "general.about.support",
+                        "Support KiwiDesk"
+                    )
+                )
+                .underline()
+            }
+        }
+        .buttonStyle(.plain)
+        .font(.callout)
+        .linkHover()
     }
 
     /// The wordmark is artwork, not text, so its ink is baked at
