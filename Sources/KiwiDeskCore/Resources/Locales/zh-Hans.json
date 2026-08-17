@@ -758,7 +758,7 @@
   "palettes.reserved": "该名称属于内置调色板，请另选一个。",
   "palettes.save": "保存",
   "palettes.save_current": "将当前颜色存储为…",
-  "palettes.title": "主题与调色板",
+  "palettes.title": "调色板",
   "panel.caption.draft": "显示的是你的草稿，而非已保存的描述文件。",
   "panel.changed_in_draft": "此草稿中的更改 — %1$d 项",
   "panel.draft_clean": "所有设置都与已保存的描述文件一致。",

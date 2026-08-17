@@ -758,7 +758,7 @@
   "palettes.reserved": "Ese nombre es de una paleta integrada — elige otro.",
   "palettes.save": "Guardar",
   "palettes.save_current": "Guardar colores actuales como…",
-  "palettes.title": "Temas y paletas de colores",
+  "palettes.title": "Paleta de colores",
   "panel.caption.draft": "Muestra tu borrador, no el perfil guardado.",
   "panel.changed_in_draft": "Cambios en este borrador — %1$d",
   "panel.draft_clean": "Todo coincide con el perfil guardado.",

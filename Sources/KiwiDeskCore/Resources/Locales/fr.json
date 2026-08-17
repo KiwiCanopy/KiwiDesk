@@ -758,7 +758,7 @@
   "palettes.reserved": "Ce nom est réservé à une palette intégrée — choisissez-en un autre.",
   "palettes.save": "Enregistrer",
   "palettes.save_current": "Enregistrer les couleurs actuelles sous…",
-  "palettes.title": "Thèmes & Palettes de couleurs",
+  "palettes.title": "Palette de couleurs",
   "panel.caption.draft": "Affiche votre brouillon, pas le profil enregistré.",
   "panel.changed_in_draft": "Modifications dans ce brouillon — %1$d",
   "panel.draft_clean": "Tout correspond au profil enregistré.",

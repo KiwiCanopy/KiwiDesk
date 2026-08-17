@@ -758,7 +758,7 @@
   "palettes.reserved": "その名前は内蔵パレットのものです。別の名前を選んでください。",
   "palettes.save": "保存",
   "palettes.save_current": "現在のカラーを別名で保存…",
-  "palettes.title": "テーマ & カラーパレット",
+  "palettes.title": "カラーパレット",
   "panel.caption.draft": "保存済みのプロファイルではなく、下書きを表示しています。",
   "panel.changed_in_draft": "この下書きでの変更 — %1$d件",
   "panel.draft_clean": "すべて保存済みのプロファイルと一致しています。",
