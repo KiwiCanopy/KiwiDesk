@@ -2502,6 +2502,48 @@ was the worked exception while it had no panel of its own;
 same rule rather than by a new decision — the condition
 changed, not the convention.
 
+**The panel's object is the DRAFT, so a picture of anything else
+is not a panel** — it is a sheet. (#859, owner 2026-08-16.)
+Preset cards raised the case: a card can identify a preset — its
+name, how many screens it plans for, one glyph per screen — but
+it cannot describe one, and Apply is consequential, so the only
+way to find out what a preset contained was to apply it and read
+the result. The panel is where this window already puts depth,
+and it is the wrong place twice over. Its column is headed "Live
+preview · <area>" and redraws from the staged draft, while a
+preset is a *catalog entry* the draft has no say in; the two
+differ exactly while a draft is open, which is when the heading
+would be lying. And the column is not always a column: by
+"Narrow windows drop the preview before they drop a control"
+below — which owns the bands, and whose promise that the preview
+loses its column and never its existence still holds — a narrower
+window hands the same content over as a card the reader summons
+and then drags out of the way. That is the right trade for a
+preview redundant with the controls beside it, and the wrong one
+for a picture that IS the answer, whose delivery should not turn
+on how wide the window happens to be. A sheet inverts both:
+its object is whatever it was handed, and its size is its own.
+
+The general rule this settles, so the next surface does not
+re-argue it: **choose the container by whose object the picture
+is.** Draft → the panel. A catalog entry, a stored file, anything
+the user is not currently editing → a sheet off the thing that
+names it. That is also why the sheet stays *read-only*: the
+moment it grows a commit it is a dialog, and the commit belongs
+to the surface that owns the object. Profiles therefore joins no
+`SettingsDetailPanelOffer.offering` and its cards owe no preview
+migration — `DetailPanelTests` pins that refusal with all three
+grounds, precisely because the redesign prototype drew a panel
+here and a later reader would otherwise take the prototype for
+the ruling.
+
+One consequence worth stating because it is not obvious: the
+sheet draws from the preset's own `TilingSettings`, never the
+draft's. Drawing it from the draft would make the picture change
+when the user edited something unrelated, and would quietly turn
+Profiles back into a draft-preview surface — the one line the
+whole ruling above rests on.
+
 **A composite question needs a composite picture, in the
 colours the user actually set.** (#793, owner 2026-08-16.)
 Advanced Colours edits twenty-five colours in four groups, and
@@ -5086,8 +5128,13 @@ exists to answer: *which screen gets what*. Screens are the one
 thing that stays legible from one display to three, so the card
 draws an outline per display carrying the layout that display's
 first space opens in, and the space total goes underneath as
-text. What is given up is per-space detail in the thumbnail,
-which the Spaces page owns properly once the preset is applied.
+text. What is given up is per-space detail in the thumbnail —
+which #859 gave back *before* applying, in the preview sheet the
+card's own **Layouts** button opens (see "the panel's object is
+the DRAFT" above); the Spaces page still owns it once the preset
+is applied. Read the thumbnail's job as identifying a preset
+rather than describing one: the moment a card is asked to
+describe, the answer is a surface of its own.
 
 **[Principle]**
 

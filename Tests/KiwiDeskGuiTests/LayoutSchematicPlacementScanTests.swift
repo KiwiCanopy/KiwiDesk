@@ -26,10 +26,29 @@ struct LayoutSchematicPlacementScanTests {
     /// alongside it, which is precisely the "a schematic written
     /// tomorrow" case this suite exists for. A tree that imports
     /// the family joins this list in the same change.
+    ///
+    /// `Components/Profiles` joined in #859, when the preset
+    /// preview sheet began mounting `LayoutSchematicView` — the
+    /// same trigger, one tree over, and the obligation above
+    /// discharged rather than reasoned about.
+    ///
+    /// **Stated limit on what a new root buys.** The sharper half
+    /// of this suite — `schematicsConsumePlacementOnlyByPassingItOn`
+    /// — filters on filenames containing "Schematic", and no file
+    /// in `Components/Profiles` or `Onboarding` has one. So those
+    /// roots get the two-case line scan and the root-coverage
+    /// check, not the "may not consume a placement at all" rule: a
+    /// copy spelled around the enum cases
+    /// (`placement?.rawValue.hasSuffix("focused")`, the evasion
+    /// found in 2026-08-03) passes there (guard-prover,
+    /// 2026-08-17). It has always been true of `Onboarding`; it is
+    /// newly worth writing down because the sheet is now the most
+    /// likely place for someone to write such a copy.
     private static var roots: [URL] {
         let repo = SourceScan.repoRoot(from: #filePath)
         return [
             "Sources/KiwiDesk/Settings/Components/Layouts",
+            "Sources/KiwiDesk/Settings/Components/Profiles",
             "Sources/KiwiDesk/Onboarding",
         ].map { repo.appendingPathComponent($0) }
     }

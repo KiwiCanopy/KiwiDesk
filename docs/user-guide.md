@@ -2071,8 +2071,9 @@ the workflow layouts alone.
 - **Starter** — The spaces chosen for your screen, each with its
   own layout (see [Your first run](#your-first-run)). A good way
   back to a known-good starting point.
-- **Developer** *(Standard)* — IDE in stack (space 2), docs in scrolling
-  (space 3), preview fullscreen (space 4). Best for software dev.
+- **Developer** *(Standard)* — grid (space 1), IDE in stack (space 2),
+  docs in scrolling (space 3), preview in monocle (space 4). Best for
+  software dev.
 - **Minimalist** — Spacious gaps (20 pt), scrolling reading (space 1),
   monocle focus (space 3), floating scratch (space 4). Distraction-free
   work.
@@ -2088,7 +2089,8 @@ the workflow layouts alone.
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
-  dashboards and logs. More room for the stack.
+  dashboards and logs. Two stack spaces on the main screen where Dual
+  Developer puts docs in scrolling.
 
 **3 Screens:**
 
@@ -2116,9 +2118,11 @@ Each card draws **screens, not spaces**: one outline per display, each
 showing the layout its first space opens in, with the total space
 count underneath. A row of identical tiles cannot say *which screen
 gets what*, which is the whole point of a two- or three-screen preset.
+Past four screens the row folds and a **+N** says how many are not
+drawn, the same way a saved profile's row does.
 
 Hover an outline for what that screen gets — how many Spaces, and the
-layout it opens in. The leftmost is your **main display** and says so,
+layout it opens in. The leftmost is your **main screen** and says so,
 rather than leaving you to read it off the position.
 
 Apply switches your **live** layout, so it is greyed while you are
@@ -2131,6 +2135,39 @@ count one names how many screens that preset needs.
 Presets themselves cannot be deleted; they always stay available. If
 you delete all saved profiles for a screen count, that count silently
 reverts to its Standard on the next monitor change.
+
+### Seeing what a preset contains
+
+A card can identify a preset; it cannot describe one. **Layouts**,
+beside Apply, opens a sheet drawing the preset's real layouts — one
+picture per Space, grouped under the screen it belongs to and
+labelled with the layout it opens in. They are the same drawings
+the "Choose a layout" strip in Layout Defaults uses, so the sheet
+answers *which layout each Space opens in* — the one thing the card
+could not say. Like every schematic in Settings, each picture draws
+a stand-in number of windows rather than yours, and substitutes a
+stand-in for anything that depends on your display (see
+[Accepted limitations](accepted-limitations.md)).
+
+Two things follow from that being a look rather than a change.
+**Layouts is never greyed** — including for a preset whose screen
+count you are not running, which is exactly when you most want to
+see inside one — and it changes nothing, so there is no confirm and
+nothing to undo. Apply is the consequential half, greyed and
+confirmed as described above.
+
+The pictures are drawn from the **preset's** own gap and layout
+tuning, not from whatever you are editing right now, so a preset
+looks the same in the sheet whatever state your draft is in.
+
+One case where the sheet is a plan rather than a promise: a preset
+under **For other setups** is drawn for a screen *count*, with no
+hardware to resolve it against, so any Space the preset does not
+name a layout for is drawn as **BSP** — the fixed historical
+default. Connect the screens it is for and apply it, and each of
+those Spaces takes the layout its screen suits instead, by the rule
+at the top of this section. The card's outlines answer the same way
+for the same reason.
 
 ## App Rules
 

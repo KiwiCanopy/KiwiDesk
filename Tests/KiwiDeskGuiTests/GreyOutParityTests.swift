@@ -162,7 +162,10 @@ struct GreyOutParityTests {
         // (#518). The predicate is the resolver's since #678
         // turn 13a, so the needle is the `.disabled` reading
         // ITS reason rather than a hand-rolled comparison.
-        ("PresetsSection.swift", ".disabled(reason != nil)", 1),
+        // Moved with Apply itself in #859 — see
+        // `ProfilesGateWiringTests` for why the card is
+        // its own widget now.
+        ("PresetCard.swift", ".disabled(reason != nil)", 1),
     ]
 
     @Test("every gated editor still greys off its own switch")

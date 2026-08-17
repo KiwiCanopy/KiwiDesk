@@ -240,11 +240,18 @@ struct SettingsResponsiveOrderTests {
         #expect(3 * 240 + 2 * 16 > usable)
     }
 
-    /// The shell spends the minimum through the same constant
-    /// the bands are cut from — a second literal 720 in the
-    /// frame is how the window comes to resize below its own
-    /// narrowest band.
-    @Test("the shell's minimum is the bands' minimum")
+    /// The shell spends BOTH floors through the constants the
+    /// bands are cut from — a second literal in the frame is how
+    /// the window comes to resize below its own narrowest band.
+    ///
+    /// The HEIGHT half was a literal `540`, and this needle pinned
+    /// it as one, until #859 wanted the same number to bound a
+    /// sheet and found nothing to derive from: its own bounds went
+    /// in as literals with a comment claiming a relation to this
+    /// frame that did not hold (code review, 2026-08-17). Naming
+    /// the pair is what makes that relation assertable, so the
+    /// needle now demands the constant rather than the number.
+    @Test("the shell's minimums are the bands' minimums")
     func shellSpendsTheMinimum() throws {
         let source = try squashed(
             "Sources/KiwiDesk/Settings/SettingsView.swift"
@@ -252,7 +259,7 @@ struct SettingsResponsiveOrderTests {
         #expect(
             source.contains(
                 ".frame(minWidth:SettingsWidthClass.minimum,"
-                    + "minHeight:540)"
+                    + "minHeight:SettingsWidthClass.minimumHeight)"
             )
         )
     }

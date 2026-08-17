@@ -240,13 +240,20 @@ struct ProfilesCensusRenderTests {
                     .desktop(7),
                 ]
         )
-        #expect(
-            expander.rows(for: .profiles(.presetsApply))?.count
-                == StandardProfiles.layouts(
-                    for: 1,
-                    sizes: censusSizes
-                ).count
-        )
+        // BOTH of the card's actions expand per preset (#859).
+        // `familiesExpand` cannot see a collapse to one row — its
+        // own docstring says so — so a key missing from HERE is a
+        // key whose per-instance expansion nothing holds.
+        for key in [ProfilesKey.presetsApply, .presetsLayouts] {
+            #expect(
+                expander.rows(for: .profiles(key))?.count
+                    == StandardProfiles.layouts(
+                        for: 1,
+                        sizes: censusSizes
+                    ).count,
+                Comment(rawValue: "\(key) lost its per-preset rows")
+            )
+        }
         // The preset instance carries the STABLE English name,
         // never the localized one — identity must not move with
         // the GUI language.
