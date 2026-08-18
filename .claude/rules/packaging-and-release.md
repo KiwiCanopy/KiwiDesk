@@ -196,6 +196,18 @@ step output first; a future gate on a new credential extends that
 step rather than reaching for `secrets` in a condition that
 silently reads empty.
 
+**Write the highlights for the installer, not for yourself.** A
+release body is two tiers: a curated highlights block on top, and
+beneath it the `--generate-notes` list the workflow already
+creates, unedited. The highlights name symptoms a reader would
+recognise rather than the mechanism that produced them, carry no
+issue numbers (the generated list below is the linked record),
+and stop at the few that are genuinely news. The argument, the
+test to apply, and the worked before/after that produced the rule
+are `docs/design-decisions.md` ▸ *Release notes are written for
+the person installing* — which also records why this one has no
+guard.
+
 **Publishing is not this file's call.** The workflow drafts the
 release rather than publishing it, and "No distribution channel
 without an update path" in `docs/design-decisions.md` owns both
