@@ -363,6 +363,25 @@ fail open on the phrasing it did not anticipate and fail closed
 on the same nouns used legitimately elsewhere. This is a
 review-time rule, and this entry is where the reviewer is sent.
 
+**A highlight describes what shipped, not what comes next.**
+0.9.7's draft opened "The last beta before 1.0" and it was struck
+before publishing. That line broke no rule above — it names
+nothing internal and a reader understands it perfectly — which is
+why it is worth its own clause: the defect is that it is a
+**forecast**. A description of what shipped can only be wrong on
+the day it is written, and review catches that. A forecast is
+falsified later, by events somewhere else entirely, and nothing
+notices — the same failure `.claude/rules/rule-authoring.md`
+names when it asks for an obligation instead of a state claim.
+A release body is also the surface least able to absorb it,
+being immutable in practice once people have read it and
+mirrored by every tap and feed that carries it.
+
+So no roadmap position, no "next up", no promise about the
+following release. Whether 0.9.7 turned out to be the last beta
+was not knowable on the day it shipped, and the notes did not
+need to answer it.
+
 ### A restore replaces; it never merges
 
 **[Principle]**
