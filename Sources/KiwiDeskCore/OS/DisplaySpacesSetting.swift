@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 
 /// Reads the macOS "Displays have separate Spaces" preference.
@@ -9,8 +8,10 @@ import Foundation
 /// (the default).
 ///
 /// The value can't be changed programmatically and only takes
-/// effect after a logout, so this is read-only detection that
-/// lets onboarding recommend the shared model when needed (#8).
+/// effect after a logout, so this is read-only detection. Its one
+/// production reader is the native-Space switch handler, which
+/// uses it to tell a secondary display's Desktop switch from a
+/// repeated notification (#888).
 public enum DisplaySpacesSetting {
     #if DEBUG
         /// Pins the mode for tests: the real read is the host's
@@ -40,50 +41,11 @@ public enum DisplaySpacesSetting {
         return number.intValue != 1
     }
 
-    /// True when the display setup makes shared Spaces worth
-    /// recommending: separate Spaces are on *and* more than one
-    /// display is present. A single display has no Desktop→profile
-    /// binding ambiguity, so the recommendation must not fire for
-    /// it. The one predicate both onboarding and the Canvas
-    /// section share, so the two surfaces can't drift (#8).
-    public static func recommendsSharedSpaces(
-        displayCount: Int
-    ) -> Bool {
-        recommendsSharedSpaces(
-            separateSpaces: hasSeparateSpaces(),
-            displayCount: displayCount
-        )
-    }
-
-    /// The same predicate over an ALREADY-READ preference.
-    ///
-    /// A caller that snapshots the `CFPreferences` value — the
-    /// Settings dashboard does, since the setting needs a log out
-    /// to change and the read is not free — still needs the
-    /// display half evaluated live, because nothing refreshes
-    /// that dashboard when a monitor is plugged in. Without this
-    /// overload such a caller re-derives `count > 1 && …` itself
-    /// and #8's one-predicate promise quietly becomes two
-    /// copies; that is exactly what happened for one commit.
-    public static func recommendsSharedSpaces(
-        separateSpaces: Bool,
-        displayCount: Int
-    ) -> Bool {
-        displayCount > 1 && separateSpaces
-    }
-
-    /// Opens System Settings › Desktop & Dock, where the option
-    /// lives. Falls back to the Settings root if Apple renames
-    /// the pane identifier.
-    @MainActor
-    public static func openSystemSettings() {
-        let pane =
-            "x-apple.systempreferences:"
-            + "com.apple.Desktop-Settings.extension"
-        let target =
-            URL(string: pane)
-            ?? URL(string: "x-apple.systempreferences:")
-        guard let target else { return }
-        NSWorkspace.shared.open(target)
-    }
+    // `recommendsSharedSpaces` and `openSystemSettings` retired
+    // with #888: nothing recommends the shared model any more —
+    // Desktop→profile bindings key to the main display's Desktop,
+    // so they are well-defined with the option on. The raw read
+    // above stays: the switch handler uses it to tell a secondary
+    // display's Desktop switch from a repeated notification
+    // (`KiwiCore.handleNativeSpaceChange`).
 }

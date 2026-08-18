@@ -2,75 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 extension OnboardingView {
-    /// The multi-display Spaces recommendation (#8), unchanged in
-    /// substance and moved to the end of the substantive steps
-    /// (#678 Phase 4 pass 11) — it is a recommendation the user
-    /// may skip, and it appears only when it can actually bite.
-    var separateSpaces: some View {
-        OnboardingPage(
-            title: L(
-                "onboarding.spaces.title",
-                "Use shared Desktops across displays"
-            ),
-            body1: separateSpacesBody,
-            hint: L(
-                "onboarding.spaces.hint",
-                "Skipping is fine — basic tiling works either way."
-            )
-        ) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "rectangle.split.2x1")
-                    .font(.system(size: 26))
-                    .foregroundStyle(SettingsTheme.accent)
-                Text(separateSpacesDetail)
-                    .font(.system(size: 13.5))
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .onboardingCard()
-            // Secondary rank through the seal, never a raw
-            // `.bordered`: the tinted window paints a bordered
-            // button's LABEL from the accent, which is #759 (#828
-            // brought the tint here, so it brings the seal too).
-            Button(
-                L(
-                    "onboarding.spaces.open_settings",
-                    "Open Desktop & Dock Settings"
-                )
-            ) {
-                model.onOpenSpaceSettings()
-            }
-            .settingsActionButton()
-        } action: {
-            Button(L("onboarding.continue", "Continue")) {
-                model.continueAfterSeparateSpaces()
-            }
-            .kiwiProminentButton()
-            .keyboardShortcut(.defaultAction)
-        }
-    }
-
-    /// The consequence, split off the lead so the page's two
-    /// tiers carry one idea each: the lead says what to change,
-    /// this says what it costs and what happens if you do not.
-    private var separateSpacesDetail: String {
-        L(
-            "onboarding.spaces.detail",
-            "Basic tiling still works if you keep it on. "
-                + "Changing this setting requires logging out and "
-                + "back in."
-        )
-    }
-
-    private var separateSpacesBody: String {
-        L(
-            "onboarding.spaces.body",
-            "KiwiDesk uses one active profile across all "
-                + "displays. For predictable Desktop-to-profile "
-                + "bindings, turn off “Displays have separate "
-                + "Spaces.”"
-        )
-    }
+    // The separate-Spaces recommendation page retired with #888:
+    // Desktop→profile bindings are keyed to the main display's
+    // Desktop now, so they are well-defined under the macOS
+    // default and there is nothing to recommend against.
 
     /// The closing card.
     ///

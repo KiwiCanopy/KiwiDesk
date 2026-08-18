@@ -25,16 +25,19 @@ final class OnboardingModel {
     /// and cost a click — the same tax turn 15 cut the detection
     /// screen for (#678 Phase 4 pass 11).
     ///
-    /// Three of these are conditional, which is why no step draws
-    /// a FIXED counter: any "step 3 of 5" is a lie on some
-    /// machine. `plannedSteps` is the answer that is true on
+    /// The route still varies — a trusted replay opens past
+    /// `.grant` (`OnboardingEntry.replayStep`) — which is why no
+    /// step draws a FIXED counter: any "step 3 of 4" is a lie at
+    /// some door. `plannedSteps` is the answer that is true on
     /// every machine — see its doc comment for what changed and
-    /// what did not (#828).
+    /// what did not (#828). (The tour's one machine-conditional
+    /// step, the separate-Spaces recommendation, retired with
+    /// #888: bindings are well-defined under the macOS default
+    /// now, so there is nothing to recommend.)
     enum Step: Equatable, CaseIterable {
         case grant
         case spaces
         case keys
-        case separateSpaces
         case done
 
         /// Whether reaching this step means the tour has said
@@ -47,7 +50,7 @@ final class OnboardingModel {
         var isClosingBeat: Bool {
             switch self {
             case .grant, .spaces: false
-            case .keys, .separateSpaces, .done: true
+            case .keys, .done: true
             }
         }
     }
@@ -115,18 +118,10 @@ final class OnboardingModel {
     /// One call, so the two cannot disagree: a plan set beside a
     /// separate `step =` assignment is two statements about the
     /// same presentation, and the second one added at a new door
-    /// would be the one that is forgotten. Called from
-    /// `showOnboarding(at:)` AFTER the model's closures are wired
-    /// — the plan reads `hasSeparateSpaces` and `displayCount`,
-    /// and resolving it against their stubs would plan the tour
-    /// for a one-display machine.
+    /// would be the one that is forgotten.
     func beginPresentation(at step: Step) {
         self.step = step
-        plannedSteps = OnboardingEntry.plannedSteps(
-            from: step,
-            separateSpaces: hasSeparateSpaces(),
-            displayCount: displayCount()
-        )
+        plannedSteps = OnboardingEntry.plannedSteps(from: step)
     }
 
     /// How far along `plannedSteps` the tour is, zero-based, or
@@ -161,28 +156,9 @@ final class OnboardingModel {
     /// testable without touching `SMAppService`.
     var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
-    /// Opens System Settings › Desktop & Dock (#8).
-    var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
     /// Closes onboarding and opens the dashboard (#331).
     var onExploreSettings: () -> Void = {}
-    /// Live count of connected displays, so the Spaces
-    /// recommendation fires only in the multi-display state that
-    /// can actually suffer ambiguous Desktop→profile bindings (#8).
-    var displayCount: () -> Int = { 1 }
-    /// The other half of that recommendation: the live "Displays
-    /// have separate Spaces" preference.
-    ///
-    /// A SEAM rather than a call inside the predicate, with the
-    /// production default live (`.claude/rules/tests.md`) — a
-    /// machine whose owner has already turned the setting off
-    /// answers `false` at every display count, so a test on that
-    /// machine cannot tell a working gate from a deleted one
-    /// (`guard-prover`, 2026-08-12). Both the plan and the
-    /// transition read THIS, so they cannot answer differently.
-    var hasSeparateSpaces: () -> Bool = {
-        DisplaySpacesSetting.hasSeparateSpaces()
-    }
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.
     var starterSpaces: () -> [OnboardingSpaceCard] = { [] }
@@ -241,22 +217,7 @@ final class OnboardingModel {
         advance()
     }
 
-    /// Shared display Spaces match KiwiDesk's one-active-profile
-    /// model. Separate Spaces remain usable for basic tiling, so
-    /// this is a recommendation the user may skip — and it comes
-    /// LAST of the substantive steps (#678 Phase 4 pass 11):
-    /// straight after the grant it made a macOS setting requiring
-    /// a logout the second thing KiwiDesk ever said.
-    ///
-    /// Whether it appears at all is the PLAN's question now, not
-    /// this method's: it asked `recommendsSharedSpaces` itself
-    /// until #828's review, which is the second copy of the same
-    /// predicate the row derives from.
     func continueAfterKeys() {
-        advance()
-    }
-
-    func continueAfterSeparateSpaces() {
         advance()
     }
 

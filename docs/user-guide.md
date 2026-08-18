@@ -239,15 +239,6 @@ panel. Teaching them here rather than pointing at the menu bar
 is deliberate: it works when the menu bar is auto-hidden, and
 nothing opens on top of the tour while you are reading it.
 
-One more screen follows only when two or more displays are
-connected with "Displays have separate Spaces" still on: it asks
-you to turn that option off. KiwiDesk uses one active profile across
-all displays, so Desktops shared across displays make
-Desktop-to-profile bindings predictable. This is optional: basic
-tiling still works with the option on, and a single display is
-never affected. Changing the macOS option requires logging out
-and back in.
-
 The closing card confirms KiwiDesk is managing your windows and
 shows you where it lives: a small picture of a menu bar with the
 KiwiDesk mark in it, so you can find the app once the window
