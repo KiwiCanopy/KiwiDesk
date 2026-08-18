@@ -51,9 +51,12 @@ extension SettingsModel {
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }
-        nativeSpaceCount =
-            NativeSpaces.allSpaces().filter(\.isUser).count
-        currentNativeSpace = NativeSpaces.activeDesktopNumber()
+        // ONE topology reading for both: the Desktops the card
+        // offers and the one it badges as current cannot then
+        // disagree about the arrangement (#888).
+        let desktops = NativeSpaces.desktopSnapshot()
+        mainDesktops = desktops.mainDisplayDesktops
+        currentNativeSpace = desktops.authority
         // After `currentNativeSpace`: a Desktop binding outranks
         // monitor matching, so the verdict needs the desktop this
         // pass just read. The count is captured in the same

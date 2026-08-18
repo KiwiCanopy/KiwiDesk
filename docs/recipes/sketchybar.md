@@ -62,7 +62,7 @@ any of them to keep sketchybar in sync:
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
 | `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
-| `native_space_change` | `native_space`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main display) |
+| `native_space_change` | `native_space`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`vanished`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
@@ -106,7 +106,7 @@ end)
 
 -- macOS Desktop indicator (Mission Control number). With
 -- "Displays have separate Spaces" on, secondary screens report
--- their own switches too — filter on the main display so the
+-- their own switches too — filter on the main screen so the
 -- indicator tracks the Desktop that selects profiles:
 KiwiDesk.on("native_space_change", function(desktop, monitor)
     if monitor ~= 1 then return end

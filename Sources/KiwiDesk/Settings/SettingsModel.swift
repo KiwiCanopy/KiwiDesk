@@ -220,7 +220,11 @@ final class SettingsModel: ObservableObject {
     /// Number of native macOS user Spaces (Mission Control
     /// desktops) currently detected — 0 without SkyLight. Drives
     /// the profile-binding rows (#7).
-    @Published var nativeSpaceCount = 0
+    /// The MAIN screen's user Desktops, by Mission Control
+    /// number (#888) — the Desktops a binding can fire on, which
+    /// is what the bindings card offers. Global numbers, possibly
+    /// non-contiguous; never positions.
+    @Published var mainDesktops: [Int] = []
     /// Mission Control number of the active native Space, for the
     /// "current" badge; nil without SkyLight.
     @Published var currentNativeSpace: Int?

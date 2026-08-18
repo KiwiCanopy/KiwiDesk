@@ -59,7 +59,47 @@ struct NativeSpacesGroup: View {
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
+        } accessory: {
+            HelpButton(
+                explanation: helpText,
+                subject: L(
+                    "native_spaces.title",
+                    "Profiles per macOS Desktop"
+                )
+            )
         }
+    }
+
+    /// Why only some Desktops are offered, and what the other
+    /// side of the macOS lever costs (#888, ui-designer
+    /// 2026-08-18).
+    ///
+    /// **Behind a click, and descriptive rather than
+    /// prescriptive.** #888 retired a standing recommendation to
+    /// turn "Displays have separate Spaces" off — advice shown to
+    /// every multi-screen user whether or not it applied, with a
+    /// button one click from flipping it. This answers a question
+    /// a reader has visibly already asked, names the ergonomic
+    /// costs the retirement was argued on rather than only the
+    /// gain, and carries no imperative and no deep link: the
+    /// checkbox is quoted verbatim so System Settings' own search
+    /// finds it, which is what `config-vocabulary.md` asks for
+    /// and all it asks for. Putting this in the card's caption
+    /// instead would make it ambient again, which is the retired
+    /// shape in miniature.
+    private var helpText: String {
+        L(
+            "native_spaces.help",
+            "Only Desktops on your main screen can be bound, "
+                + "because macOS's \"Displays have separate "
+                + "Spaces\" gives every screen its own Desktops "
+                + "by default. Turn it off, in System Settings ▸ "
+                + "Desktop & Dock, and every Desktop is shared "
+                + "across your screens instead — all of them "
+                + "bindable, at the cost of each screen's own "
+                + "menu bar, its own Dock, and fullscreen windows "
+                + "that no longer blank the others."
+        )
     }
 
     private var intro: String {
@@ -68,8 +108,8 @@ struct NativeSpacesGroup: View {
             "These are your Mac's own Desktops, from Mission "
                 + "Control — not KiwiDesk's Spaces. Pick a "
                 + "profile to load automatically when a "
-                + "Desktop activates on your main display "
-                + "(the screen with the menu bar)."
+                + "Desktop activates on your main screen "
+                + "(the one with the menu bar)."
         )
     }
 
@@ -136,6 +176,27 @@ struct NativeSpacesGroup: View {
                     label: L("native_spaces.current", "current")
                 )
             }
+            // A Desktop that is bound but does NOT live on the
+            // main screen: listed because it carries the user's
+            // own configuration, badged because a binding there
+            // cannot fire in this arrangement — it waits for a
+            // display change that makes that Desktop the main
+            // screen's.
+            //
+            // A badge, never a grey: this row's picker is the
+            // only way to change or clear that binding, so
+            // dimming it would be the trap
+            // `docs/design-decisions.md` bans — and the store is
+            // valid and already effective, which "grey, don't
+            // hide" does not describe (ui-designer, 2026-08-18).
+            if !model.mainDesktops.contains(number) {
+                BadgeChip(
+                    label: L(
+                        "native_spaces.not_on_main",
+                        "not on main screen"
+                    )
+                )
+            }
             Spacer()
             profileMenu(number)
         }
@@ -161,7 +222,7 @@ struct NativeSpacesGroup: View {
     /// expansion watches the rows the card actually draws.
     private var spaceNumbers: [Int] {
         ProfilesFamilyRows.desktops(
-            present: model.nativeSpaceCount,
+            onMain: model.mainDesktops,
             bound: model.config.profileBindings.keys
         )
     }

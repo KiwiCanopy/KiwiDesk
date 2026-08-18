@@ -170,7 +170,7 @@ struct ProfilesCensusRenderTests {
         ]
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
-            presentDesktops: 3,
+            mainDesktops: [1, 2, 3],
             boundDesktops: [],
             presets: StandardProfiles.all(sizes: censusSizes)
         )
@@ -219,7 +219,7 @@ struct ProfilesCensusRenderTests {
         // stays listed, and so stays clearable" promise.
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk"), summary("Laptop")],
-            presentDesktops: 3,
+            mainDesktops: [1, 2, 3],
             boundDesktops: [7],
             presets: StandardProfiles.layouts(
                 for: 1,
@@ -279,7 +279,7 @@ struct ProfilesCensusRenderTests {
     func foreignKey() {
         let expander = ProfilesFamilyRows(
             profiles: [summary("Desk")],
-            presentDesktops: 1,
+            mainDesktops: [1],
             boundDesktops: [],
             presets: []
         )

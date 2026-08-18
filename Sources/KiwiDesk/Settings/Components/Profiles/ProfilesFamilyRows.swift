@@ -45,8 +45,11 @@ struct ProfilesFamilyRows {
     /// puts them in display order, and it is the same call the
     /// list makes.
     let profiles: [ProfileSummary]
-    /// How many native Desktops are detected right now.
-    let presentDesktops: Int
+    /// The MAIN screen's native Desktops, by Mission Control
+    /// number (#888) — the ones a binding can fire on. Global
+    /// numbers, possibly non-contiguous; never a count, which
+    /// could only mean `1...n` and would renumber them.
+    let mainDesktops: [Int]
     /// Desktop numbers a binding already names, so one to a
     /// now-absent Space stays listed.
     let boundDesktops: [Int]
@@ -111,16 +114,25 @@ struct ProfilesFamilyRows {
         return summaries.sorted { key($0) < key($1) }
     }
 
-    /// The Desktops the bindings card lists: every present
-    /// desktop plus any number already bound, so a binding to a
-    /// now-absent Space stays visible and clearable rather than
-    /// silently lost.
+    /// The Desktops the bindings card lists: the MAIN screen's —
+    /// the ones a binding can fire on (#888) — plus any number
+    /// already bound, so a binding on another screen's Desktop,
+    /// or on a now-absent one, stays visible and clearable rather
+    /// than silently lost.
+    ///
+    /// `onMain` carries GLOBAL Mission Control numbers and may be
+    /// non-contiguous: depending on the display order the main
+    /// screen's Desktops can be 3 and 4. That is why this takes
+    /// the numbers rather than a count — a count could only mean
+    /// `1...n`, which would renumber them, and a row reading
+    /// "Desktop 1" that wrote a binding on another Desktop is
+    /// worse than the over-offer this replaced (owner QA,
+    /// 2026-08-18).
     static func desktops(
-        present: Int,
+        onMain: some Collection<Int>,
         bound: some Collection<Int>
     ) -> [Int] {
-        let live = present > 0 ? Array(1...present) : []
-        return Array(Set(live).union(bound)).sorted()
+        Array(Set(onMain).union(bound)).sorted()
     }
 
     /// The presets a screen count offers, in catalog order.
@@ -170,7 +182,7 @@ struct ProfilesFamilyRows {
                 .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:
             return Self.desktops(
-                present: presentDesktops,
+                onMain: mainDesktops,
                 bound: boundDesktops
             )
             .map(ProfilesRowInstance.desktop)

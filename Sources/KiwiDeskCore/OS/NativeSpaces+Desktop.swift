@@ -32,6 +32,34 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.number(of: space, in: spaces)
     }
 
+    /// The Mission Control numbers of the MAIN display's user
+    /// Desktops, ascending — the Desktops a binding can fire on
+    /// in this arrangement (#888).
+    ///
+    /// **Numbers, never positions.** Mission Control counts
+    /// across every display, and a binding keys on that global
+    /// number, so a consumer may narrow WHICH Desktops it offers
+    /// but must keep each one's number: depending on SkyLight's
+    /// display order the main display's Desktops can be 3 and 4.
+    ///
+    /// Every user Desktop when the main display cannot be named
+    /// (no SkyLight, shared mode's synthetic managed-display
+    /// identifier) — in shared mode every Desktop IS the main
+    /// display's, so the degenerate case answers exactly as it
+    /// did before this existed.
+    public var mainDisplayDesktops: [Int] {
+        guard let mainUUID,
+            spaces.contains(where: { $0.displayUUID == mainUUID })
+        else {
+            return spaces.filter(\.isUser).indices.map { $0 + 1 }
+        }
+        return
+            spaces
+            .filter { $0.displayUUID == mainUUID && $0.isUser }
+            .compactMap { number(of: $0.id) }
+            .sorted()
+    }
+
     /// Whether the space now current on `uuid` is a user desktop
     /// — the #670 verdict, per display and inside this snapshot,
     /// rather than a second live read. True for an unknown

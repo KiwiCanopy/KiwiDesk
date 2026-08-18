@@ -102,7 +102,7 @@ question, from `NativeSpaces.desktopSnapshot()`, whose
 and it holds exactly the snapshot's public fallback: a main
 display the topology cannot name (shared mode's synthetic
 managed-display identifier, no SkyLight, no display-UUID
-symbol), where the global number IS the main display's.
+symbol), where the global number IS the main screen's.
 
 The two functions are the same shape, the same type and the
 same answer on every single-display machine — they diverge only

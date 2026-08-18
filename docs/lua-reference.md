@@ -3685,7 +3685,7 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `native_space_change` | `native_space` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main display) |
+| `native_space_change` | `native_space` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
@@ -4176,22 +4176,22 @@ settings. Unsure which number you're on? Check
 
 KiwiDesk resolves one active profile across the whole display
 setup, so one screen holds the binding authority: **"Desktop N
-activates" means Desktop N became current on the main display**
+activates" means Desktop N became current on the main screen**
 (the screen with the menu bar). With macOS's "Displays have
 separate Spaces" on, each screen switches Desktops on its own —
 a swipe on a secondary screen retiles that screen's arrived
 windows and reports itself on `native_space_change`
 (`monitor` ≥ 2), but never selects a profile. A Desktop that
 lives on a secondary screen can carry a binding, and it fires
-if a display change ever makes that Desktop the main display's.
-With the option off, or with one screen, the main display's
+if a display change ever makes that Desktop the main screen's.
+With the option off, or with one screen, the main screen's
 Desktop is the global one and everything reads as before.
 
 KiwiDesk never moves windows between Desktops — windows stay on
 their Desktop, and KiwiDesk manages the ones on the Desktop you're
 looking at.
 
-Each Desktop the main display shows also remembers which
+Each Desktop the main screen shows also remembers which
 KiwiDesk space it was showing: switch away and back, and you
 land on the same space with the same windows hidden. The memory
 is kept per screen, so it survives display changes without ever
@@ -4553,7 +4553,7 @@ KiwiDesk.debug_log("hello from init.lua")
 **Does:** returns a table with the current window and space state.
 Fields: `active_space` (current space id or `nil`), `spaces` (array of
 space objects), `windows` (array of window objects), `monitor_count`,
-`native_space` (the main display's current Desktop — the number
+`native_space` (the main screen's current Desktop — the number
 bindings fire on), `exec_running` (count of `KiwiDesk.exec`
 children still running).
 

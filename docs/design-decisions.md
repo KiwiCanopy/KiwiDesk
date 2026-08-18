@@ -1474,7 +1474,7 @@ each profile is its own file, so removing a space from the
 active profile never touches another profile that still
 declares a space of the same name. (#77)
 
-**Desktop→profile bindings key to the main display's Desktop —
+**Desktop→profile bindings key to the main screen's Desktop —
 and the separate-Spaces recommendation retired with that
 definition.** KiwiDesk resolves one active profile across the
 whole display setup, so with macOS's "Displays have separate
@@ -1482,9 +1482,9 @@ Spaces" on — the macOS **default** — "Desktop N activates" needs
 one display to answer for it. #888 ruled that display to be the
 main one (the screen with the menu bar): a swipe on the main
 display selects profiles, a swipe on a secondary display never
-does, and each Desktop the main display shows keeps the
+does, and each Desktop the main screen shows keeps the
 per-Desktop Space memory. Shared mode and a single display are
-degenerate cases — the main display's Desktop IS the global one —
+degenerate cases — the main screen's Desktop IS the global one —
 so their behavior is unchanged, and the precedent was already in
 the tree: the starter setup is "named by the main screen".
 
@@ -1507,10 +1507,10 @@ active profiles** (profile slicing) is a full redesign, parked on
 demonstrated demand. Main-display authority is deliberately the
 smallest ruling that removes the recommendation: a binding on a
 Desktop that lives on a secondary display simply never fires
-until a display change makes that Desktop the main display's —
+until a screen change makes that Desktop the main screen's —
 honest, documented, and cheaper than either machinery. The
 identical-monitors ambiguity (#734) gets the same answer as its
-existing Monitors row — the main display is unambiguous at the
+existing Monitors row — the main screen is unambiguous at the
 CoreGraphics level, so no new machinery. (#8, #888)
 
 **Profiles may override *behavior* settings, never *routing*
@@ -5457,7 +5457,7 @@ rather than live-under-a-warning: leaving the menus live let a
 user configure bindings that could not do what the row says.
 That grey was correct *for as long as its premise held* — and
 #888 removed the premise rather than the ruling, by giving the
-trigger a definition (the main display's Desktop) that holds in
+trigger a definition (the main screen's Desktop) that holds in
 every display mode. The rows are live in every display state now, so the
 grey, its inline warning and its Desktop & Dock button retired
 together (the stored-profile grey, a different premise, stands). What survives, because it never depended on the
