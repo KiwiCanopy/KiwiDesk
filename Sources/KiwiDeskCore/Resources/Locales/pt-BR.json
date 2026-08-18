@@ -694,6 +694,7 @@
   "native_spaces.current": "atual",
   "native_spaces.desktop": "Mesa %1$d",
   "native_spaces.empty": "Nenhuma Mesa nativa do macOS detectada. Adicione Mesas no Mission Control para vincular perfis.",
+  "native_spaces.intro": "Estas são as Mesas do próprio Mac, vindas do Mission Control — não os espaços do KiwiDesk. Escolha um perfil para carregar automaticamente quando uma Mesa for ativada na sua tela principal (a tela com a barra de menus).",
   "native_spaces.none": "Nenhum",
   "native_spaces.title": "Perfis por Mesa do macOS",
   "notification.permission_lost.body": "A permissão de Acessibilidade foi revogada. Reative-a em Ajustes do Sistema > Privacidade e Segurança > Acessibilidade.",

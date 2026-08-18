@@ -694,6 +694,7 @@
   "native_spaces.current": "attuale",
   "native_spaces.desktop": "Scrivania %1$d",
   "native_spaces.empty": "Nessuna Scrivania nativa di macOS rilevata. Aggiungi Scrivanie in Mission Control per associare i profili.",
+  "native_spaces.intro": "Queste sono le Scrivanie del tuo Mac, quelle di Mission Control — non gli spazi di KiwiDesk. Scegli un profilo da caricare automaticamente quando una Scrivania diventa attiva sullo schermo principale (quello con la barra dei menu).",
   "native_spaces.none": "Nessuno",
   "native_spaces.title": "Profili per Scrivania di macOS",
   "notification.permission_lost.body": "L'autorizzazione di Accessibilità è stata revocata. Riattivala in Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.",

@@ -694,6 +694,7 @@
   "native_spaces.current": "actual",
   "native_spaces.desktop": "Escritorio %1$d",
   "native_spaces.empty": "No se ha detectado ningún Escritorio nativo de macOS. Añade Escritorios en Mission Control para asociar perfiles.",
+  "native_spaces.intro": "Estos son los Escritorios propios de tu Mac, de Mission Control — no los espacios de KiwiDesk. Elige un perfil para que se cargue automáticamente cuando se active un Escritorio en tu pantalla principal (la pantalla con la barra de menús).",
   "native_spaces.none": "Ninguno",
   "native_spaces.title": "Perfiles por Escritorio de macOS",
   "notification.permission_lost.body": "Se ha revocado el permiso de Accesibilidad. Vuelve a activarlo en Ajustes del Sistema > Privacidad y seguridad > Accesibilidad.",

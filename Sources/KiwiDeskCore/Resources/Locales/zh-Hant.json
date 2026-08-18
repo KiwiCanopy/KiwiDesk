@@ -694,6 +694,7 @@
   "native_spaces.current": "目前",
   "native_spaces.desktop": "桌面 %1$d",
   "native_spaces.empty": "未偵測到 macOS 原生桌面。請在 Mission Control 中加入桌面以綁定描述檔。",
+  "native_spaces.intro": "這些是來自 Mission Control 的 macOS 原生桌面，而不是 KiwiDesk 的空間。請挑選一個描述檔，以便在主顯示器（帶有選單列的螢幕）上的某個桌面啟用時自動載入。",
   "native_spaces.none": "無",
   "native_spaces.title": "每個 macOS 桌面的描述檔",
   "notification.permission_lost.body": "「輔助使用」權限已被撤銷。請在「系統設定」>「隱私權與安全性」>「輔助使用」中重新啟用。",

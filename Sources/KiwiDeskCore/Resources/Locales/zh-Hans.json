@@ -694,6 +694,7 @@
   "native_spaces.current": "当前",
   "native_spaces.desktop": "桌面 %1$d",
   "native_spaces.empty": "未检测到 macOS 原生桌面。请在调度中心添加桌面以关联描述文件。",
+  "native_spaces.intro": "这些是来自调度中心的 macOS 原生桌面，而不是 KiwiDesk 的空间。请选择一个描述文件，在主显示器（带菜单栏的屏幕）上的某个桌面激活时自动载入。",
   "native_spaces.none": "无",
   "native_spaces.title": "每个 macOS 桌面的描述文件",
   "notification.permission_lost.body": "“辅助功能”权限已被撤销。请在“系统设置”>“隐私与安全性”>“辅助功能”中重新启用。",

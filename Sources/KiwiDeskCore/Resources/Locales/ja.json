@@ -694,6 +694,7 @@
   "native_spaces.current": "現在",
   "native_spaces.desktop": "デスクトップ%1$d",
   "native_spaces.empty": "macOSネイティブのデスクトップが検出されませんでした。プロファイルを割り当てるには、Mission Controlでデスクトップを追加してください。",
+  "native_spaces.intro": "これらはMission Controlにある、macOS自体のデスクトップです。KiwiDeskのスペースではありません。メインディスプレイ（メニューバーのある画面）でデスクトップが有効になったときに自動的に読み込むプロファイルを選んでください。",
   "native_spaces.none": "なし",
   "native_spaces.title": "macOSのデスクトップごとのプロファイル",
   "notification.permission_lost.body": "アクセシビリティの許可が取り消されました。システム設定 > プライバシーとセキュリティ > アクセシビリティで再度有効にしてください。",

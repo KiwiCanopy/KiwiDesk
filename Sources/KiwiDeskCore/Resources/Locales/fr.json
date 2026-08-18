@@ -694,6 +694,7 @@
   "native_spaces.current": "actuel",
   "native_spaces.desktop": "Bureau %1$d",
   "native_spaces.empty": "Aucun bureau natif macOS détecté. Ajoutez des bureaux dans Mission Control pour y associer des profils.",
+  "native_spaces.intro": "Ce sont les bureaux propres à votre Mac, issus de Mission Control — pas les espaces de KiwiDesk. Choisissez un profil à charger automatiquement lorsqu'un bureau devient actif sur votre écran principal (celui qui porte la barre des menus).",
   "native_spaces.none": "Aucun",
   "native_spaces.title": "Profils par bureau macOS",
   "notification.permission_lost.body": "L'autorisation d'Accessibilité a été révoquée. Réactivez-la dans Réglages Système > Confidentialité et sécurité > Accessibilité.",

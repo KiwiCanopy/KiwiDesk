@@ -694,6 +694,7 @@
   "native_spaces.current": "aktuell",
   "native_spaces.desktop": "Schreibtisch %1$d",
   "native_spaces.empty": "Keine nativen macOS-Schreibtische erkannt. Füge in Mission Control Schreibtische hinzu, um Profile zu verknüpfen.",
+  "native_spaces.intro": "Das sind die Schreibtische deines Macs aus Mission Control — nicht die Spaces von KiwiDesk. Wähle ein Profil, das automatisch geladen wird, sobald ein Schreibtisch auf deinem Hauptbildschirm (dem Bildschirm mit der Menüleiste) aktiv wird.",
   "native_spaces.none": "Keines",
   "native_spaces.title": "Profile pro macOS-Schreibtisch",
   "notification.permission_lost.body": "Die Erlaubnis für Bedienungshilfen wurde entzogen. Aktiviere sie wieder in Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen.",
