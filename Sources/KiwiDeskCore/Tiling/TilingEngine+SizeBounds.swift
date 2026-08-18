@@ -56,6 +56,29 @@ extension TilingEngine {
         return result
     }
 
+    /// The per-axis pin for a window OUR animation is driving
+    /// toward a size the app has already refused (#677): the
+    /// learned answer where the in-flight target re-asks the
+    /// refused ask, nil otherwise — including nil while no
+    /// animation is in flight, because only the tick channel
+    /// consumes it. The follow tee threads this into
+    /// `FollowSource.renderFrame`, which is where the decision
+    /// lives.
+    func animationSizePin(
+        for id: WindowID
+    ) -> FollowSource.SizePin? {
+        guard let bound = boundLearner.bound(for: id),
+            let target = animation.targetFrame(window: id)
+        else { return nil }
+        let pin = FollowSource.SizePin(
+            width: bound.consumedWidth(asking: target.width),
+            height: bound.consumedHeight(
+                asking: target.height
+            )
+        )
+        return pin.isEmpty ? nil : pin
+    }
+
     /// Drops everything learned about a window. Called on a
     /// genuine (non-echo) resize — the user or the app itself
     /// changed the size, so the ledger is stale — and on

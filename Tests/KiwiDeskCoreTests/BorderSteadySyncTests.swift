@@ -41,7 +41,8 @@ struct BorderSteadySyncTests {
         border.follow(
             WindowID(1),
             windowFrame: tick,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) == tick)
         // ...and a retile burst / focus change mid-flight must
@@ -63,7 +64,8 @@ struct BorderSteadySyncTests {
         border.follow(
             WindowID(1),
             windowFrame: tick,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         border.sync([spec(1, frame: stale, color: "#00FF00")])
         // Held frame, new colour: the recolor rode the same
@@ -110,7 +112,8 @@ struct StickyMarkSteadySyncTests {
         marks.follow(
             WindowID(1),
             windowFrame: tick,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(marks.lastFrame(WindowID(1)) == tick)
         marks.sync([

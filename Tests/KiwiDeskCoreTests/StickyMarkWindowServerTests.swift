@@ -115,7 +115,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: moved,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) != moved)
         // The unguarded WS path always advances it.
@@ -127,7 +128,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: axFrame,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) == axFrame)
     }
@@ -145,7 +147,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: tick,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) == tick)
         // And with both suppressors down: the tick still
@@ -156,7 +159,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: snap,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) == snap)
     }
@@ -174,7 +178,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: echo,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) != echo)
         // Settled: the echo path resumes.
@@ -182,7 +187,8 @@ struct StickyChipManagerEntryPointTests {
         manager.follow(
             WindowID(1),
             windowFrame: echo,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(manager.lastFrame(WindowID(1)) == echo)
     }

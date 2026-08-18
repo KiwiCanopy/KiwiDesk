@@ -70,15 +70,18 @@ extension BorderManager {
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
-        source: FollowSource
+        source: FollowSource,
+        pin: FollowSource.SizePin?
     ) {
         guard
-            source.applies(
+            let frame = source.renderFrame(
+                reported: windowFrame,
+                pin: pin,
                 wsTracked: usesWindowServerTracking(id),
                 animating: isAnimating(id)
             )
         else { return }
-        apply(id, windowFrame: windowFrame)
+        apply(id, windowFrame: frame)
     }
 
     /// The frame a window's ring last rendered against, for

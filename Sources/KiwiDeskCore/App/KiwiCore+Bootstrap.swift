@@ -75,15 +75,22 @@ extension KiwiCore {
             self?.strandDetector.windowSettled(id, target: target)
         }
         tiler.onFrameApplied = { [weak self] id, frame in
+            // The #677 pin: while this animation re-asks a size
+            // the app has refused, the truthful render is the
+            // commanded origin at the learned answer — computed
+            // once here so ring and mark correct together.
+            let pin = self?.tiler.animationSizePin(for: id)
             self?.borders.follow(
                 id,
                 windowFrame: frame,
-                source: .animationTick
+                source: .animationTick,
+                pin: pin
             )
             self?.stickyMarks.follow(
                 id,
                 windowFrame: frame,
-                source: .animationTick
+                source: .animationTick,
+                pin: pin
             )
         }
         // Mid-animation the commanded tick frame leads the real

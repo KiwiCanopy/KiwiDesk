@@ -61,16 +61,19 @@ extension KiwiCore {
             // self-suppresses when the WindowServer stream already
             // tracks the ring (#285) and while our own animation
             // drives the window (#594), so a laggy AX echo can't
-            // rewind it — the guards live there, once.
+            // rewind it — the guards live there, once. No size
+            // pin: an echo IS reality (#677).
             borders.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             stickyMarks.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             // A genuine user move (not the echo of our own
             // frame-set) supersedes a pending stash restore:
@@ -89,12 +92,14 @@ extension KiwiCore {
             borders.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             stickyMarks.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             // Same policy as .windowMoved above: a genuine
             // user resize takes the window over.
