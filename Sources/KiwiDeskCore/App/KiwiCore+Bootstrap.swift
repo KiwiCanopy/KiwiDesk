@@ -116,6 +116,18 @@ extension KiwiCore {
         }
         borders.isAnimating = animationDriven
         stickyMarks.isAnimating = animationDriven
+        // The instant twin of the tick's leading truth (#881):
+        // a just-commanded `applyInstant` target leads the
+        // echo-fed state frame in the steady-state syncs, so
+        // the ring moves at monocle park's instant focus
+        // switch instead of a whole echo behind it. ONE
+        // closure for both managers, like the predicate above.
+        let commandedInstant: @MainActor (WindowID) -> CGRect? =
+            { [weak self] id in
+                self?.tiler.recentInstantTarget(id)
+            }
+        borders.commandedFrame = commandedInstant
+        stickyMarks.commandedFrame = commandedInstant
 
         socket.handler = { [weak self] command, args in
             self?.execute(command, args: args)

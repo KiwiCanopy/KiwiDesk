@@ -98,12 +98,25 @@ public enum FollowSource {
     /// state on it and against the public-fallback doctrine. The
     /// drag path already re-reads WS bounds continuously
     /// (`reconcile`), so it self-corrects within an event.
+    ///
+    /// `commanded` is the instant path's twin of the tick's
+    /// leading truth (#881): the engine's just-issued
+    /// `applyInstant` target while its echo is pending, nil
+    /// otherwise. `spec` is echo-fed, so a sync landing between
+    /// an instant set and its echo drew the overlay a whole
+    /// switch behind — monocle park's focus flip, where the
+    /// ring sat at the corner the window had already left
+    /// (owner QA 2026-08-18). The stamp is cleared by the first
+    /// self-echo, so a clamping app's real frame wins the
+    /// moment reality reports, and the echo channel itself is
+    /// untouched — this leads only while nothing has reported.
     public static func syncFrame(
         spec: CGRect,
         held: CGRect?,
-        animating: Bool
+        animating: Bool,
+        commanded: CGRect?
     ) -> CGRect {
-        guard animating else { return spec }
-        return held ?? spec
+        guard !animating else { return held ?? spec }
+        return commanded ?? spec
     }
 }

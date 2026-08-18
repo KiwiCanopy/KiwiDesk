@@ -99,6 +99,15 @@ public final class BorderManager {
     /// down. A no-op default keeps the manager testable in
     /// isolation.
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
+
+    /// The engine's just-commanded instant-set target while its
+    /// echo is pending, nil otherwise (#881) — the `commanded`
+    /// input `sync` hands `FollowSource.syncFrame`. Wired in
+    /// `KiwiCore+Bootstrap` beside `isAnimating`, one closure
+    /// shared with the mark manager.
+    var commandedFrame: @MainActor (WindowID) -> CGRect? = {
+        _ in nil
+    }
     /// WindowServer bounds read behind `reconcile` — injectable
     /// so tests can hand the manager deterministic bounds
     /// without a live SkyLight connection.

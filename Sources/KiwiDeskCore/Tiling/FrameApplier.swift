@@ -29,6 +29,7 @@ final class FrameApplier {
     private var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
     private let recent = RecentApplies()
+    private let instantTargets = InstantTargets()
 
     /// How long after one of our own frame-sets a window's
     /// move events are still considered self-inflicted. AX
@@ -43,6 +44,26 @@ final class FrameApplier {
     /// swaps windows and retriggers itself forever).
     func didRecentlySetFrame(_ id: WindowID) -> Bool {
         recent.isRecent(id, within: Self.echoGrace)
+    }
+
+    /// The frame a recent `applyInstant` commanded for this
+    /// window, while its echo may still be in flight (#881):
+    /// the steady-state overlay syncs prefer it over the
+    /// echo-fed state frame, so a ring moves at monocle park's
+    /// instant focus switch instead of a whole echo behind it.
+    /// Cleared by the first self-echo (`clearInstantTarget` —
+    /// reality reported, and an app may have clamped the ask)
+    /// or by the echo grace expiring.
+    func instantTarget(_ id: WindowID) -> CGRect? {
+        instantTargets.frame(id, within: Self.echoGrace)
+    }
+
+    /// The window's first self-echo arrived: the echo-fed state
+    /// frame is now the better truth, so the stamp retires
+    /// early rather than shadowing a clamped answer for the
+    /// rest of the grace.
+    func clearInstantTarget(_ id: WindowID) {
+        instantTargets.clear(id)
     }
 
     // MARK: - Animation lifecycle (EUI management)
@@ -137,6 +158,11 @@ final class FrameApplier {
     /// instant set (as `retile` and `stashInactive` do) so a
     /// window is never spring-animated and instant-set at once.
     func applyInstant(_ id: WindowID, _ frame: CGRect) {
+        // Recorded before the element guard, at enqueue time:
+        // the overlay sync wants the commanded frame this same
+        // turn (#881), and a stamp for a window whose element
+        // is gone expires unread.
+        instantTargets.record(id, frame: frame)
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -216,6 +242,44 @@ final class FrameApplier {
 
 /// When each window's frame was last set by us. Written from
 /// the per-app queues, read from the main actor.
+/// Commanded instant-set targets whose echoes may still be in
+/// flight (#881) — `RecentApplies`' shape, carrying the frame.
+private final class InstantTargets: @unchecked Sendable {
+    private typealias Entry = (frame: CGRect, at: TimeInterval)
+    private let lock = NSLock()
+    private var entries: [WindowID: Entry] = [:]
+
+    func record(_ id: WindowID, frame: CGRect) {
+        lock.lock()
+        defer { lock.unlock() }
+        entries[id] = (
+            frame,
+            ProcessInfo.processInfo.systemUptime
+        )
+    }
+
+    func frame(
+        _ id: WindowID,
+        within interval: TimeInterval
+    ) -> CGRect? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let entry = entries[id] else { return nil }
+        let now = ProcessInfo.processInfo.systemUptime
+        if now - entry.at > interval {
+            entries[id] = nil
+            return nil
+        }
+        return entry.frame
+    }
+
+    func clear(_ id: WindowID) {
+        lock.lock()
+        defer { lock.unlock() }
+        entries[id] = nil
+    }
+}
+
 private final class RecentApplies: @unchecked Sendable {
     private let lock = NSLock()
     private var stamps: [WindowID: TimeInterval] = [:]

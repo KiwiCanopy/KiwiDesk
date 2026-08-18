@@ -43,7 +43,8 @@ extension BorderManager {
             let frame = FollowSource.syncFrame(
                 spec: spec.frame,
                 held: overlay.lastRenderedFrame,
-                animating: isAnimating(spec.window)
+                animating: isAnimating(spec.window),
+                commanded: commandedFrame(spec.window)
             )
             overlay.update(
                 frame: frame,

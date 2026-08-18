@@ -99,6 +99,9 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "move echo"
                 )
+                // Reality reported (#881): the state frame
+                // now beats the commanded instant target.
+                tiler.clearInstantTarget(id)
             }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
@@ -134,6 +137,7 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "resize echo"
                 )
+                tiler.clearInstantTarget(id)  // as above, #881
             } else if !tiler.ledgerExplainsResize(
                 id,
                 size: frame.size

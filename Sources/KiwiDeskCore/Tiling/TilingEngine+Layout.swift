@@ -275,6 +275,22 @@ extension TilingEngine {
         }
     }
 
+    /// The commanded frame of a recent instant set whose echo
+    /// is still pending, nil otherwise (#881). The overlay
+    /// syncs read it (`FollowSource.syncFrame`'s `commanded`)
+    /// so a ring moves at the instant switch; the first
+    /// self-echo clears it (`KiwiCore+Events`), after which the
+    /// echo-fed state frame is the better truth.
+    func recentInstantTarget(_ id: WindowID) -> CGRect? {
+        applier.instantTarget(id)
+    }
+
+    /// See `recentInstantTarget` — called on the first
+    /// self-echo.
+    func clearInstantTarget(_ id: WindowID) {
+        applier.clearInstantTarget(id)
+    }
+
     /// The frames every visible space's layout assigns right now,
     /// unioned across all displays, without applying them. Used
     /// by retiling and by drag / border / resize slot detection —
