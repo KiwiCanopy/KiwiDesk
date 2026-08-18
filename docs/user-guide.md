@@ -944,8 +944,16 @@ Adjust each mode's defaults:
   because they are this layout's parameters — Colors & Motion
   links across to them.
 - **Monocle**: orientation (affects which arrow keys cycle focus
-  and where the app bar sits), wrap focus, and **New window**
-  placement. Wrap focus is **off** by default, the same as
+  and where the app bar sits), **Hidden windows**, wrap focus,
+  and **New window** placement. Hidden windows picks how the
+  unfocused windows hide: **Stack behind** (the default) keeps
+  them behind the focused one at full size, **Park in corner**
+  moves them to a corner of the screen instead — with an
+  instant focus switch — for windows with transparent
+  backgrounds, or windows that can't fill the whole screen, that
+  would otherwise show the stack behind them (a thin edge of
+  each parked window stays visible in the corner). Wrap focus
+  is **off** by default, the same as
   scrolling and track — turn it on and cycling past the last
   window returns to the first. New window defaults to
   **first**, so a new window comes to the front of the cycle

@@ -50,10 +50,23 @@ extension TilingEngine {
         for screen: CGRect,
         among others: [CGRect]
     ) -> HideCorner {
-        let neighbors = ScreenNeighbors.detect(
-            around: screen,
-            among: others
+        optimalHideCorner(
+            neighbors: ScreenNeighbors.detect(
+                around: screen,
+                among: others
+            )
         )
+    }
+
+    /// The corner PREFERENCE, one copy: the stash resolves its
+    /// neighbors from screen rects above, while `MonocleLayout`'s
+    /// park (#881) arrives with the flags already threaded
+    /// through its context (#878) — both must answer alike for
+    /// one arrangement, so the choice lives here and not beside
+    /// either caller.
+    nonisolated static func optimalHideCorner(
+        neighbors: ScreenNeighbors
+    ) -> HideCorner {
         if !neighbors.right { return .bottomRight }
         if !neighbors.left { return .bottomLeft }
         return .bottomRight

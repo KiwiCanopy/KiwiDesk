@@ -21,6 +21,15 @@ extension KiwiCore {
         if command == "monocle.set_orientation_override" {
             return applyMonocleOverride(args)
         }
+        if command == "monocle.set_hide_style" {
+            guard let raw = args.first?.stringValue,
+                let style = MonocleParams.HideStyle(
+                    rawValue: raw
+                )
+            else { return .fail("expected stack|park") }
+            tiler.settings.monocle.hideStyle = style
+            return .ok()
+        }
         if command == "monocle.set_wrap_focus" {
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")

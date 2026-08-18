@@ -300,14 +300,27 @@ extension KiwiCore {
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's
-    /// focus slide is toggleable (`on_scrolling`); other
-    /// focus-driven modes (Monocle) always animate. Used by
+    /// focus slide is toggleable (`on_scrolling`); Monocle
+    /// animates under `stack` (where the retile is a no-op and
+    /// the raise is the visible change) but SNAPS under `park`
+    /// (#881): the park and the un-park go through the instant
+    /// `applyInstant` path in one frame-set each, so the switch
+    /// keeps today's raise-only feel instead of sliding windows
+    /// to and from the corner. Used by
     /// `retileWithScrollDuration`'s non-scrolling branch — the
     /// scrolling branch swaps in `scrollDurationMS` and always
     /// animates when `on_scrolling` is set.
     var focusRetileAnimated: Bool {
-        activeSpace?.mode == .scrolling
-            ? tiler.settings.animations.onScrolling : true
+        guard let space = activeSpace else { return true }
+        switch space.mode {
+        case .scrolling:
+            return tiler.settings.animations.onScrolling
+        case .monocle:
+            return tiler.settings.resolvedMonocle(for: space.id)
+                .hideStyle == .stack
+        default:
+            return true
+        }
     }
 
     /// Retiles for a focus-driven layout, honouring

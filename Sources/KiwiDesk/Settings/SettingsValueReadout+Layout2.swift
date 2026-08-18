@@ -118,6 +118,22 @@ extension SettingsValueReadout {
         }
     }
 
+    /// Monocle's hide style (#881), in the picker row's own
+    /// option words.
+    static func layoutHideStyle(
+        _ value: MonocleParams.HideStyle
+    ) -> String {
+        switch value {
+        case .stack:
+            return L("monocle.hide_style.stack", "Stack behind")
+        case .park:
+            return L(
+                "monocle.hide_style.park",
+                "Park in corner"
+            )
+        }
+    }
+
     static func layoutGridType(
         _ value: GridParams.GridType
     ) -> String {

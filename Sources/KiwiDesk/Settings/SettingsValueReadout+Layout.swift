@@ -200,6 +200,13 @@ extension SettingsValueReadout {
                 o.monocle.orientation,
                 n.monocle.orientation
             ) { layoutAxisWord(vertical: $0 == .vertical) }
+        case .monocleHideStyle:
+            return layoutRow(
+                census,
+                o.monocle.hideStyle,
+                n.monocle.hideStyle,
+                layoutHideStyle
+            )
         case .monocleWrapFocus:
             return layoutRow(
                 census,

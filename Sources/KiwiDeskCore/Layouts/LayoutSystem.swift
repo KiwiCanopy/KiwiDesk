@@ -89,9 +89,11 @@ public struct LayoutContext: Sendable {
     /// diverge from the space's own focus: it can carry a
     /// tiled-sticky traveler that is the frontmost window but not
     /// the membership-guarded `focused` slot (#431,
-    /// `StateCoordinator.focusAnchor`). Only Scrolling reads it —
-    /// Monocle's raise resolves the anchor itself
-    /// (`restoreMonocleZOrder`), it does not read this field.
+    /// `StateCoordinator.focusAnchor`). Scrolling reads it to
+    /// pan, and Monocle's `park` hide style reads it to pick
+    /// the one member it shows (#881) — Monocle's raise still
+    /// resolves the anchor itself (`restoreMonocleZOrder`), it
+    /// does not read this field.
     public var focused: WindowID?
     /// Below this width/height the Overlap Stack kicks in.
     public var minWindowSize: CGFloat
@@ -119,10 +121,12 @@ public struct LayoutContext: Sendable {
     public var sticky: Set<WindowID>
     /// Which screen edges have another screen beyond them
     /// (#878). Scrolling picks its per-edge clamp form from
-    /// this; every other layout ignores it. Defaults to no
-    /// neighbors — the single-screen verdict, under which every
-    /// edge is open and the clamps behave as they did before
-    /// the flags existed.
+    /// this, and Monocle's `park` hide style picks its stash
+    /// corner from the left/right pair (#881); every other
+    /// layout ignores it. Defaults to no neighbors — the
+    /// single-screen verdict, under which every edge is open,
+    /// the clamps behave as they did before the flags existed,
+    /// and the park corner is the bottom-right default.
     public var screenNeighbors: ScreenNeighbors
     /// App-enforced size bounds the engine has confirmed
     /// (#677), keyed by window. A layout MAY consume one as

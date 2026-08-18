@@ -26,6 +26,7 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case gridRows = "settings.grid.rows"
     case gridNewWindowPlacement = "settings.grid.newWindowPlacement"
     case monocleOrientation = "settings.monocle.orientation"
+    case monocleHideStyle = "settings.monocle.hideStyle"
     case monocleWrapFocus = "settings.monocle.wrapFocus"
     case monocleNewWindowPlacement = "settings.monocle.newWindowPlacement"
     case trackAxis = "settings.track.axis"
@@ -124,8 +125,8 @@ extension LayoutKey {
                 .atRest,
                 gate: .setting(.layout(.gridAutoSize))
             )
-        case .monocleOrientation, .monocleWrapFocus,
-            .monocleNewWindowPlacement:
+        case .monocleOrientation, .monocleHideStyle,
+            .monocleWrapFocus, .monocleNewWindowPlacement:
             return .row(.layoutDefaults, .monocle, .atRest)
         case .trackAxis, .trackOverflowStyle, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks, .trackWrapFocus:

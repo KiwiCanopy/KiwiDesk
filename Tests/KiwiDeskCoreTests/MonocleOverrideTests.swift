@@ -15,6 +15,11 @@ struct MonocleOverrideTests {
         "appBar",
         // Per-layout, like the scrolling/track wrap toggles (#168).
         "wrapFocus",
+        // Per-layout too (#881): the owner ruling ships ONE
+        // global axis (`monocle.set_hide_style`), and a
+        // per-space split of how monocle hides would put a
+        // second config behind the one picker row the GUI shows.
+        "hideStyle",
         // Placement is the global new-window rule (mirrored into
         // StateCoordinator.spawnPlacements), overridden per space
         // by the shared `new_window_placement_override`, not a

@@ -99,6 +99,7 @@ struct LayoutSchematicView: View {
         case .monocle:
             MonocleSchematic(
                 orientation: settings.monocle.orientation,
+                hideStyle: settings.monocle.hideStyle,
                 windows: windows,
                 scale: scale
             )
