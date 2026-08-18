@@ -161,35 +161,44 @@ never promise it again.
 It sits next to the SIP entry because a reader who accepts that
 one asks about the App Store next, and both are doors that stay
 shut. The shared root is only the private symbols, though — the
-second reason below is a sandbox constraint, unrelated to SIP.
+second reason below is economics, unrelated to SIP.
 
-Two independent reasons, either alone sufficient:
+Two reasons, of different kinds — one technical, one economic:
 
 - **Private API.** The SkyLight/CGS symbols the section above
-  discusses — dozens of them, and Desktop management does
-  not work without them — put this squarely against review
-  guideline 2.5.1, which permits public API only.
+  discusses put Desktop management squarely against review
+  guideline 2.5.1, which permits public API only — and no
+  public replacement exists: detecting *that* a Desktop
+  switch happened is public, knowing *which* Desktop is not.
   Resolving them through `dlsym` is a robustness measure
   (`AGENTS.md` §5: a vanished symbol must return nil, not
-  crash at launch), never a way around the guideline.
-- **The sandbox**, which every App Store app must adopt, and
-  which is the *harder* blocker because it survives removing
-  every private symbol. It forbids the `kiwidesk` CLI on
-  `PATH` (one binary serves both roles — `main.swift`), the
-  LaunchAgent `ServiceManager` writes, the subprocesses
-  `ExecLauncher` spawns, and reading a Lua config from a fixed
-  path.
+  crash at launch), never a way around the guideline — review
+  scans the binary's string table, so a compliant build has
+  to compile the resolver out, not disable it.
+- **The economics.** A store edition is buildable — the
+  2026-08-18 feasibility pass
+  ([#882](https://github.com/KiwiCanopy/KiwiDesk/issues/882),
+  the full inventory) found most of the app survives the
+  sandbox: KiwiDesk's own spaces and the default focus ring
+  are public-API already, crash-restart ports to
+  `SMAppService`, and Lua-as-local-config is permissible.
+  What it costs is a **permanent second product**: a split
+  build with its own entitlements, packaging and edition
+  guards, doubled CI, and App Review latency on every release
+  — paid forever, for reach the project does not need and
+  that store search does not deliver a niche utility against
+  Magnet-class incumbents with a decade of ratings. And the
+  losses that do remain (Desktop integration, `KiwiDesk.exec`,
+  the `kiwidesk` CLI on `PATH`) land exactly on the users the
+  product is built for.
 
 Note what is *not* the reason: driving other apps' windows
 through Accessibility is fine sandboxed — Magnet and Moom do
-exactly that on the App Store. Anyone re-opening this should
-argue about the sandbox, not about AX.
-
-A cut-down App Store build is conceivable and pointless: it
-would drop Desktop management, the CLI, Lua config and the
-service — nearly everything the README advertises. Every
-comparable tool (yabai, Amethyst, AeroSpace, Rectangle) is
-distributed directly for the same reasons.
+exactly that on the App Store. Anyone re-opening this argues
+the economics, priced with [#882](https://github.com/KiwiCanopy/KiwiDesk/issues/882)'s
+inventory; the trigger it names is 1.0 shipped *plus* a
+concrete demand signal. Every comparable tool (yabai,
+Amethyst, AeroSpace, Rectangle) is distributed directly.
 
 The practical consequence: **notarization is on the critical
 path, not a nicety.** A Homebrew user who meets Gatekeeper runs
