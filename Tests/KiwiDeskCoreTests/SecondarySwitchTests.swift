@@ -126,6 +126,22 @@ struct SecondarySwitchTests {
                 mainUUID: "UUID-A"
             )
         )
+        // ONLY the main display diffed, with the authority
+        // unchanged — a space deleted and re-created under the
+        // same number, a re-arrangement. The one input shape
+        // that isolates the `mainUUID` exclusion: without it
+        // this reads as a secondary switch and stands the
+        // profile down on the main display's own switch
+        // (`guard-prover` found no case reaching that clause,
+        // 2026-08-18).
+        #expect(
+            !KiwiCore.isSecondarySwitch(
+                authority: 1,
+                lastAuthority: 1,
+                changed: ["UUID-A"],
+                mainUUID: "UUID-A"
+            )
+        )
         // The nil authority: fullscreen main display, or no
         // SkyLight. Falls through to the main arm whatever the
         // diff says.
