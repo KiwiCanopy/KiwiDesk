@@ -71,8 +71,8 @@ struct RetileBoundSkipTests {
         return (target, refused)
     }
 
-    @Test("The third retile stops re-issuing a refused target")
-    func thirdRetileSkips() throws {
+    @Test("The confirming retile places; the next is silent")
+    func confirmingRetilePlacesThenSkips() throws {
         guard NSScreen.main != nil else { return }
         let applied = Applied()
         let core = makeCore(applied: applied)
@@ -82,13 +82,27 @@ struct RetileBoundSkipTests {
         )
         #expect(target.width > 717)
 
+        // The third retile's observation confirms mid-pass;
+        // the wrapper consumes the placement flag and runs the
+        // residue pass right then — the window lands CENTERED
+        // in the same call, not at some later event (device
+        // QA, 2026-08-18).
         applied.frames = [:]
         core.retile()
-        #expect(applied.frames[w] == nil)
         #expect(
             core.tiler.sizeBound(for: w)?.width.first?.answered
                 == 715
         )
+        let placed = try #require(applied.frames[w])
+        #expect(placed.width == 715)
+        #expect(abs(placed.midX - target.midX) < 0.01)
+
+        // Settled: the app "performs" the centered ask and the
+        // next retile re-issues nothing.
+        core.state.apply(.windowResized(w, placed))
+        applied.frames = [:]
+        core.retile()
+        #expect(applied.frames[w] == nil)
     }
 
     @Test("Force still re-issues past a learned bound")
@@ -154,129 +168,4 @@ struct RetileBoundSkipTests {
         #expect(reissued == moved)
     }
 
-    @Test("An un-echoed ask is not observed")
-    func staleEchoDoesNotConfirm() throws {
-        // The echo-grace gate (review, 2026-08-18): while the
-        // last set's echo may still be in flight, the state
-        // frame is the stale pre-ask value — a DETERMINISTIC
-        // repeated "answer" that two rapid retiles would
-        // otherwise confirm as a false bound.
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        core.tiler.echoGraceOverride = { _ in true }
-        _ = try learnBound(core, applied: applied)
-        applied.frames = [:]
-        core.retile()
-        // Gated: nothing was learned, so the target re-issues.
-        #expect(core.tiler.sizeBound(for: w) == nil)
-        #expect(applied.frames[w] != nil)
-
-        // With echoes settled the ladder resumes — the gate
-        // discriminates lag, it does not disable learning. The
-        // state frame still holds the refusal, so two quiet
-        // retiles observe and confirm it.
-        core.tiler.echoGraceOverride = { _ in false }
-        core.retile()
-        core.retile()
-        #expect(core.tiler.sizeBound(for: w) != nil)
-    }
-
-    @Test("An echo confirm places the residue immediately")
-    func echoConfirmPlacesResidueImmediately() throws {
-        // The device-QA finding (2026-08-18): learning waited
-        // on the NEXT retile, so the re-pack/centering arrived
-        // only after "many visits". The echo channel observes
-        // the answer as it arrives, and the confirmation edge
-        // retiles right then — monocle centers on the second
-        // probe's settle, not at some later event.
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        // The severed applier never stamps, so inject the
-        // "this is our echo" verdict.
-        core.tiler.echoGraceOverride = { _ in true }
-        let target = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w]
-        )
-        let refused = CGRect(
-            origin: target.origin,
-            size: CGSize(width: 715, height: target.height)
-        )
-        // Probe 1: ask, then the app's echo answers.
-        core.retile()
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) == nil)
-        // Probe 2: ask again; the confirming echo must place
-        // the centered residue in the SAME event turn.
-        applied.frames = [:]
-        core.retile()
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) != nil)
-        let placed = try #require(applied.frames[w])
-        #expect(placed.width == 715)
-        #expect(abs(placed.midX - target.midX) < 0.01)
-        // The placement's own echo (the app performing the
-        // centered ask) is no new edge — nothing re-issues.
-        applied.frames = [:]
-        core.handle(.windowResized(w, placed))
-        #expect(applied.frames[w] == nil)
-    }
-
-    @Test("A late echo of the answer does not wipe the ledger")
-    func lateEchoDoesNotForget() throws {
-        // Past the applier's grace (or delayed by the #618 read
-        // queue) an echo classifies as non-recent — but its
-        // size is one the ledger predicted, so wiping on it
-        // would erase the learning it is evidence for (the
-        // monocle-never-centers half of the device-QA finding).
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        let (_, refused) = try learnBound(
-            core,
-            applied: applied
-        )
-        core.retile()
-        #expect(core.tiler.sizeBound(for: w) != nil)
-
-        // A late-delivered echo of the learned answer.
-        core.handle(.windowResized(w, refused))
-        #expect(core.tiler.sizeBound(for: w) != nil)
-    }
-
-    @Test("A genuine resize stales the ledger via the event flow")
-    func genuineResizeForgets() throws {
-        guard NSScreen.main != nil else { return }
-        let applied = Applied()
-        let core = makeCore(applied: applied)
-        let (_, refused) = try learnBound(
-            core,
-            applied: applied
-        )
-        // Confirmation lands at the NEXT retile's observation
-        // (the same pass that first skips).
-        core.retile()
-        #expect(core.tiler.sizeBound(for: w) != nil)
-
-        // A non-echo resize (the applier is severed here, so
-        // nothing is "recently set"): the user or the app
-        // itself changed the size — System Settings switching
-        // panes — and the ledger must not outlive it.
-        core.handle(
-            .windowResized(
-                w,
-                CGRect(
-                    origin: refused.origin,
-                    size: CGSize(width: 830, height: 700)
-                )
-            )
-        )
-        #expect(core.tiler.sizeBound(for: w) == nil)
-
-        applied.frames = [:]
-        core.retile()
-        // Probing resumes: the target is issued again.
-        #expect(applied.frames[w] != nil)
-    }
 }

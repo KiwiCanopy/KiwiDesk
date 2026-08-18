@@ -30,7 +30,9 @@ extension TilingEngine {
         guard !animation.isAnimating(window: id),
             !askEchoLikely(id)
         else { return }
-        boundLearner.observe(id, currentSize: current.size)
+        if boundLearner.observe(id, currentSize: current.size) {
+            pendingBoundPlacement = true
+        }
     }
 
     /// The echo-time observation (#677, device QA 2026-08-18):
@@ -52,6 +54,33 @@ extension TilingEngine {
         guard !animation.isAnimating(window: id)
         else { return false }
         return boundLearner.observe(id, currentSize: size)
+    }
+
+    /// The settle probe's gate — see
+    /// `SizeBoundLearner.wantsProbe`.
+    func wantsAnswerProbe(
+        _ id: WindowID,
+        currentSize: CGSize
+    ) -> Bool {
+        boundLearner.wantsProbe(id, currentSize: currentSize)
+    }
+
+    /// The candidate view, for the probe's seeded-vs-updated
+    /// distinction — see `SizeBoundLearner.candidateBound`.
+    func candidateSizeBound(
+        for id: WindowID
+    ) -> EffectiveSizeBound? {
+        boundLearner.candidateBound(for: id)
+    }
+
+    /// Consumes the retile-channel confirmation flag (#677):
+    /// the retile loop cannot retile itself, so
+    /// `KiwiCore.retile` reads this after the pass and runs the
+    /// placement immediately instead of leaving the residue for
+    /// the next unrelated event.
+    func takePendingBoundPlacement() -> Bool {
+        defer { pendingBoundPlacement = false }
+        return pendingBoundPlacement
     }
 
     /// Whether a reported size is one the ledger already

@@ -57,6 +57,13 @@ public final class TilingEngine {
     /// stamp is only written by a real AX apply.
     var echoGraceOverride: (@MainActor (WindowID) -> Bool)?
 
+    /// Raised when a retile-channel observation confirms a
+    /// bound (#677): the loop cannot retile itself, so the
+    /// `KiwiCore.retile` wrapper consumes this
+    /// (`takePendingBoundPlacement`) and runs the placement
+    /// pass right after.
+    var pendingBoundPlacement = false
+
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,
     /// per-window tiling state — the `dragExemptWindow` precedent —

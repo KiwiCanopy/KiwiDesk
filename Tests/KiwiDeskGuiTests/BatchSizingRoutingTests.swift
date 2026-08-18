@@ -116,8 +116,12 @@ struct BatchSizingRoutingTests {
         // ceiling; it still only threads the caller's promise.
         "KiwiDeskCore/Tiling/TilingEngine+Layout.swift":
             Site(names: 4, promises: 0),
+        // Two more names since the #677 placement pass: the
+        // wrapper re-runs the SAME caller promise after a
+        // mid-retile bound confirmation — it threads `sizing`
+        // through unchanged and promises nothing of its own.
         "KiwiDeskCore/App/KiwiCore+Retile.swift":
-            Site(names: 4, promises: 0),
+            Site(names: 6, promises: 0),
         // The per-dispatch flag the layout setters raise.
         "KiwiDeskCore/App/KiwiCore.swift":
             Site(names: 1, promises: 0),

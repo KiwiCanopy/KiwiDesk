@@ -73,6 +73,10 @@ extension KiwiCore {
         }
         tiler.animation.onWindowSettled = { [weak self] id, target in
             self?.strandDetector.windowSettled(id, target: target)
+            // The #677 answer probe: a refused size answers
+            // with SILENCE (no event), so a probing window's
+            // settle schedules a direct read-back.
+            self?.scheduleSizeBoundProbe(id)
         }
         tiler.onFrameApplied = { [weak self] id, frame in
             // The #677 pin: while this animation re-asks a size

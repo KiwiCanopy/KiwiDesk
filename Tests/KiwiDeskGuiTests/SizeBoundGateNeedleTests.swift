@@ -28,4 +28,21 @@ struct SizeBoundGateNeedleTests {
         #expect(source.contains("echoGraceOverride?(id)"))
         #expect(source.contains("?? didRecentlySetFrame(id)"))
     }
+
+    @Test("The settle probe is wired at bootstrap")
+    func settleProbeIsWired() throws {
+        // The probe's schedule rides `onWindowSettled` in
+        // Bootstrap — a production wire no unit test reaches
+        // (the suites call `runSizeBoundProbe` directly), and
+        // an unwired probe starves the whole answer channel on
+        // a quiet screen (#677 device QA).
+        let source = try SourceScan.functionBody(
+            of: "bootstrapCoreServices",
+            in: "KiwiCore+Bootstrap.swift",
+            under: "App"
+        )
+        #expect(
+            source.contains("scheduleSizeBoundProbe(id)")
+        )
+    }
 }

@@ -131,6 +131,35 @@ struct SizeBoundLearner {
         }
     }
 
+    /// Whether a post-settle probe is worth an AX read
+    /// (#677): the last ask exists, some axis of it is off the
+    /// window's current state frame (a refusal, or an echo not
+    /// yet landed), and that axis is not already believed. The
+    /// common settle — a complying window whose echo landed —
+    /// answers false, so probing costs nothing there.
+    func wantsProbe(
+        _ id: WindowID,
+        currentSize: CGSize
+    ) -> Bool {
+        guard let asked = lastAsks[id] else { return false }
+        let believed = bound(for: id)
+        let widthDone =
+            EffectiveSizeBound.matches(
+                currentSize.width,
+                asked.width
+            )
+            || believed?.consumedWidth(asking: asked.width)
+                != nil
+        let heightDone =
+            EffectiveSizeBound.matches(
+                currentSize.height,
+                asked.height
+            )
+            || believed?.consumedHeight(asking: asked.height)
+                != nil
+        return !(widthDone && heightDone)
+    }
+
     /// The unconfirmed candidates, in the same shape — for the
     /// overlay pin ONLY (#677 device QA): rendering may trust a
     /// single refusal because a wrong render self-corrects at

@@ -221,6 +221,12 @@ extension EventLoop {
                 self.onEvent(.windowMoved(id, frame))
             case .resized:
                 self.onEvent(.windowResized(id, frame))
+            case .settleProbe:
+                // Never requested through this wire — the
+                // #677 probe (`KiwiCore.runSizeBoundProbe`)
+                // passes its own completion and emits no
+                // event.
+                break
             }
         }
     }

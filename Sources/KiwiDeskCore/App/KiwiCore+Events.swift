@@ -87,6 +87,19 @@ extension KiwiCore {
             {
                 tiler.forgetStash(id)
             }
+            // #677: a refused SIZE emits no resized event —
+            // the size never changed — but the probe's
+            // position sets still echo as moves, and a move
+            // echo carries the full frame: observe it. No
+            // forget half here — a genuine move says nothing
+            // about size bounds.
+            if tiler.askEchoLikely(id) {
+                observeSizeAnswer(
+                    id,
+                    size: frame.size,
+                    channel: "move echo"
+                )
+            }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(
@@ -116,9 +129,11 @@ extension KiwiCore {
             // learned entry, so this retile cannot loop on its
             // own echoes.
             if tiler.askEchoLikely(id) {
-                if tiler.observeEchoAnswer(id, size: frame.size) {
-                    retile()
-                }
+                observeSizeAnswer(
+                    id,
+                    size: frame.size,
+                    channel: "resize echo"
+                )
             } else if !tiler.ledgerExplainsResize(
                 id,
                 size: frame.size
@@ -133,6 +148,12 @@ extension KiwiCore {
                 // read queue can outlast the applier's grace),
                 // and wiping on it erased the learning over and
                 // over (device QA, 2026-08-18).
+                if tiler.sizeBound(for: id) != nil {
+                    onLog(
+                        "size bound staled by a genuine "
+                            + "resize of window \(id.raw)"
+                    )
+                }
                 tiler.forgetSizeBound(id)
             }
             // Resize gestures share the drag pipeline (same

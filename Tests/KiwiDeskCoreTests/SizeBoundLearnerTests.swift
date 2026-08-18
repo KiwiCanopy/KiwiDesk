@@ -236,6 +236,24 @@ struct SizeBoundLearnerTests {
         )
     }
 
+    @Test("The probe gate wants only unexplained refusals")
+    func probeGateWantsOnlyUnexplainedRefusals() {
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 900, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        // No ask on record: nothing to answer.
+        #expect(!learner.wantsProbe(w, currentSize: answered))
+        learner.recordAsk(w, size: asked)
+        // Complying state frame: the echo landed, no probe.
+        #expect(!learner.wantsProbe(w, currentSize: asked))
+        // Off the ask and unexplained: probe.
+        #expect(learner.wantsProbe(w, currentSize: answered))
+        // Believed: the refusal is explained, probing stops.
+        refused(&learner, asked: asked, answered: answered)
+        refused(&learner, asked: asked, answered: answered)
+        #expect(!learner.wantsProbe(w, currentSize: answered))
+    }
+
     @Test("A zero-size frame is no answer")
     func zeroSizeFrameIsNoAnswer() {
         // A window created and never echoed keeps a .zero

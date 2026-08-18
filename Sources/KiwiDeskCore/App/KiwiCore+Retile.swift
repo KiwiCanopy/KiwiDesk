@@ -36,6 +36,26 @@ extension KiwiCore {
             stashAnimated: stashAnimated,
             sizing: sizing
         )
+        // A retile-channel observation confirmed a bound
+        // mid-pass (#677): the pass computed its frames BEFORE
+        // believing it, so run the placement now rather than
+        // leaving the residue for the next unrelated event.
+        // Terminates: the second pass re-observes the same
+        // answer, which is no confirmation edge.
+        if tiler.takePendingBoundPlacement() {
+            onLog(
+                "size bound confirmed during retile; "
+                    + "placing residue"
+            )
+            tiler.retile(
+                state: state,
+                animated: animated
+                    ?? tiler.settings.animations.onRelayout,
+                force: false,
+                stashAnimated: stashAnimated,
+                sizing: sizing
+            )
+        }
         // Scrolling reads back its own last offset (#66); other
         // modes never write `scrollOffset`, so this is a no-op
         // for them.

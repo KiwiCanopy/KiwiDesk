@@ -41,6 +41,10 @@ final class FrameReadCoalescer {
     enum Kind: Hashable, Sendable {
         case moved
         case resized
+        /// The #677 post-settle answer probe — its own key, so
+        /// it never coalesces against live echoes of the same
+        /// window.
+        case settleProbe
     }
 
     private struct Key: Hashable, Sendable {
