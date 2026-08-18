@@ -86,7 +86,11 @@ public struct MonocleLayout: LayoutSystem {
     /// the bar's own edge moves; the Space Bar's strip is
     /// already carved from `context.bounds` by the engine
     /// (#293), which is also why the sliver clears a bottom
-    /// Space Bar.
+    /// Space Bar. Deliberately private rather than an
+    /// `AppBarGeometry` op (§2.4, architect round): the
+    /// "bounds pulled to the strip's near edge" arithmetic has
+    /// this one consumer — home it beside `windowFrame` and
+    /// `clampClear` when a second appears.
     private func parkBounds(
         in context: LayoutContext
     ) -> CGRect {
