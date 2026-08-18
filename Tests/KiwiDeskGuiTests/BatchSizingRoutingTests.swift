@@ -110,7 +110,12 @@ struct BatchSizingRoutingTests {
         "KiwiDeskCore/Animation/SizeStep.swift":
             Site(names: 3, promises: 0),
         "KiwiDeskCore/Tiling/TilingEngine.swift":
-            Site(names: 9, promises: 0),
+            Site(names: 5, promises: 0),
+        // `applyFrame` (the animate-or-instant policy) moved
+        // here when #677's additions hit the main file's line
+        // ceiling; it still only threads the caller's promise.
+        "KiwiDeskCore/Tiling/TilingEngine+Layout.swift":
+            Site(names: 4, promises: 0),
         "KiwiDeskCore/App/KiwiCore+Retile.swift":
             Site(names: 4, promises: 0),
         // The per-dispatch flag the layout setters raise.

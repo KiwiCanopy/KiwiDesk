@@ -223,6 +223,48 @@ extension TilingEngine {
             .max { overlap($0) < overlap($1) }
     }
 
+    /// Applies one frame through the shared animate-or-instant
+    /// policy: animated when asked (and a screen exists),
+    /// otherwise an instant, echo-tracked set with any
+    /// in-flight animation cancelled. The single authority for
+    /// this policy — `retile` and the floating keyboard resize
+    /// both route here; never copy the branch (a copy already
+    /// drifted once, dropping the cancel). The animation screen
+    /// is the display the target frame lands on (multi-monitor:
+    /// one `DisplayLink` per monitor), falling back to main.
+    ///
+    /// `sizing` says why this frame is being applied (#593);
+    /// it reaches `SizeStep` through the animation and decides
+    /// whether a shrinking axis may slide instead of snapping.
+    /// `.mayInstantSize` is the default because mismarking is asymmetric —
+    /// see `BatchSizing`.
+    public func applyFrame(
+        _ id: WindowID,
+        from current: CGRect,
+        to target: CGRect,
+        animated: Bool,
+        isNewWindow: Bool = false,
+        sizing: BatchSizing = .mayInstantSize
+    ) {
+        if animated,
+            let screen = Self.screen(containing: target)
+                ?? NSScreen.main
+                ?? NSScreen.screens.first
+        {
+            animation.animate(
+                window: id,
+                on: screen,
+                from: current,
+                to: target,
+                isNewWindow: isNewWindow,
+                sizing: sizing
+            )
+        } else {
+            animation.cancel(window: id)
+            setFrame(id, target)
+        }
+    }
+
     /// The frames every visible space's layout assigns right now,
     /// unioned across all displays, without applying them. Used
     /// by retiling and by drag / border / resize slot detection —

@@ -103,6 +103,14 @@ extension KiwiCore {
             {
                 tiler.forgetStash(id)
             }
+            // A genuine resize also stales the learned size
+            // bound (#677): the user or the app itself changed
+            // the size — System Settings switching panes moves
+            // its fixed width — so the next retile must probe
+            // fresh rather than skip on a dead answer.
+            if !tiler.didRecentlySetFrame(id) {
+                tiler.forgetSizeBound(id)
+            }
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected
@@ -123,6 +131,9 @@ extension KiwiCore {
             // (#152/#158). Same for a pending z-order-raise echo.
             outstandingSelfRaises.remove(id)
             zOrderRaiseEchoes[id] = nil
+            // WindowIDs are reused (#152/#158): a bound learned
+            // for the gone window must not skip the next one.
+            tiler.forgetSizeBound(id)
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
@@ -188,6 +199,10 @@ extension KiwiCore {
             // corner forever — #412's "floating vanishes"
             // failure mode, reintroduced on this one path.
             tiler.rekeyStash(oldID: old, newID: new)
+            // The learned size bound follows the id swap too
+            // (#677): same on-screen window, same app-side
+            // constraint, new id.
+            tiler.rekeySizeBound(oldID: old, newID: new)
             // A live display crossing's bookkeeping (#504) must
             // follow the id swap, or a rekey after a crossing
             // strands the (new) window on the destination space
