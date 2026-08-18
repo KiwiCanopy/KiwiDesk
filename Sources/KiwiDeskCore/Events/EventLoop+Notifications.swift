@@ -202,6 +202,16 @@ extension EventLoop {
             // after either must not fold a stale event into a
             // torn-down core — a delivery the old inline read
             // could not produce (review, 2026-08-18).
+            // Observer PRESENCE alone, not the full
+            // `ownsObservation` funnel: the policy re-read
+            // exists to catch an app whose policy changed with
+            // its observer still installed, and `handle`
+            // already ran it at receipt — a policy flip inside
+            // the read's flight still ends in a detach, which
+            // clears the observer and closes this guard. The
+            // funnel's extra term would buy that narrowing at
+            // an `NSRunningApplication` lookup per delivered
+            // frame, on the main actor, at storm rate.
             guard self.observers[pid] != nil else { return }
             if self.elements[pid]?[id] != nil {
                 self.trackedFrames[id] = frame
