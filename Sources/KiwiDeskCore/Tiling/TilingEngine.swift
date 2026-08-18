@@ -241,28 +241,10 @@ public final class TilingEngine {
             if id == dragExemptWindow { continue }
             guard let current = state.windows[id]?.frame
             else { continue }
-            // #677: a settled window's echo-fed frame is the
-            // app's answer to the engine's last ask — observe
-            // it. Neither a mid-flight frame (travel, not an
-            // answer) nor one whose ask's echo may still be in
-            // flight counts: two rapid retiles re-asking one
-            // target before any echo lands would otherwise
-            // read the stale pre-ask frame as the same refusal
-            // twice and confirm a false bound (review,
-            // 2026-08-18). Deferring costs nothing but time —
-            // a real refusal is still there at the next quiet
-            // retile.
-            let echoMaybePending =
-                echoGraceOverride?(id)
-                ?? didRecentlySetFrame(id)
-            if !animation.isAnimating(window: id),
-                !echoMaybePending
-            {
-                boundLearner.observe(
-                    id,
-                    currentSize: current.size
-                )
-            }
+            // #677: the settled, echo-quiet state frame is the
+            // app's answer to the engine's last ask — the gate
+            // and its argument live on `observeAppAnswer`.
+            observeAppAnswer(for: id, current: current)
             // Tolerance: apps clamp what we set (character
             // grids, minimum sizes), so the reported frame is
             // often a hair off the target. Re-applying an

@@ -7,6 +7,25 @@ import CoreGraphics
 /// flow calls. The learning ladder itself is `SizeBoundLearner`;
 /// what a learned bound means is `EffectiveSizeBound`.
 extension TilingEngine {
+    /// The observe gate (#677): a settled window's echo-fed
+    /// frame is the app's answer to the engine's last ask.
+    /// Neither a mid-flight frame (travel, not an answer) nor
+    /// one inside its ask's echo grace counts — two rapid
+    /// retiles re-asking one target before any echo lands
+    /// would otherwise read the stale pre-ask frame as the
+    /// same refusal twice and confirm a false bound (review,
+    /// 2026-08-18). Deferring costs nothing but time: a real
+    /// refusal is still there at the next quiet retile.
+    func observeAppAnswer(for id: WindowID, current: CGRect) {
+        let echoMaybePending =
+            echoGraceOverride?(id)
+            ?? didRecentlySetFrame(id)
+        guard !animation.isAnimating(window: id),
+            !echoMaybePending
+        else { return }
+        boundLearner.observe(id, currentSize: current.size)
+    }
+
     /// Whether a retile target that fails the plain skip check
     /// is nevertheless "already there": the window's position
     /// matches, and every size axis off target is re-asking an

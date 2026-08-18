@@ -13,15 +13,23 @@ import CoreGraphics
 ///
 /// The engine gates `observe` on the window not animating AND
 /// on its last set's echo grace having passed
-/// (`TilingEngine.retile`'s #677 block): a pending echo makes
+/// (`TilingEngine.observeAppAnswer`): a pending echo makes
 /// the stale pre-ask frame a *deterministic* repeated answer,
 /// which two rapid retiles would confirm as a false bound —
-/// so an un-echoed ask is simply not observed yet.
+/// so an ask inside its echo grace is not observed yet. The
+/// grace is a time bound, not echo receipt, which is the first
+/// accepted imprecision below.
 ///
-/// Two accepted imprecisions, weighed rather than overlooked:
-/// a cancel mid-flight can seed one wrong candidate (the frame
-/// observed is mid-travel, not an answer), and the next
-/// settled observation overwrites it. And a constraint
+/// Three accepted imprecisions, weighed rather than overlooked:
+/// an app whose echo outlasts the grace (the stalled-app
+/// class — its echo event also rides the #618 read queue) can
+/// still present the stale pre-ask frame as a repeated answer
+/// and confirm a false bound, narrowed by the grace and healed
+/// by the same compliance and invalidation arms as every other
+/// stale entry. A cancel mid-flight can seed one wrong
+/// candidate (the frame observed is mid-travel, not an
+/// answer), and the next settled observation overwrites it.
+/// And a constraint
 /// that lifts with no resize event and no recurring ask stays
 /// learned until an invalidation fires; the forget on every
 /// genuine (non-echo) resize covers the real-world case, an
