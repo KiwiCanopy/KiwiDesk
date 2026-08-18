@@ -313,6 +313,56 @@ in the update in front of me", and this answers "what changed
 across every version, whenever I ask" — including for a user who
 skipped four of them.
 
+### Release notes are written for the person installing
+
+**[Principle]**
+
+**A release note names what the reader will notice; the mechanism
+belongs in the PR that carried it.** The first draft of 0.9.7's
+highlights said "the ring's work no longer starves the main
+actor", "the layouts place the residue" and "31 interpolations
+across 472 values". Every clause was true and none was legible to
+anyone who had not read the diff. The same three, rewritten:
+"the focus outline keeps up", "KiwiDesk arranges the others
+around it", and "a batch of sentences that couldn't be phrased
+naturally in other languages have been rebuilt so they can be".
+
+The test is neither word count nor tone. It is: **would a reader
+who has never seen this codebase recognise the thing described as
+something that happened to them?** An internal noun — the engine,
+the tiler, a retile, the main actor, a residue, an interpolation
+— fails by construction, the reader having no referent for it. A
+symptom passes. The rule is easy to lose because the person
+writing the notes has just spent a week inside the mechanism, and
+the mechanism is what feels notable to them.
+
+Two consequences fall out, both structural rather than stylistic:
+
+- **Highlights carry no issue or PR numbers.** The generated
+  "What's Changed" list sits directly beneath them and is the
+  complete record, every entry linked. Numbering the highlights
+  as well makes the reader's eye redo work the section below
+  already did, and turns news into a bug list.
+- **Highlights are highlights.** Twenty bullets is a changelog
+  with headings. Site fixes, a font bump and release plumbing
+  collapse into one closing line; the generated list still
+  carries each of them for whoever wants that.
+
+This binds whichever surface carries the notes, not the surface
+it happens to be today. That surface is currently the GitHub
+release body — the entry above rules it *is* this project's
+changelog — and when the curated changelog page lands (#873) for
+Sparkle to render (#874), the page inherits this rather than
+restating it.
+
+No guard is proposed, and that is a ruling rather than an
+omission: nothing mechanical separates "the focus outline keeps
+up" from "the ring no longer starves the main actor". Both are
+well-formed prose about the same commit. A banned-word list would
+fail open on the phrasing it did not anticipate and fail closed
+on the same nouns used legitimately elsewhere. This is a
+review-time rule, and this entry is where the reviewer is sent.
+
 ### A restore replaces; it never merges
 
 **[Principle]**
