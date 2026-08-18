@@ -60,9 +60,16 @@ public struct ScrollingLayout: LayoutSystem {
         )
         let horizontal = context.scrolling.axisIsHorizontal
 
-        // A single window always fills the whole window area.
+        // A single window always fills the whole window area —
+        // unless its app refuses that size (#677): a lone
+        // window has no neighbors to re-pack against, so the
+        // answered size is CENTERED instead (the monocle
+        // treatment; a symmetric gap reads deliberate).
         if windows.count == 1, let only = windows.first {
-            return [only: area]
+            return [
+                only: context.sizeBounds[only]?
+                    .centered(in: area) ?? area
+            ]
         }
 
         let metrics = Self.metrics(
@@ -75,7 +82,7 @@ public struct ScrollingLayout: LayoutSystem {
             anchor: context.scrolling.anchor,
             previous: context.scrollOffset,
             along: metrics.along,
-            size: metrics.size,
+            size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
             focusedPos: metrics.focusedPos
         )
@@ -85,24 +92,29 @@ public struct ScrollingLayout: LayoutSystem {
             area: area,
             horizontal: horizontal,
             offset: offset,
-            stride: metrics.stride,
-            size: metrics.size,
+            metrics: metrics,
             neighbors: context.screenNeighbors
         )
     }
 
     /// The row geometry shared by `calculateGeometry` and
-    /// `viewportOffset`: slot size, stride, total row length, and
-    /// the focused slot's position along the scroll axis — nil
-    /// when the focused window has no slot in the row (a floating
-    /// window, or nothing focused), so the offset math knows there
-    /// is nothing to scroll into view (#141).
+    /// `viewportOffset`: per-slot spans and positions, total
+    /// row length, and the focused slot's position along the
+    /// scroll axis — nil when the focused window has no slot in
+    /// the row (a floating window, or nothing focused), so the
+    /// offset math knows there is nothing to scroll into view
+    /// (#141). `size` is the uniform ask; a slot's span differs
+    /// from it only where a confirmed app bound consumed the
+    /// ask (#677), which is what re-packs the row so neighbors
+    /// close a refusal's gap.
     struct Metrics {
         let along: CGFloat
         let size: CGFloat
-        let stride: CGFloat
+        let spans: [CGFloat]
+        let positions: [CGFloat]
         let rowLength: CGFloat
         let focusedPos: CGFloat?
+        let focusedSpan: CGFloat
     }
 
     static func metrics(
@@ -128,20 +140,38 @@ public struct ScrollingLayout: LayoutSystem {
         // no pile (its overflow is the scroll itself), so it floors
         // the slot instead.
         let size = min(along, max(resolved, context.minWindowSize))
-        let stride = size + gap
-        let count = CGFloat(windows.count)
-        let rowLength = count * size + (count - 1) * gap
+        // Per-slot span: the learned answer where the app has
+        // refused exactly this ask (#677), the uniform size
+        // everywhere else — only the scroll axis re-packs; the
+        // cross axis keeps asking the full extent.
+        let spans = windows.map { window -> CGFloat in
+            let bound = context.sizeBounds[window]
+            let consumed =
+                horizontal
+                ? bound?.consumedWidth(asking: size)
+                : bound?.consumedHeight(asking: size)
+            return consumed ?? size
+        }
+        var positions: [CGFloat] = []
+        positions.reserveCapacity(spans.count)
+        var cursor: CGFloat = 0
+        for span in spans {
+            positions.append(cursor)
+            cursor += span + gap
+        }
+        let rowLength = max(cursor - gap, 0)
         let focusedIndex = context.focused.flatMap {
             windows.firstIndex(of: $0)
         }
         return Metrics(
             along: along,
             size: size,
-            stride: stride,
+            spans: spans,
+            positions: positions,
             rowLength: rowLength,
-            focusedPos: focusedIndex.map {
-                CGFloat($0) * stride
-            }
+            focusedPos: focusedIndex.map { positions[$0] },
+            focusedSpan: focusedIndex.map { spans[$0] }
+                ?? size
         )
     }
 
@@ -182,7 +212,7 @@ public struct ScrollingLayout: LayoutSystem {
             anchor: context.scrolling.anchor,
             previous: context.scrollOffset,
             along: metrics.along,
-            size: metrics.size,
+            size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
             focusedPos: metrics.focusedPos
         )
@@ -222,11 +252,10 @@ public struct ScrollingLayout: LayoutSystem {
         area: CGRect,
         horizontal: Bool,
         offset: CGFloat,
-        stride: CGFloat,
-        size: CGFloat,
+        metrics: Metrics,
         neighbors: ScreenNeighbors
     ) -> [WindowID: CGRect] {
-        let along = horizontal ? area.width : area.height
+        let along = metrics.along
         // A blocked edge — another screen beyond it, or the
         // vertical top, which macOS itself walls off (#139) — is
         // a hard stop (#878): the scrolled-out slot stops flush
@@ -239,43 +268,45 @@ public struct ScrollingLayout: LayoutSystem {
             horizontal ? neighbors.right : neighbors.bottom
         var result: [WindowID: CGRect] = [:]
         for (index, window) in windows.enumerated() {
-            var lead = offset + CGFloat(index) * stride
+            let span = metrics.spans[index]
+            var lead = offset + metrics.positions[index]
             // On an open edge, pin what macOS would refuse
             // anyway (#142): (almost) fully offscreen frames
             // clamp to its own title-bar minimum. An unreachable
             // target makes every retile re-issue the frame past
             // the ±2pt tolerance, so far slots keep `edgePeek`
-            // visible at the edge. The peek caps at the slot
-            // size: a slot smaller than `edgePeek` (possible via
-            // `.fraction`, whose 5% floor has no point minimum)
-            // pins fully visible instead of displacing
+            // visible at the edge. The peek caps at the slot's
+            // own span: a slot smaller than `edgePeek` (possible
+            // via `.fraction`, whose 5% floor has no point
+            // minimum) pins fully visible instead of displacing
             // already-visible slots — with the cap, the focused
-            // slot is provably never touched (its lead stays in
-            // [0, along-size], which both clamp forms keep
-            // reachable: `size` never exceeds `along`, so the
-            // hard stop's bound is never tighter than it).
-            let peek = min(Self.edgePeek, size)
+            // slot is provably never touched: the offset clamps
+            // already hold its lead in [0, along - focusedSpan]
+            // using the slot's OWN span, which is exactly the
+            // hard stop's bound here, and the open form's is
+            // looser still (peek ≤ span on both ends).
+            let peek = min(Self.edgePeek, span)
             lead = min(
                 lead,
-                trailingBlocked ? along - size : along - peek
+                trailingBlocked ? along - span : along - peek
             )
             lead = max(
                 lead,
-                leadingBlocked ? 0 : peek - size
+                leadingBlocked ? 0 : peek - span
             )
             result[window] =
                 horizontal
                 ? CGRect(
                     x: area.minX + lead,
                     y: area.minY,
-                    width: size,
+                    width: span,
                     height: area.height
                 )
                 : CGRect(
                     x: area.minX,
                     y: area.minY + lead,
                     width: area.width,
-                    height: size
+                    height: span
                 )
         }
         return result

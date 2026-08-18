@@ -21,7 +21,14 @@ public struct MonocleLayout: LayoutSystem {
         )
         var result: [WindowID: CGRect] = [:]
         for window in windows {
-            result[window] = frame
+            // A window whose app refuses the monocle size
+            // (#677) takes the learned answer CENTERED in the
+            // slot — residue split symmetrically instead of
+            // piling on one side. Only the refused ask
+            // consumes; anything else asks the full frame.
+            result[window] =
+                context.sizeBounds[window]?
+                .centered(in: frame) ?? frame
         }
         return result
     }

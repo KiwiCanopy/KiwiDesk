@@ -53,6 +53,13 @@ struct SizeBoundLearner {
     /// not an answer.
     mutating func observe(_ id: WindowID, currentSize: CGSize) {
         guard let asked = lastAsks[id] else { return }
+        // A non-positive span cannot be a real on-screen
+        // window — it is a state frame no echo ever wrote (a
+        // window created and never heard from again), not an
+        // answer. Learning it would confirm a 0 pt "bound" and
+        // collapse the slot.
+        guard currentSize.width > 0, currentSize.height > 0
+        else { return }
         observeAxis(
             id,
             asked: asked.width,

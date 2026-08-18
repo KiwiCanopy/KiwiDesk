@@ -124,6 +124,20 @@ struct SizeBoundLearnerTests {
         #expect(learner.bound(for: w)?.width?.answered == 715)
     }
 
+    @Test("A zero-size frame is no answer")
+    func zeroSizeFrameIsNoAnswer() {
+        // A window created and never echoed keeps a .zero
+        // state frame; reading that as "the app answered 0"
+        // would confirm a 0 pt bound and collapse the slot
+        // (caught by ScrollingFloatingFocusTests' end-to-end
+        // fixture on this suite's first full run).
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 900, height: 800)
+        refused(&learner, asked: asked, answered: .zero)
+        refused(&learner, asked: asked, answered: .zero)
+        #expect(learner.bound(for: w) == nil)
+    }
+
     @Test("Forget drops everything learned")
     func forgetDrops() {
         var learner = SizeBoundLearner()

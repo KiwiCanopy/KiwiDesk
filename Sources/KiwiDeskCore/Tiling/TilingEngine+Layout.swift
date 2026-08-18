@@ -92,7 +92,13 @@ extension TilingEngine {
             screenNeighbors: ScreenNeighbors.detect(
                 around: visibleBounds(screen),
                 among: allScreenBounds()
-            )
+            ),
+            // Confirmed app-enforced bounds (#677), read fresh
+            // from the learner like the neighbors above: these
+            // frames reach real windows, so the residue of a
+            // refusal is placed rather than left at the slot
+            // origin.
+            sizeBounds: sizeBounds(for: tiled)
         )
         return (space, tiled, context)
     }

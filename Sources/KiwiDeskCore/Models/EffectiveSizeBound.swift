@@ -72,6 +72,31 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         return height.answered
     }
 
+    /// The centered residue frame for a slot this bound
+    /// refuses (owner ruling on #677): per axis, the answered
+    /// span centered in the slot iff the slot's span is the
+    /// refused ask; the other axis keeps the slot's extent.
+    /// Nil when neither axis consumes — the slot must be asked
+    /// as-is. Centered because the residue at the slot origin
+    /// reads broken while a symmetric gap reads deliberate;
+    /// monocle takes this for its whole slot, scrolling for a
+    /// row that cannot re-pack (a single window).
+    public func centered(in slot: CGRect) -> CGRect? {
+        let width = consumedWidth(asking: slot.width)
+        let height = consumedHeight(asking: slot.height)
+        guard width != nil || height != nil else { return nil }
+        let size = CGSize(
+            width: width ?? slot.width,
+            height: height ?? slot.height
+        )
+        return CGRect(
+            x: slot.midX - size.width / 2,
+            y: slot.midY - size.height / 2,
+            width: size.width,
+            height: size.height
+        )
+    }
+
     /// Whether a window sitting at `currentSize` against a
     /// retile's `targetSize` is fully explained by this bound:
     /// per axis, either already within tolerance, or re-asking
