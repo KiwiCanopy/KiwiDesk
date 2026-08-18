@@ -99,6 +99,12 @@ public final class EventLoop {
     /// frame. Set at track, refreshed on move/resize/reconcile,
     /// moved on re-key, cleared on destroy/detach/stop.
     var trackedFrames: [WindowID: CGRect] = [:]
+    /// Per-app off-main frame reads for move/resize
+    /// notifications (#618) — the read is blocking IPC into an
+    /// app that is busiest exactly when it storms, and on the
+    /// main actor it froze the focus ring for the app's whole
+    /// busy stretch. The type owns the coalescing argument.
+    let frameReads = FrameReadCoalescer()
     /// Tracked windows that carry (or last carried) an `AXTabGroup`.
     /// A re-key needs a tab group on only one side, so this preserves
     /// the "was a carrier" fact for a window that vanishes after a
@@ -168,6 +174,15 @@ public final class EventLoop {
     /// Creates the per-app AX observer `attach` installs.
     var makeObserver: @MainActor (pid_t) -> (any AppObserving)? =
         { AXApplicationObserver(pid: $0) }
+
+    /// Resolves a window element's stable id in the
+    /// notification arms. A seam because a unit test has no
+    /// real window to hand `_AXUIElementGetWindow`, so the
+    /// move/resize wire (#618) would otherwise be unpinnable;
+    /// production is the live read.
+    var resolveWindowID: (AXUIElement) -> WindowID? = {
+        AXHelper.windowID(of: $0)
+    }
 
     /// The app source the startup scan and `reconcileAll`
     /// iterate. Descriptor-shaped rather than
