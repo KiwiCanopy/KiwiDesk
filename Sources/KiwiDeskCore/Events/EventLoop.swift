@@ -179,7 +179,11 @@ public final class EventLoop {
     /// notification arms. A seam because a unit test has no
     /// real window to hand `_AXUIElementGetWindow`, so the
     /// move/resize wire (#618) would otherwise be unpinnable;
-    /// production is the live read.
+    /// production is the live read. Scoped DELIBERATELY to the
+    /// move/resize arms — the created/focused/title arms keep
+    /// the direct `AXHelper.windowID` read, and route through
+    /// here only when a test needs them, so the seam's reach
+    /// matches what it pins.
     var resolveWindowID: (AXUIElement) -> WindowID? = {
         AXHelper.windowID(of: $0)
     }

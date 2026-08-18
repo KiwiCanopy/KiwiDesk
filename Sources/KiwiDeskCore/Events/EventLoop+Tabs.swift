@@ -103,6 +103,16 @@ extension EventLoop {
     /// excluded — a minimize is not a tab close (`TabReconciler`'s
     /// precondition) — but they stay in the sweep so they still emit a
     /// destroy. A window with no remembered frame can't be matched.
+    ///
+    /// The remembered frame can lag by one in-flight read (#618):
+    /// move/resize frames land a hop after their notification, so
+    /// a tab switch racing a read compares against the frame one
+    /// move ago and can miss the coalesce. Accepted — the miss
+    /// degrades to the destroy+create fallback this file already
+    /// documents as self-healing, the overlap needs the switch to
+    /// land inside a read's flight, and the alternative (draining
+    /// the pid's reads before the sweep) blocks the main actor on
+    /// the stalled-app IPC #618 exists to move off it.
     private func rekeyCandidates(
         _ vanishedIDs: [WindowID],
         _ minimized: Set<WindowID>

@@ -8,7 +8,8 @@ import Foundation
 /// blocking IPC into the very app that is busiest at exactly
 /// that moment (a live mouse resize saturates its main thread).
 /// Read on the main actor, one stalled answer parks KiwiDesk
-/// for the app's whole busy stretch (~150–210 ms measured), and
+/// for the app's whole busy stretch (150–210 ms, measured on
+/// device in #618, 2026-08), and
 /// the WindowServer event queue that drives the focus ring
 /// starves behind it — the freeze-then-teleport of #618.
 ///
@@ -24,10 +25,17 @@ import Foundation
 /// on the wrong thread.
 ///
 /// Delivery hops back to the main actor, so every consumer
-/// downstream of `EventLoop.onEvent` is unchanged. Accepted: an
-/// event can now deliver after its window's destroy — already
-/// possible via run-loop queuing, and every consumer no-ops on
-/// an unknown id.
+/// downstream of `EventLoop.onEvent` is unchanged. Two accepted
+/// residuals, weighed rather than overlooked: an event can now
+/// deliver after its window's destroy — already possible via
+/// run-loop queuing, and every consumer no-ops on an unknown
+/// id — and `trackedFrames` can lag by one in-flight read, so a
+/// native-tab switch racing a read can miss its same-frame
+/// coalesce and degrade to the tabs machinery's documented
+/// destroy+create fallback (`rekeyCandidates` carries the
+/// argument where the frame is read; draining reads before a
+/// reconcile would re-block the main actor in exactly the storm
+/// this type exists to survive).
 @MainActor
 final class FrameReadCoalescer {
     enum Kind: Hashable, Sendable {
@@ -142,6 +150,16 @@ final class FrameReadCoalescer {
     /// only its own windows' reads, and one idle queue per app
     /// is cheaper than two queues racing AX calls.
     private func queue(for pid: pid_t) -> DispatchQueue {
+        // Own-process AX runs on the main queue —
+        // `FrameApplier.queue(for:)`'s arm, same reason: an
+        // in-process AX call never crosses to the AX server,
+        // HIServices serves it on the calling thread against
+        // AppKit state, and AppKit traps off the main thread.
+        // No blocking is reintroduced: the in-process answer is
+        // local, never the stalled-app IPC #618 moved off.
+        if pid == getpid() {
+            return DispatchQueue.main
+        }
         if let existing = queues[pid] {
             return existing
         }

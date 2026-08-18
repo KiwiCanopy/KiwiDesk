@@ -131,3 +131,29 @@ public struct EffectiveSizeBound: Sendable, Equatable {
             && Self.matches(current, bound.answered)
     }
 }
+
+/// The learned answer for an animation whose target re-asks a
+/// size the app has refused (#677): per axis, the span the
+/// window will actually hold, nil where the tick's size is
+/// honest. Bound semantics, so it lives beside
+/// `EffectiveSizeBound` — computed by
+/// `TilingEngine.animationSizePin(for:)` from the confirmed
+/// bound and the in-flight target, consumed by
+/// `FollowSource.renderFrame`, whose signature is what drags
+/// both overlay managers through any change (borders.md).
+public struct SizePin: Sendable, Equatable {
+    public var width: CGFloat?
+    public var height: CGFloat?
+
+    public init(
+        width: CGFloat? = nil,
+        height: CGFloat? = nil
+    ) {
+        self.width = width
+        self.height = height
+    }
+
+    public var isEmpty: Bool {
+        width == nil && height == nil
+    }
+}

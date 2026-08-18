@@ -16,31 +16,6 @@ public enum FollowSource {
     /// An AX `.windowMoved` / `.windowResized` echo.
     case axEcho
 
-    /// The learned answer for an animation whose target
-    /// re-asks a size the app has refused (#677): per axis, the
-    /// span the window will actually hold, nil where the tick's
-    /// size is honest. Computed by
-    /// `TilingEngine.animationSizePin(for:)` from the confirmed
-    /// bound and the in-flight target; the follow call sites
-    /// thread it here so the correction is FollowSource's
-    /// decision, never a guard bolted beside one manager.
-    public struct SizePin: Sendable, Equatable {
-        public var width: CGFloat?
-        public var height: CGFloat?
-
-        public init(
-            width: CGFloat? = nil,
-            height: CGFloat? = nil
-        ) {
-            self.width = width
-            self.height = height
-        }
-
-        public var isEmpty: Bool {
-            width == nil && height == nil
-        }
-    }
-
     /// The one follow decision both managers share: which frame
     /// does a reported one render, given what currently owns
     /// the window's frame? Nil = stand down. The tick is the

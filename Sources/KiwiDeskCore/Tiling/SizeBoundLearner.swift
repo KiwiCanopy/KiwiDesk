@@ -11,11 +11,17 @@ import CoreGraphics
 /// bound its answer contradicts — so a lifted constraint heals
 /// the moment the engine happens to ask past it again.
 ///
+/// The engine gates `observe` on the window not animating AND
+/// on its last set's echo grace having passed
+/// (`TilingEngine.retile`'s #677 block): a pending echo makes
+/// the stale pre-ask frame a *deterministic* repeated answer,
+/// which two rapid retiles would confirm as a false bound —
+/// so an un-echoed ask is simply not observed yet.
+///
 /// Two accepted imprecisions, weighed rather than overlooked:
 /// a cancel mid-flight can seed one wrong candidate (the frame
-/// observed is mid-travel, not an answer), but it cannot
-/// *confirm* — that needs the identical answer twice, and the
-/// next settled observation overwrites it. And a constraint
+/// observed is mid-travel, not an answer), and the next
+/// settled observation overwrites it. And a constraint
 /// that lifts with no resize event and no recurring ask stays
 /// learned until an invalidation fires; the forget on every
 /// genuine (non-echo) resize covers the real-world case, an

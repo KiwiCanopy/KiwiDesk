@@ -197,6 +197,12 @@ extension EventLoop {
             pid: pid
         ) { [weak self] frame in
             guard let self else { return }
+            // Ownership re-check at delivery: `stop()` and a
+            // detach clear the observer, and a read completing
+            // after either must not fold a stale event into a
+            // torn-down core — a delivery the old inline read
+            // could not produce (review, 2026-08-18).
+            guard self.observers[pid] != nil else { return }
             if self.elements[pid]?[id] != nil {
                 self.trackedFrames[id] = frame
             }

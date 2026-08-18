@@ -126,6 +126,62 @@ struct RetileBoundSkipTests {
         #expect(reissued == moved)
     }
 
+    @Test("A slot translated at the same size still issues")
+    func translatedSlotStillIssues() throws {
+        // The position half of the skip (guard-prover,
+        // 2026-08-18): a display-origin shift moves the slot
+        // WITHOUT changing its size, so the size axes are all
+        // explained by the bound and only the position check
+        // forces the re-issue.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        _ = try learnBound(core, applied: applied)
+        // Confirm (and skip) at the next retile, so the
+        // translation below runs against a believed bound.
+        core.retile()
+        #expect(core.tiler.sizeBound(for: w) != nil)
+
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 300, y: 0, width: 1000, height: 800)
+        }
+        applied.frames = [:]
+        core.retile()
+        let reissued = try #require(applied.frames[w])
+        let moved = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w]
+        )
+        #expect(reissued == moved)
+    }
+
+    @Test("An un-echoed ask is not observed")
+    func staleEchoDoesNotConfirm() throws {
+        // The echo-grace gate (review, 2026-08-18): while the
+        // last set's echo may still be in flight, the state
+        // frame is the stale pre-ask value — a DETERMINISTIC
+        // repeated "answer" that two rapid retiles would
+        // otherwise confirm as a false bound.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        core.tiler.echoGraceOverride = { _ in true }
+        _ = try learnBound(core, applied: applied)
+        applied.frames = [:]
+        core.retile()
+        // Gated: nothing was learned, so the target re-issues.
+        #expect(core.tiler.sizeBound(for: w) == nil)
+        #expect(applied.frames[w] != nil)
+
+        // With echoes settled the ladder resumes — the gate
+        // discriminates lag, it does not disable learning. The
+        // state frame still holds the refusal, so two quiet
+        // retiles observe and confirm it.
+        core.tiler.echoGraceOverride = { _ in false }
+        core.retile()
+        core.retile()
+        #expect(core.tiler.sizeBound(for: w) != nil)
+    }
+
     @Test("A genuine resize stales the ledger via the event flow")
     func genuineResizeForgets() throws {
         guard NSScreen.main != nil else { return }

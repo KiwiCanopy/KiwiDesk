@@ -66,11 +66,11 @@ extension TilingEngine {
     /// lives.
     func animationSizePin(
         for id: WindowID
-    ) -> FollowSource.SizePin? {
+    ) -> SizePin? {
         guard let bound = boundLearner.bound(for: id),
             let target = animation.targetFrame(window: id)
         else { return nil }
-        let pin = FollowSource.SizePin(
+        let pin = SizePin(
             width: bound.consumedWidth(asking: target.width),
             height: bound.consumedHeight(
                 asking: target.height

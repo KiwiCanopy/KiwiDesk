@@ -20,7 +20,7 @@ struct FollowSizePinTests {
         width: 900,
         height: 300
     )
-    private let pin = FollowSource.SizePin(width: 715)
+    private let pin = SizePin(width: 715)
 
     @Test("A pinned tick renders the answer on the ring")
     func pinnedTickCorrectsRing() {
@@ -110,6 +110,58 @@ struct FollowSizePinTests {
         #expect(border.lastFrame(WindowID(1)) == echo)
     }
 
+    @Test("The production tee threads the pin to the ring")
+    func productionTeeThreadsThePin() throws {
+        // The wire the hand-built-pin tests cannot see
+        // (guard-prover, 2026-08-18): `KiwiCore+Bootstrap`'s
+        // `onFrameApplied` tee must COMPUTE the pin and pass
+        // it — a tee passing nil ships green through every
+        // other test in this suite.
+        guard let screen = NSScreen.main else { return }
+        let core = makeTestCore()
+        let w = WindowID(1)
+        core.borders.sync([
+            BorderManager.Spec(
+                window: w,
+                frame: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 715,
+                    height: 800
+                ),
+                colorHex: "#FF0000",
+                width: 4,
+                cornerStyle: .rounded
+            )
+        ])
+        let asked = CGSize(width: 900, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        for _ in 0..<2 {
+            core.tiler.boundLearner.recordAsk(w, size: asked)
+            core.tiler.boundLearner.observe(
+                w,
+                currentSize: answered
+            )
+        }
+        core.tiler.animation.animate(
+            window: w,
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 715, height: 800),
+            to: CGRect(x: 50, y: 0, width: 900, height: 800)
+        )
+        core.tiler.onFrameApplied(
+            w,
+            CGRect(x: 20, y: 0, width: 800, height: 800)
+        )
+        // Commanded origin, learned width: the tee computed
+        // and threaded the pin.
+        #expect(
+            core.borders.lastFrame(w)
+                == CGRect(x: 20, y: 0, width: 715, height: 800)
+        )
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     @Test("The engine pins only a matching in-flight target")
     func enginePinsMatchingTarget() throws {
         guard let screen = NSScreen.main else { return }
@@ -140,7 +192,7 @@ struct FollowSizePinTests {
         )
         #expect(
             core.tiler.animationSizePin(for: w)
-                == FollowSource.SizePin(width: 715)
+                == SizePin(width: 715)
         )
         // In flight toward a NEW ask: probe honestly, no pin.
         core.tiler.animation.animate(

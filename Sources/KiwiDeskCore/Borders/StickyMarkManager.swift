@@ -120,7 +120,7 @@ public final class StickyMarkManager {
         _ id: WindowID,
         windowFrame: CGRect,
         source: FollowSource,
-        pin: FollowSource.SizePin?
+        pin: SizePin?
     ) {
         guard
             let frame = source.renderFrame(

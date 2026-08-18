@@ -62,16 +62,17 @@ extension BorderManager {
     }
 
     /// Animation / AX-echo hot path: move an already-shown ring
-    /// to a window's current frame. The stand-down decision is
-    /// `FollowSource.applies` — one switch shared with the
-    /// sticky mark, so no caller re-implements it (#285) and the
-    /// two overlays cannot drift (#594). A no-op for windows
-    /// without a ring.
+    /// to a window's current frame. The render decision is
+    /// `FollowSource.renderFrame` — one switch shared with the
+    /// sticky mark, so no caller re-implements it (#285), the
+    /// two overlays cannot drift (#594), and the #677 size pin
+    /// corrects both at once. A no-op for windows without a
+    /// ring.
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
         source: FollowSource,
-        pin: FollowSource.SizePin?
+        pin: SizePin?
     ) {
         guard
             let frame = source.renderFrame(

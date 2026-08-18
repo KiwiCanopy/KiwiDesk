@@ -49,6 +49,14 @@ public final class TilingEngine {
     /// state, like `stashedFrames` below.
     var boundLearner = SizeBoundLearner()
 
+    /// Test seam for the observe gate above: whether one of our
+    /// own frame-sets for this window is recent enough that its
+    /// echo may still be in flight. Production reads the
+    /// applier's stamp (`didRecentlySetFrame`); a fixture whose
+    /// applier is severed injects the lag directly, because the
+    /// stamp is only written by a real AX apply.
+    var echoGraceOverride: (@MainActor (WindowID) -> Bool)?
+
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,
     /// per-window tiling state — the `dragExemptWindow` precedent —
@@ -235,8 +243,21 @@ public final class TilingEngine {
             else { continue }
             // #677: a settled window's echo-fed frame is the
             // app's answer to the engine's last ask — observe
-            // it (a mid-flight frame is travel, not an answer).
-            if !animation.isAnimating(window: id) {
+            // it. Neither a mid-flight frame (travel, not an
+            // answer) nor one whose ask's echo may still be in
+            // flight counts: two rapid retiles re-asking one
+            // target before any echo lands would otherwise
+            // read the stale pre-ask frame as the same refusal
+            // twice and confirm a false bound (review,
+            // 2026-08-18). Deferring costs nothing but time —
+            // a real refusal is still there at the next quiet
+            // retile.
+            let echoMaybePending =
+                echoGraceOverride?(id)
+                ?? didRecentlySetFrame(id)
+            if !animation.isAnimating(window: id),
+                !echoMaybePending
+            {
                 boundLearner.observe(
                     id,
                     currentSize: current.size

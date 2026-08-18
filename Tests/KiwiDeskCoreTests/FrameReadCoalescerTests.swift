@@ -178,6 +178,40 @@ struct FrameReadCoalescerTests {
         #expect(loop.trackedFrames[id] == answer)
     }
 
+    @Test("A read completing after detach delivers nothing")
+    func detachDropsPendingDelivery() {
+        // The ownership re-check (review, 2026-08-18): `stop()`
+        // and a detach clear the observer, and a read still in
+        // flight then must not fold a stale event into a
+        // torn-down core.
+        let loop = EventLoop()
+        let pump = Pump()
+        let id = WindowID(42)
+        loop.resolveWindowID = { _ in id }
+        loop.frameReads.reader = { _ in .zero }
+        loop.frameReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        loop.frameReads.dispatchOverride = { pid, work in
+            pump.work.append((pid: pid, run: work))
+        }
+        let pid = pid_t(getpid())
+        loop.observers[pid] = FakeObserver()
+        var events: [KiwiEvent] = []
+        loop.onEvent = { events.append($0) }
+        loop.handle(
+            kAXWindowMovedNotification,
+            element,
+            pid: pid,
+            app: AppRef(bundleID: nil, name: "Test")
+        )
+        #expect(pump.work.count == 1)
+        // The app detaches while the read is in flight.
+        loop.observers[pid] = nil
+        pump.drainOne()
+        #expect(events.isEmpty)
+    }
+
     /// Inert healthy observer (the `StartupWarmupSkipTests`
     /// shape): attach state only, nothing fires.
     private final class FakeObserver: AppObserving {
