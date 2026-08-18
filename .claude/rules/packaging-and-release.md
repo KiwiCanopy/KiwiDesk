@@ -152,6 +152,23 @@ same failure from memory. A release procedure that is only
 correct when the operator remembers to deviate from it is the
 thing being fixed here.
 
+**Phase B skips its gate only on an exact tree match, and fails
+closed.** A release otherwise runs the gate five times — phase A
+locally, CI on the stamp PR, CI again on `main` post-merge, phase
+B locally, `release.yml` on the tag — and phase B's is the one
+that buys nothing, being the tree CI just verified. So phase A
+records `HEAD^{tree}` and phase B compares against it.
+
+Key the skip on the tree hash and nothing weaker. A version
+match, a timestamp, or "phase B trusts CI" would each skip on a
+tree nothing had verified; a squash merge of only the stamp
+reproduces phase A's tree exactly, and any other commit landing
+between changes the hash so the gate runs. Write no record on a
+`--skip-verify` run — it attests to nothing — and treat a
+missing, empty or unreadable record as "run the gate".
+`ReleaseGateSkipTests` holds that shape and states in its own doc
+comment what a text scan cannot see.
+
 **A version is three integers — no prerelease suffix.** `0.9.0-rc1`
 is valid SemVer and cannot be a `CFBundleVersion`, which takes 1-3
 dot-separated integers and nothing else. Both `bump-version.sh`

@@ -202,10 +202,59 @@ STAMPED=1
 "$ROOT/scripts/bump-version.sh" "$VERSION"
 
 # ---------------------------------------------------------------
+# 2b. Which phase, and whether phase B's gate is already paid for
+
+# The phase is answerable here, ahead of the gate, because it is
+# only a question about the stamp: bump-version.sh either changed
+# the version file or the tree already declared this version.
+# Asked of git rather than by re-reading the file, which keeps
+# bump-version.sh the one owner of its shape.
+PHASE="stamp"
+if git diff --quiet -- "$VERSION_FILE"; then
+    PHASE="tag"
+fi
+
+# A release used to run this gate FIVE times: phase A locally, CI
+# on the stamp PR, CI again on main after the merge, phase B
+# locally, and release.yml on the tag. Phase B's was the one that
+# bought nothing — same tree CI had just verified.
+#
+# So phase A records the tree it verified and phase B skips its
+# gate only when the tree it is about to tag hashes identically.
+# The tree hash is what makes that safe rather than optimistic: a
+# squash merge of nothing but the stamp reproduces phase A's tree
+# exactly, and ANY other commit landing in between changes the
+# hash, so the gate runs. This is deliberately not "phase B trusts
+# CI" — that would skip on a tree nothing had verified.
+#
+# Fails closed in every direction: no record, an empty or
+# unreadable one, a mismatch, or a git that cannot answer, all
+# leave the gate running. A stale record is harmless by
+# construction, since it can only ever match the one tree it
+# attests to.
+VERIFIED_RECORD="$(git rev-parse --git-dir)/kiwidesk-release-verified"
+
+if [ "$PHASE" = "tag" ] && [ "$SKIP_VERIFY" -eq 0 ]; then
+    if recorded="$(cat "$VERIFIED_RECORD" 2>/dev/null)" \
+        && current="$(git rev-parse "HEAD^{tree}" 2>/dev/null)" \
+        && [ -n "$recorded" ] \
+        && [ "$recorded" = "$current" ]; then
+        GATE_ALREADY_PAID=1
+        echo "==> gate already passed on this exact tree" \
+             "(${current:0:12}) — skipping it"
+        echo "    CI verified it on the merge and release.yml" \
+             "re-verifies the tag."
+    fi
+fi
+GATE_ALREADY_PAID="${GATE_ALREADY_PAID:-0}"
+
+# ---------------------------------------------------------------
 # 3. Verify
 
 if [ "$SKIP_VERIFY" -eq 1 ]; then
     echo "==> skipping the verification gate (--skip-verify)"
+elif [ "$GATE_ALREADY_PAID" -eq 1 ]; then
+    : # 2b explained it and said so on stdout
 else
     # AGENTS.md §3 / the verify-gate skill. The release build is
     # conditional there because CI runs it per PR; it is
@@ -269,6 +318,14 @@ if ! git diff --cached --quiet; then
     # The commit carries the stamp, so there is nothing to revert
     # and the handler must not run.
     STAMPED=0
+
+    # The tree the gate just passed on, for phase B to match
+    # against. Written only when the gate ACTUALLY ran: a
+    # --skip-verify run has no verification to attest to, and
+    # recording one would let phase B skip on its word.
+    if [ "$SKIP_VERIFY" -eq 0 ]; then
+        git rev-parse "HEAD^{tree}" > "$VERIFIED_RECORD"
+    fi
 
     if [ "$ASSUME_YES" -eq 0 ]; then
         echo
