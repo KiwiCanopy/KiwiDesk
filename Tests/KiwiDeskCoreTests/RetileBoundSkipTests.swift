@@ -131,12 +131,16 @@ struct RetileBoundSkipTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 100, y: 0, width: 800, height: 800)
         }
-        applied.frames = [:]
-        core.retile()
-        let reissued = try #require(applied.frames[w])
+        // Computed BEFORE the retile: the ledger may advance
+        // during the pass (the baseline shortcut can believe
+        // the new ask's refusal immediately), so a post-hoc
+        // expectation would compare against a later truth.
         let moved = try #require(
             core.tiler.calculatedFrames(state: core.state)[w]
         )
+        applied.frames = [:]
+        core.retile()
+        let reissued = try #require(applied.frames[w])
         #expect(reissued == moved)
     }
 
@@ -159,12 +163,13 @@ struct RetileBoundSkipTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 300, y: 0, width: 1000, height: 800)
         }
-        applied.frames = [:]
-        core.retile()
-        let reissued = try #require(applied.frames[w])
+        // Pre-computed for the same reason as above.
         let moved = try #require(
             core.tiler.calculatedFrames(state: core.state)[w]
         )
+        applied.frames = [:]
+        core.retile()
+        let reissued = try #require(applied.frames[w])
         #expect(reissued == moved)
     }
 

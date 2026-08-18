@@ -69,7 +69,21 @@ struct SizeBoundLearner {
     /// correctness.
     static let maxEntriesPerAxis = 8
 
-    var lastAsks: [WindowID: CGSize] = [:]
+    /// One recorded ask: the size issued, and — when the issue
+    /// happened from an echo-quiet, settled state — the size the
+    /// window held at that moment. The baseline is a real
+    /// observation: "held X before the ask, still exactly X
+    /// after a whole animation of size-sets" IS the same answer
+    /// twice, which is what lets the common case confirm from a
+    /// single post-settle probe (~the probe grace after the
+    /// dance settles) instead of a second full cycle (device
+    /// QA, 2026-08-18: "could we make it immediate?").
+    struct Ask {
+        var size: CGSize
+        var settledFrom: CGSize?
+    }
+
+    var lastAsks: [WindowID: Ask] = [:]
     var candidates: [WindowID: Ledger] = [:]
     var bounds: [WindowID: Ledger] = [:]
 
@@ -77,8 +91,20 @@ struct SizeBoundLearner {
     /// layout loop records — a stash park or float restore is
     /// not a layout ask, and learning from one would key a
     /// bound to a frame no layout will re-issue.
-    mutating func recordAsk(_ id: WindowID, size: CGSize) {
-        lastAsks[id] = size
+    /// The size `retile` just issued for a window. Only the
+    /// layout loop records — a stash park or float restore is
+    /// not a layout ask, and learning from one would key a
+    /// bound to a frame no layout will re-issue. `settledFrom`
+    /// carries the window's size at issue time ONLY when the
+    /// issue happened from an echo-quiet, settled state — an
+    /// untrusted baseline (mid-flight, echo pending) must stay
+    /// nil, or a stale frame fakes the second observation.
+    mutating func recordAsk(
+        _ id: WindowID,
+        size: CGSize,
+        settledFrom: CGSize? = nil
+    ) {
+        lastAsks[id] = Ask(size: size, settledFrom: settledFrom)
     }
 
     /// The app's answer to the last recorded ask: the window's
@@ -96,7 +122,8 @@ struct SizeBoundLearner {
         _ id: WindowID,
         currentSize: CGSize
     ) -> Bool {
-        guard let asked = lastAsks[id] else { return false }
+        guard let ask = lastAsks[id] else { return false }
+        let asked = ask.size
         // A non-positive span cannot be a real on-screen
         // window — it is a state frame no echo ever wrote (a
         // window created and never heard from again), not an
@@ -108,12 +135,14 @@ struct SizeBoundLearner {
             id,
             asked: asked.width,
             current: currentSize.width,
+            baseline: ask.settledFrom?.width,
             axis: \.width
         )
         let heightConfirmed = observeAxis(
             id,
             asked: asked.height,
             current: currentSize.height,
+            baseline: ask.settledFrom?.height,
             axis: \.height
         )
         return widthConfirmed || heightConfirmed
@@ -141,7 +170,8 @@ struct SizeBoundLearner {
         _ id: WindowID,
         currentSize: CGSize
     ) -> Bool {
-        guard let asked = lastAsks[id] else { return false }
+        guard let ask = lastAsks[id] else { return false }
+        let asked = ask.size
         let believed = bound(for: id)
         let widthDone =
             EffectiveSizeBound.matches(
@@ -207,6 +237,7 @@ struct SizeBoundLearner {
         _ id: WindowID,
         asked: CGFloat,
         current: CGFloat,
+        baseline: CGFloat?,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
     ) -> Bool {
         var confirmed = false
@@ -216,6 +247,27 @@ struct SizeBoundLearner {
         }
         var candidateEntries =
             candidates[id]?[keyPath: axis] ?? []
+        // The settled pre-ask size is a real prior observation:
+        // unchanged through a whole animation of size-sets, it
+        // completes "the same answer twice" without a second
+        // probe cycle. Only a positive, trusted baseline counts
+        // (a fresh window's .zero state is silence, not an
+        // answer), and a live candidate for the ask keeps the
+        // ordinary ladder.
+        if let baseline,
+            baseline > 0,
+            EffectiveSizeBound.matches(baseline, current),
+            !candidateEntries.contains(where: {
+                EffectiveSizeBound.matches($0.asked, asked)
+            })
+        {
+            return promote(
+                id,
+                asked: asked,
+                answered: current,
+                axis: axis
+            )
+        }
         if let index = candidateEntries.firstIndex(where: {
             EffectiveSizeBound.matches($0.asked, asked)
         }) {

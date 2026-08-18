@@ -21,13 +21,13 @@ extension SizeBoundLearner {
         axisResizeExplained(
             id,
             span: size.width,
-            ask: lastAsks[id]?.width,
+            ask: lastAsks[id]?.size.width,
             axis: \.width
         )
             && axisResizeExplained(
                 id,
                 span: size.height,
-                ask: lastAsks[id]?.height,
+                ask: lastAsks[id]?.size.height,
                 axis: \.height
             )
     }

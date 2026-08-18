@@ -26,13 +26,23 @@ extension TilingEngine {
     /// 2026-08-18). Deferring costs nothing but time: the echo
     /// channel below is the primary learner now, and this pass
     /// only mops up answers whose echoes were missed.
-    func observeAppAnswer(for id: WindowID, current: CGRect) {
+    /// Returns whether the gate passed — i.e. `current` is an
+    /// echo-quiet, settled reading. The retile loop threads
+    /// that verdict into `recordAsk(settledFrom:)` so a quiet
+    /// issue's pre-ask size can serve as the first observation
+    /// (`SizeBoundLearner.Ask`).
+    @discardableResult
+    func observeAppAnswer(
+        for id: WindowID,
+        current: CGRect
+    ) -> Bool {
         guard !animation.isAnimating(window: id),
             !askEchoLikely(id)
-        else { return }
+        else { return false }
         if boundLearner.observe(id, currentSize: current.size) {
             pendingBoundPlacement = true
         }
+        return true
     }
 
     /// The echo-time observation (#677, device QA 2026-08-18):

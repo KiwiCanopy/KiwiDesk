@@ -250,8 +250,13 @@ public final class TilingEngine {
             else { continue }
             // #677: the settled, echo-quiet state frame is the
             // app's answer to the engine's last ask — the gate
-            // and its argument live on `observeAppAnswer`.
-            observeAppAnswer(for: id, current: current)
+            // and its argument live on `observeAppAnswer`. Its
+            // verdict doubles as the baseline trust for the ask
+            // recorded below.
+            let settledNow = observeAppAnswer(
+                for: id,
+                current: current
+            )
             // Tolerance: apps clamp what we set (character
             // grids, minimum sizes), so the reported frame is
             // often a hair off the target. Re-applying an
@@ -281,7 +286,11 @@ public final class TilingEngine {
                 isNewWindow: id == newlyCreatedWindow,
                 sizing: promised
             )
-            boundLearner.recordAsk(id, size: target.size)
+            boundLearner.recordAsk(
+                id,
+                size: target.size,
+                settledFrom: settledNow ? current.size : nil
+            )
         }
         stashInactive(
             state: state,
