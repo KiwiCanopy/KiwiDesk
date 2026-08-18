@@ -77,12 +77,16 @@ extension TilingEngine {
             // Surface a tiled-sticky traveler when it is the
             // frontmost window (#431): it has a slot in `tiled`
             // but can never be the membership-guarded `focused`
-            // slot. Only Scrolling reads `context.focused`, to
-            // pan; `persistScrollOffset` reads this same
-            // `layoutInput`, so the pan and the stored offset stay
-            // consistent.
-            focusedOverride: state.focusAnchor(
-                of: space,
+            // slot. Scrolling reads `context.focused` to pan
+            // and Monocle's `park` reads it to pick the shown
+            // member (#881); `persistScrollOffset` reads this
+            // same `layoutInput`, so the pan and the stored
+            // offset stay consistent. For a monocle space the
+            // anchor is HELD across a float focus — see
+            // `heldMonocleAnchor`.
+            focusedOverride: heldMonocleAnchor(
+                state.focusAnchor(of: space, tiled: tiled),
+                space: space,
                 tiled: tiled
             ),
             // Freshly detected on every layout pass (#878):

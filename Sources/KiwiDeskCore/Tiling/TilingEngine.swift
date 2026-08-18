@@ -64,6 +64,13 @@ public final class TilingEngine {
     /// pass right after.
     var pendingBoundPlacement = false
 
+    /// The tiled member monocle's `park` keeps showing while a
+    /// float holds the focus (#881). Engine-owned, transient,
+    /// per-space tiling state — the `stashedFrames` precedent;
+    /// the argument, the read/write sites and the destroy/rekey
+    /// upkeep live in `TilingEngine+MonocleShown`.
+    var monocleShownMembers: [SpaceID: WindowID] = [:]
+
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,
     /// per-window tiling state — the `dragExemptWindow` precedent —

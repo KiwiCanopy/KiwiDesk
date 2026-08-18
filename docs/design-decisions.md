@@ -757,8 +757,9 @@ exempt nothing (no fully-tiled slot exists — see Accepted
 limitations); Scrolling has no `OverlapStack` pile at all — its
 overflow is the scroll, and the clamped edge columns (#142/#150)
 are scroll-reachable viewport pins a sticky may sit in like any
-other slot, not cascades — and Monocle stacks everything
-full-frame, so both need nothing. Reorder of a traveler is home-space-only: `Space.swap`
+other slot, not cascades — and Monocle overlaps everything at
+one frame, stacked full-frame or parked at the stash corner
+under `hide_style = park` (#881), so both need nothing. Reorder of a traveler is home-space-only: `Space.swap`
 /`move`/bar-drag membership guards no-op on a non-member by
 design (v2 non-goal; see [Accepted limitations](accepted-limitations.md)). A **new layout**
 adding a row above must also state which pile class it produces,

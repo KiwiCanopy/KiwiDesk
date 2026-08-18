@@ -1226,9 +1226,10 @@ switch snaps instantly instead of animating.
 Pick `"park"` when the stack shows where it shouldn't: through
 a window with a transparent or blurred background, or through
 the side gaps around a window that cannot fill the monocle
-frame and centers instead (see `docs/accepted-limitations.md`
-on app-enforced sizes). Mission Control shows the parked
-windows at the corner, like a stashed Space.
+frame and centers instead (see
+[Accepted limitations](accepted-limitations.md) on
+app-enforced sizes). Mission Control shows the parked windows
+at the corner, like a stashed Space.
 
 **Example:**
 

@@ -42,12 +42,13 @@ public struct MonocleLayout: LayoutSystem {
         // Park (#881): only the shown member takes its slot;
         // every other member parks at the stash corner — the
         // space stash's own geometry and sliver trade, anchored
-        // to the layout bounds (a bottom Space Bar strip lifts
-        // the sliver clear of the bar). The
+        // to `parkBounds` so the sliver clears both bars. The
         // shown member is the pan anchor (a tiled-sticky
         // traveler parks like a member and shows while it holds
-        // the focus, #431); with no anchored member — a focused
-        // float above the space — the front of the carousel
+        // the focus, #431), which the engine HOLDS across a
+        // float focus (`monocleShownMembers`) so a float taking
+        // focus cannot swap the members beneath it; with no
+        // anchored member at all the front of the carousel
         // stands in, matching `new_window_placement`'s "front"
         // instinct. Parking each member's OWN effective frame
         // keeps a refused-width window's sliver on screen: a
@@ -60,6 +61,7 @@ public struct MonocleLayout: LayoutSystem {
         let corner = TilingEngine.optimalHideCorner(
             neighbors: context.screenNeighbors
         )
+        let bounds = parkBounds(in: context)
         var result: [WindowID: CGRect] = [:]
         for window in windows {
             let own = effective(window)
@@ -68,10 +70,55 @@ public struct MonocleLayout: LayoutSystem {
                 ? own
                 : TilingEngine.stashFrame(
                     own,
-                    in: context.bounds,
+                    in: bounds,
                     corner: corner
                 )
         }
         return result
+    }
+
+    /// The rect a park anchors to: the layout bounds, pulled in
+    /// past the monocle bar's strip (#881 review round). The
+    /// bar renders ABOVE windows on its edge, so a sliver
+    /// anchored to the raw bounds would park underneath a
+    /// bottom bar — enabled at the bottom by default — and the
+    /// "thin edge stays visible" promise would be false. Only
+    /// the bar's own edge moves; the Space Bar's strip is
+    /// already carved from `context.bounds` by the engine
+    /// (#293), which is also why the sliver clears a bottom
+    /// Space Bar.
+    private func parkBounds(
+        in context: LayoutContext
+    ) -> CGRect {
+        var bounds = context.bounds
+        guard
+            let strip = context.monocle.barFrame(
+                in: context.usable,
+                global: context.appBarStyle
+            )
+        else { return bounds }
+        switch context.monocle
+            .resolvedBar(global: context.appBarStyle).edge
+        {
+        case .top:
+            let cut = strip.maxY - bounds.minY
+            bounds.origin.y += cut
+            bounds.size.height = max(bounds.height - cut, 0)
+        case .bottom:
+            bounds.size.height = max(
+                strip.minY - bounds.minY,
+                0
+            )
+        case .left:
+            let cut = strip.maxX - bounds.minX
+            bounds.origin.x += cut
+            bounds.size.width = max(bounds.width - cut, 0)
+        case .right:
+            bounds.size.width = max(
+                strip.minX - bounds.minX,
+                0
+            )
+        }
+        return bounds
     }
 }

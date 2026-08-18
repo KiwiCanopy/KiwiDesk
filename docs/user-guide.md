@@ -843,7 +843,9 @@ Pick a layout mode for each space:
   gets a region.
 - **Stack** (Master/Stack): one master zone and a collapsing stack.
 - **Scrolling** (PaperWM style): columns or rows that scroll.
-- **Monocle**: fullscreen focus, all windows hidden behind one.
+- **Monocle**: fullscreen focus, the other windows hidden
+  behind the focused one — or parked in a screen corner (see
+  Per-Layout Tuning ▸ Monocle).
 - **Grid**: evenly-sized cells in rows and columns.
 - **Track**: columns (or rows) of windows where every resize has
   one true target — grow *your* track, or *your* share within it

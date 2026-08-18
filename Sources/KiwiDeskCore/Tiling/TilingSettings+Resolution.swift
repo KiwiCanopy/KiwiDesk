@@ -240,20 +240,23 @@ extension TilingSettings {
     /// piled — the hardest drift to spot. Strip-geometry-only
     /// builds pass `[]` explicitly.
     ///
-    /// `focusedOverride` supplies the pan anchor a focus-driven
-    /// layout (Scrolling) reads, for the one case a window a space
-    /// should scroll to can never be its `focused` slot: a
-    /// tiled-sticky traveler is injected into the active space's
-    /// row but is a member only of its home space, so the
-    /// membership guard keeps `space.focused` off it (#431).
-    /// Callers that carve only the bar strip omit it and fall back
-    /// to `space.focused`.
+    /// `focusedOverride` supplies the anchor the focus-driven
+    /// layouts read — Scrolling to pan, Monocle's `park` to
+    /// pick the shown member (#881) — for the one case a window
+    /// a space should center on can never be its `focused`
+    /// slot: a tiled-sticky traveler is injected into the
+    /// active space's row but is a member only of its home
+    /// space, so the membership guard keeps `space.focused` off
+    /// it (#431). Callers that carve only the bar strip omit it
+    /// and fall back to `space.focused`.
     /// `screenNeighbors` carries the per-retile neighbor
     /// verdicts (#878) for the screen `bounds` describes;
-    /// Scrolling reads them to wall its blocked edges. Callers
-    /// that never materialize scrolled-out frames (capacity
-    /// probes, bar-strip carving, previews) omit it and get the
-    /// single-screen verdict — every edge open.
+    /// Scrolling reads them to wall its blocked edges, and
+    /// Monocle's `park` picks its stash corner from them
+    /// (#881). Callers that never materialize scrolled-out or
+    /// parked frames (capacity probes, bar-strip carving,
+    /// previews) omit it and get the single-screen verdict —
+    /// every edge open, park corner bottom-right.
     /// `sizeBounds` carries the engine's confirmed app-enforced
     /// bounds (#677); a frame-producing build threads
     /// `TilingEngine.sizeBounds(for:)` so the residue a refusal

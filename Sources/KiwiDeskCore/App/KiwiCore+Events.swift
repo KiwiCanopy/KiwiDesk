@@ -177,8 +177,11 @@ extension KiwiCore {
             outstandingSelfRaises.remove(id)
             zOrderRaiseEchoes[id] = nil
             // WindowIDs are reused (#152/#158): a bound learned
-            // for the gone window must not skip the next one.
+            // for the gone window must not skip the next one,
+            // and the monocle shown-member hold (#881) must not
+            // pin a future stranger.
             tiler.forgetSizeBound(id)
+            tiler.forgetMonocleShown(id)
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
@@ -246,8 +249,11 @@ extension KiwiCore {
             tiler.rekeyStash(oldID: old, newID: new)
             // The learned size bound follows the id swap too
             // (#677): same on-screen window, same app-side
-            // constraint, new id.
+            // constraint, new id. So does the monocle
+            // shown-member hold (#881) — a tab switch on the
+            // shown member must not park it.
             tiler.rekeySizeBound(oldID: old, newID: new)
+            tiler.rekeyMonocleShown(oldID: old, newID: new)
             // A live display crossing's bookkeeping (#504) must
             // follow the id swap, or a rekey after a crossing
             // strands the (new) window on the destination space

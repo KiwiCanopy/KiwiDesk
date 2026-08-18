@@ -146,6 +146,37 @@ struct MonocleParkLayoutTests {
         #expect(frames[w1] != frames[w2])
     }
 
+    @Test("The sliver clears an enabled bottom App Bar strip")
+    func parkClearsTheBarStrip() throws {
+        // The bar renders ABOVE windows on its edge and
+        // defaults ENABLED at the bottom — a park anchored to
+        // the raw bounds would hide the sliver underneath it
+        // (#881 review round).
+        var context = makeContext()
+        context.monocle.appBar.enabled = true
+        context.focused = w1
+        let strip = try #require(
+            context.monocle.barFrame(
+                in: context.usable,
+                global: context.appBarStyle
+            )
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let parked = try #require(frames[w2])
+        // The whole visible band sits above the strip.
+        #expect(
+            parked.minY + TilingEngine.stashPeekY
+                <= strip.minY
+        )
+        #expect(
+            parked.minY
+                == strip.minY - TilingEngine.stashPeekY
+        )
+    }
+
     @Test("stack keeps every member at the shared frame")
     func stackKeepsSharedFrame() throws {
         var context = makeContext()
@@ -167,6 +198,67 @@ private func makeCore() -> KiwiCore {
             "kiwidesk-tests-\(UUID().uuidString)"
         )
     return makeTestCore(configDirectory: directory)
+}
+
+/// The shown-member hold (#881, architect round): a focused
+/// local float makes `focusAnchor` follow the float, and the
+/// engine must keep showing the member the user was on rather
+/// than re-deriving the shown member from the array front and
+/// physically swapping windows under the float.
+@Suite("Monocle park shown-member hold (#881)", .serialized)
+@MainActor
+struct MonocleParkShownMemberHoldTests {
+    @Test("A float taking focus keeps the shown member")
+    func floatFocusHoldsShownMember() throws {
+        let core = makeCore()
+        for id in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        var float = ManagedWindow(
+            id: WindowID(3),
+            pid: 3,
+            appName: "Float"
+        )
+        float.isFloating = true
+        core.state.apply(.windowCreated(float))
+        let space = try #require(
+            core.state.workspaces.space(of: WindowID(1))
+        )
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("monocle")]
+        )
+        _ = core.execute(
+            "monocle.set_hide_style",
+            args: [.string("park")]
+        )
+        core.state.workspaces.focus(WindowID(2), in: space)
+        #expect(
+            core.tiler.layoutInput(state: core.state)?
+                .context.focused == WindowID(2)
+        )
+        // The float takes focus: the anchor follows it, but the
+        // context keeps showing the held member.
+        core.state.workspaces.focus(WindowID(3), in: space)
+        #expect(
+            core.tiler.layoutInput(state: core.state)?
+                .context.focused == WindowID(2)
+        )
+        // A tiled focus updates the hold.
+        core.state.workspaces.focus(WindowID(1), in: space)
+        #expect(
+            core.tiler.layoutInput(state: core.state)?
+                .context.focused == WindowID(1)
+        )
+    }
 }
 
 /// The instant-switch half of #881: under `park` a monocle
