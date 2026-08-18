@@ -50,12 +50,32 @@ extension KiwiCore {
     /// reach that arm, so their flow is exactly the pre-#888
     /// one.
     func handleNativeSpaceChange() {
-        let number = NativeSpaces.activeDesktopNumber()
+        let snapshot = NativeSpaces.desktopSnapshot()
+        let number = snapshot.authority
         lastNativeSwitch = Date()
-        let secondarySwitch =
-            number == lastNativeSpace
-            && state.workspaces.allDisplays.count > 1
-            && DisplaySpacesSetting.hasSeparateSpaces()
+        // A secondary display switched: the authority is a live
+        // number that did not move, and some OTHER display's
+        // current Space did. Both halves are read from the ONE
+        // snapshot, so no mode read and no display count is
+        // needed — shared mode carries one managed display, which
+        // cannot produce an "other display" diff, and a single
+        // display cannot either.
+        //
+        // `number != nil` is load-bearing: `nil == nil` is
+        // satisfied by a main display sitting on a
+        // fullscreen/system space AND by SkyLight being
+        // unavailable, which is exactly the conflation #670 bans
+        // deciding on (state-and-layout.md — the verdict is
+        // `isUser`, never the nil number). Nil falls through to
+        // the main arm, whose fullscreen branch stands down the
+        // way it did before #888 (review, 2026-08-18).
+        let changed = switchedDisplays(in: snapshot)
+        let secondarySwitch = Self.isSecondarySwitch(
+            authority: number,
+            lastAuthority: lastNativeSpace,
+            changed: changed,
+            mainUUID: snapshot.mainUUID
+        )
         if let last = lastNativeSpace, last != number,
             let active = state.workspaces.activeSpace
         {
@@ -85,7 +105,9 @@ extension KiwiCore {
                 // around.
                 retile(animated: false, force: true)
                 emitSpaceChange()
-            } else if !NativeSpaces.activeSpaceIsUser() {
+            } else if !snapshot.currentSpaceIsUser(
+                on: snapshot.mainUUID
+            ) {
                 // Arrived on a fullscreen/system space (#670):
                 // the nil number skipped the retile above and
                 // the settle stands down, so sync the bars
@@ -93,12 +115,69 @@ extension KiwiCore {
                 // them instead of leaving the panels painted
                 // over the fullscreen app for the 600 ms until
                 // the settle's own sync.
+                //
+                // The verdict is read for the MAIN display, the
+                // one `number` is keyed to (review, 2026-08-18):
+                // the global-focus read could answer for a
+                // secondary display, so a fullscreen main display
+                // with focus on a secondary user space skipped
+                // both branches and left the bars painted over
+                // the fullscreen app.
                 updateAppBar()
                 updateSpaceBar()
             }
         }
-        emitNativeSpaceChange()
+        emitNativeSpaceChange(snapshot, changed: changed)
         settleAfterNativeSwitch(number)
+    }
+
+    /// Whether this switch belongs to a secondary display: the
+    /// authority is a live number that did not move, and some
+    /// display OTHER than the main one changed its Space.
+    ///
+    /// A pure decision, so it is assertable without a
+    /// WindowServer (`SecondarySwitchTests`) — the arm it gates
+    /// force-retiles, and a retile is only observable on a host
+    /// with a screen.
+    ///
+    /// **`authority != nil` is the load-bearing clause.** A nil
+    /// authority is satisfied by a main display on a
+    /// fullscreen/system space AND by SkyLight being unavailable,
+    /// which is the conflation #670 bans deciding on
+    /// (state-and-layout.md: the fullscreen verdict is `isUser`,
+    /// never the nil Mission Control number). Without it, a
+    /// fullscreen main display took this arm and force-retiled
+    /// where the pre-#888 handler — and `nativeSpaceSettle` —
+    /// deliberately stand down, and a host without SkyLight
+    /// force-retiled on every switch (review, 2026-08-18).
+    static func isSecondarySwitch(
+        authority: Int?,
+        lastAuthority: Int?,
+        changed: [String],
+        mainUUID: String?
+    ) -> Bool {
+        guard let authority, authority == lastAuthority else {
+            return false
+        }
+        return changed.contains { $0 != mainUUID }
+    }
+
+    /// The display UUIDs whose current Space differs from the
+    /// last reading, re-stamping the memory as it goes.
+    ///
+    /// Called ONCE per switch, and its answer threaded to the
+    /// emit: the switch arm and the event must not name different
+    /// displays, and a second call would diff against the stamp
+    /// the first one just wrote (review, 2026-08-18).
+    func switchedDisplays(
+        in snapshot: DesktopSnapshot
+    ) -> [String] {
+        let previous = desktopMemory.lastDisplaySpaces
+        desktopMemory.lastDisplaySpaces = snapshot.currentSpaces
+        return
+            snapshot.currentSpaces
+            .filter { $0.value != previous[$0.key] }
+            .keys.sorted()
     }
 
     // MARK: - Per-Desktop Space memory (#888)

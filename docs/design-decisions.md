@@ -5458,9 +5458,9 @@ user configure bindings that could not do what the row says.
 That grey was correct *for as long as its premise held* — and
 #888 removed the premise rather than the ruling, by giving the
 trigger a definition (the main display's Desktop) that holds in
-every display mode. The rows are live everywhere now, so the
+every display mode. The rows are live in every display state now, so the
 grey, its inline warning and its Desktop & Dock button retired
-together. What survives, because it never depended on the
+together (the stored-profile grey, a different premise, stands). What survives, because it never depended on the
 instance: a control the OS genuinely makes meaningless is still
 greyed rather than left live, and existing config stays visible
 under any such grey — hiding a user's own configuration to

@@ -11,22 +11,10 @@ import Foundation
 /// (`CGMainDisplayID`), secondaries follow in physical order
 /// (left to right), which is unambiguous by construction.
 public enum PositionalDisplays {
-    #if DEBUG
-        /// Pins the main display for tests: the live read is
-        /// the host's, and a fixture's fake `DisplayID` can
-        /// collide with it (#523's crime, one API over).
-        public static nonisolated(unsafe) var liveMainIDOverride: DisplayID?
-    #endif
-
     /// The current main display's id (the screen with the menu
     /// bar). Pure CoreGraphics — safe off the AX path.
     public static var liveMainID: DisplayID {
-        #if DEBUG
-            if let override = liveMainIDOverride {
-                return override
-            }
-        #endif
-        return DisplayID(CGMainDisplayID())
+        DisplayID(CGMainDisplayID())
     }
 
     /// Orders displays positionally: the main display first,

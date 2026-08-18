@@ -356,8 +356,8 @@ reassignments (profile load, session restore) stay silent:
 Desktops (Mission Control); its data carries the 1-based
 Desktop number now current on the screen that switched, that
 screen's positional number (`monitor`: 1 is the main display,
-secondaries follow left to right — the same numbering
-`list_monitors` uses), and the active profile:
+secondaries follow left to right — the same 1-based positional
+numbering a display argument takes), and the active profile:
 
 ```json
 {"event": "native_space_change",

@@ -22,8 +22,23 @@ final class DesktopMemory {
     /// it back would activate a Space the user never left there.
     var virtualSpaces: [String: [Int: SpaceID]] = [:]
 
-    /// Each display's current native Space at the last
-    /// `native_space_change` emit — diffed against the live
-    /// snapshot to name the display whose Desktop switched.
+    /// Each display's current native Space at the last reading —
+    /// diffed against the live snapshot to name the display whose
+    /// Desktop switched.
+    ///
+    /// **Seeded at boot** (`KiwiCore+BootSeams`), beside
+    /// `lastNativeSpace`. Left empty, the session's first switch
+    /// diffs against nothing, reads every display as changed, and
+    /// the main-outranks tiebreak then attributes a secondary
+    /// swipe to `monitor: 1` — the field `docs/cli.md` tells
+    /// subscribers to key profile-selection off (review,
+    /// 2026-08-18).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]
+
+    /// Seeds the per-display reading without treating it as a
+    /// switch. One call site (boot); a switch re-stamps it
+    /// through `switchedDisplays(in:)`.
+    func seed(_ snapshot: DesktopSnapshot) {
+        lastDisplaySpaces = snapshot.currentSpaces
+    }
 }

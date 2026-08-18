@@ -7,50 +7,51 @@ extension KiwiCore {
     /// Emits one `native_space_change` per switch notification.
     ///
     /// Payload: `native_space` (the Desktop now current on the
-    /// display that switched), `monitor` (that display's
-    /// 1-based positional number — 1 is the main display, the
-    /// same numbering the Lua screen API documents), `profile`.
-    /// Which display switched is the diff of the per-display
-    /// current Spaces against the last emit's snapshot; the
-    /// main display answers when nothing diffed (a repeated
-    /// notification, shared mode's synthetic managed display,
-    /// or no SkyLight at all — every mode where the global
-    /// number is the main display's). If one notification
-    /// coalesces several displays' switches — a display
-    /// connect, which fires the monitor-change machinery
-    /// anyway — the main display outranks, then the first
-    /// changed display in sorted-UUID order, so the pick is
+    /// display that switched), `monitor` (that display's 1-based
+    /// positional number — 1 is the main display, the same
+    /// numbering a Lua display argument takes), `profile`.
+    ///
+    /// Both inputs come from the handler's ONE topology reading:
+    /// `snapshot` and the `changed` diff it derived. Which
+    /// display switched is that diff; the main display answers
+    /// when nothing diffed (a repeated notification, shared
+    /// mode's synthetic managed display, or no SkyLight at all —
+    /// every mode where the global number is the main display's).
+    /// If one notification coalesces several displays' switches —
+    /// a display connect, which fires the monitor-change
+    /// machinery anyway — the main display outranks, then the
+    /// first changed display in sorted-UUID order, so the pick is
     /// deterministic.
-    func emitNativeSpaceChange() {
-        let spaces = NativeSpaces.allSpaces()
-        let current = [String: SkyLight.SpaceID](
-            spaces.filter(\.isCurrent).map {
-                ($0.displayUUID, $0.id)
-            },
-            uniquingKeysWith: { first, _ in first }
-        )
-        let previous = desktopMemory.lastDisplaySpaces
-        desktopMemory.lastDisplaySpaces = current
-        let changed =
-            current
-            .filter { $0.value != previous[$0.key] }
-            .keys.sorted()
-        let mainUUID = NativeSpaces.mainDisplayUUID()
+    ///
+    /// **Nothing is emitted when the switched display's new Space
+    /// has no Mission Control number** — it arrived on a
+    /// fullscreen/system space, the pre-#888 silence. The number
+    /// is never back-filled from another display: a payload
+    /// pairing one display's `monitor` with another's
+    /// `native_space` describes a switch that never happened
+    /// (review, 2026-08-18).
+    func emitNativeSpaceChange(
+        _ snapshot: DesktopSnapshot,
+        changed: [String]
+    ) {
         let switched: String? = {
-            if let mainUUID, changed.contains(mainUUID) {
-                return mainUUID
+            if let main = snapshot.mainUUID,
+                changed.contains(main)
+            {
+                return main
             }
-            return changed.first ?? mainUUID
+            return changed.first ?? snapshot.mainUUID
         }()
-        // The switched display's new Desktop; the main-display
-        // authority answers when the topology cannot (no
-        // SkyLight). Nil — a fullscreen/system space — emits
-        // nothing, as before #888.
+        // The switched display's new Desktop, numbered in the
+        // same snapshot it was read from. Without a switched
+        // display to name — no SkyLight, no display UUID — the
+        // authority answers, which is that ladder's public
+        // fallback rather than another display's number.
         let number =
             switched
-            .flatMap { current[$0] }
-            .flatMap { NativeSpaces.number(of: $0, in: spaces) }
-            ?? NativeSpaces.activeDesktopNumber()
+            .flatMap { snapshot.currentSpaces[$0] }
+            .flatMap { snapshot.number(of: $0) }
+            ?? (switched == nil ? snapshot.authority : nil)
         guard let number else { return }
         let monitor =
             switched.flatMap { monitorNumber(forUUID: $0) } ?? 1
@@ -75,13 +76,21 @@ extension KiwiCore {
     /// left-to-right (`PositionalDisplays.ordered`). Nil when
     /// no connected display carries the UUID (unplugged
     /// mid-switch, or shared mode's synthetic identifier).
+    ///
+    /// Main comes from `NativeSpaces.mainDisplayUUID()` — the
+    /// same seam the switch attribution reads — rather than a
+    /// second `CGMainDisplayID` read, so a fixture cannot pin one
+    /// and get a switch attributed to one display and numbered as
+    /// another (review, 2026-08-18).
     private func monitorNumber(forUUID uuid: String) -> Int? {
-        let ordered = PositionalDisplays.ordered(
-            state.workspaces.allDisplays,
-            mainID: PositionalDisplays.liveMainID
-        )
+        let displays = state.workspaces.allDisplays
+        let mainUUID = NativeSpaces.mainDisplayUUID()
+        let mainID = displays.first {
+            NativeSpaces.displayUUID(for: $0.id) == mainUUID
+        }?.id
         return
-            ordered
+            PositionalDisplays
+            .ordered(displays, mainID: mainID)
             .firstIndex {
                 NativeSpaces.displayUUID(for: $0.id) == uuid
             }

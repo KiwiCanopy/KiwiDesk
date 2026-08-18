@@ -161,14 +161,19 @@ public enum NativeSpaces {
 
     #if DEBUG
         /// Pins the Desktop number for BOTH readers —
-        /// `activeSpaceNumber()` and `activeDesktopNumber()` —
+        /// `activeSpaceNumber()` and the snapshot's authority —
         /// because outside a topology fixture they are the same
         /// number, and a test pinning one but not the other
         /// would read the host's WindowServer through the
-        /// unpinned one (#523's crime). A test that needs the
-        /// two to DIVERGE pins `spacesOverride` +
-        /// `mainDisplayUUIDOverride` instead and leaves this
-        /// nil.
+        /// unpinned one (#523's crime).
+        ///
+        /// A test that needs the two to DIVERGE leaves this nil
+        /// and pins the topology instead: `spacesOverride`,
+        /// `mainDisplayUUIDOverride` AND `activeSpaceIDOverride`
+        /// — the third because a main display absent from the
+        /// pinned snapshot falls through to `activeSpaceNumber()`,
+        /// which reads the live WindowServer without it (review,
+        /// 2026-08-18).
         public static nonisolated(unsafe) var activeDesktopNumberOverride: Int?
         public static nonisolated(unsafe) var activeSpaceIsUserOverride: Bool?
         public static nonisolated(unsafe) var currentSpaceIsUserOverride:

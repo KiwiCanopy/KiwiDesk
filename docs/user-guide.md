@@ -2020,8 +2020,8 @@ matches, preferring the one marked default* — and then answers it for
 your machine right now, naming which of the four ways it resolved:
 
 - a **Desktop binding**, which outranks everything below it. If you
-  bound a profile to the Desktop you are on, that is what loads,
-  whatever your displays are — see
+  bound a profile to the Desktop your main display is on, that is
+  what loads, whatever your displays are — see
   [macOS Desktops](#macos-desktops-mission-control);
 - an **exact monitor match** — these exact displays. It stops
   matching the moment you swap one of them out, unless you have
@@ -2776,7 +2776,7 @@ Desktop.
 KiwiDesk has one active profile across the whole display setup, so
 one screen holds the binding trigger: **a binding fires when its
 Desktop becomes current on your main display** (the screen with the
-menu bar — the row copy says so too). With one screen, or with
+menu bar — the card's intro says so too). With one screen, or with
 "Displays have separate Spaces" turned off, the main display's
 Desktop is simply *the* Desktop, so nothing reads differently. With
 the option on — macOS's default — each screen switches Desktops on

@@ -90,6 +90,39 @@ change here:
   invisible to a sum-and-clamp assertion, and both shipped
   (`StarterAllocationTests`).
 
+## The active Desktop is the MAIN display's (#888)
+
+A binding, profile-selection or Desktop-memory path reads the
+active Desktop from **`NativeSpaces.activeDesktopNumber()`** —
+or, when it is handling a switch and will ask more than one
+question, from `NativeSpaces.desktopSnapshot()`, whose
+`authority` is the same answer — never from the global
+`activeSpaceNumber()`. `DesktopAuthorityRoutingTests`'
+`allowed` map is the one copy of who may name the global read,
+and it holds exactly the snapshot's public fallback: a main
+display the topology cannot name (shared mode's synthetic
+managed-display identifier, no SkyLight, no display-UUID
+symbol), where the global number IS the main display's.
+
+The two functions are the same shape, the same type and the
+same answer on every single-display machine — they diverge only
+under "Displays have separate Spaces" with two screens, which is
+the state the rule exists for and the state a dev machine
+usually is not in. That is why this is a guard rather than a
+convention.
+
+Two obligations fall out for a **switch handler**. Take ONE
+snapshot and answer every question from it — which Desktop is
+authoritative, which displays changed, whether a display's
+current Space is a user desktop — because two readings taken
+moments apart can disagree about which display switched. And
+never decide anything from a nil Desktop number: nil means a
+fullscreen/system space AND "no SkyLight", the conflation
+[state-and-layout.md](state-and-layout.md)'s #670 row bans —
+the fullscreen verdict is `isUser`, per display
+(`DesktopSnapshot.currentSpaceIsUser(on:)`). `SecondarySwitchTests`
+holds the secondary-switch decision including its nil case.
+
 ## API shape
 
 - `ProfileManager` mutators are `internal` **by design** — mutate
