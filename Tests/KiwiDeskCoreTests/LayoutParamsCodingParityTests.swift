@@ -132,6 +132,7 @@ struct LayoutParamsCodingParityTests {
     private static func monocle() -> MonocleParams {
         var params = MonocleParams()
         params.orientation = .vertical
+        params.hideStyle = .park
         params.wrapFocus = true
         params.newWindowPlacement = .last
         params.appBar.enabled = false

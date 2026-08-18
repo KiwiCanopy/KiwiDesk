@@ -99,6 +99,8 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "move echo"
                 )
+                // Reality reported — state beats stamp (#881).
+                tiler.clearInstantTarget(id)
             }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
@@ -134,6 +136,7 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "resize echo"
                 )
+                tiler.clearInstantTarget(id)  // as :104, #881
             } else if !tiler.ledgerExplainsResize(
                 id,
                 size: frame.size
@@ -176,9 +179,13 @@ extension KiwiCore {
             // (#152/#158). Same for a pending z-order-raise echo.
             outstandingSelfRaises.remove(id)
             zOrderRaiseEchoes[id] = nil
-            // WindowIDs are reused (#152/#158): a bound learned
-            // for the gone window must not skip the next one.
+            // WindowIDs are reused (#152/#158): the learned
+            // bound, the monocle shown-member hold and the
+            // commanded stamp (#881) must not reach the next
+            // tenant of this id.
             tiler.forgetSizeBound(id)
+            tiler.forgetMonocleShown(id)
+            tiler.clearInstantTarget(id)
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
@@ -246,8 +253,11 @@ extension KiwiCore {
             tiler.rekeyStash(oldID: old, newID: new)
             // The learned size bound follows the id swap too
             // (#677): same on-screen window, same app-side
-            // constraint, new id.
+            // constraint, new id. So does the monocle
+            // shown-member hold (#881) — a tab switch on the
+            // shown member must not park it.
             tiler.rekeySizeBound(oldID: old, newID: new)
+            tiler.rekeyMonocleShown(oldID: old, newID: new)
             // A live display crossing's bookkeeping (#504) must
             // follow the id swap, or a rekey after a crossing
             // strands the (new) window on the destination space

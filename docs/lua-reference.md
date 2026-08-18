@@ -1212,6 +1212,31 @@ monocle.set_orientation("horizontal")
 monocle.set_orientation_override("3", "vertical")
 ```
 
+### monocle.set_hide_style
+
+**Expects:** `"stack"` or `"park"` (default `"stack"`).
+
+**Does:** sets how the unfocused monocle windows are hidden.
+`"stack"` keeps them all at the full monocle frame behind the
+focused one — the illusion is z-order. `"park"` moves them to
+the corner of the screen the space stash already uses (a
+~1 pt sliver stays visible per parked window), and the focus
+switch snaps instantly instead of animating.
+
+Pick `"park"` when the stack shows where it shouldn't: through
+a window with a transparent or blurred background, or through
+the side gaps around a window that cannot fill the monocle
+frame and centers instead (see
+[Accepted limitations](accepted-limitations.md) on
+app-enforced sizes). Mission Control shows the parked windows
+at the corner, like a stashed Space.
+
+**Example:**
+
+```lua
+monocle.set_hide_style("park")
+```
+
 ### monocle.set_wrap_focus
 
 **Expects:** `true` or `false` (default `false`).

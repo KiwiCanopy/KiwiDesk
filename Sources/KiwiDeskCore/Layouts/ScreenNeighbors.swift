@@ -7,7 +7,9 @@ import CoreGraphics
 /// on its own screen — the "offscreen" region there is the
 /// neighbor screen, frames are global, and macOS cannot clip or
 /// hide another app's window, so an overhang would render on
-/// the neighbor.
+/// the neighbor. Monocle's `park` hide style consumes the
+/// left/right pair the same way, through
+/// `TilingEngine.optimalHideCorner(neighbors:)` (#881).
 ///
 /// The flags are an input to the retile, never a cache: the
 /// engine detects them fresh from the connected screens on

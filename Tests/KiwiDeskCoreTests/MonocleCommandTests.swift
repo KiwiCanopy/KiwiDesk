@@ -30,6 +30,20 @@ struct MonocleCommandTests {
             core.tiler.settings.monocle.orientation
                 == .vertical
         )
+        // Default is `stack` (#881) — today's behavior — and
+        // the setter takes the park opt-in.
+        #expect(
+            core.tiler.settings.monocle.hideStyle == .stack
+        )
+        #expect(
+            core.execute(
+                "monocle.set_hide_style",
+                args: [.string("park")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.monocle.hideStyle == .park
+        )
         #expect(
             core.execute(
                 "monocle.set_app_bar_background_style",
@@ -107,6 +121,15 @@ struct MonocleCommandTests {
                 "monocle.set_orientation",
                 args: [.string("diagonal")]
             ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "monocle.set_hide_style",
+                args: [.string("hide")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.monocle.hideStyle == .stack
         )
         #expect(
             !core.execute(

@@ -197,6 +197,7 @@ public enum APIReference {
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",
+            "set_hide_style",
             "set_wrap_focus", "set_new_window_placement",
             "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",
             "set_app_bar_thickness",

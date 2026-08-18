@@ -32,6 +32,7 @@ extension LayoutCard {
         case .gridFillEmptyCells: gridFillEmptyRow
         case .gridAutoSize: gridDimensionsGroup
         case .monocleOrientation: monocleOrientationRow
+        case .monocleHideStyle: monocleHideStyleRow
         case .monocleWrapFocus: monocleWrapFocusRow
         case .trackAxis: trackArrangeRow
         case .trackOverflowStyle: trackOverflowRow
@@ -245,6 +246,27 @@ extension LayoutCard {
                 ),
                 (L("scroll_grid.vertical", "Vertical"), .vertical),
             ]
+        )
+    }
+
+    var monocleHideStyleRow: some View {
+        SegmentedPicker(
+            L("monocle.hide_style", "Hidden windows"),
+            selection: monocle.hideStyle,
+            options: [
+                (
+                    L("monocle.hide_style.stack", "Stack behind"),
+                    MonocleParams.HideStyle.stack
+                ),
+                (
+                    L(
+                        "monocle.hide_style.park",
+                        "Park in corner"
+                    ),
+                    .park
+                ),
+            ],
+            help: LayoutHelp.monocleHideStyle
         )
     }
 

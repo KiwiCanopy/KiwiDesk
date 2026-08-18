@@ -15,7 +15,26 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
         case vertical
     }
 
+    /// How the unfocused members are hidden (#881). Monocle's
+    /// illusion of "one window" has two ways to break: an app
+    /// with a transparent or blurred body shows the stack
+    /// straight through itself, and a width-bound window (#677)
+    /// centers with symmetric gaps the stack shows through with
+    /// no transparency involved. `park` closes both by moving
+    /// the unfocused members out from behind instead of
+    /// ordering them.
+    public enum HideStyle: String, Sendable, Codable {
+        /// Every member shares the full frame; only z-order
+        /// hides the unfocused ones. The default.
+        case stack
+        /// Unfocused members park at the stash corner (the
+        /// space stash's own geometry and sliver trade), and
+        /// the focus switch snaps instantly.
+        case park
+    }
+
     public var orientation: Orientation = .horizontal
+    public var hideStyle: HideStyle = .stack
     /// Whether the focus cycle wraps past the ends (#168). Unlike
     /// Whether moving focus past the last window wraps to the
     /// first (and the reverse). Defaults **off**, matching the
@@ -44,6 +63,7 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
+        case hideStyle = "hide_style"
         case wrapFocus = "wrap_focus"
         case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
@@ -62,6 +82,11 @@ extension MonocleParams: Codable {
                 Orientation.self,
                 forKey: .orientation
             ) ?? defaults.orientation
+        hideStyle =
+            try container.decodeIfPresent(
+                HideStyle.self,
+                forKey: .hideStyle
+            ) ?? defaults.hideStyle
         wrapFocus =
             try container.decodeIfPresent(
                 Bool.self,
@@ -89,6 +114,7 @@ extension MonocleParams: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)
+        try container.encode(hideStyle, forKey: .hideStyle)
         try container.encode(wrapFocus, forKey: .wrapFocus)
         try container.encode(
             newWindowPlacement,

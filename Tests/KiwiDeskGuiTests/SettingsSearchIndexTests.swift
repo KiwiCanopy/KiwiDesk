@@ -187,7 +187,7 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                .layoutDefaults: 34,
+                .layoutDefaults: 35,
                 .monitors: 3,
                 .gapsAndBorders: 18,
                 .bars: 34,

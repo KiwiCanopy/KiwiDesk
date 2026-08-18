@@ -60,6 +60,15 @@ public final class StickyMarkManager {
         false
     }
 
+    /// The engine's just-commanded instant-set target while its
+    /// echo is pending (#881) — the `commanded` input `sync`
+    /// hands `FollowSource.syncFrame`. Wired in
+    /// `KiwiCore+Bootstrap` beside `isAnimating`, one closure
+    /// shared with the ring manager.
+    public var commandedFrame: @MainActor (WindowID) -> CGRect? = {
+        _ in nil
+    }
+
     public init() {}
 
     /// Windows currently wearing the mark — the contract
@@ -100,7 +109,8 @@ public final class StickyMarkManager {
                 frame: FollowSource.syncFrame(
                     spec: spec.frame,
                     held: overlay.lastFrame,
-                    animating: isAnimating(spec.window)
+                    animating: isAnimating(spec.window),
+                    commanded: commandedFrame(spec.window)
                 )
             )
             // Re-assert stacking each sync (focus change,

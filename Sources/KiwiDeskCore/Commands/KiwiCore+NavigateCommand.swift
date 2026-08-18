@@ -124,6 +124,30 @@ extension KiwiCore {
                 }
             }
         }
+        // Monocle `park` (#881): the parked members leave the
+        // tiled tier. Their corner slivers are real frames now,
+        // so the cross-axis search — and the dead-end
+        // fall-through of an unwrapped cycle — would
+        // geometric-hit the pile: an accidental tile jump that
+        // also made `wrap_focus` look inert, since focusing a
+        // parked member SHOWS it (owner QA 2026-08-18). The
+        // SHOWN member stays a candidate, so the #488
+        // float→tile hop still lands; under `stack` nothing
+        // changes (members share one frame, which the search
+        // never finds).
+        if space.mode == .monocle,
+            tiler.settings.resolvedMonocle(for: space.id)
+                .hideStyle == .park
+        {
+            let shown = MonocleLayout.shownMember(
+                anchor: tiler.layoutInput(state: state)?
+                    .context.focused,
+                of: tiled
+            )
+            searchCandidates = searchCandidates.filter {
+                $0.0 == shown
+            }
+        }
         // Two-tier candidate search (#488): tiled slots first;
         // when no tiled candidate lies in the direction, the
         // float tier (focus only, live frames) keeps a visible

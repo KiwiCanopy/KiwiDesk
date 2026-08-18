@@ -28,8 +28,10 @@ public final class TilingEngine {
     }
 
     /// Applies frames off the main thread with frame-dropping
-    /// and per-app EnhancedUserInterface toggling.
-    private let applier = FrameApplier()
+    /// and per-app EnhancedUserInterface toggling. Internal,
+    /// not private: its echo-pending seams surface from the
+    /// sibling extensions (`recentInstantTarget`, #881).
+    let applier = FrameApplier()
 
     /// A window in an active drag gesture, exempt from ALL frame
     /// application in `retile` — both the main layout loop and
@@ -63,6 +65,11 @@ public final class TilingEngine {
     /// (`takePendingBoundPlacement`) and runs the placement
     /// pass right after.
     var pendingBoundPlacement = false
+
+    /// The tiled member monocle's `park` keeps showing while a
+    /// float holds the focus (#881) — engine-owned transient
+    /// state, argued in `TilingEngine+MonocleShown`.
+    var monocleShownMembers: [SpaceID: WindowID] = [:]
 
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,

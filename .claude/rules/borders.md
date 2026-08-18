@@ -56,10 +56,16 @@ frame is the leading truth — every other channel trails it, by
 | `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor, re-order and retire still run |
 
 `sync` is the easy one to miss, because it reads as a rebuild
-rather than a move — its frame is `state.windows[id]?.frame`,
+rather than a move — its spec frame is `state.windows[id]?.frame`,
 written only by AX echoes, so a retile burst or focus change
 landing mid-flight snapped the overlay back to the pre-motion
 frame (~31 pt on device) until the next tick dragged it forward.
+Since #881 the steady state has a second input: a just-issued
+`applyInstant` target leads the echo-fed spec while its echo is
+pending (`syncFrame`'s `commanded`, stamped by the applier,
+cleared by the first self-echo or the echo grace) — monocle
+park's instant switch has no ticks, so without it the ring
+drew a whole switch behind.
 
 Whatever holds the frame must also resolve **`screen` from the
 same rect**: it selects the backing scale, so a held frame paired
@@ -134,10 +140,12 @@ shortest, or with an app frozen across the whole flight and
 resumed after settle — the harshest case the mechanism allows,
 where its catch-up echoes walked the ring *forward* onto the real
 frame. And the guard has a known cost: after an instant
-`setFrame` the echo is the **only** carrier of overlay updates
-under AX fallback (`onFrameApplied` tees from inside
-`animation.apply` alone), so suppressing it freezes the ring in a
-case that works today. Re-open only with a device capture of the
+`setFrame` the echo is the only carrier of overlay updates
+under AX fallback once the commanded stamp clears
+(`onFrameApplied` tees from inside `animation.apply` alone, and
+`syncFrame`'s `commanded` lead lasts only until the first
+self-echo or the grace, #881), so suppressing it freezes the
+ring in a case that works today. Re-open only with a device capture of the
 backward pull; if one arrives it is an
 `docs/accepted-limitations.md` row before it is a new guard.
 

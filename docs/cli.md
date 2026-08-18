@@ -182,7 +182,8 @@ item's only appearance in CLI output.
 | | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
-| | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
+| | `monocle.set_hide_style` | `stack\|park` (default `stack`; park hides unfocused windows at the stash corner) |
+| | `monocle.set_wrap_focus` | true\|false (default `false`, matching scrolling/track) |
 | | `monocle.set_new_window_placement` | placement¹ (default `first`) |
 | Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one |
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |

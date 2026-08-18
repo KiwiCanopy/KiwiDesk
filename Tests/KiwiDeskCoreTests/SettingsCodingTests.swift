@@ -159,6 +159,9 @@ struct SettingsCodingTests {
         // (#168), off by default like scrolling/track (#257).
         let monocle = try object(layout["monocle"])
         #expect(monocle["wrap_focus"] as? Bool == false)
+        // `monocle.set_hide_style` → `layout.monocle.hide_style`
+        // (#881), `stack` by default — today's behavior.
+        #expect(monocle["hide_style"] as? String == "stack")
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // `stack.set_master_orientation` / `set_stack_position`
@@ -245,6 +248,7 @@ struct SettingsCodingTests {
         settings.grid.rows = 4
         settings.grid.autoSize = true
         settings.monocle.wrapFocus = false
+        settings.monocle.hideStyle = .park
         settings.track.axis = .horizontal
         settings.track.autoTracks = false
         settings.track.limit = 3

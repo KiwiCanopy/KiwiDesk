@@ -190,7 +190,8 @@ extension SettingsValueReadout {
             .gridType, .gridSplitDirection, .gridFillEmptyCells,
             .gridAutoSize, .gridColumns, .gridRows,
             .gridNewWindowPlacement, .monocleOrientation,
-            .monocleWrapFocus, .monocleNewWindowPlacement,
+            .monocleHideStyle, .monocleWrapFocus,
+            .monocleNewWindowPlacement,
             .trackAxis, .trackOverflowStyle, .trackNewWindow,
             .trackNewWindowPosition, .trackAutoTracks,
             .trackLimit, .trackWrapFocus:

@@ -88,6 +88,10 @@ extension InterpolatedLabelTests {
         "layout.schematic.grid.ax": 2,
         "search.result_mode_ax": 1,
         "track.new_window_position.help": 4,
+        // Monocle's hide-style popover (#881): both option
+        // names interpolated from their own keys, authored that
+        // way from the start.
+        "monocle.hide_style.help": 2,
         "space_override.slot_size.help": 4,
         "profiles.current_setup_note": 1,
         "app_bar.alignment.label.help": 2,

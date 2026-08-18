@@ -757,8 +757,9 @@ exempt nothing (no fully-tiled slot exists — see Accepted
 limitations); Scrolling has no `OverlapStack` pile at all — its
 overflow is the scroll, and the clamped edge columns (#142/#150)
 are scroll-reachable viewport pins a sticky may sit in like any
-other slot, not cascades — and Monocle stacks everything
-full-frame, so both need nothing. Reorder of a traveler is home-space-only: `Space.swap`
+other slot, not cascades — and Monocle overlaps everything at
+one frame, stacked full-frame or parked at the stash corner
+under `hide_style = park` (#881), so both need nothing. Reorder of a traveler is home-space-only: `Space.swap`
 /`move`/bar-drag membership guards no-op on a non-member by
 design (v2 non-goal; see [Accepted limitations](accepted-limitations.md)). A **new layout**
 adding a row above must also state which pile class it produces,
@@ -1158,6 +1159,36 @@ recomputed from the connected screens on every retile
 (`ScreenNeighbors.detect`) — an input, never a cache — so a
 screen plugged in or out is correct from the retile the display
 change already triggers.
+
+**Monocle hides by z-order, and `park` is the opt-in for
+bodies the stack shows through (#881).** The default `stack`
+hides the unfocused members entirely behind the focused window
+— perfect concealment until the focused body is itself
+see-through: a transparent or blurred app shows the stack
+through its own pixels, and since #880 a width-bound window
+centers with symmetric gaps the stack shows through with no
+transparency involved. `park` moves the unfocused members to
+the stash's #410 corner instead — the same geometry, so the
+sliver trade rides its precedent: with windows on several
+Spaces, `stashInactive` piles the same slivers in that corner
+today, they all overlap at essentially one point, and the pile
+reads as one slightly denser tab (Mission Control showing
+parked windows at the corner is the same precedent). Only a
+single-Space monocle user sees anything new, which is one of
+the two reasons this is an option rather than the default —
+the other being that most users have neither transparent
+windows nor width-bound apps in monocle, and a default change
+would retune a shipped surface for all of them. The focus
+switch under `park` snaps instead of animating: the park is a
+hide mechanism, not motion the user asked to watch, and an
+animated park would turn every focus change into a corner
+flight where monocle's promise is the raise-only flip. Truly
+hiding the windows was rejected on platform grounds: macOS
+offers no public API to hide another app's window (minimize is
+slow and changes Dock state; moving them to another native
+Space is the SIP list above; ordering lower in z changes
+nothing — they are already behind, and a transparent body
+shows whatever is behind it).
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or

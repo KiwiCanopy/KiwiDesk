@@ -68,6 +68,11 @@ extension LayoutKey {
             return .text("scroll_grid.rows")
         case .monocleOrientation:
             return .text("monocle.focus_orientation")
+        case .monocleHideStyle:
+            return .text(
+                "monocle.hide_style",
+                help: "monocle.hide_style.help"
+            )
         case .trackNewWindow:
             return .text("track.new_window")
         case .trackNewWindowPosition:

@@ -176,6 +176,10 @@ extension KiwiCore {
         // that restore's plan is empty (the traveler is already
         // frontmost) and its own re-assert is skipped by the
         // completion's focus guard, so it cannot loop.
+        // The arm stays under `park` (#881): the stacking half
+        // dissolves, but the RELIABILITY half (the bar-click
+        // raise from a background app) is style-independent,
+        // and the already-behind floor verifies immediately.
         if activeSpace?.mode == .monocle, previousFocused != id {
             scheduleZOrderRestore()
         }
@@ -300,14 +304,26 @@ extension KiwiCore {
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's
-    /// focus slide is toggleable (`on_scrolling`); other
-    /// focus-driven modes (Monocle) always animate. Used by
+    /// focus slide is toggleable (`on_scrolling`); Monocle
+    /// animates under `stack` (the retile is a no-op, the raise
+    /// is the visible change) but SNAPS under `park` (#881):
+    /// park and un-park take the instant `applyInstant` path,
+    /// keeping the raise-only feel instead of sliding windows
+    /// to and from the corner. Used by
     /// `retileWithScrollDuration`'s non-scrolling branch — the
     /// scrolling branch swaps in `scrollDurationMS` and always
     /// animates when `on_scrolling` is set.
     var focusRetileAnimated: Bool {
-        activeSpace?.mode == .scrolling
-            ? tiler.settings.animations.onScrolling : true
+        guard let space = activeSpace else { return true }
+        switch space.mode {
+        case .scrolling:
+            return tiler.settings.animations.onScrolling
+        case .monocle:
+            return tiler.settings.resolvedMonocle(for: space.id)
+                .hideStyle == .stack
+        default:
+            return true
+        }
     }
 
     /// Retiles for a focus-driven layout, honouring

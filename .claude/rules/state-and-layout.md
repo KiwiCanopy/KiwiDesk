@@ -159,7 +159,8 @@ editing here:
   `ZOrderSequenceWiringTests` pins that the teardown call site
   still drops it.
 - A context site that **materializes scrolled-out scrolling
-  frames threads `screenNeighbors`** (#878):
+  frames — or monocle's parked frames (#881) — threads
+  `screenNeighbors`** (#878):
   `TilingSettings.context` defaults the flags to all-open (the
   single-screen verdict), and nothing scans for the omitted
   parameter, so a new site that computes real scrolling frames
@@ -171,7 +172,12 @@ editing here:
   rightly omit it and get every edge open. The wall verdicts
   are an input detected fresh each retile, never a cache —
   which is also why a stash or corner consumer reads the same
-  seam rather than enumerating screens itself.
+  seam rather than enumerating screens itself. And a corner
+  consumer takes the corner PREFERENCE from
+  `TilingEngine.optimalHideCorner(neighbors:)` — the one copy
+  the stash and monocle's park share (#881) — never a
+  re-derivation beside the flags, or the two answer one
+  arrangement differently.
   `ScreenNeighborsPlumbingTests` pins the threading and the
   default; `ScrollingBlockedEdgeTests` the clamp forms.
 - **An app-enforced size bound is learned, never assumed
