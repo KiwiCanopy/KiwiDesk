@@ -240,10 +240,10 @@ final class FrameApplier {
     }
 }
 
-/// When each window's frame was last set by us. Written from
-/// the per-app queues, read from the main actor.
 /// Commanded instant-set targets whose echoes may still be in
 /// flight (#881) — `RecentApplies`' shape, carrying the frame.
+/// Written on the main actor at enqueue time (`applyInstant`),
+/// read from the main actor.
 private final class InstantTargets: @unchecked Sendable {
     private typealias Entry = (frame: CGRect, at: TimeInterval)
     private let lock = NSLock()
@@ -280,6 +280,8 @@ private final class InstantTargets: @unchecked Sendable {
     }
 }
 
+/// When each window's frame was last set by us. Written from
+/// the per-app queues, read from the main actor.
 private final class RecentApplies: @unchecked Sendable {
     private let lock = NSLock()
     private var stamps: [WindowID: TimeInterval] = [:]

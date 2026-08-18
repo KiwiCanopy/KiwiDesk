@@ -139,12 +139,11 @@ extension KiwiCore {
             tiler.settings.resolvedMonocle(for: space.id)
                 .hideStyle == .park
         {
-            let anchor = tiler.layoutInput(state: state)?
-                .context.focused
-            let shown =
-                anchor.flatMap {
-                    tiled.contains($0) ? $0 : nil
-                } ?? tiled.first
+            let shown = MonocleLayout.shownMember(
+                anchor: tiler.layoutInput(state: state)?
+                    .context.focused,
+                of: tiled
+            )
             searchCandidates = searchCandidates.filter {
                 $0.0 == shown
             }

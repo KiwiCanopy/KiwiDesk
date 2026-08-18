@@ -87,8 +87,15 @@ struct MonocleParkNavigationTests {
     func crossAxisStaysOffThePile() {
         // Horizontal monocle: up/down are the cross axis and
         // fall through to the geometric tier, which must not
-        // reach the corner pile.
+        // reach the corner pile. Gaps ZEROED deliberately
+        // (guard-prover round): with the default outer gap the
+        // 1 pt sliver never overlaps the slot on x and
+        // `Navigation.neighbor`'s own precondition rejects the
+        // pile before the #881 filter is consulted — this test
+        // must fail via the FILTER, so the slot's maxX has to
+        // reach past the sliver's minX.
         let core = makeParkCore()
+        _ = core.execute("set_gap_global", args: [.number(0)])
         #expect(
             !core.execute("focus", args: [.string("down")])
                 .isSuccess

@@ -54,10 +54,10 @@ public struct MonocleLayout: LayoutSystem {
         // keeps a refused-width window's sliver on screen: a
         // full-width park of a narrower window would push its
         // body past the peek entirely.
-        let shown =
-            context.focused.flatMap { focused in
-                windows.contains(focused) ? focused : nil
-            } ?? windows.first
+        let shown = Self.shownMember(
+            anchor: context.focused,
+            of: windows
+        )
         let corner = TilingEngine.optimalHideCorner(
             neighbors: context.screenNeighbors
         )
@@ -75,6 +75,20 @@ public struct MonocleLayout: LayoutSystem {
                 )
         }
         return result
+    }
+
+    /// The one copy of park's shown-member pick (#881, review
+    /// round): the anchor while it is a member, else the front
+    /// of the carousel. The navigate filter consumes the same
+    /// rule (`KiwiCore+NavigateCommand`), so the tier it keeps
+    /// and the member the layout shows cannot drift apart.
+    static func shownMember(
+        anchor: WindowID?,
+        of members: [WindowID]
+    ) -> WindowID? {
+        anchor.flatMap {
+            members.contains($0) ? $0 : nil
+        } ?? members.first
     }
 
     /// The rect a park anchors to: the layout bounds, pulled in

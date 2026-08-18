@@ -99,8 +99,7 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "move echo"
                 )
-                // Reality reported (#881): the state frame
-                // now beats the commanded instant target.
+                // Reality reported — state beats stamp (#881).
                 tiler.clearInstantTarget(id)
             }
             drag.windowMoved(id, frame: frame)
@@ -137,7 +136,7 @@ extension KiwiCore {
                     size: frame.size,
                     channel: "resize echo"
                 )
-                tiler.clearInstantTarget(id)  // as above, #881
+                tiler.clearInstantTarget(id)  // as :104, #881
             } else if !tiler.ledgerExplainsResize(
                 id,
                 size: frame.size
@@ -180,12 +179,13 @@ extension KiwiCore {
             // (#152/#158). Same for a pending z-order-raise echo.
             outstandingSelfRaises.remove(id)
             zOrderRaiseEchoes[id] = nil
-            // WindowIDs are reused (#152/#158): a bound learned
-            // for the gone window must not skip the next one,
-            // and the monocle shown-member hold (#881) must not
-            // pin a future stranger.
+            // WindowIDs are reused (#152/#158): the learned
+            // bound, the monocle shown-member hold and the
+            // commanded stamp (#881) must not reach the next
+            // tenant of this id.
             tiler.forgetSizeBound(id)
             tiler.forgetMonocleShown(id)
+            tiler.clearInstantTarget(id)
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
