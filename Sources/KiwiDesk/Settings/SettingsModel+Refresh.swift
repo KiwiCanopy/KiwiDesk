@@ -69,8 +69,6 @@ extension SettingsModel {
             verdict: resolved.verdict,
             screens: resolved.screens
         )
-        separateDisplaySpacesPreference =
-            DisplaySpacesSetting.hasSeparateSpaces()
         refreshLayoutDrift()
     }
 

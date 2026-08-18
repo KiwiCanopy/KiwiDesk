@@ -178,22 +178,6 @@ final class SettingsModel: ObservableObject {
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
-    /// macOS's "Displays have separate Spaces" preference, on its
-    /// own (#678 turn 13a).
-    ///
-    /// Snapshotted because it is a `CFPreferences` lookup and two
-    /// surfaces ask for it; the DISPLAY COUNT half of the
-    /// ambiguity condition is deliberately NOT baked in here.
-    /// Folding `recommendsSharedSpaces(displayCount:)` whole into
-    /// a snapshot re-created the fail-open it was meant to close:
-    /// nothing refreshes the dashboard on a display change, so
-    /// plugging in a second monitor left the binding rows live
-    /// with the stale one-display answer. The count is read live
-    /// at each use (`displaysHaveSeparateSpaces`), which cannot
-    /// go stale; only the preference — which a user changes in
-    /// System Settings and which needs a log out to take effect
-    /// anyway — is cached.
-    @Published var separateDisplaySpacesPreference = false
     /// The one-line confirmation after a search pick flipped the
     /// mode (#678 4c) — set and cleared only by
     /// `noteSearchModeSwitch` (`SettingsModel+Search`).

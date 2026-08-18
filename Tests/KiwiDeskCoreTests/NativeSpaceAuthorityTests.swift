@@ -5,11 +5,14 @@ import Testing
 @testable import KiwiDeskCore
 
 // #888 main-display authority: "Desktop N activates" means the
-// MAIN display's current Desktop became N. One serialized suite
-// file — every test drives the process-global DEBUG overrides
-// (`spacesOverride`, `mainDisplayUUIDOverride`,
-// `hasSeparateSpacesOverride`, …), and a second suite would race
-// it under parallel testing.
+// MAIN display's current Desktop became N. Every test drives the
+// process-global DEBUG overrides (`spacesOverride`,
+// `mainDisplayUUIDOverride`, `hasSeparateSpacesOverride`, …).
+// `.serialized` binds PER SUITE, so what keeps the four suites
+// here from racing each other is that every test body is
+// synchronous `@MainActor` — set, assert and reset in one hop.
+// A test here must stay that shape: an `async` body opens the
+// override window the serialization does not close.
 
 @MainActor
 private func makeCore() -> KiwiCore {

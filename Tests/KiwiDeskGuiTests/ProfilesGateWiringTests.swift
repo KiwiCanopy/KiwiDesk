@@ -305,7 +305,6 @@ struct ProfilesGateWiringTests {
             ]
         for key in [
             "profiles.native_spaces.live_only",
-            "native_spaces.separate_warning",
             "presets.editing_stored",
             "presets.needs_screens",
         ] {

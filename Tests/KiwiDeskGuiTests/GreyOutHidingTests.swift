@@ -33,7 +33,6 @@ struct GreyOutHidingTests {
         "if model.editingStoredProfile {",
         "if style.wrappedValue.enabled {",
         "if visual.enabled {",
-        "if !model.config.profileBindings.isEmpty {",
     ]
 
     /// OS-capability gates are the one legitimate reason to
@@ -82,15 +81,6 @@ struct GreyOutHidingTests {
             + "the pill exists only while the draft does",
         "SettingsFooter+Slots.swift":
             "either/or slot; each mode renders its own verb",
-        // "Clear all bindings" acts on bindings; with none
-        // stored there is nothing for it to act ON, so it is
-        // absent rather than dimmed — an affordance for a
-        // channel that does not exist reads as broken, not as
-        // forthcoming (gui.md). It is NOT a control that exists
-        // in some other mode, which is what this guard protects.
-        "NativeSpacesGroup.swift":
-            "destructive verb with no referent until a binding "
-            + "exists",
     ]
 
     @Test("no settings view hides a control it should grey")

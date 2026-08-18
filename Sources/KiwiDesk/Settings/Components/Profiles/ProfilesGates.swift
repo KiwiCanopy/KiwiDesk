@@ -13,17 +13,17 @@ import KiwiDeskCore
 /// `SettingsContainer.gate` — and it takes no `SettingsMode`
 /// input: the mode never changes what runs (8c).
 ///
-/// **Two arms per gated row, and the census names both.** Apply
-/// is dead on a screen-count mismatch AND while a stored profile
-/// is being edited (applying a preset switches the LIVE layout,
-/// which editing a stored profile never does); the bindings are
-/// dead while a stored profile is being edited AND while
-/// displays have separate Spaces. The resolver owns the whole
-/// predicate either way, so both rows declare `.runtimeAnyOf`
-/// rather than a single tag standing for the pair — a tag named
-/// for the row's own outcome would record nothing a reader could
-/// not see from the greyed row. The reasons stay APART here
-/// because their sentences differ and only some name a fix.
+/// **The census names every arm.** Apply is dead on a
+/// screen-count mismatch AND while a stored profile is being
+/// edited (applying a preset switches the LIVE layout, which
+/// editing a stored profile never does), so it declares
+/// `.runtimeAnyOf`; the bindings die only while a stored profile
+/// is being edited — #888 retired the separate-Spaces arm by
+/// giving the trigger a definition that holds in every display
+/// mode (the MAIN display's Desktop), so that row is back to one
+/// arm. The resolver owns the whole predicate either way. The
+/// reasons stay APART here because their sentences differ and
+/// only some name a fix.
 ///
 /// Returning the reason rather than a Bool keeps the grey and its
 /// inline sentence from being two decisions that can disagree
@@ -33,21 +33,6 @@ struct ProfilesGates {
     /// Whether the dashboard is editing a stored profile rather
     /// than the live config (#18).
     let editingStoredProfile: Bool
-    /// macOS's "Displays have separate Spaces" is on with more
-    /// than one display attached
-    /// (`DisplaySpacesSetting.recommendsSharedSpaces`). Each
-    /// display then has its own Desktop 1, and KiwiDesk runs one
-    /// profile across all of them, so "load X when Desktop 2
-    /// activates" names no single event.
-    ///
-    /// Only `profileBindings` reads it — and it takes NO
-    /// default. A defaulted `false` would be the one fail-open
-    /// input in the resolver family: a future call site
-    /// resolving the bindings gate off a preset-shaped context
-    /// would silently get a live row, with nothing anywhere to
-    /// notice. Making the compiler ask every construction is
-    /// cheaper than a guard that watches for the omission.
-    let separateDisplaySpaces: Bool
     /// How many screens are connected right now.
     let connectedScreens: Int
     /// The preset row's OWN screen count. nil on every other
@@ -64,9 +49,6 @@ struct ProfilesGates {
         /// Desktop bindings are global — a stored profile may
         /// never override what SELECTS it.
         case bindingsAreGlobal
-        /// A Desktop number does not name one event while
-        /// displays have separate Spaces.
-        case desktopsAreAmbiguous
         /// Applying a preset switches the live layout.
         case presetSwitchesLiveLayout
         /// The preset plans for a different screen count.
@@ -84,9 +66,8 @@ struct ProfilesGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .profiles(.profileBindings):
-            if editingStoredProfile { return .bindingsAreGlobal }
-            return separateDisplaySpaces
-                ? .desktopsAreAmbiguous : nil
+            return editingStoredProfile
+                ? .bindingsAreGlobal : nil
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -129,14 +110,11 @@ struct ProfilesGates {
 /// the main actor; the reason and its sentence are one decision,
 /// never two that can disagree (#678, gui.md).
 ///
-/// Three of the four keys are reused verbatim from the
-/// hand-wired gate this conversion replaced, so their English is
-/// unchanged and no translation of them is dropped. The fourth,
-/// `native_spaces.separate_warning`, was deliberately rewritten
-/// in the same change — the rows went from live-under-a-warning
-/// to greyed, and the old sentence described the old behavior —
-/// so it was dropped from every locale and re-enters the
-/// translation round.
+/// Every key is reused verbatim from the hand-wired gate this
+/// conversion replaced, so their English is unchanged and no
+/// translation of them is dropped. (The conversion's fourth key,
+/// `native_spaces.separate_warning`, retired with #888 — the
+/// separate-Spaces state no longer greys the rows at all.)
 @MainActor
 enum ProfilesGateHelp {
     static func sentence(
@@ -148,16 +126,6 @@ enum ProfilesGateHelp {
                 "profiles.native_spaces.live_only",
                 "Desktop bindings are global — switch to "
                     + "Live to change them."
-            )
-        case .desktopsAreAmbiguous:
-            return L(
-                "native_spaces.separate_warning",
-                "Unavailable while \"Displays have separate "
-                    + "Spaces\" is on — KiwiDesk runs one "
-                    + "profile across all displays, so a "
-                    + "Desktop binding would be ambiguous. "
-                    + "Turning it off needs a log out and back "
-                    + "in."
             )
         case .presetSwitchesLiveLayout:
             return L(
