@@ -37,47 +37,108 @@ extension KiwiCore {
 
     // MARK: - Space switch reaction
 
-    /// Native space switch: remember the Space the
-    /// desktop we left was showing, swap in the bound profile
-    /// (if any), restore the new desktop's Space, and
-    /// notify subscribers.
+    /// Native space switch: remember the Space the Desktop we
+    /// left was showing, swap in the bound profile (if any),
+    /// restore the new Desktop's Space, and notify subscribers.
+    ///
+    /// The Desktop that counts is the MAIN display's (#888,
+    /// `NativeSpaces.activeDesktopNumber`). With "Displays have
+    /// separate Spaces" on, a swipe on a secondary display fires
+    /// this handler too — that arm reconciles and retiles the
+    /// arrived windows but never selects a profile or moves the
+    /// active Space. Shared mode and a single display never
+    /// reach that arm, so their flow is exactly the pre-#888
+    /// one.
     func handleNativeSpaceChange() {
-        let number = NativeSpaces.activeSpaceNumber()
+        let number = NativeSpaces.activeDesktopNumber()
         lastNativeSwitch = Date()
+        let secondarySwitch =
+            number == lastNativeSpace
+            && state.workspaces.allDisplays.count > 1
+            && DisplaySpacesSetting.hasSeparateSpaces()
         if let last = lastNativeSpace, last != number,
             let active = state.workspaces.activeSpace
         {
-            virtualSpaceMemory[last] = active
+            rememberVirtualSpace(active, leaving: last)
         }
         lastNativeSpace = number
-        applyNativeSpaceBinding()
-        if let number,
-            let target = virtualSpaceTarget(for: number)
-        {
-            state.workspaces.activate(target)
-            // Never animate here: this desktop's windows just
-            // (re)appeared, there is nothing to fly around.
+        if secondarySwitch {
+            // A secondary display's Desktop switched: the
+            // binding authority is unmoved, so the profile and
+            // the active Space stand down. The windows that
+            // arrived with the switch still need placing now —
+            // the 600 ms settle would otherwise be the first
+            // full pass — and the bars re-sync so a fullscreen
+            // arrival retires that display's panels (#670's
+            // per-display verdicts).
             retile(animated: false, force: true)
-            emitSpaceChange()
-        } else if !NativeSpaces.activeSpaceIsUser() {
-            // Arrived on a fullscreen/system space (#670): the
-            // nil number skipped the retile above and the
-            // settle stands down, so sync the bars directly —
-            // the per-display verdict retires them instead of
-            // leaving the panels painted over the fullscreen
-            // app for the 600 ms until the settle's own sync.
             updateAppBar()
             updateSpaceBar()
+        } else {
+            applyNativeSpaceBinding()
+            if let number,
+                let target = virtualSpaceTarget(for: number)
+            {
+                state.workspaces.activate(target)
+                // Never animate here: this desktop's windows
+                // just (re)appeared, there is nothing to fly
+                // around.
+                retile(animated: false, force: true)
+                emitSpaceChange()
+            } else if !NativeSpaces.activeSpaceIsUser() {
+                // Arrived on a fullscreen/system space (#670):
+                // the nil number skipped the retile above and
+                // the settle stands down, so sync the bars
+                // directly — the per-display verdict retires
+                // them instead of leaving the panels painted
+                // over the fullscreen app for the 600 ms until
+                // the settle's own sync.
+                updateAppBar()
+                updateSpaceBar()
+            }
         }
         emitNativeSpaceChange()
         settleAfterNativeSwitch(number)
     }
 
-    /// The Space a native desktop should show: the
-    /// one it showed last, or the first space as default.
+    // MARK: - Per-Desktop Space memory (#888)
+
+    /// The memory key for the current main display — see
+    /// `DesktopMemory` for why the keying is per display and
+    /// mode-independent.
+    private var virtualSpaceMemoryKey: String {
+        NativeSpaces.mainDisplayUUID() ?? "main"
+    }
+
+    /// Records the Space the main display's outgoing Desktop
+    /// was showing.
+    func rememberVirtualSpace(
+        _ space: SpaceID,
+        leaving desktop: Int
+    ) {
+        desktopMemory
+            .virtualSpaces[virtualSpaceMemoryKey, default: [:]][
+                desktop
+            ] = space
+    }
+
+    /// The Space a native Desktop should show: the one it
+    /// showed last, or the first space as default. A remembered
+    /// SpaceID foreign to the CURRENT space set falls back too
+    /// (#888): the binding apply just before this read may have
+    /// swapped profiles, and a stale id would activate a Space
+    /// the new profile does not have — missing and stale take
+    /// the same exit.
     func virtualSpaceTarget(for native: Int) -> SpaceID? {
-        virtualSpaceMemory[native]
-            ?? state.workspaces.allSpaces.first?.id
+        let spaces = state.workspaces.allSpaces
+        if let remembered =
+            desktopMemory
+            .virtualSpaces[virtualSpaceMemoryKey]?[native],
+            spaces.contains(where: { $0.id == remembered })
+        {
+            return remembered
+        }
+        return spaces.first?.id
     }
 
     /// The post-switch AX reconcile re-tracks this desktop's
@@ -137,13 +198,14 @@ extension KiwiCore {
         }
     }
 
-    /// Loads the profile bound to the current native space.
-    /// No-ops without SkyLight (single-space fallback), when
-    /// the space has no binding, or when the bound profile is
-    /// already active. All native spaces without a binding
-    /// share whatever profile is current.
+    /// Loads the profile bound to the active Desktop — the MAIN
+    /// display's current one (#888). No-ops without SkyLight
+    /// (single-space fallback), when the Desktop has no binding,
+    /// or when the bound profile is already active. All native
+    /// Desktops without a binding share whatever profile is
+    /// current.
     func applyNativeSpaceBinding() {
-        guard let number = NativeSpaces.activeSpaceNumber(),
+        guard let number = NativeSpaces.activeDesktopNumber(),
             let name = nativeSpaceBindings[number],
             name != profiles.currentName
         else { return }
@@ -160,20 +222,5 @@ extension KiwiCore {
                     + "profile '\(name)': \(error)"
             )
         }
-    }
-
-    private func emitNativeSpaceChange() {
-        guard let number = NativeSpaces.activeSpaceNumber()
-        else { return }
-        bus.emit(
-            .nativeSpaceChange,
-            data: .object([
-                "native_space": .number(Double(number)),
-                "profile": profiles.currentName.map {
-                    .string($0)
-                } ?? .null,
-            ]),
-            luaArgs: [.number(Double(number))]
-        )
     }
 }

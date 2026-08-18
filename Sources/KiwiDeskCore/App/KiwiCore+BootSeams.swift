@@ -71,7 +71,7 @@ extension KiwiCore {
             )
             self?.followDisplayUnderClick(at: point)
         }
-        lastNativeSpace = NativeSpaces.activeSpaceNumber()
+        lastNativeSpace = NativeSpaces.activeDesktopNumber()
         // Cheap and off-main; kicked here so the first glyph bar
         // never renders an image-fallback frame.
         appFont.preload()

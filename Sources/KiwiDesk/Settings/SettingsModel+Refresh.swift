@@ -53,7 +53,7 @@ extension SettingsModel {
         }
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
-        currentNativeSpace = NativeSpaces.activeSpaceNumber()
+        currentNativeSpace = NativeSpaces.activeDesktopNumber()
         // After `currentNativeSpace`: a Desktop binding outranks
         // monitor matching, so the verdict needs the desktop this
         // pass just read. The count is captured in the same

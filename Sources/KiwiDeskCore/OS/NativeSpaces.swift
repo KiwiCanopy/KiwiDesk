@@ -31,6 +31,11 @@ public struct NativeSpace: Sendable, Equatable {
 public enum NativeSpaces {
     /// The currently active space, or nil without SkyLight.
     public static func activeSpaceID() -> SkyLight.SpaceID? {
+        #if DEBUG
+            if let override = activeSpaceIDOverride {
+                return override
+            }
+        #endif
         guard let cid = SkyLight.connection,
             let getActiveSpace = SkyLight.getActiveSpace
         else { return nil }
@@ -51,6 +56,11 @@ public enum NativeSpaces {
 
     /// All spaces across all displays.
     public static func allSpaces() -> [NativeSpace] {
+        #if DEBUG
+            if let override = spacesOverride {
+                return override
+            }
+        #endif
         guard let cid = SkyLight.connection,
             let copySpaces = SkyLight.copyManagedDisplaySpaces,
             let unmanaged = copySpaces(cid)
@@ -150,17 +160,36 @@ public enum NativeSpaces {
     }
 
     #if DEBUG
-        public static nonisolated(unsafe) var activeSpaceNumberOverride: Int?
+        /// Pins the Desktop number for BOTH readers —
+        /// `activeSpaceNumber()` and `activeDesktopNumber()` —
+        /// because outside a topology fixture they are the same
+        /// number, and a test pinning one but not the other
+        /// would read the host's WindowServer through the
+        /// unpinned one (#523's crime). A test that needs the
+        /// two to DIVERGE pins `spacesOverride` +
+        /// `mainDisplayUUIDOverride` instead and leaves this
+        /// nil.
+        public static nonisolated(unsafe) var activeDesktopNumberOverride: Int?
         public static nonisolated(unsafe) var activeSpaceIsUserOverride: Bool?
         public static nonisolated(unsafe) var currentSpaceIsUserOverride:
             ((DisplayID) -> Bool)?
+        public static nonisolated(unsafe) var spacesOverride: [NativeSpace]?
+        public static nonisolated(unsafe) var activeSpaceIDOverride:
+            SkyLight.SpaceID?
+        public static nonisolated(unsafe) var mainDisplayUUIDOverride: String?
+        public static nonisolated(unsafe) var displayUUIDOverride:
+            ((DisplayID) -> String?)?
     #endif
 
-    /// Mission Control number of the active space, or nil
+    /// Mission Control number of the GLOBAL active space, or nil
     /// without SkyLight (callers treat that as single-space).
+    /// Binding and profile paths do not read this — they consult
+    /// `activeDesktopNumber()` (the main display's Desktop,
+    /// #888), which falls back here when SkyLight cannot answer
+    /// per display.
     public static func activeSpaceNumber() -> Int? {
         #if DEBUG
-            if let override = activeSpaceNumberOverride {
+            if let override = activeDesktopNumberOverride {
                 return override
             }
         #endif
@@ -189,6 +218,11 @@ public enum NativeSpaces {
     public static func displayUUID(
         for display: DisplayID
     ) -> String? {
+        #if DEBUG
+            if let override = displayUUIDOverride {
+                return override(display)
+            }
+        #endif
         guard let createDisplayUUID,
             let uuid = createDisplayUUID(display.raw)?
                 .takeRetainedValue()

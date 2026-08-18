@@ -12,10 +12,22 @@ import Foundation
 /// effect after a logout, so this is read-only detection that
 /// lets onboarding recommend the shared model when needed (#8).
 public enum DisplaySpacesSetting {
+    #if DEBUG
+        /// Pins the mode for tests: the real read is the host's
+        /// own System Settings choice, which a fixture must
+        /// never inherit (the #523 rule, one preference over).
+        public static nonisolated(unsafe) var hasSeparateSpacesOverride: Bool?
+    #endif
+
     /// True when displays have separate Spaces (or the default is
     /// in effect). False only when the user explicitly turned the
     /// setting off (`spans-displays = 1`).
     public static func hasSeparateSpaces() -> Bool {
+        #if DEBUG
+            if let override = hasSeparateSpacesOverride {
+                return override
+            }
+        #endif
         let value = CFPreferencesCopyAppValue(
             "spans-displays" as CFString,
             "com.apple.spaces" as CFString
