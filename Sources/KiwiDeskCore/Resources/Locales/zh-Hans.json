@@ -695,7 +695,7 @@
   "native_spaces.desktop": "桌面 %1$d",
   "native_spaces.empty": "未检测到 macOS 原生桌面。请在调度中心添加桌面以关联描述文件。",
   "native_spaces.help": "只有主屏幕上的桌面可以绑定，因为 macOS 的“显示器具有单独的空间”默认让每个屏幕拥有各自的桌面。在“系统设置”▸“桌面与程序坞”中关闭该选项后，所有屏幕将共享同一组桌面，全部都可绑定——代价是每个屏幕不再有各自的菜单栏和程序坞，全屏窗口也不再清空其他屏幕。",
-  "native_spaces.intro": "这些是来自调度中心的 macOS 原生桌面，而不是 KiwiDesk 的空间。请选择一个描述文件，在主显示器（带菜单栏的屏幕）上的某个桌面激活时自动载入。",
+  "native_spaces.intro": "这些是来自调度中心的 macOS 原生桌面，而不是 KiwiDesk 的空间。请选择一个描述文件，在主屏幕（带菜单栏的那块屏幕）上的某个桌面激活时自动载入。",
   "native_spaces.none": "无",
   "native_spaces.not_on_main": "不在主屏幕上",
   "native_spaces.title": "每个 macOS 桌面的描述文件",

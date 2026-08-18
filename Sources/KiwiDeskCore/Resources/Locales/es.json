@@ -697,7 +697,7 @@
   "native_spaces.help": "Solo se pueden asignar los Escritorios de tu pantalla principal, porque «Las pantallas tienen espacios separados» de macOS da por omisión a cada pantalla sus propios Escritorios. Si la desactivas, en Ajustes del Sistema ▸ Escritorio y Dock, todas las pantallas comparten los mismos Escritorios y se pueden asignar todos, a cambio de la barra de menús y el Dock propios de cada pantalla, y de que las ventanas a pantalla completa dejen de vaciar las demás.",
   "native_spaces.intro": "Estos son los Escritorios propios de tu Mac, de Mission Control — no los espacios de KiwiDesk. Elige un perfil para que se cargue automáticamente cuando se active un Escritorio en tu pantalla principal (la pantalla con la barra de menús).",
   "native_spaces.none": "Ninguno",
-  "native_spaces.not_on_main": "no está en la pantalla principal",
+  "native_spaces.not_on_main": "fuera de la pantalla principal",
   "native_spaces.title": "Perfiles por Escritorio de macOS",
   "notification.permission_lost.body": "Se ha revocado el permiso de Accesibilidad. Vuelve a activarlo en Ajustes del Sistema > Privacidad y seguridad > Accesibilidad.",
   "notification.permission_lost.title": "KiwiDesk ha dejado de gestionar las ventanas",

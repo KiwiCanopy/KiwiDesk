@@ -695,7 +695,7 @@
   "native_spaces.desktop": "桌面 %1$d",
   "native_spaces.empty": "未偵測到 macOS 原生桌面。請在 Mission Control 中加入桌面以綁定描述檔。",
   "native_spaces.help": "只有主螢幕上的桌面可以綁定，因為 macOS 的「顯示器各自有專屬的空間」預設讓每個螢幕擁有各自的桌面。在「系統設定」▸「桌面與 Dock」中關閉此選項後，所有螢幕會共用同一組桌面，全部都能綁定——代價是每個螢幕不再有各自的選單列和 Dock，全螢幕視窗也不再清空其他螢幕。",
-  "native_spaces.intro": "這些是來自 Mission Control 的 macOS 原生桌面，而不是 KiwiDesk 的空間。請挑選一個描述檔，以便在主顯示器（帶有選單列的螢幕）上的某個桌面啟用時自動載入。",
+  "native_spaces.intro": "這些是來自 Mission Control 的 macOS 原生桌面，而不是 KiwiDesk 的空間。請挑選一個描述檔，以便在主螢幕（有選單列的那一個螢幕）上的某個桌面啟用時自動載入。",
   "native_spaces.none": "無",
   "native_spaces.not_on_main": "不在主螢幕上",
   "native_spaces.title": "每個 macOS 桌面的描述檔",

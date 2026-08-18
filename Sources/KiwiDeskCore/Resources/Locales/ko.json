@@ -695,7 +695,7 @@
   "native_spaces.desktop": "데스크탑 %1$d",
   "native_spaces.empty": "macOS 자체의 데스크탑이 감지되지 않았습니다. 프로필을 바인딩하려면 Mission Control에서 데스크탑을 추가하십시오.",
   "native_spaces.help": "주 화면의 데스크탑만 연결할 수 있습니다. macOS의 ‘디스플레이마다 별도의 공간 사용’이 기본적으로 화면마다 고유한 데스크탑을 제공하기 때문입니다. 시스템 설정의 ‘데스크탑 및 Dock’에서 이 기능을 끄면 모든 화면이 같은 데스크탑을 공유하여 전부 연결할 수 있게 됩니다. 대신 화면마다 별도의 메뉴 막대와 Dock이 사라지고, 전체 화면 윈도우가 다른 화면을 비우지 않게 됩니다.",
-  "native_spaces.intro": "이것은 Mission Control에 있는 macOS 자체의 데스크탑이며, KiwiDesk의 공간이 아닙니다. 주 디스플레이(메뉴 막대가 있는 화면)에서 데스크탑이 활성화될 때 자동으로 불러올 프로필을 선택하십시오.",
+  "native_spaces.intro": "이것은 Mission Control에 있는 macOS 자체의 데스크탑이며, KiwiDesk의 공간이 아닙니다. 주 화면(메뉴 막대가 있는 화면)에서 데스크탑이 활성화될 때 자동으로 불러올 프로필을 선택하십시오.",
   "native_spaces.none": "없음",
   "native_spaces.not_on_main": "주 화면에 없음",
   "native_spaces.title": "macOS 데스크탑별 프로필",
