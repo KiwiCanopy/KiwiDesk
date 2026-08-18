@@ -254,12 +254,20 @@ extension TilingSettings {
     /// that never materialize scrolled-out frames (capacity
     /// probes, bar-strip carving, previews) omit it and get the
     /// single-screen verdict — every edge open.
+    /// `sizeBounds` carries the engine's confirmed app-enforced
+    /// bounds (#677); a frame-producing build threads
+    /// `TilingEngine.sizeBounds(for:)` so the residue a refusal
+    /// leaves is placed (scrolling re-packs, monocle centers).
+    /// Callers whose frames never reach a window (probes,
+    /// previews) omit it and every layout asks what it always
+    /// did.
     public func context(
         bounds: CGRect,
         space: Space,
         sticky: Set<WindowID>,
         focusedOverride: WindowID? = nil,
-        screenNeighbors: ScreenNeighbors = ScreenNeighbors()
+        screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
+        sizeBounds: [WindowID: EffectiveSizeBound] = [:]
     ) -> LayoutContext {
         LayoutContext(
             bounds: bounds,
@@ -272,6 +280,7 @@ extension TilingSettings {
             trackWeights: space.trackWeights,
             sticky: sticky,
             screenNeighbors: screenNeighbors,
+            sizeBounds: sizeBounds,
             bsp: resolvedBsp(for: space),
             stack: resolvedStack(for: space),
             scrolling: resolvedScrolling(for: space),

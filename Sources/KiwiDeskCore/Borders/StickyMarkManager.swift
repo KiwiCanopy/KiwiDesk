@@ -111,22 +111,26 @@ public final class StickyMarkManager {
     }
 
     /// AX-echo / animation hot path: re-corner an already-shown
-    /// mark on a fresh frame. The stand-down decision is
-    /// `FollowSource.applies` — one switch shared with the ring,
-    /// so the two overlays cannot drift (#285/#594). A no-op for
-    /// unmarked windows.
+    /// mark on a fresh frame. The render decision is
+    /// `FollowSource.renderFrame` — one switch shared with the
+    /// ring, so the two overlays cannot drift (#285/#594), and
+    /// the #677 size pin corrects a tick riding a refused ask
+    /// for both at once. A no-op for unmarked windows.
     public func follow(
         _ id: WindowID,
         windowFrame: CGRect,
-        source: FollowSource
+        source: FollowSource,
+        pin: SizePin?
     ) {
         guard
-            source.applies(
+            let frame = source.renderFrame(
+                reported: windowFrame,
+                pin: pin,
                 wsTracked: isWindowServerTracked(id),
                 animating: isAnimating(id)
             )
         else { return }
-        overlays[id]?.update(frame: windowFrame)
+        overlays[id]?.update(frame: frame)
     }
 
     /// Unguarded reposition — the WindowServer bounds re-read

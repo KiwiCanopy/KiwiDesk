@@ -16,14 +16,22 @@ public enum FollowSource {
     /// An AX `.windowMoved` / `.windowResized` echo.
     case axEcho
 
-    /// The one follow decision both managers share: does a
-    /// reported frame apply, given what currently owns the
-    /// window's frame? The tick is the leading truth mid-flight
-    /// and always applies; an echo stands down while the
-    /// WindowServer stream tracks the window (#285 — a coalesced
-    /// late echo would rewind the overlay behind the live
-    /// bounds) and while our own animation drives it (#594 —
-    /// the echo trails the commanded frame on slow-AX apps).
+    /// The one follow decision both managers share: which frame
+    /// does a reported one render, given what currently owns
+    /// the window's frame? Nil = stand down. The tick is the
+    /// leading truth mid-flight and always renders — but where
+    /// a `pin` says the commanded size re-asks a refused ask
+    /// (#677), the truthful render is the commanded ORIGIN at
+    /// the pinned size: the app performs our position sets and
+    /// refuses the pinned axes, so riding the raw tick would
+    /// sweep the overlay out to a size the window never reaches
+    /// and snap it back after settle. An echo stands down while
+    /// the WindowServer stream tracks the window (#285 — a
+    /// coalesced late echo would rewind the overlay behind the
+    /// live bounds) and while our own animation drives it
+    /// (#594 — the echo trails the commanded frame on slow-AX
+    /// apps); when it renders, it renders as reported — the
+    /// echo IS reality, so the pin never touches it.
     /// Hoisted here so the ring and the mark cannot drift: a
     /// new decision INPUT changes this signature, and the
     /// compiler then drags both managers through the change
@@ -33,15 +41,25 @@ public enum FollowSource {
     /// (`usesWindowServerTracking` vs the broader
     /// `markUsesWindowServerTracking`); only the decision is
     /// shared.
-    public func applies(
+    public func renderFrame(
+        reported: CGRect,
+        pin: SizePin?,
         wsTracked: Bool,
         animating: Bool
-    ) -> Bool {
+    ) -> CGRect? {
         switch self {
         case .animationTick:
-            return true
+            guard let pin, !pin.isEmpty else { return reported }
+            return CGRect(
+                origin: reported.origin,
+                size: CGSize(
+                    width: pin.width ?? reported.width,
+                    height: pin.height ?? reported.height
+                )
+            )
         case .axEcho:
-            return !wsTracked && !animating
+            guard !wsTracked, !animating else { return nil }
+            return reported
         }
     }
 

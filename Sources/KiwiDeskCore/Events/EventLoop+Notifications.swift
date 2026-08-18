@@ -126,19 +126,25 @@ extension EventLoop {
             }
             onEvent(.windowFocused(id))
         case kAXWindowMovedNotification:
-            guard let id = AXHelper.windowID(of: element) else {
+            guard let id = resolveWindowID(element) else {
                 return
             }
-            let frame = AXHelper.frame(of: element)
-            if elements[pid]?[id] != nil { trackedFrames[id] = frame }
-            onEvent(.windowMoved(id, frame))
+            requestFrameRead(
+                .moved,
+                id: id,
+                element: element,
+                pid: pid
+            )
         case kAXWindowResizedNotification:
-            guard let id = AXHelper.windowID(of: element) else {
+            guard let id = resolveWindowID(element) else {
                 return
             }
-            let frame = AXHelper.frame(of: element)
-            if elements[pid]?[id] != nil { trackedFrames[id] = frame }
-            onEvent(.windowResized(id, frame))
+            requestFrameRead(
+                .resized,
+                id: id,
+                element: element,
+                pid: pid
+            )
         case kAXTitleChangedNotification:
             guard let id = AXHelper.windowID(of: element) else {
                 return
@@ -167,6 +173,61 @@ extension EventLoop {
             }
         default:
             break
+        }
+    }
+
+    /// The frame half of a move/resize notification, read off
+    /// the main actor (#618): the notification carries no
+    /// geometry, and reading it here blocked the run loop on
+    /// IPC into an app that is busiest exactly when it storms.
+    /// `FrameReadCoalescer` owns the queueing and newest-wins
+    /// coalescing; this closure is the delivery — the same
+    /// tracked-frame refresh and event the arms used to run
+    /// inline, one run-loop hop later.
+    private func requestFrameRead(
+        _ kind: FrameReadCoalescer.Kind,
+        id: WindowID,
+        element: AXUIElement,
+        pid: pid_t
+    ) {
+        frameReads.request(
+            kind,
+            window: id,
+            element: element,
+            pid: pid
+        ) { [weak self] frame in
+            guard let self else { return }
+            // Ownership re-check at delivery: `stop()` and a
+            // detach clear the observer, and a read completing
+            // after either must not fold a stale event into a
+            // torn-down core — a delivery the old inline read
+            // could not produce (review, 2026-08-18).
+            // Observer PRESENCE alone, not the full
+            // `ownsObservation` funnel: the policy re-read
+            // exists to catch an app whose policy changed with
+            // its observer still installed, and `handle`
+            // already ran it at receipt — a policy flip inside
+            // the read's flight still ends in a detach, which
+            // clears the observer and closes this guard. The
+            // funnel's extra term would buy that narrowing at
+            // an `NSRunningApplication` lookup per delivered
+            // frame, on the main actor, at storm rate.
+            guard self.observers[pid] != nil else { return }
+            if self.elements[pid]?[id] != nil {
+                self.trackedFrames[id] = frame
+            }
+            switch kind {
+            case .moved:
+                self.onEvent(.windowMoved(id, frame))
+            case .resized:
+                self.onEvent(.windowResized(id, frame))
+            case .settleProbe:
+                // Never requested through this wire — the
+                // #677 probe (`KiwiCore.runSizeBoundProbe`)
+                // passes its own completion and emits no
+                // event.
+                break
+            }
         }
     }
 }

@@ -124,6 +124,17 @@ public struct LayoutContext: Sendable {
     /// edge is open and the clamps behave as they did before
     /// the flags existed.
     public var screenNeighbors: ScreenNeighbors
+    /// App-enforced size bounds the engine has confirmed
+    /// (#677), keyed by window. A layout MAY consume one as
+    /// that window's own extent — scrolling re-packs the row
+    /// around the answered span, monocle centers the answered
+    /// size — so the refusal's residue is placed deliberately.
+    /// Only an ask matching the refused one consumes
+    /// (`EffectiveSizeBound.consumedWidth/Height`); defaults
+    /// empty, under which every layout asks exactly what it
+    /// always did — capacity probes and schematic previews
+    /// rightly omit it.
+    public var sizeBounds: [WindowID: EffectiveSizeBound]
 
     public var bsp: BspParams
     public var stack: StackParams
@@ -146,6 +157,7 @@ public struct LayoutContext: Sendable {
         trackWeights: [WindowID: Double] = [:],
         sticky: Set<WindowID> = [],
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
+        sizeBounds: [WindowID: EffectiveSizeBound] = [:],
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
@@ -164,6 +176,7 @@ public struct LayoutContext: Sendable {
         self.trackWeights = trackWeights
         self.sticky = sticky
         self.screenNeighbors = screenNeighbors
+        self.sizeBounds = sizeBounds
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling

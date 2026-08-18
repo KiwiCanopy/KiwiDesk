@@ -174,6 +174,39 @@ editing here:
   seam rather than enumerating screens itself.
   `ScreenNeighborsPlumbingTests` pins the threading and the
   default; `ScrollingBlockedEdgeTests` the clamp forms.
+- **An app-enforced size bound is learned, never assumed
+  (#677).** AX exposes no min/max-size attribute, so the engine
+  learns a bound from its own asks: `retile` records each issued
+  size and reads the settled, echo-fed state frame as the app's
+  answer — the same ask refused with the same answer twice
+  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
+  entries never generalize across asks (a grid-snapping app
+  answers each ask differently; the one deliberate exception is
+  the compliance contradiction sweep, argued on `complied`) and
+  hold a ladder PER ASK up to `SizeBoundLearner
+  .maxEntriesPerAxis` (alternating layouts starved a single
+  slot, device QA 2026-08-18; keep that cap sized past every
+  real producer, because an evicted candidate re-opens the
+  starvation) — after which the
+  un-forced skip treats the refused target as "already there"
+  (ends the endless re-issue) and the layouts place the residue
+  (scrolling re-packs, monocle and a lone scrolling window
+  center). Three obligations follow. A frame-producing context
+  build **threads `sizeBounds`** the way it threads
+  `screenNeighbors` — `layoutInput` is the site, probes and
+  previews rightly omit it (`SizeBoundPlumbingTests`). A path
+  that changes a window's size outside the engine's asks **owes
+  the ledger an invalidation** — genuine resize forgets, destroy
+  forgets (ids are reused, #152/#158), rekey migrates — or a
+  stale bound pins the window at a size the app no longer
+  insists on (`RetileBoundSkipTests`). And only the layout loop
+  **records asks** — a stash park or float restore is not a
+  layout ask, and learning from one keys a bound to a frame no
+  layout re-issues. Rendering may
+  additionally trust an UNCONFIRMED candidate (the overlay pin's
+  fallback — cosmetic, self-correcting); geometry never may.
+  The ladder is `SizeBoundLearnerTests`; the
+  overlay half is [borders.md](borders.md)'s pin row.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

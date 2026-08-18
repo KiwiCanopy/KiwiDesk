@@ -61,16 +61,19 @@ extension KiwiCore {
             // self-suppresses when the WindowServer stream already
             // tracks the ring (#285) and while our own animation
             // drives the window (#594), so a laggy AX echo can't
-            // rewind it — the guards live there, once.
+            // rewind it — the guards live there, once. No size
+            // pin: an echo IS reality (#677).
             borders.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             stickyMarks.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             // A genuine user move (not the echo of our own
             // frame-set) supersedes a pending stash restore:
@@ -84,17 +87,32 @@ extension KiwiCore {
             {
                 tiler.forgetStash(id)
             }
+            // #677: a refused SIZE emits no resized event —
+            // the size never changed — but the probe's
+            // position sets still echo as moves, and a move
+            // echo carries the full frame: observe it. No
+            // forget half here — a genuine move says nothing
+            // about size bounds.
+            if tiler.askEchoLikely(id) {
+                observeSizeAnswer(
+                    id,
+                    size: frame.size,
+                    channel: "move echo"
+                )
+            }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             stickyMarks.follow(
                 id,
                 windowFrame: frame,
-                source: .axEcho
+                source: .axEcho,
+                pin: nil
             )
             // Same policy as .windowMoved above: a genuine
             // user resize takes the window over.
@@ -102,6 +120,41 @@ extension KiwiCore {
                 !TilingEngine.looksStashed(frame)
             {
                 tiler.forgetStash(id)
+            }
+            // #677: an echo of our own set is the app's ANSWER
+            // to the last ask — observe it now rather than at
+            // the next retile, and place the residue (the
+            // re-pack, the centering) the moment a bound is
+            // confirmed. The confirmation edge fires once per
+            // learned entry, so this retile cannot loop on its
+            // own echoes.
+            if tiler.askEchoLikely(id) {
+                observeSizeAnswer(
+                    id,
+                    size: frame.size,
+                    channel: "resize echo"
+                )
+            } else if !tiler.ledgerExplainsResize(
+                id,
+                size: frame.size
+            ) {
+                // A genuine resize stales the learned bound:
+                // the user or the app itself changed the size —
+                // System Settings switching panes moves its
+                // fixed width — so the next retile must probe
+                // fresh rather than skip on a dead answer. A
+                // size the ledger already predicted is exempt:
+                // that is a LATE echo of our own ask (#618's
+                // read queue can outlast the applier's grace),
+                // and wiping on it erased the learning over and
+                // over (device QA, 2026-08-18).
+                if tiler.sizeBound(for: id) != nil {
+                    onLog(
+                        "size bound staled by a genuine "
+                            + "resize of window \(id.raw)"
+                    )
+                }
+                tiler.forgetSizeBound(id)
             }
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
@@ -123,6 +176,9 @@ extension KiwiCore {
             // (#152/#158). Same for a pending z-order-raise echo.
             outstandingSelfRaises.remove(id)
             zOrderRaiseEchoes[id] = nil
+            // WindowIDs are reused (#152/#158): a bound learned
+            // for the gone window must not skip the next one.
+            tiler.forgetSizeBound(id)
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
@@ -188,6 +244,10 @@ extension KiwiCore {
             // corner forever — #412's "floating vanishes"
             // failure mode, reintroduced on this one path.
             tiler.rekeyStash(oldID: old, newID: new)
+            // The learned size bound follows the id swap too
+            // (#677): same on-screen window, same app-side
+            // constraint, new id.
+            tiler.rekeySizeBound(oldID: old, newID: new)
             // A live display crossing's bookkeeping (#504) must
             // follow the id swap, or a rekey after a crossing
             // strands the (new) window on the destination space

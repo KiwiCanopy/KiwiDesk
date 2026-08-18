@@ -42,6 +42,28 @@ public final class TilingEngine {
     /// un-exempt: pinned for the duration of the gesture.
     public var dragExemptWindow: WindowID?
 
+    /// App-enforced size bounds, learned from the engine's own
+    /// asks (#677) — see `SizeBoundLearner` for the confirm
+    /// ladder and `TilingEngine+SizeBounds` for how `retile`
+    /// consults it. Engine-owned, transient, per-window tiling
+    /// state, like `stashedFrames` below.
+    var boundLearner = SizeBoundLearner()
+
+    /// Test seam for the observe gate above: whether one of our
+    /// own frame-sets for this window is recent enough that its
+    /// echo may still be in flight. Production reads the
+    /// applier's stamp (`didRecentlySetFrame`); a fixture whose
+    /// applier is severed injects the lag directly, because the
+    /// stamp is only written by a real AX apply.
+    var echoGraceOverride: (@MainActor (WindowID) -> Bool)?
+
+    /// Raised when a retile-channel observation confirms a
+    /// bound (#677): the loop cannot retile itself, so the
+    /// `KiwiCore.retile` wrapper consumes this
+    /// (`takePendingBoundPlacement`) and runs the placement
+    /// pass right after.
+    var pendingBoundPlacement = false
+
     /// Original frames of floating windows parked off-screen by
     /// `stashInactive`, keyed by window. Engine-owned, transient,
     /// per-window tiling state — the `dragExemptWindow` precedent —
@@ -226,11 +248,33 @@ public final class TilingEngine {
             if id == dragExemptWindow { continue }
             guard let current = state.windows[id]?.frame
             else { continue }
+            // #677: the settled, echo-quiet state frame is the
+            // app's answer to the engine's last ask — the gate
+            // and its argument live on `observeAppAnswer`. Its
+            // verdict doubles as the baseline trust for the ask
+            // recorded below.
+            let settledNow = observeAppAnswer(
+                for: id,
+                current: current
+            )
             // Tolerance: apps clamp what we set (character
             // grids, minimum sizes), so the reported frame is
             // often a hair off the target. Re-applying an
             // unchanged target just wobbles the window.
             if !force, Self.close(current, to: target) {
+                animation.cancel(window: id)
+                continue
+            }
+            // #677: a target the app has twice refused is
+            // "already there" too — re-issuing it restarts an
+            // animation the window can never perform, forever.
+            if !force,
+                sizeBoundExplains(
+                    id,
+                    current: current,
+                    target: target
+                )
+            {
                 animation.cancel(window: id)
                 continue
             }
@@ -242,6 +286,11 @@ public final class TilingEngine {
                 isNewWindow: id == newlyCreatedWindow,
                 sizing: promised
             )
+            boundLearner.recordAsk(
+                id,
+                size: target.size,
+                settledFrom: settledNow ? current.size : nil
+            )
         }
         stashInactive(
             state: state,
@@ -252,51 +301,13 @@ public final class TilingEngine {
         restoreStashed(state: state, frames: frames)
     }
 
-    /// Applies one frame through the shared animate-or-instant
-    /// policy: animated when asked (and a screen exists),
-    /// otherwise an instant, echo-tracked set with any
-    /// in-flight animation cancelled. The single authority for
-    /// this policy — `retile` and the floating keyboard resize
-    /// both route here; never copy the branch (a copy already
-    /// drifted once, dropping the cancel). The animation screen
-    /// is the display the target frame lands on (multi-monitor:
-    /// one `DisplayLink` per monitor), falling back to main.
-    ///
-    /// `sizing` says why this frame is being applied (#593);
-    /// it reaches `SizeStep` through the animation and decides
-    /// whether a shrinking axis may slide instead of snapping.
-    /// `.mayInstantSize` is the default because mismarking is asymmetric —
-    /// see `BatchSizing`.
-    public func applyFrame(
-        _ id: WindowID,
-        from current: CGRect,
-        to target: CGRect,
-        animated: Bool,
-        isNewWindow: Bool = false,
-        sizing: BatchSizing = .mayInstantSize
-    ) {
-        if animated,
-            let screen = Self.screen(containing: target)
-                ?? NSScreen.main
-                ?? NSScreen.screens.first
-        {
-            animation.animate(
-                window: id,
-                on: screen,
-                from: current,
-                to: target,
-                isNewWindow: isNewWindow,
-                sizing: sizing
-            )
-        } else {
-            animation.cancel(window: id)
-            setFrame(id, target)
-        }
-    }
-
     /// Frames within this distance per edge count as "already
     /// there". Covers rounding and small app-side clamping.
-    static let retileTolerance: CGFloat = 2
+    /// Derived from the bound machinery's quantum (#677): both
+    /// answer "does the frame the app holds count as the frame
+    /// we named", so one constant owns the number.
+    static let retileTolerance: CGFloat =
+        EffectiveSizeBound.matchTolerance
 
     static func close(
         _ a: CGRect,

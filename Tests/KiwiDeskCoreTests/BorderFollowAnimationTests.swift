@@ -39,7 +39,8 @@ struct BorderFollowAnimationTests {
         border.follow(
             WindowID(1),
             windowFrame: tick,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) == tick)
         // And with both suppressors down (a teardown snap, the
@@ -51,7 +52,8 @@ struct BorderFollowAnimationTests {
         border.follow(
             WindowID(1),
             windowFrame: snap,
-            source: .animationTick
+            source: .animationTick,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) == snap)
     }
@@ -69,7 +71,8 @@ struct BorderFollowAnimationTests {
         border.follow(
             WindowID(1),
             windowFrame: echo,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) != echo)
         // Settled: the echo path resumes.
@@ -77,7 +80,8 @@ struct BorderFollowAnimationTests {
         border.follow(
             WindowID(1),
             windowFrame: echo,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) == echo)
     }
@@ -93,7 +97,8 @@ struct BorderFollowAnimationTests {
         border.follow(
             WindowID(1),
             windowFrame: echo,
-            source: .axEcho
+            source: .axEcho,
+            pin: nil
         )
         #expect(border.lastFrame(WindowID(1)) != echo)
     }
