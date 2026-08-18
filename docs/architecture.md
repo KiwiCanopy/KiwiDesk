@@ -58,7 +58,12 @@ flowchart TD
 1. **`Events` / `AX`** — an `AXObserver` callback (window created,
    destroyed, moved, focused) or an event listener fires. AX callbacks
    arrive on the run loop of the thread that registered them; observer
-   registration stays on the main thread (§5).
+   registration stays on the main thread (§5). A move/resize
+   notification carries no geometry, so its frame is read back on a
+   per-app background queue with newest-wins coalescing and delivered
+   to the main actor afterwards (`FrameReadCoalescer`, #618) — the
+   read is blocking IPC into an app that is busiest exactly when it
+   storms, and reading inline froze the focus ring.
 2. **reconcile** — the raw OS delta is reconciled against known state.
    The subtle case: macOS **native tabs** surface as one window
    vanishing while another appears at the same frame;
@@ -89,7 +94,10 @@ flowchart TD
 
 Event-driven retiles run **un-forced**, so the engine's ±2 pt "already
 there" tolerance can absorb AX-echo lag without wobbling windows.
-(Contrast with pipeline 2.)
+(Contrast with pipeline 2.) A size an app refuses twice is learned as
+that window's **effective bound** (#677): the refused target stops
+being re-issued, and Scrolling/Monocle consume the learned answer to
+place the residue (re-pack / center).
 
 **Tab reconciliation** (the subtle case in step 2). A native-tab
 switch is temporal — one window disappears as another appears at the

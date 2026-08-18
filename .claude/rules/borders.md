@@ -25,8 +25,9 @@ engineering side: which input owns an overlay's frame, and when.
 
 ## One type owns "which frame does an overlay render"
 
-`FollowSource` holds both decisions — `applies` for a *reported*
-frame, `syncFrame` for the steady-state rebuild — and the ring and
+`FollowSource` holds both decisions — `renderFrame` for a
+*reported* frame (which also corrects a #677 size pin, below),
+`syncFrame` for the steady-state rebuild — and the ring and
 the mark call the same code for each. Do not re-implement either
 beside a call site, and do not bolt a guard on next to one: that
 is the drift the type exists to prevent, and it is invisible in
@@ -49,7 +50,7 @@ frame is the leading truth — every other channel trails it, by
 
 | Writer | Mid-animation |
 |---|---|
-| `follow(.animationTick)` | always applies — it *is* the truth |
+| `follow(.animationTick)` | always applies — it *is* the truth. One correction (#677): when the animation's target re-asks a size the app has twice refused, the tick renders the commanded origin at the learned answer (`FollowSource.SizePin`, computed by `TilingEngine.animationSizePin`), because the window performs our position sets and refuses the size — `FollowSizePinTests` |
 | `follow(.axEcho)` | stands down (#594), and also while WindowServer-tracked (#285) |
 | `reconcile` (WS bounds re-read) | stands down (#594) |
 | `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor, re-order and retire still run |
