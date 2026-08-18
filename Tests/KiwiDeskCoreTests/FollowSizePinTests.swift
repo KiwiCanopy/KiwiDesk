@@ -209,4 +209,41 @@ struct FollowSizePinTests {
         #expect(core.tiler.animationSizePin(for: w) == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
+
+    @Test("A single refusal already pins the second probe")
+    func candidatePinsSecondProbe() throws {
+        // Rendering may trust an unconfirmed candidate (#677
+        // device QA): the second probe's animation re-asks the
+        // once-refused size, and without this the ring rode out
+        // on it too — the eye saw two dances where one is the
+        // floor. Geometry stays confirmed-only; only the pin
+        // takes the fallback.
+        guard let screen = NSScreen.main else { return }
+        let core = makeTestCore()
+        let w = WindowID(1)
+        let asked = CGSize(width: 900, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        core.tiler.boundLearner.recordAsk(w, size: asked)
+        core.tiler.boundLearner.observe(
+            w,
+            currentSize: answered
+        )
+        #expect(core.tiler.sizeBound(for: w) == nil)
+        core.tiler.animation.animate(
+            window: w,
+            on: screen,
+            from: CGRect(
+                x: 0,
+                y: 0,
+                width: 715,
+                height: 800
+            ),
+            to: CGRect(x: 50, y: 0, width: 900, height: 800)
+        )
+        #expect(
+            core.tiler.animationSizePin(for: w)
+                == SizePin(width: 715)
+        )
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
 }

@@ -30,10 +30,10 @@ struct SizeBoundLearnerTests {
         #expect(learner.bound(for: w) == nil)
         refused(&learner, asked: asked, answered: answered)
         let bound = learner.bound(for: w)
-        #expect(bound?.width?.asked == 900)
-        #expect(bound?.width?.answered == 715)
+        #expect(bound?.width.first?.asked == 900)
+        #expect(bound?.width.first?.answered == 715)
         // The complied axis learns nothing.
-        #expect(bound?.height == nil)
+        #expect(bound?.height.isEmpty != false)
     }
 
     @Test("A different answer restarts the ladder")
@@ -59,7 +59,7 @@ struct SizeBoundLearnerTests {
             asked: asked,
             answered: CGSize(width: 780, height: 800)
         )
-        #expect(learner.bound(for: w)?.width?.answered == 780)
+        #expect(learner.bound(for: w)?.width.first?.answered == 780)
     }
 
     @Test("Axes learn independently")
@@ -70,8 +70,8 @@ struct SizeBoundLearnerTests {
         refused(&learner, asked: asked, answered: answered)
         refused(&learner, asked: asked, answered: answered)
         let bound = learner.bound(for: w)
-        #expect(bound?.width?.answered == 715)
-        #expect(bound?.height?.answered == 600)
+        #expect(bound?.width.first?.answered == 715)
+        #expect(bound?.height.first?.answered == 600)
     }
 
     @Test("Compliance clears the candidate")
@@ -121,7 +121,84 @@ struct SizeBoundLearnerTests {
         // the app performs. That contradicts nothing — the
         // ceiling still stands for the 900 ask.
         refused(&learner, asked: answered, answered: answered)
-        #expect(learner.bound(for: w)?.width?.answered == 715)
+        #expect(learner.bound(for: w)?.width.first?.answered == 715)
+    }
+
+    @Test("Interleaved asks ladder independently")
+    func interleavedAsksBothConfirm() {
+        // The monocle dance that never stopped (device QA,
+        // 2026-08-18): two layouts ask the same window
+        // different sizes, and a single candidate slot per
+        // axis let each ask overwrite the other's ladder — the
+        // alternating pattern below never confirmed either.
+        var learner = SizeBoundLearner()
+        let scroll = CGSize(width: 900, height: 800)
+        let monocle = CGSize(width: 1900, height: 1060)
+        let scrollAnswer = CGSize(width: 715, height: 800)
+        let monocleAnswer = CGSize(width: 715, height: 1060)
+        refused(&learner, asked: scroll, answered: scrollAnswer)
+        refused(
+            &learner,
+            asked: monocle,
+            answered: monocleAnswer
+        )
+        refused(&learner, asked: scroll, answered: scrollAnswer)
+        refused(
+            &learner,
+            asked: monocle,
+            answered: monocleAnswer
+        )
+        let bound = learner.bound(for: w)
+        #expect(bound?.consumedWidth(asking: 900) == 715)
+        #expect(bound?.consumedWidth(asking: 1900) == 715)
+        #expect(bound?.consumedHeight(asking: 1060) == nil)
+    }
+
+    @Test("Entries are capped, oldest evicted")
+    func entriesAreCapped() {
+        var learner = SizeBoundLearner()
+        let asks: [CGFloat] = [900, 1000, 1100, 1200, 1300]
+        for ask in asks {
+            let asked = CGSize(width: ask, height: 800)
+            let answered = CGSize(width: 715, height: 800)
+            refused(&learner, asked: asked, answered: answered)
+            refused(&learner, asked: asked, answered: answered)
+        }
+        let bound = learner.bound(for: w)
+        // The oldest ask fell off the cap; the newest four hold.
+        #expect(bound?.consumedWidth(asking: 900) == nil)
+        #expect(bound?.consumedWidth(asking: 1000) == 715)
+        #expect(bound?.consumedWidth(asking: 1300) == 715)
+        #expect(
+            bound?.width.count
+                == SizeBoundLearner.maxEntriesPerAxis
+        )
+    }
+
+    @Test("The candidate view carries a single refusal")
+    func candidateViewCarriesOneRefusal() {
+        // The overlay pin's provisional source (#677 device
+        // QA): one refusal is enough for RENDERING — the ring
+        // stops riding out on the second probe — while
+        // `bound(for:)`, the geometry view, stays empty until
+        // the confirm.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 900, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        refused(&learner, asked: asked, answered: answered)
+        #expect(learner.bound(for: w) == nil)
+        #expect(
+            learner.candidateBound(for: w)?
+                .consumedWidth(asking: 900) == 715
+        )
+        // Confirmation moves the entry across: the candidate
+        // view drains, the geometry view fills.
+        refused(&learner, asked: asked, answered: answered)
+        #expect(learner.candidateBound(for: w) == nil)
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: 900) == 715
+        )
     }
 
     @Test("A zero-size frame is no answer")
@@ -163,6 +240,6 @@ struct SizeBoundLearnerTests {
         refused(&learner, asked: asked, answered: answered)
         learner.rekey(old: w, new: new)
         #expect(learner.bound(for: w) == nil)
-        #expect(learner.bound(for: new)?.width?.answered == 715)
+        #expect(learner.bound(for: new)?.width.first?.answered == 715)
     }
 }

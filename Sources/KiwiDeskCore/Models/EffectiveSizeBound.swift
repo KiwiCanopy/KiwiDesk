@@ -16,9 +16,20 @@ import CoreGraphics
 /// swap for the answer (`consumedWidth`/`consumedHeight`), and
 /// when a window sitting off its target is explained rather than
 /// stranded (`explains`).
+///
+/// Each axis carries a small SET of refusals keyed by the asked
+/// span, not one: different layouts ask the same window
+/// different sizes (a scrolling slot vs the monocle area), and a
+/// single slot per axis let alternating layouts overwrite each
+/// other's entry so the second layout never converged — the
+/// monocle dance that never stopped (device QA, 2026-08-18). No
+/// entry ever generalizes to a DIFFERENT ask: a grid-snapping
+/// app (a terminal) answers each ask a few points off, and
+/// inferring "ceiling" from one ask would pin every narrower ask
+/// at a size the app would have accepted.
 public struct EffectiveSizeBound: Sendable, Equatable {
-    /// One refused axis: the engine asked `asked`, the app
-    /// answered `answered`, twice in a row.
+    /// One refused ask on one axis: the engine asked `asked`,
+    /// the app answered `answered`, twice in a row.
     public struct Axis: Sendable, Equatable {
         public var asked: CGFloat
         public var answered: CGFloat
@@ -29,17 +40,26 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         }
     }
 
-    public var width: Axis?
-    public var height: Axis?
+    public var width: [Axis]
+    public var height: [Axis]
 
-    public init(width: Axis? = nil, height: Axis? = nil) {
+    public init(width: [Axis] = [], height: [Axis] = []) {
         self.width = width
         self.height = height
     }
 
+    /// Single-entry convenience — most call sites (and every
+    /// test fixture) carry one refusal per axis.
+    public init(width: Axis? = nil, height: Axis? = nil) {
+        self.width = width.map { [$0] } ?? []
+        self.height = height.map { [$0] } ?? []
+    }
+
     /// Nothing learned on either axis — the learner drops the
     /// entry rather than keeping an empty one.
-    public var isEmpty: Bool { width == nil && height == nil }
+    public var isEmpty: Bool {
+        width.isEmpty && height.isEmpty
+    }
 
     /// The quantum for "counts as the same span": AX rounding
     /// and app-side snapping (character grids) wobble an
@@ -60,16 +80,13 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// not silently swapped — a user who widens a slot past a
     /// stale bound would otherwise never be heard, #677).
     public func consumedWidth(asking span: CGFloat) -> CGFloat? {
-        guard let width, Self.matches(width.asked, span)
-        else { return nil }
-        return width.answered
+        width.first { Self.matches($0.asked, span) }?.answered
     }
 
     /// `consumedWidth`'s vertical twin.
     public func consumedHeight(asking span: CGFloat) -> CGFloat? {
-        guard let height, Self.matches(height.asked, span)
-        else { return nil }
-        return height.answered
+        height.first { Self.matches($0.asked, span) }?
+            .answered
     }
 
     /// The centered residue frame for a slot this bound
@@ -109,26 +126,27 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         targetSize: CGSize
     ) -> Bool {
         axisExplained(
-            bound: width,
+            entries: width,
             current: currentSize.width,
             target: targetSize.width
         )
             && axisExplained(
-                bound: height,
+                entries: height,
                 current: currentSize.height,
                 target: targetSize.height
             )
     }
 
     private func axisExplained(
-        bound: Axis?,
+        entries: [Axis],
         current: CGFloat,
         target: CGFloat
     ) -> Bool {
         if Self.matches(current, target) { return true }
-        guard let bound else { return false }
-        return Self.matches(target, bound.asked)
-            && Self.matches(current, bound.answered)
+        return entries.contains {
+            Self.matches(target, $0.asked)
+                && Self.matches(current, $0.answered)
+        }
     }
 }
 

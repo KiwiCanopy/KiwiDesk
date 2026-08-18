@@ -38,20 +38,29 @@ import CoreGraphics
 /// Pure bookkeeping — no AX, no actors — so the confirm ladder
 /// is unit-testable (`SizeBoundLearnerTests`).
 struct SizeBoundLearner {
-    private struct AxisCandidate: Equatable {
-        var asked: CGFloat
-        var answered: CGFloat
+    /// Per-window, per-axis entry lists — the same shape twice,
+    /// once for unconfirmed candidates and once for believed
+    /// bounds. Entries are keyed by their asked span (matched
+    /// within the quantum) and capped per axis, oldest evicted:
+    /// different layouts ask different sizes, and a single slot
+    /// per axis let them overwrite each other's ladder so the
+    /// less-visited layout never converged (device QA,
+    /// 2026-08-18).
+    private struct Ledger {
+        var width: [EffectiveSizeBound.Axis] = []
+        var height: [EffectiveSizeBound.Axis] = []
+        var isEmpty: Bool { width.isEmpty && height.isEmpty }
     }
 
-    private struct Candidates {
-        var width: AxisCandidate?
-        var height: AxisCandidate?
-        var isEmpty: Bool { width == nil && height == nil }
-    }
+    /// Distinct asks remembered per axis. Sized to the real
+    /// producers — one ask per layout mode a window meets, and
+    /// a window rarely tiles under more than a few — so
+    /// eviction is a leak bound, not a working limit.
+    static let maxEntriesPerAxis = 4
 
     private var lastAsks: [WindowID: CGSize] = [:]
-    private var candidates: [WindowID: Candidates] = [:]
-    private var bounds: [WindowID: EffectiveSizeBound] = [:]
+    private var candidates: [WindowID: Ledger] = [:]
+    private var bounds: [WindowID: Ledger] = [:]
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -78,21 +87,43 @@ struct SizeBoundLearner {
             id,
             asked: asked.width,
             current: currentSize.width,
-            candidate: \.width,
-            bound: \.width
+            axis: \.width
         )
         observeAxis(
             id,
             asked: asked.height,
             current: currentSize.height,
-            candidate: \.height,
-            bound: \.height
+            axis: \.height
         )
     }
 
     /// The confirmed bound for a window, nil while unproven.
+    /// The only view GEOMETRY may consume — the layouts'
+    /// re-pack and centering, and the retile skip.
     func bound(for id: WindowID) -> EffectiveSizeBound? {
-        bounds[id]
+        bounds[id].map {
+            EffectiveSizeBound(
+                width: $0.width,
+                height: $0.height
+            )
+        }
+    }
+
+    /// The unconfirmed candidates, in the same shape — for the
+    /// overlay pin ONLY (#677 device QA): rendering may trust a
+    /// single refusal because a wrong render self-corrects at
+    /// settle, so the ring stops riding out on the second probe
+    /// instead of the third. Geometry must not consume this — a
+    /// wrong candidate would misplace real windows.
+    func candidateBound(
+        for id: WindowID
+    ) -> EffectiveSizeBound? {
+        candidates[id].map {
+            EffectiveSizeBound(
+                width: $0.width,
+                height: $0.height
+            )
+        }
     }
 
     /// Drops everything learned about a window: it resized for
@@ -125,73 +156,134 @@ struct SizeBoundLearner {
         _ id: WindowID,
         asked: CGFloat,
         current: CGFloat,
-        candidate: WritableKeyPath<Candidates, AxisCandidate?>,
-        bound: WritableKeyPath<EffectiveSizeBound, EffectiveSizeBound.Axis?>
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
     ) {
         if EffectiveSizeBound.matches(current, asked) {
-            complied(
-                id,
-                asked: asked,
-                candidate: candidate,
-                bound: bound
-            )
+            complied(id, asked: asked, axis: axis)
             return
         }
-        let observed = AxisCandidate(
-            asked: asked,
-            answered: current
-        )
-        if let prior = candidates[id]?[keyPath: candidate],
-            EffectiveSizeBound.matches(prior.asked, asked),
-            EffectiveSizeBound.matches(prior.answered, current)
-        {
-            var entry = bounds[id] ?? EffectiveSizeBound()
-            entry[keyPath: bound] = EffectiveSizeBound.Axis(
-                asked: asked,
-                answered: current
-            )
-            bounds[id] = entry
-            candidates[id]?[keyPath: candidate] = nil
-            cleanUpCandidates(id)
+        var candidateEntries =
+            candidates[id]?[keyPath: axis] ?? []
+        if let index = candidateEntries.firstIndex(where: {
+            EffectiveSizeBound.matches($0.asked, asked)
+        }) {
+            let prior = candidateEntries[index]
+            if EffectiveSizeBound.matches(
+                prior.answered,
+                current
+            ) {
+                // Twice in a row: the entry is believed.
+                promote(
+                    id,
+                    asked: asked,
+                    answered: current,
+                    axis: axis
+                )
+                candidateEntries.remove(at: index)
+            } else {
+                // Same ask, different answer: restart this
+                // ask's ladder on the newest observation.
+                candidateEntries[index] =
+                    EffectiveSizeBound.Axis(
+                        asked: asked,
+                        answered: current
+                    )
+            }
         } else {
-            var entry = candidates[id] ?? Candidates()
-            entry[keyPath: candidate] = observed
-            candidates[id] = entry
+            candidateEntries.append(
+                EffectiveSizeBound.Axis(
+                    asked: asked,
+                    answered: current
+                )
+            )
+            if candidateEntries.count > Self.maxEntriesPerAxis {
+                candidateEntries.removeFirst()
+            }
         }
+        writeCandidates(
+            id,
+            entries: candidateEntries,
+            axis: axis
+        )
     }
 
-    /// The app performed this axis's ask. Clear the candidate,
-    /// and clear a confirmed bound the compliance contradicts:
-    /// a ceiling (`answered < asked`) is falsified by a
-    /// complied ask above its answer, a floor by one below —
-    /// the constraint lifted, and keeping the bound would let a
-    /// stale skip pin the window at a size the app no longer
-    /// insists on.
+    private mutating func promote(
+        _ id: WindowID,
+        asked: CGFloat,
+        answered: CGFloat,
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+    ) {
+        var entries = bounds[id]?[keyPath: axis] ?? []
+        let entry = EffectiveSizeBound.Axis(
+            asked: asked,
+            answered: answered
+        )
+        if let index = entries.firstIndex(where: {
+            EffectiveSizeBound.matches($0.asked, asked)
+        }) {
+            entries[index] = entry
+        } else {
+            entries.append(entry)
+            if entries.count > Self.maxEntriesPerAxis {
+                entries.removeFirst()
+            }
+        }
+        writeBounds(id, entries: entries, axis: axis)
+    }
+
+    /// The app performed this axis's ask. Clear the ask's
+    /// candidate, and clear every believed entry the compliance
+    /// contradicts: a ceiling (`answered < asked`) is falsified
+    /// by a complied ask above its answer, a floor by one
+    /// below — the constraint lifted, and keeping the entry
+    /// would let a stale skip pin the window at a size the app
+    /// no longer insists on.
     private mutating func complied(
         _ id: WindowID,
         asked: CGFloat,
-        candidate: WritableKeyPath<Candidates, AxisCandidate?>,
-        bound: WritableKeyPath<EffectiveSizeBound, EffectiveSizeBound.Axis?>
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
     ) {
-        candidates[id]?[keyPath: candidate] = nil
-        cleanUpCandidates(id)
-        guard var entry = bounds[id],
-            let axis = entry[keyPath: bound]
+        if var candidateEntries = candidates[id]?[
+            keyPath: axis
+        ] {
+            candidateEntries.removeAll {
+                EffectiveSizeBound.matches($0.asked, asked)
+            }
+            writeCandidates(
+                id,
+                entries: candidateEntries,
+                axis: axis
+            )
+        }
+        guard var entries = bounds[id]?[keyPath: axis]
         else { return }
         let tolerance = EffectiveSizeBound.matchTolerance
-        let ceiling = axis.answered < axis.asked
-        let contradicts =
-            ceiling
-            ? asked > axis.answered + tolerance
-            : asked < axis.answered - tolerance
-        guard contradicts else { return }
-        entry[keyPath: bound] = nil
-        bounds[id] = entry.isEmpty ? nil : entry
+        entries.removeAll { entry in
+            let ceiling = entry.answered < entry.asked
+            return ceiling
+                ? asked > entry.answered + tolerance
+                : asked < entry.answered - tolerance
+        }
+        writeBounds(id, entries: entries, axis: axis)
     }
 
-    private mutating func cleanUpCandidates(_ id: WindowID) {
-        if candidates[id]?.isEmpty == true {
-            candidates[id] = nil
-        }
+    private mutating func writeCandidates(
+        _ id: WindowID,
+        entries: [EffectiveSizeBound.Axis],
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+    ) {
+        var ledger = candidates[id] ?? Ledger()
+        ledger[keyPath: axis] = entries
+        candidates[id] = ledger.isEmpty ? nil : ledger
+    }
+
+    private mutating func writeBounds(
+        _ id: WindowID,
+        entries: [EffectiveSizeBound.Axis],
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+    ) {
+        var ledger = bounds[id] ?? Ledger()
+        ledger[keyPath: axis] = entries
+        bounds[id] = ledger.isEmpty ? nil : ledger
     }
 }

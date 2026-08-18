@@ -86,7 +86,7 @@ struct RetileBoundSkipTests {
         core.retile()
         #expect(applied.frames[w] == nil)
         #expect(
-            core.tiler.sizeBound(for: w)?.width?.answered
+            core.tiler.sizeBound(for: w)?.width.first?.answered
                 == 715
         )
     }

@@ -179,7 +179,11 @@ editing here:
   learns a bound from its own asks: `retile` records each issued
   size and reads the settled, echo-fed state frame as the app's
   answer — the same ask refused with the same answer twice
-  confirms a per-axis `EffectiveSizeBound`, after which the
+  confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
+  entries never generalize across asks (a grid-snapping app
+  answers each ask differently) and never overwrite another
+  ask's ladder (alternating layouts starved a single slot,
+  device QA 2026-08-18) — after which the
   un-forced skip treats the refused target as "already there"
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
@@ -194,7 +198,10 @@ editing here:
   insists on (`RetileBoundSkipTests`). And only the layout loop
   **records asks** — a stash park or float restore is not a
   layout ask, and learning from one keys a bound to a frame no
-  layout re-issues. The ladder is `SizeBoundLearnerTests`; the
+  layout re-issues. Rendering may
+  additionally trust an UNCONFIRMED candidate (the overlay pin's
+  fallback — cosmetic, self-correcting); geometry never may.
+  The ladder is `SizeBoundLearnerTests`; the
   overlay half is [borders.md](borders.md)'s pin row.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs

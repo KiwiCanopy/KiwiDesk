@@ -50,7 +50,7 @@ frame is the leading truth — every other channel trails it, by
 
 | Writer | Mid-animation |
 |---|---|
-| `follow(.animationTick)` | always applies — it *is* the truth. One correction (#677): when the animation's target re-asks a size the app has twice refused, the tick renders the commanded origin at the learned answer (`SizePin`, computed by `TilingEngine.animationSizePin`), because the window performs our position sets and refuses the size — `FollowSizePinTests` |
+| `follow(.animationTick)` | always applies — it *is* the truth. One correction (#677): when the animation's target re-asks a size the app has twice refused, the tick renders the commanded origin at the learned answer (`SizePin`, computed by `TilingEngine.animationSizePin` — from the confirmed bound, or provisionally from the first refusal's candidate, because a render self-corrects at settle while geometry must stay confirmed-only), because the window performs our position sets and refuses the size — `FollowSizePinTests` |
 | `follow(.axEcho)` | stands down (#594), and also while WindowServer-tracked (#285) |
 | `reconcile` (WS bounds re-read) | stands down (#594) |
 | `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor, re-order and retire still run |

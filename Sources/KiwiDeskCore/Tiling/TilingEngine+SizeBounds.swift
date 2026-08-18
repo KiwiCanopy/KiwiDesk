@@ -83,17 +83,30 @@ extension TilingEngine {
     /// consumes it. The follow tee threads this into
     /// `FollowSource.renderFrame`, which is where the decision
     /// lives.
+    ///
+    /// Falls back to the UNCONFIRMED candidate where no
+    /// confirmed entry answers (#677 device QA): a render is
+    /// cosmetic and self-corrects at settle, so the ring may
+    /// trust a single refusal — the visible ride-out then
+    /// happens once, on the first encounter, instead of on
+    /// every probe. Geometry never takes this fallback
+    /// (`sizeBounds(for:)` above is confirmed-only).
     func animationSizePin(
         for id: WindowID
     ) -> SizePin? {
-        guard let bound = boundLearner.bound(for: id),
-            let target = animation.targetFrame(window: id)
+        guard let target = animation.targetFrame(window: id)
         else { return nil }
+        let confirmed = boundLearner.bound(for: id)
+        let candidate = boundLearner.candidateBound(for: id)
         let pin = SizePin(
-            width: bound.consumedWidth(asking: target.width),
-            height: bound.consumedHeight(
-                asking: target.height
-            )
+            width: confirmed?
+                .consumedWidth(asking: target.width)
+                ?? candidate?
+                .consumedWidth(asking: target.width),
+            height: confirmed?
+                .consumedHeight(asking: target.height)
+                ?? candidate?
+                .consumedHeight(asking: target.height)
         )
         return pin.isEmpty ? nil : pin
     }

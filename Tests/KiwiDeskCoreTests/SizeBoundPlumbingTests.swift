@@ -84,7 +84,7 @@ struct SizeBoundPlumbingTests {
             screen: screen
         )
         #expect(
-            input.context.sizeBounds[w]?.width?.answered
+            input.context.sizeBounds[w]?.width.first?.answered
                 == 715
         )
     }
