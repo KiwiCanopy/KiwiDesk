@@ -198,16 +198,8 @@ struct PresetCard: View {
     }
 
     private var gates: ProfilesGates {
-        // `separateDisplaySpaces` reaches no arm this row can
-        // hit, and it is passed anyway: the resolver takes no
-        // default for it, so a call site that would rather not
-        // think about it is made to. One snapshot on the model
-        // means this costs nothing and cannot disagree with
-        // what the bindings card resolves from.
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
-            separateDisplaySpaces:
-                model.displaysHaveSeparateSpaces,
             connectedScreens: connectedScreens,
             presetScreens: layout.screenCount
         )

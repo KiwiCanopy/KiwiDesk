@@ -31,7 +31,8 @@ extension KiwiCore {
 
         // A native-Space binding wins over matching (#7); a
         // binding that fails to load falls through to matching.
-        if let number = NativeSpaces.activeSpaceNumber(),
+        // The Desktop that counts is the main display's (#888).
+        if let number = NativeSpaces.activeDesktopNumber(),
             let boundName = nativeSpaceBindings[number]
         {
             do {

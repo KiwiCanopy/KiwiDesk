@@ -268,11 +268,11 @@ public final class KiwiCore {
     /// must not space-follow (#482/#483) — see the type doc.
     let moveLatch = MoveIntentLatch()
 
-    /// Native desktop we are currently on (Mission Control
-    /// number), and the Space each desktop showed
-    /// last, restored when the user returns to it.
+    /// The MAIN display's current native Desktop (Mission
+    /// Control number, #888) — the binding authority — and the
+    /// per-display Space memory restored on returning to one.
     var lastNativeSpace: Int?
-    var virtualSpaceMemory: [Int: SpaceID] = [:]
+    let desktopMemory = DesktopMemory()
     /// When the last native desktop switch happened; focus
     /// events during the transition must not change spaces.
     var lastNativeSwitch: Date = .distantPast

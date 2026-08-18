@@ -133,10 +133,11 @@ extension KiwiCore {
             "monitor_count": .number(
                 Double(state.workspaces.allDisplays.count)
             ),
-            // Mission Control desktop number, for setting up
+            // The active Desktop — the MAIN display's current
+            // one (#888) — for setting up
             // bind_profile_to_native_space. Null without
             // SkyLight.
-            "native_space": NativeSpaces.activeSpaceNumber()
+            "native_space": NativeSpaces.activeDesktopNumber()
                 .map { .number(Double($0)) } ?? .null,
             // Exec children still running; useful for
             // debugging config hooks (issue #37).

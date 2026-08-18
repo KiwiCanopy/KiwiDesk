@@ -133,39 +133,63 @@ struct ProfilesFamilyRowsTests {
         #expect(ordered.map(\.name) == ["Solo", "Desk"])
     }
 
-    /// Every present desktop, plus any number already bound —
-    /// a binding to a now-absent Space stays visible and
-    /// clearable rather than silently lost.
-    @Test("desktops union the present and the bound")
+    /// The MAIN screen's Desktops, plus any number already bound
+    /// (#888) — a binding on another screen's Desktop, or on a
+    /// now-absent one, stays visible and clearable rather than
+    /// silently lost.
+    @Test("desktops union the main screen's and the bound")
     func desktopsUnionBindings() {
         #expect(
             ProfilesFamilyRows.desktops(
-                present: 2,
+                onMain: [1, 2],
                 bound: [5]
             ) == [1, 2, 5]
         )
-        // A bound number that is also present appears once.
+        // A bound number that is also on main appears once.
         #expect(
             ProfilesFamilyRows.desktops(
-                present: 3,
+                onMain: [1, 2, 3],
                 bound: [2]
             ) == [1, 2, 3]
         )
     }
 
+    /// The main screen's Desktops carry GLOBAL Mission Control
+    /// numbers and need not start at 1: with the secondary screen
+    /// listed first, main's are 3 and 4. The retired `present:
+    /// Int` parameter could only ever mean `1...n`, so it offered
+    /// the wrong Desktops on exactly this arrangement (owner QA,
+    /// 2026-08-18).
+    @Test("a non-contiguous main screen keeps its own numbers")
+    func desktopsAreNotRenumbered() {
+        #expect(
+            ProfilesFamilyRows.desktops(
+                onMain: [3, 4],
+                bound: []
+            ) == [3, 4]
+        )
+        #expect(
+            ProfilesFamilyRows.desktops(
+                onMain: [3, 4],
+                bound: [1]
+            ) == [1, 3, 4]
+        )
+    }
+
     /// No detected desktops is not "1 desktop": with SkyLight
-    /// unavailable the count is 0 and only bound numbers show.
+    /// unavailable there are none to offer and only bound
+    /// numbers show.
     @Test("no detected desktops lists only bound numbers")
     func desktopsWithNonePresent() {
         #expect(
             ProfilesFamilyRows.desktops(
-                present: 0,
+                onMain: [],
                 bound: [4]
             ) == [4]
         )
         #expect(
             ProfilesFamilyRows.desktops(
-                present: 0,
+                onMain: [],
                 bound: [Int]()
             ).isEmpty
         )

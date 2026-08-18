@@ -220,7 +220,7 @@ extension KiwiCore {
     /// (#18).
     public func isProfileInEffect(_ name: String) -> Bool {
         if profiles.currentName == name { return true }
-        guard let active = NativeSpaces.activeSpaceNumber()
+        guard let active = NativeSpaces.activeDesktopNumber()
         else { return false }
         return nativeSpaceBindings[active] == name
     }

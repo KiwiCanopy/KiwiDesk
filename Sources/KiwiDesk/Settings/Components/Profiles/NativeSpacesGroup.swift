@@ -5,7 +5,10 @@ import SwiftUI
 /// rebuilt in #678 turn 13a): bind a saved profile to each macOS
 /// Desktop, picked from the row's dropdown; the binding emits
 /// `bind_profile_to_native_space` — a wire name #768 deliberately
-/// froze — and loads that profile when the Desktop activates.
+/// froze — and loads that profile when the Desktop activates on
+/// the main display (#888, the definition that made the rows
+/// well-defined under "Displays have separate Spaces" and
+/// retired that state's grey, warning and escape hatch).
 /// Rows are named "Desktop n", the name Mission Control shows,
 /// never "Space n", which is how KiwiDesk's own Spaces read
 /// elsewhere in the app. Bindings mutate
@@ -19,13 +22,11 @@ import SwiftUI
 /// scrolled to it has already asked the question its title
 /// answers.
 ///
-/// Both greys are the resolver's (`ProfilesGates`), and both are
-/// scoped to the ROWS: the explanation and its "Open Desktop &
-/// Dock" button stay live under a grey, since the advice holds —
-/// and the button works — in exactly the state that dims the
-/// rows. That is also why the gate is not wrapped around the
-/// whole card (#527): the drawer keeps its header and its `?`
-/// anchor clickable.
+/// The remaining grey is the resolver's (`ProfilesGates`) and is
+/// scoped to the ROWS: the explanation stays live under it. That
+/// is also why the gate is not wrapped around the whole card
+/// (#527): the drawer keeps its header and its `?` anchor
+/// clickable.
 struct NativeSpacesGroup: View {
     @ObservedObject var model: SettingsModel
     /// Drawn open (#678 turn 13a). View state, like every other
@@ -36,8 +37,6 @@ struct NativeSpacesGroup: View {
     private var gates: ProfilesGates {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
-            separateDisplaySpaces:
-                model.displaysHaveSeparateSpaces,
             connectedScreens: model.displays.count
         )
     }
@@ -56,14 +55,51 @@ struct NativeSpacesGroup: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if let reason {
-                    inertNote(reason)
-                }
                 rows(inert: reason)
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
+        } accessory: {
+            HelpButton(
+                explanation: helpText,
+                subject: L(
+                    "native_spaces.title",
+                    "Profiles per macOS Desktop"
+                )
+            )
         }
+    }
+
+    /// Why only some Desktops are offered, and what the other
+    /// side of the macOS lever costs (#888, ui-designer
+    /// 2026-08-18).
+    ///
+    /// **Behind a click, and descriptive rather than
+    /// prescriptive.** #888 retired a standing recommendation to
+    /// turn "Displays have separate Spaces" off — advice shown to
+    /// every multi-screen user whether or not it applied, with a
+    /// button one click from flipping it. This answers a question
+    /// a reader has visibly already asked, names the ergonomic
+    /// costs the retirement was argued on rather than only the
+    /// gain, and carries no imperative and no deep link: the
+    /// checkbox is quoted verbatim so System Settings' own search
+    /// finds it, which is what `config-vocabulary.md` asks for
+    /// and all it asks for. Putting this in the card's caption
+    /// instead would make it ambient again, which is the retired
+    /// shape in miniature.
+    private var helpText: String {
+        L(
+            "native_spaces.help",
+            "Only Desktops on your main screen can be bound, "
+                + "because macOS's \"Displays have separate "
+                + "Spaces\" gives every screen its own Desktops "
+                + "by default. Turn it off, in System Settings ▸ "
+                + "Desktop & Dock, and every Desktop is shared "
+                + "across your screens instead — all of them "
+                + "bindable, at the cost of each screen's own "
+                + "menu bar, its own Dock, and fullscreen windows "
+                + "that no longer blank the others."
+        )
     }
 
     private var intro: String {
@@ -72,88 +108,22 @@ struct NativeSpacesGroup: View {
             "These are your Mac's own Desktops, from Mission "
                 + "Control — not KiwiDesk's Spaces. Pick a "
                 + "profile to load automatically when a "
-                + "Desktop activates."
+                + "Desktop activates on your main screen "
+                + "(the one with the menu bar)."
         )
     }
 
-    /// Why the rows are dead, inline — why-you-cannot is never a
-    /// tooltip alone (VoiceOver reads it) — and, for the reason
-    /// that has one, the fix.
-    ///
-    /// **The escape hatch is load-bearing, not a convenience.**
-    /// Greying every row takes away the only control that can
-    /// CLEAR a binding, while Core keeps firing bound profiles
-    /// regardless of the OS setting (`applyNativeSpaceBinding`
-    /// consults no display-Spaces state). Without this button a
-    /// user who bound a Desktop *before* turning separate Spaces
-    /// on is stuck with a binding that fires and cannot be
-    /// removed short of a log out — the grey would have created
-    /// the trap it exists to prevent. So the note stays outside
-    /// the `GreyOut` and carries both the way out of the OS
-    /// setting and the way out of the bindings.
-    private func inertNote(
-        _ reason: ProfilesGates.InertReason
-    ) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(SettingsTheme.warningInk)
-            VStack(alignment: .leading, spacing: 8) {
-                Text(ProfilesGateHelp.sentence(for: reason))
-                    .font(.callout)
-                    .fixedSize(horizontal: false, vertical: true)
-                if reason == .desktopsAreAmbiguous {
-                    ambiguityActions
-                }
-            }
-        }
-        .padding(10)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(SettingsTheme.warningSurface)
-        )
-    }
-
-    private var ambiguityActions: some View {
-        HStack(spacing: 8) {
-            Button(
-                L(
-                    "native_spaces.open_settings",
-                    "Open Desktop & Dock"
-                )
-            ) {
-                DisplaySpacesSetting.openSystemSettings()
-            }
-            .settingsActionButton()
-            .controlSize(.large)
-            // Absent, not greyed, with nothing to clear: an
-            // affordance for a channel that does not exist reads
-            // as broken rather than as forthcoming (gui.md), and
-            // here "no bindings" is the state the grey is
-            // harmless in.
-            if !model.config.profileBindings.isEmpty {
-                Button(
-                    L(
-                        "native_spaces.clear_all",
-                        "Clear all bindings"
-                    ),
-                    role: .destructive
-                ) {
-                    model.clearProfileBindings()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .help(
-                    L(
-                        "native_spaces.clear_all.help",
-                        "Removes every Desktop → profile "
-                            + "binding. The footer's %1$@ writes "
-                            + "it.",
-                        L("footer.save", "Save")
-                    )
-                )
-            }
-        }
-    }
+    // #888 retired the inline warning note along with the
+    // separate-Spaces grey. The one reason left
+    // (`bindingsAreGlobal`) has its cause on the surface — the
+    // header chip names the profile being edited — so by the
+    // #815 derivation (`GateReasonPlacement`) these rows owe no
+    // inline sentence, exactly like `presetsApply` under the
+    // same reason; the `GreyOut`'s hover help still carries it.
+    // The "Clear all bindings" escape hatch retired with the
+    // grey too: with the rows live, each binding is cleared on
+    // its own row, so the hatch lost the trap it existed to
+    // open — `docs/design-decisions.md` re-argues the ruling.
 
     @ViewBuilder private func rows(
         inert reason: ProfilesGates.InertReason?
@@ -206,6 +176,27 @@ struct NativeSpacesGroup: View {
                     label: L("native_spaces.current", "current")
                 )
             }
+            // A Desktop that is bound but does NOT live on the
+            // main screen: listed because it carries the user's
+            // own configuration, badged because a binding there
+            // cannot fire in this arrangement — it waits for a
+            // display change that makes that Desktop the main
+            // screen's.
+            //
+            // A badge, never a grey: this row's picker is the
+            // only way to change or clear that binding, so
+            // dimming it would be the trap
+            // `docs/design-decisions.md` bans — and the store is
+            // valid and already effective, which "grey, don't
+            // hide" does not describe (ui-designer, 2026-08-18).
+            if !model.mainDesktops.contains(number) {
+                BadgeChip(
+                    label: L(
+                        "native_spaces.not_on_main",
+                        "not on main screen"
+                    )
+                )
+            }
             Spacer()
             profileMenu(number)
         }
@@ -231,7 +222,7 @@ struct NativeSpacesGroup: View {
     /// expansion watches the rows the card actually draws.
     private var spaceNumbers: [Int] {
         ProfilesFamilyRows.desktops(
-            present: model.nativeSpaceCount,
+            onMain: model.mainDesktops,
             bound: model.config.profileBindings.keys
         )
     }

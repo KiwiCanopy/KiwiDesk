@@ -124,7 +124,7 @@ item's only appearance in CLI output.
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |
 | | `quit.set_grid_target_depth` | 1–20 (default 5) — quit-grid density target (windows per cell before the grid grows) |
-| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
+| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`; `native_space` is the main screen's current Desktop) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists) |
@@ -133,7 +133,7 @@ item's only appearance in CLI output.
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
-| | `bind_profile_to_native_space` | Desktop number, profile |
+| | `bind_profile_to_native_space` | Desktop number, profile (fires when that Desktop becomes current on the main screen) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
@@ -353,13 +353,24 @@ reassignments (profile load, session restore) stay silent:
 ```
 
 `native_space_change` fires when the user switches macOS
-Desktops (Mission Control); its data carries the
-1-based Desktop number and the active profile:
+Desktops (Mission Control); its data carries the 1-based
+Desktop number now current on the screen that switched, that
+screen's positional number (`monitor`: 1 is the main screen,
+secondaries follow left to right — the same 1-based positional
+numbering a display argument takes), and the active profile:
 
 ```json
 {"event": "native_space_change",
- "data": {"native_space": 2, "profile": "Creator Studio"}}
+ "data": {"native_space": 2, "monitor": 1,
+          "profile": "Creator Studio"}}
 ```
+
+With "Displays have separate Spaces" on, each screen switches
+Desktops on its own, so watch `monitor` to tell them apart:
+only a switch on the main screen (`monitor: 1`) selects
+profiles or moves the active Space — a secondary screen's
+swipe reports its Desktop and changes nothing else. With the
+option off, or with a single screen, `monitor` is always 1.
 
 ## Raw IPC Protocol
 

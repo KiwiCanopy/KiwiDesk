@@ -178,22 +178,6 @@ final class SettingsModel: ObservableObject {
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
-    /// macOS's "Displays have separate Spaces" preference, on its
-    /// own (#678 turn 13a).
-    ///
-    /// Snapshotted because it is a `CFPreferences` lookup and two
-    /// surfaces ask for it; the DISPLAY COUNT half of the
-    /// ambiguity condition is deliberately NOT baked in here.
-    /// Folding `recommendsSharedSpaces(displayCount:)` whole into
-    /// a snapshot re-created the fail-open it was meant to close:
-    /// nothing refreshes the dashboard on a display change, so
-    /// plugging in a second monitor left the binding rows live
-    /// with the stale one-display answer. The count is read live
-    /// at each use (`displaysHaveSeparateSpaces`), which cannot
-    /// go stale; only the preference — which a user changes in
-    /// System Settings and which needs a log out to take effect
-    /// anyway — is cached.
-    @Published var separateDisplaySpacesPreference = false
     /// The one-line confirmation after a search pick flipped the
     /// mode (#678 4c) — set and cleared only by
     /// `noteSearchModeSwitch` (`SettingsModel+Search`).
@@ -233,10 +217,11 @@ final class SettingsModel: ObservableObject {
     /// write only through `refreshLayoutDrift()` there.
     @Published var layoutDrift: LayoutDrift?
 
-    /// Number of native macOS user Spaces (Mission Control
-    /// desktops) currently detected — 0 without SkyLight. Drives
-    /// the profile-binding rows (#7).
-    @Published var nativeSpaceCount = 0
+    /// The MAIN screen's user Desktops, by Mission Control
+    /// number (#888) — the Desktops a binding can fire on, which
+    /// is what the bindings card offers. Global numbers, possibly
+    /// non-contiguous; never positions.
+    @Published var mainDesktops: [Int] = []
     /// Mission Control number of the active native Space, for the
     /// "current" badge; nil without SkyLight.
     @Published var currentNativeSpace: Int?

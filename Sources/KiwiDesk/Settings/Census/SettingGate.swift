@@ -16,10 +16,6 @@ enum SettingRuntimeGate: Hashable {
     /// A stored profile is being edited, so a global setting
     /// this profile may never override is dead (switch to Live).
     case editingStoredProfile
-    /// macOS's "Displays have separate Spaces" is on with more
-    /// than one display attached, so every display has its own
-    /// Desktop 1 and a Desktop binding names no single event.
-    case displaysHaveSeparateSpaces
     /// Presets apply only when the connected screen count
     /// matches the preset's.
     case screenCountMismatch

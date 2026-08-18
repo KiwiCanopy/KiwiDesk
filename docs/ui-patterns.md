@@ -1211,8 +1211,7 @@ was written down:
   live (the App Bar card's Show-it-in switches) exactly when
   its copy points at them ("turn one on below"). When the gate
   must reach inside a child view to do this, pass it in
-  (`NativeSpacesGroup(gatedOff:gateHelp:)`,
-  `AdvancedColorRows(allows:gateHelp:)`) rather than wrapping
+  (`AdvancedColorRows(allows:gateHelp:)`) rather than wrapping
   the child
   from outside, which would disable the anchor too. A
   *control-scoped* gate — one row, its gating control directly

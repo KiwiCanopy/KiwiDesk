@@ -24,8 +24,6 @@ struct OnboardingView: View {
                 spaces
             case .keys:
                 keys
-            case .separateSpaces:
-                separateSpaces
             case .done:
                 done
             }

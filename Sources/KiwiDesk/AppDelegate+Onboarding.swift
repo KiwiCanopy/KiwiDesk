@@ -79,12 +79,6 @@ extension AppDelegate {
         onboardingModel.onOpenSettings = {
             PermissionMonitor.openSystemSettings()
         }
-        onboardingModel.onOpenSpaceSettings = {
-            DisplaySpacesSetting.openSystemSettings()
-        }
-        onboardingModel.displayCount = { [weak self] in
-            self?.core.state.workspaces.allDisplays.count ?? 1
-        }
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
@@ -107,9 +101,11 @@ extension AppDelegate {
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
-        // LAST of the wiring, and deliberately so: the plan reads
-        // `hasSeparateSpaces` and `displayCount`, so resolving it
-        // any earlier would plan against their stubs (#828).
+        // After the wiring: the plan is resolved once per
+        // presentation (#828). Since #888 it reads no machine
+        // seams — the route varies only by its door — but a
+        // future machine-gated step would read them here, so the
+        // ordering stays deliberate.
         onboardingModel.beginPresentation(at: entry)
 
         let window = NSWindow(

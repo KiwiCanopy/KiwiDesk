@@ -103,10 +103,6 @@ struct SettingsBorderedSealTests {
             "SpaceOverrideRows+Footer.swift": (
                 1, "role: .destructive", "reset-all"
             ),
-            "NativeSpacesGroup.swift": (
-                1, "role: .destructive",
-                "unbind; its sibling bind button is sealed"
-            ),
             "LayerStripEditor.swift": (
                 1, "role: .destructive",
                 "delete layer; #770's hand-pairing suppressed "

@@ -239,15 +239,6 @@ panel. Teaching them here rather than pointing at the menu bar
 is deliberate: it works when the menu bar is auto-hidden, and
 nothing opens on top of the tour while you are reading it.
 
-One more screen follows only when two or more displays are
-connected with "Displays have separate Spaces" still on: it asks
-you to turn that option off. KiwiDesk uses one active profile across
-all displays, so Desktops shared across displays make
-Desktop-to-profile bindings predictable. This is optional: basic
-tiling still works with the option on, and a single display is
-never affected. Changing the macOS option requires logging out
-and back in.
-
 The closing card confirms KiwiDesk is managing your windows and
 shows you where it lives: a small picture of a menu bar with the
 KiwiDesk mark in it, so you can find the app once the window
@@ -697,9 +688,9 @@ Each field:
   are never tracked or managed. This power-user field has no
   Settings control, but Settings preserves it when saving.
 - **`profile_bindings`**: object mapping macOS Desktop numbers
-  (as Mission Control counts them) to profile names. When you
-  switch Desktops, the bound profile loads. Updated in the
-  Profiles section.
+  (as Mission Control counts them) to profile names. When that
+  Desktop becomes current on your main screen, the bound
+  profile loads. Updated in the Profiles section.
 - **`layers`**: array of keybinding layers — named alternate
   shortcut sets, only one of which fires at a time. Each layer is
   an object with:
@@ -2029,8 +2020,8 @@ matches, preferring the one marked default* — and then answers it for
 your machine right now, naming which of the four ways it resolved:
 
 - a **Desktop binding**, which outranks everything below it. If you
-  bound a profile to the Desktop you are on, that is what loads,
-  whatever your displays are — see
+  bound a profile to the Desktop your main screen is on, that is
+  what loads, whatever your displays are — see
   [macOS Desktops](#macos-desktops-mission-control);
 - an **exact monitor match** — these exact displays. It stops
   matching the moment you swap one of them out, unless you have
@@ -2777,38 +2768,50 @@ shortcut can never be lost by omission.
 ## macOS Desktops (Mission Control)
 
 The **Profiles** section has a **Profiles per macOS Desktop** card
-listing each Desktop (by its Mission Control number). Assign a profile
-to each Desktop using the dropdown. The card is a disclosure — open by
-default, and one click from out of the way if you never bind a
-Desktop.
+listing the Desktops on your **main screen** (by their Mission
+Control number). Assign a profile to each Desktop using the
+dropdown. The card is a disclosure — open by default, and one click
+from out of the way if you never bind a Desktop.
 
-KiwiDesk has one active profile across the whole display setup. When
-multiple displays are connected while "Displays have separate Spaces"
-is on, every display has its own "Desktop 1", so a binding names no
-single event — the rows are **greyed with the reason inline**, and the
-warning carries an **Open Desktop & Dock** button. Turn the option off
-there, then log out and back in; the rows come back live. A single
-display never greys them: "Desktop 2" is unambiguous with one screen.
+Those numbers are Mission Control's own, counted across every
+screen, so they need not start at 1: if macOS lists another screen
+first, your main screen's Desktops might be 3 and 4. The card shows
+them under the numbers they really have.
 
-Existing bindings stay visible while greyed, so you can still read what
-you configured — and they stay **clearable**: while any binding exists,
-the warning carries a **Clear all bindings** button beside the pane
-link. That matters because a binding made *before* you turned separate
-Spaces on keeps loading its profile when that Desktop activates;
-without the button, greying the rows would leave you with a binding
-that fires and no way to remove it.
+A Desktop you bound earlier that is **not** on your main screen —
+because you rearranged screens, or bound it under a different
+setup — stays listed and carries a **not on main screen** badge.
+Its dropdown keeps working, so you can change or clear it; the
+badge is there because a binding on it cannot fire while that
+Desktop lives on another screen. It becomes live again if a screen
+change makes that Desktop your main screen's.
 
-The rows are also greyed while you edit a *stored* profile from the
+The **?** on the card explains the macOS setting behind all of
+this, and what sharing Desktops across screens would cost.
+
+KiwiDesk has one active profile across the whole display setup, so
+one screen holds the binding trigger: **a binding fires when its
+Desktop becomes current on your main screen** (the one with the
+menu bar — the card's intro says so too). With one screen, or with
+"Displays have separate Spaces" turned off, the main screen's
+Desktop is simply *the* Desktop, so nothing reads differently. With
+the option on — macOS's default — each screen switches Desktops on
+its own: a swipe on the main screen switches profiles, and a swipe
+on a secondary screen never does. The rows stay live in every one
+of these states.
+
+The rows are greyed only while you edit a *stored* profile from the
 banner picker: bindings are global, and a profile may never override
 what selects it. Switch back to Live to change them.
 
-When you switch Desktops (Ctrl+arrow, Mission Control, …), the bound
-profile loads with its spaces, layouts, and settings. Desktops without
-a binding keep whatever profile is active.
+When the main screen switches Desktops (Ctrl+arrow, Mission
+Control, …), the bound profile loads with its spaces, layouts, and
+settings. Desktops without a binding keep whatever profile is
+active.
 
 ```mermaid
 flowchart TD
-    S["You switch to a<br/>macOS Desktop"] --> B{"A profile bound<br/>to this Desktop?"}
+    S["Your main screen switches<br/>to a macOS Desktop"] --> B{"A profile bound<br/>to this Desktop?"}
     B -->|"Yes"| A["That profile activates —<br/>its layout, gaps, and rules"]
     B -->|"No binding"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
@@ -2817,8 +2820,10 @@ flowchart TD
 Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
 `init.lua` with `bind_profile_to_native_space` instead. Each
-Desktop also remembers which space it was on — return to
-it and you land on the same space.
+Desktop your main screen shows also remembers which space it was
+on — return to it and you land on the same space. (If the profile
+changed in between and that space no longer exists, you land on
+the first space instead.)
 
 ## Getting Help
 

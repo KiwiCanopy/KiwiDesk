@@ -51,17 +51,15 @@ extension SettingsModel {
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }
-        nativeSpaceCount =
-            NativeSpaces.allSpaces().filter(\.isUser).count
-        currentNativeSpace = NativeSpaces.activeSpaceNumber()
-        // After `currentNativeSpace`: a Desktop binding outranks
-        // monitor matching, so the verdict needs the desktop this
-        // pass just read. The count is captured in the same
-        // breath, so the card's sentence has one moment behind
-        // it.
-        // Verdict and count come out of ONE Core read, so the
-        // card's sentence cannot pair a verdict with a later
-        // reading of the display list.
+        // ONE topology reading for all three: the Desktops the
+        // card offers, the one it badges as current, and the
+        // verdict below — which needs the Desktop this pass just
+        // read, since a Desktop binding outranks monitor
+        // matching. Read apart, the card's sentence could pair a
+        // verdict with a later reading of the arrangement (#888).
+        let desktops = NativeSpaces.desktopSnapshot()
+        mainDesktops = desktops.mainDisplayDesktops
+        currentNativeSpace = desktops.authority
         let resolved = core.profileVerdict(
             activeDesktop: currentNativeSpace
         )
@@ -69,8 +67,6 @@ extension SettingsModel {
             verdict: resolved.verdict,
             screens: resolved.screens
         )
-        separateDisplaySpacesPreference =
-            DisplaySpacesSetting.hasSeparateSpaces()
         refreshLayoutDrift()
     }
 

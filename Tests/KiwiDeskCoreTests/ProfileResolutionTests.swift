@@ -192,9 +192,9 @@ struct MonitorChangeTests {
             "bind_profile_to_native_space",
             args: [.number(2), .string("Desk Two")]
         )
-        NativeSpaces.activeSpaceNumberOverride = 2
+        NativeSpaces.activeDesktopNumberOverride = 2
         defer {
-            NativeSpaces.activeSpaceNumberOverride = nil
+            NativeSpaces.activeDesktopNumberOverride = nil
         }
 
         core.handleMonitorChange()

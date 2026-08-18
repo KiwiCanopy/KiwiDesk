@@ -23,13 +23,11 @@ import Testing
 struct ProfilesGateTests {
     private func gates(
         editing: Bool = false,
-        separateSpaces: Bool = false,
         screens: Int = 3,
         preset: Int? = nil
     ) -> ProfilesGates {
         ProfilesGates(
             editingStoredProfile: editing,
-            separateDisplaySpaces: separateSpaces,
             connectedScreens: screens,
             presetScreens: preset
         )
@@ -104,9 +102,12 @@ struct ProfilesGateTests {
                 "\(key.id) names a condition twice"
             )
         }
-        // Vacuity: the sweep must have found the rows it is
+        // Vacuity: the sweep must have found the row it is
         // about, or every check above held over nothing.
-        #expect(compound == 2)
+        // (`profileBindings` left the compound set with #888 —
+        // its separate-Spaces arm retired, so it is a plain
+        // `.runtime` again and `presetsApply` is the one left.)
+        #expect(compound == 1)
     }
 
     /// No container in this area carries a gate, so the resolver
@@ -146,29 +147,10 @@ struct ProfilesGateTests {
         )
     }
 
-    /// Separate display Spaces give every display its own
-    /// "Desktop 1", so a binding names no single event.
-    @Test("separate display Spaces kill the bindings")
-    func bindingsSeparateSpaces() {
-        #expect(
-            gates(separateSpaces: true).inertReason(
-                for: .profiles(.profileBindings)
-            ) == .desktopsAreAmbiguous
-        )
-    }
-
-    /// Both conditions at once still names the profile one: it
-    /// is the reason the user can act on from where they are
-    /// standing (switch to Live), and the other is a system
-    /// setting behind a log-out.
-    @Test("the stored-profile reason outranks the ambiguity")
-    func bindingsReasonPrecedence() {
-        #expect(
-            gates(editing: true, separateSpaces: true)
-                .inertReason(for: .profiles(.profileBindings))
-                == .bindingsAreGlobal
-        )
-    }
+    // #888 retired the separate-Spaces arm: a binding names one
+    // event in every display mode (the main display's Desktop),
+    // so no display state greys these rows any more —
+    // `bindingsLive` above is what holds them live.
 
     // MARK: - Preset apply
 

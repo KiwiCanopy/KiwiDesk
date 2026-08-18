@@ -16,19 +16,16 @@ extension ProfilesKey {
         switch self {
         case .profileBindings:
             // Dead while a stored profile is being edited
-            // (bindings are global), AND dead while displays
-            // have separate Spaces (every display has its own
-            // Desktop 1). One slot, two arms — the tag names
-            // the disjunction rather than half of it, and
-            // `ProfilesGates` tells the two apart.
+            // (bindings are global). The separate-Spaces arm
+            // retired with #888: a binding now names one event
+            // in every display mode — the main display's
+            // Desktop N activating — so the rows stay live
+            // there.
             return .row(
                 .profiles,
                 .profilesPerMacOSSpace,
                 .showMore,
-                gate: .runtimeAnyOf([
-                    .editingStoredProfile,
-                    .displaysHaveSeparateSpaces,
-                ])
+                gate: .runtime(.editingStoredProfile)
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)

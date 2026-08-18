@@ -723,8 +723,8 @@ claim; the obligations a change here takes on:
   own container needs nothing, a row gated from another
   destination owes a LIVE pointer naming that destination, and
   only what falls through all three draws the reason INLINE,
-  outside the dimmed subtree, the way `NativeSpacesGroup` and
-  `GeneralRestartRow` already do. What SHAPE the remote
+  outside the dimmed subtree, the way `GeneralRestartRow`
+  already does. What SHAPE the remote
   pointer takes follows from the block: a `?` where there is a
   live label above the dimmed rows to hang one on (Advanced
   Colours), a `CrossReferenceRow` under them where there is not

@@ -71,7 +71,14 @@ extension KiwiCore {
             )
             self?.followDisplayUnderClick(at: point)
         }
-        lastNativeSpace = NativeSpaces.activeSpaceNumber()
+        // Both memories from ONE reading (#888): the authority
+        // the switch handler compares against, and the
+        // per-display Spaces it diffs against. Seeding only the
+        // first left the session's opening switch diffing against
+        // an empty snapshot.
+        let desktops = NativeSpaces.desktopSnapshot()
+        lastNativeSpace = desktops.authority
+        desktopMemory.seed(desktops)
         // Cheap and off-main; kicked here so the first glyph bar
         // never renders an image-fallback frame.
         appFont.preload()

@@ -166,7 +166,7 @@ extension SettingRuntimeGate {
     var greys: Bool {
         switch self {
         case .perEdgeValuesDiffer, .editingStoredProfile,
-            .displaysHaveSeparateSpaces, .screenCountMismatch,
+            .screenCountMismatch,
             .loginItemServiceStatus, .autoStartLoginOff,
             .spaceHasNoOverrides, .reduceMotion:
             return true
@@ -200,9 +200,9 @@ extension SettingRuntimeGate {
             // the defaults", which IS the condition.
             return true
         case .reduceMotion, .loginItemServiceStatus,
-            .autoStartLoginOff, .displaysHaveSeparateSpaces:
+            .autoStartLoginOff:
             // System state, with nothing in this window to look
-            // at. The rows gated on the middle two already draw
+            // at. The rows gated on the last two already draw
             // their reason inline today, which is what
             // `GateReasonPlacementTests` checks this answer
             // against.

@@ -1474,30 +1474,44 @@ each profile is its own file, so removing a space from the
 active profile never touches another profile that still
 declares a space of the same name. (#77)
 
-**Sharing Desktops across displays is recommended, not
-required.**
-KiwiDesk resolves one active Desktop number and one active
-profile across the whole display setup. With macOS's "Displays have
-separate Spaces" option on, multiple displays can show independent
-Desktop combinations that this one-profile model cannot represent
-unambiguously. Sharing Desktops across displays therefore makes
-Desktop→profile bindings predictable, but it is not a prerequisite
-for basic tiling.
+**Desktop→profile bindings key to the main screen's Desktop —
+and the separate-Spaces recommendation retired with that
+definition.** KiwiDesk resolves one active profile across the
+whole display setup, so with macOS's "Displays have separate
+Spaces" on — the macOS **default** — "Desktop N activates" needs
+one display to answer for it. #888 ruled that display to be the
+main one (the screen with the menu bar): a swipe on the main
+display selects profiles, a swipe on a secondary display never
+does, and each Desktop the main screen shows keeps the
+per-Desktop Space memory. Shared mode and a single display are
+degenerate cases — the main screen's Desktop IS the global one —
+so their behavior is unchanged, and the precedent was already in
+the tree: the starter setup is "named by the main screen".
 
-Both surfaces share one gate — the separate-Desktops option on
-*and* two or more
-displays connected — so a single-display setup, which has no binding
-ambiguity, is never prompted. Onboarding recommends turning the option
-off only in that state and lets the user continue without changing it.
-The Profiles page keeps the Desktop-binding rows and their stored
-values **visible** in that state — hiding the section would erase both
-the context and a user's own configuration — with an inline warning
-that explains the limitation and opens Desktop & Dock Settings. The
-saved profile list and its Load actions are unrelated and never warned
-or disabled. Whether those rows also stay *live* under that warning is
-a separate ruling, and #678 settled it the other way: see
-[A control the OS has made meaningless is greyed, not left live under a
-warning](#profiles). (#8)
+This superseded #8's recommendation to turn the option off, which
+was the previous answer to the same ambiguity. That advice was
+wrong-by-default twice over: every multi-display user met the
+degraded state out of the box, and following the advice forfeited
+real macOS ergonomics — each display's own menu bar, the Dock
+summonable on any display, fullscreen on one screen not blanking
+the others, all of which exist only with separate Spaces ON.
+Shipping 1.0 with "change a macOS default" as standing advice and
+retracting it later would have been guidance churn.
+
+Two alternatives were weighed and rejected. **Coordinated
+switching** (KiwiDesk switches all displays together so a global
+number stays well-defined) is drift-prone — one swipe on one
+display breaks the invariant, and force-resync teleports screens;
+it survives only as a possible later opt-in verb. **Per-display
+active profiles** (profile slicing) is a full redesign, parked on
+demonstrated demand. Main-display authority is deliberately the
+smallest ruling that removes the recommendation: a binding on a
+Desktop that lives on a secondary display simply never fires
+until a screen change makes that Desktop the main screen's —
+honest, documented, and cheaper than either machinery. The
+identical-monitors ambiguity (#734) gets the same answer as its
+existing Monitors row — the main screen is unambiguous at the
+CoreGraphics level, so no new machinery. (#8, #888)
 
 **Profiles may override *behavior* settings, never *routing*
 ones.** A profile owns tiling, and may also carry a sparse
@@ -2167,14 +2181,15 @@ guess about where the item ended up.
 
 **[Principle]**
 
-**No screen of the tour asserts a total it cannot know.** "Step 3
-of 5" is false on any machine that shows four, and the machine it
-lies to is the one whose user is least able to tell a skipped
-screen from a broken one. The tour's length genuinely varies: the
-Displays recommendation appears only where it can bite (two or
-more displays with "Displays have separate Spaces" on), and a
+**No screen of the tour asserts a total it cannot know.** "Step 2
+of 4" is false at any door that opens past the first screen, and
+the reader it lies to is the one least able to tell a skipped
+screen from a broken one. The tour's length genuinely varies: a
 tour reopened from Settings starts past the screens that have
-nothing left to say.
+nothing left to say, and any future machine-gated step widens the
+variance again (the Displays recommendation was that step until
+#888 retired it — the principle predates its retirement and does
+not lean on it).
 
 The row of pips at the top of each screen is not that counter
 re-admitted. The banned thing is a **fixed** total; a
@@ -3812,9 +3827,8 @@ Lua's unclamped setters (`sticky.set_mark`,
 a floor would only have moved the state one layer down anyway.
 
 Settings does warn about valid-but-surprising choices
-elsewhere (`native_spaces.separate_warning`,
-`profiles.overlap_warning`), and the line between them is
-**proximity, not subject matter**: those two surface a
+elsewhere (`profiles.overlap_warning`), and the line between
+them is **proximity, not subject matter**: that one surfaces a
 consequence that lands somewhere the user is not — at profile
 load, on another destination — whereas this one is one click
 away at the moment of choosing, in the `?` beside the switch.
@@ -5436,32 +5450,32 @@ answers that could be ordered wrongly a second time.
 **[Trade-off]**
 
 **A control the OS has made meaningless is greyed, not left live
-under a warning.** With "Displays have separate Spaces" on and
-more than one display, every display has its own Desktop 1, so
-"load this profile when Desktop 2 activates" names no single
-event. Leaving the menus live under a warning — the earlier
-behavior — let a user configure bindings that could not do what
-the row says. Greying costs the user who is mid-migration to a
-shared-Spaces setup: they must flip the OS setting and log out
-before they can prepare their bindings. That is the smaller harm,
-and the inline reason carries the button that starts it. The gate
-requires BOTH conditions: one display never greys, because
-"Desktop 2" is unambiguous there. Existing bindings stay visible
-while greyed — config presence expands the surface, and hiding a
-user's own configuration to protect them from it is the worse
-failure.
+under a warning — and #888 ended the instance by ending the
+meaninglessness.** While "Desktop N activates" named no single
+event under separate Spaces, #678 ruled the binding rows greyed
+rather than live-under-a-warning: leaving the menus live let a
+user configure bindings that could not do what the row says.
+That grey was correct *for as long as its premise held* — and
+#888 removed the premise rather than the ruling, by giving the
+trigger a definition (the main screen's Desktop) that holds in
+every display mode. The rows are live in every display state now, so the
+grey, its inline warning and its Desktop & Dock button retired
+together (the stored-profile grey, a different premise, stands). What survives, because it never depended on the
+instance: a control the OS genuinely makes meaningless is still
+greyed rather than left live, and existing config stays visible
+under any such grey — hiding a user's own configuration to
+protect them from it is the worse failure.
 
 **And greying a control never removes the only way out of the
-state it describes.** Bindings are cleared from these rows and
-nowhere else, while the runtime keeps firing a bound profile
-regardless of the OS setting — so dimming the rows alone would
-strand a binding made *before* the setting changed: still
-loading, no longer removable, and undoable only by logging out.
-The inline warning therefore carries **Clear all bindings**
-alongside the pane link, present exactly while there is
-something to clear. Generalise it: when a grey covers the last
-affordance that can undo the thing being greyed, the grey owes
-an escape hatch, or it is a trap wearing the costume of a
+state it describes.** The greyed rows were the only place a
+binding could be cleared while the runtime kept firing it, so
+the warning carried **Clear all bindings** — an escape hatch
+present exactly while there was something to clear. With the
+rows live, each binding is cleared on its own row, the trap the
+hatch opened cannot form, and the hatch retired with the grey.
+The general rule outlives its instance: when a grey covers the
+last affordance that can undo the thing being greyed, the grey
+owes an escape hatch, or it is a trap wearing the costume of a
 safeguard.
 
 ### Monitors

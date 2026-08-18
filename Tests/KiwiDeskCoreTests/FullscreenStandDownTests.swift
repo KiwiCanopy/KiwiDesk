@@ -10,7 +10,7 @@ import Testing
 // `isUser` DEBUG overrides (`activeSpaceIsUserOverride`,
 // `currentSpaceIsUserOverride`) lives in THIS one serialized
 // suite -- a second suite would race it under parallel testing.
-// (`activeSpaceNumberOverride` has its own pre-existing users;
+// (`activeDesktopNumberOverride` has its own pre-existing users;
 // no stand-down test reads the space number.)
 
 private let w1 = WindowID(1)

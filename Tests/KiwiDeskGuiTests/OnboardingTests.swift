@@ -3,18 +3,20 @@ import Testing
 
 @testable import KiwiDesk
 
-@Suite("Onboarding display Spaces recommendation (#8)")
+@Suite("Onboarding flow")
 @MainActor
 struct OnboardingTests {
-    /// The flow after #828: grant → spaces → keys → Displays
-    /// (gated) → done. The one gated step is why no screen draws
-    /// a FIXED counter, and why the progress row derives its
-    /// length instead (`OnboardingProgressTests`).
+    /// The flow since #888: grant → spaces → keys → done, with no
+    /// machine-gated step. (#828's separate-Spaces recommendation
+    /// retired with the ruling it recommended around — bindings
+    /// key to the main display's Desktop now, so they are
+    /// well-defined under the macOS default.) The route still
+    /// varies by its DOOR, which is why the progress row derives
+    /// its length instead of drawing a fixed counter
+    /// (`OnboardingProgressTests`).
     @Test("the grant step hands off to the spaces step")
     func grantLeadsToSpaces() {
         let model = OnboardingModel()
-        model.hasSeparateSpaces = { false }
-        model.displayCount = { 1 }
         model.beginPresentation(at: .grant)
         model.continueAfterAccessibility()
         #expect(model.step == .spaces)
@@ -32,59 +34,21 @@ struct OnboardingTests {
     @Test("the spaces step always leads to the keys step")
     func spacesAlwaysLeadToKeys() {
         let model = OnboardingModel()
-        model.hasSeparateSpaces = { false }
-        model.displayCount = { 1 }
         model.beginPresentation(at: .spaces)
         model.continueAfterSpaces()
         #expect(model.step == .keys)
     }
 
-    /// The recommendation is the LAST substantive step, reached
-    /// from the keys step rather than from the grant.
-    ///
-    /// Driven through the INJECTED preference, never the host's:
-    /// deriving the expectation from the same live read the model
-    /// makes puts the same value on both sides of the `==`, so
-    /// the test agrees with itself on every machine and
-    /// discriminates on none — the shape `guard-prover` proved
-    /// vacuous here on 2026-08-12.
-    @Test("multi-display separate Spaces show the recommendation")
-    func separateSpacesRecommendSharedModel() {
+    /// The keys step leads straight to the closing card on every
+    /// machine — the step that used to sit between them was the
+    /// #888-retired recommendation, and this is the assertion
+    /// that reds if a machine-gated step quietly returns without
+    /// re-earning the plan seams it would need.
+    @Test("the keys step leads to the closing card")
+    func keysLeadToDone() {
         let model = OnboardingModel()
-        model.hasSeparateSpaces = { true }
-        model.displayCount = { 2 }
         model.beginPresentation(at: .keys)
         model.continueAfterKeys()
-        #expect(model.step == .separateSpaces)
-    }
-
-    @Test("shared display Spaces skip the recommendation")
-    func sharedSpacesSkipTheRecommendation() {
-        let model = OnboardingModel()
-        model.hasSeparateSpaces = { false }
-        model.displayCount = { 2 }
-        model.beginPresentation(at: .keys)
-        model.continueAfterKeys()
-        #expect(model.step == .done)
-    }
-
-    @Test("a single display goes straight to the closing card")
-    func singleDisplaySkipsTheRecommendation() {
-        let model = OnboardingModel()
-        model.hasSeparateSpaces = { true }
-        model.displayCount = { 1 }
-        model.beginPresentation(at: .keys)
-        model.continueAfterKeys()
-        #expect(model.step == .done)
-    }
-
-    @Test("the recommendation's Continue reaches the closing card")
-    func separateSpacesLeadsToDone() {
-        let model = OnboardingModel()
-        model.hasSeparateSpaces = { true }
-        model.displayCount = { 2 }
-        model.beginPresentation(at: .separateSpaces)
-        model.continueAfterSeparateSpaces()
         #expect(model.step == .done)
     }
 
@@ -141,11 +105,9 @@ struct OnboardingTests {
     /// cannot see it.
     @Test("every terminal route arrives having reached the end")
     func everyTerminalRouteReachesTheEnd() {
-        // Route 1 — one display: grant, spaces, keys, done. The
+        // Route 1 — the full tour: grant, spaces, keys, done. The
         // keys step is on every route since #828.
         let direct = OnboardingModel()
-        direct.hasSeparateSpaces = { false }
-        direct.displayCount = { 1 }
         direct.beginPresentation(at: .grant)
         direct.continueAfterAccessibility()
         direct.continueAfterSpaces()
@@ -154,25 +116,10 @@ struct OnboardingTests {
         #expect(direct.step == .done)
         #expect(direct.reachedEnd, "the direct route did not count")
 
-        // Route 3 — through the Displays recommendation, which is
-        // the last substantive step when it appears at all.
-        let viaSpaces = OnboardingModel()
-        viaSpaces.hasSeparateSpaces = { true }
-        viaSpaces.displayCount = { 2 }
-        viaSpaces.beginPresentation(at: .separateSpaces)
-        viaSpaces.continueAfterSeparateSpaces()
-        #expect(viaSpaces.step == .done)
-        #expect(
-            viaSpaces.reachedEnd,
-            "the Displays route did not count"
-        )
-
-        // Route 4 — the user closes ON the keys step rather than
+        // Route 2 — the user closes ON the keys step rather than
         // continuing. `shouldResume` puts a returning user there
         // directly, so this is a real ending, not an abandonment.
         let closedOnKeys = OnboardingModel()
-        closedOnKeys.hasSeparateSpaces = { false }
-        closedOnKeys.displayCount = { 1 }
         closedOnKeys.beginPresentation(at: .grant)
         closedOnKeys.continueAfterAccessibility()
         closedOnKeys.continueAfterSpaces()
@@ -183,8 +130,6 @@ struct OnboardingTests {
         // the flag would be true from the first screen and mean
         // nothing at all.
         let opening = OnboardingModel()
-        opening.hasSeparateSpaces = { false }
-        opening.displayCount = { 1 }
         opening.beginPresentation(at: .grant)
         #expect(!opening.reachedEnd)
         opening.continueAfterAccessibility()
@@ -228,56 +173,5 @@ struct OnboardingTests {
             #expect(applied == choice, "route \(route)")
             #expect(exited, "route \(route)")
         }
-    }
-
-    @Test("single display never triggers the recommendation")
-    func singleDisplayNeverRecommends() {
-        // A single display can't have ambiguous Desktop→profile
-        // bindings, so the gate must suppress the step even with
-        // separate Spaces on. Predicate lives in Core; assert the
-        // display-count half here (the hasSeparateSpaces half
-        // reads a live system pref and isn't unit-testable).
-        #expect(
-            !DisplaySpacesSetting.recommendsSharedSpaces(
-                displayCount: 1
-            )
-        )
-    }
-
-    /// The overload that takes an ALREADY-READ preference (#678
-    /// turn 13a) — the Settings dashboard snapshots the
-    /// `CFPreferences` value but must evaluate the display half
-    /// live, and routing through Core is what keeps #8's
-    /// one-predicate promise from quietly becoming two copies.
-    ///
-    /// Unlike the live-read overload above, both halves ARE
-    /// unit-testable here, so all four combinations are pinned:
-    /// inverting either arm is otherwise silent.
-    @Test("the pre-read overload agrees on every combination")
-    func preReadOverloadTruthTable() {
-        #expect(
-            DisplaySpacesSetting.recommendsSharedSpaces(
-                separateSpaces: true,
-                displayCount: 2
-            )
-        )
-        #expect(
-            !DisplaySpacesSetting.recommendsSharedSpaces(
-                separateSpaces: true,
-                displayCount: 1
-            )
-        )
-        #expect(
-            !DisplaySpacesSetting.recommendsSharedSpaces(
-                separateSpaces: false,
-                displayCount: 2
-            )
-        )
-        #expect(
-            !DisplaySpacesSetting.recommendsSharedSpaces(
-                separateSpaces: false,
-                displayCount: 1
-            )
-        )
     }
 }
