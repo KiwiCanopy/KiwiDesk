@@ -217,9 +217,6 @@ final class SettingsModel: ObservableObject {
     /// write only through `refreshLayoutDrift()` there.
     @Published var layoutDrift: LayoutDrift?
 
-    /// Number of native macOS user Spaces (Mission Control
-    /// desktops) currently detected — 0 without SkyLight. Drives
-    /// the profile-binding rows (#7).
     /// The MAIN screen's user Desktops, by Mission Control
     /// number (#888) — the Desktops a binding can fire on, which
     /// is what the bindings card offers. Global numbers, possibly

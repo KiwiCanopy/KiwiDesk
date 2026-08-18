@@ -2,25 +2,26 @@ import CoreGraphics
 import Foundation
 
 /// One switch's reading of the desktop topology (#888): the
-/// active-Desktop authority and every display's current Space,
+/// active-Desktop authority and every screen's current Space,
 /// taken from ONE `allSpaces()` snapshot.
 ///
 /// One value rather than two reads, because the switch handler
-/// and the event emit ask the same question — *which display
+/// and the event emit ask the same question — *which screen
 /// switched, and to what* — and two readings taken moments apart
 /// can disagree (review, 2026-08-18). Whoever handles a switch
 /// reads this once and passes it on.
 public struct DesktopSnapshot: Sendable {
-    /// The Mission Control number of the MAIN display's current
+    /// The Mission Control number of the MAIN screen's current
     /// Desktop, or nil when that Desktop is a fullscreen/system
     /// space, or without SkyLight (callers treat nil as
     /// single-space, as with `activeSpaceNumber()`).
     public let authority: Int?
-    /// UUID of the main display, or nil when the topology cannot
+    /// UUID of the main screen, or nil when the topology cannot
     /// name it (no SkyLight, no display-UUID symbol, or shared
     /// mode's synthetic managed-display identifier).
     public let mainUUID: String?
-    /// Each display's current Space, keyed by display UUID.
+    /// Each screen's current Space, keyed by its display UUID
+    /// (SkyLight's own key name).
     public let currentSpaces: [String: SkyLight.SpaceID]
     /// The spaces the snapshot was read from — so a consumer can
     /// number a Space in the SAME topology the authority was
@@ -32,20 +33,20 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.number(of: space, in: spaces)
     }
 
-    /// The Mission Control numbers of the MAIN display's user
+    /// The Mission Control numbers of the MAIN screen's user
     /// Desktops, ascending — the Desktops a binding can fire on
     /// in this arrangement (#888).
     ///
     /// **Numbers, never positions.** Mission Control counts
-    /// across every display, and a binding keys on that global
+    /// across every screen, and a binding keys on that global
     /// number, so a consumer may narrow WHICH Desktops it offers
     /// but must keep each one's number: depending on SkyLight's
-    /// display order the main display's Desktops can be 3 and 4.
+    /// screen order the main screen's Desktops can be 3 and 4.
     ///
-    /// Every user Desktop when the main display cannot be named
+    /// Every user Desktop when the main screen cannot be named
     /// (no SkyLight, shared mode's synthetic managed-display
     /// identifier) — in shared mode every Desktop IS the main
-    /// display's, so the degenerate case answers exactly as it
+    /// screen's, so the degenerate case answers exactly as it
     /// did before this existed.
     public var mainDisplayDesktops: [Int] {
         guard let mainUUID,
@@ -61,9 +62,9 @@ public struct DesktopSnapshot: Sendable {
     }
 
     /// Whether the space now current on `uuid` is a user desktop
-    /// — the #670 verdict, per display and inside this snapshot,
+    /// — the #670 verdict, per screen and inside this snapshot,
     /// rather than a second live read. True for an unknown
-    /// display: standing down needs positive evidence of a
+    /// screen: standing down needs positive evidence of a
     /// fullscreen/system space, never a lookup miss.
     public func currentSpaceIsUser(on uuid: String?) -> Bool {
         guard let uuid, let id = currentSpaces[uuid] else {
@@ -77,23 +78,23 @@ public struct DesktopSnapshot: Sendable {
 /// desktop counts as "the" active one for Desktop→profile
 /// bindings and the per-Desktop Space memory.
 ///
-/// The definition: **the MAIN display's current Desktop**.
+/// The definition: **the MAIN screen's current Desktop**.
 /// KiwiDesk resolves one active profile for the whole setup, so
-/// one display has to hold the authority, and the main display
-/// (the screen with the menu bar) is it — a secondary display's
+/// one screen has to hold the authority, and the main screen
+/// (the one with the menu bar) is it — a secondary screen's
 /// swipe never changes this answer. With "Displays have separate
-/// Spaces" off, or with a single display, the main display's
+/// Spaces" off, or with a single screen, the main screen's
 /// Desktop IS the global one, so the answer degenerates to
 /// `activeSpaceNumber()` exactly.
 extension NativeSpaces {
-    /// UUID of the main display (the screen with the menu bar),
-    /// or nil when `CGDisplayCreateUUIDFromDisplayID` is
+    /// UUID of the main screen (the one with the menu bar), or
+    /// nil when `CGDisplayCreateUUIDFromDisplayID` is
     /// unavailable.
     ///
-    /// The ONE main-display seam this subsystem reads: the emit's
-    /// monitor numbering resolves its main display from this
+    /// The ONE main-screen seam this subsystem reads: the emit's
+    /// monitor numbering resolves its main screen from this
     /// answer too, so a fixture pinning it cannot get a switch
-    /// attributed to one display and numbered as another
+    /// attributed to one screen and numbered as another
     /// (review, 2026-08-18).
     public static func mainDisplayUUID() -> String? {
         #if DEBUG
@@ -106,12 +107,12 @@ extension NativeSpaces {
 
     /// Reads the topology once and answers the authority with it.
     ///
-    /// When the main display cannot be found in that snapshot (no
+    /// When the main screen cannot be found in that snapshot (no
     /// SkyLight, no display-UUID symbol, or macOS's shared mode,
     /// whose managed display carries a synthetic identifier), the
     /// global `activeSpaceNumber()` answers — the public-fallback
     /// ladder os-private-apis.md requires, and in shared mode the
-    /// global number is exactly the main display's.
+    /// global number is exactly the main screen's.
     public static func desktopSnapshot() -> DesktopSnapshot {
         let spaces = allSpaces()
         let uuid = mainDisplayUUID()
@@ -141,7 +142,7 @@ extension NativeSpaces {
     }
 
     /// Mission Control number of the active Desktop: the MAIN
-    /// display's current Desktop (#888).
+    /// screen's current Desktop (#888).
     ///
     /// The convenience read, for a caller that wants the number
     /// and nothing else (a diagnostics dump, a Settings refresh).

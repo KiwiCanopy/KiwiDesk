@@ -138,9 +138,20 @@ struct DesktopAuthorityTests {
         )
     }
 
-    /// A fullscreen space on the main display is not a Desktop a
+    /// A fullscreen space on the main screen is not a Desktop a
     /// binding can name, so it is not offered — and it does not
     /// shift the numbers of the ones that are.
+    ///
+    /// **Stated limitation** (`guard-prover`, 2026-08-18):
+    /// deleting `mainDisplayDesktops`' own `&& $0.isUser` clause
+    /// in isolation does NOT red this test, because
+    /// `NativeSpaces.number(of:in:)` filters to user spaces
+    /// itself and the `compactMap` drops the nil it returns for a
+    /// fullscreen space. The clause is defence in depth, not the
+    /// only filter. What this test does catch is a change to how
+    /// the numbers are DERIVED — positional numbering, or a
+    /// bypass of `number(of:)` — which is the failure that
+    /// actually shifts the offered Desktops.
     @Test("A fullscreen space is not an offered Desktop")
     func fullscreenIsNotOffered() {
         defer { resetAuthorityOverrides() }

@@ -51,20 +51,15 @@ extension SettingsModel {
         brokenProfiles = core.profiles.brokenProfiles().map {
             BrokenProfile(name: $0.name, cause: $0.cause)
         }
-        // ONE topology reading for both: the Desktops the card
-        // offers and the one it badges as current cannot then
-        // disagree about the arrangement (#888).
+        // ONE topology reading for all three: the Desktops the
+        // card offers, the one it badges as current, and the
+        // verdict below — which needs the Desktop this pass just
+        // read, since a Desktop binding outranks monitor
+        // matching. Read apart, the card's sentence could pair a
+        // verdict with a later reading of the arrangement (#888).
         let desktops = NativeSpaces.desktopSnapshot()
         mainDesktops = desktops.mainDisplayDesktops
         currentNativeSpace = desktops.authority
-        // After `currentNativeSpace`: a Desktop binding outranks
-        // monitor matching, so the verdict needs the desktop this
-        // pass just read. The count is captured in the same
-        // breath, so the card's sentence has one moment behind
-        // it.
-        // Verdict and count come out of ONE Core read, so the
-        // card's sentence cannot pair a verdict with a later
-        // reading of the display list.
         let resolved = core.profileVerdict(
             activeDesktop: currentNativeSpace
         )
