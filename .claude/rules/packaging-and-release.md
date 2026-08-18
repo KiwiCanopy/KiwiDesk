@@ -128,6 +128,30 @@ the tag matches the binary" step in
 when it fires, against a mislabelled download when it does not
 exist.
 
+**`release.sh` must never push `main`; the stamp gets there
+through a PR and the tag is cut on a second run.**
+`ReleasePushSeamTests` holds the first half. `scripts/protect-main.sh`
+applied #487's ruleset with `enforce_admins` TRUE — observed
+2026-08-18 refusing a release push with `GH006: Protected branch
+update failed` — so nothing pushes `main` directly and no one,
+the owner included, can bypass that. `release.sh`
+therefore runs twice on the same command: phase A stamps, gates,
+commits onto `chore/stamp-<version>`, pushes that branch and
+opens its PR; phase B, on a synced `main` after the merge, gates
+again and pushes **only** the tag. It never attempts a push of
+`main` at all.
+
+Write the two phases as one script rather than two, and let it
+pick the phase from whether the stamp changed anything — asked of
+`git`, never by re-reading `KiwiDeskVersion.swift`, which
+`bump-version.sh` is the one owner of. The reason this is a rule
+and not a convenience: the stamps for 0.9.1, 0.9.5 and 0.9.6 each
+reached `main` on a branch opened *by hand* after the script had
+already failed at its push, three releases in a row rescuing the
+same failure from memory. A release procedure that is only
+correct when the operator remembers to deviate from it is the
+thing being fixed here.
+
 **A version is three integers — no prerelease suffix.** `0.9.0-rc1`
 is valid SemVer and cannot be a `CFBundleVersion`, which takes 1-3
 dot-separated integers and nothing else. Both `bump-version.sh`
@@ -252,11 +276,17 @@ moved aside does.
 
 `./scripts/install-hooks.sh` once per clone. The `pre-commit`
 hook lints staged Swift, runs the locale checks when a catalog is
-staged, and **refuses a commit made while HEAD is `main`** —
-server-side branch protection is impossible while the repo is
-private (GitHub free answers `403 Upgrade to GitHub Pro or make
-this repository public`), and the exposure that actually bites is
-committing to `main` believing HEAD is a feature branch.
+staged, and **refuses a commit made while HEAD is `main`** — the
+exposure that actually bites is committing to `main` believing
+HEAD is a feature branch, and the hook catches that before the
+push does.
+
+It predates server-side protection, which the free plan refused
+for a private repo (`403 Upgrade to GitHub Pro or make this
+repository public`) until the public flip let
+`scripts/protect-main.sh` apply #487's ruleset. Both still earn
+their keep: the ruleset is what red CI cannot get past, and the
+hook is what tells you *before* you have written the commit.
 
 Deliberately the commit, not the push: ff-merging a reviewed
 branch legitimately writes to `main`. Override a genuinely

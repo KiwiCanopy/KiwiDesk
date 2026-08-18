@@ -1,8 +1,17 @@
 #!/bin/bash
-# Cut a release: stamp the version, verify, commit, tag, push
-# (#32). Pushing the tag is what triggers .github/workflows/
-# release.yml, which re-verifies the tag, builds the artifact
-# and drafts the release.
+# Cut a release in TWO RUNS (#32). main is protected (#487), so
+# the version stamp reaches it through a PR like everything else,
+# and the tag is cut once that PR has merged:
+#
+#   run 1  stamp -> verify -> commit on chore/stamp-<version>
+#          -> push the branch -> open its PR              (phase A)
+#   run 2  (after the PR merges, on a synced main)
+#          verify -> tag -> push the tag                  (phase B)
+#
+# The same command drives both; the script picks the phase from
+# whether the tree already declares the version. Pushing the tag
+# is what triggers .github/workflows/release.yml, which
+# re-verifies the tag, builds the artifact and drafts the release.
 #
 # Usage: scripts/release.sh <semantic-version> [options]
 #   e.g. scripts/release.sh 0.9.0
@@ -31,6 +40,10 @@ ASSUME_YES=0
 usage() {
     cat <<'EOF'
 Cut a release: stamp, verify, commit, tag, push (#32).
+
+Runs twice: the first stamps the version onto a
+chore/stamp-<version> branch and opens its PR; the second, on a
+synced main after that PR merges, cuts and pushes the tag.
 
 Usage: scripts/release.sh <semantic-version> [options]
 
@@ -211,54 +224,125 @@ else
 fi
 
 # ---------------------------------------------------------------
-# 4. Commit & tag
+# 4. Stamp (phase A) or tag (phase B)
+#
+# WHY THIS IS TWO PHASES. `main` is protected (#487, applied by
+# scripts/protect-main.sh) with enforce_admins TRUE, so a direct
+# push to it is refused and the owner cannot bypass that. The
+# stamp therefore reaches main the only way anything does — a PR
+# — and the tag is cut on a later run, once that PR has merged.
+#
+# The stamps for 0.9.1, 0.9.5 and 0.9.6 each landed through a
+# branch opened by hand after this script had already failed at
+# the push. Phase A is that rescue, done by the script rather
+# than re-derived from memory on release night.
 
-echo "==> committing"
+# Which phase this run is, asked of git rather than of the file:
+# reading the version back out here would make this a second
+# owner of KiwiDeskVersion.swift's shape, and bump-version.sh is
+# the one owner of it.
 git add "$VERSION_FILE"
-# Whether THIS run created a commit. The decline path below prints
-# an undo, and `git reset --hard HEAD~1` is destructive in the
-# already-stamped case: HEAD is then a commit that is already on
-# origin/main, so the undo would discard an unrelated pushed
-# commit and leave local main behind the remote.
-COMMITTED=0
-if git diff --cached --quiet; then
-    # The tree already declares this version, so there is nothing
-    # to commit and `git commit` would exit 1 on "nothing to
-    # commit" — after the whole gate has run, reading like a bug
-    # rather than a state. Two ordinary ways to get here: the tag
-    # push failed and this is the re-run, or someone deleted the
-    # tag and started over. Tag HEAD instead; the workflow's
-    # tag-match guard is satisfied either way, because the
-    # constant already says $VERSION.
-    echo "    already stamped $VERSION — tagging HEAD"
-else
-    # The pre-commit hook refuses commits on main, and this is
-    # the case its override exists for: a release commit belongs
-    # on main by definition. Named rather than `--no-verify`,
-    # which would also drop the lint and locale checks.
-    KIWIDESK_ALLOW_MAIN_COMMIT=1 \
-        git commit -m "chore(release): stamp version $VERSION"
-    COMMITTED=1
+
+if ! git diff --cached --quiet; then
+    # -----------------------------------------------------------
+    # Phase A — the stamp goes to main through a PR.
+    STAMP_BRANCH="chore/stamp-$VERSION"
+
+    # Checked here rather than in step 1 because the phase is not
+    # known until the stamp has been attempted. Nothing is lost
+    # by the lateness — the trap reverts the stamp on the way out
+    # — and a step-1 copy would be wrong: in phase B this branch
+    # may still exist on origin, and refusing the tag run for
+    # that would strand the release.
+    if git rev-parse -q --verify "$STAMP_BRANCH" >/dev/null; then
+        echo "error: branch $STAMP_BRANCH already exists" \
+             "locally. Delete it, or finish the release it" \
+             "belongs to." >&2
+        exit 1
+    fi
+
+    echo "==> committing on $STAMP_BRANCH"
+    git checkout -q -b "$STAMP_BRANCH"
+    # No KIWIDESK_ALLOW_MAIN_COMMIT: this commit is on a branch,
+    # which is exactly what the pre-commit hook wants.
+    git commit -q -m "chore(release): stamp version $VERSION"
+    # The commit carries the stamp, so there is nothing to revert
+    # and the handler must not run.
+    STAMPED=0
+
+    if [ "$ASSUME_YES" -eq 0 ]; then
+        echo
+        echo "About to push $STAMP_BRANCH and open its PR."
+        echo "No tag is cut by this phase: $TAG is created on the"
+        echo "run after the PR merges, so nothing here is"
+        echo "irreversible."
+        printf 'Push? [y/N] '
+        read -r reply
+        case "$reply" in
+            [yY]|[yY][eE][sS]) ;;
+            *)
+                echo "not pushed. The stamp is committed on" \
+                     "$STAMP_BRANCH:"
+                echo "  git push -u origin $STAMP_BRANCH"
+                echo "  git checkout main &&" \
+                     "git branch -D $STAMP_BRANCH"
+                exit 0
+                ;;
+        esac
+    fi
+
+    echo "==> pushing $STAMP_BRANCH"
+    git push -q -u origin "$STAMP_BRANCH"
+
+    # Best effort, the same trade the milestone check makes: gh
+    # may be absent or unauthenticated, and that must not strand
+    # a branch that is already pushed. The next steps are printed
+    # either way, so a failure here costs a click, not the thread.
+    if command -v gh >/dev/null 2>&1 \
+        && gh auth status >/dev/null 2>&1; then
+        echo "==> opening the PR"
+        PR_BODY="Version stamp for $VERSION, produced by
+scripts/release.sh.
+
+main is protected (#487), so the stamp reaches it through this
+PR. The $TAG tag is pushed by re-running the script once this
+has merged, which takes its tag phase and creates no second
+commit."
+        gh pr create --base main --head "$STAMP_BRANCH" \
+            --title "chore(release): stamp version $VERSION" \
+            --body "$PR_BODY" || true
+    else
+        echo "! gh unavailable — open the PR by hand" >&2
+    fi
+
+    echo
+    echo "stamped $VERSION on $STAMP_BRANCH — NOT yet released."
+    echo "  1. merge the PR once CI is green"
+    echo "  2. git checkout main && git pull"
+    echo "  3. scripts/release.sh $VERSION   (cuts $TAG)"
+    exit 0
 fi
-# Either the commit carries the stamp or there was none to make.
-# Nothing left to revert, so the handler must not run.
+
+# ---------------------------------------------------------------
+# 5. Phase B — the tree already declares this version, so tag it
+#
+# Reached on the run after phase A's PR merged: step 1 has proven
+# HEAD is main and level with origin/main, and the stamp is
+# already in that tree. The tag is the only thing left to push,
+# and main is deliberately not pushed at all — there is nothing
+# to send, and protection would refuse it if there were.
+
+echo "    already stamped $VERSION — tagging HEAD"
+# Nothing was written this run, so the handler must not run.
 STAMPED=0
 
 echo "==> tagging $TAG"
 git tag -a "$TAG" -m "KiwiDesk $VERSION"
 
-# ---------------------------------------------------------------
-# 5. Push
-
 if [ "$ASSUME_YES" -eq 0 ]; then
     echo
     echo "About to push to origin:"
-    if [ "$COMMITTED" -eq 1 ]; then
-        echo "  commit  $(git rev-parse --short HEAD) on main"
-    else
-        echo "  commit  none (already stamped)"
-    fi
-    echo "  tag     $TAG"
+    echo "  tag  $TAG -> $(git rev-parse --short HEAD)"
     echo
     echo "Pushing the tag starts the release workflow and cannot"
     echo "be undone cleanly once anyone has fetched it."
@@ -267,51 +351,24 @@ if [ "$ASSUME_YES" -eq 0 ]; then
     case "$reply" in
         [yY]|[yY][eE][sS]) ;;
         *)
-            # The undo has to branch on what this run actually did.
-            # Printing `reset --hard HEAD~1` when no commit was
-            # made would throw away whatever HEAD already was — and
-            # in the already-stamped path that is a commit sitting
-            # on origin/main.
-            if [ "$COMMITTED" -eq 1 ]; then
-                echo "not pushed. The commit and tag are local:"
-                echo "  git push origin main &&" \
-                     "git push origin $TAG"
-                echo "  git tag -d $TAG && git reset --hard HEAD~1"
-            else
-                echo "not pushed. Only the tag is local:"
-                echo "  git push origin $TAG"
-                echo "  git tag -d $TAG"
-            fi
+            echo "not pushed. Only the tag is local:"
+            echo "  git push origin $TAG"
+            echo "  git tag -d $TAG"
             exit 0
             ;;
     esac
 fi
 
-# The commit first, always: a tag pushed ahead of it would point
-# at an object that is not on main, and if the branch push were
-# then rejected the tag would be the only reference to it.
-echo "==> pushing main"
-# Same courtesy as the tag push below: a bare re-run after this
-# fails dies at the "level with origin/main" precondition, which
-# describes the symptom and not the fix.
-if ! git push origin main; then
-    echo >&2
-    echo "error: could not push main, so the tag was not pushed" \
-         "either. Both are still local — resolve the push (pull," \
-         "or check access) and re-run:" >&2
-    echo "  git push origin main && git push origin $TAG" >&2
-    exit 1
-fi
 echo "==> pushing $TAG"
-# The one partial state this script can end in, so it names the
+# The one partial state this phase can end in, so it names the
 # way out. A bare re-run would refuse at the local-tag
-# precondition — technically true and unhelpful, since the fix is
-# to push the tag that already exists, not to cut another.
+# precondition — true and unhelpful, since the fix is to push the
+# tag that already exists, not to cut another.
 if ! git push origin "$TAG"; then
     echo >&2
-    echo "error: main was pushed but $TAG was not. The release" \
-         "commit is on origin/main; only the tag is missing, so" \
-         "re-running this script will refuse. Push it directly:" >&2
+    echo "error: $TAG was not pushed. The stamp is already on" \
+         "origin/main, so re-running this script refuses at the" \
+         "local-tag precondition. Push it directly:" >&2
     echo "  git push origin $TAG" >&2
     exit 1
 fi
