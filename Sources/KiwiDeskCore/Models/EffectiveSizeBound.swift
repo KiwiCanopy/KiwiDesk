@@ -155,8 +155,11 @@ public struct EffectiveSizeBound: Sendable, Equatable {
 /// window will actually hold, nil where the tick's size is
 /// honest. Bound semantics, so it lives beside
 /// `EffectiveSizeBound` — computed by
-/// `TilingEngine.animationSizePin(for:)` from the confirmed
-/// bound and the in-flight target, consumed by
+/// `TilingEngine.animationSizePin(for:)` from the in-flight
+/// target against the confirmed bound, or provisionally
+/// against the first refusal's candidate (rendering
+/// self-corrects at settle; geometry stays confirmed-only),
+/// consumed by
 /// `FollowSource.renderFrame`, whose signature is what drags
 /// both overlay managers through any change (borders.md).
 public struct SizePin: Sendable, Equatable {

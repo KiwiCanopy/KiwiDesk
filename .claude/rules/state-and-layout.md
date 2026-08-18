@@ -181,9 +181,13 @@ editing here:
   answer — the same ask refused with the same answer twice
   confirms a per-axis, PER-ASK `EffectiveSizeBound` entry —
   entries never generalize across asks (a grid-snapping app
-  answers each ask differently) and never overwrite another
-  ask's ladder (alternating layouts starved a single slot,
-  device QA 2026-08-18) — after which the
+  answers each ask differently; the one deliberate exception is
+  the compliance contradiction sweep, argued on `complied`) and
+  hold a ladder PER ASK up to `SizeBoundLearner
+  .maxEntriesPerAxis` (alternating layouts starved a single
+  slot, device QA 2026-08-18; keep that cap sized past every
+  real producer, because an evicted candidate re-opens the
+  starvation) — after which the
   un-forced skip treats the refused target as "already there"
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window

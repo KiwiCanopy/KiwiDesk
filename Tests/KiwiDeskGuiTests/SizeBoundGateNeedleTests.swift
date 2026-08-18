@@ -18,8 +18,10 @@ import Testing
 struct SizeBoundGateNeedleTests {
     @Test("The gate defaults to the applier's echo grace")
     func gateDefaultsToEchoGrace() throws {
+        // Both #677 channels consult `askEchoLikely`, so the
+        // production default lives in ITS body now.
         let source = try SourceScan.functionBody(
-            of: "observeAppAnswer",
+            of: "askEchoLikely",
             in: "TilingEngine+SizeBounds.swift",
             under: "Tiling"
         )

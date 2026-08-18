@@ -7,23 +7,63 @@ import CoreGraphics
 /// flow calls. The learning ladder itself is `SizeBoundLearner`;
 /// what a learned bound means is `EffectiveSizeBound`.
 extension TilingEngine {
-    /// The observe gate (#677): a settled window's echo-fed
-    /// frame is the app's answer to the engine's last ask.
-    /// Neither a mid-flight frame (travel, not an answer) nor
-    /// one inside its ask's echo grace counts — two rapid
+    /// The #677 channels' shared "is this our own ask's echo"
+    /// probe: production reads the applier's recent-set stamp;
+    /// fixtures with a severed applier inject through
+    /// `echoGraceOverride`, because the stamp is only written
+    /// by a real AX apply.
+    func askEchoLikely(_ id: WindowID) -> Bool {
+        echoGraceOverride?(id) ?? didRecentlySetFrame(id)
+    }
+
+    /// The retile-time observe gate (#677): a settled window's
+    /// echo-fed frame is the app's answer to the engine's last
+    /// ask. Neither a mid-flight frame (travel, not an answer)
+    /// nor one inside its ask's echo grace counts — two rapid
     /// retiles re-asking one target before any echo lands
     /// would otherwise read the stale pre-ask frame as the
     /// same refusal twice and confirm a false bound (review,
-    /// 2026-08-18). Deferring costs nothing but time: a real
-    /// refusal is still there at the next quiet retile.
+    /// 2026-08-18). Deferring costs nothing but time: the echo
+    /// channel below is the primary learner now, and this pass
+    /// only mops up answers whose echoes were missed.
     func observeAppAnswer(for id: WindowID, current: CGRect) {
-        let echoMaybePending =
-            echoGraceOverride?(id)
-            ?? didRecentlySetFrame(id)
         guard !animation.isAnimating(window: id),
-            !echoMaybePending
+            !askEchoLikely(id)
         else { return }
         boundLearner.observe(id, currentSize: current.size)
+    }
+
+    /// The echo-time observation (#677, device QA 2026-08-18):
+    /// an echo of our own set IS the app's answer, knowable the
+    /// moment it arrives — the retile-time pass alone starved,
+    /// because every unconfirmed retile re-issued the ask and
+    /// restarted the very grace the observation waited on, and
+    /// a quiet screen produced no retile to learn from at all.
+    /// Gated on the animation being done: an in-flight echo is
+    /// travel, and the spring's deceleration tail can emit two
+    /// near-identical sizes shy of the target — a false confirm
+    /// the settled gate closes. Returns the confirmation edge;
+    /// the caller answers it with an immediate retile so the
+    /// residue (re-pack / centering) is placed right then.
+    func observeEchoAnswer(
+        _ id: WindowID,
+        size: CGSize
+    ) -> Bool {
+        guard !animation.isAnimating(window: id)
+        else { return false }
+        return boundLearner.observe(id, currentSize: size)
+    }
+
+    /// Whether a reported size is one the ledger already
+    /// explains — the forget gate's second term: a late echo of
+    /// our own ask (past the applier's grace, or delayed by the
+    /// #618 read queue) must not classify as a genuine resize
+    /// and wipe the learning it is evidence FOR.
+    func ledgerExplainsResize(
+        _ id: WindowID,
+        size: CGSize
+    ) -> Bool {
+        boundLearner.explainsResize(id, size: size)
     }
 
     /// Whether a retile target that fails the plain skip check

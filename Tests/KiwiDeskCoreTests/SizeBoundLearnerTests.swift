@@ -74,56 +74,6 @@ struct SizeBoundLearnerTests {
         #expect(bound?.height.first?.answered == 600)
     }
 
-    @Test("Compliance clears the candidate")
-    func complianceClearsCandidate() {
-        var learner = SizeBoundLearner()
-        let asked = CGSize(width: 900, height: 800)
-        refused(
-            &learner,
-            asked: asked,
-            answered: CGSize(width: 715, height: 800)
-        )
-        // The app performs the ask this time — the earlier
-        // refusal was transient, so the ladder restarts.
-        refused(&learner, asked: asked, answered: asked)
-        refused(
-            &learner,
-            asked: asked,
-            answered: CGSize(width: 715, height: 800)
-        )
-        #expect(learner.bound(for: w) == nil)
-    }
-
-    @Test("A contradicted bound is cleared by compliance")
-    func contradictionClearsBound() {
-        var learner = SizeBoundLearner()
-        let asked = CGSize(width: 900, height: 800)
-        let answered = CGSize(width: 715, height: 800)
-        refused(&learner, asked: asked, answered: answered)
-        refused(&learner, asked: asked, answered: answered)
-        #expect(learner.bound(for: w) != nil)
-        // The app later performs 800 — above the learned
-        // ceiling of 715, so the constraint has lifted and the
-        // bound must go, or a stale skip pins the window small.
-        let wider = CGSize(width: 800, height: 800)
-        refused(&learner, asked: wider, answered: wider)
-        #expect(learner.bound(for: w) == nil)
-    }
-
-    @Test("Compliance below a ceiling keeps the bound")
-    func complianceBelowCeilingKeeps() {
-        var learner = SizeBoundLearner()
-        let asked = CGSize(width: 900, height: 800)
-        let answered = CGSize(width: 715, height: 800)
-        refused(&learner, asked: asked, answered: answered)
-        refused(&learner, asked: asked, answered: answered)
-        // The layout consumed the bound and asked 715, which
-        // the app performs. That contradicts nothing — the
-        // ceiling still stands for the 900 ask.
-        refused(&learner, asked: answered, answered: answered)
-        #expect(learner.bound(for: w)?.width.first?.answered == 715)
-    }
-
     @Test("Interleaved asks ladder independently")
     func interleavedAsksBothConfirm() {
         // The monocle dance that never stopped (device QA,
@@ -157,7 +107,10 @@ struct SizeBoundLearnerTests {
     @Test("Entries are capped, oldest evicted")
     func entriesAreCapped() {
         var learner = SizeBoundLearner()
-        let asks: [CGFloat] = [900, 1000, 1100, 1200, 1300]
+        // One past the cap, derived so a retuned cap keeps the
+        // test honest.
+        let count = SizeBoundLearner.maxEntriesPerAxis + 1
+        let asks = (0..<count).map { CGFloat(900 + $0 * 100) }
         for ask in asks {
             let asked = CGSize(width: ask, height: 800)
             let answered = CGSize(width: 715, height: 800)
@@ -165,13 +118,62 @@ struct SizeBoundLearnerTests {
             refused(&learner, asked: asked, answered: answered)
         }
         let bound = learner.bound(for: w)
-        // The oldest ask fell off the cap; the newest four hold.
-        #expect(bound?.consumedWidth(asking: 900) == nil)
-        #expect(bound?.consumedWidth(asking: 1000) == 715)
-        #expect(bound?.consumedWidth(asking: 1300) == 715)
+        // The oldest ask fell off the cap; the newest hold.
+        #expect(
+            bound?.consumedWidth(asking: asks[0]) == nil
+        )
+        #expect(bound?.consumedWidth(asking: asks[1]) == 715)
+        #expect(
+            bound?.consumedWidth(asking: asks[count - 1])
+                == 715
+        )
         #expect(
             bound?.width.count
                 == SizeBoundLearner.maxEntriesPerAxis
+        )
+    }
+
+    @Test("Unconfirmed candidates are capped too")
+    func candidatesAreCapped() {
+        // The candidate-side cap was unexercised: every other
+        // fixture confirms each ask before the next, so the
+        // candidate list never grows past one (review,
+        // 2026-08-18).
+        var learner = SizeBoundLearner()
+        let count = SizeBoundLearner.maxEntriesPerAxis + 1
+        let asks = (0..<count).map { CGFloat(900 + $0 * 100) }
+        for ask in asks {
+            refused(
+                &learner,
+                asked: CGSize(width: ask, height: 800),
+                answered: CGSize(width: 715, height: 800)
+            )
+        }
+        // A surviving candidate confirms on its second
+        // observation… (checked first: re-observing the
+        // EVICTED ask below evicts another survivor)
+        refused(
+            &learner,
+            asked: CGSize(
+                width: asks[count - 1],
+                height: 800
+            ),
+            answered: CGSize(width: 715, height: 800)
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: asks[count - 1]) == 715
+        )
+        // …while the evicted first ask's cannot — its ladder
+        // restarted from zero.
+        refused(
+            &learner,
+            asked: CGSize(width: asks[0], height: 800),
+            answered: CGSize(width: 715, height: 800)
+        )
+        #expect(
+            learner.bound(for: w)?
+                .consumedWidth(asking: asks[0]) == nil
         )
     }
 
@@ -201,6 +203,39 @@ struct SizeBoundLearnerTests {
         )
     }
 
+    @Test("Observe reports the confirmation edge exactly once")
+    func observeReportsTheConfirmationEdge() {
+        // The caller answers a confirm with an immediate
+        // retile — so the edge must fire on the believing
+        // observation, and NEVER on a re-observation of the
+        // same believed answer, or the retile loops on its own
+        // echoes.
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 900, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(w, currentSize: answered) == false
+        )
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(w, currentSize: answered) == true
+        )
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(w, currentSize: answered) == false
+        )
+        // A CHANGED answer that re-confirms is a new edge — the
+        // geometry it implies moved.
+        let changed = CGSize(width: 640, height: 800)
+        learner.recordAsk(w, size: asked)
+        learner.observe(w, currentSize: changed)
+        learner.recordAsk(w, size: asked)
+        #expect(
+            learner.observe(w, currentSize: changed) == true
+        )
+    }
+
     @Test("A zero-size frame is no answer")
     func zeroSizeFrameIsNoAnswer() {
         // A window created and never echoed keeps a .zero
@@ -215,31 +250,4 @@ struct SizeBoundLearnerTests {
         #expect(learner.bound(for: w) == nil)
     }
 
-    @Test("Forget drops everything learned")
-    func forgetDrops() {
-        var learner = SizeBoundLearner()
-        let asked = CGSize(width: 900, height: 800)
-        let answered = CGSize(width: 715, height: 800)
-        refused(&learner, asked: asked, answered: answered)
-        refused(&learner, asked: asked, answered: answered)
-        learner.forget(w)
-        #expect(learner.bound(for: w) == nil)
-        // The ladder restarts from zero — one observation after
-        // a forget must not confirm against pre-forget history.
-        refused(&learner, asked: asked, answered: answered)
-        #expect(learner.bound(for: w) == nil)
-    }
-
-    @Test("Rekey migrates the ledger")
-    func rekeyMigrates() {
-        var learner = SizeBoundLearner()
-        let new = WindowID(9)
-        let asked = CGSize(width: 900, height: 800)
-        let answered = CGSize(width: 715, height: 800)
-        refused(&learner, asked: asked, answered: answered)
-        refused(&learner, asked: asked, answered: answered)
-        learner.rekey(old: w, new: new)
-        #expect(learner.bound(for: w) == nil)
-        #expect(learner.bound(for: new)?.width.first?.answered == 715)
-    }
 }

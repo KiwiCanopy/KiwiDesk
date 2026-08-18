@@ -28,8 +28,11 @@ import CoreGraphics
 /// by the same compliance and invalidation arms as every other
 /// stale entry. A cancel mid-flight can seed one wrong
 /// candidate (the frame observed is mid-travel, not an
-/// answer), and the next settled observation overwrites it.
-/// And a constraint
+/// answer); the next SAME-ASK observation overwrites it, and
+/// one for an ask that never recurs persists until eviction or
+/// forget — where its one consumer, the overlay pin, can
+/// mis-render a single matching flight before the settle keys
+/// re-read reality. And a constraint
 /// that lifts with no resize event and no recurring ask stays
 /// learned until an invalidation fires; the forget on every
 /// genuine (non-echo) resize covers the real-world case, an
@@ -46,21 +49,29 @@ struct SizeBoundLearner {
     /// per axis let them overwrite each other's ladder so the
     /// less-visited layout never converged (device QA,
     /// 2026-08-18).
-    private struct Ledger {
+    // Internal (not private): the invalidation half lives in
+    // `SizeBoundLearner+Invalidation.swift`, split at the file
+    // ceiling, and Swift private does not cross files.
+    struct Ledger {
         var width: [EffectiveSizeBound.Axis] = []
         var height: [EffectiveSizeBound.Axis] = []
         var isEmpty: Bool { width.isEmpty && height.isEmpty }
     }
 
-    /// Distinct asks remembered per axis. Sized to the real
-    /// producers — one ask per layout mode a window meets, and
-    /// a window rarely tiles under more than a few — so
-    /// eviction is a leak bound, not a working limit.
-    static let maxEntriesPerAxis = 4
+    /// Distinct asks remembered per axis. Sized WELL past the
+    /// real producers — one ask per layout mode a window meets,
+    /// and a window rarely tiles under more than three or
+    /// four — because eviction is only a leak bound: evicting a
+    /// candidate before its confirming re-encounter re-opens
+    /// the starvation the per-ask shape exists to close
+    /// (review, 2026-08-18), so the cap must never bind in
+    /// ordinary use. Recurring past it costs a re-probe, not
+    /// correctness.
+    static let maxEntriesPerAxis = 8
 
-    private var lastAsks: [WindowID: CGSize] = [:]
-    private var candidates: [WindowID: Ledger] = [:]
-    private var bounds: [WindowID: Ledger] = [:]
+    var lastAsks: [WindowID: CGSize] = [:]
+    var candidates: [WindowID: Ledger] = [:]
+    var bounds: [WindowID: Ledger] = [:]
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -73,28 +84,39 @@ struct SizeBoundLearner {
     /// The app's answer to the last recorded ask: the window's
     /// settled, echo-fed frame size. Callers gate on the
     /// window not animating — a mid-flight frame is travel,
-    /// not an answer.
-    mutating func observe(_ id: WindowID, currentSize: CGSize) {
-        guard let asked = lastAsks[id] else { return }
+    /// not an answer. Returns whether a BELIEVED entry was
+    /// created or changed — the confirmation edge the caller
+    /// answers with an immediate retile, so the residue is
+    /// placed the moment the bound is known instead of at the
+    /// next unrelated event (device QA, 2026-08-18: the
+    /// re-pack "taking many visits" was this placement waiting
+    /// for a retile that had no reason to come).
+    @discardableResult
+    mutating func observe(
+        _ id: WindowID,
+        currentSize: CGSize
+    ) -> Bool {
+        guard let asked = lastAsks[id] else { return false }
         // A non-positive span cannot be a real on-screen
         // window — it is a state frame no echo ever wrote (a
         // window created and never heard from again), not an
         // answer. Learning it would confirm a 0 pt "bound" and
         // collapse the slot.
         guard currentSize.width > 0, currentSize.height > 0
-        else { return }
-        observeAxis(
+        else { return false }
+        let widthConfirmed = observeAxis(
             id,
             asked: asked.width,
             current: currentSize.width,
             axis: \.width
         )
-        observeAxis(
+        let heightConfirmed = observeAxis(
             id,
             asked: asked.height,
             current: currentSize.height,
             axis: \.height
         )
+        return widthConfirmed || heightConfirmed
     }
 
     /// The confirmed bound for a window, nil while unproven.
@@ -157,10 +179,11 @@ struct SizeBoundLearner {
         asked: CGFloat,
         current: CGFloat,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
+    ) -> Bool {
+        var confirmed = false
         if EffectiveSizeBound.matches(current, asked) {
             complied(id, asked: asked, axis: axis)
-            return
+            return false
         }
         var candidateEntries =
             candidates[id]?[keyPath: axis] ?? []
@@ -173,7 +196,7 @@ struct SizeBoundLearner {
                 current
             ) {
                 // Twice in a row: the entry is believed.
-                promote(
+                confirmed = promote(
                     id,
                     asked: asked,
                     answered: current,
@@ -205,14 +228,19 @@ struct SizeBoundLearner {
             entries: candidateEntries,
             axis: axis
         )
+        return confirmed
     }
 
+    /// Returns whether the believed ledger actually CHANGED —
+    /// re-promoting an identical entry is not a confirmation
+    /// edge, which is what keeps the caller's answer (an
+    /// immediate retile) from looping on its own echoes.
     private mutating func promote(
         _ id: WindowID,
         asked: CGFloat,
         answered: CGFloat,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
+    ) -> Bool {
         var entries = bounds[id]?[keyPath: axis] ?? []
         let entry = EffectiveSizeBound.Axis(
             asked: asked,
@@ -221,6 +249,12 @@ struct SizeBoundLearner {
         if let index = entries.firstIndex(where: {
             EffectiveSizeBound.matches($0.asked, asked)
         }) {
+            if EffectiveSizeBound.matches(
+                entries[index].answered,
+                answered
+            ) {
+                return false
+            }
             entries[index] = entry
         } else {
             entries.append(entry)
@@ -229,61 +263,7 @@ struct SizeBoundLearner {
             }
         }
         writeBounds(id, entries: entries, axis: axis)
+        return true
     }
 
-    /// The app performed this axis's ask. Clear the ask's
-    /// candidate, and clear every believed entry the compliance
-    /// contradicts: a ceiling (`answered < asked`) is falsified
-    /// by a complied ask above its answer, a floor by one
-    /// below — the constraint lifted, and keeping the entry
-    /// would let a stale skip pin the window at a size the app
-    /// no longer insists on.
-    private mutating func complied(
-        _ id: WindowID,
-        asked: CGFloat,
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
-        if var candidateEntries = candidates[id]?[
-            keyPath: axis
-        ] {
-            candidateEntries.removeAll {
-                EffectiveSizeBound.matches($0.asked, asked)
-            }
-            writeCandidates(
-                id,
-                entries: candidateEntries,
-                axis: axis
-            )
-        }
-        guard var entries = bounds[id]?[keyPath: axis]
-        else { return }
-        let tolerance = EffectiveSizeBound.matchTolerance
-        entries.removeAll { entry in
-            let ceiling = entry.answered < entry.asked
-            return ceiling
-                ? asked > entry.answered + tolerance
-                : asked < entry.answered - tolerance
-        }
-        writeBounds(id, entries: entries, axis: axis)
-    }
-
-    private mutating func writeCandidates(
-        _ id: WindowID,
-        entries: [EffectiveSizeBound.Axis],
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
-        var ledger = candidates[id] ?? Ledger()
-        ledger[keyPath: axis] = entries
-        candidates[id] = ledger.isEmpty ? nil : ledger
-    }
-
-    private mutating func writeBounds(
-        _ id: WindowID,
-        entries: [EffectiveSizeBound.Axis],
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
-        var ledger = bounds[id] ?? Ledger()
-        ledger[keyPath: axis] = entries
-        bounds[id] = ledger.isEmpty ? nil : ledger
-    }
 }
