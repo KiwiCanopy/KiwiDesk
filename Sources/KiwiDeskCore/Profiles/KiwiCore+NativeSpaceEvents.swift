@@ -54,7 +54,12 @@ extension KiwiCore {
             ?? (switched == nil ? snapshot.authority : nil)
         guard let number else { return }
         let monitor =
-            switched.flatMap { monitorNumber(forUUID: $0) } ?? 1
+            switched.flatMap {
+                monitorNumber(
+                    forUUID: $0,
+                    mainUUID: snapshot.mainUUID
+                )
+            } ?? 1
         bus.emit(
             .nativeSpaceChange,
             data: .object([
@@ -77,14 +82,16 @@ extension KiwiCore {
     /// no connected display carries the UUID (unplugged
     /// mid-switch, or shared mode's synthetic identifier).
     ///
-    /// Main comes from `NativeSpaces.mainDisplayUUID()` — the
-    /// same seam the switch attribution reads — rather than a
-    /// second `CGMainDisplayID` read, so a fixture cannot pin one
-    /// and get a switch attributed to one display and numbered as
-    /// another (review, 2026-08-18).
-    private func monitorNumber(forUUID uuid: String) -> Int? {
+    /// Main arrives as the SNAPSHOT's `mainUUID` — the same
+    /// value the switch attribution used, not merely the same
+    /// seam re-read (review round 2, 2026-08-18) — so a switch
+    /// cannot be attributed to one display and numbered as
+    /// another.
+    private func monitorNumber(
+        forUUID uuid: String,
+        mainUUID: String?
+    ) -> Int? {
         let displays = state.workspaces.allDisplays
-        let mainUUID = NativeSpaces.mainDisplayUUID()
         let mainID = displays.first {
             NativeSpaces.displayUUID(for: $0.id) == mainUUID
         }?.id

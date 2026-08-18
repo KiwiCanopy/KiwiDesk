@@ -31,7 +31,11 @@ extension KiwiCore {
                     + "'\(profile)' does not exist (yet)"
             )
         }
-        applyNativeSpaceBinding()
+        // A verb, not a switch: no snapshot in hand, so this is
+        // the one live read of the authority on this path.
+        applyNativeSpaceBinding(
+            desktop: NativeSpaces.activeDesktopNumber()
+        )
         return .ok()
     }
 
@@ -76,10 +80,21 @@ extension KiwiCore {
             changed: changed,
             mainUUID: snapshot.mainUUID
         )
+        // Every question below is answered from `snapshot` — the
+        // memory key included, so the Space a Desktop is
+        // remembered under and the Desktop that was
+        // authoritative come from ONE reading (review round 2).
+        let memoryKey = Self.virtualSpaceMemoryKey(
+            mainUUID: snapshot.mainUUID
+        )
         if let last = lastNativeSpace, last != number,
             let active = state.workspaces.activeSpace
         {
-            rememberVirtualSpace(active, leaving: last)
+            rememberVirtualSpace(
+                active,
+                leaving: last,
+                key: memoryKey
+            )
         }
         lastNativeSpace = number
         if secondarySwitch {
@@ -95,9 +110,12 @@ extension KiwiCore {
             updateAppBar()
             updateSpaceBar()
         } else {
-            applyNativeSpaceBinding()
+            applyNativeSpaceBinding(desktop: number)
             if let number,
-                let target = virtualSpaceTarget(for: number)
+                let target = virtualSpaceTarget(
+                    for: number,
+                    key: memoryKey
+                )
             {
                 state.workspaces.activate(target)
                 // Never animate here: this desktop's windows
@@ -180,46 +198,6 @@ extension KiwiCore {
             .keys.sorted()
     }
 
-    // MARK: - Per-Desktop Space memory (#888)
-
-    /// The memory key for the current main display — see
-    /// `DesktopMemory` for why the keying is per display and
-    /// mode-independent.
-    private var virtualSpaceMemoryKey: String {
-        NativeSpaces.mainDisplayUUID() ?? "main"
-    }
-
-    /// Records the Space the main display's outgoing Desktop
-    /// was showing.
-    func rememberVirtualSpace(
-        _ space: SpaceID,
-        leaving desktop: Int
-    ) {
-        desktopMemory
-            .virtualSpaces[virtualSpaceMemoryKey, default: [:]][
-                desktop
-            ] = space
-    }
-
-    /// The Space a native Desktop should show: the one it
-    /// showed last, or the first space as default. A remembered
-    /// SpaceID foreign to the CURRENT space set falls back too
-    /// (#888): the binding apply just before this read may have
-    /// swapped profiles, and a stale id would activate a Space
-    /// the new profile does not have — missing and stale take
-    /// the same exit.
-    func virtualSpaceTarget(for native: Int) -> SpaceID? {
-        let spaces = state.workspaces.allSpaces
-        if let remembered =
-            desktopMemory
-            .virtualSpaces[virtualSpaceMemoryKey]?[native],
-            spaces.contains(where: { $0.id == remembered })
-        {
-            return remembered
-        }
-        return spaces.first?.id
-    }
-
     /// The post-switch AX reconcile re-tracks this desktop's
     /// windows over the next few hundred ms; afterwards,
     /// re-assert the layout (stashing included) and hand
@@ -283,8 +261,15 @@ extension KiwiCore {
     /// or when the bound profile is already active. All native
     /// Desktops without a binding share whatever profile is
     /// current.
-    func applyNativeSpaceBinding() {
-        guard let number = NativeSpaces.activeDesktopNumber(),
+    ///
+    /// A caller holding a `DesktopSnapshot` passes its
+    /// `authority` rather than letting this re-read the topology
+    /// (review round 2, 2026-08-18); `desktop: nil` from such a
+    /// caller means "no authoritative Desktop", which no-ops, so
+    /// the live read belongs to the no-argument convenience
+    /// alone.
+    func applyNativeSpaceBinding(desktop: Int?) {
+        guard let number = desktop,
             let name = nativeSpaceBindings[number],
             name != profiles.currentName
         else { return }

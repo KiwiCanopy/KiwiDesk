@@ -114,9 +114,19 @@ convention.
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is
 authoritative, which displays changed, whether a display's
-current Space is a user desktop — because two readings taken
-moments apart can disagree about which display switched. And
-never decide anything from a nil Desktop number: nil means a
+current Space is a user desktop, which key the Space memory
+writes under — because two readings taken moments apart can
+disagree about which display switched. That means **threading
+the value, not re-reading the seam**: a helper the handler calls
+takes the answer as a parameter (`applyNativeSpaceBinding(desktop:)`,
+`virtualSpaceTarget(for:key:)`, the emit's `mainUUID`), and the
+no-argument conveniences beside them exist for callers that hold
+no snapshot — a Lua/CLI verb, a config load. Nothing scans for
+a helper that reads its own answer back, so each new one owes
+this deliberately; three shipped without it inside the handler
+this rule was written for (review round 2, 2026-08-18).
+
+And never decide anything from a nil Desktop number: nil means a
 fullscreen/system space AND "no SkyLight", the conflation
 [state-and-layout.md](state-and-layout.md)'s #670 row bans —
 the fullscreen verdict is `isUser`, per display

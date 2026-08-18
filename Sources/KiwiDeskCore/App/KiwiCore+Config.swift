@@ -121,8 +121,12 @@ extension KiwiCore {
         reapplyActiveProfileState()
         // The current native space may carry a binding that
         // the config just (re)declared. Window-rule reconcile
-        // stays deferred until this final profile wins.
-        applyNativeSpaceBinding()
+        // stays deferred until this final profile wins. A
+        // config load holds no switch snapshot, so it reads the
+        // authority live (#888).
+        applyNativeSpaceBinding(
+            desktop: NativeSpaces.activeDesktopNumber()
+        )
         defersWindowRuleReconcile = false
         // The rule owner/profile just changed: re-sync every app
         // once against the FINAL effective rules. Without this,
