@@ -265,6 +265,50 @@ it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
 debugged on the release everyone downloads.
 
+**Corollary: the updater ships before the release that matters,
+and *ships* means published.** The trade-off above buys something
+only if a Sparkle-carrying release exists for the next one to
+update *from*. Merge the updater, go straight to the release
+people arrive at, and the first genuine update is that release to
+its own first patch — debugged on the largest cohort the project
+has had, which is the outcome a smaller first audience was being
+accepted to avoid. So the updater lands in an ordinary release of
+its own, and the release that opens the channel is one a person
+can arrive at by updating.
+
+A merged updater nobody has installed from a published release
+has exercised none of that. A test appcast rehearses the feed
+parse, the version compare and the install-on-quit; it cannot
+rehearse signed, notarized, stapled bytes fetched over the
+network from the production URL, or the cask and the in-app
+updater not fighting over one install. Which release this binds
+is whichever one opens the channel — 1.0 on the current plan
+([#874](https://github.com/KiwiCanopy/KiwiDesk/issues/874)) — and
+the obligation holds wherever that lands.
+
+**Corollary: the gate is Sparkle-in-the-build, never a version
+number.** The rule above says "until Sparkle lands" and names no
+version deliberately: what it asks is whether the build a person
+installs can update itself, and a version number answers that in
+neither direction. So the question is never "have we reached
+1.0". A release shipped without an updater keeps the channel shut
+however large its number, and a release carrying one satisfies
+**this** condition whatever number it lands at.
+
+It satisfies this one, not the gate. The gate is two conditions
+and both are properties of builds rather than of a version:
+Sparkle is in the build a person installs, **and** — by the
+corollary above — that build is one they can have arrived at by
+updating. The first Sparkle-carrying release meets the first and
+cannot meet the second, which is why a promoted download opens on
+the one after it and not on a number.
+
+A promoted `.dmg` then owes
+`.claude/rules/packaging-and-release.md` ▸ *Every distributable
+artifact needs its OWN ticket*. `scripts/build-app.sh` already
+implements it; the change that promotes one carries it into the
+release workflow, which asks for `--zip` alone.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**
