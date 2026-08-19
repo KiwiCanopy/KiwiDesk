@@ -173,6 +173,8 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
         <a href="/docs">{t("footer_docs")}</a>
+        <a href={localePath(lang, "/changelog/")}
+          >{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
         <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
         <a href={repo} target="_blank" rel="noopener">{t("footer_github")}</a>

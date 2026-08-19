@@ -237,6 +237,21 @@ step output first; a future gate on a new credential extends that
 step rather than reaching for `secrets` in a condition that
 silently reads empty.
 
+**The release body has a form, and a parser enforces it (#873).**
+A curated `## Highlights` block sits on top, `--generate-notes`'
+list underneath unedited. Under `## Highlights`: one or two
+sentences of summary, then `###` sections whose titles the author
+chooses, each carrying at least one entry. **Curate the draft,
+then publish** — `release.yml` drafts, and
+`.github/workflows/changelog.yml` fires on *publish* and syncs the
+body onto the site's release-notes page, so publishing an
+uncurated body shows the raw generated list until a correction
+lands. `scripts/release.sh` prints the skeleton after the tag
+push; `scripts/changelog-sync --release <tag> --check` is how to
+check a body before publishing, and the same parser refuses one it
+cannot read rather than half-rendering it. `.claude/rules/site.md`
+owns the generated file and the rest of that contract.
+
 **Write the highlights for the installer, not for yourself.** A
 release body is two tiers: a curated highlights block on top, and
 beneath it the `--generate-notes` list the workflow already

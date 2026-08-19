@@ -308,6 +308,11 @@ const jsonLd = [
                it's useful in Nerd mode too. */}
           <a class="nav__link nav__link--guide" href="/guide/"
             >{t.nav_guide}</a>
+          {/* Release Notes: shown in BOTH modes too. "What changed"
+               is not a nerd question, and the page carries one
+               register for everyone (#873). */}
+          <a class="nav__link" href={`${homeHref}changelog/`}
+            >{t.nav_changelog}</a>
           {/* Docs + GitHub live in the DOM always but are hidden in
                Simple mode (dev-only, via .dev-only). */}
           <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
@@ -934,6 +939,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
             rel="noopener">{t.footer_github}</a>
+          <a href={`${homeHref}changelog/`}>{t.footer_changelog}</a>
           {/* Legal links stay visible in every mode — the Impressum
               must be reachable from every page (§ 5 DDG). */}
           <a href={`${homeHref}imprint`}>{t.footer_impressum}</a>

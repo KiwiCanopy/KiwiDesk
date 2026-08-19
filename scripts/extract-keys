@@ -670,8 +670,70 @@ def _warn_orphans(mapping: dict[str, str]) -> None:
             print(f"    - {key}")
 
 
+def check_site_parity(mapping: dict[str, str]) -> list[str]:
+    """SITE MODE ONLY: every translated catalog must carry every
+    key `en.json` has (#869).
+
+    The asymmetry with the app corpus is the ruling, not an
+    oversight. An app locale is allowed to lag: every `L(key,
+    english)` call site carries its English inline, a missing key
+    falls back to it, and `--<locale>`'s worksheet round exists to
+    let a translator catch up over time. Requiring parity there
+    would block the workflow it is meant to serve.
+
+    The site has no such fallback at the KEY level — a component
+    reads `t.<key>`, and an absent key renders NOTHING. So a gap
+    is a blank on a published page, in a language the person
+    reviewing the PR may not read: invisible in review by
+    construction, which is why it needs a machine. `quote_byline_name`
+    shipped English-only for exactly that reason, and no check
+    noticed.
+
+    Three hand-maintained catalogs make this cheap, and the escape
+    hatch already exists: `scripts/extract-keys --site <locale>`
+    writes the worksheet that clears the failure.
+
+    Refuses an EMPTY mapping rather than passing on it: a guard
+    that finds no violations because it was handed nothing to
+    check reads exactly like a guard that found none, which is
+    the vacuous pass `.claude/rules/rule-authoring.md` names."""
+    if not mapping:
+        return [
+            "en.json decoded to zero keys — nothing to check "
+            "parity against. That is a broken catalog, not a "
+            "clean run."
+        ]
+    problems: list[str] = []
+    for locale_file in shipped_locale_files():
+        try:
+            decoded = json.loads(
+                locale_file.read_text(encoding="utf-8")
+            )
+        except (OSError, json.JSONDecodeError):
+            # validate_locale_files() already hard-failed on this
+            # and named it better than a parity diff could.
+            continue
+        if not isinstance(decoded, dict):
+            continue
+        missing = sorted(set(mapping) - set(decoded))
+        if missing:
+            listed = ", ".join(missing[:8])
+            more = (
+                f" (+{len(missing) - 8} more)"
+                if len(missing) > 8
+                else ""
+            )
+            problems.append(
+                f"{locale_file.name}: missing {len(missing)} "
+                f"key(s) present in en.json — {listed}{more}"
+            )
+    return problems
+
+
 def check(
-    mapping: dict[str, str], residue: bool = True
+    mapping: dict[str, str],
+    residue: bool = True,
+    site: bool = False,
 ) -> int:
     """Compares the freshly-scanned mapping to the committed
     en.json without writing anything. Non-zero exit (with a
@@ -713,6 +775,26 @@ def check(
         for problem in broken:
             print(f"    - {problem}", file=sys.stderr)
         return 1
+    if site:
+        gaps = check_site_parity(mapping)
+        if gaps:
+            print(
+                "extract-keys --site --check: FAILED — a site "
+                "catalog is missing keys en.json has. An absent "
+                "key renders as NOTHING on the page (the app's "
+                "per-call-site English fallback has no site "
+                "equivalent), so this blocks:",
+                file=sys.stderr,
+            )
+            for problem in gaps:
+                print(f"    - {problem}", file=sys.stderr)
+            print(
+                "\nRun `scripts/extract-keys --site <locale>` for "
+                "the worksheet, then `scripts/merge-keys --site "
+                "<locale>`.",
+                file=sys.stderr,
+            )
+            return 1
     _warn_orphans(mapping)
     if not EN_JSON.exists():
         print(
@@ -1168,8 +1250,9 @@ def main(argv: list[str]) -> int:
     mapping = _site_mapping() if site else extract()
     if mode == "--check":
         # Site mode drops the residue heuristic — see
-        # `check_content`.
-        return check(mapping, residue=not site)
+        # `check_content` — and adds the parity gate the app
+        # corpus deliberately does not want (#869).
+        return check(mapping, residue=not site, site=site)
     if mode == "--prune":
         return prune(mapping, regen=not site)
     # Default action: (re)build the manifest, plus optionally the
