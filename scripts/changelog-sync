@@ -1,0 +1,692 @@
+#!/usr/bin/env python3
+"""Build site/src/data/changelog.json from the PUBLISHED GitHub
+releases (#873).
+
+The page renders the curated highlights and nothing else — one
+register, shown to everyone, with the complete generated list one
+link away on the release itself. So the data file carries
+structure (summary, sections, items) rather than a blob of
+markdown, and the generated half is deliberately NOT copied onto
+the site: it is reviewer language, and
+`docs/design-decisions.md` ▸ *Release notes are written for the
+person installing* is why a visitor is not shown it by default.
+
+Three modes, and the difference between them is the guard:
+
+    scripts/changelog-sync --body <file>
+        Parse one release body from a FILE and report. No
+        network, nothing written. This is how to check a DRAFT
+        before publishing it — a draft has no tag to fetch — and
+        it is what `ChangelogParserTests` drives.
+
+    scripts/changelog-sync --release <tag>
+        One published release, strictly: a missing or malformed
+        curated block is a FAILURE, every problem named at once
+        rather than only the first. With --check it writes
+        nothing, which is the form the workflow runs as its
+        guard.
+
+    scripts/changelog-sync --all
+        Rebuild from every published release. A release with no
+        curated block is kept WITHOUT one — the convention
+        postdates most of the history, and rewriting a published
+        body is not on the table — and a release whose block is
+        malformed is kept the same way, with a warning, so ONE
+        bad historical body cannot red every future publish.
+
+Why a parser is the guard rather than a template: a template is a
+suggestion and drifts on the release someone is in a hurry for,
+while the page cannot render a body it cannot read.
+`.claude/rules/packaging-and-release.md` carries the obligation
+and the argument.
+
+Needs `gh` (authenticated) for the two release modes; `--body`
+needs nothing. No third-party Python anywhere.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA_FILE = ROOT / "site" / "src" / "data" / "changelog.json"
+
+# The level-2 heading that opens the curated block. Everything
+# from here to the NEXT level-2 heading (or the end) is the part a
+# human wrote; what follows is `--generate-notes`' own output,
+# which stays on the release rather than being mirrored here.
+
+# Section titles are NOT enumerated, and that is the ruling rather
+# than a gap (owner, 2026-08-19). A fixed New/Improved/Fixed triple
+# splits one story across three buckets — 0.9.7's "Multi-screen
+# Desktops" is at once new, improved and a fix, while a reader
+# notices it as one thing — so a release names its own sections and
+# may name one "Fixed" when that genuinely is the story. What this
+# parser holds is the SHAPE: a summary, at least one section, no
+# empty section, no empty entry, no issue numbers.
+HIGHLIGHTS_HEADING = "Highlights"
+
+_H1 = re.compile(r"^#(?!#)")
+_H2 = re.compile(r"^##(?!#)\s+(?P<title>.+?)\s*$")
+_H3 = re.compile(r"^###(?!#)\s*(?P<title>.*?)\s*$")
+_DEEPER_HEADING = re.compile(r"^#{4,}")
+_FENCE = re.compile(r"^\s*(?:```|~~~)")
+_BULLET = re.compile(r"^[-*][ \t]+(?P<text>.*?)[ \t]*$")
+_BARE_BULLET = re.compile(r"^[-*][ \t]*$")
+_NESTED_BULLET = re.compile(r"^[ \t]+[-*][ \t]")
+_CONTINUATION = re.compile(r"^[ \t]+(?P<text>\S.*?)[ \t]*$")
+
+# "Highlights carry no issue or PR numbers" — docs/design-decisions.md
+# ▸ Release notes are written for the person installing. That
+# consequence is structural, so unlike the voice itself it can be
+# held mechanically.
+#
+# Anchored on both sides so a hex colour is not read as one:
+# `#1E1E1E` must not report issue 1. The cost of the anchoring is
+# that a genuine "your #1 request" still refuses — accepted,
+# because the message names the fix and rephrasing is cheap,
+# while letting a real issue number through is the failure this
+# exists to stop.
+_ISSUE_REF = re.compile(
+    r"(?<![\w#])#\d+\b(?![\w-])"
+    r"|github\.com/[^\s)]+/(?:issues|pull)/\d+"
+)
+
+# A tag this project cuts: `v` + semantic version.
+_TAG = re.compile(r"^v(?P<version>\d+\.\d+\.\d+)$")
+
+
+class NotesError(Exception):
+    """A release body the parser refuses, carrying every problem
+    it found rather than only the first — a maintainer fixing a
+    body should need one round, not four."""
+
+    def __init__(self, tag: str, problems: list[str]) -> None:
+        self.tag = tag
+        self.problems = problems
+        super().__init__(f"{tag}: {len(problems)} problem(s)")
+
+
+# ---------------------------------------------------------------
+# gh
+
+
+def _gh_json(args: list[str]) -> object:
+    """Runs `gh` and decodes its stdout.
+
+    Deliberately NO `--jq`: with `--paginate` the filter is
+    applied per page and `gh` emits one JSON document per page,
+    so a second page turns the output into `[...]\\n[...]` and
+    decoding raises. Without a filter it merges the pages into
+    one array. That is invisible until the 31st release, and the
+    first thing it would break is the only writing call the
+    publish workflow makes."""
+    result = subprocess.run(
+        ["gh", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        print(
+            f"changelog-sync: `gh {' '.join(args)}` failed:\n"
+            f"{result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        print(
+            f"changelog-sync: `gh {' '.join(args)}` returned "
+            f"something that is not JSON ({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def fetch_releases() -> list[dict]:
+    """Every PUBLISHED release. Drafts are excluded on purpose:
+    `release.yml` creates a draft and the curation happens on it,
+    so a draft is by definition not yet the thing this page
+    describes."""
+    data = _gh_json(
+        ["api", "repos/{owner}/{repo}/releases", "--paginate"]
+    )
+    if not isinstance(data, list):
+        print(
+            "changelog-sync: the releases endpoint did not "
+            "return a list.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return [r for r in data if not r.get("draft")]
+
+
+def fetch_release(tag: str) -> dict:
+    data = _gh_json(
+        ["api", f"repos/{{owner}}/{{repo}}/releases/tags/{tag}"]
+    )
+    if not isinstance(data, dict):
+        print(
+            f"changelog-sync: no release found for {tag}.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if data.get("draft"):
+        print(
+            f"changelog-sync: {tag} is still a draft. Curate the "
+            "draft, then publish — publishing is what this page "
+            "reads. To check a draft's body first, save it to a "
+            "file and run `--body <file>`.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return data
+
+
+# ---------------------------------------------------------------
+# Parsing
+
+
+def split_body(body: str) -> tuple[bool, list[str], list[str]]:
+    """Returns (found, curated lines, problems).
+
+    `found` is kept separate from the line list so "there is no
+    curated block" and "the block is present but empty" reach the
+    maintainer as different sentences — they are different edits.
+    Fenced code is skipped while looking for headings, so a fence
+    quoting `## Highlights` cannot hijack the split."""
+    lines = body.replace("\r\n", "\n").split("\n")
+    problems: list[str] = []
+    starts: list[int] = []
+    fenced = False
+    for index, line in enumerate(lines):
+        if _FENCE.match(line):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        match = _H2.match(line)
+        if match and match.group("title") == HIGHLIGHTS_HEADING:
+            starts.append(index)
+    if not starts:
+        return False, [], problems
+    for extra in starts[1:]:
+        problems.append(
+            f"line {extra + 1}: a second "
+            f"`## {HIGHLIGHTS_HEADING}` heading. One curated "
+            "block per release — everything under a second one "
+            "would be silently dropped."
+        )
+    start = starts[0] + 1
+    end = len(lines)
+    fenced = False
+    for index in range(start, len(lines)):
+        if _FENCE.match(lines[index]):
+            fenced = not fenced
+            continue
+        if not fenced and _H2.match(lines[index]):
+            end = index
+            break
+    return True, lines[start:end], problems
+
+
+def parse_curated(
+    tag: str,
+    lines: list[str],
+    problems: list[str] | None = None,
+) -> tuple[str, list[dict]]:
+    """The curated block → (summary, sections). Raises NotesError
+    carrying every structural problem found."""
+    problems = list(problems or [])
+    summary_parts: list[str] = []
+    sections: list[dict] = []
+    current: dict | None = None
+    pending: list[str] = []
+    pending_line = 0
+
+    def flush() -> None:
+        """Close the entry being accumulated. An entry that
+        strips to nothing is a problem rather than an item: it
+        would clear the empty-section check and then render as a
+        blank bullet, which is what a guard exists to catch."""
+        if not pending:
+            return
+        text = " ".join(part for part in pending if part).strip()
+        pending.clear()
+        if not text:
+            problems.append(
+                f"line {pending_line}: an entry with no text. It "
+                "would render as a blank bullet."
+            )
+            return
+        # Unreachable with `current is None`: every site that
+        # appends to `pending` sits under a `current is not None`
+        # guard. Stated rather than defended against.
+        assert current is not None
+        current["items"].append(text)
+
+    for number, line in enumerate(lines, start=1):
+        if _FENCE.match(line):
+            problems.append(
+                f"line {number}: a code fence inside the curated "
+                "block. Highlights are prose — the page renders "
+                "them inline and has nowhere to put a code block."
+            )
+            continue
+        if _DEEPER_HEADING.match(line):
+            problems.append(
+                f"line {number}: a heading deeper than `###` "
+                f"({line.strip()!r}). The block is two levels: a "
+                "summary, then `###` sections."
+            )
+            continue
+        heading = _H3.match(line)
+        if heading:
+            flush()
+            if current is not None:
+                sections.append(current)
+            title = heading.group("title")
+            if not title:
+                problems.append(
+                    f"line {number}: a `###` with no title."
+                )
+            current = {"title": title, "items": []}
+            continue
+        if _H1.match(line):
+            problems.append(
+                f"line {number}: a level-1 `#` heading inside the "
+                f"block ({line.strip()!r}). The release's own "
+                "headings are `##` and `###`."
+            )
+            continue
+        if _NESTED_BULLET.match(line):
+            problems.append(
+                f"line {number}: a nested list item. The block is "
+                "one level of bullets; a nested list would be "
+                "flattened into its parent, markers and all."
+            )
+            continue
+        if _BARE_BULLET.match(line):
+            problems.append(
+                f"line {number}: a bullet marker with no text."
+            )
+            continue
+        bullet = _BULLET.match(line)
+        if bullet:
+            if current is None:
+                problems.append(
+                    f"line {number}: a bullet before the first "
+                    "`###` section. The summary is prose, not a "
+                    "list."
+                )
+                continue
+            flush()
+            pending_line = number
+            pending.append(bullet.group("text"))
+            continue
+        if not line.strip():
+            flush()
+            continue
+        if current is None:
+            summary_parts.append(line.strip())
+            continue
+        continuation = _CONTINUATION.match(line)
+        if pending:
+            pending.append(
+                continuation.group("text")
+                if continuation
+                else line.strip()
+            )
+        else:
+            # Prose directly under a `###` with no bullets — the
+            # "Translations" / "Also" shape, legitimate, and it
+            # becomes that section's single entry.
+            pending_line = number
+            pending.append(line.strip())
+
+    flush()
+    if current is not None:
+        sections.append(current)
+
+    summary = " ".join(summary_parts).strip()
+    if not summary:
+        problems.append(
+            f"no summary: `## {HIGHLIGHTS_HEADING}` must be "
+            "followed by a sentence or two saying what the "
+            "release is about, before the first `###`."
+        )
+    if not sections:
+        problems.append(
+            f"no `###` sections under `## {HIGHLIGHTS_HEADING}`."
+        )
+    for section in sections:
+        if not section["items"]:
+            problems.append(
+                f"section {section['title']!r} is empty. A "
+                "section with nothing in it is omitted, never "
+                "left under its heading."
+            )
+
+    # EVERY authored slot is checked, not only the entries: a
+    # number in the summary or in a section title is the same
+    # defect one line up.
+    slots: list[tuple[str, str]] = [("the summary", summary)]
+    for section in sections:
+        slots.append(
+            (
+                f"section title {section['title']!r}",
+                section["title"],
+            )
+        )
+        for item in section["items"]:
+            slots.append((f"section {section['title']!r}", item))
+    for where, text in slots:
+        hit = _ISSUE_REF.search(text)
+        if hit:
+            problems.append(
+                f"{where} cites {hit.group(0)!r}. Highlights "
+                "carry no issue or PR numbers — the generated "
+                "list below them is the complete linked record "
+                "(docs/design-decisions.md ▸ Release notes are "
+                "written for the person installing)."
+            )
+
+    if problems:
+        raise NotesError(tag, problems)
+    return summary, sections
+
+
+def parse_release_body(
+    tag: str, body: str
+) -> tuple[str, list[dict]]:
+    """A whole release body → (summary, sections), strictly. The
+    "no block at all" case is its own NotesError so `--all` can
+    tell it apart from a body that is merely malformed."""
+    found, lines, problems = split_body(body or "")
+    if not found:
+        raise NotesError(
+            tag,
+            [
+                f"no `## {HIGHLIGHTS_HEADING}` block. Every "
+                "published release carries one — see the "
+                "skeleton `scripts/release.sh` prints, and "
+                "`.claude/rules/packaging-and-release.md`."
+            ],
+        )
+    if not [line for line in lines if line.strip()]:
+        raise NotesError(
+            tag,
+            problems
+            + [
+                f"`## {HIGHLIGHTS_HEADING}` is present but empty "
+                "— the heading is there and nothing is under it."
+            ],
+        )
+    return parse_curated(tag, lines, problems)
+
+
+# ---------------------------------------------------------------
+# Entries
+
+
+def build_entry(
+    release: dict, strict: bool
+) -> tuple[dict, str]:
+    """Returns (entry, warning). In non-strict mode a body the
+    parser refuses yields an entry WITHOUT a curated block plus a
+    warning, rather than aborting: one bad historical body must
+    not red every future publish."""
+    tag = release.get("tag_name")
+    url = release.get("html_url")
+    if not tag or not url:
+        raise NotesError(
+            str(tag or "<unknown>"),
+            [
+                "the releases API returned an entry with no "
+                "`tag_name` or no `html_url`."
+            ],
+        )
+    match = _TAG.match(tag)
+    entry = {
+        "version": match.group("version") if match else tag,
+        "tag": tag,
+        "date": (release.get("published_at") or "")[:10],
+        "prerelease": bool(release.get("prerelease")),
+        "url": url,
+    }
+    try:
+        summary, sections = parse_release_body(
+            tag, release.get("body") or ""
+        )
+    except NotesError as error:
+        if strict:
+            raise
+        return entry, "; ".join(error.problems)
+    entry["summary"] = summary
+    entry["sections"] = sections
+    return entry, ""
+
+
+def _sort_key(entry: dict) -> tuple:
+    """Newest first, by publication DATE rather than by parsing
+    the tag.
+
+    A version key needs the tag to be exactly `vX.Y.Z`, and
+    anything else — a prerelease suffix, a tag cut without the
+    `v` — then sorts beneath every real version rather than among
+    its neighbours. The date is present on every published
+    release and is what "newest" means on a changelog anyway. The
+    version tuple stays as the tiebreak for two releases
+    published the same day."""
+    match = _TAG.match(entry["tag"])
+    version = (
+        tuple(
+            int(part) for part in match.group("version").split(".")
+        )
+        if match
+        else (0, 0, 0)
+    )
+    return (entry.get("date", ""), version)
+
+
+def write(entries: list[dict]) -> None:
+    entries = sorted(entries, key=_sort_key, reverse=True)
+    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    DATA_FILE.write_text(
+        json.dumps(
+            {
+                "generated_by": "scripts/changelog-sync",
+                "releases": entries,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"changelog-sync: wrote {len(entries)} release(s) to "
+        f"{DATA_FILE.relative_to(ROOT)}"
+    )
+
+
+def read_existing() -> list[dict]:
+    """The committed file, for `--release` to merge into. REFUSES
+    an absent or unreadable base rather than starting from empty:
+    starting from empty would write a one-entry file and destroy
+    the published history, silently and with a success message."""
+    if not DATA_FILE.exists():
+        print(
+            f"changelog-sync: {DATA_FILE.relative_to(ROOT)} does "
+            "not exist. `--release` merges into it and will not "
+            "create it from one release — run "
+            "`scripts/changelog-sync --all` to seed it.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    try:
+        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+        entries = data["releases"]
+        if not isinstance(entries, list) or not all(
+            isinstance(item, dict) and "tag" in item
+            for item in entries
+        ):
+            raise ValueError("`releases` is not a list of entries")
+    except (json.JSONDecodeError, KeyError, ValueError) as error:
+        print(
+            f"changelog-sync: {DATA_FILE.relative_to(ROOT)} is "
+            f"not readable as generated output ({error}). It IS "
+            "generated — rebuild it with "
+            "`scripts/changelog-sync --all` rather than repairing "
+            "it by hand.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return list(entries)
+
+
+def _report(error: NotesError) -> int:
+    print(
+        f"changelog-sync: FAILED — {error.tag}'s body does not "
+        "carry a curated block this page can render:",
+        file=sys.stderr,
+    )
+    for problem in error.problems:
+        print(f"    - {problem}", file=sys.stderr)
+    print(
+        "\nFix the body, then re-run. The page shows the curated "
+        "block to everyone, so an unreadable body is a blank "
+        "entry rather than a rough one.",
+        file=sys.stderr,
+    )
+    return 1
+
+
+# ---------------------------------------------------------------
+# Modes
+
+
+def run_body(path: str) -> int:
+    try:
+        body = Path(path).read_text(encoding="utf-8")
+    except OSError as error:
+        print(f"changelog-sync: {error}", file=sys.stderr)
+        return 1
+    try:
+        summary, sections = parse_release_body(path, body)
+    except NotesError as error:
+        return _report(error)
+    entries = sum(len(s["items"]) for s in sections)
+    print(
+        f"changelog-sync --body: OK — {len(sections)} section(s), "
+        f"{entries} entr(ies)."
+    )
+    print(f"  summary: {summary}")
+    for section in sections:
+        print(
+            f"  ### {section['title']} "
+            f"({len(section['items'])})"
+        )
+    return 0
+
+
+def run_all(check: bool) -> int:
+    entries: list[dict] = []
+    warnings: list[str] = []
+    for release in fetch_releases():
+        try:
+            entry, warning = build_entry(release, strict=False)
+        except NotesError as error:
+            return _report(error)
+        entries.append(entry)
+        if warning:
+            warnings.append(f"{entry['tag']}: {warning}")
+    for warning in warnings:
+        print(
+            f"changelog-sync: WARNING — {warning}", file=sys.stderr
+        )
+    if warnings:
+        print(
+            f"changelog-sync: {len(warnings)} release(s) kept "
+            "without a curated block. Expected for releases "
+            "predating the convention; a release that SHOULD "
+            "carry one is caught by `--release` on publish.",
+            file=sys.stderr,
+        )
+    if check:
+        print(
+            f"changelog-sync --check: OK — {len(entries)} "
+            "release(s) read."
+        )
+        return 0
+    write(entries)
+    return 0
+
+
+def run_release(tag: str, check: bool) -> int:
+    try:
+        entry, _ = build_entry(fetch_release(tag), strict=True)
+    except NotesError as error:
+        return _report(error)
+    if check:
+        print(f"changelog-sync --check: OK — {tag} parses.")
+        return 0
+    entries = [
+        existing
+        for existing in read_existing()
+        if existing["tag"] != entry["tag"]
+    ]
+    entries.append(entry)
+    write(entries)
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="changelog-sync",
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--body",
+        metavar="FILE",
+        help="parse one release body from a file and report; no "
+        "network, nothing written — how to check a DRAFT",
+    )
+    group.add_argument(
+        "--all",
+        action="store_true",
+        help="rebuild from every published release; one the "
+        "parser refuses is kept without a curated block, with a "
+        "warning",
+    )
+    group.add_argument(
+        "--release",
+        metavar="TAG",
+        help="one published release, strictly: a missing or "
+        "malformed curated block FAILS",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="parse and report, writing nothing",
+    )
+    args = parser.parse_args(argv[1:])
+
+    if args.body:
+        return run_body(args.body)
+    if args.all:
+        return run_all(args.check)
+    return run_release(args.release, args.check)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

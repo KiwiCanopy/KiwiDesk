@@ -16,6 +16,7 @@
     "astro": "^7.1.1",
     "astro-icon": "^1.1.5",
     "astro-mermaid": "^2.1.0",
+    "marked": "^18.0.10",
     "mermaid": "^11.16.1",
     "sharp": "^0.35.3"
   }

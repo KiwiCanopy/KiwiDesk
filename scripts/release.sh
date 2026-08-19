@@ -434,3 +434,62 @@ echo
 echo "released $TAG"
 echo "  workflow: gh run list --workflow=release.yml"
 echo "  draft:    gh release view $TAG"
+
+# ---------------------------------------------------------------
+# 6. The notes skeleton — printed here because this is the one
+#    place every release passes through (#873).
+#
+# release.yml drafts the release with --generate-notes, and the
+# curated block goes on TOP of that generated list, by hand,
+# BEFORE publishing. The form is not decoration: the Changelog
+# workflow parses the published body into the site's release-notes
+# page and REFUSES one it cannot read, so a body that drifts fails
+# the workflow rather than half-rendering.
+#
+# Printed rather than filed in .github/: GitHub applies no release
+# template the way it applies the issue and PR forms, so a
+# RELEASE_TEMPLATE.md beside ISSUE_TEMPLATE/ would read as a form
+# that runs and never run. And a template nobody is made to open
+# drifts on the release someone is in a hurry for; this one is
+# unavoidable.
+#
+# Section titles are the author's own — a fixed
+# New/Improved/Fixed triple splits one story across three buckets,
+# and a reader notices the story. The parser holds the SHAPE.
+cat <<SKELETON
+
+--------------------------------------------------------------
+Curate the draft, THEN publish. Paste above the generated
+"What's Changed" list and fill it in:
+
+## Highlights
+
+One or two sentences: what this release is about, plainly.
+
+### <A thing a user noticed>
+
+- **The short version.** Then the detail, from the user's side.
+
+### <Another one>
+
+- ...
+
+--------------------------------------------------------------
+The rules, in four lines:
+
+  * An entry earns its place by what a USER can observe — never
+    by having a commit. This is the whole rule.
+  * No issue or PR numbers in the highlights. The generated list
+    below them is the complete, linked record.
+  * No internal vocabulary (engine, retile, census, seam, main
+    actor). Layout names, Space, profile, App Bar are on screen,
+    so they are fine.
+  * Highlights are highlights. Site fixes, a font bump and
+    release plumbing collapse into one closing line.
+
+  Voice:  docs/design-decisions.md
+          -> Release notes are written for the person installing
+  Form:   .claude/rules/packaging-and-release.md
+  Check:  python3 scripts/changelog-sync --release $TAG --check
+--------------------------------------------------------------
+SKELETON

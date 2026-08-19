@@ -13,8 +13,12 @@ const langs = ["en", "de", "ja"] as const;
 type Lang = (typeof langs)[number];
 
 // Indexable routes — the path segment *after* the locale prefix.
-// "" is the landing page; "guide" is the guide page.
-const paths = ["", "guide"];
+// "" is the landing page; "guide" is the guide page; "changelog"
+// is the release notes (#873). Every entry here is emitted for
+// ALL THREE locales with hreflang alternates, so a path may only
+// join this list once its /de/ and /ja/ routes genuinely exist —
+// otherwise the alternates advertise URLs that 404.
+const paths = ["", "guide", "changelog"];
 
 function urlFor(base: string, lang: Lang, path: string): string {
   // English lives at root, other locales under /<lang>/

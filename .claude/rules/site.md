@@ -169,3 +169,60 @@ baseline, regex-stripping `<!--.*?-->` from its output and diffing
 against the new build: byte-identical across every page proves no
 markup was swallowed by a mis-terminated delimiter, which counting
 `<section` only weakly suggests.
+
+## `src/data/` is generated; a translated catalog is not (#873, #869)
+
+**`site/src/data/changelog.json` is written by
+`scripts/changelog-sync`, never by hand.** It is rebuilt from the
+published GitHub release bodies on every `release: published`, so
+a hand edit survives exactly until the next release and then
+disappears with no diff to explain it — the same trap the app
+locale catalogs carry, one shelf over. Change what a release body
+says, or change the generator; the file itself is output.
+
+**The published body is an input contract, and the parser is what
+holds it.** `scripts/changelog-sync --release <tag>` refuses a
+body with no `## Highlights` block, no summary sentence, an empty
+section or entry, a heading outside `##`/`###`, a nested list, a
+code fence, a second `## Highlights`, or an issue number in ANY
+authored slot — the entries, the summary and the section titles
+alike — and names every problem at once rather than the first. A
+template is a suggestion that drifts on the release someone is in
+a hurry for; refusing is what keeps the shape identical across
+releases, and it fails the workflow loudly instead of rendering a
+half-page. Each of those refusals is pinned by
+`ChangelogParserTests`, which also pins the bodies that must NOT
+be refused — a guard that rejects legitimate input gets switched
+off.
+
+**Check a draft before publishing it**, with
+`scripts/changelog-sync --body <file>`: a draft has no tag, so
+`--release` cannot see one, and publishing is what puts the body
+on the site. `scripts/release.sh` prints the skeleton after the
+tag push, which is the one place every release passes through.
+
+Section titles under `## Highlights` are the author's own, and
+that is a ruling rather than a gap (owner, 2026-08-19): a fixed
+New / Improved / Fixed triple splits one story across three
+buckets, while a reader notices the story. The parser holds the
+SHAPE and never a vocabulary. What the entries must SAY is
+`docs/design-decisions.md` ▸ *Release notes are written for the
+person installing*, which is a review-time rule by its own ruling
+and has no guard.
+
+**A path joins `sitemap.xml.ts`'s `paths` only once its `/de/` and
+`/ja/` routes exist.** Every entry there is emitted for all three
+locales with `hreflang` alternates, so a single-locale route
+advertises two URLs that 404.
+
+**Every site catalog carries every key `en.json` has**, enforced
+by `scripts/extract-keys --site --check`, which `site.yml` runs on
+any PR touching `site/**`, `docs/**` or `assets/**`. The app
+corpus deliberately has no such rule: an `L(key, english)` call
+site carries its English inline, so an app locale may lag and the
+worksheet round exists for it to catch up. A site component reads
+`t.<key>` and an absent key renders **nothing**, so the same
+laxity is a blank on a published page in a language the reviewer
+may not read. Clear a failure with `scripts/extract-keys --site
+<locale>` and `scripts/merge-keys --site <locale>` — never by
+deleting the English key.

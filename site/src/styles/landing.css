@@ -387,6 +387,22 @@ body::before {
   }
 }
 
+/* Phones: the Release Notes link goes first, and it goes early.
+   The cluster below (Learn + lang + mode + theme) was tuned to
+   clear 320px with ~60px of slack at 500px, and this link is 95px
+   in English and 132px in Japanese — so it does not fit at any
+   width the rules below are defending, and `.nav__links` neither
+   wraps nor scrolls (the body is `overflow-x: hidden`, so an
+   overflow is CLIPPED: the theme toggle simply leaves the screen).
+   Shed at 720px rather than at the tight breakpoints, because the
+   ja label overflows well before them. The footer link is the
+   phone-sized path to the page, as it is for Docs and GitHub. */
+@media (max-width: 720px) {
+  .nav__link--changelog {
+    display: none;
+  }
+}
+
 /* Tight phones: shed the nav's least-critical text before the
    cluster can overflow. The Ko-fi button is already icon-only, so
    there's no text left to shed there. */
