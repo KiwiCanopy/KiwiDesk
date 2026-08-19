@@ -247,9 +247,11 @@ then publish** — `release.yml` drafts, and
 body onto the site's release-notes page, so publishing an
 uncurated body shows the raw generated list until a correction
 lands. `scripts/release.sh` prints the skeleton after the tag
-push; `scripts/changelog-sync --release <tag> --check` is how to
-check a body before publishing, and the same parser refuses one it
-cannot read rather than half-rendering it. `.claude/rules/site.md`
+push, and `scripts/changelog-sync --body <file>` reads a DRAFT's
+body from a file — the mode to use before publishing, since a
+draft has no tag for `--release` to fetch. The same parser
+refuses a body it cannot read rather than half-rendering it, and
+`ChangelogParserTests` pins every refusal. `.claude/rules/site.md`
 owns the generated file and the rest of that contract.
 
 **Write the highlights for the installer, not for yourself.** A

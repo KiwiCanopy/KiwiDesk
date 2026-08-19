@@ -183,13 +183,23 @@ says, or change the generator; the file itself is output.
 **The published body is an input contract, and the parser is what
 holds it.** `scripts/changelog-sync --release <tag>` refuses a
 body with no `## Highlights` block, no summary sentence, an empty
-section, a heading deeper than `###`, or an issue number inside a
-highlight — and names each problem rather than the first. A
+section or entry, a heading outside `##`/`###`, a nested list, a
+code fence, a second `## Highlights`, or an issue number in ANY
+authored slot — the entries, the summary and the section titles
+alike — and names every problem at once rather than the first. A
 template is a suggestion that drifts on the release someone is in
 a hurry for; refusing is what keeps the shape identical across
 releases, and it fails the workflow loudly instead of rendering a
-half-page. `scripts/release.sh` prints the skeleton after the tag
-push, which is the one place every release passes through.
+half-page. Each of those refusals is pinned by
+`ChangelogParserTests`, which also pins the bodies that must NOT
+be refused — a guard that rejects legitimate input gets switched
+off.
+
+**Check a draft before publishing it**, with
+`scripts/changelog-sync --body <file>`: a draft has no tag, so
+`--release` cannot see one, and publishing is what puts the body
+on the site. `scripts/release.sh` prints the skeleton after the
+tag push, which is the one place every release passes through.
 
 Section titles under `## Highlights` are the author's own, and
 that is a ruling rather than a gap (owner, 2026-08-19): a fixed
