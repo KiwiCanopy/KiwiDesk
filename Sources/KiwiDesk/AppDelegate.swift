@@ -105,6 +105,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
+        // The ONE site that opts into the live updater (#874).
+        // `StatusItemController` defaults to the inert
+        // `NoUpdater`, so a suite constructing it never starts
+        // Sparkle's scheduled checks — see AppUpdater.swift.
+        statusItem.updater = SparkleUpdater()
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
