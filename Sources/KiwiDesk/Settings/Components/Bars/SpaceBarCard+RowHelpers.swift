@@ -116,14 +116,11 @@ extension SpaceBarCard {
         }
     }
 
-    /// The stepper plus a neutral live summary of the current
-    /// cap — a caption that states what shows, not why (#94
-    /// defers the why to `help`). The preview strip is a fixed
-    /// stand-in and cannot honestly render N synthetic glyphs,
-    /// so the fact lives here.
-    /// The front segment's title length. Paired with the
-    /// segment's own toggle by the census gate, so it greys
-    /// rather than disappearing when the segment is off.
+    /// The front segment's title length — the only text the
+    /// Space Bar draws, so the knob is inert while that segment
+    /// is off. Greyed rather than hidden (#171), pairing the
+    /// census gate `SettingKey+SpaceBar` declares with a live
+    /// `GreyOut`, as `backgroundFitRow` above does.
     @ViewBuilder var titleCapRow: some View {
         StepperRow(
             label: L("space_bar.title_cap", "Title length"),
@@ -136,8 +133,28 @@ extension SpaceBarCard {
                     + "is shortened."
             )
         )
+        .modifier(
+            GreyOut(
+                active: !style.wrappedValue.showFrontApp,
+                // Toggle name INTERPOLATED from its own key,
+                // not re-typed (#818).
+                help: L(
+                    "space_bar.title_cap.front_app_only",
+                    "Only \u{201C}%1$@\u{201D} draws a title.",
+                    L(
+                        "space_bar.show_front_app",
+                        "Show front app"
+                    )
+                )
+            )
+        )
     }
 
+    /// The stepper plus a neutral live summary of the current
+    /// cap — a caption that states what shows, not why (#94
+    /// defers the why to `help`). The preview strip is a fixed
+    /// stand-in and cannot honestly render N synthetic glyphs,
+    /// so the fact lives here.
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(
             label: L("space_bar.glyph_cap", "Glyphs per Space"),

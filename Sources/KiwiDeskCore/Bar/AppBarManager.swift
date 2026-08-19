@@ -136,6 +136,14 @@ public final class AppBarManager {
         ) -> AppBarOverlay? {
             overlays[display]
         }
+
+        /// Test seam: the bars `sync` last accepted, items and
+        /// all. `shownStrips` exposes only geometry, which
+        /// cannot answer "what does the item SAY" — the question
+        /// the title refresh exists to change, and the one a
+        /// suite asserting on task identity alone cannot reach
+        /// (`BarTitleRefreshTests.refreshRedrawsTheItem`).
+        var shownBarsForTesting: [Bar] { shownBars }
     #endif
 
     private func overlay(for display: DisplayID) -> AppBarOverlay {

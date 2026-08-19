@@ -9,9 +9,12 @@ import Foundation
 /// The `Codable` conformance deliberately stays in
 /// `AppBarStyle.swift`: Swift only synthesizes `encode(to:)`
 /// where the conformance sits, so keeping it there leaves encode
-/// generated and makes a new stored property impossible to drop
-/// from the wire by forgetting a line. Moving the conformance
-/// here is a compile error rather than a quiet regression.
+/// generated rather than hand-written — one fewer field list to
+/// forget. It is NOT a guarantee that a new stored property
+/// reaches the wire: a property absent from `CodingKeys` below
+/// is silently not encoded, with no error. `AppBarParityTests`
+/// (reflection over `CodingKeys.allCases` against the struct's
+/// fields) is the actual net for that.
 ///
 /// Sparse by design — every field falls back to `defaults`, so a
 /// profile written before a field existed still loads.
@@ -102,16 +105,23 @@ extension AppBarStyle {
                 CGFloat.self,
                 forKey: .itemGap
             ) ?? defaults.itemGap
-        // Decoded as a raw string and folded through
-        // `Content.decoded`, never as `Content.self`: a profile
-        // saved with a retired app-name spelling would otherwise
-        // THROW here and take every other bar setting in this
-        // struct down with it.
+        // Decoded as a raw String, never as `Content.self`: a
+        // value this enum no longer knows — the retired
+        // `name` / `icon_and_name`, or a hand-edit typo — would
+        // otherwise THROW here and take every other bar setting
+        // in this struct down with it. Through String it lands
+        // on the default instead, so an old profile opens as
+        // `icon_and_title` and the user re-picks if they care
+        // (AGENTS.md §5: re-editing the config IS the
+        // migration). Deliberately unlike the sibling enum
+        // fields, which still throw: `content` is the one whose
+        // vocabulary was renamed under existing configs.
+        // `ContentDecodeFallbackTests` pins both halves.
         content =
             try container.decodeIfPresent(
                 String.self,
                 forKey: .content
-            ).flatMap(Content.decoded) ?? defaults.content
+            ).flatMap(Content.init(rawValue:)) ?? defaults.content
         titleCap =
             try container.decodeIfPresent(
                 Int.self,

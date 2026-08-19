@@ -40,7 +40,12 @@ struct AppBarScrollLayoutTests {
     }
 
     private func item(_ name: String) -> AppBarOverlay.Item {
-        AppBarOverlay.Item(id: WindowID(1), name: name, icon: nil)
+        AppBarOverlay.Item(
+            id: WindowID(1),
+            name: name,
+            text: name,
+            icon: nil
+        )
     }
 
     @Test("Scroll offset follows the active item into view")

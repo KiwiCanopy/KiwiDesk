@@ -1549,15 +1549,17 @@ mismatch can occur.
 
 Items appear in window order and are always **equal-sized**: `item_size`
 pt along the bar (width on horizontal bars, height on vertical
-ones). Left at `0` (the default), each `content` mode gets a
-sensible standard. The size is clamped: at least the icon square
+ones). Left at `0` (the default), the slot is measured from the
+**widest** item actually on the bar, so one long title widens
+every slot. The size is clamped: at least the icon square
 (icons never clip), at most a quarter of the bar.
 
 Items that don't fit the strip **scroll** instead of shrinking: the
 bar follows the focused window as you cycle, and clickable arrows
 appear over the ends that hide more items. Titles truncate when they
 pass `title_cap` or genuinely don't fit their slot; with
-`icon_and_title`, only the title shrinks, the icon always survives. Clicking an item focuses
+`icon_and_title`, only the title shrinks, the icon always
+survives. Clicking an item focuses
 its window; hovering swaps the item's background to the hover color
 — the already-active item ignores clicks and shows no hover.
 

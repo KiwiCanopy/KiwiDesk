@@ -9,6 +9,27 @@ import Foundation
 /// the `handle(_:)` switch made that switch harder to read than
 /// it needed to be.
 extension KiwiCore {
+    /// #674, the close path: a close-return pick can cross
+    /// several scrolling slots, and `focusWindow`'s own jump arm
+    /// cannot see it — the destroy fold already wrote the pick
+    /// into `space.focused`, so the anchor the jump test
+    /// classifies from IS the target (distance zero), and the
+    /// closed window has left the row besides. Re-derive the
+    /// distance from the REMOVED slot instead: the old focus sat
+    /// there, and the successor pick inherits it, which is why
+    /// the close path never jumped before close-return existed.
+    /// The same anchor blindness means the #143 backward-pan
+    /// deferral can never defer this raise; that stays the
+    /// close-handoff's documented immediate-raise behavior
+    /// (`focusWindow`'s own comment), a pop being cheaper than a
+    /// spurious deferral on every close. Self-gated downstream on
+    /// scrolling + actual overflow; a nil slot (the closed window
+    /// was a float or fullscreen member) or a candidate outside
+    /// the tiled row is no evidence of a jump — same asymmetry
+    /// as `scrollFocusJumpsSlots`. Internal, not private: its
+    /// call site (the close handler in `KiwiCore+Events`) sits
+    /// behind `eventLoop.isListed` (live AX — the
+    /// `TransientOverlayFocusTests` gate note), so
     /// `ZOrderCloseReturnArmTests` proves the arm directly.
     func armCloseReturnRestack(
         to target: WindowID,

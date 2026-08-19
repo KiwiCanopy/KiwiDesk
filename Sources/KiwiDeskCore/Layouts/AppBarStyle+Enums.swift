@@ -92,30 +92,14 @@ extension AppBarStyle {
             horizontal ? self : .icon
         }
 
-        /// Whether the drawn content carries text at all — the
-        /// one predicate gating both the title-change bar
-        /// refresh (`KiwiCore.appBarWantsTitles`) and the text
-        /// measurement. Ask this rather than re-spelling
-        /// `!= .icon`, so a later text-free case cannot be
-        /// missed at one of the two sites.
+        /// Whether the drawn content carries text at all. Ask
+        /// this rather than re-spelling `!= .icon`, so a later
+        /// text-free case cannot be missed at a call site.
+        /// Consulted by the title-change refresh gate
+        /// (`KiwiCore.appBarDrawsTitle`), the slot measurement
+        /// (`AppBarOverlay.autoSlotWidth`) and the GUI's
+        /// title-cap grey-out (`BarsGates.everyShownBarIconOnly`).
         public var showsText: Bool { self != .icon }
-
-        /// Decodes a stored value, folding the two retired
-        /// app-name spellings onto their title equivalents
-        /// (owner 2026-08-19). Pre-release a rename needs no
-        /// compat shim (AGENTS.md §5) — but a *raw* decode of a
-        /// retired spelling THROWS rather than returning nil, so
-        /// dropping the cases without this would fail the whole
-        /// profile decode and reset every unrelated bar setting
-        /// with it. That is the only reason this exists, and it
-        /// is not a promise to keep reading `name` forever.
-        static func decoded(_ raw: String) -> Content? {
-            switch raw {
-            case "name": return .title
-            case "icon_and_name": return .iconAndTitle
-            default: return Content(rawValue: raw)
-            }
-        }
     }
 
     /// Where the item group sits along the bar's long axis

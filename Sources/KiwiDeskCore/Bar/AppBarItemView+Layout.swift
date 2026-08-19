@@ -102,7 +102,7 @@ extension AppBarItemView {
     }
 
     /// Icon and name sit centered in the slot as one group;
-    /// when space runs out, only the name shrinks — the icon
+    /// when space runs out, only the title shrinks — the icon
     /// always survives.
     private func layoutHorizontal() {
         let pad = Self.contentPadding
@@ -120,9 +120,9 @@ extension AppBarItemView {
                 min(bounds.height, bounds.width) - pad * 2,
                 0
             )
-        // The cell itself knows how much room the name needs;
+        // The cell itself knows how much room the text needs;
         // measuring the raw string undershoots the cell's own
-        // padding and truncates names that would have fit.
+        // padding and truncates titles that would have fit.
         var textSize =
             style.content == .icon
             ? .zero
@@ -133,11 +133,11 @@ extension AppBarItemView {
         // rendered content here.
         let showText = style.content != .icon
         // Half a pad: the full pad read too airy between icon
-        // and name (manual QA 2026-07-18).
+        // and text (manual QA 2026-07-18).
         var spacing: CGFloat =
             side > 0 && showText ? pad / 2 : 0
-        // A grouped item reserves room after the name for its count
-        // badge, so the badge sits beside the name instead of
+        // A grouped item reserves room after the text for its count
+        // badge, so the badge sits beside the text instead of
         // clamping over it (owner 2026-07-20).
         let badgeReserve: CGFloat =
             count >= 2 && showText
@@ -160,7 +160,7 @@ extension AppBarItemView {
         // 2026-07-20). Only when the name shows: an icon-only badge
         // overlaps the corner instead (see `layoutBadge`), and the
         // slot already reserved this room (`badgeReserve`), so the
-        // shift never re-truncates the name.
+        // shift never re-truncates the text.
         let badgeExtent: CGFloat =
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2

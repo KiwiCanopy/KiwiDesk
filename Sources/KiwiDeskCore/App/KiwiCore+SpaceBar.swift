@@ -106,8 +106,17 @@ extension KiwiCore {
         // window rather than repeating its app: an app already
         // shown by the icon beside it, and by every glyph in the
         // run. Nil leaves `layoutFrontName` on the app-name
-        // fallback, which is what an empty title (#160) and a
-        // vertical bar both want.
+        // fallback, which is what an empty title (#160) wants.
+        //
+        // Deliberately NOT edge-aware: a vertical bar is handed
+        // a title it never draws (`layoutFrontName` returns
+        // early, and `frontExtent` measures nothing), because
+        // the style here is global while the edge is the one
+        // thing a per-display bar could differ on. The cost is
+        // that a vertical bar's AX label takes the two-argument
+        // frame for text it does not show; the alternative —
+        // resolving the edge in the driver — would put a
+        // rendering question in the wrong layer.
         let title = state.windows[focused]?.title ?? ""
         app.title =
             title.isEmpty

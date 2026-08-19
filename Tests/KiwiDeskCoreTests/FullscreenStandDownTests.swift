@@ -257,4 +257,45 @@ struct FullscreenStandDownTests {
         #expect(core.appBars.shownStrips.isEmpty)
         #expect(core.spaceBars.shownDisplays.isEmpty)
     }
+
+    /// The title-refresh gate stands down with the bars.
+    ///
+    /// `KiwiCore+BarTitles.showingSpaces()` is a third reader of
+    /// "which space is showing", beside the two drivers above,
+    /// and it must apply the same verdict: a fullscreen desktop
+    /// paints no bar, so a title change on it has nothing to
+    /// re-render. Dropping the check there is invisible on a dev
+    /// machine, where an unregistered display fails open to
+    /// `true` — only this override can see it.
+    @Test("A fullscreen space schedules no title refresh")
+    func titleRefreshStandsDown() {
+        let core = makeCore()
+        guard let screen = NSScreen.main,
+            let display = screen.kiwiDisplay
+        else { return }
+        core.state.apply(.displaysChanged([display]))
+        core.state.apply(.windowCreated(makeWindow(w1)))
+        core.resolveSpaceDisplays(mainID: display.id)
+        let spaceID = core.state.workspaces.space(of: w1)!
+        _ = core.execute(
+            "set_mode",
+            args: [.string(spaceID.raw), .string("monocle")]
+        )
+        core.tiler.settings.appBarStyle.content = .iconAndTitle
+        core.tiler.settings.appBarStyle.edge = .top
+        core.tiler.settings.spaceBarStyle.showFrontApp = false
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+
+        // A user desktop schedules, so the negative below cannot
+        // pass by the fixture simply never qualifying.
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        core.deferred.cancel(.barTitleRefresh)
+        core.handleTitleChangedForBars(w1)
+        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
+
+        NativeSpaces.currentSpaceIsUserOverride = { _ in false }
+        core.deferred.cancel(.barTitleRefresh)
+        core.handleTitleChangedForBars(w1)
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
 }

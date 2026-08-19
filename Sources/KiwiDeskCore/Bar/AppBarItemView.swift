@@ -1,7 +1,8 @@
 import AppKit
 
 /// One entry in the indicator bar: an optional app icon and
-/// name centered in the slot, a style-dependent accent
+/// the window's title centered in the slot, a style-dependent
+/// accent
 /// marking the active window, a count badge on grouped
 /// items, and click-to-focus. Clicks never take key focus —
 /// the panel above is non-activating. Dragging past a small
@@ -44,10 +45,16 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
-    /// The app's name — identity, not display. Kept because the
-    /// item announces the APP to VoiceOver (a title changes under
-    /// the reader mid-announcement; the app it belongs to does
-    /// not) and because the drag/reorder code reads it.
+    /// The app's name — identity, not display.
+    ///
+    /// Currently WRITE-ONLY: nothing reads it. It is kept
+    /// because the item has no accessible name at all (it is a
+    /// click target that is not an AX element), and the app name
+    /// is what an explicit label would be built from — the
+    /// choice the Space Bar's front segment already made. Until
+    /// that lands the item's only spoken text is whatever
+    /// `label` draws, i.e. the title. Do not read this as "the
+    /// item announces the app"; it does not.
     var name = ""
     /// The string the label draws, resolved by the driver
     /// (`KiwiCore.barItemText`): the capped window title, or the

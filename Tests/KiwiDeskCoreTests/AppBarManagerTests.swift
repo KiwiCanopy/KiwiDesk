@@ -18,6 +18,7 @@ struct AppBarManagerTests {
                 AppBarOverlay.Item(
                     id: WindowID(1),
                     name: "A",
+                    text: "A",
                     icon: nil
                 )
             ],
@@ -88,6 +89,7 @@ struct AppBarManagerTests {
                 AppBarOverlay.Item(
                     id: WindowID(1),
                     name: "A",
+                    text: "A",
                     icon: nil
                 )
             ],

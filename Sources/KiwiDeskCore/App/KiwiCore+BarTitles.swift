@@ -80,8 +80,12 @@ extension KiwiCore {
     /// (`Content.rendered(horizontal:)`), so a title change
     /// under one must schedule nothing at all rather than
     /// re-render a bar that cannot show it.
+    /// Space Bar first, deliberately: it is three bool reads and
+    /// one comparison, while the App Bar half builds an
+    /// `effectiveTiledMembers` array per shown display. On every
+    /// title event, the cheap question deserves to answer first.
     private func barsDrawTitle(of id: WindowID) -> Bool {
-        appBarDrawsTitle(of: id) || spaceBarDrawsTitle(of: id)
+        spaceBarDrawsTitle(of: id) || appBarDrawsTitle(of: id)
     }
 
     /// True when `id` is a bar item on a space that is showing,
@@ -130,17 +134,37 @@ extension KiwiCore {
         return showingSpaces().contains { $0.focused == id }
     }
 
-    /// The spaces currently visible on some display — the only
-    /// ones whose bars are painted. Falls back to the active
-    /// space before the display list seeds, matching
-    /// `updateAppBar`'s own cold-start fallback.
+    /// The spaces whose bars are actually painted right now.
+    ///
+    /// Three rules, and all three must match what the drivers
+    /// (`KiwiCore+AppBar.bar(for:)`, `KiwiCore+SpaceBar
+    /// .spaceBar(for:)`) apply, or this gate refuses refreshes
+    /// they would have rendered, or schedules ones they discard:
+    /// the CURRENT space per display, the #670 fullscreen
+    /// stand-down (a fullscreen desktop paints no bar at all),
+    /// and the cold-start fallback to the active space before
+    /// the display list seeds.
+    ///
+    /// The drivers re-derive rather than call this because each
+    /// needs more than the space — a screen, a bar host, a
+    /// resolved style. `BarTitleRefreshTests` pins the agreement
+    /// from this side; a driver that changes one of the three
+    /// owes this function the same change.
     private func showingSpaces() -> [Space] {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
+            guard NativeSpaces.activeSpaceIsUser() else {
+                return []
+            }
             return activeSpace.map { [$0] } ?? []
         }
         return displays.compactMap { display in
-            state.workspaces.currentSpace(on: display.id)
+            guard
+                NativeSpaces.currentSpaceIsUser(
+                    display: display.id
+                )
+            else { return nil }
+            return state.workspaces.currentSpace(on: display.id)
                 .flatMap { state.workspaces[$0] }
         }
     }

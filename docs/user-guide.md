@@ -1493,7 +1493,7 @@ touches your running windows.
 rest; the rest behind **Style**):
 
 - **Background style**: boxed (a box per item honoring corner
-  roundness), plain (names on a shared translucent strip), or
+  roundness), plain (items on a shared translucent strip), or
   **Liquid Glass** — a macOS&nbsp;26 glass plate under the items,
   tinted by the Background color (transparent = clear glass) and
   rounded by corner roundness. Liquid Glass appears in the picker
@@ -1706,7 +1706,7 @@ chevron to scroll, or — while dragging a window — hold the cursor
 over a chevron and the bar autoscrolls so you can drop onto a
 Space that started off-screen. The front-app segment stays
 pinned at the trailing end — only the Spaces scroll behind the
-chevrons — so the focused app is always in view; while the bar
+chevrons — so the focused window is always in view; while the bar
 fits it sits at the row's tail as before.
 
 The card's order matches the App Bar card's: at rest **Show
@@ -1719,10 +1719,10 @@ share one), **Thickness**, and the two behavior toggles. The
 **Alignment** (start / center / end along the bar,
 edge-relative, like the App Bar's — and, like it, the three
 read the same once the bar overflows and scrolls), active
-indicator, **App symbol style**, sizes and **Glyphs per Space**
+indicator, **App symbol style**, sizes, **Glyphs per Space**
 (how many app glyphs an item shows before the rest collapse
-into the `+n` badge, 1–12), and **Spring delay**. Colors live
-in **Advanced Colors ▸ Space Bar colors**.
+into the `+n` badge, 1–12), **Title length** and **Spring
+delay**. Colors live in **Advanced Colors ▸ Space Bar colors**.
 
 The color ladder there is the bar's signature: **Item** paints
 inactive Spaces, **Active space** the Space currently shown on

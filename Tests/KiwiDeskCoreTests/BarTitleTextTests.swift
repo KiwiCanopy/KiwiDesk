@@ -104,6 +104,33 @@ struct AppBarItemTextTests {
         #expect(text(core, [1], style: style) == "TanStack S…")
     }
 
+    /// The driver reads the CLAMPED cap, not the raw stored
+    /// one.
+    ///
+    /// Every other cap test passes a value inside 8...80, where
+    /// raw and resolved agree — so swapping the driver to
+    /// `style.titleCap` was inert (guard-prover, 2026-08-19).
+    /// A stored 0 is reachable: the decode does not clamp, by
+    /// design, because `resolvedTitleCap` is the one clamp site.
+    /// Unclamped it would cut every title to a bare ellipsis.
+    @Test("An out-of-range cap is clamped by the driver")
+    func outOfRangeCapIsClamped() {
+        let core = seeded([
+            titledWindow(1, title: "Downloads and more")
+        ])
+        var style = AppBarStyle()
+        style.titleCap = 0
+        let drawn = text(core, [1], style: style)
+        #expect(
+            drawn
+                == AppBarStyle.cappedTitle(
+                    "Downloads and more",
+                    to: AppBarStyle.titleCapRange.lowerBound
+                )
+        )
+        #expect(drawn != "…", "an unclamped 0 would cut to this")
+    }
+
     /// The cap is a TITLE cap. An app name reaching an item as
     /// the fallback is short by construction and is not clipped
     /// by a number the user set for titles.

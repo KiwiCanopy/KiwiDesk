@@ -1,7 +1,7 @@
 import AppKit
 
 /// The trailing front-app segment (#293 verdict 6):
-/// `| <glyph + app name>` after the last Space item. On
+/// `| <glyph + window title>` after the last Space item. On
 /// vertical bars the segment is icon-only — never rotated
 /// text, never hidden — and the divider flips to a horizontal
 /// rule. Informational; no click target.
@@ -266,7 +266,8 @@ extension SpaceBarOverlay {
         return cell + SpaceBarItemView.pad
     }
 
-    /// The app name — horizontal bars only (vertical stays
+    /// The window's title (app name where it has none) —
+    /// horizontal bars only (vertical stays
     /// icon-only, never rotated).
     private func layoutFrontName(
         _ app: SpaceBarItemView.App,

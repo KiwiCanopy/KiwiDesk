@@ -70,8 +70,8 @@ extension AppBarCard {
     }
 
     /// #294 icon rendering, directly below the Content control
-    /// it depends on; greyed (never hidden, #171) when Name-only
-    /// content shows no icons at all. Census-exempt from the
+    /// it depends on; greyed (never hidden, #171) when
+    /// title-only content shows no icons at all. Census-exempt from the
     /// container gate: the ⌃⌥K panel's Apps band reads this
     /// whether or not any bar renders.
     var iconSourceRow: some View {

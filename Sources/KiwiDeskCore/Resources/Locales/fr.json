@@ -1030,6 +1030,7 @@
   "space_bar.spring_delay.help": "Faites glisser une fenêtre sur un espace et maintenez-la ce temps pour basculer la vue sur cet espace, permettant de la déposer dans sa disposition. Un dépôt plus rapide déplace la fenêtre sans basculer d'espace.",
   "space_bar.thickness": "Épaisseur",
   "space_bar.title_cap": "Longueur du titre",
+  "space_bar.title_cap.front_app_only": "Seul « %1$@ » affiche un titre.",
   "space_bar.title_cap.help": "Nombre de caractères du titre de la fenêtre active affichés par le segment de tête avant qu'il ne soit raccourci.",
   "space_override.caption": "Les paramètres décochés héritent des valeurs par défaut de %1$@.",
   "space_override.dormant.entry_many": "%1$@ — %2$d champs",

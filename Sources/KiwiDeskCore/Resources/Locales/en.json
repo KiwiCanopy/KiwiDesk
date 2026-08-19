@@ -1031,6 +1031,7 @@
   "space_bar.spring_delay.help": "Drag a window onto a Space and hold this long for the view to spring to that Space, so you can drop the window into its layout. A quicker drop moves the window there without switching.",
   "space_bar.thickness": "Thickness",
   "space_bar.title_cap": "Title length",
+  "space_bar.title_cap.front_app_only": "Only “%1$@” draws a title.",
   "space_bar.title_cap.help": "How many characters of the focused window's title the front segment shows before it is shortened.",
   "space_override.caption": "Unchecked settings inherit %1$@ defaults.",
   "space_override.dormant.entry_many": "%1$@ — %2$d fields",

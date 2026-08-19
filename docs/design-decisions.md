@@ -5014,13 +5014,14 @@ the user who never opens the editor.
 
 **The bars name the WINDOW, not its app.** (Owner ruling
 2026-08-19, replacing the `name` / `icon_and_name` content modes
-shipped since #228.) `app_bar.set_content` takes `icon`, `title`
-or `icon_and_title`, and the Space Bar's front segment shows the
-focused window's title in place of its app's name. The retired
-spellings fold onto the title ones on decode — not a compat shim
-(§5 rules those out pre-release) but because a raw enum decode of
-a dropped case *throws*, which would have failed the whole
-profile decode and reset every unrelated bar setting with it.
+the bar has carried since it shipped.) `app_bar.set_content` takes
+`icon`, `title` or `icon_and_title`, and the Space Bar's front
+segment shows the focused window's title in place of its app's
+name. The retired spellings fold onto the title ones on decode —
+not a compat shim (§5 rules those out pre-release) but because a
+raw enum decode of a dropped case *throws*, which would have
+failed the whole profile decode and reset every unrelated bar
+setting with it.
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read
@@ -5055,8 +5056,8 @@ polish.
 
 `app_bar.set_title_cap` (8–80, default 25) exists because App
 Bar slots are **uniform and measured from the widest item**
-(`AppBarOverlay.autoSlotWidth`). App names are 6–20 characters
-by construction; the sampled titles ran to 57. One long title
+(`AppBarOverlay.autoSlotWidth`). On that same sample the app
+names ran 6–20 characters and the titles to 57. One long title
 therefore widens *every* slot until `slotLength`'s
 quarter-of-the-bar clamp bites and the rest of the bar scrolls —
 so the cap is what keeps auto item sizing usable at all, and
@@ -5130,7 +5131,7 @@ the system is the bar's defining signature): `item_color`
 paints inactive Spaces, `active_item_color` the active Space's
 identifier and glyphs, and `focused_item_color` the focused
 window **wherever it shows** — its glyph inside the active
-Space AND the front-app segment's glyph + name (QA 2026-07-19:
+Space AND the front-app segment's glyph and text (QA 2026-07-19:
 the front-app segment IS the focused window, so it belongs to
 the focused accent, not the active-Space one; each accent now
 maps to exactly one concept — the Space vs the focused window).
@@ -5159,7 +5160,7 @@ The corollary for a *bespoke* badge still stands: choose its
 text colour for contrast against that badge, not from the
 accents. In Settings the `Focused window`
 row greys out (#171) when its only surfaces are untintable:
-native-image glyphs *and* no front-app name shown. Emoji
+native-image glyphs *and* no front-app text shown. Emoji
 identifiers and native app
 images stay untinted; shape (the active indicator) carries the
 active state there, plus a half-strength alpha dim on inactive
@@ -5169,10 +5170,10 @@ inactive), so color is never the only signal. A thin divider
 identifier from the glyph row inside every occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
-app glyphs — no clone of the App Bar's `Icon | Name |
-Icon & name` chooser. The identifier is structural and the
-compact glyphs are the point of the overview; an app-name mode
-needs its own demonstrated use case first.
+app glyphs — no clone of the App Bar's `Icon | Title |
+Icon & title` chooser. The identifier is structural and the
+compact glyphs are the point of the overview; a labelled-glyph
+mode needs its own demonstrated use case first.
 
 **Space identifiers are icon-only, with settled fallbacks.**
 (#293, revised QA 2026-07-19.) The configured Space icon

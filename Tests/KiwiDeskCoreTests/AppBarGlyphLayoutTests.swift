@@ -56,6 +56,34 @@ struct AppBarGlyphLayoutTests {
         #expect(view.glyphLabel.isHidden)
     }
 
+    /// The label draws `text` — the driver-resolved title — and
+    /// never `name`, the app identity that rides along for the
+    /// glyph and (one day) the accessibility label.
+    ///
+    /// Asserted directly rather than through a geometry side
+    /// effect: a fixture sized to make truncation visible can
+    /// discriminate the MEASUREMENT or the DRAW, but not both at
+    /// once, and swapping this write was inert until it had its
+    /// own assertion (guard-prover, 2026-08-19).
+    @Test("The label draws the item's text, not its app name")
+    func labelDrawsText() {
+        let view = makeView(thickness: 32, glyph: nil)
+        view.configure(
+            id: WindowID(1),
+            name: "Finder",
+            text: "Downloads",
+            icon: nil,
+            glyph: nil,
+            count: 1,
+            active: false,
+            horizontal: true,
+            style: AppBarStyle()
+        )
+        view.layout()
+        #expect(view.label.stringValue == "Downloads")
+        #expect(view.label.stringValue != view.name)
+    }
+
     @Test("Name-only content shows neither glyph nor image")
     func nameOnlyHidesGlyph() {
         var style = AppBarStyle()
@@ -75,14 +103,14 @@ struct AppBarGlyphLayoutTests {
     /// Parameterized over the formula's branches: content mode
     /// (icon side present or not) and fixed-vs-auto font.
     @Test(
-        "The widest name fits the slot it defined",
+        "The widest title fits the slot it defined",
         arguments: [
             (AppBarStyle.Content.iconAndTitle, CGFloat(0)),
             (AppBarStyle.Content.iconAndTitle, CGFloat(18)),
             (AppBarStyle.Content.title, CGFloat(0)),
         ]
     )
-    func widestNameFitsItsOwnSlot(
+    func widestTitleFitsItsOwnSlot(
         variant: (AppBarStyle.Content, CGFloat)
     ) {
         let thickness: CGFloat = 32
@@ -90,14 +118,21 @@ struct AppBarGlyphLayoutTests {
         style.content = variant.0
         style.fontSize = variant.1
         let items = [
+            // The widest TITLE deliberately belongs to the
+            // app with the SHORTEST name. A measurement that
+            // read `name` would size the slot to
+            // "Systemeinstellungen" — narrower than the title
+            // actually drawn below — and truncate it.
             AppBarOverlay.Item(
                 id: WindowID(1),
                 name: "Systemeinstellungen",
+                text: "Bedienungshilfen",
                 icon: nil
             ),
             AppBarOverlay.Item(
                 id: WindowID(2),
                 name: "Zen",
+                text: "TanStack Start: Full-Stack React",
                 icon: nil
             ),
         ]
@@ -115,10 +150,13 @@ struct AppBarGlyphLayoutTests {
                 height: thickness
             )
         )
+        // The item that DEFINED the width is the one that must
+        // fit — item 2, whose title is the widest string in the
+        // set above.
         view.configure(
-            id: WindowID(1),
-            name: "Systemeinstellungen",
-            text: "Systemeinstellungen",
+            id: WindowID(2),
+            name: "Zen",
+            text: "TanStack Start: Full-Stack React",
             icon: nil,
             glyph: variant.0 == .title ? nil : ":settings:",
             count: 1,

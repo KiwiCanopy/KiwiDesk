@@ -65,7 +65,7 @@ extension AppBarOverlay {
 
     /// The auto (`item_size = 0`) slot length: on a horizontal
     /// bar, the widest item measured at the effective font (so
-    /// slots fit their real names instead of a fixed guess); a
+    /// slots fit their real titles instead of a fixed guess); a
     /// vertical bar renders icon-only (QA 2026-07-19), so its
     /// slot is the icon square — the thickness. The caller
     /// still clamps this between the icon minimum and a quarter
@@ -88,12 +88,12 @@ extension AppBarOverlay {
             style.content == .title
             ? 0 : max(thickness - pad * 2, 0)
         // The uniform slot fits the widest item, so measure every
-        // name and take the max: icon square + gap + text + pads,
+        // title and take the max: icon square + gap + text + pads,
         // mirroring `layoutHorizontal`'s own composition. Measure
         // through a label configured EXACTLY like the item's own —
         // notably `.center` alignment, which alone widens the cell
         // by 4 pt; a left-aligned or raw-string measurement leaves
-        // the widest name's slot those 4 pt short of itself,
+        // the widest title's slot those 4 pt short of itself,
         // tail-truncating exactly the item that defined the width.
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
@@ -103,7 +103,10 @@ extension AppBarOverlay {
         measure.lineBreakMode = .byTruncatingTail
         return items.reduce(0) { widest, item in
             let text: CGFloat
-            if style.content == .icon {
+            // `showsText`, not `== .icon`: a later text-free
+            // case must stop reserving text width here without
+            // anyone remembering this site.
+            if !style.content.showsText {
                 text = 0
             } else {
                 measure.stringValue = item.text
@@ -113,9 +116,9 @@ extension AppBarOverlay {
             }
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
-            // A grouped item's count badge sits after the name, so
+            // A grouped item's count badge sits after the text, so
             // the slot must be wide enough for it too or the widest
-            // name over-truncates (owner 2026-07-20) — same reserve
+            // title over-truncates (owner 2026-07-20) — same reserve
             // as `layoutHorizontal`.
             let badge =
                 item.count >= 2 && text > 0
@@ -155,7 +158,7 @@ extension AppBarOverlay {
     /// at `thickness` is what makes the measurement's
     /// `iconSide = thickness - pad*2` equal the layout's
     /// `min(bounds.height, bounds.width) - pad*2` — the
-    /// slot-fits-widest-name invariant leans on it.
+    /// slot-fits-widest-title invariant leans on it.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
         content: AppBarStyle.Content

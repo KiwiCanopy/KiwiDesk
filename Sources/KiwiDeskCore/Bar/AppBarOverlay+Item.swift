@@ -11,10 +11,14 @@ import AppKit
 extension AppBarOverlay {
     public struct Item {
         public let id: WindowID
-        /// The app's name. Still the identity the item is keyed
-        /// and announced by — glyph resolution and the
-        /// accessibility label both read it — never what the
-        /// item draws. That is `text`.
+        /// The app's name — the item's identity, never what it
+        /// draws (that is `text`).
+        ///
+        /// The glyph is resolved from the same app name in the
+        /// driver BEFORE this value exists, and the App Bar item
+        /// carries no accessibility label, so nothing reads this
+        /// today. It is the input an explicit AX label would be
+        /// built from; see `AppBarItemView.name`.
         public let name: String
         /// The string the item actually draws under a
         /// text-bearing `Content`: the window's title, already
@@ -32,20 +36,25 @@ extension AppBarOverlay {
         /// adjacent same-app windows (shown as a badge).
         public let count: Int
 
-        /// `text` defaults to `name` so a fixture or a caller
-        /// that only cares about identity still draws something
-        /// legible rather than an empty slot.
+        /// `text` is REQUIRED, deliberately. Defaulting it to
+        /// `name` made every render-side fixture blind: with the
+        /// two equal by construction, no assertion could tell a
+        /// bar drawing the title from one drawing the app name,
+        /// and both the label write and the slot measurement
+        /// could be reverted with the suite green (guard-prover,
+        /// 2026-08-19). A silent fallback on a driver-resolved
+        /// value is worth less than three explicit fixtures.
         public init(
             id: WindowID,
             name: String,
-            text: String? = nil,
+            text: String,
             icon: NSImage?,
             glyph: String? = nil,
             count: Int = 1
         ) {
             self.id = id
             self.name = name
-            self.text = text ?? name
+            self.text = text
             self.icon = icon
             self.glyph = glyph
             self.count = count

@@ -172,7 +172,7 @@ struct BarStripView: View {
     ) -> some View {
         if item.label != nil || item.glyph != nil {
             // Icon and name together when the item carries
-            // both — the App Bar's `icon_and_name` content;
+            // both — the App Bar's `icon_and_title` content;
             // truncation only ever eats the name, the real
             // bar's rule.
             // Sizes come through the bar's OWN font ladder
