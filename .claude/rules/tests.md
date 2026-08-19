@@ -200,6 +200,26 @@ bite large test PRs:
   the seam class generally — spawns, the production status-bar
   touch), and `StatusItemSeamGuardTests` pins the menu-bar
   seam's construction routes and its sealed wrapper.
+- **One seam runs the OTHER way, and it is named here rather
+  than left in a doc comment.** The rule above keeps a live
+  production default and injects a fake; the updater seam (#874)
+  defaults INERT and `AppDelegate` opts into the live
+  `SparkleUpdater`. The reason is that its live object starts a
+  scheduled network channel and spawns XPC services on
+  construction, so a live default would run in every GUI suite
+  that builds a `StatusItemController` — not a resource seized
+  and released, but a background service. The inversion is only
+  safe because it is guarded from BOTH sides:
+  `MachineTouchTests` pins the construction and the wiring by
+  exact count, so deleting the wiring reds exactly as loudly as
+  duplicating it. That matters more than it sounds — a forgotten
+  wiring greys one menu row, which is visible, while the
+  scheduled channel silently never starts, which is not, and
+  `docs/design-decisions.md` ▸ *No distribution channel without
+  an update path* calls that failure unrecoverable. **A further
+  inverted seam takes the same two-sided guard**, or it is the
+  omission risk this rule exists to prevent wearing the other
+  polarity.
 - **Discardable results express side-effect intent** — a command
   or setup helper whose primary job is mutation may use
   `@discardableResult` when callers commonly ignore optional

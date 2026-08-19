@@ -54,10 +54,16 @@ final class SparkleUpdater: AppUpdating {
     /// there is nothing to configure here and nothing that can
     /// disagree with the shipped bundle.
     ///
-    /// A build without those keys (a bare `swift build` binary,
-    /// which is the documented device-QA launch) simply never
-    /// finds a feed. That is why this is constructed from the
-    /// `.app` path only.
+    /// **Only construct this when `make()` says to.** Sparkle's
+    /// `-startUpdater` does not fail quietly on a misconfigured
+    /// host: it logs, waits a few seconds, and then shows the
+    /// user a modal telling them to contact the developer. A bare
+    /// `.build/release/KiwiDesk` — the device-QA launch
+    /// `.claude/rules/tests.md` documents — has no `Info.plist`
+    /// and therefore no bundle identifier, so constructing this
+    /// unconditionally puts an "Update Error!" alert on the
+    /// screen of an accessory app with no Dock tile to explain
+    /// where it came from.
     init() {
         controller = SPUStandardUpdaterController(
             startingUpdater: true,
@@ -75,10 +81,49 @@ final class SparkleUpdater: AppUpdating {
     }
 }
 
-/// The inert default. Reports that it cannot check, so the row
-/// that drives it greys itself.
+/// The inert stand-in. Reports that it cannot check, so the row
+/// that drives it greys itself, and starts no scheduled channel.
 @MainActor
 final class NoUpdater: AppUpdating {
     var canCheckForUpdates: Bool { false }
     func checkForUpdates() {}
+}
+
+/// Chooses the updater this process should use — a flat
+/// namespace rather than a protocol extension, because the caller
+/// reads `AppUpdaterFactory.make()` and should not have to know
+/// which conformer it hangs off (§2.4: keep code flat).
+@MainActor
+enum AppUpdaterFactory {
+    /// The updater this process should use: live when it is a
+    /// configured `.app`, inert otherwise.
+    ///
+    /// **Called exactly once, from `AppDelegate`.** Sparkle's
+    /// scheduled check runs for the process lifetime, so a
+    /// second instance is a second scheduler against one app —
+    /// which is what a future consumer (a Settings section, a
+    /// Lua verb) would create by reaching for `SparkleUpdater()`
+    /// of its own. It borrows the status item's instead.
+    /// `MachineTouchTests` pins both construction sites, by
+    /// exact count, so deleting the wiring reds as loudly as
+    /// duplicating it — the live channel starting is otherwise
+    /// invisible, and an update path that silently never runs is
+    /// the one failure `docs/design-decisions.md` ▸ *No
+    /// distribution channel without an update path* calls
+    /// unrecoverable.
+    ///
+    /// The gate is a property of the BUNDLE rather than of the
+    /// build configuration, deliberately — a release binary run
+    /// straight out of `.build` is the case that matters, and it
+    /// is indistinguishable from the shipped one by
+    /// `#if DEBUG`. Both conditions are load-bearing: no bundle
+    /// identifier is the bare-binary case, and no `SUFeedURL` is
+    /// an `.app` built before the packaging half landed.
+    static func make() -> any AppUpdating {
+        guard Bundle.main.bundleIdentifier != nil,
+            Bundle.main.object(forInfoDictionaryKey: "SUFeedURL")
+                != nil
+        else { return NoUpdater() }
+        return SparkleUpdater()
+    }
 }

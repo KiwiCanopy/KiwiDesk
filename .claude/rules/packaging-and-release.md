@@ -55,10 +55,48 @@ a `notarytool` keychain profile the developer created themselves.
 website download — the cask installs from a `.zip` and never
 needs one.
 
-Signing is inside-out over `Resources/*.bundle` only, so the
-first dependency that adds nested code (`Contents/Frameworks/`,
-i.e. Sparkle) has to extend that loop — packaging is not "done"
-for it.
+**Signing is inside-out over the whole nest, and the order is
+the obligation.** The bundle carries `Resources/*.bundle` and,
+since #874, `Contents/Frameworks/Sparkle.framework` — which is
+itself four signable pieces (both XPC services, `Autoupdate`,
+`Updater.app`) before the framework, before the app. Every rule
+below is held by `SparklePackagingTests`, which pins the order in
+the script rather than the behaviour, a shell script being
+untestable without a signing identity:
+
+- **A nested piece that is missing is a hard error, never a
+  skip.** The set is stable for a Sparkle version, so an absent
+  one means the layout moved on a bump — and a loop that quietly
+  signs three of four ships an app that fails notarization days
+  later, from a build that verified perfectly here.
+- **The framework is copied and the executable's rpath written
+  BEFORE any signing.** `install_name_tool` rewrites the Mach-O
+  load commands, so running it afterwards invalidates the
+  signature it comes after. SwiftPM links Sparkle and embeds
+  nothing, so a bundle without that copy launches and dies on a
+  missing `@rpath`.
+- **A vendor framework's own signature is not something to
+  preserve.** Sparkle ships ad-hoc signed with no Team ID
+  (checked against 2.9.6, both distributions), so ours is the
+  only real signature the nest gets. A future dependency that
+  arrives properly signed is a different case — weigh it then
+  rather than inheriting this sentence.
+
+**`SUFeedURL` and `SUPublicEDKey` are permanent from the first
+build that ships them.** An installed copy looks at no other feed
+and trusts no other key, so changing either reaches nobody who
+has not already updated — and losing the EdDSA private half
+strands every installed copy with no recovery. It belongs
+wherever the Developer ID certificate belongs, and in the
+`SPARKLE_PRIVATE_KEY` actions secret. Leave
+`SUEnableAutomaticChecks` set too: unset, Sparkle puts its own
+"check automatically?" modal on screen from an app with no Dock
+tile to explain it.
+
+**A build must not ship a feed URL that 404s.** The plist keys
+and the appcast that answers them are one shipping decision, so a
+release cut between the two halves advertises an update channel
+that errors on click. Either both are in the tag, or neither.
 
 Whether a built artifact may be *published* is a separate,
 product decision: see "No distribution channel without an update

@@ -17,7 +17,21 @@ import KiwiDeskCore
 /// parameters, so the move costs nothing. `SystemStatusItem`
 /// stayed behind too: `StatusItemSeamGuardTests` pins it to the
 /// controller file BY NAME, and that seal is the point of it.
+///
+/// One cost the cut does pay, stated rather than hidden: these
+/// three were `private` and are now internal, so `render()`'s
+/// precedence chain — warning ▸ config error ▸ mode icon ▸ brand
+/// — is no longer sealed by access control the way it was. They
+/// remain single-caller, and `render()` is still the only thing
+/// that should call them.
 extension StatusItemController {
+    /// The standard kiwi mark, named for VoiceOver by the caller
+    /// — the starting state and the ready one draw the SAME
+    /// glyph, so the name is the only thing that separates them
+    /// to a reader who cannot see the dimming. The label goes on
+    /// the BUTTON rather than the image: `BrandAssets.menuBarIcon`
+    /// is a shared cached `NSImage`, and re-describing it would
+    /// rename it for every other surface that draws it.
     func applyBrandIcon(
         to button: NSStatusBarButton,
         a11y: String
@@ -97,7 +111,4 @@ extension StatusItemController {
             button.title = icon
         }
     }
-
-    /// Shared SF Symbol → template-image helper for the menu
-    /// builders (`+Menu`, `+Layout`) and `render`.
 }

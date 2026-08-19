@@ -221,13 +221,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
     }
 
-    /// The standard kiwi mark, named for VoiceOver by the caller
-    /// — the starting state and the ready one draw the SAME
-    /// glyph, so the name is the only thing that separates them
-    /// to a reader who cannot see the dimming. The label goes on
-    /// the BUTTON rather than the image: `BrandAssets.menuBarIcon`
-    /// is a shared cached `NSImage`, and re-describing it would
-    /// rename it for every other surface that draws it.
+    /// Shared SF Symbol → template-image helper for the menu
+    /// builders (`+Menu`, `+Layout`) and `render`.
     func symbol(_ name: String) -> NSImage? {
         let image = NSImage(
             systemSymbolName: name,

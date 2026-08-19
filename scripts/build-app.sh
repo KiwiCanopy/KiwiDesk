@@ -372,6 +372,19 @@ cat > "$PLIST" <<PLISTEOF
          SPARKLE_PRIVATE_KEY actions secret. -->
     <key>SUFeedURL</key>
     <string>https://kiwidesk.kiwicanopy.com/appcast.xml</string>
+    <!-- Answer the automatic-check question HERE, because the
+         alternative is Sparkle asking it: left unset it puts its
+         own "check for updates automatically?" modal on screen a
+         few seconds after first launch, from an LSUIElement app
+         with no Dock tile to explain where the dialog came from,
+         and possibly over the first-run tour. Yes is the
+         approachable-by-default answer (gui.md's north star) —
+         an updater nobody remembers to run is not an update
+         path. System profiling stays OFF by default and is not
+         enabled here: nothing about the user's machine is sent,
+         which keeps this a plain versioned GET. -->
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
     <key>SUPublicEDKey</key>
     <string>ROU/g1Y79H9TFrN8zIvD5Cl8yJKi8BrAicyFUBQ9l9A=</string>
 </dict>
@@ -434,7 +447,11 @@ fi
 SPARKLE_FW="$FRAMEWORKS/Sparkle.framework"
 # Resolve `Versions/Current` rather than hard-coding `B`: the
 # letter is Sparkle's to change, the symlink is not.
-SPARKLE_V="$(cd "$SPARKLE_FW/Versions/Current" && pwd -P)"
+# `CDPATH=` because a set CDPATH makes `cd` echo the directory it
+# landed in, which would append a second line to this assignment.
+# It fails closed either way — the `-e` below then reports a
+# layout change — but it would report the wrong problem.
+SPARKLE_V="$(CDPATH= cd "$SPARKLE_FW/Versions/Current" && pwd -P)"
 for nested in \
     "XPCServices/Downloader.xpc" \
     "XPCServices/Installer.xpc" \

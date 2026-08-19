@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let core = KiwiCore()
     let permissions = PermissionMonitor()
     var statusItem: StatusItemController?
+
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
     /// Created on first `dashboard` access. Kept alongside so
@@ -105,11 +106,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
-        // The ONE site that opts into the live updater (#874).
-        // `StatusItemController` defaults to the inert
-        // `NoUpdater`, so a suite constructing it never starts
-        // Sparkle's scheduled checks — see AppUpdater.swift.
-        statusItem.updater = SparkleUpdater()
+        // The ONE construction of the app's updater (#874).
+        // AppUpdater.swift owns why it lives here and nowhere
+        // else; `MachineTouchTests` is what holds it to that.
+        statusItem.updater = AppUpdaterFactory.make()
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
