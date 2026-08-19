@@ -13,7 +13,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 0,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 88
@@ -24,7 +24,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 0,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 10
@@ -34,7 +34,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 0,
-                content: .name,
+                content: .title,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 900
@@ -48,7 +48,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 80,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 140
@@ -59,7 +59,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 10,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 140
@@ -69,7 +69,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 900,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
                 autoWidth: 140
@@ -79,7 +79,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 80,
-                content: .iconAndName,
+                content: .iconAndTitle,
                 thickness: 32,
                 axis: 60,
                 autoWidth: 140
@@ -92,7 +92,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.minimumSlot(
                 thickness: 32,
-                content: .iconAndName
+                content: .iconAndTitle
             ) == 32
         )
         #expect(
@@ -105,7 +105,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.minimumSlot(
                 thickness: 32,
-                content: .name
+                content: .title
             ) < 32
         )
     }
@@ -136,19 +136,19 @@ struct AppBarSlotSizingTests {
         // The stored preference survives; only rendering
         // collapses (QA 2026-07-19).
         #expect(
-            AppBarStyle.Content.iconAndName.rendered(
+            AppBarStyle.Content.iconAndTitle.rendered(
                 horizontal: false
             ) == .icon
         )
         #expect(
-            AppBarStyle.Content.name.rendered(
+            AppBarStyle.Content.title.rendered(
                 horizontal: false
             ) == .icon
         )
         #expect(
-            AppBarStyle.Content.iconAndName.rendered(
+            AppBarStyle.Content.iconAndTitle.rendered(
                 horizontal: true
-            ) == .iconAndName
+            ) == .iconAndTitle
         )
     }
 }

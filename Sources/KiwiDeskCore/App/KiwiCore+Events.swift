@@ -205,9 +205,15 @@ extension KiwiCore {
                 space: effects.removedWindow?.space,
                 reason: reason
             )
-        case .windowTitleChanged:
+        case .windowTitleChanged(let id, _):
             if effects.floatFlipped {
                 retile()
+            } else {
+                // The bars draw titles, so this is a render
+                // input — but only a render one. Skipped when
+                // the float flip already retiled: that pass
+                // rebuilds the bars itself.
+                handleTitleChangedForBars(id)
             }
         case .windowFullscreenChanged:
             // The state fold already flipped the snapshot flag;
@@ -329,22 +335,4 @@ extension KiwiCore {
     /// as `scrollFocusJumpsSlots`. Internal, not private: the
     /// call site above sits behind `eventLoop.isListed` (live
     /// AX — the `TransientOverlayFocusTests` gate note), so
-    /// `ZOrderCloseReturnArmTests` proves the arm directly.
-    func armCloseReturnRestack(
-        to target: WindowID,
-        fromRemovedSlot slot: Int?
-    ) {
-        guard let slot, let space = activeSpace else { return }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
-        guard !tiled.isEmpty,
-            let targetIndex = tiled.firstIndex(of: target)
-        else { return }
-        let from = min(slot, tiled.count - 1)
-        if abs(targetIndex - from) > 1 {
-            scheduleScrollingZOrderRestoreIfOverflowing()
-        }
-    }
 }

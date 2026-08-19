@@ -33,6 +33,7 @@ enum AppBarCommandSetting {
     case itemSize(CGFloat)
     case itemGap(CGFloat)
     case content(AppBarStyle.Content)
+    case titleCap(Int)
     case iconSource(BarAppIconSource)
     case groupAdjacentWindows(Bool)
     case fontSize(CGFloat)
@@ -111,8 +112,10 @@ enum AppBarCommandSetting {
             return choice(
                 args,
                 AppBarStyle.Content.self,
-                "icon|name|icon_and_name"
+                "icon|title|icon_and_title"
             ).map(Self.content)
+        case "title_cap":
+            return titleCap(args)
         case "icon_source":
             return choice(
                 args,
@@ -193,6 +196,26 @@ enum AppBarCommandSetting {
         return .success(value)
     }
 
+    /// Mirrors `SpaceBarCommandSetting.glyphCap` — including the
+    /// clamp-as-Double-BEFORE-`Int(...)` order, because
+    /// `Int(1e300)` traps and a config typo would otherwise kill
+    /// the WM (#58).
+    private static func titleCap(
+        _ args: [JSONValue]
+    ) -> Result<AppBarCommandSetting, AppBarSettingError> {
+        guard let value = args.first?.numberValue,
+            value.isFinite
+        else {
+            return .failure("expected a character count")
+        }
+        let range = AppBarStyle.titleCapRange
+        let clamped = min(
+            max(value.rounded(), Double(range.lowerBound)),
+            Double(range.upperBound)
+        )
+        return .success(.titleCap(Int(clamped)))
+    }
+
     /// Writes the value into the global style (concrete).
     func apply(to style: inout AppBarStyle) {
         switch self {
@@ -210,6 +233,7 @@ enum AppBarCommandSetting {
         case .itemSize(let value): style.itemSize = value
         case .itemGap(let value): style.itemGap = value
         case .content(let value): style.content = value
+        case .titleCap(let value): style.titleCap = value
         case .iconSource(let value): style.iconSource = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
@@ -250,6 +274,7 @@ enum AppBarCommandSetting {
         case .itemSize(let value): bar.itemSize = value
         case .itemGap(let value): bar.itemGap = value
         case .content(let value): bar.content = value
+        case .titleCap(let value): bar.titleCap = value
         case .iconSource(let value): bar.iconSource = value
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value

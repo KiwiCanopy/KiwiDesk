@@ -8,6 +8,7 @@ enum AppBarKey: String, CaseIterable, Hashable {
     case appBarBackgroundFit = "settings.appBarStyle.backgroundFit"
     case appBarActiveIndicator = "settings.appBarStyle.activeIndicator"
     case appBarContent = "settings.appBarStyle.content"
+    case appBarTitleCap = "settings.appBarStyle.titleCap"
     case appBarIconSource = "settings.appBarStyle.iconSource"
     case appBarGroupAdjacentWindows =
         "settings.appBarStyle.groupAdjacentWindows"
@@ -72,8 +73,18 @@ extension AppBarKey {
                 .showMore,
                 gate: .setting(.appBar(.appBarEdge))
             )
+        case .appBarTitleCap:
+            // Inert when the content draws no text — an
+            // icon-only bar caps nothing. Gated on the content
+            // row, like `appBarIconSource` below.
+            return .row(
+                .bars,
+                .appBar,
+                .showMore,
+                gate: .setting(.appBar(.appBarContent))
+            )
         case .appBarIconSource:
-            // Name-only content shows no icons. Deliberately
+            // Title-only content shows no icons. Deliberately
             // outside the container gate: the ⌃⌥K panel's Apps
             // band reads this whether or not any bar renders.
             return .row(
@@ -149,6 +160,11 @@ extension AppBarKey {
             return .text("app_bar.active_indicator.label")
         case .appBarContent:
             return .text("app_bar.content.label")
+        case .appBarTitleCap:
+            return .text(
+                "app_bar.title_cap",
+                help: "app_bar.title_cap.help"
+            )
         case .appBarIconSource:
             return .text(
                 "app_bar.icon_source.label",

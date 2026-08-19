@@ -1555,9 +1555,9 @@ sensible standard. The size is clamped: at least the icon square
 
 Items that don't fit the strip **scroll** instead of shrinking: the
 bar follows the focused window as you cycle, and clickable arrows
-appear over the ends that hide more items. Names truncate only when
-they genuinely don't fit their slot; with `icon_and_name`, only the
-name shrinks, the icon always survives. Clicking an item focuses
+appear over the ends that hide more items. Titles truncate when they
+pass `title_cap` or genuinely don't fit their slot; with
+`icon_and_title`, only the title shrinks, the icon always survives. Clicking an item focuses
 its window; hovering swaps the item's background to the hover color
 — the already-active item ignores clicks and shows no hover.
 
@@ -1727,17 +1727,59 @@ app_bar.set_item_gap(6)
 
 ### app_bar.set_content
 
-**Expects:** `"icon"`, `"name"`, or `"icon_and_name"`.
+**Expects:** `"icon"`, `"title"`, or `"icon_and_title"`
+(default `icon_and_title`).
 
-**Does:** sets what each item displays. Vertical bars (edge
-`left`/`right`) always render icon-only — names would need
-stacked or rotated text; the stored preference returns when the
-bar moves back to a horizontal edge.
+**Does:** sets what each item displays. The text is the
+window's own **title**, not its app name — five Finder windows
+all reading "Finder" name nothing the icon did not already say,
+while "Downloads" / "Projects" tells them apart.
+
+The app name still appears in the two places a title cannot
+speak, and there it is never shortened:
+
+- a **grouped** item, whose windows have several titles and no
+  one of them is true of the group (focus the group and it
+  expands into its members, which do show titles);
+- a window whose title is **empty** — some apps (Electron and
+  WebKit ones especially) report no title until well after the
+  window opens.
+
+Vertical bars (edge `left`/`right`) always render icon-only —
+titles would need stacked or rotated text; the stored
+preference returns when the bar moves back to a horizontal
+edge.
 
 **Example:**
 
 ```lua
-app_bar.set_content("icon_and_name")
+app_bar.set_content("icon_and_title")
+```
+
+### app_bar.set_title_cap
+
+**Expects:** a character count, 8–80 (default `25`). Values
+outside the range are clamped.
+
+**Does:** sets how much of a window's title an item shows;
+longer titles are cut at the end and marked with an ellipsis.
+
+This is not only cosmetic. Every item on a bar is the same
+size, and with `item_size` left at `0` that size is measured
+from the **widest** item — so one long title widens every slot
+until the quarter-of-the-bar clamp bites and the rest of the
+bar has to scroll. Titles also change as you work (an editor
+retitles on every keystroke), so an uncapped bar re-measures
+and shifts while you type.
+
+Cutting at the end is deliberate: the apps that repeat their
+own name in a title append it (`"ToDo — Second_Brain — Obsidian
+1.13.7"`), so the tail is the part worth losing first.
+
+**Example:**
+
+```lua
+app_bar.set_title_cap(25)
 ```
 
 ### app_bar.set_icon_source
@@ -2213,16 +2255,40 @@ space_bar.set_active_dim_factor(0.6)
 **Expects:** boolean (default `false`).
 
 **Does:** shows a trailing front-app segment after the last
-Space item — a divider, then the glyph and name of the focused
-window of the Space **this display currently shows** (per
-display, not the globally frontmost app — one bar per display,
-per-display content). On vertical (left/right) bars the
-segment is icon-only; the divider flips to a horizontal rule.
+Space item — a divider, then the glyph and the **title** of the
+focused window of the Space **this display currently shows**
+(per display, not the globally frontmost app — one bar per
+display, per-display content). The segment is that window, so
+it names the window rather than repeating the app the glyph
+beside it already shows; a window with no title yet falls back
+to its app's name. On vertical (left/right) bars the segment is
+icon-only; the divider flips to a horizontal rule.
 
 **Example:**
 
 ```lua
 space_bar.set_show_front_app(false)
+```
+
+### space_bar.set_title_cap
+
+**Expects:** a character count, 8–80 (default `25`). Values
+outside the range are clamped.
+
+**Does:** sets how much of the focused window's title the
+front-app segment shows. The segment always ellipsizes at the
+bar's edge, so this is not about clipping: the segment's length
+feeds the bar's alignment, so under `center` or `end` an
+uncapped title slides the whole run of Space items sideways
+every time the title changes.
+
+Inert while `show_front_app` is off — nothing else on the Space
+Bar draws a title.
+
+**Example:**
+
+```lua
+space_bar.set_title_cap(25)
 ```
 
 ### space_bar.set_hide_empty

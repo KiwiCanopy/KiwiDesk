@@ -32,6 +32,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var itemSize: CGFloat?
     public var itemGap: CGFloat?
     public var content: Content?
+    public var titleCap: Int?
     public var iconSource: BarAppIconSource?
     public var groupAdjacentWindows: Bool?
     public var fontSize: CGFloat?
@@ -73,6 +74,7 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let itemSize { out.itemSize = itemSize }
         if let itemGap { out.itemGap = itemGap }
         if let content { out.content = content }
+        if let titleCap { out.titleCap = titleCap }
         if let iconSource { out.iconSource = iconSource }
         if let groupAdjacentWindows {
             out.groupAdjacentWindows = groupAdjacentWindows
@@ -127,6 +129,7 @@ extension LayoutAppBar: Codable {
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
+        case titleCap = "title_cap"
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
@@ -185,9 +188,16 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .itemGap
         )
+        // Raw string + `Content.decoded`, for the reason
+        // `AppBarStyle`'s own decode carries: a retired app-name
+        // spelling must fold, not throw the override away.
         content = try container.decodeIfPresent(
-            Content.self,
+            String.self,
             forKey: .content
+        ).flatMap(Content.decoded)
+        titleCap = try container.decodeIfPresent(
+            Int.self,
+            forKey: .titleCap
         )
         iconSource = try container.decodeIfPresent(
             BarAppIconSource.self,
@@ -280,6 +290,7 @@ extension LayoutAppBar: Codable {
         try container.encodeIfPresent(itemSize, forKey: .itemSize)
         try container.encodeIfPresent(itemGap, forKey: .itemGap)
         try container.encodeIfPresent(content, forKey: .content)
+        try container.encodeIfPresent(titleCap, forKey: .titleCap)
         try container.encodeIfPresent(
             iconSource,
             forKey: .iconSource

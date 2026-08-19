@@ -5012,6 +5012,76 @@ point is right when we know nothing about the desktop, which is
 exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
 
+**The bars name the WINDOW, not its app.** (Owner ruling
+2026-08-19, replacing the `name` / `icon_and_name` content modes
+shipped since #228.) `app_bar.set_content` takes `icon`, `title`
+or `icon_and_title`, and the Space Bar's front segment shows the
+focused window's title in place of its app's name. The retired
+spellings fold onto the title ones on decode — not a compat shim
+(§5 rules those out pre-release) but because a raw enum decode of
+a dropped case *throws*, which would have failed the whole
+profile decode and reset every unrelated bar setting with it.
+
+The bar exists to tell one window from another, and the app name
+is the one label that provably cannot. Five Finder windows read
+"Finder" five times while the icon beside each already said so;
+a sampled desktop (owner, 2026-08-19) had three Finder windows
+titled `Downloads`, `KiwiCall` and `keebart-studio`, sharing no
+prefix. The app name is not redundant *in general* — it is
+redundant **next to the icon that names the same app**, which is
+the only place the bar ever drew it.
+
+The app name survives in exactly the two places a title cannot
+speak, and there it is never shortened: a **collapsed group**,
+whose windows have several titles and no one of them is true of
+the group; and an **empty title**, which the lazy-title apps of
+#160 report for a while after opening — four of twelve apps on
+that same desktop reported none at all. The group case
+self-heals, because focusing a group expands it into members
+that do show titles.
+
+Titles do NOT generally repeat the app name, which is what makes
+`icon_and_title` non-redundant: of that sample, Finder, ghostty
+and System Settings put none of it in the title, Obsidian
+appended its own name *and version*, and the browser appended
+the **site** rather than the app. Where an app does append it,
+it appends at the tail — which is the argument for
+tail-truncating the cap rather than head-truncating it.
+
+**A drawn title needs a cap and a refresh path; neither is
+optional.** (Same ruling.) Two consequences fall out of drawing
+a string the user edits, and both are load-bearing rather than
+polish.
+
+`app_bar.set_title_cap` (8–80, default 25) exists because App
+Bar slots are **uniform and measured from the widest item**
+(`AppBarOverlay.autoSlotWidth`). App names are 6–20 characters
+by construction; the sampled titles ran to 57. One long title
+therefore widens *every* slot until `slotLength`'s
+quarter-of-the-bar clamp bites and the rest of the bar scrolls —
+so the cap is what keeps auto item sizing usable at all, and
+`item_size` is not a substitute (it answers a different
+question, and only for users who go looking). The Space Bar's
+own cap exists for a different reason and is kept as a separate
+knob for that reason: its front segment already ellipsizes at
+the panel edge and cannot clip, but its estimated length feeds
+the bar's alignment total, so under `center` or `end` an
+uncapped title slides the whole run of Space items sideways.
+
+The refresh path is the subtler half. The bars are driven from
+`retile()`, and `TilingEngine.shouldRetile` returns false for
+`.windowTitleChanged` — correctly, since a title moves no
+window. Before this change that meant a title event did nothing
+and nothing needed it to; drawing a title makes the same event a
+*render* input. It is handled as one: `handleTitleChangedForBars`
+re-renders the bars and never retiles, because retiling on a
+rename would re-issue a frame set — and, on an app that refuses
+a size, re-teach the #677 ledger — every time a tab was renamed.
+It is debounced through a `DeferredTasks` slot rather than a
+bespoke flag, so teardown's `cancelAll()` reaches it like every
+other settle (#48), and gated on the **rendered** content, so a
+vertical bar (which collapses to icon-only) schedules nothing.
+
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default bottom) and the

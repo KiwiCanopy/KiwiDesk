@@ -29,6 +29,18 @@ final class SpaceBarItemView: NSView {
     /// focused accent.
     struct App: Equatable {
         let name: String
+        /// The window title the FRONT SEGMENT draws, already
+        /// capped, or nil to fall back to `name`. Only the front
+        /// segment ever carries one: a Space item is a run of
+        /// app glyphs with no text at all, so its `App` values
+        /// leave this nil. Resolved by the driver
+        /// (`KiwiCore.frontApp`), like the glyph.
+        ///
+        /// Separate from `name` on purpose — `name` still
+        /// resolves the App Font glyph
+        /// (`appFont.glyph(forAppName:)`) and names the app for
+        /// accessibility, neither of which a title can do.
+        var title: String?
         let icon: NSImage?
         /// App Font ligature; non-nil replaces `icon` and
         /// follows the text-color ladder (#294).

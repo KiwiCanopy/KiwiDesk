@@ -85,7 +85,7 @@ extension AppBarOverlay {
             )
         )
         let iconSide =
-            style.content == .name
+            style.content == .title
             ? 0 : max(thickness - pad * 2, 0)
         // The uniform slot fits the widest item, so measure every
         // name and take the max: icon square + gap + text + pads,
@@ -106,7 +106,7 @@ extension AppBarOverlay {
             if style.content == .icon {
                 text = 0
             } else {
-                measure.stringValue = item.name
+                measure.stringValue = item.text
                 text = ceil(
                     measure.cell?.cellSize.width ?? 0
                 )
@@ -160,7 +160,7 @@ extension AppBarOverlay {
         thickness: CGFloat,
         content: AppBarStyle.Content
     ) -> CGFloat {
-        content == .name
+        content == .title
             ? AppBarItemView.contentPadding * 4
             : thickness
     }

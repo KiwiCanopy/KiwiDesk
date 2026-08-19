@@ -65,21 +65,56 @@ extension AppBarStyle {
         case gap
     }
 
+    /// What an item draws. The text is the window's own
+    /// **title**, never its app name: a bar of five Finder
+    /// windows reading "Finder" five times names nothing the
+    /// icon did not already say, while "Downloads" / "KiwiCall"
+    /// tells them apart (owner 2026-08-19). The app name
+    /// survives as the fallback in the two places a title
+    /// cannot speak — an empty one (lazy-title apps, #160) and
+    /// a collapsed group, whose members have several titles and
+    /// no one of them is true. Both fallbacks are resolved by
+    /// the driver, in `KiwiCore.barItemText`.
     public enum Content: String, Sendable, Codable {
         case icon
-        case name
-        /// Truncation only ever eats the name; the icon
+        case title
+        /// Truncation only ever eats the title; the icon
         /// always survives.
-        case iconAndName = "icon_and_name"
+        case iconAndTitle = "icon_and_title"
 
         /// The content actually drawn: vertical bars render
-        /// icon-only — letter-stacked names read terribly and
+        /// icon-only — letter-stacked titles read terribly and
         /// rotated text is not native (QA 2026-07-19; the Space
-        /// Bar settled the same rule for its front-app name).
+        /// Bar settled the same rule for its front segment).
         /// The stored preference round-trips, mirroring
         /// `BackgroundStyle.rendered(glassAvailable:)`.
         public func rendered(horizontal: Bool) -> Content {
             horizontal ? self : .icon
+        }
+
+        /// Whether the drawn content carries text at all — the
+        /// one predicate gating both the title-change bar
+        /// refresh (`KiwiCore.appBarWantsTitles`) and the text
+        /// measurement. Ask this rather than re-spelling
+        /// `!= .icon`, so a later text-free case cannot be
+        /// missed at one of the two sites.
+        public var showsText: Bool { self != .icon }
+
+        /// Decodes a stored value, folding the two retired
+        /// app-name spellings onto their title equivalents
+        /// (owner 2026-08-19). Pre-release a rename needs no
+        /// compat shim (AGENTS.md §5) — but a *raw* decode of a
+        /// retired spelling THROWS rather than returning nil, so
+        /// dropping the cases without this would fail the whole
+        /// profile decode and reset every unrelated bar setting
+        /// with it. That is the only reason this exists, and it
+        /// is not a promise to keep reading `name` forever.
+        static func decoded(_ raw: String) -> Content? {
+            switch raw {
+            case "name": return .title
+            case "icon_and_name": return .iconAndTitle
+            default: return Content(rawValue: raw)
+            }
         }
     }
 

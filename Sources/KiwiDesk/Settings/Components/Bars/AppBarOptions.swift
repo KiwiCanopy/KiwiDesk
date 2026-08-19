@@ -104,10 +104,10 @@ enum AppBarOptions {
     @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
         (.icon, L("app_bar.content.icon", "Icon")),
-        (.name, L("app_bar.content.name", "Name")),
+        (.title, L("app_bar.content.title", "Title")),
         (
-            .iconAndName,
-            L("app_bar.content.icon_and_name", "Icon & name")
+            .iconAndTitle,
+            L("app_bar.content.icon_and_title", "Icon & title")
         ),
     ]
 }

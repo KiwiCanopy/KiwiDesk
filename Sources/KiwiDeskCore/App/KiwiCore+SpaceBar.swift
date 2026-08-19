@@ -95,11 +95,28 @@ extension KiwiCore {
             let space = state.workspaces[current],
             let focused = space.focused
         else { return nil }
-        return spaceBarApp(
-            group: [focused],
-            space: space,
-            style: style
-        )
+        guard
+            var app = spaceBarApp(
+                group: [focused],
+                space: space,
+                style: style
+            )
+        else { return nil }
+        // The segment IS the focused window, so it names that
+        // window rather than repeating its app: an app already
+        // shown by the icon beside it, and by every glyph in the
+        // run. Nil leaves `layoutFrontName` on the app-name
+        // fallback, which is what an empty title (#160) and a
+        // vertical bar both want.
+        let title = state.windows[focused]?.title ?? ""
+        app.title =
+            title.isEmpty
+            ? nil
+            : AppBarStyle.cappedTitle(
+                title,
+                to: style.resolvedTitleCap
+            )
+        return app
     }
 
     /// The display's Spaces in profile order, each with its

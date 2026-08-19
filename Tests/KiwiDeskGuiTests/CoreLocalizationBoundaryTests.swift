@@ -83,7 +83,7 @@ struct CoreLocalizationBoundaryTests {
         // Core. (The App Bar renders app and window NAMES —
         // data, not copy — and calls `L()` zero times.)
         "Bar/SpaceBarItemView.swift": 3,
-        "Bar/SpaceBarOverlay+FrontApp.swift": 1,
+        "Bar/SpaceBarOverlay+FrontApp.swift": 2,
     ]
 
     /// `L(` preceded by an identifier character is a different

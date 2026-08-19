@@ -91,6 +91,14 @@ extension SettingsValueReadout {
                     AppBarOptions.activeIndicator
                 )
             )
+        case .monocleAppBarTitleCap, .scrollingAppBarTitleCap:
+            return layoutBarRow(
+                census,
+                mode,
+                .appBarTitleCap,
+                layoutBarCount(o.titleCap),
+                layoutBarCount(n.titleCap)
+            )
         case .monocleAppBarContent, .scrollingAppBarContent:
             return layoutBarRow(
                 census,
@@ -273,6 +281,7 @@ extension SettingsValueReadout {
             .monocleAppBarAlignment, .monocleAppBarBackgroundStyle,
             .monocleAppBarBackgroundFit,
             .monocleAppBarActiveIndicator, .monocleAppBarContent,
+            .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows,
             .monocleAppBarThickness, .monocleAppBarItemSize,
             .monocleAppBarItemGap, .monocleAppBarFontSize,
@@ -291,7 +300,7 @@ extension SettingsValueReadout {
             .scrollingAppBarBackgroundStyle,
             .scrollingAppBarBackgroundFit,
             .scrollingAppBarActiveIndicator,
-            .scrollingAppBarContent,
+            .scrollingAppBarContent, .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows,
             .scrollingAppBarThickness, .scrollingAppBarItemSize,
             .scrollingAppBarItemGap, .scrollingAppBarFontSize,

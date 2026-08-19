@@ -112,7 +112,7 @@ extension AppBarItemView {
         label.usesSingleLineMode = true
         label.maximumNumberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
-        label.stringValue = name
+        label.stringValue = text
         let side =
             iconSlotHidden
             ? 0

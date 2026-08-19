@@ -190,7 +190,7 @@ struct SettingsSearchIndexTests {
                 .layoutDefaults: 35,
                 .monitors: 3,
                 .gapsAndBorders: 18,
-                .bars: 34,
+                .bars: 36,
                 .colors: 12,
                 .advancedColors: 25,
                 .behavior: 3,

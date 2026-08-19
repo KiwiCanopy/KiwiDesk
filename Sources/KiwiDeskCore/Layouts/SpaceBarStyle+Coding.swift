@@ -36,6 +36,7 @@ extension SpaceBarStyle {
         case itemGap = "item_gap"
         case fontSize = "font_size"
         case glyphCap = "glyph_cap"
+        case titleCap = "title_cap"
         case iconSource = "icon_source"
         case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
@@ -108,6 +109,11 @@ extension SpaceBarStyle {
                 Int.self,
                 forKey: .glyphCap
             ) ?? defaults.glyphCap
+        titleCap =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .titleCap
+            ) ?? defaults.titleCap
         iconSource =
             try container.decodeIfPresent(
                 BarAppIconSource.self,

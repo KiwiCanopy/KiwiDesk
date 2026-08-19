@@ -282,10 +282,18 @@ struct HomeCardBarsTile: View {
         _ style: AppBarStyle,
         vertical: Bool
     ) -> [BarItem] {
-        let mocks: [(glyph: String, name: String)] = [
-            ("envelope", L("bars_scene.app_mail", "Mail")),
-            ("globe", L("bars_scene.app_web", "Web")),
-            ("folder", L("bars_scene.app_files", "Files")),
+        // Window TITLES, not app names — the bar draws a title,
+        // so a preview labelled "Mail / Web / Files" would show
+        // the one thing the setting no longer does. Each still
+        // pairs with its app's glyph, which is what the icon
+        // slot really draws.
+        let mocks: [(glyph: String, title: String)] = [
+            ("envelope", L("bars_scene.title_mail", "Inbox")),
+            ("globe", L("bars_scene.title_web", "News")),
+            (
+                "folder",
+                L("bars_scene.title_files", "Downloads")
+            ),
         ]
         let content = style.content.rendered(
             horizontal: !vertical
@@ -301,9 +309,9 @@ struct HomeCardBarsTile: View {
             )
             if scale > 1 {
                 item.glyph =
-                    content == .name ? nil : mock.glyph
+                    content == .title ? nil : mock.glyph
                 item.label =
-                    content == .icon ? nil : mock.name
+                    content == .icon ? nil : mock.title
             }
             item.active = active
             items.append(item)

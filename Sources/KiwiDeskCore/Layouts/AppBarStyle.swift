@@ -49,7 +49,24 @@ public struct AppBarStyle: Sendable, Equatable {
     public var itemSize: CGFloat = 0
     /// Spacing between boxes (pt); 0 = touching.
     public var itemGap: CGFloat = 6
-    public var content: Content = .iconAndName
+    public var content: Content = .iconAndTitle
+    /// Longest title an item draws, in characters; longer ones
+    /// tail-truncate to it with an ellipsis. Read through
+    /// `resolvedTitleCap`, which clamps to `titleCapRange`.
+    ///
+    /// Not cosmetic. Slots are uniform and auto-sized to the
+    /// WIDEST item (`AppBarOverlay.autoSlotWidth`), so one long
+    /// title widens every slot until `slotLength`'s quarter-bar
+    /// clamp bites and the rest of the bar scrolls — and because
+    /// the measurement re-runs per render, an uncapped bar also
+    /// breathes on every keystroke in an editor. Titles observed
+    /// on a real desktop ran to 57 characters (owner 2026-08-19)
+    /// against app names of 6–20, which is the whole reason this
+    /// knob exists and `item_size` alone does not answer it.
+    /// Tail truncation, deliberately: the apps that do repeat
+    /// their own name in the title append it ("… — Obsidian
+    /// 1.13.7"), so the tail is the byte worth losing first.
+    public var titleCap = 25
     /// Where app icons come from: the native app image, or a
     /// monochrome SketchyBar App Font glyph that follows the
     /// bar's text colors (#294). Apps without a glyph keep
@@ -175,168 +192,4 @@ public struct AppBarStyle: Sendable, Equatable {
 // MARK: - Codable
 
 extension AppBarStyle: Codable {
-    /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
-    /// `set_` verb — the `app_bar` nesting carries the namespace.
-    /// `CaseIterable` is load-bearing: the parity test
-    /// (`AppBarParityTests`) reflects over `allCases` to prove
-    /// every field has a key — do not drop it as "unused".
-    enum CodingKeys: String, CodingKey, CaseIterable {
-        case edge
-        case alignment
-        case thickness
-        case backgroundStyle = "background_style"
-        case liquidGlass = "liquid_glass"
-        case backgroundFit = "background_fit"
-        case activeIndicator = "active_indicator"
-        case itemSize = "item_size"
-        case itemGap = "item_gap"
-        case content
-        case iconSource = "icon_source"
-        case groupAdjacentWindows = "group_adjacent_windows"
-        case fontSize = "font_size"
-        case cornerRoundness = "corner_roundness"
-        case dimFactor = "dim_factor"
-        case itemColor = "item_color"
-        case fillColor = "fill_color"
-        case activeItemColor = "active_item_color"
-        case highlightColor = "highlight_color"
-        case hoverFillColor = "hover_fill_color"
-        case hoverItemColor = "hover_item_color"
-        case groupBadgeColor = "group_badge_color"
-        case groupBadgeTextColor = "group_badge_text_color"
-    }
-
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(
-            keyedBy: CodingKeys.self
-        )
-        let defaults = Self()
-        edge =
-            try container.decodeIfPresent(
-                AppBarEdge.self,
-                forKey: .edge
-            ) ?? defaults.edge
-        alignment =
-            try container.decodeIfPresent(
-                BarAlignment.self,
-                forKey: .alignment
-            ) ?? defaults.alignment
-        thickness = max(
-            Self.minThickness,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .thickness
-            ) ?? defaults.thickness
-        )
-        backgroundStyle =
-            try container.decodeIfPresent(
-                BackgroundStyle.self,
-                forKey: .backgroundStyle
-            ) ?? defaults.backgroundStyle
-        liquidGlass =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .liquidGlass
-            ) ?? defaults.liquidGlass
-        backgroundFit =
-            try container.decodeIfPresent(
-                BackgroundFit.self,
-                forKey: .backgroundFit
-            ) ?? defaults.backgroundFit
-        activeIndicator =
-            try container.decodeIfPresent(
-                ActiveIndicator.self,
-                forKey: .activeIndicator
-            ) ?? defaults.activeIndicator
-        itemSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemSize
-            ) ?? defaults.itemSize
-        itemGap =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemGap
-            ) ?? defaults.itemGap
-        content =
-            try container.decodeIfPresent(
-                Content.self,
-                forKey: .content
-            ) ?? defaults.content
-        iconSource =
-            try container.decodeIfPresent(
-                BarAppIconSource.self,
-                forKey: .iconSource
-            ) ?? defaults.iconSource
-        groupAdjacentWindows =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .groupAdjacentWindows
-            ) ?? defaults.groupAdjacentWindows
-        try decodeAppearance(from: container)
-    }
-
-    private mutating func decodeAppearance(
-        from container: KeyedDecodingContainer<CodingKeys>
-    ) throws {
-        let defaults = Self()
-        fontSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .fontSize
-            ) ?? defaults.fontSize
-        cornerRoundness =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .cornerRoundness
-            ) ?? defaults.cornerRoundness
-        dimFactor = Self.clampDim(
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .dimFactor
-            ) ?? defaults.dimFactor
-        )
-        itemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .itemColor
-            ) ?? defaults.itemColor
-        fillColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .fillColor
-            ) ?? defaults.fillColor
-        activeItemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .activeItemColor
-            ) ?? defaults.activeItemColor
-        highlightColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .highlightColor
-            ) ?? defaults.highlightColor
-        hoverFillColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .hoverFillColor
-            ) ?? defaults.hoverFillColor
-        hoverItemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .hoverItemColor
-            ) ?? defaults.hoverItemColor
-        groupBadgeColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .groupBadgeColor
-            ) ?? defaults.groupBadgeColor
-        groupBadgeTextColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .groupBadgeTextColor
-            ) ?? defaults.groupBadgeTextColor
-    }
 }

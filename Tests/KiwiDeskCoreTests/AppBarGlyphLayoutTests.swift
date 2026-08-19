@@ -25,6 +25,7 @@ struct AppBarGlyphLayoutTests {
         view.configure(
             id: WindowID(1),
             name: "Zed",
+            text: "Zed",
             icon: nil,
             glyph: glyph,
             count: 1,
@@ -58,7 +59,7 @@ struct AppBarGlyphLayoutTests {
     @Test("Name-only content shows neither glyph nor image")
     func nameOnlyHidesGlyph() {
         var style = AppBarStyle()
-        style.content = .name
+        style.content = .title
         let view = makeView(
             thickness: 32,
             glyph: ":zed:",
@@ -76,9 +77,9 @@ struct AppBarGlyphLayoutTests {
     @Test(
         "The widest name fits the slot it defined",
         arguments: [
-            (AppBarStyle.Content.iconAndName, CGFloat(0)),
-            (AppBarStyle.Content.iconAndName, CGFloat(18)),
-            (AppBarStyle.Content.name, CGFloat(0)),
+            (AppBarStyle.Content.iconAndTitle, CGFloat(0)),
+            (AppBarStyle.Content.iconAndTitle, CGFloat(18)),
+            (AppBarStyle.Content.title, CGFloat(0)),
         ]
     )
     func widestNameFitsItsOwnSlot(
@@ -117,8 +118,9 @@ struct AppBarGlyphLayoutTests {
         view.configure(
             id: WindowID(1),
             name: "Systemeinstellungen",
+            text: "Systemeinstellungen",
             icon: nil,
-            glyph: variant.0 == .name ? nil : ":settings:",
+            glyph: variant.0 == .title ? nil : ":settings:",
             count: 1,
             active: false,
             horizontal: true,

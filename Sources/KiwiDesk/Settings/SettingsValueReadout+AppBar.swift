@@ -94,6 +94,12 @@ extension SettingsValueReadout {
             )
         case .appBarItemGap:
             return appBarPointsRow(census, o.itemGap, n.itemGap)
+        case .appBarTitleCap:
+            return appBarRow(
+                census,
+                trimmed(Double(o.titleCap)),
+                trimmed(Double(n.titleCap))
+            )
         case .appBarFontSizeAuto:
             return appBarOnOffRow(
                 census,

@@ -121,6 +121,23 @@ extension SpaceBarCard {
     /// defers the why to `help`). The preview strip is a fixed
     /// stand-in and cannot honestly render N synthetic glyphs,
     /// so the fact lives here.
+    /// The front segment's title length. Paired with the
+    /// segment's own toggle by the census gate, so it greys
+    /// rather than disappearing when the segment is off.
+    @ViewBuilder var titleCapRow: some View {
+        StepperRow(
+            label: L("space_bar.title_cap", "Title length"),
+            value: style.titleCap,
+            in: AppBarStyle.titleCapRange,
+            help: L(
+                "space_bar.title_cap.help",
+                "How many characters of the focused window's "
+                    + "title the front segment shows before it "
+                    + "is shortened."
+            )
+        )
+    }
+
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(
             label: L("space_bar.glyph_cap", "Glyphs per Space"),

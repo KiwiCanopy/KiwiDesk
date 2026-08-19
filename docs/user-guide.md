@@ -1528,13 +1528,28 @@ rest; the rest behind **Style**):
   points.
 - **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
-- **Content**: icon only, name only, or both. Left/right bars
-  always render icon-only (names would need stacked or rotated
-  text), so the control greys when every bar on screen sits on
-  a vertical edge; your choice returns when one moves back to a
-  horizontal edge.
+- **Content**: icon only, title only, or both. The text is the
+  window's own title, not its app name — five Finder windows all
+  reading "Finder" tell you nothing the icon didn't, while
+  "Downloads" / "Projects" tells them apart. Two cases still
+  show the app's name, because a title can't speak there:
+  a **grouped** item (its windows have several titles, and none
+  of them is true of the group — focus it and it expands into
+  members that do show titles), and a window that reports **no
+  title yet**, which some apps don't until a moment after they
+  open. Left/right bars always render icon-only (titles would
+  need stacked or rotated text), so the control greys when every
+  bar on screen sits on a vertical edge; your choice returns
+  when one moves back to a horizontal edge.
+- **Title length**: how many characters of a title an item
+  shows before it's shortened at the end (8–80, default 25).
+  Worth knowing why it matters: every item on a bar is the same
+  size, and on **auto** item size that size comes from the
+  widest item — so one long title widens *every* slot until the
+  quarter-of-the-bar limit kicks in and the rest of the bar has
+  to scroll. Greyed while every bar on screen shows icons only.
 - **App symbol style**: how app icons are drawn (greyed while
-  every bar on screen renders names only, which shows no
+  every bar on screen renders titles only, which shows no
   icons). This one stays available even when no layout shows an
   App Bar at all, because it also styles the shortcuts panel's
   Apps band. **System default**
@@ -1725,10 +1740,13 @@ concern.
 Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by
 shortcut) and **Show front app** — a trailing segment with the
-focused window of the Space each display currently shows
-(icon-only on vertical bars). **Spring delay** sets how long a
-dragged window must hover a Space before the view springs to it
-(default 1.5 s, 1–4 s).
+focused window of the Space each display currently shows: its
+app's icon, then that window's **title** (its app's name
+instead if it reports no title yet). Icon-only on vertical bars.
+**Title length** caps that title (8–80 characters, default 25)
+and is greyed while the segment is off. **Spring delay** sets
+how long a dragged window must hover a Space before the view
+springs to it (default 1.5 s, 1–4 s).
 
 ## Colors & Motion
 

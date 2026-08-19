@@ -105,6 +105,12 @@ extension SettingsValueReadout {
                 trimmed(Double(o.glyphCap)),
                 trimmed(Double(n.glyphCap))
             )
+        case .spaceBarTitleCap:
+            return spaceBarRow(
+                census,
+                trimmed(Double(o.titleCap)),
+                trimmed(Double(n.titleCap))
+            )
         case .spaceBarCornerRoundness:
             return spaceBarRow(
                 census,
