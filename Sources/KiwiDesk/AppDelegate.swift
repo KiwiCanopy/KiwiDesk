@@ -108,7 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         let statusItem = StatusItemController()
         // The ONE construction of the app's updater (#874).
         // AppUpdater.swift owns why it lives here and nowhere
-        // else; `MachineTouchTests` is what holds it to that.
+        // else; `UpdaterSeamGuardTests` holds it to that.
         statusItem.updater = AppUpdaterFactory.make()
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()

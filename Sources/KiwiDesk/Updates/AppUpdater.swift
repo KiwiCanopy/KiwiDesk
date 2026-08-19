@@ -104,13 +104,15 @@ enum AppUpdaterFactory {
     /// which is what a future consumer (a Settings section, a
     /// Lua verb) would create by reaching for `SparkleUpdater()`
     /// of its own. It borrows the status item's instead.
-    /// `MachineTouchTests` pins both construction sites, by
-    /// exact count, so deleting the wiring reds as loudly as
-    /// duplicating it — the live channel starting is otherwise
-    /// invisible, and an update path that silently never runs is
-    /// the one failure `docs/design-decisions.md` ▸ *No
-    /// distribution channel without an update path* calls
-    /// unrecoverable.
+    /// `UpdaterSeamGuardTests` pins all three sites — this
+    /// factory's call, `SparkleUpdater(` itself, and Sparkle's
+    /// own controller — by exact count, so deleting the wiring
+    /// reds as loudly as duplicating it. That symmetry is the
+    /// point: a missing wiring greys one menu row, which is
+    /// visible, while the scheduled channel never starting is
+    /// not — and an update path that silently never runs is the
+    /// failure `docs/design-decisions.md` ▸ *No distribution
+    /// channel without an update path* calls unrecoverable.
     ///
     /// The gate is a property of the BUNDLE rather than of the
     /// build configuration, deliberately — a release binary run

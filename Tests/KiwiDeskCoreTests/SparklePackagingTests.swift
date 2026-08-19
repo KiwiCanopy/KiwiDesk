@@ -37,9 +37,12 @@ struct SparklePackagingTests {
         // `.claude/rules/gui.md` names, where a comment quoting a
         // deleted key stood in for its call site.
         //
-        // Cut at the first `#` on a line, never mid-line: a `#`
-        // inside a plist heredoc (`<key>…`) is not a comment, and
-        // the keys asserted below live in one.
+        // A line is dropped only when its first non-blank
+        // character is `#`; a trailing `# …` on a code line
+        // survives, so a needle parked in one would still
+        // satisfy this guard. Deliberate rather than thorough:
+        // cutting mid-line would eat the plist heredoc's
+        // `<key>` lines, which the assertions below read.
         let text = raw.split(
             separator: "\n",
             omittingEmptySubsequences: false
@@ -142,6 +145,21 @@ struct SparklePackagingTests {
                 "\(piece) is not signed inside the nest loop"
             )
         }
+        // The four NAMES above are only the loop's LIST.
+        // Deleting the codesign call inside the loop leaves every
+        // one of them in place and every ordering true, so the
+        // first cut of this suite went green while ZERO of four
+        // pieces were signed. Three-of-four was caught;
+        // none-of-four was not.
+        let signsNested = try index(
+            #"--sign "$IDENTITY" "$SPARKLE_V/$nested""#,
+            in: text,
+            "the nested pieces are never actually signed"
+        )
+        #expect(
+            signsNested > loop && signsNested < framework,
+            "the nested signing call is outside its own loop"
+        )
         #expect(framework < app)
     }
 
@@ -158,12 +176,33 @@ struct SparklePackagingTests {
             in: text,
             "the missing-piece check is gone"
         )
-        let exitIndex = try index(
-            "Sparkle's\" \\\n             \"nested layout changed",
-            in: text,
-            "the refusal no longer names what went wrong"
+        // Pin the REFUSAL, not the message. The first cut of this
+        // test needled the guard line and the position of the
+        // error text, and stayed green when `exit 1` became
+        // `continue` — the one mutation its own docstring names.
+        let after = String(
+            text[
+                text.index(text.startIndex, offsetBy: guardIndex)...
+            ]
         )
-        #expect(exitIndex > guardIndex)
+        let refusal = try index(
+            "exit 1",
+            in: after,
+            "the missing-piece check no longer refuses"
+        )
+        let signsNested = try index(
+            #"--sign "$IDENTITY" "$SPARKLE_V/$nested""#,
+            in: text,
+            "the nested signing call is gone"
+        )
+        #expect(
+            guardIndex + refusal < signsNested,
+            """
+            the refusal must come BEFORE the signing call it \
+            protects, or the loop signs a piece it just failed \
+            to find
+            """
+        )
     }
 
     /// Both keys are permanent once a build ships: an installed

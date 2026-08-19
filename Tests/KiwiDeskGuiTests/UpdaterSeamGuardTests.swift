@@ -3,10 +3,9 @@ import Testing
 
 /// The updater seam's construction sites (#874).
 ///
-/// Split out of `MachineTouchTests` at §2.1's ceiling rather than
-/// merged into it — same family, same idiom, its own file, which
-/// `.claude/rules/tests.md` asks for before the ceiling rather
-/// than after.
+/// Its own file rather than a section of `MachineTouchTests`,
+/// which was already at §2.1's ceiling — same family and the
+/// same needle idiom, split before crossing rather than after.
 @Suite("Updater seam stays singular (#874)")
 struct UpdaterSeamGuardTests {
     private static let root = SourceScan.repoRoot(
@@ -63,6 +62,33 @@ struct UpdaterSeamGuardTests {
         )
         #expect(
             controllers.allSatisfy {
+                $0.file.lastPathComponent == Self.updaterAllowed
+            }
+        )
+
+        // The live conformer itself. This needle is the one
+        // the ownership trade rests on, and it is NOT implied
+        // by the one above: `SPUStandardUpdaterController(`
+        // lives inside `SparkleUpdater.init`, so its source
+        // count stays 1 however many `SparkleUpdater()` a
+        // future Settings section builds. Without this, the
+        // duplication direction — two Sparkles scheduled
+        // against one app — is guarded by nothing, which is
+        // what the first cut of this suite claimed to prevent
+        // and did not.
+        let conformers = try Self.sites(
+            of: "SparkleUpdater(",
+            under: Self.productionTrees
+        )
+        #expect(
+            conformers.count == 1,
+            .init(
+                rawValue: "one SparkleUpdater() expected, got "
+                    + "\(conformers.count)"
+            )
+        )
+        #expect(
+            conformers.allSatisfy {
                 $0.file.lastPathComponent == Self.updaterAllowed
             }
         )

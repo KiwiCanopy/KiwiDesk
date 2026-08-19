@@ -106,6 +106,27 @@ struct UpdatesRowTests {
         #expect(updater.checks == 0)
     }
 
+    /// Nothing else pins that the row is actually ADDED. Delete
+    /// the `menu.addItem(makeUpdatesItem())` line and every other
+    /// test here still passes — the item is still constructible —
+    /// while "Check for Updates…" is gone from the app.
+    @Test("the row is in the menu the app builds")
+    func rowIsInTheMenu() {
+        LocalizationManager.shared.select("en")
+        let controller = StatusItemController(
+            item: FakeStatusItem()
+        )
+        controller.updater = FakeUpdater(canCheck: true)
+        let menu = NSMenu()
+        controller.menuNeedsUpdate(menu)
+        #expect(
+            menu.items.contains {
+                $0.title == "Check for Updates…"
+            },
+            "the quick menu has no Check for Updates row"
+        )
+    }
+
     /// The gate that keeps every OTHER suite off the network: in
     /// a test process `Bundle.main` is the runner, which carries
     /// no `SUFeedURL`, so the factory must hand back the inert
@@ -115,6 +136,17 @@ struct UpdatesRowTests {
     /// modal error alert during a test run.
     @Test("the factory is inert outside a configured .app")
     func factoryIsInertInTests() {
+        // The INPUT is asserted first, and that ordering is the
+        // point: `make()` constructs a live updater when the gate
+        // admits, so a test that called it to find out would
+        // start Sparkle's scheduled channel inside the runner and
+        // only then report the failure. Proving the gate cannot
+        // admit here makes the call below safe to make.
+        #expect(
+            Bundle.main.object(forInfoDictionaryKey: "SUFeedURL")
+                == nil,
+            "the test runner carries a Sparkle feed URL"
+        )
         #expect(AppUpdaterFactory.make() is NoUpdater)
     }
 }

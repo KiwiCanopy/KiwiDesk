@@ -210,9 +210,9 @@ bite large test PRs:
   that builds a `StatusItemController` — not a resource seized
   and released, but a background service. The inversion is only
   safe because it is guarded from BOTH sides:
-  `MachineTouchTests` pins the construction and the wiring by
-  exact count, so deleting the wiring reds exactly as loudly as
-  duplicating it. That matters more than it sounds — a forgotten
+  `UpdaterSeamGuardTests` pins the construction, the conformer
+  and the wiring by exact count, so deleting the wiring reds
+  exactly as loudly as duplicating it. That matters more than it sounds — a forgotten
   wiring greys one menu row, which is visible, while the
   scheduled channel silently never starts, which is not, and
   `docs/design-decisions.md` ▸ *No distribution channel without
