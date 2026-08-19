@@ -276,6 +276,105 @@ def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     )
 
 
+# Starlight's own custom-property layer. Exempt by NAMESPACE
+# rather than by file, because the point is whose layer it is: we
+# do not author these, we cannot fix a dangling one, and Starlight
+# ships several (`--sl-text-h6`, `--sl-icon-size`) that its own
+# bundle references without declaring. Ours are the ones this
+# guard is for, and none of ours may hide behind this prefix.
+THIRD_PARTY_PREFIX = "--sl-"
+
+
+def check_var_references(dist: pathlib.Path) -> None:
+    """Every `var(--x)` in the built CSS resolves to a `--x:`
+    declaration in the same artifact.
+
+    An undeclared custom property is the quietest failure this
+    tree has: the build stays green, the page still renders, and
+    every rule using it silently drops. A colour falls back to
+    the inherited one, so a muted tier collapses into the body
+    text; worse, `border: 1px solid var(--nope)` is invalid at
+    computed-value time, so the whole shorthand unsets and
+    `border-style` becomes `none` — the rule simply is not there.
+
+    That is not hypothetical. The release-notes page (#873)
+    shipped its first draft against `--fg-1`, `--fg-2` and
+    `--line`, none of which exists here (`--text`, `--text-dim`,
+    `--border` do). Its section eyebrows, dates and back link all
+    rendered at full body strength, its separators and its BETA
+    pill had no border at all, and the only link out to the
+    GitHub release was the same colour as the paragraph above it
+    with no underline — a WCAG 1.4.1 failure that no build, test
+    or lint noticed.
+
+    Reads the ARTIFACT rather than `site/src`, so it also covers
+    an Astro component's scoped `<style>` block and anything a
+    dependency emits."""
+    declared: set[str] = set()
+    used: dict[str, str] = {}
+    sheets = sorted(dist.rglob("*.css"))
+    inline = sorted(dist.rglob("*.html"))
+    if not sheets:
+        fail(
+            f"no CSS found under {dist} — this check would pass "
+            "for having looked at nothing."
+        )
+    blocks: list[tuple[str, str]] = [
+        (str(path.relative_to(dist)), path.read_text(encoding="utf-8"))
+        for path in sheets
+    ]
+    for path in inline:
+        text = path.read_text(encoding="utf-8")
+        where = str(path.relative_to(dist))
+        for match in re.finditer(
+            r"<style[^>]*>(.*?)</style>", text, re.DOTALL
+        ):
+            blocks.append((where, match.group(1)))
+        # An inline `style="--depth: 0"` IS a declaration, and it
+        # is how a component hands a per-element value to CSS —
+        # Starlight's sidebar nesting does exactly this. Scanning
+        # only stylesheets would report those as dangling.
+        for match in re.finditer(r'style="([^"]*)"', text):
+            blocks.append((where, match.group(1)))
+    for where, text in blocks:
+        declared.update(re.findall(r"(--[\w-]+)\s*:", text))
+        # Only the NO-FALLBACK form. `var(--x, 1em)` survives an
+        # undeclared `--x` by design — that is what the fallback
+        # is — so flagging it would be flagging correct CSS, and
+        # Starlight's own layer uses that form throughout.
+        for name in re.findall(
+            r"var\(\s*(--[\w-]+)\s*\)", text
+        ):
+            used.setdefault(name, where)
+    if not used:
+        fail(
+            "no `var(--x)` references found in the built CSS — "
+            "this check would pass for having looked at nothing."
+        )
+    missing = sorted(
+        name
+        for name in set(used) - declared
+        if not name.startswith(THIRD_PARTY_PREFIX)
+    )
+    if missing:
+        listed = "\n".join(
+            f"    - {name}  (first seen in {used[name]})"
+            for name in missing
+        )
+        fail(
+            "CSS custom propert(ies) used but never declared. "
+            "Every rule referencing one is silently dropped:\n"
+            f"{listed}\n"
+            "  Declared names live in site/src/styles/*.css — "
+            "text is --text / --text-dim / --text-faint, borders "
+            "are --border / --border-strong."
+        )
+    print(
+        f"var(--x) references resolve: {len(used)} name(s) across "
+        f"{len(blocks)} stylesheet(s)/block(s)"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -291,6 +390,7 @@ def main() -> None:
     dist = pathlib.Path(args.dist).resolve()
     check_branded_404(dist)
     check_sitemaps_disjoint(dist)
+    check_var_references(dist)
 
 
 if __name__ == "__main__":

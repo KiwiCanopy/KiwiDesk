@@ -35,6 +35,9 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import changelog from "../data/changelog.json";
+import ogBannerEn from "../assets/brand/og-banner.jpg";
+import ogBannerDe from "../assets/brand/og-banner.de.jpg";
+import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 
 type Lang = "en" | "de" | "ja";
 
@@ -105,6 +108,11 @@ const pageDesc = t("changelog_meta_desc");
 const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
+// One banner per locale — the card carries the tagline, so it
+// speaks the language of the title beside it (as Guide does).
+const ogBanner =
+  lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
+const ogImage = new URL(ogBanner.src, Astro.site).href;
 ---
 
 <!doctype html>
@@ -121,6 +129,11 @@ const kofi = "https://ko-fi.com/kiwicanopy";
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
     <meta property="og:locale" content={ogLocale} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDesc} />
+    <meta name="twitter:image" content={ogImage} />
     <ThemeHead />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link
@@ -237,11 +250,23 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         )
       }
 
+      {/* The frame is localized and the ENTRIES are English in
+          every locale (see the header). Each entry says so, or a
+          screen reader pronounces English prose with the page's
+          declared voice. */}
       {
         releases.map((release, index) => (
-          <section class="rel" aria-labelledby={`v-${release.tag}`}>
+          <section class="rel" aria-labelledby={`v-${release.tag}`}
+            lang={lang === "en" ? undefined : "en"}>
             <header class="rel__head">
-              <h2 id={`v-${release.tag}`}>{release.version}</h2>
+              {/* The id already labels the section; making the
+                  version itself the anchor is what turns it
+                  into a per-release permalink to share. */}
+              <h2 id={`v-${release.tag}`}>
+                <a class="rel__anchor" href={`#v-${release.tag}`}>
+                  {release.version}
+                </a>
+              </h2>
               <time datetime={release.date}>
                 {readable(release.date)}
               </time>
@@ -270,9 +295,10 @@ const kofi = "https://ko-fi.com/kiwicanopy";
               </div>
             ))}
 
-            {!release.summary && (
-              <p class="rel__none">{t("changelog_no_notes")}</p>
-            )}
+            {!release.summary &&
+              !(release.sections ?? []).length && (
+                <p class="rel__none">{t("changelog_no_notes")}</p>
+              )}
 
             <a class="rel__out" href={release.url} target="_blank"
               rel="noopener">
@@ -286,7 +312,7 @@ const kofi = "https://ko-fi.com/kiwicanopy";
     <footer class="lfoot">
       <p class="tag-line">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
-        <a href="/docs">{t("footer_docs")}</a>
+        <a href="/docs/">{t("footer_docs")}</a>
         <a href={localePath(lang, "/changelog/")}
           >{t("footer_changelog")}</a>
         <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
@@ -315,19 +341,24 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       }
 
       .lnav {
+        /* Above landing.css's fixed `body::before`
+           wash, which `.rel` clears only by inheriting
+           the global `section` rule. */
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
         padding: 1rem clamp(1rem, 4vw, 2.5rem);
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px solid var(--border);
       }
       .lnav .brand {
         display: inline-flex;
         align-items: center;
         gap: 0.6rem;
         font-weight: 700;
-        color: var(--fg-1);
+        color: var(--text);
         text-decoration: none;
       }
       .lnav .right {
@@ -343,17 +374,22 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         font-weight: 600;
       }
       .langs a {
-        color: var(--fg-2);
+        color: var(--text-dim);
         text-decoration: none;
         padding: 0.15rem 0.3rem;
         border-radius: 6px;
       }
       .langs a[aria-current="page"] {
-        color: var(--fg-1);
+        color: var(--text);
         background: var(--bg-2);
       }
 
       .clog {
+        /* Above landing.css's fixed `body::before`
+           wash, which `.rel` clears only by inheriting
+           the global `section` rule. */
+        position: relative;
+        z-index: 1;
         max-width: 46rem;
         margin: 0 auto;
         padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem)
@@ -362,12 +398,12 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       .back {
         display: inline-block;
         margin-bottom: 1.6rem;
-        color: var(--fg-2);
+        color: var(--text-dim);
         text-decoration: none;
         font-size: 0.92rem;
       }
       .back:hover {
-        color: var(--fg-1);
+        color: var(--text);
       }
       .clog h1 {
         margin: 0 0 0.4rem;
@@ -376,16 +412,23 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       }
       .intro {
         margin: 0 0 2.6rem;
-        color: var(--fg-2);
+        color: var(--text-dim);
         font-size: 1.02rem;
       }
       .empty {
-        color: var(--fg-2);
+        color: var(--text-dim);
       }
 
+      /* `section` in landing.css carries
+         `padding-block: clamp(3.5rem, 9vw, 7rem)`, which a release
+         entry must not inherit — overriding only `padding-top`
+         leaves an 81px bottom against a 35px top. Legal.astro
+         resets the same trap. Spacing here comes from the rule
+         plus the margin. */
       .rel {
+        padding-block: 0;
         padding-top: 2.2rem;
-        border-top: 1px solid var(--line);
+        border-top: 1px solid var(--border);
         margin-bottom: 2.2rem;
       }
       .rel__head {
@@ -400,8 +443,15 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         font-size: 1.5rem;
         line-height: 1.1;
       }
+      .rel__anchor {
+        color: inherit;
+        text-decoration: none;
+      }
+      .rel__anchor:hover {
+        text-decoration: underline;
+      }
       .rel__head time {
-        color: var(--fg-2);
+        color: var(--text-dim);
         font-size: 0.9rem;
       }
       /* A status chip, not the footer's tagline paragraph — hence
@@ -413,8 +463,8 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         text-transform: uppercase;
         padding: 0.16rem 0.5rem;
         border-radius: 999px;
-        border: 1px solid var(--line);
-        color: var(--fg-2);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
       }
       .rel .tag--latest {
         border-color: transparent;
@@ -425,11 +475,11 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       .rel__summary {
         margin: 0 0 1.6rem;
         font-size: 1.06rem;
-        color: var(--fg-1);
+        color: var(--text);
       }
       .rel__none {
         margin: 0 0 1.2rem;
-        color: var(--fg-2);
+        color: var(--text-dim);
         font-size: 0.95rem;
       }
 
@@ -442,7 +492,7 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        color: var(--fg-2);
+        color: var(--text-dim);
       }
       .grp ul {
         margin: 0;
@@ -454,9 +504,10 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         line-height: 1.6;
       }
       .grp li :global(strong) {
-        color: var(--fg-1);
+        color: var(--text);
       }
       .grp li :global(code) {
+        font-family: var(--mono);
         font-size: 0.9em;
         padding: 0.1em 0.35em;
         border-radius: 5px;
@@ -466,19 +517,24 @@ const kofi = "https://ko-fi.com/kiwicanopy";
       .rel__out {
         display: inline-block;
         font-size: 0.9rem;
-        color: var(--fg-2);
+        color: var(--text-dim);
         text-decoration: none;
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px solid var(--border);
       }
       .rel__out:hover {
-        color: var(--fg-1);
+        color: var(--text);
       }
 
       .lfoot {
-        border-top: 1px solid var(--line);
+        /* Above landing.css's fixed `body::before`
+           wash, which `.rel` clears only by inheriting
+           the global `section` rule. */
+        position: relative;
+        z-index: 1;
+        border-top: 1px solid var(--border);
         padding: 2rem clamp(1rem, 4vw, 2.5rem) 3rem;
         text-align: center;
-        color: var(--fg-2);
+        color: var(--text-dim);
         font-size: 0.9rem;
       }
       .flinks {
@@ -489,11 +545,15 @@ const kofi = "https://ko-fi.com/kiwicanopy";
         margin: 0.8rem 0;
       }
       .flinks a {
-        color: var(--fg-2);
+        color: var(--text-dim);
         text-decoration: none;
       }
       .flinks a:hover {
-        color: var(--fg-1);
+        color: var(--text);
+      }
+      .tag-line {
+        font-weight: 600;
+        color: var(--text);
       }
       .copy {
         margin: 0;

@@ -27,7 +27,7 @@
   "changelog_full_list": "変更点の全リストを GitHub で見る",
   "changelog_intro": "各バージョンの変更点を新しい順に。インストールする人に向けて書いています。",
   "changelog_latest": "最新",
-  "changelog_meta_desc": "KiwiDesk の各バージョンの変更点を、わかりやすい言葉で。新しい順に並んでいます。",
+  "changelog_meta_desc": "KiwiDesk の各バージョンで何が変わったかを、新しい順に。つくった人ではなく、インストールする人に向けて、わかりやすい言葉で書いています。",
   "changelog_meta_title": "KiwiDesk リリースノート — バージョンごとの変更点",
   "changelog_no_notes": "このリリースノートができる前のバージョンです。全リストは GitHub にあります。",
   "changelog_title": "リリースノート",
