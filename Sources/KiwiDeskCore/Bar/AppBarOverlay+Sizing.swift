@@ -36,9 +36,7 @@ extension AppBarOverlay {
         let gap = style.itemGap
         let slot = Self.slotLength(
             itemSize: style.itemSize,
-            content: style.content.rendered(
-                horizontal: horizontal
-            ),
+            content: style.renderedContent,
             thickness: thickness,
             axis: axis,
             autoWidth: Self.autoSlotWidth(

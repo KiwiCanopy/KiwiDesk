@@ -93,9 +93,7 @@ struct BarsGates {
         anyBarShown
             && shownBars.allSatisfy {
                 let bar = $0.resolved(with: settings.appBarStyle)
-                return !bar.content.rendered(
-                    horizontal: bar.edge.isHorizontal
-                ).showsText
+                return !bar.renderedContent.showsText
             }
     }
 
@@ -104,9 +102,7 @@ struct BarsGates {
         anyBarShown
             && shownBars.allSatisfy {
                 let bar = $0.resolved(with: settings.appBarStyle)
-                return bar.content.rendered(
-                    horizontal: bar.edge.isHorizontal
-                ) == .title
+                return bar.renderedContent == .title
             }
     }
 

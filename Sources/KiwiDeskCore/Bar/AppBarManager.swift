@@ -84,6 +84,31 @@ public final class AppBarManager {
         }
     }
 
+    /// True when a painted bar is drawing `id`'s own window
+    /// title right now.
+    ///
+    /// Read from `shownBars` — what `sync` accepted and the
+    /// overlays drew — for the same reason `shownStrips` is:
+    /// a second derivation drifts from what is on screen. The
+    /// title-refresh gate asked its own copy of this question
+    /// until a review found it disagreeing with a driver
+    /// (2026-08-20); everything it had to re-derive (the #670
+    /// stand-down, the screen pick, the empty-bar filter, the
+    /// cold-start fallback) is already folded into this array.
+    ///
+    /// A `count > 1` item draws its APP NAME, never a member's
+    /// title (`KiwiCore.barItemText`), so a group is not a
+    /// consumer — exact here, where the groups are the painted
+    /// ones, and only approximable from state.
+    public func showsTitle(of id: WindowID) -> Bool {
+        shownBars.contains { bar in
+            bar.style.renderedContent.showsText
+                && bar.items.contains {
+                    $0.id == id && $0.count == 1
+                }
+        }
+    }
+
     /// The painted strips covering `space` (empty when it shows
     /// no bar: off, or suppressed because it has no non-floating
     /// windows).

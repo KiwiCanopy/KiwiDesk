@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The title cap's arithmetic, and the fold that keeps a
-/// profile written before the rename decodable. Both are pure —
-/// no `KiwiCore` — which is why they are their own file; the
+/// The title cap's arithmetic, and what a `content` value this
+/// build cannot read does at the decode. Both are pure — no
+/// `KiwiCore` — which is why they are their own file; the
 /// driver-level halves are in `BarTitleTextTests.swift` and
 /// `BarTitleRefreshTests.swift`.
 @Suite("Bar titles")
@@ -110,25 +110,30 @@ struct BarTitleCapTests {
     }
 }
 
-/// A `content` value this enum no longer knows must fall back,
-/// not throw.
+/// A `content` value this enum no longer knows THROWS, exactly
+/// as every sibling enum field does.
 ///
-/// The retired `name` / `icon_and_name` spellings are the reason
-/// the decode goes through `String` rather than `Content.self`,
-/// and a hand-edit typo reaches the same path. Nothing folds them
-/// onto a title mode — §5 bans compatibility aliases pre-release,
-/// so an old profile simply opens at the default and the user
-/// re-picks. What must NOT happen is the throw: `Content.self`
-/// raises `DecodingError.dataCorrupted` on an unknown raw value,
-/// which fails the whole `init(from:)` and resets every unrelated
-/// bar setting in the struct.
+/// The retired `name` / `icon_and_name` spellings are gone, and
+/// a hand-edit typo reaches the same path: `Content.self` raises
+/// `DecodingError.dataCorrupted` on an unknown raw value, which
+/// fails `init(from:)` — and, because `TilingSettings` decodes
+/// this struct inline, falls the whole profile back to its
+/// defaults.
+///
+/// That price is the point of the suite rather than an
+/// embarrassment to it. The decode was briefly lenient for this
+/// one field on exactly that argument, and the argument proved
+/// too good: it applies to six sibling enums here and every one
+/// in `SpaceBarStyle`, none of which is lenient, so sparing the
+/// single renamed field was a shim with a blast-radius
+/// rationale (§5; ruled 2026-08-20, `docs/design-decisions.md`).
 @Suite("Unreadable content values")
-struct ContentDecodeFallbackTests {
-    /// The sibling settings are the assertion. A decode that
-    /// threw would lose thickness, gap and colour too — which is
-    /// the damage, not the content field itself.
-    @Test("A retired spelling falls back and keeps its siblings")
-    func retiredSpellingKeepsSiblings() throws {
+struct ContentDecodeStrictnessTests {
+    /// The siblings are the assertion, in the negative: what a
+    /// throw costs is thickness, gap and colour, and pinning the
+    /// cost is what keeps the ruling honest about its price.
+    @Test("A retired spelling throws, siblings and all")
+    func retiredSpellingThrows() {
         for retired in ["name", "icon_and_name"] {
             let json = """
                 {
@@ -138,36 +143,34 @@ struct ContentDecodeFallbackTests {
                   "fill_color": "#123456"
                 }
                 """
-            let style = try JSONDecoder().decode(
-                AppBarStyle.self,
-                from: Data(json.utf8)
-            )
-            #expect(style.content == AppBarStyle().content)
-            #expect(style.thickness == 44)
-            #expect(style.itemGap == 11)
-            #expect(style.fillColor == "#123456")
+            #expect(throws: DecodingError.self) {
+                try JSONDecoder().decode(
+                    AppBarStyle.self,
+                    from: Data(json.utf8)
+                )
+            }
         }
     }
 
-    /// Not special-cased to the two retired words — any
-    /// unreadable value takes the same path, which is what makes
-    /// this a decode rule rather than a rename shim.
-    @Test("A typo falls back the same way")
-    func typoFallsBack() throws {
+    /// Not special-cased to the two retired words — an unreadable
+    /// value is an unreadable value, which is what makes this a
+    /// decode rule rather than a rename shim in reverse.
+    @Test("A typo throws the same way")
+    func typoThrows() {
         let json = """
             {"content": "not_a_mode", "thickness": 37}
             """
-        let style = try JSONDecoder().decode(
-            AppBarStyle.self,
-            from: Data(json.utf8)
-        )
-        #expect(style.content == AppBarStyle().content)
-        #expect(style.thickness == 37)
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(
+                AppBarStyle.self,
+                from: Data(json.utf8)
+            )
+        }
     }
 
     /// A live spelling still decodes to itself — otherwise the
-    /// two tests above would pass on a decode that ignored the
-    /// key entirely. `.title` is deliberately not the default.
+    /// two tests above would pass on a decode that rejected
+    /// everything. `.title` is deliberately not the default.
     @Test("A live spelling still decodes")
     func liveSpellingDecodes() throws {
         let json = """
@@ -181,21 +184,21 @@ struct ContentDecodeFallbackTests {
         #expect(style.content != AppBarStyle().content)
     }
 
-    /// The layout override's decode is a separate hand-written
-    /// site. There the fallback is nil — "no override" — which
-    /// inherits the global, the right answer for a retired
-    /// spelling.
-    @Test("An override falls back to inheriting")
-    func overrideFallsBackToNil() throws {
+    /// The layout override is a second hand-written decode site,
+    /// and it is strict for the same reason: its own siblings
+    /// (`iconSource`, `alignment`) throw, so a lenient `content`
+    /// there would re-introduce the asymmetry one file over.
+    @Test("An override throws rather than inheriting")
+    func overrideThrows() {
         let json = """
             {"content": "icon_and_name", "item_gap": 7}
             """
-        let bar = try JSONDecoder().decode(
-            LayoutAppBar.self,
-            from: Data(json.utf8)
-        )
-        #expect(bar.content == nil)
-        #expect(bar.itemGap == 7)
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(
+                LayoutAppBar.self,
+                from: Data(json.utf8)
+            )
+        }
     }
 
     /// ...and a live one still overrides, for the same reason
@@ -213,10 +216,14 @@ struct ContentDecodeFallbackTests {
     }
 
     /// `showsText` gates the refresh, the slot measurement and
-    /// the GUI grey-out; pin what it answers so a later
-    /// text-free case cannot be missed at one of them.
+    /// the GUI grey-out. Hand-listed on purpose — a loop over
+    /// `allCases` would re-derive the implementation and assert
+    /// nothing. The COUNT is the guard: a new case reds this
+    /// test, and whoever adds it has to rule on whether it draws
+    /// text at all three call sites.
     @Test("Only the icon case draws no text")
     func showsTextIsExhaustive() {
+        #expect(AppBarStyle.Content.allCases.count == 3)
         #expect(!AppBarStyle.Content.icon.showsText)
         #expect(AppBarStyle.Content.title.showsText)
         #expect(AppBarStyle.Content.iconAndTitle.showsText)

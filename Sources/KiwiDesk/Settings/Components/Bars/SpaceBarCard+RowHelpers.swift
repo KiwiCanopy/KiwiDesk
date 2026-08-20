@@ -121,6 +121,18 @@ extension SpaceBarCard {
     /// is off. Greyed rather than hidden (#171), pairing the
     /// census gate `SettingKey+SpaceBar` declares with a live
     /// `GreyOut`, as `backgroundFitRow` above does.
+    ///
+    /// Gated on the toggle ALONE, deliberately unlike its App Bar
+    /// twin, which greys through `everyShownBarIconOnly` and so
+    /// folds the vertical case in. A vertical Space Bar draws no
+    /// front name but still ANNOUNCES one — the segment's
+    /// accessibility label is built from the capped title on
+    /// every edge (`SpaceBarOverlay+FrontApp`) — so the cap is
+    /// live there and greying it would lie. The App Bar item has
+    /// no accessible name at all (#901), which is why the
+    /// asymmetry is earned rather than an oversight; if #901
+    /// gives it one, that gate owes this reasoning too (raised
+    /// and ruled in review, 2026-08-20).
     @ViewBuilder var titleCapRow: some View {
         StepperRow(
             label: L("space_bar.title_cap", "Title length"),

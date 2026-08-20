@@ -49,7 +49,7 @@ extension KiwiCore {
     /// bar whose content draws no text, or to a bar that is not
     /// on screen at all.
     func handleTitleChangedForBars(_ id: WindowID) {
-        guard barsDrawTitle(of: id) else { return }
+        guard barsShowTitle(of: id) else { return }
         deferred.schedule(
             .barTitleRefresh,
             after: Self.barTitleRefreshDelay
@@ -72,100 +72,34 @@ extension KiwiCore {
         updateSpaceBar()
     }
 
-    /// Whether any bar currently on screen would draw this
-    /// window's title.
+    /// Whether any bar on screen right now is showing this
+    /// window's title — drawing it, or announcing it.
     ///
-    /// Both halves ask the RENDERED content, not the stored
-    /// preference: a vertical bar collapses to icon-only
-    /// (`Content.rendered(horizontal:)`), so a title change
-    /// under one must schedule nothing at all rather than
-    /// re-render a bar that cannot show it.
-    /// Space Bar first, deliberately: it is three bool reads and
-    /// one comparison, while the App Bar half builds an
-    /// `effectiveTiledMembers` array per shown display. On every
-    /// title event, the cheap question deserves to answer first.
-    private func barsDrawTitle(of id: WindowID) -> Bool {
-        spaceBarDrawsTitle(of: id) || appBarDrawsTitle(of: id)
-    }
-
-    /// True when `id` is a bar item on a space that is showing,
-    /// under a resolved content that draws text.
+    /// Asked of the bars the managers actually PAINTED, never
+    /// re-derived from state. That is the obligation the float
+    /// clamp already carries for bar geometry
+    /// (`KiwiCore+FloatClamp`: strips come from `shownStrips`,
+    /// "never re-derived here — a second derivation drifts from
+    /// what is on screen"), and this gate is the argument for
+    /// it: it shipped with a three-rule copy of a five-gate
+    /// policy and disagreed with the Space Bar driver on its
+    /// first day (review 2026-08-20). The painted record folds
+    /// in every rule for free — the #670 fullscreen stand-down,
+    /// the per-display screen pick, the empty-bar suppression,
+    /// the App Bar's cold-start fallback and the Space Bar's
+    /// deliberate lack of one — so no driver can change one of
+    /// them out from under this file.
     ///
-    /// A collapsed group draws its app name, never a member's
-    /// title (`barItemText`), so a title change inside one
-    /// changes nothing on screen — but resolving that here would
-    /// mean rebuilding the groups for every keystroke, which
-    /// costs more than the refresh it would save. The cheap
-    /// membership question is the right altitude; the expensive
-    /// one is answered once, in the refresh itself.
-    private func appBarDrawsTitle(of id: WindowID) -> Bool {
-        for space in showingSpaces() {
-            guard let host = barHost(for: space),
-                host.appBar.enabled
-            else { continue }
-            let style = host.resolvedBar(
-                global: tiler.settings.appBarStyle
-            )
-            guard
-                style.content.rendered(
-                    horizontal: style.edge.isHorizontal
-                ).showsText
-            else { continue }
-            if state.effectiveTiledMembers(
-                of: space,
-                activeSpace: activeSpace?.id
-            ).contains(id) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /// True when the Space Bar's front segment is drawing this
-    /// window. That segment shows the focused window of the
-    /// space on its display, so only a focused window's title
-    /// can be on screen there — and only on a horizontal bar,
-    /// where `layoutFrontName` draws text at all.
-    private func spaceBarDrawsTitle(of id: WindowID) -> Bool {
-        let style = tiler.settings.spaceBarStyle
-        guard style.enabled, style.showFrontApp,
-            style.edge.isHorizontal
-        else { return false }
-        return showingSpaces().contains { $0.focused == id }
-    }
-
-    /// The spaces whose bars are actually painted right now.
+    /// Cheap, as the drop path must be: two walks over at most
+    /// one bar per display, and no machine read at all. The
+    /// version this replaced called the WindowServer twice per
+    /// event (`NativeSpaces.currentSpaceIsUser` enumerates every
+    /// display's every space), on the main actor, BEFORE the
+    /// debounce — once per keystroke in an editor.
     ///
-    /// Three rules, and all three must match what the drivers
-    /// (`KiwiCore+AppBar.bar(for:)`, `KiwiCore+SpaceBar
-    /// .spaceBar(for:)`) apply, or this gate refuses refreshes
-    /// they would have rendered, or schedules ones they discard:
-    /// the CURRENT space per display, the #670 fullscreen
-    /// stand-down (a fullscreen desktop paints no bar at all),
-    /// and the cold-start fallback to the active space before
-    /// the display list seeds.
-    ///
-    /// The drivers re-derive rather than call this because each
-    /// needs more than the space — a screen, a bar host, a
-    /// resolved style. `BarTitleRefreshTests` pins the agreement
-    /// from this side; a driver that changes one of the three
-    /// owes this function the same change.
-    private func showingSpaces() -> [Space] {
-        let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else {
-            guard NativeSpaces.activeSpaceIsUser() else {
-                return []
-            }
-            return activeSpace.map { [$0] } ?? []
-        }
-        return displays.compactMap { display in
-            guard
-                NativeSpaces.currentSpaceIsUser(
-                    display: display.id
-                )
-            else { return nil }
-            return state.workspaces.currentSpace(on: display.id)
-                .flatMap { state.workspaces[$0] }
-        }
+    /// Space Bar first: it compares one optional per painted
+    /// bar, while the App Bar half walks that bar's items.
+    private func barsShowTitle(of id: WindowID) -> Bool {
+        spaceBars.showsTitle(of: id) || appBars.showsTitle(of: id)
     }
 }

@@ -105,23 +105,11 @@ extension AppBarStyle {
                 CGFloat.self,
                 forKey: .itemGap
             ) ?? defaults.itemGap
-        // Decoded as a raw String, never as `Content.self`: a
-        // value this enum no longer knows — the retired
-        // `name` / `icon_and_name`, or a hand-edit typo — would
-        // otherwise THROW here and take every other bar setting
-        // in this struct down with it. Through String it lands
-        // on the default instead, so an old profile opens as
-        // `icon_and_title` and the user re-picks if they care
-        // (AGENTS.md §5: re-editing the config IS the
-        // migration). Deliberately unlike the sibling enum
-        // fields, which still throw: `content` is the one whose
-        // vocabulary was renamed under existing configs.
-        // `ContentDecodeFallbackTests` pins both halves.
         content =
             try container.decodeIfPresent(
-                String.self,
+                Content.self,
                 forKey: .content
-            ).flatMap(Content.init(rawValue:)) ?? defaults.content
+            ) ?? defaults.content
         titleCap =
             try container.decodeIfPresent(
                 Int.self,

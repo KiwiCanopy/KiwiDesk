@@ -14,6 +14,13 @@ public final class SpaceBarManager {
         /// The trailing front-app segment's app; nil while the
         /// toggle is off or nothing is focused.
         let frontApp: SpaceBarItemView.App?
+        /// WHICH window that segment is about. Carried beside
+        /// the render value rather than inside it: `App` is what
+        /// the overlay draws, and a window id draws nothing.
+        /// The title-refresh gate needs the identity, and asking
+        /// the painted bar is what keeps it from re-deriving the
+        /// driver's guards (`showsTitle(of:)`).
+        let frontWindow: WindowID?
         public let strip: CGRect
         /// The resolved style; its `edge` is the stored
         /// absolute edge — single source, like the App Bar.
@@ -28,6 +35,7 @@ public final class SpaceBarManager {
             display: DisplayID,
             items: [SpaceBarOverlay.Item],
             frontApp: SpaceBarItemView.App? = nil,
+            frontWindow: WindowID? = nil,
             strip: CGRect,
             style: SpaceBarStyle,
             stateMarkColors: StateMarkColors
@@ -35,6 +43,7 @@ public final class SpaceBarManager {
             self.display = display
             self.items = items
             self.frontApp = frontApp
+            self.frontWindow = frontWindow
             self.strip = strip
             self.style = style
             self.stateMarkColors = stateMarkColors
@@ -76,6 +85,24 @@ public final class SpaceBarManager {
                 edge: $0.style.edge
             )
         }
+    }
+
+    /// True when a painted bar's front segment is about `id`.
+    ///
+    /// Deliberately NOT gated on the edge. A vertical bar draws
+    /// no front name (`layoutFrontName` returns early), but
+    /// `SpaceBarOverlay` builds the segment's accessibility
+    /// label from the same title on EVERY edge, so there the
+    /// title is announced rather than drawn — and a title that
+    /// is announced stale is as wrong as one drawn stale. The
+    /// gate treated "not drawn" as "not consumed" until a
+    /// review caught it (2026-08-20); both are consumers.
+    ///
+    /// The toggle and the focus guard come free: the driver
+    /// leaves `frontWindow` nil when `showFrontApp` is off or
+    /// nothing is focused.
+    public func showsTitle(of id: WindowID) -> Bool {
+        shownBars.contains { $0.frontWindow == id }
     }
 
     /// Shows exactly `bars` — one per display — and retires the

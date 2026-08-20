@@ -24,7 +24,6 @@ struct AppBarGlyphLayoutTests {
         )
         view.configure(
             id: WindowID(1),
-            name: "Zed",
             text: "Zed",
             icon: nil,
             glyph: glyph,
@@ -56,21 +55,23 @@ struct AppBarGlyphLayoutTests {
         #expect(view.glyphLabel.isHidden)
     }
 
-    /// The label draws `text` — the driver-resolved title — and
-    /// never `name`, the app identity that rides along for the
-    /// glyph and (one day) the accessibility label.
+    /// The label draws `text` — the driver-resolved title.
     ///
-    /// Asserted directly rather than through a geometry side
-    /// effect: a fixture sized to make truncation visible can
-    /// discriminate the MEASUREMENT or the DRAW, but not both at
-    /// once, and swapping this write was inert until it had its
-    /// own assertion (guard-prover, 2026-08-19).
-    @Test("The label draws the item's text, not its app name")
+    /// It cannot draw the app name instead, because the view is
+    /// no longer told one: the write-only `name` that rode along
+    /// for a future accessibility label was dropped rather than
+    /// kept as scaffolding (#901 reintroduces it beside its
+    /// consumer). What is left to assert is that the label draws
+    /// the string it was handed — asserted directly, because a
+    /// fixture sized to make truncation visible discriminates
+    /// the MEASUREMENT or the DRAW but not both, and swapping
+    /// this write was inert until it had its own assertion
+    /// (guard-prover, 2026-08-19).
+    @Test("The label draws the item's text")
     func labelDrawsText() {
         let view = makeView(thickness: 32, glyph: nil)
         view.configure(
             id: WindowID(1),
-            name: "Finder",
             text: "Downloads",
             icon: nil,
             glyph: nil,
@@ -81,7 +82,6 @@ struct AppBarGlyphLayoutTests {
         )
         view.layout()
         #expect(view.label.stringValue == "Downloads")
-        #expect(view.label.stringValue != view.name)
     }
 
     @Test("Name-only content shows neither glyph nor image")
@@ -125,13 +125,11 @@ struct AppBarGlyphLayoutTests {
             // actually drawn below — and truncate it.
             AppBarOverlay.Item(
                 id: WindowID(1),
-                name: "Systemeinstellungen",
                 text: "Bedienungshilfen",
                 icon: nil
             ),
             AppBarOverlay.Item(
                 id: WindowID(2),
-                name: "Zen",
                 text: "TanStack Start: Full-Stack React",
                 icon: nil
             ),
@@ -155,7 +153,6 @@ struct AppBarGlyphLayoutTests {
         // set above.
         view.configure(
             id: WindowID(2),
-            name: "Zen",
             text: "TanStack Start: Full-Stack React",
             icon: nil,
             glyph: variant.0 == .title ? nil : ":settings:",
@@ -170,5 +167,32 @@ struct AppBarGlyphLayoutTests {
         #expect(!view.label.isHidden)
         let needed = ceil(view.label.cell?.cellSize.width ?? 0)
         #expect(view.label.frame.width >= needed)
+    }
+
+    /// ...and an icon-only item hides its label outright.
+    ///
+    /// What it pins is the MEASUREMENT, which is the load-bearing
+    /// half: `showText` zeroes `textSize`, and a zero-width label
+    /// is hidden either way. Forcing `showText = true` reds this
+    /// test and nothing in `AppBarSlotSizingTests` (mutation,
+    /// 2026-08-20).
+    ///
+    /// It also settled a duplicate. `configure` hid the label as
+    /// well, and the layout pass then decided it again, so
+    /// mutating the `configure` write was inert in every suite —
+    /// an unobservable write, now gone. `layoutHorizontal` owns
+    /// this, through `Content.showsText` rather than a
+    /// hand-spelled `== .icon`, so a later text-free case
+    /// inherits the answer (review 2026-08-20).
+    @Test("An icon-only item hides its label")
+    func iconOnlyHidesLabel() {
+        var style = AppBarStyle()
+        style.content = .icon
+        let view = makeView(
+            thickness: 32,
+            glyph: ":zed:",
+            style: style
+        )
+        #expect(view.label.isHidden)
     }
 }

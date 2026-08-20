@@ -31,8 +31,8 @@ extension AppBarStyle {
         /// A box per item, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed
-        /// No per-item box; names sit on one shared translucent
-        /// strip.
+        /// No per-item box; the items sit on one shared
+        /// translucent strip.
         case plain
     }
 
@@ -75,7 +75,12 @@ extension AppBarStyle {
     /// a collapsed group, whose members have several titles and
     /// no one of them is true. Both fallbacks are resolved by
     /// the driver, in `KiwiCore.barItemText`.
-    public enum Content: String, Sendable, Codable {
+    /// `CaseIterable` is load-bearing:
+    /// `BarTitleCapTests.showsTextIsExhaustive` asserts the case
+    /// COUNT, so adding a case reds that test and forces a
+    /// ruling on whether the new one draws text — do not drop
+    /// it as "unused".
+    public enum Content: String, Sendable, Codable, CaseIterable {
         case icon
         case title
         /// Truncation only ever eats the title; the icon
@@ -94,9 +99,15 @@ extension AppBarStyle {
 
         /// Whether the drawn content carries text at all. Ask
         /// this rather than re-spelling `!= .icon`, so a later
-        /// text-free case cannot be missed at a call site.
-        /// Consulted by the title-change refresh gate
-        /// (`KiwiCore.appBarDrawsTitle`), the slot measurement
+        /// text-free case cannot be missed at a call site —
+        /// `BarTitleCapTests.showsTextIsExhaustive` walks
+        /// `allCases` so a new one has to be ruled on here.
+        ///
+        /// Every asker reaches it through
+        /// `AppBarStyle.renderedContent`, which folds in the
+        /// vertical collapse: the title-refresh gate
+        /// (`AppBarManager.showsTitle(of:)`), the item view's
+        /// own layout and paint, the slot measurement
         /// (`AppBarOverlay.autoSlotWidth`) and the GUI's
         /// title-cap grey-out (`BarsGates.everyShownBarIconOnly`).
         public var showsText: Bool { self != .icon }

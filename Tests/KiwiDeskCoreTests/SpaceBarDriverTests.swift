@@ -193,9 +193,13 @@ struct SpaceBarDriverTests {
         // Toggle on → the focused window's app ("Mail").
         var style = SpaceBarStyle()
         style.showFrontApp = true
-        let app = core.frontApp(display: display, style: style)
-        #expect(app?.name == "Mail")
-        #expect(app?.count == 1)
+        let front = core.frontApp(display: display, style: style)
+        #expect(front?.app.name == "Mail")
+        #expect(front?.app.count == 1)
+        // The painted bar records WHICH window the segment is
+        // about; the refresh gate reads exactly this
+        // (`SpaceBarManager.showsTitle(of:)`).
+        #expect(front?.window == core.state.workspaces.lastFocused)
     }
 
     @Test("Identifier ladder: icon, symbol probe, monogram")

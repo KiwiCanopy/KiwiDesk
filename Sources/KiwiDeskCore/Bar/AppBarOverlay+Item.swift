@@ -11,15 +11,6 @@ import AppKit
 extension AppBarOverlay {
     public struct Item {
         public let id: WindowID
-        /// The app's name — the item's identity, never what it
-        /// draws (that is `text`).
-        ///
-        /// The glyph is resolved from the same app name in the
-        /// driver BEFORE this value exists, and the App Bar item
-        /// carries no accessibility label, so nothing reads this
-        /// today. It is the input an explicit AX label would be
-        /// built from; see `AppBarItemView.name`.
-        public let name: String
         /// The string the item actually draws under a
         /// text-bearing `Content`: the window's title, already
         /// capped, with the app name standing in for a collapsed
@@ -46,14 +37,12 @@ extension AppBarOverlay {
         /// value is worth less than three explicit fixtures.
         public init(
             id: WindowID,
-            name: String,
             text: String,
             icon: NSImage?,
             glyph: String? = nil,
             count: Int = 1
         ) {
             self.id = id
-            self.name = name
             self.text = text
             self.icon = icon
             self.glyph = glyph

@@ -19,6 +19,23 @@ extension AppBarStyle {
         return min(max(thickness * 0.42, 9), 28)
     }
 
+    /// What THIS bar actually draws — `content` with the
+    /// vertical collapse (`Content.rendered(horizontal:)`)
+    /// folded in against its own `edge`.
+    ///
+    /// The two terms are one question, so they are composed
+    /// once. Asked separately, a change to the collapse rule
+    /// reaches whichever sites remembered to re-spell it: the
+    /// slot measurement and the GUI's two bar gates each had
+    /// their own copy. A site whose horizontality is NOT this
+    /// style's edge — an item view handed one by its overlay, a
+    /// Settings preview drawing a mock bar — still calls
+    /// `rendered(horizontal:)` directly, because there the edge
+    /// is genuinely a parameter.
+    public var renderedContent: Content {
+        content.rendered(horizontal: edge.isHorizontal)
+    }
+
     /// Valid title-cap bounds, shared by both bars — the Space
     /// Bar aliases this rather than declaring a second range, the
     /// way it already shares `BackgroundStyle` and `BarAlignment`.

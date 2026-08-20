@@ -311,7 +311,7 @@ struct HomeCardBarsTile: View {
                 item.glyph =
                     content == .title ? nil : mock.glyph
                 item.label =
-                    content == .icon ? nil : mock.title
+                    content.showsText ? mock.title : nil
             }
             item.active = active
             items.append(item)

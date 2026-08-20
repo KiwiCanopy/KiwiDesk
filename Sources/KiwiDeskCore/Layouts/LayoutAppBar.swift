@@ -188,16 +188,10 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .itemGap
         )
-        // Raw String, for the reason `AppBarStyle`'s own decode
-        // carries: a value this enum no longer knows must land
-        // on "no override" rather than throw the whole override
-        // away. Here that IS the fallback — an unset override
-        // inherits the global, which is the right answer for a
-        // layout whose stored spelling was retired.
         content = try container.decodeIfPresent(
-            String.self,
+            Content.self,
             forKey: .content
-        ).flatMap(Content.init(rawValue:))
+        )
         titleCap = try container.decodeIfPresent(
             Int.self,
             forKey: .titleCap

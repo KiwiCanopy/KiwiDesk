@@ -3,34 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// What text each bar's driver resolves for a window — the App
-/// Bar's items and the Space Bar's front segment. The app name
-/// survives as the fallback in the two places a title cannot
-/// speak: a collapsed group and an empty title (#160).
-@MainActor
-private func makeBarCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
-        .appendingPathComponent(
-            "kiwidesk-tests-\(UUID().uuidString)"
-        )
-    return makeTestCore(configDirectory: directory)
-}
-
-private func titledWindow(
-    _ id: UInt32,
-    app: String = "Finder",
-    title: String
-) -> ManagedWindow {
-    ManagedWindow(
-        id: WindowID(id),
-        pid: 100,
-        appName: app,
-        title: title,
-        isFloating: false
-    )
-}
-
 /// Which text an App Bar item resolves to.
+///
+/// The app name survives as the fallback in the two places a
+/// title cannot speak: a collapsed group, whose members have
+/// several titles and no one of them is true, and an empty title
+/// (#160).
 @Suite("App bar item text", .serialized)
 @MainActor
 struct AppBarItemTextTests {
@@ -151,15 +129,24 @@ struct AppBarItemTextTests {
         )
     }
 
-    /// `name` stays the app's identity whatever is drawn — the
-    /// App Font glyph is resolved from it, and it is what the
-    /// item announces.
-    @Test("The item keeps the app name beside its text")
-    func nameSurvivesBesideText() {
+    /// The item carries the drawn string, and nothing else about
+    /// the app.
+    ///
+    /// It used to carry `name` beside `text`, documented as
+    /// "what the item announces" — which was never true: the App
+    /// Bar item is a click target with no accessible name at all
+    /// (#901). The field was write-only, so it went rather than
+    /// staying as scaffolding, and what this test used to pin —
+    /// that the two never collapse into one — the compiler now
+    /// pins instead. What is left worth asserting is that the
+    /// drawn string is the TITLE, on an item whose app name
+    /// would have read differently.
+    @Test("The item draws the title, not the app name")
+    func itemDrawsTheTitle() {
         let core = seeded([titledWindow(1, title: "Downloads")])
         let item = core.barItem(for: [WindowID(1)], style: AppBarStyle())
-        #expect(item.name == "Finder")
         #expect(item.text == "Downloads")
+        #expect(item.text != "Finder")
     }
 }
 
@@ -194,7 +181,7 @@ struct SpaceBarFrontTitleTests {
         let core = seeded(title: "ToDo — Second_Brain")
         let app = try #require(
             core.frontApp(display: display, style: style())
-        )
+        ).app
         #expect(app.title == "ToDo — Second_Brain")
         // The app name rides along: the glyph resolves from it.
         #expect(app.name == "Obsidian")
@@ -205,7 +192,7 @@ struct SpaceBarFrontTitleTests {
         let core = seeded(title: "ToDo — Second_Brain — Obsidian")
         let app = try #require(
             core.frontApp(display: display, style: style(cap: 8))
-        )
+        ).app
         #expect(app.title == "ToDo — S…")
     }
 
@@ -217,7 +204,7 @@ struct SpaceBarFrontTitleTests {
         let core = seeded(title: "")
         let app = try #require(
             core.frontApp(display: display, style: style())
-        )
+        ).app
         #expect(app.title == nil)
         #expect(app.name == "Obsidian")
     }

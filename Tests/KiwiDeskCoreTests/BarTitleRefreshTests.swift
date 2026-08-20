@@ -4,85 +4,54 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A drawn title makes `.windowTitleChanged` a RENDER input for
-/// the bars — and only a render one.
-///
-/// This suite is the only net over that. The event was
-/// deliberately inert before this change (`shouldRetile` returns
-/// false for it, and the handler did nothing unless a late title
-/// flipped a remembered float), so a revert to inert breaks no
-/// other test.
-@MainActor
-private func makeBarCore() -> KiwiCore {
-    let directory = FileManager.default.temporaryDirectory
-        .appendingPathComponent(
-            "kiwidesk-tests-\(UUID().uuidString)"
-        )
-    return makeTestCore(configDirectory: directory)
-}
-
-private func titledWindow(
-    _ id: UInt32,
-    app: String = "Finder",
-    title: String
-) -> ManagedWindow {
-    ManagedWindow(
-        id: WindowID(id),
-        pid: 100,
-        appName: app,
-        title: title,
-        isFloating: false
-    )
-}
-
 /// A title change is a RENDER input for the bars and nothing
 /// more. This suite is the only net over that: the event was
-/// deliberately inert before, so a revert to inert is otherwise
-/// silent.
-@Suite("Bar title refresh", .serialized)
+/// deliberately inert before (`shouldRetile` returns false for
+/// it, and the handler did nothing unless a late title flipped a
+/// remembered float), so a revert to inert breaks no other test.
+///
+/// The bars here are PAINTED through the managers rather than
+/// built by the drivers, because that is exactly what the gate
+/// reads (`AppBarManager.showsTitle(of:)`). It is also what keeps
+/// this suite off the machine: the version that seeded state and
+/// let the gate re-derive the on-screen spaces was green only
+/// because an unregistered display fails open to `true` on a dev
+/// host (review 2026-08-20, `tests.md` on injected seams). The
+/// drivers' own agreement with what they paint is `FullscreenStand
+/// DownTests.titleRefreshStandsDown` and the driver suites.
+@Suite(
+    "Bar title refresh",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct BarTitleRefreshTests {
-    private let display = DisplayID(7)
-
-    /// One monocle space on one display, its App Bar enabled and
-    /// drawing text, holding one window.
+    /// One window, on one painted App Bar that draws text.
     private func seeded(
         content: AppBarStyle.Content = .iconAndTitle,
-        edge: AppBarEdge = .top
+        edge: AppBarEdge = .top,
+        count: Int = 1,
+        front: WindowID? = nil
     ) -> KiwiCore {
         let core = makeBarCore()
-        // REGISTER the display, not just the space->display
-        // mapping: `assign` alone leaves `allDisplays` empty, and
-        // `showingSpaces()` then takes its cold-start fallback —
-        // so every gate test below would exercise the fallback
-        // branch and prove nothing about the per-display
-        // resolution or the #670 stand-down (found by mutating
-        // that branch and watching this suite stay green,
-        // 2026-08-19).
-        core.state.workspaces.upsertDisplay(
-            Display(
-                id: display,
-                name: "Test",
-                frame: CGRect(x: 0, y: 0, width: 1440, height: 900)
-            )
-        )
-        // Pin the Space Bar defaults this fixture reasons from
-        // (#660 moved this type's default edge once, and
-        // `frontSegmentArms` / the three "schedules nothing"
-        // tests are green only because of these three values).
-        #expect(SpaceBarStyle().enabled)
-        #expect(SpaceBarStyle().edge == .top)
-        #expect(!SpaceBarStyle().showFrontApp)
-        core.state.workspaces.assign(SpaceID("1"), to: display)
+        core.state.workspaces.assign(SpaceID("1"), to: barTitleDisplay)
         core.state.workspaces.activate(SpaceID("1"))
-        core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        core.tiler.settings.monocle.appBar.enabled = true
-        core.tiler.settings.appBarStyle.content = content
-        core.tiler.settings.appBarStyle.edge = edge
         core.state.apply(
             .windowCreated(titledWindow(1, title: "Downloads"))
         )
         core.state.apply(.windowFocused(WindowID(1)))
+        core.appBars.sync([
+            paintedAppBar(
+                content: content,
+                edge: edge,
+                items: [
+                    appBarItem(1, text: "Downloads", count: count)
+                ]
+            )
+        ])
+        core.spaceBars.sync(
+            front == nil ? [] : [paintedSpaceBar(front: front)]
+        )
         return core
     }
 
@@ -104,8 +73,8 @@ struct BarTitleRefreshTests {
     }
 
     /// A vertical bar RENDERS icon-only whatever the stored
-    /// preference says, so the gate must ask the rendered
-    /// content — asking the raw preference would schedule a
+    /// preference says, so the gate asks the painted bar's
+    /// `renderedContent` — the raw preference would schedule a
     /// refresh for a bar that cannot show a title.
     @Test("A vertical bar schedules nothing")
     func verticalSchedulesNothing() {
@@ -114,12 +83,79 @@ struct BarTitleRefreshTests {
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
 
-    /// A window that is on no shown bar is the common case and
+    /// A collapsed group draws its APP NAME, never a member's
+    /// title (`KiwiCore.barItemText`), so a rename inside one
+    /// changes nothing on screen. Exact here only because the
+    /// gate reads the painted groups; the state-derived version
+    /// could not afford the question and deliberately
+    /// over-scheduled.
+    @Test("A collapsed group schedules nothing")
+    func collapsedGroupSchedulesNothing() {
+        let core = seeded(count: 2)
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
+
+    /// A window that is on no painted bar is the common case and
     /// must stay free.
     @Test("An untracked window schedules nothing")
     func untrackedSchedulesNothing() {
         let core = seeded()
         core.handleTitleChangedForBars(WindowID(999))
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
+
+    /// Every reason a bar is absent — disabled, empty, on a
+    /// hidden space, on a fullscreen desktop, on a display with
+    /// no screen — arrives here as the same fact: nothing was
+    /// painted. That collapse is the point of reading the
+    /// painted record instead of re-deriving five gates.
+    @Test("No painted bar schedules nothing")
+    func noPaintedBarSchedulesNothing() {
+        let core = seeded()
+        core.appBars.sync([])
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
+
+    /// The Space Bar's front segment is a second reason to
+    /// refresh, independent of the App Bar.
+    @Test("The front segment arms the refresh on its own")
+    func frontSegmentArms() {
+        let core = seeded(content: .icon, front: WindowID(1))
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
+    }
+
+    /// A VERTICAL Space Bar draws no front name but still
+    /// ANNOUNCES one: `SpaceBarOverlay` builds the segment's
+    /// accessibility label from the same title on every edge. The
+    /// gate stood down here until a review found it (2026-08-20),
+    /// which left VoiceOver reading a title that stopped updating
+    /// until the next retile.
+    @Test("A vertical Space Bar still arms it")
+    func verticalSpaceBarStillArms() {
+        let core = seeded(content: .icon)
+        core.spaceBars.sync([
+            paintedSpaceBar(edge: .left, front: WindowID(1))
+        ])
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
+    }
+
+    @Test("The front segment toggle gates it")
+    func frontSegmentOffDoesNotArm() {
+        let core = seeded(content: .icon, front: nil)
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
+
+    /// The segment is about ONE window, so another window's
+    /// rename is not its business.
+    @Test("Another window's title leaves the segment alone")
+    func otherWindowDoesNotArmTheSegment() {
+        let core = seeded(content: .icon, front: WindowID(2))
+        core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
 
@@ -155,83 +191,6 @@ struct BarTitleRefreshTests {
         core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
         core.deferred.cancelAll()
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
-
-    /// A bar the layout does not show schedules nothing. The
-    /// gate reads `host.appBar.enabled`, and no other fixture
-    /// ever seeds a DISABLED bar — dropping that check was inert
-    /// (guard-prover, 2026-08-19).
-    @Test("A disabled App Bar schedules nothing")
-    func disabledAppBarSchedulesNothing() {
-        let core = seeded()
-        core.tiler.settings.monocle.appBar.enabled = false
-        core.tiler.settings.spaceBarStyle.showFrontApp = false
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
-
-    /// The Space Bar's own on/off switch, likewise.
-    @Test("A disabled Space Bar schedules nothing")
-    func disabledSpaceBarSchedulesNothing() {
-        let core = seeded(content: .icon)
-        core.tiler.settings.spaceBarStyle.showFrontApp = true
-        core.tiler.settings.spaceBarStyle.enabled = false
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
-
-    /// `verticalSchedulesNothing` covers the App Bar's vertical
-    /// leg; the Space Bar has an identical one, because
-    /// `layoutFrontName` returns early on a vertical bar and so
-    /// draws no title to refresh.
-    @Test("A vertical Space Bar schedules nothing")
-    func verticalSpaceBarSchedulesNothing() {
-        let core = seeded(content: .icon)
-        core.tiler.settings.spaceBarStyle.showFrontApp = true
-        core.tiler.settings.spaceBarStyle.edge = .left
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
-
-    /// Only the space a display is SHOWING counts. A window on
-    /// another Desktop is the common case the gate exists to
-    /// drop, and `showingSpaces()` returning every space instead
-    /// of the current one was inert.
-    @Test("A window on a non-showing space schedules nothing")
-    func hiddenSpaceSchedulesNothing() {
-        let core = seeded()
-        core.tiler.settings.spaceBarStyle.showFrontApp = false
-        // A second space on the same display, not current, with
-        // its own window.
-        core.state.workspaces.assign(SpaceID("2"), to: display)
-        core.state.workspaces.setMode(SpaceID("2"), .monocle)
-        core.state.windows.upsert(
-            titledWindow(2, title: "Elsewhere")
-        )
-        core.state.workspaces.add(WindowID(2), to: "2")
-        core.handleTitleChangedForBars(WindowID(2))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-        // ...while the showing space's own window still does.
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
-    }
-
-    /// The Space Bar's front segment is a second reason to
-    /// refresh, and it is gated on its own toggle.
-    @Test("The front segment arms the refresh on its own")
-    func frontSegmentArms() {
-        let core = seeded(content: .icon)
-        core.tiler.settings.spaceBarStyle.showFrontApp = true
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
-    }
-
-    @Test("The front segment toggle gates it")
-    func frontSegmentOffDoesNotArm() {
-        let core = seeded(content: .icon)
-        core.tiler.settings.spaceBarStyle.showFrontApp = false
-        core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
 
@@ -286,64 +245,9 @@ struct BarTitleRefreshTests {
     @Test("handle() honours the gate")
     func handleHonoursTheGate() {
         let core = seeded(content: .icon)
-        core.tiler.settings.spaceBarStyle.showFrontApp = false
         core.handle(
             .windowTitleChanged(WindowID(1), "Renamed")
         )
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
-}
-
-/// That the debounced pass DOES something.
-///
-/// `burstDebounces` asserts on task identity, which an empty body
-/// satisfies — emptying `runBarTitleRefresh()` was inert across
-/// every test in the new suites (guard-prover, 2026-08-19). The
-/// only honest observation is the rendered item text, which is
-/// the one thing the refresh exists to change.
-///
-/// Its own suite because its fixture differs on purpose: no
-/// display is assigned, so `updateAppBar` takes its documented
-/// cold-start fallback to the main screen and can build a real
-/// bar without a `DisplayID` that happens to match this host's.
-@Suite("Bar title refresh output", .serialized)
-@MainActor
-struct BarTitleRefreshOutputTests {
-    private func seededOnMainScreen() -> KiwiCore {
-        let core = makeBarCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.state.workspaces.setMode(SpaceID("1"), .monocle)
-        core.tiler.settings.monocle.appBar.enabled = true
-        core.tiler.settings.appBarStyle.content = .iconAndTitle
-        core.tiler.settings.appBarStyle.edge = .top
-        core.state.apply(
-            .windowCreated(titledWindow(1, title: "Downloads"))
-        )
-        core.state.apply(.windowFocused(WindowID(1)))
-        return core
-    }
-
-    @Test("The refresh re-renders the bar with the new title")
-    func refreshRedrawsTheItem() throws {
-        let core = seededOnMainScreen()
-        core.updateAppBar()
-        // `#require`, not `if let`: a fixture that built no bar
-        // would make every assertion below pass vacuously, which
-        // is the failure this whole suite exists to rule out.
-        let before = try #require(
-            core.appBars.shownBarsForTesting.first?.items.first
-        )
-        #expect(before.text == "Downloads")
-
-        core.state.apply(
-            .windowTitleChanged(WindowID(1), "Projects")
-        )
-        core.runBarTitleRefresh()
-
-        let after = try #require(
-            core.appBars.shownBarsForTesting.first?.items.first
-        )
-        #expect(after.text == "Projects")
     }
 }

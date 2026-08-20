@@ -258,15 +258,17 @@ struct FullscreenStandDownTests {
         #expect(core.spaceBars.shownDisplays.isEmpty)
     }
 
-    /// The title-refresh gate stands down with the bars.
+    /// The title-refresh gate stands down with the bars — and
+    /// does so BECAUSE they did, not by re-deciding it.
     ///
-    /// `KiwiCore+BarTitles.showingSpaces()` is a third reader of
-    /// "which space is showing", beside the two drivers above,
-    /// and it must apply the same verdict: a fullscreen desktop
-    /// paints no bar, so a title change on it has nothing to
-    /// re-render. Dropping the check there is invisible on a dev
-    /// machine, where an unregistered display fails open to
-    /// `true` — only this override can see it.
+    /// This is where the gate and the drivers meet: `updateAppBar`
+    /// runs for real under each verdict, and the gate is then
+    /// asked what the painted record says
+    /// (`AppBarManager.showsTitle(of:)`). The predecessor asked
+    /// the gate alone, against its own copy of the rule — which
+    /// is how a three-rule copy of a five-gate policy passed here
+    /// while disagreeing with the Space Bar driver (review
+    /// 2026-08-20). A copy that cannot exist cannot drift.
     @Test("A fullscreen space schedules no title refresh")
     func titleRefreshStandsDown() {
         let core = makeCore()
@@ -289,11 +291,13 @@ struct FullscreenStandDownTests {
         // A user desktop schedules, so the negative below cannot
         // pass by the fixture simply never qualifying.
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        core.updateAppBar()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(w1)
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
+        core.updateAppBar()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(w1)
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)

@@ -42,7 +42,6 @@ struct AppBarScrollLayoutTests {
     private func item(_ name: String) -> AppBarOverlay.Item {
         AppBarOverlay.Item(
             id: WindowID(1),
-            name: name,
             text: name,
             icon: nil
         )

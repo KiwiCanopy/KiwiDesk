@@ -5017,11 +5017,26 @@ the user who never opens the editor.
 the bar has carried since it shipped.) `app_bar.set_content` takes
 `icon`, `title` or `icon_and_title`, and the Space Bar's front
 segment shows the focused window's title in place of its app's
-name. The retired spellings fold onto the title ones on decode —
-not a compat shim (§5 rules those out pre-release) but because a
-raw enum decode of a dropped case *throws*, which would have
-failed the whole profile decode and reset every unrelated bar
-setting with it.
+name. The retired spellings are simply gone: a profile still
+carrying one no longer decodes, the profile falls back to its
+defaults, and the user re-picks — §5's rule that re-editing the
+config IS the migration, applied rather than worked around.
+
+The decode was briefly lenient for this one field, folding the
+retired words onto the title modes, and that is worth recording
+because the leniency argued for itself convincingly. It read as
+damage control, not compatibility: an unreadable enum throws,
+and a throw here loses the whole `TilingSettings`, so one stale
+word reset every unrelated setting with it. Two things sank it.
+The blast radius was the argument *for* leniency everywhere or
+nowhere — six sibling enums in this same struct, and every enum
+in `SpaceBarStyle`, throw exactly this way — so making the one
+renamed field lenient was not a mitigation but a coin flip on
+which field the user got wrong. And the only thing that singled
+that field out was that its vocabulary had been renamed under
+existing configs, which is the definition of the shim §5 bans.
+The field now throws with its siblings, at both decode sites
+(`AppBarStyle` and the per-layout override).
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read

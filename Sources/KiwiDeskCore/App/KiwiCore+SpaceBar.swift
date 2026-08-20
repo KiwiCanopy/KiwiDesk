@@ -47,10 +47,12 @@ extension KiwiCore {
                 style: style
             )
         else { return nil }
+        let front = frontApp(display: display.id, style: style)
         return SpaceBarManager.Bar(
             display: display.id,
             items: items,
-            frontApp: frontApp(display: display.id, style: style),
+            frontApp: front?.app,
+            frontWindow: front?.window,
             strip: strip,
             style: style,
             stateMarkColors: StateMarkColors(
@@ -84,10 +86,15 @@ extension KiwiCore {
     /// the focus ring, which #300 already suppresses for the
     /// same window; `SpaceBarOverlayFilterTests` pins both
     /// halves.
+    ///
+    /// Returns the window ALONGSIDE its render value: the
+    /// painted bar records which window its segment is about, so
+    /// the title-refresh gate can ask it instead of re-deriving
+    /// this guard chain (`SpaceBarManager.showsTitle(of:)`).
     func frontApp(
         display: DisplayID,
         style: SpaceBarStyle
-    ) -> SpaceBarItemView.App? {
+    ) -> (window: WindowID, app: SpaceBarItemView.App)? {
         guard style.showFrontApp,
             let current = state.workspaces.currentSpace(
                 on: display
@@ -108,15 +115,17 @@ extension KiwiCore {
         // run. Nil leaves `layoutFrontName` on the app-name
         // fallback, which is what an empty title (#160) wants.
         //
-        // Deliberately NOT edge-aware: a vertical bar is handed
-        // a title it never draws (`layoutFrontName` returns
-        // early, and `frontExtent` measures nothing), because
-        // the style here is global while the edge is the one
-        // thing a per-display bar could differ on. The cost is
-        // that a vertical bar's AX label takes the two-argument
-        // frame for text it does not show; the alternative —
-        // resolving the edge in the driver — would put a
-        // rendering question in the wrong layer.
+        // Deliberately NOT edge-aware. A vertical bar draws no
+        // front name (`layoutFrontName` returns early, and
+        // `frontExtent` measures nothing) but it still ANNOUNCES
+        // one: the segment's accessibility label is built from
+        // this title on every edge
+        // (`SpaceBarOverlay+FrontApp`). Resolving the edge here
+        // would silence VoiceOver on a vertical bar to save a
+        // string nobody pays for. The refresh gate keeps the
+        // announced title current instead, which is why
+        // `SpaceBarManager.showsTitle(of:)` does not gate on the
+        // edge either (review 2026-08-20).
         let title = state.windows[focused]?.title ?? ""
         app.title =
             title.isEmpty
@@ -125,7 +134,7 @@ extension KiwiCore {
                 title,
                 to: style.resolvedTitleCap
             )
-        return app
+        return (window: focused, app: app)
     }
 
     /// The display's Spaces in profile order, each with its

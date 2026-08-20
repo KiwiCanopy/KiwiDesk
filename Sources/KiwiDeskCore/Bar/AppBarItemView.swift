@@ -45,17 +45,6 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
-    /// The app's name — identity, not display.
-    ///
-    /// Currently WRITE-ONLY: nothing reads it. It is kept
-    /// because the item has no accessible name at all (it is a
-    /// click target that is not an AX element), and the app name
-    /// is what an explicit label would be built from — the
-    /// choice the Space Bar's front segment already made. Until
-    /// that lands the item's only spoken text is whatever
-    /// `label` draws, i.e. the title. Do not read this as "the
-    /// item announces the app"; it does not.
-    var name = ""
     /// The string the label draws, resolved by the driver
     /// (`KiwiCore.barItemText`): the capped window title, or the
     /// app name where a title cannot speak.
@@ -187,7 +176,6 @@ final class AppBarItemView: NSView {
     // swiftlint:disable:next function_parameter_count
     func configure(
         id: WindowID,
-        name: String,
         text: String,
         icon: NSImage?,
         glyph: String?,
@@ -197,7 +185,6 @@ final class AppBarItemView: NSView {
         style: AppBarStyle
     ) {
         windowID = id
-        self.name = name
         self.text = text
         self.count = count
         self.horizontal = horizontal
@@ -217,7 +204,6 @@ final class AppBarItemView: NSView {
         iconView.isHidden =
             showsGlyph || content == .title
             || icon == nil
-        label.isHidden = content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =

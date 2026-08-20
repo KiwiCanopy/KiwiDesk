@@ -120,18 +120,22 @@ extension AppBarItemView {
                 min(bounds.height, bounds.width) - pad * 2,
                 0
             )
+        // Horizontal-only path, so the raw preference IS the
+        // rendered content here. One predicate for both the
+        // measurement and the layout below: they answered
+        // `== .icon` separately until a review found the pair
+        // (2026-08-20), which is two ways for a later text-free
+        // content to draw text into a slot measured without it.
+        let showText = style.content.showsText
         // The cell itself knows how much room the text needs;
         // measuring the raw string undershoots the cell's own
         // padding and truncates titles that would have fit.
         var textSize =
-            style.content == .icon
-            ? .zero
-            : (label.cell?.cellSize ?? .zero)
+            showText
+            ? (label.cell?.cellSize ?? .zero)
+            : .zero
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
-        // Horizontal-only path, so the raw preference IS the
-        // rendered content here.
-        let showText = style.content != .icon
         // Half a pad: the full pad read too airy between icon
         // and text (manual QA 2026-07-18).
         var spacing: CGFloat =
