@@ -116,22 +116,21 @@ struct BarTitleCapTests {
 /// The retired `name` / `icon_and_name` spellings are gone, and
 /// a hand-edit typo reaches the same path: `Content.self` raises
 /// `DecodingError.dataCorrupted` on an unknown raw value, which
-/// fails `init(from:)` — and, because `TilingSettings` decodes
-/// this struct inline, falls the whole profile back to its
-/// defaults.
+/// fails `init(from:)`.
 ///
-/// That price is the point of the suite rather than an
-/// embarrassment to it. The decode was briefly lenient for this
-/// one field on exactly that argument, and the argument proved
-/// too good: it applies to six sibling enums here and every one
-/// in `SpaceBarStyle`, none of which is lenient, so sparing the
-/// single renamed field was a shim with a blast-radius
-/// rationale (§5; ruled 2026-08-20, `docs/design-decisions.md`).
+/// What that costs is NOT asserted here, and deliberately: it is
+/// not this struct's to lose. `TilingSettings` decodes
+/// `AppBarStyle` inline, so the throw propagates — a profile
+/// file is skipped by `allProfiles()` and a `gui.json` fails
+/// whole. These tests pin the throw itself; the price, and why
+/// leniency for the one renamed field was refused anyway, are
+/// ruled in `docs/design-decisions.md` ▸ The bars name the
+/// WINDOW, not its app.
 @Suite("Unreadable content values")
 struct ContentDecodeStrictnessTests {
-    /// The siblings are the assertion, in the negative: what a
-    /// throw costs is thickness, gap and colour, and pinning the
-    /// cost is what keeps the ruling honest about its price.
+    /// The siblings ride along in the fixture so the throw is
+    /// shown to be indiscriminate — it is the whole decode that
+    /// fails, not the one field.
     @Test("A retired spelling throws, siblings and all")
     func retiredSpellingThrows() {
         for retired in ["name", "icon_and_name"] {

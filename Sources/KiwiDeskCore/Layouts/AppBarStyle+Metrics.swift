@@ -27,11 +27,13 @@ extension AppBarStyle {
     /// once. Asked separately, a change to the collapse rule
     /// reaches whichever sites remembered to re-spell it: the
     /// slot measurement and the GUI's two bar gates each had
-    /// their own copy. A site whose horizontality is NOT this
-    /// style's edge — an item view handed one by its overlay, a
-    /// Settings preview drawing a mock bar — still calls
-    /// `rendered(horizontal:)` directly, because there the edge
-    /// is genuinely a parameter.
+    /// their own copy.
+    ///
+    /// A site whose horizontality is NOT this style's edge calls
+    /// `Content.rendered(horizontal:)` directly instead, because
+    /// there the edge is genuinely a parameter: the item view is
+    /// handed one by its overlay, and a Settings preview draws a
+    /// mock bar at whatever edge it is illustrating.
     public var renderedContent: Content {
         content.rendered(horizontal: edge.isHorizontal)
     }

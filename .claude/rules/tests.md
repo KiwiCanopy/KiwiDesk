@@ -159,6 +159,21 @@ bite large test PRs:
     order — nothing is shared or carried between tests, so the
     isolation the bar stood for holds. Weigh a further stateful
     helper against that, not against the word.
+  - *painted bar fixtures* in `BarTitleFixtures.swift` — the
+    `paintedAppBar` / `paintedSpaceBar` builders the title-refresh
+    suites hand to `AppBarManager.sync` / `SpaceBarManager.sync`,
+    with the `makeBarCore` / `titledWindow` factories beside them.
+    Admitted on the divergence ground, and the harm is specific
+    rather than tidiness: the gate under test reads only what
+    `sync` ACCEPTED, and `sync` silently drops a bar with no items
+    or a sub-1x1 strip. A drifted copy that falls under either
+    filter builds a bar the manager never paints, so every "arms
+    the refresh" assertion in that suite would pass against
+    nothing — the vacuity class this area has already shipped
+    twice, both times as a test that read the feature without
+    reaching the branch it named. Stateless: pure builders, no
+    assertions, no setup or teardown.
+
   (The status-item seam deliberately does NOT add a shared
   factory here: its fake is a per-file `StatusItemHandle`
   stub, because the live wrapper is sealed file-`private` and

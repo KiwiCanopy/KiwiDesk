@@ -3,11 +3,17 @@ import Foundation
 
 @testable import KiwiDeskCore
 
-// Shared fixtures for the three bar-title suites
+// Shared fixtures for the bar-title suites
 // (`BarTitleRefreshTests`, `BarTitleRefreshOutputTests`,
-// `BarTitleTextTests`). Split out at the §2.1 ceiling, and to
-// stop the third copy of `makeBarCore` from appearing — the
-// `AppBarFixtures.swift` / `SpaceBarFixtures.swift` arrangement.
+// `BarTitleTextTests`), registered in `.claude/rules/tests.md`'s
+// shared-helper list.
+//
+// The copy count is not the argument (§2.4 keeps duplication
+// that merely costs lines). The painted-bar builders below are
+// shared because a drifted copy would weaken a guard: the gate
+// reads only what `sync` ACCEPTED, and `sync` drops a bar with
+// no items or a sub-1x1 strip without a word, so a copy that
+// falls under either filter tests a bar nobody paints.
 
 @MainActor
 func makeBarCore() -> KiwiCore {

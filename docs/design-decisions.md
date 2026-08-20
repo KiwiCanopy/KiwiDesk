@@ -5017,26 +5017,32 @@ the user who never opens the editor.
 the bar has carried since it shipped.) `app_bar.set_content` takes
 `icon`, `title` or `icon_and_title`, and the Space Bar's front
 segment shows the focused window's title in place of its app's
-name. The retired spellings are simply gone: a profile still
-carrying one no longer decodes, the profile falls back to its
-defaults, and the user re-picks — §5's rule that re-editing the
-config IS the migration, applied rather than worked around.
+name. The retired spellings are simply gone.
 
-The decode was briefly lenient for this one field, folding the
-retired words onto the title modes, and that is worth recording
-because the leniency argued for itself convincingly. It read as
-damage control, not compatibility: an unreadable enum throws,
-and a throw here loses the whole `TilingSettings`, so one stale
-word reset every unrelated setting with it. Two things sank it.
-The blast radius was the argument *for* leniency everywhere or
-nowhere — six sibling enums in this same struct, and every enum
-in `SpaceBarStyle`, throw exactly this way — so making the one
-renamed field lenient was not a mitigation but a coin flip on
-which field the user got wrong. And the only thing that singled
-that field out was that its vocabulary had been renamed under
-existing configs, which is the definition of the shim §5 bans.
-The field now throws with its siblings, at both decode sites
-(`AppBarStyle` and the per-layout override).
+**A stale enum spelling costs the FILE, not the field**, and
+that price is worth stating plainly because it is the one the
+config format already charges everywhere else. `TilingSettings`
+decodes `AppBarStyle` inline, so an unreadable value fails the
+enclosing decode: a profile carrying one is skipped by
+`allProfiles()` — it disappears from the profile list rather
+than opening at defaults — and a `gui.json` carrying one fails
+whole, taking the keybinding layers, app rules, float and ignore
+rules, profile bindings and the space list with it.
+
+Leniency for this one field was refused anyway, and not because
+that damage is small. The argument for it — an unreadable enum
+should not take its siblings down — is the strongest one in the
+area, and it is *why* it fails: it is not specific to `content`.
+Six sibling enums in this struct and every enum in
+`SpaceBarStyle` throw exactly this way, so sparing the single
+renamed field is a coin flip on which field the user gets wrong,
+not a mitigation. Leniency belongs everywhere or nowhere; what
+cannot be justified is granting it to the one field whose
+vocabulary was renamed under existing configs, which is the
+definition of the compatibility shim §5 bans pre-release. Both
+decode sites are strict — `AppBarStyle` and the per-layout
+override — and re-editing the config IS the migration, which
+here includes hand-editing a profile written before the rename.
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read

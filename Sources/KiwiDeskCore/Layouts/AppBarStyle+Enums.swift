@@ -99,17 +99,25 @@ extension AppBarStyle {
 
         /// Whether the drawn content carries text at all. Ask
         /// this rather than re-spelling `!= .icon`, so a later
-        /// text-free case cannot be missed at a call site —
-        /// `BarTitleCapTests.showsTextIsExhaustive` walks
-        /// `allCases` so a new one has to be ruled on here.
+        /// text-free case cannot be missed at a call site;
+        /// `BarTitleCapTests.showsTextIsExhaustive` asserts the
+        /// case COUNT, so a new one reds it and has to be ruled
+        /// on here.
         ///
-        /// Every asker reaches it through
-        /// `AppBarStyle.renderedContent`, which folds in the
-        /// vertical collapse: the title-refresh gate
-        /// (`AppBarManager.showsTitle(of:)`), the item view's
-        /// own layout and paint, the slot measurement
-        /// (`AppBarOverlay.autoSlotWidth`) and the GUI's
-        /// title-cap grey-out (`BarsGates.everyShownBarIconOnly`).
+        /// Ask it of `AppBarStyle.renderedContent`, which folds
+        /// in the vertical collapse — the title-refresh gate
+        /// (`AppBarManager.showsTitle(of:)`) and the GUI's
+        /// title-cap grey-out
+        /// (`BarsGates.everyShownBarIconOnly`) do.
+        ///
+        /// Two sites ask the raw `content` instead, and may only
+        /// because each already stands on a horizontal-only
+        /// path: `AppBarOverlay+Sizing`'s text measurement,
+        /// behind its own `guard horizontal`, and
+        /// `layoutHorizontal`, which by name never runs on a
+        /// vertical bar. Moving either off that path owes it
+        /// `renderedContent` — the collapse is the whole reason
+        /// the gate exists.
         public var showsText: Bool { self != .icon }
     }
 

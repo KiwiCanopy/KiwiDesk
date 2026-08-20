@@ -184,6 +184,37 @@ struct AppBarGlyphLayoutTests {
     /// this, through `Content.showsText` rather than a
     /// hand-spelled `== .icon`, so a later text-free case
     /// inherits the answer (review 2026-08-20).
+    /// A REUSED view that flips to a vertical bar hides its
+    /// label — the case the horizontal fixtures cannot see.
+    ///
+    /// `AppBarOverlay` reconfigures surviving item views in
+    /// place rather than rebuilding them, so a bar whose edge
+    /// flips horizontal→vertical hands the same view a new
+    /// `horizontal: false`. `layoutVertical` is then the only
+    /// pass that runs, and it owns the hiding: nothing else on
+    /// that path writes `label.isHidden`, so a view that drew a
+    /// title keeps drawing it over the icons — with a stale
+    /// string and a stale frame, and `layoutBadge` placing the
+    /// group count beside the phantom name (review 2026-08-20,
+    /// after a deletion this suite could not red).
+    @Test("A view reused on a vertical bar hides its label")
+    func verticalReuseHidesLabel() {
+        let view = makeView(thickness: 32, glyph: nil)
+        #expect(!view.label.isHidden, "fixture must start shown")
+        view.configure(
+            id: WindowID(1),
+            text: "Downloads",
+            icon: nil,
+            glyph: nil,
+            count: 1,
+            active: false,
+            horizontal: false,
+            style: AppBarStyle()
+        )
+        view.layout()
+        #expect(view.label.isHidden)
+    }
+
     @Test("An icon-only item hides its label")
     func iconOnlyHidesLabel() {
         var style = AppBarStyle()

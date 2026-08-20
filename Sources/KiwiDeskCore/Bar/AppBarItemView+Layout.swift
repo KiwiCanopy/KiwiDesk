@@ -196,12 +196,28 @@ extension AppBarItemView {
         )
     }
 
-    /// Vertical bars render icon-only (QA 2026-07-19): names
-    /// letter-stacked terribly and rotated text is not native,
-    /// so `Content.rendered(horizontal:)` collapses the
-    /// preference to `.icon` and the label never shows here
-    /// (`configure` hides it).
+    /// Vertical bars render icon-only (QA 2026-07-19): titles
+    /// letter-stack terribly and rotated text is not native, so
+    /// `Content.rendered(horizontal:)` collapses the preference
+    /// to `.icon` and no title is drawn here.
+    ///
+    /// This pass hides the label ITSELF, and must: item views
+    /// are reused across renders (`AppBarOverlay` reconfigures
+    /// survivors in place), so a view that laid out horizontally
+    /// arrives here still showing a title, with a stale string
+    /// and a stale frame. `layoutHorizontal` is the only other
+    /// writer of `label.isHidden`, and it does not run on this
+    /// path. `configure` used to hide it too — a write that
+    /// looked redundant from every horizontal fixture and was
+    /// deleted as such, which is how this became a real defect
+    /// for one commit (`AppBarGlyphLayoutTests
+    /// .verticalReuseHidesLabel`).
+    ///
+    /// Hidden BEFORE the `side` guard: an item too small for an
+    /// icon slot returns early, and must not keep a title on the
+    /// way out.
     private func layoutVertical() {
+        label.isHidden = true
         let pad = Self.contentPadding
         let side =
             iconSlotHidden

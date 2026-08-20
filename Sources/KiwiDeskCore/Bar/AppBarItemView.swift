@@ -15,8 +15,10 @@ final class AppBarItemView: NSView {
     let iconView = NSImageView()
     /// SketchyBar App Font ligature shown in the icon slot when
     /// the item carries a glyph (#294). Text, so it follows the
-    /// bar's text colors; purely presentational to AX (the item
-    /// announces the app name, never the ligature).
+    /// bar's text colors, and explicitly not an AX element so
+    /// the ligature's raw name is never spoken. The item
+    /// announces nothing else either — it is a click target with
+    /// no accessible name at all (#901).
     let glyphLabel: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         tf.alignment = .center

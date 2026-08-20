@@ -65,42 +65,4 @@ struct BarTitleRefreshOutputTests {
         )
         #expect(after.text == "Projects")
     }
-
-    /// The Space Bar driver RECORDS which window its front
-    /// segment is about, so the gate can read it back.
-    ///
-    /// Its own test because nothing else observes that hop:
-    /// `SpaceBarDriverTests` asserts what `frontApp` returns, and
-    /// the gate's suite paints the bar by hand — dropping
-    /// `frontWindow` on the way into `SpaceBarManager.Bar` left
-    /// both green while the Space Bar half of the refresh died
-    /// (mutation-proved, 2026-08-20). Needs the host's real
-    /// display: `updateSpaceBar` has no cold-start fallback, by
-    /// design.
-    @Test("The Space Bar driver arms the gate through its bar")
-    func spaceBarDriverArmsTheGate() throws {
-        let core = makeBarCore()
-        let display = try #require(NSScreen.main?.kiwiDisplay)
-        core.state.apply(.displaysChanged([display]))
-        core.state.workspaces.assign(SpaceID("1"), to: display.id)
-        core.state.workspaces.activate("1")
-        core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.spaceBarStyle.showFrontApp = true
-        core.tiler.settings.monocle.appBar.enabled = false
-        core.tiler.settings.appBarStyle.content = .icon
-        core.state.apply(
-            .windowCreated(titledWindow(1, title: "Downloads"))
-        )
-        core.state.apply(.windowFocused(WindowID(1)))
-        core.updateSpaceBar()
-        core.deferred.cancel(.barTitleRefresh)
-
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
-
-        // ...and it is about THAT window, not any window.
-        core.deferred.cancel(.barTitleRefresh)
-        core.handleTitleChangedForBars(WindowID(999))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
-    }
 }

@@ -6,10 +6,22 @@ import Testing
 @testable import KiwiDeskCore
 
 // #670 stand-down: split from FullscreenExemptionTests.swift for
-// the file-size ceiling. Every test touching the process-global
-// `isUser` DEBUG overrides (`activeSpaceIsUserOverride`,
-// `currentSpaceIsUserOverride`) lives in THIS one serialized
-// suite -- a second suite would race it under parallel testing.
+// the file-size ceiling, and again into
+// FullscreenStandDownTests+BarTitles.swift -- an EXTENSION, not
+// a second suite, on purpose.
+//
+// A test that pins the process-global `isUser` DEBUG overrides
+// (`activeSpaceIsUserOverride`, `currentSpaceIsUserOverride`)
+// joins this suite rather than opening its own, because two
+// suites race each other under parallel testing. Files may be
+// split freely; suites may not.
+//
+// One other holder exists and is not this suite:
+// `DesktopAuthorityFixture.pinTwoDisplays` sets both overrides
+// for the Desktop-authority suites. It is on the honour system
+// -- nothing guards the rule above -- so a THIRD holder is the
+// point at which to stop adding one and give the pair a seam
+// that cannot be held twice.
 // (`activeDesktopNumberOverride` has its own pre-existing users;
 // no stand-down test reads the space number.)
 
@@ -34,7 +46,11 @@ private func makeWindow(_ id: WindowID) -> ManagedWindow {
 )
 @MainActor
 struct FullscreenStandDownTests {
-    private func makeCore() -> KiwiCore {
+    // Not private: the bar-title half of this suite lives in
+    // `FullscreenStandDownTests+BarTitles.swift`, an extension
+    // rather than a second suite — the overrides below are
+    // process-global, and only one suite may serialize them.
+    func makeCore() -> KiwiCore {
         makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -256,50 +272,5 @@ struct FullscreenStandDownTests {
         core.updateSpaceBar()
         #expect(core.appBars.shownStrips.isEmpty)
         #expect(core.spaceBars.shownDisplays.isEmpty)
-    }
-
-    /// The title-refresh gate stands down with the bars — and
-    /// does so BECAUSE they did, not by re-deciding it.
-    ///
-    /// This is where the gate and the drivers meet: `updateAppBar`
-    /// runs for real under each verdict, and the gate is then
-    /// asked what the painted record says
-    /// (`AppBarManager.showsTitle(of:)`). The predecessor asked
-    /// the gate alone, against its own copy of the rule — which
-    /// is how a three-rule copy of a five-gate policy passed here
-    /// while disagreeing with the Space Bar driver (review
-    /// 2026-08-20). A copy that cannot exist cannot drift.
-    @Test("A fullscreen space schedules no title refresh")
-    func titleRefreshStandsDown() {
-        let core = makeCore()
-        guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay
-        else { return }
-        core.state.apply(.displaysChanged([display]))
-        core.state.apply(.windowCreated(makeWindow(w1)))
-        core.resolveSpaceDisplays(mainID: display.id)
-        let spaceID = core.state.workspaces.space(of: w1)!
-        _ = core.execute(
-            "set_mode",
-            args: [.string(spaceID.raw), .string("monocle")]
-        )
-        core.tiler.settings.appBarStyle.content = .iconAndTitle
-        core.tiler.settings.appBarStyle.edge = .top
-        core.tiler.settings.spaceBarStyle.showFrontApp = false
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-
-        // A user desktop schedules, so the negative below cannot
-        // pass by the fixture simply never qualifying.
-        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateAppBar()
-        core.deferred.cancel(.barTitleRefresh)
-        core.handleTitleChangedForBars(w1)
-        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
-
-        NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        core.updateAppBar()
-        core.deferred.cancel(.barTitleRefresh)
-        core.handleTitleChangedForBars(w1)
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
 }

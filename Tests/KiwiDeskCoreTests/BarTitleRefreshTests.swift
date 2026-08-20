@@ -17,13 +17,9 @@ import Testing
 /// let the gate re-derive the on-screen spaces was green only
 /// because an unregistered display fails open to `true` on a dev
 /// host (review 2026-08-20, `tests.md` on injected seams). The
-/// drivers' own agreement with what they paint is `FullscreenStand
-/// DownTests.titleRefreshStandsDown` and the driver suites.
-@Suite(
-    "Bar title refresh",
-    .serialized,
-    .enabled(if: NSScreen.main != nil)
-)
+/// drivers' own agreement with what they paint belongs to
+/// `FullscreenStandDownTests` and the driver suites.
+@Suite("Bar title refresh", .serialized)
 @MainActor
 struct BarTitleRefreshTests {
     /// One window, on one painted App Bar that draws text.
