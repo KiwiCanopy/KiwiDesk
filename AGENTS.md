@@ -310,13 +310,25 @@ loads when you edit one.
 
 These apply everywhere, whatever you touch:
 
-- **Pre-release, single user: no backward-compat shims.** Nothing
-  external depends on the current command names, Lua/CLI verbs,
-  event names or file formats. Rename and restructure freely; add
-  no compatibility aliases, deprecation layers or migration
-  scripts — re-saving or re-editing the config *is* the migration
-  (#42 renamed the space commands outright). Revisit at the first
-  public release.
+- **Rename code freely; a stored VALUE needs a crossing.**
+  Nothing external depends on the current command names, Lua/CLI
+  verbs or event names — rename and restructure those outright
+  (#42 renamed the space commands), and add no compatibility
+  aliases or deprecation layers for them.
+  **File formats are no longer in that set.** The old rule read
+  "pre-release, single user… re-editing the config *is* the
+  migration", and that premise expired the day v0.9.7 went to
+  people who are not the author. A rename that changes a stored
+  value or key therefore owes a one-shot migration in
+  `ConfigMigration` — it rewrites the file, so it ENDS — and
+  never a lenient decoder, which cannot: nothing ever signals
+  that the last config carrying the retired spelling is gone.
+  Decoders stay strict. The stake is not the renamed setting but
+  the FILE: config files decode as a unit, so one unreadable
+  value costs everything beside it — the rename that prompted
+  this would have dropped every profile v0.9.7 wrote, since
+  `TilingSettings.encode` is exhaustive and the retired value was
+  that build's default (`ConfigMigrationTests`).
 - **Windows live in a flat `[WindowID]` array per space.** Never
   introduce tree or container structures into state or layout.
 - **Never disable SIP, or ask a user to.** Every private fast

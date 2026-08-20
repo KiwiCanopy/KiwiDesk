@@ -5025,9 +5025,13 @@ config format already charges everywhere else. `TilingSettings`
 decodes `AppBarStyle` inline, so an unreadable value fails the
 enclosing decode: a profile carrying one is skipped by
 `allProfiles()` — it disappears from the profile list rather
-than opening at defaults — and a `gui.json` carrying one fails
-whole, taking the keybinding layers, app rules, float and ignore
-rules, profile bindings and the space list with it.
+than opening at defaults, surfaced as a
+`ConfigIssue.profileBroken` with Delete / Reveal. And that is
+every profile v0.9.7 wrote, not the few whose owner changed the
+setting: `TilingSettings.encode` is exhaustive and
+`icon_and_name` was that build's default. The `gui.json` sidecar
+is NOT exposed — `GuiConfig.encode` writes the spaces, rules,
+bindings and layers, never `settings`.
 
 Leniency for this one field was refused anyway, and not because
 that damage is small. The argument for it — an unreadable enum
@@ -5036,13 +5040,20 @@ area, and it is *why* it fails: it is not specific to `content`.
 Six sibling enums in this struct and every enum in
 `SpaceBarStyle` throw exactly this way, so sparing the single
 renamed field is a coin flip on which field the user gets wrong,
-not a mitigation. Leniency belongs everywhere or nowhere; what
-cannot be justified is granting it to the one field whose
-vocabulary was renamed under existing configs, which is the
-definition of the compatibility shim §5 bans pre-release. Both
+not a mitigation. Leniency belongs everywhere or nowhere. Both
 decode sites are strict — `AppBarStyle` and the per-layout
-override — and re-editing the config IS the migration, which
-here includes hand-editing a profile written before the rename.
+override.
+
+**The crossing is a migration, not a lenient decoder**, and the
+difference is that one of them ends. `ConfigMigration` rewrites
+`name` / `icon_and_name` in the file itself, once; a decoder that
+folded them would keep accepting the retired vocabulary forever,
+because nothing ever signals that the last config carrying it is
+gone. That is also why the earlier "re-editing the config IS the
+migration" answer was withdrawn rather than defended: it was
+sound while this repo had one user, and v0.9.7 shipped to others
+(AGENTS.md §5, amended). Asking a stranger to hand-edit JSON to
+recover their keybindings is not a migration policy.
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read

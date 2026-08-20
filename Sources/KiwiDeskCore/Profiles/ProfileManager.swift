@@ -222,10 +222,23 @@ public final class ProfileManager {
     }
 
     /// Reads a profile without touching current/dirty state.
+    ///
+    /// Migrates the file first when it was written by a build
+    /// whose vocabulary this one no longer reads
+    /// (`ConfigMigration`). The rewrite is best-effort: a config
+    /// directory we cannot write to must not turn a readable
+    /// profile into a broken one, and the migration is
+    /// idempotent, so the next launch simply tries again with
+    /// the in-memory copy carrying the read either way.
     public func read(name: String) throws -> Profile {
-        let data = try Data(
-            contentsOf: url(for: validated(name))
-        )
+        let file = url(for: try validated(name))
+        var data = try Data(contentsOf: file)
+        if let migrated =
+            ConfigMigration.migratingRetiredBarContent(data)
+        {
+            data = migrated
+            try? migrated.write(to: file, options: .atomic)
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(Profile.self, from: data)
