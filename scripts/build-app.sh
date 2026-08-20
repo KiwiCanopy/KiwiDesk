@@ -373,16 +373,13 @@ cat > "$PLIST" <<PLISTEOF
     <key>SUFeedURL</key>
     <string>https://kiwidesk.kiwicanopy.com/appcast.xml</string>
     <!-- Answer the automatic-check question HERE, because the
-         alternative is Sparkle asking it: left unset it puts its
-         own "check for updates automatically?" modal on screen a
-         few seconds after first launch, from an LSUIElement app
-         with no Dock tile to explain where the dialog came from,
-         and possibly over the first-run tour. Yes is the
-         approachable-by-default answer (gui.md's north star) —
-         an updater nobody remembers to run is not an update
-         path. System profiling stays OFF by default and is not
-         enabled here: nothing about the user's machine is sent,
-         which keeps this a plain versioned GET. -->
+         alternative is Sparkle asking it with a modal a few
+         seconds after first launch. The ruling, what it gives
+         up and what would reopen it are in
+         docs/design-decisions.md ▸ "Background update checks
+         are on, and there is no switch". Do not unset this key
+         without changing that entry first. System profiling
+         stays off, which that entry leans on. -->
     <key>SUEnableAutomaticChecks</key>
     <true/>
     <key>SUPublicEDKey</key>

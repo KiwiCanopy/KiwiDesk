@@ -97,6 +97,47 @@ tile to explain it.
 and the appcast that answers them are one shipping decision, so a
 release cut between the two halves advertises an update channel
 that errors on click. Either both are in the tag, or neither.
+`site/public/appcast.xml` is therefore in the tree from the same
+branch as the plist keys, itemless — an itemless channel is a
+well-formed "nothing newer", where a missing file is an error
+dialog.
+
+**The feed is written from PUBLISHED releases, never from the
+draft.** `release.yml` drafts, and a draft's asset URL is
+unfetchable without auth, so an item written at tag time
+advertises an update every installed copy fails to download for
+as long as the highlights take to curate. `appcast-sync` reads
+the releases API and skips anything still a draft;
+`.github/workflows/changelog.yml` runs it on `release:
+published`, alongside the notes it shares a corpus with.
+`.claude/rules/site.md` owns the generated file itself.
+
+**Three clauses decide whether a release enters the feed, and
+`scripts/appcast-sync` names the one that failed:** it is
+published; it carries exactly one distributable `.zip`, never a
+`-unnotarized.zip` that Sparkle downloads in full and then
+refuses; and that archive has a `.edsig` sidecar. No version
+cutoff is written anywhere and none should be — the releases
+that predate the updater have no sidecar and fall out of the feed
+as a consequence of the data rather than of a number someone has
+to remember. `AppcastParserTests` pins each refusal.
+
+**The signature is produced where the bytes are, and travels as a
+sidecar.** `release.yml` signs the archive it has just built and
+attaches `<archive>.edsig` to the release; the sync job reads it
+there. That split is what lets the feed be written by a job that
+never holds the private key, and it is why the sidecar is
+renamed and dropped in step with the archive it signs — the two
+are paired by name.
+
+**Sign with `--ed-key-file -`, never `-s`.** `sign_update` 2.9.6
+refuses `-s` outright for a key in the current format, after
+printing a deprecation warning that reads like a warning rather
+than a failure; the key stanza reaches the tool on stdin
+instead. Verify what was signed before shipping it — the tool's
+`--verify` exits non-zero on a bad signature, and a signature no
+installed copy accepts is an update that fails on every user's
+machine and nowhere else.
 
 Whether a built artifact may be *published* is a separate,
 product decision: see "No distribution channel without an update
@@ -282,11 +323,13 @@ sentences of summary, then `###` sections whose titles the author
 chooses, each carrying at least one entry. **Curate the draft,
 then publish** — `release.yml` drafts, and
 `.github/workflows/changelog.yml` fires on *publish* and syncs the
-body onto the site's release-notes page, so publishing an
-uncurated body shows the raw generated list until a correction
-lands. `scripts/release.sh` prints the skeleton after the tag
-push, and `scripts/changelog-sync --body <file>` reads a DRAFT's
-body from a file — the mode to use before publishing, since a
+body onto the site's release-notes page AND into Sparkle's feed,
+so publishing an uncurated body shows the raw generated list
+until a correction lands — in the update window as well as on the
+page, since both render the one curated block.
+`scripts/release.sh` prints the skeleton after the tag push,
+and `scripts/changelog-sync --body <file>` reads a DRAFT's body
+from a file — the mode to use before publishing, since a
 draft has no tag for `--release` to fetch. The same parser
 refuses a body it cannot read rather than half-rendering it, and
 `ChangelogParserTests` pins every refusal. `.claude/rules/site.md`

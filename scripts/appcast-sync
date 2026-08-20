@@ -1,0 +1,675 @@
+#!/usr/bin/env python3
+"""Generates site/public/appcast.xml from the PUBLISHED releases.
+
+Sparkle's feed (#874). Every KiwiDesk build bakes
+`https://kiwidesk.kiwicanopy.com/appcast.xml` into its
+`Info.plist` as `SUFeedURL`, so this file is what an installed
+copy asks "is there anything newer?" — and it is the only thing
+it asks. `.claude/rules/packaging-and-release.md` carries what
+that permanence obliges.
+
+WHY IT READS PUBLISHED RELEASES AND NOTHING ELSE. `release.yml`
+creates a DRAFT, and a draft's asset URL is unfetchable without
+auth. An item written from a draft therefore advertises an
+enclosure that 404s for every user, which is the "channel with
+no working update path" failure `docs/design-decisions.md` calls
+unrecoverable. Publication is the signal, exactly as it is for
+the sibling `changelog-sync`.
+
+WHAT MAKES A RELEASE OFFERABLE, and each clause is load-bearing:
+
+  1. It is published.
+  2. It carries exactly one distributable `.zip` — never a
+     `-unnotarized.zip`, which Sparkle would refuse to install
+     after downloading it.
+  3. That zip has a `<name>.edsig` sidecar, written by
+     `release.yml` from the bytes it had just built. No sidecar,
+     no `sparkle:edSignature`, and an item without one is an
+     update every installed copy rejects.
+
+Clause 3 is also why no version cutoff is written anywhere: the
+releases that predate Sparkle have no sidecar and drop out of
+the feed as a consequence of the data rather than of a number
+someone has to remember to bump.
+
+The notes come from site/src/data/changelog.json — the file
+`changelog-sync` generates from the same curated `## Highlights`
+block the site renders. One corpus, two surfaces: the update
+window and the changelog page cannot disagree about what a
+release contained, because neither owns the text.
+
+MODES
+
+  --all               Rebuild the feed from every published
+                      release and write it. Tolerates history:
+                      a release that fails a clause above is
+                      skipped with a warning, never fatal.
+  --release <tag> [--check]
+                      Strict about ONE tag — the one just
+                      published. Every clause is an error and
+                      each is named. `--check` writes nothing.
+  --releases <file>   Offline: read the releases from a JSON
+                      file instead of `gh` and render to stdout.
+                      Touches no network. This is the mode the
+                      guard suite drives.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import binascii
+import html
+import json
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+from email.utils import format_datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+APPCAST = ROOT / "site" / "public" / "appcast.xml"
+CHANGELOG = ROOT / "site" / "src" / "data" / "changelog.json"
+BUILD_APP = ROOT / "scripts" / "build-app.sh"
+
+FEED_URL = "https://kiwidesk.kiwicanopy.com/appcast.xml"
+
+# A tag this project cuts. Same shape changelog-sync matches;
+# that script's `_TAG` carries why anything else sorts badly.
+_TAG = re.compile(r"^v(?P<version>\d+\.\d+\.\d+)$")
+
+# The suffix build-app.sh gives an archive it could not have
+# notarized. Read here rather than reconstructed from a version,
+# for the reason release.yml states where it locates the archive.
+_UNNOTARIZED = "-unnotarized.zip"
+
+_SIDECAR_SUFFIX = ".edsig"
+
+# Ed25519: 64 raw bytes. Sparkle rejects anything else, and it
+# does so on the user's machine after the download — so the shape
+# is checked here, where a failure is a red workflow instead of a
+# silent no-op update for everyone.
+_SIGNATURE_BYTES = 64
+
+
+class AppcastError(Exception):
+    """One release, one or more reasons it cannot be offered."""
+
+    def __init__(self, tag: str, problems: list[str]) -> None:
+        super().__init__(tag)
+        self.tag = tag
+        self.problems = problems
+
+
+# ---------------------------------------------------------------
+# Inputs
+
+
+def _gh_json(args: list[str]) -> object:
+    """Runs `gh` and decodes its stdout.
+
+    No `--jq` alongside `--paginate`, for the reason
+    `changelog-sync`'s `_gh_json` sets out in full — that lesson
+    is the sibling script's to argue and this is the second
+    caller of it, not a second copy of the argument."""
+    result = subprocess.run(
+        ["gh", *args], capture_output=True, text=True, check=False
+    )
+    if result.returncode != 0:
+        print(
+            f"appcast-sync: `gh {' '.join(args)}` failed:\n"
+            f"{result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        print(
+            f"appcast-sync: `gh {' '.join(args)}` returned "
+            f"something that is not JSON ({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def fetch_releases() -> list[dict]:
+    """Every PUBLISHED release, newest first left to the sort."""
+    data = _gh_json(
+        ["api", "repos/{owner}/{repo}/releases", "--paginate"]
+    )
+    if not isinstance(data, list):
+        print(
+            "appcast-sync: the releases endpoint did not return "
+            "a list.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return [r for r in data if not r.get("draft")]
+
+
+def fetch_asset_text(asset: dict) -> str:
+    """Downloads one asset's BYTES through the API.
+
+    `browser_download_url` is the public mirror and would work
+    for a published release, but the API route works for both and
+    needs no second auth story."""
+    url = asset.get("url")
+    if not url:
+        return ""
+    result = subprocess.run(
+        [
+            "gh",
+            "api",
+            "-H",
+            "Accept: application/octet-stream",
+            str(url),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
+
+
+def minimum_system_version() -> str:
+    """The one copy of the floor lives in build-app.sh, which
+    writes it into every bundle's `LSMinimumSystemVersion`.
+
+    Read rather than restated: a feed offering an update to a
+    machine that cannot run it produces a download, an install
+    and a bundle macOS refuses to launch. Extraction is the same
+    technique release.yml uses on the version constant."""
+    try:
+        text = BUILD_APP.read_text(encoding="utf-8")
+    except OSError as error:
+        print(
+            f"appcast-sync: could not read "
+            f"{BUILD_APP.relative_to(ROOT)} ({error}), so the "
+            "minimum system version could not be derived.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    match = re.search(
+        r"<key>LSMinimumSystemVersion</key>\s*<string>"
+        r"(?P<version>[^<]+)</string>",
+        text,
+    )
+    if not match:
+        print(
+            "appcast-sync: no LSMinimumSystemVersion in "
+            f"{BUILD_APP.relative_to(ROOT)}. It is the one copy "
+            "of the floor — restating it here instead would let "
+            "the feed offer an update macOS refuses to launch.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return match.group("version")
+
+
+def read_notes() -> dict[str, dict]:
+    """The curated entries by tag, from changelog-sync's output.
+
+    A missing file is not fatal. The two syncs run in one step
+    with this one second, so an absent file means the first has
+    not run yet — the feed is still correct without notes, and
+    an item with a thin description updates where no item at all
+    does not."""
+    try:
+        data = json.loads(CHANGELOG.read_text(encoding="utf-8"))
+        entries = data["releases"]
+    except (OSError, json.JSONDecodeError, KeyError):
+        return {}
+    if not isinstance(entries, list):
+        return {}
+    return {
+        entry["tag"]: entry
+        for entry in entries
+        if isinstance(entry, dict) and entry.get("tag")
+    }
+
+
+# ---------------------------------------------------------------
+# Rendering
+
+
+_BOLD = re.compile(r"\*\*(?P<text>.+?)\*\*")
+_CODE = re.compile(r"`(?P<text>[^`]+)`")
+_LINK = re.compile(r"\[(?P<text>[^\]]+)\]\((?P<href>[^)\s]+)\)")
+
+
+def inline(markdown: str) -> str:
+    """The inline subset a curated highlight actually uses.
+
+    The site renders the same strings with `marked.parseInline`
+    (see Changelog.astro). This is deliberately NOT a markdown
+    implementation: the corpus is our own release bodies, the
+    parser that admits them already refuses issue numbers and
+    block structure, and anything outside the subset renders as
+    the literal text a reviewer can see rather than as broken
+    markup. Escaping happens FIRST, so a `<` in a release note
+    cannot close the CDATA or invent an element."""
+    text = html.escape(markdown, quote=False)
+    text = _CODE.sub(
+        lambda m: f"<code>{m.group('text')}</code>", text
+    )
+    text = _BOLD.sub(
+        lambda m: f"<strong>{m.group('text')}</strong>", text
+    )
+    text = _LINK.sub(
+        lambda m: (
+            f'<a href="{m.group("href")}">{m.group("text")}</a>'
+        ),
+        text,
+    )
+    return text
+
+
+def description(entry: dict | None, version: str) -> str:
+    """The HTML Sparkle shows in its update window.
+
+    No stylesheet and no colours: Sparkle renders this inside its
+    own WebView, which follows the user's appearance, and a
+    palette pinned here would be the one surface that ignores
+    dark mode."""
+    if not entry:
+        return (
+            f"<p>KiwiDesk {html.escape(version)}.</p>"
+            "<p>Release notes are on the KiwiDesk site.</p>"
+        )
+    parts: list[str] = []
+    summary = entry.get("summary")
+    if summary:
+        parts.append(f"<p>{inline(summary)}</p>")
+    for section in entry.get("sections") or []:
+        title = section.get("title")
+        if title:
+            parts.append(f"<h3>{inline(title)}</h3>")
+        items = [
+            f"<li>{inline(item)}</li>"
+            for item in section.get("items") or []
+            if item
+        ]
+        if items:
+            parts.append("<ul>" + "".join(items) + "</ul>")
+    return "".join(parts) or f"<p>KiwiDesk {html.escape(version)}.</p>"
+
+
+def pub_date(published_at: str) -> str:
+    """RFC 822, which is what an RSS `pubDate` is."""
+    if not published_at:
+        return ""
+    try:
+        moment = datetime.fromisoformat(
+            published_at.replace("Z", "+00:00")
+        )
+    except ValueError:
+        return ""
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return format_datetime(moment)
+
+
+# ---------------------------------------------------------------
+# Items
+
+
+def archive_asset(release: dict, tag: str) -> dict:
+    """The one distributable archive, or an explained refusal."""
+    assets = [
+        asset
+        for asset in release.get("assets") or []
+        if isinstance(asset, dict) and asset.get("name")
+    ]
+    zips = [
+        asset
+        for asset in assets
+        if str(asset["name"]).endswith(".zip")
+    ]
+    if not zips:
+        raise AppcastError(
+            tag, ["it has no .zip asset, so there is nothing to offer."]
+        )
+    shippable = [
+        asset
+        for asset in zips
+        if not str(asset["name"]).endswith(_UNNOTARIZED)
+    ]
+    if not shippable:
+        raise AppcastError(
+            tag,
+            [
+                "its only archive is "
+                f"`{zips[0]['name']}`. Sparkle refuses to install "
+                "an update that is not notarized, so offering "
+                "one costs the user the whole download and then "
+                "fails."
+            ],
+        )
+    if len(shippable) > 1:
+        names = ", ".join(sorted(str(a["name"]) for a in shippable))
+        raise AppcastError(
+            tag,
+            [
+                f"it carries {len(shippable)} distributable "
+                f"archives ({names}). Which one an installed copy "
+                "should fetch is not something to guess."
+            ],
+        )
+    return shippable[0]
+
+
+def signature_for(
+    release: dict, archive: dict, tag: str, fetch
+) -> str:
+    """The sidecar's contents, validated as an Ed25519 signature."""
+    wanted = f"{archive['name']}{_SIDECAR_SUFFIX}"
+    sidecars = [
+        asset
+        for asset in release.get("assets") or []
+        if isinstance(asset, dict) and asset.get("name") == wanted
+    ]
+    if not sidecars:
+        raise AppcastError(
+            tag,
+            [
+                f"there is no `{wanted}` beside the archive. "
+                "release.yml writes it from the bytes it built; "
+                "a release published without one predates the "
+                "updater or was built by a run with no "
+                "SPARKLE_PRIVATE_KEY."
+            ],
+        )
+    value = (fetch(sidecars[0]) or "").strip()
+    if not value:
+        raise AppcastError(
+            tag, [f"`{wanted}` is empty."]
+        )
+    try:
+        raw = base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError):
+        raise AppcastError(
+            tag, [f"`{wanted}` is not base64: {value[:32]}…"]
+        ) from None
+    if len(raw) != _SIGNATURE_BYTES:
+        raise AppcastError(
+            tag,
+            [
+                f"`{wanted}` decodes to {len(raw)} bytes, and an "
+                f"Ed25519 signature is {_SIGNATURE_BYTES}."
+            ],
+        )
+    return value
+
+
+def build_item(
+    release: dict, notes: dict[str, dict], fetch
+) -> dict:
+    """One offerable release, or an AppcastError saying why not."""
+    tag = str(release.get("tag_name") or "")
+    if not tag:
+        raise AppcastError(
+            "<unknown>",
+            ["the releases API returned an entry with no tag."],
+        )
+    if release.get("draft"):
+        # Enforced HERE rather than only at the fetch, so no
+        # caller can route around it. A draft's asset URL 404s
+        # for everyone without auth, and an installed copy that
+        # is offered one downloads nothing and reports an error
+        # the user cannot act on.
+        raise AppcastError(
+            tag,
+            [
+                "it is still a draft. Its asset URL is not "
+                "public, so an item for it would advertise an "
+                "update nobody can fetch."
+            ],
+        )
+    match = _TAG.match(tag)
+    version = match.group("version") if match else tag
+    archive = archive_asset(release, tag)
+    signature = signature_for(release, archive, tag, fetch)
+    url = archive.get("browser_download_url")
+    if not url:
+        raise AppcastError(
+            tag, [f"`{archive['name']}` has no download URL."]
+        )
+    length = archive.get("size")
+    if not isinstance(length, int) or length <= 0:
+        raise AppcastError(
+            tag,
+            [
+                f"`{archive['name']}` reports a size of "
+                f"{length!r}. Sparkle shows it as the download "
+                "size before the user agrees to it."
+            ],
+        )
+    return {
+        "version": version,
+        "tag": tag,
+        "date": str(release.get("published_at") or ""),
+        "url": str(url),
+        "length": length,
+        "signature": signature,
+        "description": description(notes.get(tag), version),
+    }
+
+
+def _sort_key(item: dict) -> tuple:
+    """Newest first. Same reasoning as changelog-sync's sort: the
+    date is present on every published release and the version is
+    the tiebreak for two on one day."""
+    match = _TAG.match(item["tag"])
+    version = (
+        tuple(int(p) for p in match.group("version").split("."))
+        if match
+        else (0, 0, 0)
+    )
+    return (item.get("date", ""), version)
+
+
+# ---------------------------------------------------------------
+# Output
+
+
+def render(items: list[dict], floor: str) -> str:
+    body: list[str] = []
+    for item in sorted(items, key=_sort_key, reverse=True):
+        version = html.escape(item["version"])
+        date = pub_date(item["date"])
+        line = f"      <pubDate>{date}</pubDate>\n" if date else ""
+        body.append(
+            f"    <item>\n"
+            f"      <title>{version}</title>\n"
+            f"{line}"
+            f"      <sparkle:version>{version}"
+            f"</sparkle:version>\n"
+            f"      <sparkle:shortVersionString>{version}"
+            f"</sparkle:shortVersionString>\n"
+            f"      <sparkle:minimumSystemVersion>"
+            f"{html.escape(floor)}"
+            f"</sparkle:minimumSystemVersion>\n"
+            f"      <description><![CDATA["
+            f"{item['description']}]]></description>\n"
+            f"      <enclosure\n"
+            f'        url="{html.escape(item["url"], quote=True)}"'
+            f"\n"
+            f'        length="{item["length"]}"\n'
+            f'        type="application/octet-stream"\n'
+            f'        sparkle:edSignature="'
+            f'{html.escape(item["signature"], quote=True)}" />\n'
+            f"    </item>\n"
+        )
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<!--\n"
+        "  GENERATED by scripts/appcast-sync from the PUBLISHED\n"
+        "  releases. Never hand-edited — the next publish\n"
+        "  overwrites it. The script's docstring carries what an\n"
+        "  item has to satisfy before it appears here.\n"
+        "-->\n"
+        '<rss version="2.0"\n'
+        '     xmlns:sparkle="http://www.andymatuschak.org/'
+        'xml-namespaces/sparkle">\n'
+        "  <channel>\n"
+        "    <title>KiwiDesk</title>\n"
+        f"    <link>{FEED_URL}</link>\n"
+        "    <description>Updates for KiwiDesk, a tiling window "
+        "manager for macOS.</description>\n"
+        "    <language>en</language>\n"
+        f"{''.join(body)}"
+        "  </channel>\n"
+        "</rss>\n"
+    )
+
+
+def write(text: str) -> None:
+    APPCAST.parent.mkdir(parents=True, exist_ok=True)
+    APPCAST.write_text(text, encoding="utf-8")
+    print(
+        f"appcast-sync: wrote {APPCAST.relative_to(ROOT)}"
+    )
+
+
+def _report(error: AppcastError) -> None:
+    print(
+        f"appcast-sync: FAILED — {error.tag} cannot be offered "
+        "as an update:",
+        file=sys.stderr,
+    )
+    for problem in error.problems:
+        print(f"  - {problem}", file=sys.stderr)
+
+
+# ---------------------------------------------------------------
+# Modes
+
+
+def run_all(fetch) -> int:
+    notes = read_notes()
+    floor = minimum_system_version()
+    items: list[dict] = []
+    for release in fetch_releases():
+        try:
+            items.append(build_item(release, notes, fetch))
+        except AppcastError as error:
+            # Never fatal here, and that is the difference from
+            # --release. One historical release with no sidecar
+            # must not red every future publish; the release just
+            # published is held to the strict pass instead.
+            print(
+                f"appcast-sync: {error.tag} is not offered — "
+                f"{' '.join(error.problems)}"
+            )
+    write(render(items, floor))
+    print(f"appcast-sync: {len(items)} item(s) in the feed")
+    return 0
+
+
+def run_release(tag: str, check: bool, fetch) -> int:
+    notes = read_notes()
+    floor = minimum_system_version()
+    releases = [
+        r for r in fetch_releases() if r.get("tag_name") == tag
+    ]
+    if not releases:
+        print(
+            f"appcast-sync: no PUBLISHED release for {tag}. A "
+            "draft is not one — curate the draft, then publish.",
+            file=sys.stderr,
+        )
+        return 1
+    try:
+        item = build_item(releases[0], notes, fetch)
+    except AppcastError as error:
+        _report(error)
+        return 1
+    print(
+        f"appcast-sync: {tag} is offerable "
+        f"({item['length']} bytes)"
+    )
+    if check:
+        return 0
+    return run_all(fetch)
+
+
+def run_offline(path: str) -> int:
+    """Render from a JSON file, for the guard suite.
+
+    The sidecar's CONTENT cannot come from the API here, so a
+    release in the fixture may carry `edsig` beside its assets
+    and that value stands in for the download."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        print(
+            f"appcast-sync: could not read {path} ({error}).",
+            file=sys.stderr,
+        )
+        return 1
+    releases = data if isinstance(data, list) else [data]
+    floor = minimum_system_version()
+    notes = read_notes()
+    items: list[dict] = []
+    status = 0
+    for release in releases:
+        try:
+            items.append(
+                build_item(
+                    release,
+                    notes,
+                    lambda _a, r=release: str(r.get("edsig") or ""),
+                )
+            )
+        except AppcastError as error:
+            _report(error)
+            status = 1
+    sys.stdout.write(render(items, floor))
+    return status
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="appcast-sync",
+        description=(
+            "Generate site/public/appcast.xml from the published "
+            "releases."
+        ),
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "--all",
+        action="store_true",
+        help="rebuild the feed from every published release",
+    )
+    group.add_argument(
+        "--release",
+        metavar="TAG",
+        help="hold ONE tag to every clause, then rebuild",
+    )
+    group.add_argument(
+        "--releases",
+        metavar="FILE",
+        help="offline: render from a JSON fixture to stdout",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="with --release: verify only, write nothing",
+    )
+    args = parser.parse_args(argv)
+    if args.all:
+        return run_all(fetch_asset_text)
+    if args.release:
+        return run_release(
+            args.release, args.check, fetch_asset_text
+        )
+    return run_offline(args.releases)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
