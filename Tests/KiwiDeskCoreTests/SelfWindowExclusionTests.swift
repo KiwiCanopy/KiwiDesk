@@ -23,8 +23,7 @@ struct SelfWindowExclusionTests {
     }
 
     @Test(
-        "Own main windows and key-capable titled dialogs are managed; "
-            + "own panels stay ignored"
+        "Own windows and key-capable dialogs are managed; panels stay ignored"
     )
     func ownWindowClassification() {
         #expect(

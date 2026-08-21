@@ -18,15 +18,17 @@ import Foundation
 /// several panels:
 ///
 /// - **Settings** — marked, tiles. The one exception.
-/// - **The onboarding tour** and **the Config Issues window** —
-///   titled, main-capable, unmarked, so they are tracked and
-///   force-floated. Both end.
-/// - **Every own `NSPanel`** — the ⌃⌥K shortcuts panel, the
-///   menu-bar coach mark, the drag ghost and drop zones, the
-///   border and sticky overlays — never reaches the float
-///   question at all: `shouldIgnoreOwnWindow` drops anything
-///   that cannot become main before tracking, which is also
-///   what keeps the ⌃⌥K panel out of both bars.
+/// - **The onboarding tour**, **the Config Issues window**, and
+///   **update dialogs/alerts** (`NSAlert` / Sparkle) — titled,
+///   main- or key-capable, unmarked, so they are tracked and
+///   force-floated. All end.
+/// - **Every own borderless utility panel** — the ⌃⌥K shortcuts
+///   panel, the menu-bar coach mark, the drag ghost and drop
+///   zones, the border and sticky overlays — never reaches the
+///   float question at all: `shouldIgnoreOwnWindow` drops
+///   borderless utility panels and non-key overlays before
+///   tracking, which is also what keeps the ⌃⌥K panel out of both
+///   bars.
 ///
 /// A new own window is unmarked, and therefore chrome, by
 /// DEFAULT — the failure direction that costs a stray float
