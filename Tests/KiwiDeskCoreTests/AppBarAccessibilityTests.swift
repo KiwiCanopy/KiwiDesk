@@ -10,15 +10,12 @@ import Testing
 @Suite("App bar item accessibility (#901)", .serialized)
 @MainActor
 struct AppBarAccessibilityTests {
-    init() {
-        LocalizationManager.shared.select("en")
-    }
-
     private func makeView(
         name: String = "Safari",
         text: String = "Downloads",
         count: Int = 1
     ) -> AppBarItemView {
+        LocalizationManager.shared.select("en")
         let view = AppBarItemView(
             frame: NSRect(x: 0, y: 0, width: 120, height: 32)
         )
