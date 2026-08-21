@@ -3,16 +3,11 @@
 //
 // The docs are Starlight and the landing is a monolith; the legal pages are
 // their own small standalone Astro documents that reuse the landing's design
-// tokens (landing.css) so they match the marketing surface without pulling in
-// Starlight's chrome. German is legally binding; en/ja are courtesy
-// translations (see src/i18n/legal.ts).
-import "../styles/landing.css";
-import ThemeHead from "./ThemeHead.astro";
-import logoMark from "../assets/brand/logo.svg";
-import en from "../i18n/en.json";
-import de from "../i18n/de.json";
-import ja from "../i18n/ja.json";
-import { legal, type Lang, type LegalDoc } from "../i18n/legal";
+// tokens (landing.css) via PageShell.astro so they match the marketing surface
+// without pulling in Starlight's chrome. German is legally binding; en/ja are
+// courtesy translations (see src/i18n/legal.ts).
+import PageShell, { type Lang } from "./PageShell.astro";
+import { legal, type LegalDoc } from "../i18n/legal";
 
 interface Props {
   lang: Lang;
@@ -20,14 +15,6 @@ interface Props {
 }
 const { lang, doc } = Astro.props;
 
-const LANGS: Record<Lang, string> = {
-  en: "English",
-  de: "Deutsch",
-  ja: "日本語",
-};
-
-// English lives at /, German at /de, Japanese at /ja. The legal slug (the
-// German legal term) is shared across every locale.
 function localePath(l: Lang, sub = ""): string {
   const prefix = l === "en" ? "" : `/${l}`;
   return `${prefix}${sub}` || "/";
@@ -38,442 +25,117 @@ const data: LegalDoc = strings[doc];
 const slug = doc === "impressum" ? "/imprint" : "/privacy";
 const showNote = lang !== "de" && !!strings.translationNote;
 
-// Per-locale footer strings, English-fallback (mirrors Landing/Guide).
-const dict = { ...en, ...{ en, de, ja }[lang] } as Record<string, string>;
-const t = (k: string): string => dict[k] ?? (en as Record<string, string>)[k] ?? k;
-
-const site = Astro.site?.toString().replace(/\/$/, "") ?? "";
-const canonical = `${site}${localePath(lang, slug)}`;
 const pageTitle = `${data.title} · KiwiDesk`;
-const pageDesc =
-  doc === "impressum"
-    ? `${data.title} — KiwiDesk / KiwiCanopy.`
-    : `${data.title} — KiwiDesk / KiwiCanopy.`;
-
-const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
-const repo = "https://github.com/KiwiCanopy/KiwiDesk";
-const kofi = "https://ko-fi.com/kiwicanopy";
+const pageDesc = `${data.title} — KiwiDesk / KiwiCanopy.`;
 ---
 
-<!doctype html>
-<html lang={lang}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={pageDesc} />
-    <meta name="robots" content="noindex" />
-    <link rel="canonical" href={canonical} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDesc} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="KiwiDesk" />
-    <meta property="og:locale" content={ogLocale} />
-    <ThemeHead />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
-    <link rel="alternate" hreflang="de" href={`${site}${localePath("de", slug)}`} />
-    <link rel="alternate" hreflang="ja" href={`${site}${localePath("ja", slug)}`} />
-    <link rel="alternate" hreflang="x-default" href={`${site}${localePath("en", slug)}`} />
+<PageShell
+  lang={lang}
+  slug={slug}
+  title={pageTitle}
+  desc={pageDesc}
+  noindex={true}
+  mainClass="legal"
+>
+  <a class="back" href={localePath(lang)}>← {strings.backHome}</a>
+  <h1>{data.title}</h1>
+  <p class="updated">{strings.updatedLabel} {data.updated}</p>
 
-    {/* Language resolve (anti-redirect-loop). Unlike the landing's
-        root-only redirect, this PRESERVES the sub-path so a stored
-        language never bounces a legal page to the home page.
-          1. A stored `kiwidesk-site-lang` wins — sent to its locale,
-             same document.
-          2. No stored pref: nudge by navigator.language, but only
-             away from the English root of THIS document. */}
-    <script is:inline>
-      (function () {
-        var p = location.pathname;
-        var m = p.match(/^\/(de|ja)(?=\/|$)/);
-        var cur = m ? m[1] : "en";
-        var rest = (m ? p.slice(m[0].length) : p) || "/";
-        function go(to) {
-          if (to === cur) return;
-          location.replace((to === "en" ? "" : "/" + to) + rest + location.hash);
-        }
-        var stored;
-        try {
-          stored = localStorage.getItem("kiwidesk-site-lang");
-        } catch (e) {
-          stored = null;
-        }
-        if (stored === "en" || stored === "de" || stored === "ja") return go(stored);
-        if (cur !== "en") return;
-        var nav = (navigator.language || "").toLowerCase();
-        if (nav.indexOf("de") === 0) return go("de");
-        if (nav.indexOf("ja") === 0) return go("ja");
-      })();
-    </script>
-  </head>
-  <body>
-    <a href="#main-content" class="skip-link">{t("skip_to_content")}</a>
+  {showNote && <p class="note">{strings.translationNote}</p>}
 
-    <header class="lnav">
-      <a class="brand" href={localePath(lang)} aria-label="KiwiDesk">
-        <img src={logoMark.src} alt="" width="34" height="34" />
-        <span>KiwiDesk</span>
-      </a>
-      <nav class="right">
-        <span class="langs">
-          {
-            (Object.entries(LANGS) as [Lang, string][]).map(([code, label]) => (
-              <a
-                href={localePath(code, slug)}
-                data-lang={code}
-                title={label}
-                aria-current={code === lang ? "page" : undefined}
-              >
-                {code.toUpperCase()}
-              </a>
-            ))
-          }
-        </span>
-        <button
-          id="themeToggle"
-          class="theme-toggle"
-          type="button"
-          aria-label="Switch color theme"
-        >
-          <span class="theme-toggle__track" aria-hidden="true">
-            <span class="theme-toggle__thumb">
-              <svg class="theme-toggle__sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"></circle>
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-              </svg>
-              <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-              </svg>
-            </span>
-          </span>
-        </button>
-      </nav>
-    </header>
+  {
+    data.sections.map((s) => (
+      <section class="sec">
+        <h2>{s.title}</h2>
+        <div class="body" set:html={s.body} />
+      </section>
+    ))
+  }
+</PageShell>
 
-    <main id="main-content" class="legal">
-      <a class="back" href={localePath(lang)}>← {strings.backHome}</a>
-      <h1>{data.title}</h1>
-      <p class="updated">{strings.updatedLabel} {data.updated}</p>
-
-      {showNote && <p class="note">{strings.translationNote}</p>}
-
-      {
-        data.sections.map((s) => (
-          <section class="sec">
-            <h2>{s.title}</h2>
-            <div class="body" set:html={s.body} />
-          </section>
-        ))
-      }
-    </main>
-
-    <footer class="lfoot">
-      <p class="tag">{t("footer_tag")}</p>
-      <nav class="flinks" aria-label={t("footer_nav_aria")}>
-        <a href="/docs">{t("footer_docs")}</a>
-        <a href={localePath(lang, "/changelog/")}
-          >{t("footer_changelog")}</a>
-        <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
-        <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
-        <a href={repo} target="_blank" rel="noopener">{t("footer_github")}</a>
-        <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}</a>
-      </nav>
-      <p class="copy">{t("footer_copy")}</p>
-    </footer>
-
-    <style>
-      .skip-link {
-        position: absolute;
-        left: 0.5rem;
-        top: -3rem;
-        z-index: 10;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        background: var(--accent);
-        color: var(--bg-1);
-        font-weight: 700;
-        transition: top 140ms ease;
-      }
-      .skip-link:focus {
-        top: 0.5rem;
-      }
-
-      .lnav {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        max-width: var(--maxw);
-        margin: 0 auto;
-        padding: 1.25rem 1.5rem;
-        flex-wrap: wrap;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        font-weight: 800;
-        font-size: 1.15rem;
-        color: var(--text);
-      }
-      .brand img {
-        height: 30px;
-        width: auto;
-      }
-      .right {
-        display: flex;
-        align-items: center;
-        gap: 1.1rem;
-      }
-      .langs {
-        display: flex;
-        gap: 0.25rem;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 0.2rem;
-        border-radius: 999px;
-        background: var(--bg-2);
-      }
-      .langs a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 24px;
-        padding: 0.4rem 0.6rem;
-        border-radius: 999px;
-        color: var(--text);
-        opacity: 0.55;
-        transition: background 140ms ease, opacity 140ms ease;
-      }
-      .langs a:hover {
-        opacity: 1;
-      }
-      .langs a[aria-current="page"] {
-        background: var(--bg-1);
-        opacity: 1;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-      }
-
-      /* Theme toggle — sliding sun/moon pill (matches KiwiCanopy). */
-      .theme-toggle {
-        display: inline-grid;
-        place-items: center;
-        padding: 0;
-        border: 0;
-        background: none;
-        cursor: pointer;
-        border-radius: 999px;
-      }
-      .theme-toggle__track {
-        position: relative;
-        display: block;
-        width: 52px;
-        height: 30px;
-        border-radius: 999px;
-        border: 1px solid var(--border-strong);
-        background: var(--bg-2);
-        transition: background 0.25s ease, border-color 0.25s ease;
-      }
-      .theme-toggle__thumb {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        color: #fff8e6;
-        background: linear-gradient(180deg, #f6c453, #e0932f);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
-        transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
-      }
-      :root[data-theme="dark"] .theme-toggle__thumb {
-        transform: translateX(22px);
-        background: linear-gradient(180deg, #cfe0bd, #9db785);
-        color: #10210b;
-      }
-      .theme-toggle:hover .theme-toggle__track {
-        border-color: var(--accent);
-      }
-      .theme-toggle:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 3px;
-      }
-      .theme-toggle svg {
-        display: block;
-      }
-      .theme-toggle__sun,
-      .theme-toggle__moon {
-        grid-area: 1 / 1;
-        transition: opacity 0.2s ease;
-      }
-      .theme-toggle__moon {
-        opacity: 0;
-      }
-      :root[data-theme="dark"] .theme-toggle__sun {
-        opacity: 0;
-      }
-      :root[data-theme="dark"] .theme-toggle__moon {
-        opacity: 1;
-      }
-
-      /* --- Document body --- */
-      .legal {
-        position: relative;
-        z-index: 1;
-        max-width: 720px;
-        margin: 0 auto;
-        padding: 1.5rem 1.5rem 4rem;
-      }
-      .back {
-        display: inline-block;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--accent);
-      }
-      .back:hover {
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-      .legal h1 {
-        font-size: clamp(1.9rem, 5vw, 2.6rem);
-        color: var(--text);
-        line-height: 1.15;
-      }
-      .updated {
-        margin-top: 0.5rem;
-        font-size: 0.85rem;
-        color: var(--text-dim);
-      }
-      .note {
-        margin-top: 1.5rem;
-        padding: 0.9rem 1.1rem;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--bg-2);
-        font-size: 0.9rem;
-        font-style: italic;
-        color: var(--text-dim);
-      }
-      .sec {
-        margin-top: 2.25rem;
-        /* landing.css gives every bare <section> large marketing padding-block;
-           these legal sections are plain prose, so reset it — otherwise huge
-           vertical gaps open between numbered sections. */
-        padding-block: 0;
-      }
-      .sec h2 {
-        margin: 0;
-        font-size: 1.15rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        color: var(--text);
-      }
-      .body {
-        margin-top: 0.6rem;
-        color: var(--text);
-      }
-      /* landing.css resets box-sizing but not margins, so kill the browser's
-         default vertical <p> margin and keep only the intended top rhythm. */
-      .body :global(p) {
-        margin: 0.7rem 0 0;
-      }
-      .body :global(p:first-child) {
-        margin-top: 0;
-      }
-      .body :global(ul) {
-        margin: 0.7rem 0 0;
-        padding-left: 1.25rem;
-      }
-      .body :global(li) {
-        margin-top: 0.25rem;
-      }
-      .body :global(a) {
-        color: var(--accent);
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        overflow-wrap: anywhere;
-      }
-      .body :global(code) {
-        font-family: var(--mono);
-        font-size: 0.88em;
-        padding: 0.1em 0.35em;
-        border-radius: 5px;
-        background: var(--bg-2);
-      }
-
-      /* --- Footer --- */
-      .lfoot {
-        position: relative;
-        z-index: 1;
-        max-width: var(--maxw);
-        margin: 0 auto;
-        padding: 2.5rem 1.5rem 3.5rem;
-        border-top: 1px solid var(--border);
-        text-align: center;
-      }
-      .lfoot .tag {
-        font-weight: 600;
-        color: var(--text);
-      }
-      .flinks {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1.25rem;
-        margin: 1.1rem 0;
-        font-weight: 600;
-        font-size: 0.9rem;
-      }
-      .flinks a {
-        color: var(--text);
-        opacity: 0.75;
-        transition: opacity 140ms ease, color 140ms ease;
-      }
-      .flinks a:hover {
-        opacity: 1;
-        color: var(--accent);
-      }
-      .lfoot .copy {
-        font-size: 0.85rem;
-        color: var(--text-faint);
-      }
-    </style>
-
-    <script>
-      // Persist an explicit language choice (the head redirect reads it back).
-      document.querySelectorAll<HTMLElement>("[data-lang]").forEach((el) => {
-        el.addEventListener("click", () => {
-          try {
-            localStorage.setItem("kiwidesk-site-lang", el.dataset.lang || "");
-          } catch {
-            /* private mode / storage blocked — ignore */
-          }
-        });
-      });
-
-      // Theme toggle: flip the effective theme, persist to the shared
-      // `starlight-theme` key, and stamp data-theme.
-      const themeBtn = document.getElementById("themeToggle");
-      themeBtn?.addEventListener("click", () => {
-        const root = document.documentElement;
-        const explicit = root.getAttribute("data-theme");
-        const prefersDark = matchMedia("(prefers-color-scheme: dark)").matches;
-        const effective = explicit || (prefersDark ? "dark" : "light");
-        const next = effective === "dark" ? "light" : "dark";
-        root.setAttribute("data-theme", next);
-        try {
-          localStorage.setItem("starlight-theme", next);
-        } catch {
-          /* ignore */
-        }
-      });
-    </script>
-  </body>
-</html>
+<style>
+  .legal {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--accent);
+  }
+  .back:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .legal h1 {
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .updated {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .note {
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-2);
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .sec {
+    margin-top: 2.25rem;
+    /* landing.css gives every bare <section> large marketing padding-block;
+       these legal sections are plain prose, so reset it — otherwise huge
+       vertical gaps open between numbered sections. */
+    padding-block: 0;
+  }
+  .sec h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .body {
+    margin-top: 0.6rem;
+    color: var(--text);
+  }
+  /* landing.css resets box-sizing but not margins, so kill the browser's
+     default vertical <p> margin and keep only the intended top rhythm. */
+  .body :global(p) {
+    margin: 0.7rem 0 0;
+  }
+  .body :global(p:first-child) {
+    margin-top: 0;
+  }
+  .body :global(ul) {
+    margin: 0.7rem 0 0;
+    padding-left: 1.25rem;
+  }
+  .body :global(li) {
+    margin-top: 0.25rem;
+  }
+  .body :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+  }
+  .body :global(code) {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    padding: 0.1em 0.35em;
+    border-radius: 5px;
+    background: var(--bg-2);
+  }
+</style>
