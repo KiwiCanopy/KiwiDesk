@@ -46,25 +46,54 @@ public enum ConfigMigration {
     /// migration that reached only the global one would leave the
     /// file just as undecodable.
     ///
-    /// That breadth is bounded by the map, not by the walk, and a
-    /// SECOND `content` CodingKey elsewhere in the config would
-    /// break the bound — such a key owes this walk a path, or
-    /// this map a narrower home. Two declare it today
-    /// (`AppBarStyle+Coding`, `LayoutAppBar`); nothing guards
-    /// that count.
+    /// That breadth is bounded by this map, not by the walk, so a
+    /// second `content` CodingKey anywhere in the config would
+    /// break the bound — and `readBackup` runs the walk across a
+    /// whole `SetupBundle`, so the reach is wider than the two
+    /// types this reasons about. Such a key owes the walk a path,
+    /// or this map a narrower home;
+    /// `ConfigMigrationRoutingTests` is what says so on arrival.
     static let retiredBarContent = [
         "name": "title",
         "icon_and_name": "icon_and_title",
     ]
 
-    /// `data` with every retired bar-content value rewritten, or
-    /// nil when there was nothing to rewrite.
+    /// Every migration, oldest first.
     ///
-    /// Nil rather than the unchanged bytes, deliberately: the
-    /// callers write back exactly when this returns non-nil, so
+    /// The ORDERED list is the extension point, and the reason
+    /// the wired seam below is `migrated(_:)` rather than any one
+    /// migration's name: a reader names the seam, never a step,
+    /// so migration #2 lands here alone instead of re-editing
+    /// every reader and re-asking which readers exist
+    /// (`ConfigMigrationRoutingTests` is the census). Each step
+    /// takes the bytes as they stand after the previous one.
+    private static let steps: [@Sendable (Data) -> Data?] = [
+        migratingRetiredBarContent
+    ]
+
+    /// `data` with every applicable migration applied, or nil
+    /// when none applied.
+    ///
+    /// Nil rather than the unchanged bytes, deliberately: a
+    /// caller writes back exactly when this returns non-nil, so
     /// a config that needs nothing is never rewritten and its
     /// mtime never moves.
-    public static func migratingRetiredBarContent(
+    public static func migrated(_ data: Data) -> Data? {
+        var current = data
+        var changed = false
+        for step in steps {
+            if let next = step(current) {
+                current = next
+                changed = true
+            }
+        }
+        return changed ? current : nil
+    }
+
+    /// `data` with every retired bar-content value rewritten, or
+    /// nil when there was nothing to rewrite.
+    @Sendable
+    static func migratingRetiredBarContent(
         _ data: Data
     ) -> Data? {
         // Cheap gate first: a config that never set the bar's
@@ -75,11 +104,66 @@ public enum ConfigMigration {
         guard
             let root = try? JSONSerialization.jsonObject(with: data)
         else { return nil }
-        let (migrated, changed) = rewritten(root)
+        let (expected, changed) = rewritten(root)
         guard changed else { return nil }
+        // The parse decides; a TEXTUAL edit applies. Writing the
+        // re-serialized tree back instead re-encodes every
+        // `Double` in the file — `0.4` became
+        // `0.40000000000000002` and `0.6` became
+        // `0.59999999999999998`, in five places, for a one-value
+        // migration (measured, 2026-08-20). The decoded values
+        // are identical, so nothing breaks; what breaks is the
+        // promise. This rewrites the user's file without being
+        // asked, so it may touch only what it came for — a
+        // config kept in a dotfiles repo shows every unasked byte
+        // as a diff.
+        //
+        // Correctness does not rest on the edit: the result is
+        // re-parsed and compared against the tree the walk
+        // produced, and anything but an exact match falls back to
+        // serializing that tree. A surgical edit that is ever
+        // wrong is simply not used.
+        if let text = String(data: data, encoding: .utf8),
+            let edited = surgicallyEdited(text),
+            let reparsed = try? JSONSerialization.jsonObject(
+                with: edited
+            ),
+            canonical(reparsed) == canonical(expected)
+        {
+            return edited
+        }
         return try? JSONSerialization.data(
-            withJSONObject: migrated,
+            withJSONObject: expected,
             options: [.prettyPrinted, .sortedKeys]
+        )
+    }
+
+    /// `text` with each retired `content` VALUE replaced where it
+    /// is the value of a `content` key, leaving every other byte
+    /// exactly as it was.
+    ///
+    /// The pattern requires the opening quote, so
+    /// `"icon_and_name"` can never be matched by the `"name"`
+    /// entry and the two are order-independent.
+    private static func surgicallyEdited(_ text: String) -> Data? {
+        var out = text
+        for (retired, mapped) in retiredBarContent {
+            out = out.replacingOccurrences(
+                of: "(\"content\"\\s*:\\s*)\"\(retired)\"",
+                with: "$1\"\(mapped)\"",
+                options: .regularExpression
+            )
+        }
+        return out == text ? nil : out.data(using: .utf8)
+    }
+
+    /// One serializer for both sides of the comparison, so the
+    /// check is about VALUES and never about how either side
+    /// happened to spell a float.
+    private static func canonical(_ node: Any) -> Data? {
+        try? JSONSerialization.data(
+            withJSONObject: node,
+            options: [.sortedKeys]
         )
     }
 

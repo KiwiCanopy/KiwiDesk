@@ -84,9 +84,7 @@ extension KiwiCore {
         // unforgiving side of the crossing — a profile file is
         // repaired and retried next launch, while a refused
         // backup is refused forever.
-        let payload =
-            ConfigMigration.migratingRetiredBarContent(data)
-            ?? data
+        let payload = ConfigMigration.migrated(data) ?? data
         guard
             let bundle = try? decoder.decode(
                 SetupBundle.self,
