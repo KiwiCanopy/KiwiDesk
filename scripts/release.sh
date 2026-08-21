@@ -460,7 +460,7 @@ cat <<SKELETON
 
 --------------------------------------------------------------
 Curate the draft, THEN publish. Paste above the generated
-"What's Changed" list and fill it in:
+"What's Changed" list, leaving a blank line between the two:
 
 ## Highlights
 
@@ -473,6 +473,7 @@ One or two sentences: what this release is about, plainly.
 ### <Another one>
 
 - ...
+
 
 --------------------------------------------------------------
 The rules, in four lines:
