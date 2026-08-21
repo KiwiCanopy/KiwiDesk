@@ -138,15 +138,26 @@ holds the secondary-switch decision including its nil case.
 - `ProfileManager` mutators are `internal` **by design** — mutate
   through a `KiwiCore` facade, never re-publicize them.
 - `read(name:)` is the public load-for-edit primitive
-  (path-traversal guarded, touches no state).
+  (path-traversal guarded, touches no in-memory state — it does
+  rewrite the FILE when a migration applies, see below).
 - `save()` **adopts** (sets `currentName`, clears dirty), so an
   edit-without-activating path must be a separate, non-adopting
   write — never overload `save()`.
 - The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine
   that one predicate, never add a second.
-- Pre-release, single user: profile JSON needs no migration
-  scripts — re-saving is the migration.
+- **A stored value that is renamed owes a one-shot migration**
+  in `ConfigMigration`, applied at EVERY reader of that file
+  shape — `ProfileManager.read` and `KiwiCore.readBackup`, since
+  a `SetupBundle` carries `[Profile]` inline. Missing the second
+  one refuses a backup as "not a KiwiDesk backup", and a backup
+  is never rewritten, so that refusal is permanent
+  (`ConfigMigrationTests`).
+  The older rule here — "pre-release, single user, re-saving is
+  the migration" — was retired with AGENTS.md §5's premise: it
+  was true while the author was the only user, and v0.9.7 shipped
+  to others. A lenient decoder is still banned; it never ends,
+  where a rewrite does.
 
 ## A new file in the config directory answers the backup question
 

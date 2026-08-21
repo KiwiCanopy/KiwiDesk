@@ -275,7 +275,8 @@ bite large test PRs:
 - Config/profile shape is pinned by `SettingsCodingTests` — extend
   it when adding a setting (Lua name → JSON key via `CodingKeys`;
   see [config-vocabulary.md](config-vocabulary.md)).
-- Pre-release, single-user: profile JSON needs no migration — see
+- A renamed stored value owes a one-shot migration and a test
+  that reds without it, at every reader of that file shape — see
   [profiles.md](profiles.md).
 - Mirrored field lists need a forget-proof parity test — see
   [parity-tests.md](parity-tests.md).

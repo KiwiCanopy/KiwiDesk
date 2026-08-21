@@ -26,6 +26,13 @@ import Foundation
 /// applied to the two files read on every launch — removing this
 /// is a guess, and the guess fails silently on someone else's
 /// machine.
+/// `init.lua` is deliberately out of scope. A hand-written
+/// `app_bar.set_content("icon_and_name")` now fails, but it fails
+/// as ONE line reporting `expected one of icon|title|
+/// icon_and_title` — the user's own script, which KiwiDesk does
+/// not own or rewrite, and a refusal that names the fix. The
+/// crossing exists for files this app WROTE, where the user made
+/// no choice that could be reported back to them.
 public enum ConfigMigration {
     /// The `app_bar.content` spellings retired when the bars
     /// began naming the WINDOW rather than its app (owner ruling
@@ -33,9 +40,18 @@ public enum ConfigMigration {
     ///
     /// Both bar-content sites decode from the same vocabulary —
     /// `AppBarStyle.content` and a layout's `LayoutAppBar`
-    /// override — and `content` is not a JSON key anywhere else
-    /// in the config, which is why the walk below can rewrite by
-    /// KEY at any depth instead of hardcoding a path per layout.
+    /// override — which is why the walk below rewrites by KEY at
+    /// any depth instead of hardcoding a path per layout: an
+    /// override sits one level down from the global style, and a
+    /// migration that reached only the global one would leave the
+    /// file just as undecodable.
+    ///
+    /// That breadth is bounded by the map, not by the walk, and a
+    /// SECOND `content` CodingKey elsewhere in the config would
+    /// break the bound — such a key owes this walk a path, or
+    /// this map a narrower home. Two declare it today
+    /// (`AppBarStyle+Coding`, `LayoutAppBar`); nothing guards
+    /// that count.
     static let retiredBarContent = [
         "name": "title",
         "icon_and_name": "icon_and_title",

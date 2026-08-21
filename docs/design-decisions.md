@@ -5053,7 +5053,7 @@ gone. That is also why the earlier "re-editing the config IS the
 migration" answer was withdrawn rather than defended: it was
 sound while this repo had one user, and v0.9.7 shipped to others
 (AGENTS.md §5, amended). Asking a stranger to hand-edit JSON to
-recover their keybindings is not a migration policy.
+get their profiles back is not a migration policy.
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read

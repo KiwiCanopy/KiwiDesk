@@ -169,21 +169,6 @@ struct AppBarGlyphLayoutTests {
         #expect(view.label.frame.width >= needed)
     }
 
-    /// ...and an icon-only item hides its label outright.
-    ///
-    /// What it pins is the MEASUREMENT, which is the load-bearing
-    /// half: `showText` zeroes `textSize`, and a zero-width label
-    /// is hidden either way. Forcing `showText = true` reds this
-    /// test and nothing in `AppBarSlotSizingTests` (mutation,
-    /// 2026-08-20).
-    ///
-    /// It also settled a duplicate. `configure` hid the label as
-    /// well, and the layout pass then decided it again, so
-    /// mutating the `configure` write was inert in every suite —
-    /// an unobservable write, now gone. `layoutHorizontal` owns
-    /// this, through `Content.showsText` rather than a
-    /// hand-spelled `== .icon`, so a later text-free case
-    /// inherits the answer (review 2026-08-20).
     /// A REUSED view that flips to a vertical bar hides its
     /// label — the case the horizontal fixtures cannot see.
     ///
@@ -215,6 +200,23 @@ struct AppBarGlyphLayoutTests {
         #expect(view.label.isHidden)
     }
 
+    /// ...and an icon-only item hides its label outright.
+    ///
+    /// What it pins is the MEASUREMENT, which is the load-bearing
+    /// half: `showText` zeroes `textSize`, and a zero-width label
+    /// is hidden either way. Forcing `showText = true` reds this
+    /// test and nothing in `AppBarSlotSizingTests` (mutation,
+    /// 2026-08-20). The vertical sibling above does NOT pin that
+    /// — `layoutVertical` never consults `showsText` — which is
+    /// why the two keep separate paragraphs.
+    ///
+    /// It also settled a duplicate. `configure` hid the label as
+    /// well, and the layout pass then decided it again, so
+    /// mutating the `configure` write was inert in every suite —
+    /// an unobservable write, now gone. `layoutHorizontal` owns
+    /// this, through `Content.showsText` rather than a
+    /// hand-spelled `== .icon`, so a later text-free case
+    /// inherits the answer (review 2026-08-20).
     @Test("An icon-only item hides its label")
     func iconOnlyHidesLabel() {
         var style = AppBarStyle()
