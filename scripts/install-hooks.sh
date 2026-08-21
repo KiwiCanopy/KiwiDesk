@@ -11,5 +11,6 @@ if [ ! -d "$ROOT/.git" ]; then
 fi
 
 ln -sf "$ROOT/scripts/pre-commit" "$HOOKS_DIR/pre-commit"
-chmod +x "$ROOT/scripts/pre-commit" "$ROOT/scripts/lint.sh"
+chmod +x "$ROOT/scripts/pre-commit" "$ROOT/scripts/lint.sh" \
+    "$ROOT/scripts/check-doc-anchors"
 echo "Installed pre-commit hook -> scripts/pre-commit"

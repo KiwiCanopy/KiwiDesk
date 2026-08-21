@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Refuse a change that inserts a declaration between a `///`
+block and the declaration it documents.
+
+This is a DIFF-shaped check, which is why it is a script and not
+a test: the defect is invisible in the finished file. Both of
+these are structurally perfect Swift, and the second is the bug —
+
+    /// Hides the label on a vertical bar.        <- unchanged
+    @Test("...") func newlyInserted() {}          <- added
+    func theOneTheDocMeant() {}                   <- unchanged
+
+The `///` block silently re-anchors to whatever was inserted
+under it, and the sentence that was true of one declaration
+becomes false of another. It happened three times on
+`feat/app-bar-label-style`: `armCloseReturnRestack` lost the
+whole #674 argument, `glyphCapRow`'s doc ended up heading a
+title-length stepper where every clause was false, and a merged
+pair left a mutation claim ("forcing `showText = true` reds this
+test") attached to a test that mutation cannot red. A false
+claim about a proof is worse than a false claim about behavior:
+the next reader trusts a `guard-prover` run that never happened.
+
+Reviewers caught all three, and only after they shipped. The
+signature is mechanical, so it does not need a reviewer.
+
+Usage:
+    scripts/check-doc-anchors              # staged changes
+    scripts/check-doc-anchors main...HEAD  # a range
+"""
+import re
+import subprocess
+import sys
+
+DECL = re.compile(
+    r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*"
+    r"(?:public|private|internal|fileprivate|open)?\s*"
+    r"(?:static|final|class|override|mutating|lazy)?\s*"
+    r"\b(?:func|var|let|struct|enum|class|init|case|"
+    r"protocol|extension|typealias)\b"
+)
+# An attribute line that opens a declaration on its own line.
+ATTR_DECL = re.compile(r"^\s*@(?:Test|Suite|ViewBuilder|objc)\b")
+
+
+def declaration(line: str) -> bool:
+    return bool(DECL.match(line) or ATTR_DECL.match(line))
+
+
+def diff(args: list[str]) -> str:
+    cmd = ["git", "diff", "-U3"]
+    cmd += args if args else ["--cached"]
+    return subprocess.run(
+        cmd, capture_output=True, text=True, check=True
+    ).stdout
+
+
+def findings(text: str) -> list[tuple[str, str, str]]:
+    out: list[tuple[str, str, str]] = []
+    path = ""
+    prev_ctx: str | None = None
+    run: list[str] = []
+    anchor: str | None = None
+    replaced = False
+
+    def flush() -> None:
+        nonlocal run, anchor, replaced
+        if anchor is not None and any(declaration(x) for x in run):
+            decl = next(x for x in run if declaration(x))
+            out.append((path, anchor.strip(), decl.strip()))
+        run = []
+        anchor = None
+        replaced = False
+
+    for line in text.splitlines():
+        if line.startswith("+++ b/"):
+            flush()
+            path = line[6:]
+            prev_ctx = None
+            continue
+        if line.startswith(("@@", "---", "diff ", "index ")):
+            flush()
+            prev_ctx = None
+            continue
+        if line.startswith("+"):
+            body = line[1:]
+            if not run:
+                # A run only matters when it opens directly under
+                # an UNCHANGED doc line — that is the insertion
+                # point where re-anchoring happens — and when
+                # nothing was REMOVED there. A removed line means
+                # the declaration was edited in place: a rename
+                # keeps a doc with its own declaration, which is
+                # not this defect and was most of the noise when
+                # this ran without the distinction.
+                if (
+                    not replaced
+                    and prev_ctx is not None
+                    and prev_ctx.lstrip().startswith("///")
+                ):
+                    anchor = prev_ctx
+                    run = [body]
+            else:
+                run.append(body)
+            continue
+        if line.startswith("-"):
+            replaced = True
+            continue
+        # A context line ends any run, and clears the
+        # replacement flag: removals only shadow the addition
+        # they sit against.
+        flush()
+        replaced = False
+        prev_ctx = line[1:] if line.startswith(" ") else None
+    flush()
+    return out
+
+
+def main() -> int:
+    hits = findings(diff(sys.argv[1:]))
+    if not hits:
+        return 0
+    print(
+        "check-doc-anchors: a declaration was inserted between a "
+        "`///` block and what it documents.\n"
+        "The doc now describes the NEW declaration. Move the block, "
+        "or separate the two.\n"
+    )
+    for path, anchor, decl in hits:
+        print(f"  {path}")
+        print(f"    doc (kept):   {anchor[:70]}")
+        print(f"    decl (added): {decl[:70]}\n")
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
