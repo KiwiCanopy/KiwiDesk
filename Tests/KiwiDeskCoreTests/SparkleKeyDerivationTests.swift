@@ -1,6 +1,16 @@
 import Foundation
 import Testing
 
+/// Whether `node` runs on this host at all.
+///
+/// File scope rather than a static on the suite: a trait
+/// attached to a type cannot reference that type's own members,
+/// which the macro reports as a circular reference.
+private let nodeIsAvailable: Bool = {
+    (try? spawn("/usr/bin/env", ["node", "--version"]))?.status
+        == 0
+}()
+
 /// `scripts/sparkle-public-key.js` derives the public half of
 /// the Sparkle signing key, and `release.yml` refuses to sign
 /// when it does not match the `SUPublicEDKey` every bundle
@@ -16,8 +26,23 @@ import Testing
 /// is pinned against RFC 8032's own test vector rather than
 /// against a value this repo produced, which would only prove
 /// the code agrees with itself.
-@Suite("Sparkle key derivation (#874)")
+/// **Skips rather than reds on a host without Node.** `swift
+/// test` otherwise needs no Node at all — AGENTS.md §4 lists it
+/// as optional per-developer — so a contributor without it would
+/// meet a red suite about a release-pipeline detail they cannot
+/// act on. The precedent is `WakeSessionPresenceWiringTests`,
+/// which skips a session-less host the same way.
+///
+/// The skip cannot hide a shipping problem: `release.yml` calls
+/// the same script to decide whether it may sign at all, so a
+/// runner without Node fails the release loudly, before any
+/// artifact exists.
+@Suite(
+    "Sparkle key derivation (#874)",
+    .enabled(if: nodeIsAvailable)
+)
 struct SparkleKeyDerivationTests {
+
     private var script: URL {
         scriptFixtureRepoRoot()
             .appendingPathComponent("scripts")

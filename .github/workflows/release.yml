@@ -705,17 +705,26 @@ jobs:
             # enters the feed and every installed copy
             # downloads it and then refuses to install. Treat it
             # as superseded, exactly like the renamed sibling.
+            # Two names, because they answer two questions and
+            # overloading SIBLING_SIG made it mean "the renamed
+            # archive's signature" on one path and "this run's
+            # own stale signature" on the other — which dropped
+            # the renamed sibling's `.edsig` from the delete set
+            # on the second path.
             if [ -n "$SIDECAR" ]; then
               KEEP_SIG="$KEEP.edsig"
+              STALE_SIG=""
             else
               KEEP_SIG=""
-              SIBLING_SIG="$KEEP.edsig"
+              STALE_SIG="$KEEP.edsig"
             fi
             while IFS= read -r asset; do
               [ -n "$asset" ] || continue
               if [ "$asset" = "$SIBLING" ] \
                 || { [ -n "$SIBLING_SIG" ] \
-                     && [ "$asset" = "$SIBLING_SIG" ]; }; then
+                     && [ "$asset" = "$SIBLING_SIG" ]; } \
+                || { [ -n "$STALE_SIG" ] \
+                     && [ "$asset" = "$STALE_SIG" ]; }; then
                 echo "dropping superseded asset: $asset"
                 if ! gh release delete-asset "$TAG" "$asset" \
                   --yes; then

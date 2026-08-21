@@ -29,7 +29,7 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Eight ratified exceptions, none with setup/teardown coupling or
+  Ten ratified exceptions, none with setup/teardown coupling or
   assertions of their own, and all but the fake WindowServer
   *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
@@ -57,6 +57,25 @@ bite large test PRs:
     Extracted at the **third** caller (#874), and it re-uses
     `ScriptFixture.swift`'s spawn primitive rather than
     duplicating it.
+  - *the appcast fixtures* in `AppcastFixture.swift` — release
+    dictionaries, notes files and the spawn of
+    `scripts/appcast-sync` itself. Extracted at the **third**
+    consumer (#874: the offerability, mode and notes suites),
+    which is where parity-tests.md puts the line; two copies is
+    the duplication §2.4 prefers, three is a shape that drifts,
+    and a suite asserting over a release the others no longer
+    produce stops guarding what its name claims while staying
+    green.
+  - *the workflow-source reader* in `WorkflowSource.swift` — a
+    workflow's YAML with comments stripped and `\`-continuations
+    joined. The STRIPPING is the load-bearing part: a suite
+    scanning raw YAML has needles satisfied by the comments that
+    argue for the very mechanism they watch, which happened
+    three times in #874 before this existed, and a second copy
+    that stripped less would leave one suite silently weaker
+    than the other while both stayed green. Extracted at the
+    **second** caller (#874), when the signing and publishing
+    guards split.
   - *colour-vision maths* in `ColorVision.swift` — the
     Viénot protanopia transform and the measures the CVD guards
     assert on. **Which suites share it is that file's own doc
@@ -422,11 +441,15 @@ construction routes. Adding a production type whose
 needle in one of those guards.
 
 Deliberate residue a run does still touch, as audited
-2026-08-17 — a change adding a residue class extends and
+2026-08-21 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
-`ScriptFixture`, one inert `true` child when
+`ScriptFixture` — including, since #874, a `node` child for
+`scripts/sparkle-public-key.js`, the one toolchain a `swift
+test` run needs that AGENTS.md §4 calls optional, which is why
+`SparkleKeyDerivationTests` carries an `.enabled(if:)` rather
+than redding a host without it — one inert `true` child when
 `FirstRunSeedTests`' executed hooks fixture fires, scratch
 `UserDefaults` suites cleaned on both sides, one live
 `NSEvent.pressedMouseButtons` read —

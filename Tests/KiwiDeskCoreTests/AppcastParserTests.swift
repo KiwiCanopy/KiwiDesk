@@ -26,78 +26,46 @@ import Testing
 /// reasons from). No release can ever carry these.
 @Suite("Appcast offerability (#874)")
 struct AppcastParserTests {
-    static let fixtureTag = "v9999.0.1"
-    static let fixtureVersion = "9999.0.1"
+    private static let fixtureTag = "v9999.0.1"
+    private static let fixtureVersion = "9999.0.1"
 
     /// A 64-byte Ed25519 signature, base64. Built rather than
     /// pasted, so a change to the script's expected length reds
     /// here instead of silently accepting a stale literal.
-    static let signature = Data(repeating: 0x41, count: 64)
-        .base64EncodedString()
+    private static let signature = AppcastFixture.signature
 
-    /// The shape every case below is a mutation of: one
-    /// published release with a notarized archive and its
-    /// sidecar.
-    static func release(
+    /// Forwarders so each case reads as a mutation of one shape.
+    /// The builders themselves live in `AppcastFixture`, shared
+    /// with the mode and notes suites.
+    private static func release(
         tag: String = AppcastParserTests.fixtureTag,
         assets: [[String: Any]]? = nil,
-        signature: String = AppcastParserTests.signature,
+        signature: String = AppcastFixture.signature,
         draft: Bool = false
     ) -> [String: Any] {
-        let version =
-            tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
-        let name = "KiwiDesk-\(version).zip"
-        return [
-            "tag_name": tag,
-            "published_at": "2026-08-26T10:00:00Z",
-            "draft": draft,
-            "edsig": signature,
-            "assets": assets ?? [
-                asset(name),
-                asset("\(name).edsig", size: 89),
-            ],
-        ]
+        AppcastFixture.release(
+            tag: tag,
+            assets: assets,
+            signature: signature,
+            draft: draft
+        )
     }
 
-    static func asset(
+    private static func asset(
         _ name: String,
         size: Int = 9_123_456
     ) -> [String: Any] {
-        [
-            "name": name,
-            "size": size,
-            "browser_download_url":
-                "https://github.com/KiwiCanopy/KiwiDesk/releases"
-                + "/download/\(fixtureTag)/\(name)",
-            "url": "https://api.github.com/assets/9",
-        ]
-    }
-
-    /// Renders a fixture through the real script.
-    static func render(
-        _ releases: [[String: Any]],
-        arguments: [String] = ["--all"]
-    ) throws -> ScriptRun {
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "appcast-releases-\(UUID().uuidString).json"
-            )
-        try JSONSerialization.data(withJSONObject: releases)
-            .write(to: file)
-        defer { try? FileManager.default.removeItem(at: file) }
-        return try runPythonScript(
-            at: scriptFixtureRepoRoot()
-                .appendingPathComponent("scripts")
-                .appendingPathComponent("appcast-sync"),
-            arguments: ["--releases", file.path]
-                + arguments + ["--output", "-"]
+        AppcastFixture.asset(
+            name,
+            tag: fixtureTag,
+            size: size
         )
     }
 
     private func render(
         _ releases: [[String: Any]]
     ) throws -> ScriptRun {
-        try Self.render(releases)
+        try AppcastFixture.render(releases, arguments: ["--all"])
     }
 
     // MARK: - The shape that must NOT be refused

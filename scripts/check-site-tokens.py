@@ -303,16 +303,33 @@ def check_appcast(dist: pathlib.Path) -> None:
         r'SITE_URL\s*\?\?\s*"(?P<site>[^"]+)"',
         source_without_comments(REPO / "site" / "astro.config.mjs"),
     )
-    if canonical:
-        expected_host = urllib.parse.urlsplit(
-            canonical.group("site")
-        ).netloc
-        if expected_host and parts.netloc != expected_host:
-            fail(
-                f"SUFeedURL points at {parts.netloc} but the site "
-                f"is published at {expected_host}. Every build "
-                "ever shipped reads that host and no other."
-            )
+    # A miss FAILS rather than skipping. Hanging the host check
+    # on `if canonical:` meant that the day astro.config.mjs
+    # stopped matching, half this function would switch itself
+    # off while the other half still printed its success line —
+    # a guard that stops guarding with no signal. The site cannot
+    # build without a canonical URL, so not finding one is a
+    # defect, not an absence.
+    if not canonical:
+        fail(
+            "site/astro.config.mjs declares no `SITE_URL ?? \"…\"`, "
+            "so the host every build bakes into SUFeedURL cannot "
+            "be checked against the host the site publishes at."
+        )
+    expected_host = urllib.parse.urlsplit(
+        canonical.group("site")
+    ).netloc
+    if not expected_host:
+        fail(
+            f"site/astro.config.mjs's SITE_URL "
+            f"({canonical.group('site')}) has no host."
+        )
+    if parts.netloc != expected_host:
+        fail(
+            f"SUFeedURL points at {parts.netloc} but the site "
+            f"is published at {expected_host}. Every build ever "
+            "shipped reads that host and no other."
+        )
 
     if not served.is_file():
         fail(

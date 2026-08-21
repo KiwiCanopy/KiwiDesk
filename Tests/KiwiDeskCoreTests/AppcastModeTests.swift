@@ -1,9 +1,9 @@
 import Foundation
 import Testing
 
-/// The two contracts `.github/workflows/changelog.yml` leans on
-/// when it publishes a release (#874), neither of which is
-/// visible from a single rendered feed.
+/// The two exit-status contracts
+/// `.github/workflows/changelog.yml` leans on when it publishes
+/// a release (#874), neither visible from a rendered feed.
 ///
 /// - `--all` is **tolerant**: a release it cannot offer is
 ///   skipped with a printed reason. Make it fatal and every
@@ -11,32 +11,30 @@ import Testing
 ///   predate the updater have no signature and never will.
 /// - `--release <tag>` is **strict**: every clause is an error.
 ///   Make it tolerant and the gate silently stops gating — a
-///   publish whose signing step failed would write a feed
-///   missing the newest version and report success.
+///   publish whose signing failed would write a feed missing the
+///   newest version and report success.
 ///
-/// Both are exit-status contracts, so a suite that only rendered
-/// output could not see either. That was the gap: the first cut
-/// of these guards drove one render-to-stdout mode and pinned
-/// neither, which is why `--releases` is now a SOURCE that any
-/// mode can read rather than a mode of its own.
+/// That was the gap: the first cut of these guards drove one
+/// render-to-stdout mode and pinned neither, which is why
+/// `--releases` is now a SOURCE any mode can read rather than a
+/// mode of its own.
 ///
-/// Fixture tags are `v9999.*` for the reason
-/// `AppcastParserTests` states.
+/// The notes half lives in `AppcastNotesTests`.
 @Suite("Appcast sync modes (#874)")
 struct AppcastModeTests {
-    private static let goodTag = "v9999.1.0"
-    private static let unsignedTag = "v9999.0.9"
+    static let goodTag = "v9999.1.0"
+    static let unsignedTag = "v9999.0.9"
 
-    /// One offerable release and one that predates the updater —
-    /// a signed archive, and an archive with no sidecar.
-    private static func mixed() -> [[String: Any]] {
+    /// One offerable release and one that predates the updater.
+    static func mixed() -> [[String: Any]] {
         [
-            AppcastParserTests.release(tag: goodTag),
-            AppcastParserTests.release(
+            AppcastFixture.release(tag: goodTag),
+            AppcastFixture.release(
                 tag: unsignedTag,
                 assets: [
-                    AppcastParserTests.asset(
-                        "KiwiDesk-9999.0.9.zip"
+                    AppcastFixture.asset(
+                        "KiwiDesk-9999.0.9.zip",
+                        tag: unsignedTag
                     )
                 ]
             ),
@@ -45,7 +43,7 @@ struct AppcastModeTests {
 
     @Test("--all skips what it cannot offer, without failing")
     func allIsTolerant() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             Self.mixed(),
             arguments: ["--all"]
         )
@@ -69,7 +67,7 @@ struct AppcastModeTests {
 
     @Test("--release refuses the same release --all skipped")
     func releaseIsStrict() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             Self.mixed(),
             arguments: ["--release", Self.unsignedTag, "--check"]
         )
@@ -82,7 +80,7 @@ struct AppcastModeTests {
 
     @Test("--release passes an offerable tag")
     func releaseAcceptsGood() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             Self.mixed(),
             arguments: ["--release", Self.goodTag, "--check"]
         )
@@ -94,7 +92,7 @@ struct AppcastModeTests {
     /// safe to run before the write.
     @Test("--check renders no feed")
     func checkWritesNothing() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             Self.mixed(),
             arguments: ["--release", Self.goodTag, "--check"]
         )
@@ -106,9 +104,9 @@ struct AppcastModeTests {
     /// that matters, and a draft is not a published release.
     @Test("--release refuses a tag that is not published")
     func releaseRefusesUnknownTag() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             [
-                AppcastParserTests.release(
+                AppcastFixture.release(
                     tag: Self.goodTag,
                     draft: true
                 )
@@ -134,7 +132,7 @@ struct AppcastModeTests {
     /// statement is that no test here exercises it.
     @Test("a write that verified a tag contains it")
     func writeContainsTheVerifiedTag() throws {
-        let run = try AppcastParserTests.render(
+        let run = try AppcastFixture.render(
             Self.mixed(),
             arguments: ["--release", Self.goodTag]
         )
@@ -186,8 +184,8 @@ struct AppcastModeTests {
             .write(to: file)
         defer { try? FileManager.default.removeItem(at: file) }
 
-        let run = try AppcastParserTests.render(
-            [AppcastParserTests.release(tag: Self.goodTag)],
+        let run = try AppcastFixture.render(
+            [AppcastFixture.release(tag: Self.goodTag)],
             arguments: ["--all", "--notes", file.path]
         )
         #expect(run.status == 0)
@@ -201,16 +199,11 @@ struct AppcastModeTests {
         #expect(run.stdout.contains("<em>why</em>"))
     }
 
-    /// With no curated entry the item still ships, carrying a
-    /// thin description. An item with poor prose updates; no
-    /// item at all does not.
-    @Test("a release with no notes is still offered")
-    func missingNotesStillOffers() throws {
-        let run = try AppcastParserTests.render(
-            [AppcastParserTests.release(tag: Self.goodTag)],
-            arguments: ["--all"]
-        )
-        #expect(run.status == 0)
-        #expect(run.stdout.contains("<item>"))
-    }
+    /// `--notes` has to reach the STRICT path as well.
+    ///
+    /// Its first cut threaded the override through `run_all` and
+    /// not `run_release`, so `--release` silently kept reading
+    /// the repo's real `site/src/data/changelog.json` — the very
+    /// coupling the flag was added to remove. The only test
+    /// driving `--notes` used `--all`, so nothing caught it.
 }

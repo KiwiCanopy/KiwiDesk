@@ -124,7 +124,8 @@ as a consequence of the data rather than of a number someone has
 to remember. `AppcastParserTests` pins each refusal.
 
 **The signature is produced where the bytes are, and travels as a
-sidecar** (`AppcastWorkflowTests`, and `SparkleKeyDerivationTests`
+sidecar** (`AppcastSigningWorkflowTests` and
+`AppcastPublishWorkflowTests`, and `SparkleKeyDerivationTests`
 for the key check below)**.** `release.yml` signs the archive it
 has just built and attaches `<archive>.edsig` to the release;
 the sync job reads it there.

@@ -41,17 +41,32 @@ release contained, because neither owns the text.
 MODES
 
   --all               Rebuild the feed from every published
-                      release and write it. Tolerates history:
-                      a release that fails a clause above is
-                      skipped with a warning, never fatal.
-  --release <tag> [--check]
-                      Strict about ONE tag — the one just
+                      release and write it. TOLERANT: a release
+                      that fails a clause above is skipped with a
+                      printed reason, never fatal, because one
+                      historical release with no sidecar must not
+                      red every future publish.
+  --release <tag>     STRICT about ONE tag — the one just
                       published. Every clause is an error and
-                      each is named. `--check` writes nothing.
-  --releases <file>   Offline: read the releases from a JSON
-                      file instead of `gh` and render to stdout.
-                      Touches no network. This is the mode the
-                      guard suite drives.
+                      each is named. Then rebuilds, refusing to
+                      write a feed the tag does not end up in.
+      --check         Verify only; write nothing.
+
+SOURCES AND OUTPUT — both exist so the writing modes above can be
+exercised without a network or a repo checkout, which is what the
+guard suite needs:
+
+  --releases <file>   Read the releases from a JSON fixture
+                      instead of `gh`. A fixture supplies a
+                      sidecar's CONTENT in an `edsig` field,
+                      since the bytes otherwise live behind an
+                      API call.
+  --notes <file>      Read the curated notes from this file
+                      instead of site/src/data/changelog.json.
+  --output <path>     Write here instead of site/public; `-` is
+                      stdout, and then stdout carries the feed
+                      and nothing else (diagnostics go to
+                      stderr).
 """
 
 from __future__ import annotations
@@ -292,7 +307,17 @@ def read_notes(source: Path | None = None) -> dict[str, dict]:
 
 _CODE = re.compile(r"`(?P<text>[^`]+)`")
 _BOLD = re.compile(r"\*\*(?P<text>.+?)\*\*")
-_ITALIC = re.compile(r"(?<![\*\w])\*(?P<text>[^\*\n]+?)\*(?!\*)")
+# CommonMark's flanking rule, narrowly: the opening `*` must be
+# followed by a non-space and the closing one preceded by a
+# non-space. Without it `2 * 3 = 6 and *why* not` matched from
+# the multiplication sign to the opening of the real emphasis and
+# rendered `2 <em> 3 = 6 and </em>why* not` — not a degradation
+# but a corruption, and the site renders the same string
+# correctly, which is the disagreement this subset exists to
+# avoid.
+_ITALIC = re.compile(
+    r"(?<![\*\w])\*(?P<text>[^\s\*][^\*\n]*?(?<![\s\*]))\*(?!\*)"
+)
 _LINK = re.compile(r"\[(?P<text>[^\]]+)\]\((?P<href>[^)\s]+)\)")
 
 
@@ -317,9 +342,13 @@ def inline(markdown: str) -> str:
     Escaping happens FIRST, so a `<` in a release note can
     neither close the CDATA nor invent an element.
 
-    This is deliberately not a markdown implementation. Anything
-    outside the subset renders as the literal text a reviewer
-    can see, rather than as broken markup."""
+    This is deliberately not a markdown implementation, and the
+    constructs KNOWN to render differently are named rather than
+    left to be discovered: `_underscore emphasis_`, intra-word
+    `foo*bar*`, and bare URLs (the site has `marked`'s GFM
+    autolink on). None appears in the corpus; each renders as
+    its own literal text here, which a reviewer can see, rather
+    than as broken markup."""
     text = html.escape(markdown, quote=False)
 
     spans: list[str] = []
@@ -758,7 +787,7 @@ def run_release(
 ) -> int:
     """Hold ONE tag to every clause. Strict: each failure is an
     error naming itself, never a skip."""
-    notes = read_notes()
+    notes = read_notes(notes_source)
     matching = [r for r in releases if r.get("tag_name") == tag]
     if matching and matching[0].get("draft"):
         _report(

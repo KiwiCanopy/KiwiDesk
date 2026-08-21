@@ -25,11 +25,17 @@
 const crypto = require("crypto");
 const fs = require("fs");
 
+// The read can fail; the DECODE cannot. Node's base64 decoder
+// never throws — it silently drops anything outside the
+// alphabet — so a catch reporting "not base64" would be
+// unreachable, and reporting it as the reason would be a lie
+// about which check found the problem. The length test below is
+// what actually rejects garbage.
 let raw;
 try {
   raw = Buffer.from(fs.readFileSync(0, "utf8").trim(), "base64");
-} catch {
-  console.error("sparkle-public-key: stdin is not base64");
+} catch (error) {
+  console.error(`sparkle-public-key: could not read stdin: ${error.message}`);
   process.exit(1);
 }
 
