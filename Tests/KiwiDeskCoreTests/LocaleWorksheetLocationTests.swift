@@ -175,4 +175,39 @@ struct LocaleWorksheetLocationTests {
                 == "Tiling, quietly"
         )
     }
+
+    /// Unrecognized flags and `--help` must not be treated as
+    /// locale codes or write spurious files (#876).
+    @Test("unrecognized flags do not mint locale files")
+    func unrecognizedFlagsDoNotMintFiles() throws {
+        let fx = try makeRepoShapedFixture(
+            prefix: "kiwi-flag-rejection",
+            locales: [
+                "en.json": #"{"gap.hint": "Gap between windows"}"#,
+                "de.json": #"{}"#,
+            ]
+        )
+        defer { fx.cleanup() }
+        try fx.writeSources([
+            "A.swift": #"""
+            let a = L("gap.hint", "Gap between windows")
+            """#
+        ])
+
+        let run = try runRepoScript(
+            "extract-keys",
+            arguments: ["--unknown-flag"],
+            in: fx,
+            repoRoot: repoRoot
+        )
+        #expect(run.status != 0)
+        #expect(
+            !fx.localeFileExists("--unknown-flag.json"),
+            "extract-keys created a spurious catalog file"
+        )
+        #expect(
+            !fx.worksheetExists("missing_--unknown-flag.json"),
+            "extract-keys created a spurious worksheet file"
+        )
+    }
 }

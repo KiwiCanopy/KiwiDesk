@@ -131,6 +131,7 @@ import re
 import sys
 from pathlib import Path
 
+from locale_decoder import decode_json_object
 from locale_paths import (
     WORKSHEET_PREFIX,
     site_override_conflict,
@@ -936,16 +937,10 @@ def read_drafts(
     """
     if not out.exists():
         return {}, []
-    try:
-        entries = json.loads(out.read_text(encoding="utf-8"))
-    except (
-        json.JSONDecodeError,
-        UnicodeDecodeError,
-        OSError,
-    ) as error:
-        raise WorksheetUnreadable(str(error)) from error
-    if not isinstance(entries, dict):
-        raise WorksheetUnreadable("not a JSON object")
+    entries, error = decode_json_object(out)
+    if error is not None:
+        raise WorksheetUnreadable(error)
+    assert isinstance(entries, dict)
     drafts: dict[str, tuple[str, str]] = {}
     unusable: list[tuple[str, str]] = []
     for key, entry in entries.items():
@@ -1233,6 +1228,9 @@ def _site_mapping() -> dict[str, str]:
 def main(argv: list[str]) -> int:
     global LOCALES_DIR, EN_JSON, WORKSHEETS_DIR
     args = argv[1:]
+    if "-h" in args or "--help" in args:
+        print(__doc__)
+        return 0
     site = "--site" in args
     conflict = site_override_conflict(site)
     if conflict:
@@ -1243,6 +1241,13 @@ def main(argv: list[str]) -> int:
         LOCALES_DIR = SITE_LOCALES_DIR
         EN_JSON = LOCALES_DIR / "en.json"
         WORKSHEETS_DIR = SITE_WORKSHEETS_DIR
+    for arg in args:
+        if arg.startswith("-") and arg not in ("--check", "--prune"):
+            print(
+                f"extract-keys: unrecognized option '{arg}'",
+                file=sys.stderr,
+            )
+            return 1
     if len(args) > 1:
         print(__doc__)
         return 1

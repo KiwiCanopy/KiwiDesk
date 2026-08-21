@@ -79,6 +79,7 @@ import json
 import sys
 from pathlib import Path
 
+from locale_decoder import decode_json_object
 from locale_paths import (
     site_override_conflict,
     worksheet_name,
@@ -109,32 +110,24 @@ SITE_WORKSHEETS_DIR = worksheets_dir(ROOT, site=True)
 
 
 def _load_map(path: Path, label: str) -> dict | None:
-    """Decodes a JSON object, reporting a malformed file in the
-    script's own voice instead of a raw traceback. Returns None
-    on failure; every caller aborts before writing anything."""
-    try:
-        loaded = json.loads(path.read_text(encoding="utf-8"))
-    except (
-        json.JSONDecodeError,
-        UnicodeDecodeError,
-        OSError,
-    ) as error:
-        # UnicodeDecodeError matters as much as bad JSON here: the
-        # worksheet is the one file in this pipeline a non-developer
-        # edits, and an editor that saves it as Latin-1 would
-        # otherwise dump a traceback.
-        print(
-            f"merge-keys: {label} could not be read ({error}) — "
-            "nothing was merged.",
-            file=sys.stderr,
-        )
-        return None
-    if not isinstance(loaded, dict):
-        print(
-            f"merge-keys: {label} must be a JSON object — "
-            "nothing was merged.",
-            file=sys.stderr,
-        )
+    """Decodes a JSON object via `decode_json_object` (#855),
+    reporting a malformed file in the script's own voice instead
+    of a raw traceback. Returns None on failure; every caller
+    aborts before writing anything."""
+    loaded, error = decode_json_object(path)
+    if error is not None:
+        if error == "not a JSON object":
+            print(
+                f"merge-keys: {label} must be a JSON object — "
+                "nothing was merged.",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"merge-keys: {label} could not be read ({error}) — "
+                "nothing was merged.",
+                file=sys.stderr,
+            )
         return None
     return loaded
 
@@ -196,6 +189,9 @@ def _content_defect(
 def main(argv: list[str]) -> int:
     global LOCALES_DIR, WORKSHEETS_DIR
     args = argv[1:]
+    if "-h" in args or "--help" in args:
+        print(__doc__)
+        return 0
     site = "--site" in args
     flag = "--site " if site else ""
     conflict = site_override_conflict(site)
@@ -206,6 +202,13 @@ def main(argv: list[str]) -> int:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = ROOT / "site" / "src" / "i18n"
         WORKSHEETS_DIR = SITE_WORKSHEETS_DIR
+    for arg in args:
+        if arg.startswith("-"):
+            print(
+                f"merge-keys: unrecognized option '{arg}'",
+                file=sys.stderr,
+            )
+            return 1
     if len(args) != 1:
         print(__doc__)
         return 1
