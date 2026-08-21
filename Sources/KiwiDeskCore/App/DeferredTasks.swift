@@ -97,7 +97,15 @@ final class DeferredTasks {
         _ body: @escaping @MainActor () -> Void
     ) {
         tasks[key]?.cancel()
+        tasks[key] = nil
+
         let start = burstStarts[key] ?? ContinuousClock.now
+        if let maxWait, ContinuousClock.now - start >= maxWait {
+            burstStarts[key] = nil
+            body()
+            return
+        }
+
         burstStarts[key] = start
 
         let sleepDuration: Duration
