@@ -13,6 +13,11 @@ import Foundation
 /// `init.lua` is the user's own hooks-only Lua; code touching
 /// managed vocabulary flips the raw editor (`ManagedConfig`).
 public struct GuiConfig: Codable, Equatable, Sendable {
+    /// Format version of the gui.json schema (#902).
+    /// Format 0 = unversioned legacy.
+    public static let currentFormat = 1
+
+    public var format: Int = GuiConfig.currentFormat
     /// Tunable tiling parameters (gaps, per-layout params,
     /// drag visuals). Mirrors the running `tiler.settings`;
     /// profile-scoped.
@@ -148,6 +153,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// profile-scoped ones (settings, modes, pins) round-trip
     /// through the profile JSON instead (#36).
     private enum CodingKeys: String, CodingKey {
+        case format
         case spaces
         case appRules = "app_rules"
         case floatRules = "float_rules"
@@ -163,6 +169,21 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
+        let decodedFormat =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .format
+            ) ?? 0
+        guard decodedFormat <= Self.currentFormat else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .format,
+                in: container,
+                debugDescription:
+                    "gui config format \(decodedFormat) is newer "
+                    + "than supported \(Self.currentFormat)"
+            )
+        }
+        format = Self.currentFormat
         spaces =
             try container.decodeIfPresent(
                 [SpaceID].self,
@@ -233,6 +254,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         var container = encoder.container(
             keyedBy: CodingKeys.self
         )
+        try container.encode(format, forKey: .format)
         try container.encode(spaces, forKey: .spaces)
         try container.encode(appRules, forKey: .appRules)
         try container.encode(floatRules, forKey: .floatRules)

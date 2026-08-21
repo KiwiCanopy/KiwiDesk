@@ -17,6 +17,7 @@ extension SettingsModel {
         from source: GuiConfig,
         into target: inout GuiConfig
     ) {
+        target.format = source.format
         target.layers = source.layers
         target.appRules = source.appRules
         target.floatRules = source.floatRules

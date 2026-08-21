@@ -28,10 +28,10 @@ struct GuiConfigParityTests {
         // the round-trip below — and only then this list.
         #expect(
             fields == [
-                "settings", "spaces", "spaceModes", "appRules",
-                "spacePins", "mainSpaces", "fallbackSpace",
-                "floatRules", "ignoreRules", "profileBindings",
-                "layers",
+                "format", "settings", "spaces", "spaceModes",
+                "appRules", "spacePins", "mainSpaces",
+                "fallbackSpace", "floatRules", "ignoreRules",
+                "profileBindings", "layers",
             ]
         )
     }
@@ -61,6 +61,7 @@ struct GuiConfigParityTests {
             GuiConfig.self,
             from: JSONEncoder().encode(config)
         )
+        #expect(back.format == config.format)
         #expect(back.spaces == config.spaces)
         #expect(back.appRules == config.appRules)
         #expect(back.floatRules == config.floatRules)

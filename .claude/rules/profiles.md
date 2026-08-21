@@ -179,14 +179,20 @@ alone leaves the reason unrecorded.
 a case to `false` changes behaviour rather than only a test.
 
 **A change that breaks the decoded shape of anything the bundle
-carries bumps `SetupBundle.currentFormat` in the same change set.**
+carries bumps `SetupBundle.currentFormat` in the same change set,
+and a breaking schema change to `Profile` or `GuiConfig` bumps
+`Profile.currentFormat` or `GuiConfig.currentFormat`.**
 Nothing can guard this, and it is the obligation the format
-integer rests on: `<=` is decoder tolerance rather than a
-compatibility shim, so an older backup is accepted — which is
+integers rest on: `<=` is decoder tolerance rather than a
+compatibility shim, so an older config or backup is accepted — which is
 right, and which silently becomes a lie the first time a
 `GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
 actively encourages that rename, so the bump is the reader's
 responsibility here.
+
+When removing an old migration from `ConfigMigration`, the removal
+advances the supported format floor: files below the floor are
+refused explicitly rather than silently failing (#902).
 
 `SetupBundleTests.theAllowListIsPinned` guards the bundle's own
 shape in both directions, by reflection over its stored

@@ -1,64 +1,14 @@
 import Foundation
 
-/// One concrete monitor combination a profile covers, together
-/// with the space→monitor pins valid for that arrangement (#36).
-///
-/// `monitors` is stored canonically sorted and compared as a
-/// sorted array (a multiset — two identical monitors must not
-/// collapse the way a `Set` would). The pin map is nested here
-/// because a space→fingerprint pair only has meaning inside the
-/// set that contains that fingerprint.
-public struct MonitorSet: Codable, Sendable, Equatable {
-    /// Fingerprints (`Name:WxH`) of the covered monitors,
-    /// canonically sorted.
-    public private(set) var monitors: [String]
-    /// Explicit fingerprint pin per space (sparse; unpinned
-    /// spaces resolve via Main and the positional default).
-    /// Read-only so the init-time invariant (pins reference
-    /// only monitors inside the set) cannot be bypassed.
-    public private(set) var spaceMonitorMap: [SpaceID: String]
-
-    private enum CodingKeys: String, CodingKey {
-        case monitors
-        case spaceMonitorMap = "space_monitor_map"
-    }
-
-    public init(
-        monitors: [String],
-        spaceMonitorMap: [SpaceID: String] = [:]
-    ) {
-        self.monitors = monitors.sorted()
-        // A pin to a monitor outside the set is meaningless;
-        // drop it so integrity stays structural.
-        self.spaceMonitorMap = spaceMonitorMap.filter {
-            monitors.contains($0.value)
-        }
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(
-            keyedBy: CodingKeys.self
-        )
-        let rawMonitors = try container.decode(
-            [String].self,
-            forKey: .monitors
-        )
-        let rawMap =
-            try container.decodeIfPresent(
-                [SpaceID: String].self,
-                forKey: .spaceMonitorMap
-            ) ?? [:]
-        self.init(
-            monitors: rawMonitors,
-            spaceMonitorMap: rawMap
-        )
-    }
-}
-
 /// A saved KiwiDesk configuration: layout modes per space plus
 /// all tiling settings, valid for one or more concrete monitor
 /// combinations (#36).
 public struct Profile: Codable, Sendable, Equatable {
+    /// Format version of the profile schema (#902).
+    /// Format 0 = unversioned legacy (v0.9.7 and earlier).
+    public static let currentFormat = 1
+
+    public var format: Int
     public var name: String
     /// The monitor combinations this profile covers. All entries
     /// share one length; the profile's screen count.
@@ -156,6 +106,7 @@ public struct Profile: Codable, Sendable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
+        case format
         case name
         case monitorSets = "monitor_sets"
         case mainSpaces = "main_spaces"
@@ -173,6 +124,7 @@ public struct Profile: Codable, Sendable, Equatable {
     }
 
     public init(
+        format: Int = Profile.currentFormat,
         name: String,
         monitorSets: [MonitorSet],
         mainSpaces: [SpaceID] = [],
@@ -188,6 +140,7 @@ public struct Profile: Codable, Sendable, Equatable {
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil
     ) {
+        self.format = format
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
@@ -211,6 +164,21 @@ public struct Profile: Codable, Sendable, Equatable {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
+        let decodedFormat =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .format
+            ) ?? 0
+        guard decodedFormat <= Self.currentFormat else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .format,
+                in: container,
+                debugDescription:
+                    "profile format \(decodedFormat) is newer "
+                    + "than supported \(Self.currentFormat)"
+            )
+        }
+        format = Self.currentFormat
         name = try container.decode(String.self, forKey: .name)
         monitorSets = Self.sanitized(
             try container.decode(

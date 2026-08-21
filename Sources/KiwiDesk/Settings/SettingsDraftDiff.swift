@@ -200,7 +200,8 @@ struct SettingsDraftDiff {
         walk(config.settings, at: "settings", into: &result)
         let mirror = Mirror(reflecting: config)
         for child in mirror.children {
-            guard let name = child.label, name != "settings"
+            guard let name = child.label,
+                name != "settings", name != "format"
             else { continue }
             walk(
                 child.value,

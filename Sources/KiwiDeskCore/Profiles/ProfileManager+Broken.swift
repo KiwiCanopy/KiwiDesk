@@ -4,12 +4,10 @@ import Foundation
 /// sentence (#96) — the GUI picks the words, in `ProfileBrokenText`.
 ///
 /// The split is the one a reader can act on: it answers "is
-/// opening this file going to show me anything?". Nothing on disk
-/// records which KiwiDesk wrote a profile — `Profile` carries no
-/// schema version — so a case claiming to tell "saved by another
-/// version" from "edited by hand" outright would be inventing the
-/// evidence. What the decoder DOES know is whether the bytes are
-/// JSON at all, and that is the useful half.
+/// opening this file going to show me anything?". A corrupt
+/// shape or an unsupported schema format maps to `.unexpectedShape`.
+/// What the decoder DOES know is whether the bytes are JSON at
+/// all, and that is the useful half.
 /// `CaseIterable` so its renderer's coverage DERIVES: the text
 /// suite builds one fixture per case rather than restating three
 /// by hand, and a fourth cause then reaches the distinctness

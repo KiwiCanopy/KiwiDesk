@@ -147,6 +147,7 @@ struct ConfigMigrationTests {
         encoder.dateEncodingStrategy = .iso8601
         let current = try encoder.encode(
             Profile(
+                format: 0,
                 name: "Starter",
                 monitorSets: [
                     MonitorSet(monitors: ["A:100x100"])
@@ -190,5 +191,49 @@ struct ConfigMigrationTests {
         #expect(
             profile.settings.appBarStyle.content == .iconAndTitle
         )
+    }
+
+    /// A config carrying format 1 (current) skips migration
+    /// immediately without scanning payload.
+    @Test("Format 1 config skips migration")
+    func format1SkipsMigration() {
+        let data = json(
+            """
+            {"format":1,"settings":{"app_bar":{"content":"icon_and_title"}}}
+            """
+        )
+        #expect(ConfigMigration.migrated(data) == nil)
+    }
+
+    /// A profile carrying a newer format than supported is refused.
+    @Test("A profile with newer format is refused")
+    func newerProfileFormatIsRefused() throws {
+        let future = Profile.currentFormat + 1
+        let data = json(
+            """
+            {"format":\(future),"name":"Future","monitor_sets":\
+            [{"monitors":["A:100x100"]}],"space_modes":{"1":"bsp"},\
+            "settings":{}}
+            """
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        #expect(throws: DecodingError.self) {
+            try decoder.decode(Profile.self, from: data)
+        }
+    }
+
+    /// A GuiConfig carrying a newer format than supported is refused.
+    @Test("A GuiConfig with newer format is refused")
+    func newerGuiConfigFormatIsRefused() {
+        let future = GuiConfig.currentFormat + 1
+        let data = json(
+            """
+            {"format":\(future),"spaces":["1"]}
+            """
+        )
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(GuiConfig.self, from: data)
+        }
     }
 }
