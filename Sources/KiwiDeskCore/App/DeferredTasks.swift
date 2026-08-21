@@ -77,6 +77,7 @@ final class DeferredTasks {
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
+    private var burstStarts: [Key: ContinuousClock.Instant] = [:]
 
     /// Runs `body` after `delay` unless the key is rescheduled
     /// or cancelled first. Cancellation is checked once, after
@@ -85,15 +86,33 @@ final class DeferredTasks {
     /// `body` is retained until it fires or is cancelled, so
     /// capture the core weakly (see the type doc) — a strong
     /// capture would pin it for the pending delay.
+    ///
+    /// When `maxWait` is provided, continuous reschedules within
+    /// a burst will not delay execution past `maxWait` from the
+    /// burst's initial schedule (#900).
     func schedule(
         _ key: Key,
         after delay: Duration,
+        maxWait: Duration? = nil,
         _ body: @escaping @MainActor () -> Void
     ) {
         tasks[key]?.cancel()
+        let start = burstStarts[key] ?? ContinuousClock.now
+        burstStarts[key] = start
+
+        let sleepDuration: Duration
+        if let maxWait {
+            let elapsed = ContinuousClock.now - start
+            let remaining = maxWait - elapsed
+            sleepDuration = min(delay, max(.zero, remaining))
+        } else {
+            sleepDuration = delay
+        }
+
         tasks[key] = Task { @MainActor in
-            try? await Task.sleep(for: delay)
+            try? await Task.sleep(for: sleepDuration)
             guard !Task.isCancelled else { return }
+            burstStarts[key] = nil
             body()
         }
     }
@@ -101,6 +120,7 @@ final class DeferredTasks {
     func cancel(_ key: Key) {
         tasks[key]?.cancel()
         tasks[key] = nil
+        burstStarts[key] = nil
     }
 
     /// The task currently stored for a key — lets tests pin the
@@ -118,5 +138,6 @@ final class DeferredTasks {
     func cancelAll() {
         for task in tasks.values { task.cancel() }
         tasks.removeAll()
+        burstStarts.removeAll()
     }
 }

@@ -130,4 +130,66 @@ struct DeferredTasksTests {
         #expect(settle?.isCancelled == true)
         #expect(core.deferred.task(for: .spaceSettle) == nil)
     }
+
+    @Test("maxWait forces execution during a continuous burst")
+    func maxWaitForcesExecution() async {
+        let owner = DeferredTasks()
+        var fireCount = 0
+        let body: @MainActor () -> Void = {
+            fireCount += 1
+        }
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(50),
+            maxWait: .milliseconds(80),
+            body
+        )
+        // 6 iterations spaced 20 ms apart = 120 ms stream.
+        // maxWait (80 ms) forces at least one execution mid-stream,
+        // and the trailing reschedule produces a second execution.
+        for _ in 1...6 {
+            try? await Task.sleep(for: .milliseconds(20))
+            owner.schedule(
+                .barTitleRefresh,
+                after: .milliseconds(50),
+                maxWait: .milliseconds(80),
+                body
+            )
+        }
+        // An inert maxWait would produce 0 mid-stream and only 1 total.
+        await owner.task(for: .barTitleRefresh)?.value
+        #expect(fireCount >= 2)
+    }
+
+    @Test("cancel() clears the maxWait burst tracking")
+    func cancelClearsBurstTracking() async {
+        let owner = DeferredTasks()
+        var fired = false
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(50),
+            maxWait: .milliseconds(60)
+        ) {
+            fired = true
+        }
+        // Advance 40 ms into the 60 ms maxWait window, then cancel.
+        try? await Task.sleep(for: .milliseconds(40))
+        owner.cancel(.barTitleRefresh)
+        #expect(!fired)
+
+        // Reschedule with 50 ms delay and 60 ms maxWait. If cancel()
+        // did not clear the start timestamp, remaining maxWait would
+        // be 20 ms (60 - 40) and it would fire after 20 ms.
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(50),
+            maxWait: .milliseconds(60)
+        ) {
+            fired = true
+        }
+        try? await Task.sleep(for: .milliseconds(25))
+        #expect(!fired, "must not inherit pre-cancel burst time")
+        await owner.task(for: .barTitleRefresh)?.value
+        #expect(fired)
+    }
 }

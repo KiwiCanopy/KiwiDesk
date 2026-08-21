@@ -42,6 +42,10 @@ extension KiwiCore {
     /// change, never a wrong window position.
     static let barTitleRefreshDelay = Duration.milliseconds(200)
 
+    /// Maximum time a continuous burst of title changes may delay
+    /// the bar refresh before one is forced (#900).
+    static let barTitleRefreshMaxWait = Duration.seconds(1)
+
     /// Folds a `.windowTitleChanged` into the bars, or drops it.
     ///
     /// Dropping is the common case and has to stay cheap: most
@@ -52,7 +56,8 @@ extension KiwiCore {
         guard barsShowTitle(of: id) else { return }
         deferred.schedule(
             .barTitleRefresh,
-            after: Self.barTitleRefreshDelay
+            after: Self.barTitleRefreshDelay,
+            maxWait: Self.barTitleRefreshMaxWait
         ) { [weak self] in
             self?.runBarTitleRefresh()
         }
