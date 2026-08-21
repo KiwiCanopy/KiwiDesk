@@ -79,9 +79,9 @@ extension SettingsModel {
                 .joined(separator: ", ")
             profileWarning = L(
                 "profiles.overlap_warning",
-                "This monitor set is also covered by %1$@ "
-                    + "— exact-match ties load the "
-                    + "alphabetically first.",
+                "This screen setup is also used by %1$@ "
+                    + "— if multiple profiles match on startup, "
+                    + "the first one alphabetically is loaded.",
                 names
             )
         }

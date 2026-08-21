@@ -143,7 +143,7 @@ struct ProfilesSection: View {
                 + "separately, use \u{201C}%2$@\u{201D} in the "
                 + "bar below.",
             active,
-            L("footer.save_a_copy_as", "Save a copy…")
+            L("footer.save_a_copy_as", "Save as new profile…")
         )
     }
 

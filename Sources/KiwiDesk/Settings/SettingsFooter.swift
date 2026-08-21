@@ -96,7 +96,7 @@ struct SettingsFooter: View {
             Text(saveAsNewMessage)
         }
         .alert(
-            L("footer.save_copy_as.title", "Save a copy as"),
+            L("footer.save_copy_as.title", "Save as new profile"),
             isPresented: $namingProfileCopy
         ) {
             TextField(
