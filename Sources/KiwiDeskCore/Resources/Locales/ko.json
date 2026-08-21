@@ -745,6 +745,7 @@
   "onboarding.starter_spaces.tile.axlabel.no_screen": "공간 %1$@, %2$@",
   "onboarding.starter_spaces.title": "공간이 준비되었습니다",
   "onboarding.window.title": "KiwiDesk 설정",
+  "palettes.already_saved": "이 색상은 이미 ‘%1$@’(으)로 저장되어 있습니다.",
   "palettes.applied": "적용됨",
   "palettes.builtin": "내장",
   "palettes.bundled": "기본 제공 팔레트",
