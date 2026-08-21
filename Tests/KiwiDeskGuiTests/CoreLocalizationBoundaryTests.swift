@@ -79,9 +79,9 @@ struct CoreLocalizationBoundaryTests {
         // so. Re-check this entry if that move happens.
         "App/KiwiCore+StickyMarks.swift": 4,
         "Borders/StickyMarkOverlay.swift": 1,
-        // The Space Bar's item labels and a11y strings, drawn by
-        // Core. (The App Bar renders app and window NAMES —
-        // data, not copy — and calls `L()` zero times.)
+        // The Space Bar's item labels and a11y strings, and the
+        // App Bar's a11y labels (#901), drawn by Core.
+        "Bar/AppBarItemView.swift": 3,
         "Bar/SpaceBarItemView.swift": 3,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
     ]

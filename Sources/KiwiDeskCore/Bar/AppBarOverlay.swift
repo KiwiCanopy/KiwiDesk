@@ -265,6 +265,7 @@ public final class AppBarOverlay {
                 active && style.activeIndicator == .gap
             view.configure(
                 id: item.id,
+                name: item.name,
                 text: item.text,
                 icon: item.icon,
                 glyph: item.glyph,
