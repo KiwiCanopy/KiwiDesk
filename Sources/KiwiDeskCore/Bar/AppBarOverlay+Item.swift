@@ -11,6 +11,9 @@ import AppKit
 extension AppBarOverlay {
     public struct Item {
         public let id: WindowID
+        /// The app's name, used for VoiceOver accessible name
+        /// generation (#901).
+        public let name: String
         /// The string the item actually draws under a
         /// text-bearing `Content`: the window's title, already
         /// capped, with the app name standing in for a collapsed
@@ -27,26 +30,16 @@ extension AppBarOverlay {
         /// adjacent same-app windows (shown as a badge).
         public let count: Int
 
-        /// `text` is REQUIRED, deliberately.
-        ///
-        /// It briefly defaulted to a sibling `name` field
-        /// holding the app name, and that made every render-side
-        /// fixture blind: with the two equal by construction, no
-        /// assertion could tell a bar drawing the title from one
-        /// drawing the app name, and both the label write and
-        /// the slot measurement could be reverted with the suite
-        /// green (guard-prover, 2026-08-19). The field is gone —
-        /// nothing read it — but the rule it taught is not: a
-        /// silent fallback on a driver-resolved value is worth
-        /// less than three explicit fixtures.
         public init(
             id: WindowID,
+            name: String = "",
             text: String,
             icon: NSImage?,
             glyph: String? = nil,
             count: Int = 1
         ) {
             self.id = id
+            self.name = name
             self.text = text
             self.icon = icon
             self.glyph = glyph

@@ -161,6 +161,7 @@ extension KiwiCore {
         // into individual items (see barGroups).
         return AppBarOverlay.Item(
             id: group.first ?? WindowID(0),
+            name: name,
             text: barItemText(
                 for: group,
                 window: window,
