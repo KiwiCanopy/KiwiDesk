@@ -37,13 +37,27 @@ extension PaletteShelf {
     /// The caption under the field, or nil while there is
     /// nothing to say.
     func saveNotice(_ typed: String) -> String? {
-        guard store.isBuiltinName(trimmed(typed)) else {
-            return nil
+        let name = trimmed(typed)
+        if store.isBuiltinName(name) {
+            return L(
+                "palettes.reserved",
+                "That name is a built-in palette — choose another."
+            )
         }
-        return L(
-            "palettes.reserved",
-            "That name is a built-in palette — choose another."
+        let live = ColorPaletteKeys.extract(
+            from: model.config.settings
         )
+        let all = store.builtins() + store.userPalettes()
+        if let matching = all.first(where: {
+            $0.isApplied(matching: live)
+        }) {
+            return L(
+                "palettes.already_saved",
+                "These colors are already saved as “%1$@”.",
+                matching.name
+            )
+        }
+        return nil
     }
 
     func saveCurrent(_ typed: String) {
