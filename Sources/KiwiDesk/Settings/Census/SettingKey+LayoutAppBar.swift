@@ -13,6 +13,7 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarActiveIndicator =
         "settings.monocle.appBar.activeIndicator"
     case monocleAppBarContent = "settings.monocle.appBar.content"
+    case monocleAppBarTitleCap = "settings.monocle.appBar.titleCap"
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
     case monocleAppBarThickness = "settings.monocle.appBar.thickness"
@@ -45,6 +46,7 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case scrollingAppBarActiveIndicator =
         "settings.scrolling.appBar.activeIndicator"
     case scrollingAppBarContent = "settings.scrolling.appBar.content"
+    case scrollingAppBarTitleCap = "settings.scrolling.appBar.titleCap"
     case scrollingAppBarGroupAdjacentWindows =
         "settings.scrolling.appBar.groupAdjacentWindows"
     case scrollingAppBarThickness = "settings.scrolling.appBar.thickness"
@@ -106,7 +108,9 @@ extension LayoutAppBarKey {
             // GUI_REMOVED_2026-08
             return .luaOnly
         case .monocleAppBarBackgroundFit, .monocleAppBarContent,
-            .scrollingAppBarBackgroundFit, .scrollingAppBarContent:
+            .monocleAppBarTitleCap,
+            .scrollingAppBarBackgroundFit, .scrollingAppBarContent,
+            .scrollingAppBarTitleCap:
             // GUI_REMOVED_2026-08. The table also marks these
             // GATED; a surfaceless row carries no gate.
             return .luaOnly
@@ -131,6 +135,7 @@ extension LayoutAppBarKey {
         case .monocleAppBarEdge, .monocleAppBarAlignment,
             .monocleAppBarBackgroundStyle, .monocleAppBarBackgroundFit,
             .monocleAppBarActiveIndicator, .monocleAppBarContent,
+            .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,
             .monocleAppBarItemSize, .monocleAppBarItemGap,
             .monocleAppBarFontSize, .monocleAppBarCornerRoundness,
@@ -142,7 +147,8 @@ extension LayoutAppBarKey {
             .monocleAppBarDimFactor, .scrollingAppBarEdge,
             .scrollingAppBarAlignment, .scrollingAppBarBackgroundStyle,
             .scrollingAppBarBackgroundFit, .scrollingAppBarActiveIndicator,
-            .scrollingAppBarContent, .scrollingAppBarGroupAdjacentWindows,
+            .scrollingAppBarContent, .scrollingAppBarTitleCap,
+            .scrollingAppBarGroupAdjacentWindows,
             .scrollingAppBarThickness, .scrollingAppBarItemSize,
             .scrollingAppBarItemGap, .scrollingAppBarFontSize,
             .scrollingAppBarCornerRoundness, .scrollingAppBarFillColor,

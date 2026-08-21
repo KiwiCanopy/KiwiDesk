@@ -50,7 +50,18 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// format would decode "successfully" with unknown fields
     /// dropped — a restore that reports success having silently
     /// lost data. One integer turns that into a refusal.
-    public static let currentFormat = 1
+    ///
+    /// **2** since the bar-content rename (owner ruling
+    /// 2026-08-19): `Profile` is bundle payload, and
+    /// `AppBarStyle.Content`'s raw values changed under it, which
+    /// is exactly the "breaks the decoded shape of anything the
+    /// bundle carries" case `profiles.md` says must bump this.
+    /// A v0.9.7 install then REFUSES a bundle written here
+    /// instead of restoring profiles whose bar setting it cannot
+    /// read; the other direction — a format-1 bundle read here —
+    /// stays readable and is migrated on the way in
+    /// (`KiwiCore+Backup.readBackup`).
+    public static let currentFormat = 2
 
     public let format: Int
     /// The version that wrote it — informational, for a human

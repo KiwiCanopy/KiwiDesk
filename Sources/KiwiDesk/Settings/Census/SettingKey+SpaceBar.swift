@@ -19,6 +19,7 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarFontSizeAuto = "settings.spaceBarStyle.fontSize (auto)"
     case spaceBarFontSize = "settings.spaceBarStyle.fontSize"
     case spaceBarGlyphCap = "settings.spaceBarStyle.glyphCap"
+    case spaceBarTitleCap = "settings.spaceBarStyle.titleCap"
     case spaceBarCornerRoundness = "settings.spaceBarStyle.cornerRoundness"
     case spaceBarDimFactor = "settings.spaceBarStyle.dimFactor"
     case spaceBarActiveDimFactor = "settings.spaceBarStyle.activeDimFactor"
@@ -57,6 +58,15 @@ extension SpaceBarKey {
             .spaceBarItemGap, .spaceBarFontSizeAuto, .spaceBarGlyphCap,
             .spaceBarCornerRoundness:
             return .row(.bars, .spaceBar, .showMore)
+        case .spaceBarTitleCap:
+            // Only the front segment draws a title, so the cap
+            // is inert while that segment is off.
+            return .row(
+                .bars,
+                .spaceBar,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarShowFrontApp))
+            )
         case .spaceBarItemSize:
             return .row(
                 .bars,
@@ -199,6 +209,11 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.glyph_cap",
                 help: "space_bar.glyph_cap.help"
+            )
+        case .spaceBarTitleCap:
+            return .text(
+                "space_bar.title_cap",
+                help: "space_bar.title_cap.help"
             )
         case .spaceBarCornerRoundness:
             return .text("space_bar.corner_roundness")

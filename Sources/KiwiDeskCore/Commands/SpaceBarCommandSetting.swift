@@ -15,6 +15,7 @@ enum SpaceBarCommandSetting {
     case itemGap(CGFloat)
     case fontSize(CGFloat)
     case glyphCap(Int)
+    case titleCap(Int)
     case iconSource(BarAppIconSource)
     case backgroundStyle(SpaceBarStyle.BackgroundStyle)
     case liquidGlass(Bool)
@@ -54,6 +55,9 @@ enum SpaceBarCommandSetting {
         }
         if field == "glyph_cap" {
             return glyphCap(args)
+        }
+        if field == "title_cap" {
+            return titleCap(args)
         }
         if let setting = parseChoice(field: field, args: args) {
             return setting
@@ -175,6 +179,26 @@ enum SpaceBarCommandSetting {
         return .success(.springDelay(Int(clamped)))
     }
 
+    /// Front-segment title length in characters. Mirrors
+    /// `glyphCap` below, including the
+    /// clamp-as-Double-BEFORE-`Int(...)` order (#58), and reads
+    /// the range both bars share.
+    private static func titleCap(
+        _ args: [JSONValue]
+    ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
+        guard let value = args.first?.numberValue,
+            value.isFinite
+        else {
+            return .failure("expected a character count")
+        }
+        let range = AppBarStyle.titleCapRange
+        let clamped = min(
+            max(value.rounded(), Double(range.lowerBound)),
+            Double(range.upperBound)
+        )
+        return .success(.titleCap(Int(clamped)))
+    }
+
     /// App-group glyph count, clamped to the Space Bar's valid
     /// cap range (#376) — a stored out-of-range value can't
     /// render an empty item or an unscannable row.
@@ -243,6 +267,7 @@ enum SpaceBarCommandSetting {
         case .itemGap(let value): style.itemGap = value
         case .fontSize(let value): style.fontSize = value
         case .glyphCap(let value): style.glyphCap = value
+        case .titleCap(let value): style.titleCap = value
         case .iconSource(let value): style.iconSource = value
         case .backgroundStyle(let value):
             style.backgroundStyle = value

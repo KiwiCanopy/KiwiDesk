@@ -36,6 +36,7 @@ enum BarsRowOrder {
         .spaceBar(.spaceBarFontSizeAuto),
         .spaceBar(.spaceBarFontSize),
         .spaceBar(.spaceBarGlyphCap),
+        .spaceBar(.spaceBarTitleCap),
         .spaceBar(.spaceBarSpringDelay),
     ]
 
@@ -59,6 +60,7 @@ enum BarsRowOrder {
         .appBar(.appBarAlignment),
         .appBar(.appBarActiveIndicator),
         .appBar(.appBarContent),
+        .appBar(.appBarTitleCap),
         .appBar(.appBarIconSource),
         .appBar(.appBarCornerRoundness),
         .appBar(.appBarItemSizeAuto),

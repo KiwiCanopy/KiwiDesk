@@ -205,9 +205,15 @@ extension KiwiCore {
                 space: effects.removedWindow?.space,
                 reason: reason
             )
-        case .windowTitleChanged:
+        case .windowTitleChanged(let id, _):
             if effects.floatFlipped {
                 retile()
+            } else {
+                // The bars draw titles, so this is a render
+                // input — but only a render one. Skipped when
+                // the float flip already retiled: that pass
+                // rebuilds the bars itself.
+                handleTitleChangedForBars(id)
             }
         case .windowFullscreenChanged:
             // The state fold already flipped the snapshot flag;
@@ -306,45 +312,6 @@ extension KiwiCore {
         // minimize).
         if willRetile {
             scheduleTrackZOrderRestoreIfOverflowing()
-        }
-    }
-
-    /// #674, the close path: a close-return pick can cross
-    /// several scrolling slots, and `focusWindow`'s own jump arm
-    /// cannot see it — the destroy fold already wrote the pick
-    /// into `space.focused`, so the anchor the jump test
-    /// classifies from IS the target (distance zero), and the
-    /// closed window has left the row besides. Re-derive the
-    /// distance from the REMOVED slot instead: the old focus sat
-    /// there, and the successor pick inherits it, which is why
-    /// the close path never jumped before close-return existed.
-    /// The same anchor blindness means the #143 backward-pan
-    /// deferral can never defer this raise; that stays the
-    /// close-handoff's documented immediate-raise behavior
-    /// (`focusWindow`'s own comment), a pop being cheaper than a
-    /// spurious deferral on every close. Self-gated downstream on
-    /// scrolling + actual overflow; a nil slot (the closed window
-    /// was a float or fullscreen member) or a candidate outside
-    /// the tiled row is no evidence of a jump — same asymmetry
-    /// as `scrollFocusJumpsSlots`. Internal, not private: the
-    /// call site above sits behind `eventLoop.isListed` (live
-    /// AX — the `TransientOverlayFocusTests` gate note), so
-    /// `ZOrderCloseReturnArmTests` proves the arm directly.
-    func armCloseReturnRestack(
-        to target: WindowID,
-        fromRemovedSlot slot: Int?
-    ) {
-        guard let slot, let space = activeSpace else { return }
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: space.id
-        )
-        guard !tiled.isEmpty,
-            let targetIndex = tiled.firstIndex(of: target)
-        else { return }
-        let from = min(slot, tiled.count - 1)
-        if abs(targetIndex - from) > 1 {
-            scheduleScrollingZOrderRestoreIfOverflowing()
         }
     }
 }

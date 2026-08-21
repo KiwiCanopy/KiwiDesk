@@ -102,6 +102,8 @@ extension AppBarCard {
             )
         case .appBarContent:
             contentRow
+        case .appBarTitleCap:
+            titleCapRow
         case .appBarIconSource:
             iconSourceRow
         case .appBarCornerRoundness:
@@ -231,91 +233,6 @@ extension AppBarCard {
                         + "not a shared plate, so there is "
                         + "nothing to size.",
                     L("app_bar.background_style.boxed", "Boxed")
-                )
-            )
-        )
-    }
-
-    private var contentRow: some View {
-        SegmentedPicker(
-            L("app_bar.content.label", "Content"),
-            selection: style.content,
-            options: AppBarOptions.content.map { ($0.1, $0.0) }
-        )
-        .modifier(
-            GreyOut(
-                // Vertical bars render icon-only (names would
-                // need stacked or rotated text) — the stored
-                // preference survives an edge round-trip.
-                active: gates.everyShownBarVertical,
-                help: L(
-                    "app_bar.content.vertical_only",
-                    "Left and right bars always show icons "
-                        + "only."
-                )
-            )
-        )
-    }
-
-    /// #294 icon rendering, directly below the Content control
-    /// it depends on; greyed (never hidden, #171) when Name-only
-    /// content shows no icons at all. Census-exempt from the
-    /// container gate: the ⌃⌥K panel's Apps band reads this
-    /// whether or not any bar renders.
-    private var iconSourceRow: some View {
-        DropdownRow(
-            label: L("app_bar.icon_source.label", "App symbol style"),
-            // Five labels INTERPOLATED from their own keys, not
-            // re-typed (#818): the mode, the three colour rows
-            // this sentence sends the reader to, and the page
-            // they are on. The rows are NOT below — they render
-            // at `.row(.advancedColours, .appBar, .showMore)`,
-            // all three Power-User-only — so the sentence
-            // names the destination instead of saying "below",
-            // which sent the reader looking down this card.
-            help: L(
-                "app_bar.icon_source.help",
-                "How app icons are drawn. "
-                    + "\u{201C}%1$@\u{201D} shows a "
-                    + "monochrome symbol from KiwiDesk's "
-                    + "built-in icon set, colored by the bar's "
-                    + "item colors — %2$@, %3$@ and %4$@, in "
-                    + "%5$@ — so those colors also "
-                    + "decide how the glyphs look. Apps "
-                    + "without a symbol keep their app icon.",
-                L("app_bar.icon_source.app_font", "Glyphs"),
-                L("app_bar.color.item", "Item"),
-                L("app_bar.color.active_item", "Active item"),
-                L("app_bar.color.hover_item", "Hover item"),
-                SettingsDestination.advancedColors.title
-            )
-        ) {
-            Picker(
-                L("app_bar.icon_source.label", "App symbol style"),
-                selection: style.iconSource
-            ) {
-                ForEach(
-                    AppBarOptions.iconSource,
-                    id: \.0
-                ) { option in
-                    Text(option.1).tag(option.0)
-                }
-            }
-        }
-        .modifier(
-            GreyOut(
-                // Gate on the RENDERED content: a vertical bar
-                // collapses Name to icon-only, so icons are on
-                // screen and this control must stay live.
-                active: gates.everyShownBarNameOnly,
-                // Both labels INTERPOLATED from their own keys,
-                // not re-typed (#818).
-                help: L(
-                    "app_bar.icon_source.name_only",
-                    "Icons are hidden while \u{201C}%1$@\u{201D} "
-                        + "is \u{201C}%2$@\u{201D}.",
-                    L("app_bar.content.label", "Content"),
-                    L("app_bar.content.name", "Name")
                 )
             )
         )

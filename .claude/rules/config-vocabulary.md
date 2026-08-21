@@ -83,6 +83,15 @@ synonym:
   that word belongs to macOS **native tabs** (§5) and to the
   user guide's gesture prose alone — see
   [state-and-layout.md](state-and-layout.md).
+- **title** vs **name** — a *title* is the text a window itself
+  reports (`app_bar.set_content`'s `title` / `icon_and_title`,
+  `app_bar.set_title_cap`, `space_bar.set_title_cap`, the app
+  rules' "Title contains…"); a *name* is the label of the app
+  that owns the window, which a bar draws only where a title
+  cannot speak. Name a new drawn-text knob after the *title*,
+  and coin no third word for either; the ruling is
+  `docs/design-decisions.md` ▸ The bars name the WINDOW, not
+  its app.
 - **space** vs **Desktop** — a *space* is one of KiwiDesk's own
   window lists (`SpaceID`, `focus_space`, `space_modes`, the
   Space Bar). Name a macOS Mission Control desktop **Desktop**

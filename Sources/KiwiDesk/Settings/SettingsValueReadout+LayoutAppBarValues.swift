@@ -81,6 +81,13 @@ extension SettingsValueReadout {
         value.map(trimmed) ?? unset
     }
 
+    /// A whole-number override (the title cap). Its own overload
+    /// rather than a `CGFloat` conversion at each call site, so
+    /// an unset override still reads as the inherit dash.
+    static func layoutBarCount(_ value: Int?) -> String {
+        value.map { trimmed(Double($0)) } ?? unset
+    }
+
     /// A set override's hex through the shared `hexDisplay`;
     /// unset inherits, so it reads as the dash.
     static func layoutBarHex(_ raw: String?) -> String {

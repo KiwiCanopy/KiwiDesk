@@ -17,6 +17,15 @@ public struct GuiConfigStore {
     }
 
     /// Loads the sidecar, or nil if it is absent or unreadable.
+    ///
+    /// Deliberately NOT run through `ConfigMigration`, unlike
+    /// `ProfileManager.read`: `GuiConfig.encode(to:)` writes only
+    /// the spaces, rules, bindings and layers — never `settings`,
+    /// which `GuiConfig.CodingKeys` has no case for either —
+    /// so no `gui.json` this app has ever written can carry a
+    /// bar-content value to migrate. A hop here would be a
+    /// crossing for a case that cannot arise. The day this
+    /// sidecar starts persisting `settings`, it owes one.
     public func load() -> GuiConfig? {
         guard let data = try? Data(contentsOf: url) else {
             return nil

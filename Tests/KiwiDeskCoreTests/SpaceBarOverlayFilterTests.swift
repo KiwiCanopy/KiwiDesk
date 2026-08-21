@@ -169,7 +169,7 @@ struct SpaceBarOverlayFilterTests {
         #expect(item.apps.map(\.focused) == [false])
         // The segment still names the app the user is in.
         let front = core.frontApp(display: display, style: style)
-        #expect(front?.name == "Chat")
+        #expect(front?.app.name == "Chat")
     }
 
     @Test("A space holding only overlays reads as empty")

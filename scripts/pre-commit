@@ -68,6 +68,9 @@ if [ "${#STAGED_SWIFT[@]}" -gt 0 ]; then
     if ! "$ROOT/scripts/lint.sh" "${STAGED_SWIFT[@]}"; then
         STATUS=1
     fi
+    if ! python3 "$ROOT/scripts/check-doc-anchors"; then
+        STATUS=1
+    fi
 elif [ "${#STAGED_LOCALES[@]}" -gt 0 ]; then
     echo "pre-commit: ${#STAGED_LOCALES[@]} staged locale" \
         "file(s), running extract-keys --check..."

@@ -150,7 +150,7 @@ struct BarStripAbsorptionTests {
                 items: [
                     AppBarOverlay.Item(
                         id: WindowID(1),
-                        name: "A",
+                        text: "A",
                         icon: nil
                     )
                 ],

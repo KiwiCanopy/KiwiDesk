@@ -31,8 +31,8 @@ extension AppBarStyle {
         /// A box per item, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed
-        /// No per-item box; names sit on one shared translucent
-        /// strip.
+        /// No per-item box; the items sit on one shared
+        /// translucent strip.
         case plain
     }
 
@@ -65,22 +65,60 @@ extension AppBarStyle {
         case gap
     }
 
-    public enum Content: String, Sendable, Codable {
+    /// What an item draws. The text is the window's own
+    /// **title**, never its app name: a bar of five Finder
+    /// windows reading "Finder" five times names nothing the
+    /// icon did not already say, while "Downloads" / "KiwiCall"
+    /// tells them apart (owner 2026-08-19). The app name
+    /// survives as the fallback in the two places a title
+    /// cannot speak — an empty one (lazy-title apps, #160) and
+    /// a collapsed group, whose members have several titles and
+    /// no one of them is true. Both fallbacks are resolved by
+    /// the driver, in `KiwiCore.barItemText`.
+    /// `CaseIterable` is load-bearing:
+    /// `BarTitleCapTests.showsTextIsExhaustive` asserts the case
+    /// COUNT, so adding a case reds that test and forces a
+    /// ruling on whether the new one draws text — do not drop
+    /// it as "unused".
+    public enum Content: String, Sendable, Codable, CaseIterable {
         case icon
-        case name
-        /// Truncation only ever eats the name; the icon
+        case title
+        /// Truncation only ever eats the title; the icon
         /// always survives.
-        case iconAndName = "icon_and_name"
+        case iconAndTitle = "icon_and_title"
 
         /// The content actually drawn: vertical bars render
-        /// icon-only — letter-stacked names read terribly and
+        /// icon-only — letter-stacked titles read terribly and
         /// rotated text is not native (QA 2026-07-19; the Space
-        /// Bar settled the same rule for its front-app name).
+        /// Bar settled the same rule for its front segment).
         /// The stored preference round-trips, mirroring
         /// `BackgroundStyle.rendered(glassAvailable:)`.
         public func rendered(horizontal: Bool) -> Content {
             horizontal ? self : .icon
         }
+
+        /// Whether the drawn content carries text at all. Ask
+        /// this rather than re-spelling `!= .icon`, so a later
+        /// text-free case cannot be missed at a call site;
+        /// `BarTitleCapTests.showsTextIsExhaustive` asserts the
+        /// case COUNT, so a new one reds it and has to be ruled
+        /// on here.
+        ///
+        /// Ask it of `AppBarStyle.renderedContent`, which folds
+        /// in the vertical collapse — the title-refresh gate
+        /// (`AppBarManager.showsTitle(of:)`) and the GUI's
+        /// title-cap grey-out
+        /// (`BarsGates.everyShownBarIconOnly`) do.
+        ///
+        /// Two sites ask the raw `content` instead, and may only
+        /// because each already stands on a horizontal-only
+        /// path: `AppBarOverlay+Sizing`'s text measurement,
+        /// behind its own `guard horizontal`, and
+        /// `layoutHorizontal`, which by name never runs on a
+        /// vertical bar. Moving either off that path owes it
+        /// `renderedContent` — the collapse is the whole reason
+        /// the gate exists.
+        public var showsText: Bool { self != .icon }
     }
 
     /// Where the item group sits along the bar's long axis

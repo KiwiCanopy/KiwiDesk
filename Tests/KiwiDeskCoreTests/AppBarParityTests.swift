@@ -89,7 +89,7 @@ struct AppBarCommandParityTests {
         .backgroundFit(.full),
         .activeIndicator(.gap),
         .itemSize(88), .itemGap(9),
-        .content(.name), .iconSource(.appFont),
+        .content(.title), .titleCap(40), .iconSource(.appFont),
         .groupAdjacentWindows(false),
         .fontSize(20), .cornerRoundness(12), .dimFactor(0.3),
         .itemColor("#111111"), .fillColor("#222222"),
@@ -156,6 +156,7 @@ struct AppBarCommandParityTests {
         case .backgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
         case .content: return [.string("icon")]
+        case .titleCap: return [.number(40)]
         case .thickness, .itemSize, .itemGap, .fontSize,
             .cornerRoundness, .dimFactor:
             return [.number(10)]

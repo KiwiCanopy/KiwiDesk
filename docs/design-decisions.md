@@ -5012,6 +5012,109 @@ point is right when we know nothing about the desktop, which is
 exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
 
+**The bars name the WINDOW, not its app.** (Owner ruling
+2026-08-19, replacing the `name` / `icon_and_name` content modes
+the bar has carried since it shipped.) `app_bar.set_content` takes
+`icon`, `title` or `icon_and_title`, and the Space Bar's front
+segment shows the focused window's title in place of its app's
+name. The retired spellings are simply gone.
+
+**A stale enum spelling costs the FILE, not the field**, and
+that price is worth stating plainly because it is the one the
+config format already charges everywhere else. `TilingSettings`
+decodes `AppBarStyle` inline, so an unreadable value fails the
+enclosing decode: a profile carrying one is skipped by
+`allProfiles()` — it disappears from the profile list rather
+than opening at defaults, surfaced as a
+`ConfigIssue.profileBroken` with Delete / Reveal. And that is
+every profile v0.9.7 wrote, not the few whose owner changed the
+setting: `TilingSettings.encode` is exhaustive and
+`icon_and_name` was that build's default. The `gui.json` sidecar
+is NOT exposed — `GuiConfig.encode` writes the spaces, rules,
+bindings and layers, never `settings`.
+
+Leniency for this one field was refused anyway, and not because
+that damage is small. The argument for it — an unreadable enum
+should not take its siblings down — is the strongest one in the
+area, and it is *why* it fails: it is not specific to `content`.
+Six sibling enums in this struct and every enum in
+`SpaceBarStyle` throw exactly this way, so sparing the single
+renamed field is a coin flip on which field the user gets wrong,
+not a mitigation. Leniency belongs everywhere or nowhere. Both
+decode sites are strict — `AppBarStyle` and the per-layout
+override.
+
+**The crossing is a migration, not a lenient decoder**, and the
+difference is that one of them ends. `ConfigMigration` rewrites
+`name` / `icon_and_name` in the file itself, once; a decoder that
+folded them would keep accepting the retired vocabulary forever,
+because nothing ever signals that the last config carrying it is
+gone. That is also why the earlier "re-editing the config IS the
+migration" answer was withdrawn rather than defended: it was
+sound while this repo had one user, and v0.9.7 shipped to others
+(AGENTS.md §5, amended). Asking a stranger to hand-edit JSON to
+get their profiles back is not a migration policy.
+
+The bar exists to tell one window from another, and the app name
+is the one label that provably cannot. Five Finder windows read
+"Finder" five times while the icon beside each already said so;
+a sampled desktop (owner, 2026-08-19) had three Finder windows
+titled `Downloads`, `KiwiCall` and `keebart-studio`, sharing no
+prefix. The app name is not redundant *in general* — it is
+redundant **next to the icon that names the same app**, which is
+the only place the bar ever drew it.
+
+The app name survives in exactly the two places a title cannot
+speak, and there it is never shortened: a **collapsed group**,
+whose windows have several titles and no one of them is true of
+the group; and an **empty title**, which the lazy-title apps of
+#160 report for a while after opening — four of twelve apps on
+that same desktop reported none at all. The group case
+self-heals, because focusing a group expands it into members
+that do show titles.
+
+Titles do NOT generally repeat the app name, which is what makes
+`icon_and_title` non-redundant: of that sample, Finder, ghostty
+and System Settings put none of it in the title, Obsidian
+appended its own name *and version*, and the browser appended
+the **site** rather than the app. Where an app does append it,
+it appends at the tail — which is the argument for
+tail-truncating the cap rather than head-truncating it.
+
+**A drawn title needs a cap and a refresh path; neither is
+optional.** (Same ruling.) Two consequences fall out of drawing
+a string the user edits, and both are load-bearing rather than
+polish.
+
+`app_bar.set_title_cap` (8–80, default 25) exists because App
+Bar slots are **uniform and measured from the widest item**
+(`AppBarOverlay.autoSlotWidth`). On that same sample the app
+names ran 6–20 characters and the titles to 57. One long title
+therefore widens *every* slot until `slotLength`'s
+quarter-of-the-bar clamp bites and the rest of the bar scrolls —
+so the cap is what keeps auto item sizing usable at all, and
+`item_size` is not a substitute (it answers a different
+question, and only for users who go looking). The Space Bar's
+own cap exists for a different reason and is kept as a separate
+knob for that reason: its front segment already ellipsizes at
+the panel edge and cannot clip, but its estimated length feeds
+the bar's alignment total, so under `center` or `end` an
+uncapped title slides the whole run of Space items sideways.
+
+The refresh path is the subtler half. The bars are driven from
+`retile()`, and `TilingEngine.shouldRetile` returns false for
+`.windowTitleChanged` — correctly, since a title moves no
+window. Before this change that meant a title event did nothing
+and nothing needed it to; drawing a title makes the same event a
+*render* input. It is handled as one: `handleTitleChangedForBars`
+re-renders the bars and never retiles, because retiling on a
+rename would re-issue a frame set — and, on an app that refuses
+a size, re-teach the #677 ledger — every time a tab was renamed.
+It is debounced through a `DeferredTasks` slot rather than a
+bespoke flag, so teardown's `cancelAll()` reaches it like every
+other settle (#48), and gated on the **rendered** content, so a
+vertical bar (which collapses to icon-only) schedules nothing.
+
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default bottom) and the
@@ -5060,7 +5163,7 @@ the system is the bar's defining signature): `item_color`
 paints inactive Spaces, `active_item_color` the active Space's
 identifier and glyphs, and `focused_item_color` the focused
 window **wherever it shows** — its glyph inside the active
-Space AND the front-app segment's glyph + name (QA 2026-07-19:
+Space AND the front-app segment's glyph and text (QA 2026-07-19:
 the front-app segment IS the focused window, so it belongs to
 the focused accent, not the active-Space one; each accent now
 maps to exactly one concept — the Space vs the focused window).
@@ -5089,7 +5192,7 @@ The corollary for a *bespoke* badge still stands: choose its
 text colour for contrast against that badge, not from the
 accents. In Settings the `Focused window`
 row greys out (#171) when its only surfaces are untintable:
-native-image glyphs *and* no front-app name shown. Emoji
+native-image glyphs *and* no front-app text shown. Emoji
 identifiers and native app
 images stay untinted; shape (the active indicator) carries the
 active state there, plus a half-strength alpha dim on inactive
@@ -5099,10 +5202,10 @@ inactive), so color is never the only signal. A thin divider
 identifier from the glyph row inside every occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
-app glyphs — no clone of the App Bar's `Icon | Name |
-Icon & name` chooser. The identifier is structural and the
-compact glyphs are the point of the overview; an app-name mode
-needs its own demonstrated use case first.
+app glyphs — no clone of the App Bar's `Icon | Title |
+Icon & title` chooser. The identifier is structural and the
+compact glyphs are the point of the overview; a labelled-glyph
+mode needs its own demonstrated use case first.
 
 **Space identifiers are icon-only, with settled fallbacks.**
 (#293, revised QA 2026-07-19.) The configured Space icon

@@ -87,6 +87,19 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Trailing `| <front app>` segment (spaces.lua's front_app);
     /// off by default (ui-designer verdict 6).
     public var showFrontApp = false
+    /// Longest front-segment title drawn, in characters; read
+    /// through `resolvedTitleCap`, which clamps to
+    /// `AppBarStyle.titleCapRange` (the shared range, aliased
+    /// rather than re-declared like `BackgroundStyle` above).
+    ///
+    /// The segment cannot CLIP without it — `layoutFrontName`
+    /// already tail-truncates to the remaining viewport. The cap
+    /// exists because the render pass folds the segment's
+    /// estimated length into its alignment total
+    /// (`SpaceBarOverlay+Render`), so under `center` or `end` a
+    /// growing title slides the whole Space run sideways, and a
+    /// title grows on every keystroke.
+    public var titleCap = 25
     /// Hides empty spaces except the current one (verdict 4);
     /// off by default.
     public var hideEmpty = false

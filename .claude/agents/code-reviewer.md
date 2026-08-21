@@ -70,8 +70,10 @@ an exemption list or a rationale, open the owning file.
   it is not a finding here.
 - Formatting `swift format` owns. `scripts/lint.sh` decides by
   exit code, not by taste.
-- A missing backward-compatibility shim, alias, deprecation layer
-  or migration script. The repo forbids them pre-release (§5).
+- A missing backward-compatibility shim, alias or deprecation
+  layer. §5 forbids those outright. A missing one-shot MIGRATION
+  is the opposite — §5 requires one for a renamed stored value,
+  at every reader of that file shape — so flag that.
 - The `@_silgen_name` exemption named in
   `.claude/rules/os-private-apis.md`. That file owns both the rule
   and its one carve-out, and its `paths:` reach every file the

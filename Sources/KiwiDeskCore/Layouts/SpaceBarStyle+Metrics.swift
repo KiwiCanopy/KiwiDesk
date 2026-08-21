@@ -40,6 +40,16 @@ extension SpaceBarStyle {
         )
     }
 
+    /// The front-segment title cap clamped to the range both
+    /// bars share (`AppBarStyle.titleCapRange`) — one range, so
+    /// the same window cannot read two lengths on one screen.
+    public var resolvedTitleCap: Int {
+        min(
+            max(titleCap, AppBarStyle.titleCapRange.lowerBound),
+            AppBarStyle.titleCapRange.upperBound
+        )
+    }
+
     /// The drag-drop spring dwell in seconds, clamped to
     /// `springDelayRange` — the coordinator and the sweep both
     /// read this so a stored out-of-range value can't misbehave.

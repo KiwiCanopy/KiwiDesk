@@ -1493,7 +1493,7 @@ touches your running windows.
 rest; the rest behind **Style**):
 
 - **Background style**: boxed (a box per item honoring corner
-  roundness), plain (names on a shared translucent strip), or
+  roundness), plain (items on a shared translucent strip), or
   **Liquid Glass** — a macOS&nbsp;26 glass plate under the items,
   tinted by the Background color (transparent = clear glass) and
   rounded by corner roundness. Liquid Glass appears in the picker
@@ -1528,13 +1528,28 @@ rest; the rest behind **Style**):
   points.
 - **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
-- **Content**: icon only, name only, or both. Left/right bars
-  always render icon-only (names would need stacked or rotated
-  text), so the control greys when every bar on screen sits on
-  a vertical edge; your choice returns when one moves back to a
-  horizontal edge.
+- **Content**: icon only, title only, or both. The text is the
+  window's own title, not its app name — five Finder windows all
+  reading "Finder" tell you nothing the icon didn't, while
+  "Downloads" / "Projects" tells them apart. Two cases still
+  show the app's name, because a title can't speak there:
+  a **grouped** item (its windows have several titles, and none
+  of them is true of the group — focus it and it expands into
+  members that do show titles), and a window that reports **no
+  title yet**, which some apps don't until a moment after they
+  open. Left/right bars always render icon-only (titles would
+  need stacked or rotated text), so the control greys when every
+  bar on screen sits on a vertical edge; your choice returns
+  when one moves back to a horizontal edge.
+- **Title length**: how many characters of a title an item
+  shows before it's shortened at the end (8–80, default 25).
+  Worth knowing why it matters: every item on a bar is the same
+  size, and on **auto** item size that size comes from the
+  widest item — so one long title widens *every* slot until the
+  quarter-of-the-bar limit kicks in and the rest of the bar has
+  to scroll. Greyed while every bar on screen shows icons only.
 - **App symbol style**: how app icons are drawn (greyed while
-  every bar on screen renders names only, which shows no
+  every bar on screen renders titles only, which shows no
   icons). This one stays available even when no layout shows an
   App Bar at all, because it also styles the shortcuts panel's
   Apps band. **System default**
@@ -1691,7 +1706,7 @@ chevron to scroll, or — while dragging a window — hold the cursor
 over a chevron and the bar autoscrolls so you can drop onto a
 Space that started off-screen. The front-app segment stays
 pinned at the trailing end — only the Spaces scroll behind the
-chevrons — so the focused app is always in view; while the bar
+chevrons — so the focused window is always in view; while the bar
 fits it sits at the row's tail as before.
 
 The card's order matches the App Bar card's: at rest **Show
@@ -1704,10 +1719,10 @@ share one), **Thickness**, and the two behavior toggles. The
 **Alignment** (start / center / end along the bar,
 edge-relative, like the App Bar's — and, like it, the three
 read the same once the bar overflows and scrolls), active
-indicator, **App symbol style**, sizes and **Glyphs per Space**
+indicator, **App symbol style**, sizes, **Glyphs per Space**
 (how many app glyphs an item shows before the rest collapse
-into the `+n` badge, 1–12), and **Spring delay**. Colors live
-in **Advanced Colors ▸ Space Bar colors**.
+into the `+n` badge, 1–12), **Title length** and **Spring
+delay**. Colors live in **Advanced Colors ▸ Space Bar colors**.
 
 The color ladder there is the bar's signature: **Item** paints
 inactive Spaces, **Active space** the Space currently shown on
@@ -1725,10 +1740,13 @@ concern.
 Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by
 shortcut) and **Show front app** — a trailing segment with the
-focused window of the Space each display currently shows
-(icon-only on vertical bars). **Spring delay** sets how long a
-dragged window must hover a Space before the view springs to it
-(default 1.5 s, 1–4 s).
+focused window of the Space each display currently shows: its
+app's icon, then that window's **title** (its app's name
+instead if it reports no title yet). Icon-only on vertical bars.
+**Title length** caps that title (8–80 characters, default 25)
+and is greyed while the segment is off. **Spring delay** sets
+how long a dragged window must hover a Space before the view
+springs to it (default 1.5 s, 1–4 s).
 
 ## Colors & Motion
 

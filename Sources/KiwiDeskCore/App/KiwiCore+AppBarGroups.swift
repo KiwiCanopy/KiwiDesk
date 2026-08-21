@@ -111,6 +111,43 @@ extension KiwiCore {
         return runs
     }
 
+    /// The text one item draws, resolved here so `AppBarOverlay`
+    /// stays a dumb renderer — the same seam the glyph already
+    /// takes.
+    ///
+    /// The app name is the fallback in the two places a title
+    /// cannot speak, and only there:
+    ///
+    /// - A **collapsed group** holds several windows with several
+    ///   titles, and no one of them is true of the group. (Its
+    ///   members are reachable as titles the moment focus enters
+    ///   it — `barGroups` expands the focused group — so nothing
+    ///   is lost, only deferred.)
+    /// - An **empty title**. Lazy-title apps (Electron/WebKit,
+    ///   #160) are tracked before their titles arrive, and four
+    ///   of twelve apps on a real desktop reported none at all
+    ///   (owner 2026-08-19). Without this the bar would draw
+    ///   blank slots for them at every launch.
+    ///
+    /// Only the title is capped: app names are short by
+    /// construction (6–20 characters observed), so capping the
+    /// fallback would be a clamp that never fires.
+    func barItemText(
+        for group: [WindowID],
+        window: ManagedWindow?,
+        appName: String,
+        style: AppBarStyle
+    ) -> String {
+        guard group.count == 1,
+            let title = window?.title,
+            !title.isEmpty
+        else { return appName }
+        return AppBarStyle.cappedTitle(
+            title,
+            to: style.resolvedTitleCap
+        )
+    }
+
     func barItem(
         for group: [WindowID],
         style: AppBarStyle
@@ -124,7 +161,12 @@ extension KiwiCore {
         // into individual items (see barGroups).
         return AppBarOverlay.Item(
             id: group.first ?? WindowID(0),
-            name: name,
+            text: barItemText(
+                for: group,
+                window: window,
+                appName: name,
+                style: style
+            ),
             icon: window.flatMap {
                 NSRunningApplication(
                     processIdentifier: $0.pid

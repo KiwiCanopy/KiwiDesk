@@ -67,6 +67,13 @@ final class DeferredTasks {
         /// dropped mid-launch (`scheduleTransientRetrack`,
         /// #675).
         case transientRetrack
+        /// Re-render of the bars after a drawn window title
+        /// changed (`handleTitleChangedForBars`). The one slot
+        /// here whose reschedule is the POINT rather than a
+        /// correctness guard: a title event arrives as fast as a
+        /// keystroke, and cancel-and-replace is what turns a
+        /// burst into one refresh when it stops.
+        case barTitleRefresh
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

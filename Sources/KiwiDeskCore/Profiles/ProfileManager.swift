@@ -222,10 +222,27 @@ public final class ProfileManager {
     }
 
     /// Reads a profile without touching current/dirty state.
+    ///
+    /// Migrates the file first when it was written by a build
+    /// whose vocabulary this one no longer reads
+    /// (`ConfigMigration`). The rewrite is best-effort: a config
+    /// directory we cannot write to must not turn a readable
+    /// profile into a broken one, and the migration is
+    /// idempotent, so the next launch simply tries again with
+    /// the in-memory copy carrying the read either way.
     public func read(name: String) throws -> Profile {
-        let data = try Data(
-            contentsOf: url(for: validated(name))
-        )
+        let file = url(for: try validated(name))
+        var data = try Data(contentsOf: file)
+        if let migrated = ConfigMigration.migrated(data) {
+            data = migrated
+            // The SECOND writer of a profile file, beside
+            // `write(_:)`. Deliberately not routed through it:
+            // that one encodes a decoded `Profile`, which would
+            // silently drop any key this build does not know,
+            // and a migration must preserve what it did not come
+            // for. It writes the migrated BYTES instead.
+            try? migrated.write(to: file, options: .atomic)
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(Profile.self, from: data)
@@ -305,6 +322,10 @@ public final class ProfileManager {
         ]
         // Human-readable timestamps in the profile files.
         encoder.dateEncodingStrategy = .iso8601
+        // Not the store's only writer since `read(name:)` gained
+        // its migration write-back — that one writes raw bytes on
+        // purpose, because this encoder can only write fields
+        // this build knows.
         try encoder.encode(profile).write(
             to: url(for: name),
             options: .atomic

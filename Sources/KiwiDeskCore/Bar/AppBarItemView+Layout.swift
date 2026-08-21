@@ -102,7 +102,7 @@ extension AppBarItemView {
     }
 
     /// Icon and name sit centered in the slot as one group;
-    /// when space runs out, only the name shrinks — the icon
+    /// when space runs out, only the title shrinks — the icon
     /// always survives.
     private func layoutHorizontal() {
         let pad = Self.contentPadding
@@ -112,7 +112,7 @@ extension AppBarItemView {
         label.usesSingleLineMode = true
         label.maximumNumberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
-        label.stringValue = name
+        label.stringValue = text
         let side =
             iconSlotHidden
             ? 0
@@ -120,24 +120,28 @@ extension AppBarItemView {
                 min(bounds.height, bounds.width) - pad * 2,
                 0
             )
-        // The cell itself knows how much room the name needs;
+        // Horizontal-only path, so the raw preference IS the
+        // rendered content here. One predicate for both the
+        // measurement and the layout below: they answered
+        // `== .icon` separately until a review found the pair
+        // (2026-08-20), which is two ways for a later text-free
+        // content to draw text into a slot measured without it.
+        let showText = style.content.showsText
+        // The cell itself knows how much room the text needs;
         // measuring the raw string undershoots the cell's own
-        // padding and truncates names that would have fit.
+        // padding and truncates titles that would have fit.
         var textSize =
-            style.content == .icon
-            ? .zero
-            : (label.cell?.cellSize ?? .zero)
+            showText
+            ? (label.cell?.cellSize ?? .zero)
+            : .zero
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
-        // Horizontal-only path, so the raw preference IS the
-        // rendered content here.
-        let showText = style.content != .icon
         // Half a pad: the full pad read too airy between icon
-        // and name (manual QA 2026-07-18).
+        // and text (manual QA 2026-07-18).
         var spacing: CGFloat =
             side > 0 && showText ? pad / 2 : 0
-        // A grouped item reserves room after the name for its count
-        // badge, so the badge sits beside the name instead of
+        // A grouped item reserves room after the text for its count
+        // badge, so the badge sits beside the text instead of
         // clamping over it (owner 2026-07-20).
         let badgeReserve: CGFloat =
             count >= 2 && showText
@@ -160,7 +164,7 @@ extension AppBarItemView {
         // 2026-07-20). Only when the name shows: an icon-only badge
         // overlaps the corner instead (see `layoutBadge`), and the
         // slot already reserved this room (`badgeReserve`), so the
-        // shift never re-truncates the name.
+        // shift never re-truncates the text.
         let badgeExtent: CGFloat =
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
@@ -192,12 +196,28 @@ extension AppBarItemView {
         )
     }
 
-    /// Vertical bars render icon-only (QA 2026-07-19): names
-    /// letter-stacked terribly and rotated text is not native,
-    /// so `Content.rendered(horizontal:)` collapses the
-    /// preference to `.icon` and the label never shows here
-    /// (`configure` hides it).
+    /// Vertical bars render icon-only (QA 2026-07-19): titles
+    /// letter-stack terribly and rotated text is not native, so
+    /// `Content.rendered(horizontal:)` collapses the preference
+    /// to `.icon` and no title is drawn here.
+    ///
+    /// This pass hides the label ITSELF, and must: item views
+    /// are reused across renders (`AppBarOverlay` reconfigures
+    /// survivors in place), so a view that laid out horizontally
+    /// arrives here still showing a title, with a stale string
+    /// and a stale frame. `layoutHorizontal` is the only other
+    /// writer of `label.isHidden`, and it does not run on this
+    /// path. `configure` used to hide it too — a write that
+    /// looked redundant from every horizontal fixture and was
+    /// deleted as such, which is how this became a real defect
+    /// for one commit (`AppBarGlyphLayoutTests
+    /// .verticalReuseHidesLabel`).
+    ///
+    /// Hidden BEFORE the `side` guard: an item too small for an
+    /// icon slot returns early, and must not keep a title on the
+    /// way out.
     private func layoutVertical() {
+        label.isHidden = true
         let pad = Self.contentPadding
         let side =
             iconSlotHidden

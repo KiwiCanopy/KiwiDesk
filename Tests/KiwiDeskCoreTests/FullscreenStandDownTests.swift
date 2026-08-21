@@ -6,10 +6,22 @@ import Testing
 @testable import KiwiDeskCore
 
 // #670 stand-down: split from FullscreenExemptionTests.swift for
-// the file-size ceiling. Every test touching the process-global
-// `isUser` DEBUG overrides (`activeSpaceIsUserOverride`,
-// `currentSpaceIsUserOverride`) lives in THIS one serialized
-// suite -- a second suite would race it under parallel testing.
+// the file-size ceiling, and again into
+// FullscreenStandDownTests+BarTitles.swift -- an EXTENSION, not
+// a second suite, on purpose.
+//
+// A test that pins the process-global `isUser` DEBUG overrides
+// (`activeSpaceIsUserOverride`, `currentSpaceIsUserOverride`)
+// joins this suite rather than opening its own, because two
+// suites race each other under parallel testing. Files may be
+// split freely; suites may not.
+//
+// One other holder exists and is not this suite:
+// `DesktopAuthorityFixture.pinTwoDisplays` sets both overrides
+// for the Desktop-authority suites. It is on the honour system
+// -- nothing guards the rule above -- so a THIRD holder is the
+// point at which to stop adding one and give the pair a seam
+// that cannot be held twice.
 // (`activeDesktopNumberOverride` has its own pre-existing users;
 // no stand-down test reads the space number.)
 
@@ -34,7 +46,11 @@ private func makeWindow(_ id: WindowID) -> ManagedWindow {
 )
 @MainActor
 struct FullscreenStandDownTests {
-    private func makeCore() -> KiwiCore {
+    // Not private: the bar-title half of this suite lives in
+    // `FullscreenStandDownTests+BarTitles.swift`, an extension
+    // rather than a second suite — the overrides below are
+    // process-global, and only one suite may serialize them.
+    func makeCore() -> KiwiCore {
         makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory

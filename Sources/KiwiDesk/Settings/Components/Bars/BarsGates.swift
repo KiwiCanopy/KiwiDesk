@@ -76,7 +76,7 @@ struct BarsGates {
     }
 
     /// True when EVERY shown bar renders on a vertical edge,
-    /// where names would need stacked or rotated text.
+    /// where titles would need stacked or rotated text.
     var everyShownBarVertical: Bool {
         anyBarShown
             && shownBars.allSatisfy {
@@ -85,14 +85,24 @@ struct BarsGates {
             }
     }
 
-    /// True when no shown bar renders an icon at all.
-    var everyShownBarNameOnly: Bool {
+    /// True when no shown bar draws text at all — every one of
+    /// them resolves to icon-only, which a vertical bar always
+    /// does. Gates the title cap: with no title on screen there
+    /// is nothing to shorten.
+    var everyShownBarIconOnly: Bool {
         anyBarShown
             && shownBars.allSatisfy {
                 let bar = $0.resolved(with: settings.appBarStyle)
-                return bar.content.rendered(
-                    horizontal: bar.edge.isHorizontal
-                ) == .name
+                return !bar.renderedContent.showsText
+            }
+    }
+
+    /// True when no shown bar renders an icon at all.
+    var everyShownBarTitleOnly: Bool {
+        anyBarShown
+            && shownBars.allSatisfy {
+                let bar = $0.resolved(with: settings.appBarStyle)
+                return bar.renderedContent == .title
             }
     }
 

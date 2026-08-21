@@ -1,7 +1,7 @@
 import AppKit
 
 /// The trailing front-app segment (#293 verdict 6):
-/// `| <glyph + app name>` after the last Space item. On
+/// `| <glyph + window title>` after the last Space item. On
 /// vertical bars the segment is icon-only — never rotated
 /// text, never hidden — and the divider flips to a horizontal
 /// rule. Informational; no click target.
@@ -65,70 +65,6 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// A Boxed-only fill box behind the front-app content, so the
-    /// segment reads as a chip like the Space items (Plain and
-    /// Material draw their shared plate under it instead). Sits
-    /// below the glyph/name, filled `fillColor`, rounded to match.
-    /// Mirrors `SpaceBarItemView`'s box (fill + corner) — keep the
-    /// two in step on any fill/corner change. The radius here
-    /// resolves from cross-axis `depth`; the chip's from
-    /// `min(width, height)` — they read alike but aren't identical.
-    private func layoutFrontBox(
-        _ app: SpaceBarItemView.App,
-        from start: CGFloat,
-        depth: CGFloat,
-        cell: CGFloat,
-        horizontal: Bool,
-        style: SpaceBarStyle
-    ) {
-        // Boxed fills the chip; per-box glass frosts it as a
-        // backdrop; plain (shared plate) draws neither here.
-        let boxed = style.hasBox
-        let glass = wantsBoxGlass(style)
-        guard boxed || glass else {
-            frontBox.isHidden = true
-            updateFrontGlass(nil, radius: 0, style: style)
-            return
-        }
-        let pad = SpaceBarItemView.pad
-        let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
-        let end =
-            horizontal
-            ? (frontName.isHidden
-                ? content.frame.maxX : frontName.frame.maxX)
-            : content.frame.maxY
-        let length = max(end - start, cell) + pad * 2
-        let cross = cell + pad * 2
-        let crossOrigin = max((depth - cross) / 2, 0)
-        let rect =
-            horizontal
-            ? CGRect(
-                x: start - pad,
-                y: crossOrigin,
-                width: length,
-                height: cross
-            )
-            : CGRect(
-                x: crossOrigin,
-                y: start - pad,
-                width: cross,
-                height: length
-            )
-        let radius = style.resolvedCornerRadius(forThickness: depth)
-        if boxed {
-            frontBox.isHidden = false
-            frontBox.wantsLayer = true
-            frontBox.frame = rect
-            frontBox.layer?.cornerRadius = radius
-            frontBox.layer?.backgroundColor =
-                NSColor(kiwiHex: style.fillColor).cgColor
-            updateFrontGlass(nil, radius: 0, style: style)
-        } else {
-            frontBox.isHidden = true
-            updateFrontGlass(rect, radius: radius, style: style)
-        }
-    }
-
     /// Axis length the segment will consume, for the render
     /// pass's alignment total — the leading item gap, the
     /// divider and glyph (`layoutDivider`/`layoutFrontGlyph`
@@ -164,7 +100,12 @@ extension SpaceBarOverlay {
                 ? style.fontSize : depth * 0.42
             extent +=
                 ceil(
-                    (app.name as NSString).size(
+                    // What is DRAWN, not the app name: the
+                    // estimate feeds the render pass's alignment
+                    // total, so measuring a different string
+                    // than `layoutFrontName` lays out slides the
+                    // whole Space run off its alignment.
+                    ((app.title ?? app.name) as NSString).size(
                         withAttributes: [
                             .font: NSFont.systemFont(
                                 ofSize: size
@@ -259,14 +200,31 @@ extension SpaceBarOverlay {
                 width: cell,
                 height: cell
             )
-        // The one AX element the segment exposes: the visible
-        // glyph carries "Front app: <name>"; everything else
-        // stays silent (glyphs are informational).
-        let axLabel = L(
-            "space_bar.front_app.ax",
-            "Front app: %1$@",
-            app.name
-        )
+        // The one AX element the segment exposes; everything
+        // else stays silent (glyphs are informational).
+        //
+        // Names the APP even when a title is drawn, and names it
+        // first: the icon beside it is the app's, a title alone
+        // ("Downloads") says nothing about where it lives, and
+        // an app name is stable under a reader while a title
+        // changes as the user types. Two frames rather than one
+        // with a withheld argument — an app with no title yet
+        // (#160) should announce a short sentence, not a
+        // dangling separator.
+        let axLabel =
+            app.title.map {
+                L(
+                    "space_bar.front_window.ax",
+                    "Front app: %1$@, window %2$@",
+                    app.name,
+                    $0
+                )
+            }
+            ?? L(
+                "space_bar.front_app.ax",
+                "Front app: %1$@",
+                app.name
+            )
         if let glyph = app.glyph {
             frontIcon.isHidden = true
             frontGlyph.isHidden = false
@@ -308,7 +266,8 @@ extension SpaceBarOverlay {
         return cell + SpaceBarItemView.pad
     }
 
-    /// The app name — horizontal bars only (vertical stays
+    /// The window's title (app name where it has none) —
+    /// horizontal bars only (vertical stays
     /// icon-only, never rotated).
     private func layoutFrontName(
         _ app: SpaceBarItemView.App,
@@ -324,7 +283,7 @@ extension SpaceBarOverlay {
             return
         }
         frontName.isHidden = false
-        frontName.stringValue = app.name
+        frontName.stringValue = app.title ?? app.name
         let size =
             style.fontSize > 0
             ? style.fontSize : depth * 0.42

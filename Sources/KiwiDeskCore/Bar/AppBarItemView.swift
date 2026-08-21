@@ -1,7 +1,8 @@
 import AppKit
 
 /// One entry in the indicator bar: an optional app icon and
-/// name centered in the slot, a style-dependent accent
+/// the window's title centered in the slot, a style-dependent
+/// accent
 /// marking the active window, a count badge on grouped
 /// items, and click-to-focus. Clicks never take key focus —
 /// the panel above is non-activating. Dragging past a small
@@ -14,8 +15,10 @@ final class AppBarItemView: NSView {
     let iconView = NSImageView()
     /// SketchyBar App Font ligature shown in the icon slot when
     /// the item carries a glyph (#294). Text, so it follows the
-    /// bar's text colors; purely presentational to AX (the item
-    /// announces the app name, never the ligature).
+    /// bar's text colors, and explicitly not an AX element so
+    /// the ligature's raw name is never spoken. The item
+    /// announces nothing else either — it is a click target with
+    /// no accessible name at all (#901).
     let glyphLabel: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         tf.alignment = .center
@@ -44,7 +47,10 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
-    var name = ""
+    /// The string the label draws, resolved by the driver
+    /// (`KiwiCore.barItemText`): the capped window title, or the
+    /// app name where a title cannot speak.
+    var text = ""
     var horizontal = true
     /// The concrete edge the bar sits on (from the resolved
     /// style); the active edge-mark hugs it.
@@ -57,7 +63,9 @@ final class AppBarItemView: NSView {
     /// their outer corner; Boxed clips every item (its own box).
     var isFirstInRun = false
     var isLastInRun = false
-    private var isHovered = false
+    /// Internal, not private: the painting half lives in
+    /// `AppBarItemView+Paint.swift` and reads it.
+    var isHovered = false
     var style = AppBarStyle()
     var onSelect: (WindowID) -> Void = { _ in }
     var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
@@ -170,7 +178,7 @@ final class AppBarItemView: NSView {
     // swiftlint:disable:next function_parameter_count
     func configure(
         id: WindowID,
-        name: String,
+        text: String,
         icon: NSImage?,
         glyph: String?,
         count: Int,
@@ -179,7 +187,7 @@ final class AppBarItemView: NSView {
         style: AppBarStyle
     ) {
         windowID = id
-        self.name = name
+        self.text = text
         self.count = count
         self.horizontal = horizontal
         self.isActive = active
@@ -192,13 +200,12 @@ final class AppBarItemView: NSView {
         // Empty ligature (bad vendor drop) must not reserve a
         // blank square — treat it as no glyph.
         let showsGlyph =
-            glyph?.isEmpty == false && content != .name
+            glyph?.isEmpty == false && content != .title
         glyphLabel.isHidden = !showsGlyph
         glyphLabel.stringValue = glyph ?? ""
         iconView.isHidden =
-            showsGlyph || content == .name
+            showsGlyph || content == .title
             || icon == nil
-        label.isHidden = content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =
@@ -208,141 +215,5 @@ final class AppBarItemView: NSView {
         applyColors()
         applyAccent()
         needsLayout = true
-    }
-
-    /// Hover swaps the box background (no overlay: a wash on
-    /// top would muddy the icon and text) and the text color.
-    private func applyColors() {
-        label.textColor = NSColor(kiwiHex: textColorHex)
-        glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
-        // The app image never tints, so it carried no active
-        // cue at all (QA 2026-07-19): dimmed when inactive,
-        // shape (accent) plus opacity carry the state.
-        // Deliberately the full 0.4 dim, NOT the Space Bar's
-        // 0.6 middle tier — this is a binary signal reinforced
-        // by the outline, with no lower tier to collide with
-        // (see `BarAccent.activeUnfocusedAlpha`).
-        iconView.alphaValue =
-            isActive || isHovered
-            ? 1 : style.dimFactor
-        layer?.backgroundColor =
-            NSColor(kiwiHex: boxColorHex).cgColor
-        applyCornerRadius()
-    }
-
-    /// The item's bar-cross dimension (its thickness), which the
-    /// corner radius resolves against.
-    var crossThickness: CGFloat {
-        horizontal ? bounds.height : bounds.width
-    }
-
-    /// Round the box fill to `cornerRoundness`% of a capsule, and
-    /// clip the active mark to the same corner through `accentClip`
-    /// so it cuts on the curve like the Space Bar (owner 2026-07-20)
-    /// instead of a square end — the item itself does NOT clip, so a
-    /// corner count badge stays whole. Which corners round follows
-    /// `maskedCorners`.
-    func applyCornerRadius() {
-        let radius = style.resolvedCornerRadius(
-            forThickness: crossThickness
-        )
-        layer?.cornerRadius = radius
-        accentClip.frame = bounds
-        accentClip.layer?.masksToBounds = true
-        accentClip.layer?.cornerRadius = radius
-        accentClip.layer?.maskedCorners = maskedCorners
-    }
-
-    /// Boxed clips all four corners (each item is its own box). Plain
-    /// clips only where the shared plate actually rounds — the run's
-    /// outer end — so the mark cuts on the curve there and runs
-    /// square (touching a neighbour) between (owner 2026-07-20). The
-    /// horizontal run maps the outer end to the X side (flip-safe);
-    /// the vertical run to the Y side.
-    private var maskedCorners: CACornerMask {
-        let all: CACornerMask = [
-            .layerMinXMinYCorner, .layerMaxXMinYCorner,
-            .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
-        ]
-        if style.hasBox { return all }
-        let leading: CACornerMask =
-            horizontal
-            ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]
-            : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        let trailing: CACornerMask =
-            horizontal
-            ? [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-            : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        var corners: CACornerMask = []
-        if isFirstInRun { corners.formUnion(leading) }
-        if isLastInRun { corners.formUnion(trailing) }
-        return corners
-    }
-
-    private var textColorHex: String {
-        if isHovered { return style.hoverItemColor }
-        return isActive
-            ? style.activeItemColor
-            : style.itemColor
-    }
-
-    /// Whether this item paints a box behind its content: always
-    /// when `boxed`, and on hover (a `plain` item reveals a box
-    /// only while hovered). `plain` is otherwise boxless in every
-    /// combo, including the active ring (which is a pure stroke).
-    private var hasBox: Bool {
-        if isHovered { return true }
-        return style.hasBox
-    }
-
-    // The Settings palette scene (`PaletteSceneThumbnail`, GUI
-    // target) is a schematic twin of this box/accent logic —
-    // keep the two in step when the box or accent rules change.
-    // It replaced `AppBarPreviewStrip`, which drew the same
-    // twin and was retired in #793.
-    private var boxColorHex: String {
-        if isHovered { return style.hoverFillColor }
-        // One fill for every box (active marked by the indicator,
-        // not a distinct fill). Plain — and any glass finish, whose
-        // shared plate is the background — paint no per-item box.
-        return style.hasBox ? style.fillColor : "#00000000"
-    }
-
-    /// How the active item is marked, gated on the indicator and
-    /// orthogonal to `backgroundStyle` (the background no longer
-    /// secretly picks the accent). Only the active item, and never
-    /// under `gap` (its slot is hidden entirely).
-    enum AccentMode { case none, outline, edgeMark }
-
-    var accentMode: AccentMode {
-        guard isActive, style.activeIndicator != .gap else {
-            return .none
-        }
-        return style.activeIndicator == .outline
-            ? .outline : .edgeMark
-    }
-
-    /// The ring and edge mark both live on the `accent` subview
-    /// (mutually exclusive); geometry is set in `layoutAccent`.
-    /// The ring is a pure stroke (no fill) in the highlight
-    /// color; the edge mark a filled bar.
-    private func applyAccent() {
-        layer?.borderWidth = 0
-        switch accentMode {
-        case .none:
-            accent.isHidden = true
-        case .outline:
-            accent.isHidden = false
-            accent.layer?.borderWidth = 2
-            accent.layer?.borderColor =
-                NSColor(kiwiHex: style.highlightColor).cgColor
-            accent.layer?.backgroundColor =
-                NSColor.clear.cgColor
-        case .edgeMark:
-            accent.isHidden = false
-            accent.layer?.borderWidth = 0
-            accent.layer?.backgroundColor =
-                NSColor(kiwiHex: style.highlightColor).cgColor
-        }
     }
 }

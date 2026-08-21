@@ -77,6 +77,7 @@ extension SpaceBarStyle {
         case "item_size": itemSize = appBar.itemSize
         case "item_gap": itemGap = appBar.itemGap
         case "font_size": fontSize = appBar.fontSize
+        case "title_cap": titleCap = appBar.titleCap
         case "icon_source": iconSource = appBar.iconSource
         case "background_style":
             backgroundStyle = appBar.backgroundStyle

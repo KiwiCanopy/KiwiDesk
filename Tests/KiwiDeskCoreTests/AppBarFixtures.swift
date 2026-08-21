@@ -23,7 +23,8 @@ enum AppBarFixtures {
         style.activeIndicator = .gap
         style.itemSize = 120
         style.itemGap = 3
-        style.content = .name
+        style.content = .title
+        style.titleCap = 40
         style.iconSource = .appFont
         style.groupAdjacentWindows = false
         style.fontSize = 15
@@ -56,7 +57,8 @@ enum AppBarFixtures {
         bar.activeIndicator = .outline
         bar.itemSize = 88
         bar.itemGap = 9
-        bar.content = .iconAndName
+        bar.content = .iconAndTitle
+        bar.titleCap = 60
         bar.iconSource = .appImage
         bar.groupAdjacentWindows = true
         bar.fontSize = 20

@@ -180,6 +180,8 @@ extension SpaceBarCard {
             }
         case .spaceBarGlyphCap:
             glyphCapRow
+        case .spaceBarTitleCap:
+            titleCapRow
         case .spaceBarSpringDelay:
             SecondsRow(
                 label: L("space_bar.spring_delay", "Spring delay"),

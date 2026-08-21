@@ -11,10 +11,12 @@ import Foundation
 /// in the `+Coding` file and hand-writes `encode(to:)` in a third
 /// file. Here the conformance stays in `SpaceBarStyle.swift`,
 /// because Swift only synthesizes `encode(to:)` where the
-/// conformance sits — so encode remains generated and a new
-/// stored property cannot be silently dropped from the wire.
-/// Moving the conformance into this file is a compile error, not
-/// a subtle regression; the compiler enforces the arrangement.
+/// conformance sits — so encode stays generated rather than
+/// hand-written, one fewer field list to forget. It is NOT a
+/// guarantee that a new stored property reaches the wire: a
+/// property absent from `CodingKeys` below is silently not
+/// encoded, with no error. `SpaceBarParityTests` is the actual
+/// net for that — the same correction its App Bar twin carries.
 ///
 /// Sparse by design — a decode falls back to `defaults` per
 /// field, so a profile written before a field existed still
@@ -36,6 +38,7 @@ extension SpaceBarStyle {
         case itemGap = "item_gap"
         case fontSize = "font_size"
         case glyphCap = "glyph_cap"
+        case titleCap = "title_cap"
         case iconSource = "icon_source"
         case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
@@ -108,6 +111,11 @@ extension SpaceBarStyle {
                 Int.self,
                 forKey: .glyphCap
             ) ?? defaults.glyphCap
+        titleCap =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .titleCap
+            ) ?? defaults.titleCap
         iconSource =
             try container.decodeIfPresent(
                 BarAppIconSource.self,
