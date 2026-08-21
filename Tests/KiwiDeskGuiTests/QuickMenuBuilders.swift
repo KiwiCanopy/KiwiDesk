@@ -33,7 +33,14 @@ enum QuickMenuBuilders {
     /// branch's — filed, not swept. Adding it here is the fix's
     /// second half.
     static let checked = [
-        "Sources/KiwiDesk/StatusItemController+Layout.swift"
+        "Sources/KiwiDesk/StatusItemController+Layout.swift",
+        // The Check-for-Updates row (#874). It joins the CHECKED
+        // list rather than the exempt one because its enablement
+        // is genuinely conditional — Sparkle refuses while a check
+        // is running or an update is mid-install — so it is the
+        // first quick-menu row that has to state `isEnabled` for a
+        // reason rather than by convention.
+        "Sources/KiwiDesk/StatusItemController+Updates.swift",
     ]
 
     /// Files that construct rows and are NOT checked per row,

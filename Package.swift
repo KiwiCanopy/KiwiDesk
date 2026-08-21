@@ -12,6 +12,25 @@ let package = Package(
     // SwiftLint prebuild plugin cannot run during build planning on
     // the CI toolchain ("a prebuild command cannot use executables
     // built from source"), and its rules were advisory only.
+    // Sparkle is the app's update channel
+    // (docs/design-decisions.md ▸ "No distribution channel
+    // without an update path"). It is the FIRST third-party
+    // Swift dependency here — CLua below is vendored C — and it
+    // is declared on the GUI executable alone, never on
+    // KiwiDeskCore: Core must stay buildable and testable
+    // without AppKit-adjacent vendor code (AGENTS.md §1).
+    //
+    // Upstream ships `Sparkle.framework` AD-HOC signed with no
+    // Team ID (checked against 2.9.6, both distributions), so
+    // there is no vendor signature to preserve and
+    // scripts/build-app.sh signs the whole nest with our
+    // Developer ID. See packaging-and-release.md.
+    dependencies: [
+        .package(
+            url: "https://github.com/sparkle-project/Sparkle",
+            from: "2.9.6"
+        )
+    ],
     targets: [
         // Vendored Lua 5.5 (unmodified upstream C sources).
         .target(
@@ -55,7 +74,10 @@ let package = Package(
         // Executable: AppDelegate, menu bar, SwiftUI GUI.
         .executableTarget(
             name: "KiwiDesk",
-            dependencies: ["KiwiDeskCore"],
+            dependencies: [
+                "KiwiDeskCore",
+                .product(name: "Sparkle", package: "Sparkle"),
+            ],
             path: "Sources/KiwiDesk",
             // Pre-rasterized from the vector masters in
             // /assets (see assets/README.md) — plain files,

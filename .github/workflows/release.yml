@@ -294,6 +294,7 @@ jobs:
           NOTARY_KEY: ${{ secrets.NOTARY_KEY_P8 }}
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           if [ -n "$CERT" ] && [ -n "$CERT_PASSWORD" ]; then
             echo "sign=true" >> "$GITHUB_OUTPUT"
@@ -308,6 +309,19 @@ jobs:
             echo "notarize=true" >> "$GITHUB_OUTPUT"
           else
             echo "notarize=false" >> "$GITHUB_OUTPUT"
+          fi
+          # Sparkle's key is independent of both: it signs the
+          # archive for the appcast and has nothing to do with
+          # Gatekeeper. Lifted here rather than read as `secrets`
+          # in a step-level `if` for the reason above — that
+          # context reads empty and the step would silently skip.
+          if [ -n "$SPARKLE_KEY" ]; then
+            echo "sparkle=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "sparkle=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::no SPARKLE_PRIVATE_KEY — the" \
+                 "archive gets no update signature, so this" \
+                 "release cannot enter the appcast"
           fi
 
       # A throwaway keychain, unlocked for this run only. Its
@@ -445,6 +459,117 @@ jobs:
           # ending in .zip downloads as `….zip.zip`.
           echo "artifact=${name%.zip}" >> "$GITHUB_OUTPUT"
 
+      # Sparkle's signature over the archive (#874), produced
+      # HERE because this is the one place that holds both the
+      # bytes and the key. The appcast is written later, from the
+      # PUBLISHED release — `release.yml` only ever drafts, and a
+      # draft's asset URL 404s for everyone without auth, so an
+      # item written now would advertise an update nobody can
+      # fetch. The signature travels between the two as a sidecar
+      # asset on the release; scripts/appcast-sync reads it there
+      # and refuses a release that has none.
+      #
+      # `--ed-key-file -` is the automation form and `-s` is NOT:
+      # sign_update 2.9.6 rejects `-s` outright for a key in the
+      # current format ("no longer supported for newly generated
+      # keys"), after printing a deprecation warning that reads
+      # like a warning rather than a failure. Checked against the
+      # tool, not its documentation.
+      #
+      # No download step: SwiftPM puts the tool on disk when it
+      # resolves Sparkle, and `build-app.sh` has already built by
+      # the time this runs.
+      - name: Sign the archive for Sparkle
+        id: edsig
+        if: steps.creds.outputs.sparkle == 'true'
+        env:
+          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          ARCHIVE: ${{ steps.archive.outputs.path }}
+        run: |
+          set -euo pipefail
+          TOOL=.build/artifacts/sparkle/Sparkle/bin/sign_update
+          if [ ! -x "$TOOL" ]; then
+            echo "::error::$TOOL is missing. It arrives with the" \
+                 "Sparkle dependency, so this means the artifact" \
+                 "layout moved on a version bump."
+            exit 1
+          fi
+          # The signature is only worth anything if this key is
+          # the one whose PUBLIC half every shipped bundle
+          # carries. Signing and then verifying with the same
+          # key proves the secret is self-consistent and nothing
+          # else: a valid but WRONG key passes that happily, and
+          # the first user to be offered the update is the one
+          # who finds out — every installed copy rejects it, and
+          # they are back to re-downloading by hand.
+          #
+          # So derive the public half and compare it to the
+          # packager's own `SUPublicEDKey`. Node, because
+          # LibreSSL — which is what `openssl` is on a macOS
+          # runner — has no Ed25519 support, and hand-rolling
+          # curve arithmetic in a release workflow is worse than
+          # the problem. The derivation is checked against
+          # RFC 8032's first test vector by
+          # `SparkleKeyDerivationTests`.
+          #
+          # Both reads are tested for FAILURE, not for an empty
+          # string. This step runs under `set -e`, so a failing
+          # command substitution in an assignment aborts before
+          # any `-z` test could run — a check written that way
+          # is one that cannot fire, which reads as protection
+          # and is not.
+          if ! EXPECTED_PUB="$(python3 scripts/read-plist-key \
+            SUPublicEDKey)"; then
+            echo "::error::build-app.sh declares no" \
+                 "SUPublicEDKey, so nothing says which key an" \
+                 "installed copy trusts."
+            exit 1
+          fi
+          if ! ACTUAL_PUB="$(printf '%s' "$SPARKLE_KEY" \
+            | node scripts/sparkle-public-key.js)"; then
+            echo "::error::could not derive a public key from" \
+                 "SPARKLE_PRIVATE_KEY — the secret is not a" \
+                 "Sparkle EdDSA key."
+            exit 1
+          fi
+          if [ "$ACTUAL_PUB" != "$EXPECTED_PUB" ]; then
+            echo "::error::SPARKLE_PRIVATE_KEY is not the key" \
+                 "this app trusts. Bundles ship" \
+                 "SUPublicEDKey=$EXPECTED_PUB but the secret's" \
+                 "public half is $ACTUAL_PUB. Signing with it" \
+                 "would produce an update every installed copy" \
+                 "refuses."
+            exit 1
+          fi
+          echo "the signing key matches SUPublicEDKey"
+
+          SIG="$(printf '%s' "$SPARKLE_KEY" \
+            | "$TOOL" --ed-key-file - -p "$ARCHIVE")"
+          if [ -z "$SIG" ]; then
+            echo "::error::sign_update produced no signature."
+            exit 1
+          fi
+          # Verify what was just produced, against the same key.
+          # A signature the appcast carries but no installed copy
+          # accepts is an update path that fails on every user's
+          # machine and nowhere else — the one failure mode this
+          # whole lane exists to prevent, and it costs a second
+          # to rule out here.
+          if ! printf '%s' "$SPARKLE_KEY" \
+            | "$TOOL" --verify --ed-key-file - "$ARCHIVE" "$SIG" \
+            >/dev/null 2>&1; then
+            echo "::error::the signature just produced does not" \
+                 "verify against SPARKLE_PRIVATE_KEY — the" \
+                 "secret is corrupt or is not the key whose" \
+                 "public half every build carries."
+            exit 1
+          fi
+          SIDECAR="$ARCHIVE.edsig"
+          printf '%s\n' "$SIG" > "$SIDECAR"
+          echo "path=$SIDECAR" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$SIDECAR")" >> "$GITHUB_OUTPUT"
+          echo "signed $(basename "$ARCHIVE")"
+
       # The acceptance criterion of #32, asserted against the
       # built binary rather than against the source it was built
       # from. Everything upstream — the stamp, the tag check —
@@ -493,7 +618,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.tag.outputs.version }}
           ARCHIVE: ${{ steps.archive.outputs.path }}
+          SIDECAR: ${{ steps.edsig.outputs.path }}
         run: |
+          # The archive, plus its Sparkle signature when the key
+          # was present. An empty SIDECAR is the no-key build and
+          # is not an error here — appcast-sync is what refuses
+          # to offer a release that reaches it without one.
+          # An `if`, not `[ -n … ] && …`. The default shell here
+          # is `bash -e`, where an AND-list whose left side fails
+          # is exempt from the exit — true, load-bearing, and
+          # exactly the kind of rule this file has been bitten by
+          # before. Nothing about this step can be exercised
+          # locally, so it is written to be obvious.
+          UPLOADS=("$ARCHIVE")
+          if [ -n "$SIDECAR" ]; then
+            UPLOADS+=("$SIDECAR")
+          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             # Drop every archive that is not the one being written,
             # because `--clobber` only replaces an asset of the
@@ -543,20 +683,61 @@ jobs:
                 SIBLING="${KEEP%.zip}-unnotarized.zip" ;;
               *) SIBLING="" ;;
             esac
+            # The signature is named after the archive it signs,
+            # so the rename that supersedes one supersedes the
+            # other. Left behind, the stale sidecar still matches
+            # its stale archive's name — and appcast-sync pairs
+            # BY name, so a draft re-run that dropped only the
+            # zip would leave a signature that verifies nothing
+            # sitting beside the good one.
+            if [ -n "$SIBLING" ]; then
+              SIBLING_SIG="$SIBLING.edsig"
+            else
+              SIBLING_SIG=""
+            fi
+            # When THIS run produced no signature, any
+            # `$KEEP.edsig` on the release is a previous run's,
+            # and `gh release upload --clobber` has just
+            # replaced the archive bytes underneath it. Keeping
+            # it pairs a valid-looking signature with bytes it
+            # does not sign — appcast-sync pairs by NAME and
+            # checks only base64 and length, so that release
+            # enters the feed and every installed copy
+            # downloads it and then refuses to install. Treat it
+            # as superseded, exactly like the renamed sibling.
+            # Two names, because they answer two questions and
+            # overloading SIBLING_SIG made it mean "the renamed
+            # archive's signature" on one path and "this run's
+            # own stale signature" on the other — which dropped
+            # the renamed sibling's `.edsig` from the delete set
+            # on the second path.
+            if [ -n "$SIDECAR" ]; then
+              KEEP_SIG="$KEEP.edsig"
+              STALE_SIG=""
+            else
+              KEEP_SIG=""
+              STALE_SIG="$KEEP.edsig"
+            fi
             while IFS= read -r asset; do
               [ -n "$asset" ] || continue
-              if [ "$asset" = "$SIBLING" ]; then
+              if [ "$asset" = "$SIBLING" ] \
+                || { [ -n "$SIBLING_SIG" ] \
+                     && [ "$asset" = "$SIBLING_SIG" ]; } \
+                || { [ -n "$STALE_SIG" ] \
+                     && [ "$asset" = "$STALE_SIG" ]; }; then
                 echo "dropping superseded asset: $asset"
                 if ! gh release delete-asset "$TAG" "$asset" \
                   --yes; then
                   echo "::warning::could not delete $asset — it" \
                        "may still be attached to the draft"
                 fi
-              elif [ "$asset" != "$KEEP" ]; then
+              elif [ "$asset" != "$KEEP" ] \
+                && [ "$asset" != "$KEEP_SIG" ]; then
                 case "$asset" in
-                  *.zip)
-                    echo "::warning::unexpected archive on the" \
-                         "draft, left in place: $asset" ;;
+                  *.zip|*.edsig)
+                    echo "::warning::unexpected archive or" \
+                         "signature on the draft, left in" \
+                         "place: $asset" ;;
                 esac
               fi
             done <<< "$assets"
@@ -569,7 +750,7 @@ jobs:
             # the same invariant the create branch sets.
             gh release edit "$TAG" \
               --target "$(git rev-parse HEAD)"
-            gh release upload "$TAG" "$ARCHIVE" --clobber
+            gh release upload "$TAG" "${UPLOADS[@]}" --clobber
           else
             # --target: if the tag was deleted mid-run (a human
             # aborting a bad release), this call would otherwise
@@ -578,7 +759,7 @@ jobs:
             # the vetted artifact attached under it. Pinned, a
             # minted tag lands on the vetted commit; with the
             # tag intact the flag is ignored.
-            gh release create "$TAG" "$ARCHIVE" \
+            gh release create "$TAG" "${UPLOADS[@]}" \
               --draft \
               --prerelease \
               --title "KiwiDesk $VERSION" \

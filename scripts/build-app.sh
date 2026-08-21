@@ -206,6 +206,41 @@ for b in "${bundles[@]}"; do
     echo "    resource bundle: $(basename "$b")"
 done
 
+# Sparkle (#874). SwiftPM LINKS `@rpath/Sparkle.framework/...`
+# and embeds nothing — a SwiftPM executable has no bundle to
+# embed into — so the framework is copied here and the executable
+# is given the rpath that finds it inside the .app.
+#
+# `ditto`, never `cp -R`: a versioned framework is a nest of
+# symlinks (Versions/Current plus the root aliases) and codesign
+# refuses one that arrives broken.
+#
+# The dev path is untouched. SwiftPM puts the framework beside
+# the binary in .build, which the linker's own `@loader_path`
+# already resolves, so `.build/release/KiwiDesk` — the documented
+# device-QA launch (tests.md) — keeps working without any of this.
+FRAMEWORKS="$APP/Contents/Frameworks"
+SPARKLE_SRC="$BUILT/Sparkle.framework"
+if [ ! -d "$SPARKLE_SRC" ]; then
+    echo "error: $SPARKLE_SRC is missing. The app would build," \
+         "launch, and die immediately on a missing @rpath" \
+         "framework. Run 'swift build -c release' first." >&2
+    exit 1
+fi
+mkdir -p "$FRAMEWORKS"
+ditto "$SPARKLE_SRC" "$FRAMEWORKS/Sparkle.framework"
+echo "    framework: Sparkle.framework"
+
+# BEFORE signing, never after: install_name_tool rewrites the
+# Mach-O load commands, which invalidates any signature already
+# on the binary. Deliberately not guarded with `|| true` — the
+# linker does not add this rpath today, and if a toolchain starts
+# doing so this call fails loudly and someone looks, which beats
+# silently swallowing the one command that makes the app able to
+# find its updater.
+install_name_tool -add_rpath "@executable_path/../Frameworks" \
+    "$MACOS/KiwiDesk"
+
 # ---------------------------------------------------------------
 # 3. Icon (#89). One .icon yields both the modern Assets.car
 #    renditions and the legacy .icns; actool reports the exact
@@ -327,6 +362,28 @@ cat > "$PLIST" <<PLISTEOF
     <true/>
     <key>NSHumanReadableCopyright</key>
     <string>KiwiCanopy</string>
+    <!-- Sparkle (#874). Both keys are BAKED INTO EVERY BUILD and
+         are therefore permanent: an installed copy only trusts
+         updates signed by SUPublicEDKey and only looks at
+         SUFeedURL, so changing either reaches nobody who has not
+         already updated. The public key is public by
+         construction — it ships here — and its private half
+         lives only in the maintainer's keychain and in the
+         SPARKLE_PRIVATE_KEY actions secret. -->
+    <key>SUFeedURL</key>
+    <string>https://kiwidesk.kiwicanopy.com/appcast.xml</string>
+    <!-- Answer the automatic-check question HERE, because the
+         alternative is Sparkle asking it with a modal a few
+         seconds after first launch. The ruling, what it gives
+         up and what would reopen it are in
+         docs/design-decisions.md ▸ "Background update checks
+         are on, and there is no switch". Do not unset this key
+         without changing that entry first. System profiling
+         stays off, which that entry leans on. -->
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUPublicEDKey</key>
+    <string>ROU/g1Y79H9TFrN8zIvD5Cl8yJKi8BrAicyFUBQ9l9A=</string>
 </dict>
 </plist>
 PLISTEOF
@@ -369,6 +426,49 @@ if [ "$IDENTITY" = "-" ]; then
 fi
 # Inside-out: nested code must already be sealed when the outer
 # bundle is signed, or the outer signature does not cover it.
+# Sparkle is four nested signable pieces plus the framework, and
+# every one of them has to be sealed before the framework, which
+# has to be sealed before the app. Upstream ships ALL of it
+# ad-hoc signed with no Team ID (checked against 2.9.6, both
+# distributions), so this is not re-signing over a vendor
+# identity — it is the only real signature the nest ever gets,
+# and notarization rejects the app if one piece is missed.
+#
+# A missing piece is a hard error rather than a skip. The set is
+# stable for a given Sparkle version, so an absent one means the
+# layout moved on a version bump — and a loop that quietly signs
+# three of four ships an app that fails notarization on the build
+# machine's blind side, which is exactly what
+# packaging-and-release.md ▸ "Every distributable artifact needs
+# its OWN ticket" is about.
+SPARKLE_FW="$FRAMEWORKS/Sparkle.framework"
+# Resolve `Versions/Current` rather than hard-coding `B`: the
+# letter is Sparkle's to change, the symlink is not.
+# `CDPATH=` because a set CDPATH makes `cd` echo the directory it
+# landed in, which would append a second line to this assignment.
+# It fails closed either way — the `-e` below then reports a
+# layout change — but it would report the wrong problem.
+SPARKLE_V="$(CDPATH= cd "$SPARKLE_FW/Versions/Current" && pwd -P)"
+for nested in \
+    "XPCServices/Downloader.xpc" \
+    "XPCServices/Installer.xpc" \
+    "Autoupdate" \
+    "Updater.app"
+do
+    if [ ! -e "$SPARKLE_V/$nested" ]; then
+        echo "error: $SPARKLE_V/$nested is missing. Sparkle's" \
+             "nested layout changed; signing the rest would" \
+             "produce an app that fails notarization." >&2
+        exit 1
+    fi
+    codesign --force "${TS[@]}" --options runtime \
+        --sign "$IDENTITY" "$SPARKLE_V/$nested"
+    echo "    signed: Sparkle.framework/$nested"
+done
+codesign --force "${TS[@]}" --options runtime \
+    --sign "$IDENTITY" "$SPARKLE_FW"
+echo "    signed: Sparkle.framework"
+
 for b in "$RES"/*.bundle; do
     [ -e "$b" ] || continue
     codesign --force "${TS[@]}" --options runtime \

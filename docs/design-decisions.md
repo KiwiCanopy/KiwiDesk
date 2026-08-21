@@ -309,6 +309,45 @@ artifact needs its OWN ticket*. `scripts/build-app.sh` already
 implements it; the change that promotes one carries it into the
 release workflow, which asks for `--zip` alone.
 
+### Background update checks are on, and there is no switch
+
+**[Rationale]**
+
+KiwiDesk checks for updates in the background, `Info.plist` says
+so with `SUEnableAutomaticChecks`, and no Settings row, Lua verb
+or census key lets a user turn it off.
+
+The alternative is not "no prompt". Left unset, Sparkle asks the
+question itself — a modal, a few seconds after first launch,
+from an app with no Dock tile to explain where the dialog came
+from and quite possibly on top of the first-run tour. That is
+the worst version of offering the choice: it arrives before the
+user knows what KiwiDesk is, and it is the first thing the app
+ever says to them.
+
+Answering it in the plist is what *approachable by default* means
+here. An updater nobody remembers to run is not an update path,
+and this project's whole distribution argument
+([above](#no-distribution-channel-without-an-update-path)) rests
+on installed copies actually moving forward.
+
+**What is given up, stated rather than glossed:** a Mac app that
+checks automatically normally offers the toggle, and
+`.claude/rules/gui.md`'s north star is Apple-native behavior.
+This is a deliberate exception to it, taken because the toggle's
+only *shipped* form was a modal at the worst moment. The check
+sends nothing about the machine — Sparkle's system profiling
+stays off, so it is a plain versioned GET — which is what makes
+the missing switch a preference question rather than a privacy
+one. If it were sending a profile, this ruling would go the
+other way.
+
+**What would reopen it:** a Settings row is the answer whenever
+someone builds one, and this entry is not an argument against
+it. It is the answer to "why is there none *yet*", so a future
+row supersedes this without contradicting it. What must not
+happen is unsetting the key and letting Sparkle ask again.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**

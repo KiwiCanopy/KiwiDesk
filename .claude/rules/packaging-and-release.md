@@ -55,10 +55,101 @@ a `notarytool` keychain profile the developer created themselves.
 website download — the cask installs from a `.zip` and never
 needs one.
 
-Signing is inside-out over `Resources/*.bundle` only, so the
-first dependency that adds nested code (`Contents/Frameworks/`,
-i.e. Sparkle) has to extend that loop — packaging is not "done"
-for it.
+**Signing is inside-out over the whole nest, and the order is
+the obligation.** The bundle carries `Resources/*.bundle` and,
+since #874, `Contents/Frameworks/Sparkle.framework` — which is
+itself four signable pieces (both XPC services, `Autoupdate`,
+`Updater.app`) before the framework, before the app. Every rule
+below is held by `SparklePackagingTests`, which pins the order in
+the script rather than the behaviour, a shell script being
+untestable without a signing identity:
+
+- **A nested piece that is missing is a hard error, never a
+  skip.** The set is stable for a Sparkle version, so an absent
+  one means the layout moved on a bump — and a loop that quietly
+  signs three of four ships an app that fails notarization days
+  later, from a build that verified perfectly here.
+- **The framework is copied and the executable's rpath written
+  BEFORE any signing.** `install_name_tool` rewrites the Mach-O
+  load commands, so running it afterwards invalidates the
+  signature it comes after. SwiftPM links Sparkle and embeds
+  nothing, so a bundle without that copy launches and dies on a
+  missing `@rpath`.
+- **A vendor framework's own signature is not something to
+  preserve.** Sparkle ships ad-hoc signed with no Team ID
+  (checked against 2.9.6, both distributions), so ours is the
+  only real signature the nest gets. A future dependency that
+  arrives properly signed is a different case — weigh it then
+  rather than inheriting this sentence.
+
+**`SUFeedURL` and `SUPublicEDKey` are permanent from the first
+build that ships them.** An installed copy looks at no other feed
+and trusts no other key, so changing either reaches nobody who
+has not already updated — and losing the EdDSA private half
+strands every installed copy with no recovery. It belongs
+wherever the Developer ID certificate belongs, and in the
+`SPARKLE_PRIVATE_KEY` actions secret. **Leave
+`SUEnableAutomaticChecks` set.** `docs/design-decisions.md` ▸
+*Background update checks are on, and there is no switch* is the
+ruling, and unsetting the key is what changes it.
+
+**A build must not ship a feed URL that 404s.** The plist keys
+and the appcast that answers them are one shipping decision, so a
+release cut between the two halves advertises an update channel
+that errors on click. Either both are in the tag, or neither.
+So a feed with no offerable release renders an itemless channel
+rather than no file: an itemless channel is a well-formed
+"nothing newer" — confirmed against Sparkle 2.9.6, whose
+`SUAppcast` parses it and reaches `SUNoUpdateError`, silent on a
+background check — where a missing file is an error dialog.
+
+**The feed is written from PUBLISHED releases, never from the
+draft.** `release.yml` drafts, and a draft's asset URL is
+unfetchable without auth, so an item written at tag time
+advertises an update every installed copy fails to download for
+as long as the highlights take to curate. `appcast-sync` reads
+the releases API and skips anything still a draft;
+`.github/workflows/changelog.yml` runs it on `release:
+published`, alongside the notes it shares a corpus with.
+`.claude/rules/site.md` owns the generated file itself.
+
+**Three clauses decide whether a release enters the feed, and
+`scripts/appcast-sync` names the one that failed:** it is
+published; it carries exactly one distributable `.zip`, never a
+`-unnotarized.zip` that Sparkle downloads in full and then
+refuses; and that archive has a `.edsig` sidecar. No version
+cutoff is written anywhere and none should be — the releases
+that predate the updater have no sidecar and fall out of the feed
+as a consequence of the data rather than of a number someone has
+to remember. `AppcastParserTests` pins each refusal.
+
+**The signature is produced where the bytes are, and travels as a
+sidecar** (`AppcastSigningWorkflowTests` and
+`AppcastPublishWorkflowTests`, and `SparkleKeyDerivationTests`
+for the key check below)**.** `release.yml` signs the archive it
+has just built and attaches `<archive>.edsig` to the release;
+the sync job reads it there.
+That split is what lets the feed be written by a job that never
+holds the private key, and it is why the sidecar is renamed and
+dropped in step with the archive it signs — the two are paired by
+name.
+
+**Prove the key is THE key before signing with it.** Signing and
+then verifying with the same key shows the secret is
+self-consistent and nothing more — a valid but wrong key passes,
+and the first person offered the update is the one who finds out.
+`release.yml` derives the public half
+(`scripts/sparkle-public-key.js`) and refuses to sign unless it
+equals the `SUPublicEDKey` the packager ships.
+
+**Sign with `--ed-key-file -`, never `-s`.** `sign_update` 2.9.6
+refuses `-s` outright for a key in the current format, after
+printing a deprecation warning that reads like a warning rather
+than a failure; the key stanza reaches the tool on stdin
+instead. Verify what was signed before shipping it — the tool's
+`--verify` exits non-zero on a bad signature, and a signature no
+installed copy accepts is an update that fails on every user's
+machine and nowhere else.
 
 Whether a built artifact may be *published* is a separate,
 product decision: see "No distribution channel without an update
@@ -244,11 +335,13 @@ sentences of summary, then `###` sections whose titles the author
 chooses, each carrying at least one entry. **Curate the draft,
 then publish** — `release.yml` drafts, and
 `.github/workflows/changelog.yml` fires on *publish* and syncs the
-body onto the site's release-notes page, so publishing an
-uncurated body shows the raw generated list until a correction
-lands. `scripts/release.sh` prints the skeleton after the tag
-push, and `scripts/changelog-sync --body <file>` reads a DRAFT's
-body from a file — the mode to use before publishing, since a
+body onto the site's release-notes page AND into Sparkle's feed,
+so publishing an uncurated body shows the raw generated list
+until a correction lands — in the update window as well as on the
+page, since both render the one curated block.
+`scripts/release.sh` prints the skeleton after the tag push,
+and `scripts/changelog-sync --body <file>` reads a DRAFT's body
+from a file — the mode to use before publishing, since a
 draft has no tag for `--release` to fetch. The same parser
 refuses a body it cannot read rather than half-rendering it, and
 `ChangelogParserTests` pins every refusal. `.claude/rules/site.md`
@@ -369,7 +462,15 @@ a whole top-level directory.
 **A workflow that changes the tree opens a PR; it never writes to
 `main`.** `.github/workflows/app-font.yml` watches the vendored
 SketchyBar App Font weekly and is the shape to copy for any later
-watcher (a Sparkle appcast, a tap bump). Three obligations, all
+**watcher** — something that polls an upstream nobody here
+controls. The Sparkle appcast is deliberately NOT one: it is
+generated from this repo's own published releases, on the
+`release: published` event, so it lives beside the notes it
+shares a corpus with in `changelog.yml` rather than in a poller
+of its own. What it does inherit is this rule's first clause —
+run the gate before the PR exists, because a PR opened with
+`GITHUB_TOKEN` fires no workflows, so `changelog.yml` runs the
+site build AND `check-site-tokens.py` itself. Three obligations, all
 enforced by `AppFontWorkflowTests`: it **calls the developer
 script** rather than re-implementing the vendoring inline, because
 only the hand-run path is ever exercised outside the cron; it

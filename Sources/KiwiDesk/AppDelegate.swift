@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let core = KiwiCore()
     let permissions = PermissionMonitor()
     var statusItem: StatusItemController?
+
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
     /// Created on first `dashboard` access. Kept alongside so
@@ -105,6 +106,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
+        // The ONE construction of the app's updater (#874).
+        // AppUpdater.swift owns why it lives here and nowhere
+        // else; `UpdaterSeamGuardTests` holds it to that.
+        statusItem.updater = AppUpdaterFactory.make()
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }

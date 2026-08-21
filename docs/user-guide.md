@@ -334,6 +334,18 @@ the KiwiDesk icon opens the quick menu where you can:
 - **View Shortcuts…**: Open a read-only reference of every shortcut
   bound in the currently active layer — see below.
 - **Settings…**: Open the full Settings window.
+- **Check for Updates…**: Ask right now whether a newer KiwiDesk
+  has been released, and install it if you want it. KiwiDesk also
+  checks on its own in the background, so you will normally be
+  told rather than have to ask; this is the row for when you want
+  to know immediately. It is greyed while a check is already
+  running or an update is part-way through installing.
+
+  **If you installed with Homebrew**, KiwiDesk now keeps itself
+  up to date and `brew upgrade` steps aside for it. To move an
+  older copy onto a version that can do this, run
+  `brew upgrade --cask kiwidesk` once — naming the cask works
+  even after `brew upgrade` starts skipping it.
 - **Window Management Paused…** (only when Accessibility permission
   is missing): appears at the top of the menu and reopens the
   permission wizard so tiling can resume.

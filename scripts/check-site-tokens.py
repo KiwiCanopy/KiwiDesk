@@ -58,11 +58,19 @@ of a silently skipped assertion.
 from __future__ import annotations
 
 import argparse
+import io
 import pathlib
 import re
 import sys
+import urllib.parse
+import xml.etree.ElementTree as ET
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
+
+# The exact namespace Sparkle binds its elements to.
+SPARKLE_NS = (
+    "http://www.andymatuschak.org/xml-namespaces/sparkle"
+)
 STYLES = REPO / "site" / "src" / "styles"
 SRC = REPO / "site" / "src"
 TOKENS = STYLES / "brand-tokens.css"
@@ -224,6 +232,159 @@ def check_branded_404(dist: pathlib.Path) -> None:
             "(#635)."
         )
     print(f"{page.relative_to(REPO)} is the branded 4-kiwi-4 page")
+
+
+def check_appcast(dist: pathlib.Path) -> None:
+    """Sparkle's feed must be served, at the URL every build bakes in.
+
+    This lives on the SITE gate rather than in the Swift suite, and
+    that placement is the whole point. `site/**` is on
+    `.github/ci-ignore.txt`, so a change confined to the site skips
+    the macOS jobs — which is exactly the change that could delete
+    this file. A guard in a suite that does not run for the edit it
+    is watching guards nothing; `site.yml` runs on every `site/**`
+    PR, so it is the gate that can actually catch it
+    (`CiPathFilterTests` is what refused the other placement), and
+    `changelog.yml` runs it again on the sync PR, which fires no
+    workflows of its own.
+
+    Read from the BUILT output, not from `public/`: what matters is
+    the file Cloudflare serves, and `public/` reaching `dist/` is an
+    Astro behaviour rather than a promise this repo controls.
+
+    Losing this is unrecoverable in the strict sense — an installed
+    copy reads one URL forever, so a 404 here is an error dialog on
+    the screen of every user who ever installed KiwiDesk, with no
+    way to reach them (docs/design-decisions.md, "No distribution
+    channel without an update path").
+
+    **What it does NOT check: that the feed offers anything.** An
+    itemless channel is well-formed and passes here, deliberately —
+    it is the correct state before the first signed release. The
+    guard that a PUBLISHED release actually reaches the feed is
+    `appcast-sync --release`, run by `changelog.yml`; this one
+    answers "is it served, and is it a feed".
+    """
+    # `.read_text()`, never `source()`. That helper strips JSX
+    # block comments, and a shell script opens one every time it
+    # globs — `for locale_file in "$LOCALES"/*.json` begins a
+    # span that swallows the plist and everything else up to the
+    # next `*/`. Read through it, this reported "no SUFeedURL
+    # declared" for a plist that was plainly there.
+    build = (REPO / "scripts" / "build-app.sh").read_text(
+        encoding="utf-8"
+    )
+    match = re.search(
+        r"<key>SUFeedURL</key>\s*<string>(?P<url>[^<]+)</string>",
+        build,
+    )
+    if not match:
+        fail(
+            "scripts/build-app.sh declares no SUFeedURL, so the "
+            "feed this checks for has no shipped URL to answer."
+        )
+    url = match.group("url")
+    parts = urllib.parse.urlsplit(url)
+
+    # The WHOLE path, not the basename. Checking only the last
+    # component means a feed URL that ever gains a directory
+    # segment is looked for at the wrong place, found, and passes
+    # green while the shipped URL 404s — the exact false green
+    # this check exists to make impossible.
+    relative = parts.path.strip("/")
+    if not relative:
+        fail(f"SUFeedURL names no path to serve: {url}")
+    served = dist.joinpath(*relative.split("/"))
+
+    # The host, too. Nothing else covers it: `build-app.sh` is
+    # outside site.yml's path filter, so a host typo would ship
+    # with no gate having read it.
+    canonical = re.search(
+        r'SITE_URL\s*\?\?\s*"(?P<site>[^"]+)"',
+        source_without_comments(REPO / "site" / "astro.config.mjs"),
+    )
+    # A miss FAILS rather than skipping. Hanging the host check
+    # on `if canonical:` meant that the day astro.config.mjs
+    # stopped matching, half this function would switch itself
+    # off while the other half still printed its success line —
+    # a guard that stops guarding with no signal. The site cannot
+    # build without a canonical URL, so not finding one is a
+    # defect, not an absence.
+    if not canonical:
+        fail(
+            "site/astro.config.mjs declares no `SITE_URL ?? \"…\"`, "
+            "so the host every build bakes into SUFeedURL cannot "
+            "be checked against the host the site publishes at."
+        )
+    expected_host = urllib.parse.urlsplit(
+        canonical.group("site")
+    ).netloc
+    if not expected_host:
+        fail(
+            f"site/astro.config.mjs's SITE_URL "
+            f"({canonical.group('site')}) has no host."
+        )
+    if parts.netloc != expected_host:
+        fail(
+            f"SUFeedURL points at {parts.netloc} but the site "
+            f"is published at {expected_host}. Every build ever "
+            "shipped reads that host and no other."
+        )
+
+    if not served.is_file():
+        fail(
+            f"{served} is missing, but every KiwiDesk build ships "
+            f"SUFeedURL={url}. An installed copy reads that URL and "
+            "no other, so this file 404ing is a permanent update "
+            "error for everyone who already installed. It is "
+            "generated by scripts/appcast-sync — rebuild it rather "
+            "than writing one by hand."
+        )
+
+    # PARSED, not grepped. Substring checks for `<rss` and the
+    # namespace are satisfied by a truncated file — a half-written
+    # feed keeps both and still fails in Sparkle, which parses it
+    # with NSXMLDocument and then runs XPath /rss/channel/item.
+    text = served.read_text(encoding="utf-8")
+    try:
+        root = ET.fromstring(text)
+    except ET.ParseError as error:
+        fail(
+            f"{served} is not well-formed XML ({error}). Sparkle "
+            "reports a malformed feed as an update error, which "
+            "is the same failure as a 404 with a more confusing "
+            "message."
+        )
+    if root.tag != "rss" or root.find("channel") is None:
+        fail(
+            f"{served} parses but is not an appcast — Sparkle "
+            "looks for /rss/channel/item and would find nothing."
+        )
+    # The DECLARED namespaces, collected from the parse rather
+    # than matched as a substring. `SPARKLE_NS in text` looked
+    # equivalent and is not: a feed declaring
+    # `…/xml-namespaces/sparkle-v2` contains the correct URI as a
+    # prefix of a wrong one and passed, while Sparkle would bind
+    # nothing and silently ignore every `sparkle:` element in the
+    # file — the signatures among them.
+    declared = {
+        uri
+        for _, (_, uri) in ET.iterparse(
+            io.StringIO(text), events=("start-ns",)
+        )
+    }
+    if SPARKLE_NS not in declared:
+        fail(
+            f"{served} declares {sorted(declared) or 'no'} "
+            f"namespace(s), not {SPARKLE_NS}. Without the exact "
+            "URI Sparkle binds no sparkle: element, signatures "
+            "included."
+        )
+    items = root.findall("./channel/item")
+    print(
+        f"{served.relative_to(REPO)} answers the shipped "
+        f"SUFeedURL ({url}), {len(items)} item(s)"
+    )
 
 
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
@@ -389,6 +550,7 @@ def main() -> None:
     check_accent(tokens)
     dist = pathlib.Path(args.dist).resolve()
     check_branded_404(dist)
+    check_appcast(dist)
     check_sitemaps_disjoint(dist)
     check_var_references(dist)
 

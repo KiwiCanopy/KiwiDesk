@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Reads one `<string>` value out of build-app.sh's Info.plist.
+
+`scripts/build-app.sh` is the ONE owner of what every shipped
+bundle declares — the feed URL, the public key, the deployment
+floor, the version. Anything that needs to agree with a bundle
+reads it from there rather than restating it, because a literal
+in a second file agrees with itself forever: move the feed or
+raise the floor, and every copy that was not edited keeps
+passing against the value that used to be true.
+
+This exists because there were about to be five readers, each
+with its own regex over a shell heredoc — `appcast-sync`,
+`check-site-tokens.py`, the Swift test helper, and two shell
+steps in `release.yml`. `.claude/rules/parity-tests.md` puts the
+line at two.
+
+**Read the file raw.** `check-site-tokens.py`'s `source()`
+helper strips JSX block comments, and a shell script opens one
+every time it globs — `for locale_file in "$LOCALES"/*.json`
+begins a span that swallows the plist and everything else up to
+the next `*/`. Reading through it reported "no SUFeedURL
+declared" for a plist that was plainly there.
+
+Exit 1 with a message when the key is absent, so a caller gets
+a named failure rather than an empty string that compares equal
+to nothing.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BUILD_APP = ROOT / "scripts" / "build-app.sh"
+
+
+def plist_value(key: str) -> str | None:
+    """The `<string>` following `<key>` in the plist heredoc."""
+    try:
+        text = BUILD_APP.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    match = re.search(
+        r"<key>" + re.escape(key) + r"</key>\s*<string>"
+        r"(?P<value>[^<]*)</string>",
+        text,
+    )
+    if not match:
+        return None
+    value = match.group("value")
+    return value if value else None
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 1:
+        print(
+            "usage: scripts/read-plist-key <Info.plist key>",
+            file=sys.stderr,
+        )
+        return 2
+    value = plist_value(argv[0])
+    if value is None:
+        print(
+            f"read-plist-key: {BUILD_APP.name} declares no "
+            f"{argv[0]}, or declares it empty. That file is the "
+            "one owner of what every bundle ships — add the key "
+            "there rather than hardcoding a value in the caller.",
+            file=sys.stderr,
+        )
+        return 1
+    print(value)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
