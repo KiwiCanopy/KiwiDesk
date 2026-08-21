@@ -745,6 +745,7 @@
   "onboarding.starter_spaces.tile.axlabel.no_screen": "空间 %1$@，%2$@",
   "onboarding.starter_spaces.title": "你的空间已准备就绪",
   "onboarding.window.title": "KiwiDesk 设置",
+  "palettes.already_saved": "这些颜色已保存为“%1$@”。",
   "palettes.applied": "已应用",
   "palettes.builtin": "内置",
   "palettes.bundled": "内置调色板",

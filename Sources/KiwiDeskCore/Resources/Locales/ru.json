@@ -745,6 +745,7 @@
   "onboarding.starter_spaces.tile.axlabel.no_screen": "Пространство %1$@, %2$@",
   "onboarding.starter_spaces.title": "Твои пространства готовы",
   "onboarding.window.title": "Настройка KiwiDesk",
+  "palettes.already_saved": "Эти цвета уже сохранены как «%1$@».",
   "palettes.applied": "Применена",
   "palettes.builtin": "Встроенная",
   "palettes.bundled": "Входящие в комплект",

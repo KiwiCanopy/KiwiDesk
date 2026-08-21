@@ -746,6 +746,7 @@
   "onboarding.starter_spaces.tile.axlabel.no_screen": "Space %1$@, %2$@",
   "onboarding.starter_spaces.title": "Your Spaces are ready",
   "onboarding.window.title": "KiwiDesk Setup",
+  "palettes.already_saved": "These colors are already saved as “%1$@”.",
   "palettes.applied": "Applied",
   "palettes.builtin": "Built-in",
   "palettes.bundled": "Bundled",
