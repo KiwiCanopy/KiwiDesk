@@ -79,6 +79,9 @@ def _translation_files(
 def main(argv: list[str]) -> int:
     global LOCALES_DIR
     args = argv[1:]
+    if "-h" in args or "--help" in args:
+        print(__doc__)
+        return 0
     site = "--site" in args
     flag = "--site " if site else ""
     if site:
