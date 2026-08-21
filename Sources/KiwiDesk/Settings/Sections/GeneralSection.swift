@@ -36,7 +36,6 @@ struct GeneralSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 appliesImmediatelySection
-                installInventorySection
                 aboutSection
                 advancedSection
             }

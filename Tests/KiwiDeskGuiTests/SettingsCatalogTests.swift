@@ -69,10 +69,8 @@ struct SettingsCatalogTests {
         // panel's "Every color at once" scene.
         // 67 since #794: Spaces & Layouts gains its panel's
         // per-Space preview.
-        // 68 since #795's device round: the install inventory
-        // becomes a card of its own instead of four loose lines
-        // under the wordmark.
-        #expect(allEntries.count == 68)
+        // 67 since #875: deleted the install inventory card.
+        #expect(allEntries.count == 67)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

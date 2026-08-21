@@ -17,8 +17,7 @@ extension SettingsValueReadout {
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,
             .iconPickerRecents, .onboardingOpenAtLogin,
-            .installInventory, .advancedExportBackup,
-            .advancedRestoreBackup:
+            .advancedExportBackup, .advancedRestoreBackup:
             // no model path — never booked by the diff.
             // #606's pair joins the list for the same reason as
             // the reset actions: `(action) …` is not a model path,

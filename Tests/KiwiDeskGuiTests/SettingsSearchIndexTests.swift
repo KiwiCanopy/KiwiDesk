@@ -207,15 +207,9 @@ struct SettingsSearchIndexTests {
                 // anchor yet).
                 .shortcuts: 12,
                 .appRules: 3,
-                // 10 since #606: the backup pair are census rows
-                // with no #277 catalog anchor, like every other
-                // General row. An earlier cut gave them catalog
-                // controls claiming search could scroll to them —
-                // it could not, because nothing hands a General
-                // row to an anchor primitive, and the catalog
-                // guard passed only because `model.exportBackup()`
-                // and `model.restoreBackup(…)` happen to contain
-                // the needles it greps for.
+                // 10: the backup pair and the other General rows
+                // have no #277 catalog anchor. (The deleted
+                // install inventory card was anchored).
                 .general: 10,
             ]
         )
