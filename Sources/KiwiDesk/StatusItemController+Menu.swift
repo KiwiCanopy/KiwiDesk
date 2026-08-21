@@ -170,9 +170,8 @@ extension StatusItemController {
         settings.image = symbol("gearshape")
         menu.addItem(settings)
 
-        menu.addItem(makeUpdatesItem())
-
         menu.addItem(.separator())
+        menu.addItem(makeUpdatesItem())
         let quit = NSMenuItem(
             title: L("menu.quit", "Quit KiwiDesk"),
             action: #selector(NSApplication.terminate(_:)),
