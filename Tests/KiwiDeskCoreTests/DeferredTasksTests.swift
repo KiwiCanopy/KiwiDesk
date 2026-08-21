@@ -130,4 +130,54 @@ struct DeferredTasksTests {
         #expect(settle?.isCancelled == true)
         #expect(core.deferred.task(for: .spaceSettle) == nil)
     }
+
+    @Test("maxWait forces execution during a continuous burst")
+    func maxWaitForcesExecution() async {
+        let owner = DeferredTasks()
+        var fireCount = 0
+        let body: @MainActor () -> Void = {
+            fireCount += 1
+        }
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(50),
+            maxWait: .milliseconds(80),
+            body
+        )
+        for _ in 1...6 {
+            try? await Task.sleep(for: .milliseconds(20))
+            owner.schedule(
+                .barTitleRefresh,
+                after: .milliseconds(50),
+                maxWait: .milliseconds(80),
+                body
+            )
+        }
+        await owner.task(for: .barTitleRefresh)?.value
+        #expect(fireCount >= 1)
+    }
+
+    @Test("cancel() clears the maxWait burst tracking")
+    func cancelClearsBurstTracking() async {
+        let owner = DeferredTasks()
+        var fired = false
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(50),
+            maxWait: .milliseconds(80)
+        ) {
+            fired = true
+        }
+        owner.cancel(.barTitleRefresh)
+        #expect(!fired)
+        owner.schedule(
+            .barTitleRefresh,
+            after: .milliseconds(5),
+            maxWait: .milliseconds(80)
+        ) {
+            fired = true
+        }
+        await owner.task(for: .barTitleRefresh)?.value
+        #expect(fired)
+    }
 }
