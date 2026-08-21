@@ -60,6 +60,8 @@ import argparse
 import base64
 import binascii
 import html
+import importlib.machinery
+import importlib.util
 import json
 import re
 import subprocess
@@ -69,11 +71,47 @@ from email.utils import format_datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# The one parser for what a bundle declares, shared with
+# `check-site-tokens.py`, `release.yml` and the Swift helper.
+# Loaded by path because the script has no `.py` extension —
+# these are commands first and modules second.
+# An explicit loader, because `spec_from_file_location` infers
+# one from the SUFFIX and these scripts deliberately have none —
+# it returns a spec with `loader=None` and the import fails on
+# an attribute error that says nothing about why.
+_reader_path = Path(__file__).resolve().parent / "read-plist-key"
+_reader_loader = importlib.machinery.SourceFileLoader(
+    "read_plist_key", str(_reader_path)
+)
+_reader = importlib.util.module_from_spec(
+    importlib.util.spec_from_loader("read_plist_key", _reader_loader)
+)
+_reader_loader.exec_module(_reader)
+plist_value = _reader.plist_value
 APPCAST = ROOT / "site" / "public" / "appcast.xml"
 CHANGELOG = ROOT / "site" / "src" / "data" / "changelog.json"
-BUILD_APP = ROOT / "scripts" / "build-app.sh"
 
-FEED_URL = "https://kiwidesk.kiwicanopy.com/appcast.xml"
+
+
+def feed_url() -> str:
+    """The channel `<link>`, from the packager that owns it.
+
+    Restating the URL here would be a second source of truth for
+    the one string this whole subsystem calls permanent — and in
+    the same tree whose `site.md` says to read `build-app.sh`
+    rather than restate it."""
+    value = plist_value("SUFeedURL")
+    if not value:
+        print(
+            "appcast-sync: scripts/build-app.sh declares no "
+            "SUFeedURL, so the feed has no shipped URL to name "
+            "as its own link.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return value
+
 
 # A tag this project cuts. Same shape changelog-sync matches;
 # that script's `_TAG` carries why anything else sorts badly.
@@ -149,7 +187,7 @@ def fetch_releases() -> list[dict]:
     return [r for r in data if not r.get("draft")]
 
 
-def fetch_asset_text(asset: dict) -> str:
+def fetch_asset_text(asset: dict, release: dict | None = None) -> str:
     """Downloads one asset's BYTES through the API.
 
     `browser_download_url` is the public mirror and would work
@@ -158,59 +196,56 @@ def fetch_asset_text(asset: dict) -> str:
     url = asset.get("url")
     if not url:
         return ""
+    args = [
+        "gh",
+        "api",
+        "-H",
+        "Accept: application/octet-stream",
+        str(url),
+    ]
     result = subprocess.run(
-        [
-            "gh",
-            "api",
-            "-H",
-            "Accept: application/octet-stream",
-            str(url),
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
+        args, capture_output=True, text=True, check=False
     )
     if result.returncode != 0:
-        return ""
+        # HARD failure, never an empty string. Returning "" here
+        # made a network flake, a rate limit or an auth problem
+        # arrive downstream as "the sidecar is empty" — which in
+        # `--all` is a non-fatal skip. The result was a green
+        # run, an opened PR, and a feed silently missing the
+        # release that had just been published: the failure
+        # `docs/design-decisions.md` ▸ *No distribution channel
+        # without an update path* calls unrecoverable, reached
+        # by a transient error rather than by a bad release.
+        print(
+            f"appcast-sync: could not download "
+            f"`{asset.get('name')}` — `{' '.join(args)}` failed:"
+            f"\n{result.stderr.strip()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     return result.stdout.strip()
 
 
 def minimum_system_version() -> str:
-    """The one copy of the floor lives in build-app.sh, which
-    writes it into every bundle's `LSMinimumSystemVersion`.
+    """The deployment floor every bundle declares.
 
     Read rather than restated: a feed offering an update to a
-    machine that cannot run it produces a download, an install
-    and a bundle macOS refuses to launch. Extraction is the same
-    technique release.yml uses on the version constant."""
-    try:
-        text = BUILD_APP.read_text(encoding="utf-8")
-    except OSError as error:
+    machine that cannot run it produces a download, an install,
+    and a bundle macOS refuses to launch."""
+    value = plist_value("LSMinimumSystemVersion")
+    if not value:
         print(
-            f"appcast-sync: could not read "
-            f"{BUILD_APP.relative_to(ROOT)} ({error}), so the "
-            "minimum system version could not be derived.",
+            "appcast-sync: scripts/build-app.sh declares no "
+            "LSMinimumSystemVersion. It is the one copy of the "
+            "floor — restating it here would let the feed offer "
+            "an update macOS refuses to launch.",
             file=sys.stderr,
         )
         sys.exit(1)
-    match = re.search(
-        r"<key>LSMinimumSystemVersion</key>\s*<string>"
-        r"(?P<version>[^<]+)</string>",
-        text,
-    )
-    if not match:
-        print(
-            "appcast-sync: no LSMinimumSystemVersion in "
-            f"{BUILD_APP.relative_to(ROOT)}. It is the one copy "
-            "of the floor — restating it here instead would let "
-            "the feed offer an update macOS refuses to launch.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    return match.group("version")
+    return value
 
 
-def read_notes() -> dict[str, dict]:
+def read_notes(source: Path | None = None) -> dict[str, dict]:
     """The curated entries by tag, from changelog-sync's output.
 
     A missing file is not fatal. The two syncs run in one step
@@ -218,13 +253,32 @@ def read_notes() -> dict[str, dict]:
     not run yet — the feed is still correct without notes, and
     an item with a thin description updates where no item at all
     does not."""
+    path = source or CHANGELOG
+    if not path.exists():
+        return {}
+    # Present but unreadable is a DIFFERENT case from absent, and
+    # only the second is tolerable. Swallowing both gave every
+    # item the generic fallback description on a green run — the
+    # update window would quietly stop describing releases while
+    # the site kept rendering them from the same file.
     try:
-        data = json.loads(CHANGELOG.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
         entries = data["releases"]
-    except (OSError, json.JSONDecodeError, KeyError):
-        return {}
+    except (OSError, json.JSONDecodeError, KeyError) as error:
+        print(
+            f"appcast-sync: {path} exists "
+            f"but is not readable as generated output ({error}). "
+            "It IS generated — rebuild it with "
+            "`scripts/changelog-sync --all`.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     if not isinstance(entries, list):
-        return {}
+        print(
+            f"appcast-sync: {path}'s `releases` is not a list.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     return {
         entry["tag"]: entry
         for entry in entries
@@ -236,28 +290,50 @@ def read_notes() -> dict[str, dict]:
 # Rendering
 
 
-_BOLD = re.compile(r"\*\*(?P<text>.+?)\*\*")
 _CODE = re.compile(r"`(?P<text>[^`]+)`")
+_BOLD = re.compile(r"\*\*(?P<text>.+?)\*\*")
+_ITALIC = re.compile(r"(?<![\*\w])\*(?P<text>[^\*\n]+?)\*(?!\*)")
 _LINK = re.compile(r"\[(?P<text>[^\]]+)\]\((?P<href>[^)\s]+)\)")
 
 
 def inline(markdown: str) -> str:
     """The inline subset a curated highlight actually uses.
 
-    The site renders the same strings with `marked.parseInline`
-    (see Changelog.astro). This is deliberately NOT a markdown
-    implementation: the corpus is our own release bodies, the
-    parser that admits them already refuses issue numbers and
-    block structure, and anything outside the subset renders as
-    the literal text a reviewer can see rather than as broken
-    markup. Escaping happens FIRST, so a `<` in a release note
-    cannot close the CDATA or invent an element."""
+    The site renders these same strings with
+    `marked.parseInline` (see `Changelog.astro`), so the two
+    surfaces have to agree — one corpus, and a reader who sees
+    literal asterisks in the update window and italics on the
+    page is looking at a bug in one of them. `**bold**`,
+    `*emphasis*`, `` `code` `` and `[text](href)` are what the
+    corpus contains; 0.9.7's body already carries `*why*`.
+
+    **Code spans are lifted out before anything else runs and
+    put back afterwards.** Substituting inside them is the
+    divergence that is easy to miss: markdown does not interpret
+    `**` inside backticks and neither does `marked`, so a naive
+    ordering renders `` `a **b** c` `` with real bold here and
+    literal asterisks on the site.
+
+    Escaping happens FIRST, so a `<` in a release note can
+    neither close the CDATA nor invent an element.
+
+    This is deliberately not a markdown implementation. Anything
+    outside the subset renders as the literal text a reviewer
+    can see, rather than as broken markup."""
     text = html.escape(markdown, quote=False)
-    text = _CODE.sub(
-        lambda m: f"<code>{m.group('text')}</code>", text
-    )
+
+    spans: list[str] = []
+
+    def _stash(match: re.Match) -> str:
+        spans.append(match.group("text"))
+        return f"\x00{len(spans) - 1}\x00"
+
+    text = _CODE.sub(_stash, text)
     text = _BOLD.sub(
         lambda m: f"<strong>{m.group('text')}</strong>", text
+    )
+    text = _ITALIC.sub(
+        lambda m: f"<em>{m.group('text')}</em>", text
     )
     text = _LINK.sub(
         lambda m: (
@@ -265,6 +341,10 @@ def inline(markdown: str) -> str:
         ),
         text,
     )
+    for index, span in enumerate(spans):
+        text = text.replace(
+            f"\x00{index}\x00", f"<code>{span}</code>"
+        )
     return text
 
 
@@ -517,7 +597,7 @@ def render(items: list[dict], floor: str) -> str:
         'xml-namespaces/sparkle">\n'
         "  <channel>\n"
         "    <title>KiwiDesk</title>\n"
-        f"    <link>{FEED_URL}</link>\n"
+        f"    <link>{feed_url()}</link>\n"
         "    <description>Updates for KiwiDesk, a tiling window "
         "manager for macOS.</description>\n"
         "    <language>en</language>\n"
@@ -527,12 +607,29 @@ def render(items: list[dict], floor: str) -> str:
     )
 
 
-def write(text: str) -> None:
-    APPCAST.parent.mkdir(parents=True, exist_ok=True)
-    APPCAST.write_text(text, encoding="utf-8")
-    print(
-        f"appcast-sync: wrote {APPCAST.relative_to(ROOT)}"
-    )
+def write(text: str, output: Path | None) -> None:
+    """`None` means the real feed; a path means that path; `-`
+    (passed as a Path) means stdout.
+
+    The seam exists so the WRITING modes can be exercised
+    offline. Before it, the guard suite could only drive a
+    render-to-stdout mode, which meant the two contracts the
+    publish workflow actually leans on — `--all` tolerating a
+    release it cannot offer, `--release` refusing one — were
+    pinned by nothing. Make `--all` fatal and every future
+    publish reds; make `--release` tolerant and the strict gate
+    silently stops gating."""
+    if output is not None and str(output) == "-":
+        sys.stdout.write(text)
+        return
+    target = output or APPCAST
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(text, encoding="utf-8")
+    # stderr, so `--output -` puts the FEED on stdout and
+    # nothing else. A status line mixed into the document is
+    # not a cosmetic problem: anything piping this to a file
+    # would write an appcast with a stray line after `</rss>`.
+    print(f"appcast-sync: wrote {target}", file=sys.stderr)
 
 
 def _report(error: AppcastError) -> None:
@@ -546,37 +643,136 @@ def _report(error: AppcastError) -> None:
 
 
 # ---------------------------------------------------------------
+# Sources
+
+
+def load_releases(source: str | None) -> list[dict]:
+    """The published releases, from `gh` or from a fixture."""
+    if source is None:
+        return fetch_releases()
+    try:
+        data = json.loads(
+            Path(source).read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        print(
+            f"appcast-sync: could not read {source} ({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    # Drafts are NOT filtered here, deliberately. `build_item`
+    # refuses one by name, and that is the rule every caller
+    # meets; filtering here as well made the fixture path skip
+    # drafts before the rule could speak, so a guard aimed at
+    # the rule passed with the rule deleted. One enforcement
+    # point, reachable from the tests that claim to hold it.
+    # (`fetch_releases` still filters, because the API path has
+    # no reason to carry drafts across the network.)
+    return data if isinstance(data, list) else [data]
+
+
+def make_fetch(source: str | None):
+    """How a sidecar's CONTENT is read.
+
+    Offline it comes from the fixture's own `edsig` field: the
+    bytes live behind an API call, and a suite that reached for
+    it would be reaching for the network."""
+    if source is None:
+        return fetch_asset_text
+
+    def _fixture(asset, release=None):
+        return str((release or {}).get("edsig") or "")
+
+    return _fixture
+
+
+# ---------------------------------------------------------------
 # Modes
 
 
-def run_all(fetch) -> int:
-    notes = read_notes()
+def run_all(
+    releases: list[dict],
+    fetch,
+    output: Path | None,
+    require: str | None = None,
+    notes_source: Path | None = None,
+) -> int:
+    """Rebuild the feed from every offerable release.
+
+    Tolerant by design: a release that fails a clause is skipped
+    with a printed reason rather than being fatal, because one
+    historical release with no sidecar must not red every future
+    publish.
+
+    `require` names a tag that MUST end up in the feed — the one
+    just published — and nothing is written when it does not.
+    Without that post-condition the strict pass and the write
+    are two independent fetches: the first can pass, the second
+    return something different, and the run stay green over a
+    feed missing the newest version."""
+    notes = read_notes(notes_source)
     floor = minimum_system_version()
     items: list[dict] = []
-    for release in fetch_releases():
+    for release in releases:
         try:
-            items.append(build_item(release, notes, fetch))
+            items.append(
+                build_item(
+                    release,
+                    notes,
+                    lambda a, r=release: fetch(a, r),
+                )
+            )
         except AppcastError as error:
-            # Never fatal here, and that is the difference from
-            # --release. One historical release with no sidecar
-            # must not red every future publish; the release just
-            # published is held to the strict pass instead.
             print(
                 f"appcast-sync: {error.tag} is not offered — "
-                f"{' '.join(error.problems)}"
+                f"{' '.join(error.problems)}",
+                file=sys.stderr,
             )
-    write(render(items, floor))
-    print(f"appcast-sync: {len(items)} item(s) in the feed")
+    if require and not any(
+        item["tag"] == require for item in items
+    ):
+        print(
+            f"appcast-sync: REFUSING to write — {require} was "
+            "verified as offerable, then did not survive the "
+            "rebuild. Nothing was written, so the feed still "
+            "carries whatever it carried before rather than a "
+            "version of it with the newest release missing.",
+            file=sys.stderr,
+        )
+        return 1
+    write(render(items, floor), output)
+    print(
+        f"appcast-sync: {len(items)} item(s) in the feed",
+        file=sys.stderr,
+    )
     return 0
 
 
-def run_release(tag: str, check: bool, fetch) -> int:
+def run_release(
+    tag: str,
+    check: bool,
+    releases: list[dict],
+    fetch,
+    output: Path | None,
+    notes_source: Path | None = None,
+) -> int:
+    """Hold ONE tag to every clause. Strict: each failure is an
+    error naming itself, never a skip."""
     notes = read_notes()
-    floor = minimum_system_version()
-    releases = [
-        r for r in fetch_releases() if r.get("tag_name") == tag
-    ]
-    if not releases:
+    matching = [r for r in releases if r.get("tag_name") == tag]
+    if matching and matching[0].get("draft"):
+        _report(
+            AppcastError(
+                tag,
+                [
+                    "it is still a draft. Curate the draft, "
+                    "then publish — publication is what this "
+                    "feed reads."
+                ],
+            )
+        )
+        return 1
+    if not matching:
         print(
             f"appcast-sync: no PUBLISHED release for {tag}. A "
             "draft is not one — curate the draft, then publish.",
@@ -584,52 +780,28 @@ def run_release(tag: str, check: bool, fetch) -> int:
         )
         return 1
     try:
-        item = build_item(releases[0], notes, fetch)
+        item = build_item(
+            matching[0],
+            notes,
+            lambda a, r=matching[0]: fetch(a, r),
+        )
     except AppcastError as error:
         _report(error)
         return 1
     print(
         f"appcast-sync: {tag} is offerable "
-        f"({item['length']} bytes)"
+        f"({item['length']} bytes)",
+        file=sys.stderr,
     )
     if check:
         return 0
-    return run_all(fetch)
-
-
-def run_offline(path: str) -> int:
-    """Render from a JSON file, for the guard suite.
-
-    The sidecar's CONTENT cannot come from the API here, so a
-    release in the fixture may carry `edsig` beside its assets
-    and that value stands in for the download."""
-    try:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        print(
-            f"appcast-sync: could not read {path} ({error}).",
-            file=sys.stderr,
-        )
-        return 1
-    releases = data if isinstance(data, list) else [data]
-    floor = minimum_system_version()
-    notes = read_notes()
-    items: list[dict] = []
-    status = 0
-    for release in releases:
-        try:
-            items.append(
-                build_item(
-                    release,
-                    notes,
-                    lambda _a, r=release: str(r.get("edsig") or ""),
-                )
-            )
-        except AppcastError as error:
-            _report(error)
-            status = 1
-    sys.stdout.write(render(items, floor))
-    return status
+    return run_all(
+        releases,
+        fetch,
+        output,
+        require=tag,
+        notes_source=notes_source,
+    )
 
 
 def main(argv: list[str]) -> int:
@@ -651,24 +823,52 @@ def main(argv: list[str]) -> int:
         metavar="TAG",
         help="hold ONE tag to every clause, then rebuild",
     )
-    group.add_argument(
-        "--releases",
-        metavar="FILE",
-        help="offline: render from a JSON fixture to stdout",
-    )
     parser.add_argument(
         "--check",
         action="store_true",
         help="with --release: verify only, write nothing",
     )
+    parser.add_argument(
+        "--releases",
+        metavar="FILE",
+        help=(
+            "read the releases from a JSON fixture instead of "
+            "`gh` (touches no network)"
+        ),
+    )
+    parser.add_argument(
+        "--notes",
+        metavar="FILE",
+        help=(
+            "read the curated notes from this file instead of "
+            "site/src/data/changelog.json"
+        ),
+    )
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        help=(
+            "write the feed here instead of site/public; `-` is "
+            "stdout"
+        ),
+    )
     args = parser.parse_args(argv)
+    output = Path(args.output) if args.output else None
+    releases = load_releases(args.releases)
+    fetch = make_fetch(args.releases)
+    notes_source = Path(args.notes) if args.notes else None
     if args.all:
-        return run_all(fetch_asset_text)
-    if args.release:
-        return run_release(
-            args.release, args.check, fetch_asset_text
+        return run_all(
+            releases, fetch, output, notes_source=notes_source
         )
-    return run_offline(args.releases)
+    return run_release(
+        args.release,
+        args.check,
+        releases,
+        fetch,
+        output,
+        notes_source=notes_source,
+    )
 
 
 if __name__ == "__main__":

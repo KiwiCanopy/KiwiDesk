@@ -122,18 +122,25 @@ jobs:
           # above just wrote, so the update window and the site
           # quote one corpus rather than two.
           #
-          # The guard is the half that matters. `--all` skips a
-          # release it cannot offer with a printed reason, which
-          # is right for history and useless for the release that
-          # just went out: a run where release.yml failed to sign
-          # would otherwise write a feed silently missing the
-          # newest version, publish nothing, and look green. Held
-          # strictly, that run reds and names why.
+          # ONE invocation on the publish path, not a strict
+          # `--check` followed by a separate `--all`. The split
+          # looked safer and was not: the two calls fetch the
+          # releases independently, so the check could pass and
+          # the write could then produce a feed without that
+          # release — green run, opened PR, newest version
+          # missing. `--release <tag>` holds the tag to every
+          # clause AND refuses to write a feed it does not end
+          # up in.
+          #
+          # `--all` stays the dispatch path, where the job is a
+          # rebuild rather than a publication and every release
+          # from before the updater legitimately has no
+          # signature to find.
           if [ -n "$PUBLISHED" ]; then
-            python3 scripts/appcast-sync --release "$PUBLISHED" \
-              --check
+            python3 scripts/appcast-sync --release "$PUBLISHED"
+          else
+            python3 scripts/appcast-sync --all
           fi
-          python3 scripts/appcast-sync --all
 
       # A PR opened with `github.token` does NOT trigger other
       # workflows — GitHub's loop prevention — so `site.yml` will
@@ -147,6 +154,14 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
+          # The site gate, run HERE for the same reason the build
+          # is: a PR opened with `github.token` fires no
+          # workflows, so `site.yml` never sees this one — and
+          # `check-site-tokens.py` is where the assertion that
+          # the feed is actually served lives. Without this call
+          # the feed is the one artifact that reaches `main`
+          # with its own guard never having run on it.
+          python3 ../scripts/check-site-tokens.py --dist dist
         working-directory: site
 
       - name: Open a PR if anything moved

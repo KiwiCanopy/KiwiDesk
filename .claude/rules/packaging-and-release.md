@@ -88,19 +88,20 @@ and trusts no other key, so changing either reaches nobody who
 has not already updated — and losing the EdDSA private half
 strands every installed copy with no recovery. It belongs
 wherever the Developer ID certificate belongs, and in the
-`SPARKLE_PRIVATE_KEY` actions secret. Leave
-`SUEnableAutomaticChecks` set too: unset, Sparkle puts its own
-"check automatically?" modal on screen from an app with no Dock
-tile to explain it.
+`SPARKLE_PRIVATE_KEY` actions secret. **Leave
+`SUEnableAutomaticChecks` set.** `docs/design-decisions.md` ▸
+*Background update checks are on, and there is no switch* is the
+ruling, and unsetting the key is what changes it.
 
 **A build must not ship a feed URL that 404s.** The plist keys
 and the appcast that answers them are one shipping decision, so a
 release cut between the two halves advertises an update channel
 that errors on click. Either both are in the tag, or neither.
-`site/public/appcast.xml` is therefore in the tree from the same
-branch as the plist keys, itemless — an itemless channel is a
-well-formed "nothing newer", where a missing file is an error
-dialog.
+So a feed with no offerable release renders an itemless channel
+rather than no file: an itemless channel is a well-formed
+"nothing newer" — confirmed against Sparkle 2.9.6, whose
+`SUAppcast` parses it and reaches `SUNoUpdateError`, silent on a
+background check — where a missing file is an error dialog.
 
 **The feed is written from PUBLISHED releases, never from the
 draft.** `release.yml` drafts, and a draft's asset URL is
@@ -123,12 +124,22 @@ as a consequence of the data rather than of a number someone has
 to remember. `AppcastParserTests` pins each refusal.
 
 **The signature is produced where the bytes are, and travels as a
-sidecar.** `release.yml` signs the archive it has just built and
-attaches `<archive>.edsig` to the release; the sync job reads it
-there. That split is what lets the feed be written by a job that
-never holds the private key, and it is why the sidecar is
-renamed and dropped in step with the archive it signs — the two
-are paired by name.
+sidecar** (`AppcastWorkflowTests`, and `SparkleKeyDerivationTests`
+for the key check below)**.** `release.yml` signs the archive it
+has just built and attaches `<archive>.edsig` to the release;
+the sync job reads it there.
+That split is what lets the feed be written by a job that never
+holds the private key, and it is why the sidecar is renamed and
+dropped in step with the archive it signs — the two are paired by
+name.
+
+**Prove the key is THE key before signing with it.** Signing and
+then verifying with the same key shows the secret is
+self-consistent and nothing more — a valid but wrong key passes,
+and the first person offered the update is the one who finds out.
+`release.yml` derives the public half
+(`scripts/sparkle-public-key.js`) and refuses to sign unless it
+equals the `SUPublicEDKey` the packager ships.
 
 **Sign with `--ed-key-file -`, never `-s`.** `sign_update` 2.9.6
 refuses `-s` outright for a key in the current format, after
@@ -450,7 +461,15 @@ a whole top-level directory.
 **A workflow that changes the tree opens a PR; it never writes to
 `main`.** `.github/workflows/app-font.yml` watches the vendored
 SketchyBar App Font weekly and is the shape to copy for any later
-watcher (a Sparkle appcast, a tap bump). Three obligations, all
+**watcher** — something that polls an upstream nobody here
+controls. The Sparkle appcast is deliberately NOT one: it is
+generated from this repo's own published releases, on the
+`release: published` event, so it lives beside the notes it
+shares a corpus with in `changelog.yml` rather than in a poller
+of its own. What it does inherit is this rule's first clause —
+run the gate before the PR exists, because a PR opened with
+`GITHUB_TOKEN` fires no workflows, so `changelog.yml` runs the
+site build AND `check-site-tokens.py` itself. Three obligations, all
 enforced by `AppFontWorkflowTests`: it **calls the developer
 script** rather than re-implementing the vendoring inline, because
 only the hand-run path is ever exercised outside the cron; it

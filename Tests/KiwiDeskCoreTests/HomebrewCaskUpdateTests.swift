@@ -121,7 +121,22 @@ struct HomebrewCaskUpdateTests {
         #expect(workflow.contains("queue: max"))
         #expect(workflow.contains("cancel-in-progress: false"))
         #expect(workflow.contains("HOMEBREW_TAP_DEPLOY_KEY"))
-        #expect(workflow.contains("assets | length"))
+        // Selection BY NAME, not by counting assets. The old
+        // needle was `assets | length`, which #874 falsified:
+        // a release now also carries `<archive>.zip.edsig`, so
+        // a count-of-one gate refused every signed release and
+        // `.assets[0]` was a coin flip between the archive and
+        // the signature. The needle then survived the fix by
+        // matching the COMMENT that records it, which is why it
+        // names the mechanism here instead.
+        #expect(
+            workflow.contains("select(.name == $want)"),
+            "the cask's archive must be picked by name"
+        )
+        #expect(
+            !workflow.contains("jq -r '.assets[0]"),
+            "positional asset reads break on the signature"
+        )
         #expect(workflow.contains("sha256sum"))
         #expect(workflow.contains("update-homebrew-cask.py"))
     }

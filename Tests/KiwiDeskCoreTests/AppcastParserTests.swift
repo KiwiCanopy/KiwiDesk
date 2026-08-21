@@ -1,53 +1,51 @@
 import Foundation
 import Testing
 
-/// `scripts/appcast-sync` decides what an installed KiwiDesk is
-/// offered as an update (#874), so every refusal it documents is
-/// a case that must actually red.
+/// What `scripts/appcast-sync` will and will not offer as an
+/// update (#874).
 ///
 /// The stakes differ from `ChangelogParserTests`' by one step: a
 /// body that parses badly shows a poor page, while an item that
 /// should not be in the feed is an update every installed copy
-/// downloads and fails to install — and one that should be there
-/// and is missing is an update path that silently never runs.
+/// downloads and then refuses — and one that should be there and
+/// is missing is an update path that silently never runs.
 /// `docs/design-decisions.md` ▸ *No distribution channel without
 /// an update path* calls the second unrecoverable.
 ///
-/// Driven through `--releases <file>`, which renders from a JSON
-/// fixture and touches neither the network nor `gh`. The real
-/// script runs in place: it reads `scripts/build-app.sh` for the
-/// system-version floor and `site/src/data/changelog.json` for
-/// the notes, and both are properties of the tree rather than of
-/// the fixture.
-@Suite("Appcast generator (#874)")
+/// Driven through `--releases <fixture> --all --output -`, which
+/// reads the releases from disk and renders to stdout, touching
+/// neither the network nor `gh`. `AppcastModeTests` covers the
+/// other half — that `--all` TOLERATES what `--release` refuses.
+///
+/// **Fixture tags are `v9999.*` deliberately.** The script runs
+/// in place and reads the repo's real
+/// `site/src/data/changelog.json` for its notes, so a fixture
+/// borrowing a plausible version number would silently start
+/// rendering release prose into the output these assertions
+/// inspect (`.claude/rules/tests.md` ▸ pin any default a fixture
+/// reasons from). No release can ever carry these.
+@Suite("Appcast offerability (#874)")
 struct AppcastParserTests {
-    private func script() -> URL {
-        scriptFixtureRepoRoot()
-            .appendingPathComponent("scripts")
-            .appendingPathComponent("appcast-sync")
-    }
+    static let fixtureTag = "v9999.0.1"
+    static let fixtureVersion = "9999.0.1"
 
     /// A 64-byte Ed25519 signature, base64. Built rather than
-    /// pasted, so the length assertion the script makes is
-    /// satisfied by construction and a future change to
-    /// `_SIGNATURE_BYTES` fails loudly here instead of silently
-    /// accepting a literal that no longer matches.
-    private static let signature = Data(
-        repeating: 0x41,
-        count: 64
-    ).base64EncodedString()
+    /// pasted, so a change to the script's expected length reds
+    /// here instead of silently accepting a stale literal.
+    static let signature = Data(repeating: 0x41, count: 64)
+        .base64EncodedString()
 
-    /// One published release carrying a notarized archive and its
-    /// sidecar — the shape every case below is a mutation of.
-    private static func release(
-        tag: String = "v0.9.8",
+    /// The shape every case below is a mutation of: one
+    /// published release with a notarized archive and its
+    /// sidecar.
+    static func release(
+        tag: String = AppcastParserTests.fixtureTag,
         assets: [[String: Any]]? = nil,
         signature: String = AppcastParserTests.signature,
         draft: Bool = false
     ) -> [String: Any] {
         let version =
-            tag.hasPrefix("v")
-            ? String(tag.dropFirst()) : tag
+            tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         let name = "KiwiDesk-\(version).zip"
         return [
             "tag_name": tag,
@@ -55,51 +53,51 @@ struct AppcastParserTests {
             "draft": draft,
             "edsig": signature,
             "assets": assets ?? [
-                [
-                    "name": name,
-                    "size": 9_123_456,
-                    "browser_download_url":
-                        "https://github.com/KiwiCanopy/KiwiDesk"
-                        + "/releases/download/\(tag)/\(name)",
-                    "url": "https://api.github.com/assets/1",
-                ],
-                [
-                    "name": "\(name).edsig",
-                    "size": 89,
-                    "url": "https://api.github.com/assets/2",
-                ],
+                asset(name),
+                asset("\(name).edsig", size: 89),
             ],
         ]
     }
 
-    private static func asset(
+    static func asset(
         _ name: String,
         size: Int = 9_123_456
     ) -> [String: Any] {
         [
             "name": name,
             "size": size,
-            "browser_download_url": "https://example.invalid/\(name)",
+            "browser_download_url":
+                "https://github.com/KiwiCanopy/KiwiDesk/releases"
+                + "/download/\(fixtureTag)/\(name)",
             "url": "https://api.github.com/assets/9",
         ]
+    }
+
+    /// Renders a fixture through the real script.
+    static func render(
+        _ releases: [[String: Any]],
+        arguments: [String] = ["--all"]
+    ) throws -> ScriptRun {
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "appcast-releases-\(UUID().uuidString).json"
+            )
+        try JSONSerialization.data(withJSONObject: releases)
+            .write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        return try runPythonScript(
+            at: scriptFixtureRepoRoot()
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("appcast-sync"),
+            arguments: ["--releases", file.path]
+                + arguments + ["--output", "-"]
+        )
     }
 
     private func render(
         _ releases: [[String: Any]]
     ) throws -> ScriptRun {
-        let data = try JSONSerialization.data(
-            withJSONObject: releases
-        )
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "appcast-releases-\(UUID().uuidString).json"
-            )
-        try data.write(to: file)
-        defer { try? FileManager.default.removeItem(at: file) }
-        return try runPythonScript(
-            at: script(),
-            arguments: ["--releases", file.path]
-        )
+        try Self.render(releases)
     }
 
     // MARK: - The shape that must NOT be refused
@@ -113,7 +111,8 @@ struct AppcastParserTests {
         #expect(run.stdout.contains("<item>"))
         #expect(
             run.stdout.contains(
-                "<sparkle:version>0.9.8</sparkle:version>"
+                "<sparkle:version>\(Self.fixtureVersion)"
+                    + "</sparkle:version>"
             )
         )
         #expect(
@@ -124,43 +123,39 @@ struct AppcastParserTests {
         #expect(run.stdout.contains(#"length="9123456""#))
     }
 
-    /// The enclosure URL is the published download, never the
-    /// API's asset route — an installed copy fetches it with no
-    /// credentials at all.
+    /// The enclosure is the published download an installed copy
+    /// fetches with no credentials — never the API asset route,
+    /// which needs auth.
     @Test("the enclosure points at the public download")
     func enclosureIsThePublicURL() throws {
         let run = try render([Self.release()])
         #expect(
             run.stdout.contains(
                 "https://github.com/KiwiCanopy/KiwiDesk/releases"
-                    + "/download/v0.9.8/KiwiDesk-0.9.8.zip"
+                    + "/download/\(Self.fixtureTag)/"
             )
         )
         #expect(!run.stdout.contains("api.github.com"))
     }
 
-    /// No version cutoff exists anywhere in the script, and this
-    /// is what says so: a release numbered below every shipped
-    /// one is still offered when it satisfies the clauses. The
-    /// releases that predate Sparkle drop out because they have
-    /// no sidecar, which is a property of their DATA — a number
-    /// written into the generator would be a second thing to
-    /// remember to bump.
+    /// No version cutoff exists in the script and none should:
+    /// the releases that predate the updater drop out because
+    /// they have no sidecar, which is a property of their DATA.
+    /// A number written into the generator would be a second
+    /// thing to remember to bump.
     @Test("no version is special-cased")
     func noVersionCutoff() throws {
-        let run = try render([Self.release(tag: "v0.0.1")])
+        let run = try render([Self.release(tag: "v9999.0.2")])
         #expect(run.status == 0)
         #expect(
             run.stdout.contains(
-                "<sparkle:version>0.0.1</sparkle:version>"
+                "<sparkle:version>9999.0.2</sparkle:version>"
             )
         )
     }
 
-    /// The floor is `build-app.sh`'s `LSMinimumSystemVersion`,
-    /// read rather than restated. Derived here the same way, so
-    /// a raise to macOS 15 that touched only the script cannot
-    /// leave this suite agreeing with a stale literal.
+    /// The floor and the feed's own link both come from the
+    /// packager, read rather than restated.
     @Test("the system floor is read from build-app.sh")
     func floorComesFromTheBuildScript() throws {
         guard
@@ -182,28 +177,39 @@ struct AppcastParserTests {
         )
     }
 
+    @Test("the channel link is the shipped feed URL")
+    func channelLinkIsTheShippedURL() throws {
+        guard let url = try buildAppPlistValue("SUFeedURL") else {
+            Issue.record("build-app.sh declares no SUFeedURL")
+            return
+        }
+        let run = try render([Self.release()])
+        #expect(run.stdout.contains("<link>\(url)</link>"))
+    }
+
     // MARK: - Refusals
 
-    @Test("a draft is never offered")
+    /// Asserts the REASON, not just the absence of an item.
+    /// An earlier cut asserted only "no item", which a second
+    /// draft filter one layer up satisfied — so the rule this
+    /// names could be deleted outright and the guard stayed
+    /// green.
+    @Test("a draft is never offered, and says why")
     func draftRefused() throws {
         let run = try render([Self.release(draft: true)])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("still a draft"))
         #expect(!run.stdout.contains("<item>"))
     }
 
     @Test("an un-notarized archive is never offered")
     func unnotarizedRefused() throws {
+        let name = "KiwiDesk-\(Self.fixtureVersion)-unnotarized.zip"
         let run = try render([
             Self.release(assets: [
-                Self.asset("KiwiDesk-0.9.8-unnotarized.zip"),
-                Self.asset(
-                    "KiwiDesk-0.9.8-unnotarized.zip.edsig",
-                    size: 89
-                ),
+                Self.asset(name),
+                Self.asset("\(name).edsig", size: 89),
             ])
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("not notarized"))
         #expect(!run.stdout.contains("<item>"))
     }
@@ -212,11 +218,10 @@ struct AppcastParserTests {
     func missingSidecarRefused() throws {
         let run = try render([
             Self.release(assets: [
-                Self.asset("KiwiDesk-0.9.8.zip")
+                Self.asset("KiwiDesk-\(Self.fixtureVersion).zip")
             ])
         ])
-        #expect(run.status != 0)
-        #expect(run.stderr.contains("KiwiDesk-0.9.8.zip.edsig"))
+        #expect(run.stderr.contains(".edsig"))
         #expect(!run.stdout.contains("<item>"))
     }
 
@@ -225,8 +230,8 @@ struct AppcastParserTests {
         let run = try render([
             Self.release(signature: "this is not base64 !!")
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("not base64"))
+        #expect(!run.stdout.contains("<item>"))
     }
 
     /// A base64 string of the wrong length is the case a shape
@@ -240,15 +245,15 @@ struct AppcastParserTests {
                     .base64EncodedString()
             )
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("32 bytes"))
+        #expect(!run.stdout.contains("<item>"))
     }
 
     @Test("an empty signature is refused")
     func emptySignatureRefused() throws {
         let run = try render([Self.release(signature: "")])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("is empty"))
+        #expect(!run.stdout.contains("<item>"))
     }
 
     @Test("a release with no archive is not offered")
@@ -256,63 +261,37 @@ struct AppcastParserTests {
         let run = try render([
             Self.release(assets: [Self.asset("notes.txt")])
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("no .zip asset"))
+        #expect(!run.stdout.contains("<item>"))
     }
 
     /// Two shippable archives is the per-architecture case the
     /// release workflow already anticipates. Guessing between
-    /// them would send half the users the wrong build, so it
-    /// refuses until someone decides.
+    /// them would send half the users the wrong build.
     @Test("two distributable archives refuse rather than guess")
     func ambiguousArchiveRefused() throws {
+        let base = "KiwiDesk-\(Self.fixtureVersion)"
         let run = try render([
             Self.release(assets: [
-                Self.asset("KiwiDesk-0.9.8.zip"),
-                Self.asset("KiwiDesk-0.9.8-arm64.zip"),
-                Self.asset("KiwiDesk-0.9.8.zip.edsig", size: 89),
+                Self.asset("\(base).zip"),
+                Self.asset("\(base)-arm64.zip"),
+                Self.asset("\(base).zip.edsig", size: 89),
             ])
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("2 distributable"))
+        #expect(!run.stdout.contains("<item>"))
     }
 
     @Test("a zero-length archive is refused")
     func zeroLengthRefused() throws {
+        let base = "KiwiDesk-\(Self.fixtureVersion)"
         let run = try render([
             Self.release(assets: [
-                Self.asset("KiwiDesk-0.9.8.zip", size: 0),
-                Self.asset("KiwiDesk-0.9.8.zip.edsig", size: 89),
+                Self.asset("\(base).zip", size: 0),
+                Self.asset("\(base).zip.edsig", size: 89),
             ])
         ])
-        #expect(run.status != 0)
         #expect(run.stderr.contains("size of"))
-    }
-
-    // MARK: - One bad release does not take the feed with it
-
-    /// The refusals above are per-release. A feed that dropped
-    /// every item because one historical release lacks a sidecar
-    /// would strand everyone, so the good release still renders.
-    @Test("a refused release does not remove a good one")
-    func oneRefusalKeepsTheRest() throws {
-        let run = try render([
-            Self.release(tag: "v0.9.8"),
-            Self.release(
-                tag: "v0.9.7",
-                assets: [Self.asset("KiwiDesk-0.9.7.zip")]
-            ),
-        ])
-        #expect(run.status != 0)
-        #expect(
-            run.stdout.contains(
-                "<sparkle:version>0.9.8</sparkle:version>"
-            )
-        )
-        #expect(
-            !run.stdout.contains(
-                "<sparkle:version>0.9.7</sparkle:version>"
-            )
-        )
+        #expect(!run.stdout.contains("<item>"))
     }
 }

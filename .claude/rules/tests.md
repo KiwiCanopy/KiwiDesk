@@ -29,7 +29,7 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Seven ratified exceptions, none with setup/teardown coupling or
+  Eight ratified exceptions, none with setup/teardown coupling or
   assertions of their own, and all but the fake WindowServer
   *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
@@ -45,6 +45,18 @@ bite large test PRs:
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
+  - *the packaged-bundle plist reader* in
+    `BuildPlistValue.swift` — one `Info.plist` value from
+    `scripts/build-app.sh`, spawned through `read-plist-key`
+    rather than parsed again. `build-app.sh` is the one owner of
+    what every shipped bundle declares, and the guards that
+    assert on the feed URL, the public key and the deployment
+    floor all have to agree with it; a per-suite copy of the
+    parse would keep agreeing with the shape the plist USED to
+    have, which is the drift those guards exist to catch.
+    Extracted at the **third** caller (#874), and it re-uses
+    `ScriptFixture.swift`'s spawn primitive rather than
+    duplicating it.
   - *colour-vision maths* in `ColorVision.swift` — the
     Viénot protanopia transform and the measures the CVD guards
     assert on. **Which suites share it is that file's own doc

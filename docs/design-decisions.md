@@ -311,7 +311,7 @@ release workflow, which asks for `--zip` alone.
 
 ### Background update checks are on, and there is no switch
 
-**[Ruling]**
+**[Rationale]**
 
 KiwiDesk checks for updates in the background, `Info.plist` says
 so with `SUEnableAutomaticChecks`, and no Settings row, Lua verb

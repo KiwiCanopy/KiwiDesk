@@ -64,17 +64,69 @@ struct AppcastWorkflowTests {
             !text.isEmpty,
             "\(name) is missing: every needle would pass vacuously"
         )
+        // Continuations are JOINED before comments are
+        // stripped, and that order is the fix rather than a
+        // tidy-up. A `\\`-wrapped command is one shell line
+        // pretending to be several, so quote parity counted per
+        // physical line is wrong on every one of them — which
+        // is how a needle parked in a trailing comment survived
+        // the first version of this helper. Joining also stops
+        // every needle below depending on where the YAML
+        // happens to wrap.
+        let joined = text.replacingOccurrences(
+            of: #"\s*\\\n\s*"#,
+            with: " ",
+            options: .regularExpression
+        )
         return
-            text
+            joined
             .split(
                 separator: "\n",
                 omittingEmptySubsequences: false
             )
-            .filter {
-                !$0.trimmingCharacters(in: .whitespaces)
-                    .hasPrefix("#")
-            }
+            .map(Self.stripComment)
             .joined(separator: "\n")
+    }
+
+    /// One line with its comment removed — WHOLE-LINE and
+    /// TRAILING alike.
+    ///
+    /// Dropping only whole-line comments left the hole this
+    /// helper exists to close: a mutation that moved the signing
+    /// key onto disk and parked `--ed-key-file - -p "$ARCHIVE"`
+    /// in a trailing `# was: …` kept every needle in this suite
+    /// matched while the mechanism was gone.
+    ///
+    /// A `#` counts as a comment only when it follows whitespace
+    /// AND the quotes before it on the line are balanced. Both
+    /// clauses are load-bearing against real lines in these
+    /// workflows: `"${TAG#v}"` is parameter expansion inside a
+    /// quoted string, not a comment, and it is neither preceded
+    /// by whitespace nor outside quotes.
+    private static func stripComment(
+        _ line: Substring
+    ) -> String {
+        if line.trimmingCharacters(in: .whitespaces)
+            .hasPrefix("#")
+        {
+            return ""
+        }
+        var quotes = 0
+        var kept = ""
+        var previous: Character?
+        for character in line {
+            if character == "\"" || character == "'" {
+                quotes += 1
+            }
+            if character == "#", quotes % 2 == 0,
+                previous?.isWhitespace == true
+            {
+                break
+            }
+            kept.append(character)
+            previous = character
+        }
+        return kept
     }
 
     // MARK: - release.yml produces the signature
@@ -121,11 +173,27 @@ struct AppcastWorkflowTests {
     @Test("the signature is attached to the release")
     func attachesTheSidecar() throws {
         let yaml = try workflow("release.yml")
-        #expect(yaml.contains(".edsig"))
-        #expect(yaml.contains("UPLOADS"))
+        // What goes INTO the array, not merely that the array is
+        // passed. This guard was inert on its first cut for
+        // exactly that reason: deleting the append left
+        // `UPLOADS=("$ARCHIVE")` behind, so both `${UPLOADS[@]}`
+        // needles still matched and a bare `.edsig` needle was
+        // satisfied by the superseded-asset cleanup further
+        // down — the sidecar reached no release and the suite
+        // stayed green.
+        #expect(
+            yaml.contains(#"UPLOADS+=("$SIDECAR")"#),
+            "the signature must be put into the upload set"
+        )
+        #expect(
+            yaml.contains(
+                "SIDECAR: ${{ steps.edsig.outputs.path }}"
+            ),
+            "the draft step must be handed the signing step's path"
+        )
         #expect(
             yaml.contains(#"gh release upload "$TAG" "${UPLOADS[@]}""#),
-            "the upload must carry the sidecar, not the archive alone"
+            "the upload must carry the set, not the archive alone"
         )
         #expect(
             yaml.contains(#"gh release create "$TAG" "${UPLOADS[@]}""#),
@@ -153,6 +221,48 @@ struct AppcastWorkflowTests {
             !yaml.contains(
                 "if: ${{ secrets.SPARKLE_PRIVATE_KEY }}"
             )
+        )
+    }
+
+    /// The check that makes the signature mean anything.
+    /// Signing and verifying with one key proves the secret is
+    /// self-consistent and nothing else — a valid but WRONG key
+    /// passes it, and the release then ships an update every
+    /// installed copy refuses.
+    @Test("the signing key is matched against SUPublicEDKey")
+    func keyMatchesShippedPublicKey() throws {
+        let yaml = try workflow("release.yml")
+        #expect(
+            yaml.contains("sparkle-public-key.js"),
+            "the public half must be derived from the secret"
+        )
+        #expect(
+            yaml.contains("read-plist-key SUPublicEDKey"),
+            "and compared against what the packager ships"
+        )
+        #expect(
+            yaml.contains(#"[ "$ACTUAL_PUB" != "$EXPECTED_PUB" ]"#),
+            "a mismatch must stop the release"
+        )
+    }
+
+    /// A run that produces no signature must DROP any signature
+    /// an earlier run left, because `--clobber` has just
+    /// replaced the archive bytes underneath it. Keeping it
+    /// pairs a well-formed signature with bytes it does not
+    /// sign, and `appcast-sync` pairs by name — so the release
+    /// enters the feed and every installed copy downloads it
+    /// and then refuses to install.
+    @Test("a superseded signature is dropped, never kept")
+    func supersededSignatureIsDropped() throws {
+        let yaml = try workflow("release.yml")
+        #expect(
+            yaml.contains(#"SIBLING_SIG="$KEEP.edsig""#),
+            "with no new signature the old one is superseded"
+        )
+        #expect(
+            yaml.contains(#"KEEP_SIG="""#),
+            "and must not be on the keep list"
         )
     }
 
@@ -189,11 +299,27 @@ struct AppcastWorkflowTests {
     @Test("the just-published release is held strictly")
     func publishedReleaseIsCheckedStrictly() throws {
         let yaml = try workflow("changelog.yml")
-        #expect(yaml.contains("appcast-sync --release"))
-        #expect(yaml.contains("--check"))
+        // The whole invocation. A bare `--check` needle was
+        // decoration: `changelog-sync --release "$TAG" --check`
+        // sits four lines above and kept it matched with the
+        // appcast pass deleted outright.
         #expect(
-            yaml.contains("PUBLISHED: ${{ github.event.release.tag_name }}"),
+            yaml.contains(
+                #"appcast-sync --release "$PUBLISHED""#
+            ),
+            "the published tag must be held to every clause"
+        )
+        #expect(
+            yaml.contains(
+                "PUBLISHED: ${{ github.event.release.tag_name }}"
+            ),
             "the strict pass keys on the event's tag, not a dispatch"
+        )
+        #expect(
+            !yaml.contains(
+                #"appcast-sync --release "$PUBLISHED" --check"#
+            ),
+            "on a publish it must WRITE, not only verify"
         )
     }
 
@@ -211,6 +337,22 @@ struct AppcastWorkflowTests {
             "both files must be in the one synced list"
         )
         #expect(yaml.contains(#"git add "${SYNCED[@]}""#))
+    }
+
+    /// A PR opened with `github.token` fires no workflows, so
+    /// `site.yml` never runs on the sync PR — and `site.yml` is
+    /// where the "is the feed actually served" check lives.
+    /// Without this call the feed is the one artifact that
+    /// reaches `main` with its own guard never having read it.
+    @Test("the sync PR runs the site gate before it exists")
+    func syncPRRunsTheSiteGate() throws {
+        let yaml = try workflow("changelog.yml")
+        #expect(
+            yaml.contains(
+                "python3 ../scripts/check-site-tokens.py --dist dist"
+            ),
+            "the feed's own guard must run before the PR opens"
+        )
     }
 
     /// The shipped feed URL and the file the sync writes must

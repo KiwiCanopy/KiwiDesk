@@ -259,8 +259,13 @@ it — a guard agreeing with its own literal is how the two would
 drift apart while staying green.
 
 **A path served to a program is not a page**, so the site's page
-rules do not reach it. It takes no `/de/` or `/ja/` route, joins
-no sitemap, and carries no localized frame — Sparkle asks for one
-URL. The entries inside it are the same English release notes the
-changelog page renders, and `site.md`'s two-corpora rule is why
-that is not an omission.
+rules do not reach it. Give it no `/de/` or `/ja/` route, add it
+to no sitemap, and localize no part of it: Sparkle asks for one
+URL and negotiates nothing. (Written as an obligation because no
+guard holds it — `check_sitemaps_disjoint` compares the two
+sitemaps to each other, never to the feed.)
+
+The entries inside it are the same English release notes the
+changelog page renders in every locale, which
+`site/src/components/Changelog.astro` argues for and now owns for
+both surfaces.

@@ -1,39 +1,34 @@
 import Foundation
 
-/// Reads one `<string>` value out of the `Info.plist` heredoc in
-/// `scripts/build-app.sh`.
+/// One `Info.plist` value from `scripts/build-app.sh`, read
+/// through `scripts/read-plist-key`.
 ///
-/// The packager is the one owner of what every shipped bundle
-/// declares, so a suite asserting anything about a plist key has
-/// to READ it there rather than restate it. A literal in a test
-/// agrees with itself forever: raise the deployment target or
-/// move the feed, and the guard keeps passing against the value
-/// that used to be true.
+/// It SPAWNS the script rather than re-implementing the parse,
+/// and that is the point. `scripts/build-app.sh` is the one
+/// owner of what every shipped bundle declares, and this was
+/// about to be the fourth reader of it with its own regex —
+/// beside `appcast-sync`, `check-site-tokens.py` and two shell
+/// steps in `release.yml`. `.claude/rules/parity-tests.md` puts
+/// the line at two mirrors, so the parse lives in one place and
+/// everything routes to it.
 ///
-/// Two suites need this (`AppcastParserTests` for the system
-/// floor, `AppcastWorkflowTests` for the feed URL), which is the
-/// point at which `.claude/rules/parity-tests.md` prefers one
-/// reader over a second copy of the parse.
+/// The side benefit is that these suites then exercise the real
+/// reader: a change that breaks `read-plist-key` reds here as
+/// well as in the workflow that depends on it, rather than
+/// leaving a Swift copy quietly agreeing with the old shape.
 ///
-/// Returns nil when the key is absent, so the caller can record a
-/// specific failure rather than assert against an empty string.
+/// Returns nil when the key is absent, so a caller can record a
+/// specific failure instead of asserting against "".
 func buildAppPlistValue(_ key: String) throws -> String? {
-    let script = try String(
-        contentsOf: URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
+    let run = try runPythonScript(
+        at: scriptFixtureRepoRoot()
             .appendingPathComponent("scripts")
-            .appendingPathComponent("build-app.sh"),
-        encoding: .utf8
+            .appendingPathComponent("read-plist-key"),
+        arguments: [key]
     )
-    guard let keyRange = script.range(of: "<key>\(key)</key>")
-    else { return nil }
-    let rest = keyRange.upperBound..<script.endIndex
-    guard let open = script.range(of: "<string>", range: rest)
-    else { return nil }
-    let afterOpen = open.upperBound..<script.endIndex
-    guard let close = script.range(of: "</string>", range: afterOpen)
-    else { return nil }
-    return String(script[open.upperBound..<close.lowerBound])
+    guard run.status == 0 else { return nil }
+    let value = run.stdout.trimmingCharacters(
+        in: .whitespacesAndNewlines
+    )
+    return value.isEmpty ? nil : value
 }

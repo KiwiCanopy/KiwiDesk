@@ -494,6 +494,55 @@ jobs:
                  "layout moved on a version bump."
             exit 1
           fi
+          # The signature is only worth anything if this key is
+          # the one whose PUBLIC half every shipped bundle
+          # carries. Signing and then verifying with the same
+          # key proves the secret is self-consistent and nothing
+          # else: a valid but WRONG key passes that happily, and
+          # the first user to be offered the update is the one
+          # who finds out — every installed copy rejects it, and
+          # they are back to re-downloading by hand.
+          #
+          # So derive the public half and compare it to the
+          # packager's own `SUPublicEDKey`. Node, because
+          # LibreSSL — which is what `openssl` is on a macOS
+          # runner — has no Ed25519 support, and hand-rolling
+          # curve arithmetic in a release workflow is worse than
+          # the problem. The derivation is checked against
+          # RFC 8032's first test vector by
+          # `SparkleKeyDerivationTests`.
+          #
+          # Both reads are tested for FAILURE, not for an empty
+          # string. This step runs under `set -e`, so a failing
+          # command substitution in an assignment aborts before
+          # any `-z` test could run — a check written that way
+          # is one that cannot fire, which reads as protection
+          # and is not.
+          if ! EXPECTED_PUB="$(python3 scripts/read-plist-key \
+            SUPublicEDKey)"; then
+            echo "::error::build-app.sh declares no" \
+                 "SUPublicEDKey, so nothing says which key an" \
+                 "installed copy trusts."
+            exit 1
+          fi
+          if ! ACTUAL_PUB="$(printf '%s' "$SPARKLE_KEY" \
+            | node scripts/sparkle-public-key.js)"; then
+            echo "::error::could not derive a public key from" \
+                 "SPARKLE_PRIVATE_KEY — the secret is not a" \
+                 "Sparkle EdDSA key."
+            exit 1
+          fi
+          if [ "$ACTUAL_PUB" != "$EXPECTED_PUB" ]; then
+            echo "::error::SPARKLE_PRIVATE_KEY is not the key" \
+                 "this app trusts. Bundles ship" \
+                 "SUPublicEDKey=$EXPECTED_PUB but the secret's" \
+                 "public half is $ACTUAL_PUB. Signing with it" \
+                 "would produce an update every installed copy" \
+                 "refuses."
+            exit 1
+          fi
+          echo "the signing key matches SUPublicEDKey"
+
           SIG="$(printf '%s' "$SPARKLE_KEY" \
             | "$TOOL" --ed-key-file - -p "$ARCHIVE")"
           if [ -z "$SIG" ]; then
@@ -646,7 +695,22 @@ jobs:
             else
               SIBLING_SIG=""
             fi
-            KEEP_SIG="$KEEP.edsig"
+            # When THIS run produced no signature, any
+            # `$KEEP.edsig` on the release is a previous run's,
+            # and `gh release upload --clobber` has just
+            # replaced the archive bytes underneath it. Keeping
+            # it pairs a valid-looking signature with bytes it
+            # does not sign — appcast-sync pairs by NAME and
+            # checks only base64 and length, so that release
+            # enters the feed and every installed copy
+            # downloads it and then refuses to install. Treat it
+            # as superseded, exactly like the renamed sibling.
+            if [ -n "$SIDECAR" ]; then
+              KEEP_SIG="$KEEP.edsig"
+            else
+              KEEP_SIG=""
+              SIBLING_SIG="$KEEP.edsig"
+            fi
             while IFS= read -r asset; do
               [ -n "$asset" ] || continue
               if [ "$asset" = "$SIBLING" ] \
@@ -661,9 +725,10 @@ jobs:
               elif [ "$asset" != "$KEEP" ] \
                 && [ "$asset" != "$KEEP_SIG" ]; then
                 case "$asset" in
-                  *.zip)
-                    echo "::warning::unexpected archive on the" \
-                         "draft, left in place: $asset" ;;
+                  *.zip|*.edsig)
+                    echo "::warning::unexpected archive or" \
+                         "signature on the draft, left in" \
+                         "place: $asset" ;;
                 esac
               fi
             done <<< "$assets"

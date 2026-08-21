@@ -58,20 +58,32 @@ jobs:
             echo "::error::$TAG is still a draft"
             exit 1
           fi
-          COUNT="$(jq '.assets | length' <<< "$RELEASE")"
+          # Selected BY NAME, never by counting and indexing.
+          # A release carries more than the cask's archive since
+          # #874: `release.yml` attaches `<archive>.zip.edsig`,
+          # Sparkle's signature over those bytes. The old
+          # `.assets | length -ne 1` refused every such release
+          # outright, and `.assets[0]` would then have been a
+          # coin flip between the archive and the signature.
+          #
+          # Still exactly-one, just of the name that matters —
+          # two assets called `KiwiDesk-$VERSION.zip` cannot
+          # happen through the API, so a count other than 1 here
+          # means the archive is absent, which must fail.
+          MATCHES="$(jq -c --arg want "$EXPECTED" \
+            '[.assets[] | select(.name == $want)]' <<< "$RELEASE")"
+          COUNT="$(jq 'length' <<< "$MATCHES")"
           if [ "$COUNT" -ne 1 ]; then
-            echo "::error::$TAG must have exactly one asset, found $COUNT"
+            echo "::error::$TAG must carry exactly one asset named" \
+                 "$EXPECTED, found $COUNT. Assets present:"
+            jq -r '.assets[].name' <<< "$RELEASE" | sed 's/^/  /'
             exit 1
           fi
 
-          NAME="$(jq -r '.assets[0].name' <<< "$RELEASE")"
-          STATE="$(jq -r '.assets[0].state' <<< "$RELEASE")"
-          TYPE="$(jq -r '.assets[0].content_type' <<< "$RELEASE")"
-          DIGEST="$(jq -r '.assets[0].digest' <<< "$RELEASE")"
-          if [ "$NAME" != "$EXPECTED" ]; then
-            echo "::error::expected $EXPECTED, found $NAME"
-            exit 1
-          fi
+          NAME="$(jq -r '.[0].name' <<< "$MATCHES")"
+          STATE="$(jq -r '.[0].state' <<< "$MATCHES")"
+          TYPE="$(jq -r '.[0].content_type' <<< "$MATCHES")"
+          DIGEST="$(jq -r '.[0].digest' <<< "$MATCHES")"
           if [ "$STATE" != uploaded ] || [ "$TYPE" != application/zip ]; then
             echo "::error::$NAME is not an uploaded ZIP ($STATE, $TYPE)"
             exit 1
