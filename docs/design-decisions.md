@@ -3900,6 +3900,32 @@ into the layout. If demand for reaching minimized windows ever
 materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
 
+**A hidden app holds no tiles, and the same rule covers an app
+that hides itself.** [Principle] A tile is space on screen given
+to a window the user can see. ⌘H takes every one of an app's
+windows off screen without destroying them, so holding their
+slots leaves the layout describing a desk that no longer exists
+— and it is not a rare corner: an Electron app hides *itself*
+when its last window closes, which is what Discord's red X does,
+so the commonest "I closed it" gesture on a chat app arrives
+here. The window comes back to the space it left, unlike a
+restore from the Dock, because hiding is not a parking decision
+about one window — the user aimed it at the app, and unhiding
+undoes exactly that.
+
+The trade-off is that this is read from the *app*, not the
+window: an app cannot be half hidden, so no rule here can be
+finer than that, and an app hiding one window while showing
+another is telling AX something else entirely (the window simply
+leaves the list). The alternative signal — the WindowServer's
+on-screen census — was rejected as the trigger: it cannot tell a
+hidden window from one on another Desktop, which AX also omits,
+so dropping on it would untrack every window the user parked on
+a Desktop they are not standing on. `NSRunningApplication`'s
+hidden flag answers the narrow question exactly, costs no AX
+round trip, and comes with a notification for both directions.
+(#913)
+
 **Close-return focus: closing the focused window returns focus
 to the previously focused window, same space only — and this is
 not the MRU the cycling ruling rejected.** [Rationale] The

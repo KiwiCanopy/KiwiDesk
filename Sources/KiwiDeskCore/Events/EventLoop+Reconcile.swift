@@ -63,6 +63,39 @@ extension EventLoop {
         {
             observer.repairRegistration()
         }
+        // A hidden app shows nothing on screen, yet AX keeps
+        // listing its windows un-minimized at their last frames
+        // — ⌘H, and what an Electron app does to itself when its
+        // last window closes (`appIsHidden`, #913). Read as live, they
+        // held their tiles until the app quit.
+        //
+        // Deliberately the one path that reaches the sweep
+        // WITHOUT reading the window list, where every abort
+        // below returns before it. The reasons do not collide:
+        // an abort holds a partial list, and sweeping one would
+        // untrack whatever it never reached, while "hidden"
+        // is a total answer about the app — no window of it is
+        // up — so the empty `live` here is the finished reading
+        // rather than an unfinished one.
+        //
+        // `wasMinimized: false` (the sweep's default for an
+        // empty `minimized`) is the right half of the fold: a
+        // hidden window keeps its Desktop and comes back to it,
+        // unlike one parked in the Dock. Unhiding re-adopts
+        // through this same reconcile — see the hide/unhide
+        // observers in `EventLoop+Apps` — with the census-gated
+        // heal as the backstop either way.
+        guard !appIsHidden(pid) else {
+            reconcileTabsAndSweep(
+                pid: pid,
+                app: app,
+                appeared: [],
+                live: [],
+                minimized: [],
+                coalesceTabs: false
+            )
+            return
+        }
         let isAccessory = Self.classifiesAsOverlay(
             pid: pid,
             activationPolicy: activationPolicy
@@ -119,7 +152,7 @@ extension EventLoop {
                 )
                 return
             }
-            guard let id = AXHelper.windowID(of: element)
+            guard let id = resolveWindowID(element)
             else { continue }
             // Minimized windows count as gone. Unlike windows
             // missing from the list entirely (other native

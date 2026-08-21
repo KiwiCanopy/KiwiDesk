@@ -179,11 +179,21 @@ public final class EventLoop {
     /// notification arms. A seam because a unit test has no
     /// real window to hand `_AXUIElementGetWindow`, so the
     /// move/resize wire (#618) would otherwise be unpinnable;
-    /// production is the live read. Scoped DELIBERATELY to the
-    /// move/resize arms — the created/focused/title arms keep
-    /// the direct `AXHelper.windowID` read, and route through
-    /// here only when a test needs them, so the seam's reach
-    /// matches what it pins.
+    /// production is the live read. Scoped to the move/resize
+    /// arms and to `reconcile`'s live-list loop — the
+    /// created/focused/title arms keep the direct
+    /// `AXHelper.windowID` read, and route through here only
+    /// when a test needs them, so the seam's reach matches what
+    /// it pins.
+    ///
+    /// The reconcile loop earned it with the hidden-app drop:
+    /// a suite whose fake window list resolves to no id at all
+    /// cannot state "the app still lists this window", which is
+    /// the only world in which that drop is the thing doing the
+    /// dropping. Without it three assertions passed on an empty
+    /// list — the sweep destroying everything for want of a live
+    /// id, exactly as it would with the guard deleted
+    /// (`HiddenAppWindowTests`).
     var resolveWindowID: (AXUIElement) -> WindowID? = {
         AXHelper.windowID(of: $0)
     }
@@ -219,6 +229,24 @@ public final class EventLoop {
     var activationPolicy: (pid_t) -> NSApplication.ActivationPolicy? = {
         NSRunningApplication(processIdentifier: $0)?
             .activationPolicy
+    }
+
+    /// Whether an app is hidden — ⌘H, and the state an Electron
+    /// app puts ITSELF in when its last window closes (Discord's
+    /// red X hides the application; no window is destroyed and
+    /// no AX notification is sent, #913).
+    ///
+    /// Load-bearing because AX keeps listing a hidden app's
+    /// windows, un-minimized and at their last frames, so
+    /// nothing in the window list separates them from windows
+    /// that are really up — `reconcile` read them as live and
+    /// their tiles were never released. A seam like its
+    /// neighbours: a unit test cannot hide a real app, and a
+    /// call site that stopped consulting it would restore that
+    /// defect with every suite green.
+    var appIsHidden: (pid_t) -> Bool = {
+        NSRunningApplication(processIdentifier: $0)?.isHidden
+            ?? false
     }
 
     /// The warmup taps (#360): the EUI read/write pair and the

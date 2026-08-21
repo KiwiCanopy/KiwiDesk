@@ -82,6 +82,27 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **A hidden app contributes NO live windows, and the read is
+  `appIsHidden` rather than anything in the AX list (#913).** ⌘H — and
+  an Electron app hiding itself as its last window closes, which
+  is Discord's red X — leaves every window in `kAXWindows`,
+  un-minimized, at its last frame, and sends no notification at
+  all, so a reconcile that only reads the window list keeps
+  tiling windows nobody can see. Two obligations. **The drop
+  reaches the sweep with an empty `live`** — the one path in
+  `reconcile` that does so without reading the window list,
+  which does not weaken the abort-before-sweep rule above,
+  because an abort holds a PARTIAL list while "hidden" is a
+  total answer about the app. And **`attach` skips the scan for
+  a hidden app too**, or boot adopts what it should have
+  dropped. Do not re-base either on the WindowServer's on-screen
+  census: it omits a window on another Desktop exactly as
+  readily, so it would untrack every window parked on a Desktop
+  the user is not standing on (`docs/design-decisions.md`
+  ▸ *A hidden app holds no tiles* argues the choice).
+  `HiddenAppWindowTests` pins both drops, the hide/unhide arm
+  that funnels them, and the `wasMinimized: false` the fold
+  reads to send the window back to the Desktop it left.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Three links

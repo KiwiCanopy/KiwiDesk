@@ -44,6 +44,40 @@ extension EventLoop {
                 self?.appActivated(app)
             }
         }
+        // Hide and unhide are the only signal an app gives
+        // when it stops (or resumes) showing windows without
+        // destroying them — a ⌘H, or an Electron app hiding
+        // itself as its last window closes. `appHideChanged`
+        // argues why one arm serves both.
+        let hide = center.addObserver(
+            forName: NSWorkspace.didHideApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            let app = note.runningApplication
+            MainActor.assumeIsolated {
+                guard let app else { return }
+                self?.appHideChanged(
+                    pid: app.processIdentifier,
+                    ref: AppRef(app)
+                )
+            }
+        }
+        let unhide = center.addObserver(
+            forName:
+                NSWorkspace.didUnhideApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            let app = note.runningApplication
+            MainActor.assumeIsolated {
+                guard let app else { return }
+                self?.appHideChanged(
+                    pid: app.processIdentifier,
+                    ref: AppRef(app)
+                )
+            }
+        }
         let space = center.addObserver(
             forName:
                 NSWorkspace.activeSpaceDidChangeNotification,
@@ -54,7 +88,9 @@ extension EventLoop {
                 self?.nativeSpaceChanged()
             }
         }
-        workspaceTokens = [launch, terminate, activate, space]
+        workspaceTokens = [
+            launch, terminate, activate, space, hide, unhide,
+        ]
 
         screenToken = NotificationCenter.default.addObserver(
             forName:
@@ -86,6 +122,31 @@ extension EventLoop {
         let pid = app.processIdentifier
         detach(pid: pid, restoreEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
+    }
+
+    /// An app hid or unhid: reconcile it (#913). ONE arm for both
+    /// directions on purpose — reconcile already asks
+    /// `appIsHidden` and answers each direction correctly
+    /// (hiding drops the windows AX still lists, unhiding
+    /// re-adopts whatever the app now shows), so a second arm
+    /// would only be a second copy of that question, free to
+    /// disagree with the first.
+    ///
+    /// Without this the drop still lands, but only whenever
+    /// something else happens to reconcile the app — an
+    /// activation elsewhere, the next heal tick — which is a
+    /// visibly late release of the tile.
+    ///
+    /// Descriptor-shaped, like `runningApplications`: a test
+    /// cannot build an `NSRunningApplication` for a made-up pid,
+    /// which would leave the arm below unpinnable (#672 review
+    /// made the same call for the scan's app source).
+    func appHideChanged(pid: pid_t, ref: AppRef) {
+        // Ignored and prohibited apps have no observer; nothing
+        // of theirs is tracked, so there is nothing to reconcile
+        // (mirrors `appActivated`'s guard).
+        guard observers[pid] != nil else { return }
+        reconcile(pid: pid, app: ref)
     }
 
     /// Closing an app's last window moves focus to a DIFFERENT

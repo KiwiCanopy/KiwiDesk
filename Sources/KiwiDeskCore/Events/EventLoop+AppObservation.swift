@@ -142,6 +142,13 @@ extension EventLoop {
         // re-warms (StartupWarmupSkipTests, #662).
         guard scanWindowsAtAttach else { return }
 
+        // A hidden app's windows are listed by AX and on screen
+        // nowhere (`reconcile` carries the argument, #913), so adopting
+        // them here would tile what the user cannot see — boot's
+        // way into the same defect. The observer above stays
+        // installed, and the unhide reconcile adopts them.
+        guard !appIsHidden(pid) else { return }
+
         // Every call below can block for a whole AX messaging
         // timeout on an unresponsive app, and boot pays them
         // serially — so a chunked pass drops what is left of this
