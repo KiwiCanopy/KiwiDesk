@@ -2255,9 +2255,9 @@ never merely whose process it belongs to.** (#678 item 18,
 Phase 5.) The engine used to force-float every own window by
 `isOwnProcess(pid)` — one predicate answering for three titled
 windows that want two different fates, Settings against the
-tour and the Config Issues window. (The app's panels never
-reach it: `shouldIgnoreOwnWindow` drops anything that cannot
-become main before tracking.) Relaxing that predicate per
+tour and the Config Issues window. (The app's utility panels never
+reach it: `shouldIgnoreOwnWindow` drops non-key overlays and
+borderless panels before tracking.) Relaxing that predicate per
 PROCESS would have swept the tour and the Config Issues window
 into layouts alongside Settings, so the exemption rides a
 per-window mark instead
@@ -2276,11 +2276,10 @@ a window and promoting a process are unrelated axes, and a
 window that takes a layout slot is not thereby a reason to grow
 a Dock icon; the activation-policy seam is untouched. And **the
 ⌃⌥K panel needs no mark and no bar exclusion**: item 18 asks for
-one, but an own `NSPanel` cannot become main, so
-`shouldIgnoreOwnWindow` already drops it before tracking and it
-reaches no bar's enumeration to be excluded from. A written
-exclusion would have been dead code asserting a fact the type
-system already holds.
+one, but an own borderless `NSPanel` is ignored by
+`shouldIgnoreOwnWindow` before tracking and it reaches no bar's
+enumeration to be excluded from. A written exclusion would have
+been dead code asserting a fact the type system already holds.
 
 The companion affordance: **"Open Settings" is bindable and
 unbound by default** (`KiwiDesk.open_settings()`, offered under

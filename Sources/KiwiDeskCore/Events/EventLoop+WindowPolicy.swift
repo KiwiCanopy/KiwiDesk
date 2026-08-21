@@ -157,14 +157,22 @@ extension EventLoop {
     }
 
     /// KiwiDesk's normal Settings window can become a main app
-    /// window. Its NSPanels cannot, giving one robust distinction
-    /// for drag/drop, App Bar, and border overlays regardless of
-    /// the AX subrole AppKit reports for each panel.
+    /// window. Its internal overlay panels cannot, giving one
+    /// robust distinction for drag/drop, App Bar, and border
+    /// overlays. Titled dialogs and alerts (e.g. Sparkle update
+    /// alerts) that can become key are managed as floating chrome;
+    /// borderless utility panels and hidden windows stay ignored.
     nonisolated static func shouldIgnoreOwnWindow(
         pid: pid_t,
-        canBecomeMain: Bool
+        canBecomeMain: Bool,
+        canBecomeKey: Bool = false,
+        isTitled: Bool = false,
+        isVisible: Bool = true
     ) -> Bool {
-        isOwnProcess(pid) && !canBecomeMain
+        guard isOwnProcess(pid) else { return false }
+        guard isVisible else { return true }
+        let isManaged = canBecomeMain || (canBecomeKey && isTitled)
+        return !isManaged
     }
 
     func shouldIgnore(
@@ -175,13 +183,18 @@ extension EventLoop {
         isAccessory: Bool
     ) -> Bool {
         if Self.isOwnProcess(pid) {
-            let canBecomeMain =
-                AXHelper.windowID(of: element)
-                .flatMap { Self.ownWindow(number: Int($0.raw)) }?
-                .canBecomeMain ?? false
+            guard
+                let window = AXHelper.windowID(of: element)
+                    .flatMap({ Self.ownWindow(number: Int($0.raw)) })
+            else {
+                return true
+            }
             return Self.shouldIgnoreOwnWindow(
                 pid: pid,
-                canBecomeMain: canBecomeMain
+                canBecomeMain: window.canBecomeMain,
+                canBecomeKey: window.canBecomeKey,
+                isTitled: window.styleMask.contains(.titled),
+                isVisible: window.isVisible
             )
         }
         if shouldIgnoreApp(bundleID: app.bundleID) {
