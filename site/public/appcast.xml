@@ -12,5 +12,18 @@
     <link>https://kiwidesk.kiwicanopy.com/appcast.xml</link>
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
+    <item>
+      <title>0.9.8</title>
+      <pubDate>Fri, 21 Aug 2026 15:15:36 +0000</pubDate>
+      <sparkle:version>0.9.8</sparkle:version>
+      <sparkle:shortVersionString>0.9.8</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<p>KiwiDesk can keep itself up to date now.</p><h3>Updates</h3><ul><li><strong>New versions arrive on their own.</strong> KiwiDesk checks quietly in the background and tells you when there is something newer, so you no longer have to go looking for it. Nothing installs without you saying yes.</li><li><strong>Ask whenever you like.</strong> There is a <strong>Check for Updates…</strong> item in the menu for when you would rather not wait to be told.</li><li><strong>See what changed before you take it.</strong> The update window shows you the notes for the new version, and the same notes now live on the KiwiDesk site.</li></ul><h3>If you installed with Homebrew, do this once</h3><ul><li><strong>Run <code>brew upgrade --cask kiwidesk</code> to move onto this version.</strong> After that KiwiDesk keeps itself current and Homebrew steps aside for it — which also means a plain <code>brew upgrade</code> will pass KiwiDesk by from now on. Naming the cask still works whenever you want Homebrew to do it instead.</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v0.9.8/KiwiDesk-0.9.8.zip"
+        length="8002946"
+        type="application/octet-stream"
+        sparkle:edSignature="XkBr3vvmwrgr+PftIKihTITGh7Ly0R2zWpUNhRN9qzfh37oiwgzNDsqMgyws6DIcLzjca05V+IEW8z6/ETa6CA==" />
+    </item>
   </channel>
 </rss>
