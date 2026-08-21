@@ -5055,6 +5055,12 @@ sound while this repo had one user, and v0.9.7 shipped to others
 (AGENTS.md §5, amended). Asking a stranger to hand-edit JSON to
 get their profiles back is not a migration policy.
 
+`Profile` and `GuiConfig` carry a `format` version integer (#902),
+following `SetupBundle.currentFormat`. Migrations key off the format
+rather than scanning payloads, and future migration removals establish
+a supported format floor rather than guessing whether older configs
+still exist.
+
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read
 "Finder" five times while the icon beside each already said so;

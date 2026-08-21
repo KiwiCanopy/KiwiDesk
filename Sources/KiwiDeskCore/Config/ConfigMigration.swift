@@ -17,15 +17,14 @@ import Foundation
 /// exactly the shim §5 bans, and exactly what this branch
 /// removed twice before understanding why it kept coming back.
 ///
-/// Deleting this is a real decision and needs a real signal.
-/// Neither `Profile` nor `GuiConfig` carries a format stamp, so
-/// nothing here can prove a given config has been through the
-/// rewrite — a user upgrading across several versions at once
-/// skips whichever build would have done it. Until those files
-/// carry a version — `SetupBundle.currentFormat` is the pattern,
-/// applied to the two files read on every launch — removing this
-/// is a guess, and the guess fails silently on someone else's
-/// machine.
+/// Deleting a migration is a decision with a format floor (#902).
+/// Both `Profile` and `GuiConfig` carry a format integer (with
+/// absent meaning format 0, the unversioned legacy format),
+/// matching `SetupBundle.currentFormat`.
+///
+/// Removing an old migration means advancing the minimum
+/// supported format floor: files below the floor are refused
+/// explicitly rather than failing silently on an upgrade.
 /// `init.lua` is deliberately out of scope. A hand-written
 /// `app_bar.set_content("icon_and_name")` now fails, but it fails
 /// as ONE line reporting `expected one of icon|title|
@@ -71,6 +70,28 @@ public enum ConfigMigration {
         migratingRetiredBarContent
     ]
 
+    /// Whether `data` is below the current format version for
+    /// its shape (#902).
+    ///
+    /// Formats at or above current format skip migrations
+    /// entirely — avoiding JSON parsing and key scans on every
+    /// config read once a file carries the format stamp.
+    static func needsMigration(_ data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(
+                with: data
+            ) as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        if root["writtenBy"] != nil {
+            return format < SetupBundle.currentFormat
+        }
+        if root["monitor_sets"] != nil || root["monitorSets"] != nil {
+            return format < Profile.currentFormat
+        }
+        return format < GuiConfig.currentFormat
+    }
+
     /// `data` with every applicable migration applied, or nil
     /// when none applied.
     ///
@@ -79,6 +100,7 @@ public enum ConfigMigration {
     /// a config that needs nothing is never rewritten and its
     /// mtime never moves.
     public static func migrated(_ data: Data) -> Data? {
+        guard needsMigration(data) else { return nil }
         var current = data
         var changed = false
         for step in steps {

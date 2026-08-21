@@ -41,13 +41,9 @@ struct ConfigMigrationRoutingTests {
         // A bundle carries `[Profile]` inline, so it reads the
         // same shape from a file this app wrote earlier.
         "App/KiwiCore+Backup.swift": true,
-        // EXEMPT, and not by oversight: `GuiConfig.encode` writes
-        // only the spaces, rules, bindings and layers, and
-        // `CodingKeys` has no `settings` case at all, so no
-        // sidecar this app has written can carry a migratable
-        // value. The day it persists `settings`, this entry flips
-        // to `true` and this suite is what says so.
-        "Config/GuiConfigStore.swift": false,
+        // Routes through ConfigMigration so older sidecars are
+        // migrated before decoding and repaired in place (#902).
+        "Config/GuiConfigStore.swift": true,
     ]
 
     @Test("Every config-file reader routes through the migration")

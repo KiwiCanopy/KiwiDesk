@@ -197,4 +197,22 @@ struct ProfileModelTests {
         )
         #expect(!wrongLength)
     }
+
+    @Test("Profile encodes and decodes format 1 by default")
+    func profileFormatRoundTrip() throws {
+        let profile = makeProfile(name: "p", monitors: ["A:1x1"])
+        #expect(profile.format == 1)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(profile)
+        let json = String(decoding: data, as: UTF8.self)
+        #expect(
+            json.contains("\"format\":1")
+                || json.contains("\"format\" : 1")
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(Profile.self, from: data)
+        #expect(decoded.format == 1)
+    }
 }

@@ -174,7 +174,8 @@ struct SettingKeyModelParityTests {
     @Test func guiConfigFieldsAreCensused() {
         var fields: Set<String> = []
         for child in Mirror(reflecting: GuiConfig()).children {
-            guard let name = child.label, name != "settings"
+            guard let name = child.label,
+                name != "settings", name != "format"
             else { continue }
             fields.insert(name)
         }

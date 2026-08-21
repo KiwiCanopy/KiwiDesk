@@ -63,6 +63,10 @@ struct ConfigMigrationWiringTests {
             .replacingOccurrences(
                 of: "\"icon_and_title\"",
                 with: "\"icon_and_name\""
+            )
+            .replacingOccurrences(
+                of: "  \"format\" : 1,\n",
+                with: ""
             ).utf8
         ).write(to: file)
 
@@ -205,10 +209,16 @@ struct ConfigMigrationWiringTests {
         // is a claim about a file that never had any.
         #expect(asWritten.contains("0.4"))
 
-        let old = asWritten.replacingOccurrences(
-            of: "\"icon_and_title\"",
-            with: "\"icon_and_name\""
-        )
+        let old =
+            asWritten
+            .replacingOccurrences(
+                of: "\"icon_and_title\"",
+                with: "\"icon_and_name\""
+            )
+            .replacingOccurrences(
+                of: "  \"format\" : 1,\n",
+                with: ""
+            )
         let migrated = String(
             decoding: try #require(
                 ConfigMigration.migrated(Data(old.utf8))
@@ -227,5 +237,28 @@ struct ConfigMigrationWiringTests {
         let changed = zip(before, after).filter { $0 != $1 }
         #expect(changed.count == 1)
         #expect(changed.first?.1.contains("icon_and_title") == true)
+    }
+
+    /// An unversioned legacy gui.json loads and decodes with current format.
+    @Test("A legacy gui.json loads through GuiConfigStore")
+    func guiConfigFileMigratesOnLoad() throws {
+        let dir = try scratch()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = GuiConfigStore(directory: dir)
+        var config = GuiConfig()
+        config.spaces = [SpaceID("code")]
+        try store.save(config)
+        let file = dir.appendingPathComponent("gui.json")
+        let legacy = String(
+            decoding: try Data(contentsOf: file),
+            as: UTF8.self
+        ).replacingOccurrences(
+            of: "  \"format\" : 1,\n",
+            with: ""
+        )
+        try legacy.write(to: file, atomically: true, encoding: .utf8)
+        let loaded = store.load()
+        #expect(loaded?.spaces == [SpaceID("code")])
+        #expect(loaded?.format == GuiConfig.currentFormat)
     }
 }
