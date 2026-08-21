@@ -46,7 +46,7 @@ extension SettingsFooter {
     }
 
     var saveCopyAsLabel: String {
-        L("footer.save_a_copy_as", "Save a copy…")
+        L("footer.save_a_copy_as", "Save as new profile…")
     }
 
     // MARK: - Primary slot: Save (⌘S)
