@@ -45,7 +45,7 @@
   "app_bar.font_size": "Tamaño de fuente",
   "app_bar.font_size.auto": "Tamaño automático",
   "app_bar.global_colors.title": "Colores de la App Bar",
-  "app_bar.group.ax": "%1$@, %2$d ventanas",
+  "app_bar.group.ax": "%1$@, ventanas: %2$d",
   "app_bar.group_adjacent": "Agrupar ventanas adyacentes de la misma aplicación",
   "app_bar.group_adjacent.help": "Combina ventanas adyacentes de la misma aplicación en un solo elemento con una insignia de recuento, en lugar de mostrar un elemento para cada una.",
   "app_bar.icon_source.app_font": "Glifos",

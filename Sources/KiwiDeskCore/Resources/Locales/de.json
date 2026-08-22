@@ -45,7 +45,7 @@
   "app_bar.font_size": "Schriftgröße",
   "app_bar.font_size.auto": "Automatische Schriftgröße",
   "app_bar.global_colors.title": "App Bar-Farben",
-  "app_bar.group.ax": "%1$@, %2$d Fenster",
+  "app_bar.group.ax": "%1$@, Fenster: %2$d",
   "app_bar.group_adjacent": "Benachbarte Fenster derselben App gruppieren",
   "app_bar.group_adjacent.help": "Führt benachbarte Fenster derselben App zu einem einzelnen Element mit Zähler-Badge zusammen, anstatt für jedes ein eigenes Element anzuzeigen.",
   "app_bar.icon_source.app_font": "Glyphen",

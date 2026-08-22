@@ -45,7 +45,7 @@
   "app_bar.font_size": "Tamanho da fonte",
   "app_bar.font_size.auto": "Tamanho de fonte automático",
   "app_bar.global_colors.title": "Cores da App Bar",
-  "app_bar.group.ax": "%1$@, %2$d janelas",
+  "app_bar.group.ax": "%1$@, janelas: %2$d",
   "app_bar.group_adjacent": "Agrupar janelas vizinhas do mesmo app",
   "app_bar.group_adjacent.help": "Funde as janelas vizinhas do mesmo app em um único item, marcado com um selo de contagem, em vez de mostrar uma para cada.",
   "app_bar.icon_source.app_font": "Símbolos",
