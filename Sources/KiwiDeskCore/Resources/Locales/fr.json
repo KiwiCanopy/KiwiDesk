@@ -619,6 +619,7 @@
   "menu.app.hide": "Masquer %1$@",
   "menu.app.hide_others": "Masquer les autres",
   "menu.app.show_all": "Tout afficher",
+  "menu.check_updates": "Rechercher des mises à jour…",
   "menu.config_issues": "Problèmes de configuration…",
   "menu.edit.copy": "Copier",
   "menu.edit.cut": "Couper",

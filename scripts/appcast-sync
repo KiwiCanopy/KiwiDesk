@@ -377,19 +377,37 @@ def inline(markdown: str) -> str:
     return text
 
 
-def description(entry: dict | None, version: str) -> str:
-    """The HTML Sparkle shows in its update window.
+_STYLE = (
+    "<style>"
+    ":root{color-scheme:light dark;"
+    "font-family:-apple-system,BlinkMacSystemFont,"
+    "'Segoe UI',Roboto,Helvetica,Arial,sans-serif;"
+    "font-size:13px;line-height:1.5;}"
+    "body{margin:0;padding:2px 4px 16px 4px;}"
+    "h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}"
+    "p{margin:0 0 8px 0;}"
+    "ul{margin:0 0 10px 0;padding-left:18px;}"
+    "li{margin-bottom:5px;}"
+    "code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;"
+    "font-size:11.5px;padding:1px 4px;border-radius:4px;"
+    "background:rgba(128,128,128,0.15);}"
+    "::-webkit-scrollbar{width:6px;height:6px;}"
+    "::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);"
+    "border-radius:3px;}"
+    "::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}"
+    "</style>"
+)
 
-    No stylesheet and no colours: Sparkle renders this inside its
-    own WebView, which follows the user's appearance, and a
-    palette pinned here would be the one surface that ignores
-    dark mode."""
+
+def description(entry: dict | None, version: str) -> str:
+    """The HTML Sparkle shows in its update window."""
     if not entry:
         return (
+            f"{_STYLE}"
             f"<p>KiwiDesk {html.escape(version)}.</p>"
             "<p>Release notes are on the KiwiDesk site.</p>"
         )
-    parts: list[str] = []
+    parts: list[str] = [_STYLE]
     summary = entry.get("summary")
     if summary:
         parts.append(f"<p>{inline(summary)}</p>")
@@ -404,7 +422,7 @@ def description(entry: dict | None, version: str) -> str:
         ]
         if items:
             parts.append("<ul>" + "".join(items) + "</ul>")
-    return "".join(parts) or f"<p>KiwiDesk {html.escape(version)}.</p>"
+    return "".join(parts) or f"{_STYLE}<p>KiwiDesk {html.escape(version)}.</p>"
 
 
 def pub_date(published_at: str) -> str:

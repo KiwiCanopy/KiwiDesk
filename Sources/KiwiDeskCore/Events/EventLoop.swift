@@ -63,6 +63,13 @@ public final class EventLoop {
             .identifier?.rawValue
     }
 
+    /// Whether KiwiDesk's own process currently holds an active,
+    /// visible key window or modal dialog (#929). Injected in
+    /// tests.
+    var hasOwnKeyWindow: () -> Bool = {
+        EventLoop.hasOwnActiveKeyWindow()
+    }
+
     var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop
