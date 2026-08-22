@@ -20,9 +20,10 @@ import Testing
 /// inside `track`. Its door is an app opening a window while
 /// hidden, and with a fabricated AX element `track` returns at
 /// its role check whatever the refusal does — so an assertion
-/// would pass with the guard deleted, which is worse than no
-/// assertion. It is defence in depth for a door not shown to be
-/// reachable; the rule bullet says so too.
+/// here would pass with the guard deleted, which is worse than
+/// no assertion. It is defence in depth for a door not shown to
+/// be reachable; `HiddenAppTrackNeedleTests` pins its presence
+/// and position via `SourceScan`.
 ///
 /// Everything drives the funnels through the injected seams
 /// (tests.md); no app is hidden, attached to or messaged for

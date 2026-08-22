@@ -52,31 +52,91 @@ struct HideObserverWiringTests {
         )
     }
 
+    /// The registration block: from the first hide observer to
+    /// the line that retains the tokens. The claims below are
+    /// scoped to it, because a file-wide count is satisfiable
+    /// from anywhere — proven, not theorised: unwiring the
+    /// unhide closure and adding one unrelated
+    /// `appHideChanged(` mention elsewhere in the file restored
+    /// a whole-file count and left the suite green with the
+    /// unhide direction dead.
+    private func registrationBlock() throws -> Substring {
+        let text = try appsSource()
+        let from = try #require(
+            text.range(of: "didHideApplicationNotification")
+        )
+        let to = try #require(
+            text.range(of: "workspaceTokens = [")
+        )
+        try #require(from.lowerBound < to.lowerBound)
+        return text[from.lowerBound..<to.lowerBound]
+    }
+
     @Test("both registrations reach the funnel")
     func bothRegistrationsCallTheArm() throws {
         // Two call sites, because the two closures are separate
         // — registering both notifications and wiring only one
         // of them to `appHideChanged` is a live failure mode
         // that the needle above alone would miss.
-        let text = try appsSource()
+        let block = try registrationBlock()
         let calls =
-            text.components(
+            block.components(
                 separatedBy: "appHideChanged("
             ).count - 1
-        // Two closures plus the declaration itself.
-        #expect(calls == 3)
+        #expect(calls == 2)
     }
 
-    @Test("the tokens are retained for teardown")
+    @Test("every registered observer is retained for teardown")
     func tokensAreRetained() throws {
-        // An observer token dropped on the floor is deregistered
-        // by `stop()` never — `workspaceTokens` is what
+        // An observer token dropped on the floor is never
+        // deregistered — `workspaceTokens` is what
         // `EventLoop+Lifecycle` walks, so a registration missing
         // from that array leaks a live observer past a stop.
+        //
+        // DERIVED, not listed. The first draft asked whether the
+        // array contained "hide" and "unhide", and the first is
+        // a substring of the second: dropping `hide` from the
+        // array left this suite green with the didHide observer
+        // leaking past every `stop()`. A hand-listed pair also
+        // has to be updated for the next observer, which is the
+        // copy rule-authoring.md ▸ "a number-pin must derive the
+        // number" refuses. So parse the bindings the function
+        // creates, parse the array, and require the first set
+        // inside the second.
         let text = try appsSource()
-        let at = try #require(text.range(of: "workspaceTokens = ["))
-        let assignment = text[at.lowerBound...].prefix(120)
-        #expect(assignment.contains("hide"))
-        #expect(assignment.contains("unhide"))
+        var registered: Set<String> = []
+        for line in text.split(separator: "\n") {
+            let trimmed = line.trimmingCharacters(
+                in: .whitespaces
+            )
+            guard trimmed.hasPrefix("let "),
+                trimmed.contains("center.addObserver")
+            else { continue }
+            let name =
+                trimmed
+                .dropFirst("let ".count)
+                .prefix { $0.isLetter || $0.isNumber }
+            registered.insert(String(name))
+        }
+        // Fail-shut: no bindings parsed means the shape moved,
+        // and an empty set is a subset of anything.
+        try #require(registered.count >= 2)
+
+        let at = try #require(
+            text.range(of: "workspaceTokens = [")
+        )
+        let after = text[at.upperBound...]
+        let close = try #require(after.firstIndex(of: "]"))
+        let retained = Set(
+            after[..<close]
+                .split(separator: ",")
+                .map {
+                    $0.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                }
+                .filter { !$0.isEmpty }
+        )
+        #expect(registered.subtracting(retained).isEmpty)
     }
 }

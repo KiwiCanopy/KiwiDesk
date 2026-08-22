@@ -3908,10 +3908,10 @@ slots leaves the layout describing a desk that no longer exists
 — and it is not a rare corner: an app built to live in the
 background hides *itself* when its last window closes, which is
 what Discord's red X does, so the commonest "I closed it"
-gesture on a chat app arrives here. The window comes back to the space it left, unlike a
-restore from the Dock, because hiding is not a parking decision
-about one window — the user aimed it at the app, and unhiding
-undoes exactly that.
+gesture on a chat app arrives here. The window comes back to
+the space it left, unlike a restore from the Dock, because
+hiding is not a parking decision about one window — the user
+aimed it at the app, and unhiding undoes exactly that.
 
 The trade-off is that this is read from the *app*, not the
 window: an app cannot be half hidden, so no rule here can be
@@ -3934,11 +3934,12 @@ and a bar script filtering on `closed` would otherwise fire its
 window-closed trigger every time someone pressed ⌘H. And the
 close-return raise stands down. macOS picks the next frontmost
 app itself when an app hides, so a raise racing that choice
-lands the user somewhere neither of them chose — with the
-pointer warped after it, on a keystroke that never moved the
-mouse. State still names the survivor; it simply is not forced
-there. A close has no such competing chooser, which is why it
-keeps the raise. (#913)
+lands the user somewhere neither of them chose — and, for
+anyone running `mouse.follows_focus`, drags the pointer after
+it on a keystroke that never moved the mouse. State still
+names the survivor; it simply is not forced there. A close has
+no such competing chooser, which is why it keeps the raise.
+(#913)
 
 **Close-return focus: closing the focused window returns focus
 to the previously focused window, same space only — and this is

@@ -81,6 +81,30 @@ struct LifecycleEventTests {
         )
     }
 
+    @Test("hiding the app fires window_destroyed reason hidden")
+    func hidden() {
+        // The whole point of #913's reporting half, and until
+        // this existed nothing watched it: deleting KiwiCore's
+        // `.windowHidden` arm outright left every suite green
+        // (the switch has a `default:`, so it compiles), and
+        // flipping `.hidden` back to `.closed` was a one-token
+        // regression to the defect the change was made for —
+        // `docs/recipes/sketchybar.md` filters on `closed`, so a
+        // hide reported that way fires a window-closed trigger
+        // on every ⌘H.
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(11)))
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
+        }
+        core.eventLoop.onEvent(.windowHidden(WindowID(11)))
+        #expect(
+            reason(of: .windowDestroyed, in: events)
+                == .string("hidden")
+        )
+    }
+
     @Test("minimizing fires window_destroyed reason minimized")
     func minimized() {
         let core = makeCore()

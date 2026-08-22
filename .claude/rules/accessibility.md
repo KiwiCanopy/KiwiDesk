@@ -83,9 +83,9 @@ editing AX code:
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
 - **A hidden app contributes NO live windows, and the read is
-  `appIsHidden` rather than anything in the AX list (#913).** ⌘H — and
-  an app hiding itself as its last window closes, which is
-  Discord's red X — leaves every window in `kAXWindows`,
+  `appIsHidden` rather than anything in the AX list (#913).**
+  ⌘H — and an app hiding itself as its last window closes,
+  which is Discord's red X — leaves every window in `kAXWindows`,
   un-minimized, at its last frame, and sends no AX notification
   at all (probed on device 2026-08-21, macOS 26.6.2), so a
   reconcile that only reads the window list keeps tiling windows
@@ -99,16 +99,20 @@ editing AX code:
   app at `track`**, the one door every caller comes through —
   attach's scan, reconcile's sweep, and the created and
   deminiaturized arms — because a rule enforced at three of
-  four doors is not a rule. **A hidden app is still WARMED**
-  though never adopted: #662's promise is that a following
-  reconcile warms what attach skipped, and both hidden paths
-  return before that warm, so an app hidden across boot would
-  meet its first unhide with a cold AX tree — which for an
-  Electron app is an empty window list. And **the drop reports
-  `.windowHidden`, never a destroy**: the window was not
-  closed, so the public `window_destroyed` reason must not say
-  it was, and the close-return raise must stand down rather
-  than race the frontmost app macOS itself picks.
+  four doors is not a rule; a new adoption site takes that door
+  rather than restating the refusal beside itself. **A hidden
+  app is still WARMED** though never adopted: #662's promise is
+  that a following reconcile warms what attach skipped, and
+  both hidden paths return before that warm, so an app hidden
+  across boot would meet its first unhide with a cold AX tree —
+  which for an Electron app is an empty window list. And **the
+  drop reports `.windowHidden`, never a destroy**: the window
+  was not closed, so the public `window_destroyed` reason must
+  not say it was, and the close-return raise must stand down
+  rather than race the frontmost app macOS itself picks
+  (`HiddenAppRaiseTests` holds the predicate,
+  `HiddenAppRaiseWiringTests` the raise site that asks it —
+  needles, because that site is gated on live AX).
 
   Do not re-base the drop on the WindowServer's on-screen
   census: it omits a window on another Desktop exactly as
@@ -132,8 +136,15 @@ editing AX code:
 
   `HiddenAppWindowTests` pins the drop, its `.windowHidden`
   reporting, the warm-while-hidden, the hide/unhide arm and its
-  observer guard; its docstring names the one obligation here
-  that no test discriminates (the `track` refusal) and why.
+  observer guard. The `track` refusal is pinned in
+  `HiddenAppTrackNeedleTests` (`SourceScan`), because no behavior
+  test can reach it without live AX.
+  What `HiddenAppWindowTests` cannot reach is the pair of
+  workspace notifications that fire that arm at all: it drives
+  the arm directly, with `registersWorkspaceObservers` off so no
+  live observer outlives the test, and stays green if either
+  registration is deleted. Keep those pinned in
+  `HideObserverWiringTests`.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Three links
