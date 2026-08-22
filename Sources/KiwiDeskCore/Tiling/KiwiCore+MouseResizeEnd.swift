@@ -68,6 +68,7 @@ extension KiwiCore {
         // the write target all follow the space's own override,
         // never the global — so a resize can't shift other spaces.
         let stack = tiler.settings.resolvedStack(for: space.id)
+        let track = tiler.settings.resolvedTrack(for: space.id)
         // Zone membership via the partition authority — never
         // a re-derived boundary comparison (#67 review).
         let isMaster = StackLayout.partition(
@@ -85,12 +86,14 @@ extension KiwiCore {
             isMaster: isMaster,
             stackSplitHorizontal: stack.stackPosition
                 .splitsHorizontally,
+            trackAxisVertical: track.axis == .vertical,
             slot: slot,
             frame: frame,
             bounds: bounds
         )
         applyResizeAdjustment(
             adjustment,
+            for: id,
             in: space,
             bounds: bounds
         )
@@ -141,6 +144,7 @@ extension KiwiCore {
     /// one never retiles; the caller does.)
     func applyResizeAdjustment(
         _ adjustment: ResizeAdjustment?,
+        for window: WindowID? = nil,
         in space: Space,
         bounds: CGRect
     ) {
@@ -211,6 +215,34 @@ extension KiwiCore {
             writeSlotSize(
                 .points(clamping: current + delta),
                 for: space.id
+            )
+        case .trackAcross(let delta):
+            guard let window else { break }
+            let track = tiler.settings.resolvedTrack(for: space.id)
+            let vertical = track.axis == .vertical
+            let acrossAxis = vertical ? "x" : "y"
+            let span =
+                Double(vertical ? bounds.width : bounds.height)
+            resizeTrackMember(
+                window,
+                axis: acrossAxis,
+                delta: Double(delta),
+                span: span,
+                space: space
+            )
+        case .trackAlong(let delta):
+            guard let window else { break }
+            let track = tiler.settings.resolvedTrack(for: space.id)
+            let vertical = track.axis == .vertical
+            let alongAxis = vertical ? "y" : "x"
+            let span =
+                Double(vertical ? bounds.height : bounds.width)
+            resizeTrackMember(
+                window,
+                axis: alongAxis,
+                delta: Double(delta),
+                span: span,
+                space: space
             )
         case nil:
             break

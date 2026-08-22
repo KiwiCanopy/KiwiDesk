@@ -38,8 +38,9 @@ extension StackLayout {
     ) -> Double {
         let current = weights[index]
         let total = weights.reduce(0, +)
+        let otherTotal = total - current
         let change =
-            delta * total * total / (span * (total - current))
+            delta * total * total / (span * otherTotal)
         var value = current + change
         if change > 0 {
             let others = weights.enumerated()
@@ -51,8 +52,14 @@ extension StackLayout {
                     span: span,
                     minSize: minSize
                 )
-                let cap = limit - (total - current)
+                let cap = limit - otherTotal
                 value = min(value, max(cap, current))
+            }
+        } else if change < 0 {
+            if minSize > 0, span > minSize, otherTotal > 0 {
+                let minWeight =
+                    minSize * otherTotal / (span - minSize)
+                value = max(value, min(minWeight, current))
             }
         }
         return min(
