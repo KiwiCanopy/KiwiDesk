@@ -53,7 +53,7 @@ restrictions.
 
 ## Events you can subscribe to
 
-All nine events fire whenever KiwiDesk's state changes. Hook
+Every event below fires whenever KiwiDesk's state changes. Hook
 any of them to keep sketchybar in sync:
 
 | Event | Lua arguments | Fires when |
@@ -64,7 +64,7 @@ any of them to keep sketchybar in sync:
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
 | `native_space_change` | `native_space`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`vanished`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
 
 **Caveats:**

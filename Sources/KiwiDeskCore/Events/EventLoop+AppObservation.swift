@@ -142,6 +142,32 @@ extension EventLoop {
         // re-warms (StartupWarmupSkipTests, #662).
         guard scanWindowsAtAttach else { return }
 
+        // A hidden app's windows are listed by AX and on screen
+        // nowhere (`reconcile` carries the argument, #913), so
+        // adopting them here would tile what the user cannot
+        // see — boot's way into the same defect. The observer
+        // above stays installed, and the unhide reconcile
+        // adopts them.
+        //
+        // Warmed on the way out, though. #662's promise is that
+        // a following reconcile warms whatever attach skipped,
+        // and the hidden reconcile returns before its warm too
+        // — so an app hidden across boot would meet its first
+        // unhide with a cold AX tree, and an Electron app with
+        // a cold tree answers an EMPTY window list. That is
+        // Discord's exact shape, and it would put the window
+        // back on the census heal's latency instead of the
+        // gesture. An accessory app is left to that reconcile:
+        // the warm below needs the window list to decide it is
+        // worth warming at all, and this path is refusing to
+        // read that list.
+        if appIsHidden(pid) {
+            if activationPolicy == .regular {
+                warmAccessibilityTree(pid: pid)
+            }
+            return
+        }
+
         // Every call below can block for a whole AX messaging
         // timeout on an unresponsive app, and boot pays them
         // serially — so a chunked pass drops what is left of this

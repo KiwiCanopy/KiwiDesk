@@ -174,20 +174,7 @@ extension KiwiCore {
                 )
             }
         case .windowDestroyed(let id, let wasMinimized):
-            // Drop any unechoed self-raise for the gone window: its
-            // echo will never land, and WindowIDs can be reused
-            // (#152/#158). Same for a pending z-order-raise echo.
-            outstandingSelfRaises.remove(id)
-            zOrderRaiseEchoes[id] = nil
-            // WindowIDs are reused (#152/#158): the learned
-            // bound, the monocle shown-member hold and the
-            // commanded stamp (#881) must not reach the next
-            // tenant of this id.
-            tiler.forgetSizeBound(id)
-            tiler.forgetMonocleShown(id)
-            tiler.clearInstantTarget(id)
-            cancelDrag(id)
-            dragOverlay.hideAll()
+            forgetGoneWindow(id)
             // The switch timestamp is set by the
             // .nativeSpaceChanged event, which the event loop
             // emits BEFORE the reconcile burst on the same
@@ -204,6 +191,21 @@ extension KiwiCore {
                 bundleID: effects.removedWindow?.bundleID,
                 space: effects.removedWindow?.space,
                 reason: reason
+            )
+        case .windowHidden(let id):
+            // Same forgetting as a destroy — the id can be
+            // reused whether the window closed or its app hid.
+            forgetGoneWindow(id)
+            // `.hidden` rather than the timing classifier: a
+            // hide is explicit, like a minimize, so there is
+            // nothing to infer from how long ago the desktop
+            // switched (#913).
+            emitWindowDestroyed(
+                id,
+                app: effects.removedWindow?.app,
+                bundleID: effects.removedWindow?.bundleID,
+                space: effects.removedWindow?.space,
+                reason: .hidden
             )
         case .windowTitleChanged(let id, _):
             if effects.floatFlipped {
@@ -289,7 +291,15 @@ extension KiwiCore {
         // makes it real). Only raise windows the app still lists:
         // after a native Space switch the fallback may live on
         // the previous desktop, and raising it would switch back.
+        // A hide stands the raise down (#913). macOS picks the
+        // next frontmost app itself when an app hides, and a
+        // raise racing that choice lands the user somewhere
+        // neither chose — with `warp: true` dragging the pointer
+        // after it, on a keystroke that never moved the mouse.
+        // The fold's focus pick still stands: state names the
+        // survivor, and the OS's own activation reports it.
         if effects.removedWindow?.focusLost == true,
+            !event.isHideDrop,
             let next = activeSpace?.focused,
             eventLoop.isListed(next),
             // Belt to the fold's re-pick (#670): never raise a

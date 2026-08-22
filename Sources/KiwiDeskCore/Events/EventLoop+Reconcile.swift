@@ -63,6 +63,50 @@ extension EventLoop {
         {
             observer.repairRegistration()
         }
+        // A hidden app shows nothing on screen, yet AX keeps
+        // listing its windows un-minimized at their last frames
+        // — ⌘H, and what an Electron app does to itself when its
+        // last window closes (`appIsHidden`, #913). Read as live, they
+        // held their tiles until the app quit.
+        //
+        // Deliberately the one path that reaches the sweep
+        // WITHOUT reading the window list, where every abort
+        // below returns before it. The reasons do not collide:
+        // an abort holds a partial list, and sweeping one would
+        // untrack whatever it never reached, while "hidden"
+        // is a total answer about the app — no window of it is
+        // up — so the empty `live` here is the finished reading
+        // rather than an unfinished one.
+        //
+        // The sweep reports these as `.windowHidden`, not as
+        // destroys: the windows were never closed, so neither
+        // the public reason nor the close-return raise may say
+        // they were (#913). The fold behind that event is a
+        // non-minimized destroy exactly — a hidden window keeps
+        // its Desktop and comes back to it, unlike one parked
+        // in the Dock.
+        //
+        // Unhiding re-adopts through this same reconcile — see
+        // the hide/unhide observers in `EventLoop+Apps`. The
+        // backstops differ by direction, and only the unhide
+        // one is the heal: `healSweep`'s gate opens on the
+        // ON-SCREEN census, which by construction never names a
+        // hidden app, so it cannot drop anything. What catches
+        // a missed hide is `appActivated`'s reconcile of the
+        // app just left, which a ⌘H always produces because
+        // hiding moves the foreground.
+        guard !appIsHidden(pid) else {
+            reconcileTabsAndSweep(
+                pid: pid,
+                app: app,
+                appeared: [],
+                live: [],
+                minimized: [],
+                coalesceTabs: false,
+                hidden: true
+            )
+            return
+        }
         let isAccessory = Self.classifiesAsOverlay(
             pid: pid,
             activationPolicy: activationPolicy
@@ -119,7 +163,7 @@ extension EventLoop {
                 )
                 return
             }
-            guard let id = AXHelper.windowID(of: element)
+            guard let id = resolveWindowID(element)
             else { continue }
             // Minimized windows count as gone. Unlike windows
             // missing from the list entirely (other native

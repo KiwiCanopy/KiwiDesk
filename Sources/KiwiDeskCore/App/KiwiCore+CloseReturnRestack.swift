@@ -49,3 +49,26 @@ extension KiwiCore {
         }
     }
 }
+
+extension KiwiCore {
+    /// The forgetting both gone-window paths owe (#152/#158):
+    /// WindowIDs are reused, so an unechoed self-raise, a
+    /// pending z-order echo, the learned size bound, the
+    /// monocle shown-member hold and the commanded stamp
+    /// (#881) must not reach the next tenant of this id.
+    ///
+    /// Shared by the destroy and the hide (#913) rather than
+    /// copied: the two differ in what they REPORT and in
+    /// whether the close-return raise runs, never in what they
+    /// forget — and a copy that fell behind would leak exactly
+    /// the stale state these lines exist to drop.
+    func forgetGoneWindow(_ id: WindowID) {
+        outstandingSelfRaises.remove(id)
+        zOrderRaiseEchoes[id] = nil
+        tiler.forgetSizeBound(id)
+        tiler.forgetMonocleShown(id)
+        tiler.clearInstantTarget(id)
+        cancelDrag(id)
+        dragOverlay.hideAll()
+    }
+}

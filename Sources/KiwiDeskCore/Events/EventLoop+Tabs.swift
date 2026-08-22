@@ -43,7 +43,8 @@ extension EventLoop {
         appeared: [(element: AXUIElement, id: WindowID)],
         live: Set<WindowID>,
         minimized: Set<WindowID>,
-        coalesceTabs: Bool
+        coalesceTabs: Bool,
+        hidden: Bool = false
     ) {
         let vanishedIDs = elements[pid, default: [:]].keys
             .filter { !live.contains($0) }
@@ -90,11 +91,29 @@ extension EventLoop {
             ignorePending.remove(id)
             trackedFrames[id] = nil
             tabCarriers.remove(id)
+            // A hidden app's whole sweep is a hide (#913):
+            // the windows are not gone, their app is, so they
+            // must not be reported as closed and must not move
+            // the user's focus.
+            //
+            // The hidden path passes an empty `minimized`, so
+            // the two cannot both be true here — but that is
+            // this sweep's ignorance, not a fact about the
+            // window. A window whose miniaturize notification
+            // was dropped, and whose app then hides, is parked
+            // AND reported hidden, so it files no
+            // most-recently-minimized record (#673). Left
+            // alone: separating them means asking AX which
+            // windows are minimized, which is the read this
+            // path exists to avoid, to mend a record its own
+            // docs call best-effort.
             onEvent(
-                .windowDestroyed(
-                    id,
-                    wasMinimized: minimized.contains(id)
-                )
+                hidden
+                    ? .windowHidden(id)
+                    : .windowDestroyed(
+                        id,
+                        wasMinimized: minimized.contains(id)
+                    )
             )
         }
     }

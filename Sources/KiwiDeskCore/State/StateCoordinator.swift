@@ -224,6 +224,19 @@ public struct StateCoordinator: Sendable {
                 effects: &effects
             )
 
+        // A hide folds as a non-minimized destroy exactly
+        // (#913): the window keeps its remembered space, so
+        // unhiding returns it there rather than landing it
+        // wherever the user now stands. What differs is
+        // downstream of the fold — the public reason, and the
+        // close-return raise KiwiCore stands down.
+        case .windowHidden(let id):
+            applyWindowDestroyed(
+                id,
+                wasMinimized: false,
+                effects: &effects
+            )
+
         case .windowMoved(let id, let frame):
             windows.updateFrame(id, frame: frame)
 
