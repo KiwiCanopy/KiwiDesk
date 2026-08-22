@@ -1,4 +1,6 @@
+import AppKit
 import CoreGraphics
+import Foundation
 
 /// Drives the focus-border overlays (#278). `updateBorders()`
 /// snapshots the active space and hands the manager the desired
@@ -19,6 +21,45 @@ extension KiwiCore {
         // enabled guard so a re-enable rebuilds on the right backend.
         borders.setDrawOrder(tiler.settings.borderStyle.drawOrder)
         borders.sync(desiredBorderSpecs())
+    }
+
+    /// Re-evaluates the ring set when one of OUR OWN windows
+    /// gains or resigns key (#933 follow-up). The stand-down
+    /// predicate in `desiredBorderSpecs` is only as live as its
+    /// triggers: Sparkle's update alert can take key without
+    /// producing a single `KiwiEvent` (nothing tracked
+    /// changes), so no retile re-ran the specs and the stale
+    /// focused ring stayed drawn behind the alert — the
+    /// predicate was right and simply never re-asked (device
+    /// QA, 2026-08-22). Both directions, so the ring also
+    /// returns on dismiss without an app switch.
+    /// `NotificationCenter.default` carries only this
+    /// process's window notifications, so no sender filter is
+    /// needed. Tokens live on `BorderManager`
+    /// (`ownKeyWindowObservers`); the handler body is named so
+    /// a test can drive the refresh without a real `NSWindow`.
+    func wireOwnKeyWindowRefresh() {
+        let names = [
+            NSWindow.didBecomeKeyNotification,
+            NSWindow.didResignKeyNotification,
+        ]
+        for name in names {
+            let token = NotificationCenter.default.addObserver(
+                forName: name,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.ownKeyWindowDidChange()
+                }
+            }
+            borders.ownKeyWindowObservers.append(token)
+        }
+    }
+
+    /// The observer body: one cheap, idempotent spec rebuild.
+    func ownKeyWindowDidChange() {
+        updateBorders()
     }
 
     /// The rings the active space should show right now — the pure

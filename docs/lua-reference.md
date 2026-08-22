@@ -3632,7 +3632,9 @@ drop below its own — still applies the part that fits, and
 cues the refusal visually on the first truncated attempt: the
 focus ring gives the same rubber-band bounce as a dead-end
 focus move (#436), and a pill names the reason on the window
-that cannot shrink — the neighbor, on a refused grow. Keyboard
+that cannot shrink — and on a refused grow the resized
+window additionally names the reason while the blocking
+neighbor marks itself at its minimum. Keyboard
 and mouse resizes share these clamps and cues. What the
 `delta` actually adjusts depends on the layout:
 

@@ -222,8 +222,9 @@ editing here:
   `.scrollWidth` drag crossed the floor the keyboard path
   refused. The writers clamp each side at its members'
   effective minimums (`min_window_size`, raised by a #677
-  learned bound) and cue a truncated attempt — the pill on the
-  window that cannot shrink, the bounce on the trier
+  learned bound) and cue a truncated attempt — a pill on each end
+  (the trier names the reason, the blocker marks itself), the
+  bounce on the trier
   (`ResizeSizeLimitFeedbackTests`,
   `ResizeNeighborLimitTests`). And a weight clamp divides the
   span the LAYOUT divides — the one
