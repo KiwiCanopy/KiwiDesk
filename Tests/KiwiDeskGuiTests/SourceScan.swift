@@ -270,22 +270,6 @@ enum SourceScan {
     private static let tripleQuote: [Character] = ["\"", "\"", "\""]
     private static let quote: [Character] = ["\""]
 
-    static func swiftSources(
-        under directory: URL
-    ) throws -> [URL] {
-        let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: nil
-        )
-        var files: [URL] = []
-        while let item = enumerator?.nextObject() as? URL {
-            if item.pathExtension == "swift" {
-                files.append(item)
-            }
-        }
-        return files
-    }
-
     /// The repo root, derived from a test file's own path.
     static func repoRoot(from filePath: String) -> URL {
         URL(fileURLWithPath: filePath)

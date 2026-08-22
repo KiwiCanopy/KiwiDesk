@@ -38,10 +38,11 @@ extension SourceScan {
     ) throws -> [LogSeamDeclaration] {
         var found: [LogSeamDeclaration] = []
         for file in try swiftSources(under: directory) {
-            let lines = stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            .split(separator: "\n", omittingEmptySubsequences: false)
+            let lines = try strippedSource(at: file)
+                .split(
+                    separator: "\n",
+                    omittingEmptySubsequences: false
+                )
             let enclosing = enclosingTypes(of: lines)
             for index in lines.indices
             where lines[index].contains("var onLog:") {

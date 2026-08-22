@@ -34,13 +34,11 @@ extension SourceScan {
     ) throws -> [MachineTouchSite] {
         var found: [MachineTouchSite] = []
         for file in try swiftSources(under: directory) {
-            let lines = stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            .split(
-                separator: "\n",
-                omittingEmptySubsequences: false
-            )
+            let lines = try strippedSource(at: file)
+                .split(
+                    separator: "\n",
+                    omittingEmptySubsequences: false
+                )
             for index in lines.indices {
                 let line = lines[index]
                 var cursor = line.startIndex
@@ -83,16 +81,14 @@ extension SourceScan {
     static func normalizedFile(
         _ file: URL
     ) throws -> String {
-        stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(
-            separator: "\n",
-            omittingEmptySubsequences: true
-        )
-        .map { $0.trimmingCharacters(in: .whitespaces) }
-        .filter { !$0.isEmpty }
-        .joined(separator: "\n")
+        try strippedSource(at: file)
+            .split(
+                separator: "\n",
+                omittingEmptySubsequences: true
+            )
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
     }
 
     /// The type names declared under an `@Suite` attribute in
@@ -113,10 +109,11 @@ extension SourceScan {
     static func suiteTypeNames(
         in file: URL
     ) throws -> [String] {
-        let lines = stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(separator: "\n", omittingEmptySubsequences: false)
+        let lines = try strippedSource(at: file)
+            .split(
+                separator: "\n",
+                omittingEmptySubsequences: false
+            )
         var names: [String] = []
         var pending = false
         for line in lines {

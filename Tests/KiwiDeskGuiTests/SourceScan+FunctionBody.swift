@@ -27,9 +27,7 @@ extension SourceScan {
             .appendingPathComponent("Sources/KiwiDeskCore")
             .appendingPathComponent(directory)
             .appendingPathComponent(file)
-        let source = SourceScan.stripComments(
-            try String(contentsOf: url, encoding: .utf8)
-        )
+        let source = try SourceScan.strippedSource(at: url)
         let characters = Array(source)
         let marker = Array("func \(function)(")
         guard
