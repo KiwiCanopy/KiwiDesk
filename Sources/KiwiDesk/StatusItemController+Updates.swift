@@ -52,6 +52,7 @@ extension StatusItemController {
     /// from is not necessarily the state at click.
     @objc func checkForUpdates(_ sender: NSMenuItem) {
         guard updater.canCheckForUpdates else { return }
+        NSApp.activate(ignoringOtherApps: true)
         updater.checkForUpdates()
     }
 }

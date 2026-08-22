@@ -3934,7 +3934,11 @@ anyone running `mouse.follows_focus`, drags the pointer after
 it on a keystroke that never moved the mouse. State still
 names the survivor; it simply is not forced there. A close has
 no such competing chooser, which is why it keeps the raise.
-(#913)
+(#913) The raise stands down too when KiwiDesk's own process
+currently holds an active, visible key window or modal sheet
+(#929): when an own transient progress window closes to yield
+to an update alert or dialog, raising the background workspace
+window would submerge the own alert.
 
 **Close-return focus: closing the focused window returns focus
 to the previously focused window, same space only — and this is

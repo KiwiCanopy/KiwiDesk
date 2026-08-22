@@ -619,6 +619,7 @@
   "menu.app.hide": "%1$@ ausblenden",
   "menu.app.hide_others": "Andere ausblenden",
   "menu.app.show_all": "Alle einblenden",
+  "menu.check_updates": "Nach Updates suchen…",
   "menu.config_issues": "Konfigurationsprobleme…",
   "menu.edit.copy": "Kopieren",
   "menu.edit.cut": "Ausschneiden",

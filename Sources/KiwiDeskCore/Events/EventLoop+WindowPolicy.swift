@@ -106,7 +106,14 @@ extension EventLoop {
     /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s
     /// production default (the tiling mark).
     static func ownWindow(number: Int) -> NSWindow? {
-        NSApp.windows.first { $0.windowNumber == number }
+        NSApplication.shared.windows.first { $0.windowNumber == number }
+    }
+
+    /// Whether KiwiDesk's own process currently holds an active,
+    /// visible key window or modal dialog (#929).
+    static func hasOwnActiveKeyWindow() -> Bool {
+        NSApplication.shared.keyWindow?.isVisible == true
+            || NSApplication.shared.modalWindow != nil
     }
 
     /// The *structural* half of the transient-overlay

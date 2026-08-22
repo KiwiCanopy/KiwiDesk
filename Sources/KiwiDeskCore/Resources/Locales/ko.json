@@ -619,6 +619,7 @@
   "menu.app.hide": "%1$@ 가리기",
   "menu.app.hide_others": "기타 가리기",
   "menu.app.show_all": "모두 보기",
+  "menu.check_updates": "업데이트 확인…",
   "menu.config_issues": "설정 문제…",
   "menu.edit.copy": "복사",
   "menu.edit.cut": "오리기",

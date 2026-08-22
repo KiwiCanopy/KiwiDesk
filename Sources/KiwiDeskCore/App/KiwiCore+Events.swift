@@ -296,10 +296,15 @@ extension KiwiCore {
         // raise racing that choice lands the user somewhere
         // neither chose — with `warp: true` dragging the pointer
         // after it, on a keystroke that never moved the mouse.
+        // An active own dialog stands the raise down too (#929):
+        // when an own progress window or alert closes to yield to
+        // a newly opened own alert (Sparkle's update dialog),
+        // raising the background window submerges the own alert.
         // The fold's focus pick still stands: state names the
         // survivor, and the OS's own activation reports it.
         if effects.removedWindow?.focusLost == true,
             !event.isHideDrop,
+            !eventLoop.hasOwnKeyWindow(),
             let next = activeSpace?.focused,
             eventLoop.isListed(next),
             // Belt to the fold's re-pick (#670): never raise a
