@@ -9,7 +9,9 @@ import Foundation
 /// and formula as the stack's #67 path, via the shared domain
 /// authorities, so the two layouts cannot drift apart).
 extension KiwiCore {
-    func resizeTrack(
+    @discardableResult
+    func resizeTrackMember(
+        _ window: WindowID,
         axis: String,
         delta: Double,
         span: Double,
@@ -20,12 +22,7 @@ extension KiwiCore {
             of: space,
             activeSpace: activeSpace?.id
         )
-        // `space.focused`, not the anchor: resize keys per-window
-        // weights by id, which must stay on a real member to avoid
-        // orphaning under a non-member traveler (#308) — see
-        // `resize` in `KiwiCore+Resize.swift`.
-        guard let focused = space.focused,
-            let index = tiled.firstIndex(of: focused)
+        guard let index = tiled.firstIndex(of: window)
         else { return .fail("no focused tiled window") }
         let counts = TrackLayout.counts(
             of: tiled,
@@ -55,8 +52,30 @@ extension KiwiCore {
             delta: delta,
             span: span,
             space: space,
-            focused: focused,
+            focused: window,
             column: tiled[ranges[track]]
+        )
+    }
+
+    func resizeTrack(
+        axis: String,
+        delta: Double,
+        span: Double,
+        space: Space
+    ) -> CommandResponse {
+        // `space.focused`, not the anchor: resize keys per-window
+        // weights by id, which must stay on a real member to avoid
+        // orphaning under a non-member traveler (#308) — see
+        // `resize` in `KiwiCore+Resize.swift`.
+        guard let focused = space.focused else {
+            return .fail("no focused tiled window")
+        }
+        return resizeTrackMember(
+            focused,
+            axis: axis,
+            delta: delta,
+            span: span,
+            space: space
         )
     }
 

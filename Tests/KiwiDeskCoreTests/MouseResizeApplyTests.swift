@@ -158,4 +158,68 @@ struct MouseResizeApplyTests {
             .editablePoints(along: bounds.width, horizontal: true)
         #expect(abs(after - before - 100) < 0.5)
     }
+
+    @Test("trackAcross adjusts track weight")
+    func trackAcrossApplies() {
+        let core = makeCore()
+        for id in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "track.set_new_window",
+            args: [.string("own_track")]
+        )
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("track")]
+        )
+        core.applyResizeAdjustment(
+            .trackAcross(100),
+            for: WindowID(1),
+            in: core.state.workspaces[space]!,
+            bounds: bounds
+        )
+        let weights =
+            core.state.workspaces[space]!.trackWeights
+        #expect((weights[WindowID(1)] ?? 1) > 1)
+    }
+
+    @Test("trackAlong adjusts in-track share")
+    func trackAlongApplies() {
+        let core = makeCore()
+        for id in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("track")]
+        )
+        core.applyResizeAdjustment(
+            .trackAlong(100),
+            for: WindowID(1),
+            in: core.state.workspaces[space]!,
+            bounds: bounds
+        )
+        let weights =
+            core.state.workspaces[space]!.stackWeights
+        #expect((weights[WindowID(1)] ?? 1) > 1)
+    }
 }

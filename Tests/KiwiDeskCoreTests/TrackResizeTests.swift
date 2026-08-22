@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -9,7 +10,11 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-track-resize-\(UUID().uuidString)"
         )
-    return makeTestCore(configDirectory: directory)
+    let core = makeTestCore(configDirectory: directory)
+    core.tiler.visibleBounds = { _ in
+        CGRect(x: 0, y: 25, width: 1200, height: 800)
+    }
+    return core
 }
 
 @MainActor
@@ -167,5 +172,77 @@ struct TrackResizeTests {
             core.state.workspaces[space]!
             .trackWeights[WindowID(1)] ?? 1
         #expect(weight <= TrackLayout.weightRange.upperBound)
+    }
+
+    @Test("Shrink stops at min_window_size floor without cascade")
+    func shrinkStopsAtMinSize() {
+        let span: Double = 1200
+        let minSize: Double = 150
+        var weights = [1.0, 1.0, 1.0]
+        for _ in 0..<50 {
+            weights[0] = StackLayout.weightStep(
+                weights: weights,
+                at: 0,
+                delta: -100,
+                span: span,
+                minSize: minSize
+            )
+        }
+        let total = weights.reduce(0, +)
+        let smallest = weights.min()!
+        let limit = StackLayout.maxColumnTotal(
+            smallestWeight: smallest,
+            span: span,
+            minSize: minSize
+        )
+        #expect(total <= limit + 0.0001)
+        let window0Size = span * (weights[0] / total)
+        #expect(window0Size >= minSize - 0.0001)
+    }
+
+    @Test("Mouse drag across tracks updates track weight")
+    func mouseDragAcross() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        let space = makeTrackSpace(
+            core,
+            windows: 2,
+            focus: WindowID(1)
+        )
+        let slot = CGRect(x: 0, y: 25, width: 400, height: 700)
+        let dragged = CGRect(x: 0, y: 25, width: 500, height: 700)
+        core.handleResizeEnd(
+            WindowID(1),
+            slot: slot,
+            frame: dragged,
+            in: core.state.workspaces[space]!
+        )
+        let weights =
+            core.state.workspaces[space]!.trackWeights
+        #expect((weights[WindowID(1)] ?? 1) > 1)
+    }
+
+    @Test("Mouse drag along track updates in-track share")
+    func mouseDragAlong() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        let space = makeTrackSpace(
+            core,
+            windows: 3,
+            focus: WindowID(2)
+        )
+        core.state.workspaces.withSpace(space) {
+            $0.trackBreaks = [WindowID(2)]
+        }
+        let slot = CGRect(x: 400, y: 25, width: 400, height: 350)
+        let dragged = CGRect(x: 400, y: 25, width: 400, height: 450)
+        core.handleResizeEnd(
+            WindowID(2),
+            slot: slot,
+            frame: dragged,
+            in: core.state.workspaces[space]!
+        )
+        let after = core.state.workspaces[space]!
+        #expect((after.stackWeights[WindowID(2)] ?? 1) > 1)
     }
 }

@@ -17,18 +17,15 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
     case scrollWidth(CGFloat)
+    /// Track layout delta across tracks (track weight, #128).
+    case trackAcross(CGFloat)
+    /// Track layout delta along a track (window share, #128).
+    case trackAlong(CGFloat)
 }
 
 /// Pure translation of mouse resizes into the same parameter
 /// changes the `resize` command makes, so both paths share one
 /// per-layout behavior. Pure so it is fully testable.
-///
-/// One deliberate exception (#67): a stack drag along the
-/// zones' own axis snaps back while the keyboard `resize`
-/// adjusts the focused window's per-window weight — wiring the
-/// drag would need the dragged window's identity in this
-/// deliberately windowless seam. Revisit if those drags are
-/// asked for.
 public enum MouseResize {
     /// Size deltas beyond this are a resize gesture; smaller
     /// ones are app-side clamping noise (character grids).
@@ -147,6 +144,7 @@ public enum MouseResize {
         mode: LayoutMode,
         isMaster: Bool,
         stackSplitHorizontal: Bool,
+        trackAxisVertical: Bool = true,
         slot: CGRect,
         frame: CGRect,
         bounds: CGRect
@@ -187,11 +185,21 @@ public enum MouseResize {
             guard abs(dw) > threshold else { return nil }
             return .scrollWidth(dw)
         case .track:
-            // Both track adjustments (track weight, in-track
-            // share) key off the dragged window's identity —
-            // the same windowless-seam gap as the stack height
-            // drag above (#67): drags snap back, keyboard
-            // `resize` covers both axes. Revisit together.
+            if trackAxisVertical {
+                if abs(dw) >= abs(dh), abs(dw) > threshold {
+                    return .trackAcross(dw)
+                }
+                if abs(dh) > threshold {
+                    return .trackAlong(dh)
+                }
+            } else {
+                if abs(dh) >= abs(dw), abs(dh) > threshold {
+                    return .trackAcross(dh)
+                }
+                if abs(dw) > threshold {
+                    return .trackAlong(dw)
+                }
+            }
             return nil
         case .monocle, .grid, .floating:
             return nil
