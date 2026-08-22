@@ -2,6 +2,38 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "0.9.9",
+      "tag": "v0.9.9",
+      "date": "2026-08-22",
+      "prerelease": true,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v0.9.9",
+      "summary": "Refined window behavior, mouse resizing in Track layout, and polish across Settings and the bars.",
+      "sections": [
+        {
+          "title": "Windows and layout",
+          "items": [
+            "**Apps that hide stay out of your way.** Closing an app like Discord or Spotify that keeps running in the background no longer leaves a ghost tile in your layout.",
+            "**Mouse resizing in Track mode.** Dragging borders between track columns or windows in the Track layout now resizes them smoothly, matching the keyboard shortcuts.",
+            "**Shrinking stops cleanly at minimum size.** Shrinking windows no longer risks tripping into an unexpected full-screen cascade when reaching minimum dimensions."
+          ]
+        },
+        {
+          "title": "Bars and Settings",
+          "items": [
+            "**Bars name the active window.** The App Bar and Space Bar now show the title of the specific document or window you are on rather than only the application name.",
+            "**Minimizable Settings.** The KiwiDesk Settings window can now be minimized from the title bar like any standard Mac window.",
+            "**Palette duplicate notices.** Adding a color already in a palette now clearly explains that the duplicate is skipped."
+          ]
+        },
+        {
+          "title": "Also",
+          "items": [
+            "Smoother title updates, accessible names for App Bar controls, and automatic migrations for saved configuration profiles."
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.8",
       "tag": "v0.9.8",
       "date": "2026-08-21",

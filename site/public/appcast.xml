@@ -13,6 +13,19 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>0.9.9</title>
+      <pubDate>Sat, 22 Aug 2026 12:34:10 +0000</pubDate>
+      <sparkle:version>0.9.9</sparkle:version>
+      <sparkle:shortVersionString>0.9.9</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<p>Refined window behavior, mouse resizing in Track layout, and polish across Settings and the bars.</p><h3>Windows and layout</h3><ul><li><strong>Apps that hide stay out of your way.</strong> Closing an app like Discord or Spotify that keeps running in the background no longer leaves a ghost tile in your layout.</li><li><strong>Mouse resizing in Track mode.</strong> Dragging borders between track columns or windows in the Track layout now resizes them smoothly, matching the keyboard shortcuts.</li><li><strong>Shrinking stops cleanly at minimum size.</strong> Shrinking windows no longer risks tripping into an unexpected full-screen cascade when reaching minimum dimensions.</li></ul><h3>Bars and Settings</h3><ul><li><strong>Bars name the active window.</strong> The App Bar and Space Bar now show the title of the specific document or window you are on rather than only the application name.</li><li><strong>Minimizable Settings.</strong> The KiwiDesk Settings window can now be minimized from the title bar like any standard Mac window.</li><li><strong>Palette duplicate notices.</strong> Adding a color already in a palette now clearly explains that the duplicate is skipped.</li></ul><h3>Also</h3><ul><li>Smoother title updates, accessible names for App Bar controls, and automatic migrations for saved configuration profiles.</li></ul>]]></description>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v0.9.9/KiwiDesk-0.9.9.zip"
+        length="8040140"
+        type="application/octet-stream"
+        sparkle:edSignature="gqS0ph8ZA777w3FhGlL/w7MUzJ22TmQ9REdDugKCaPVJBdvzdbt5Fqe9CbdYZfePjkyTT45+vfxNofNi1dmIBA==" />
+    </item>
+    <item>
       <title>0.9.8</title>
       <pubDate>Fri, 21 Aug 2026 15:15:36 +0000</pubDate>
       <sparkle:version>0.9.8</sparkle:version>
