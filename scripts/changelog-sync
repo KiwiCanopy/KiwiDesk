@@ -605,7 +605,8 @@ def run_all(check: bool) -> int:
             entry, warning = build_entry(release, strict=False)
         except NotesError as error:
             return _report(error)
-        entries.append(entry)
+        if entry.get("summary") or entry.get("sections"):
+            entries.append(entry)
         if warning:
             warnings.append(f"{entry['tag']}: {warning}")
     for warning in warnings:
@@ -614,10 +615,8 @@ def run_all(check: bool) -> int:
         )
     if warnings:
         print(
-            f"changelog-sync: {len(warnings)} release(s) kept "
-            "without a curated block. Expected for releases "
-            "predating the convention; a release that SHOULD "
-            "carry one is caught by `--release` on publish.",
+            f"changelog-sync: {len(warnings)} historical release(s) "
+            "skipped (no curated block).",
             file=sys.stderr,
         )
     if check:

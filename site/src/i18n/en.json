@@ -30,6 +30,8 @@
   "changelog_meta_desc": "What changed in each KiwiDesk release, newest first — new features, improvements and fixes for every version, in plain language.",
   "changelog_meta_title": "KiwiDesk Release Notes — what changed, version by version",
   "changelog_no_notes": "Released before these notes existed — the full list is on GitHub.",
+  "changelog_older_label": "Looking for older releases?",
+  "changelog_older_link": "View all releases on GitHub",
   "changelog_title": "Release Notes",
   "cli_body": "Every action is a command. Bind them to keys, script them, or stream live events over a Unix socket into SketchyBar, JankyBorders, or your own tools.",
   "cli_cmt": "# stream live events (feed SketchyBar, your own tools…)",

@@ -30,6 +30,8 @@
   "changelog_meta_desc": "KiwiDesk の各バージョンの変更点を新しい順に。新機能・改善・修正を、わかりやすい言葉でまとめています。",
   "changelog_meta_title": "KiwiDesk リリースノート — バージョンごとの変更点",
   "changelog_no_notes": "このリリースノートができる前のバージョンです。全リストは GitHub にあります。",
+  "changelog_older_label": "以前のバージョンをお探しですか？",
+  "changelog_older_link": "GitHub で過去の全リリースを見る",
   "changelog_title": "リリースノート",
   "cli_body": "すべての操作がコマンドです。キーに割り当てても、スクリプトから呼び出しても、Unix ソケット経由でイベントを SketchyBar や JankyBorders、自作のツールへ流し込んでも構いません。",
   "cli_cmt": "# ライブイベントを配信（SketchyBar や自作ツールへ）",
