@@ -2186,23 +2186,19 @@ AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
 Cut/Copy/Paste/Undo.
 
-### No content window is miniaturizable
+### Settings is miniaturizable; modal chrome is not
 
 **[Rationale]**
 
-**No KiwiDesk window carries `.miniaturizable` in its style
-mask** — not Settings, not onboarding, not Config Issues. A
-minimized window goes to the Dock, and KiwiDesk has no Dock tile
-to restore it from, because it never leaves `.accessory` (above).
-Minimizing would park the window somewhere the user has no
-affordance to bring it back from; the menu-bar quick menu is the
-only route back, and a disabled yellow button says so up front
-instead of letting them discover it.
-
-This is a consequence of the entry above rather than a taste call
-about any one window, which is why it is stated over all of them:
-a new content window inherits the reason, and giving it a
-minimize button would be the bug.
+**Settings carries `.miniaturizable` in its style mask, while
+ephemeral/modal chrome (onboarding, Config Issues) does not.**
+Settings persists and tiles alongside user workspaces, so the
+standard macOS minimize affordance (the yellow traffic light
+and ⌘M) works as expected, parking the window in the Dock's
+recent-windows section or allowing quick restoration from the
+menu bar or hotkey. Ephemeral completion surfaces (the tour,
+Config Issues) stay un-miniaturizable so they are completed or
+dismissed rather than parked indefinitely.
 
 ### The tour is chrome, and chrome is not tiled
 
