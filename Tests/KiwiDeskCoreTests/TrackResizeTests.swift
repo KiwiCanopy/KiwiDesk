@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -9,7 +10,11 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-track-resize-\(UUID().uuidString)"
         )
-    return makeTestCore(configDirectory: directory)
+    let core = makeTestCore(configDirectory: directory)
+    core.tiler.visibleBounds = { _ in
+        CGRect(x: 0, y: 25, width: 1200, height: 800)
+    }
+    return core
 }
 
 @MainActor
@@ -197,6 +202,7 @@ struct TrackResizeTests {
 
     @Test("Mouse drag across tracks updates track weight")
     func mouseDragAcross() {
+        guard NSScreen.main != nil else { return }
         let core = makeCore()
         let space = makeTrackSpace(
             core,
@@ -218,6 +224,7 @@ struct TrackResizeTests {
 
     @Test("Mouse drag along track updates in-track share")
     func mouseDragAlong() {
+        guard NSScreen.main != nil else { return }
         let core = makeCore()
         let space = makeTrackSpace(
             core,
