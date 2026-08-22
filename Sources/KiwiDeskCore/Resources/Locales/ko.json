@@ -45,7 +45,7 @@
   "app_bar.font_size": "서체 크기",
   "app_bar.font_size.auto": "자동 서체 크기",
   "app_bar.global_colors.title": "App Bar 색상",
-  "app_bar.group.ax": "%1$@, 윈도우 %2$d개",
+  "app_bar.group.ax": "%1$@, 윈도우: %2$d",
   "app_bar.group_adjacent": "같은 앱의 인접한 윈도우 묶기",
   "app_bar.group_adjacent.help": "같은 앱의 이웃한 윈도우를 각각 표시하는 대신 하나의 항목으로 병합하고, 개수 배지를 표시합니다.",
   "app_bar.icon_source.app_font": "심볼",

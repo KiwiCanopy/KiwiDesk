@@ -45,7 +45,7 @@
   "app_bar.font_size": "Dimensione carattere",
   "app_bar.font_size.auto": "Dimensione carattere automatica",
   "app_bar.global_colors.title": "Colori App Bar",
-  "app_bar.group.ax": "%1$@, %2$d finestre",
+  "app_bar.group.ax": "%1$@, finestre: %2$d",
   "app_bar.group_adjacent": "Raggruppa le finestre adiacenti della stessa app",
   "app_bar.group_adjacent.help": "Unisce le finestre vicine della stessa app in un solo elemento, contrassegnato da un badge con il conteggio, invece di mostrarne una per ciascuna.",
   "app_bar.icon_source.app_font": "Simboli",

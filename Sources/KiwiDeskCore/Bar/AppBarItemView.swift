@@ -239,7 +239,7 @@ final class AppBarItemView: NSView {
             setAccessibilityLabel(
                 L(
                     "app_bar.group.ax",
-                    "%1$@, %2$d windows",
+                    "%1$@, windows: %2$d",
                     name,
                     count
                 )

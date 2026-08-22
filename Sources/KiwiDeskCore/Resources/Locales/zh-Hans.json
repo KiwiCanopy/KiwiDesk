@@ -45,7 +45,7 @@
   "app_bar.font_size": "字体大小",
   "app_bar.font_size.auto": "自动字体大小",
   "app_bar.global_colors.title": "App Bar 颜色",
-  "app_bar.group.ax": "%1$@，%2$d 个窗口",
+  "app_bar.group.ax": "%1$@，窗口：%2$d",
   "app_bar.group_adjacent": "合并同一 App 的相邻窗口",
   "app_bar.group_adjacent.help": "将同一 App 的相邻窗口合并为一个项目，并标注数量徽标，而不是每个窗口各占一项。",
   "app_bar.icon_source.app_font": "符号",
