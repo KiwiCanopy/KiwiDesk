@@ -171,8 +171,8 @@ struct QuickMenuProfileRowTests {
             controller(active: "Work", all: ["Work", "Play"])
         )
         #expect(line?.title == "Profile: Work")
-        // Context only — never an action.
-        #expect(line?.isEnabled == false)
+        // Context only — native section header, never an action.
+        #expect(line?.isSectionHeader == true)
     }
 
     @Test("active line hidden with only the active profile")

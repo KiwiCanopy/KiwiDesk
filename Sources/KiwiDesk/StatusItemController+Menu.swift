@@ -111,16 +111,13 @@ extension StatusItemController {
         // regardless of screen count (#36), so this does not filter
         // by display setup.
         if let active = profiles.active, hasSwitchTarget {
-            let current = NSMenuItem(
+            let current = NSMenuItem.sectionHeader(
                 title: L(
                     "menu.active_profile",
                     "Profile: %1$@",
                     active
-                ),
-                action: nil,
-                keyEquivalent: ""
+                )
             )
-            current.isEnabled = false
             menu.addItem(current)
         }
         // Grey, don't hide (#171): both act on state the scan has
@@ -170,9 +167,8 @@ extension StatusItemController {
         settings.image = symbol("gearshape")
         menu.addItem(settings)
 
-        menu.addItem(makeUpdatesItem())
-
         menu.addItem(.separator())
+        menu.addItem(makeUpdatesItem())
         let quit = NSMenuItem(
             title: L("menu.quit", "Quit KiwiDesk"),
             action: #selector(NSApplication.terminate(_:)),

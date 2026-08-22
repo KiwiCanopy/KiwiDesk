@@ -179,6 +179,13 @@ struct BarTitleRefreshTests {
         #expect(!second.isCancelled)
     }
 
+    /// Continuous title updates cannot starve the debounce
+    /// indefinitely (#900).
+    @Test("Refresh debounce has a max wait ceiling (#900)")
+    func maxWaitConstant() {
+        #expect(KiwiCore.barTitleRefreshMaxWait == .seconds(1))
+    }
+
     /// Teardown reaches it, because it is a `DeferredTasks` slot
     /// rather than a bespoke dispatch hop — the #48 argument.
     @Test("Teardown cancels a pending refresh")

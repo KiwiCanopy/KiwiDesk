@@ -22,7 +22,9 @@ struct SelfWindowExclusionTests {
         #expect(!EventLoop.isOwnProcess(getpid() &+ 1))
     }
 
-    @Test("Own main windows are managed; own panels stay ignored")
+    @Test(
+        "Own windows and key-capable dialogs are managed; panels stay ignored"
+    )
     func ownWindowClassification() {
         #expect(
             !EventLoop.shouldIgnoreOwnWindow(
@@ -34,6 +36,35 @@ struct SelfWindowExclusionTests {
             EventLoop.shouldIgnoreOwnWindow(
                 pid: getpid(),
                 canBecomeMain: false
+            )
+        )
+        // Key-capable titled dialogs/alerts (e.g. Sparkle update alerts)
+        // are tracked so focus rings and floating chrome stay in sync.
+        #expect(
+            !EventLoop.shouldIgnoreOwnWindow(
+                pid: getpid(),
+                canBecomeMain: false,
+                canBecomeKey: true,
+                isTitled: true,
+                isVisible: true
+            )
+        )
+        // Borderless utility panels (e.g. ⌃⌥K shortcuts) stay ignored.
+        #expect(
+            EventLoop.shouldIgnoreOwnWindow(
+                pid: getpid(),
+                canBecomeMain: false,
+                canBecomeKey: true,
+                isTitled: false,
+                isVisible: true
+            )
+        )
+        // Hidden/ordered-out windows stay ignored.
+        #expect(
+            EventLoop.shouldIgnoreOwnWindow(
+                pid: getpid(),
+                canBecomeMain: true,
+                isVisible: false
             )
         )
     }

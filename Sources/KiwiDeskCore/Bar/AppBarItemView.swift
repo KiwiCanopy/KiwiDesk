@@ -16,16 +16,19 @@ final class AppBarItemView: NSView {
     /// SketchyBar App Font ligature shown in the icon slot when
     /// the item carries a glyph (#294). Text, so it follows the
     /// bar's text colors, and explicitly not an AX element so
-    /// the ligature's raw name is never spoken. The item
-    /// announces nothing else either — it is a click target with
-    /// no accessible name at all (#901).
+    /// the ligature's raw name is never spoken (#901).
     let glyphLabel: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         tf.alignment = .center
         tf.setAccessibilityElement(false)
         return tf
     }()
-    let label = NSTextField(labelWithString: "")
+    let label: NSTextField = {
+        let tf = NSTextField(labelWithString: "")
+        tf.alignment = .center
+        tf.setAccessibilityElement(false)
+        return tf
+    }()
     let accent = NSView()
     /// Rounds/clips only the active mark (and ring) to the item's
     /// corner without clipping the item itself — so the mark cuts on
@@ -47,6 +50,9 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
+    /// The app's name, used for VoiceOver accessible name
+    /// generation (#901).
+    var name = ""
     /// The string the label draws, resolved by the driver
     /// (`KiwiCore.barItemText`): the capped window title, or the
     /// app name where a title cannot speak.
@@ -86,17 +92,23 @@ final class AppBarItemView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
+        // The item is a click target with a button role; its
+        // subviews stay silent so VoiceOver speaks once (#901).
+        setAccessibilityElement(true)
+        setAccessibilityRole(.button)
         // Scale the app icon up as well as down: the default
         // `scaleProportionallyDown` capped it at the image's native
         // size, so it stopped growing on thick bars (owner
         // 2026-07-20). App icons carry high-res reps, so upscaling
         // to the slot stays crisp.
         iconView.imageScaling = .scaleProportionallyUpOrDown
+        iconView.setAccessibilityElement(false)
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         label.alignment = .center
         badge.wantsLayer = true
         badge.alignment = .center
+        badge.setAccessibilityElement(false)
         addSubview(iconView)
         addSubview(glyphLabel)
         addSubview(label)
@@ -178,6 +190,7 @@ final class AppBarItemView: NSView {
     // swiftlint:disable:next function_parameter_count
     func configure(
         id: WindowID,
+        name: String = "",
         text: String,
         icon: NSImage?,
         glyph: String?,
@@ -187,6 +200,7 @@ final class AppBarItemView: NSView {
         style: AppBarStyle
     ) {
         windowID = id
+        self.name = name
         self.text = text
         self.count = count
         self.horizontal = horizontal
@@ -214,6 +228,39 @@ final class AppBarItemView: NSView {
             NSColor(kiwiHex: style.groupBadgeColor).cgColor
         applyColors()
         applyAccent()
+        updateAccessibilityLabel()
         needsLayout = true
+    }
+
+    /// Names the app and, when a title is drawn, the window;
+    /// collapsed groups name the app and count (#901).
+    private func updateAccessibilityLabel() {
+        if count > 1 {
+            setAccessibilityLabel(
+                L(
+                    "app_bar.group.ax",
+                    "%1$@, %2$d windows",
+                    name,
+                    count
+                )
+            )
+        } else if !text.isEmpty && text != name {
+            setAccessibilityLabel(
+                L(
+                    "app_bar.item_window.ax",
+                    "%1$@, window %2$@",
+                    name,
+                    text
+                )
+            )
+        } else {
+            setAccessibilityLabel(
+                L(
+                    "app_bar.item_app.ax",
+                    "%1$@",
+                    name
+                )
+            )
+        }
     }
 }
