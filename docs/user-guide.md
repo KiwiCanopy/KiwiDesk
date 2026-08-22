@@ -1314,10 +1314,11 @@ go (the configured minimum window size, or a larger minimum the
 app itself enforces) bounces the ring the same way and shows a
 small frosted pill on the window: "Minimum window size
 reached". Growing stops where a *neighbor* would drop below its
-own minimum; the pill then appears on that neighbor
-("Neighboring window at its minimum size") — the window that
-can't shrink, not the one you resized — while the bounce stays
-on the window whose gesture hit the wall. The cues fire on the
+own minimum; both windows then say so, each from its own
+perspective — the one you resized explains why nothing moved
+("Neighboring window at its minimum size") while the blocking
+neighbor marks itself ("Minimum window size reached") — and
+the bounce stays on the window whose gesture hit the wall. The cues fire on the
 first press or drag that gets only part of what it asked for,
 not just once you are already at the floor, and keyboard and
 mouse resizes behave identically.

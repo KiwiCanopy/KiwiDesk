@@ -1580,10 +1580,16 @@ Four rulings sharpen that:
   minimums (`StackLayout.weightStep(minSizes:)`, the two-sided
   `SplitDomain`), never one blanket value. When a grow (or a
   shrink whose group floor is carried by a group-mate) is
-  refused, the pill goes on **the window that cannot shrink, not
-  the trier** — the #435 sticky-swap rule — with its own copy
-  (`"Neighboring window at its minimum size"`); the bounce stays
-  on the resized window, whose gesture hit the wall.
+  refused, BOTH ends pill, each with the copy that fits its
+  anchor: the resized window explains why nothing moved
+  (`"Neighboring window at its minimum size"`), while the
+  blocking window marks itself (`"Minimum window size
+  reached"`). One pill on the blocker alone read absurd there —
+  from its own perspective IT reached the minimum, not a
+  neighbor — and one on the trier alone leaves which window
+  blocks unnamed; the #435 rule's core survives (the window
+  that cannot move is marked). The bounce stays on the resized
+  window, whose gesture hit the wall.
 - **A weight clamp divides the layout's exact span.** The ratio
   caps deliberately use the raw region span (a superset can never
   block reaching the visible bound; the render clamp is the net),

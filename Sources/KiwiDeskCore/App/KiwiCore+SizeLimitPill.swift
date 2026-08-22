@@ -37,11 +37,18 @@ extension KiwiCore {
         )
     }
 
-    /// Cues a grow refused because a NEIGHBOR sits at its own
+    /// Cues a resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933): the bump stays on the resized
-    /// window (the gesture hit a wall), while the pill goes on
-    /// `anchor` — the window that cannot shrink, not the trier,
-    /// the #435 sticky-swap rule.
+    /// window (the gesture hit a wall), and BOTH ends pill with
+    /// the text that fits its anchor — the resized window
+    /// explains why nothing moved ("Neighboring window at its
+    /// minimum size"), the blocking window marks itself
+    /// ("Minimum window size reached"). One pill on the blocker
+    /// alone read absurd there — from its own perspective IT
+    /// reached the minimum, not a neighbor — and one on the
+    /// trier alone leaves which window blocks unnamed (owner
+    /// ruling, 2026-08-22; the #435 anchor rule still holds:
+    /// the window that cannot move is marked).
     func refuseGrowAtNeighborMinimum(
         _ focused: WindowID,
         anchor: WindowID,
@@ -53,10 +60,17 @@ extension KiwiCore {
         let direction: Direction = axis == "y" ? .down : .right
         flashDeadEnd(focused, direction: direction)
         flashSizeLimitPill(
-            anchor,
+            focused,
             text: L(
                 "resize.neighbor_min_size",
                 "Neighboring window at its minimum size"
+            )
+        )
+        flashSizeLimitPill(
+            anchor,
+            text: L(
+                "resize.min_size_reached",
+                "Minimum window size reached"
             )
         )
     }

@@ -83,7 +83,7 @@ struct CoreLocalizationBoundaryTests {
         // neighbor-minimum sentences it hands to the Core-drawn
         // `SizeLimitOverlay`. Same caveat as `+StickyMarks` if
         // the overlays ever move out of Core.
-        "App/KiwiCore+SizeLimitPill.swift": 2,
+        "App/KiwiCore+SizeLimitPill.swift": 3,
         "Borders/StickyMarkOverlay.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core.
