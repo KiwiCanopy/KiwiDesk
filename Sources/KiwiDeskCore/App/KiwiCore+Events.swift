@@ -34,6 +34,18 @@ extension KiwiCore {
                 state: state
             )
         }
+        // The frame BEFORE this event folds in — the drag
+        // coordinator anchors a gesture's start on it (#933);
+        // `state.apply` below overwrites it.
+        let preEventFrame: CGRect? = {
+            switch event {
+            case .windowMoved(let id, _),
+                .windowResized(let id, _):
+                return state.windows[id]?.frame
+            default:
+                return nil
+            }
+        }()
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
@@ -102,7 +114,11 @@ extension KiwiCore {
                 // Reality reported — state beats stamp (#881).
                 tiler.clearInstantTarget(id)
             }
-            drag.windowMoved(id, frame: frame)
+            drag.windowMoved(
+                id,
+                frame: frame,
+                previous: preEventFrame
+            )
         case .windowResized(let id, let frame):
             borders.follow(
                 id,
@@ -170,7 +186,8 @@ extension KiwiCore {
                 drag.windowMoved(
                     id,
                     frame: frame,
-                    validated: true
+                    validated: true,
+                    previous: preEventFrame
                 )
             }
         case .windowDestroyed(let id, let wasMinimized):

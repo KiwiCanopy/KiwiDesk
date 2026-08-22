@@ -213,6 +213,26 @@ editing here:
   fallback — cosmetic, self-correcting); geometry never may.
   The ladder is `SizeBoundLearnerTests`; the
   overlay half is [borders.md](borders.md)'s pin row.
+- **An interactive resize write goes through the shared capped
+  writers (#933).** The keyboard `resize` verb and the mouse
+  resize end call the one set of clamped writers in
+  `KiwiCore+ResizeLimits` — never a raw `writeSlotSize`,
+  `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
+  write from a resize path, which is exactly how the mouse
+  `.scrollWidth` drag crossed the floor the keyboard path
+  refused. The writers clamp each side at its members'
+  effective minimums (`min_window_size`, raised by a #677
+  learned bound) and cue a truncated attempt — the pill on the
+  window that cannot shrink, the bounce on the trier
+  (`ResizeSizeLimitFeedbackTests`,
+  `ResizeNeighborLimitTests`). And a weight clamp divides the
+  span the LAYOUT divides — the one
+  `StackLayout.weightedSpan` copy, kept `minSizeMargin` above
+  exact equality — never the raw region span, which crosses
+  the layouts' cascade checks by exactly the gaps it ignored:
+  that is how #925's clamp still collapsed a
+  clamped-at-minimum track space into a pile
+  (`WeightStepOutcomeTests`).
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

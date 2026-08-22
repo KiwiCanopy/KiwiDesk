@@ -37,7 +37,8 @@ struct BorderSpecsTests {
             floating: floating,
             overlays: overlays,
             fullscreen: fullscreen,
-            isMonocle: monocle
+            isMonocle: monocle,
+            focusedRingSuppressed: false
         )
     }
 

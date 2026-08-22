@@ -100,13 +100,78 @@ extension KiwiCore {
                 weights: space.trackWeights
             )
         }
-        let value = StackLayout.weightStep(
+        let params = tiler.settings.resolvedTrack(for: space.id)
+        let vertical = params.axis == .vertical
+        let acrossAxis = vertical ? "x" : "y"
+        // The layout divides the span minus the inner gaps
+        // between the tracks — clamping against the raw span
+        // lets the stored weight cross the layout's cascade
+        // check by exactly the gaps, which is how #925's clamp
+        // still collapsed the space into an overflow pile
+        // (#933). Exact for the unfolded case; under an active
+        // overflow fold the layout merges surplus tracks
+        // (`overflowCap`) while this clamp reasons over the
+        // per-marker `ranges`, so it subtracts more gaps than
+        // the layout — tighter, in the safe direction: it can
+        // cue a refusal early, never admit a pile. Per-track
+        // minimums: a track spans all its members across the
+        // axis, so its tightest member binds it.
+        let gaps = tiler.settings.gaps(for: space.id)
+        let gap =
+            vertical
+            ? gaps.inner.horizontal : gaps.inner.vertical
+        let outer =
+            vertical
+            ? gaps.outer.left + gaps.outer.right
+            : gaps.outer.top + gaps.outer.bottom
+        let effectiveSpan = StackLayout.weightedSpan(
+            region: span,
+            outer: Double(outer),
+            innerGap: Double(gap),
+            count: ranges.count
+        )
+        let trackMins = ranges.map {
+            effectiveMinSize(
+                of: tiled[$0],
+                axis: acrossAxis
+            )
+        }
+        let outcome = StackLayout.weightStep(
             weights: weights,
             at: track,
             delta: delta,
-            span: span,
-            minSize: Double(tiler.settings.minWindowSize)
+            span: effectiveSpan,
+            minSizes: trackMins.map(\.size)
         )
+        let value = outcome.value
+        if let focused = space.focused {
+            if delta < 0, outcome.hitOwnMinimum {
+                // The focused track's floor may be carried by a
+                // track-mate with a larger learned bound — then
+                // the mate is the window that cannot shrink and
+                // the pill goes on it (#435's rule).
+                reportResizeRefusal(
+                    focused: focused,
+                    bindingCarrier: trackMins[track].carrier,
+                    fallbackAnchor: nil,
+                    shrinking: true,
+                    axis: acrossAxis
+                )
+            } else if delta > 0,
+                let blocked = outcome.blockedByOther
+            {
+                let anchor =
+                    trackMins[blocked].carrier
+                    ?? tiled[ranges[blocked]].first(where: {
+                        $0 != focused
+                    })
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: anchor ?? focused,
+                    axis: acrossAxis
+                )
+            }
+        }
         // Key the weight to the first LOCAL member of the
         // track: a traveler heading it (#414 v2) is not in
         // `space.windows`, so an entry under its id could never
@@ -137,6 +202,19 @@ extension KiwiCore {
         focused: WindowID,
         column: ArraySlice<WindowID>
     ) -> CommandResponse {
+        // The share write keys per-window state by id: a
+        // tiled-sticky traveler (#414 v2) is not in
+        // `space.windows`, so an entry under its id could never
+        // be pruned (orphan; recycled-id hazard, #308) — refuse
+        // it, mirroring the across-track head guard above. The
+        // mouse path hands the DRAGGED window, which can be a
+        // traveler; the keyboard path's `space.focused` cannot.
+        guard space.windows.contains(focused) else {
+            return .fail(
+                "the focused window is visiting from "
+                    + "another Space"
+            )
+        }
         guard let offset = column.firstIndex(of: focused),
             column.count > 1
         else {
@@ -158,15 +236,51 @@ extension KiwiCore {
             from: column.startIndex,
             to: offset
         )
-        let value = StackLayout.weightStep(
+        let params = tiler.settings.resolvedTrack(for: space.id)
+        let vertical = params.axis == .vertical
+        let alongAxis = vertical ? "y" : "x"
+        // Gap-adjusted span and per-window minimums, exactly as
+        // the across-tracks knob above (#933): the layout
+        // divides the span minus the gaps between the track's
+        // windows, and each member carries its own floor.
+        let gaps = tiler.settings.gaps(for: space.id)
+        let gap =
+            vertical
+            ? gaps.inner.vertical : gaps.inner.horizontal
+        let outer =
+            vertical
+            ? gaps.outer.top + gaps.outer.bottom
+            : gaps.outer.left + gaps.outer.right
+        let effectiveSpan = StackLayout.weightedSpan(
+            region: span,
+            outer: Double(outer),
+            innerGap: Double(gap),
+            count: column.count
+        )
+        let members = Array(column)
+        let minSizes = members.map {
+            effectiveMinSize(of: $0, axis: alongAxis)
+        }
+        let outcome = StackLayout.weightStep(
             weights: weights,
             at: index,
             delta: delta,
-            span: span,
-            minSize: Double(tiler.settings.minWindowSize)
+            span: effectiveSpan,
+            minSizes: minSizes
         )
+        if delta < 0, outcome.hitOwnMinimum {
+            refuseShrinkAtMinimum(focused, axis: alongAxis)
+        } else if delta > 0,
+            let blocked = outcome.blockedByOther
+        {
+            refuseGrowAtNeighborMinimum(
+                focused,
+                anchor: members[blocked],
+                axis: alongAxis
+            )
+        }
         state.workspaces.withSpace(space.id) {
-            $0.stackWeights[focused] = value
+            $0.stackWeights[focused] = outcome.value
         }
         return .ok()
     }

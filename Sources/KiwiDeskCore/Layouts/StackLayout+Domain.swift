@@ -16,6 +16,33 @@ extension StackLayout {
     /// Clamp for what the `resize` command *stores* (#67).
     public static let weightRange: ClosedRange<Double> = 0.1...10
 
+    /// What one interactive weight step did besides the value:
+    /// whether a shrink stopped at the stepped share's own
+    /// minimum, and which OTHER index's minimum capped a grow —
+    /// the inputs the refusal cues render (#933). `nil`
+    /// `blockedByOther` with an unchanged value on a grow means
+    /// only the store clamp (`weightRange`) engaged, which is a
+    /// domain bound, not a size limit — no cue.
+    public struct WeightStepOutcome: Equatable, Sendable {
+        public let value: Double
+        /// A shrink was truncated at the stepped share's own
+        /// minimum size (fires on the first attempt that LANDS
+        /// on the minimum, not only once already there).
+        public let hitOwnMinimum: Bool
+        /// The other index whose minimum size capped a grow.
+        public let blockedByOther: Int?
+    }
+
+    /// Safety margin (pt) added to a minimum before deriving
+    /// its weight clamp. The layout's cascade check
+    /// (`maxColumnTotal` over the SAME span) sits at exact
+    /// equality with the clamp's fixed point, so float rounding
+    /// alone could tip a clamped-at-minimum write over the
+    /// cliff into an `OverlapStack` pile — the #925 failure
+    /// one epsilon wide. A quarter point is invisible on
+    /// screen and decisively inside the guard.
+    public static let minSizeMargin: Double = 0.25
+
     /// One interactive weight step (#67/#128): the new value
     /// for `weights[index]` after a `resize` of `delta` points
     /// over a span of `span`. The single authority for the
@@ -36,36 +63,111 @@ extension StackLayout {
         span: Double,
         minSize: Double
     ) -> Double {
+        weightStep(
+            weights: weights,
+            at: index,
+            delta: delta,
+            span: span,
+            minSizes: Array(
+                repeating: minSize,
+                count: weights.count
+            )
+        ).value
+    }
+
+    /// The per-share form of `weightStep` (#933): `minSizes`
+    /// carries each index's own effective minimum (the global
+    /// `min_window_size` raised by that window's learned
+    /// app-enforced bound, #677), so a shrink clamps at the
+    /// stepped window's own floor while a grow caps where the
+    /// FIRST other share would drop below ITS floor — the two
+    /// directions read different windows' minimums, which the
+    /// single-`minSize` form cannot express. Callers pass the
+    /// span the layout actually divides (gap-adjusted); a raw
+    /// region span lets the stored value cross the layout's
+    /// cascade check by exactly the gaps (#925's residue).
+    public static func weightStep(
+        weights: [Double],
+        at index: Int,
+        delta: Double,
+        span: Double,
+        minSizes: [Double]
+    ) -> WeightStepOutcome {
         let current = weights[index]
         let total = weights.reduce(0, +)
         let otherTotal = total - current
         let change =
             delta * total * total / (span * otherTotal)
         var value = current + change
+        var hitOwnMinimum = false
+        var blockedByOther: Int? = nil
         if change > 0 {
-            let others = weights.enumerated()
-                .filter { $0.offset != index }
-                .map(\.element)
-            if let smallest = others.min() {
+            // Per other index: the largest total that keeps its
+            // share at its own minimum — `maxColumnTotal`, the
+            // same authority the layouts' cascade checks read,
+            // so the cap and the check cannot drift (#67). The
+            // tightest other index is the cap and the cue's
+            // anchor.
+            var maxTotal = Double.infinity
+            for (offset, weight) in weights.enumerated()
+            where offset != index {
+                guard minSizes[offset] > 0 else { continue }
                 let limit = maxColumnTotal(
-                    smallestWeight: smallest,
+                    smallestWeight: weight,
                     span: span,
-                    minSize: minSize
+                    minSize: minSizes[offset] + Self.minSizeMargin
                 )
-                let cap = limit - otherTotal
-                value = min(value, max(cap, current))
+                if limit < maxTotal {
+                    maxTotal = limit
+                    blockedByOther = offset
+                }
+            }
+            let cap = maxTotal - otherTotal
+            if value > max(cap, current) {
+                value = max(cap, current)
+            } else {
+                blockedByOther = nil
             }
         } else if change < 0 {
-            if minSize > 0, span > minSize, otherTotal > 0 {
+            let min = minSizes[index] + Self.minSizeMargin
+            if minSizes[index] > 0, span > min, otherTotal > 0 {
                 let minWeight =
-                    minSize * otherTotal / (span - minSize)
-                value = max(value, min(minWeight, current))
+                    min * otherTotal / (span - min)
+                let floor = Swift.min(minWeight, current)
+                if value < floor {
+                    value = floor
+                    hitOwnMinimum = true
+                }
             }
         }
-        return min(
-            max(value, weightRange.lowerBound),
-            weightRange.upperBound
+        return WeightStepOutcome(
+            value: Swift.min(
+                Swift.max(value, weightRange.lowerBound),
+                weightRange.upperBound
+            ),
+            hitOwnMinimum: hitOwnMinimum,
+            blockedByOther: blockedByOther
         )
+    }
+
+    /// The span a weighted group actually divides (#933): the
+    /// pre-outer-gap region span minus the outer gaps on the
+    /// weighted axis and one inner gap per boundary — the same
+    /// arithmetic the layouts perform on their `usable` rect.
+    /// The interactive weight clamps must divide THIS span,
+    /// never the raw region: a raw span lets a
+    /// clamped-at-minimum write cross the layouts' cascade
+    /// checks by exactly the gaps (#925's residue), and the
+    /// hand-copied subtraction is precisely the drift that
+    /// shipped it — so the three resize call sites share this
+    /// one copy.
+    public static func weightedSpan(
+        region: Double,
+        outer: Double,
+        innerGap: Double,
+        count: Int
+    ) -> Double {
+        region - outer - innerGap * Double(max(count - 1, 0))
     }
 
     /// The largest weight total a zone can carry along its

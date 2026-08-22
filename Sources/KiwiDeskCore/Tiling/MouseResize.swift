@@ -144,7 +144,11 @@ public enum MouseResize {
         mode: LayoutMode,
         isMaster: Bool,
         stackSplitHorizontal: Bool,
-        trackAxisVertical: Bool = true,
+        // Required on purpose (#925 review): a defaulted
+        // discriminator lets a new call site silently
+        // classify a horizontal-track drag with the
+        // vertical mapping (across/along swapped).
+        trackAxisVertical: Bool,
         slot: CGRect,
         frame: CGRect,
         bounds: CGRect

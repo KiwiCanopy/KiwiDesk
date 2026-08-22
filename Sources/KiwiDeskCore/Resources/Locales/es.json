@@ -869,6 +869,8 @@
   "profiles.which_loads.rule": "El perfil asignado al Escritorio activo se carga primero. De lo contrario, KiwiDesk elige el perfil cuyo número de pantallas coincida, prefiriendo el marcado como predeterminado.",
   "profiles.which_loads.standard": "Ahora mismo: %1$@ → el %2$@ integrado (ningún perfil guardado coincide).",
   "profiles.which_loads.title": "Qué perfil se carga",
+  "resize.min_size_reached": "Tamaño mínimo de ventana alcanzado",
+  "resize.neighbor_min_size": "La ventana vecina está en su tamaño mínimo",
   "scroll_grid.anchor.center": "Centro",
   "scroll_grid.anchor.end_h": "Derecha",
   "scroll_grid.anchor.end_v": "Abajo",

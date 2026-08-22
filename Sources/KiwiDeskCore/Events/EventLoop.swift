@@ -63,11 +63,30 @@ public final class EventLoop {
             .identifier?.rawValue
     }
 
-    /// Whether KiwiDesk's own process currently holds an active,
-    /// visible key window or modal dialog (#929). Injected in
-    /// tests.
-    var hasOwnKeyWindow: () -> Bool = {
-        EventLoop.hasOwnActiveKeyWindow()
+    /// The window NUMBER of KiwiDesk's own active key or modal
+    /// window, nil when the process holds none — the ONE seam
+    /// both stand-downs read: the #929 close-return raise (via
+    /// `hasOwnKeyWindow()` below) and the #933 focused-ring
+    /// suppression. When an own progress window closes to yield
+    /// to an own alert (Sparkle's flow), the destroy fold
+    /// re-points state focus at the background survivor and no
+    /// focus event re-points it at the alert — so the anchor
+    /// goes stale and the ring would keep drawing behind the
+    /// alert (the own-window census is `OwnWindowTiling`'s
+    /// doc). The number, not a Bool, so an own key window that
+    /// IS the anchor (the Settings window) keeps its ring.
+    /// Injected in tests.
+    var ownKeyWindowNumber: () -> Int? = {
+        EventLoop.ownActiveKeyWindowNumber()
+    }
+
+    /// Whether the process holds an own active key/modal window
+    /// at all (#929) — derived from the number seam above so
+    /// the raise stand-down and the ring stand-down can never
+    /// describe different worlds, and a test injecting the one
+    /// seam steers both.
+    func hasOwnKeyWindow() -> Bool {
+        ownKeyWindowNumber() != nil
     }
 
     var observers: [pid_t: any AppObserving] = [:]

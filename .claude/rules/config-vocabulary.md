@@ -63,13 +63,15 @@ synonym:
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One
   family, three different corners.
-- **pill** — two ruled senses, deliberately (2026-08-10):
-  the sticky mark's transient EXPANDED state, and the Settings
-  window's floating **save pill** (#678 turn 9, always with
-  "save" attached in copy and code). The contexts cannot
-  collide — one is an on-window overlay, the other Settings
-  chrome — which is what a third sense would have to prove
-  before joining; the ruling is in `docs/design-decisions.md`
+- **pill** — two ruled senses, deliberately (2026-08-10): a
+  transient worded on-window cue — the sticky mark's EXPANDED
+  state (#435/#438) and, since #933, the size-limit refusal
+  flash (`SizeLimitOverlay`) — and the Settings window's
+  floating **save pill** (#678 turn 9, always with "save"
+  attached in copy and code). The contexts cannot collide —
+  one is an on-window overlay, the other Settings chrome —
+  which is what a third sense would have to prove before
+  joining; the ruling is in `docs/design-decisions.md`
   ▸ the floating pill.
 - **indicator** — the bar's **active-item** marker
   (`active_indicator`): which item is current, never a window's

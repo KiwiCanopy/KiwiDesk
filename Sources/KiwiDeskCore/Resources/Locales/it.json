@@ -869,6 +869,8 @@
   "profiles.which_loads.rule": "Un profilo associato alla Scrivania attiva viene caricato per primo. Altrimenti KiwiDesk sceglie il profilo il cui numero di schermi corrisponde, preferendo quello segnato come predefinito.",
   "profiles.which_loads.standard": "In questo momento: %1$@ → il %2$@ predefinito (nessun profilo salvato corrisponde).",
   "profiles.which_loads.title": "Quale profilo viene caricato",
+  "resize.min_size_reached": "Dimensione minima della finestra raggiunta",
+  "resize.neighbor_min_size": "La finestra adiacente è alla dimensione minima",
   "scroll_grid.anchor.center": "Al centro",
   "scroll_grid.anchor.end_h": "A destra",
   "scroll_grid.anchor.end_v": "In basso",

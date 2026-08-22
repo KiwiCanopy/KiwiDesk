@@ -142,79 +142,93 @@ extension KiwiCore {
     /// (Named apart from the profile `apply(...)` family,
     /// whose members classify their own forced retile — this
     /// one never retiles; the caller does.)
+    // `window` carries no default on purpose: the track cases
+    // no-op without the identity, so a caller that forgot it
+    // would compile and silently drop track drags — nil is an
+    // explicit answer ("no window identity at this site"),
+    // never an omission.
     func applyResizeAdjustment(
         _ adjustment: ResizeAdjustment?,
-        for window: WindowID? = nil,
+        for window: WindowID?,
         in space: Space,
         bounds: CGRect
     ) {
         switch adjustment {
+        // The ratio and slot writes go through the same capped
+        // writers the keyboard `resize` verb calls (#933) —
+        // per-side effective minimums, and the refusal cues
+        // when the drag ran into one.
         case .bspRatioH(let delta):
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioH
-            // Cap at the layout region's effective range (#383):
-            // no invisible ratchet past the min-size cliff,
-            // matching the keyboard path and the stack drag (#44).
-            // `bounds` is the region, not the display (#537).
-            let value = SplitDomain.cappedRatioWrite(
-                base + Double(delta),
-                base: base,
-                available: Double(bounds.width),
-                minSize: Double(tiler.settings.minWindowSize)
-            )
-            writeSplitRatioH(
-                min(max(value, 0.1), 0.9),
-                for: space.id
+            writeCappedBspRatio(
+                proposed: base + Double(delta),
+                axis: "x",
+                span: Double(bounds.width),
+                space: space,
+                focused: window,
+                deltaSign: bspDragSign(
+                    ratioDelta: Double(delta),
+                    axis: "x",
+                    space: space,
+                    window: window
+                )
             )
         case .bspRatioV(let delta):
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioV
-            let value = SplitDomain.cappedRatioWrite(
-                base + Double(delta),
-                base: base,
-                available: Double(bounds.height),
-                minSize: Double(tiler.settings.minWindowSize)
-            )
-            writeSplitRatioV(
-                min(max(value, 0.1), 0.9),
-                for: space.id
+            writeCappedBspRatio(
+                proposed: base + Double(delta),
+                axis: "y",
+                span: Double(bounds.height),
+                space: space,
+                focused: window,
+                deltaSign: bspDragSign(
+                    ratioDelta: Double(delta),
+                    axis: "y",
+                    space: space,
+                    window: window
+                )
             )
         case .masterRatio(let delta):
             let stack =
                 tiler.settings.resolvedStack(for: space)
-            let base = stack.masterRatio
-            // The ratio lives on the split axis (#222), so the
-            // cap's available span follows it too.
+            let splitH = stack.stackPosition.splitsHorizontally
             let available =
-                stack.stackPosition.splitsHorizontally
-                ? bounds.width : bounds.height
-            // Cap at the display's effective range (#44), like
-            // the keyboard path — no invisible ratchet.
-            let value = SplitDomain.cappedRatioWrite(
-                base + delta,
-                base: base,
-                available: Double(available),
-                minSize: Double(tiler.settings.minWindowSize)
-            )
-            writeMasterRatio(
-                min(max(value, 0.1), 0.9),
-                for: space.id
+                splitH ? bounds.width : bounds.height
+            let axis = splitH ? "x" : "y"
+            // The translate's sign already follows the dragged
+            // window (isMaster), so the gesture grows it when
+            // the signed ratio delta moves the ratio toward its
+            // zone: master grows with +, stack with −.
+            let inMaster =
+                window.map {
+                    StackLayout.partition(
+                        state.effectiveTiledMembers(
+                            of: space,
+                            activeSpace: activeSpace?.id
+                        ),
+                        masterCount: stack.masterCount
+                    ).master.contains($0)
+                } ?? true
+            writeCappedMasterRatio(
+                proposed: stack.masterRatio + delta,
+                span: Double(available),
+                axis: axis,
+                space: space,
+                focused: window,
+                deltaSign: inMaster ? delta : -delta
             )
         case .scrollWidth(let delta):
-            // Resize grows the slot by a pt delta: take the current
-            // magnitude (a stored pt as-is; auto/% seeded against
-            // the scroll axis), add the delta, store as points.
-            let scrolling =
-                tiler.settings.resolvedScrolling(for: space)
-            let horizontal = scrolling.axisIsHorizontal
-            let along = horizontal ? bounds.width : bounds.height
-            let current = scrolling.slotSize
-                .editablePoints(along: along, horizontal: horizontal)
-            writeSlotSize(
-                .points(clamping: current + delta),
-                for: space.id
+            // Resize grows the slot by a pt delta; the shared
+            // writer clamps at the effective minimum, which the
+            // mouse path previously skipped.
+            writeCappedScrollSlot(
+                delta: Double(delta),
+                space: space,
+                bounds: bounds
             )
         case .trackAcross(let delta):
             guard let window else { break }
@@ -247,5 +261,36 @@ extension KiwiCore {
         case nil:
             break
         }
+    }
+
+    /// Whether a BSP ratio delta GROWS (+) or SHRINKS (−) the
+    /// dragged window: a positive ratio move grows the FIRST
+    /// region, so the window's own growth is its side times the
+    /// delta — via the shared `MouseResize.bspSide` authority,
+    /// never a re-derived comparison. Unknown window/slot keeps
+    /// the raw delta (first-region perspective).
+    private func bspDragSign(
+        ratioDelta: Double,
+        axis: String,
+        space: Space,
+        window: WindowID?
+    ) -> Double {
+        guard let window,
+            let slot = tiler.calculatedFrames(
+                state: state
+            )[window],
+            let screen = TilingEngine.screen(
+                for: space.id,
+                in: state
+            )
+        else { return ratioDelta }
+        let side = Double(
+            MouseResize.bspSide(
+                slot: slot,
+                bounds: tiler.layoutBounds(on: screen),
+                horizontal: axis == "x"
+            )
+        )
+        return side * ratioDelta
     }
 }

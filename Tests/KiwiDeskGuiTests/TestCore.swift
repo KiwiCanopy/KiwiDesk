@@ -77,5 +77,11 @@ func makeTestCore(
     // every edge open); an adjacency suite injects a fabricated
     // list itself.
     core.tiler.allScreenBounds = { [] }
+    // Same class, fifth time (#933): the own-key-window seam
+    // defaults to a live `NSApplication.shared` read, so a
+    // runner that happens to hold a key window would suppress
+    // the focused ring in every border suite. Pin "no own key
+    // window"; the stand-down suites inject their own number.
+    core.eventLoop.ownKeyWindowNumber = { nil }
     return core
 }

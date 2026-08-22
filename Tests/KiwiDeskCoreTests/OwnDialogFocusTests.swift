@@ -61,7 +61,9 @@ struct OwnDialogFocusTests {
     func seamCanBeCustomized() {
         let loop = EventLoop()
         #expect(!loop.hasOwnKeyWindow())
-        loop.hasOwnKeyWindow = { true }
+        // One seam steers both stand-downs (#929 raise, #933
+        // ring): the Bool derives from the number.
+        loop.ownKeyWindowNumber = { 42 }
         #expect(loop.hasOwnKeyWindow())
     }
 }

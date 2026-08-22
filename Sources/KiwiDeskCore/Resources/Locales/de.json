@@ -869,6 +869,8 @@
   "profiles.which_loads.rule": "Ein an den aktiven Schreibtisch gebundenes Profil wird zuerst geladen. Andernfalls wählt KiwiDesk das Profil mit passender Bildschirmanzahl und bevorzugt das als Standard markierte.",
   "profiles.which_loads.standard": "Aktuell: %1$@ → das integrierte %2$@ (kein gespeichertes Profil passt).",
   "profiles.which_loads.title": "Welches Profil geladen wird",
+  "resize.min_size_reached": "Mindestfenstergröße erreicht",
+  "resize.neighbor_min_size": "Nachbarfenster hat die Mindestgröße erreicht",
   "scroll_grid.anchor.center": "Mitte",
   "scroll_grid.anchor.end_h": "Rechts",
   "scroll_grid.anchor.end_v": "Unten",

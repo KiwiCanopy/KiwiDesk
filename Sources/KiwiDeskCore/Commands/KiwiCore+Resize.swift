@@ -165,12 +165,12 @@ extension KiwiCore {
         let bounds =
             screen.map { tiler.layoutBounds(on: $0) }
             ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
-        let along = horizontal ? bounds.width : bounds.height
-        let current = scrolling.slotSize
-            .editablePoints(along: along, horizontal: horizontal)
-        writeSlotSize(
-            .points(clamping: current + CGFloat(delta)),
-            for: space.id
+        // Clamp + refusal cue via the shared writer (#933),
+        // the same one the mouse `.scrollWidth` path calls.
+        writeCappedScrollSlot(
+            delta: delta,
+            space: space,
+            bounds: bounds
         )
         return .ok()
     }

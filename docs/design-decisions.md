@@ -1550,6 +1550,73 @@ this: it resizes itself directly, in every mode (width for x,
 height for y, floored at `min_window_size`). (#122, #124,
 #129)
 
+**Resizing clamps at a window's *effective minimum*, and a
+truncated attempt is cued, never silent (#933).** A window's
+resize floor is the configured `min_window_size`, raised where
+its app enforces a larger physical minimum of its own — learned
+from the engine's refused asks (`SizeBoundLearner`, #677), since
+AX exposes no minimum-size attribute. Keyboard and mouse resizes
+share one set of clamped writers, so the two paths cannot answer
+the same gesture differently. A shrink the clamp truncates gets
+the tactile rubber-band bounce on the focus ring (`DeadEndBump`
+#436) *and* a frosted pill naming the reason
+(`"Minimum window size reached"`). Pairing the two vocabularies
+here is deliberate, not a breach of the "two distinct
+vocabularies — never merged" ruling (#435/#436, below): a
+minimum is at once a true edge — the bounce's "nothing
+further" holds, there genuinely is no further — and a refusal
+with a reason worth a word, so the two cues agree, unlike the
+swap-onto-a-traveler case that ruling keeps pill-only.
+
+Four rulings sharpen that:
+
+- **The cue fires on the first truncated attempt.** A shrink that
+  lands ON the floor already refused part of the request; waiting
+  for a second press once at the floor read as "nothing happened"
+  the first time (the original #933 defect).
+- **The two directions read different windows' minimums.** A
+  shrink clamps at the resized window's own floor; a grow caps
+  where a NEIGHBOR would drop below *its* floor — per-window
+  minimums (`StackLayout.weightStep(minSizes:)`, the two-sided
+  `SplitDomain`), never one blanket value. When a grow (or a
+  shrink whose group floor is carried by a group-mate) is
+  refused, the pill goes on **the window that cannot shrink, not
+  the trier** — the #435 sticky-swap rule — with its own copy
+  (`"Neighboring window at its minimum size"`); the bounce stays
+  on the resized window, whose gesture hit the wall.
+- **A weight clamp divides the layout's exact span.** The ratio
+  caps deliberately use the raw region span (a superset can never
+  block reaching the visible bound; the render clamp is the net),
+  but for the track/stack *weight* paths crossing the floor means
+  an `OverlapStack` cascade, so the clamp subtracts the outer
+  gaps and inner gaps exactly as the layout does — plus a small
+  margin (`StackLayout.minSizeMargin` owns the number), because
+  the clamp's fixed point sits at exact equality with the
+  cascade check and float noise alone could tip a
+  clamped-at-minimum write into the pile. That equality gap is how #925's clamp
+  still collapsed a track space at the minimum.
+- **A mouse gesture is measured from the pre-event frame.** AX
+  throttles move/resize notifications, so a fast drag's first
+  event already sits mid-flight and its last can lag the drop;
+  the drop end re-reads the live frame (#245) and the START now
+  anchors on the frame state held before the gesture's first
+  event — measuring first-event → last-event resized only part
+  of the way.
+
+**The focused ring stands down while an own key window that is
+not the focus anchor is active (#933).** Sparkle's update alert
+is an own titled dialog — tracked and force-floated, per
+`OwnWindowTiling`'s census — but when Sparkle's progress window
+closes to yield to it, the destroy fold re-points state focus
+at the background survivor (#929's flow) and no focus event
+re-points it at the alert, so the ring kept drawing around the
+stale anchor behind the alert. While the process holds a key or
+modal window that is NOT the focus anchor, the focused ring is
+suppressed (`EventLoop.ownKeyWindowNumber` — the one seam the
+#929 close-return raise stand-down also reads), the same answer
+a focused launcher gets (#300); an own key window that IS the
+anchor — the Settings window — keeps its ring.
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

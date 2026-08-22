@@ -3613,15 +3613,27 @@ end)
 **Does:** grows or shrinks the focused window. A **floating**
 focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, top-left
-corner anchored, floored at `min_window_size` (a window already
-smaller than that just shrinks no further). Tiled windows
+corner anchored, floored at its **effective minimum** —
+`min_window_size`, raised by a larger minimum the app itself
+enforces, once KiwiDesk has learned it (#677). A window already
+smaller than that just shrinks no further. Tiled windows
 only resize in bsp, stack, scrolling, and track layouts —
 monocle, grid, and the floating layout report "not supported",
 and when that failure comes from a **hotkey** press KiwiDesk
 plays the system alert sound so the no-op is perceivable at
 the keyboard (the Cmd+Z-with-nothing-to-undo idiom; #184).
 Mute it with `set_resize_feedback(false)` — CLI and IPC
-callers never hear it, they read the error JSON. What the
+callers never hear it, they read the error JSON.
+
+Distinct from that no-target alert (#933): a resize a minimum
+size **truncates** — a shrink reaching the focused window's
+effective minimum, or a grow stopped where a neighbor would
+drop below its own — still applies the part that fits, and
+cues the refusal visually on the first truncated attempt: the
+focus ring gives the same rubber-band bounce as a dead-end
+focus move (#436), and a pill names the reason on the window
+that cannot shrink — the neighbor, on a refused grow. Keyboard
+and mouse resizes share these clamps and cues. What the
 `delta` actually adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
@@ -3634,7 +3646,8 @@ callers never hear it, they read the error JSON. What the
   splits still share the one ratio; with no focused window the
   delta moves the left/top region, as before. Like the stack,
   the write stops at the bound that keeps both regions at
-  `min_window_size` within the area the layout fills (#383) —
+  their effective minimums (per-side since #933) within the
+  area the layout fills (#383) —
   the display minus any Space Bar strip — so a resize no longer
   suddenly collapses the split into an overlap pile.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
@@ -3642,7 +3655,8 @@ callers never hear it, they read the error JSON. What the
   a master focused, a positive delta raises the master ratio;
   with a stack window focused, it lowers the ratio (the column
   grows). The write stops at the bound that keeps both zones
-  at `min_window_size` within the area the layout fills (#44).
+  at their effective minimums (per-zone since #933) within the
+  area the layout fills (#44).
   `"y"`
   grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
@@ -3659,7 +3673,8 @@ callers never hear it, they read the error JSON. What the
   window's whole *track*; the axis **along** them grows the
   focused window's *share within its track* — the same
   per-window weights as the stack's `"y"` path, with the same
-  session-scoped lifetime and `min_window_size` cap. A single
+  session-scoped lifetime and effective-minimum cap (#933). A
+  single
   track cannot trade cross-axis area, and a window alone in
   its track has no share to grow; both report an error.
 

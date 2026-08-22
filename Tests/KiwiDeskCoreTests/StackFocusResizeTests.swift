@@ -203,11 +203,16 @@ struct StackFocusResizeTests {
         stackSpace(core)
         // The cap derives from the display height, which the
         // fixture pins (#531) — a 6K host legitimately reaches
-        // the 10 clamp otherwise — and from the minimum, which
-        // stays at its 300pt default. Pinned, not assumed: the
-        // expected weight below is span / 300 − 1.
+        // the 10 clamp otherwise — from the minimum, which
+        // stays at its 300pt default, and since #933 from the
+        // gaps the layout carves off the span (outer top+bottom
+        // and one inner gap for a 2-window column) plus the
+        // quarter-point cascade margin. All pinned, not
+        // assumed.
         #expect(core.tiler.settings.minWindowSize == 300)
-        let span = Double(Self.display.height)
+        core.tiler.settings.gapsGlobal = Gaps.uniform(10)
+        let span = Double(Self.display.height) - 20 - 10
+        let minSize = 300 + StackLayout.minSizeMargin
         core.state.apply(.windowFocused(WindowID(2)))
         // Hammer Grow height far past where the column mate
         // would drop below min_window_size: the stored weight
@@ -220,7 +225,7 @@ struct StackFocusResizeTests {
                 args: [.string("y"), .number(400)]
             )
         }
-        let expected = min(max(span / 300 - 1, 1), 10)
+        let expected = min(max(span / minSize - 1, 1), 10)
         let space = core.state.workspaces[SpaceID("1")]
         let weight = space?.stackWeights[WindowID(2)] ?? 0
         #expect(abs(weight - expected) < 1e-9)

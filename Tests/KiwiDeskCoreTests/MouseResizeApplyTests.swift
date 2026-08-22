@@ -52,6 +52,7 @@ struct MouseResizeApplyTests {
         let space = space(core, mode: "bsp")
         core.applyResizeAdjustment(
             .bspRatioH(0.1),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -68,6 +69,7 @@ struct MouseResizeApplyTests {
         let space = space(core, mode: "bsp")
         core.applyResizeAdjustment(
             .bspRatioV(0.1),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -86,6 +88,7 @@ struct MouseResizeApplyTests {
         // collapsing the neighbor into the overlap pile.
         core.applyResizeAdjustment(
             .bspRatioH(0.5),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -99,6 +102,7 @@ struct MouseResizeApplyTests {
         // bounds 800 tall, min 300 → effective [0.375, 0.625].
         core.applyResizeAdjustment(
             .bspRatioV(0.5),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -111,6 +115,7 @@ struct MouseResizeApplyTests {
         let space = space(core, mode: "stack")
         core.applyResizeAdjustment(
             .masterRatio(-0.1),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -129,6 +134,7 @@ struct MouseResizeApplyTests {
         // of ratcheting the stored value to the 0.9 clamp.
         core.applyResizeAdjustment(
             .masterRatio(0.5),
+            for: nil,
             in: space,
             bounds: bounds
         )
@@ -149,6 +155,7 @@ struct MouseResizeApplyTests {
             .editablePoints(along: bounds.width, horizontal: true)
         core.applyResizeAdjustment(
             .scrollWidth(100),
+            for: nil,
             in: space,
             bounds: bounds
         )

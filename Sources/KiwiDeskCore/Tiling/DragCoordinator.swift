@@ -79,10 +79,22 @@ public final class DragCoordinator {
     /// grace arrive with the button up, and reading them as
     /// drags swaps windows in the array and re-tiles them into
     /// the wrong slots (issue #45).
+    ///
+    /// `previous` is the frame the window had BEFORE this
+    /// event (the caller's state, written by the last event).
+    /// A gesture's start frame is taken from it, because AX
+    /// throttles move/resize notifications: a fast gesture's
+    /// FIRST event already sits mid-flight — or, released
+    /// quickly, at the final frame — so measuring the gesture
+    /// from that event's own frame loses everything before it
+    /// (#933: a fast border drag resized only part of the
+    /// way). Nil (or a first-ever event) falls back to the
+    /// event frame, the old behavior.
     public func windowMoved(
         _ id: WindowID,
         frame: CGRect,
-        validated: Bool = false
+        validated: Bool = false,
+        previous: CGRect? = nil
     ) {
         guard !isAnimating(id) else {
             // Our own animation: forget any pending drag so
@@ -102,7 +114,7 @@ public final class DragCoordinator {
             return
         }
         latestFrames[id] = frame
-        let start = startFrames[id] ?? frame
+        let start = startFrames[id] ?? previous ?? frame
         startFrames[id] = start
         if isMousePressed() {
             onDragMove(id, start, frame)
