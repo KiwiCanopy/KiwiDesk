@@ -45,15 +45,20 @@ struct ResizeNeighborLimitTests {
         window: WindowID,
         min: CGFloat
     ) {
-        for _ in 0..<2 {
-            core.tiler.boundLearner.recordAsk(
-                window,
-                size: CGSize(width: 200, height: 780)
-            )
-            core.tiler.boundLearner.observe(
-                window,
-                currentSize: CGSize(width: min, height: 780)
-            )
+        // Two DISTINCT asks converging on one answer: a floor
+        // is only believed corroborated (#933) — a single
+        // refused ask reads as grid noise.
+        for asked in [CGFloat(200), CGFloat(240)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    window,
+                    size: CGSize(width: asked, height: 780)
+                )
+                core.tiler.boundLearner.observe(
+                    window,
+                    currentSize: CGSize(width: min, height: 780)
+                )
+            }
         }
     }
 

@@ -5,12 +5,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The focused ring stands down while an own UNTRACKED key
-/// window is active (#933): Sparkle's update alert is an own
-/// panel that never enters tracking, so no focus event fires
-/// and the anchor goes stale — the ring must not keep drawing
-/// around it behind the alert. A tracked own key window (the
-/// Settings window) IS the anchor and keeps its ring.
+/// The focused ring stands down while an own key window that
+/// is NOT the focus anchor is active (#933): in Sparkle's
+/// update flow the progress window's close re-points state
+/// focus at the background survivor (#929) and no focus event
+/// re-points it at the alert, so the anchor goes stale — the
+/// ring must not keep drawing around it behind the alert. An
+/// own key window that IS the anchor (the Settings window)
+/// keeps its ring.
 @Suite("Border own-key-window stand-down (#933)")
 @MainActor
 struct BorderOwnKeyWindowTests {

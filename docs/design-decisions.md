@@ -1550,15 +1550,23 @@ this: it resizes itself directly, in every mode (width for x,
 height for y, floored at `min_window_size`). (#122, #124,
 #129)
 
-**Resizing clamps against learned app minimum size bounds with
-rubber-band bounce and indicator pill (#933).** When an application
-enforces its own physical minimum size (learned via `SizeBoundLearner`
-#677 when macOS/AppKit refuses a smaller requested dimension),
-keyboard and mouse resize commands respect this floor
-(`max(min_window_size, sizeBound.minWidth/minHeight)`). Attempting to
-shrink past this physical bound triggers a tactile rubber-band spring
-bounce (`DeadEndBump` #436) on the focus ring and displays a frosted
-indicator pill (`"Minimum window size reached"`).
+**Resizing clamps at a window's *effective minimum*, and a
+truncated attempt is cued, never silent (#933).** A window's
+resize floor is the configured `min_window_size`, raised where
+its app enforces a larger physical minimum of its own — learned
+from the engine's refused asks (`SizeBoundLearner`, #677), since
+AX exposes no minimum-size attribute. Keyboard and mouse resizes
+share one set of clamped writers, so the two paths cannot answer
+the same gesture differently. A shrink the clamp truncates gets
+the tactile rubber-band bounce on the focus ring (`DeadEndBump`
+#436) *and* a frosted pill naming the reason
+(`"Minimum window size reached"`). Pairing the two vocabularies
+here is deliberate, not a breach of the "two distinct
+vocabularies — never merged" ruling (#435/#436, below): a
+minimum is at once a true edge — the bounce's "nothing
+further" holds, there genuinely is no further — and a refusal
+with a reason worth a word, so the two cues agree, unlike the
+swap-onto-a-traveler case that ruling keeps pill-only.
 
 Four rulings sharpen that:
 
@@ -1581,29 +1589,33 @@ Four rulings sharpen that:
   block reaching the visible bound; the render clamp is the net),
   but for the track/stack *weight* paths crossing the floor means
   an `OverlapStack` cascade, so the clamp subtracts the outer
-  gaps and inner gaps exactly as the layout does — plus a
-  quarter-point margin (`StackLayout.minSizeMargin`), because the
-  clamp's fixed point sits at exact equality with the cascade
-  check and float noise alone could tip a clamped-at-minimum
-  write into the pile. That equality gap is how #925's clamp
+  gaps and inner gaps exactly as the layout does — plus a small
+  margin (`StackLayout.minSizeMargin` owns the number), because
+  the clamp's fixed point sits at exact equality with the
+  cascade check and float noise alone could tip a
+  clamped-at-minimum write into the pile. That equality gap is how #925's clamp
   still collapsed a track space at the minimum.
 - **A mouse gesture is measured from the pre-event frame.** AX
   throttles move/resize notifications, so a fast drag's first
   event already sits mid-flight and its last can lag the drop;
-  the drop end re-reads the live frame (#492) and the START now
+  the drop end re-reads the live frame (#245) and the START now
   anchors on the frame state held before the gesture's first
   event — measuring first-event → last-event resized only part
   of the way.
 
-**The focused ring stands down while an own untracked dialog is
-key (#933).** Sparkle's update alert is an own panel
-`shouldIgnoreOwnWindow` drops before tracking, so no focus event
-fires when it becomes key and the ring kept drawing around the
+**The focused ring stands down while an own key window that is
+not the focus anchor is active (#933).** Sparkle's update alert
+is an own titled dialog — tracked and force-floated, per
+`OwnWindowTiling`'s census — but when Sparkle's progress window
+closes to yield to it, the destroy fold re-points state focus
+at the background survivor (#929's flow) and no focus event
+re-points it at the alert, so the ring kept drawing around the
 stale anchor behind the alert. While the process holds a key or
 modal window that is NOT the focus anchor, the focused ring is
-suppressed (`EventLoop.ownKeyWindowNumber`), the same answer a
-focused launcher gets (#300); a tracked own key window — the
-Settings window — IS the anchor and keeps its ring.
+suppressed (`EventLoop.ownKeyWindowNumber` — the one seam the
+#929 close-return raise stand-down also reads), the same answer
+a focused launcher gets (#300); an own key window that IS the
+anchor — the Settings window — keeps its ring.
 
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact

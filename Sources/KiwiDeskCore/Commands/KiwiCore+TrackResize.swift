@@ -108,9 +108,14 @@ extension KiwiCore {
         // lets the stored weight cross the layout's cascade
         // check by exactly the gaps, which is how #925's clamp
         // still collapsed the space into an overflow pile
-        // (#933). Per-track minimums: a track spans all its
-        // members across the axis, so its tightest member
-        // binds it.
+        // (#933). Exact for the unfolded case; under an active
+        // overflow fold the layout merges surplus tracks
+        // (`overflowCap`) while this clamp reasons over the
+        // per-marker `ranges`, so it subtracts more gaps than
+        // the layout — tighter, in the safe direction: it can
+        // cue a refusal early, never admit a pile. Per-track
+        // minimums: a track spans all its members across the
+        // axis, so its tightest member binds it.
         let gaps = tiler.settings.gaps(for: space.id)
         let gap =
             vertical
@@ -119,9 +124,12 @@ extension KiwiCore {
             vertical
             ? gaps.outer.left + gaps.outer.right
             : gaps.outer.top + gaps.outer.bottom
-        let effectiveSpan =
-            span - Double(outer)
-            - Double(gap) * Double(ranges.count - 1)
+        let effectiveSpan = StackLayout.weightedSpan(
+            region: span,
+            outer: Double(outer),
+            innerGap: Double(gap),
+            count: ranges.count
+        )
         let trackMins = ranges.map {
             effectiveMinSize(
                 of: tiled[$0],
@@ -194,6 +202,19 @@ extension KiwiCore {
         focused: WindowID,
         column: ArraySlice<WindowID>
     ) -> CommandResponse {
+        // The share write keys per-window state by id: a
+        // tiled-sticky traveler (#414 v2) is not in
+        // `space.windows`, so an entry under its id could never
+        // be pruned (orphan; recycled-id hazard, #308) — refuse
+        // it, mirroring the across-track head guard above. The
+        // mouse path hands the DRAGGED window, which can be a
+        // traveler; the keyboard path's `space.focused` cannot.
+        guard space.windows.contains(focused) else {
+            return .fail(
+                "the focused window is visiting from "
+                    + "another Space"
+            )
+        }
         guard let offset = column.firstIndex(of: focused),
             column.count > 1
         else {
@@ -230,9 +251,12 @@ extension KiwiCore {
             vertical
             ? gaps.outer.top + gaps.outer.bottom
             : gaps.outer.left + gaps.outer.right
-        let effectiveSpan =
-            span - Double(outer)
-            - Double(gap) * Double(column.count - 1)
+        let effectiveSpan = StackLayout.weightedSpan(
+            region: span,
+            outer: Double(outer),
+            innerGap: Double(gap),
+            count: column.count
+        )
         let members = Array(column)
         let minSizes = members.map {
             effectiveMinSize(of: $0, axis: alongAxis)

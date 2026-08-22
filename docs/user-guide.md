@@ -1307,6 +1307,21 @@ a movement. This is distinct from a sticky window's pill: the
 bounce is a wordless "edge of the layout," the pill explains a
 window that *can't* be moved.
 
+A resize that comes up against a minimum size gets both cues at
+once — deliberately, because a minimum is a real edge *and* has
+a reason worth naming. Shrinking past the smallest a window can
+go (the configured minimum window size, or a larger minimum the
+app itself enforces) bounces the ring the same way and shows a
+small frosted pill on the window: "Minimum window size
+reached". Growing stops where a *neighbor* would drop below its
+own minimum; the pill then appears on that neighbor
+("Neighboring window at its minimum size") — the window that
+can't shrink, not the one you resized — while the bounce stays
+on the window whose gesture hit the wall. The cues fire on the
+first press or drag that gets only part of what it asked for,
+not just once you are already at the floor, and keyboard and
+mouse resizes behave identically.
+
 Floating windows take part in directional focus as a second
 tier: tiled windows always win, but when no tiled window lies
 in the pressed direction — you're at the layout's edge — focus

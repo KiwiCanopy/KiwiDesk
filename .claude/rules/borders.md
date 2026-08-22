@@ -72,6 +72,19 @@ same rect**: it selects the backing scale, so a held frame paired
 with the spec's screen rasterizes the ring at the wrong display's
 scale during a cross-display move.
 
+## The focused ring consults the own-key-window seam
+
+While the process holds an own key or modal window that is NOT
+the focus anchor, the anchor is stale and the focused ring
+stands down — the anchor draws an unfocused ring instead
+(#933). A path deciding which ring is the focused one takes
+that answer from the one `EventLoop.ownKeyWindowNumber` seam —
+the #929 close-return raise stand-down reads the same seam, so
+the two stand-downs can never describe different worlds. The
+why (Sparkle's alert flow, and why a number rather than a Bool)
+is argued on that seam's own doc; the guard is
+`BorderOwnKeyWindowTests`.
+
 ## Two settle passes, two deferred keys
 
 They do different jobs and want opposite timing, so they are not

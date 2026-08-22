@@ -4,8 +4,8 @@ import Foundation
 
 /// Which size limit refused (part of) an interactive resize
 /// (#933) — the structure the cues render, and what the test
-/// seam (`KiwiCore.onResizeRefusal`) observes, since the drawn
-/// cues are display-gated and invisible headless.
+/// seam (`BorderManager.onResizeRefusal`) observes, since the
+/// drawn cues are display-gated and invisible headless.
 enum ResizeRefusal: Equatable {
     /// A shrink stopped at the resized window's own effective
     /// minimum (`min_window_size`, or its learned app bound).
@@ -20,6 +20,13 @@ enum ResizeRefusal: Equatable {
 /// keyboard (`resize`) and mouse (`applyResizeAdjustment`)
 /// alike, so the two cannot drift apart (#933; parity rule).
 extension KiwiCore {
+    /// The quantum for "the clamp truncated the request" on the
+    /// point-valued paths (float, scrolling slot): AX frames
+    /// wobble by sub-point rounding, so exact comparison would
+    /// cue on noise. The ratio/weight paths need none — their
+    /// outcomes report truncation from the domain math itself.
+    static let resizeTruncationEpsilon: CGFloat = 0.5
+
     /// One window's effective minimum on `axis`: the global
     /// `min_window_size` raised by the window's learned
     /// app-enforced bound (#677).
@@ -43,7 +50,14 @@ extension KiwiCore {
     /// that carries a LEARNED bound above the global floor, the
     /// honest anchor for a refusal cue. `carrier` is nil when
     /// only the global floor binds (every member is at the
-    /// minimum at once).
+    /// minimum at once). An EMPTY group still answers the
+    /// global floor: the ratio caps protect the REGION, not
+    /// only the windows currently in it (#383/#44 — an
+    /// oversized drag must not ratchet the stored ratio to the
+    /// store clamp), while the phantom-neighbor problem an
+    /// empty side poses is the CUE's, which
+    /// `reportResizeRefusal` stands down when no anchor
+    /// exists.
     func effectiveMinSize(
         of members: some Collection<WindowID>,
         axis: String
@@ -74,20 +88,33 @@ extension KiwiCore {
         shrinking: Bool,
         axis: String
     ) {
-        if shrinking, bindingCarrier == nil || bindingCarrier == focused {
-            refuseShrinkAtMinimum(focused, axis: axis)
+        if shrinking {
+            if let carrier = bindingCarrier, carrier != focused {
+                // A group-mate's larger floor binds the shrink:
+                // the mate is the window that cannot shrink.
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: carrier,
+                    axis: axis
+                )
+            } else {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            }
             return
         }
-        let anchor = bindingCarrier ?? fallbackAnchor ?? focused
-        if anchor == focused, shrinking {
-            refuseShrinkAtMinimum(focused, axis: axis)
-        } else {
-            refuseGrowAtNeighborMinimum(
-                focused,
-                anchor: anchor,
-                axis: axis
-            )
-        }
+        // A grow cue needs a real neighbor to point at; with no
+        // binding-side member there is nothing being protected
+        // and the cue stands down rather than naming a phantom
+        // (a lone window's ratio still stops at the store
+        // clamp, silently).
+        guard let anchor = bindingCarrier ?? fallbackAnchor,
+            anchor != focused
+        else { return }
+        refuseGrowAtNeighborMinimum(
+            focused,
+            anchor: anchor,
+            axis: axis
+        )
     }
 
     /// Two-sided capped master-ratio write plus refusal cues —
@@ -264,7 +291,8 @@ extension KiwiCore {
         )
         let requested = current + CGFloat(delta)
         let clamped = max(requested, CGFloat(effectiveMin))
-        if delta < 0, clamped > requested + 0.5,
+        if delta < 0,
+            clamped > requested + Self.resizeTruncationEpsilon,
             let focused = space.focused
         {
             refuseShrinkAtMinimum(focused, axis: axis)

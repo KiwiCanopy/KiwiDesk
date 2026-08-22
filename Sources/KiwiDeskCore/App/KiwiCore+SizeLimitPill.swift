@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 
 extension KiwiCore {
-    /// Flashes the minimum size indicator pill on `window`
+    /// Flashes the minimum-size refusal pill on `window`
     /// (#933) with `text`.
     private func flashSizeLimitPill(
         _ window: WindowID,
@@ -20,7 +20,7 @@ extension KiwiCore {
     }
 
     /// Triggers both the DeadEndBump rubber-band on the focus ring
-    /// and the minimum size indicator pill when a shrink attempt
+    /// and the minimum-size refusal pill when a shrink attempt
     /// hits the window's effective minimum size limit (#933).
     /// Fires on the first attempt the clamp truncates — landing
     /// ON the minimum included — not only once already there.

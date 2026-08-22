@@ -142,9 +142,14 @@ extension KiwiCore {
     /// (Named apart from the profile `apply(...)` family,
     /// whose members classify their own forced retile — this
     /// one never retiles; the caller does.)
+    // `window` carries no default on purpose: the track cases
+    // no-op without the identity, so a caller that forgot it
+    // would compile and silently drop track drags — nil is an
+    // explicit answer ("no window identity at this site"),
+    // never an omission.
     func applyResizeAdjustment(
         _ adjustment: ResizeAdjustment?,
-        for window: WindowID? = nil,
+        for window: WindowID?,
         in space: Space,
         bounds: CGRect
     ) {

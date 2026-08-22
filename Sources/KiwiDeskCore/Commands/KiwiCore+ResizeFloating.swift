@@ -45,7 +45,7 @@ extension KiwiCore {
                     : window.frame.height) + CGFloat(delta)
             let actual =
                 axis == "x" ? target.width : target.height
-            if actual > requested + 0.5 {
+            if actual > requested + Self.resizeTruncationEpsilon {
                 refuseShrinkAtMinimum(id, axis: axis)
             }
         }

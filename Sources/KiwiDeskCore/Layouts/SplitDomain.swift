@@ -69,8 +69,9 @@ public enum SplitDomain {
     /// shallowest split, but wider for one in a deep sub-region,
     /// where this span is a multiple of the region's own: the
     /// per-region render clamp is the depth-complete safety net
-    /// beneath this cap. Callers must pass the SAME `minSize` the
-    /// layout resolves (the global today).
+    /// beneath this cap. Callers pass each side's own effective
+    /// minimum through the two-sided form below (#933); this
+    /// symmetric form remains for the equal-minimum case.
     public static func cappedRatioWrite(
         _ proposed: Double,
         base: Double,

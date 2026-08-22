@@ -74,13 +74,14 @@ extension KiwiCore {
             else { return nil }
             return (id: id, frame: frame)
         }
-        // While an own UNTRACKED key window is active (Sparkle's
-        // update alert — an own panel `shouldIgnoreOwnWindow`
-        // drops before tracking), the OS focus sits on a window
-        // state cannot see: the anchor is stale, so the focused
-        // ring stands down, exactly as it does for a focused
-        // launcher (#300/#933). A tracked own key window (the
-        // Settings window) IS the anchor and keeps its ring.
+        // While an own key window that is NOT the anchor is
+        // active (Sparkle's update alert: the #929 flow
+        // re-points state focus at the background survivor and
+        // nothing re-points it at the alert), the anchor is
+        // stale — the focused ring stands down, exactly as it
+        // does for a focused launcher (#300/#933). An own key
+        // window that IS the anchor (the Settings window)
+        // keeps its ring.
         let anchor = state.focusAnchor(of: space, tiled: tiled)
         let suppressed =
             eventLoop.ownKeyWindowNumber().map { number in
@@ -238,7 +239,11 @@ extension KiwiCore {
         overlays: Set<WindowID>,
         fullscreen: Set<WindowID>,
         isMonocle: Bool,
-        focusedRingSuppressed: Bool = false
+        // No default (#878's defaulted-parameter lesson): a new
+        // caller must answer whether an own untracked key window
+        // holds the real focus, or it silently restores the
+        // stale-anchor ring with every suite green.
+        focusedRingSuppressed: Bool
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
             let focusedFrame = slots.first(where: {

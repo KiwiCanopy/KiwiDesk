@@ -308,6 +308,7 @@ struct SessionRatioTests {
         }
         core.applyResizeAdjustment(
             .bspRatioH(0.1),
+            for: nil,
             in: space,
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080)
         )

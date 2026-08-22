@@ -61,18 +61,38 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         width.isEmpty && height.isEmpty
     }
 
-    /// The learned minimum width floor — the largest answer the
-    /// app gave ABOVE what was asked (#933). Nil when no entry
-    /// is a floor (answers at or below the ask are ceilings).
-    public var minWidth: CGFloat? {
-        width.filter { $0.answered > $0.asked }
-            .map(\.answered).max()
-    }
+    /// The learned minimum width floor (#933): the largest
+    /// answer TWO entries with DISTINCT asks agree on (within
+    /// `matchTolerance`), each answering above its ask. This is
+    /// the one accessor that reads ACROSS asks, so it must not
+    /// violate the header's rule that no entry generalizes to a
+    /// different ask — and it does not, because it requires the
+    /// corroboration a grid-snapping app can never produce: a
+    /// terminal answers each ask a few points off (different
+    /// answers to different asks), while a true floor answers
+    /// every smaller ask with the SAME span. A single
+    /// answered-above-asked entry is grid noise as often as a
+    /// floor, and believing it pinned shrinks at sizes the app
+    /// would have accepted. Nil when uncorroborated (answers at
+    /// or below the ask are ceilings and never count).
+    public var minWidth: CGFloat? { floor(of: width) }
 
     /// The learned minimum height floor; see `minWidth`.
-    public var minHeight: CGFloat? {
-        height.filter { $0.answered > $0.asked }
-            .map(\.answered).max()
+    public var minHeight: CGFloat? { floor(of: height) }
+
+    private func floor(of entries: [Axis]) -> CGFloat? {
+        let floors = entries.filter { $0.answered > $0.asked }
+        var best: CGFloat? = nil
+        for (index, a) in floors.enumerated() {
+            for b in floors.dropFirst(index + 1)
+            where !Self.matches(a.asked, b.asked)
+                && Self.matches(a.answered, b.answered)
+            {
+                let answer = max(a.answered, b.answered)
+                if answer > (best ?? 0) { best = answer }
+            }
+        }
+        return best
     }
 
     /// The quantum for "counts as the same span": AX rounding

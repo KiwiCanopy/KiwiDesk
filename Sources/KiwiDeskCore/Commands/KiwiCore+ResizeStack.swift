@@ -122,9 +122,12 @@ extension KiwiCore {
             weightAxis == "y"
             ? gaps.outer.top + gaps.outer.bottom
             : gaps.outer.left + gaps.outer.right
-        let effectiveSpan =
-            span - Double(outer)
-            - Double(gap) * Double(column.count - 1)
+        let effectiveSpan = StackLayout.weightedSpan(
+            region: span,
+            outer: Double(outer),
+            innerGap: Double(gap),
+            count: column.count
+        )
         let members = Array(column)
         let minSizes = members.map {
             effectiveMinSize(of: $0, axis: weightAxis)

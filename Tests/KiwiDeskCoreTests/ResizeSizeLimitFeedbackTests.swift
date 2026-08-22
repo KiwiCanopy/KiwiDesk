@@ -20,7 +20,9 @@ struct ResizeSizeLimitFeedbackTests {
             ]
         )
         #expect(bound.minWidth == 500)
-        #expect(bound.minHeight == 400)
+        // A single refused ask never corroborates a floor —
+        // grid noise reads exactly like it (#933/#677).
+        #expect(bound.minHeight == nil)
 
         let emptyBound = EffectiveSizeBound(
             width: [] as [EffectiveSizeBound.Axis],
@@ -65,22 +67,20 @@ struct ResizeSizeLimitFeedbackTests {
         core.state.workspaces.focus(WindowID(1), in: space)
 
         // Seed learned bound: Window 1 cannot shrink below 500 pt
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
+        // Two DISTINCT asks converging on 500: the floor is
+        // only believed corroborated (#933).
+        for asked in [CGFloat(300), CGFloat(240)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 500, height: 800)
+                )
+            }
+        }
 
         // Attempting to shrink past 500pt should clamp
         let res = core.execute(
@@ -127,22 +127,20 @@ struct ResizeSizeLimitFeedbackTests {
         )
         core.state.workspaces.focus(WindowID(1), in: space)
 
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
+        // Two DISTINCT asks converging on 500: the floor is
+        // only believed corroborated (#933).
+        for asked in [CGFloat(300), CGFloat(240)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 500, height: 800)
+                )
+            }
+        }
 
         let res = core.execute(
             "resize",
@@ -183,22 +181,20 @@ struct ResizeSizeLimitFeedbackTests {
         )
         core.state.workspaces.focus(WindowID(1), in: space)
 
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 800)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 500, height: 800)
-        )
+        // Two DISTINCT asks converging on 500: the floor is
+        // only believed corroborated (#933).
+        for asked in [CGFloat(300), CGFloat(240)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 800)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 500, height: 800)
+                )
+            }
+        }
 
         let res = core.execute(
             "resize",
@@ -232,22 +228,18 @@ struct ResizeSizeLimitFeedbackTests {
         let space = core.state.workspaces.space(of: WindowID(1))!
         core.state.workspaces.focus(WindowID(1), in: space)
 
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 400)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 480, height: 400)
-        )
-        core.tiler.boundLearner.recordAsk(
-            WindowID(1),
-            size: CGSize(width: 300, height: 400)
-        )
-        core.tiler.boundLearner.observe(
-            WindowID(1),
-            currentSize: CGSize(width: 480, height: 400)
-        )
+        for asked in [CGFloat(300), CGFloat(240)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    WindowID(1),
+                    size: CGSize(width: asked, height: 400)
+                )
+                core.tiler.boundLearner.observe(
+                    WindowID(1),
+                    currentSize: CGSize(width: 480, height: 400)
+                )
+            }
+        }
         var appliedFrame: CGRect?
         core.tiler.settings.animations.onWindowResize = true
         core.tiler.animation.isEnabled = false

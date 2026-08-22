@@ -37,7 +37,13 @@ final class SizeLimitOverlay {
             frame.width - 24,
             max(textSize.width + Self.pillPadding, 120)
         )
-        guard pillWidth > 40 else { return }
+        // `hideWork` was already cancelled above, so a bare
+        // return here would strand a previous pill at alpha 1
+        // forever — fade it out instead of leaving it.
+        guard pillWidth > 40 else {
+            fadeOut()
+            return
+        }
 
         let pillRect = CGRect(
             x: frame.midX - pillWidth / 2,

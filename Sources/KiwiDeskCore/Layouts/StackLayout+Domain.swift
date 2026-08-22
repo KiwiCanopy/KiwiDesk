@@ -102,15 +102,21 @@ extension StackLayout {
         var hitOwnMinimum = false
         var blockedByOther: Int? = nil
         if change > 0 {
-            // total ≤ wᵢ·span/mᵢ keeps other share i at least
-            // mᵢ; the tightest other index is the cap and the
-            // cue's anchor.
+            // Per other index: the largest total that keeps its
+            // share at its own minimum — `maxColumnTotal`, the
+            // same authority the layouts' cascade checks read,
+            // so the cap and the check cannot drift (#67). The
+            // tightest other index is the cap and the cue's
+            // anchor.
             var maxTotal = Double.infinity
             for (offset, weight) in weights.enumerated()
             where offset != index {
-                let min = minSizes[offset] + Self.minSizeMargin
                 guard minSizes[offset] > 0 else { continue }
-                let limit = weight * span / min
+                let limit = maxColumnTotal(
+                    smallestWeight: weight,
+                    span: span,
+                    minSize: minSizes[offset] + Self.minSizeMargin
+                )
                 if limit < maxTotal {
                     maxTotal = limit
                     blockedByOther = offset
@@ -142,6 +148,26 @@ extension StackLayout {
             hitOwnMinimum: hitOwnMinimum,
             blockedByOther: blockedByOther
         )
+    }
+
+    /// The span a weighted group actually divides (#933): the
+    /// pre-outer-gap region span minus the outer gaps on the
+    /// weighted axis and one inner gap per boundary — the same
+    /// arithmetic the layouts perform on their `usable` rect.
+    /// The interactive weight clamps must divide THIS span,
+    /// never the raw region: a raw span lets a
+    /// clamped-at-minimum write cross the layouts' cascade
+    /// checks by exactly the gaps (#925's residue), and the
+    /// hand-copied subtraction is precisely the drift that
+    /// shipped it — so the three resize call sites share this
+    /// one copy.
+    public static func weightedSpan(
+        region: Double,
+        outer: Double,
+        innerGap: Double,
+        count: Int
+    ) -> Double {
+        region - outer - innerGap * Double(max(count - 1, 0))
     }
 
     /// The largest weight total a zone can carry along its
