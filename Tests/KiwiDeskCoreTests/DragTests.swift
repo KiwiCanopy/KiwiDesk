@@ -107,6 +107,41 @@ struct DragCoordinatorTests {
         #expect(ended == [frame])
     }
 
+    @Test("A gesture's start comes from the pre-event frame")
+    func startAnchorsOnPreEventFrame() async throws {
+        let drag = DragCoordinator()
+        drag.settleDelay = 0.05
+        let mouse = MouseButtonState(isPressed: true)
+        drag.isMousePressed = { mouse.isPressed }
+        var ended: [(CGRect, CGRect)] = []
+        drag.onDragEnd = { _, start, frame in
+            ended.append((start, frame))
+        }
+        // AX throttles notifications, so a fast gesture's FIRST
+        // event already sits mid-flight — measuring from it
+        // loses everything before it (#933: a fast border drag
+        // resized only part of the way). The caller passes the
+        // frame its state held BEFORE the event; the gesture
+        // starts there.
+        drag.windowMoved(
+            WindowID(1),
+            frame: CGRect(x: 0, y: 0, width: 700, height: 500),
+            previous: CGRect(
+                x: 0,
+                y: 0,
+                width: 400,
+                height: 500
+            )
+        )
+        mouse.isPressed = false
+        let deadline = ContinuousClock.now + dragSettleHangGuard
+        while ended.isEmpty, ContinuousClock.now < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(ended.first?.0.width == 400)
+        #expect(ended.first?.1.width == 700)
+    }
+
     @Test("Trailing moves after release join the gesture")
     func trailingMovesJoinGesture() async throws {
         let drag = DragCoordinator()

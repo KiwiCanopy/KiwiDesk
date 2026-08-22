@@ -869,6 +869,8 @@
   "profiles.which_loads.rule": "Профиль, привязанный к активному Рабочему столу, загружается первым. Иначе KiwiDesk выбирает профиль с подходящим количеством экранов, предпочитая отмеченный по умолчанию.",
   "profiles.which_loads.standard": "Сейчас: %1$@ → встроенный %2$@ (нет подходящего сохранённого профиля).",
   "profiles.which_loads.title": "Какой профиль загружается",
+  "resize.min_size_reached": "Достигнут минимальный размер окна",
+  "resize.neighbor_min_size": "Соседнее окно достигло минимального размера",
   "scroll_grid.anchor.center": "По центру",
   "scroll_grid.anchor.end_h": "Справа",
   "scroll_grid.anchor.end_v": "Снизу",

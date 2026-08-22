@@ -21,6 +21,9 @@ extension KiwiCore {
         guard let window = state.windows[id] else {
             return .fail("unknown window")
         }
+        let minSize = CGFloat(
+            effectiveMinSize(of: id, axis: axis)
+        )
         // Growing the top edge under a top app bar would re-hide
         // the title bar; keep the result clear of the strip (#242).
         let target = floatFrameClampedClearOfBars(
@@ -29,9 +32,23 @@ extension KiwiCore {
                 window.frame,
                 horizontal: axis == "x",
                 delta: delta,
-                minSize: tiler.settings.minWindowSize
+                minSize: minSize
             )
         )
+        // Cue on TRUNCATION, not only on "no change": the first
+        // shrink that lands ON the minimum is already a refusal
+        // of part of the request (#933).
+        if delta < 0 {
+            let requested =
+                (axis == "x"
+                    ? window.frame.width
+                    : window.frame.height) + CGFloat(delta)
+            let actual =
+                axis == "x" ? target.width : target.height
+            if actual > requested + 0.5 {
+                refuseShrinkAtMinimum(id, axis: axis)
+            }
+        }
         // Promises (#593): a float resizes ITSELF and no tiled
         // window moves — there is no sibling yielding room, and a
         // float already overlaps the layout by definition, so the

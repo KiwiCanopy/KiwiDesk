@@ -70,6 +70,19 @@ public final class EventLoop {
         EventLoop.hasOwnActiveKeyWindow()
     }
 
+    /// The window NUMBER of that own key/modal window, nil when
+    /// the process holds none — the focused ring's stand-down
+    /// input (#933): an own panel that never enters tracking
+    /// (Sparkle's update alert; `shouldIgnoreOwnWindow` drops
+    /// every own panel) emits no focus event, so the ring would
+    /// keep drawing around the stale anchor behind it. The
+    /// number, not a Bool, so a TRACKED own key window (the
+    /// Settings window) — which IS the anchor — keeps its ring.
+    /// Injected in tests.
+    var ownKeyWindowNumber: () -> Int? = {
+        EventLoop.ownActiveKeyWindowNumber()
+    }
+
     var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     /// AXEnhancedUserInterface state observed before this loop

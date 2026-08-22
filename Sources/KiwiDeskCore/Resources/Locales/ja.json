@@ -869,6 +869,8 @@
   "profiles.which_loads.rule": "アクティブなデスクトップに割り当てられたプロファイルが最優先で読み込まれます。それ以外の場合、KiwiDeskは画面数が一致するプロファイルを選択し、デフォルトに指定されたものを優先します。",
   "profiles.which_loads.standard": "現在: %1$@ → 組み込みの%2$@（一致する保存済みプロファイルなし）。",
   "profiles.which_loads.title": "読み込まれるプロファイル",
+  "resize.min_size_reached": "ウィンドウの最小サイズに達しました",
+  "resize.neighbor_min_size": "隣のウィンドウが最小サイズに達しています",
   "scroll_grid.anchor.center": "中央",
   "scroll_grid.anchor.end_h": "右",
   "scroll_grid.anchor.end_v": "下",

@@ -74,14 +74,29 @@ extension KiwiCore {
             else { return nil }
             return (id: id, frame: frame)
         }
+        // While an own UNTRACKED key window is active (Sparkle's
+        // update alert — an own panel `shouldIgnoreOwnWindow`
+        // drops before tracking), the OS focus sits on a window
+        // state cannot see: the anchor is stale, so the focused
+        // ring stands down, exactly as it does for a focused
+        // launcher (#300/#933). A tracked own key window (the
+        // Settings window) IS the anchor and keeps its ring.
+        let anchor = state.focusAnchor(of: space, tiled: tiled)
+        let suppressed =
+            eventLoop.ownKeyWindowNumber().map { number in
+                UInt32(exactly: number).map {
+                    anchor?.raw != $0
+                } ?? true
+            } ?? false
         let chosen = Self.borderSpecs(
             style: style,
-            focused: state.focusAnchor(of: space, tiled: tiled),
+            focused: anchor,
             slots: slots,
             floating: floating,
             overlays: overlays,
             fullscreen: fullscreen,
-            isMonocle: space.mode == .monocle
+            isMonocle: space.mode == .monocle,
+            focusedRingSuppressed: suppressed
         )
         // Draw each ring around the window's REAL frame (its
         // actual on-screen size, which an app may have clamped
@@ -222,7 +237,8 @@ extension KiwiCore {
         floating: Set<WindowID>,
         overlays: Set<WindowID>,
         fullscreen: Set<WindowID>,
-        isMonocle: Bool
+        isMonocle: Bool,
+        focusedRingSuppressed: Bool = false
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
             let focusedFrame = slots.first(where: {
@@ -233,9 +249,13 @@ extension KiwiCore {
         var specs: [BorderManager.Spec] = []
         // A focused transient overlay (Spotlight/Raycast/Alfred)
         // or native-fullscreen window gets no ring; a focused
-        // user-floated standard window still does.
+        // user-floated standard window still does. Suppression
+        // (#933: an own untracked key window holds the real
+        // focus) drops it too — the stale anchor joins the
+        // unfocused rings below instead.
         if !overlays.contains(focused),
-            !fullscreen.contains(focused)
+            !fullscreen.contains(focused),
+            !focusedRingSuppressed
         {
             specs.append(
                 BorderManager.Spec(
@@ -254,7 +274,7 @@ extension KiwiCore {
             return specs
         }
         for slot in slots
-        where slot.id != focused
+        where (focusedRingSuppressed || slot.id != focused)
             && !floating.contains(slot.id)
             && !overlays.contains(slot.id)
             && !fullscreen.contains(slot.id)

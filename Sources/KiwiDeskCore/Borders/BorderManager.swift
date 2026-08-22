@@ -136,6 +136,13 @@ public final class BorderManager {
     /// bumps the same overlays this manager holds, and spawns a
     /// transient one when borders are off (see `+DeadEnd`).
     let bumpAnimator = BorderBumpAnimator()
+    /// Overlay pill for minimum size refusal (#933).
+    let sizeLimitOverlay = SizeLimitOverlay()
+
+    /// Test observation seam for the resize refusal cues (#933):
+    /// the drawn cues are display-gated, so headless suites
+    /// observe refusals here. Production leaves the no-op.
+    var onResizeRefusal: (ResizeRefusal) -> Void = { _ in }
 
     public init() {}
 

@@ -61,6 +61,20 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         width.isEmpty && height.isEmpty
     }
 
+    /// The learned minimum width floor — the largest answer the
+    /// app gave ABOVE what was asked (#933). Nil when no entry
+    /// is a floor (answers at or below the ask are ceilings).
+    public var minWidth: CGFloat? {
+        width.filter { $0.answered > $0.asked }
+            .map(\.answered).max()
+    }
+
+    /// The learned minimum height floor; see `minWidth`.
+    public var minHeight: CGFloat? {
+        height.filter { $0.answered > $0.asked }
+            .map(\.answered).max()
+    }
+
     /// The quantum for "counts as the same span": AX rounding
     /// and app-side snapping (character grids) wobble an
     /// answered frame by a point or two, so exact comparison

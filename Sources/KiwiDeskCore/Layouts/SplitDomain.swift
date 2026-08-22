@@ -20,13 +20,31 @@ public enum SplitDomain {
         available: Double,
         minSize: Double
     ) -> ClosedRange<Double>? {
+        effectiveRatioRange(
+            available: available,
+            minLow: minSize,
+            minHigh: minSize
+        )
+    }
+
+    /// The two-sided form (#933): `minLow` binds the side the
+    /// ratio measures (ratio → 0 shrinks it), `minHigh` the
+    /// other side. The two sides carry different windows, whose
+    /// learned app-enforced minimums (#677) differ — the
+    /// symmetric form above cannot express that.
+    public static func effectiveRatioRange(
+        available: Double,
+        minLow: Double,
+        minHigh: Double
+    ) -> ClosedRange<Double>? {
         // A degenerate region (gaps wider than the usable area)
         // cascades regardless of the minimum.
         guard available > 0 else { return nil }
-        guard minSize > 0 else { return 0...1 }
-        guard available >= minSize * 2 else { return nil }
-        let fraction = minSize / available
-        return fraction...(1 - fraction)
+        let low = max(minLow, 0)
+        let high = max(minHigh, 0)
+        guard low > 0 || high > 0 else { return 0...1 }
+        guard available >= low + high else { return nil }
+        return (low / available)...(1 - high / available)
     }
 
     /// Caps an interactive ratio write at the effective range, so
@@ -59,18 +77,68 @@ public enum SplitDomain {
         available: Double,
         minSize: Double
     ) -> Double {
+        cappedRatioWrite(
+            proposed,
+            base: base,
+            available: available,
+            minLow: minSize,
+            minHigh: minSize
+        ).value
+    }
+
+    /// A capped ratio write plus whether the cap truncated it —
+    /// the input the refusal cues render (#933).
+    public struct RatioWriteOutcome: Equatable, Sendable {
+        public let value: Double
+        /// The proposal was truncated at a range bound. False
+        /// on the uncappable nil-range span — there is no
+        /// visible bound there to report.
+        public let clamped: Bool
+    }
+
+    /// The two-sided form of `cappedRatioWrite` (#933), with
+    /// the same never-cross-`base` and nil-range rules as the
+    /// symmetric form above. `minLow`/`minHigh` as in
+    /// `effectiveRatioRange`.
+    public static func cappedRatioWrite(
+        _ proposed: Double,
+        base: Double,
+        available: Double,
+        minLow: Double,
+        minHigh: Double
+    ) -> RatioWriteOutcome {
         guard
             let range = effectiveRatioRange(
                 available: available,
-                minSize: minSize
+                minLow: minLow,
+                minHigh: minHigh
             )
-        else { return proposed }
+        else {
+            return RatioWriteOutcome(
+                value: proposed,
+                clamped: false
+            )
+        }
         if proposed > base {
-            return min(proposed, max(range.upperBound, base))
+            let value = min(
+                proposed,
+                max(range.upperBound, base)
+            )
+            return RatioWriteOutcome(
+                value: value,
+                clamped: value < proposed
+            )
         }
         if proposed < base {
-            return max(proposed, min(range.lowerBound, base))
+            let value = max(
+                proposed,
+                min(range.lowerBound, base)
+            )
+            return RatioWriteOutcome(
+                value: value,
+                clamped: value > proposed
+            )
         }
-        return proposed
+        return RatioWriteOutcome(value: proposed, clamped: false)
     }
 }

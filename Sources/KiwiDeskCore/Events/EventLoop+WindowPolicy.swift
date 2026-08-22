@@ -116,6 +116,18 @@ extension EventLoop {
             || NSApplication.shared.modalWindow != nil
     }
 
+    /// The window number of that own key/modal window, nil when
+    /// the process holds none (#933; the ring stand-down's
+    /// production default — see `EventLoop.ownKeyWindowNumber`).
+    static func ownActiveKeyWindowNumber() -> Int? {
+        if let key = NSApplication.shared.keyWindow,
+            key.isVisible
+        {
+            return key.windowNumber
+        }
+        return NSApplication.shared.modalWindow?.windowNumber
+    }
+
     /// The *structural* half of the transient-overlay
     /// classification (#300): third-party accessory-app windows
     /// — but never our own (#315). Any own window that reaches

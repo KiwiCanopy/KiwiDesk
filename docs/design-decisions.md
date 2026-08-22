@@ -1550,6 +1550,61 @@ this: it resizes itself directly, in every mode (width for x,
 height for y, floored at `min_window_size`). (#122, #124,
 #129)
 
+**Resizing clamps against learned app minimum size bounds with
+rubber-band bounce and indicator pill (#933).** When an application
+enforces its own physical minimum size (learned via `SizeBoundLearner`
+#677 when macOS/AppKit refuses a smaller requested dimension),
+keyboard and mouse resize commands respect this floor
+(`max(min_window_size, sizeBound.minWidth/minHeight)`). Attempting to
+shrink past this physical bound triggers a tactile rubber-band spring
+bounce (`DeadEndBump` #436) on the focus ring and displays a frosted
+indicator pill (`"Minimum window size reached"`).
+
+Four rulings sharpen that:
+
+- **The cue fires on the first truncated attempt.** A shrink that
+  lands ON the floor already refused part of the request; waiting
+  for a second press once at the floor read as "nothing happened"
+  the first time (the original #933 defect).
+- **The two directions read different windows' minimums.** A
+  shrink clamps at the resized window's own floor; a grow caps
+  where a NEIGHBOR would drop below *its* floor — per-window
+  minimums (`StackLayout.weightStep(minSizes:)`, the two-sided
+  `SplitDomain`), never one blanket value. When a grow (or a
+  shrink whose group floor is carried by a group-mate) is
+  refused, the pill goes on **the window that cannot shrink, not
+  the trier** — the #435 sticky-swap rule — with its own copy
+  (`"Neighboring window at its minimum size"`); the bounce stays
+  on the resized window, whose gesture hit the wall.
+- **A weight clamp divides the layout's exact span.** The ratio
+  caps deliberately use the raw region span (a superset can never
+  block reaching the visible bound; the render clamp is the net),
+  but for the track/stack *weight* paths crossing the floor means
+  an `OverlapStack` cascade, so the clamp subtracts the outer
+  gaps and inner gaps exactly as the layout does — plus a
+  quarter-point margin (`StackLayout.minSizeMargin`), because the
+  clamp's fixed point sits at exact equality with the cascade
+  check and float noise alone could tip a clamped-at-minimum
+  write into the pile. That equality gap is how #925's clamp
+  still collapsed a track space at the minimum.
+- **A mouse gesture is measured from the pre-event frame.** AX
+  throttles move/resize notifications, so a fast drag's first
+  event already sits mid-flight and its last can lag the drop;
+  the drop end re-reads the live frame (#492) and the START now
+  anchors on the frame state held before the gesture's first
+  event — measuring first-event → last-event resized only part
+  of the way.
+
+**The focused ring stands down while an own untracked dialog is
+key (#933).** Sparkle's update alert is an own panel
+`shouldIgnoreOwnWindow` drops before tracking, so no focus event
+fires when it becomes key and the ring kept drawing around the
+stale anchor behind the alert. While the process holds a key or
+modal window that is NOT the focus anchor, the focused ring is
+suppressed (`EventLoop.ownKeyWindowNumber`), the same answer a
+focused launcher gets (#300); a tracked own key window — the
+Settings window — IS the anchor and keeps its ring.
+
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /

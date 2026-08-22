@@ -74,4 +74,18 @@ extension BorderManager {
             }
         }
     }
+
+    /// Flashes the minimum-size refusal pill on `window` (#933).
+    func flashSizeLimitPill(
+        window: WindowID,
+        frame: CGRect,
+        text: String
+    ) {
+        guard privateRuntimeStarted else { return }
+        sizeLimitOverlay.flash(
+            window: window.raw,
+            frame: frame,
+            text: text
+        )
+    }
 }

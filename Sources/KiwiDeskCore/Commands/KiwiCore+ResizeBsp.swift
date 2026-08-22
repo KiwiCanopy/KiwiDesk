@@ -30,30 +30,19 @@ extension KiwiCore {
         // layout divides, so the cap never blocks reaching the
         // visible bound, but no longer a superset by the Space
         // Bar's whole strip, which let the ratchet back in.
-        let minSize = Double(tiler.settings.minWindowSize)
-        if axis == "x" {
-            let value = SplitDomain.cappedRatioWrite(
-                bsp.splitRatioH + signed / span,
-                base: bsp.splitRatioH,
-                available: span,
-                minSize: minSize
-            )
-            writeSplitRatioH(
-                min(max(value, 0.1), 0.9),
-                for: space.id
-            )
-        } else {
-            let value = SplitDomain.cappedRatioWrite(
-                bsp.splitRatioV + signed / span,
-                base: bsp.splitRatioV,
-                available: span,
-                minSize: minSize
-            )
-            writeSplitRatioV(
-                min(max(value, 0.1), 0.9),
-                for: space.id
-            )
-        }
+        // Two-sided since #933: each side of the first split
+        // carries its own windows' effective minimums, and a
+        // truncated write cues the refusal.
+        let base =
+            axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
+        writeCappedBspRatio(
+            proposed: base + signed / span,
+            axis: axis,
+            span: span,
+            space: space,
+            focused: space.focused,
+            deltaSign: delta
+        )
         return .ok()
     }
 
