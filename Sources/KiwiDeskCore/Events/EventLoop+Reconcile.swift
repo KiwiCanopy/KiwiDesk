@@ -78,13 +78,23 @@ extension EventLoop {
         // up — so the empty `live` here is the finished reading
         // rather than an unfinished one.
         //
-        // `wasMinimized: false` (the sweep's default for an
-        // empty `minimized`) is the right half of the fold: a
-        // hidden window keeps its Desktop and comes back to it,
-        // unlike one parked in the Dock. Unhiding re-adopts
-        // through this same reconcile — see the hide/unhide
-        // observers in `EventLoop+Apps` — with the census-gated
-        // heal as the backstop either way.
+        // The sweep reports these as `.windowHidden`, not as
+        // destroys: the windows were never closed, so neither
+        // the public reason nor the close-return raise may say
+        // they were (#913). The fold behind that event is a
+        // non-minimized destroy exactly — a hidden window keeps
+        // its Desktop and comes back to it, unlike one parked
+        // in the Dock.
+        //
+        // Unhiding re-adopts through this same reconcile — see
+        // the hide/unhide observers in `EventLoop+Apps`. The
+        // backstops differ by direction, and only the unhide
+        // one is the heal: `healSweep`'s gate opens on the
+        // ON-SCREEN census, which by construction never names a
+        // hidden app, so it cannot drop anything. What catches
+        // a missed hide is `appActivated`'s reconcile of the
+        // app just left, which a ⌘H always produces because
+        // hiding moves the foreground.
         guard !appIsHidden(pid) else {
             reconcileTabsAndSweep(
                 pid: pid,
@@ -92,7 +102,8 @@ extension EventLoop {
                 appeared: [],
                 live: [],
                 minimized: [],
-                coalesceTabs: false
+                coalesceTabs: false,
+                hidden: true
             )
             return
         }

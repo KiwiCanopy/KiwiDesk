@@ -6,12 +6,31 @@ import ApplicationServices
 /// size (§2); the reconcile funnel that drives it in bulk lives
 /// in `EventLoop+Reconcile.swift`.
 extension EventLoop {
+    /// Adoption's one door (#913): every caller that turns an
+    /// AX element into a tracked window comes through here —
+    /// attach's scan, reconcile's sweep, and the window-created
+    /// and deminiaturized notification arms — so the hidden
+    /// refusal below is stated once instead of at each of them.
+    /// A rule enforced at three of four doors is not a rule.
     func track(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef,
         displayBounds: [CGRect]? = nil
     ) {
+        // A hidden app's windows are on screen nowhere, so
+        // adopting one would hand a tile to something the user
+        // cannot see, and the next reconcile of that app would
+        // take it straight back — an adopt/drop churn that
+        // retiles the neighbours each way. The reachable door
+        // is the create arm: an app that opens a window while
+        // hidden. Whether AppKit permits that without an
+        // implicit unhide was not established on device, so
+        // this is defence in depth rather than a fix for an
+        // observed failure — and it is why no test below
+        // discriminates it (`HiddenAppWindowTests` says so in
+        // its own words).
+        guard !appIsHidden(pid) else { return }
         let role = AXHelper.role(of: element)
         guard role == kAXWindowRole,
             !AXHelper.isMinimized(element),

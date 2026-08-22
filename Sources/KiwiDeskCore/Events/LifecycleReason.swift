@@ -18,6 +18,16 @@ public enum WindowGoneReason: String, Sendable {
     case closed
     case minimized
     case vanished
+    /// The window's APP hid — ⌘H, or an Electron app hiding
+    /// itself as its last window closes (#913). Its own value
+    /// rather than `closed`, which this vocabulary defines as a
+    /// real close, and rather than `vanished`, which a consumer
+    /// reads as the native-Space artifact: the window is still
+    /// there, one gesture away, and it comes back as `returned`.
+    /// Not produced by `classify` — a hide is explicit, like a
+    /// minimize, so there is nothing to infer from timing; the
+    /// `.windowHidden` event carries it directly.
+    case hidden
 
     /// Pure classifier. Minimize wins (the AX notification is
     /// explicit); a destroy inside the native-switch settle

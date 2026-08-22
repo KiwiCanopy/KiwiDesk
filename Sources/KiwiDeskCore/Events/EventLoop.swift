@@ -179,12 +179,20 @@ public final class EventLoop {
     /// notification arms. A seam because a unit test has no
     /// real window to hand `_AXUIElementGetWindow`, so the
     /// move/resize wire (#618) would otherwise be unpinnable;
-    /// production is the live read. Scoped to the move/resize
-    /// arms and to `reconcile`'s live-list loop — the
-    /// created/focused/title arms keep the direct
-    /// `AXHelper.windowID` read, and route through here only
-    /// when a test needs them, so the seam's reach matches what
-    /// it pins.
+    /// production is the live read, so routing a call site
+    /// through here changes no behaviour.
+    ///
+    /// **Route a site through it when a test needs to state
+    /// what the id read returns, and leave the rest direct.**
+    /// An obligation rather than a boundary: the earlier claim
+    /// named the move/resize arms as the scope, which stopped
+    /// being true the moment `reconcile`'s loop joined them
+    /// (#913), and nothing would have caught that — the reach
+    /// is a doc comment with no guard, and "a test needed it"
+    /// is a reason any future arm can give truthfully. Widening
+    /// it costs nothing but the ability to say the reach is
+    /// small, so say what earns a route instead of counting
+    /// them.
     ///
     /// The reconcile loop earned it with the hidden-app drop:
     /// a suite whose fake window list resolves to no id at all

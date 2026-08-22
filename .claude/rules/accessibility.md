@@ -84,25 +84,56 @@ editing AX code:
   MOVED out of it heals nothing.
 - **A hidden app contributes NO live windows, and the read is
   `appIsHidden` rather than anything in the AX list (#913).** ⌘H — and
-  an Electron app hiding itself as its last window closes, which
-  is Discord's red X — leaves every window in `kAXWindows`,
-  un-minimized, at its last frame, and sends no notification at
-  all, so a reconcile that only reads the window list keeps
-  tiling windows nobody can see. Two obligations. **The drop
-  reaches the sweep with an empty `live`** — the one path in
-  `reconcile` that does so without reading the window list,
-  which does not weaken the abort-before-sweep rule above,
-  because an abort holds a PARTIAL list while "hidden" is a
-  total answer about the app. And **`attach` skips the scan for
-  a hidden app too**, or boot adopts what it should have
-  dropped. Do not re-base either on the WindowServer's on-screen
+  an app hiding itself as its last window closes, which is
+  Discord's red X — leaves every window in `kAXWindows`,
+  un-minimized, at its last frame, and sends no AX notification
+  at all (probed on device 2026-08-21, macOS 26.6.2), so a
+  reconcile that only reads the window list keeps tiling windows
+  nobody can see. Four obligations.
+
+  **The drop reaches the sweep with an empty `live`** — the one
+  path in `reconcile` that does so without reading the window
+  list, which does not weaken the abort-before-sweep rule
+  above, because an abort holds a PARTIAL list while "hidden"
+  is a total answer about the app. **Adoption refuses a hidden
+  app at `track`**, the one door every caller comes through —
+  attach's scan, reconcile's sweep, and the created and
+  deminiaturized arms — because a rule enforced at three of
+  four doors is not a rule. **A hidden app is still WARMED**
+  though never adopted: #662's promise is that a following
+  reconcile warms what attach skipped, and both hidden paths
+  return before that warm, so an app hidden across boot would
+  meet its first unhide with a cold AX tree — which for an
+  Electron app is an empty window list. And **the drop reports
+  `.windowHidden`, never a destroy**: the window was not
+  closed, so the public `window_destroyed` reason must not say
+  it was, and the close-return raise must stand down rather
+  than race the frontmost app macOS itself picks.
+
+  Do not re-base the drop on the WindowServer's on-screen
   census: it omits a window on another Desktop exactly as
   readily, so it would untrack every window parked on a Desktop
   the user is not standing on (`docs/design-decisions.md`
-  ▸ *A hidden app holds no tiles* argues the choice).
-  `HiddenAppWindowTests` pins both drops, the hide/unhide arm
-  that funnels them, and the `wasMinimized: false` the fold
-  reads to send the window back to the Desktop it left.
+  ▸ *A hidden app holds no tiles* argues the choice). Note too
+  that the backstops differ by direction — `healSweep`'s gate
+  opens on that same on-screen census, so it can only ever
+  catch a missed UNHIDE, while a missed hide is caught by
+  `appActivated`'s reconcile of the app just left.
+
+  **A hidden app's windows are not counted alike everywhere,
+  and that is deliberate.** `KiwiCore.readAppWindowCensus`
+  (`Commands/KiwiCore+LaunchRestore.swift`) counts them as UP,
+  and its docstring argues why at length for #673: it answers
+  "what will `activate()` bring back", where a hidden app's
+  windows are exactly what is about to reappear, while this
+  bullet answers "what occupies a tile", where they are not.
+  Do not route Open-or-Focus through `appIsHidden` to make the
+  two agree — that re-breaks #673.
+
+  `HiddenAppWindowTests` pins the drop, its `.windowHidden`
+  reporting, the warm-while-hidden, the hide/unhide arm and its
+  observer guard; its docstring names the one obligation here
+  that no test discriminates (the `track` refusal) and why.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
   reconcile warms whatever was skipped (#662).** Three links

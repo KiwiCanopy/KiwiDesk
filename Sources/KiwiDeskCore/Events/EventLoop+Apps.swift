@@ -124,18 +124,32 @@ extension EventLoop {
         onEvent(.appTerminated(pid: pid))
     }
 
-    /// An app hid or unhid: reconcile it (#913). ONE arm for both
-    /// directions on purpose — reconcile already asks
-    /// `appIsHidden` and answers each direction correctly
-    /// (hiding drops the windows AX still lists, unhiding
-    /// re-adopts whatever the app now shows), so a second arm
-    /// would only be a second copy of that question, free to
-    /// disagree with the first.
+    /// An app hid or unhid: reconcile it (#913). ONE arm for
+    /// both directions on purpose — reconcile already asks
+    /// `appIsHidden`, so a second arm would be a second copy of
+    /// that question, free to disagree with the first.
     ///
-    /// Without this the drop still lands, but only whenever
-    /// something else happens to reconcile the app — an
-    /// activation elsewhere, the next heal tick — which is a
+    /// The two directions are not equally reliable, though, and
+    /// the asymmetry belongs here rather than in `reconcile`,
+    /// because this is where the single arm is claimed. Hiding
+    /// is a total answer needing no AX at all. Unhiding depends
+    /// on a window-list read that can race a cold tree, so it
+    /// is the direction that leans on a backstop — the
+    /// census-gated heal, which sees the app again the moment
+    /// its windows are back on screen.
+    ///
+    /// Without this arm the drop still lands, but only when
+    /// something else reconciles the app: `appActivated`'s
+    /// reconcile of the app just left, which a hide produces
+    /// because it moves the foreground. That is a beat later
+    /// and tied to where focus happens to go, which is a
     /// visibly late release of the tile.
+    ///
+    /// Reading `appIsHidden` inside the arm rather than taking
+    /// the direction from the notification is safe: measured on
+    /// device (2026-08-22, macOS 26.6.2), the flag already
+    /// reads its settled value when its own notification
+    /// fires, in both directions.
     ///
     /// Descriptor-shaped, like `runningApplications`: a test
     /// cannot build an `NSRunningApplication` for a made-up pid,

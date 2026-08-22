@@ -15,6 +15,22 @@ public enum KiwiEvent: Sendable {
     /// a native Space switch (remember it, so it returns to
     /// its space when the desktop comes back).
     case windowDestroyed(WindowID, wasMinimized: Bool)
+    /// The window left the layout because its APP hid — ⌘H,
+    /// or an Electron app hiding itself as its last window
+    /// closes (#913). Its own case rather than a
+    /// `windowDestroyed` flag for two reasons a bool could not
+    /// carry: the public `window_destroyed` reason must not say
+    /// `closed` for a window that was never closed
+    /// (`WindowGoneReason.hidden`), and the close-return raise
+    /// must stand down — macOS picks the next frontmost app
+    /// itself on a hide, and a raise racing that choice moves
+    /// the user somewhere neither of them chose.
+    ///
+    /// The state fold is a non-minimized destroy exactly: the
+    /// window keeps its remembered space and comes back to it
+    /// on unhide, which is what makes the appear side classify
+    /// as `returned` rather than `new`.
+    case windowHidden(WindowID)
     case windowMoved(WindowID, CGRect)
     case windowResized(WindowID, CGRect)
     case windowFocused(WindowID)
@@ -43,4 +59,18 @@ public enum KiwiEvent: Sendable {
     /// The user switched native macOS Spaces (Mission
     /// Control). Consumers query `NativeSpaces` for details.
     case nativeSpaceChanged
+
+    /// True when this event removes a window because its APP
+    /// hid, rather than because the window went away (#913).
+    ///
+    /// A named predicate rather than an inline `if case` at the
+    /// one site that asks: the site is the close-return raise,
+    /// which no unit test can reach (its gate calls live AX),
+    /// so what pins it is a source needle — and a needle over
+    /// an anonymous pattern match pins the spelling instead of
+    /// the meaning.
+    public var isHideDrop: Bool {
+        if case .windowHidden = self { return true }
+        return false
+    }
 }

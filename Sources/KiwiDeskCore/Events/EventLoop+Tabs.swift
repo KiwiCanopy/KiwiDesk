@@ -43,7 +43,8 @@ extension EventLoop {
         appeared: [(element: AXUIElement, id: WindowID)],
         live: Set<WindowID>,
         minimized: Set<WindowID>,
-        coalesceTabs: Bool
+        coalesceTabs: Bool,
+        hidden: Bool = false
     ) {
         let vanishedIDs = elements[pid, default: [:]].keys
             .filter { !live.contains($0) }
@@ -90,11 +91,18 @@ extension EventLoop {
             ignorePending.remove(id)
             trackedFrames[id] = nil
             tabCarriers.remove(id)
+            // A hidden app's whole sweep is a hide (#913):
+            // the windows are not gone, their app is, so they
+            // must not be reported as closed and must not move
+            // the user's focus. Never crosses with `minimized`
+            // — the hidden path passes none.
             onEvent(
-                .windowDestroyed(
-                    id,
-                    wasMinimized: minimized.contains(id)
-                )
+                hidden
+                    ? .windowHidden(id)
+                    : .windowDestroyed(
+                        id,
+                        wasMinimized: minimized.contains(id)
+                    )
             )
         }
     }

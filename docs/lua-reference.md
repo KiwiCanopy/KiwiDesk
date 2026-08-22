@@ -583,11 +583,11 @@ was minimized from.
 **Hiding** an app (cmd+H) releases the tiles of every window it
 had on screen, and unhiding takes them back — into the space they
 came from, unlike a restore from the Dock. Some apps hide
-themselves when you close their last window: Discord's red X, and
-Electron apps generally, leave the app running with nothing on
-screen. KiwiDesk treats those the same way, so the layout closes
-over the gap rather than holding a slot for a window you can no
-longer see.
+themselves rather than close when you click the red X: Discord
+does, and it is how an app that keeps running in the background
+stays out of the way. KiwiDesk treats that the same way, so the
+layout closes over the gap rather than holding a slot for a
+window you can no longer see.
 
 With **multiple monitors**, arrange your displays so no monitor
 sits directly right of or below another one's bottom-right corner,
@@ -3797,11 +3797,15 @@ accessibility tree and reappear on return. The `reason` argument
 says which kind of change fired:
 
 - `window_created` — `"new"` (a genuinely new window),
-  `"returned"` (back from another macOS Desktop or a session
-  restore), `"restored"` (deminiaturized).
+  `"returned"` (back from another macOS Desktop, from an app that
+  was unhidden, or from a session restore), `"restored"`
+  (deminiaturized).
 - `window_destroyed` — `"closed"` (a real close), `"minimized"`
-  (it will come back as `"restored"`), `"vanished"` (its macOS
-  Desktop was switched away; it comes back as `"returned"`).
+  (it will come back as `"restored"`), `"hidden"` (its app was
+  hidden, with cmd+H or by hiding itself as its last window
+  closed; the window is untouched and comes back as
+  `"returned"`), `"vanished"` (its macOS Desktop was switched
+  away; it comes back as `"returned"`).
 
 So a bar callback that only cares about real lifecycle filters in
 one line:

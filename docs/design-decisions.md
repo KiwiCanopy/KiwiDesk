@@ -3901,14 +3901,14 @@ materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
 
 **A hidden app holds no tiles, and the same rule covers an app
-that hides itself.** [Principle] A tile is space on screen given
+that hides itself.** [Principle] A tile is room on screen given
 to a window the user can see. ⌘H takes every one of an app's
 windows off screen without destroying them, so holding their
 slots leaves the layout describing a desk that no longer exists
-— and it is not a rare corner: an Electron app hides *itself*
-when its last window closes, which is what Discord's red X does,
-so the commonest "I closed it" gesture on a chat app arrives
-here. The window comes back to the space it left, unlike a
+— and it is not a rare corner: an app built to live in the
+background hides *itself* when its last window closes, which is
+what Discord's red X does, so the commonest "I closed it"
+gesture on a chat app arrives here. The window comes back to the space it left, unlike a
 restore from the Dock, because hiding is not a parking decision
 about one window — the user aimed it at the app, and unhiding
 undoes exactly that.
@@ -3924,7 +3924,21 @@ so dropping on it would untrack every window the user parked on
 a Desktop they are not standing on. `NSRunningApplication`'s
 hidden flag answers the narrow question exactly, costs no AX
 round trip, and comes with a notification for both directions.
-(#913)
+
+Two things a hide deliberately does NOT inherit from a close,
+though the layout half of it is the same removal. It reports
+its own `window_destroyed` reason, `hidden`, rather than
+`closed`: that vocabulary exists so a consumer can tell a real
+close from a visibility artifact without heuristics of its own,
+and a bar script filtering on `closed` would otherwise fire its
+window-closed trigger every time someone pressed ⌘H. And the
+close-return raise stands down. macOS picks the next frontmost
+app itself when an app hides, so a raise racing that choice
+lands the user somewhere neither of them chose — with the
+pointer warped after it, on a keystroke that never moved the
+mouse. State still names the survivor; it simply is not forced
+there. A close has no such competing chooser, which is why it
+keeps the raise. (#913)
 
 **Close-return focus: closing the focused window returns focus
 to the previously focused window, same space only — and this is

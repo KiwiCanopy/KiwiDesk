@@ -15,6 +15,15 @@ import Testing
 /// until the app quit. Minimize never had the bug because it is
 /// the one case that flips `AXMinimized`.
 ///
+/// One obligation in `.claude/rules/accessibility.md`'s hidden
+/// bullet is deliberately NOT discriminated here: the refusal
+/// inside `track`. Its door is an app opening a window while
+/// hidden, and with a fabricated AX element `track` returns at
+/// its role check whatever the refusal does — so an assertion
+/// would pass with the guard deleted, which is worse than no
+/// assertion. It is defence in depth for a door not shown to be
+/// reachable; the rule bullet says so too.
+///
 /// Everything drives the funnels through the injected seams
 /// (tests.md); no app is hidden, attached to or messaged for
 /// real. The AX values are inert dictionary entries — the hidden
@@ -46,6 +55,14 @@ struct HiddenAppWindowTests {
         /// round and detaches, which no window-list count can
         /// see.
         var policyReads = 0
+        /// The EUI warm's read — #662's promise is that a
+        /// skipped app is warmed anyway, and a hidden app must
+        /// not lose it.
+        var euiReads = 0
+        /// `.windowHidden` ids, kept apart from `destroyed`:
+        /// the two differ in the public reason they produce
+        /// and in whether the close-return raise runs.
+        var hiddenEvents: [WindowID] = []
         var destroyed: [(id: WindowID, wasMinimized: Bool)] = []
     }
 
@@ -63,7 +80,10 @@ struct HiddenAppWindowTests {
         loop.visiblePIDs = { [] }
         loop.applyAXMessagingTimeout = { _ in }
         loop.makeObserver = { _ in FakeObserver() }
-        loop.readEnhancedUI = { _ in false }
+        loop.readEnhancedUI = { _ in
+            box.euiReads += 1
+            return false
+        }
         loop.writeEnhancedUI = { _, _ in }
         loop.writeManualAX = { _, _ in }
         loop.activationPolicy = { _ in
@@ -93,12 +113,15 @@ struct HiddenAppWindowTests {
         }
         loop.appIsHidden = { _ in box.hidden }
         loop.onEvent = { event in
-            if case .windowDestroyed(let id, let wasMinimized) =
-                event
-            {
+            switch event {
+            case .windowDestroyed(let id, let wasMinimized):
                 box.destroyed.append(
                     (id: id, wasMinimized: wasMinimized)
                 )
+            case .windowHidden(let id):
+                box.hiddenEvents.append(id)
+            default:
+                break
             }
         }
         // `attach` refuses before `start()` (#672), and a
@@ -108,6 +131,7 @@ struct HiddenAppWindowTests {
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
         box.policyReads = 0
+        box.euiReads = 0
         return (loop, box)
     }
 
@@ -140,26 +164,50 @@ struct HiddenAppWindowTests {
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
         #expect(
-            box.destroyed.map(\.id).sorted { $0.raw < $1.raw }
+            box.hiddenEvents.sorted { $0.raw < $1.raw }
                 == [WindowID(11), WindowID(12)]
         )
+        // Never as destroys: a consumer told `closed` fires
+        // whatever it does for a real close.
+        #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid, default: [:]].isEmpty)
     }
 
     @Test("the drop keeps the window's Desktop, unlike a park")
     func dropIsNotAMinimize() {
-        // `wasMinimized` is what the destroy fold reads to
-        // decide between remembering the window's space and
-        // forgetting it for the Dock. A hidden window comes
-        // back where it was, so it must read false — a true
-        // here would silently re-home the whole app on unhide.
+        // The fold behind `.windowHidden` is a NON-minimized
+        // destroy: that is what decides between remembering the
+        // window's space and forgetting it for the Dock, and a
+        // hidden window comes back where it was. Asserted on
+        // the fold's own output rather than on the event, since
+        // the event carries no flag to read.
         let (loop, box) = makeLoop()
         attach(loop)
         loop.elements[pid] = [WindowID(11): dummyElement]
         box.listed = [WindowID(11)]
         box.hidden = true
         loop.reconcile(pid: pid, app: ref)
-        #expect(box.destroyed.map(\.wasMinimized) == [false])
+        #expect(box.hiddenEvents == [WindowID(11)])
+
+        var state = StateCoordinator()
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(11),
+                    pid: pid,
+                    appName: "Hidden",
+                    appBundleID: "test.kiwi.hidden",
+                    title: "W11"
+                )
+            )
+        )
+        state.apply(.windowHidden(WindowID(11)))
+        #expect(state.windows[WindowID(11)] == nil)
+        // The space is REMEMBERED (the non-minimized arm); a
+        // minimize would have cleared it and filed a park
+        // record instead.
+        #expect(state.rememberedSpaces[WindowID(11)] != nil)
+        #expect(state.lastMinimized(bundleID: "test.kiwi.hidden") == nil)
     }
 
     @Test("the drop costs no AX window read")
@@ -201,6 +249,22 @@ struct HiddenAppWindowTests {
         #expect(box.windowQueries == 0)
     }
 
+    @Test("a hidden app is warmed even though it is not adopted")
+    func hiddenAppIsStillWarmed() {
+        // #662's promise — a following reconcile warms whatever
+        // attach skipped — does not reach a hidden app, because
+        // both hidden paths return before that warm. An app
+        // hidden across boot would then meet its first unhide
+        // with a cold AX tree, which for an Electron app means
+        // an empty window list, putting the window back on the
+        // heal's latency instead of the gesture.
+        let (loop, box) = makeLoop()
+        box.hidden = true
+        attach(loop, scanWindowsAtAttach: true)
+        #expect(box.euiReads == 1)
+        #expect(box.windowQueries == 0)
+    }
+
     @Test("attach still scans a visible app")
     func attachScansAVisibleApp() {
         let (loop, box) = makeLoop()
@@ -213,13 +277,24 @@ struct HiddenAppWindowTests {
         // Both directions take one arm, so the release lands on
         // the gesture rather than whenever something else
         // happens to reconcile the app.
+        //
+        // The hidden half reads a hide EFFECT, not the absence
+        // of a window read: `windowQueries == 1` after the hide
+        // is satisfied identically by the wired arm, by an arm
+        // that returned early, and by a reconcile that skipped
+        // the sweep — three states the test claims to tell
+        // apart. Only the emitted event does.
         let (loop, box) = makeLoop()
         attach(loop)
+        loop.elements[pid] = [WindowID(11): dummyElement]
+        box.listed = [WindowID(11)]
         loop.appHideChanged(pid: pid, ref: ref)
         #expect(box.windowQueries == 1)
+        #expect(box.hiddenEvents.isEmpty)
         box.hidden = true
         loop.appHideChanged(pid: pid, ref: ref)
         #expect(box.windowQueries == 1)
+        #expect(box.hiddenEvents == [WindowID(11)])
     }
 
     @Test("an unobserved app's hide reconciles nothing")

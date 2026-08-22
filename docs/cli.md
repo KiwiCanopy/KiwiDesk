@@ -324,12 +324,15 @@ These events track the *visible window set*, not app
 lifecycle; the `reason` field says why the set changed:
 
 - `window_created` — `new` (a genuinely new window),
-  `returned` (back from another macOS Desktop or a
-  session restore), `restored` (deminiaturized).
+  `returned` (back from another macOS Desktop, from an app
+  that was unhidden, or from a session restore), `restored`
+  (deminiaturized).
 - `window_destroyed` — `closed` (a real close), `minimized`
   (only minimized; it will come back as `restored`),
-  `vanished` (its macOS Desktop was switched away; it
-  returns as `returned`).
+  `hidden` (its app was hidden, with ⌘H or by hiding itself
+  as its last window closed; the window is untouched and
+  comes back as `returned`), `vanished` (its macOS Desktop
+  was switched away; it returns as `returned`).
 
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
