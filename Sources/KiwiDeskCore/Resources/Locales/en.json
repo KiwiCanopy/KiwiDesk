@@ -45,7 +45,7 @@
   "app_bar.font_size": "Font size",
   "app_bar.font_size.auto": "Auto font size",
   "app_bar.global_colors.title": "App Bar colors",
-  "app_bar.group.ax": "%1$@, %2$d windows",
+  "app_bar.group.ax": "%1$@, windows: %2$d",
   "app_bar.group_adjacent": "Group adjacent same-app windows",
   "app_bar.group_adjacent.help": "Merges neighbouring windows of the same app into a single item, marked with a count badge, instead of showing one item each.",
   "app_bar.icon_source.app_font": "Glyphs",

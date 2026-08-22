@@ -89,6 +89,6 @@ struct AppBarAccessibilityTests {
             text: "Safari",
             count: 3
         )
-        #expect(view.accessibilityLabel() == "Safari, 3 windows")
+        #expect(view.accessibilityLabel() == "Safari, windows: 3")
     }
 }

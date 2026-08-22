@@ -45,6 +45,7 @@ extension KiwiCore {
         // pins the ring and mark to the AX-fallback path.
         borders.configureFromEnvironment()
         wireDrag()
+        wireOwnKeyWindowRefresh()
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
         }
