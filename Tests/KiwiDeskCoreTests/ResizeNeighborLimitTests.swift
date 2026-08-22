@@ -151,6 +151,103 @@ struct ResizeNeighborLimitTests {
         #expect(neighbor.width >= 499)
     }
 
+    @Test("A shrink bound by a zone-mate's floor cues on the mate")
+    func shrinkBoundByZoneMateCuesOnMate() {
+        // Three stack windows in array order [1, 2, 3]: w1 the
+        // master, w2/w3 the stack zone. Focus w2; its zone-mate
+        // w3 carries a learned 500 pt floor, and the zone spans
+        // both on the split axis — so the mate is the window
+        // that cannot shrink, and the pill goes on IT (#435),
+        // not on the trier.
+        let core = makeCore()
+        for id: UInt32 in 1...3 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("stack")]
+        )
+        core.state.workspaces.focus(WindowID(2), in: space)
+        seedMinWidth(core, window: WindowID(3), min: 500)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.execute(
+            "resize",
+            args: [.string("x"), .number(-400)]
+        )
+        #expect(
+            refusals == [
+                .neighborMinimum(
+                    anchor: WindowID(3),
+                    focused: WindowID(2)
+                )
+            ]
+        )
+    }
+
+    @Test("A traveler's share write is refused, not orphaned")
+    func travelerShareWriteRefused() {
+        // A tiled-sticky traveler (#414 v2) homed on space 2
+        // rides in space 1's track; a share write under its id
+        // on space 1 could never be pruned (#308 recycled-id
+        // hazard), so the write is refused.
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.ensureSpace("2")
+        core.state.workspaces.activate("1")
+        for id: UInt32 in 1...2 {
+            core.state.windows.upsert(
+                ManagedWindow(
+                    id: WindowID(id),
+                    pid: pid_t(id),
+                    appName: "App\(id)"
+                )
+            )
+            core.state.workspaces.add(WindowID(id), to: "1")
+        }
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(50),
+                pid: 50,
+                appName: "Sticky",
+                stickyScope: .global
+            )
+        )
+        core.state.workspaces.add(WindowID(50), to: "2")
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("track")]
+        )
+        // Entering track mode seeds the 1D per-window breaks;
+        // clear them so the traveler shares one track and the
+        // ALONG-axis share path is actually reachable.
+        core.state.workspaces.withSpace(SpaceID("1")) {
+            $0.trackBreaks = []
+        }
+        let space = core.state.workspaces[SpaceID("1")]!
+        let res = core.resizeTrackMember(
+            WindowID(50),
+            axis: "y",
+            delta: -100,
+            span: 800,
+            space: space
+        )
+        #expect(!res.isSuccess)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .stackWeights[WindowID(50)] == nil
+        )
+    }
+
     @Test("A grow with no neighbor cues nothing")
     func lonelyGrowCuesNothing() {
         // One stack window: the stack zone is empty, so the
