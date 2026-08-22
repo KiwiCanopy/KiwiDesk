@@ -151,6 +151,39 @@ struct ResizeNeighborLimitTests {
         #expect(neighbor.width >= 499)
     }
 
+    @Test("A grow with no neighbor cues nothing")
+    func lonelyGrowCuesNothing() {
+        // One stack window: the stack zone is empty, so the
+        // ratio cap still protects the region (the #383/#44
+        // global floor) but there is no neighbor to blame — a
+        // cue here would name a phantom window.
+        let core = makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 1,
+                    appName: "Solo"
+                )
+            )
+        )
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("stack")]
+        )
+        core.state.workspaces.focus(WindowID(1), in: space)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        for _ in 0..<5 {
+            core.execute(
+                "resize",
+                args: [.string("x"), .number(600)]
+            )
+        }
+        #expect(refusals.isEmpty)
+    }
+
     @Test("A stack ratio grow is blocked by the stack zone's minimum")
     func stackGrowBlockedByNeighborMin() {
         let core = makeCore()
