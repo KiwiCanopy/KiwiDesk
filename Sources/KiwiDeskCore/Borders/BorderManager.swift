@@ -144,6 +144,12 @@ public final class BorderManager {
     /// observe refusals here. Production leaves the no-op.
     var onResizeRefusal: (ResizeRefusal) -> Void = { _ in }
 
+    /// Tokens for the own-key-window notifications that
+    /// re-evaluate the ring set (#933 follow-up) — stored here
+    /// because `KiwiCore` sits at the file-size ceiling; wired
+    /// by `KiwiCore.wireOwnKeyWindowRefresh`.
+    var ownKeyWindowObservers: [NSObjectProtocol] = []
+
     public init() {}
 
     /// Enables the private WindowServer fast path once KiwiDesk's
