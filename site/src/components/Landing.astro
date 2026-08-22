@@ -308,10 +308,9 @@ const jsonLd = [
                it's useful in Nerd mode too. */}
           <a class="nav__link nav__link--guide" href="/guide/"
             >{t.nav_guide}</a>
-          {/* Release Notes: shown in BOTH modes too. "What changed"
-               is not a nerd question, and the page carries one
-               register for everyone (#873). */}
-          <a class="nav__link nav__link--changelog"
+          {/* Release Notes: shown in Nerd mode (dev-only). "What changed"
+               is accessible to everyone via the footer and About window. */}
+          <a class="nav__link nav__link--changelog dev-only"
             href={`${homeHref}changelog/`}>{t.nav_changelog}</a>
           {/* Docs + GitHub live in the DOM always but are hidden in
                Simple mode (dev-only, via .dev-only). */}
