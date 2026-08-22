@@ -45,14 +45,23 @@ public final class PaletteStore {
     }
 
     /// The user's saved palettes, in saved order.
+    /// Migrates legacy or older formats through `ConfigMigration`
+    /// and writes back the migrated bytes.
     public func userPalettes() -> [ColorPalette] {
-        guard let data = try? Data(contentsOf: fileURL),
-            let palettes = try? JSONDecoder().decode(
-                [ColorPalette].self,
+        guard var data = try? Data(contentsOf: fileURL) else {
+            return []
+        }
+        if let migrated = ConfigMigration.migrated(data) {
+            data = migrated
+            try? migrated.write(to: fileURL, options: .atomic)
+        }
+        guard
+            let doc = try? JSONDecoder().decode(
+                PaletteDocument.self,
                 from: data
             )
         else { return [] }
-        return palettes
+        return doc.palettes
     }
 
     /// True if `name` belongs to a built-in (reserved).
@@ -206,12 +215,60 @@ public final class PaletteStore {
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys,
         ]
+        let doc = PaletteDocument(
+            format: ColorPalette.currentFormat,
+            palettes: palettes
+        )
         // Atomic: a crash mid-flush must not truncate the library
         // — a corrupt file decodes to [] and the next save would
         // then rewrite it with only the new palette, losing it all.
-        try encoder.encode(palettes).write(
+        try encoder.encode(doc).write(
             to: fileURL,
             options: .atomic
         )
+    }
+}
+
+/// The envelope for `palettes.json` (#939).
+/// Carries format versioning and the list of user palettes.
+struct PaletteDocument: Codable {
+    var format: Int
+    var palettes: [ColorPalette]
+
+    enum CodingKeys: String, CodingKey {
+        case format
+        case palettes
+    }
+
+    init(
+        format: Int = ColorPalette.currentFormat,
+        palettes: [ColorPalette]
+    ) {
+        self.format = format
+        self.palettes = palettes
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedFormat =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .format
+            ) ?? 0
+        guard decodedFormat <= ColorPalette.currentFormat else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .format,
+                in: container,
+                debugDescription:
+                    "palette format \(decodedFormat) is newer "
+                    + "than supported \(ColorPalette.currentFormat)"
+            )
+        }
+        format = ColorPalette.currentFormat
+        palettes =
+            try container.decodeIfPresent(
+                [ColorPalette].self,
+                forKey: .palettes
+            ) ?? []
     }
 }

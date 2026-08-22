@@ -183,7 +183,7 @@ struct ConfigMigrationWiringTests {
     /// config kept in a dotfiles repo would have shown the whole
     /// thing as noise.
     @MainActor
-    @Test("Migrating rewrites only the line it came for")
+    @Test("Migrating rewrites only the migrated key and format stamp")
     func migrationTouchesOneLine() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -205,10 +205,11 @@ struct ConfigMigrationWiringTests {
             decoding: try Data(contentsOf: file),
             as: UTF8.self
         )
-        // The fixture must contain floats, or "one line changed"
-        // is a claim about a file that never had any.
+        // The fixture must contain floats, or the claim that floats
+        // are untouched is a claim about a file that never had any.
         #expect(asWritten.contains("0.4"))
 
+        // An unversioned v0.9.7 profile:
         let old =
             asWritten
             .replacingOccurrences(
@@ -225,18 +226,44 @@ struct ConfigMigrationWiringTests {
             ),
             as: UTF8.self
         )
-        let before = old.split(
+        // Floats remain un-reencoded:
+        #expect(migrated.contains("0.4"))
+        #expect(!migrated.contains("0.40000000000000002"))
+        #expect(migrated.contains("icon_and_title"))
+        #expect(!migrated.contains("icon_and_name"))
+        #expect(migrated.contains("\"format\" : 1"))
+
+        // When format: 0 was already present, exactly two lines change:
+        // format 0 -> 1 and icon_and_name -> icon_and_title.
+        let withFormat0 =
+            asWritten
+            .replacingOccurrences(
+                of: "\"icon_and_title\"",
+                with: "\"icon_and_name\""
+            )
+            .replacingOccurrences(
+                of: "  \"format\" : 1,\n",
+                with: "  \"format\" : 0,\n"
+            )
+        let migratedWithFormat0 = String(
+            decoding: try #require(
+                ConfigMigration.migrated(Data(withFormat0.utf8))
+            ),
+            as: UTF8.self
+        )
+        let before = withFormat0.split(
             separator: "\n",
             omittingEmptySubsequences: false
         )
-        let after = migrated.split(
+        let after = migratedWithFormat0.split(
             separator: "\n",
             omittingEmptySubsequences: false
         )
         #expect(before.count == after.count)
         let changed = zip(before, after).filter { $0 != $1 }
-        #expect(changed.count == 1)
-        #expect(changed.first?.1.contains("icon_and_title") == true)
+        #expect(changed.count == 2)
+        #expect(changed.contains { $0.1.contains("icon_and_title") })
+        #expect(changed.contains { $0.1.contains("\"format\" : 1") })
     }
 
     /// An unversioned legacy gui.json loads and decodes with current format.

@@ -29,6 +29,7 @@ struct ConfigMigrationRoutingTests {
     /// file readers and are not the subject here.
     private let fileShapes = [
         "Profile.self", "SetupBundle.self", "GuiConfig.self",
+        "PaletteDocument.self",
     ]
 
     /// Every file that decodes one of those shapes, and whether
@@ -44,6 +45,9 @@ struct ConfigMigrationRoutingTests {
         // Routes through ConfigMigration so older sidecars are
         // migrated before decoding and repaired in place (#902).
         "Config/GuiConfigStore.swift": true,
+        // Routes through ConfigMigration so legacy bare-array
+        // palettes are migrated to wrapped format (#939).
+        "Appearance/PaletteStore.swift": true,
     ]
 
     @Test("Every config-file reader routes through the migration")

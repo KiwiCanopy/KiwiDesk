@@ -67,8 +67,25 @@ public enum ConfigMigration {
     /// (`ConfigMigrationRoutingTests` is the census). Each step
     /// takes the bytes as they stand after the previous one.
     private static let steps: [@Sendable (Data) -> Data?] = [
-        migratingRetiredBarContent
+        migratingLegacyPalettesArray,
+        migratingRetiredBarContent,
     ]
+
+    /// Target format integer for `root`'s shape (#902, #938, #939).
+    static func targetFormat(for root: [String: Any]) -> Int {
+        if root["writtenBy"] != nil {
+            return SetupBundle.currentFormat
+        }
+        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
+            || root["monitorSets"] != nil
+        {
+            return Profile.currentFormat
+        }
+        if root["palettes"] != nil {
+            return ColorPalette.currentFormat
+        }
+        return GuiConfig.currentFormat
+    }
 
     /// Whether `data` is below the current format version for
     /// its shape (#902).
@@ -78,18 +95,16 @@ public enum ConfigMigration {
     /// config read once a file carries the format stamp.
     static func needsMigration(_ data: Data) -> Bool {
         guard
-            let root = try? JSONSerialization.jsonObject(
+            let json = try? JSONSerialization.jsonObject(
                 with: data
-            ) as? [String: Any]
+            )
         else { return false }
+        if json is [Any] {
+            return true
+        }
+        guard let root = json as? [String: Any] else { return false }
         let format = root["format"] as? Int ?? 0
-        if root["writtenBy"] != nil {
-            return format < SetupBundle.currentFormat
-        }
-        if root["monitor_sets"] != nil || root["monitorSets"] != nil {
-            return format < Profile.currentFormat
-        }
-        return format < GuiConfig.currentFormat
+        return format < targetFormat(for: root)
     }
 
     /// `data` with every applicable migration applied, or nil
@@ -109,7 +124,29 @@ public enum ConfigMigration {
                 changed = true
             }
         }
-        return changed ? current : nil
+        guard changed else { return nil }
+        return stamped(current)
+    }
+
+    /// Lifts a legacy bare array of color palettes into the wrapped
+    /// document format `{"format": 1, "palettes": [...]}` (#939).
+    @Sendable
+    static func migratingLegacyPalettesArray(
+        _ data: Data
+    ) -> Data? {
+        guard
+            let array = try? JSONSerialization.jsonObject(
+                with: data
+            ) as? [Any]
+        else { return nil }
+        let wrapped: [String: Any] = [
+            "format": ColorPalette.currentFormat,
+            "palettes": array,
+        ]
+        return try? JSONSerialization.data(
+            withJSONObject: wrapped,
+            options: [.prettyPrinted, .sortedKeys]
+        )
     }
 
     /// `data` with every retired bar-content value rewritten, or
@@ -220,5 +257,69 @@ public enum ConfigMigration {
             return (out, changed)
         }
         return (node, false)
+    }
+
+    /// Stamps the target format into `data` if not already current (#938).
+    private static func stamped(_ data: Data) -> Data {
+        guard
+            let root = try? JSONSerialization.jsonObject(
+                with: data
+            ) as? [String: Any]
+        else { return data }
+        let target = targetFormat(for: root)
+        if root["format"] as? Int == target {
+            return data
+        }
+        var expected = root
+        expected["format"] = target
+        if let text = String(data: data, encoding: .utf8),
+            let edited = surgicallyStamped(text, format: target),
+            let reparsed = try? JSONSerialization.jsonObject(
+                with: edited
+            ),
+            canonical(reparsed) == canonical(expected)
+        {
+            return edited
+        }
+        if let fallback = try? JSONSerialization.data(
+            withJSONObject: expected,
+            options: [.prettyPrinted, .sortedKeys]
+        ) {
+            return fallback
+        }
+        return data
+    }
+
+    /// Surgically inserts or updates the `"format"` key in `text`.
+    private static func surgicallyStamped(
+        _ text: String,
+        format: Int
+    ) -> Data? {
+        if text.range(
+            of: "\"format\"\\s*:",
+            options: .regularExpression
+        ) != nil {
+            let replaced = text.replacingOccurrences(
+                of: "(\"format\"\\s*:\\s*)\\d+",
+                with: "$1\(format)",
+                options: .regularExpression
+            )
+            return replaced.data(using: .utf8)
+        }
+        guard let brace = text.range(of: "{") else { return nil }
+        var out = text
+        let after = text[brace.upperBound...]
+        if after.hasPrefix("\r\n") || after.hasPrefix("\n") {
+            out.insert(
+                contentsOf: "\n  \"format\" : \(format),",
+                at: brace.upperBound
+            )
+        } else {
+            out.insert(
+                contentsOf: "\"format\":\(format),",
+                at: brace.upperBound
+            )
+        }
+        return out.data(using: .utf8)
     }
 }

@@ -236,4 +236,69 @@ struct ConfigMigrationTests {
             try JSONDecoder().decode(GuiConfig.self, from: data)
         }
     }
+
+    /// A legacy bare-array palettes.json is wrapped as
+    /// `{"format": N, "palettes": [...]}` (#939).
+    @Test("Legacy bare-array palettes file migrates to wrapped format")
+    func legacyPalettesArrayMigrates() throws {
+        let legacy = json(
+            """
+            [{"colors":{"app_bar.fill_color":"#123456"},"name":"Mine"}]
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(legacy))
+        let root =
+            try JSONSerialization.jsonObject(with: out) as? [String: Any]
+        #expect(root?["format"] as? Int == ColorPalette.currentFormat)
+        let palettes = root?["palettes"] as? [[String: Any]]
+        #expect(palettes?.count == 1)
+        #expect(palettes?.first?["name"] as? String == "Mine")
+    }
+
+    /// A file that needed migration is stamped with current format
+    /// and reports needsMigration == false on next read (#938).
+    @Test("Migrated profile is stamped with current format")
+    func migratedProfileStampedWithCurrentFormat() throws {
+        let unversionedOld = json(
+            """
+            {"name":"Starter","monitor_sets":[{"monitors":["A:100x100"]}],\
+            "space_modes":{"1":"bsp"},\
+            "settings":{"app_bar":{"content":"icon_and_name"}}}
+            """
+        )
+        let out = try #require(ConfigMigration.migrated(unversionedOld))
+        let root =
+            try JSONSerialization.jsonObject(with: out) as? [String: Any]
+        #expect(root?["format"] as? Int == Profile.currentFormat)
+        #expect(ConfigMigration.needsMigration(out) == false)
+        #expect(ConfigMigration.migrated(out) == nil)
+    }
+
+    /// A palette document carrying a newer format than supported is refused.
+    @Test("A palette document with newer format is refused")
+    func newerPaletteFormatIsRefused() {
+        let future = ColorPalette.currentFormat + 1
+        let data = json(
+            """
+            {"format":\(future),"palettes":[{"colors":{},\
+            "name":"Future"}]}
+            """
+        )
+        #expect(throws: DecodingError.self) {
+            try JSONDecoder().decode(PaletteDocument.self, from: data)
+        }
+    }
+
+    /// Shape marker keys match owning CodingKeys (#938).
+    @Test("Shape marker keys match owning CodingKeys")
+    func shapeMarkersMatchCodingKeys() {
+        #expect(
+            Profile.CodingKeys.monitorSets.rawValue
+                == "monitor_sets"
+        )
+        #expect(
+            PaletteDocument.CodingKeys.palettes.rawValue
+                == "palettes"
+        )
+    }
 }

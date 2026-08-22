@@ -150,4 +150,62 @@ struct PaletteStoreTests {
             try store.importPalette(from: url)
         }
     }
+
+    /// Legacy bare-array palettes.json loads, is rewritten wrapped,
+    /// and loads with needsMigration == false (#939).
+    @Test("Legacy bare-array file migrates and rewrites wrapped")
+    func legacyPalettesFileMigrates() throws {
+        let (store, dir) = makeStore()
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        let legacy =
+            """
+            [{"colors":{"app_bar.fill_color":"#112233"},"name":"Mine"}]
+            """
+        try Data(legacy.utf8).write(to: store.url)
+        let initial = try Data(contentsOf: store.url)
+        #expect(ConfigMigration.needsMigration(initial))
+        let loaded = store.userPalettes()
+        #expect(loaded == [sample])
+
+        let onDisk = try Data(contentsOf: store.url)
+        #expect(!ConfigMigration.needsMigration(onDisk))
+        let doc = try JSONDecoder().decode(
+            PaletteDocument.self,
+            from: onDisk
+        )
+        #expect(doc.format == ColorPalette.currentFormat)
+        #expect(doc.palettes == [sample])
+    }
+
+    /// Saved palettes are wrapped and round-trip identically.
+    @Test("Saved palettes are wrapped and round-trip")
+    func savedPalettesAreWrapped() throws {
+        let (store, _) = makeStore()
+        try store.save(sample)
+        let data = try Data(contentsOf: store.url)
+        let doc = try JSONDecoder().decode(PaletteDocument.self, from: data)
+        #expect(doc.format == ColorPalette.currentFormat)
+        #expect(doc.palettes == [sample])
+        #expect(store.userPalettes() == [sample])
+    }
+
+    /// Newer format palettes.json returns empty (refused).
+    @Test("Newer format palettes.json returns empty")
+    func newerPaletteFormatReturnsEmpty() throws {
+        let (store, dir) = makeStore()
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        let future = ColorPalette.currentFormat + 1
+        let data =
+            """
+            {"format":\(future),"palettes":[{"colors":{},"name":"Future"}]}
+            """
+        try Data(data.utf8).write(to: store.url)
+        #expect(store.userPalettes().isEmpty)
+    }
 }
