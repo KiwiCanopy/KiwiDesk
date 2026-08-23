@@ -91,6 +91,14 @@ struct TrackWeightTravelerTests {
         // the honest-physics nil and the test passes with the
         // ruling reverted (review round 3). Computed from the
         // same span authority the heal divides.
+        // #660: the pins hand `vertical: true` to `alongSpan`
+        // while the heal reads `params.axis` — pin the default
+        // they mirror, or an axis flip turns the pins into
+        // arithmetic about the wrong span.
+        #expect(
+            core.tiler.settings.resolvedTrack(for: space)
+                .axis == .vertical
+        )
         let screen = TilingEngine.screen(
             for: space,
             in: core.state

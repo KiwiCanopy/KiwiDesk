@@ -257,6 +257,16 @@ editing here:
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
   the math; the ruling and the stack-zone residue are in
   `docs/design-decisions.md`.
+  And a track fold consumer — any site needing the folded
+  track partition: the render, the `track.swap` guard, the
+  heal — takes `TrackLayout.foldedPartition`, never a hand
+  assembly of `counts` → `overflowCap` beside it. The hand
+  copy shipped at three sites and drifted before the #944
+  rounds extracted the one assembly; nothing scans for a new
+  hand copy, so each new consumer owes the routing
+  deliberately — a fold-rule change that updates the render
+  and misses a hand copy re-opens the exact divergence the
+  extraction closed.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

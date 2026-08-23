@@ -80,7 +80,13 @@ extension TrackLayout {
     /// differently (the render's full context, the swap guard's
     /// live `layoutInput` with a headless fallback, the heal's
     /// minimal probe), and that split is each site's own doc's
-    /// to argue.
+    /// to argue. At a SECOND consumer of the merge question —
+    /// "does the fold merge ≥2 marker tracks, not a lone N+1th
+    /// slot" (`markers > cap`, today ruled once, in the swap
+    /// guard) — promote this tuple to a named struct carrying
+    /// that predicate as a member: a tuple cannot, which is why
+    /// the guard holds it as a comment (round-4 architect
+    /// review).
     public static func foldedPartition(
         of tiled: [WindowID],
         breaks: Set<WindowID>,
