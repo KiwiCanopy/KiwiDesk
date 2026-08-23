@@ -63,30 +63,30 @@ public final class EventLoop {
             .identifier?.rawValue
     }
 
-    /// The window NUMBER of KiwiDesk's own active key or modal
-    /// window, nil when the process holds none — the ONE seam
-    /// both stand-downs read: the #929 close-return raise (via
-    /// `hasOwnKeyWindow()` below) and the #933 focused-ring
-    /// suppression. When an own progress window closes to yield
-    /// to an own alert (Sparkle's flow), the destroy fold
-    /// re-points state focus at the background survivor and no
-    /// focus event re-points it at the alert — so the anchor
-    /// goes stale and the ring would keep drawing behind the
-    /// alert (the own-window census is `OwnWindowTiling`'s
-    /// doc). The number, not a Bool, so an own key window that
-    /// IS the anchor (the Settings window) keeps its ring.
-    /// Injected in tests.
-    var ownKeyWindowNumber: () -> Int? = {
-        EventLoop.ownActiveKeyWindowNumber()
-    }
-
-    /// Whether the process holds an own active key/modal window
-    /// at all (#929) — derived from the number seam above so
-    /// the raise stand-down and the ring stand-down can never
-    /// describe different worlds, and a test injecting the one
-    /// seam steers both.
-    func hasOwnKeyWindow() -> Bool {
-        ownKeyWindowNumber() != nil
+    /// KiwiDesk's own active key or modal window, nil when the
+    /// process holds none — the ONE seam both stand-downs read:
+    /// the #929/#935 close-return raise (via
+    /// `closeReturnRaiseStandsDown(after:)`) and the #933
+    /// focused-ring suppression. When an own progress window
+    /// closes to yield to an own alert (Sparkle's flow), the
+    /// destroy fold re-points state focus at the background
+    /// survivor and no focus event re-points it at the alert —
+    /// so the anchor goes stale (the own-window census is
+    /// `OwnWindowTiling`'s doc).
+    ///
+    /// One reading, two facets, read by DIFFERENT stand-downs
+    /// on purpose (#935): the ring reads `number` — ANY own key
+    /// window makes the anchor stale, and the number rather
+    /// than a Bool is what lets an own key window that IS the
+    /// anchor (the Settings window) keep its ring — while the
+    /// raise reads `isDialog`, the narrower class a raise could
+    /// actually submerge (`classifiesAsOwnDialog` carries the
+    /// classification's argument). One closure resolves both so
+    /// the two stand-downs can never disagree about WHICH
+    /// window is key — only the ruled facet differs. Injected
+    /// in tests.
+    var ownKeyWindow: () -> OwnKeyWindowReading? = {
+        EventLoop.ownKeyWindowReading()
     }
 
     var observers: [pid_t: any AppObserving] = [:]

@@ -308,20 +308,15 @@ extension KiwiCore {
         // makes it real). Only raise windows the app still lists:
         // after a native Space switch the fallback may live on
         // the previous desktop, and raising it would switch back.
-        // A hide stands the raise down (#913). macOS picks the
-        // next frontmost app itself when an app hides, and a
-        // raise racing that choice lands the user somewhere
-        // neither chose — with `warp: true` dragging the pointer
-        // after it, on a keystroke that never moved the mouse.
-        // An active own dialog stands the raise down too (#929):
-        // when an own progress window or alert closes to yield to
-        // a newly opened own alert (Sparkle's update dialog),
-        // raising the background window submerges the own alert.
-        // The fold's focus pick still stands: state names the
-        // survivor, and the OS's own activation reports it.
+        // A hide, or an active own dialog, stands the raise
+        // down — `closeReturnRaiseStandsDown` owns both arms'
+        // arguments (#913/#929/#935). The fold's focus pick
+        // still stands: state names the survivor, and the OS's
+        // own activation reports it.
+        let closeReturnRaiseStandsDown =
+            eventLoop.closeReturnRaiseStandsDown(after: event)
         if effects.removedWindow?.focusLost == true,
-            !event.isHideDrop,
-            !eventLoop.hasOwnKeyWindow(),
+            !closeReturnRaiseStandsDown,
             let next = activeSpace?.focused,
             eventLoop.isListed(next),
             // Belt to the fold's re-pick (#670): never raise a
@@ -341,8 +336,14 @@ extension KiwiCore {
         // actual overflow). AFTER the focus fallback above, so the
         // restore's closing re-focus targets the settled focus,
         // never a stale/nil one (which would clear focus on a
-        // minimize).
-        if willRetile {
+        // minimize). A removal whose return raise stood down
+        // arms no restore either (#936): the drain ends in a
+        // focus re-raise of the very anchor the stand-down
+        // refused — the next mutation's arm heals the pile.
+        if willRetile,
+            !(effects.removedWindow?.focusLost == true
+                && closeReturnRaiseStandsDown)
+        {
             scheduleTrackZOrderRestoreIfOverflowing()
         }
     }
