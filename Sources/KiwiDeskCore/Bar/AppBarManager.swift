@@ -84,8 +84,8 @@ public final class AppBarManager {
         }
     }
 
-    /// True when a painted bar is drawing `id`'s own window
-    /// title right now.
+    /// True when a painted bar is showing `id`'s own window
+    /// title right now — drawing it, or announcing it.
     ///
     /// Read from `shownBars` — what `sync` accepted and the
     /// overlays drew — for the same reason `shownStrips` is:
@@ -96,16 +96,24 @@ public final class AppBarManager {
     /// stand-down, the screen pick, the empty-bar filter, the
     /// cold-start fallback) is already folded into this array.
     ///
-    /// A `count > 1` item draws its APP NAME, never a member's
-    /// title (`KiwiCore.barItemText`), so a group is not a
-    /// consumer — exact here, where the groups are the painted
-    /// ones, and only approximable from state.
+    /// Deliberately NOT gated on `showsText` or the edge (#937).
+    /// Icon-only and vertical bars draw no title text, but
+    /// `AppBarItemView` builds its accessibility label from
+    /// the same title unconditionally, so there the title is
+    /// announced rather than drawn — and a title that is
+    /// announced stale is as wrong as one drawn stale (the
+    /// same rule `SpaceBarManager.showsTitle` follows).
+    ///
+    /// A `count > 1` item draws and announces its APP NAME and
+    /// count, never a member's title (`KiwiCore.barItemText`,
+    /// `AppBarItemView.updateAccessibilityLabel`), so a group
+    /// is not a consumer — exact here, where the groups are the
+    /// painted ones, and only approximable from state.
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { bar in
-            bar.style.renderedContent.showsText
-                && bar.items.contains {
-                    $0.id == id && $0.count == 1
-                }
+            bar.items.contains {
+                $0.id == id && $0.count == 1
+            }
         }
     }
 

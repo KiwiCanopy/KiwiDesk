@@ -104,11 +104,13 @@ extension AppBarStyle {
         /// case COUNT, so a new one reds it and has to be ruled
         /// on here.
         ///
-        /// Ask it of `AppBarStyle.renderedContent`, which folds
-        /// in the vertical collapse — the title-refresh gate
-        /// (`AppBarManager.showsTitle(of:)`) and the GUI's
-        /// title-cap grey-out
-        /// (`BarsGates.everyShownBarIconOnly`) do.
+        /// A consumer deciding for a PAINTED bar asks it of
+        /// `AppBarStyle.renderedContent`, which folds in the
+        /// vertical collapse. No such consumer remains: the
+        /// title-refresh gate left in #937 (announced titles
+        /// made every item a consumer) and the GUI's title-cap
+        /// grey-out followed it out (same corollary — the cap
+        /// binds the announced title too).
         ///
         /// Two sites ask the raw `content` instead, and may only
         /// because each already stands on a horizontal-only

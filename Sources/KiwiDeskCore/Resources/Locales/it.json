@@ -64,7 +64,6 @@
   "app_bar.thickness": "Spessore",
   "app_bar.title_cap": "Lunghezza del titolo",
   "app_bar.title_cap.help": "Quanti caratteri del titolo di una finestra mostra un elemento prima di accorciarlo. Le finestre raggruppate mostrano invece il nome della loro app, che non viene mai accorciato.",
-  "app_bar.title_cap.icon_only": "Non viene mostrato alcun titolo finché «%1$@» è impostato su «%2$@».",
   "app_picker.search.placeholder": "Cerca app",
   "app_rules.add": "Aggiungi",
   "app_rules.add_rule": "Aggiungi regola app",

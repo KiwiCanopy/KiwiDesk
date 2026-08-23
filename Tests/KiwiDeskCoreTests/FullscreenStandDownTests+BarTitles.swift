@@ -94,7 +94,10 @@ extension FullscreenStandDownTests {
         core.state.apply(.windowFocused(barWindow))
         core.tiler.settings.spaceBarStyle.enabled = true
         core.tiler.settings.spaceBarStyle.showFrontApp = true
-        // The App Bar must not be the one arming it.
+        // Since #937 `.icon` no longer stands the App Bar
+        // down; it stays silent here only because no App Bar
+        // is ever painted in this fixture (`updateAppBar` is
+        // not called), so the arm below is the Space Bar's.
         core.tiler.settings.appBarStyle.content = .icon
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 

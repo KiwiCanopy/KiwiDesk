@@ -65,4 +65,33 @@ struct BarTitleRefreshOutputTests {
         )
         #expect(after.text == "Projects")
     }
+
+    /// The #937 chain's middle link: under icon content the
+    /// refresh must still rebuild the item's title text — the
+    /// drawn label ignores it, the accessibility label
+    /// announces it (`AppBarAccessibilityTests` pins the view
+    /// half). Without this pin a later "optimization" gating
+    /// `barItemText` on `showsText` reverts #937 with the arm
+    /// tests green — armed but inert, the vacuity class this
+    /// suite exists to rule out.
+    @Test("Icon content still re-renders the item's title")
+    func iconContentRefreshStillCarriesTitle() throws {
+        let core = seededOnMainScreen()
+        core.tiler.settings.appBarStyle.content = .icon
+        core.updateAppBar()
+        let before = try #require(
+            core.appBars.shownBarsForTesting.first?.items.first
+        )
+        #expect(before.text == "Downloads")
+
+        core.state.apply(
+            .windowTitleChanged(WindowID(1), "Projects")
+        )
+        core.runBarTitleRefresh()
+
+        let after = try #require(
+            core.appBars.shownBarsForTesting.first?.items.first
+        )
+        #expect(after.text == "Projects")
+    }
 }

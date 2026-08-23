@@ -64,7 +64,6 @@
   "app_bar.thickness": "Épaisseur",
   "app_bar.title_cap": "Longueur du titre",
   "app_bar.title_cap.help": "Nombre de caractères du titre d'une fenêtre affichés par un élément avant qu'il ne soit raccourci. Les fenêtres groupées affichent le nom de leur app, qui n'est jamais raccourci.",
-  "app_bar.title_cap.icon_only": "Aucun titre n'est affiché tant que « %1$@ » est réglé sur « %2$@ ».",
   "app_picker.search.placeholder": "Rechercher apps",
   "app_rules.add": "Ajouter",
   "app_rules.add_rule": "Ajouter une règle d'app",

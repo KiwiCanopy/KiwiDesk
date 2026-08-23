@@ -85,18 +85,6 @@ struct BarsGates {
             }
     }
 
-    /// True when no shown bar draws text at all — every one of
-    /// them resolves to icon-only, which a vertical bar always
-    /// does. Gates the title cap: with no title on screen there
-    /// is nothing to shorten.
-    var everyShownBarIconOnly: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                let bar = $0.resolved(with: settings.appBarStyle)
-                return !bar.renderedContent.showsText
-            }
-    }
-
     /// True when no shown bar renders an icon at all.
     var everyShownBarTitleOnly: Bool {
         anyBarShown

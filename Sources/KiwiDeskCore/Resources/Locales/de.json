@@ -64,7 +64,6 @@
   "app_bar.thickness": "Dicke",
   "app_bar.title_cap": "Titellänge",
   "app_bar.title_cap.help": "Wie viele Zeichen des Fenstertitels ein Element anzeigt, bevor er gekürzt wird. Gruppierte Fenster zeigen stattdessen den Namen ihrer App, der nie gekürzt wird.",
-  "app_bar.title_cap.icon_only": "Es werden keine Titel angezeigt, solange „%1$@“ auf „%2$@“ steht.",
   "app_picker.search.placeholder": "Apps suchen",
   "app_rules.add": "Hinzufügen",
   "app_rules.add_rule": "App-Regel hinzufügen",
