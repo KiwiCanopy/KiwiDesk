@@ -29,6 +29,9 @@ struct SpaceNameField: View {
         // align in a column across rows.
         TextField("", text: $draft)
             .textFieldStyle(.roundedBorder)
+            // Nameless otherwise — an empty title, and the row
+            // draws no label beside it (#812).
+            .accessibilityLabel(L("spaces.name.ax", "Space name"))
             .fontWeight(.medium)
             .focused($focused)
             .frame(width: 180, alignment: .leading)

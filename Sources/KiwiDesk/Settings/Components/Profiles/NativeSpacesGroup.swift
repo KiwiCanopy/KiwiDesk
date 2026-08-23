@@ -213,6 +213,19 @@ struct NativeSpacesGroup: View {
         .labelsHidden()
         .controlSize(.large)
         .frame(width: 180)
+        // An empty title names nothing, so the picker is named
+        // here — and named, it owes its selection back as the
+        // value (#812).
+        .accessibilityLabel(
+            L(
+                "native_spaces.profile_ax",
+                "Profile for this Desktop"
+            )
+        )
+        .accessibilityValue(
+            binding(number).wrappedValue
+                ?? L("native_spaces.none", "None")
+        )
     }
 
     // MARK: - Data

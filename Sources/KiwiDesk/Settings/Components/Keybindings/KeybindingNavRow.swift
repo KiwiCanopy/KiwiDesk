@@ -42,6 +42,7 @@ struct NavRow: View {
             }
             Spacer()
             KeyRecorderField(
+                name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
                 conflict: conflict,
                 preflight: preflight,

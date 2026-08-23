@@ -7,10 +7,27 @@ import SwiftUI
 /// snap to `step`. Accessibility is delegated to a native
 /// `Slider` representation, so VoiceOver and keyboard
 /// adjustment behave exactly like the control it replaces.
+///
+/// The representation is NAMED and VALUED here, by two
+/// required arguments, because a bare `Slider` announces a
+/// percentage of its range and nothing else: every row in this
+/// tree draws its label and its readout as SIBLINGS of the
+/// slider (`SettingsRowShape`), and a sibling `Text` names
+/// nothing (gui.md ▸ the keyboard path). Nineteen rows shipped
+/// "six percent" for "Outer gap, 6 pt" that way (#812). The
+/// arguments have no defaults on purpose — the compiler is the
+/// guard, and a site that cannot name its slider has found a
+/// row with no label.
 struct SettingsSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     var step: Double = 1
+    /// What VoiceOver calls the control — the row's label.
+    let label: String
+    /// What VoiceOver reads as its value — the row's readout,
+    /// unit included ("6 pt", "29%", "1.5 s"), never the
+    /// native percentage.
+    let spokenValue: String
 
     @Environment(\.isEnabled) private var isEnabled
 
@@ -26,6 +43,8 @@ struct SettingsSlider: View {
         .accessibilityRepresentation {
             Slider(value: $value, in: range, step: step)
         }
+        .accessibilityLabel(label)
+        .accessibilityValue(spokenValue)
     }
 
     /// Disabled sliders gray the fill itself — the dimming

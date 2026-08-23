@@ -201,6 +201,12 @@ struct LuaSourceEditor: NSViewRepresentable {
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
         textView.string = text
+        // An AppKit view re-earns what a SwiftUI control gives
+        // free (gui.md); a bare `NSTextView` is an unnamed
+        // text area (#812).
+        textView.setAccessibilityLabel(
+            L("lua_editor.ax", "Lua configuration")
+        )
         return scroll
     }
 

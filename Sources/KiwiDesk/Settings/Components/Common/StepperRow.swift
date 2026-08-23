@@ -16,8 +16,9 @@ struct StepperRow: View {
     /// Hide the visual label, leaving value + arrows only (#275):
     /// for a section whose header already names the sole control,
     /// restating it on the row is native-atypical (Dock "Size").
-    /// `label` still feeds the accessibility label, so VoiceOver
-    /// is unaffected — the control is left-aligned under the
+    /// `label` still feeds the accessibility label of both the
+    /// field and the arrows, so VoiceOver is unaffected — the
+    /// control is left-aligned under the
     /// header instead of trailing an empty label column.
     let labelHidden: Bool
     /// Optional #94 `?` popover, label-adjacent like the other
@@ -81,6 +82,13 @@ struct StepperRow: View {
             }
             TextField("", text: $text)
                 .labelsHidden()
+                // The field is a control of its own beside the
+                // arrows, and an empty title names it nothing:
+                // the arrows said "Title length, 40" while the
+                // field the user types into said only its
+                // digits (#812). Same name as the arrows; its
+                // value is the text itself.
+                .accessibilityLabel(label)
                 .frame(width: 48)
                 .multilineTextAlignment(.trailing)
                 .monospacedDigit()

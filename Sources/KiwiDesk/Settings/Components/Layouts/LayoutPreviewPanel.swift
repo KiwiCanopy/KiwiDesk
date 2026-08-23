@@ -80,24 +80,24 @@ struct LayoutPreviewPanel: View {
                     set: { windows = Int($0.rounded()) }
                 ),
                 range: countRange,
-                step: 1
-            )
-            .frame(maxWidth: .infinity)
-            // The label above is a SIBLING `Text`, which names
-            // nothing as far as VoiceOver is concerned — so the
-            // slider announced a bare percentage, and the count it
-            // was actually setting sat in a third element beside
-            // it (#678 Phase 4 pass 10, turn 20a rule 2: the
-            // preview is skipped, but the controls that change
-            // what it shows are not). Naming and valuing the
-            // control puts both back on the thing being adjusted.
-            .accessibilityLabel(
-                L(
+                step: 1,
+                // The label above is a SIBLING `Text`, which
+                // names nothing as far as VoiceOver is concerned
+                // — so the slider announced a bare percentage,
+                // and the count it was actually setting sat in a
+                // third element beside it (#678 Phase 4 pass 10,
+                // turn 20a rule 2: the preview is skipped, but
+                // the controls that change what it shows are
+                // not). Naming and valuing the control puts both
+                // back on the thing being adjusted — the seam
+                // every slider now takes (#812).
+                label: L(
                     "layout_defaults.preview_windows",
                     "Window count"
-                )
+                ),
+                spokenValue: "\(windows)"
             )
-            .accessibilityValue("\(windows)")
+            .frame(maxWidth: .infinity)
             Text("\(windows)")
                 .frame(minWidth: 24, alignment: .trailing)
                 .foregroundStyle(SettingsTheme.ink2)

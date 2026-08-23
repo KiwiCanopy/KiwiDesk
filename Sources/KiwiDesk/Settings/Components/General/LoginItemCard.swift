@@ -55,6 +55,11 @@ struct LoginItemCard: View {
                 // toggle the binary case.
                 Toggle("", isOn: loginBinding)
                     .labelsHidden()
+                    // The row's label is `DropdownRow`'s sibling
+                    // text, which names nothing; a toggle's
+                    // state is its VALUE, so naming it here
+                    // displaces nothing (#812).
+                    .accessibilityLabel(startLabel)
                     // Grey the control only, never the row —
                     // the label's `?` stays live because that
                     // help is useful whether or not the

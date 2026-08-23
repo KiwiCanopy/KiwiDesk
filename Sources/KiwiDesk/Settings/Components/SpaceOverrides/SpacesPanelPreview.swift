@@ -317,12 +317,13 @@ struct SpacesPanelPreview: View {
                     set: { windows = Int($0.rounded()) }
                 ),
                 range: countRange,
-                step: 1
+                step: 1,
+                label: L(
+                    "layout_defaults.preview_windows",
+                    "Window count"
+                ),
+                spokenValue: "\(windows)"
             )
-            .accessibilityLabel(
-                L("layout_defaults.preview_windows", "Window count")
-            )
-            .accessibilityValue("\(windows)")
             .accessibilityHint(
                 L(
                     "spaces.preview.count_hint",
