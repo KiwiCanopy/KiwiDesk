@@ -51,11 +51,15 @@ struct CloseReturnStandDownWiringTests {
     @Test("the raise site derives from the ONE predicate")
     func raiseSiteConsultsThePredicate() throws {
         let text = try eventsSource()
-        #expect(
-            text.contains(
-                "eventLoop.closeReturnRaiseStandsDown(after: event)"
-            )
-        )
+        let anchor =
+            "eventLoop.closeReturnRaiseStandsDown(after: event)"
+        let at = try #require(text.range(of: anchor))
+        // The consult is guarded on the removal's focus loss:
+        // both consumers need the answer only then, and the
+        // production seam reads `NSApplication` — unguarded,
+        // every move and focus event would pay it.
+        let prefix = text[..<at.lowerBound].suffix(160)
+        #expect(prefix.contains("focusLost"))
     }
 
     @Test("the close-return raise asks the stand-down")
@@ -78,11 +82,14 @@ struct CloseReturnStandDownWiringTests {
         // The trailing arm in handle(): the text immediately
         // before the schedule call must gate on the same
         // stand-down, or the restore's closing focus re-raise
-        // undoes the refusal one settle later.
+        // undoes the refusal one settle later. (The focus-loss
+        // half of the skip lives inside the shared local's own
+        // definition — the needle above pins it.)
         let anchor = "scheduleTrackZOrderRestoreIfOverflowing()"
         let at = try #require(text.range(of: anchor))
         let guardText = text[..<at.lowerBound].suffix(200)
-        #expect(guardText.contains("closeReturnRaiseStandsDown"))
-        #expect(guardText.contains("focusLost"))
+        #expect(
+            guardText.contains("!closeReturnRaiseStandsDown")
+        )
     }
 }

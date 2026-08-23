@@ -115,10 +115,11 @@ editing here:
   track restore either, because the drain ends in a focus
   re-raise of the very anchor the stand-down refused, one settle
   later; the next genuine mutation's arm heals the pile.
-  Command-driven arms (navigate, swap, resize, drag) are exempt
-  by ruling — an explicit user command is not an event-driven
-  return raise. `CloseReturnStandDownWiringTests` pins both
-  consulting sites.
+  Command-driven arms are exempt by ruling — an explicit user
+  command is not an event-driven return raise; the product
+  ruling (and which arms that covers) is
+  `docs/design-decisions.md`'s. `CloseReturnStandDownWiringTests`
+  pins both consulting sites.
   An arm in `focusWindow` guards against its own re-arm (the
   restore's closing re-assert calls back in) **semantically** —
   refuse because the focus is unchanged (`previousFocused !=

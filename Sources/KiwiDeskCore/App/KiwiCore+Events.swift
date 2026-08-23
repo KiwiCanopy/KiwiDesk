@@ -312,9 +312,12 @@ extension KiwiCore {
         // down — `closeReturnRaiseStandsDown` owns both arms'
         // arguments (#913/#929/#935). The fold's focus pick
         // still stands: state names the survivor, and the OS's
-        // own activation reports it.
+        // own activation reports it. Guarded on the focus loss
+        // so only a removal that would raise pays the seam's
+        // NSApplication read.
         let closeReturnRaiseStandsDown =
-            eventLoop.closeReturnRaiseStandsDown(after: event)
+            effects.removedWindow?.focusLost == true
+            && eventLoop.closeReturnRaiseStandsDown(after: event)
         if effects.removedWindow?.focusLost == true,
             !closeReturnRaiseStandsDown,
             let next = activeSpace?.focused,
@@ -340,10 +343,7 @@ extension KiwiCore {
         // arms no restore either (#936): the drain ends in a
         // focus re-raise of the very anchor the stand-down
         // refused — the next mutation's arm heals the pile.
-        if willRetile,
-            !(effects.removedWindow?.focusLost == true
-                && closeReturnRaiseStandsDown)
-        {
+        if willRetile, !closeReturnRaiseStandsDown {
             scheduleTrackZOrderRestoreIfOverflowing()
         }
     }

@@ -93,8 +93,13 @@ struct BorderOwnKeyWindowTests {
     @Test("An own UNTRACKED key window stands the ring down")
     func ownUntrackedKeyWindowSuppresses() {
         let core = makeCore()
+        // isDialog FALSE on purpose: the ring reads the broad
+        // number facet — ANY own key window stales the anchor,
+        // the ⌃⌥K panel included — so this must suppress even
+        // outside the dialog class the raise reads (#935). A
+        // ring "simplified" onto the dialog facet reds here.
         core.eventLoop.ownKeyWindow = {
-            OwnKeyWindowReading(number: 999_999, isDialog: true)
+            OwnKeyWindowReading(number: 999_999, isDialog: false)
         }
         let specs = core.desiredBorderSpecs()
         #expect(

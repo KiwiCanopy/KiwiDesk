@@ -48,18 +48,18 @@ extension EventLoop {
     /// - A MODAL window always is: it blocks the app, so any
     ///   raise beneath it fights a surface the user must answer
     ///   first.
-    /// - An `NSPanel` never is: the own utility summons — the
-    ///   ⌃⌥K shortcuts panel, whose own doc promises the global
-    ///   hotkeys keep firing while it is open, and
-    ///   `NSColorPanel` — float above the raise's reach, so the
-    ///   successor raise they would suppress cannot touch them.
+    /// - An `NSPanel` never is: an own utility summon (the ⌃⌥K
+    ///   shortcuts panel, whose own doc promises the global
+    ///   hotkeys keep firing while it is open) floats above the
+    ///   raise's reach, so the successor raise it would
+    ///   suppress cannot touch it.
     /// - The `OwnWindowTiling`-marked window never is: it TILES
     ///   (#678 item 18), so the close-return raise beside it is
     ///   the layout's own behavior, not a submersion.
-    /// - Everything else own-and-key — Sparkle's alerts, the
-    ///   tour, the Config Issues window; `OwnWindowTiling`'s
-    ///   doc is the census — is chrome the user is looking at,
-    ///   and stands the raise down.
+    /// - Everything else own-and-key is chrome the user is
+    ///   looking at, and stands the raise down —
+    ///   `OwnWindowTiling`'s doc is the census of which own
+    ///   window is which; cite it, do not re-list it.
     nonisolated static func classifiesAsOwnDialog(
         isModal: Bool,
         isPanel: Bool,
@@ -71,31 +71,30 @@ extension EventLoop {
 
     /// Production resolution of the `ownKeyWindow` seam: the
     /// active key window when visible, else the modal window.
-    /// A sheet classifies as the window it is attached to — the
-    /// sheet belongs to its parent, so a sheet over the marked
-    /// Settings window inherits its exemption — while `number`
-    /// stays the key window's own, which is what the ring
-    /// compares against the anchor.
+    /// A sheet classifies as the window it is attached to —
+    /// walked to the chain's ROOT, so a sheet (however nested)
+    /// over the marked Settings window inherits its exemption —
+    /// while `number` stays the key window's own, which is what
+    /// the ring compares against the anchor.
     static func ownKeyWindowReading() -> OwnKeyWindowReading? {
         let app = NSApplication.shared
-        if let key = app.keyWindow, key.isVisible {
-            let classified = key.sheetParent ?? key
-            return OwnKeyWindowReading(
-                number: key.windowNumber,
-                isDialog: classifiesAsOwnDialog(
-                    isModal: app.modalWindow === classified,
-                    isPanel: classified is NSPanel,
-                    isMarkedTilingWindow: classified.identifier?
-                        .rawValue == OwnWindowTiling.identifier
-                )
-            )
+        let key =
+            app.keyWindow?.isVisible == true
+            ? app.keyWindow : app.modalWindow
+        guard let key else { return nil }
+        var classified = key
+        while let parent = classified.sheetParent {
+            classified = parent
         }
-        if let modal = app.modalWindow {
-            return OwnKeyWindowReading(
-                number: modal.windowNumber,
-                isDialog: true
+        return OwnKeyWindowReading(
+            number: key.windowNumber,
+            isDialog: classifiesAsOwnDialog(
+                isModal: app.modalWindow === classified
+                    || app.modalWindow === key,
+                isPanel: classified is NSPanel,
+                isMarkedTilingWindow: classified.identifier?
+                    .rawValue == OwnWindowTiling.identifier
             )
-        }
-        return nil
+        )
     }
 }

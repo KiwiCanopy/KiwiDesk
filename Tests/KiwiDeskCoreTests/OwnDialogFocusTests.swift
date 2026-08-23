@@ -21,6 +21,13 @@ import Testing
 /// block for a fabricated pid — an assertion there would pass
 /// with the stand-down deleted. The predicate itself is
 /// behavior-tested here through the `ownKeyWindow` seam.
+///
+/// Stated residue: the production resolution's non-nil
+/// branches (`ownKeyWindowReading()` — the sheet-chain walk,
+/// the visibility gate, the modal fallback) need a real key
+/// window, so headless only the nil case is pinned. If that
+/// glue ever bites, the fix is an injected seam over
+/// `keyWindow`/`modalWindow` per tests.md, not a looser test.
 @MainActor
 @Suite("Close-return raise stand-down (#929/#935)", .serialized)
 struct OwnDialogFocusTests {
@@ -103,8 +110,8 @@ struct OwnDialogFocusTests {
                 isMarkedTilingWindow: true
             )
         )
-        // Everything else own-and-key — Sparkle's alerts, the
-        // tour, Config Issues — is the #929 dialog class.
+        // Everything else own-and-key is the #929 dialog
+        // class (`OwnWindowTiling`'s doc is the census).
         #expect(
             EventLoop.classifiesAsOwnDialog(
                 isModal: false,
