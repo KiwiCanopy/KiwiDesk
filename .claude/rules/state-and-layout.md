@@ -246,6 +246,27 @@ editing here:
   that is how #925's clamp still collapsed a
   clamped-at-minimum track space into a pile
   (`WeightStepOutcomeTests`).
+  And a write-time clamp is only half the guarantee (#944): it
+  validates against the membership at PRESS time, so a track
+  session store also rides the retile-time heal
+  (`healTrackSessionWeights`, called from `KiwiCore.retile`;
+  the math is `StackLayout.healedWeights`) — a NEW session
+  weight store joins that heal in the same change, or a
+  membership change after a legal write collapses the space
+  into a pile the clamps cannot see coming.
+  `TrackWeightHealTests` pins the wiring, `WeightHealTests`
+  the math; the ruling and the stack-zone residue are in
+  `docs/design-decisions.md`.
+  And a track fold consumer — any site needing the folded
+  track partition: the render, the `track.swap` guard, the
+  heal — takes `TrackLayout.foldedPartition`, never a hand
+  assembly of `counts` → `overflowCap` beside it. The hand
+  copy shipped at three sites and drifted before the #944
+  rounds extracted the one assembly; nothing scans for a new
+  hand copy, so each new consumer owes the routing
+  deliberately — a fold-rule change that updates the render
+  and misses a hand copy re-opens the exact divergence the
+  extraction closed.
 - An **explicit settings apply must `retile(force: true)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

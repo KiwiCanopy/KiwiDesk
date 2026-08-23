@@ -159,8 +159,10 @@ extension StackLayout {
     /// clamped-at-minimum write cross the layouts' cascade
     /// checks by exactly the gaps (#925's residue), and the
     /// hand-copied subtraction is precisely the drift that
-    /// shipped it — so the three resize call sites share this
-    /// one copy.
+    /// shipped it — so every weight clamp and heal divides
+    /// this one copy (the track paths through
+    /// `TrackLayout.acrossSpan`/`alongSpan`, which own the
+    /// axis→gap selection the same way).
     public static func weightedSpan(
         region: Double,
         outer: Double,

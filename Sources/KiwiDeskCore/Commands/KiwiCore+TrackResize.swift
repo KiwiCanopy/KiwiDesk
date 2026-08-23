@@ -113,21 +113,15 @@ extension KiwiCore {
         // (`overflowCap`) while this clamp reasons over the
         // per-marker `ranges`, so it subtracts more gaps than
         // the layout — tighter, in the safe direction: it can
-        // cue a refusal early, never admit a pile. Per-track
-        // minimums: a track spans all its members across the
-        // axis, so its tightest member binds it.
-        let gaps = tiler.settings.gaps(for: space.id)
-        let gap =
-            vertical
-            ? gaps.inner.horizontal : gaps.inner.vertical
-        let outer =
-            vertical
-            ? gaps.outer.left + gaps.outer.right
-            : gaps.outer.top + gaps.outer.bottom
-        let effectiveSpan = StackLayout.weightedSpan(
+        // cue a refusal early, never admit a pile. (The #944
+        // heal deliberately answers the fold the other way —
+        // its doc owns why.) Per-track minimums: a track spans
+        // all its members across the axis, so its tightest
+        // member binds it.
+        let effectiveSpan = TrackLayout.acrossSpan(
             region: span,
-            outer: Double(outer),
-            innerGap: Double(gap),
+            gaps: tiler.settings.gaps(for: space.id),
+            vertical: vertical,
             count: ranges.count
         )
         let trackMins = ranges.map {
@@ -172,18 +166,17 @@ extension KiwiCore {
                 )
             }
         }
-        // Key the weight to the first LOCAL member of the
-        // track: a traveler heading it (#414 v2) is not in
-        // `space.windows`, so an entry under its id could never
-        // be pruned (orphan; recycled-id hazard, #308) and
-        // stops applying the moment it leaves. While the
+        // Key the weight to the first LOCAL member of the track
+        // (`localHead` owns the traveler argument). While a
         // traveler heads the track the layout still reads the
         // head's (default) weight — an accepted wobble, see
         // design-decisions.
         guard
-            let head = tiled[ranges[track]].first(where: {
-                space.windows.contains($0)
-            })
+            let head = TrackLayout.localHead(
+                ofTrack: ranges[track],
+                tiled: tiled,
+                members: space.windows
+            )
         else { return .fail("track has no local window") }
         state.workspaces.withSpace(space.id) {
             $0.trackWeights[head] = value
@@ -243,18 +236,10 @@ extension KiwiCore {
         // the across-tracks knob above (#933): the layout
         // divides the span minus the gaps between the track's
         // windows, and each member carries its own floor.
-        let gaps = tiler.settings.gaps(for: space.id)
-        let gap =
-            vertical
-            ? gaps.inner.vertical : gaps.inner.horizontal
-        let outer =
-            vertical
-            ? gaps.outer.top + gaps.outer.bottom
-            : gaps.outer.left + gaps.outer.right
-        let effectiveSpan = StackLayout.weightedSpan(
+        let effectiveSpan = TrackLayout.alongSpan(
             region: span,
-            outer: Double(outer),
-            innerGap: Double(gap),
+            gaps: tiler.settings.gaps(for: space.id),
+            vertical: vertical,
             count: column.count
         )
         let members = Array(column)

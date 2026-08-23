@@ -38,30 +38,21 @@ public struct TrackLayout: LayoutSystem {
         // columns can't hold min size, the fit-count reduces (the
         // limit is display-agnostic; the display decides at render
         // time), never grows past it.
-        let markerCount = Self.counts(
-            of: windows,
-            breaks: context.trackBreaks,
-            cap: 0
-        ).count
-        let geoCap = Self.geometricCap(for: context)
         // The render cap folds the surplus past the normal
         // capacity (`params.normalCap`: fixed `count`, or `.max`
         // when auto tracks caps by geometry alone) OR the
-        // geometric fit into one far-edge overflow track.
-        let (effectiveCap, overflows) = Self.overflowCap(
-            markerCount: markerCount,
-            normalCap: params.normalCap,
-            geoCap: geoCap
-        )
-        let counts = Self.counts(
+        // geometric fit into one far-edge overflow track. The
+        // last slot is the overflow track whenever capacity is
+        // exceeded — even when it holds a single window (the
+        // N+1th track past a fixed limit), so no actual merge is
+        // needed. `foldedPartition` is the one copy of this
+        // assembly, shared with the swap guard and the heal.
+        let (counts, _, _, overflowTrack) = Self.foldedPartition(
             of: windows,
             breaks: context.trackBreaks,
-            cap: effectiveCap
+            normalCap: params.normalCap,
+            geoCap: Self.geometricCap(for: context)
         )
-        // The last slot is the overflow track whenever capacity is
-        // exceeded — even when it holds a single window (the N+1th
-        // track past a fixed limit), so no actual merge is needed.
-        let overflowTrack = overflows ? counts.count - 1 : nil
         let weights = Self.ranges(of: counts).map {
             Self.weight(
                 ofTrack: $0,
@@ -75,8 +66,17 @@ public struct TrackLayout: LayoutSystem {
         let total = weights.reduce(0, +)
         // The min-size cap shares the stack's authority (#44/#67):
         // when even the merged tracks can't hold min_window_size
-        // (a degenerate span, or a heavily-weighted track), the
-        // whole space cascades — physics, not a knob.
+        // (a degenerate span), the whole space cascades —
+        // physics, not a knob. A heavily-weighted track no
+        // longer reaches this check through the session stores:
+        // write-time clamps (#933) refuse one at press time and
+        // the retile-time heal (#944) — which reasons over this
+        // check's own folded partition — shaves one a
+        // membership change left behind. So tripping it here
+        // means the span itself cannot hold the members, a
+        // transient no heal has seen yet, or a traveler's visit
+        // (the heal deliberately reads LOCAL members; its doc
+        // owns why).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),

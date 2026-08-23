@@ -3679,6 +3679,17 @@ and mouse resizes share these clamps and cues. What the
   single
   track cannot trade cross-axis area, and a window alone in
   its track has no share to grow; both report an error.
+  In the track layout — and only there — session weights are
+  also **healed** whenever the arrangement changes around them
+  (#944): a weight that was legal when you resized can stop
+  fitting once another track opens or a member joins a track —
+  the layout would answer by collapsing the space into an
+  overlap pile — so the next layout pass shaves the largest
+  weights just enough that every track and share can still
+  hold `min_window_size`. Weights you set that still fit are
+  never touched. A stack column's per-window weights keep only
+  the write-time clamp; that asymmetry is deliberate (see the
+  accepted limitations).
 
 **Where the ratio write lands (#458):** a space with an authored
 per-space override of the field (`bsp.set_ratio_h_override`, the
