@@ -86,6 +86,12 @@ extension SettingsButtonStyleConventionTests {
                 "Two Links taking plain style — the Release Notes "
                     + "pointer and the support ask"
             ),
+            "ContextShortcut.swift": (
+                1, ".buttonStyle(.plain)",
+                "The chord popover's container style for the "
+                    + "seam-fed menu buttons, which live in the "
+                    + "call sites' builder files (#845)"
+            ),
             // Moved from `PresetsSection.swift` with the card
             // itself in #859. The reason is also CORRECTED: the
             // entry said "Picker taking plain style" and this file

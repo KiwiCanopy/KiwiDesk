@@ -232,7 +232,7 @@ struct SpacesSection: View {
         // on the row whose controls hold focus — the row itself
         // is not focusable, its fields and buttons are, and the
         // seam's focused-value publication covers descendants.
-        .rowActions(id: space) { contextActions(space) }
+        .rowActions { contextActions(space) }
         // Lifted while dragged: the row itself is what moves
         // (no system ghost), stepping slot to slot — it never
         // leaves the column.

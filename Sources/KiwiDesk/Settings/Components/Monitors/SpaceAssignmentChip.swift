@@ -105,7 +105,7 @@ struct SpaceAssignmentChip: View {
             // and a whole-chip `Menu` is what took the drag.
             // The hidden chord anchor draws nothing and
             // consumes no mouse-down.
-            .rowActions(id: space) { menu }
+            .rowActions { menu }
     }
 
     private var capsule: some View {

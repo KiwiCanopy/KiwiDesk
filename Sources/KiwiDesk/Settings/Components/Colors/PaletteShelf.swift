@@ -143,9 +143,7 @@ struct PaletteShelf: View {
                         // and Delete are reached via
                         // right-click, VoiceOver actions, or ⌃.
                         // on the focused tile.
-                        .rowActions(id: palette.name) {
-                            userMenu(palette)
-                        }
+                        .rowActions { userMenu(palette) }
                 }
                 addTile
             }

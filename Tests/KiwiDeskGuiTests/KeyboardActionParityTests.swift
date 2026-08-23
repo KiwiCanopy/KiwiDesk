@@ -60,9 +60,8 @@ struct KeyboardActionParityTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            if source.contains("rowActions(id:")
-                || source.contains("rowActions(\n")
-                || source.contains(".rowActions(")
+            if source.contains("rowActions {")
+                || source.contains("rowActions(")
             {
                 seamCallFiles += 1
             }
@@ -112,18 +111,21 @@ struct KeyboardActionParityTests {
     }
 
     /// The seam's own composition, pinned structurally: the
-    /// three channels each hand off to the ONE `menu()` token,
-    /// the chord is exactly `⌃.` (prose in gui.md and the user
-    /// guide states it, and this needle is what keeps the code
-    /// from drifting under that prose — prover residue,
-    /// 2026-08-23), and the hidden anchor exists only for the
-    /// row whose identity matches the published focus — the
-    /// window-wide first-in-hierarchy resolution that
-    /// cross-targeted destructive items is what the gate
-    /// removed (#845 review blocker). Wiring pins, not
-    /// behavior: whether the chord LANDS is the device
-    /// checklist's, stated in the seam's doc.
-    @Test("the seam composes one builder, one chord, focus-gated")
+    /// menu channels each hand off to the ONE `menu()` token,
+    /// the chord is exactly `⌃.` matched in one place (prose in
+    /// gui.md and the user guide states it, and this needle is
+    /// what keeps the code from drifting under that prose —
+    /// prover residue, 2026-08-23), and delivery is the ONE key
+    /// monitor resolving the focused row and popping its REAL
+    /// context menu with a synthetic right-click — per-row
+    /// `.keyboardShortcut` bindings resolve first-in-hierarchy
+    /// and cross-targeted destructive items (#845 review
+    /// blocker), and a focus-gated hidden `Menu` never received
+    /// the key on AppKit-backed focus at all (device QA
+    /// 2026-08-23). Wiring pins, not behavior: whether the
+    /// chord LANDS is the device checklist's, stated in the
+    /// seam's doc.
+    @Test("the seam composes one builder, one chord, one monitor")
     func seamComposesOneBuilderChordAndFocusGate() throws {
         let file =
             settingsDir
@@ -135,9 +137,12 @@ struct KeyboardActionParityTests {
         for needle in [
             ".contextMenu { menu() }",
             ".accessibilityActions { menu() }",
-            ".focusedValue(\\.rowActionFocus, id)",
-            "if focusedRow == id {",
-            ".keyboardShortcut(\".\", modifiers: .control)",
+            ".focusedValue(\\.rowActionFocus, catcher)",
+            "charactersIgnoringModifiers == \".\"",
+            "== .control",
+            "addLocalMonitorForEvents(",
+            "target.token?.openMenu?()",
+            ".popover(",
         ] {
             #expect(
                 source.contains(needle),

@@ -25,30 +25,14 @@ extension View {
         draft: Binding<String>
     ) -> some View {
         if automatic {
-            modifier(
-                AutomaticRowActions(hex: hex, draft: draft)
-            )
+            rowActions {
+                automaticItem(hex: hex, draft: draft)
+            }
         } else {
             self
         }
     }
 
-}
-
-/// Routes the well's one menu item through the `rowActions`
-/// seam. A well has no domain identity of its own, so the chord
-/// routing takes a stable per-mount `UUID` — never persisted,
-/// only compared against the focused row's published identity.
-private struct AutomaticRowActions: ViewModifier {
-    let hex: Binding<String>
-    let draft: Binding<String>
-    @State private var rowID = UUID()
-
-    func body(content: Content) -> some View {
-        content.rowActions(id: rowID) {
-            automaticItem(hex: hex, draft: draft)
-        }
-    }
 }
 
 /// The one "Automatic" item, built once for every route so a
