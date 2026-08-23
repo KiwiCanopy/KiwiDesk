@@ -1609,6 +1609,37 @@ Four rulings sharpen that:
   event — measuring first-event → last-event resized only part
   of the way.
 
+**Session weights are healed at retile, not validated forever
+at write time (#944).** [Principle] The write-time clamps above
+validate a weight against the membership at PRESS time, and
+that is the only moment they can see: a track opening later, a
+member joining a track, or the span shrinking (a display
+change, waking to a smaller screen) can leave a legally-written
+weight squeezing the smallest share below `min_window_size` —
+and the layouts answer infeasible weights by collapsing the
+whole group into an overlap pile, which live QA read as "resize
+is broken", not as physics. So every layout pass re-checks the
+track session stores against the CURRENT membership and span
+and shaves the extremes: a waterline cap derived from the same
+`maxColumnTotal`/`weightedSpan` authorities the clamps and the
+cascade check share, landing the smallest share exactly at the
+margined minimum, touching nothing below the cap, and logging
+itself (a silent heal removes the symptom that makes a defect
+findable). Healing at the retile choke point rather than at
+each membership-change site means no site can forget to arm it
+and no latch can go stale; healing rather than piling because
+the pile destroys the whole arrangement to preserve a number
+the user has no way to see. Count-driven overflow is untouched:
+when the span cannot hold the members at ANY weights, the
+overflow folds stay the honest answer. Deliberate residue: the
+stack layout's zone shares keep write-time clamps only — a
+zone's membership shifts with `master_count` and spawns too,
+but its overflow degrades to a cascade inside the zone, not a
+whole-space collapse, and the heal joins it only if live QA
+ever measures that class. An explicit `balance` verb stays a
+possible future escape hatch, not shipped — the heal removes
+the defect, and 1.0 adds no new configuration axes (#663).
+
 **The focused ring stands down while an own key window that is
 not the focus anchor is active (#933).** Sparkle's update alert
 is an own titled dialog — tracked and force-floated, per

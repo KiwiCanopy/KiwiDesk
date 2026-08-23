@@ -75,8 +75,14 @@ public struct TrackLayout: LayoutSystem {
         let total = weights.reduce(0, +)
         // The min-size cap shares the stack's authority (#44/#67):
         // when even the merged tracks can't hold min_window_size
-        // (a degenerate span, or a heavily-weighted track), the
-        // whole space cascades — physics, not a knob.
+        // (a degenerate span), the whole space cascades —
+        // physics, not a knob. A heavily-weighted track no
+        // longer reaches this check through the session stores:
+        // write-time clamps (#933) refuse one at press time and
+        // the retile-time heal (#944) shaves one a membership
+        // change left behind — so tripping it here means the
+        // span itself cannot hold the members, or a transient
+        // no heal has seen yet.
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),

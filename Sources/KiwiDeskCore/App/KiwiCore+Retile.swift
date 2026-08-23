@@ -27,6 +27,14 @@ extension KiwiCore {
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        // Session weights are validated at WRITE time against
+        // the membership at press time; a membership or span
+        // change afterwards can leave them infeasible, and the
+        // layouts answer that by piling the whole group (#944).
+        // Heal them here, before the pass renders — every such
+        // change already retiles, so this is the one choke
+        // point and needs no per-site arming.
+        healTrackSessionWeights()
         tiler.retile(
             state: state,
             animated: animated
