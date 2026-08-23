@@ -142,7 +142,7 @@ extension KiwiCore {
             self?.handle(event)
         }
         eventLoop.onIgnoredPanelFocus = { [weak self] pid in
-            self?.ignoredPanelActive.insert(pid)
+            self?.armIgnoredPanel(pid)
         }
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()

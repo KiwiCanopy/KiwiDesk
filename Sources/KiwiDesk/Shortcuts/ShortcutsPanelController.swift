@@ -45,15 +45,55 @@ final class ShortcutsPanel: NSPanel {
 /// remember (a summoned reference, not a window the user parks).
 @MainActor
 final class ShortcutsPanelController: NSObject, NSWindowDelegate {
-    private let core: KiwiCore
+    // Internal, not private: `+Reference.swift` (a separate file,
+    // split for the 350-line ceiling) reads it to build the
+    // panel's content.
+    let core: KiwiCore
     /// Opens Settings ▸ Shortcuts — the one bridge to editing.
     private let onEdit: () -> Void
     private var panel: ShortcutsPanel?
+    /// The app frontmost before `show()` stole activation, to
+    /// hand back on a keyboard-commanded close (#952). nil when
+    /// the summon came from our own process (a Settings-window
+    /// bridge) — that closes back to Settings naturally, and nil
+    /// when nothing has been shown yet. Internal so a test can
+    /// set it directly without calling `show()` (which activates
+    /// the app and builds panels).
+    var returnTarget: NSRunningApplication?
+    /// Machine seam (#565 pattern): the live hand-back, so a
+    /// test can record it instead of touching the real machine.
+    var activateReturnTarget: (NSRunningApplication) -> Void = {
+        $0.activate()
+    }
+    /// Machine seam, live by default: whether KiwiDesk is the
+    /// active app, gating the yield in `close`. A test process
+    /// is never the active app, so this is injectable —
+    /// otherwise the yield gate could never be exercised true
+    /// (the `frontmostPIDProvider` pattern, #565).
+    var isAppActive: () -> Bool = {
+        NSApplication.shared.isActive
+    }
 
     init(core: KiwiCore, onEdit: @escaping () -> Void) {
         self.core = core
         self.onEdit = onEdit
         super.init()
+    }
+
+    /// Whether a close should hand activation back to `target`
+    /// (#952): only a keyboard-commanded close (`commanded` —
+    /// Escape, the toggle-close, `closeIfOpen`'s layer switch)
+    /// while KiwiDesk is still the active app, with a remembered
+    /// target. A click-away close (`windowDidResignKey`) passes
+    /// `commanded: false` — the clicked app is already active,
+    /// and re-activating the remembered one would fight it. Pure
+    /// so all four arms are directly testable without NSApp.
+    static func shouldYield(
+        commanded: Bool,
+        appActive: Bool,
+        target: NSRunningApplication?
+    ) -> Bool {
+        commanded && appActive && target != nil
     }
 
     func show() {
@@ -64,7 +104,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
                 core: core
             ),
             onEdit: { [weak self] in
-                self?.close()
+                // A click, not a keyboard command, and its next
+                // step is Settings — our own app — coming
+                // forward, not the remembered app, so this does
+                // not yield (#952).
+                self?.close(yieldingActivation: false)
                 self?.onEdit()
             }
         )
@@ -86,16 +130,21 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // A layer switch while it's up auto-closes it (#603, see
         // closeIfOpen) rather than leaving another layer's bindings on
         // screen — reopen to see the new layer.
-        // #952 diagnosis: name what held frontmost before the
-        // summon steals activation — the window focus SHOULD
-        // return there on close.
-        let front =
-            NSWorkspace.shared.frontmostApplication?
-            .bundleIdentifier ?? "none"
+        // Remember what held frontmost before the summon steals
+        // activation, so a keyboard-commanded close can hand it
+        // back (#952) — UNLESS it is our own process (a summon
+        // from Settings' Shortcuts row), which returns there
+        // naturally without a re-activate.
+        let frontmost = NSWorkspace.shared.frontmostApplication
+        returnTarget =
+            frontmost?.processIdentifier
+                == ProcessInfo.processInfo.processIdentifier
+            ? nil : frontmost
+        let front = frontmost?.bundleIdentifier ?? "none"
         panelLog.log(
             "KiwiDesk: sheet show; front \(front, privacy: .public)"
         )
-        NSApp.activate(ignoringOtherApps: true)
+        NSApplication.shared.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
 
@@ -104,25 +153,50 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     /// never leaves the panel.
     func toggle() {
         if let panel, panel.isVisible {
-            close()
+            close(yieldingActivation: true)
         } else {
             show()
         }
     }
 
-    private func close() {
+    /// Orders the panel out. `yieldingActivation` is true for
+    /// every keyboard-commanded close — Escape, this toggle-off,
+    /// and `closeIfOpen`'s layer switch — where the user's focus
+    /// context is the app `show()` remembered; `false` for
+    /// `windowDidResignKey`, whose click-away has already
+    /// activated the clicked app (#952 ruling). `returnTarget` is
+    /// consumed (nilled) on every close, yielding or not, so a
+    /// double close — this, then a resign-key close it triggers —
+    /// cannot yield twice. Internal so a test can call it without
+    /// `show()`, which activates the app and builds panels.
+    func close(yieldingActivation: Bool) {
         // #952 diagnosis: after orderOut, macOS re-keys the
         // app's next window — log what it picked one turn
         // later, and which app is frontmost then. The steal
         // is expected exactly when our Settings window is the
         // pick.
-        let key = NSApp.keyWindow?.title ?? "none"
+        let key = NSApplication.shared.keyWindow?.title ?? "none"
         panelLog.log(
             "KiwiDesk: sheet close; key \(key, privacy: .public)"
         )
+        // Consume the target BEFORE orderOut: ordering a key
+        // panel out fires `windowDidResignKey`, whose re-entrant
+        // `close(yieldingActivation: false)` would nil
+        // `returnTarget` under this frame — leaving the Escape
+        // yield dead in production while every test (which
+        // orders out no real key panel) stays green.
+        let target = returnTarget
+        returnTarget = nil
         panel?.orderOut(nil)
+        if Self.shouldYield(
+            commanded: yieldingActivation,
+            appActive: isAppActive(),
+            target: target
+        ), let target {
+            activateReturnTarget(target)
+        }
         DispatchQueue.main.async {
-            let key = NSApp.keyWindow?.title ?? "none"
+            let key = NSApplication.shared.keyWindow?.title ?? "none"
             let front =
                 NSWorkspace.shared.frontmostApplication?
                 .bundleIdentifier ?? "none"
@@ -142,7 +216,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     /// Reopening (⌃⌥K) rebuilds it for the new layer.
     func closeIfOpen() {
         guard let panel, panel.isVisible else { return }
-        close()
+        close(yieldingActivation: true)
     }
 
     // MARK: - Panel construction
@@ -164,7 +238,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             .canJoinAllSpaces, .fullScreenAuxiliary,
         ]
         panel.delegate = self
-        panel.onCancel = { [weak self] in self?.close() }
+        panel.onCancel = { [weak self] in
+            self?.close(yieldingActivation: true)
+        }
         return panel
     }
 
@@ -207,102 +283,13 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         } ?? NSScreen.main
     }
 
-    // MARK: - Reference data
-
-    /// The shortcuts for the active layer. Nil ONLY when the config
-    /// is genuinely owned by `init.lua` (not GUI-managed) — the view
-    /// then shows its "managed by init.lua" placeholder.
-    ///
-    /// Prefers the live, resolved snapshot (what Carbon actually has
-    /// installed). When window management is paused — no Accessibility
-    /// permission, or bindings not applied yet — there is no snapshot;
-    /// for a GUI-managed config we fall back to the CONFIGURED layers
-    /// from gui.json so the user still sees their shortcuts (defined,
-    /// just not live right now) rather than a misleading placeholder.
-    private func buildReference() -> ShortcutsReference? {
-        let layers: [KeyLayer]
-        let activeLayer: String
-        let config: GuiConfig
-        if let snapshot = core.liveKeybindingSnapshot() {
-            // Live: the running engine's spaces match the resolved
-            // bindings, so the live-overlaid config is correct.
-            layers = snapshot.keyLayers
-            activeLayer = snapshot.activeLayerName
-            config = core.loadGuiConfig()
-        } else if core.isGuiManaged,
-            let raw = core.persistedGuiConfig()
-        {
-            // Paused (no Accessibility): the engine hasn't discovered
-            // any spaces, so loadGuiConfig would overlay an EMPTY live
-            // space list and misfile every space shortcut into Custom.
-            // Read the persisted gui.json directly — it keeps the
-            // authored spaces and layers.
-            layers = raw.layers
-            activeLayer = raw.layers.first?.name ?? KeyLayer.defaultName
-            config = raw
-        } else {
-            return nil
-        }
-        let layer =
-            layers.first { $0.name == activeLayer }
-            ?? layers.first
-            ?? KeyLayer.defaultLayer
-        // Two-source read: the layers supply the bindings; the config
-        // supplies only spaces / icons / step, used to *generate
-        // candidate preset rows* that are then intersected with the
-        // actual bindings. A transient disagreement (space or step
-        // edited but not yet re-applied) can only misfile a binding
-        // — never hide or invent one — which stays safe for a
-        // read-only glance panel. Since #820 the misfile can land
-        // in Inactive as well as Custom, and that band's caption
-        // ASSERTS the Space has left the list; the window is the
-        // beat between a space edit and its apply, and it closes
-        // itself, exactly as the Custom misfile does.
-        let reference = ShortcutsReferenceBuilder.build(
-            layer: layer,
-            spaces: config.spaces,
-            spaceIcons: config.settings.spaceIcons,
-            resizeStep: Int(config.settings.resizeStep),
-            layerNames: layers.map(\.name)
-        )
-        return withAppGlyphs(
-            reference,
-            settings: config.settings
-        )
-    }
-
-    /// #294: when the bar renders App Font glyphs, the Apps
-    /// band leads with the same glyph; apps without one keep
-    /// their bundle icon. Deliberately keyed on the GLOBAL
-    /// symbol style — the panel spans all layouts, so a
-    /// Lua-only per-layout override can't (and shouldn't)
-    /// steer it.
-    private func withAppGlyphs(
-        _ reference: ShortcutsReference,
-        settings: TilingSettings
-    ) -> ShortcutsReference {
-        let source = settings.appBarStyle.iconSource
-        // Allocation early-out only — the authoritative gate
-        // lives in the resolver; mapping through it with an
-        // image source would just write nils.
-        guard source == .appFont else { return reference }
-        var out = reference
-        out.apps = reference.apps.map { row in
-            var row = row
-            row.glyph = core.appFont.glyph(
-                forAppName: row.label,
-                source: source
-            )
-            return row
-        }
-        return out
-    }
-
     // MARK: - NSWindowDelegate
 
     /// Click-away dismissal: losing key closes the panel, the
-    /// Character-Viewer / Quick-Look dismissal gesture.
+    /// Character-Viewer / Quick-Look dismissal gesture. The
+    /// click already activated whatever app it landed in, so
+    /// this does not yield activation back (#952).
     func windowDidResignKey(_ notification: Notification) {
-        close()
+        close(yieldingActivation: false)
     }
 }
