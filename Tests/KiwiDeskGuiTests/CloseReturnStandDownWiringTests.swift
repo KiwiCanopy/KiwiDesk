@@ -65,8 +65,12 @@ struct CloseReturnStandDownWiringTests {
     @Test("the close-return raise asks the stand-down")
     func raiseConditionAsksTheStandDown() throws {
         let text = try eventsSource()
-        // A missing anchor means the raise's own condition
-        // moved: re-anchor this needle rather than deleting it.
+        // First match is the shared local's DEFINITION (the
+        // raise's own condition repeats the phrase three lines
+        // later), so the 240-char window spans definition and
+        // raise condition together. A missing anchor means the
+        // whole close-return tail moved: re-anchor this needle
+        // rather than deleting it.
         let anchor = "effects.removedWindow?.focusLost == true"
         let at = try #require(text.range(of: anchor))
         // Scoped to the raise's condition, not the whole file:
