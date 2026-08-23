@@ -40,7 +40,7 @@ extension KiwiCore {
             let front,
             front == focused.pid,
             eventLoop.observes(pid: focused.pid),
-            !ignoredPanelActive.contains(focused.pid)
+            !ignoredPanel.active.contains(focused.pid)
         else {
             // The hotkey path discards the response, so a denial
             // is otherwise invisible — the "#483 `_and_follow`

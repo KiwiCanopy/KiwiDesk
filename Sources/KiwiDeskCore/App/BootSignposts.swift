@@ -18,13 +18,14 @@ import os
 /// subsystem's `onLog` seam, so a field report's syslog names the
 /// offending app without Instruments attached.
 enum BootSignpost {
-    /// Keep this string equal to the `.app`'s
-    /// `CFBundleIdentifier` (scripts/build-app.sh writes that
-    /// one) — the whole point is that one subsystem predicate
-    /// finds the app's log lines and these intervals together,
-    /// so whoever changes either copy must change both.
+    /// `KiwiLog.subsystem` (one copy for every Swift logger)
+    /// must stay equal to the `.app`'s `CFBundleIdentifier`
+    /// (scripts/build-app.sh writes that one) — the whole point
+    /// is that one subsystem predicate finds the app's log
+    /// lines and these intervals together, so whoever changes
+    /// either must change both.
     static let signposter = OSSignposter(
-        subsystem: "com.kiwicanopy.kiwidesk",
+        subsystem: KiwiLog.subsystem,
         category: "boot"
     )
 

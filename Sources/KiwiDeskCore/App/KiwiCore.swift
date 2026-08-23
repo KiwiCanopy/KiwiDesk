@@ -210,17 +210,10 @@ public final class KiwiCore {
     /// `KiwiCore+LaunchRestore.swift`, all four live by default.
     var openOrFocus = OpenOrFocusSeams()
 
-    /// Pids of apps currently showing a focused ignored panel
-    /// (Ghostty's quick terminal). Set when the event loop
-    /// filters the panel's own focus report (#21); consumed on
-    /// the app's next managed-window focus — the dismiss
-    /// transition, where the app re-reports its (spurious) main
-    /// window as focused (#244). At most one pid in practice.
-    var ignoredPanelActive: Set<pid_t> = []
-    /// Deadline through which the flag survives a report for
-    /// another app (#951 dismissal grace; argued in
-    /// `KiwiCore+IgnoredPanel.swift`). nil outside grace.
-    var ignoredPanelDismissDeadline: Date?
+    /// The ignored-panel distrust (#21/#244/#951) — the state's
+    /// own docs, and the one state machine mutating it, live in
+    /// `KiwiCore+IgnoredPanel.swift`.
+    var ignoredPanel = IgnoredPanelDistrust()
 
     /// Z-order restores whose raise sequence has not re-asserted
     /// focus yet (#186). The pile raises steal focus window by

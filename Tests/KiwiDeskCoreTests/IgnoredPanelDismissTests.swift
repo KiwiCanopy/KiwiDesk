@@ -68,12 +68,12 @@ struct IgnoredPanelDismissTests {
     @Test("onIgnoredPanelFocus flags the app's pid")
     func signalSetsFlag() {
         let core = makeCore()
-        #expect(core.ignoredPanelActive.isEmpty)
+        #expect(core.ignoredPanel.active.isEmpty)
         // The event loop fires this when it filters an ignored
         // panel's own focus report (#21); the wiring must flag
         // the pid so the dismiss transition can be caught.
         core.eventLoop.onIgnoredPanelFocus(7)
-        #expect(core.ignoredPanelActive.contains(7))
+        #expect(core.ignoredPanel.active.contains(7))
     }
 
     @Test(
@@ -84,13 +84,13 @@ struct IgnoredPanelDismissTests {
     )
     func dismissDoesNotFollowCrossSpace() {
         let core = twoSpaceSetup()
-        core.ignoredPanelActive.insert(2)
+        core.ignoredPanel.active.insert(2)
         core.handle(.windowFocused(WindowID(2)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
         #expect(
             core.state.workspaces.activeSpace == SpaceID(1)
         )
-        #expect(core.ignoredPanelActive.isEmpty)
+        #expect(core.ignoredPanel.active.isEmpty)
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
@@ -123,12 +123,12 @@ struct IgnoredPanelDismissTests {
         // The user was on window 1 before opening the panel;
         // window 2 is the app's managed main window.
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
-        core.ignoredPanelActive.insert(2)
+        core.ignoredPanel.active.insert(2)
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
         )
-        #expect(core.ignoredPanelActive.isEmpty)
+        #expect(core.ignoredPanel.active.isEmpty)
     }
 }

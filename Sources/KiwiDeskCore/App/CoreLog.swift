@@ -1,6 +1,17 @@
 import Foundation
 import os
 
+/// The unified-log subsystem every KiwiDesk `Logger` uses — one
+/// public constant so Core's loggers and the GUI's cannot drift
+/// from the documented capture predicate
+/// (`subsystem == "com.kiwicanopy.kiwidesk"`). Public because
+/// the GUI target's loggers read it. `scripts/build-app.sh`
+/// bakes the same string as the bundle id and cannot read
+/// Swift — that copy carries its own change-both burden.
+public enum KiwiLog {
+    public static let subsystem = "com.kiwicanopy.kiwidesk"
+}
+
 /// The unified-log write under every `var onLog` seam in Core, and
 /// under `KiwiCore.onLog` itself.
 ///
@@ -40,7 +51,7 @@ enum CoreLog {
     /// nothing. The messages carry window ids and app names,
     /// never user content, so public is the correct privacy.
     private static let logger = Logger(
-        subsystem: "com.kiwicanopy.kiwidesk",
+        subsystem: KiwiLog.subsystem,
         category: "core"
     )
 

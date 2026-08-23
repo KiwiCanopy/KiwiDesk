@@ -6,7 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Issue #951: a genuine click on another window cleared
-/// `ignoredPanelActive` synchronously, but a dismissed panel
+/// `ignoredPanel.active` synchronously, but a dismissed panel
 /// app's stale main-window re-report could land 125-200 ms
 /// later and be honored — the flag must survive a short
 /// dismissal grace instead. `IgnoredPanelDismissTests` (#244)
@@ -60,13 +60,13 @@ struct IgnoredPanelGraceTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.armIgnoredPanel(3)
         // The click on B: this used to clear the flag
-        // synchronously via `ignoredPanelActive.removeAll()`.
+        // synchronously via `ignoredPanel.active.removeAll()`.
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(2)
         )
-        #expect(core.ignoredPanelActive.contains(3))
+        #expect(core.ignoredPanel.active.contains(3))
         // The panel app's stale re-report, landing after the
         // click — must still be consumed, not honored.
         core.handle(.windowFocused(WindowID(3)))
@@ -100,8 +100,8 @@ struct IgnoredPanelGraceTests {
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(3)
         )
-        #expect(core.ignoredPanelActive.isEmpty)
-        #expect(core.ignoredPanelDismissDeadline == nil)
+        #expect(core.ignoredPanel.active.isEmpty)
+        #expect(core.ignoredPanel.dismissDeadline == nil)
     }
 
     @Test(
@@ -117,12 +117,12 @@ struct IgnoredPanelGraceTests {
         addWindow(core, 2, pid: 9)
         core.state.workspaces.focus(WindowID(2), in: SpaceID(1))
         core.armIgnoredPanel(9)
-        core.ignoredPanelDismissDeadline = Date(
+        core.ignoredPanel.dismissDeadline = Date(
             timeIntervalSinceNow: -1
         )
         core.handle(.windowFocused(WindowID(1)))
-        #expect(core.ignoredPanelActive.isEmpty)
-        #expect(core.ignoredPanelDismissDeadline == nil)
+        #expect(core.ignoredPanel.active.isEmpty)
+        #expect(core.ignoredPanel.dismissDeadline == nil)
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
                 == WindowID(1)
@@ -136,12 +136,39 @@ struct IgnoredPanelGraceTests {
         )
     }
 
+    @Test(
+        """
+        A FLAGGED app's report after the grace expired is \
+        honored, not consumed — the past deadline clears the \
+        flags whatever pid reports (review, 2026-08-23): \
+        without the transition, a genuine clickless focus of \
+        the panel app minutes later was still eaten
+        """
+    )
+    func expiredGraceHonorsFlaggedAppReport() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 1)
+        addWindow(core, 2, pid: 9)
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
+        core.armIgnoredPanel(9)
+        core.ignoredPanel.dismissDeadline = Date(
+            timeIntervalSinceNow: -1
+        )
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(core.ignoredPanel.active.isEmpty)
+        #expect(core.ignoredPanel.dismissDeadline == nil)
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.focused
+                == WindowID(2)
+        )
+    }
+
     @Test("armIgnoredPanel resets an existing dismiss deadline")
     func armResetsDeadline() {
         let core = makeCore()
-        core.ignoredPanelDismissDeadline = Date()
+        core.ignoredPanel.dismissDeadline = Date()
         core.armIgnoredPanel(5)
-        #expect(core.ignoredPanelActive.contains(5))
-        #expect(core.ignoredPanelDismissDeadline == nil)
+        #expect(core.ignoredPanel.active.contains(5))
+        #expect(core.ignoredPanel.dismissDeadline == nil)
     }
 }

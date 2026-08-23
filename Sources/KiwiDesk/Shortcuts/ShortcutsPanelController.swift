@@ -7,9 +7,17 @@ import os
 /// `NSLog` — macOS redacts NSLog content to `<private>` in
 /// `log show`, which blinds the capture (2026-08-23).
 private let panelLog = Logger(
-    subsystem: "com.kiwicanopy.kiwidesk",
+    subsystem: KiwiLog.subsystem,
     category: "gui"
 )
+
+/// One wrapper so every diagnosis line carries the
+/// `KiwiDesk: ` capture prefix and the public privacy the
+/// documented predicate depends on — a hand-spelled prefix
+/// forgotten once is a line the capture silently drops.
+private func logPanel(_ message: String) {
+    panelLog.log("KiwiDesk: \(message, privacy: .public)")
+}
 
 /// A floating panel that closes on Esc and, via the controller's
 /// resign-key handler, on click-away. Borderless, so it must opt
@@ -141,9 +149,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
                 == ProcessInfo.processInfo.processIdentifier
             ? nil : frontmost
         let front = frontmost?.bundleIdentifier ?? "none"
-        panelLog.log(
-            "KiwiDesk: sheet show; front \(front, privacy: .public)"
-        )
+        logPanel("sheet show; front \(front)")
         NSApplication.shared.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
@@ -176,9 +182,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // is expected exactly when our Settings window is the
         // pick.
         let key = NSApplication.shared.keyWindow?.title ?? "none"
-        panelLog.log(
-            "KiwiDesk: sheet close; key \(key, privacy: .public)"
-        )
+        logPanel("sheet close; key \(key)")
         // Consume the target BEFORE orderOut: ordering a key
         // panel out fires `windowDidResignKey`, whose re-entrant
         // `close(yieldingActivation: false)` would nil
@@ -187,16 +191,22 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // orders out no real key panel) stays green.
         let target = returnTarget
         returnTarget = nil
-        // Armed BEFORE orderOut: ordering the key panel out
-        // blip-keys another own window (Settings) while the app
-        // is still active, and AX's clickless re-report of it
-        // lands after the yield below — the #952 residue the
-        // dismiss grace consumes.
-        core.distrustOwnDismissHandoff()
+        let active = isAppActive()
+        // Armed BEFORE orderOut, and only on a commanded close
+        // of the still-active app — the one close whose orderOut
+        // blip-keys another own window (Settings), AX's
+        // clickless re-report landing after the yield below
+        // (#952 capture). A click-away close already resigned
+        // active, and the Edit-in-Settings close WANTS the
+        // Settings focus that follows — arming there ate the
+        // intended focus (review, 2026-08-23).
+        if yieldingActivation, active {
+            core.distrustOwnDismissHandoff()
+        }
         panel?.orderOut(nil)
         if Self.shouldYield(
             commanded: yieldingActivation,
-            appActive: isAppActive(),
+            appActive: active,
             target: target
         ), let target {
             activateReturnTarget(target)
@@ -206,12 +216,8 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             let front =
                 NSWorkspace.shared.frontmostApplication?
                 .bundleIdentifier ?? "none"
-            panelLog.log(
-                "KiwiDesk: after close; key \(key, privacy: .public)"
-            )
-            panelLog.log(
-                "KiwiDesk: after close; front \(front, privacy: .public)"
-            )
+            logPanel("after close; key \(key)")
+            logPanel("after close; front \(front)")
         }
     }
 

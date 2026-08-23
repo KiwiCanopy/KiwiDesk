@@ -129,24 +129,43 @@ struct ShortcutsPanelReturnTests {
 
     @Test(
         """
-        Every close arms the dismiss distrust for our own pid \
-        (#952): orderOut blip-keys Settings while the app is \
-        still active, and AX's clickless re-report of it lands \
+        A commanded close of the still-active app arms the \
+        dismiss distrust for our own pid (#952): its orderOut \
+        blip-keys Settings, and AX's clickless re-report lands \
         after the activation yield — the grace must consume it
         """
     )
-    func closeArmsOwnDismissDistrust() {
+    func commandedActiveCloseArmsOwnDismissDistrust() {
         let core = makeTestCore()
         let controller = ShortcutsPanelController(
             core: core,
             onEdit: {}
         )
-        controller.close(yieldingActivation: false)
+        controller.isAppActive = { true }
+        controller.close(yieldingActivation: true)
         #expect(
-            core.ignoredPanelActive.contains(
+            core.ignoredPanel.active.contains(
                 pid_t(ProcessInfo.processInfo.processIdentifier)
             )
         )
+    }
+
+    @Test(
+        """
+        An uncommanded close never arms it — the click-away and \
+        Edit-in-Settings closes are followed by focus the user \
+        INTENDS, and arming there ate it (review, 2026-08-23)
+        """
+    )
+    func uncommandedCloseNeverArms() {
+        let core = makeTestCore()
+        let controller = ShortcutsPanelController(
+            core: core,
+            onEdit: {}
+        )
+        controller.isAppActive = { true }
+        controller.close(yieldingActivation: false)
+        #expect(core.ignoredPanel.active.isEmpty)
     }
 
     // MARK: - A double close cannot yield twice

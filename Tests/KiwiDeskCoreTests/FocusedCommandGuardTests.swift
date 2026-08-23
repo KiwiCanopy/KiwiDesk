@@ -119,7 +119,7 @@ struct FocusedCommandGuardTests {
         core.frontmostPIDProvider = { pid }
         // The app's ignored panel took focus (Ghostty-style): the
         // managed main window is stale behind it.
-        core.ignoredPanelActive.insert(pid)
+        core.ignoredPanel.active.insert(pid)
         #expect(!core.execute("make_floating").isSuccess)
         #expect(core.state.windows[WindowID(1)]?.isFloating == false)
     }
