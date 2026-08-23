@@ -229,6 +229,12 @@ struct TrackWeightHealTests {
         core.state.workspaces.withSpace(space) {
             $0.trackWeights[WindowID(1)] = 2
         }
+        // #660: the claim is "feasible stays untouched", so pin
+        // that the stored 2.0 IS feasible at the defaults — a
+        // gaps bump that tips it would otherwise red this as a
+        // heal regression instead of fixture drift.
+        let before = trackFeasibility(core, space: space)
+        #expect(before.total <= before.limit)
         core.retile()
         #expect(
             core.state.workspaces[space]!
@@ -258,6 +264,21 @@ struct TrackWeightHealTests {
             $0.trackBreaks.removeAll()
             $0.stackWeights[WindowID(1)] = 10
         }
+        // #660: pin the along-axis fit — three shares must FIT
+        // the column's span at the defaults, or the heal's
+        // honest-physics nil turns this red for fixture drift.
+        let screen = TilingEngine.screen(
+            for: space,
+            in: core.state
+        )!
+        let bounds = core.tiler.layoutBounds(on: screen)
+        let along = TrackLayout.alongSpan(
+            region: Double(bounds.height),
+            gaps: core.tiler.settings.gaps(for: space),
+            vertical: true,
+            count: 3
+        )
+        #expect(along >= 3 * (300 + StackLayout.minSizeMargin))
         core.retile()
         let shares =
             core.state.workspaces[space]!.stackWeights

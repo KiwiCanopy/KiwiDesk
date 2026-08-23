@@ -159,6 +159,10 @@ extension KiwiCore {
         var shaved = 0
         for (track, range) in ranges.enumerated()
         where healed[track] != weights[track] {
+            // Over LOCAL tiled members `localHead` is simply the
+            // slice's first window — kept for the one-copy
+            // keying rule it shares with the clamp, whose input
+            // can carry a traveler this one cannot.
             guard
                 let head = TrackLayout.localHead(
                     ofTrack: range,
@@ -220,13 +224,13 @@ extension KiwiCore {
         var shaved = 0
         // `enumerated()` counts from zero regardless of the
         // slice's own indices, so `offset` addresses the
-        // parallel `weights`/`healed` arrays directly.
+        // parallel `weights`/`healed` arrays directly. No
+        // traveler guard here on purpose: `tiled` is the LOCAL
+        // membership (the ruling above), so every member is in
+        // `space.windows` by construction — the clamp keeps its
+        // own guard because its input can carry a traveler.
         for (offset, member) in column.enumerated() {
-            guard healed[offset] != weights[offset],
-                // The membership guard is `resizeTrackShare`'s:
-                // never write under a traveler's id (orphan;
-                // recycled-id hazard, #308).
-                space.windows.contains(member)
+            guard healed[offset] != weights[offset]
             else { continue }
             state.workspaces.withSpace(space.id) {
                 $0.stackWeights[member] = healed[offset]
