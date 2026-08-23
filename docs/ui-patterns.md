@@ -525,8 +525,10 @@ no fixed hex). A `HexColorField` opts into this with an
 (the macOS "Auto appearance" idiom) with an "Automatic"
 placeholder in the hex field — so the adaptive state reads as
 a deliberate shape, never as an empty/broken dot. Clearing back
-to Automatic has two paths: right-click the swatch (a checked
-"Automatic" menu item) or empty the hex field and commit.
+to Automatic goes through the checked "Automatic" menu item —
+offered on every row-menu route (see "Interaction states" ▸ a
+row's menu is one menu) — or by emptying the hex field and
+committing.
 Resolve empty through the mark fallback, never the generic hex
 parser — an unset adaptive color means "adapt," not "broken,"
 so it must land on the adaptive fallback, not the accent color
@@ -965,6 +967,18 @@ ambiguous, rename the wire when the wire term is wrong, and
 expect a mode flag to diverge from its own label by design.
 
 ## Interaction states
+
+**A row's menu is one menu, on every route.** Wherever a row
+offers a contextual menu (palette tiles, space rows, monitor
+assignment chips, adaptive color wells), the same items are its
+right-click menu, its VoiceOver actions, and its keyboard route
+— a chord on the focused row, stated in the user guide's
+keyboard section. One builder feeds all of them through a
+single seam, so the routes cannot disagree; a surface adding a
+row menu gets every route by taking the seam, and a row in the
+family must be focusable so the chord has a target. (#845; the
+seam and its guard are engineering-side, `.claude/rules/gui.md`
+▸ the keyboard path.)
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,

@@ -698,16 +698,27 @@ claim; the obligations a change here takes on:
 
 - **A `.contextMenu` is right-click and nothing else**, macOS
   having no default key that opens a focused control's
-  contextual menu. Any mechanism behind one is also offered as
-  `.accessibilityActions` (for VoiceOver) and `.contextShortcut`
-  (for ⌃. on focused controls, #845), **from the same builder**
-  — never a mirrored list, which is a second place for the
-  menu's contents to go stale. `KeyboardActionParityTests`
-  compares the builder token inside each pair of braces across
-  `Sources/KiwiDesk`, so a hand-copied twin or missing shortcut
-  reds exactly like a missing action. A zero-size hidden `Menu`
-  binds the chord without adding resting clutter or eating the
-  drag on `.draggable` rows.
+  contextual menu. So a row offering one routes it through the
+  ONE composition seam — `rowActions(id:_:)`
+  (`ContextShortcut.swift`) — which takes the builder ONCE and
+  applies right-click, VoiceOver's named actions and the
+  focus-gated keyboard chord itself; a bare channel spelled
+  beside the seam is how a crossed pairing or a stale mirror
+  ships, and `KeyboardActionParityTests` bans it outside the
+  seam file while pinning the seam's own composition (the one
+  builder, the chord, the focus gate). The chord, the hidden
+  anchor mechanism and the focus-gating argument are
+  `ContextShortcut.swift`'s doc's to own — the user-facing copy
+  is `docs/user-guide.md` ▸ Using Settings from the Keyboard,
+  and the ruling behind the shape (a key on the focused row,
+  after a visible `⋯` was rejected twice and a whole-chip
+  `Menu` ate the drag) is `docs/design-decisions.md` ▸ the row
+  menu's keyboard route. Two obligations ride along: a row
+  joining the family must be able to HOLD focus (the
+  assignment chip needed `.focusable()` — an `HStack` has no
+  Tab stop of its own), and the chord's landing is a device
+  fact — eye-confirm with keyboard navigation ON; the guard
+  proves wiring, never behavior.
 - **A control whose label is a sibling `Text` has no name.**
   VoiceOver derives a name from the label a control OWNS;
   a `Text` beside it in an `HStack` names nothing, and the

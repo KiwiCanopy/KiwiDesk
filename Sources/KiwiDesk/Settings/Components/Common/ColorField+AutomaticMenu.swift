@@ -25,39 +25,50 @@ extension View {
         draft: Binding<String>
     ) -> some View {
         if automatic {
-            contextMenu {
-                automaticItem(hex: hex, draft: draft)
-            }
-            .accessibilityActions {
-                automaticItem(hex: hex, draft: draft)
-            }
-            .contextShortcut {
-                automaticItem(hex: hex, draft: draft)
-            }
+            modifier(
+                AutomaticRowActions(hex: hex, draft: draft)
+            )
         } else {
             self
         }
     }
 
-    /// The one "Automatic" item, built once for both routes so a
-    /// change to what it resets cannot reach only one of them.
-    @ViewBuilder
-    fileprivate func automaticItem(
-        hex: Binding<String>,
-        draft: Binding<String>
-    ) -> some View {
-        Button {
-            hex.wrappedValue = ""
-            draft.wrappedValue = ""
-        } label: {
-            if hex.wrappedValue.isEmpty {
-                Label(
-                    L("color_field.automatic", "Automatic"),
-                    systemImage: "checkmark"
-                )
-            } else {
-                Text(L("color_field.automatic", "Automatic"))
-            }
+}
+
+/// Routes the well's one menu item through the `rowActions`
+/// seam. A well has no domain identity of its own, so the chord
+/// routing takes a stable per-mount `UUID` — never persisted,
+/// only compared against the focused row's published identity.
+private struct AutomaticRowActions: ViewModifier {
+    let hex: Binding<String>
+    let draft: Binding<String>
+    @State private var rowID = UUID()
+
+    func body(content: Content) -> some View {
+        content.rowActions(id: rowID) {
+            automaticItem(hex: hex, draft: draft)
+        }
+    }
+}
+
+/// The one "Automatic" item, built once for every route so a
+/// change to what it resets cannot reach only one of them.
+@ViewBuilder
+private func automaticItem(
+    hex: Binding<String>,
+    draft: Binding<String>
+) -> some View {
+    Button {
+        hex.wrappedValue = ""
+        draft.wrappedValue = ""
+    } label: {
+        if hex.wrappedValue.isEmpty {
+            Label(
+                L("color_field.automatic", "Automatic"),
+                systemImage: "checkmark"
+            )
+        } else {
+            Text(L("color_field.automatic", "Automatic"))
         }
     }
 }

@@ -135,17 +135,17 @@ struct PaletteShelf: View {
                         // it without anything new being drawn
                         // (#816).
                         .focused($returningTile, equals: palette.name)
-                        .contextMenu { userMenu(palette) }
-                        // Same builder as named VoiceOver actions
-                        // (#678 Phase 4 pass 10, turn 20a rule 1)
-                        // and keyboard shortcut (#845).
-                        // The tile itself is a `Button`, so it
-                        // takes focus and applies the palette —
-                        // Rename, Export and Delete are reached
-                        // via right-click, VoiceOver actions, or
-                        // ⌃. on the focused tile.
-                        .accessibilityActions { userMenu(palette) }
-                        .contextShortcut { userMenu(palette) }
+                        // ONE builder, three channels, through
+                        // the one seam (#678 Phase 4 pass 10,
+                        // turn 20a rule 1; #845). The tile is a
+                        // `Button`, so it takes focus and
+                        // applies the palette — Rename, Export
+                        // and Delete are reached via
+                        // right-click, VoiceOver actions, or ⌃.
+                        // on the focused tile.
+                        .rowActions(id: palette.name) {
+                            userMenu(palette)
+                        }
                 }
                 addTile
             }

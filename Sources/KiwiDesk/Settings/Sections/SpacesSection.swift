@@ -220,19 +220,19 @@ struct SpacesSection: View {
                     SettingsTheme.hairline
                 )
         )
-        .contextMenu { contextActions(space) }
-        // The same builder as named VoiceOver actions (#678
-        // Phase 4 pass 10, turn 20a rule 1) and the keyboard
-        // shortcut (#845). It matters more here than anywhere
+        // ONE builder, three channels, through the one seam
+        // (#678 Phase 4 pass 10, turn 20a rule 1; #845). It
+        // matters more here than anywhere
         // else in the tree: Move Up, Move Down and Make Fallback
         // have no on-screen control at ALL — the context menu is
         // their only site — so before this the reorder was
         // pointer-only, and so was the fallback choice. The drag
         // handle beside it is not a control and takes no focus.
-        // VoiceOver uses accessibilityActions, and a focused row
-        // opens the menu via ⌃..
-        .accessibilityActions { contextActions(space) }
-        .contextShortcut { contextActions(space) }
+        // VoiceOver uses the named actions, and the chord fires
+        // on the row whose controls hold focus — the row itself
+        // is not focusable, its fields and buttons are, and the
+        // seam's focused-value publication covers descendants.
+        .rowActions(id: space) { contextActions(space) }
         // Lifted while dragged: the row itself is what moves
         // (no system ghost), stepping slot to slot — it never
         // leaves the column.

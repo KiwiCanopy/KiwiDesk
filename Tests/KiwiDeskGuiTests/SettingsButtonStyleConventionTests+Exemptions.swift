@@ -28,7 +28,9 @@ extension SettingsButtonStyleConventionTests {
                     + "plus one icon affordance"
             ),
             "SpaceAssignmentChip.swift": (
-                3, "contextMenu", "Returned to a menu/contextMenu builder"
+                3, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
             ),
             "PaletteShelf.swift": (
                 3, "menuItem", "Returned to a contextMenu builder"
