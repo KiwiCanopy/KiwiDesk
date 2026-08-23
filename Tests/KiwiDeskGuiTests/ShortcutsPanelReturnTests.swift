@@ -1,9 +1,9 @@
 import AppKit
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// Issue #952: `show()` steals activation
 /// (`NSApp.activate(ignoringOtherApps: true)`) so the borderless
@@ -123,6 +123,30 @@ struct ShortcutsPanelReturnTests {
         controller.activateReturnTarget = { recorded = $0 }
         controller.close(yieldingActivation: false)
         #expect(recorded == nil)
+    }
+
+    // MARK: - close arms the own-pid dismiss distrust
+
+    @Test(
+        """
+        Every close arms the dismiss distrust for our own pid \
+        (#952): orderOut blip-keys Settings while the app is \
+        still active, and AX's clickless re-report of it lands \
+        after the activation yield — the grace must consume it
+        """
+    )
+    func closeArmsOwnDismissDistrust() {
+        let core = makeTestCore()
+        let controller = ShortcutsPanelController(
+            core: core,
+            onEdit: {}
+        )
+        controller.close(yieldingActivation: false)
+        #expect(
+            core.ignoredPanelActive.contains(
+                pid_t(ProcessInfo.processInfo.processIdentifier)
+            )
+        )
     }
 
     // MARK: - A double close cannot yield twice

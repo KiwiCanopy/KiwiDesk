@@ -187,6 +187,12 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // orders out no real key panel) stays green.
         let target = returnTarget
         returnTarget = nil
+        // Armed BEFORE orderOut: ordering the key panel out
+        // blip-keys another own window (Settings) while the app
+        // is still active, and AX's clickless re-report of it
+        // lands after the yield below — the #952 residue the
+        // dismiss grace consumes.
+        core.distrustOwnDismissHandoff()
         panel?.orderOut(nil)
         if Self.shouldYield(
             commanded: yieldingActivation,

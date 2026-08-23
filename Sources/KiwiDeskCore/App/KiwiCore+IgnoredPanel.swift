@@ -27,6 +27,25 @@ extension KiwiCore {
         ignoredPanelDismissDeadline = nil
     }
 
+    /// Arms the same dismiss distrust for KIWIDESK'S OWN pid
+    /// (#952): closing the shortcuts summon blip-keys another
+    /// own window (Settings) while the app is still active, and
+    /// AX re-reports it clickless ~60-110 ms later (capture
+    /// 2026-08-23) — AFTER the close's activation yield already
+    /// landed, so honoring it moves state focus, ring and warp
+    /// onto Settings against the yield. The grace consumes that
+    /// handoff report; a genuine click on an own window still
+    /// escapes on provenance (#687). Public because the GUI's
+    /// panel controller is the caller. The residue is the #292
+    /// command guard denying a focused command on an own window
+    /// inside the ≤1 s grace — rare, self-clearing, and the
+    /// same latch semantics every flagged pid already has.
+    public func distrustOwnDismissHandoff() {
+        armIgnoredPanel(
+            pid_t(ProcessInfo.processInfo.processIdentifier)
+        )
+    }
+
     /// Whether the focus report for `id` (its window's pid, if
     /// tracked) is the panel app's stale dismiss re-report and
     /// must be consumed. Mutates the flag/deadline pair for every
