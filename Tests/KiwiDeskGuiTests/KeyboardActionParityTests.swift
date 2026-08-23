@@ -67,8 +67,17 @@ struct KeyboardActionParityTests {
                 seamCallFiles += 1
             }
             guard bareChannelExempt[name] == nil else { continue }
+            // Both the trailing-closure and labeled-argument
+            // spellings: `.contextMenu(menuItems:)` and
+            // `.accessibilityActions(` are the same bare
+            // channel wearing parentheses (re-review,
+            // 2026-08-23). The singular
+            // `.accessibilityAction(named:)` is a different
+            // affordance and deliberately unbanned.
             for marker in [
-                "contextMenu {", "accessibilityActions {",
+                "contextMenu {", "contextMenu(",
+                "accessibilityActions {",
+                "accessibilityActions(",
                 "contextShortcut {",
             ] {
                 #expect(
