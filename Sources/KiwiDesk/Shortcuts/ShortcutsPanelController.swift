@@ -1,6 +1,15 @@
 import AppKit
 import KiwiDeskCore
 import SwiftUI
+import os
+
+/// #952 diagnosis lines. `Logger` + `privacy: .public`, never
+/// `NSLog` — macOS redacts NSLog content to `<private>` in
+/// `log show`, which blinds the capture (2026-08-23).
+private let panelLog = Logger(
+    subsystem: "com.kiwicanopy.kiwidesk",
+    category: "gui"
+)
 
 /// A floating panel that closes on Esc and, via the controller's
 /// resign-key handler, on click-away. Borderless, so it must opt
@@ -80,10 +89,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // #952 diagnosis: name what held frontmost before the
         // summon steals activation — the window focus SHOULD
         // return there on close.
-        let front = NSWorkspace.shared.frontmostApplication
-        NSLog(
-            "KiwiDesk: cheat sheet show; frontmost was %@",
-            front?.bundleIdentifier ?? "none"
+        let front =
+            NSWorkspace.shared.frontmostApplication?
+            .bundleIdentifier ?? "none"
+        panelLog.log(
+            "KiwiDesk: sheet show; front \(front, privacy: .public)"
         )
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
@@ -106,18 +116,21 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // later, and which app is frontmost then. The steal
         // is expected exactly when our Settings window is the
         // pick.
-        NSLog(
-            "KiwiDesk: cheat sheet close; own key window %@",
-            NSApp.keyWindow?.title ?? "none"
+        let key = NSApp.keyWindow?.title ?? "none"
+        panelLog.log(
+            "KiwiDesk: sheet close; key \(key, privacy: .public)"
         )
         panel?.orderOut(nil)
         DispatchQueue.main.async {
-            let front = NSWorkspace.shared
-                .frontmostApplication
-            NSLog(
-                "KiwiDesk: after close; key %@, frontmost %@",
-                NSApp.keyWindow?.title ?? "none",
-                front?.bundleIdentifier ?? "none"
+            let key = NSApp.keyWindow?.title ?? "none"
+            let front =
+                NSWorkspace.shared.frontmostApplication?
+                .bundleIdentifier ?? "none"
+            panelLog.log(
+                "KiwiDesk: after close; key \(key, privacy: .public)"
+            )
+            panelLog.log(
+                "KiwiDesk: after close; front \(front, privacy: .public)"
             )
         }
     }
