@@ -20,8 +20,13 @@ struct TrackWeightTravelerTests {
                 "kiwidesk-weight-traveler-\(UUID().uuidString)"
             )
         let core = makeTestCore(configDirectory: directory)
+        // TALL on purpose: the 3-member shave branch must be
+        // REACHABLE (see the reachability pin below) — on a
+        // shorter display an infeasible 3-member column lands
+        // in `healedWeights`' honest-physics nil and the test
+        // passes with the ruling reverted (review round 3).
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1200, height: 800)
+            CGRect(x: 0, y: 0, width: 800, height: 1400)
         }
         #expect(core.tiler.settings.minWindowSize == 300)
         return core
@@ -52,7 +57,7 @@ struct TrackWeightTravelerTests {
         core.state.workspaces.focus(WindowID(1), in: space)
         core.state.workspaces.withSpace(space) {
             $0.trackBreaks.removeAll()
-            $0.stackWeights[WindowID(1)] = 1.4
+            $0.stackWeights[WindowID(1)] = 3.0
         }
         // A tiled-sticky window homed on ANOTHER space: the
         // active space's effective members inject it (#414 v2),
@@ -79,9 +84,13 @@ struct TrackWeightTravelerTests {
             !core.state.localTiledMembers(of: s1)
                 .contains(WindowID(9))
         )
-        // Divergence precondition: feasible at 2 members,
-        // infeasible at 3 — computed from the same span
-        // authority the heal divides.
+        // Divergence preconditions: feasible at 2 members,
+        // infeasible at 3, AND the 3-member shave branch
+        // reachable (target ≥ count × smallest) — without the
+        // third pin an infeasible 3-member column can land in
+        // the honest-physics nil and the test passes with the
+        // ruling reverted (review round 3). Computed from the
+        // same span authority the heal divides.
         let screen = TilingEngine.screen(
             for: space,
             in: core.state
@@ -100,8 +109,16 @@ struct TrackWeightTravelerTests {
                 minSize: 300
             )
         }
-        #expect(2.4 <= limit(2))
-        #expect(3.4 > limit(3))
+        #expect(4.0 <= limit(2))
+        #expect(5.0 > limit(3))
+        #expect(
+            TrackLayout.alongSpan(
+                region: Double(bounds.height),
+                gaps: gaps,
+                vertical: true,
+                count: 3
+            ) >= 3 * (300 + StackLayout.minSizeMargin)
+        )
         core.retile()
         // The heal read the LOCAL membership: the visitor's
         // presence must not permanently shave the stored share
@@ -110,7 +127,7 @@ struct TrackWeightTravelerTests {
         // design-decisions').
         #expect(
             core.state.workspaces[space]!
-                .stackWeights[WindowID(1)] == 1.4
+                .stackWeights[WindowID(1)] == 3.0
         )
     }
 }

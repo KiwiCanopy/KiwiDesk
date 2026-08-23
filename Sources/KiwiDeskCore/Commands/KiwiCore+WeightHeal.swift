@@ -70,12 +70,12 @@ extension KiwiCore {
             space: space,
             sticky: []
         )
-        let (counts, _, _) = TrackLayout.foldedPartition(
+        let counts = TrackLayout.foldedPartition(
             of: tiled,
             breaks: space.trackBreaks,
             normalCap: params.normalCap,
             geoCap: TrackLayout.geometricCap(for: context)
-        )
+        ).counts
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical
         let gaps = tiler.settings.gaps(for: space.id)

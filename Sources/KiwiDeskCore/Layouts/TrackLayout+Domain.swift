@@ -253,25 +253,27 @@ extension TrackLayout {
         normalCap: Int,
         geoCap: Int
     ) -> Bool {
-        let markerCount = counts(
+        // The one fold assembly (`foldedPartition`): a hand
+        // copy here made swap refusals divergeable from the
+        // render on a fold-rule change (#944 review round 3).
+        let partition = foldedPartition(
             of: tiled,
             breaks: breaks,
-            cap: 0
-        ).count
-        let (cap, overflows) = overflowCap(
-            markerCount: markerCount,
             normalCap: normalCap,
             geoCap: geoCap
         )
-        guard overflows, markerCount > cap else { return false }
-        let merged = counts(of: tiled, breaks: breaks, cap: cap)
+        // A fold of ≥2 marker tracks, not merely an N+1th
+        // overflow slot: only a real merge loses marker
+        // identity.
+        guard let folded = partition.overflowTrack,
+            partition.markers > partition.cap
+        else { return false }
         guard
             let track = trackIndex(
                 ofWindowIndex: windowIndex,
-                counts: merged
+                counts: partition.counts
             )
         else { return false }
-        let folded = merged.count - 1
         return track == folded || track + delta == folded
     }
 }

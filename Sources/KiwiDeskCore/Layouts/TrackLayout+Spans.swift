@@ -86,7 +86,10 @@ extension TrackLayout {
         breaks: Set<WindowID>,
         normalCap: Int,
         geoCap: Int
-    ) -> (counts: [Int], cap: Int, overflowTrack: Int?) {
+    ) -> (
+        counts: [Int], cap: Int, markers: Int,
+        overflowTrack: Int?
+    ) {
         let markers = counts(
             of: tiled,
             breaks: breaks,
@@ -101,6 +104,7 @@ extension TrackLayout {
         return (
             folded,
             cap,
+            markers,
             overflows ? folded.count - 1 : nil
         )
     }

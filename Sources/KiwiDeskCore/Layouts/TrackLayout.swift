@@ -47,7 +47,7 @@ public struct TrackLayout: LayoutSystem {
         // N+1th track past a fixed limit), so no actual merge is
         // needed. `foldedPartition` is the one copy of this
         // assembly, shared with the swap guard and the heal.
-        let (counts, _, overflowTrack) = Self.foldedPartition(
+        let (counts, _, _, overflowTrack) = Self.foldedPartition(
             of: windows,
             breaks: context.trackBreaks,
             normalCap: params.normalCap,
