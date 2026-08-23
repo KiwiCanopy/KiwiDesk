@@ -47,7 +47,7 @@ struct SetupBundleTests {
         try core.guiConfigStore.save(GuiConfig())
         try core.paletteLibrary.save(palette("Mine"))
 
-        let bundle = core.exportSetup()
+        let bundle = try core.exportSetup()
 
         // The finding this feature turned on: applying a palette
         // writes its COLOURS into the settings, so the current
@@ -63,7 +63,7 @@ struct SetupBundleTests {
         try core.profiles.save(profile("Desk"))
         try core.profiles.save(profile("Laptop"))
 
-        let names = Set(core.exportSetup().profiles.map(\.name))
+        let names = Set(try core.exportSetup().profiles.map(\.name))
         #expect(names == ["Desk", "Laptop"])
     }
 
@@ -75,7 +75,7 @@ struct SetupBundleTests {
         // ungated by owner ruling rather than hidden.
         #expect(!core.guiConfigStore.exists)
 
-        let bundle = core.exportSetup()
+        let bundle = try core.exportSetup()
         #expect(bundle.config == nil)
         #expect(bundle.profiles.count == 1)
         // And it is not "empty", so a restore of it is offered
@@ -130,7 +130,7 @@ struct SetupBundleTests {
         // encoding too and the two key sets still agree. Proven by
         // running that mutation against it.
         let properties = Set(
-            Mirror(reflecting: core.exportSetup()).children
+            Mirror(reflecting: try core.exportSetup()).children
                 .compactMap(\.label)
         )
         #expect(
@@ -248,7 +248,7 @@ struct SetupBundleTests {
         try core.profiles.save(profile("Desk"))
         try core.paletteLibrary.save(palette("Mine"))
 
-        let original = core.exportSetup()
+        let original = try core.exportSetup()
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(
             SetupBundle.self,

@@ -64,6 +64,15 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     public static let currentFormat = 2
 
     public let format: Int
+
+    /// The top-level key `ConfigMigration.targetFormat` routes a
+    /// bundle on — a constant HERE, beside the synthesized
+    /// CodingKey it mirrors (`writtenBy` below), so the marker
+    /// moves with the property or not at all;
+    /// `ConfigMigrationTests.shapeMarkersMatchEncodedShapes`
+    /// ties it to the real encoder output.
+    static let shapeMarker = "writtenBy"
+
     /// The version that wrote it — informational, for a human
     /// looking at a file they were mailed. Nothing branches on it;
     /// `format` is the only compatibility question.

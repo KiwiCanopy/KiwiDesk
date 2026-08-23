@@ -181,7 +181,15 @@ a case to `false` changes behaviour rather than only a test.
 **A change that breaks the decoded shape of anything the bundle
 carries bumps `SetupBundle.currentFormat` in the same change set,
 and a breaking schema change to `Profile` or `GuiConfig` bumps
-`Profile.currentFormat` or `GuiConfig.currentFormat`.**
+`Profile.currentFormat` or `GuiConfig.currentFormat`.** A
+breaking `ColorPalette` (or `PaletteDocument`) schema change
+owes TWO bumps — `PaletteDocument.currentFormat` for the
+standing `palettes.json` AND `SetupBundle.currentFormat`,
+because the bundle carries `[ColorPalette]` inline — and it
+must also rule the exported-palette SIDECAR deliberately: a
+bare `ColorPalette` file has no shape marker, sits outside the
+migration census by ruling (#945), and like a backup is never
+rewritten.
 Nothing can guard this, and it is the obligation the format
 integers rest on: `<=` is decoder tolerance rather than a
 compatibility shim, so an older config or backup is accepted — which is

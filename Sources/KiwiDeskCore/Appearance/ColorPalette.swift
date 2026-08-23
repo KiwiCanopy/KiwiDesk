@@ -10,10 +10,6 @@ import Foundation
 /// addressable configuration (tiling, layout, sparse behavior
 /// overrides) that owns the colors *after* a palette paints them.
 public struct ColorPalette: Sendable, Equatable, Codable {
-    /// Format version of the palettes.json schema (#939).
-    /// Format 0 = unversioned legacy bare array.
-    public static let currentFormat = 1
-
     /// Display name. Bundled names are reserved (a user palette may
     /// not shadow one); uniqueness among user palettes is enforced
     /// by the store, not here.

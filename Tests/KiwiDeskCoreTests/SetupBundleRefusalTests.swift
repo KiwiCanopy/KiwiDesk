@@ -106,7 +106,11 @@ struct SetupBundleRefusalTests {
         )
 
         let bundle = try core.readBackup(at: url)
-        #expect(bundle.format == older)
+        // Migrated on the way in (#938): the decoded bundle
+        // reports the CURRENT format — the file on disk is a
+        // backup and stays untouched, but what this build holds
+        // has crossed.
+        #expect(bundle.format == SetupBundle.currentFormat)
         #expect(bundle.palettes.count == 1)
     }
 

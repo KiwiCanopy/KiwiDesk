@@ -69,7 +69,7 @@ struct SetupBundleArtifactTests {
             )
         )
 
-        let bundle = core.exportSetup()
+        let bundle = try core.exportSetup()
         // Assert the loop has something to walk: every artifact
         // travels today, so a `where` that matched nothing would
         // be a green having checked nothing — the vacuity a
