@@ -110,6 +110,28 @@ struct AnnouncedValueTests {
         )
     }
 
+    /// A custom-drawn slider holds no keyboard focus of its own;
+    /// Tab skipped every one in the tree (owner, #812). The seam
+    /// re-earns the Tab stop and the arrow keys — pinned here
+    /// because a source needle is all that can hold it, and a
+    /// green needle says only that the modifiers are declared:
+    /// whether focus lands is a device fact, verified with
+    /// keyboard navigation ON.
+    @Test("the slider seam holds focus and steps by arrow key")
+    func sliderSeamIsKeyboardReachable() throws {
+        let source = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Common/"
+                + "SettingsSlider.swift"
+        )
+        #expect(source.contains(".focusable(isEnabled)"))
+        for key in ["leftArrow", "rightArrow", "upArrow", "downArrow"] {
+            #expect(
+                source.contains(".onKeyPress(.\(key))"),
+                Comment(rawValue: "the slider lost its \(key) step")
+            )
+        }
+    }
+
     // MARK: - Walker
 
     /// Every `Picker(…)` / `Menu {…}` in `source`, each as the

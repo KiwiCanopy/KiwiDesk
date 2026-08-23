@@ -40,11 +40,37 @@ struct SettingsSlider: View {
         }
         .frame(height: Self.height)
         .opacity(isEnabled ? 1 : 0.4)
+        // A custom-drawn view holds no keyboard focus of its own,
+        // so Tab skipped every slider in the tree and a keyboard
+        // user could not change a gap at all (owner, #812 device
+        // session 1). The AX representation below does not grant
+        // it either — VoiceOver's cursor is its own — so the view
+        // re-earns the two things a native `Slider` gave free:
+        // a Tab stop with the platform's ring, and arrow keys
+        // stepping by `step`.
+        .focusable(isEnabled)
+        .onKeyPress(.leftArrow) { nudge(-1) }
+        .onKeyPress(.downArrow) { nudge(-1) }
+        .onKeyPress(.rightArrow) { nudge(1) }
+        .onKeyPress(.upArrow) { nudge(1) }
         .accessibilityRepresentation {
             Slider(value: $value, in: range, step: step)
         }
         .accessibilityLabel(label)
         .accessibilityValue(spokenValue)
+    }
+
+    /// One keyboard step in `direction`; a non-positive `step`
+    /// (no snapping) moves by a hundredth of the range.
+    private func nudge(_ direction: Double) -> KeyPress.Result {
+        guard isEnabled else { return .ignored }
+        let span = range.upperBound - range.lowerBound
+        let increment = step > 0 ? step : span / 100
+        value = min(
+            max(value + direction * increment, range.lowerBound),
+            range.upperBound
+        )
+        return .handled
     }
 
     /// Disabled sliders gray the fill itself — the dimming

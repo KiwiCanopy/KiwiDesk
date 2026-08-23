@@ -201,6 +201,10 @@ takes focus.
 VoiceOver is not affected — it navigates every control either
 way, because its cursor is its own.
 
+With it on, a slider takes focus like any other control and the
+arrow keys step it: ← / ↓ down one step, → / ↑ up one — the same
+step the readout beside it counts in.
+
 Where a row carries extra moves behind a right-click (renaming a
 palette, exporting it, deleting it, or reordering spaces), press
 **⌃.** (**Control-Period**) on the focused row or item to open its
