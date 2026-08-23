@@ -13,7 +13,8 @@ struct AppBarAccessibilityTests {
     private func makeView(
         name: String = "Safari",
         text: String = "Downloads",
-        count: Int = 1
+        count: Int = 1,
+        style: AppBarStyle = AppBarStyle()
     ) -> AppBarItemView {
         LocalizationManager.shared.select("en")
         let view = AppBarItemView(
@@ -28,7 +29,7 @@ struct AppBarAccessibilityTests {
             count: count,
             active: false,
             horizontal: true,
-            style: AppBarStyle()
+            style: style
         )
         view.layout()
         return view
@@ -57,6 +58,22 @@ struct AppBarAccessibilityTests {
             text: "Downloads",
             count: 1
         )
+        #expect(
+            view.accessibilityLabel() == "Safari, window Downloads"
+        )
+    }
+
+    /// The view half of #937: the label reads `text`
+    /// unconditionally, content notwithstanding — an icon-only
+    /// bar ANNOUNCES the title it does not draw. A future
+    /// `showsText` gate here would revert #937 with the
+    /// refresh's arm tests still green (armed but inert), which
+    /// is why the content case is pinned at the label itself.
+    @Test("Icon-only content still announces the window title")
+    func iconOnlyContentAnnouncesTitle() {
+        var style = AppBarStyle()
+        style.content = .icon
+        let view = makeView(style: style)
         #expect(
             view.accessibilityLabel() == "Safari, window Downloads"
         )

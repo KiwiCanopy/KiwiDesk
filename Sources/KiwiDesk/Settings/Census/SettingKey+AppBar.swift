@@ -74,14 +74,15 @@ extension AppBarKey {
                 gate: .setting(.appBar(.appBarEdge))
             )
         case .appBarTitleCap:
-            // Inert when the content draws no text — an
-            // icon-only bar caps nothing. Gated on the content
-            // row, like `appBarIconSource` below.
+            // Ungated (#937): icon-only content still ANNOUNCES
+            // the capped title through each item's accessibility
+            // label, so the knob is never inert — the old
+            // content gate claimed "no titles are shown" on a
+            // channel that shows them.
             return .row(
                 .bars,
                 .appBar,
-                .showMore,
-                gate: .setting(.appBar(.appBarContent))
+                .showMore
             )
         case .appBarIconSource:
             // Title-only content shows no icons. Deliberately

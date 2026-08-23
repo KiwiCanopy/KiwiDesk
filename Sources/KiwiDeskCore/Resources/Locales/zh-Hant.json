@@ -64,7 +64,6 @@
   "app_bar.thickness": "粗細",
   "app_bar.title_cap": "標題長度",
   "app_bar.title_cap.help": "每個項目最多顯示視窗標題的多少個字元，超過的部分會縮短。成組的視窗改為顯示所屬 App 的名稱，該名稱不會縮短。",
-  "app_bar.title_cap.icon_only": "當「%1$@」為「%2$@」時，不會顯示標題。",
   "app_picker.search.placeholder": "搜尋 App",
   "app_rules.add": "加入",
   "app_rules.add_rule": "加入 App 規則",

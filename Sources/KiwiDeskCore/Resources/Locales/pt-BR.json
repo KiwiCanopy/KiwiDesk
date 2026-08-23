@@ -64,7 +64,6 @@
   "app_bar.thickness": "Espessura",
   "app_bar.title_cap": "Comprimento do título",
   "app_bar.title_cap.help": "Quantos caracteres do título de uma janela um item mostra antes de encurtá-lo. Janelas agrupadas mostram o nome do app, que nunca é encurtado.",
-  "app_bar.title_cap.icon_only": "Nenhum título é mostrado enquanto “%1$@” estiver em “%2$@”.",
   "app_picker.search.placeholder": "Buscar apps",
   "app_rules.add": "Adicionar",
   "app_rules.add_rule": "Adicionar regra de app",

@@ -64,7 +64,6 @@
   "app_bar.thickness": "厚み",
   "app_bar.title_cap": "タイトルの長さ",
   "app_bar.title_cap.help": "各項目がウインドウタイトルを何文字まで表示するかです。これを超えると短縮されます。グループ化されたウインドウは代わりにアプリ名を表示し、こちらは短縮されません。",
-  "app_bar.title_cap.icon_only": "「%1$@」が「%2$@」の間は、タイトルは表示されません。",
   "app_picker.search.placeholder": "検索 apps",
   "app_rules.add": "追加",
   "app_rules.add_rule": "アプリルールを追加",

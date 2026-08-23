@@ -232,8 +232,12 @@ final class AppBarItemView: NSView {
         needsLayout = true
     }
 
-    /// Names the app and, when a title is drawn, the window;
-    /// collapsed groups name the app and count (#901).
+    /// Names the app and, when the item text carries a
+    /// distinct window title, the window — content
+    /// notwithstanding, so an icon-only bar announces the
+    /// title it does not draw (#901/#937; the content case is
+    /// pinned by `AppBarAccessibilityTests`); collapsed groups
+    /// name the app and count.
     private func updateAccessibilityLabel() {
         if count > 1 {
             setAccessibilityLabel(

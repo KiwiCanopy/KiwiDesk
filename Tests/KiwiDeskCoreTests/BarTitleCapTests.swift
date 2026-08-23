@@ -214,8 +214,8 @@ struct ContentDecodeStrictnessTests {
         #expect(bar.content == .icon)
     }
 
-    /// `showsText` gates the slot measurement and the GUI
-    /// grey-out. Hand-listed on purpose — a loop over
+    /// `showsText` gates the drawn item layout and the slot
+    /// measurement. Hand-listed on purpose — a loop over
     /// `allCases` would re-derive the implementation and assert
     /// nothing. The COUNT is the guard: a new case reds this
     /// test, and whoever adds it has to rule on whether it draws

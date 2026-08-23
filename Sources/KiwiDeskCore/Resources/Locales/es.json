@@ -64,7 +64,6 @@
   "app_bar.thickness": "Grosor",
   "app_bar.title_cap": "Longitud del título",
   "app_bar.title_cap.help": "Cuántos caracteres del título de una ventana muestra un elemento antes de acortarlo. Las ventanas agrupadas muestran el nombre de su aplicación, que nunca se acorta.",
-  "app_bar.title_cap.icon_only": "No se muestra ningún título mientras «%1$@» esté en «%2$@».",
   "app_picker.search.placeholder": "Buscar apps",
   "app_rules.add": "Añadir",
   "app_rules.add_rule": "Añadir regla de aplicación",

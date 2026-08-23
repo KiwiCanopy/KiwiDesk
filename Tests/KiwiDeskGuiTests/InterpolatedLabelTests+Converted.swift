@@ -99,7 +99,6 @@ extension InterpolatedLabelTests {
         "app_bar.color.gap_only": 1,
         "app_bar.icon_source.help": 5,
         "app_bar.icon_source.title_only": 2,
-        "app_bar.title_cap.icon_only": 2,
         "space_bar.title_cap.front_app_only": 1,
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,

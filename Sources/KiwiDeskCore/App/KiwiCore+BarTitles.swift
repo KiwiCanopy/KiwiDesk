@@ -50,8 +50,11 @@ extension KiwiCore {
     ///
     /// Dropping is the common case and has to stay cheap: most
     /// title events belong to a window on another Desktop, to a
-    /// bar whose content draws no text, or to a bar that is not
-    /// on screen at all.
+    /// collapsed group (which shows its app name), or to a bar
+    /// that is not on screen at all. Content is deliberately
+    /// not a drop reason (#937): an icon-only bar announces the
+    /// title it does not draw, so those events ride the
+    /// debounce above instead of being dropped.
     func handleTitleChangedForBars(_ id: WindowID) {
         guard barsShowTitle(of: id) else { return }
         deferred.schedule(

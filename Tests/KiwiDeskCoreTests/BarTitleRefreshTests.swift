@@ -19,6 +19,12 @@ import Testing
 /// host (review 2026-08-20, `tests.md` on injected seams). The
 /// drivers' own agreement with what they paint belongs to
 /// `FullscreenStandDownTests` and the driver suites.
+///
+/// Stated reach (prover, 2026-08-23): every fixture paints ONE
+/// bar on one display, so multi-bar routing — a gate reading
+/// only `shownBars.first` would drop the second monitor's
+/// bar — is outside this suite and covered by nothing; do not
+/// read its green as multi-display coverage.
 @Suite("Bar title refresh", .serialized)
 @MainActor
 struct BarTitleRefreshTests {
@@ -95,6 +101,18 @@ struct BarTitleRefreshTests {
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
 
+    /// The twin above pins the group boundary only at
+    /// `count == 2`, so a drift that arms LARGER groups (a
+    /// `count != 2`-shaped edit of the gate) hid behind it
+    /// (prover residue, 2026-08-23). Two sizes make the shape
+    /// `count > 1` the only green line through both.
+    @Test("A three-member group schedules nothing either")
+    func threeMemberGroupSchedulesNothing() {
+        let core = seeded(count: 3)
+        core.handleTitleChangedForBars(WindowID(1))
+        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+    }
+
     /// A window that is on no painted bar is the common case and
     /// must stay free.
     @Test("An untracked window schedules nothing")
@@ -142,9 +160,16 @@ struct BarTitleRefreshTests {
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
 
+    /// The painted half of the front-segment toggle: a bar
+    /// whose front segment is OFF shows no title, so nothing
+    /// arms. The bar is painted (front: nil paints a
+    /// segment-less bar, not no bar), or this would prove the
+    /// no-painted-bar case instead; the driver's own
+    /// `frontApp` guard is the driver suites' to prove.
     @Test("The front segment toggle gates it")
     func frontSegmentOffDoesNotArm() {
         let core = seeded(count: 2, front: nil)
+        core.spaceBars.sync([paintedSpaceBar(front: nil)])
         core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }

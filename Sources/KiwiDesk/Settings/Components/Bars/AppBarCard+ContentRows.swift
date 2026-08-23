@@ -35,11 +35,15 @@ extension AppBarCard {
         )
     }
 
-    /// How much of a window title an item draws, directly
-    /// below the Content control it depends on. Greyed (never
-    /// hidden, #171) when the rendered content draws no text at
-    /// all — an icon-only bar, and every vertical bar, caps
-    /// nothing.
+    /// How much of a window title an item shows, directly
+    /// below the Content control it depends on. Deliberately
+    /// NOT greyed under icon-only content (#937): an icon-only
+    /// or vertical bar draws no title but its items still
+    /// ANNOUNCE the capped title (`AppBarItemView`'s
+    /// accessibility label), so the knob is live on every
+    /// content — the same reasoning the Space Bar twin's
+    /// asymmetry note reserved for the day #901 gave items an
+    /// accessible name, which it since has.
     var titleCapRow: some View {
         StepperRow(
             label: L("app_bar.title_cap", "Title length"),
@@ -51,20 +55,6 @@ extension AppBarCard {
                     + "item shows before it is shortened. "
                     + "Grouped windows show their app's name "
                     + "instead, which is never shortened."
-            )
-        )
-        .modifier(
-            GreyOut(
-                active: gates.everyShownBarIconOnly,
-                // Both labels INTERPOLATED from their own keys,
-                // not re-typed (#818).
-                help: L(
-                    "app_bar.title_cap.icon_only",
-                    "No titles are shown while \u{201C}%1$@\u{201D} "
-                        + "is \u{201C}%2$@\u{201D}.",
-                    L("app_bar.content.label", "Content"),
-                    L("app_bar.content.icon", "Icon")
-                )
             )
         )
     }
