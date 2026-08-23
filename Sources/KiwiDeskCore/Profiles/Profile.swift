@@ -105,7 +105,7 @@ public struct Profile: Codable, Sendable, Equatable {
             + SpaceID.numericLexicalSorted(Array(extra))
     }
 
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case format
         case name
         case monitorSets = "monitor_sets"

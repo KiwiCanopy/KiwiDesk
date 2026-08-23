@@ -106,8 +106,37 @@ struct SetupBundleRefusalTests {
         )
 
         let bundle = try core.readBackup(at: url)
-        #expect(bundle.format == older)
+        // Migrated on the way in (#938): the decoded bundle
+        // reports the CURRENT format — the file on disk is a
+        // backup and stays untouched, but what this build holds
+        // has crossed.
+        #expect(bundle.format == SetupBundle.currentFormat)
         #expect(bundle.palettes.count == 1)
+    }
+
+    /// The palettes twin of `unreadableSettings` (#945 review):
+    /// a library that exists but refuses to decode must fail
+    /// the EXPORT with its own structured case — not export an
+    /// empty library, and not report a disk-write failure.
+    @Test("An unreadable palette library refuses the export")
+    func unreadablePalettesRefusesExport() throws {
+        let core = makeTestCore()
+        let dir = core.paletteLibrary.url
+            .deletingLastPathComponent()
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        let future = PaletteDocument.currentFormat + 1
+        try Data(
+            """
+            {"format":\(future),"palettes":[]}
+            """.utf8
+        ).write(to: core.paletteLibrary.url)
+        let out = dir.appendingPathComponent("backup.json")
+        #expect(throws: SetupBundleError.unreadablePalettes) {
+            try core.writeBackup(to: out)
+        }
     }
 
     @Test("A backup that would restore nothing is refused")

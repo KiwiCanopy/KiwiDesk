@@ -67,8 +67,27 @@ public enum ConfigMigration {
     /// (`ConfigMigrationRoutingTests` is the census). Each step
     /// takes the bytes as they stand after the previous one.
     private static let steps: [@Sendable (Data) -> Data?] = [
-        migratingRetiredBarContent
+        migratingLegacyPalettesArray,
+        migratingRetiredBarContent,
     ]
+
+    /// Target format integer for `root`'s shape (#902, #938, #939).
+    static func targetFormat(for root: [String: Any]) -> Int {
+        if root[SetupBundle.shapeMarker] != nil {
+            return SetupBundle.currentFormat
+        }
+        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
+            || root["monitorSets"] != nil
+        {
+            return Profile.currentFormat
+        }
+        let palettes =
+            PaletteDocument.CodingKeys.palettes.rawValue
+        if root[palettes] != nil {
+            return PaletteDocument.currentFormat
+        }
+        return GuiConfig.currentFormat
+    }
 
     /// Whether `data` is below the current format version for
     /// its shape (#902).
@@ -78,18 +97,16 @@ public enum ConfigMigration {
     /// config read once a file carries the format stamp.
     static func needsMigration(_ data: Data) -> Bool {
         guard
-            let root = try? JSONSerialization.jsonObject(
+            let json = try? JSONSerialization.jsonObject(
                 with: data
-            ) as? [String: Any]
+            )
         else { return false }
+        if json is [Any] {
+            return true
+        }
+        guard let root = json as? [String: Any] else { return false }
         let format = root["format"] as? Int ?? 0
-        if root["writtenBy"] != nil {
-            return format < SetupBundle.currentFormat
-        }
-        if root["monitor_sets"] != nil || root["monitorSets"] != nil {
-            return format < Profile.currentFormat
-        }
-        return format < GuiConfig.currentFormat
+        return format < targetFormat(for: root)
     }
 
     /// `data` with every applicable migration applied, or nil
@@ -102,14 +119,20 @@ public enum ConfigMigration {
     public static func migrated(_ data: Data) -> Data? {
         guard needsMigration(data) else { return nil }
         var current = data
-        var changed = false
         for step in steps {
             if let next = step(current) {
                 current = next
-                changed = true
             }
         }
-        return changed ? current : nil
+        // A stale format whose bytes no step rewrites is still
+        // a crossing that must END (#938): stamp it anyway, or
+        // the file re-enters `needsMigration` on every read
+        // forever and the next floor advance (#902) refuses a
+        // valid file this app wrote. Nil only when the result
+        // is byte-identical, preserving the
+        // never-rewrite-untouched contract above.
+        let result = stamped(current)
+        return result == data ? nil : result
     }
 
     /// `data` with every retired bar-content value rewritten, or
@@ -182,7 +205,7 @@ public enum ConfigMigration {
     /// One serializer for both sides of the comparison, so the
     /// check is about VALUES and never about how either side
     /// happened to spell a float.
-    private static func canonical(_ node: Any) -> Data? {
+    static func canonical(_ node: Any) -> Data? {
         try? JSONSerialization.data(
             withJSONObject: node,
             options: [.sortedKeys]

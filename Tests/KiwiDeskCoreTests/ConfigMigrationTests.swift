@@ -71,12 +71,16 @@ struct ConfigMigrationTests {
 
     /// Nil, not the same bytes: the callers write back exactly
     /// when this returns non-nil, so a config with nothing to do
-    /// must never have its file rewritten.
+    /// must never have its file rewritten. Since the #945 stamp
+    /// fix, "nothing to do" requires the format to be current —
+    /// an unversioned file is stamped even with current values
+    /// (`unversionedFileWithNothingToRewriteIsStamped`).
     @Test("A current config is left alone")
     func currentConfigIsUntouched() {
         let data = json(
             """
-            {"settings":{"app_bar":{"content":"icon_and_title"}}}
+            {"format":\(GuiConfig.currentFormat),\
+            "settings":{"app_bar":{"content":"icon_and_title"}}}
             """
         )
         #expect(
@@ -86,9 +90,14 @@ struct ConfigMigrationTests {
     }
 
     /// The common case: sparse configs never wrote the key.
-    @Test("A config with no content key is left alone")
+    @Test("A stamped config with no content key is left alone")
     func absentKeyIsUntouched() {
-        let data = json(#"{"settings":{"app_bar":{"edge":"top"}}}"#)
+        let data = json(
+            """
+            {"format":\(GuiConfig.currentFormat),\
+            "settings":{"app_bar":{"edge":"top"}}}
+            """
+        )
         #expect(
             ConfigMigration.migrated(data)
                 == nil
@@ -98,18 +107,25 @@ struct ConfigMigrationTests {
     /// `name` is a common word in this config — the profile's own
     /// name, a space's, an app rule's. Only a `content` value may
     /// be rewritten, or the migration corrupts what it touches.
+    /// The fixture stays UNVERSIONED so the walk actually runs
+    /// (a current-format fixture would skip it and assert
+    /// nothing); the stamp is then the only permitted change.
     @Test("A `name` FIELD is never rewritten")
-    func unrelatedNameFieldSurvives() {
+    func unrelatedNameFieldSurvives() throws {
         let data = json(
             """
             {"name":"name","app_rules":{"Finder":"name"},\
             "settings":{"app_bar":{"content":"icon_and_title"}}}
             """
         )
-        #expect(
-            ConfigMigration.migrated(data)
-                == nil
-        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let root =
+            try JSONSerialization.jsonObject(with: out)
+            as? [String: Any]
+        #expect(root?["name"] as? String == "name")
+        let rules = root?["app_rules"] as? [String: Any]
+        #expect(rules?["Finder"] as? String == "name")
+        #expect(root?["format"] as? Int == GuiConfig.currentFormat)
     }
 
     /// Running twice changes nothing the second time — the

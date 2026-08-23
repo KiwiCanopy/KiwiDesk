@@ -28,7 +28,13 @@ extension KiwiCore {
     ///
     /// Reads the stores rather than the directory — the
     /// allow-list argument is `SetupBundle`'s.
-    public func exportSetup() -> SetupBundle {
+    /// Throws when the palette library exists but refuses to
+    /// decode (`PaletteStore.StoreError.unreadableLibrary`,
+    /// #945 review): a backup that silently carried an empty
+    /// library where the user has one would "restore" data
+    /// loss later — refusal must outrank convenience on the
+    /// one path whose output outlives this build.
+    public func exportSetup() throws -> SetupBundle {
         // Each field asks the register whether it travels, so
         // `travelsInABackup` is the switch rather than a comment
         // beside one: flip a case to `false` and it stops being
@@ -42,7 +48,7 @@ extension KiwiCore {
             profiles: ConfigArtifact.profiles.travelsInABackup
                 ? profiles.allProfiles() : [],
             palettes: ConfigArtifact.palettes.travelsInABackup
-                ? paletteLibrary.userPalettes() : []
+                ? try paletteLibrary.libraryPalettes() : []
         )
     }
 
@@ -137,6 +143,13 @@ extension KiwiCore {
         if guiConfigStore.exists, guiConfigStore.load() == nil {
             throw .unreadableSettings
         }
+        // The palettes twin (#945 review): `libraryPalettes`
+        // returns [] for a missing file and throws only for one
+        // that exists and refuses to decode — the case where a
+        // silent omission would "restore" data loss later.
+        if (try? paletteLibrary.libraryPalettes()) == nil {
+            throw .unreadablePalettes
+        }
         guard let data = encodedBackup() else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }
@@ -157,7 +170,9 @@ extension KiwiCore {
             let format: Int
             let writtenBy: String
         }
-        let bundle = exportSetup()
+        guard let bundle = try? exportSetup() else {
+            return nil
+        }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         // Paired with the decoder's strategy above; the two must

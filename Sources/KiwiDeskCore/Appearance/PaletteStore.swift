@@ -20,6 +20,13 @@ public final class PaletteStore {
         case duplicateName(String)
         /// The imported file wasn't a valid palette.
         case invalidFile
+        /// `palettes.json` exists but refuses to decode (a newer
+        /// format, or corrupt bytes). Distinct from an empty
+        /// library on purpose (#945 review): `save` is
+        /// read-append-write, so a downgraded build that mistook
+        /// refusal for empty would rewrite the newer build's
+        /// whole library with one palette.
+        case unreadableLibrary
     }
 
     private let fileURL: URL
@@ -44,15 +51,41 @@ public final class PaletteStore {
         PaletteCatalog.bundled()
     }
 
-    /// The user's saved palettes, in saved order.
-    public func userPalettes() -> [ColorPalette] {
-        guard let data = try? Data(contentsOf: fileURL),
-            let palettes = try? JSONDecoder().decode(
-                [ColorPalette].self,
+    /// The decoded library document — nil when no file exists,
+    /// throwing `unreadableLibrary` when one exists but refuses
+    /// to decode. Migrates legacy or older formats through
+    /// `ConfigMigration` and repairs the file in place.
+    private func readDocument() throws -> PaletteDocument? {
+        guard var data = try? Data(contentsOf: fileURL) else {
+            return nil
+        }
+        if let migrated = ConfigMigration.migrated(data) {
+            data = migrated
+            try? migrated.write(to: fileURL, options: .atomic)
+        }
+        guard
+            let doc = try? JSONDecoder().decode(
+                PaletteDocument.self,
                 from: data
             )
-        else { return [] }
-        return palettes
+        else { throw StoreError.unreadableLibrary }
+        return doc
+    }
+
+    /// The user's saved palettes for the MUTATING paths and the
+    /// backup export: refusal stays loud here, where a silent
+    /// `[]` would clobber or silently empty a backup (#945
+    /// review). Pure queries read `userPalettes()` below.
+    public func libraryPalettes() throws -> [ColorPalette] {
+        try readDocument()?.palettes ?? []
+    }
+
+    /// The user's saved palettes, in saved order — the
+    /// query-side read: an unreadable library shows as empty
+    /// here (a list the GUI renders), while every path that
+    /// WRITES from what it read goes through `libraryPalettes`.
+    public func userPalettes() -> [ColorPalette] {
+        (try? libraryPalettes()) ?? []
     }
 
     /// True if `name` belongs to a built-in (reserved).
@@ -74,7 +107,7 @@ public final class PaletteStore {
         guard !isBuiltinName(palette.name) else {
             throw StoreError.reservedName(palette.name)
         }
-        var palettes = userPalettes()
+        var palettes = try libraryPalettes()
         if let index = palettes.firstIndex(where: {
             $0.name == palette.name
         }) {
@@ -108,6 +141,11 @@ public final class PaletteStore {
     /// Dropping rather than throwing is deliberate: one bad entry
     /// must not fail a whole restore the user has already
     /// confirmed. The count says how many were refused.
+    /// It deliberately does NOT read the existing library
+    /// first: replacing an unreadable (newer-format) file is
+    /// exactly the restore the user just confirmed, so the
+    /// `unreadableLibrary` refusal the read-modify-write paths
+    /// take does not apply here.
     @discardableResult
     public func replaceUserPalettes(
         with palettes: [ColorPalette]
@@ -134,7 +172,7 @@ public final class PaletteStore {
 
     /// Deletes the user palette named `name`.
     public func delete(_ name: String) throws {
-        var palettes = userPalettes()
+        var palettes = try libraryPalettes()
         guard
             let index = palettes.firstIndex(where: {
                 $0.name == name
@@ -157,7 +195,7 @@ public final class PaletteStore {
         guard to == from || !hasUserPalette(to) else {
             throw StoreError.duplicateName(to)
         }
-        var palettes = userPalettes()
+        var palettes = try libraryPalettes()
         guard
             let index = palettes.firstIndex(where: {
                 $0.name == from
@@ -183,6 +221,15 @@ public final class PaletteStore {
     /// Reads one palette from `url` (a Finder Open panel location).
     /// Filters the colors to known paths so an alien file can't
     /// smuggle junk keys into the library.
+    ///
+    /// The sidecar (this and `export` above) is a BARE
+    /// `ColorPalette` — no envelope, no format, no shape marker
+    /// — and deliberately outside the migration census (#945
+    /// review): routing it would misroute (`targetFormat` has
+    /// no marker to key on), and like a backup an exported file
+    /// is never rewritten. The cost is recorded where it bites:
+    /// a breaking `ColorPalette` schema change must rule the
+    /// sidecar deliberately (profiles.md's bump paragraph).
     public func importPalette(from url: URL) throws -> ColorPalette {
         guard let data = try? Data(contentsOf: url),
             let raw = try? JSONDecoder().decode(
@@ -206,10 +253,14 @@ public final class PaletteStore {
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys,
         ]
+        let doc = PaletteDocument(
+            format: PaletteDocument.currentFormat,
+            palettes: palettes
+        )
         // Atomic: a crash mid-flush must not truncate the library
         // — a corrupt file decodes to [] and the next save would
         // then rewrite it with only the new palette, losing it all.
-        try encoder.encode(palettes).write(
+        try encoder.encode(doc).write(
             to: fileURL,
             options: .atomic
         )

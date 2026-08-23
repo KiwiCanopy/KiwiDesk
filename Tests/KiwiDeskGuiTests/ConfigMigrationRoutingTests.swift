@@ -17,6 +17,12 @@ import Testing
 ///
 /// It lives in the GUI test target purely because `SourceScan`
 /// does; it scans `Sources/KiwiDeskCore`.
+///
+/// Known limit: the `fileShapes` needle and a `readers` entry
+/// guard each other, but their JOINT absence — a new shape the
+/// scan was never told about — is invisible, the scan-level
+/// twin of profiles.md's never-joined-store class (#945
+/// prover).
 @Suite("Config migration routing")
 struct ConfigMigrationRoutingTests {
     private var coreRoot: URL {
@@ -29,6 +35,7 @@ struct ConfigMigrationRoutingTests {
     /// file readers and are not the subject here.
     private let fileShapes = [
         "Profile.self", "SetupBundle.self", "GuiConfig.self",
+        "PaletteDocument.self",
     ]
 
     /// Every file that decodes one of those shapes, and whether
@@ -44,6 +51,17 @@ struct ConfigMigrationRoutingTests {
         // Routes through ConfigMigration so older sidecars are
         // migrated before decoding and repaired in place (#902).
         "Config/GuiConfigStore.swift": true,
+        // Routes through ConfigMigration so legacy bare-array
+        // palettes are migrated to wrapped format (#939). The
+        // same file's export/import SIDECAR (a bare
+        // `ColorPalette`, no envelope, no marker) is
+        // deliberately OUTSIDE the census: `ColorPalette.self`
+        // is not a file shape here, routing a markerless root
+        // would misroute, and the ruling — a breaking
+        // ColorPalette schema change must rule the sidecar
+        // deliberately — lives in profiles.md's bump paragraph
+        // (#945 review).
+        "Appearance/PaletteStore.swift": true,
     ]
 
     @Test("Every config-file reader routes through the migration")

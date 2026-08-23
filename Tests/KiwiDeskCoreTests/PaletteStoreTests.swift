@@ -150,4 +150,94 @@ struct PaletteStoreTests {
             try store.importPalette(from: url)
         }
     }
+
+    /// Legacy bare-array palettes.json loads, is rewritten wrapped,
+    /// and loads with needsMigration == false (#939).
+    @Test("Legacy bare-array file migrates and rewrites wrapped")
+    func legacyPalettesFileMigrates() throws {
+        let (store, dir) = makeStore()
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        let legacy =
+            """
+            [{"colors":{"app_bar.fill_color":"#112233"},"name":"Mine"}]
+            """
+        try Data(legacy.utf8).write(to: store.url)
+        let initial = try Data(contentsOf: store.url)
+        #expect(ConfigMigration.needsMigration(initial))
+        let loaded = store.userPalettes()
+        #expect(loaded == [sample])
+
+        let onDisk = try Data(contentsOf: store.url)
+        #expect(!ConfigMigration.needsMigration(onDisk))
+        let doc = try JSONDecoder().decode(
+            PaletteDocument.self,
+            from: onDisk
+        )
+        #expect(doc.format == PaletteDocument.currentFormat)
+        #expect(doc.palettes == [sample])
+    }
+
+    /// Saved palettes are wrapped and round-trip identically.
+    /// The format is asserted on the RAW saved JSON — the
+    /// decoder-side read was vacuous (it read the decoder back,
+    /// not the file, so a `write` stamping 0 stayed green;
+    /// proven by mutation, #945 review).
+    @Test("Saved palettes are wrapped and round-trip")
+    func savedPalettesAreWrapped() throws {
+        let (store, _) = makeStore()
+        try store.save(sample)
+        let data = try Data(contentsOf: store.url)
+        let root =
+            try JSONSerialization.jsonObject(with: data)
+            as? [String: Any]
+        #expect(
+            root?["format"] as? Int
+                == PaletteDocument.currentFormat
+        )
+        #expect(!ConfigMigration.needsMigration(data))
+        let doc = try JSONDecoder().decode(
+            PaletteDocument.self,
+            from: data
+        )
+        #expect(doc.palettes == [sample])
+        #expect(store.userPalettes() == [sample])
+    }
+
+    /// A newer-format library reads as empty for pure QUERIES,
+    /// but every read-modify-WRITE path refuses loudly: a
+    /// downgraded build's save must not clobber the newer
+    /// build's whole library with one palette (#945 review —
+    /// the first draft's `[]` was indistinguishable from empty
+    /// and enabled exactly that clobber).
+    @Test("Newer format is query-empty but refuses mutation")
+    func newerPaletteFormatRefusesMutation() throws {
+        let (store, dir) = makeStore()
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        let future = PaletteDocument.currentFormat + 1
+        let data =
+            """
+            {"format":\(future),"palettes":[{"colors":{},"name":"Future"}]}
+            """
+        try Data(data.utf8).write(to: store.url)
+        #expect(store.userPalettes().isEmpty)
+        #expect(
+            throws: PaletteStore.StoreError.unreadableLibrary
+        ) {
+            try store.save(self.sample)
+        }
+        #expect(
+            throws: PaletteStore.StoreError.unreadableLibrary
+        ) {
+            try store.delete("Future")
+        }
+        // The refusal left the newer library untouched.
+        let after = try Data(contentsOf: store.url)
+        #expect(after == Data(data.utf8))
+    }
 }
