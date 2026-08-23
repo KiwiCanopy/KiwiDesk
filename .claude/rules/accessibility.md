@@ -110,9 +110,11 @@ editing AX code:
   was not closed, so the public `window_destroyed` reason must
   not say it was, and the close-return raise must stand down
   rather than race the frontmost app macOS itself picks
-  (`HiddenAppRaiseTests` holds the predicate,
-  `HiddenAppRaiseWiringTests` the raise site that asks it —
-  needles, because that site is gated on live AX).
+  (`HiddenAppRaiseTests` holds the event classification; since
+  #935 the hide is one arm of
+  `EventLoop.closeReturnRaiseStandsDown(after:)`, whose raise
+  site `CloseReturnStandDownWiringTests` pins — a needle,
+  because that site is gated on live AX).
 
   Do not re-base the drop on the WindowServer's on-screen
   census: it omits a window on another Desktop exactly as

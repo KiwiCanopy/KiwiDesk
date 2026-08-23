@@ -64,11 +64,11 @@ public enum KiwiEvent: Sendable {
     /// hid, rather than because the window went away (#913).
     ///
     /// A named predicate rather than an inline `if case` at the
-    /// one site that asks: the site is the close-return raise,
-    /// which no unit test can reach (its gate calls live AX),
-    /// so what pins it is a source needle — and a needle over
-    /// an anonymous pattern match pins the spelling instead of
-    /// the meaning.
+    /// one site that asks: since #935 that site is
+    /// `EventLoop.closeReturnRaiseStandsDown(after:)`, whose
+    /// hide arm is behavior-tested (`OwnDialogFocusTests`) —
+    /// and `HiddenAppRaiseTests` pins that only a hide reads as
+    /// a hide drop.
     public var isHideDrop: Bool {
         if case .windowHidden = self { return true }
         return false

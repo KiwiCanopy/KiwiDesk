@@ -78,11 +78,15 @@ While the process holds an own key or modal window that is NOT
 the focus anchor, the anchor is stale and the focused ring
 stands down — the anchor draws an unfocused ring instead
 (#933). A path deciding which ring is the focused one takes
-that answer from the one `EventLoop.ownKeyWindowNumber` seam —
-the #929 close-return raise stand-down reads the same seam, so
-the two stand-downs can never describe different worlds. The
-why (Sparkle's alert flow, and why a number rather than a Bool)
-is argued on that seam's own doc; the guard is
+that answer from the one `EventLoop.ownKeyWindow` seam. Since
+#935 that seam returns ONE reading with two facets: the ring
+reads the broad `number` — ANY own key window stales the
+anchor — while the #929 close-return raise reads the narrow
+`isDialog` facet. One closure resolves both, so the two
+stand-downs can never disagree about WHICH window is key —
+only about the ruled class. The why (Sparkle's alert flow, why
+a number rather than a Bool, and the split's argument) lives
+on that seam's own doc; the guard is
 `BorderOwnKeyWindowTests`.
 
 ## Two settle passes, two deferred keys

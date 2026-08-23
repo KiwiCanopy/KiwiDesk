@@ -14,21 +14,17 @@ import Testing
 /// IT chose, on a keystroke that never moved the mouse. The
 /// layout half is wanted; the focus half is not.
 ///
-/// **Why a needle and not a behavior test.** The raise site is
-/// gated on `eventLoop.isListed`, which calls live AX
+/// Since #935 the hide is one arm of the ONE stand-down
+/// predicate (`EventLoop.closeReturnRaiseStandsDown(after:)`,
+/// behavior-tested in `OwnDialogFocusTests`); this suite keeps
+/// the event classification itself pinned. The raise site that
+/// asks the predicate is pinned by
+/// `CloseReturnStandDownWiringTests` — a needle, because that
+/// site is gated on `eventLoop.isListed`, which calls live AX
 /// (`AXHelper.windows(pid:)`, not the injected seam), so for a
 /// fabricated pid the whole block is unreachable and a driven
-/// `handle(.windowDestroyed(…))` raises nothing — a behavior
-/// assertion here would pass with the stand-down deleted, and
-/// its control would pass with close-return focus deleted
-/// outright. That gate is the same limit
-/// `KiwiCore+CloseReturnRestack`'s doc names. So the fold half
-/// is pinned by behavior below, and the raise half by a needle,
-/// which is the shape `StartupSweepWiringTests` and
-/// `ZOrderSequenceWiringTests` use for a production decision no
-/// unit test can reach. That needle is
-/// `HiddenAppRaiseWiringTests`, in the GUI target because that
-/// is where `SourceScan` lives — it scans both trees.
+/// `handle(.windowDestroyed(…))` raises nothing. That gate is
+/// the same limit `KiwiCore+CloseReturnRestack`'s doc names.
 @Suite("Hidden-app raise stand-down (#913)")
 struct HiddenAppRaiseTests {
     @Test("only a hide reads as a hide drop")

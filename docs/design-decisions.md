@@ -1618,10 +1618,13 @@ at the background survivor (#929's flow) and no focus event
 re-points it at the alert, so the ring kept drawing around the
 stale anchor behind the alert. While the process holds a key or
 modal window that is NOT the focus anchor, the focused ring is
-suppressed (`EventLoop.ownKeyWindowNumber` — the one seam the
-#929 close-return raise stand-down also reads), the same answer
-a focused launcher gets (#300); an own key window that IS the
-anchor — the Settings window — keeps its ring.
+suppressed (`EventLoop.ownKeyWindow` — the one seam the #929
+close-return raise stand-down also reads, through a narrower
+facet: ANY own key window makes the anchor stale, so the ring
+reads the broad `number`, while only the #935 dialog class may
+bury a close's successor, so the raise reads `isDialog`), the
+same answer a focused launcher gets (#300); an own key window
+that IS the anchor — the Settings window — keeps its ring.
 
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
@@ -4008,10 +4011,24 @@ it on a keystroke that never moved the mouse. State still
 names the survivor; it simply is not forced there. A close has
 no such competing chooser, which is why it keeps the raise.
 (#913) The raise stands down too when KiwiDesk's own process
-currently holds an active, visible key window or modal sheet
-(#929): when an own transient progress window closes to yield
-to an update alert or dialog, raising the background workspace
-window would submerge the own alert.
+currently holds an active own DIALOG (#929): when an own
+transient progress window closes to yield to an update alert
+or dialog, raising the background workspace window would
+submerge the own alert. Dialog, not any own key window (#935):
+the class is a modal window, or an own key window that is
+neither an `NSPanel` nor the `OwnWindowTiling`-marked one —
+the ⌃⌥K shortcuts panel promises the hotkeys keep working
+while it is open and floats above the raise's reach, and the
+marked Settings window tiles, so beside it the raise is the
+layout's own behavior; suppressing the successor for either
+buried it for nothing. And the stand-down governs every
+raise-shaped action of the removal it refused, not only the
+direct raise (#936): a refused removal arms no track z-order
+restore either, because that drain ends in a focus re-raise of
+the very anchor the stand-down refused, one settle later —
+the next genuine mutation's arm heals the pile, while
+command-driven arms (navigate, swap, resize, drag) are exempt
+as explicit user actions.
 
 **Close-return focus: closing the focused window returns focus
 to the previously focused window, same space only — and this is

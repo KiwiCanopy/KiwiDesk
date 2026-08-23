@@ -4,66 +4,120 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Close-return raise stands down when an own key window / dialog
-/// is active on screen (#929).
+/// The close-return raise stand-down predicate (#913/#929/#935).
 ///
-/// When an own transient progress window (e.g. Sparkle's "Checking
-/// for updates…") closes to display a newly opened alert (Sparkle's
-/// "You're up to date!" dialog), KiwiDesk must not forcefully raise
-/// a third-party background window over its own dialog.
+/// A hide stands the raise down (macOS picks the next frontmost
+/// app itself); an own DIALOG stands it down (raising the
+/// background window would submerge a Sparkle alert) — but only
+/// the dialog class: the ⌃⌥K shortcuts panel promises the
+/// hotkeys keep working while it is open, and the
+/// `OwnWindowTiling`-marked Settings window tiles, so neither
+/// may bury a close's successor (#935).
 ///
-/// **Why a needle and not a behavior test.** The raise site is
-/// gated on `eventLoop.isListed`, which calls live AX
-/// (`AXHelper.windows(pid:)`, not the injected seam), so for a
-/// fabricated pid the whole block is unreachable and a driven
-/// `handle(.windowDestroyed(…))` raises nothing. That gate is the
-/// same limit `HiddenAppRaiseTests` and
-/// `KiwiCore+CloseReturnRestack`'s doc names. So the predicate is
-/// pinned by behavior below, and the raise half by a needle
-/// (`OwnDialogFocusWiringTests`, in the GUI target because that is
-/// where `SourceScan` lives).
+/// **Why the raise SITE is pinned by a needle instead**
+/// (`CloseReturnStandDownWiringTests`): the site is gated on
+/// `eventLoop.isListed`, which calls live AX rather than the
+/// injected seam, so a driven `handle(…)` never reaches the
+/// block for a fabricated pid — an assertion there would pass
+/// with the stand-down deleted. The predicate itself is
+/// behavior-tested here through the `ownKeyWindow` seam.
+///
+/// Stated residue: the production resolution's non-nil
+/// branches (`ownKeyWindowReading()` — the sheet-chain walk,
+/// the visibility gate, the modal fallback) need a real key
+/// window, so headless only the nil case is pinned. If that
+/// glue ever bites, the fix is an injected seam over
+/// `keyWindow`/`modalWindow` per tests.md, not a looser test.
 @MainActor
-@Suite("Own dialog focus stand-down (#929)", .serialized)
+@Suite("Close-return raise stand-down (#929/#935)", .serialized)
 struct OwnDialogFocusTests {
 
-    private func makeCore() -> KiwiCore {
-        makeTestCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-own-dialog-\(UUID().uuidString)"
-                )
-        )
-    }
-
-    private func window(
-        _ raw: UInt32,
-        floating: Bool = false
-    ) -> ManagedWindow {
-        ManagedWindow(
-            id: WindowID(raw),
-            pid: pid_t(raw),
-            appName: "App\(raw)",
-            appBundleID: "app.test.\(raw)",
-            title: "W\(raw)",
-            isFloating: floating
-        )
-    }
-
-    @Test("hasOwnActiveKeyWindow returns false in headless environment")
-    func headlessEnvironmentReturnsFalse() {
-        #expect(!EventLoop.hasOwnActiveKeyWindow())
-    }
-
-    @Test(
-        "hasOwnKeyWindow seam defaults to false headless and is customizable"
+    private let destroy = KiwiEvent.windowDestroyed(
+        WindowID(7),
+        wasMinimized: false
     )
-    func seamCanBeCustomized() {
+
+    @Test("ownKeyWindowReading is nil in a headless environment")
+    func headlessEnvironmentReadsNil() {
+        #expect(EventLoop.ownKeyWindowReading() == nil)
+    }
+
+    @Test("a hide stands the raise down whatever is key")
+    func hideStandsDown() {
         let loop = EventLoop()
-        #expect(!loop.hasOwnKeyWindow())
-        // One seam steers both stand-downs (#929 raise, #933
-        // ring): the Bool derives from the number.
-        loop.ownKeyWindowNumber = { 42 }
-        #expect(loop.hasOwnKeyWindow())
+        loop.ownKeyWindow = { nil }
+        #expect(
+            loop.closeReturnRaiseStandsDown(
+                after: .windowHidden(WindowID(7))
+            )
+        )
+    }
+
+    @Test("an own dialog stands a close's raise down")
+    func ownDialogStandsDown() {
+        let loop = EventLoop()
+        loop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 42, isDialog: true)
+        }
+        #expect(loop.closeReturnRaiseStandsDown(after: destroy))
+    }
+
+    @Test("an own NON-dialog key window lets the raise through")
+    func ownNonDialogDoesNotStandDown() {
+        let loop = EventLoop()
+        // The ⌃⌥K panel / NSColorPanel / Settings reading: key,
+        // but outside the dialog class (#935).
+        loop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 42, isDialog: false)
+        }
+        #expect(!loop.closeReturnRaiseStandsDown(after: destroy))
+    }
+
+    @Test("no own key window lets the raise through")
+    func noOwnKeyWindowDoesNotStandDown() {
+        let loop = EventLoop()
+        loop.ownKeyWindow = { nil }
+        #expect(!loop.closeReturnRaiseStandsDown(after: destroy))
+    }
+
+    @Test("the dialog class: modal always, panels and the mark never")
+    func dialogClassification() {
+        // A modal window blocks the app — always a dialog, even
+        // a modally-run panel.
+        #expect(
+            EventLoop.classifiesAsOwnDialog(
+                isModal: true,
+                isPanel: true,
+                isMarkedTilingWindow: false
+            )
+        )
+        // A utility panel (the ⌃⌥K cheat sheet, NSColorPanel)
+        // floats above the raise's reach and promises window
+        // commands keep working.
+        #expect(
+            !EventLoop.classifiesAsOwnDialog(
+                isModal: false,
+                isPanel: true,
+                isMarkedTilingWindow: false
+            )
+        )
+        // The OwnWindowTiling-marked window tiles; the raise
+        // beside it is the layout's own behavior.
+        #expect(
+            !EventLoop.classifiesAsOwnDialog(
+                isModal: false,
+                isPanel: false,
+                isMarkedTilingWindow: true
+            )
+        )
+        // Everything else own-and-key is the #929 dialog
+        // class (`OwnWindowTiling`'s doc is the census).
+        #expect(
+            EventLoop.classifiesAsOwnDialog(
+                isModal: false,
+                isPanel: false,
+                isMarkedTilingWindow: false
+            )
+        )
     }
 }

@@ -109,25 +109,6 @@ extension EventLoop {
         NSApplication.shared.windows.first { $0.windowNumber == number }
     }
 
-    /// Whether KiwiDesk's own process currently holds an active,
-    /// visible key window or modal dialog (#929) — derived from
-    /// the number below, the one copy of the resolution.
-    static func hasOwnActiveKeyWindow() -> Bool {
-        ownActiveKeyWindowNumber() != nil
-    }
-
-    /// The window number of KiwiDesk's own active key/modal
-    /// window, nil when the process holds none (#929/#933; the
-    /// production default of `EventLoop.ownKeyWindowNumber`).
-    static func ownActiveKeyWindowNumber() -> Int? {
-        if let key = NSApplication.shared.keyWindow,
-            key.isVisible
-        {
-            return key.windowNumber
-        }
-        return NSApplication.shared.modalWindow?.windowNumber
-    }
-
     /// The *structural* half of the transient-overlay
     /// classification (#300): third-party accessory-app windows
     /// — but never our own (#315). Any own window that reaches

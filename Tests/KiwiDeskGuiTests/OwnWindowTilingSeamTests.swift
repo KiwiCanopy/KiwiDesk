@@ -41,6 +41,11 @@ struct OwnWindowTilingSeamTests {
         // The read side — `shouldForceFloat`'s own-window arm.
         "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift":
             1,
+        // The second read side (#935): the dialog classifier
+        // exempts the marked window from the close-return raise
+        // stand-down — a read of the mark, never a stamp.
+        "Sources/KiwiDeskCore/Events/EventLoop+RaiseStandDown.swift":
+            1,
     ]
 
     /// BOTH source trees: Core builds its own `NSWindow`s (the

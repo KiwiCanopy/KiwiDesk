@@ -391,7 +391,10 @@ panel's own close hint. Every layer you create gets the same ⌃⌥K row,
 so the cheat-sheet is always reachable from the keyboard.
 
 The panel always appears centered on the screen under your pointer and
-never remembers a position. Press **Esc**, click anywhere outside it, or
+never remembers a position. Your shortcuts keep working while it is
+open — it is a live cheat sheet, so closing a window, switching focus
+or moving one behaves exactly as it does without the panel. Press
+**Esc**, click anywhere outside it, or
 choose **View Shortcuts…** again to close it. Empty sections are hidden;
 a layer with nothing bound shows a short placeholder. The panel never
 lists its own ⌃⌥K shortcut as a row — the close hint in the footer

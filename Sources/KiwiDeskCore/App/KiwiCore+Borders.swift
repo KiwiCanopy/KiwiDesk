@@ -122,11 +122,14 @@ extension KiwiCore {
         // stale — the focused ring stands down, exactly as it
         // does for a focused launcher (#300/#933). An own key
         // window that IS the anchor (the Settings window)
-        // keeps its ring.
+        // keeps its ring. The ring reads the seam's NUMBER —
+        // any own key window, deliberately broader than the
+        // dialog class the raise reads (#935; the seam's doc
+        // owns the split).
         let anchor = state.focusAnchor(of: space, tiled: tiled)
         let suppressed =
-            eventLoop.ownKeyWindowNumber().map { number in
-                UInt32(exactly: number).map {
+            eventLoop.ownKeyWindow().map { reading in
+                UInt32(exactly: reading.number).map {
                     anchor?.raw != $0
                 } ?? true
             } ?? false

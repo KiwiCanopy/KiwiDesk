@@ -48,7 +48,9 @@ struct OwnKeyWindowRefreshTests {
         // An own untracked window takes key: the posted
         // notification alone must stand the ring down — no
         // KiwiEvent fires in Sparkle's no-update flow.
-        core.eventLoop.ownKeyWindowNumber = { 999_999 }
+        core.eventLoop.ownKeyWindow = {
+            OwnKeyWindowReading(number: 999_999, isDialog: true)
+        }
         NotificationCenter.default.post(
             name: NSWindow.didBecomeKeyNotification,
             object: nil
@@ -56,7 +58,7 @@ struct OwnKeyWindowRefreshTests {
         #expect(core.borders.specs[WindowID(1)] == nil)
         // Dismissed (key resigned, no app switch): the ring
         // returns the same way.
-        core.eventLoop.ownKeyWindowNumber = { nil }
+        core.eventLoop.ownKeyWindow = { nil }
         NotificationCenter.default.post(
             name: NSWindow.didResignKeyNotification,
             object: nil
