@@ -59,32 +59,35 @@ struct BarTitleRefreshTests {
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
 
-    /// The gate is what keeps a keystroke off the render path
-    /// for everyone who does not draw titles.
-    @Test("An icon-only bar schedules nothing")
-    func iconOnlySchedulesNothing() {
+    /// An icon-only App Bar draws no title text, but
+    /// `AppBarItemView` builds its accessibility label from the
+    /// same title unconditionally (#937), so there the title is
+    /// announced rather than drawn. The gate arms the refresh so
+    /// VoiceOver does not announce a stale title.
+    @Test("An icon-only App Bar still arms the refresh (#937)")
+    func iconOnlyStillArms() {
         let core = seeded(content: .icon)
         core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
 
-    /// A vertical bar RENDERS icon-only whatever the stored
-    /// preference says, so the gate asks the painted bar's
-    /// `renderedContent` — the raw preference would schedule a
-    /// refresh for a bar that cannot show a title.
-    @Test("A vertical bar schedules nothing")
-    func verticalSchedulesNothing() {
+    /// A vertical App Bar renders icon-only and draws no title,
+    /// but still announces the window title in its accessibility
+    /// label (#937).
+    @Test("A vertical App Bar still arms the refresh (#937)")
+    func verticalStillArms() {
         let core = seeded(edge: .left)
         core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) == nil)
+        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
 
-    /// A collapsed group draws its APP NAME, never a member's
-    /// title (`KiwiCore.barItemText`), so a rename inside one
-    /// changes nothing on screen. Exact here only because the
-    /// gate reads the painted groups; the state-derived version
-    /// could not afford the question and deliberately
-    /// over-scheduled.
+    /// A collapsed group draws and announces its APP NAME,
+    /// never a member's title (`KiwiCore.barItemText`,
+    /// `AppBarItemView.updateAccessibilityLabel`), so a rename
+    /// inside one changes nothing on screen or in AX. Exact
+    /// here only because the gate reads the painted groups; the
+    /// state-derived version could not afford the question and
+    /// deliberately over-scheduled.
     @Test("A collapsed group schedules nothing")
     func collapsedGroupSchedulesNothing() {
         let core = seeded(count: 2)
@@ -118,7 +121,7 @@ struct BarTitleRefreshTests {
     /// refresh, independent of the App Bar.
     @Test("The front segment arms the refresh on its own")
     func frontSegmentArms() {
-        let core = seeded(content: .icon, front: WindowID(1))
+        let core = seeded(count: 2, front: WindowID(1))
         core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
@@ -131,7 +134,7 @@ struct BarTitleRefreshTests {
     /// until the next retile.
     @Test("A vertical Space Bar still arms it")
     func verticalSpaceBarStillArms() {
-        let core = seeded(content: .icon)
+        let core = seeded(count: 2)
         core.spaceBars.sync([
             paintedSpaceBar(edge: .left, front: WindowID(1))
         ])
@@ -141,7 +144,7 @@ struct BarTitleRefreshTests {
 
     @Test("The front segment toggle gates it")
     func frontSegmentOffDoesNotArm() {
-        let core = seeded(content: .icon, front: nil)
+        let core = seeded(count: 2, front: nil)
         core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
@@ -150,7 +153,7 @@ struct BarTitleRefreshTests {
     /// rename is not its business.
     @Test("Another window's title leaves the segment alone")
     func otherWindowDoesNotArmTheSegment() {
-        let core = seeded(content: .icon, front: WindowID(2))
+        let core = seeded(count: 2, front: WindowID(2))
         core.handleTitleChangedForBars(WindowID(1))
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
     }
@@ -247,7 +250,7 @@ struct BarTitleRefreshTests {
     /// The gate is consulted from `handle`, not bypassed by it.
     @Test("handle() honours the gate")
     func handleHonoursTheGate() {
-        let core = seeded(content: .icon)
+        let core = seeded(count: 2)
         core.handle(
             .windowTitleChanged(WindowID(1), "Renamed")
         )

@@ -105,10 +105,8 @@ extension AppBarStyle {
         /// on here.
         ///
         /// Ask it of `AppBarStyle.renderedContent`, which folds
-        /// in the vertical collapse — the title-refresh gate
-        /// (`AppBarManager.showsTitle(of:)`) and the GUI's
-        /// title-cap grey-out
-        /// (`BarsGates.everyShownBarIconOnly`) do.
+        /// in the vertical collapse — the GUI's title-cap
+        /// grey-out (`BarsGates.everyShownBarIconOnly`) does.
         ///
         /// Two sites ask the raw `content` instead, and may only
         /// because each already stands on a horizontal-only

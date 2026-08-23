@@ -214,12 +214,12 @@ struct ContentDecodeStrictnessTests {
         #expect(bar.content == .icon)
     }
 
-    /// `showsText` gates the refresh, the slot measurement and
-    /// the GUI grey-out. Hand-listed on purpose — a loop over
+    /// `showsText` gates the slot measurement and the GUI
+    /// grey-out. Hand-listed on purpose — a loop over
     /// `allCases` would re-derive the implementation and assert
     /// nothing. The COUNT is the guard: a new case reds this
     /// test, and whoever adds it has to rule on whether it draws
-    /// text at all three call sites.
+    /// text at all call sites.
     @Test("Only the icon case draws no text")
     func showsTextIsExhaustive() {
         #expect(AppBarStyle.Content.allCases.count == 3)
