@@ -26,6 +26,12 @@ extension KiwiCore {
         // that app from being suppressed.
         if let pid = state.windows[id]?.pid {
             if ignoredPanelActive.remove(pid) != nil {
+                onLog(
+                    "focus: w\(id.raw) re-report consumed "
+                        + "(ignored-panel dismiss, pid "
+                        + "\(pid)); restoring "
+                        + describe(effects.focusBefore)
+                )
                 // The report is spurious, but the id could
                 // still be an outstanding self-raise; drop
                 // it so a later genuine focus of this window
@@ -44,6 +50,13 @@ extension KiwiCore {
                     )
                 }
                 return
+            }
+            if !ignoredPanelActive.isEmpty {
+                onLog(
+                    "focus: w\(id.raw) cleared stale "
+                        + "ignored-panel flags "
+                        + "\(ignoredPanelActive.sorted())"
+                )
             }
             ignoredPanelActive.removeAll()
         }
@@ -111,6 +124,10 @@ extension KiwiCore {
             !freshSelfRaise(id, now: now),
             !recentClickReached(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) z-order echo reverted "
+                    + "to w\(intended.raw)"
+            )
             if let space = state.workspaces.space(of: intended) {
                 state.workspaces.focus(intended, in: space)
             }
@@ -158,6 +175,11 @@ extension KiwiCore {
             distrustsSiblingSpace(of: id),
             !recentClickInside(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) sibling re-report "
+                    + "distrusted; re-asserting "
+                    + describe(effects.focusBefore)
+            )
             if let intended = effects.focusBefore,
                 intended != id,
                 let space = state.workspaces.space(
@@ -220,6 +242,10 @@ extension KiwiCore {
                 == state.workspaces.activeSpace,
             !recentClickReached(id, now: now)
         {
+            onLog(
+                "focus: w\(id.raw) self-echo dropped; "
+                    + "keeping w\(intended.raw)"
+            )
             if let space = state.workspaces.space(
                 of: intended
             ) {
@@ -233,6 +259,16 @@ extension KiwiCore {
         // the user reached, and a stale raise firing after the
         // pan would steal focus back.
         pendingFocusRaise = nil
+        let honoredApp: String =
+            state.windows[id]?.appName ?? "?"
+        let honoredBefore: String = describe(
+            effects.focusBefore
+        )
+        onLog(
+            "focus: w\(id.raw) (\(honoredApp)) honored; "
+                + "before \(honoredBefore), "
+                + "selfEcho=\(selfEcho)"
+        )
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.
         // Static layouts don't retile on focus (below), so
@@ -297,47 +333,5 @@ extension KiwiCore {
         if !selfEcho {
             raiseFloatsAbove(afterFocusing: id)
         }
-    }
-
-    /// Whether a same-app sibling report for `id` is inherently
-    /// suspect by WHERE the window lives (#465/#496): a hidden
-    /// space always is; a space shown on a display OTHER than
-    /// the active space's is too (the cross-display steal — a
-    /// forced activation keys the app's MRU window over there).
-    /// The active space's own display stays trusted so in-app
-    /// window cycling is never fought.
-    private func distrustsSiblingSpace(
-        of id: WindowID
-    ) -> Bool {
-        guard
-            let echoSpace = state.workspaces.space(of: id)
-        else { return false }
-        guard
-            state.workspaces.visibleSpaces.contains(echoSpace)
-        else { return true }
-        guard
-            let active = state.workspaces.activeSpace,
-            echoSpace != active
-        else { return false }
-        let activeDisplay = state.workspaces.display(of: active)
-        let echoDisplay = state.workspaces.display(of: echoSpace)
-        return echoDisplay != activeDisplay
-    }
-
-    /// Whether a left click landed inside `id`'s frame within
-    /// the sibling-distrust window — the discriminator that
-    /// tells a genuine cross-display click from an activation
-    /// re-report (#496). Frames and the stamp are both AX
-    /// coordinates.
-    private func recentClickInside(
-        _ id: WindowID,
-        now: Date
-    ) -> Bool {
-        guard let click = lastLeftClick,
-            now.timeIntervalSince(click.at)
-                < Self.selfRaiseSiblingWindow,
-            let frame = state.windows[id]?.frame
-        else { return false }
-        return frame.contains(click.point)
     }
 }

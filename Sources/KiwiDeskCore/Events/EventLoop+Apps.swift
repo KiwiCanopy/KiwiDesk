@@ -201,15 +201,17 @@ extension EventLoop {
             // dismiss report can be distrusted later (#244).
             if elements[pid]?[id] != nil {
                 onEvent(.windowFocused(id))
-            } else if FloatDetection.isBuiltInIgnoredPanel(
-                bundleID: AppRef(app).bundleID,
-                id: id,
-                isAccessory: Self.classifiesAsOverlay(
+            } else {
+                classifyUntrackedFocus(
+                    id: id,
                     pid: pid,
-                    activationPolicy: app.activationPolicy
+                    bundleID: AppRef(app).bundleID,
+                    isAccessory: Self.classifiesAsOverlay(
+                        pid: pid,
+                        activationPolicy: app.activationPolicy
+                    ),
+                    channel: "activation"
                 )
-            ) {
-                onIgnoredPanelFocus(pid)
             }
         }
     }

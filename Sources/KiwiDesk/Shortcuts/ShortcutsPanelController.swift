@@ -77,6 +77,14 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // A layer switch while it's up auto-closes it (#603, see
         // closeIfOpen) rather than leaving another layer's bindings on
         // screen — reopen to see the new layer.
+        // #952 diagnosis: name what held frontmost before the
+        // summon steals activation — the window focus SHOULD
+        // return there on close.
+        let front = NSWorkspace.shared.frontmostApplication
+        NSLog(
+            "KiwiDesk: cheat sheet show; frontmost was %@",
+            front?.bundleIdentifier ?? "none"
+        )
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
@@ -93,7 +101,25 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     }
 
     private func close() {
+        // #952 diagnosis: after orderOut, macOS re-keys the
+        // app's next window — log what it picked one turn
+        // later, and which app is frontmost then. The steal
+        // is expected exactly when our Settings window is the
+        // pick.
+        NSLog(
+            "KiwiDesk: cheat sheet close; own key window %@",
+            NSApp.keyWindow?.title ?? "none"
+        )
         panel?.orderOut(nil)
+        DispatchQueue.main.async {
+            let front = NSWorkspace.shared
+                .frontmostApplication
+            NSLog(
+                "KiwiDesk: after close; key %@, frontmost %@",
+                NSApp.keyWindow?.title ?? "none",
+                front?.bundleIdentifier ?? "none"
+            )
+        }
     }
 
     /// Close the panel if it is open. Called when the active
