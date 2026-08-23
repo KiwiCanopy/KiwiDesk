@@ -41,7 +41,16 @@ itself when a fifth is added.
   declares it — and it **defaults to `CoreLog.write`**, which is
   never called directly. Leaving one unassigned costs no red and
   no warning: its lines simply never reach `KiwiCore.onLog`, so
-  nothing that reads the sink carries them. Four guards, reading
+  nothing that reads the sink carries them. **A capture
+  diagnostic writes through an `os.Logger` with a
+  `privacy: .public` interpolation, never `NSLog`** — macOS
+  redacts every NSLog line's content to `<private>` in
+  `log show` (observed 2026-08-23, macOS 26.6.2), so the lines
+  fire and the documented capture reads nothing.
+  `LogSeamSinkTests` pins Core's sink both ways; a GUI-side
+  logger owes the same shape with no guard, so its doc comment
+  carries the danger (`ShortcutsPanelController`'s `panelLog`
+  is the worked example). Four guards, reading
   different things — `LogSeamWiringTests` scans source for the
   wiring and its `allowed` map is the exemption list;
   `LogSeamDefaultTests` guards the default; `LogSeamSinkTests`

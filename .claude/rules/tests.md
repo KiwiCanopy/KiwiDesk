@@ -498,8 +498,13 @@ the running app**; its run state is irrelevant to them.
 
 **A run writes `KiwiDesk: …` lines to the unified log**, so a
 `log stream` during one shows test diagnostics that read exactly
-like the app's. Most come through `KiwiCore.onLog`, whose default
-has always been the syslog write; since #624 a subsystem
+like the app's. Most come through `KiwiCore.onLog`, whose
+default is the unified-log write — `CoreLog.write`, an
+`os.Logger` under subsystem `com.kiwicanopy.kiwidesk` with a
+`privacy: .public` interpolation. `LogSeamSinkTests` pins both
+the write and the public marker; `CoreLog`'s docstring owns why
+public is correct and how the redacted `NSLog` it replaced
+blinded a live capture (#951). Since #624 a subsystem
 constructed bare — `KeybindingManager(registrar:)`,
 `CrashRecovery(directory:)` — adds its own, because a seam
 defaults to `CoreLog.write` rather than to a no-op
@@ -532,9 +537,15 @@ which is why every suite spawning real shell children is
 that partition).
 
 **Device QA launches the app direct**, not via `service start`:
-`.build/release/KiwiDesk` in a terminal (Ctrl-C to stop, `NSLog`
-output visible, including the #292 preflight-denial and settle
-lines). Stop the service first if loaded, or the single-instance
+`.build/release/KiwiDesk` in a terminal (Ctrl-C to stop). Its
+diagnostics — the #292 preflight-denial and settle lines
+included — do NOT appear in that terminal: they are unified-log
+lines (the run-log paragraph above), so capture them with
+`/usr/bin/log stream --predicate 'eventMessage CONTAINS[c]
+"KiwiDesk"'`, or `log show --last 5m` with the same predicate
+after the fact (`subsystem == "com.kiwicanopy.kiwidesk"`
+matches too). Stop the service first if loaded, or the
+single-instance
 guard keeps the OLD binary running. Every release rebuild changes
 the binary hash, which drops the TCC Accessibility grant (re-grant
 in System Settings), and a restart flattens session state (spaces,
