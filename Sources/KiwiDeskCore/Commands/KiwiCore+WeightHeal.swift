@@ -32,29 +32,18 @@ extension KiwiCore {
     /// in `docs/accepted-limitations.md`.
     ///
     /// Two derivation rulings, both different from the clamps'
-    /// and both deliberate:
+    /// and both deliberate — the full argument for each is
+    /// `docs/design-decisions.md` ▸ Session weights are healed
+    /// at retile, and is not restated here:
     ///
-    /// - **The RENDER's folded partition, not the clamp's
-    ///   per-marker one.** The heal exists to keep the render's
-    ///   own cascade check satisfied, so it reasons over exactly
-    ///   the counts, weights and span that check reads
-    ///   (`overflowCap` over `geometricCap`). Per-marker counts
-    ///   — the clamp's "tighter in the safe direction" — invert
-    ///   here: under a geometry-driven fold the per-marker span
-    ///   fails the heal's own count×minimum guard, the heal
-    ///   declines, and the folded render still piles on the
-    ///   stored extreme — the #944 symptom, permanent; and the
-    ///   converse over-shave rewrites stored weights whose
-    ///   folded render tiles fine.
-    /// - **LOCAL members, never the traveler-injected list.** A
-    ///   visiting tiled-sticky window (#414 v2) is a transient
-    ///   injection: healing against it would permanently rewrite
-    ///   stored weights for an arrangement that departs with the
-    ///   traveler — the data loss the accepted traveler rows
-    ///   promise never happens. The cost is a possible transient
-    ///   pile WHILE it visits, the same accepted class as the
-    ///   traveler weight wobble; the heal targets the steady
-    ///   state that remains.
+    /// - **The RENDER's folded partition** (`foldedPartition`),
+    ///   not the clamp's per-marker one: the heal's target is
+    ///   the render's own cascade check, and the clamp's
+    ///   "tighter is safe" inverts for a rewrite of stored
+    ///   state.
+    /// - **LOCAL members** (`localTiledMembers`), never the
+    ///   traveler-injected list: a transient visit must not
+    ///   permanently rewrite stored weights.
     func healTrackSessionWeights() {
         for space in state.workspaces.allSpaces
         where space.mode == .track {
@@ -73,11 +62,6 @@ extension KiwiCore {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.localTiledMembers(of: space)
         guard !tiled.isEmpty else { return }
-        let markerCount = TrackLayout.counts(
-            of: tiled,
-            breaks: space.trackBreaks,
-            cap: 0
-        ).count
         // The render's effective cap needs the geometric fit,
         // which reads the usable rect — built the way
         // `trackCapacity` builds it.
@@ -86,15 +70,11 @@ extension KiwiCore {
             space: space,
             sticky: []
         )
-        let (effectiveCap, _) = TrackLayout.overflowCap(
-            markerCount: markerCount,
-            normalCap: params.normalCap,
-            geoCap: TrackLayout.geometricCap(for: context)
-        )
-        let counts = TrackLayout.counts(
+        let (counts, _, _) = TrackLayout.foldedPartition(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: effectiveCap
+            normalCap: params.normalCap,
+            geoCap: TrackLayout.geometricCap(for: context)
         )
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical

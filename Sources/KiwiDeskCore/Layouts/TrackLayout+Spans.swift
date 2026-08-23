@@ -67,6 +67,44 @@ extension TrackLayout {
         )
     }
 
+    /// The render's folded partition, assembled ONCE (#944
+    /// review round 2): marker tracks counted uncapped, folded
+    /// through `overflowCap` to the effective render cap.
+    /// Consumed by `calculateGeometry`, the `track.swap` guard,
+    /// and the retile-time heal — which hand-mirrored this
+    /// assembly at three sites until the round caught the
+    /// fourth-copy drift risk (a fold-rule change updating the
+    /// render and forgetting the heal re-opens the exact defect
+    /// the folded heal fixed). `geoCap` stays a parameter: the
+    /// three sites legitimately source their context
+    /// differently (the render's full context, the swap guard's
+    /// live `layoutInput` with a headless fallback, the heal's
+    /// minimal probe), and that split is each site's own doc's
+    /// to argue.
+    public static func foldedPartition(
+        of tiled: [WindowID],
+        breaks: Set<WindowID>,
+        normalCap: Int,
+        geoCap: Int
+    ) -> (counts: [Int], cap: Int, overflowTrack: Int?) {
+        let markers = counts(
+            of: tiled,
+            breaks: breaks,
+            cap: 0
+        ).count
+        let (cap, overflows) = overflowCap(
+            markerCount: markers,
+            normalCap: normalCap,
+            geoCap: geoCap
+        )
+        let folded = counts(of: tiled, breaks: breaks, cap: cap)
+        return (
+            folded,
+            cap,
+            overflows ? folded.count - 1 : nil
+        )
+    }
+
     /// The id a track's weight is keyed under: the first LOCAL
     /// member of the slice. A tiled-sticky traveler heading a
     /// track (#414 v2) is not in `space.windows`, so an entry

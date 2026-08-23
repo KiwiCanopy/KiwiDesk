@@ -134,6 +134,60 @@ struct WeightHealTests {
         #expect(healed[0] >= healed[2])
     }
 
+    @Test("the spans subtract each axis's OWN gaps")
+    func spansSubtractTheirOwnAxisGaps() {
+        // Deliberately asymmetric gaps: under the symmetric
+        // defaults an axis→gap swap in `acrossSpan`/`alongSpan`
+        // is numerically invisible to every consumer suite
+        // (guard-prover, round 2) — this pin is what reds it.
+        let gaps = Gaps(
+            outer: Gaps.Outer(
+                top: 1,
+                bottom: 2,
+                left: 4,
+                right: 8
+            ),
+            inner: Gaps.Inner(horizontal: 16, vertical: 32)
+        )
+        // Vertical tracks (columns): across = width, minus the
+        // left/right outer pair and the HORIZONTAL inner gap
+        // per boundary; along = height, minus top/bottom and
+        // the VERTICAL inner gap.
+        #expect(
+            TrackLayout.acrossSpan(
+                region: 1000,
+                gaps: gaps,
+                vertical: true,
+                count: 3
+            ) == 1000 - 12 - 32
+        )
+        #expect(
+            TrackLayout.alongSpan(
+                region: 1000,
+                gaps: gaps,
+                vertical: true,
+                count: 3
+            ) == 1000 - 3 - 64
+        )
+        // Horizontal tracks (rows) swap both pairs.
+        #expect(
+            TrackLayout.acrossSpan(
+                region: 1000,
+                gaps: gaps,
+                vertical: false,
+                count: 2
+            ) == 1000 - 3 - 32
+        )
+        #expect(
+            TrackLayout.alongSpan(
+                region: 1000,
+                gaps: gaps,
+                vertical: false,
+                count: 2
+            ) == 1000 - 12 - 16
+        )
+    }
+
     @Test("the cap only lowers, and never below the smallest")
     func capOnlyLowersAndNeverBelowSmallest() throws {
         // The real per-index domain claim — the first draft

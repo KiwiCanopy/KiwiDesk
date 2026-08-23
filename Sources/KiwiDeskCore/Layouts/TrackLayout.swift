@@ -38,30 +38,21 @@ public struct TrackLayout: LayoutSystem {
         // columns can't hold min size, the fit-count reduces (the
         // limit is display-agnostic; the display decides at render
         // time), never grows past it.
-        let markerCount = Self.counts(
-            of: windows,
-            breaks: context.trackBreaks,
-            cap: 0
-        ).count
-        let geoCap = Self.geometricCap(for: context)
         // The render cap folds the surplus past the normal
         // capacity (`params.normalCap`: fixed `count`, or `.max`
         // when auto tracks caps by geometry alone) OR the
-        // geometric fit into one far-edge overflow track.
-        let (effectiveCap, overflows) = Self.overflowCap(
-            markerCount: markerCount,
-            normalCap: params.normalCap,
-            geoCap: geoCap
-        )
-        let counts = Self.counts(
+        // geometric fit into one far-edge overflow track. The
+        // last slot is the overflow track whenever capacity is
+        // exceeded — even when it holds a single window (the
+        // N+1th track past a fixed limit), so no actual merge is
+        // needed. `foldedPartition` is the one copy of this
+        // assembly, shared with the swap guard and the heal.
+        let (counts, _, overflowTrack) = Self.foldedPartition(
             of: windows,
             breaks: context.trackBreaks,
-            cap: effectiveCap
+            normalCap: params.normalCap,
+            geoCap: Self.geometricCap(for: context)
         )
-        // The last slot is the overflow track whenever capacity is
-        // exceeded — even when it holds a single window (the N+1th
-        // track past a fixed limit), so no actual merge is needed.
-        let overflowTrack = overflows ? counts.count - 1 : nil
         let weights = Self.ranges(of: counts).map {
             Self.weight(
                 ofTrack: $0,

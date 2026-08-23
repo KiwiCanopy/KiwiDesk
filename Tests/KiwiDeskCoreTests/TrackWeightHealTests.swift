@@ -85,21 +85,13 @@ struct TrackWeightHealTests {
             space: space,
             sticky: []
         )
-        let (cap, _) = TrackLayout.overflowCap(
-            markerCount: TrackLayout.counts(
-                of: tiled,
-                breaks: space.trackBreaks,
-                cap: 0
-            ).count,
-            normalCap: params.normalCap,
-            geoCap: TrackLayout.geometricCap(for: context)
-        )
         let ranges = TrackLayout.ranges(
-            of: TrackLayout.counts(
+            of: TrackLayout.foldedPartition(
                 of: tiled,
                 breaks: space.trackBreaks,
-                cap: cap
-            )
+                normalCap: params.normalCap,
+                geoCap: TrackLayout.geometricCap(for: context)
+            ).counts
         )
         let weights = ranges.map {
             TrackLayout.weight(
@@ -285,10 +277,15 @@ struct TrackWeightHealTests {
         #expect(shares[WindowID(1)] != nil)
         #expect((shares[WindowID(1)] ?? 1) < 10)
         // The healed column tiles — pairwise disjoint frames.
-        // Deliberately NOT a distinct-minY count: a vertical
-        // cascade's 40 pt offsets have distinct minY too, so
-        // that assertion cannot tell a healed column from the
-        // pile it exists to prevent (guard-prover, round 1).
+        // Deliberately NOT a distinct-minY count (a vertical
+        // cascade's 40 pt offsets have distinct minY too), and
+        // stated honestly: for THIS column regime disjointness
+        // is a sanity net, not the discriminator — when the
+        // member count fits at minimum, `overflowFrames`
+        // re-packs by count and tiles disjointly with or
+        // without the heal, so the STORE assertion above is
+        // this test's discriminating net (guard-prover, rounds
+        // 1–2).
         let input = core.tiler.layoutInput(state: core.state)!
         let frames = TrackLayout().calculateGeometry(
             for: input.tiled,

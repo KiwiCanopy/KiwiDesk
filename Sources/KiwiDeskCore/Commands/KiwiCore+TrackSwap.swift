@@ -86,15 +86,12 @@ extension KiwiCore {
         // Swap on the render's effective partition so what moves
         // matches what the user sees (identical to `trackCap`
         // absent geometric pressure).
-        let effectiveCap = TrackLayout.overflowCap(
-            markerCount: TrackLayout.counts(
-                of: tiled,
-                breaks: space.trackBreaks,
-                cap: 0
-            ).count,
+        let effectiveCap = TrackLayout.foldedPartition(
+            of: tiled,
+            breaks: space.trackBreaks,
             normalCap: params.normalCap,
             geoCap: geoCap
-        ).effectiveCap
+        ).cap
         var swapped = false
         state.workspaces.withSpace(space.id) {
             swapped = $0.swapTracks(

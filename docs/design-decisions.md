@@ -1646,7 +1646,15 @@ the traveler — the data loss the traveler rows in the accepted
 limitations promise never happens. The cost is a possible
 transient pile while a visitor tips the check, the same
 accepted class as the traveler weight wobble; the heal targets
-the steady state that remains. Count-driven overflow is
+the steady state that remains. The same ruling read the other
+way — the DEPARTURE direction — is accepted too: while a
+space's own sticky renders elsewhere, the heal still counts it
+(it is a local member), one more than that moment's render, so
+a limit-grazing weight written during the absence can be
+shaved at a later retile. That write-then-shave churn is the
+steady-state ruling's cost, not a defect to fix by loosening
+the heal: when the sticky returns, the shaved weights are
+exactly the feasible ones. Count-driven overflow is
 untouched:
 when the span cannot hold the members at ANY weights, the
 overflow folds stay the honest answer. Deliberate residue: the
