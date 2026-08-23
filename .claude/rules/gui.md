@@ -699,16 +699,15 @@ claim; the obligations a change here takes on:
 - **A `.contextMenu` is right-click and nothing else**, macOS
   having no default key that opens a focused control's
   contextual menu. Any mechanism behind one is also offered as
-  `.accessibilityActions`, **from the same builder** — never a
-  mirrored list, which is a second place for the menu's contents
-  to go stale. `KeyboardActionParityTests` compares the builder
-  token inside each pair of braces across `Sources/KiwiDesk`, so
-  a hand-copied twin reds exactly like a missing one. Stated
-  residue, deliberately not closed: this reaches VoiceOver, not
-  a Tab-only keyboard, because a visible `⋯` trigger per
-  draggable row was rejected as clutter twice (owner 2026-08-04,
-  upheld 2026-08-11 against turn 20a's ask) and a whole-chip
-  `Menu` eats the `.draggable` it would sit on.
+  `.accessibilityActions` (for VoiceOver) and `.contextShortcut`
+  (for ⌃. on focused controls, #845), **from the same builder**
+  — never a mirrored list, which is a second place for the
+  menu's contents to go stale. `KeyboardActionParityTests`
+  compares the builder token inside each pair of braces across
+  `Sources/KiwiDesk`, so a hand-copied twin or missing shortcut
+  reds exactly like a missing action. A zero-size hidden `Menu`
+  binds the chord without adding resting clutter or eating the
+  drag on `.draggable` rows.
 - **A control whose label is a sibling `Text` has no name.**
   VoiceOver derives a name from the label a control OWNS;
   a `Text` beside it in an `HStack` names nothing, and the

@@ -12,11 +12,12 @@ extension View {
     /// pick), and typing an empty value is the other path.
     ///
     /// The same item is also a named VoiceOver action (#678 Phase
-    /// 4 pass 10, turn 20a rule 1). The typed-empty path meant
-    /// this was never *unreachable* without a pointer, unlike the
-    /// palette and space menus — but it required knowing that an
-    /// empty field means automatic, which is precisely the thing
-    /// a menu item exists to stop you having to know.
+    /// 4 pass 10, turn 20a rule 1) and keyboard shortcut (#845).
+    /// The typed-empty path meant this was never *unreachable*
+    /// without a pointer, unlike the palette and space menus — but
+    /// it required knowing that an empty field means automatic,
+    /// which is precisely the thing a menu item exists to stop you
+    /// having to know.
     @ViewBuilder
     func automaticMenu(
         automatic: Bool,
@@ -28,6 +29,9 @@ extension View {
                 automaticItem(hex: hex, draft: draft)
             }
             .accessibilityActions {
+                automaticItem(hex: hex, draft: draft)
+            }
+            .contextShortcut {
                 automaticItem(hex: hex, draft: draft)
             }
         } else {

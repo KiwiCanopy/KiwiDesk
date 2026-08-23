@@ -9,25 +9,17 @@ import Testing
 /// A `.contextMenu` is right-click and nothing else. macOS has no
 /// default key that opens a focused control's contextual menu, so
 /// a mechanism that lives only there is pointer-only however many
-/// keyboard-navigable things sit beside it. Three of the four
-/// sites in this tree were exactly that when the pass opened, and
-/// one of them — the spaces row — held Move Up, Move Down and
-/// Make Fallback, which have no on-screen control anywhere else.
+/// keyboard-navigable things sit beside it. Every context menu in
+/// the tree must therefore provide the same builder to
+/// `.accessibilityActions` (for VoiceOver) and `.contextShortcut`
+/// (for ⌃. keyboard access on the focused row, #845).
 ///
-/// The pairing is asserted as a COUNT per file rather than as a
-/// named list of call sites. A list is one more place to forget
-/// and would go green on a fifth menu nobody added to it; equal
-/// counts red on the next unpaired `.contextMenu` whoever writes
-/// it, which is the whole point of putting the guard here instead
-/// of in a review checklist.
-///
-/// What this does NOT claim, stated so the green is not read as
-/// more than it is: an `.accessibilityActions` reaches VoiceOver,
-/// not a Tab-only keyboard user. Turn 20a also asked for a
-/// visible `⋯` per draggable row; the owner ruled against it on
-/// 2026-08-11, standing by the 2026-08-04 clutter rejection
-/// recorded in `SpaceAssignmentChip`'s docstring, so that gap is
-/// deliberate. This guard holds the half that was ruled in.
+/// The trio is asserted as a BUILDER comparison per file rather
+/// than as a named list of call sites. A list is one more place
+/// to forget and would go green on a fifth menu nobody added to
+/// it; equal builders red on the next unpaired `.contextMenu`
+/// whoever writes it, which is the whole point of putting the
+/// guard here instead of in a review checklist.
 @Suite("Keyboard action parity")
 struct KeyboardActionParityTests {
     /// The WHOLE GUI target, not just `Settings/`: a context
@@ -45,8 +37,10 @@ struct KeyboardActionParityTests {
         guiDir.appendingPathComponent("Settings")
     }
 
-    @Test("every context menu is also a set of named actions")
-    func everyContextMenuHasAccessibilityActions() throws {
+    @Test(
+        "every context menu is also a set of named actions and a shortcut"
+    )
+    func everyContextMenuHasActionsAndShortcut() throws {
         let files = try SourceScan.swiftSources(under: guiDir)
         var checked = 0
         for file in files {
@@ -60,15 +54,18 @@ struct KeyboardActionParityTests {
                 in: source,
                 after: "accessibilityActions {"
             )
+            let shortcuts = builders(
+                in: source,
+                after: "contextShortcut {"
+            )
             // Compares the BUILDERS, not the counts. The design's
-            // invariant is that both routes run the same builder
+            // invariant is that all three routes run the same builder
             // (`SpaceAssignmentChip` says outright that a second
             // copy is a second place for the display list to go
             // stale), and equal counts admit exactly what that
             // forbids: a hand-mirrored button list, or a two-menu
-            // file whose two action sets both wrap the same menu
-            // while the other stays pointer-only (architect
-            // review, 2026-08-11).
+            // file whose action sets wrap the same menu while the
+            // other stays pointer-only (#845).
             #expect(
                 menus.sorted() == actions.sorted(),
                 Comment(
@@ -79,7 +76,20 @@ struct KeyboardActionParityTests {
                         + "— a mechanism reachable only behind a "
                         + "right-click is pointer-only, macOS "
                         + "having no key that opens one, and the "
-                        + "two routes must run ONE builder"
+                        + "routes must run ONE builder"
+                )
+            )
+            #expect(
+                menus.sorted() == shortcuts.sorted(),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) opens "
+                        + "\(menus.sorted()) by right-click but "
+                        + "\(shortcuts.sorted()) by keyboard shortcut "
+                        + "— a mechanism reachable only behind a "
+                        + "right-click is unreachable on a plain "
+                        + "keyboard, and the routes must run ONE "
+                        + "builder (#845)"
                 )
             )
         }

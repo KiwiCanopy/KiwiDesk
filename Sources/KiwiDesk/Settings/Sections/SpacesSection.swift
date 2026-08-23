@@ -222,22 +222,17 @@ struct SpacesSection: View {
         )
         .contextMenu { contextActions(space) }
         // The same builder as named VoiceOver actions (#678
-        // Phase 4 pass 10, turn 20a rule 1). It matters more here
-        // than anywhere else in the tree: Move Up, Move Down and
-        // Make Fallback have no on-screen control at ALL — the
-        // context menu is their only site — so before this the
-        // reorder was not merely pointer-preferred, it was
+        // Phase 4 pass 10, turn 20a rule 1) and the keyboard
+        // shortcut (#845). It matters more here than anywhere
+        // else in the tree: Move Up, Move Down and Make Fallback
+        // have no on-screen control at ALL — the context menu is
+        // their only site — so before this the reorder was
         // pointer-only, and so was the fallback choice. The drag
         // handle beside it is not a control and takes no focus.
-        //
-        // `contextActions`' own docstring claimed these were
-        // "keyboard-reachable equivalents of the drag/badge
-        // affordances"; a `.contextMenu` on a non-focusable
-        // `VStack` is right-click and nothing else, so the claim
-        // was false when written. This is the modifier that makes
-        // it true for VoiceOver — the Tab-only path is the
-        // residue stated on `SpaceAssignmentChip`.
+        // VoiceOver uses accessibilityActions, and a focused row
+        // opens the menu via ⌃..
         .accessibilityActions { contextActions(space) }
+        .contextShortcut { contextActions(space) }
         // Lifted while dragged: the row itself is what moves
         // (no system ghost), stepping slot to slot — it never
         // leaves the column.
