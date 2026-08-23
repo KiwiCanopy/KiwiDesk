@@ -40,25 +40,20 @@ struct SpaceAssignment: Identifiable, Hashable {
 /// borderless menu consumes the mouse-down to open itself, so
 /// `.draggable` never saw a press to begin from.
 ///
-/// **Three routes now, and the Tab-only one is knowingly gone.**
-/// Drag the chip, right-click it, or reach the same items as
-/// VoiceOver actions (`.accessibilityActions`, added in #678
-/// Phase 4 pass 10 — it draws nothing, so it costs the drag
-/// nothing).
+/// **Four routes now:** drag the chip, right-click it, reach
+/// the same items as VoiceOver actions, or press the keyboard
+/// chord on the focused chip — the menu routes come as one
+/// through the `rowActions` seam, and `.focusable()` below is
+/// what gives the chord a target at all (#845).
 ///
 /// A visible chevron carrying the `Menu` was tried twice and
 /// rejected as clutter (owner ruling 2026-08-04) — first beside
 /// the pill, then inside it — and the owner upheld that on
 /// 2026-08-11 against turn 20a's ask for a visible trigger in
-/// every draggable row. So the residue is narrower than it was
-/// but real: a keyboard user who is NOT running VoiceOver still
-/// cannot move a space to another display, `.contextMenu` having
-/// no key that opens it.
-///
-/// Anyone restoring a Tab-reachable route should read 13b's
-/// argument before reaching for a whole-chip `Menu` again — that
-/// is what took the drag, the borderless menu consuming the
-/// mouse-down `.draggable` needed to begin from.
+/// every draggable row. A whole-chip `Menu` is what took the drag
+/// in 13b (the borderless menu consuming the mouse-down
+/// `.draggable` needed to begin from). The keyboard chord (`⌃.`)
+/// satisfies the Tab-only path without chrome or eating the drag.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -86,38 +81,31 @@ struct SpaceAssignmentChip: View {
             )
             .accessibilityLabel(space.raw)
             .accessibilityValue(hint)
-            // Right-click keeps working. Making the chip a `Menu`
-            // dropped the `.contextMenu` it used to carry, which
-            // silently retired the gesture people already had — a
-            // side effect of fixing the keyboard route, never a
-            // decision (docs review, 2026-08-04). Both open the same
-            // menu.
-            .contextMenu { menu }
-            // The SAME builder as the context menu, exposed as
-            // named VoiceOver actions (#678 Phase 4 pass 10, turn
-            // 20a rule 1: the drag is the shortcut, the menu is
-            // the mechanism). One builder, not a mirrored list —
-            // a second copy of these buttons would be a second
-            // place for the display list to go stale, and this
+            // The chip must be able to HOLD focus for the #845
+            // chord to have a target at all: it is an `HStack`,
+            // not a `Button`, so without this a Tab-only
+            // keyboard can never reach it (#845 review). The
+            // platform draws the focus ring; the drag and the
+            // right-click are untouched.
+            .focusable()
+            // ONE builder, three channels, through the one seam
+            // (#678 Phase 4 pass 10, turn 20a rule 1: the drag
+            // is the shortcut, the menu is the mechanism; #845).
+            // Right-click keeps working — making the chip a
+            // `Menu` once dropped the `.contextMenu` it used to
+            // carry, silently retiring the gesture people
+            // already had (docs review, 2026-08-04) — and this
             // menu is already built from a `displays` the area
             // passes in precisely so the menu and the cards
             // cannot disagree.
             //
-            // This adds NO chrome, which is what lets it coexist
-            // with the 2026-08-04 ruling above: a visible chevron
-            // was tried twice and rejected as clutter, and a
-            // whole-chip `Menu` is what took the drag. An
-            // accessibility action is neither — it draws nothing
-            // and consumes no mouse-down.
-            //
-            // Stated residue, so it is not mistaken for coverage:
-            // this reaches VoiceOver, not the pointer-free
-            // keyboard. A user who navigates by Tab alone still
-            // has no route to move a space between displays —
-            // owner ruled 2026-08-11 that the ruling above wins
-            // over turn 20a's "⋯ button in the chip", so the gap
-            // is deliberate rather than missed.
-            .accessibilityActions { menu }
+            // The seam adds NO chrome, which is what lets it
+            // coexist with the 2026-08-04 ruling: a visible
+            // chevron was tried twice and rejected as clutter,
+            // and a whole-chip `Menu` is what took the drag.
+            // The hidden chord anchor draws nothing and
+            // consumes no mouse-down.
+            .rowActions { menu }
     }
 
     private var capsule: some View {

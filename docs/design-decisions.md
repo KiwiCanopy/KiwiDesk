@@ -2096,6 +2096,44 @@ navigation, which no app may set for the user — so a focus
 destination is verified with that ON. (#678 turn 20a, #815,
 #816.)
 
+### The row menu's keyboard route is a chord on the focused row
+
+**[Trade-off]**
+
+**Context-menu-only actions get their plain-keyboard route from
+a chord on the focused row — invisible chrome, documented key —
+rather than a visible trigger.** The alternatives were each
+rejected on grounds that still hold, and are re-litigable in
+both directions, which is why this is written down: a visible
+`⋯` per row was rejected twice as clutter (owner 2026-08-04,
+upheld 2026-08-11 against turn 20a's ask), a whole-chip `Menu`
+eats the `.draggable` it would sit on (it shipped on the
+assignment chip and silently retired the drag), and
+accept-and-document leaves a Tab-only keyboard user locked out
+of actions the app offers everyone else — the gap #845 was
+filed on, once it was seen that `.accessibilityActions` reaches
+only a running VoiceOver. The accepted cost is discoverability:
+an invisible key is found in documentation
+(`docs/user-guide.md` ▸ Using Settings from the Keyboard) or
+not at all, and an in-app hint is a candidate follow-up rather
+than part of the ruling.
+
+Two consequences bind every row menu, not just the ones that
+prompted it. The chord must target the row that HOLDS focus —
+per-row window-wide shortcut registrations resolve by hierarchy
+order, which sent the chord to the first row on the page
+whatever was focused, cross-targeting destructive items (#845
+review blocker) — so the seam gates the binding on the focused
+row's published identity, one live binding at a time. And a row
+in the family must be able to hold focus at all, which is a
+separate claim from offering the menu: the assignment chip
+offered every channel and had no Tab stop until it took
+`.focusable()`. The seam, its guard and the engineering
+obligations live in `.claude/rules/gui.md` ▸ the keyboard path;
+the chord itself is stated once in code
+(`ContextShortcut.swift`, needled) and once for users (the
+guide). (#845; owner ruling 2026-08-23, recorded on the issue.)
+
 ### A focus ring is the platform's; a chip that removes it draws its own
 
 **[Trade-off]**
@@ -5993,13 +6031,16 @@ than a limit of the identity.
 (pin, arrow) rather than border styles alone (accessibility), and
 automatic is drawn as an outline rather than a dimmed capsule —
 dimming is this app's inert vocabulary, and an automatic chip is
-the one most worth dragging. Two routes to move a space — drag
-it, or its right-click menu — and the keyboard and VoiceOver
-routes are knowingly absent: a whole-chip `Menu` made them real
-and consumed the mouse-down that `.draggable` needs, so a
-restored keyboard route must not reach for the control shape
-that took the drag (the argument lives on
-`SpaceAssignmentChip`). The
+the one most worth dragging. Four routes to move a space — drag
+it, its right-click menu, the same menu as VoiceOver actions,
+and the keyboard chord on the focused chip (#845, which also
+made the chip focusable at all) — all off ONE builder through
+the `rowActions` seam. The whole-chip `Menu` that once made the
+keyboard route real consumed the mouse-down that `.draggable`
+needs, which is why the restored route is a chord and a hidden
+anchor rather than a control shape that takes the drag (the
+argument lives on `SpaceAssignmentChip`; the ruling is ▸ The
+row menu's keyboard route, #845). The
 clear affordance never participates in the chip's layout: a
 pinned chip and an automatic chip measure identically — the ⓧ
 rides the trailing-top corner as an overlay, and hover may

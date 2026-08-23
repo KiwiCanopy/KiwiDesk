@@ -28,24 +28,29 @@ extension SettingsButtonStyleConventionTests {
                     + "plus one icon affordance"
             ),
             "SpaceAssignmentChip.swift": (
-                3, "contextMenu", "Returned to a menu/contextMenu builder"
+                3, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
             ),
             "PaletteShelf.swift": (
-                3, "menuItem", "Returned to a contextMenu builder"
+                3, "menuItem",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
             ),
             // Moved out of `ColorField.swift` with the §2.1
             // split (#678 Phase 4 pass 10). The needle changed
-            // with it and is the reason: the item is no longer
-            // written INSIDE the `contextMenu` builder — it is
-            // built once by `automaticItem` and handed to both
-            // that builder and `.accessibilityActions`, which is
-            // what stops the two routes from drifting. A button
-            // in a shared menu-item builder is as unstyleable as
-            // one written inline in the menu.
+            // with it and is the reason: the item is not
+            // written inside any one channel's builder — it is
+            // built once by `automaticItem` and handed to the
+            // `rowActions` seam, which feeds every route from
+            // it (#845); one builder is what stops the routes
+            // from drifting. A button in a shared menu-item
+            // builder is as unstyleable as one written inline
+            // in the menu.
             "ColorField+AutomaticMenu.swift": (
                 1, "automaticItem",
-                "Menu item from the builder shared by contextMenu "
-                    + "and accessibilityActions"
+                "Menu item from the one builder the rowActions "
+                    + "seam feeds (#845)"
             ),
             "HeaderSearch.swift": (
                 1, "focusShortcut", "Invisible zero-size shortcut sink"
@@ -80,6 +85,12 @@ extension SettingsButtonStyleConventionTests {
                 2, ".buttonStyle(.plain)",
                 "Two Links taking plain style — the Release Notes "
                     + "pointer and the support ask"
+            ),
+            "ContextShortcut.swift": (
+                1, ".buttonStyle(.plain)",
+                "The chord popover's container style for the "
+                    + "seam-fed menu buttons, which live in the "
+                    + "call sites' builder files (#845)"
             ),
             // Moved from `PresetsSection.swift` with the card
             // itself in #859. The reason is also CORRECTED: the

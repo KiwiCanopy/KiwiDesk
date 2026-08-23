@@ -9,25 +9,20 @@ import Testing
 /// A `.contextMenu` is right-click and nothing else. macOS has no
 /// default key that opens a focused control's contextual menu, so
 /// a mechanism that lives only there is pointer-only however many
-/// keyboard-navigable things sit beside it. Three of the four
-/// sites in this tree were exactly that when the pass opened, and
-/// one of them — the spaces row — held Move Up, Move Down and
-/// Make Fallback, which have no on-screen control anywhere else.
+/// keyboard-navigable things sit beside it. Every row menu
+/// therefore routes through the ONE composition seam —
+/// `rowActions(id:_:)` in `ContextShortcut.swift` — which takes
+/// the builder ONCE and applies right-click, VoiceOver's named
+/// actions and the focus-gated ⌃. chord itself (#845).
 ///
-/// The pairing is asserted as a COUNT per file rather than as a
-/// named list of call sites. A list is one more place to forget
-/// and would go green on a fifth menu nobody added to it; equal
-/// counts red on the next unpaired `.contextMenu` whoever writes
-/// it, which is the whole point of putting the guard here instead
-/// of in a review checklist.
-///
-/// What this does NOT claim, stated so the green is not read as
-/// more than it is: an `.accessibilityActions` reaches VoiceOver,
-/// not a Tab-only keyboard user. Turn 20a also asked for a
-/// visible `⋯` per draggable row; the owner ruled against it on
-/// 2026-08-11, standing by the 2026-08-04 clutter rejection
-/// recorded in `SpaceAssignmentChip`'s docstring, so that gap is
-/// deliberate. This guard holds the half that was ruled in.
+/// The guard is a channel BAN outside the seam plus structural
+/// pins inside it, not a per-site builder comparison: with the
+/// builder handed to the seam once, a crossed pairing or a
+/// mirrored list cannot be EXPRESSED at a call site — the
+/// pre-seam comparison guard's whole defect class (a two-menu
+/// file with crossed pairings was green under it, prover
+/// 2026-08-23). What remains expressible is a bare channel
+/// beside the seam, which is what the ban reds on.
 @Suite("Keyboard action parity")
 struct KeyboardActionParityTests {
     /// The WHOLE GUI target, not just `Settings/`: a context
@@ -45,88 +40,120 @@ struct KeyboardActionParityTests {
         guiDir.appendingPathComponent("Settings")
     }
 
-    @Test("every context menu is also a set of named actions")
-    func everyContextMenuHasAccessibilityActions() throws {
+    /// The seam file, exempt from the channel ban because it is
+    /// where the channels are legitimately spelled — once.
+    private let seamFile = "ContextShortcut.swift"
+
+    /// Bare channels a file may spell outside the seam, with the
+    /// reason that IS each exemption. Empty on purpose: a
+    /// genuine VoiceOver-only affordance (actions with no
+    /// context menu) would be the first entry, argued here.
+    private let bareChannelExempt: [String: String] = [:]
+
+    @Test("every row menu routes through the one seam")
+    func everyRowMenuRoutesThroughTheSeam() throws {
         let files = try SourceScan.swiftSources(under: guiDir)
-        var checked = 0
+        var seamCallFiles = 0
         for file in files {
+            let name = file.lastPathComponent
+            guard name != seamFile else { continue }
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let menus = builders(in: source, after: "contextMenu {")
-            guard !menus.isEmpty else { continue }
-            checked += 1
-            let actions = builders(
-                in: source,
-                after: "accessibilityActions {"
-            )
-            // Compares the BUILDERS, not the counts. The design's
-            // invariant is that both routes run the same builder
-            // (`SpaceAssignmentChip` says outright that a second
-            // copy is a second place for the display list to go
-            // stale), and equal counts admit exactly what that
-            // forbids: a hand-mirrored button list, or a two-menu
-            // file whose two action sets both wrap the same menu
-            // while the other stays pointer-only (architect
-            // review, 2026-08-11).
-            #expect(
-                menus.sorted() == actions.sorted(),
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) opens "
-                        + "\(menus.sorted()) by right-click but "
-                        + "\(actions.sorted()) as named actions "
-                        + "— a mechanism reachable only behind a "
-                        + "right-click is pointer-only, macOS "
-                        + "having no key that opens one, and the "
-                        + "two routes must run ONE builder"
+            if source.contains("rowActions {")
+                || source.contains("rowActions(")
+            {
+                seamCallFiles += 1
+            }
+            guard bareChannelExempt[name] == nil else { continue }
+            // Both the trailing-closure and labeled-argument
+            // spellings: `.contextMenu(menuItems:)` and
+            // `.accessibilityActions(` are the same bare
+            // channel wearing parentheses (re-review,
+            // 2026-08-23). The singular
+            // `.accessibilityAction(named:)` is a different
+            // affordance and deliberately unbanned.
+            for marker in [
+                "contextMenu {", "contextMenu(",
+                "accessibilityActions {",
+                "accessibilityActions(",
+                "contextShortcut {",
+            ] {
+                #expect(
+                    !source.contains(marker),
+                    Comment(
+                        rawValue:
+                            "\(name) spells `\(marker)` beside "
+                            + "the seam — a bare channel is how "
+                            + "a crossed pairing or a stale "
+                            + "mirror ships; hand the builder "
+                            + "to `rowActions(id:_:)` instead "
+                            + "(#845), or argue an exemption in "
+                            + "`bareChannelExempt`"
+                    )
                 )
-            )
+            }
         }
-        // A floor, not an exact count: this suite's job is the
-        // pairing, and a new menu is welcome. What the floor
-        // catches is the scan reading zero files — a renamed
-        // directory or a broken walker passes every #expect above
-        // by never reaching one.
+        // A floor, not an exact count: a new row menu is
+        // welcome. What the floor catches is the scan reading
+        // zero files — a renamed directory or broken walker
+        // passes the ban above by never reaching a file.
         #expect(
-            checked >= 4,
+            seamCallFiles >= 4,
             Comment(
                 rawValue:
-                    "only \(checked) file(s) with a context menu "
-                    + "were scanned — the walk found less than "
-                    + "the tree is known to hold, so the pairing "
-                    + "was not actually checked"
+                    "only \(seamCallFiles) file(s) call the "
+                    + "rowActions seam — the walk found less "
+                    + "than the tree is known to hold, so the "
+                    + "ban above was not actually checked"
             )
         )
     }
 
-    /// The first token inside each `{ ... }` opened by `marker` —
-    /// the builder the braces hand off to (`menu`,
-    /// `contextActions(space)`, `userMenu(palette)`).
-    ///
-    /// `marker` carries no leading dot on purpose: `ColorField`
-    /// calls `contextMenu` on `self` from a `View` extension, and
-    /// that spelling is a context menu like any other.
-    /// Leading whitespace AND newlines are skipped before the
-    /// token is read, because both brace spellings are in the
-    /// tree: `.contextMenu { menu }` on one line, and
-    /// `ColorField+AutomaticMenu`'s body on the next. The first
-    /// cut stopped at the newline, so the multi-line spelling
-    /// reduced to `""` on both sides and its pairing was asserted
-    /// by presence alone — guard-prover replaced that file's
-    /// action body with an unrelated `Button` and this stayed
-    /// GREEN (2026-08-11), in exactly the case the comparison was
-    /// written for.
-    private func builders(
-        in source: String,
-        after marker: String
-    ) -> [String] {
-        source.components(separatedBy: marker).dropFirst().map {
-            let body =
-                $0
-                .drop { $0.isWhitespace }
-                .prefix { $0 != "}" && $0 != "\n" }
-            return body.trimmingCharacters(in: .whitespaces)
+    /// The seam's own composition, pinned structurally: the
+    /// menu channels each hand off to the ONE `menu()` token,
+    /// the chord is exactly `⌃.` matched in one place (prose in
+    /// gui.md and the user guide states it, and this needle is
+    /// what keeps the code from drifting under that prose —
+    /// prover residue, 2026-08-23), and delivery is the ONE key
+    /// monitor resolving the focused row and popping its REAL
+    /// context menu with a synthetic right-click — per-row
+    /// `.keyboardShortcut` bindings resolve first-in-hierarchy
+    /// and cross-targeted destructive items (#845 review
+    /// blocker), and a focus-gated hidden `Menu` never received
+    /// the key on AppKit-backed focus at all (device QA
+    /// 2026-08-23). Wiring pins, not behavior: whether the
+    /// chord LANDS is the device checklist's, stated in the
+    /// seam's doc.
+    @Test("the seam composes one builder, one chord, one monitor")
+    func seamComposesOneBuilderChordAndFocusGate() throws {
+        let file =
+            settingsDir
+            .appendingPathComponent("Components/Common")
+            .appendingPathComponent(seamFile)
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        for needle in [
+            ".contextMenu { menu() }",
+            ".accessibilityActions { menu() }",
+            ".focusedValue(\\.rowActionFocus, catcher)",
+            "charactersIgnoringModifiers == \".\"",
+            "== .control",
+            "addLocalMonitorForEvents(",
+            "target.token?.openMenu?()",
+            ".popover(",
+        ] {
+            #expect(
+                source.contains(needle),
+                Comment(
+                    rawValue:
+                        "the seam lost `\(needle)` — its "
+                        + "composition (one builder, the ⌃. "
+                        + "chord, the focus gate) is what every "
+                        + "call site now relies on (#845)"
+                )
+            )
         }
     }
 

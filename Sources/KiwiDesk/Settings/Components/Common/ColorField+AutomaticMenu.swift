@@ -12,11 +12,12 @@ extension View {
     /// pick), and typing an empty value is the other path.
     ///
     /// The same item is also a named VoiceOver action (#678 Phase
-    /// 4 pass 10, turn 20a rule 1). The typed-empty path meant
-    /// this was never *unreachable* without a pointer, unlike the
-    /// palette and space menus — but it required knowing that an
-    /// empty field means automatic, which is precisely the thing
-    /// a menu item exists to stop you having to know.
+    /// 4 pass 10, turn 20a rule 1) and keyboard shortcut (#845).
+    /// The typed-empty path meant this was never *unreachable*
+    /// without a pointer, unlike the palette and space menus — but
+    /// it required knowing that an empty field means automatic,
+    /// which is precisely the thing a menu item exists to stop you
+    /// having to know.
     @ViewBuilder
     func automaticMenu(
         automatic: Bool,
@@ -24,10 +25,7 @@ extension View {
         draft: Binding<String>
     ) -> some View {
         if automatic {
-            contextMenu {
-                automaticItem(hex: hex, draft: draft)
-            }
-            .accessibilityActions {
+            rowActions {
                 automaticItem(hex: hex, draft: draft)
             }
         } else {
@@ -35,25 +33,26 @@ extension View {
         }
     }
 
-    /// The one "Automatic" item, built once for both routes so a
-    /// change to what it resets cannot reach only one of them.
-    @ViewBuilder
-    fileprivate func automaticItem(
-        hex: Binding<String>,
-        draft: Binding<String>
-    ) -> some View {
-        Button {
-            hex.wrappedValue = ""
-            draft.wrappedValue = ""
-        } label: {
-            if hex.wrappedValue.isEmpty {
-                Label(
-                    L("color_field.automatic", "Automatic"),
-                    systemImage: "checkmark"
-                )
-            } else {
-                Text(L("color_field.automatic", "Automatic"))
-            }
+}
+
+/// The one "Automatic" item, built once for every route so a
+/// change to what it resets cannot reach only one of them.
+@ViewBuilder
+private func automaticItem(
+    hex: Binding<String>,
+    draft: Binding<String>
+) -> some View {
+    Button {
+        hex.wrappedValue = ""
+        draft.wrappedValue = ""
+    } label: {
+        if hex.wrappedValue.isEmpty {
+            Label(
+                L("color_field.automatic", "Automatic"),
+                systemImage: "checkmark"
+            )
+        } else {
+            Text(L("color_field.automatic", "Automatic"))
         }
     }
 }
