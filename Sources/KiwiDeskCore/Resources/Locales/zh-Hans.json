@@ -354,6 +354,7 @@
   "general.advanced.backup.error.not_a_backup": "该文件不是 KiwiDesk 备份。",
   "general.advanced.backup.error.restore_title": "无法恢复",
   "general.advanced.backup.error.unreadable": "无法打开该文件。它可能已被移动、重命名或删除。",
+  "general.advanced.backup.error.unreadable_palettes": "KiwiDesk 无法读取这台电脑上保存的调色板，因此备份中将不包含它们。它们可能来自更新版本的 KiwiDesk。",
   "general.advanced.backup.error.unreadable_settings": "KiwiDesk 无法读取这台电脑的设置文件，因此现在备份会遗漏你的设置。请先修复该文件或还原设置。",
   "general.advanced.backup.error.write_failed": "KiwiDesk 无法写入“%1$@”。请换个位置试试，比如你的桌面。",
   "general.advanced.backup.export": "导出 KiwiDesk 备份…",

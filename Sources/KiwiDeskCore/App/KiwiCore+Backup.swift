@@ -143,6 +143,13 @@ extension KiwiCore {
         if guiConfigStore.exists, guiConfigStore.load() == nil {
             throw .unreadableSettings
         }
+        // The palettes twin (#945 review): `libraryPalettes`
+        // returns [] for a missing file and throws only for one
+        // that exists and refuses to decode — the case where a
+        // silent omission would "restore" data loss later.
+        if (try? paletteLibrary.libraryPalettes()) == nil {
+            throw .unreadablePalettes
+        }
         guard let data = encodedBackup() else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }

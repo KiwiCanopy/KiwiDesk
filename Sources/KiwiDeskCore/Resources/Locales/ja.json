@@ -354,6 +354,7 @@
   "general.advanced.backup.error.not_a_backup": "このファイルはKiwiDeskのバックアップではありません。",
   "general.advanced.backup.error.restore_title": "復元できませんでした",
   "general.advanced.backup.error.unreadable": "このファイルを開けませんでした。移動、名前の変更、または削除された可能性があります。",
+  "general.advanced.backup.error.unreadable_palettes": "KiwiDeskはこのコンピュータに保存されたカラーパレットを読み込めないため、バックアップに含まれません。新しいバージョンのKiwiDeskで作成された可能性があります。",
   "general.advanced.backup.error.unreadable_settings": "KiwiDeskはこのコンピュータに保存された設定を読み込めないため、バックアップを作成しても設定が含まれません。先に設定を修正するか、リセットしてください。",
   "general.advanced.backup.error.write_failed": "KiwiDeskは「%1$@」を書き出せませんでした。デスクトップなど、別の場所を試してください。",
   "general.advanced.backup.export": "KiwiDeskバックアップをエクスポート…",

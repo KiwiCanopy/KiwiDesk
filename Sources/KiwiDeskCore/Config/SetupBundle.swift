@@ -205,6 +205,12 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     /// through `load()` and only one of them is a backup worth
     /// making.
     case unreadableSettings
+    /// This Mac's `palettes.json` exists but will not decode
+    /// (a newer KiwiDesk wrote it, or it is corrupt), so an
+    /// export would silently back up an empty library (#945
+    /// review). The gui.json twin of `unreadableSettings`,
+    /// one line up.
+    case unreadablePalettes
     /// The backup carries settings, but this Mac's `init.lua`
     /// owns the configuration, so the settings half could not be
     /// applied.
