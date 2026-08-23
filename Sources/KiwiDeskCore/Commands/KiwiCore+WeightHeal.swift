@@ -26,10 +26,35 @@ extension KiwiCore {
     /// retile is a no-op. `StackLayout.healedWeights` owns the
     /// math (and when a pile is honest and stays); this file
     /// owns which stores are healed — the per-track head weights
-    /// and each track column's window shares, mirroring the
-    /// resize paths' span and keying rules exactly. Stack-mode
-    /// zone shares are deliberately NOT healed here — the ruling
-    /// and the residue are in `docs/design-decisions.md`.
+    /// and each track column's window shares. Stack-mode zone
+    /// shares are deliberately NOT healed here — the ruling and
+    /// the residue are in `docs/design-decisions.md`, recorded
+    /// in `docs/accepted-limitations.md`.
+    ///
+    /// Two derivation rulings, both different from the clamps'
+    /// and both deliberate:
+    ///
+    /// - **The RENDER's folded partition, not the clamp's
+    ///   per-marker one.** The heal exists to keep the render's
+    ///   own cascade check satisfied, so it reasons over exactly
+    ///   the counts, weights and span that check reads
+    ///   (`overflowCap` over `geometricCap`). Per-marker counts
+    ///   — the clamp's "tighter in the safe direction" — invert
+    ///   here: under a geometry-driven fold the per-marker span
+    ///   fails the heal's own count×minimum guard, the heal
+    ///   declines, and the folded render still piles on the
+    ///   stored extreme — the #944 symptom, permanent; and the
+    ///   converse over-shave rewrites stored weights whose
+    ///   folded render tiles fine.
+    /// - **LOCAL members, never the traveler-injected list.** A
+    ///   visiting tiled-sticky window (#414 v2) is a transient
+    ///   injection: healing against it would permanently rewrite
+    ///   stored weights for an arrangement that departs with the
+    ///   traveler — the data loss the accepted traveler rows
+    ///   promise never happens. The cost is a possible transient
+    ///   pile WHILE it visits, the same accepted class as the
+    ///   traveler weight wobble; the heal targets the steady
+    ///   state that remains.
     func healTrackSessionWeights() {
         for space in state.workspaces.allSpaces
         where space.mode == .track {
@@ -46,19 +71,30 @@ extension KiwiCore {
         else { return }
         let bounds = tiler.layoutBounds(on: screen)
         let params = tiler.settings.resolvedTrack(for: space.id)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
+        let tiled = state.localTiledMembers(of: space)
         guard !tiled.isEmpty else { return }
-        // The per-marker partition the interactive clamp reasons
-        // over (`resizeTrackWeight`) — under an active overflow
-        // fold this counts more gaps than the render, which is
-        // tighter in the safe direction (#933's argument).
+        let markerCount = TrackLayout.counts(
+            of: tiled,
+            breaks: space.trackBreaks,
+            cap: 0
+        ).count
+        // The render's effective cap needs the geometric fit,
+        // which reads the usable rect — built the way
+        // `trackCapacity` builds it.
+        let context = tiler.settings.context(
+            bounds: bounds,
+            space: space,
+            sticky: []
+        )
+        let (effectiveCap, _) = TrackLayout.overflowCap(
+            markerCount: markerCount,
+            normalCap: params.normalCap,
+            geoCap: TrackLayout.geometricCap(for: context)
+        )
         let counts = TrackLayout.counts(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: params.trackCap
+            cap: effectiveCap
         )
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical
@@ -105,17 +141,12 @@ extension KiwiCore {
                 weights: space.trackWeights
             )
         }
-        let gap =
-            vertical
-            ? gaps.inner.horizontal : gaps.inner.vertical
-        let outer =
-            vertical
-            ? gaps.outer.left + gaps.outer.right
-            : gaps.outer.top + gaps.outer.bottom
-        let span = StackLayout.weightedSpan(
-            region: Double(vertical ? bounds.width : bounds.height),
-            outer: Double(outer),
-            innerGap: Double(gap),
+        let span = TrackLayout.acrossSpan(
+            region: Double(
+                vertical ? bounds.width : bounds.height
+            ),
+            gaps: gaps,
+            vertical: vertical,
             count: ranges.count
         )
         guard
@@ -128,13 +159,12 @@ extension KiwiCore {
         var shaved = 0
         for (track, range) in ranges.enumerated()
         where healed[track] != weights[track] {
-            // The head-keying rule and its traveler guard are
-            // `resizeTrackWeight`'s: key the first LOCAL member,
-            // and skip a track a traveler heads outright.
             guard
-                let head = tiled[range].first(where: {
-                    space.windows.contains($0)
-                })
+                let head = TrackLayout.localHead(
+                    ofTrack: range,
+                    tiled: tiled,
+                    members: space.windows
+                )
             else { continue }
             state.workspaces.withSpace(space.id) {
                 $0.trackWeights[head] = healed[track]
@@ -172,17 +202,12 @@ extension KiwiCore {
                 TrackLayout.weightFloor
             )
         }
-        let gap =
-            vertical
-            ? gaps.inner.vertical : gaps.inner.horizontal
-        let outer =
-            vertical
-            ? gaps.outer.top + gaps.outer.bottom
-            : gaps.outer.left + gaps.outer.right
-        let span = StackLayout.weightedSpan(
-            region: Double(vertical ? bounds.height : bounds.width),
-            outer: Double(outer),
-            innerGap: Double(gap),
+        let span = TrackLayout.alongSpan(
+            region: Double(
+                vertical ? bounds.height : bounds.width
+            ),
+            gaps: gaps,
+            vertical: vertical,
             count: column.count
         )
         guard

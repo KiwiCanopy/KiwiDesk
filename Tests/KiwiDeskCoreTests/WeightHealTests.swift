@@ -134,20 +134,31 @@ struct WeightHealTests {
         #expect(healed[0] >= healed[2])
     }
 
-    @Test("healed values stay inside the store domain")
-    func healedValuesStayInDomain() throws {
+    @Test("the cap only lowers, and never below the smallest")
+    func capOnlyLowersAndNeverBelowSmallest() throws {
+        // The real per-index domain claim — the first draft
+        // asserted `contains(v) || v >= weightFloor`, which
+        // reduces to `v >= 0.05` and cannot fail for any
+        // reachable output (guard-prover, round 1). A healed
+        // value never exceeds its own input (so it stays inside
+        // the store range the clamps enforced at write time)
+        // and never drops below the group's smallest weight.
+        let weights = [10.0, 10, 0.1]
         let healed = try #require(
             StackLayout.healedWeights(
-                weights: [10, 10, 0.1],
+                weights: weights,
                 span: 1640,
                 minSize: 300
             )
         )
-        for value in healed {
-            #expect(
-                StackLayout.weightRange.contains(value)
-                    || value >= StackLayout.weightFloor
-            )
+        let smallest = try #require(weights.min())
+        for (weight, value) in zip(weights, healed) {
+            #expect(value <= weight)
+            #expect(value >= smallest)
         }
+        // And the heal genuinely moved something, so the two
+        // bounds above are exercised rather than trivially met
+        // by an untouched array.
+        #expect(healed != weights)
     }
 }

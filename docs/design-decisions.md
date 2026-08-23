@@ -1629,7 +1629,25 @@ findable). Healing at the retile choke point rather than at
 each membership-change site means no site can forget to arm it
 and no latch can go stale; healing rather than piling because
 the pile destroys the whole arrangement to preserve a number
-the user has no way to see. Count-driven overflow is untouched:
+the user has no way to see. Two derivation rulings sharpen
+where the heal reads its inputs. It reasons over the RENDER's
+folded partition (`overflowCap`), not the clamps' per-marker
+one: the heal's target is the render's own cascade check, and
+under an active overflow fold the per-marker reading both
+declines to heal an arrangement the folded render still piles
+on, and over-shaves weights whose folded render tiles fine —
+"tighter in the safe direction" is the CLAMP's argument, where
+tighter costs an early refusal cue, and it inverts for a
+rewrite of stored state. And it reads the LOCAL membership,
+never the traveler-injected list: a visiting tiled-sticky
+window is transient, and healing against it would permanently
+rewrite stored weights for an arrangement that departs with
+the traveler — the data loss the traveler rows in the accepted
+limitations promise never happens. The cost is a possible
+transient pile while a visitor tips the check, the same
+accepted class as the traveler weight wobble; the heal targets
+the steady state that remains. Count-driven overflow is
+untouched:
 when the span cannot hold the members at ANY weights, the
 overflow folds stay the honest answer. Deliberate residue: the
 stack layout's zone shares keep write-time clamps only — a

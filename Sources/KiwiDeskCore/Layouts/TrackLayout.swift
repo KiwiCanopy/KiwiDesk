@@ -79,10 +79,13 @@ public struct TrackLayout: LayoutSystem {
         // physics, not a knob. A heavily-weighted track no
         // longer reaches this check through the session stores:
         // write-time clamps (#933) refuse one at press time and
-        // the retile-time heal (#944) shaves one a membership
-        // change left behind — so tripping it here means the
-        // span itself cannot hold the members, or a transient
-        // no heal has seen yet.
+        // the retile-time heal (#944) — which reasons over this
+        // check's own folded partition — shaves one a
+        // membership change left behind. So tripping it here
+        // means the span itself cannot hold the members, a
+        // transient no heal has seen yet, or a traveler's visit
+        // (the heal deliberately reads LOCAL members; its doc
+        // owns why).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             span: Double(span),
